@@ -1,7 +1,5 @@
 
-package no.difi.meldingsutveksling.noarkexchange;
-
-import no.difi.meldingsutveksling.noarkexchange.schema.*;
+package no.difi.meldingsutveksling.noarkexchange.schema;
 
 import javax.jws.WebService;
 import javax.xml.ws.BindingType;
@@ -12,11 +10,12 @@ import javax.xml.ws.BindingType;
  * JAX-WS RI 2.2.8
  * Generated source version: 2.2
  */
-@WebService(portName = "noarkExchangePort", serviceName = "noarkExchange", targetNamespace = "http://www.arkivverket.no/Noark/Exchange", wsdlLocation = "file:/Users/glennbech/dev/meldingsutvikling-mellom-offentlige-virksomheter/praktiskprove/knutepunkt/src/main/webapp/WEB-INF/wsdl/noarkExchange.wsdl", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.SOAPport")
+@WebService(portName = "NoarkExchangePort", serviceName = "noarkExchange", targetNamespace = "http://www.arkivverket.no/Noark/Exchange", wsdlLocation = "file:/Users/glennbech/dev/meldingsutvikling-mellom-offentlige-virksomheter/praktiskprove/knutepunkt/src/main/webapp/WEB-INF/wsdl/noarkExchange.wsdl", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.SOAPport")
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
-public class KnutepunktImpl implements SOAPport {
+public class noarkExchange_NoarkExchangePortImpl
+        implements SOAPport {
 
-    public KnutepunktImpl() {
+    public noarkExchange_NoarkExchangePortImpl() {
     }
 
     /**
@@ -33,7 +32,7 @@ public class KnutepunktImpl implements SOAPport {
      * @return returns no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType
      */
     public PutMessageResponseType putMessage(PutMessageRequestType putMessageRequest) {
-        PutMessageRequestType putMessage = new PutMessageRequestType();
+        //replace with your impl here
         return null;
     }
 

@@ -57,7 +57,8 @@
     		</wsdl:operation>
   	</wsdl:binding>
 	<wsdl:service name="noarkExchange">
-		<wsdl:port name="noarkExchangePort" binding="tns:noarkExchangeBinding">
-		</wsdl:port>
+		<wsdl:port name="NoarkExchangePort" binding="tns:noarkExchangeBinding">
+			<soap:address location="http://hardcodeme.not/noarkExchange"/>
+        </wsdl:port>
 	</wsdl:service>
 </wsdl:definitions>

@@ -49,7 +49,6 @@
                 </executions>
 
                 <configuration>
-
                     <genJWS>true</genJWS>
                     <packageName>no.difi.meldingsutveksling.noarkexchange.schema</packageName>
                     <wsdlDirectory>src\main\webapp\WEB-INF\wsdl</wsdlDirectory>
