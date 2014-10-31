@@ -7,9 +7,35 @@
     <groupId>no.difi.meldingsutveksling</groupId>
     <artifactId>knutepunkt</artifactId>
     <version>1.0-SNAPSHOT</version>
-
+    <packaging>war</packaging>
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.sun.xml.ws</groupId>
+                        <artifactId>jaxws-rt</artifactId>
+                        <version>2.2.8</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <webApp>
+                        <contextPath>/knutepunkt</contextPath>
+                     <!--   <jettyEnvXml>${basedir}/src/test/resources/jetty-env.xml</jettyEnvXml>   -->
+                    </webApp>
+                    <connectors>
+                        <connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
+                            <port>9090</port>
+                            <maxIdleTime>60000</maxIdleTime>
+                        </connector>
+                    </connectors>
+                    <stopKey/>
+                    <stopPort/>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.jvnet.jax-ws-commons</groupId>
                 <artifactId>jaxws-maven-plugin</artifactId>
@@ -26,7 +52,7 @@
 
                     <genJWS>true</genJWS>
                     <packageName>no.difi.meldingsutveksling.noarkexchange.schema</packageName>
-                    <wsdlDirectory>src\main\resources</wsdlDirectory>
+                    <wsdlDirectory>src\main\webapp\WEB-INF\wsdl</wsdlDirectory>
                     <sei/>
                     <vmArgs>
                         <vmArg>-Djavax.xml.accessExternalDTD=all</vmArg>
@@ -34,8 +60,8 @@
                     </vmArgs>
                 </configuration>
 
-               <dependencies>
-                   <dependency>
+                <dependencies>
+                    <dependency>
                         <groupId>com.sun.xml.ws</groupId>
                         <artifactId>jaxws-tools</artifactId>
                         <version>2.2.8</version>
@@ -58,6 +84,12 @@
             <groupId>javax.xml.ws</groupId>
             <artifactId>jaxws-api</artifactId>
             <version>2.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>jaxws-rt</artifactId>
+            <version>2.2.8</version>
         </dependency>
 
         <dependency>

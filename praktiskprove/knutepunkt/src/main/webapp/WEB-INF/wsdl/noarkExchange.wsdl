@@ -58,7 +58,6 @@
   	</wsdl:binding>
 	<wsdl:service name="noarkExchange">
 		<wsdl:port name="noarkExchangePort" binding="tns:noarkExchangeBinding">
-			<soap:address location="http:8080/localhost/noarkExchange"/>
 		</wsdl:port>
 	</wsdl:service>
 </wsdl:definitions>
