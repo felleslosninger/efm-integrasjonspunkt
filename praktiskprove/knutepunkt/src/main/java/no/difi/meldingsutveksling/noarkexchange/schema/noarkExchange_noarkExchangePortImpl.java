@@ -11,10 +11,11 @@ import javax.xml.ws.BindingType;
  * Generated source version: 2.2
  * 
  */
-@WebService(portName = "noarkExchangePort", serviceName = "noarkExchange", targetNamespace = "http://www.arkivverket.no/Noark/Exchange", wsdlLocation = "file:/C:/dev/meldingsutvikling-mellom-offentlige-virksomheter/praktiskprove/knutepunkt/src/main/resources/noarkExchange.wsdl", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.SOAPport")
+@WebService(portName = "noarkExchangePort", serviceName = "noarkExchange", targetNamespace = "http://www.arkivverket.no/Noark/Exchange", wsdlLocation = "file:/Users/glennbech/dev/meldingsutvikling-mellom-offentlige-virksomheter/praktiskprove/knutepunkt/src/main/resources/noarkExchange.wsdl", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.SOAPport")
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
 public class noarkExchange_noarkExchangePortImpl
-    implements SOAPport {
+    implements SOAPport
+{
 
 
     public noarkExchange_noarkExchangePortImpl() {
