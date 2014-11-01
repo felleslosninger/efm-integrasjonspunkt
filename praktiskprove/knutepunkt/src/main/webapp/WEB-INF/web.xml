@@ -17,7 +17,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>wsServlet</servlet-name>
-        <url-pattern>/</url-pattern>
+        <url-pattern>/noarkExchange</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>60</session-timeout>

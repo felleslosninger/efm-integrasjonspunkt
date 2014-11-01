@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <endpoints xmlns='http://java.sun.com/xml/ns/jax-ws/ri/runtime'
            version='2.0'>
-    <endpoint name='NoarkExchange'
-              implementation='no.difi.meldingsutveksling.noarkexchange.schema.KnutepunkImpl'
+    <endpoint name='2'
+              implementation='no.difi.meldingsutveksling.noarkexchange.schema.noarkExchange_NoarkExchangePortImpl'
               wsdl='WEB-INF/wsdl/noarkExchange.wsdl'
-              url-pattern='/'/>
+              url-pattern='/noarkExchange'/>
 </endpoints>
