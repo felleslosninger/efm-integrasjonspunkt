@@ -28,7 +28,7 @@ public class AdressRegisterFactory {
                         "KPG4IS9rUBsFI6ISxQIDAQAB");
     }
 
-    public AddressRegister createAdressRegister() {
+    public static AddressRegister createAdressRegister() {
         return new AddressRegister() {
             @Override
             public PublicKey getPublicKey(String orgNumber) {
@@ -36,7 +36,7 @@ public class AdressRegisterFactory {
                 if (key == null) {
                     throw new IllegalArgumentException("OrgNr " + orgNumber + " not found");
                 }
-                return null;
+                return PublicKeyParser.toPublicKey(key);
             }
         };
     }
