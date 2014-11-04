@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.dokumentpakking.domain;
+package no.difi.meldingsutveksling.dokumentpakking.xml;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
