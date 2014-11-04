@@ -14,6 +14,7 @@ import javax.xml.bind.annotation.*;
 import java.io.*;
 import java.security.*;
 import java.security.cert.CertificateException;
+import java.security.spec.EncodedKeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 
 
@@ -42,7 +43,7 @@ public class MessageHandler {
         Cipher cipher = Cipher.getInstance("RSA");
         PrivateKey privateKey =loadPrivateKey();
         cipher.init(Cipher.DECRYPT_MODE,privateKey);
-        byte[] utf8 =cipher.doFinal(result);
+        byte[] utf8 = cipher.doFinal(result);
         String decrypted= new String(utf8,"UTF8");
         System.out.println();
     }
@@ -73,11 +74,26 @@ public class MessageHandler {
                     builder.append(line);
                 }
             }
-            //
-            byte[] encoded = DatatypeConverter.parseBase64Binary(builder.toString());
+            String pkcs8key =
+                    "MIICdQIBADANBgkqhkiG9w0BAQEFAASCAl8wggJbAgEAAoGBAN4tj2Uj2OkNJMSN" +
+                    "aS6Vaj2CtZDSUiOrYRelXimOWjyMgADj7PjuipieaAyANkVr58b9XcdH4ow2KSW0" +
+                    "wUh6kM6P1ESGl39blzwFmq6BRPOhDqWmPijWrAqDM6uDeYBJSnxgan4PZ3I1eRJq" +
+                    "ICw6VDrsmFqnRpknGKVgIYQPTSWTAgMBAAECgYBeh6v3MGVd4wW9yxzxgQkO2so9" +
+                    "r/7axlQtJ2ME81hZYr4jotZ0o6m8fclvaC2vI9YdyDdaTq+JUJH5RQrnt55cOcr+" +
+                    "1TLffeWVoivOZXwAqyUhCxPCkA8b4LO1oK5kXDbVyc2lV/0xFLmAU07DE2p1DYaD" +
+                    "CIh2jZzsuBwj7EPUAQJBAPAzyX9VVXWlsx/H7Pa0PggB6Xo4czn+MTDv56X3aDRk" +
+                    "XUtqukRFIcjcy6l5Zl7ER4CVu3aswgtGw40ds0Dji4ECQQDsyk2QEyayOhFwLziD" +
+                    "h29tS6QK7U9WqysuDx5sCDxXMT1MtsQlTcj4W02Ak8PRYDS3ccdpMlMttYKXLy+W" +
+                    "C0sTAkBsVn9AXkWwTW8wG2VGlF8SD4K17HYUJxEayGnL0n3+e3IUzOt8VU36oZN+" +
+                    "OdIxVggF+ALYcO0IVv9mS4oI71iBAkByWawlVKpOTa6YL6WqFyCfdnTs9fdnklfS" +
+                    "8WguobeKH/RLdMO6hBr2nRkLa9CX707l/CNh0PTMUSiUnCvt2NxTAkBPwCWmARS4" +
+                    "cZjrWFtnjw4mUjH+fR//WnLqYRFETNasROMr64uX+rtNxrvCXI4VB0oiuvKHwXd3" +
+                    "uc9j/4wX04Kk";
+            byte[] encoded = DatatypeConverter.parseBase64Binary(pkcs8key);
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
             KeyFactory kf = KeyFactory.getInstance("RSA");
             key = kf.generatePrivate(keySpec);
+
         } finally {
             closeSilent(is);
         }
