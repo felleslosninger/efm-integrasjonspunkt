@@ -6,10 +6,10 @@ import no.difi.meldingsutveksling.dokumentpakking.crypto.CreateSignature;
 import no.difi.meldingsutveksling.dokumentpakking.domain.AsicEAttachable;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Avsender;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Mottaker;
-import no.difi.meldingsutveksling.dokumentpakking.service.CreateCMSDocument;
-import no.difi.meldingsutveksling.dokumentpakking.service.CreateCMScryptadedAsic;
+import no.difi.meldingsutveksling.dokumentpakking.service.CreateAsice;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateSBD;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateZip;
+import no.difi.meldingsutveksling.dokumentpakking.service.EncryptPayload;
 import no.difi.meldingsutveksling.dokumentpakking.xml.MarshalSBD;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 
@@ -17,21 +17,22 @@ import org.unece.cefact.namespaces.standardbusinessdocumentheader.StandardBusine
 
 public class Dokumentpakker {
 
-	private CreateCMScryptadedAsic createCMScryptadedAsic;
+	private EncryptPayload encryptPayload;
 	private CreateSBD createSBD;
+	private CreateAsice createAsice;
 
-	public Dokumentpakker(CreateCMScryptadedAsic createCMScryptadedAsic, CreateSBD createSBD) {
-		this.createCMScryptadedAsic = createCMScryptadedAsic;
+	public Dokumentpakker(EncryptPayload encryptPayload,CreateAsice createAsice , CreateSBD createSBD) {
 		this.createSBD = createSBD;
 	}
 
 	public Dokumentpakker() {
-		this.createCMScryptadedAsic = new CreateCMScryptadedAsic(new CreateSignature(), new CreateZip(), new CreateCMSDocument());
 		createSBD = new CreateSBD();
+		encryptPayload = new EncryptPayload();
+		createAsice = new CreateAsice(new CreateSignature(), new CreateZip());
 	}
 
 	public byte[] pakkDokumentISbd(AsicEAttachable document, Avsender avsender, Mottaker mottaker) {
-		Payload payload = new Payload(createCMScryptadedAsic.createAsice(document, avsender, mottaker).getBytes(), "UTF-8", "texkt/xml");
+		Payload payload = new Payload(encryptPayload.encrypt(createAsice.createAsice(document, avsender).getBytes(), mottaker));
 		StandardBusinessDocument doc = createSBD.createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		MarshalSBD.marshal(doc, os);
