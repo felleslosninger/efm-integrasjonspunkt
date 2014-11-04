@@ -1,10 +1,7 @@
 
 package no.difi.messagehandler;
 
-import org.apache.commons.io.FileUtils;
 import org.bouncycastle.cms.*;
-import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.unece.cefact.namespaces.standardbusinessdocumentheader.StandardBusinessDocument;
 
 
@@ -17,9 +14,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.*;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.security.*;
 import java.security.cert.CertificateException;
@@ -41,11 +36,13 @@ public class MessageHandler {
         byte[] payloadBytes=payload.asice;
         byte[] result = DatatypeConverter.parseBase64Binary(new String(payloadBytes));
 
+        //*** get rsa cipher decrypt
         Cipher cipher = Cipher.getInstance("RSA");
-        URL file=PakkeTest.class.getClassLoader().getResourceAsStream("958935429-oslo-kommune.pem");
+        URL url= MessageHandler.class.getResource("958935429-oslo-kommune.pem");
+        PrivateKey pemFile= (PrivateKey) new File(url.toString());
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 
-
-        cipher.init(Cipher.DECRYPT_MODE,getPrivateKey(prop));
+        cipher.init(Cipher.DECRYPT_MODE,pemFile);
         byte[] utf8 =cipher.doFinal(result);
         String decrypted= new String(utf8,"UTF8");
         System.out.println();
