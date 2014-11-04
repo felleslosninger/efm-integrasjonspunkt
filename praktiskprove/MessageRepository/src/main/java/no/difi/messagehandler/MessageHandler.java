@@ -2,24 +2,18 @@
 package no.difi.messagehandler;
 
 import org.bouncycastle.cms.*;
-import org.bouncycastle.util.io.pem.PemReader;
 import org.unece.cefact.namespaces.standardbusinessdocumentheader.StandardBusinessDocument;
 
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.*;
 import java.io.*;
-import java.net.URL;
 import java.security.*;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.spec.PKCS8EncodedKeySpec;
 
 
