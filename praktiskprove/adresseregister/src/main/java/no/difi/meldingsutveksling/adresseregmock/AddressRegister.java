@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.adresseregmock;
 
+import java.security.PublicKey;
+
 /**
  * Created with IntelliJ IDEA.
  * User: glennbech
@@ -9,6 +11,6 @@ package no.difi.meldingsutveksling.adresseregmock;
  */
 public interface AddressRegister {
 
-    String lookup(String orgNumber);
+    PublicKey getPublicKey(String orgNumber);
 
 }
