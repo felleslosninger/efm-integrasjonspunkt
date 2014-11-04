@@ -53,12 +53,12 @@ public class MessageHandler {
         System.out.println();
     }
 
-    public PrivateKey loadPrivateKey()
+    public PrivateKey loadPrivateKey( )
             throws IOException, GeneralSecurityException {
         PrivateKey key = null;
         InputStream is = null;
         try {
-            is = MessageHandler.class.getClass().getResourceAsStream(pemFileName);
+            is = getClass().getClassLoader().getResourceAsStream(pemFileName);
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
             StringBuilder builder = new StringBuilder();
             boolean inKey = false;
