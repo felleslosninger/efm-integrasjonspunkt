@@ -36,7 +36,7 @@ public class AdressRegisterFactory {
                 if (key == null) {
                     throw new IllegalArgumentException("OrgNr " + orgNumber + " not found");
                 }
-                return null;
+                return PublicKeyParser.toPublicKey(key);
             }
         };
     }
