@@ -19,12 +19,11 @@ public class MessageHandlerTest {
         String textToEncrypt = "Java rules";
         MessageHandler messageHandler = new MessageHandler();
         ClassLoader classLoader = getClass().getClassLoader();
-        /**
-         * This part is for testing xml files. Awaits until further.
-         * File file = new File(classLoader.getResource("sbd.xml").getFile());
-         * messageHandler.unmarshall(file);
-         */
-        assertEquals(textToEncrypt, messageHandler.cryptAtext(textToEncrypt));
+
+
+           File file = new File(classLoader.getResource("sbd.xml").getFile());
+           messageHandler.unmarshall(file);
+        //assertEquals(textToEncrypt, messageHandler.cryptAtext(textToEncrypt));
 
     }
 }

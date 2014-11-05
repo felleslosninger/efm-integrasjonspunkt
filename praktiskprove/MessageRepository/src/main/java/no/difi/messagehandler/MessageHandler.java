@@ -1,10 +1,12 @@
 
 package no.difi.messagehandler;
 
+import org.apache.commons.io.FileUtils;
 import org.bouncycastle.cms.CMSException;
 import org.unece.cefact.namespaces.standardbusinessdocumentheader.StandardBusinessDocument;
 
 import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -31,18 +33,27 @@ public class MessageHandler {
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         StandardBusinessDocument standardBusinessDocument = (StandardBusinessDocument) unmarshaller.unmarshal(sdbXml);
 
-        //*** get payload
+        //*** get payload *****
         Payload payload= (Payload) standardBusinessDocument.getAny();
-        byte[] payloadBytes=payload.asice;
-        String result = DatatypeConverter.printBase64Binary(payloadBytes);
+        String aesInRsa=payload.encryptionKey;
+        String payloadString=payload.asice;
+        byte[] aesInDisc = DatatypeConverter.parseBase64Binary(aesInRsa);
+        byte[] aesEncZip = DatatypeConverter.parseBase64Binary(payloadString);
 
-        //*** get rsa cipher decrypt
+        //*** get rsa cipher decrypt *****
         Cipher cipher = Cipher.getInstance("RSA");
         PrivateKey privateKey =loadPrivateKey();
         cipher.init(Cipher.DECRYPT_MODE,privateKey);
-        byte[] utf8 = cipher.doFinal(result.getBytes());
-        String decrypted= new String(utf8,"UTF8");
-        System.out.println();
+        byte[] aesKey = cipher.doFinal(aesInDisc);
+
+        //*** get aes cipher decrypt *****
+        Cipher aesCipher = Cipher.getInstance("AES");
+        SecretKeySpec secretKeySpec = new SecretKeySpec(aesKey,"AES");
+        SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
+        aesCipher.init(Cipher.DECRYPT_MODE,secretKeySpec,secureRandom);
+        byte[] zipTobe= aesCipher.doFinal( aesEncZip);
+        File file = new File ("C:\\payload.zip");
+        FileUtils.writeByteArrayToFile(file, zipTobe);
     }
 
     public PrivateKey loadPrivateKey( )
@@ -125,6 +136,7 @@ public class MessageHandler {
     }
 
     private PublicKey getPublicKey() throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
+
         KeyFactory kf = KeyFactory.getInstance("RSA");
         InputStream is = null;
         StringBuilder builder=null;
@@ -164,7 +176,7 @@ public class MessageHandler {
     @XmlRootElement(name = "payload")
     public static class Payload {
         @XmlValue
-        byte[] asice;
+        String asice;
 
         @XmlAttribute
         String encoding;
