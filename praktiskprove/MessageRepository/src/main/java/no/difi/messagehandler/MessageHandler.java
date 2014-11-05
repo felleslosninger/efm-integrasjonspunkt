@@ -1,9 +1,8 @@
 
 package no.difi.messagehandler;
 
-import org.bouncycastle.cms.*;
+import org.bouncycastle.cms.CMSException;
 import org.unece.cefact.namespaces.standardbusinessdocumentheader.StandardBusinessDocument;
-
 
 import javax.crypto.Cipher;
 import javax.xml.bind.DatatypeConverter;
@@ -14,8 +13,9 @@ import javax.xml.bind.annotation.*;
 import java.io.*;
 import java.security.*;
 import java.security.cert.CertificateException;
-import java.security.spec.EncodedKeySpec;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 
 
 /**
@@ -23,7 +23,8 @@ import java.security.spec.PKCS8EncodedKeySpec;
  */
 public class MessageHandler {
 
-    private String pemFileName ="958935429-oslo-kommune.pem";
+    private String pemFileName ="958935429-oslo-kommune.pkcs8";
+    private String publicKeyFileName= "958935429-oslo-kommune.publickey";
 
     void unmarshall(File sdbXml) throws JAXBException, GeneralSecurityException, IOException, CMSException {
        //*** Unmarshall xml*****
@@ -34,7 +35,7 @@ public class MessageHandler {
         //*** get payload
         Payload payload= (Payload) standardBusinessDocument.getAny();
         byte[] payloadBytes=payload.asice;
-        byte[] result = DatatypeConverter.parseBase64Binary(new String(payloadBytes));
+        String result = DatatypeConverter.printBase64Binary(payloadBytes);
 
 
 
@@ -43,7 +44,7 @@ public class MessageHandler {
         Cipher cipher = Cipher.getInstance("RSA");
         PrivateKey privateKey =loadPrivateKey();
         cipher.init(Cipher.DECRYPT_MODE,privateKey);
-        byte[] utf8 = cipher.doFinal(result);
+        byte[] utf8 = cipher.doFinal(result.getBytes());
         String decrypted= new String(utf8,"UTF8");
         System.out.println();
     }
@@ -113,7 +114,59 @@ public class MessageHandler {
         return prvtk;
     }
 
-    public void codeDecode() {
+    public void codeDecode() throws GeneralSecurityException, IOException {
+       //TODO: finn ut om public nøkkelen oppdatert
+        String text= "hello dude";
+        Cipher cipher = Cipher.getInstance("RSA");
+        PublicKey publicKey=getPublicKey();
+        cipher.init(Cipher.DECRYPT_MODE,publicKey);
+        byte [] encryptedMessege= cipher.doFinal(text.getBytes());
+        decode(encryptedMessege);
+    }
+
+    private void decode(byte[] encrypted) throws GeneralSecurityException, IOException {
+        Cipher cipher = Cipher.getInstance("RSA");
+        PrivateKey privateKey =loadPrivateKey();
+        cipher.init(Cipher.DECRYPT_MODE,privateKey);
+        byte[] utf8 = cipher.doFinal(encrypted);
+        String decrypted= new String(utf8,"UTF8");
+        System.out.println();
+    }
+
+    private PublicKey getPublicKey() throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        InputStream is = null;
+        StringBuilder builder=null;
+        try {
+            is = getClass().getClassLoader().getResourceAsStream(publicKeyFileName);
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            builder = new StringBuilder();
+            boolean inKey = false;
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                if (!inKey) {
+                    if (line.startsWith("-----BEGIN ") &&
+                            line.endsWith(" PRIVATE KEY-----")) {
+                        inKey = true;
+                    }
+                    continue;
+                }
+                else {
+                    if (line.startsWith("-----END ") &&
+                            line.endsWith(" PRIVATE KEY-----")) {
+                        inKey = false;
+                        break;
+                    }
+                    builder.append(line);
+                }
+            }
+        }finally {
+            closeSilent(is);
+        }
+        byte[] keyBytes =DatatypeConverter.parseBase64Binary(builder.toString());;
+        X509EncodedKeySpec keySpec =
+                new X509EncodedKeySpec(keyBytes);
+        PublicKey key = kf.generatePublic(keySpec);
+        return key;
 
     }
 

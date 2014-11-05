@@ -1,22 +1,22 @@
 package no.difi.meldingsutveksling.dokumentpakking.domain;
 
-import no.difi.meldingsutveksling.dokumentpakking.crypto.Sertifikat;
+import java.security.PublicKey;
 
 public class Mottaker extends Aktor {
 
-	private Sertifikat sertifikat;
+	private PublicKey publicKey;
 	
-	public Mottaker(Organisasjonsnummer orgNummer, Sertifikat sertifikat) {
+	public Mottaker(Organisasjonsnummer orgNummer, PublicKey publicKey) {
 		super(orgNummer);
-		setSertifikat(sertifikat);
+		setPublicKey(publicKey);
 	}
 
-	public Sertifikat getSertifikat() {
-		return sertifikat;
+	public PublicKey getPublicKey() {
+		return publicKey;
 	}
 
-	private void setSertifikat(Sertifikat sertifikat) {
-		this.sertifikat = sertifikat;
+	private void setPublicKey(PublicKey publicKey) {
+		this.publicKey = publicKey;
 	}
 
 }
