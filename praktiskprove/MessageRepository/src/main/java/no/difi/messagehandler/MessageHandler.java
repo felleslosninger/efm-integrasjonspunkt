@@ -1,8 +1,11 @@
 
 package no.difi.messagehandler;
 
+import no.difi.meldingsutveksling.adresseregmock.AdressRegisterFactory;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.cms.CMSException;
+import org.unece.cefact.namespaces.standardbusinessdocumentheader.Partner;
+import org.unece.cefact.namespaces.standardbusinessdocumentheader.PartnerIdentification;
 import org.unece.cefact.namespaces.standardbusinessdocumentheader.StandardBusinessDocument;
 
 import javax.crypto.Cipher;
@@ -17,6 +20,7 @@ import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -38,8 +42,12 @@ public class MessageHandler {
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         StandardBusinessDocument standardBusinessDocument = (StandardBusinessDocument) unmarshaller.unmarshal(sdbXml);
 
-        //*** query to Elma to get PK etc..
-        new AdressRegisterFactory().createAdressRegister().getPublicKey("958935429");
+        //*** query to Elma to get PK
+        List<Partner> senders = standardBusinessDocument.getStandardBusinessDocumentHeader().getSenders();
+        Partner sender = senders.get(0);
+        PartnerIdentification orgNr = sender.getIdentifier();
+        String [] orgNrArr=orgNr.getValue().split(":");
+        final PublicKey senderPublicKey =new AdressRegisterFactory().createAdressRegister().getPublicKey( orgNrArr[1]);
 
         //*** get payload *****
         Payload payload= (Payload) standardBusinessDocument.getAny();
