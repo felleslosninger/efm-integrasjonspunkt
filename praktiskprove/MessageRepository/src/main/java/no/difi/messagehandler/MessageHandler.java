@@ -26,15 +26,20 @@ import java.util.zip.ZipInputStream;
  */
 public class MessageHandler {
 
+    private static final String PAYLOAD_ZIP = "C:"+File.separator+"payload.zip";
     private String pemFileName ="958935429-oslo-kommune.pkcs8";
     private String publicKeyFileName= "958935429-oslo-kommune.publickey";
-    private static final String OUTPUT_FOLDER = "C:\\outputzip";
+    private static final String OUTPUT_FOLDER = "C:"+File.separator+"output.zip";
+    private String PAYLOAD_EXTRACT_DESTINATION ="C:"+File.separator+"Zip Output";
 
     void unmarshall(File sdbXml) throws JAXBException, GeneralSecurityException, IOException, CMSException {
        //*** Unmarshall xml*****
         JAXBContext jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class);
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         StandardBusinessDocument standardBusinessDocument = (StandardBusinessDocument) unmarshaller.unmarshal(sdbXml);
+
+        //*** query to Elma to get PK etc..
+        new AdressRegisterFactory().createAdressRegister().getPublicKey("958935429");
 
         //*** get payload *****
         Payload payload= (Payload) standardBusinessDocument.getAny();
@@ -49,15 +54,18 @@ public class MessageHandler {
         cipher.init(Cipher.DECRYPT_MODE,privateKey);
         byte[] aesKey = cipher.doFinal(aesInDisc);
 
+
         //*** get aes cipher decrypt *****
         Cipher aesCipher = Cipher.getInstance("AES");
         SecretKeySpec secretKeySpec = new SecretKeySpec(aesKey,"AES");
         SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
         aesCipher.init(Cipher.DECRYPT_MODE,secretKeySpec,secureRandom);
         byte[] zipTobe= aesCipher.doFinal( aesEncZip);
-        File file = new File ("C:\\payload.zip");
+
+        File file = new File (PAYLOAD_ZIP);
+        file.setWritable(true,false);
         FileUtils.writeByteArrayToFile(file, zipTobe);
-        unZipIt("C:\\payload.zip" , "C:\\Zip Output");
+        unZipIt(PAYLOAD_ZIP, PAYLOAD_EXTRACT_DESTINATION);
 
     }
     public void unZipIt(String zipFile, String outputFolder){
