@@ -12,7 +12,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.*;
 import java.io.*;
 import java.security.*;
-import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -36,9 +35,6 @@ public class MessageHandler {
         Payload payload= (Payload) standardBusinessDocument.getAny();
         byte[] payloadBytes=payload.asice;
         String result = DatatypeConverter.printBase64Binary(payloadBytes);
-
-
-
 
         //*** get rsa cipher decrypt
         Cipher cipher = Cipher.getInstance("RSA");
@@ -106,31 +102,26 @@ public class MessageHandler {
         try { is.close(); } catch (Exception ign) {}
     }
 
-    private static PrivateKey getPrivateKey(String privateKeyFileNameLocation) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException, KeyStoreException, IOException, CertificateException, UnrecoverableEntryException {
-        KeyStore ks = KeyStore.getInstance("JKS");
-        ks.load((KeyStore.LoadStoreParameter) new FileInputStream(privateKeyFileNameLocation));
-        String alias = (String) ks.aliases().nextElement();
-        PrivateKey prvtk= (PrivateKey) ks.getKey("server","123456".toCharArray());
-        return prvtk;
-    }
 
-    public void codeDecode() throws GeneralSecurityException, IOException {
-       //TODO: finn ut om public nøkkelen oppdatert
-        String text= "hello dude";
+    public String cryptAtext(String text) throws GeneralSecurityException, IOException {
+
+        System.out.println("incoming text before encryption: "+ text+ "...");
         Cipher cipher = Cipher.getInstance("RSA");
         PublicKey publicKey=getPublicKey();
-        cipher.init(Cipher.DECRYPT_MODE,publicKey);
+        cipher.init(Cipher.ENCRYPT_MODE,publicKey);
         byte [] encryptedMessege= cipher.doFinal(text.getBytes());
-        decode(encryptedMessege);
+        System.out.println("incoming text after encryption: "+DatatypeConverter.printBase64Binary(encryptedMessege)+ "...");
+        return  decode(encryptedMessege);
     }
 
-    private void decode(byte[] encrypted) throws GeneralSecurityException, IOException {
+    private String decode(byte[] encrypted) throws GeneralSecurityException, IOException {
         Cipher cipher = Cipher.getInstance("RSA");
         PrivateKey privateKey =loadPrivateKey();
         cipher.init(Cipher.DECRYPT_MODE,privateKey);
         byte[] utf8 = cipher.doFinal(encrypted);
         String decrypted= new String(utf8,"UTF8");
-        System.out.println();
+        System.out.println("Decrypted message: " + decrypted+ "...");
+        return decrypted;
     }
 
     private PublicKey getPublicKey() throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
@@ -145,14 +136,14 @@ public class MessageHandler {
             for (String line = br.readLine(); line != null; line = br.readLine()) {
                 if (!inKey) {
                     if (line.startsWith("-----BEGIN ") &&
-                            line.endsWith(" PRIVATE KEY-----")) {
+                            line.endsWith(" PUBLIC KEY-----")) {
                         inKey = true;
                     }
                     continue;
                 }
                 else {
                     if (line.startsWith("-----END ") &&
-                            line.endsWith(" PRIVATE KEY-----")) {
+                            line.endsWith(" PUBLIC KEY-----")) {
                         inKey = false;
                         break;
                     }
@@ -167,7 +158,6 @@ public class MessageHandler {
                 new X509EncodedKeySpec(keyBytes);
         PublicKey key = kf.generatePublic(keySpec);
         return key;
-
     }
 
     @XmlAccessorType(XmlAccessType.FIELD)
@@ -181,6 +171,9 @@ public class MessageHandler {
 
         @XmlAttribute
         String type;
+
+        @XmlAttribute
+        String encryptionKey;
     }
 
 }
