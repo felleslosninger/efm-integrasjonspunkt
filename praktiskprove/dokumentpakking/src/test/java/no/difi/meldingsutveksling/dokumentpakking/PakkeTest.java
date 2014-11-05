@@ -1,39 +1,19 @@
 package no.difi.meldingsutveksling.dokumentpakking;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.SecretKeySpec;
 
 import no.difi.meldingsutveksling.adresseregmock.AdressRegisterFactory;
-import no.difi.meldingsutveksling.dokumentpakking.crypto.Noekkelpar;
 import no.difi.meldingsutveksling.dokumentpakking.domain.AsicEAttachable;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Avsender;
-import no.difi.meldingsutveksling.dokumentpakking.domain.EncryptedContent;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Mottaker;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Organisasjonsnummer;
-import no.difi.meldingsutveksling.dokumentpakking.service.EncryptPayload;
 
-import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
 
 public class PakkeTest {
@@ -62,48 +42,19 @@ public class PakkeTest {
 			return "<root><body></body></root>".getBytes();
 		}
 	};
-	private InputStream keyStoreFile = PakkeTest.class.getClassLoader().getResourceAsStream("klient.jks");
-	private String keyStoreType = "jks";
-
-	private String keyStorePassword = "123456";
 	Dokumentpakker datapakker = new Dokumentpakker();
 
 	@Test
-	public void testKryptering() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException,
-			IllegalBlockSizeException, BadPaddingException {
-
-		EncryptedContent c = new EncryptPayload()
-				.encrypt("Encrypted content".getBytes(), new Mottaker(new Organisasjonsnummer("958935429"), mottakerpublicKey));
-
-		Cipher keyCipher = Cipher.getInstance("RSA");
-		Cipher contentCipher = Cipher.getInstance("AES");
-
-		PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(Base64.decodeBase64(mottakerPrivateKey));
-		KeyFactory kf = KeyFactory.getInstance("RSA");
-		keyCipher.init(Cipher.DECRYPT_MODE, kf.generatePrivate(keySpec));
-		byte[] decryptedContentKey = keyCipher.doFinal(c.getKey());
-
-		Key contentKey = new SecretKeySpec(decryptedContentKey, "AES");
-
-		contentCipher.init(Cipher.DECRYPT_MODE, contentKey);
-		byte[] decryptedContent = contentCipher.doFinal(c.getContent());
-
-		assertThat(new String(decryptedContent), is(equalTo("Encrypted content")));
-
-	}
-
-	@Test
 	public void testPakkingAvXML() throws IOException, InvalidKeySpecException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
-		KeyStore ks = null;
-		ks = KeyStore.getInstance(keyStoreType);
-		ks.load(keyStoreFile, keyStorePassword.toCharArray());
 
-		Avsender avsender = Avsender.builder(new Organisasjonsnummer("12345678"), Noekkelpar.fraKeyStore(ks, "klient", "123456")).build();
+		Avsender avsender = Avsender.builder(new Organisasjonsnummer("12345678"), null).build();
 
-		// ByteArrayInputStream is = new
-		// ByteArrayInputStream(datapakker.pakkDokumentISbd(forsendelse,
-		// avsender, new Mottaker(
-		// new Organisasjonsnummer("958935429"), mottakerpublicKey)));
-		// IOUtils.copy(is, System.out);
+		ByteArrayInputStream is = new ByteArrayInputStream(datapakker.pakkDokumentISbd(forsendelse, avsender, new Mottaker(
+				new Organisasjonsnummer("958935429"), mottakerpublicKey)));
+		
+		//IOUtils.copy(is, System.out);
+		 
+//		 FileUtils.writeByteArrayToFile(new File("c:\\sbd.xml"), datapakker.pakkDokumentISbd(forsendelse, avsender, new Mottaker(
+//					new Organisasjonsnummer("958935429"), mottakerpublicKey)));
 	}
 }

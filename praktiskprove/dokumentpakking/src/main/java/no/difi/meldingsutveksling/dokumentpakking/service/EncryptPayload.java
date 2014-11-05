@@ -11,8 +11,6 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 
-import org.apache.commons.codec.binary.Base64;
-
 import no.difi.meldingsutveksling.dokumentpakking.domain.EncryptedContent;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Mottaker;
 

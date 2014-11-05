@@ -15,8 +15,11 @@ import org.unece.cefact.namespaces.standardbusinessdocumentheader.StandardBusine
 public class CreateSBD {
 	public static final String STANDARD = "???";
 	public static final String HEADER_VERSION = "1.0";
-	public static final String TYPE_VERSION = "1.0";
+	public static final String TYPE_VERSION = "???";
 	public static final String CONVERSATIONID = "ConversationId";
+	public static final String TYPE = "???";
+	public static final String INSTANCE_IDENTIFIER = "???";
+	
 	public StandardBusinessDocument createSBD(Organisasjonsnummer avsender, Organisasjonsnummer mottaker, Payload payload) {
     	StandardBusinessDocument doc = new StandardBusinessDocument()
 		.withStandardBusinessDocumentHeader(
@@ -27,15 +30,15 @@ public class CreateSBD {
 						.withDocumentIdentification(new DocumentIdentification()
 										.withStandard(STANDARD)
 										.withTypeVersion(TYPE_VERSION)
-										.withInstanceIdentifier("")
-										.withType("BEST/EDU")
+										.withInstanceIdentifier(INSTANCE_IDENTIFIER)
+										.withType(TYPE)
 										.withCreationDateAndTime(DateTime.now())
 						)
 						.withBusinessScope(new BusinessScope()
 										.withScopes(new Scope()
 														.withIdentifier(STANDARD)
 														.withType(CONVERSATIONID)
-														.withInstanceIdentifier("")
+														.withInstanceIdentifier(INSTANCE_IDENTIFIER)
 										)
 						)
 		)

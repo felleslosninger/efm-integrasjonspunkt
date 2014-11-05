@@ -1,13 +1,13 @@
 package no.difi.meldingsutveksling.dokumentpakking.domain;
 
-import no.difi.meldingsutveksling.dokumentpakking.crypto.Noekkelpar;
+import java.security.PrivateKey;
 
 public class Avsender extends Aktor {
-	private Noekkelpar noekkelpar;
+	private PrivateKey privatNokkel;
 
-	public Avsender(Organisasjonsnummer orgNummer, Noekkelpar noekkelpar) {
+	public Avsender(Organisasjonsnummer orgNummer, PrivateKey privatNokkel) {
 		super(orgNummer);
-		this.setNoekkelpar(noekkelpar);
+		this.setPrivatnokkel(privatNokkel);
 	}
 
 	/**
@@ -17,16 +17,16 @@ public class Avsender extends Aktor {
 	 *            Avsenders nøkkelpar: signert virksomhetssertifikat og
 	 *            tilhørende privatnøkkel.
 	 */
-	public static Builder builder(Organisasjonsnummer organisasjonsnummer, Noekkelpar noekkelpar) {
+	public static Builder builder(Organisasjonsnummer organisasjonsnummer, PrivateKey noekkelpar) {
 		return new Builder(organisasjonsnummer, noekkelpar);
 	}
 
-	public Noekkelpar getNoekkelpar() {
-		return noekkelpar;
+	public PrivateKey getPrivatnokkel() {
+		return privatNokkel;
 	}
 
-	private void setNoekkelpar(Noekkelpar noekkelpar) {
-		this.noekkelpar = noekkelpar;
+	private void setPrivatnokkel(PrivateKey privatNokkel) {
+		this.privatNokkel = privatNokkel;
 	}
 
 	public static class Builder {
@@ -34,8 +34,8 @@ public class Avsender extends Aktor {
 		private final Avsender target;
 		private boolean built = false;
 
-		private Builder(Organisasjonsnummer orgNummer, Noekkelpar noekkelpar) {
-			target = new Avsender(orgNummer, noekkelpar);
+		private Builder(Organisasjonsnummer orgNummer, PrivateKey privatNokkel) {
+			target = new Avsender(orgNummer, privatNokkel);
 		}
 
 		public Avsender build() {
