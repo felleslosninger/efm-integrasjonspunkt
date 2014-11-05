@@ -17,6 +17,8 @@ import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 
 /**
@@ -26,6 +28,7 @@ public class MessageHandler {
 
     private String pemFileName ="958935429-oslo-kommune.pkcs8";
     private String publicKeyFileName= "958935429-oslo-kommune.publickey";
+    private static final String OUTPUT_FOLDER = "C:\\outputzip";
 
     void unmarshall(File sdbXml) throws JAXBException, GeneralSecurityException, IOException, CMSException {
        //*** Unmarshall xml*****
@@ -54,6 +57,57 @@ public class MessageHandler {
         byte[] zipTobe= aesCipher.doFinal( aesEncZip);
         File file = new File ("C:\\payload.zip");
         FileUtils.writeByteArrayToFile(file, zipTobe);
+        unZipIt("C:\\payload.zip" , "C:\\Zip Output");
+
+    }
+    public void unZipIt(String zipFile, String outputFolder){
+
+        byte[] buffer = new byte[1024];
+
+        try{
+
+            //create output directory is not exists
+            File folder = new File(OUTPUT_FOLDER);
+            if(!folder.exists()){
+                folder.mkdir();
+            }
+
+            //get the zip file content
+            ZipInputStream zis =
+                    new ZipInputStream(new FileInputStream(zipFile));
+            //get the zipped file list entry
+            ZipEntry ze = zis.getNextEntry();
+
+            while(ze!=null){
+
+                String fileName = ze.getName();
+                File newFile = new File(outputFolder + File.separator + fileName);
+
+                System.out.println("file unzip : "+ newFile.getAbsoluteFile());
+
+                //create all non exists folders
+                //else you will hit FileNotFoundException for compressed folder
+                new File(newFile.getParent()).mkdirs();
+
+                FileOutputStream fos = new FileOutputStream(newFile);
+
+                int len;
+                while ((len = zis.read(buffer)) > 0) {
+                    fos.write(buffer, 0, len);
+                }
+
+                fos.close();
+                ze = zis.getNextEntry();
+            }
+
+            zis.closeEntry();
+            zis.close();
+
+            System.out.println("Done");
+
+        }catch(IOException ex){
+            ex.printStackTrace();
+        }
     }
 
     public PrivateKey loadPrivateKey( )
