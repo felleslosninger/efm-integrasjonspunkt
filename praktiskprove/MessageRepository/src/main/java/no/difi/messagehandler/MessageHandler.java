@@ -89,7 +89,7 @@ public class MessageHandler {
                     "8WguobeKH/RLdMO6hBr2nRkLa9CX707l/CNh0PTMUSiUnCvt2NxTAkBPwCWmARS4" +
                     "cZjrWFtnjw4mUjH+fR//WnLqYRFETNasROMr64uX+rtNxrvCXI4VB0oiuvKHwXd3" +
                     "uc9j/4wX04Kk";
-            byte[] encoded = DatatypeConverter.parseBase64Binary(pkcs8key);
+            byte[] encoded = DatatypeConverter.parseBase64Binary(builder.toString());
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
             KeyFactory kf = KeyFactory.getInstance("RSA");
             key = kf.generatePrivate(keySpec);
@@ -111,8 +111,6 @@ public class MessageHandler {
         String alias = (String) ks.aliases().nextElement();
         PrivateKey prvtk= (PrivateKey) ks.getKey("server","123456".toCharArray());
         return prvtk;
-        /*KeyStore.PrivateKeyEntry keyEntry = (KeyStore.PrivateKeyEntry) ks.getEntry(alias, new KeyStore.PasswordProtection(passPhrase.toCharArray()));
-        return keyEntry.getPrivateKey();*/
     }
 
     public void codeDecode() {
