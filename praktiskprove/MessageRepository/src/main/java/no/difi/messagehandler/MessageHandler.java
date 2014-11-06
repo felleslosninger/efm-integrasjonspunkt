@@ -1,9 +1,12 @@
 
 package no.difi.messagehandler;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.joran.action.LoggerAction;
 import no.difi.meldingsutveksling.adresseregmock.AdressRegisterFactory;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.cms.CMSException;
+import org.slf4j.LoggerFactory;
 import org.unece.cefact.namespaces.standardbusinessdocumentheader.Partner;
 import org.unece.cefact.namespaces.standardbusinessdocumentheader.PartnerIdentification;
 import org.unece.cefact.namespaces.standardbusinessdocumentheader.StandardBusinessDocument;
@@ -33,12 +36,23 @@ import java.util.zip.ZipInputStream;
 public class MessageHandler {
 
 
-    private static final String PAYLOAD_ZIP = "C:"+File.separator+"payload.zip";
-    private String pemFileName ="958935429-oslo-kommune.pkcs8";
-    private String publicKeyFileName= "958935429-oslo-kommune.publickey";
-    private static final String OUTPUT_FOLDER = "C:"+File.separator+"output.zip";
-    private String PAYLOAD_EXTRACT_DESTINATION ="C:"+File.separator+"Zip Output";
-    private java.lang.String RSA_INSTANCE ="RSA";
+    private static final String PAYLOAD_ZIP = "C:" + File.separator + "payload.zip";
+    private static final int MAGIC_NUMBER = 1024;
+    private static final String PEM_FILE_NAME = "958935429-oslo-kommune.pkcs8";
+    private static final String PUBLIC_KEY_FILENAME = "958935429-oslo-kommune.publickey";
+    private static final String OUTPUT_FOLDER = "C:" + File.separator + "output.zip";
+    private static final String PAYLOAD_EXTRACT_DESTINATION = "C:" + File.separator + "Zip Output";
+    private static final String RSA_INSTANCE = "RSA";
+    private static final String AES_INSTANCE = "AES";
+    private static final Logger logback = (Logger) LoggerFactory.getLogger(MessageHandler.class);
+
+    static{
+        logback.debug("Duden sie bitte!");
+        logback.trace("tracen sie bitte!");
+        logback.info("This is anb info");
+        logback.warn("Dummy warning message.");
+        logback.error("Dummy error message.");
+    }
 
 
     /**
@@ -60,8 +74,8 @@ public class MessageHandler {
         List<Partner> senders = standardBusinessDocument.getStandardBusinessDocumentHeader().getSenders();
         Partner sender = senders.get(0);
         PartnerIdentification orgNr = sender.getIdentifier();
-        String [] orgNrArr=orgNr.getValue().split(":");
-        final PublicKey senderPublicKey =new AdressRegisterFactory().createAdressRegister().getPublicKey( orgNrArr[1]);
+        String[] orgNrArr = orgNr.getValue().split(":");
+        final PublicKey senderPublicKey = new AdressRegisterFactory().createAdressRegister().getPublicKey(orgNrArr[1]);
 
         //*** get payload *****
         Payload payload = (Payload) standardBusinessDocument.getAny();
@@ -78,15 +92,15 @@ public class MessageHandler {
 
 
         //*** get aes cipher decrypt *****
-        Cipher aesCipher = Cipher.getInstance("AES");
-        SecretKeySpec secretKeySpec = new SecretKeySpec(aesKey, "AES");
+        Cipher aesCipher = Cipher.getInstance(AES_INSTANCE);
+        SecretKeySpec secretKeySpec = new SecretKeySpec(aesKey, AES_INSTANCE);
         SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
 
-        aesCipher.init(Cipher.DECRYPT_MODE,secretKeySpec,secureRandom);
-        byte[] zipTobe= aesCipher.doFinal( aesEncZip);
+        aesCipher.init(Cipher.DECRYPT_MODE, secretKeySpec, secureRandom);
+        byte[] zipTobe = aesCipher.doFinal(aesEncZip);
 
-        File file = new File (PAYLOAD_ZIP);
-        file.setWritable(true,false);
+        File file = new File(PAYLOAD_ZIP);
+        file.setWritable(true, false);
         FileUtils.writeByteArrayToFile(file, zipTobe);
         unZipIt(PAYLOAD_ZIP, PAYLOAD_EXTRACT_DESTINATION);
 
@@ -95,72 +109,66 @@ public class MessageHandler {
 
     /**
      * Unzips the Zip payload
-     * @param zipFile payload
+     *
+     * @param zipFile      payload
      * @param outputFolder destination folder
      */
-    public void unZipIt(String zipFile, String outputFolder) {
+    public void unZipIt(String zipFile, String outputFolder) throws IOException {
 
-        byte[] buffer = new byte[1024];
+        byte[] buffer = new byte[MAGIC_NUMBER];
 
-        try {
 
-            //create output directory is not exists
-            File folder = new File(OUTPUT_FOLDER);
-            if (!folder.exists()) {
-                folder.mkdir();
-            }
-
-            //get the zip file content
-            ZipInputStream zis =
-                    new ZipInputStream(new FileInputStream(zipFile));
-            //get the zipped file list entry
-            ZipEntry ze = zis.getNextEntry();
-
-            while (ze != null) {
-
-                String fileName = ze.getName();
-                File newFile = new File(outputFolder + File.separator + fileName);
-
-                System.out.println("file unzip : " + newFile.getAbsoluteFile());
-
-                //create all non exists folders
-                //else you will hit FileNotFoundException for compressed folder
-                new File(newFile.getParent()).mkdirs();
-
-                FileOutputStream fos = new FileOutputStream(newFile);
-
-                int len;
-                while ((len = zis.read(buffer)) > 0) {
-                    fos.write(buffer, 0, len);
-                }
-
-                fos.close();
-                ze = zis.getNextEntry();
-            }
-
-            zis.closeEntry();
-            zis.close();
-
-            System.out.println("Done");
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        //create output directory is not exists
+        File folder = new File(OUTPUT_FOLDER);
+        if (!folder.exists()) {
+            folder.mkdir();
         }
+
+        //get the zip file content
+        ZipInputStream zis =
+                new ZipInputStream(new FileInputStream(zipFile));
+        //get the zipped file list entry
+        ZipEntry ze = zis.getNextEntry();
+
+        while (ze != null) {
+
+            String fileName = ze.getName();
+            File newFile = new File(outputFolder + File.separator + fileName);
+
+            //create all non exists folders
+            //else you will hit FileNotFoundException for compressed folder
+            new File(newFile.getParent()).mkdirs();
+
+            FileOutputStream fos = new FileOutputStream(newFile);
+
+            int len;
+            while ((len = zis.read(buffer)) > 0) {
+                fos.write(buffer, 0, len);
+            }
+
+            fos.close();
+            ze = zis.getNextEntry();
+        }
+
+        zis.closeEntry();
+        zis.close();
+
     }
 
 
     /**
      * Loads the private key from a pkcs8 file
+     *
      * @return an private key
      * @throws IOException
      * @throws GeneralSecurityException
      */
     public PrivateKey loadPrivateKey()
-            throws IOException, GeneralSecurityException {
+            throws IOException {
         PrivateKey key = null;
         InputStream is = null;
         try {
-            is = getClass().getClassLoader().getResourceAsStream(pemFileName);
+            is = getClass().getClassLoader().getResourceAsStream(PEM_FILE_NAME);
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
             StringBuilder builder = new StringBuilder();
             boolean inKey = false;
@@ -180,44 +188,35 @@ public class MessageHandler {
                     builder.append(line);
                 }
             }
-            String pkcs8key =
-                    "MIICdQIBADANBgkqhkiG9w0BAQEFAASCAl8wggJbAgEAAoGBAN4tj2Uj2OkNJMSN" +
-                            "aS6Vaj2CtZDSUiOrYRelXimOWjyMgADj7PjuipieaAyANkVr58b9XcdH4ow2KSW0" +
-                            "wUh6kM6P1ESGl39blzwFmq6BRPOhDqWmPijWrAqDM6uDeYBJSnxgan4PZ3I1eRJq" +
-                            "ICw6VDrsmFqnRpknGKVgIYQPTSWTAgMBAAECgYBeh6v3MGVd4wW9yxzxgQkO2so9" +
-                            "r/7axlQtJ2ME81hZYr4jotZ0o6m8fclvaC2vI9YdyDdaTq+JUJH5RQrnt55cOcr+" +
-                            "1TLffeWVoivOZXwAqyUhCxPCkA8b4LO1oK5kXDbVyc2lV/0xFLmAU07DE2p1DYaD" +
-                            "CIh2jZzsuBwj7EPUAQJBAPAzyX9VVXWlsx/H7Pa0PggB6Xo4czn+MTDv56X3aDRk" +
-                            "XUtqukRFIcjcy6l5Zl7ER4CVu3aswgtGw40ds0Dji4ECQQDsyk2QEyayOhFwLziD" +
-                            "h29tS6QK7U9WqysuDx5sCDxXMT1MtsQlTcj4W02Ak8PRYDS3ccdpMlMttYKXLy+W" +
-                            "C0sTAkBsVn9AXkWwTW8wG2VGlF8SD4K17HYUJxEayGnL0n3+e3IUzOt8VU36oZN+" +
-                            "OdIxVggF+ALYcO0IVv9mS4oI71iBAkByWawlVKpOTa6YL6WqFyCfdnTs9fdnklfS" +
-                            "8WguobeKH/RLdMO6hBr2nRkLa9CX707l/CNh0PTMUSiUnCvt2NxTAkBPwCWmARS4" +
-                            "cZjrWFtnjw4mUjH+fR//WnLqYRFETNasROMr64uX+rtNxrvCXI4VB0oiuvKHwXd3" +
-                            "uc9j/4wX04Kk";
+
             byte[] encoded = DatatypeConverter.parseBase64Binary(builder.toString());
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
             KeyFactory kf = KeyFactory.getInstance("RSA");
             key = kf.generatePrivate(keySpec);
 
+        } catch (InvalidKeySpecException e) {
+           logback.error(e.toString());
+        } catch (NoSuchAlgorithmException e) {
+            logback.error(e.toString());
         } finally {
             closeSilent(is);
         }
         return key;
     }
 
-    public static void closeSilent(final InputStream is) {
-        if (is == null) return;
-        try {
-            is.close();
-        } catch (Exception ign) {
+    public static void closeSilent(final InputStream is) throws IOException {
+        if (is == null) {
+            return;
         }
+        is.close();
+
     }
 
     /**
      * This part belongs to cryptography testing
      * takes in a text and crypts it with public key
      * then decrypts it with private key
+     *
      * @param text text to crypt
      * @return decrypted text
      * @throws GeneralSecurityException
@@ -226,17 +225,16 @@ public class MessageHandler {
 
     public String cryptAtext(String text) throws GeneralSecurityException, IOException {
 
-        System.out.println("incoming text before encryption: " + text + "...");
         Cipher cipher = Cipher.getInstance("RSA");
         PublicKey publicKey = getPublicKey();
         cipher.init(Cipher.ENCRYPT_MODE, publicKey);
         byte[] encryptedMessege = cipher.doFinal(text.getBytes());
-        System.out.println("incoming text after encryption: " + DatatypeConverter.printBase64Binary(encryptedMessege) + "...");
         return decode(encryptedMessege);
     }
 
     /**
      * Decodes encrypted byte array
+     *
      * @param encrypted
      * @return decrypted text
      * @throws GeneralSecurityException
@@ -247,13 +245,13 @@ public class MessageHandler {
         PrivateKey privateKey = loadPrivateKey();
         cipher.init(Cipher.DECRYPT_MODE, privateKey);
         byte[] utf8 = cipher.doFinal(encrypted);
-        String decrypted = new String(utf8, "UTF8");
-        System.out.println("Decrypted message: " + decrypted + "...");
-        return decrypted;
+
+        return new String(utf8, "UTF8");
     }
 
     /**
      * Extracts a public key from a pem file
+     *
      * @return Public key
      * @throws NoSuchAlgorithmException
      * @throws IOException
@@ -265,7 +263,7 @@ public class MessageHandler {
         InputStream is = null;
         StringBuilder builder = null;
         try {
-            is = getClass().getClassLoader().getResourceAsStream(publicKeyFileName);
+            is = getClass().getClassLoader().getResourceAsStream(PUBLIC_KEY_FILENAME);
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
             builder = new StringBuilder();
             boolean inKey = false;
@@ -289,7 +287,6 @@ public class MessageHandler {
             closeSilent(is);
         }
         byte[] keyBytes = DatatypeConverter.parseBase64Binary(builder.toString());
-        ;
         X509EncodedKeySpec keySpec =
                 new X509EncodedKeySpec(keyBytes);
         PublicKey key = kf.generatePublic(keySpec);
