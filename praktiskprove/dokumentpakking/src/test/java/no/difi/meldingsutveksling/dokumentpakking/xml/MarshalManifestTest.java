@@ -14,6 +14,7 @@ import no.difi.meldingsutveksling.dokumentpakking.domain.Organisasjonsnummer;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
+
 public class MarshalManifestTest {
 	@Test
 	public void testMarshalling() throws JAXBException {
@@ -33,4 +34,5 @@ public class MarshalManifestTest {
 		assertThat(kopi.avsender.organisasjon.orgNummer, is(original.avsender.organisasjon.orgNummer));
 
 	}
+
 }
