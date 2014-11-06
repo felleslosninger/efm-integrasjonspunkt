@@ -19,7 +19,9 @@ public class Noekkelpar {
 	}
 
 	public Certificate[] getCertificateChain() {
-		return new Certificate[0];
+		Certificate[] certs = new Certificate[1];
+		certs[0] = sertifikat;
+		return certs;
 	}
 
 	public PrivateKey getPrivateKey() {

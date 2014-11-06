@@ -6,6 +6,7 @@ import java.security.KeyFactory;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -53,7 +54,7 @@ public class PakkeTest {
 		PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(Base64.decodeBase64(avsenderPrivateKey));
 		KeyFactory kf = KeyFactory.getInstance("RSA");
 
-		Avsender avsender = Avsender.builder(new Organisasjonsnummer("960885406"), Noekkelpar.createNoekkelpar(kf.generatePrivate(keySpec), null)).build();
+		Avsender avsender = Avsender.builder(new Organisasjonsnummer("960885406"), Noekkelpar.createNoekkelpar(kf.generatePrivate(keySpec),(Certificate) new AdressRegisterFactory().createAdressRegister().getCertificate("960885406"))).build();
 
 		ByteArrayInputStream is = new ByteArrayInputStream(datapakker.pakkDokumentISbd(forsendelse, avsender, new Mottaker(
 				new Organisasjonsnummer("958935429"), mottakerpublicKey)));
