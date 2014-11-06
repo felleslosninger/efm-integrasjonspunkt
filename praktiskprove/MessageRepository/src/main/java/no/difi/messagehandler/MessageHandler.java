@@ -2,7 +2,6 @@
 package no.difi.messagehandler;
 
 import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.joran.action.LoggerAction;
 import no.difi.meldingsutveksling.adresseregmock.AdressRegisterFactory;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.cms.CMSException;
@@ -44,16 +43,8 @@ public class MessageHandler {
     private static final String PAYLOAD_EXTRACT_DESTINATION = "C:" + File.separator + "Zip Output";
     private static final String RSA_INSTANCE = "RSA";
     private static final String AES_INSTANCE = "AES";
-    private static final Logger logback = (Logger) LoggerFactory.getLogger(MessageHandler.class);
-
-    static{
-        logback.debug("Duden sie bitte!");
-        logback.trace("tracen sie bitte!");
-        logback.info("This is anb info");
-        logback.warn("Dummy warning message.");
-        logback.error("Dummy error message.");
-    }
-
+    private final Logger logger = (Logger) LoggerFactory.getLogger(MessageHandler.class);
+    private static final String ERROR_MESSAGE ="Couldnt decrypt!";
 
     /**
      * Unmarshalls the SBD file
@@ -74,8 +65,8 @@ public class MessageHandler {
         List<Partner> senders = standardBusinessDocument.getStandardBusinessDocumentHeader().getSenders();
         Partner sender = senders.get(0);
         PartnerIdentification orgNr = sender.getIdentifier();
-        String[] orgNrArr = orgNr.getValue().split(":");
-        final PublicKey senderPublicKey = new AdressRegisterFactory().createAdressRegister().getPublicKey(orgNrArr[1]);
+        //*** String[] orgNrArr = orgNr.getValue().split(":"); ***
+       //*** final PublicKey senderPublicKey = new AdressRegisterFactory().createAdressRegister().getPublicKey(orgNrArr[1]); ***
 
         //*** get payload *****
         Payload payload = (Payload) standardBusinessDocument.getAny();
@@ -195,9 +186,9 @@ public class MessageHandler {
             key = kf.generatePrivate(keySpec);
 
         } catch (InvalidKeySpecException e) {
-           logback.error(e.toString());
+           logger.error("loadPrivateKey "+ e);
         } catch (NoSuchAlgorithmException e) {
-            logback.error(e.toString());
+            logger.error("loadPrivateKey " + e);
         } finally {
             closeSilent(is);
         }
@@ -209,7 +200,6 @@ public class MessageHandler {
             return;
         }
         is.close();
-
     }
 
     /**
@@ -223,13 +213,18 @@ public class MessageHandler {
      * @throws IOException
      */
 
-    public String cryptAtext(String text) throws GeneralSecurityException, IOException {
-
-        Cipher cipher = Cipher.getInstance("RSA");
-        PublicKey publicKey = getPublicKey();
-        cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-        byte[] encryptedMessege = cipher.doFinal(text.getBytes());
-        return decode(encryptedMessege);
+    public String cryptAtext(String text) throws  IOException {
+        byte [] encryptedMessege = new byte[0];
+        try {
+            Cipher cipher = Cipher.getInstance("RSA");
+            PublicKey publicKey = getPublicKey();
+            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+            encryptedMessege = cipher.doFinal(text.getBytes());
+            return decode(encryptedMessege);
+        }catch (GeneralSecurityException gse){
+            logger.error("cryptAtext: "+ gse);
+        }
+        return ERROR_MESSAGE;
     }
 
     /**
@@ -289,8 +284,8 @@ public class MessageHandler {
         byte[] keyBytes = DatatypeConverter.parseBase64Binary(builder.toString());
         X509EncodedKeySpec keySpec =
                 new X509EncodedKeySpec(keyBytes);
-        PublicKey key = kf.generatePublic(keySpec);
-        return key;
+
+        return kf.generatePublic(keySpec);
     }
 
     @XmlAccessorType(XmlAccessType.FIELD)
