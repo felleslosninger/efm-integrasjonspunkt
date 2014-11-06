@@ -17,4 +17,10 @@ public class AdressRegisterTest {
         assertNotNull(AdressRegisterFactory.createAdressRegister().getPublicKey("958935429"));
     }
 
+    @Test
+    public void shouldGetCertificateForOrganisation() {
+        assertNotNull(AdressRegisterFactory.createAdressRegister().getCertificate("960885406"));
+        assertNotNull(AdressRegisterFactory.createAdressRegister().getCertificate("958935429"));
+    }
+
 }

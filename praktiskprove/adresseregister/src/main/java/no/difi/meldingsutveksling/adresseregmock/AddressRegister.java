@@ -13,4 +13,7 @@ public interface AddressRegister {
 
     PublicKey getPublicKey(String orgNumber);
 
+    Object getCertificate(String s) ;
+
+
 }
