@@ -38,6 +38,7 @@ public class MessageHandler {
     private String publicKeyFileName= "958935429-oslo-kommune.publickey";
     private static final String OUTPUT_FOLDER = "C:"+File.separator+"output.zip";
     private String PAYLOAD_EXTRACT_DESTINATION ="C:"+File.separator+"Zip Output";
+    private java.lang.String RSA_INSTANCE ="RSA";
 
 
     /**
@@ -70,7 +71,7 @@ public class MessageHandler {
         byte[] aesEncZip = DatatypeConverter.parseBase64Binary(payloadString);
 
         //*** get rsa cipher decrypt *****
-        Cipher cipher = Cipher.getInstance("RSA");
+        Cipher cipher = Cipher.getInstance(RSA_INSTANCE);
         PrivateKey privateKey = loadPrivateKey();
         cipher.init(Cipher.DECRYPT_MODE, privateKey);
         byte[] aesKey = cipher.doFinal(aesInDisc);
@@ -92,7 +93,11 @@ public class MessageHandler {
 
     }
 
-
+    /**
+     * Unzips the Zip payload
+     * @param zipFile payload
+     * @param outputFolder destination folder
+     */
     public void unZipIt(String zipFile, String outputFolder) {
 
         byte[] buffer = new byte[1024];
@@ -143,6 +148,13 @@ public class MessageHandler {
         }
     }
 
+
+    /**
+     * Loads the private key from a pkcs8 file
+     * @return an private key
+     * @throws IOException
+     * @throws GeneralSecurityException
+     */
     public PrivateKey loadPrivateKey()
             throws IOException, GeneralSecurityException {
         PrivateKey key = null;
@@ -202,6 +214,15 @@ public class MessageHandler {
         }
     }
 
+    /**
+     * This part belongs to cryptography testing
+     * takes in a text and crypts it with public key
+     * then decrypts it with private key
+     * @param text text to crypt
+     * @return decrypted text
+     * @throws GeneralSecurityException
+     * @throws IOException
+     */
 
     public String cryptAtext(String text) throws GeneralSecurityException, IOException {
 
@@ -214,6 +235,13 @@ public class MessageHandler {
         return decode(encryptedMessege);
     }
 
+    /**
+     * Decodes encrypted byte array
+     * @param encrypted
+     * @return decrypted text
+     * @throws GeneralSecurityException
+     * @throws IOException
+     */
     private String decode(byte[] encrypted) throws GeneralSecurityException, IOException {
         Cipher cipher = Cipher.getInstance("RSA");
         PrivateKey privateKey = loadPrivateKey();
@@ -224,6 +252,13 @@ public class MessageHandler {
         return decrypted;
     }
 
+    /**
+     * Extracts a public key from a pem file
+     * @return Public key
+     * @throws NoSuchAlgorithmException
+     * @throws IOException
+     * @throws InvalidKeySpecException
+     */
     private PublicKey getPublicKey() throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
 
         KeyFactory kf = KeyFactory.getInstance("RSA");
