@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.dokumentpakking.domain.AsicEAttachable;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Avsender;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Mottaker;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateAsice;
+import no.difi.meldingsutveksling.dokumentpakking.service.CreateManifest;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateSBD;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateZip;
 import no.difi.meldingsutveksling.dokumentpakking.service.EncryptPayload;
@@ -28,11 +29,11 @@ public class Dokumentpakker {
 	public Dokumentpakker() {
 		createSBD = new CreateSBD();
 		encryptPayload = new EncryptPayload();
-		createAsice = new CreateAsice(new CreateSignature(), new CreateZip());
+		createAsice = new CreateAsice(new CreateSignature(), new CreateZip(), new CreateManifest());
 	}
 
 	public byte[] pakkDokumentISbd(AsicEAttachable document, Avsender avsender, Mottaker mottaker) {
-		Payload payload = new Payload(encryptPayload.encrypt(createAsice.createAsice(document, avsender).getBytes(), mottaker));
+		Payload payload = new Payload(encryptPayload.encrypt(createAsice.createAsice(document, avsender, mottaker).getBytes(), mottaker));
 		StandardBusinessDocument doc = createSBD.createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		MarshalSBD.marshal(doc, os);

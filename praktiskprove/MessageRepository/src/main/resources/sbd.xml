@@ -3,7 +3,7 @@
     <ns2:StandardBusinessDocumentHeader>
         <ns2:HeaderVersion>1.0</ns2:HeaderVersion>
         <ns2:Sender>
-            <ns2:Identifier Authority="urn:oasis:names:tc:ebcore:partyid-type:iso6523:9908">9908:12345678</ns2:Identifier>
+            <ns2:Identifier Authority="urn:oasis:names:tc:ebcore:partyid-type:iso6523:9908">9908:960885406</ns2:Identifier>
         </ns2:Sender>
         <ns2:Receiver>
             <ns2:Identifier Authority="urn:oasis:names:tc:ebcore:partyid-type:iso6523:9908">9908:958935429</ns2:Identifier>

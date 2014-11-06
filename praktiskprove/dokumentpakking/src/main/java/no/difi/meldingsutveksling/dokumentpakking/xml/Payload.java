@@ -14,7 +14,7 @@ import org.apache.commons.codec.binary.Base64;
 @XmlRootElement(name = "payload")
 public class Payload {
 	public Payload(EncryptedContent payload) {
-		this.asice = Base64.encodeBase64(payload.getContent());
+		this.asice = new String(Base64.encodeBase64(payload.getContent()));
 		this.encryptionKey = new String(Base64.encodeBase64(payload.getKey()));
 	}
 	public Payload() {
@@ -22,15 +22,15 @@ public class Payload {
 	}
 	
 	@XmlValue
-	private byte[] asice;
+	private String asice;
 
 	@XmlAttribute
 	private String encryptionKey;
 
-	public byte[] getAsice() {
+	public String getAsice() {
 		return asice;
 	}
-	public void setAsice(byte[] asice) {
+	public void setAsice(String asice) {
 		this.asice = asice;
 	}
 	public String getEncryptionKey() {

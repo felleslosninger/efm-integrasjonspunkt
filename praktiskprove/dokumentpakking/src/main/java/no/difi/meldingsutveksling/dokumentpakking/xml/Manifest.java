@@ -6,45 +6,51 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Manifest", propOrder = {
- "mottaker",
- "avsender",
- "hoveddokument",
-})
+@XmlType(name = "Manifest", propOrder = { "mottaker", "avsender", "hoveddokument", })
 @XmlRootElement(name = "manifest")
 public class Manifest {
 
- @XmlElement(required = true)
- protected String mottaker;
- @XmlElement(required = true)
- protected String avsender;
- @XmlElement(required = true)
- protected String hoveddokument;
- 
- public String getMottaker() {
-     return mottaker;
- }
+	@XmlElement(required = true)
+	protected Mottaker mottaker;
+	@XmlElement(required = true)
+	protected Avsender avsender;
+	@XmlElement(required = true)
+	protected HovedDokument hoveddokument;
 
- public void setMottaker(String value) {
-     this.mottaker = value;
- }
+	public Mottaker getMottaker() {
+		return mottaker;
+	}
 
- public String getAvsender() {
-     return avsender;
- }
+	public void setMottaker(Mottaker value) {
+		this.mottaker = value;
+	}
 
- public void setAvsender(String value) {
-     this.avsender = value;
- }
+	public Avsender getAvsender() {
+		return avsender;
+	}
 
- public String getHoveddokument() {
-     return hoveddokument;
- }
+	public void setAvsender(Avsender value) {
+		this.avsender = value;
+	}
 
- public void setHoveddokument(String value) {
-     this.hoveddokument = value;
- }
+	public HovedDokument getHoveddokument() {
+		return hoveddokument;
+	}
+
+	public void setHoveddokument(HovedDokument value) {
+		this.hoveddokument = value;
+	}
+
+	public Manifest(Mottaker mottaker, Avsender avsender, HovedDokument hoveddokument) {
+		super();
+		this.mottaker = mottaker;
+		this.avsender = avsender;
+		this.hoveddokument = hoveddokument;
+	}
+
+	public Manifest() {
+		super();
+	}
 
 }

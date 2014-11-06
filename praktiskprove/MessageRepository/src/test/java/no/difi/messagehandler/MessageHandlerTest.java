@@ -23,7 +23,7 @@ public class MessageHandlerTest {
 
            File file = new File(classLoader.getResource("sbd.xml").getFile());
            messageHandler.unmarshall(file);
-        //assertEquals(textToEncrypt, messageHandler.cryptAtext(textToEncrypt));
+        /*assertEquals(textToEncrypt, messageHandler.cryptAtext(textToEncrypt));*/
 
     }
 }
