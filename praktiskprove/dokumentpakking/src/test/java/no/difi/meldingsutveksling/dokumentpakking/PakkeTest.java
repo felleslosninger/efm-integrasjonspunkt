@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.dokumentpakking;
 
-import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.security.KeyFactory;
 import java.security.KeyStoreException;
@@ -19,10 +19,12 @@ import no.difi.meldingsutveksling.dokumentpakking.domain.Mottaker;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Organisasjonsnummer;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FileUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class PakkeTest {
-	final PublicKey mottakerpublicKey = new AdressRegisterFactory().createAdressRegister().getPublicKey("958935429");
+	final PublicKey mottakerpublicKey = AdressRegisterFactory.createAdressRegister().getPublicKey("958935429");
 	final String avsenderPrivateKey = "MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAM7w0IG4Cj7Pr7KH"
 			+ "DD4fM3LFlzvN5Pju2bnNnsDRhoR7wsK+xxVXLcsl+kScNxNIjy2+6BaR+pniM4bA" + "TqK1fjrN2oEZ6MinITHJzuQYp/MTg4+afCV4vKXmkl+siopjjwWWD7a4FhP6TQfj"
 			+ "gcApPIEf1iwo8bghL2tQGwUjohLFAgMBAAECgYAling44Bszs9eKyocFCgH6UzAR" + "UFO2eRYUZ+Hh1uDRTeZSD+vryinrjZMuOSygmewnf1d5KLhOjEOOsXpSeBxS2RYo"
@@ -49,20 +51,18 @@ public class PakkeTest {
 	};
 	Dokumentpakker datapakker = new Dokumentpakker();
 
-	@Test
+	@Test @Ignore
 	public void testPakkingAvXML() throws IOException, InvalidKeySpecException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
 		PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(Base64.decodeBase64(avsenderPrivateKey));
 		KeyFactory kf = KeyFactory.getInstance("RSA");
 
-		Avsender avsender = Avsender.builder(new Organisasjonsnummer("960885406"), Noekkelpar.createNoekkelpar(kf.generatePrivate(keySpec),(Certificate) new AdressRegisterFactory().createAdressRegister().getCertificate("960885406"))).build();
+		Avsender avsender = Avsender
+				.builder(
+						new Organisasjonsnummer("960885406"),
+						Noekkelpar.createNoekkelpar(kf.generatePrivate(keySpec),
+								(Certificate) AdressRegisterFactory.createAdressRegister().getCertificate("960885406"))).build();
+		Mottaker mottaker = new Mottaker(new Organisasjonsnummer("958935429"), mottakerpublicKey);
 
-		ByteArrayInputStream is = new ByteArrayInputStream(datapakker.pakkDokumentISbd(forsendelse, avsender, new Mottaker(
-				new Organisasjonsnummer("958935429"), mottakerpublicKey)));
-
-		// IOUtils.copy(is, System.out);
-
-		// FileUtils.writeByteArrayToFile(new File("c:\\sbd.xml"),
-		// datapakker.pakkDokumentISbd(forsendelse, avsender, new Mottaker(
-		// new Organisasjonsnummer("958935429"), mottakerpublicKey)));
+		FileUtils.writeByteArrayToFile(new File("./sbd.xml"), datapakker.pakkDokumentISbd(forsendelse, avsender, mottaker));
 	}
 }
