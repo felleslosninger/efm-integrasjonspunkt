@@ -62,23 +62,24 @@ public class CreateAsiceTest {
 
 	@Mock
 	private Archive archive;
-	
+
+	@Mock
+	private Noekkelpar noekkelpar;
+
 	@Mock
 	private Organisasjonsnummer orgNrAvsender, orgNrMottaker;
-	
+
 	@Captor
-    private ArgumentCaptor<List<AsicEAttachable>> zipItCaptor, createSignatureFileCaptor;
-	
-	
+	private ArgumentCaptor<List<AsicEAttachable>> zipItCaptor, createSignatureFileCaptor;
+
 	@Captor
-    private ArgumentCaptor<Noekkelpar> noekkelparCaptor;
-	
+	private ArgumentCaptor<Noekkelpar> noekkelparCaptor;
+
 	@Captor
-    private ArgumentCaptor<Organisasjonsnummer> orgNrCaptor1, orgNrCaptor2;
-	
+	private ArgumentCaptor<Organisasjonsnummer> orgNrCaptor1, orgNrCaptor2;
+
 	@Captor
-    private ArgumentCaptor<AsicEAttachable> fileCaptor ;
-	
+	private ArgumentCaptor<AsicEAttachable> fileCaptor;
 
 	@Test
 	public void testCreateAsice() throws Exception {
@@ -88,20 +89,20 @@ public class CreateAsiceTest {
 		when(createZip.zipIt(anyListOf(AsicEAttachable.class))).thenReturn(archive);
 		when(mottaker.getOrgNummer()).thenReturn(orgNrMottaker);
 		when(avsender.getOrgNummer()).thenReturn(orgNrAvsender);
-		
+		when(avsender.getNoekkelpar()).thenReturn(noekkelpar);
+
 		Archive returnedArchive = createAsice.createAsice(hoveddokument, avsender, mottaker);
-		
+
 		verify(createZip, times(1)).zipIt(zipItCaptor.capture());
 		verify(createSignature, times(1)).createSignature(noekkelparCaptor.capture(), createSignatureFileCaptor.capture());
 		verify(createManifest, times(1)).createManifest(orgNrCaptor1.capture(), orgNrCaptor2.capture(), fileCaptor.capture());
-		
-		
-		
-		//assertThat(zipItCaptor.getValue(), contains(hoveddokument, manifest, signature));
-		//assertThat(createSignatureFileCaptor.getValue(), contains(hoveddokument));
-		//assertThat(noekkelparCaptor.getValue(), contains(hoveddokument));
 
-		assertThat(returnedArchive, is(sameInstance(archive )));
+		assertThat(zipItCaptor.getValue(), contains(hoveddokument, manifest, signature));
+		assertThat(createSignatureFileCaptor.getValue(), contains(hoveddokument, manifest));
+		assertThat(noekkelparCaptor.getValue(), is(sameInstance(noekkelpar)));
+		assertThat(returnedArchive, is(sameInstance(archive)));
+		assertThat(orgNrCaptor1.getValue(), is(sameInstance(orgNrAvsender)));
+		assertThat(orgNrCaptor2.getValue(), is(sameInstance(orgNrMottaker)));
 
 	}
 
