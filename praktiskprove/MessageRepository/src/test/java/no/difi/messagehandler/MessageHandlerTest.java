@@ -21,9 +21,9 @@ public class MessageHandlerTest {
         ClassLoader classLoader = getClass().getClassLoader();
 
 
-           File file = new File(classLoader.getResource("sbd.xml").getFile());
-           messageHandler.unmarshall(file);
-        /*assertEquals(textToEncrypt, messageHandler.cryptAtext(textToEncrypt));*/
+        /*   File file = new File(classLoader.getResource("sbd.xml").getFile());
+           messageHandler.unmarshall(file);*/
+        assertEquals(textToEncrypt, messageHandler.cryptAtext(textToEncrypt));
 
     }
 }

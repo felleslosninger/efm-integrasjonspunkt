@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import no.difi.meldingsutveksling.dokumentpakking.crypto.CreateSignature;
+import no.difi.meldingsutveksling.dokumentpakking.crypto.Signature;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Archive;
 import no.difi.meldingsutveksling.dokumentpakking.domain.AsicEAttachable;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Avsender;
@@ -25,9 +26,8 @@ public class CreateAsice {
 		files.add(forsendelse);
 		files.add(createManifest.createManifest(avsender.getOrgNummer(), mottaker.getOrgNummer(), forsendelse));
 
-		//Signature signature = createSignature.createSignature(avsender.getPrivatnokkel(), files);
-		//files.add(signature);
-		
+		Signature signature = createSignature.createSignature(avsender.getNoekkelpar(), new ArrayList<AsicEAttachable>(files));
+		files.add(signature);
 		
 		Archive archive = createZip.zipIt(files);
 		

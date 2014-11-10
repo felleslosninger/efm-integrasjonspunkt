@@ -1,67 +1,34 @@
 package no.difi.meldingsutveksling.dokumentpakking.crypto;
 
-import java.security.Key;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 
 public class Noekkelpar {
 
-	private KeyStore keyStore;
-	private String alias;
-	private String password;
+	private PrivateKey privatNoekkel;
+	private Certificate sertifikat;
 
-	private Noekkelpar(KeyStore keyStore, String alias, String password) {
-		this.keyStore = keyStore;
-		this.alias = alias;
-		this.password = password;
-	}
-
-	public String getAlias() {
-		return alias;
-	}
-
-	public KeyStore getKeyStore() {
-		return keyStore;
-	}
-
-	public KeyStoreInfo getKeyStoreInfo() {
-		return new KeyStoreInfo(keyStore, alias, password);
+	private Noekkelpar(PrivateKey privatNoekkel, Certificate sertifikat) {
+		this.privatNoekkel = privatNoekkel;
+		this.sertifikat = sertifikat;
 	}
 
 	public Sertifikat getSertifikat() {
-		return Sertifikat.fraKeyStore(keyStore, alias);
+		return Sertifikat.fraCertificate((X509Certificate) sertifikat);
 	}
 
 	public Certificate[] getCertificateChain() {
-		try {
-			return keyStore.getCertificateChain(alias);
-		} catch (KeyStoreException e) {
-			throw new RuntimeException("Kunne ikke hente privat nøkkel fra KeyStore. Er KeyStore initialisiert?", e);
-		}
+		Certificate[] certs = new Certificate[1];
+		certs[0] = sertifikat;
+		return certs;
 	}
 
 	public PrivateKey getPrivateKey() {
-		try {
-			Key key = keyStore.getKey(alias, password.toCharArray());
-			if (!(key instanceof PrivateKey)) {
-				throw new RuntimeException("Kunne ikke hente privat nøkkel fra key store. Forventet å få en PrivateKey, fikk "
-						+ key.getClass().getCanonicalName());
-			}
-			return (PrivateKey) key;
-		} catch (KeyStoreException e) {
-			throw new RuntimeException("Kunne ikke hente privat nøkkel fra KeyStore. Er KeyStore initialisiert?", e);
-		} catch (NoSuchAlgorithmException e) {
-			throw new RuntimeException("Kunne ikke hente privat nøkkel fra KeyStore. Verifiser at nøkkelen er støttet på plattformen", e);
-		} catch (UnrecoverableKeyException e) {
-			throw new RuntimeException("Kunne ikke hente privat nøkkel fra KeyStore. Sjekk at passordet er riktig.", e);
-		}
+		return privatNoekkel;
 	}
 
-	public static Noekkelpar fraKeyStore(KeyStore keyStore, String alias, String password) {
-		return new Noekkelpar(keyStore, alias, password);
+	public static Noekkelpar createNoekkelpar(PrivateKey privatNoekkel, Certificate sertifikat) {
+		return new Noekkelpar(privatNoekkel, sertifikat);
 	}
 }
