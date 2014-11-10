@@ -2,12 +2,9 @@
 package no.difi.messagehandler;
 
 import ch.qos.logback.classic.Logger;
-import no.difi.meldingsutveksling.adresseregmock.AdressRegisterFactory;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.cms.CMSException;
 import org.slf4j.LoggerFactory;
-import org.unece.cefact.namespaces.standardbusinessdocumentheader.Partner;
-import org.unece.cefact.namespaces.standardbusinessdocumentheader.PartnerIdentification;
 import org.unece.cefact.namespaces.standardbusinessdocumentheader.StandardBusinessDocument;
 
 import javax.crypto.Cipher;
@@ -22,7 +19,6 @@ import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -43,8 +39,12 @@ public class MessageHandler {
     private static final String PAYLOAD_EXTRACT_DESTINATION = "C:" + File.separator + "Zip Output";
     private static final String RSA_INSTANCE = "RSA";
     private static final String AES_INSTANCE = "AES";
-    private final Logger logger = (Logger) LoggerFactory.getLogger(MessageHandler.class);
     private static final String ERROR_MESSAGE ="Couldnt decrypt!";
+    private static final String PRIVATE_LINE_START = "-----BEGIN ";
+    private static final String PRIVATE_LINE_END = " PRIVATE KEY-----";
+    private static final String AMBIQUOUS_LINE_START = "-----END ";
+    private static final String PUBLIC_LINE_END = " PUBLIC KEY-----";
+    private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(MessageHandler.class);
 
     /**
      * Unmarshalls the SBD file
@@ -60,11 +60,10 @@ public class MessageHandler {
         JAXBContext jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class);
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         StandardBusinessDocument standardBusinessDocument = (StandardBusinessDocument) unmarshaller.unmarshal(sdbXml);
-
         //*** query to Elma to get PK
-        List<Partner> senders = standardBusinessDocument.getStandardBusinessDocumentHeader().getSenders();
-        Partner sender = senders.get(0);
-        PartnerIdentification orgNr = sender.getIdentifier();
+        //***   List<Partner> senders = standardBusinessDocument.getStandardBusinessDocumentHeader().getSenders();
+        //***  Partner sender = senders.get(0);
+        //*** PartnerIdentification orgNr = sender.getIdentifier();
         //*** String[] orgNrArr = orgNr.getValue().split(":"); ***
        //*** final PublicKey senderPublicKey = new AdressRegisterFactory().createAdressRegister().getPublicKey(orgNrArr[1]); ***
 
@@ -160,35 +159,32 @@ public class MessageHandler {
         InputStream is = null;
         try {
             is = getClass().getClassLoader().getResourceAsStream(PEM_FILE_NAME);
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            StringBuilder builder = new StringBuilder();
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(is));
+            StringBuilder stringBuilder= new StringBuilder();
             boolean inKey = false;
-            for (String line = br.readLine(); line != null; line = br.readLine()) {
-                if (!inKey) {
-                    if (line.startsWith("-----BEGIN ") &&
-                            line.endsWith(" PRIVATE KEY-----")) {
+            for (String linen = bufferedReader.readLine(); linen != null; linen = bufferedReader.readLine()) {
+                if (!inKey && linen.startsWith(PRIVATE_LINE_START) &&
+                        linen.endsWith(PRIVATE_LINE_END)) {
                         inKey = true;
-                    }
-                    continue;
                 } else {
-                    if (line.startsWith("-----END ") &&
-                            line.endsWith(" PRIVATE KEY-----")) {
+                    if (linen.startsWith(AMBIQUOUS_LINE_START) &&
+                            linen.endsWith(PRIVATE_LINE_END)) {
                         inKey = false;
                         break;
                     }
-                    builder.append(line);
+                    stringBuilder.append(linen);
                 }
             }
 
-            byte[] encoded = DatatypeConverter.parseBase64Binary(builder.toString());
+            byte[] encoded = DatatypeConverter.parseBase64Binary(stringBuilder.toString());
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
             KeyFactory kf = KeyFactory.getInstance("RSA");
             key = kf.generatePrivate(keySpec);
 
         } catch (InvalidKeySpecException e) {
-           logger.error("loadPrivateKey "+ e);
+           LOGGER.error("loadPrivateKey " + e);
         } catch (NoSuchAlgorithmException e) {
-            logger.error("loadPrivateKey " + e);
+            LOGGER.error("loadPrivateKey " + e);
         } finally {
             closeSilent(is);
         }
@@ -222,7 +218,7 @@ public class MessageHandler {
             encryptedMessege = cipher.doFinal(text.getBytes());
             return decode(encryptedMessege);
         }catch (GeneralSecurityException gse){
-            logger.error("cryptAtext: "+ gse);
+            LOGGER.error("cryptAtext: " + gse);
         }
         return ERROR_MESSAGE;
     }
@@ -263,15 +259,14 @@ public class MessageHandler {
             builder = new StringBuilder();
             boolean inKey = false;
             for (String line = br.readLine(); line != null; line = br.readLine()) {
-                if (!inKey) {
-                    if (line.startsWith("-----BEGIN ") &&
-                            line.endsWith(" PUBLIC KEY-----")) {
+                if (!inKey && line.startsWith(PRIVATE_LINE_START) &&
+                        line.endsWith(PUBLIC_LINE_END)) {
+
                         inKey = true;
-                    }
-                    continue;
+
                 } else {
-                    if (line.startsWith("-----END ") &&
-                            line.endsWith(" PUBLIC KEY-----")) {
+                    if (line.startsWith(AMBIQUOUS_LINE_START) &&
+                            line.endsWith(PUBLIC_LINE_END)) {
                         inKey = false;
                         break;
                     }
