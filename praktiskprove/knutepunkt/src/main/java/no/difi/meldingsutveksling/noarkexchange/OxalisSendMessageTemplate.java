@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import no.difi.meldingsutveksling.domain.SBD;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 
 import java.io.IOException;
