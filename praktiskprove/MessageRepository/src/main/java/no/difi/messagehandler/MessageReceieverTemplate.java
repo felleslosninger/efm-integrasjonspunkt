@@ -4,7 +4,6 @@ import no.difi.meldingsutveksling.domain.BestEduMessage;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 
-import java.io.IOException;
 import java.util.zip.ZipFile;
 
 public abstract class MessageReceieverTemplate {
@@ -32,12 +31,8 @@ public abstract class MessageReceieverTemplate {
             eventLog.log(new Event());
 
             BestEduMessage bestEduMessage = getBestEduFromAsic(asicFile);
-            try {
-                senToNoark(bestEduMessage);
-                eventLog.log(new Event());
-            } catch (IOException e) {
-                eventLog.log(new Event());
-            }
+            senToNoark(bestEduMessage);
+            eventLog.log(new Event());
 
             sendApningskvittering();
             eventLog.log(new Event());
