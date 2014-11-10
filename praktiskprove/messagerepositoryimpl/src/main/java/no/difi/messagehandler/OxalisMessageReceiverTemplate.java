@@ -1,5 +1,7 @@
 package no.difi.messagehandler;
 
+import no.difi.messagehandler.peppolmessageutils.PeppolMessageMetadata;
+
 /**
  * Created with IntelliJ IDEA.
  * User: glennbech
@@ -15,6 +17,9 @@ public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
 
     @Override
     void sendApningskvittering() {
+
     }
+
+
 
 }

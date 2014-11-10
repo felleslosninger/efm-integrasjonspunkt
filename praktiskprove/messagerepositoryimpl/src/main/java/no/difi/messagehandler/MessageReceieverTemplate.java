@@ -3,6 +3,7 @@ package no.difi.messagehandler;
 import no.difi.meldingsutveksling.domain.BestEduMessage;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
+import no.difi.messagehandler.peppolmessageutils.PeppolMessageMetadata;
 
 import java.util.zip.ZipFile;
 
@@ -13,7 +14,7 @@ public abstract class MessageReceieverTemplate {
     abstract void sendLeveringskvittering();
 
     abstract void sendApningskvittering();
-
+    //TODO: Sjekk ut  receive skal ta SBD,her skal ikke være metadata kansje?
     void receive(PeppolMessageMetadata metaData, Document document) {
 
         eventLog.log(new Event());
@@ -55,6 +56,9 @@ public abstract class MessageReceieverTemplate {
     private ZipFile getZipFileFromDocument(Document document) {
         return null;
     }
+    //TODO: finn ut om kan det være noe annet enn sbd her,
+    // kvittering og melding er ikke begge SBD? om det tales om Ehf eller
+    // sbd så trenger jeg ppmmmd?
 
     private boolean isSBD(PeppolMessageMetadata metaData) {
         return false;
