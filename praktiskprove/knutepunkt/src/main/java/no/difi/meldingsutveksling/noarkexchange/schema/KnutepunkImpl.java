@@ -1,5 +1,8 @@
 package no.difi.meldingsutveksling.noarkexchange.schema;
 
+import no.difi.meldingsutveksling.noarkexchange.SendMessageTemplate;
+import no.difi.meldingsutveksling.noarkexchange.OxalisSendMessageTemplate;
+
 /**
  * This is the implementation of the wenbservice that case managenent systems supporting
  * the BEST/EDU stadard communicates with. The responsibility of this component is to
@@ -22,6 +25,8 @@ public class KnutepunkImpl extends noarkExchange_NoarkExchangePortImpl {
 
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType putMessageRequest) {
-        return super.putMessage(putMessageRequest);
+        SendMessageTemplate template = new OxalisSendMessageTemplate();
+        return template.sendMessage(putMessageRequest);
     }
+
 }

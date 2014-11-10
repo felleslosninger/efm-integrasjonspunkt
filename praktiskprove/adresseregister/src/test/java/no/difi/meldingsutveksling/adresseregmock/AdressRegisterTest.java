@@ -20,7 +20,7 @@ public class AdressRegisterTest {
     @Test
     public void shouldGetCertificateForOrganisation() {
         assertNotNull(AdressRegisterFactory.createAdressRegister().getCertificate("960885406"));
-        assertNotNull(AdressRegisterFactory.createAdressRegister().getCertificate("958935429"));
+        assertNotNull(AdressRegisterFactory.createAdressRegister().getCertificate("958935429©©©"));
     }
 
 }

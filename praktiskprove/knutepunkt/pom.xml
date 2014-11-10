@@ -10,6 +10,31 @@
     <packaging>war</packaging>
     <build>
         <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.mortbay.jetty</groupId>
+                                    <artifactId>jetty-runner</artifactId>
+                                    <version>7.5.4.v20111024</version>
+                                    <destFileName>jetty-runner.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.mortbay.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
@@ -19,11 +44,12 @@
                         <artifactId>jaxws-rt</artifactId>
                         <version>2.2.8</version>
                     </dependency>
+
                 </dependencies>
                 <configuration>
                     <webApp>
                         <contextPath>/knutepunkt</contextPath>
-                     <!--   <jettyEnvXml>${basedir}/src/test/resources/jetty-env.xml</jettyEnvXml>   -->
+                        <!--   <jettyEnvXml>${basedir}/src/test/resources/jetty-env.xml</jettyEnvXml>   -->
                     </webApp>
                     <connectors>
                         <connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
@@ -95,6 +121,19 @@
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
             <version>7.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>eventlog</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>domain</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
 
     </dependencies>

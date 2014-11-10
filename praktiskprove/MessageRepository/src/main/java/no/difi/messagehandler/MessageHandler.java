@@ -32,13 +32,12 @@ import java.util.zip.ZipInputStream;
  */
 public class MessageHandler {
 
-
-    private static final String PAYLOAD_ZIP = "C:"+File.separator+"payload.zip";
-    private String pemFileName ="958935429-oslo-kommune.pkcs8";
-    private String publicKeyFileName= "958935429-oslo-kommune.publickey";
-    private static final String OUTPUT_FOLDER = "C:"+File.separator+"output.zip";
-    private String PAYLOAD_EXTRACT_DESTINATION ="C:"+File.separator+"Zip Output";
-    private java.lang.String RSA_INSTANCE ="RSA";
+    private static final String PAYLOAD_ZIP = "C:" + File.separator + "payload.zip";
+    private String pemFileName = "958935429-oslo-kommune.pkcs8";
+    private String publicKeyFileName = "958935429-oslo-kommune.publickey";
+    private static final String OUTPUT_FOLDER = "C:" + File.separator + "output.zip";
+    private String PAYLOAD_EXTRACT_DESTINATION = "C:" + File.separator + "Zip Output";
+    private java.lang.String RSA_INSTANCE = "RSA";
 
 
     /**
@@ -60,8 +59,8 @@ public class MessageHandler {
         List<Partner> senders = standardBusinessDocument.getStandardBusinessDocumentHeader().getSenders();
         Partner sender = senders.get(0);
         PartnerIdentification orgNr = sender.getIdentifier();
-        String [] orgNrArr=orgNr.getValue().split(":");
-        final PublicKey senderPublicKey =new AdressRegisterFactory().createAdressRegister().getPublicKey( orgNrArr[1]);
+        String[] orgNrArr = orgNr.getValue().split(":");
+        final PublicKey senderPublicKey = new AdressRegisterFactory().createAdressRegister().getPublicKey(orgNrArr[1]);
 
         //*** get payload *****
         Payload payload = (Payload) standardBusinessDocument.getAny();
@@ -82,20 +81,20 @@ public class MessageHandler {
         SecretKeySpec secretKeySpec = new SecretKeySpec(aesKey, "AES");
         SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
 
-        aesCipher.init(Cipher.DECRYPT_MODE,secretKeySpec,secureRandom);
-        byte[] zipTobe= aesCipher.doFinal( aesEncZip);
+        aesCipher.init(Cipher.DECRYPT_MODE, secretKeySpec, secureRandom);
+        byte[] zipTobe = aesCipher.doFinal(aesEncZip);
 
-        File file = new File (PAYLOAD_ZIP);
-        file.setWritable(true,false);
+        File file = new File(PAYLOAD_ZIP);
+        file.setWritable(true, false);
         FileUtils.writeByteArrayToFile(file, zipTobe);
         unZipIt(PAYLOAD_ZIP, PAYLOAD_EXTRACT_DESTINATION);
-
 
     }
 
     /**
      * Unzips the Zip payload
-     * @param zipFile payload
+     *
+     * @param zipFile      payload
      * @param outputFolder destination folder
      */
     public void unZipIt(String zipFile, String outputFolder) {
@@ -151,6 +150,7 @@ public class MessageHandler {
 
     /**
      * Loads the private key from a pkcs8 file
+     *
      * @return an private key
      * @throws IOException
      * @throws GeneralSecurityException
@@ -218,6 +218,7 @@ public class MessageHandler {
      * This part belongs to cryptography testing
      * takes in a text and crypts it with public key
      * then decrypts it with private key
+     *
      * @param text text to crypt
      * @return decrypted text
      * @throws GeneralSecurityException
@@ -237,6 +238,7 @@ public class MessageHandler {
 
     /**
      * Decodes encrypted byte array
+     *
      * @param encrypted
      * @return decrypted text
      * @throws GeneralSecurityException
@@ -254,6 +256,7 @@ public class MessageHandler {
 
     /**
      * Extracts a public key from a pem file
+     *
      * @return Public key
      * @throws NoSuchAlgorithmException
      * @throws IOException
