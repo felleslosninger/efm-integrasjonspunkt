@@ -1,1 +1,1 @@
-web:    java $JAVA_OPTS -jar knutepunkt/target/dependency/jetty-runner.jar --port $PORT knutepunkt/target/*.war
+web:    java $JAVA_OPTS -jar knutepunkt/target/dependency/jetty-runner.jar --port  $PORT knutepunkt/target/*.war
