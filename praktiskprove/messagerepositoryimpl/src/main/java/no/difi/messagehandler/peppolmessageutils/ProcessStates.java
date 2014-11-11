@@ -10,14 +10,9 @@ public enum ProcessStates {
     DECRYPTION_ERROR(1),
     SIGNATURE_VALIDATION_ERROR(1),
     NOARKIVE_UNAVAILABLE(3),
-    SBD_PACKAGIN_FAIL(4),
-    RECIEVED(5);
+    SBD_PACKAGIN_FEIL(4);
     private int value;
     private ProcessStates(int value){
         this.value = value;
-    }
-
-    public int getValue() {
-        return value;
     }
 }
