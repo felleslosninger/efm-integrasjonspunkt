@@ -3,6 +3,9 @@ package no.difi.meldingsutveksling.noarkexchange.schema;
 import no.difi.meldingsutveksling.noarkexchange.SendMessageTemplate;
 import no.difi.meldingsutveksling.noarkexchange.OxalisSendMessageTemplate;
 
+import javax.jws.WebService;
+import javax.xml.ws.BindingType;
+
 /**
  * This is the implementation of the wenbservice that case managenent systems supporting
  * the BEST/EDU stadard communicates with. The responsibility of this component is to
@@ -16,6 +19,10 @@ import no.difi.meldingsutveksling.noarkexchange.OxalisSendMessageTemplate;
  * Date: 31.10.14
  * Time: 15:26
  */
+
+
+@WebService(portName = "NoarkExchangePort", serviceName = "noarkExchange", targetNamespace = "http://www.arkivverket.no/Noark/Exchange", wsdlLocation = "http://hardcodeme.not", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.SOAPport")
+@BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
 public class KnutepunkImpl extends noarkExchange_NoarkExchangePortImpl {
 
     @Override
