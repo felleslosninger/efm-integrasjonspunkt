@@ -15,7 +15,7 @@ public class PeppolMessageMetadata {
     private MessageId messageId;
 
     /** The PEPPOL Participant Identifier of the end point of the receiver */
-  /*  private ParticipantId recipientId;
+ /*   private ParticipantId recipientId;
 
     private ParticipantId senderId;
     private PeppolDocumentTypeId documentTypeIdentifier;

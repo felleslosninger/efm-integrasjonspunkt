@@ -1,6 +1,11 @@
 package no.difi.messagehandler;
 
+import eu.peppol.PeppolMessageMetaData;
 import no.difi.messagehandler.peppolmessageutils.PeppolMessageMetadata;
+import org.w3c.dom.Document;
+
+import javax.xml.bind.JAXBException;
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,7 +24,5 @@ public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
     void sendApningskvittering() {
 
     }
-
-
 
 }

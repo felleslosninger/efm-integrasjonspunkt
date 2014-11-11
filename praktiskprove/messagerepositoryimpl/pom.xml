@@ -10,6 +10,13 @@
     <packaging>jar</packaging>
     <dependencies>
 
+
+        <dependency>
+            <groupId>no.sendregning.ap</groupId>
+            <artifactId>oxalis-api</artifactId>
+            <version>3.0.2-SNAPSHOT</version>
+        </dependency>
+
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>

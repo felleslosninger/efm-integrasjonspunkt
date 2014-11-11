@@ -7,6 +7,7 @@ import org.bouncycastle.cms.CMSException;
 import org.unece.cefact.namespaces.standardbusinessdocumentheader.Partner;
 import org.unece.cefact.namespaces.standardbusinessdocumentheader.PartnerIdentification;
 import org.unece.cefact.namespaces.standardbusinessdocumentheader.StandardBusinessDocument;
+import org.w3c.dom.Document;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
@@ -30,7 +31,7 @@ import java.util.zip.ZipInputStream;
  *         Kubilay.Karayilan@inmeta.no
  *         created on 30.10.2014.
  */
-public class MessageHandler {
+public class MessageHandler  {
 
     private static final String PAYLOAD_ZIP = "C:" + File.separator + "payload.zip";
     private String pemFileName = "958935429-oslo-kommune.pkcs8";
@@ -51,7 +52,7 @@ public class MessageHandler {
      */
     void unmarshall(File sdbXml) throws JAXBException, GeneralSecurityException, IOException, CMSException {
         //*** Unmarshall xml*****
-        JAXBContext jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class);
+        JAXBContext jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class, Document.class);
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         StandardBusinessDocument standardBusinessDocument = (StandardBusinessDocument) unmarshaller.unmarshal(sdbXml);
 

@@ -1,25 +1,43 @@
 package no.difi.messagehandler;
 
+import eu.peppol.identifier.PeppolDocumentTypeId;
 import no.difi.meldingsutveksling.domain.BestEduMessage;
+import no.difi.meldingsutveksling.domain.SBD;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.messagehandler.peppolmessageutils.PeppolMessageMetadata;
+import eu.peppol.PeppolMessageMetaData;
 
+import no.difi.messagehandler.peppolmessageutils.ProcessStates;
+import org.unece.cefact.namespaces.standardbusinessdocumentheader.StandardBusinessDocument;
+import org.w3c.dom.*;
+
+import javax.swing.text.AbstractDocument;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.util.*;
 import java.util.zip.ZipFile;
 
 public abstract class MessageReceieverTemplate {
 
     private EventLog eventLog = EventLog.create();
+    private ProcessStates processStates;
 
     abstract void sendLeveringskvittering();
 
     abstract void sendApningskvittering();
-    //TODO: Sjekk ut  receive skal ta SBD,her skal ikke være metadata kansje?
-    void receive(PeppolMessageMetadata metaData, Document document) {
 
-        eventLog.log(new Event());
+    public void receive(PeppolMessageMetaData metaData,Document document) throws ParserConfigurationException, JAXBException {
 
-        if (isSBD(metaData)) {
+       Map documentElements=documentMapping(document);
+       Node n=(Node)documentElements.get("DocumentIdentification");
+
+        eventLog.log(new Event().setState(5));
+
+        if (isSBD(n)) {
             sendLeveringskvittering();
             eventLog.log(new Event());
 
@@ -43,6 +61,35 @@ public abstract class MessageReceieverTemplate {
         }
     }
 
+    /**
+     * Maps out document elements as nodes
+     * @param document sbd or best/edu
+     * @return List of node extended objects
+     * @throws JAXBException
+     */
+    private Map<String,? extends Node> documentMapping(Document document) throws JAXBException {
+
+        Map list = new HashMap();
+        NodeList sbdhNodes= document.getElementsByTagName("ns2:StandardBusinessDocumentHeader");
+        Node sbdhElement = sbdhNodes.item(0);
+        NodeList payloadNodes = document.getElementsByTagName("payload");
+        NodeList childs=sbdhElement.getChildNodes();
+        for(int i=0;i<childs.getLength();i++) {
+            Node n=   childs.item(i);
+            String name = n.getNodeName();
+            if(name.contains("ns2:"))
+                name= name.replace("ns2:","");
+                list.put(name,n);
+        }
+        for(int i=0;i< payloadNodes.getLength();i++) {
+            Node n=   payloadNodes.item(i);
+            list.put("payload",n);
+        }
+
+        return list;
+    }
+
+
     protected void senToNoark(BestEduMessage bestEduMessage) {
     }
 
@@ -56,12 +103,10 @@ public abstract class MessageReceieverTemplate {
     private ZipFile getZipFileFromDocument(Document document) {
         return null;
     }
-    //TODO: finn ut om kan det være noe annet enn sbd her,
-    // kvittering og melding er ikke begge SBD? om det tales om Ehf eller
-    // sbd så trenger jeg ppmmmd?
 
-    private boolean isSBD(PeppolMessageMetadata metaData) {
-        return false;
+    private boolean isSBD(Node node) {
+
+        return node.getTextContent().contains("Sbd");
     }
 
 }
