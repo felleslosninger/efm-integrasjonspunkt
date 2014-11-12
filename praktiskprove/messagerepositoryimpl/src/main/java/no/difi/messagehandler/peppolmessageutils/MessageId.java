@@ -14,6 +14,7 @@ public class MessageId {
     private static final Pattern pattern = Pattern.compile(REGEXP);
 
     private String value;
+    private UUID uuid ;
 
     /**
      * Create a new MessageId
@@ -24,6 +25,7 @@ public class MessageId {
             throw new IllegalArgumentException("MessageId requires a non-null string");
         }
         value = messageId;
+        uuid= UUID.randomUUID();
     }
 
     public String stringValue(){
@@ -54,4 +56,7 @@ public class MessageId {
         }
     }
 
+    public UUID getUuid() {
+        return uuid;
+    }
 }
