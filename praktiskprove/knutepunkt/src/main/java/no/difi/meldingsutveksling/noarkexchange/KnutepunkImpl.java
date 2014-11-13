@@ -1,7 +1,8 @@
-package no.difi.meldingsutveksling.noarkexchange.schema;
+package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.noarkexchange.SendMessageTemplate;
 import no.difi.meldingsutveksling.noarkexchange.OxalisSendMessageTemplate;
+import no.difi.meldingsutveksling.noarkexchange.schema.*;
 
 import javax.jws.WebService;
 import javax.xml.ws.BindingType;
