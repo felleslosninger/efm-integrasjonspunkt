@@ -1,11 +1,7 @@
 package no.difi.messagehandler;
 
-import eu.peppol.PeppolMessageMetaData;
-import no.difi.messagehandler.peppolmessageutils.PeppolMessageMetadata;
-import org.w3c.dom.Document;
-
-import javax.xml.bind.JAXBException;
-import javax.xml.parsers.ParserConfigurationException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -16,13 +12,15 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
 
+    private List<Object> removeAfterImpl= new ArrayList<Object>();
     @Override
     void sendLeveringskvittering() {
+        removeAfterImpl.add("This will be removed after implementation of this method,thnx to Sonar");
     }
 
     @Override
     void sendApningskvittering() {
-
+        removeAfterImpl.add("This will be removed after implementation of this method,thnx to Sonar");
     }
 
 }

@@ -25,7 +25,6 @@ public class MessageHandlerTest {
     @Test
     public void handlerTest() throws JAXBException, GeneralSecurityException, IOException, CMSException, OxalisMessagePersistenceException, ParserConfigurationException, SAXException {
         String textToEncrypt = "Java rules";
-        MessageHandler messageHandler = new MessageHandler();
         ClassLoader classLoader = getClass().getClassLoader();
 
 

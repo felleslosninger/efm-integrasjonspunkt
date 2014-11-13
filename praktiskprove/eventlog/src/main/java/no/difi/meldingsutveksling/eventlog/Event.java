@@ -12,7 +12,16 @@ public class Event {
     private String receiver;
     private long timeStamp;
     private ProcessState processState;
+    private Exception exception;
 
+    public Exception getException() {
+        return exception;
+    }
+
+    public Event setException(Exception exception) {
+        this.exception = exception;
+        return this;
+    }
 
     public UUID getUuid() {
         return uuid;
