@@ -7,7 +7,6 @@ import org.bouncycastle.cms.CMSException;
 import org.unece.cefact.namespaces.standardbusinessdocumentheader.Partner;
 import org.unece.cefact.namespaces.standardbusinessdocumentheader.PartnerIdentification;
 import org.unece.cefact.namespaces.standardbusinessdocumentheader.StandardBusinessDocument;
-import org.w3c.dom.Document;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
@@ -15,9 +14,24 @@ import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.*;
-import java.io.*;
-import java.security.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlValue;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -33,7 +47,7 @@ import java.util.zip.ZipInputStream;
  */
 public class MessageHandler  {
 
-    private static final String PAYLOAD_ZIP = "C:" + File.separator + "payload.zip";
+    private static final String PAYLOAD_ZIP = System.getProperty("user.home")+File.separator + "payload.zip";
     private String pemFileName = "958935429-oslo-kommune.pkcs8";
     private String publicKeyFileName = "958935429-oslo-kommune.publickey";
     private static final String OUTPUT_FOLDER = "C:" + File.separator + "output.zip";
@@ -52,7 +66,7 @@ public class MessageHandler  {
      */
     void unmarshall(File sdbXml) throws JAXBException, GeneralSecurityException, IOException, CMSException {
         //*** Unmarshall xml*****
-        JAXBContext jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class, Document.class);
+        JAXBContext jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class);
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         StandardBusinessDocument standardBusinessDocument = (StandardBusinessDocument) unmarshaller.unmarshal(sdbXml);
 

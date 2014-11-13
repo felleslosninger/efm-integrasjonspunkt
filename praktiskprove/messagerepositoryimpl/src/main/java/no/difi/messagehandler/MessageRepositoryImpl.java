@@ -3,14 +3,12 @@ package no.difi.messagehandler;
 import eu.peppol.PeppolMessageMetaData;
 import eu.peppol.persistence.MessageRepository;
 import eu.peppol.persistence.OxalisMessagePersistenceException;
-import no.difi.messagehandler.MessageReceieverTemplate;
-import no.difi.messagehandler.OxalisMessageReceiverTemplate;
 import org.w3c.dom.Document;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import javax.xml.bind.JAXBException;
-import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.security.GeneralSecurityException;
 
 /**
  * @author Kubilay Karayilan
@@ -22,12 +20,10 @@ public class MessageRepositoryImpl implements MessageRepository {
     public void saveInboundMessage(PeppolMessageMetaData peppolMessageMetaData, Document document) throws OxalisMessagePersistenceException {
         MessageReceieverTemplate template = new OxalisMessageReceiverTemplate();
         try {
-            try {
-                template.receive(peppolMessageMetaData, document);
-            } catch (JAXBException e) {
-                e.printStackTrace();
-            }
-        } catch (ParserConfigurationException e) {
+            template.receive(peppolMessageMetaData,document);
+        } catch (GeneralSecurityException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

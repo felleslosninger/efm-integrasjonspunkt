@@ -1,12 +1,19 @@
 package no.difi.meldingsutveksling.eventlog;
 
-import java.util.Date;
+import java.sql.Timestamp;
+import java.util.UUID;
+
+
 import java.util.UUID;
 
 public class Event {
     private UUID uuid;
-    private  int state;
-    private java.sql.Date timeStamp;
+
+    private long sender;
+    private long receiver;
+    private Timestamp timeStamp;
+    private ProcessState processState;
+
 
     public UUID getUuid() {
         return uuid;
@@ -17,21 +24,46 @@ public class Event {
         return this;
     }
 
-    public int getState() {
-        return state;
-    }
-
-    public Event setState(int state) {
-        this.state = state;
-        return this;
-    }
-
-    public java.sql.Date getTimeStamp() {
+    public Timestamp getTimeStamp() {
         return timeStamp;
     }
 
-    public Event setTimeStamp(java.sql.Date timeStamp) {
+    public Event setTimeStamp(Timestamp timeStamp) {
         this.timeStamp = timeStamp;
         return this;
     }
+
+    public ProcessState getProcessState() {
+        return processState;
+    }
+
+    public Event setProcessStates(ProcessState processState) {
+        this.processState = processState;
+        return this;
+    }
+
+
+    public long getSender() {
+        return sender;
+    }
+
+    public Event setSender(long sender) {
+        this.sender = sender;
+        return this;
+    }
+
+    public long getReceiver() {
+        return receiver;
+    }
+
+    public Event setReceiver(long receiver) {
+        this.receiver = receiver;
+        return this;
+    }
+
+    public String toString() {
+        String toReturn= "UUID: " + uuid +" time: "+timeStamp+" sender: " +sender+" reciever: "+ receiver+ " process state: "+ processState;
+        return toReturn;
+    }
+
 }
