@@ -26,8 +26,5 @@ public enum ProcessState {
     BEST_EDU_RECIEVED,
     AAPNINGS_KVITTERING_SENT;
 
-    /*private int value;
-    private ProcessState(int value){
-        this.value = value;
-    }*/
+
 }

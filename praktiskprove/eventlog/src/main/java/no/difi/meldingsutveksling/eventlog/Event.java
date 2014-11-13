@@ -8,10 +8,9 @@ import java.util.UUID;
 
 public class Event {
     private UUID uuid;
-
-    private long sender;
-    private long receiver;
-    private Timestamp timeStamp;
+    private String sender;
+    private String receiver;
+    private long timeStamp;
     private ProcessState processState;
 
 
@@ -24,11 +23,11 @@ public class Event {
         return this;
     }
 
-    public Timestamp getTimeStamp() {
+    public long getTimeStamp() {
         return timeStamp;
     }
 
-    public Event setTimeStamp(Timestamp timeStamp) {
+    public Event setTimeStamp(long timeStamp) {
         this.timeStamp = timeStamp;
         return this;
     }
@@ -43,20 +42,20 @@ public class Event {
     }
 
 
-    public long getSender() {
+    public String getSender() {
         return sender;
     }
 
-    public Event setSender(long sender) {
+    public Event setSender(String sender) {
         this.sender = sender;
         return this;
     }
 
-    public long getReceiver() {
+    public String getReceiver() {
         return receiver;
     }
 
-    public Event setReceiver(long receiver) {
+    public Event setReceiver(String receiver) {
         this.receiver = receiver;
         return this;
     }
