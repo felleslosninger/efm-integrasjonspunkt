@@ -8,4 +8,10 @@ package no.difi.meldingsutveksling.domain;
  * To change this template use File | Settings | File Templates.
  */
 public class SBD {
+	public byte content[];
+	public SBD(byte[] content) {
+		this.content  = content;
+	}
+	public SBD() {
+	}
 }

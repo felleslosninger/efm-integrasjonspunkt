@@ -29,7 +29,7 @@ public class Avsender extends Aktor {
 		this.noekkelpar = noekkelpar;
 	}
 
-	public static class Builder {
+	public final static class Builder {
 
 		private final Avsender target;
 		private boolean built = false;

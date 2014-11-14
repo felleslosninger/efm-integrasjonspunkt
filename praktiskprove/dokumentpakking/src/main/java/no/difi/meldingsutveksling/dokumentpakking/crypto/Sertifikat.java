@@ -22,7 +22,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.*;
 
-public class Sertifikat {
+public final class Sertifikat {
 
     private X509Certificate x509Certificate;
 

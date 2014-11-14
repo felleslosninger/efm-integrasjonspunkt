@@ -1,14 +1,16 @@
 package no.difi.meldingsutveksling.dokumentpakking.domain;
 
+import java.util.Arrays;
+
 public class Archive {
 
     private byte[] bytes;
 
     public Archive(byte[] bytes) {
-        this.bytes = bytes;
+        this.bytes = Arrays.copyOf(bytes, bytes.length);
     }
 
     public byte[] getBytes() {
-        return bytes;
+        return  Arrays.copyOf(bytes, bytes.length);
     }
 }
