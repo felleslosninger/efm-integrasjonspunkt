@@ -21,11 +21,7 @@ public class MessageRepositoryImpl implements MessageRepository {
     @Override
     public void saveInboundMessage(PeppolMessageMetaData peppolMessageMetaData, Document document) throws OxalisMessagePersistenceException {
         MessageReceieverTemplate template = new OxalisMessageReceiverTemplate();
-        try {
-            template.receive(peppolMessageMetaData,document);
-        } catch (GeneralSecurityException e) {
-            eventLog.log(new Event().setException(e));
-        }
+        template.sendToHub(document);
     }
 
     @Override

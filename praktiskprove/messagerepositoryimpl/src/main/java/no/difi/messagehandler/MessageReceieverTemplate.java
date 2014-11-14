@@ -20,6 +20,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBException;
+import javax.xml.soap.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -102,6 +103,9 @@ public abstract class MessageReceieverTemplate {
         }
     }
 
+    public void sendToHub(Document document) {
+      //TODO:her skal dokument videreformidles til knytepunkt
+    }
     private long getTimeStamp() {
         return System.currentTimeMillis();
     }
@@ -139,7 +143,29 @@ public abstract class MessageReceieverTemplate {
 
 
     protected void senToNoark(BestEduMessage bestEduMessage) {
+        try {
+            SOAPConnectionFactory soapConnectionFactory = SOAPConnectionFactory.newInstance();
+            SOAPConnection soapConnection = soapConnectionFactory.createConnection();
+
+            // Send SOAP Message to SOAP Server
+            String url = "http://muv-knutepunkt.herokuapp.com:80/noarkExchange";
+            SOAPMessage soapResponse = soapConnection.call(createSOAPRequest(), url);
+        } catch (SOAPException e) {
+            e.printStackTrace();
+        }
         toRemoveAfterIntegration.add(bestEduMessage);
+    }
+
+    private SOAPMessage createSOAPRequest() {
+        MessageFactory messageFactory = null;
+        try {
+            messageFactory = MessageFactory.newInstance();
+            SOAPMessage soapMessage = messageFactory.createMessage();
+        } catch (SOAPException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     private BestEduMessage getBestEduFromAsic(ZipFile asicFile) {
