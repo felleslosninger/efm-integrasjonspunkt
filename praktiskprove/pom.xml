@@ -13,7 +13,6 @@
     <modules>
         <module>dokumentpakking</module>
         <module>knutepunkt</module>
-        <module>messagerepositoryimpl</module>
         <module>adresseregister</module>
         <module>eventlog</module>
         <module>domain</module>
