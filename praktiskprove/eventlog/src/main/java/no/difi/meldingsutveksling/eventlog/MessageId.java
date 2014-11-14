@@ -1,0 +1,62 @@
+package no.difi.meldingsutveksling.eventlog;
+
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * @author Kubilay Karayilan
+ *         Kubilay.Karayilan@inmeta.no
+ *         created on 10.11.2014.
+ */
+public class MessageId {
+    private static final String REGEXP = "\\b(uuid:){0,1}\\s*([a-f0-9\\-]*){1}\\s*";
+    private static final Pattern pattern = Pattern.compile(REGEXP);
+
+    private String value;
+    private UUID uuid ;
+
+    /**
+     * Create a new MessageId
+     * @param messageId any messageid represented as text
+     */
+    public MessageId(String messageId) {
+        if (messageId == null) {
+            throw new IllegalArgumentException("MessageId requires a non-null string");
+        }
+        value = messageId;
+        uuid= UUID.randomUUID();
+    }
+
+    public String stringValue(){
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return value;
+    }
+
+    /**
+     * Returns an UUID instance of the MessageId or throws exception if the contained format is wrong.
+     * Note that the UUID instance will not have any "uuid:" prefix, if you need to preserve
+     * the exact MessageId you should use the @see stringValue()
+     * @throws IllegalStateException, IllegalArgumentException
+     */
+    public UUID toUUID() {
+        return uuidFromStringWithOptionalPrefix(value);
+    }
+
+    private UUID uuidFromStringWithOptionalPrefix(String s) {
+        Matcher matcher = pattern.matcher(s);
+        if (!matcher.matches()) {
+            throw new IllegalStateException("Internal error in regexp. Unable to determine UUID of '" + s + "' using regexp " + REGEXP);
+        } else {
+            return UUID.fromString(matcher.group(2));
+        }
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+}
