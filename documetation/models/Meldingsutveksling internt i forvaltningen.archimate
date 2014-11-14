@@ -72,6 +72,7 @@
     <element xsi:type="archimate:ApplicationComponent" id="2eb48ce9" name="Enhetsregisteret"/>
     <element xsi:type="archimate:ApplicationService" id="d6a0b966" name="Grunndatatjeneste"/>
     <element xsi:type="archimate:ApplicationService" id="3bd3e89e" name="Import- og vedlikeholdstjeneste"/>
+    <element xsi:type="archimate:DataObject" id="963a4a97" name="Organisasjonsnummer"/>
   </folder>
   <folder name="Technology" id="d1039cb7" type="technology"/>
   <folder name="Motivation" id="e58971d0" type="motivation">
@@ -175,6 +176,9 @@
     <element xsi:type="archimate:RealisationRelationship" id="e5ee1ce6" source="2eb48ce9" target="d6a0b966"/>
     <element xsi:type="archimate:UsedByRelationship" id="4a1ac22d" source="d6a0b966" target="3bd3e89e"/>
     <element xsi:type="archimate:RealisationRelationship" id="f6dcfd9f" source="21001b5d" target="3bd3e89e"/>
+    <element xsi:type="archimate:AccessRelationship" id="f3bc283b" source="179f7d9d" target="963a4a97"/>
+    <element xsi:type="archimate:AccessRelationship" id="f621f19e" source="3bd3e89e" target="963a4a97"/>
+    <element xsi:type="archimate:AccessRelationship" id="167be9b6" source="d6a0b966" target="963a4a97"/>
   </folder>
   <folder name="Views" id="188d59d7" type="diagrams">
     <element xsi:type="archimate:ArchimateDiagramModel" id="dbb2d31a" name="Motivasjonsmodell" connectionRouterType="2" viewpoint="22">
@@ -568,18 +572,23 @@
     </element>
     <element xsi:type="archimate:ArchimateDiagramModel" id="0889b294" name="Fremtidig - Detaljert Register">
       <child xsi:type="archimate:Group" id="8846a487" name="Generisk adresseregister">
-        <bounds x="501" y="172" width="421" height="262"/>
+        <bounds x="687" y="172" width="421" height="262"/>
+        <child xsi:type="archimate:DiagramObject" id="5b16cf65" textAlignment="2" targetConnections="df6ba4d0 9d5b9aec" archimateElement="3bd3e89e">
+          <bounds x="61" y="175" width="160" height="55"/>
+          <sourceConnection xsi:type="archimate:Connection" id="ffd6d1b3" source="5b16cf65" target="76920f61" relationship="f621f19e"/>
+        </child>
+        <child xsi:type="archimate:DiagramObject" id="66334d51" textAlignment="2" archimateElement="21001b5d">
+          <bounds x="282" y="175"/>
+          <sourceConnection xsi:type="archimate:Connection" id="97cc5f8d" source="66334d51" target="e53ca1d8" relationship="0f066406"/>
+          <sourceConnection xsi:type="archimate:Connection" id="df6ba4d0" source="66334d51" target="5b16cf65" relationship="f6dcfd9f"/>
+        </child>
+        <child xsi:type="archimate:DiagramObject" id="e53ca1d8" textAlignment="2" targetConnections="97cc5f8d" archimateElement="179f7d9d">
+          <bounds x="273" y="16" width="138" height="55"/>
+          <sourceConnection xsi:type="archimate:Connection" id="8f6c6b3a" source="e53ca1d8" target="76920f61" relationship="f3bc283b"/>
+        </child>
       </child>
       <child xsi:type="archimate:Group" id="e35c237d" name="Enhetsregisteret">
         <bounds x="253" y="172" width="219" height="262"/>
-      </child>
-      <child xsi:type="archimate:DiagramObject" id="e53ca1d8" textAlignment="2" targetConnections="97cc5f8d" archimateElement="179f7d9d">
-        <bounds x="732" y="206" width="138" height="55"/>
-      </child>
-      <child xsi:type="archimate:DiagramObject" id="66334d51" textAlignment="2" archimateElement="21001b5d">
-        <bounds x="741" y="366"/>
-        <sourceConnection xsi:type="archimate:Connection" id="97cc5f8d" source="66334d51" target="e53ca1d8" relationship="0f066406"/>
-        <sourceConnection xsi:type="archimate:Connection" id="df6ba4d0" source="66334d51" target="5b16cf65" relationship="f6dcfd9f"/>
       </child>
       <child xsi:type="archimate:DiagramObject" id="6a5e6c09" textAlignment="2" archimateElement="2eb48ce9">
         <bounds x="295" y="206"/>
@@ -588,9 +597,10 @@
       <child xsi:type="archimate:DiagramObject" id="a26218d3" textAlignment="2" targetConnections="caef5305" archimateElement="d6a0b966">
         <bounds x="278" y="366" width="153" height="55"/>
         <sourceConnection xsi:type="archimate:Connection" id="9d5b9aec" source="a26218d3" target="5b16cf65" relationship="4a1ac22d"/>
+        <sourceConnection xsi:type="archimate:Connection" id="91ba570c" source="a26218d3" target="76920f61" relationship="167be9b6"/>
       </child>
-      <child xsi:type="archimate:DiagramObject" id="5b16cf65" textAlignment="2" targetConnections="df6ba4d0 9d5b9aec" archimateElement="3bd3e89e">
-        <bounds x="520" y="366" width="160" height="55"/>
+      <child xsi:type="archimate:DiagramObject" id="76920f61" textAlignment="2" targetConnections="8f6c6b3a ffd6d1b3 91ba570c" archimateElement="963a4a97">
+        <bounds x="498" y="206" width="162" height="55"/>
       </child>
     </element>
   </folder>
