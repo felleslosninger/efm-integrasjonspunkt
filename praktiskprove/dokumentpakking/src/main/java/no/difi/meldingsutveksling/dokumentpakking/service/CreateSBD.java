@@ -13,12 +13,12 @@ import org.unece.cefact.namespaces.standardbusinessdocumentheader.StandardBusine
 import org.unece.cefact.namespaces.standardbusinessdocumentheader.StandardBusinessDocumentHeader;
 
 public class CreateSBD {
-	public static final String STANDARD = "???";
+	public static final String STANDARD = "urn:no:difi:meldingsutveksling:1.0";
 	public static final String HEADER_VERSION = "1.0";
-	public static final String TYPE_VERSION = "???";
+	public static final String TYPE_VERSION = "1.0";
 	public static final String CONVERSATIONID = "ConversationId";
-	public static final String TYPE = "???";
-	public static final String INSTANCE_IDENTIFIER = "???";
+	public static final String TYPE = "BEST/EDU";
+	public static final String INSTANCE_IDENTIFIER = "12345678-id";
 	
 	public StandardBusinessDocument createSBD(Organisasjonsnummer avsender, Organisasjonsnummer mottaker, Payload payload) {
     	StandardBusinessDocument doc = new StandardBusinessDocument()

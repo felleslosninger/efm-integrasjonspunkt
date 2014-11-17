@@ -1,10 +1,12 @@
 package no.difi.meldingsutveksling.eventlog;
 
-import java.sql.Timestamp;
 import java.util.UUID;
 
-
-import java.util.UUID;
+/**
+ * A class that represents an Event
+ *
+ * @author Glenn Bech
+ */
 
 public class Event {
     private UUID uuid;
@@ -12,7 +14,16 @@ public class Event {
     private String receiver;
     private long timeStamp;
     private ProcessState processState;
+    private String exceptionMessage;
 
+    public String getExceptionMessage() {
+        return exceptionMessage;
+    }
+
+    public Event setExceptionMessage(String exceptionMessage) {
+        this.exceptionMessage = exceptionMessage;
+        return this;
+    }
 
     public UUID getUuid() {
         return uuid;
@@ -60,9 +71,16 @@ public class Event {
         return this;
     }
 
-    public String toString() {
-        String toReturn= "UUID: " + uuid +" time: "+timeStamp+" sender: " +sender+" reciever: "+ receiver+ " process state: "+ processState;
-        return toReturn;
-    }
 
+    @Override
+    public String toString() {
+        return "Event{" +
+                "uuid=" + uuid +
+                ", sender='" + sender + '\'' +
+                ", receiver='" + receiver + '\'' +
+                ", timeStamp=" + timeStamp +
+                ", processState=" + processState +
+                ", exceptionMessage='" + exceptionMessage + '\'' +
+                '}';
+    }
 }

@@ -4,8 +4,9 @@ import eu.peppol.PeppolMessageMetaData;
 import no.difi.meldingsutveksling.domain.BestEduMessage;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
+import no.difi.meldingsutveksling.eventlog.MessageId;
 import no.difi.meldingsutveksling.eventlog.ProcessState;
-import no.difi.messagehandler.peppolmessageutils.MessageId;
+
 import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -19,6 +20,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBException;
+import javax.xml.soap.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -30,9 +32,11 @@ import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipFile;
 
@@ -40,35 +44,45 @@ public abstract class MessageReceieverTemplate {
 
     private static final String PRIVATE_KEY_FILE = "958935429-oslo-kommune.pkcs8";
     private static final String PAYLOAD_ZIP =System.getProperty("user.home")+File.separator + "payload.zip";
+    private static final String PAYLOAD = "payload";
     private EventLog eventLog = EventLog.create();
+    private List<Object> toRemoveAfterIntegration = new ArrayList();
 
     abstract void sendLeveringskvittering();
 
     abstract void sendApningskvittering();
 
-    public void receive(PeppolMessageMetaData metaData, Document document) throws  GeneralSecurityException, IOException {
+    public void receive(PeppolMessageMetaData metaData, Document document) throws  GeneralSecurityException {
 
         Map documentElements = null;
         try {
             documentElements = documentMapping(document);
         } catch (JAXBException e) {
-            e.printStackTrace();
+            eventLog.log(new Event().setException(e));
         }
         Node n = (Node) documentElements.get("DocumentIdentification");
 
         eventLog.log(new Event().setProcessStates(ProcessState.MESSAGE_RECIEVED).setTimeStamp(getTimeStamp()));
 
         if (isSBD(n)) {
+            if (metaData != null) {
+                toRemoveAfterIntegration.add(metaData);
+            }
             eventLog.log(new Event().setProcessStates(ProcessState.SBD_RECIEVED).setTimeStamp(getTimeStamp()));
             sendLeveringskvittering();
-            eventLog.log(new Event().setProcessStates((ProcessState.LEVERINGS_KVITTERING_SENT)).setTimeStamp(getTimeStamp()));
+            eventLog.log(new Event().setProcessStates(ProcessState.LEVERINGS_KVITTERING_SENT).setTimeStamp(getTimeStamp()));
 
             // get payloaed and encryption key
-            Node  payload=(Node) documentElements.get("payload");
+            Node  payload=(Node) documentElements.get(PAYLOAD);
 
 
             // dekryptert payload (AES)
-            byte[] asicFileBytes = getZipBytesFromDocument(payload);
+            byte[] asicFileBytes = new byte[0];
+            try {
+                asicFileBytes = getZipBytesFromDocument(payload);
+            } catch (IOException e) {
+                eventLog.log(new Event().setException(e));
+            }
             eventLog.log(new Event().setProcessStates(ProcessState.DECRYPTION_SUCCESS).setTimeStamp(getTimeStamp()));
 
             // Signaturvalidering
@@ -89,9 +103,11 @@ public abstract class MessageReceieverTemplate {
         }
     }
 
-    private Timestamp getTimeStamp() {
-        long time = System.currentTimeMillis();
-        return    new java.sql.Timestamp(time);
+    public void sendToHub(Document document) {
+      //TODO:her skal dokument videreformidles til knytepunkt
+    }
+    private long getTimeStamp() {
+        return System.currentTimeMillis();
     }
 
     /**
@@ -101,23 +117,25 @@ public abstract class MessageReceieverTemplate {
      * @return List of node extended objects
      * @throws JAXBException
      */
-    private Map<String, ? extends Node> documentMapping(Document document) throws JAXBException {
+    private Map<String,Node> documentMapping(Document document) throws JAXBException {
 
         Map list = new HashMap();
         NodeList sbdhNodes = document.getElementsByTagName("ns2:StandardBusinessDocumentHeader");
         Node sbdhElement = sbdhNodes.item(0);
-        NodeList payloadNodes = document.getElementsByTagName("payload");
+        NodeList payloadNodes = document.getElementsByTagName(PAYLOAD);
         NodeList childs = sbdhElement.getChildNodes();
         for (int i = 0; i < childs.getLength(); i++) {
             Node n = childs.item(i);
             String name = n.getNodeName();
-            if (name.contains("ns2:"))
+            if (name.contains("ns2:")) {
                 name = name.replace("ns2:", "");
+            }
+
             list.put(name, n);
         }
         for (int i = 0; i < payloadNodes.getLength(); i++) {
             Node n = payloadNodes.item(i);
-            list.put("payload", n);
+            list.put(PAYLOAD, n);
         }
 
         return list;
@@ -125,9 +143,33 @@ public abstract class MessageReceieverTemplate {
 
 
     protected void senToNoark(BestEduMessage bestEduMessage) {
+        try {
+            SOAPConnectionFactory soapConnectionFactory = SOAPConnectionFactory.newInstance();
+            SOAPConnection soapConnection = soapConnectionFactory.createConnection();
+
+            // Send SOAP Message to SOAP Server
+            String url = "http://muv-knutepunkt.herokuapp.com:80/noarkExchange";
+            SOAPMessage soapResponse = soapConnection.call(createSOAPRequest(), url);
+        } catch (SOAPException e) {
+            e.printStackTrace();
+        }
+        toRemoveAfterIntegration.add(bestEduMessage);
+    }
+
+    private SOAPMessage createSOAPRequest() {
+        MessageFactory messageFactory = null;
+        try {
+            messageFactory = MessageFactory.newInstance();
+            SOAPMessage soapMessage = messageFactory.createMessage();
+        } catch (SOAPException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     private BestEduMessage getBestEduFromAsic(ZipFile asicFile) {
+        toRemoveAfterIntegration.add(asicFile);
         return null;
     }
 
@@ -140,30 +182,30 @@ public abstract class MessageReceieverTemplate {
         try {
             aesCipher = Cipher.getInstance("AES");
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+           eventLog.log(new Event().setException(e));
         } catch (NoSuchPaddingException e) {
-            e.printStackTrace();
+            eventLog.log(new Event().setException(e));
         }
         SecretKeySpec secretKeySpec = new SecretKeySpec(aesKey, "AES");
         SecureRandom secureRandom = null;
         try {
             secureRandom = SecureRandom.getInstance("SHA1PRNG");
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            eventLog.log(new Event().setException(e));
         }
 
         try {
             aesCipher.init(Cipher.DECRYPT_MODE, secretKeySpec, secureRandom);
         } catch (InvalidKeyException e) {
-            e.printStackTrace();
+            eventLog.log(new Event().setException(e));
         }
         byte[] zipTobe = new byte[0];
         try {
             zipTobe = aesCipher.doFinal(aesEncZip);
-        } catch (IllegalBlockSizeException e) {
-            e.printStackTrace();
+        } catch (  IllegalBlockSizeException e) {
+            eventLog.log(new Event().setException(e));
         } catch (BadPaddingException e) {
-            e.printStackTrace();
+            eventLog.log(new Event().setException(e));
         }
 
         File file = new File(PAYLOAD_ZIP);
@@ -171,30 +213,26 @@ public abstract class MessageReceieverTemplate {
         try {
             FileUtils.writeByteArrayToFile(file, zipTobe);
         } catch (IOException e) {
-            e.printStackTrace();
+            eventLog.log(new Event().setException(e));
         }
         try {
              zipFile = new ZipFile(file);
         } catch (IOException e) {
-            e.printStackTrace();
+            eventLog.log(new Event().setException(e));
         }
         return zipFile;
     }
 
     private byte[] getZipBytesFromDocument(Node payload) throws GeneralSecurityException, IOException {
-        String payloadTextContent = payload.getTextContent();
         NamedNodeMap namedNodeMap= payload.getAttributes();
         String aesInRsa = namedNodeMap.getNamedItem("encryptionKey").getTextContent();
         byte[] aesInDisc = DatatypeConverter.parseBase64Binary(aesInRsa);
-        byte[] aesEncZip = DatatypeConverter.parseBase64Binary(payloadTextContent);
 
         //*** get rsa cipher decrypt *****
         Cipher cipher = Cipher.getInstance("RSA");
         PrivateKey privateKey = loadPrivateKey();
         cipher.init(Cipher.DECRYPT_MODE, privateKey);
-        byte[] aesKey = cipher.doFinal(aesInDisc);
-
-        return aesKey;
+        return  cipher.doFinal(aesInDisc);
     }
     private boolean isSBD(Node node) {
         return node.getTextContent().contains("Sbd");
@@ -205,10 +243,8 @@ public abstract class MessageReceieverTemplate {
      *
      * @return an private key
      * @throws java.io.IOException
-     * @throws GeneralSecurityException
      */
-    public PrivateKey loadPrivateKey()
-            throws IOException, GeneralSecurityException {
+    public PrivateKey loadPrivateKey() throws IOException  {
         PrivateKey key = null;
         InputStream is = null;
         try {
@@ -217,17 +253,13 @@ public abstract class MessageReceieverTemplate {
             StringBuilder builder = new StringBuilder();
             boolean inKey = false;
             for (String line = br.readLine(); line != null; line = br.readLine()) {
-                if (!inKey) {
-                    if (line.startsWith("-----BEGIN ") &&
-                            line.endsWith(" PRIVATE KEY-----")) {
+                if (!inKey &&  line.startsWith("-----BEGIN ") &&
+                        line.endsWith(" PRIVATE KEY-----") ) {
                         inKey = true;
-                    }
-                    continue;
                 } else {
                     if (line.startsWith("-----END ") &&
                             line.endsWith(" PRIVATE KEY-----")) {
                         inKey = false;
-                        break;
                     }
                     builder.append(line);
                 }
@@ -238,18 +270,16 @@ public abstract class MessageReceieverTemplate {
             KeyFactory kf = KeyFactory.getInstance("RSA");
             key = kf.generatePrivate(keySpec);
 
+        } catch (InvalidKeySpecException e) {
+            eventLog.log(new Event().setException(e));
+        } catch (NoSuchAlgorithmException e) {
+            eventLog.log(new Event().setException(e));
         } finally {
-            closeSilent(is);
+          is.close();
         }
         return key;
     }
-    public static void closeSilent(final InputStream is) {
-        if (is == null) return;
-        try {
-            is.close();
-        } catch (Exception ign) {
-        }
-    }
+
 
 
 
