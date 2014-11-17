@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.dokumentpakking.domain;
 
+import java.util.Arrays;
+
 public class Manifest implements AsicEAttachable {
 
 	private byte[] manifestXml;
@@ -7,7 +9,7 @@ public class Manifest implements AsicEAttachable {
 	
 	public Manifest(byte[] manifestXml) {
 		super();
-		this.manifestXml = manifestXml;
+		this.manifestXml = Arrays.copyOf(manifestXml, manifestXml.length);
 	}
 
 	@Override
@@ -17,7 +19,7 @@ public class Manifest implements AsicEAttachable {
 
 	@Override
 	public byte[] getBytes() {
-		return manifestXml;
+		return Arrays.copyOf(manifestXml, manifestXml.length);
 	}
 
 	@Override
