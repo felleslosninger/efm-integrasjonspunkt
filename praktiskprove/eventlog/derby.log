@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Mon Nov 17 10:05:23 CET 2014:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.11.1.1 - (1616546): instance a816c00e-0149-bcff-d780-00000c06e0a0 
+on database directory memory:/Users/glennbech/dev/meldingsutvikling-mellom-offentlige-virksomheter/praktiskprove/eventlog/eventLogDB with class loader sun.misc.Launcher$AppClassLoader@160bc7c0 
+Loaded from file:/Users/glennbech/.m2/repository/org/apache/derby/derby/10.11.1.1/derby-10.11.1.1.jar
+java.vendor=Oracle Corporation
+java.runtime.version=1.7.0_40-b43
+user.dir=/Users/glennbech/dev/meldingsutvikling-mellom-offentlige-virksomheter/praktiskprove/eventlog
+os.name=Mac OS X
+os.arch=x86_64
+os.version=10.9.4
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''

@@ -14,7 +14,6 @@
         <module>dokumentpakking</module>
         <module>knutepunkt</module>
         <module>adresseregister</module>
-        <module>eventlog</module>
         <module>domain</module>
     </modules>
 
