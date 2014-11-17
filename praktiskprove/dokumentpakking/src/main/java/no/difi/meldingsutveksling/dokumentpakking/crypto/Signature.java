@@ -15,6 +15,8 @@
  */
 package no.difi.meldingsutveksling.dokumentpakking.crypto;
 
+import java.util.Arrays;
+
 import no.difi.meldingsutveksling.dokumentpakking.domain.AsicEAttachable;
 
 
@@ -23,7 +25,7 @@ public class Signature implements AsicEAttachable {
     private final byte[] xmlBytes;
 
     public Signature(byte[] xmlBytes) {
-        this.xmlBytes = xmlBytes;
+        this.xmlBytes = Arrays.copyOf(xmlBytes, xmlBytes.length);
     }
 
     @Override
@@ -32,7 +34,7 @@ public class Signature implements AsicEAttachable {
     }
 
     public byte[] getBytes() {
-        return xmlBytes;
+        return Arrays.copyOf(xmlBytes, xmlBytes.length);
     }
 
     @Override

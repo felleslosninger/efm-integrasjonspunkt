@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.dokumentpakking.xml;
 
+import java.nio.charset.Charset;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -14,8 +16,8 @@ import org.apache.commons.codec.binary.Base64;
 @XmlRootElement(name = "payload")
 public class Payload {
 	public Payload(EncryptedContent payload) {
-		this.asice = new String(Base64.encodeBase64(payload.getContent()));
-		this.encryptionKey = new String(Base64.encodeBase64(payload.getKey()));
+		this.asice = new String(Base64.encodeBase64(payload.getContent()),Charset.forName("UTF-8"));
+		this.encryptionKey = new String(Base64.encodeBase64(payload.getKey()),Charset.forName("UTF-8"));
 	}
 	public Payload() {
 		// Need no-arg constructor for JAXB
