@@ -9,7 +9,7 @@
         http://www.springframework.org/schema/context/spring-context.xsd">
 
     <!-- Scans within the base package of the application for @Component classes to configure as beans -->
-    <context:component-scan base-package="org.springframework.docs.test" />
+    <context:component-scan base-package="no.difi"/>
 
     <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
         <property name="driverClassName" value="${jdbc.driverClassName}"/>
@@ -18,6 +18,7 @@
         <property name="password" value="${jdbc.password}"/>
     </bean>
 
+    <bean id="ddlBean" init-method="createDatabase" class="no.difi.meldingsutveksling.eventlog.CreateDB"/>
     <context:property-placeholder location="jdbc.properties"/>
 
 </beans>
