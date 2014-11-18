@@ -14,13 +14,13 @@ public class Event {
     private String receiver;
     private long timeStamp;
     private ProcessState processState;
-    private String exceptionMessage;
+    private Exception exceptionMessage;
 
-    public String getExceptionMessage() {
+    public Exception getExceptionMessage() {
         return exceptionMessage;
     }
 
-    public Event setExceptionMessage(String exceptionMessage) {
+    public Event setExceptionMessage(Exception exceptionMessage) {
         this.exceptionMessage = exceptionMessage;
         return this;
     }
@@ -80,7 +80,7 @@ public class Event {
                 ", receiver='" + receiver + '\'' +
                 ", timeStamp=" + timeStamp +
                 ", processState=" + processState +
-                ", exceptionMessage='" + exceptionMessage + '\'' +
+                ", exceptionMessage='" + exceptionMessage.toString() + '\'' +
                 '}';
     }
 }

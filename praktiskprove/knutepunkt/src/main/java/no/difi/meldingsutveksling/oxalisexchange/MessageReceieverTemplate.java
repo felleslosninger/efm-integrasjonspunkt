@@ -1,6 +1,5 @@
-package no.difi.messagehandler;
+package no.difi.meldingsutveksling.oxalisexchange;
 
-import eu.peppol.PeppolMessageMetaData;
 import no.difi.meldingsutveksling.domain.BestEduMessage;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
@@ -52,22 +51,20 @@ public abstract class MessageReceieverTemplate {
 
     abstract void sendApningskvittering();
 
-    public void receive(PeppolMessageMetaData metaData, Document document) throws  GeneralSecurityException {
+    public void receive( Document document) throws  GeneralSecurityException {
 
         Map documentElements = null;
         try {
             documentElements = documentMapping(document);
         } catch (JAXBException e) {
-            eventLog.log(new Event().setException(e));
+            eventLog.log(new Event().setExceptionMessage(e.toString()));
         }
         Node n = (Node) documentElements.get("DocumentIdentification");
 
         eventLog.log(new Event().setProcessStates(ProcessState.MESSAGE_RECIEVED).setTimeStamp(getTimeStamp()));
 
         if (isSBD(n)) {
-            if (metaData != null) {
-                toRemoveAfterIntegration.add(metaData);
-            }
+
             eventLog.log(new Event().setProcessStates(ProcessState.SBD_RECIEVED).setTimeStamp(getTimeStamp()));
             sendLeveringskvittering();
             eventLog.log(new Event().setProcessStates(ProcessState.LEVERINGS_KVITTERING_SENT).setTimeStamp(getTimeStamp()));
@@ -81,7 +78,7 @@ public abstract class MessageReceieverTemplate {
             try {
                 asicFileBytes = getZipBytesFromDocument(payload);
             } catch (IOException e) {
-                eventLog.log(new Event().setException(e));
+                eventLog.log(new Event().setExceptionMessage(e.toString()));
             }
             eventLog.log(new Event().setProcessStates(ProcessState.DECRYPTION_SUCCESS).setTimeStamp(getTimeStamp()));
 
@@ -182,30 +179,30 @@ public abstract class MessageReceieverTemplate {
         try {
             aesCipher = Cipher.getInstance("AES");
         } catch (NoSuchAlgorithmException e) {
-           eventLog.log(new Event().setException(e));
+           eventLog.log(new Event().setExceptionMessage(e.toString()));
         } catch (NoSuchPaddingException e) {
-            eventLog.log(new Event().setException(e));
+            eventLog.log(new Event().setExceptionMessage(e.toString()));
         }
         SecretKeySpec secretKeySpec = new SecretKeySpec(aesKey, "AES");
         SecureRandom secureRandom = null;
         try {
             secureRandom = SecureRandom.getInstance("SHA1PRNG");
         } catch (NoSuchAlgorithmException e) {
-            eventLog.log(new Event().setException(e));
+            eventLog.log(new Event().setExceptionMessage(e.toString()));
         }
 
         try {
             aesCipher.init(Cipher.DECRYPT_MODE, secretKeySpec, secureRandom);
         } catch (InvalidKeyException e) {
-            eventLog.log(new Event().setException(e));
+            eventLog.log(new Event().setExceptionMessage(e.toString()));
         }
         byte[] zipTobe = new byte[0];
         try {
             zipTobe = aesCipher.doFinal(aesEncZip);
         } catch (  IllegalBlockSizeException e) {
-            eventLog.log(new Event().setException(e));
+            eventLog.log(new Event().setExceptionMessage(e.toString()));
         } catch (BadPaddingException e) {
-            eventLog.log(new Event().setException(e));
+            eventLog.log(new Event().setExceptionMessage(e.toString()));
         }
 
         File file = new File(PAYLOAD_ZIP);
@@ -213,12 +210,12 @@ public abstract class MessageReceieverTemplate {
         try {
             FileUtils.writeByteArrayToFile(file, zipTobe);
         } catch (IOException e) {
-            eventLog.log(new Event().setException(e));
+            eventLog.log(new Event().setExceptionMessage(e.toString()));
         }
         try {
              zipFile = new ZipFile(file);
         } catch (IOException e) {
-            eventLog.log(new Event().setException(e));
+            eventLog.log(new Event().setExceptionMessage(e.toString()));
         }
         return zipFile;
     }
@@ -271,9 +268,9 @@ public abstract class MessageReceieverTemplate {
             key = kf.generatePrivate(keySpec);
 
         } catch (InvalidKeySpecException e) {
-            eventLog.log(new Event().setException(e));
+            eventLog.log(new Event().setExceptionMessage(e.toString()));
         } catch (NoSuchAlgorithmException e) {
-            eventLog.log(new Event().setException(e));
+            eventLog.log(new Event().setExceptionMessage(e.toString()));
         } finally {
           is.close();
         }
