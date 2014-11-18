@@ -20,7 +20,7 @@
                 <artifactId>flyway-maven-plugin</artifactId>
                 <version>3.0</version>
                 <configuration>
-                    <url>jdbc:derby:eventlogDB;create=true</url>
+                    <url>jdbc:derby:eventlogDB</url>
                     <user></user>
                     <password></password>
                 </configuration>
