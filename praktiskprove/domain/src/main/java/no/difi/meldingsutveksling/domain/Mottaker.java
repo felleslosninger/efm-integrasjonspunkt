@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.dokumentpakking.domain;
+package no.difi.meldingsutveksling.domain;
 
 import java.security.PublicKey;
 

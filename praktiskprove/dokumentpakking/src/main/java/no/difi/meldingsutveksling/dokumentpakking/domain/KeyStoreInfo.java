@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.dokumentpakking.crypto;
+package no.difi.meldingsutveksling.dokumentpakking.domain;
 
 import java.security.KeyStore;
 import java.security.KeyStoreException;

@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.dokumentpakking.domain;
+package no.difi.meldingsutveksling.domain;
 
 public abstract class Aktor {
 	private Organisasjonsnummer orgNummer;

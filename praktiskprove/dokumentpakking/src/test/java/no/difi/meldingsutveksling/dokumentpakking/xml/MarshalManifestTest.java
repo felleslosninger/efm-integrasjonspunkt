@@ -10,7 +10,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import no.difi.meldingsutveksling.dokumentpakking.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;

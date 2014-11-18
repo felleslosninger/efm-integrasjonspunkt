@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.dokumentpakking.service;
 
-import no.difi.meldingsutveksling.dokumentpakking.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
+import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 
 import org.joda.time.DateTime;
 import org.unece.cefact.namespaces.standardbusinessdocumentheader.BusinessScope;

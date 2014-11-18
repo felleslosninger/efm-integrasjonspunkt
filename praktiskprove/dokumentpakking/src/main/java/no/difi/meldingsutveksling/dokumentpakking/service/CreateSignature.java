@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.difi.meldingsutveksling.dokumentpakking.crypto;
+package no.difi.meldingsutveksling.dokumentpakking.service;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -56,9 +56,11 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.validation.Schema;
 
-import no.difi.meldingsutveksling.dokumentpakking.domain.AsicEAttachable;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Signature;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Constants;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Schemas;
+import no.difi.meldingsutveksling.domain.ByteArrayFile;
+import no.difi.meldingsutveksling.domain.Noekkelpar;
 
 import org.springframework.core.io.Resource;
 import org.springframework.xml.validation.SchemaLoaderUtils;
@@ -108,7 +110,7 @@ public class CreateSignature {
 		}
 	}
 
-	public Signature createSignature(final Noekkelpar noekkelpar, final List<AsicEAttachable> attachedFiles) {
+	public Signature createSignature(final Noekkelpar noekkelpar, final List<ByteArrayFile> attachedFiles) {
 		XMLSignatureFactory xmlSignatureFactory = getSignatureFactory();
 		SignatureMethod signatureMethod = getSignatureMethod(xmlSignatureFactory);
 
@@ -168,7 +170,7 @@ public class CreateSignature {
 		}
 	}
 
-	private List<Reference> references(final XMLSignatureFactory xmlSignatureFactory, final List<AsicEAttachable> files) {
+	private List<Reference> references(final XMLSignatureFactory xmlSignatureFactory, final List<ByteArrayFile> files) {
 		List<Reference> result = new ArrayList<Reference>();
 		for (int i = 0; i < files.size(); i++) {
 			try {

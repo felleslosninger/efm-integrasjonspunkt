@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import no.difi.meldingsutveksling.dokumentpakking.domain.Archive;
-import no.difi.meldingsutveksling.dokumentpakking.domain.AsicEAttachable;
+import no.difi.meldingsutveksling.domain.ByteArrayFile;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.io.IOUtils;
@@ -22,9 +22,9 @@ public class CreateZipTest {
 	@Test
 	public void testZipIt() throws Exception {
 
-		List<AsicEAttachable> files = new ArrayList<>();
+		List<ByteArrayFile> files = new ArrayList<>();
 
-		files.add(new AsicEAttachable() {
+		files.add(new ByteArrayFile() {
 			@Override
 			public String getMimeType() {
 				return "text/xml";

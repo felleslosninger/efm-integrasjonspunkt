@@ -2,7 +2,9 @@ package no.difi.meldingsutveksling.dokumentpakking.domain;
 
 import java.util.Arrays;
 
-public class Manifest implements AsicEAttachable {
+import no.difi.meldingsutveksling.domain.ByteArrayFile;
+
+public class Manifest implements ByteArrayFile {
 
 	private byte[] manifestXml;
 

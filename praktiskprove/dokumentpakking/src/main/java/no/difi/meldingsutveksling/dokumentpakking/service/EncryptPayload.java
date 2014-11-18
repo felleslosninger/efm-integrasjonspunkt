@@ -12,7 +12,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 
 import no.difi.meldingsutveksling.dokumentpakking.domain.EncryptedContent;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Mottaker;
+import no.difi.meldingsutveksling.domain.Mottaker;
 
 public class EncryptPayload {
 

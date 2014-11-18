@@ -12,15 +12,14 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import no.difi.meldingsutveksling.dokumentpakking.crypto.CreateSignature;
-import no.difi.meldingsutveksling.dokumentpakking.crypto.Noekkelpar;
-import no.difi.meldingsutveksling.dokumentpakking.crypto.Signature;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Archive;
-import no.difi.meldingsutveksling.dokumentpakking.domain.AsicEAttachable;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Avsender;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Manifest;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Mottaker;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Signature;
+import no.difi.meldingsutveksling.domain.Avsender;
+import no.difi.meldingsutveksling.domain.ByteArrayFile;
+import no.difi.meldingsutveksling.domain.Mottaker;
+import no.difi.meldingsutveksling.domain.Noekkelpar;
+import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,7 +50,7 @@ public class CreateAsiceTest {
 	private Avsender avsender;
 
 	@Mock
-	private AsicEAttachable hoveddokument;
+	private ByteArrayFile hoveddokument;
 
 	@Mock
 	private Manifest manifest;
@@ -69,7 +68,7 @@ public class CreateAsiceTest {
 	private Organisasjonsnummer orgNrAvsender, orgNrMottaker;
 
 	@Captor
-	private ArgumentCaptor<List<AsicEAttachable>> zipItCaptor, createSignatureFileCaptor;
+	private ArgumentCaptor<List<ByteArrayFile>> zipItCaptor, createSignatureFileCaptor;
 
 	@Captor
 	private ArgumentCaptor<Noekkelpar> noekkelparCaptor;
@@ -78,14 +77,14 @@ public class CreateAsiceTest {
 	private ArgumentCaptor<Organisasjonsnummer> orgNrCaptor1, orgNrCaptor2;
 
 	@Captor
-	private ArgumentCaptor<AsicEAttachable> fileCaptor;
+	private ArgumentCaptor<ByteArrayFile> fileCaptor;
 
 	@Test
 	public void testCreateAsice() throws Exception {
 
-		when(createManifest.createManifest(any(Organisasjonsnummer.class), any(Organisasjonsnummer.class), any(AsicEAttachable.class))).thenReturn(manifest);
-		when(createSignature.createSignature(any(Noekkelpar.class), anyListOf(AsicEAttachable.class))).thenReturn(signature);
-		when(createZip.zipIt(anyListOf(AsicEAttachable.class))).thenReturn(archive);
+		when(createManifest.createManifest(any(Organisasjonsnummer.class), any(Organisasjonsnummer.class), any(ByteArrayFile.class))).thenReturn(manifest);
+		when(createSignature.createSignature(any(Noekkelpar.class), anyListOf(ByteArrayFile.class))).thenReturn(signature);
+		when(createZip.zipIt(anyListOf(ByteArrayFile.class))).thenReturn(archive);
 		when(mottaker.getOrgNummer()).thenReturn(orgNrMottaker);
 		when(avsender.getOrgNummer()).thenReturn(orgNrAvsender);
 		when(avsender.getNoekkelpar()).thenReturn(noekkelpar);
