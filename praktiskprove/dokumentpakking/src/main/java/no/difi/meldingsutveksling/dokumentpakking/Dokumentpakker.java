@@ -2,17 +2,17 @@ package no.difi.meldingsutveksling.dokumentpakking;
 
 import java.io.ByteArrayOutputStream;
 
-import no.difi.meldingsutveksling.dokumentpakking.crypto.CreateSignature;
-import no.difi.meldingsutveksling.dokumentpakking.domain.AsicEAttachable;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Avsender;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Mottaker;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateAsice;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateManifest;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateSBD;
+import no.difi.meldingsutveksling.dokumentpakking.service.CreateSignature;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateZip;
 import no.difi.meldingsutveksling.dokumentpakking.service.EncryptPayload;
 import no.difi.meldingsutveksling.dokumentpakking.xml.MarshalSBD;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
+import no.difi.meldingsutveksling.domain.Avsender;
+import no.difi.meldingsutveksling.domain.ByteArrayFile;
+import no.difi.meldingsutveksling.domain.Mottaker;
 
 import org.unece.cefact.namespaces.standardbusinessdocumentheader.StandardBusinessDocument;
 
@@ -34,7 +34,7 @@ public class Dokumentpakker {
 		createAsice = new CreateAsice(new CreateSignature(), new CreateZip(), new CreateManifest());
 	}
 
-	public byte[] pakkDokumentISbd(AsicEAttachable document, Avsender avsender, Mottaker mottaker) {
+	public byte[] pakkDokumentISbd(ByteArrayFile document, Avsender avsender, Mottaker mottaker) {
 		Payload payload = new Payload(encryptPayload.encrypt(createAsice.createAsice(document, avsender, mottaker).getBytes(), mottaker));
 		StandardBusinessDocument doc = createSBD.createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();

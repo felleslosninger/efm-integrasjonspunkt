@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.difi.meldingsutveksling.dokumentpakking.crypto;
+package no.difi.meldingsutveksling.dokumentpakking.service;
 
-import no.difi.meldingsutveksling.dokumentpakking.domain.AsicEAttachable;
+import no.difi.meldingsutveksling.domain.ByteArrayFile;
+import no.difi.meldingsutveksling.domain.Sertifikat;
 
 import org.etsi.uri._01903.v1_3.CertIDType;
 import org.etsi.uri._01903.v1_3.DataObjectFormat;
@@ -59,7 +60,7 @@ public class CreateXAdESProperties {
 		marshaller.setClassesToBeBound(QualifyingProperties.class);
 	}
 
-	public Document createPropertiesToSign(List<AsicEAttachable> files, Sertifikat sertifikat) {
+	public Document createPropertiesToSign(List<ByteArrayFile> files, Sertifikat sertifikat) {
 		X509Certificate certificate = sertifikat.getX509Certificate();
 		byte[] certificateDigestValue = sha1(sertifikat.getEncoded());
 
@@ -85,7 +86,7 @@ public class CreateXAdESProperties {
 		return document;
 	}
 
-	private List<DataObjectFormat> dataObjectFormats(List<AsicEAttachable> files) {
+	private List<DataObjectFormat> dataObjectFormats(List<ByteArrayFile> files) {
 		List<DataObjectFormat> result = new ArrayList<DataObjectFormat>();
 		for (int i = 0; i < files.size(); i++) {
 			String signatureElementIdReference = format("#ID_%s", i);

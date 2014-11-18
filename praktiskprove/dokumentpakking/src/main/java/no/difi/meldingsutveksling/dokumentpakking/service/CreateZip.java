@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.dokumentpakking.service;
 
 import no.difi.meldingsutveksling.dokumentpakking.domain.Archive;
-import no.difi.meldingsutveksling.dokumentpakking.domain.AsicEAttachable;
+import no.difi.meldingsutveksling.domain.ByteArrayFile;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -15,7 +15,7 @@ import java.util.List;
 
 public class CreateZip {
 	
-    public Archive zipIt(List<AsicEAttachable> files) {
+    public Archive zipIt(List<ByteArrayFile> files) {
         ByteArrayOutputStream archive = null;
         ZipArchiveOutputStream zipOutputStream = null;
         try {
@@ -23,7 +23,7 @@ public class CreateZip {
             zipOutputStream = new ZipArchiveOutputStream(archive);
             zipOutputStream.setEncoding(Charsets.UTF_8.name());
             zipOutputStream.setMethod(ZipArchiveOutputStream.DEFLATED);
-            for (AsicEAttachable file : files) {
+            for (ByteArrayFile file : files) {
                 ZipArchiveEntry zipEntry = new ZipArchiveEntry(file.getFileName());
                 zipEntry.setSize(file.getBytes().length);
 

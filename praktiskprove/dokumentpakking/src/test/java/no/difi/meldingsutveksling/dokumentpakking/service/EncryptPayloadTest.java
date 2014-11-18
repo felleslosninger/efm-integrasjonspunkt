@@ -19,9 +19,9 @@ import javax.xml.bind.Unmarshaller;
 
 import no.difi.meldingsutveksling.adresseregmock.AdressRegisterFactory;
 import no.difi.meldingsutveksling.dokumentpakking.domain.EncryptedContent;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Mottaker;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
+import no.difi.meldingsutveksling.domain.Mottaker;
+import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.output.ByteArrayOutputStream;

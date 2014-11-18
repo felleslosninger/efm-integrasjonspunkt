@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
 
-import no.difi.meldingsutveksling.dokumentpakking.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
