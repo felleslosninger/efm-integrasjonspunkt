@@ -26,11 +26,14 @@ public class MessageHandlerTest {
     public void handlerTest() throws JAXBException, GeneralSecurityException, IOException, CMSException, OxalisMessagePersistenceException, ParserConfigurationException, SAXException {
         String textToEncrypt = "Java rules";
         ClassLoader classLoader = getClass().getClassLoader();
-       /*  MessageHandler messageHandler = new MessageHandler();
+         MessageHandler messageHandler = new MessageHandler();
 
-         File file = new File(classLoader.getResource("sbd.xml").getFile());
-           messageHandler.unmarshall(file);
-       // assertEquals(textToEncrypt, messageHandler.cryptAtext(textToEncrypt));
+         //File file = new File(classLoader.getResource("sbdUt.xml").getFile());
+         File file1= new File(
+                 System.getProperty("user.home")+File.separator + "Dropbox" + File.separator +"DifiCmnDocs" +
+                    File.separator + "demo"+ File.separator+ "sbdUt.xml");
+          messageHandler.unmarshall(file1);
+     /*  // assertEquals(textToEncrypt, messageHandler.cryptAtext(textToEncrypt));
          DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         Document doc = dBuilder.parse(file);

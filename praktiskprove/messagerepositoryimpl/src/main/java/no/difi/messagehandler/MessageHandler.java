@@ -1,8 +1,7 @@
 
 package no.difi.messagehandler;
 
-import no.difi.meldingsutveksling.eventlog.Event;
-import no.difi.meldingsutveksling.eventlog.EventLog;
+
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.cms.CMSException;
 import org.unece.cefact.namespaces.standardbusinessdocumentheader.Partner;
@@ -53,9 +52,10 @@ public class MessageHandler {
     private String pemFileName = "958935429-oslo-kommune.pkcs8";
     private String publicKeyFileName = "958935429-oslo-kommune.publickey";
     private static final String outputFolder = "C:" + File.separator + "output.zip";
-    private String payloadExtractDestination =  System.getProperty("user.home") + File.separator + "Zip Output";
+    private String payloadExtractDestination =  System.getProperty("user.home") + File.separator + "Dropbox" + File.separator +"DifiCmnDocs" +
+            File.separator + "demo"+ File.separator+"Zip Output";
     private java.lang.String RSA_INSTANCE = "RSA";
-    private EventLog eventLog = EventLog.create();
+    private List<Exception> list;
 
     /**
      * Unmarshalls the SBD file
@@ -154,7 +154,7 @@ public class MessageHandler {
             zis.close();
 
         } catch (IOException ex) {
-            eventLog.log(new Event().setException(ex));
+           list.add(ex);
         }
     }
 
