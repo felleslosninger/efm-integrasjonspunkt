@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.oxalisexchange;
 import no.difi.meldingsutveksling.domain.BestEduMessage;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.eventlog.MessageId;
 import no.difi.meldingsutveksling.eventlog.ProcessState;
 
 import org.apache.commons.io.FileUtils;
@@ -57,7 +56,7 @@ public abstract class MessageReceieverTemplate {
         try {
             documentElements = documentMapping(document);
         } catch (JAXBException e) {
-            eventLog.log(new Event().setExceptionMessage(e.toString()));
+            eventLog.log(new Event().setExceptionMessage(e));
         }
         Node n = (Node) documentElements.get("DocumentIdentification");
 
@@ -78,7 +77,7 @@ public abstract class MessageReceieverTemplate {
             try {
                 asicFileBytes = getZipBytesFromDocument(payload);
             } catch (IOException e) {
-                eventLog.log(new Event().setExceptionMessage(e.toString()));
+                eventLog.log(new Event().setExceptionMessage(e));
             }
             eventLog.log(new Event().setProcessStates(ProcessState.DECRYPTION_SUCCESS).setTimeStamp(getTimeStamp()));
 
@@ -95,8 +94,7 @@ public abstract class MessageReceieverTemplate {
 
         } else {
             // BestEdu recieved
-            MessageId messageId = new MessageId("");
-            eventLog.log(new Event().setProcessStates(ProcessState.BEST_EDU_RECIEVED).setUuid(messageId.getUuid()).setTimeStamp(getTimeStamp()));
+            eventLog.log(new Event().setProcessStates(ProcessState.BEST_EDU_RECIEVED));
         }
     }
 
@@ -179,30 +177,30 @@ public abstract class MessageReceieverTemplate {
         try {
             aesCipher = Cipher.getInstance("AES");
         } catch (NoSuchAlgorithmException e) {
-           eventLog.log(new Event().setExceptionMessage(e.toString()));
+           eventLog.log(new Event().setExceptionMessage(e ));
         } catch (NoSuchPaddingException e) {
-            eventLog.log(new Event().setExceptionMessage(e.toString()));
+            eventLog.log(new Event().setExceptionMessage(e ));
         }
         SecretKeySpec secretKeySpec = new SecretKeySpec(aesKey, "AES");
         SecureRandom secureRandom = null;
         try {
             secureRandom = SecureRandom.getInstance("SHA1PRNG");
         } catch (NoSuchAlgorithmException e) {
-            eventLog.log(new Event().setExceptionMessage(e.toString()));
+            eventLog.log(new Event().setExceptionMessage(e ));
         }
 
         try {
             aesCipher.init(Cipher.DECRYPT_MODE, secretKeySpec, secureRandom);
         } catch (InvalidKeyException e) {
-            eventLog.log(new Event().setExceptionMessage(e.toString()));
+            eventLog.log(new Event().setExceptionMessage(e));
         }
         byte[] zipTobe = new byte[0];
         try {
             zipTobe = aesCipher.doFinal(aesEncZip);
         } catch (  IllegalBlockSizeException e) {
-            eventLog.log(new Event().setExceptionMessage(e.toString()));
+            eventLog.log(new Event().setExceptionMessage(e));
         } catch (BadPaddingException e) {
-            eventLog.log(new Event().setExceptionMessage(e.toString()));
+            eventLog.log(new Event().setExceptionMessage(e));
         }
 
         File file = new File(PAYLOAD_ZIP);
@@ -210,12 +208,12 @@ public abstract class MessageReceieverTemplate {
         try {
             FileUtils.writeByteArrayToFile(file, zipTobe);
         } catch (IOException e) {
-            eventLog.log(new Event().setExceptionMessage(e.toString()));
+            eventLog.log(new Event().setExceptionMessage(e ));
         }
         try {
              zipFile = new ZipFile(file);
         } catch (IOException e) {
-            eventLog.log(new Event().setExceptionMessage(e.toString()));
+            eventLog.log(new Event().setExceptionMessage(e ));
         }
         return zipFile;
     }
@@ -268,9 +266,9 @@ public abstract class MessageReceieverTemplate {
             key = kf.generatePrivate(keySpec);
 
         } catch (InvalidKeySpecException e) {
-            eventLog.log(new Event().setExceptionMessage(e.toString()));
+            eventLog.log(new Event().setExceptionMessage(e));
         } catch (NoSuchAlgorithmException e) {
-            eventLog.log(new Event().setExceptionMessage(e.toString()));
+            eventLog.log(new Event().setExceptionMessage(e));
         } finally {
           is.close();
         }
