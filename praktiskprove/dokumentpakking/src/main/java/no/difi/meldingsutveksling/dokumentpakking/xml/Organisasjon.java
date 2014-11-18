@@ -19,12 +19,6 @@ public class Organisasjon {
 	@XmlValue
 	protected String orgNummer;
 	
-	public Organisasjon(String authority, String orgNummer) {
-		super();
-		this.authority = authority;
-		this.orgNummer = orgNummer;
-	}
-	
 	public Organisasjon(Organisasjonsnummer orgNummer) {
 		super();
 		this.authority = "iso6523-actorid-upis";

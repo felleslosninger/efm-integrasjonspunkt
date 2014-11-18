@@ -32,16 +32,8 @@ public class Payload {
 	public String getAsice() {
 		return asice;
 	}
-	public void setAsice(String asice) {
-		this.asice = asice;
-	}
 	public String getEncryptionKey() {
 		return encryptionKey;
 	}
-	public void setEncryptionKey(String encryptionKey) {
-		this.encryptionKey = encryptionKey;
-	}
-
-	
 
 }

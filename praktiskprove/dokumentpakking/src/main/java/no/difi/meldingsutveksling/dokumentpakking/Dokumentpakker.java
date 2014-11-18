@@ -22,12 +22,6 @@ public class Dokumentpakker {
 	private CreateSBD createSBD;
 	private CreateAsice createAsice;
 
-	public Dokumentpakker(EncryptPayload encryptPayload,CreateAsice createAsice , CreateSBD createSBD) {
-		this.createSBD = createSBD;
-		this.createAsice = createAsice;
-		this.encryptPayload = encryptPayload;
-	}
-
 	public Dokumentpakker() {
 		createSBD = new CreateSBD();
 		encryptPayload = new EncryptPayload();
