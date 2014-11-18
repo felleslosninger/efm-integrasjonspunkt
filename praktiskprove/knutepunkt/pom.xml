@@ -20,7 +20,7 @@
                 <artifactId>flyway-maven-plugin</artifactId>
                 <version>3.0</version>
                 <configuration>
-                    <url>jdbc:derby:memory:eventLogDB?create=true</url>
+                    <url>jdbc:derby:eventlogDB</url>
                     <user></user>
                     <password></password>
                 </configuration>
@@ -154,13 +154,6 @@
 
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>eventlog</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>domain</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
@@ -177,10 +170,24 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <version>4.1.2.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>4.1.2.RELEASE</version>
+        </dependency>
+
+
+        <dependency>
             <groupId>commons-dbcp</groupId>
             <artifactId>commons-dbcp</artifactId>
             <version>1.4</version>
         </dependency>
+
 
         <dependency>
             <groupId>org.apache.derby</groupId>
