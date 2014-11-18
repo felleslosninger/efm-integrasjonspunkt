@@ -18,7 +18,6 @@
         <property name="password" value="${jdbc.password}"/>
     </bean>
 
-    <bean id="ddlBean" init-method="createDatabase" class="no.difi.meldingsutveksling.eventlog.CreateDB"/>
     <context:property-placeholder location="classpath:jdbc.properties"/>
 
 </beans>

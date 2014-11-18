@@ -13,11 +13,11 @@ import java.util.UUID;
  */
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"/spring-datasource.xml"})
+@ContextConfiguration(locations = {"/spring-rest.xml"})
 
 public class EventLogIntegrationTest {
 
-    @Autowired()
+    @Autowired
     private EventLogDAO dao;
 
     @Test
