@@ -12,11 +12,11 @@ import javax.xml.bind.annotation.XmlType;
 public class Manifest {
 
 	@XmlElement(required = true)
-	protected Mottaker mottaker;
+	private Mottaker mottaker;
 	@XmlElement(required = true)
-	protected Avsender avsender;
+	private Avsender avsender;
 	@XmlElement(required = true)
-	protected HovedDokument hoveddokument;
+	private HovedDokument hoveddokument;
 
 	public Mottaker getMottaker() {
 		return mottaker;

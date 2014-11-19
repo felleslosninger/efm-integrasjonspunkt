@@ -6,7 +6,9 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
-public class MarshalManifest {
+public final class MarshalManifest {
+	private MarshalManifest() {
+	}
 	public static void marshal(Manifest doc, OutputStream os) {
 		try {
 			JAXBContext jaxbContext = JAXBContext.newInstance(Manifest.class);

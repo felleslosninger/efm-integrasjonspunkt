@@ -72,8 +72,8 @@ import org.xml.sax.SAXException;
 
 public class CreateSignature {
 
-	private final static String asicNamespace = "http://uri.etsi.org/2918/v1.2.1#";
-	private final static String signedPropertiesType = "http://uri.etsi.org/01903#SignedProperties";
+	private static final String ASIC_NAMESPACE = "http://uri.etsi.org/2918/v1.2.1#";
+	private static final String SIGNED_PROPERTIES_TYPE = "http://uri.etsi.org/01903#SignedProperties";
 
 	private final DigestMethod sha256DigestMethod;
 	private final CanonicalizationMethod canonicalizationMethod;
@@ -118,7 +118,7 @@ public class CreateSignature {
 		List<Reference> references = references(xmlSignatureFactory, attachedFiles);
 
 		// Lag signatur-referanse for XaDES properties
-		references.add(xmlSignatureFactory.newReference("#SignedProperties", sha256DigestMethod, singletonList(canonicalXmlTransform), signedPropertiesType,
+		references.add(xmlSignatureFactory.newReference("#SignedProperties", sha256DigestMethod, singletonList(canonicalXmlTransform), SIGNED_PROPERTIES_TYPE,
 				null));
 
 		// Generer XAdES-dokument som skal signeres, informasjon om nøkkel
@@ -195,7 +195,7 @@ public class CreateSignature {
 
 	private void wrapSignatureInXADeSEnvelope(final Document document) {
 		Node signatureElement = document.removeChild(document.getDocumentElement());
-		Element xadesElement = document.createElementNS(asicNamespace, "XAdESSignatures");
+		Element xadesElement = document.createElementNS(ASIC_NAMESPACE, "XAdESSignatures");
 		xadesElement.appendChild(signatureElement);
 		document.appendChild(xadesElement);
 	}

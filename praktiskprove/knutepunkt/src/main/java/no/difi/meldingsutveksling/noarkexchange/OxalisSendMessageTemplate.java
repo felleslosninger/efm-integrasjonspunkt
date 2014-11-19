@@ -11,6 +11,6 @@ public class OxalisSendMessageTemplate extends SendMessageTemplate {
 	
     @Override
     void sendSBD(SBD sbd) throws IOException {
-    	FileUtils.writeByteArrayToFile(new File(System.getProperty("user.home") + "\\Dropbox\\DifiCmnDocs\\demo\\sbdUt.xml"), sbd.content);
+    	FileUtils.writeByteArrayToFile(new File(System.getProperty("user.home") + "\\Dropbox\\DifiCmnDocs\\demo\\sbdUt.xml"), sbd.getContent());
     }
 }

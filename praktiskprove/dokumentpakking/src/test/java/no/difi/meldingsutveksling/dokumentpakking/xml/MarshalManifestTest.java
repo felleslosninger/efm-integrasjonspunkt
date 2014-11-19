@@ -30,8 +30,8 @@ public class MarshalManifestTest {
 		JAXBContext jaxbContext = JAXBContext.newInstance(Manifest.class);
 		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 		Manifest kopi = (Manifest) jaxbUnmarshaller.unmarshal(is);
-		assertThat(kopi.hoveddokument.tittel.tittel, is(original.hoveddokument.tittel.tittel));
-		assertThat(kopi.avsender.organisasjon.orgNummer, is(original.avsender.organisasjon.orgNummer));
+		assertThat(kopi.getHoveddokument().getTittel().getTittel(), is(original.getHoveddokument().getTittel().getTittel()));
+		assertThat(kopi.getAvsender().getOrganisasjon().getOrgNummer(), is(original.getAvsender().getOrganisasjon().getOrgNummer()));
 
 	}
 

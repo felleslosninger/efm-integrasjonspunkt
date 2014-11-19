@@ -2,8 +2,11 @@ package no.difi.meldingsutveksling.dokumentpakking.xml;
 
 import javax.xml.namespace.QName;
 
-public class Constants {
+public final class Constants {
 
+	private Constants() {
+	}
+	
 	public static final String RSA_SHA256 = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
 
 	public static final String EBMS_NAMESPACE = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/";

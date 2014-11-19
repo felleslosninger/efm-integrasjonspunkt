@@ -9,25 +9,39 @@ import javax.xml.bind.annotation.XmlValue;
 
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 
-
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "organisasjon")
 @XmlRootElement(name = "organiasjon")
 public class Organisasjon {
 	@XmlAttribute
-	protected String authority;
+	private String authority;
 	@XmlValue
-	protected String orgNummer;
-	
+	private String orgNummer;
+
 	public Organisasjon(Organisasjonsnummer orgNummer) {
 		super();
 		this.authority = "iso6523-actorid-upis";
 		this.orgNummer = orgNummer.asIso6523();
 	}
-	
+
 	public Organisasjon() {
 		super();
 	}
-	
-	
+
+	public String getAuthority() {
+		return authority;
+	}
+
+	public void setAuthority(String authority) {
+		this.authority = authority;
+	}
+
+	public String getOrgNummer() {
+		return orgNummer;
+	}
+
+	public void setOrgNummer(String orgNummer) {
+		this.orgNummer = orgNummer;
+	}
+
 }

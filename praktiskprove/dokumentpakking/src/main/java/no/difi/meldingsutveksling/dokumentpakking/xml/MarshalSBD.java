@@ -8,7 +8,10 @@ import javax.xml.bind.Marshaller;
 
 import org.unece.cefact.namespaces.standardbusinessdocumentheader.StandardBusinessDocument;
 
-public class MarshalSBD {
+public final class MarshalSBD {
+	
+	private MarshalSBD() {
+	}
 	public static void marshal(StandardBusinessDocument doc, OutputStream os) {
 		try {
 			JAXBContext jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class);
