@@ -14,7 +14,9 @@ public class Event {
     private String receiver;
     private long timeStamp;
     private ProcessState processState;
+
     private Exception exceptionMessage;
+    private String message;
 
     public Exception getExceptionMessage() {
         return exceptionMessage;
@@ -71,7 +73,6 @@ public class Event {
         return this;
     }
 
-
     @Override
     public String toString() {
         return "Event{" +
@@ -82,5 +83,13 @@ public class Event {
                 ", processState=" + processState +
                 ", exceptionMessage='" + exceptionMessage + '\'' +
                 '}';
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

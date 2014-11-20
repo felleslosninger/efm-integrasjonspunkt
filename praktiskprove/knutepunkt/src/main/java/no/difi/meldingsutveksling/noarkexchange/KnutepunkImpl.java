@@ -1,8 +1,10 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import no.difi.meldingsutveksling.noarkexchange.SendMessageTemplate;
-import no.difi.meldingsutveksling.noarkexchange.OxalisSendMessageTemplate;
-import no.difi.meldingsutveksling.noarkexchange.schema.*;
+import no.difi.meldingsutveksling.eventlog.EventLog;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
+import no.difi.meldingsutveksling.noarkexchange.schema.noarkExchange_NoarkExchangePortImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.jws.WebService;
 import javax.xml.ws.BindingType;
@@ -26,14 +28,14 @@ import javax.xml.ws.BindingType;
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
 public class KnutepunkImpl extends noarkExchange_NoarkExchangePortImpl {
 
-    @Override
-    public GetCanReceiveMessageResponseType getCanReceiveMessage(GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
-        return super.getCanReceiveMessage(getCanReceiveMessageRequest);
-    }
+    @Autowired
+    EventLog eventLog;
+
+    @Autowired
+    SendMessageTemplate template;
 
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType putMessageRequest) {
-        SendMessageTemplate template = new OxalisSendMessageTemplate();
         return template.sendMessage(putMessageRequest);
     }
 

@@ -24,6 +24,13 @@ public class EventLogDAO {
 
     private NamedParameterJdbcTemplate jdbcTemplate;
 
+    public EventLogDAO() {
+    }
+
+    public EventLogDAO(DataSource dataSource) {
+        this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+    }
+
     @Autowired
     public void setDataSource(DataSource dataSource) {
         this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
@@ -37,10 +44,11 @@ public class EventLogDAO {
     public void insertEventLog(Event e) {
         String insertSQL = "insert into EVENT_LOG(UUID, SENDER, RECEIVER, EVENT_TIMESTAMP, STATE, ERROR_MESSAGE) " +
                 "values (:uuid, :sender, :receiver, :timestamp, :state, :errorMessage) ";
-        Map<String, Object> params = new HashMap<String, Object>();
+        Map<String, Object> params = new HashMap<>();
         params.put("uuid", e.getUuid().toString());
         params.put("sender", e.getSender());
         params.put("receiver", e.getReceiver());
+        params.put("message", e.getMessage());
         params.put("timestamp", e.getTimeStamp());
         params.put("state", e.getProcessState().toString());
         params.put("errorMessage", e.getExceptionMessage());
@@ -53,8 +61,8 @@ public class EventLogDAO {
      * @param since the point in time to return log entries after
      */
     public List<Event> getEventLog(long since) {
-        String q = "select * from EVENT_LOG where timestamp > :since";
-        Map<String, Long> params = new HashMap<String, Long>();
+        String q = "select * from EVENT_LOG where event_timestamp >= :since";
+        Map<String, Long> params = new HashMap<>();
         params.put("since", since);
         return jdbcTemplate.query(q, params, new RowMapper<Event>() {
             @Override
@@ -70,6 +78,5 @@ public class EventLogDAO {
             }
         });
     }
-
 
 }
