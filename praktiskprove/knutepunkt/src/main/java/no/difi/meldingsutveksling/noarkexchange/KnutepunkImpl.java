@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.noarkExchange_NoarkExchangePortImpl;
@@ -29,9 +28,6 @@ import javax.xml.ws.BindingType;
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
 @Component
 public class KnutepunkImpl extends noarkExchange_NoarkExchangePortImpl {
-
-    @Autowired
-    EventLog eventLog;
 
     @Autowired
     ISendMessageTemplate template = new LogToEventLogOnlySendMessageTemplate();
