@@ -24,12 +24,11 @@ public class LogToEventLogOnlySendMessageTemplate implements ISendMessageTemplat
     @Override
     public PutMessageResponseType sendMessage(PutMessageRequestType message) {
 
-        JAXBContext context = JAXBContext.newInstance(Employee.class);
-
         Marshaller m;
         String textMessage;
 
         try {
+            JAXBContext context = JAXBContext.newInstance(PutMessageRequestType.class);
             m = context.createMarshaller();
             m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             ByteArrayOutputStream os = new ByteArrayOutputStream();
