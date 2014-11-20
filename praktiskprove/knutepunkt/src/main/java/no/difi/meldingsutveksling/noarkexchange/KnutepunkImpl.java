@@ -26,11 +26,9 @@ import javax.xml.ws.BindingType;
 
 @WebService(portName = "NoarkExchangePort", serviceName = "noarkExchange", targetNamespace = "http://www.arkivverket.no/Noark/Exchange", wsdlLocation = "http://hardcodeme.not", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.SOAPport")
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
-@Component
 public class KnutepunkImpl extends noarkExchange_NoarkExchangePortImpl {
 
-    @Autowired
-    ISendMessageTemplate template = new LogToEventLogOnlySendMessageTemplate();
+    SendMessageTemplate template = new OxalisSendMessageTemplate();
 
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType putMessageRequest) {
