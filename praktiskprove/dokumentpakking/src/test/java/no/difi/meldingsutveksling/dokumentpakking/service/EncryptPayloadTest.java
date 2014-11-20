@@ -4,15 +4,22 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.security.Key;
 import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -29,14 +36,6 @@ import org.junit.Test;
 
 public class EncryptPayloadTest {
 	final PublicKey mottakerpublicKey = AdressRegisterFactory.createAdressRegister().getPublicKey("958935429");
-	final String mottakerPrivateKey = "MIICdQIBADANBgkqhkiG9w0BAQEFAASCAl8wggJbAgEAAoGBAN4tj2Uj2OkNJMSN"
-			+ "aS6Vaj2CtZDSUiOrYRelXimOWjyMgADj7PjuipieaAyANkVr58b9XcdH4ow2KSW0" + "wUh6kM6P1ESGl39blzwFmq6BRPOhDqWmPijWrAqDM6uDeYBJSnxgan4PZ3I1eRJq"
-			+ "ICw6VDrsmFqnRpknGKVgIYQPTSWTAgMBAAECgYBeh6v3MGVd4wW9yxzxgQkO2so9" + "r/7axlQtJ2ME81hZYr4jotZ0o6m8fclvaC2vI9YdyDdaTq+JUJH5RQrnt55cOcr+"
-			+ "1TLffeWVoivOZXwAqyUhCxPCkA8b4LO1oK5kXDbVyc2lV/0xFLmAU07DE2p1DYaD" + "CIh2jZzsuBwj7EPUAQJBAPAzyX9VVXWlsx/H7Pa0PggB6Xo4czn+MTDv56X3aDRk"
-			+ "XUtqukRFIcjcy6l5Zl7ER4CVu3aswgtGw40ds0Dji4ECQQDsyk2QEyayOhFwLziD" + "h29tS6QK7U9WqysuDx5sCDxXMT1MtsQlTcj4W02Ak8PRYDS3ccdpMlMttYKXLy+W"
-			+ "C0sTAkBsVn9AXkWwTW8wG2VGlF8SD4K17HYUJxEayGnL0n3+e3IUzOt8VU36oZN+" + "OdIxVggF+ALYcO0IVv9mS4oI71iBAkByWawlVKpOTa6YL6WqFyCfdnTs9fdnklfS"
-			+ "8WguobeKH/RLdMO6hBr2nRkLa9CX707l/CNh0PTMUSiUnCvt2NxTAkBPwCWmARS4" + "cZjrWFtnjw4mUjH+fR//WnLqYRFETNasROMr64uX+rtNxrvCXI4VB0oiuvKHwXd3"
-			+ "uc9j/4wX04Kk";
 
 	@Test
 	public void testEncrypt() throws Exception {
@@ -46,9 +45,7 @@ public class EncryptPayloadTest {
 		Cipher keyCipher = Cipher.getInstance("RSA");
 		Cipher contentCipher = Cipher.getInstance("AES");
 
-		PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(Base64.decodeBase64(mottakerPrivateKey));
-		KeyFactory kf = KeyFactory.getInstance("RSA");
-		keyCipher.init(Cipher.DECRYPT_MODE, kf.generatePrivate(keySpec));
+		keyCipher.init(Cipher.DECRYPT_MODE, loadPrivateKey("958935429-oslo-kommune.pkcs8"));
 		byte[] decryptedContentKey = keyCipher.doFinal(c.getKey());
 
 		Key contentKey = new SecretKeySpec(decryptedContentKey, "AES");
@@ -80,9 +77,7 @@ public class EncryptPayloadTest {
 		Cipher keyCipher = Cipher.getInstance("RSA");
 		Cipher contentCipher = Cipher.getInstance("AES");
 		
-		PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(Base64.decodeBase64(mottakerPrivateKey));
-		KeyFactory kf = KeyFactory.getInstance("RSA");
-		keyCipher.init(Cipher.DECRYPT_MODE, kf.generatePrivate(keySpec));
+		keyCipher.init(Cipher.DECRYPT_MODE, loadPrivateKey("958935429-oslo-kommune.pkcs8"));
 		byte[] decryptedContentKey = keyCipher.doFinal(Base64.decodeBase64(kopi.getEncryptionKey()));
 
 		Key contentKey = new SecretKeySpec(decryptedContentKey, "AES");
@@ -93,6 +88,38 @@ public class EncryptPayloadTest {
 		assertThat(new String(decryptedContent), is(equalTo("Encrypted content")));
 	}
 	
+    public PrivateKey loadPrivateKey(String fileName) throws IOException  {
+        PrivateKey key = null;
+        InputStream is = null;
+        try {
+            is = getClass().getClassLoader().getResourceAsStream(fileName);
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder builder = new StringBuilder();
+            boolean inKey = false;
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                if (!inKey &&  line.startsWith("-----BEGIN ") &&
+                        line.endsWith(" PRIVATE KEY-----") ) {
+                        inKey = true;
+                } else {
+                    if (line.startsWith("-----END ") &&
+                            line.endsWith(" PRIVATE KEY-----")) {
+                        inKey = false;
+                    }
+                    builder.append(line);
+                }
+            }
 
+            byte[] encoded = DatatypeConverter.parseBase64Binary(builder.toString());
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+            key = kf.generatePrivate(keySpec);
+
+        } catch (InvalidKeySpecException e) {
+        } catch (NoSuchAlgorithmException e) {
+        } finally {
+          is.close();
+        }
+        return key;
+    }
 
 }
