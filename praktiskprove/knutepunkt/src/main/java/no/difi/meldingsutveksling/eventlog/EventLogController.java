@@ -20,7 +20,7 @@ public class EventLogController {
     private EventLogDAO eventLogDAO;
 
     @RequestMapping(value = "/event", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public List<Event> getEventsSince(@RequestParam(value = "since") long since) {
+    public List<Event> getEventsSince(@RequestParam(value = "since", required = false, defaultValue = "0") long since) {
         return eventLogDAO.getEventLog(since);
     }
 
