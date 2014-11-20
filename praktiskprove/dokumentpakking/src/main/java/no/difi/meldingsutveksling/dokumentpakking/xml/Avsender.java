@@ -6,13 +6,12 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "avsender")
 @XmlRootElement(name = "avsender")
 public class Avsender {
-	@XmlElement
-	protected Organisasjon organisasjon;
+  @XmlElement
+	private Organisasjon organisasjon;
 
 	public Avsender(Organisasjon organisasjon) {
 		super();
@@ -22,7 +21,13 @@ public class Avsender {
 	public Avsender() {
 		super();
 	}
-	
-	
-	
+
+	public Organisasjon getOrganisasjon() {
+		return organisasjon;
+	}
+
+	public void setOrganisasjon(Organisasjon organisasjon) {
+		this.organisasjon = organisasjon;
+	}
+
 }

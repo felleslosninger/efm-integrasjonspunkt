@@ -10,7 +10,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import no.difi.meldingsutveksling.dokumentpakking.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
@@ -30,8 +30,8 @@ public class MarshalManifestTest {
 		JAXBContext jaxbContext = JAXBContext.newInstance(Manifest.class);
 		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 		Manifest kopi = (Manifest) jaxbUnmarshaller.unmarshal(is);
-		assertThat(kopi.hoveddokument.tittel.tittel, is(original.hoveddokument.tittel.tittel));
-		assertThat(kopi.avsender.organisasjon.orgNummer, is(original.avsender.organisasjon.orgNummer));
+		assertThat(kopi.getHoveddokument().getTittel().getTittel(), is(original.getHoveddokument().getTittel().getTittel()));
+		assertThat(kopi.getAvsender().getOrganisasjon().getOrgNummer(), is(original.getAvsender().getOrganisasjon().getOrgNummer()));
 
 	}
 

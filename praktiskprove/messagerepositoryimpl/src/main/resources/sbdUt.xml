@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:StandardBusinessDocument xmlns:ns2="http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader">
+    <ns2:StandardBusinessDocumentHeader>
+        <ns2:HeaderVersion>1.0</ns2:HeaderVersion>
+        <ns2:Sender>
+            <ns2:Identifier Authority="urn:oasis:names:tc:ebcore:partyid-type:iso6523:9908">9908:960885406</ns2:Identifier>
+        </ns2:Sender>
+        <ns2:Receiver>
+            <ns2:Identifier Authority="urn:oasis:names:tc:ebcore:partyid-type:iso6523:9908">9908:958935429</ns2:Identifier>
+        </ns2:Receiver>
+        <ns2:DocumentIdentification>
+            <ns2:Standard>urn:no:difi:meldingsutveksling:1.0</ns2:Standard>
+            <ns2:TypeVersion>1.0</ns2:TypeVersion>
+            <ns2:InstanceIdentifier>12345678-id</ns2:InstanceIdentifier>
+            <ns2:Type>BEST/EDU</ns2:Type>
+            <ns2:CreationDateAndTime>2014-11-14T14:59:47.949+01:00</ns2:CreationDateAndTime>
+        </ns2:DocumentIdentification>
+        <ns2:BusinessScope>
+            <ns2:Scope>
+                <ns2:Type>ConversationId</ns2:Type>
+                <ns2:InstanceIdentifier>12345678-id</ns2:InstanceIdentifier>
+                <ns2:Identifier>urn:no:difi:meldingsutveksling:1.0</ns2:Identifier>
+            </ns2:Scope>
+        </ns2:BusinessScope>
+    </ns2:StandardBusinessDocumentHeader>
+    <payload encryptionKey="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</payload>
+</ns2:StandardBusinessDocument>

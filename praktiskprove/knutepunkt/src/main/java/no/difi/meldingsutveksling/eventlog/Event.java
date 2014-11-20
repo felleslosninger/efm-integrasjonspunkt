@@ -14,14 +14,15 @@ public class Event {
     private String receiver;
     private long timeStamp;
     private ProcessState processState;
-    private String exceptionMessage;
-    private Object message;
 
-    public String getExceptionMessage() {
+    private Exception exceptionMessage;
+    private String message;
+
+    public Exception getExceptionMessage() {
         return exceptionMessage;
     }
 
-    public Event setExceptionMessage(String exceptionMessage) {
+    public Event setExceptionMessage(Exception exceptionMessage) {
         this.exceptionMessage = exceptionMessage;
         return this;
     }
@@ -81,15 +82,15 @@ public class Event {
                 ", receiver='" + receiver + '\'' +
                 ", timeStamp=" + timeStamp +
                 ", processState=" + processState +
-                ", exceptionMessage='" + exceptionMessage + '\'' +
+                ", exceptionMessage='" + exceptionMessage.toString() + '\'' +
                 '}';
     }
 
-    public Object getMessage() {
+    public String getMessage() {
         return message;
     }
 
-    public void setMessage(Object message) {
+    public void setMessage(String message) {
         this.message = message;
     }
 }

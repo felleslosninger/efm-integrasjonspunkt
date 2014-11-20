@@ -1,4 +1,4 @@
-package no.difi.messagehandler;
+package no.difi.meldingsutveksling.oxalisexchange;
 
 import java.util.ArrayList;
 import java.util.List;

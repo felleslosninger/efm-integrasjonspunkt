@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.difi.meldingsutveksling.dokumentpakking.crypto;
+package no.difi.meldingsutveksling.dokumentpakking.domain;
 
 import java.util.Arrays;
 
-import no.difi.meldingsutveksling.dokumentpakking.domain.AsicEAttachable;
+import no.difi.meldingsutveksling.domain.ByteArrayFile;
 
 
-public class Signature implements AsicEAttachable {
+public class Signature implements ByteArrayFile {
 
     private final byte[] xmlBytes;
 

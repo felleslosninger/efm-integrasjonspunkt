@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.dokumentpakking.crypto;
+package no.difi.meldingsutveksling.domain;
 
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -9,7 +9,7 @@ public class Noekkelpar {
 	private PrivateKey privatNoekkel;
 	private Certificate sertifikat;
 
-	private Noekkelpar(PrivateKey privatNoekkel, Certificate sertifikat) {
+	public Noekkelpar(PrivateKey privatNoekkel, Certificate sertifikat) {
 		this.privatNoekkel = privatNoekkel;
 		this.sertifikat = sertifikat;
 	}
@@ -26,9 +26,5 @@ public class Noekkelpar {
 
 	public PrivateKey getPrivateKey() {
 		return privatNoekkel;
-	}
-
-	public static Noekkelpar createNoekkelpar(PrivateKey privatNoekkel, Certificate sertifikat) {
-		return new Noekkelpar(privatNoekkel, sertifikat);
 	}
 }

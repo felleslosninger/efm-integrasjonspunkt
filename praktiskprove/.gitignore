@@ -17,3 +17,4 @@ eventLogDB/
 # Maven
 log/
 target/
+knutepunkt/src/main/java/no/difi/meldingsutveksling/noarkexchange/schema/noarkExchange_NoarkExchangePortImpl.java

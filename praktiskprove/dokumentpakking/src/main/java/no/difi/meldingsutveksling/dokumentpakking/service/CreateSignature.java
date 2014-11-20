@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.difi.meldingsutveksling.dokumentpakking.crypto;
+package no.difi.meldingsutveksling.dokumentpakking.service;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -56,9 +56,11 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.validation.Schema;
 
-import no.difi.meldingsutveksling.dokumentpakking.domain.AsicEAttachable;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Signature;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Constants;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Schemas;
+import no.difi.meldingsutveksling.domain.ByteArrayFile;
+import no.difi.meldingsutveksling.domain.Noekkelpar;
 
 import org.springframework.core.io.Resource;
 import org.springframework.xml.validation.SchemaLoaderUtils;
@@ -70,8 +72,8 @@ import org.xml.sax.SAXException;
 
 public class CreateSignature {
 
-	private final static String asicNamespace = "http://uri.etsi.org/2918/v1.2.1#";
-	private final static String signedPropertiesType = "http://uri.etsi.org/01903#SignedProperties";
+	private static final String ASIC_NAMESPACE = "http://uri.etsi.org/2918/v1.2.1#";
+	private static final String SIGNED_PROPERTIES_TYPE = "http://uri.etsi.org/01903#SignedProperties";
 
 	private final DigestMethod sha256DigestMethod;
 	private final CanonicalizationMethod canonicalizationMethod;
@@ -108,7 +110,7 @@ public class CreateSignature {
 		}
 	}
 
-	public Signature createSignature(final Noekkelpar noekkelpar, final List<AsicEAttachable> attachedFiles) {
+	public Signature createSignature(final Noekkelpar noekkelpar, final List<ByteArrayFile> attachedFiles) {
 		XMLSignatureFactory xmlSignatureFactory = getSignatureFactory();
 		SignatureMethod signatureMethod = getSignatureMethod(xmlSignatureFactory);
 
@@ -116,7 +118,7 @@ public class CreateSignature {
 		List<Reference> references = references(xmlSignatureFactory, attachedFiles);
 
 		// Lag signatur-referanse for XaDES properties
-		references.add(xmlSignatureFactory.newReference("#SignedProperties", sha256DigestMethod, singletonList(canonicalXmlTransform), signedPropertiesType,
+		references.add(xmlSignatureFactory.newReference("#SignedProperties", sha256DigestMethod, singletonList(canonicalXmlTransform), SIGNED_PROPERTIES_TYPE,
 				null));
 
 		// Generer XAdES-dokument som skal signeres, informasjon om nøkkel
@@ -168,7 +170,7 @@ public class CreateSignature {
 		}
 	}
 
-	private List<Reference> references(final XMLSignatureFactory xmlSignatureFactory, final List<AsicEAttachable> files) {
+	private List<Reference> references(final XMLSignatureFactory xmlSignatureFactory, final List<ByteArrayFile> files) {
 		List<Reference> result = new ArrayList<Reference>();
 		for (int i = 0; i < files.size(); i++) {
 			try {
@@ -193,7 +195,7 @@ public class CreateSignature {
 
 	private void wrapSignatureInXADeSEnvelope(final Document document) {
 		Node signatureElement = document.removeChild(document.getDocumentElement());
-		Element xadesElement = document.createElementNS(asicNamespace, "XAdESSignatures");
+		Element xadesElement = document.createElementNS(ASIC_NAMESPACE, "XAdESSignatures");
 		xadesElement.appendChild(signatureElement);
 		document.appendChild(xadesElement);
 	}

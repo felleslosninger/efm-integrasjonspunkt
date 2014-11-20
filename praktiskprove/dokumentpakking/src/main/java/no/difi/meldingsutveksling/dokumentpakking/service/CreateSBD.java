@@ -1,7 +1,9 @@
 package no.difi.meldingsutveksling.dokumentpakking.service;
 
-import no.difi.meldingsutveksling.dokumentpakking.domain.Organisasjonsnummer;
+import java.util.UUID;
+
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
+import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 
 import org.joda.time.DateTime;
 import org.unece.cefact.namespaces.standardbusinessdocumentheader.BusinessScope;
@@ -20,7 +22,7 @@ public class CreateSBD {
 	public static final String TYPE = "BEST/EDU";
 	public static final String INSTANCE_IDENTIFIER = "12345678-id";
 	
-	public StandardBusinessDocument createSBD(Organisasjonsnummer avsender, Organisasjonsnummer mottaker, Payload payload) {
+	public StandardBusinessDocument createSBD(Organisasjonsnummer avsender, Organisasjonsnummer mottaker, Payload payload, String conversationId) {
     	StandardBusinessDocument doc = new StandardBusinessDocument()
 		.withStandardBusinessDocumentHeader(
 				new StandardBusinessDocumentHeader()
@@ -30,7 +32,7 @@ public class CreateSBD {
 						.withDocumentIdentification(new DocumentIdentification()
 										.withStandard(STANDARD)
 										.withTypeVersion(TYPE_VERSION)
-										.withInstanceIdentifier(INSTANCE_IDENTIFIER)
+										.withInstanceIdentifier(UUID.randomUUID().toString())
 										.withType(TYPE)
 										.withCreationDateAndTime(DateTime.now())
 						)
@@ -38,7 +40,7 @@ public class CreateSBD {
 										.withScopes(new Scope()
 														.withIdentifier(STANDARD)
 														.withType(CONVERSATIONID)
-														.withInstanceIdentifier(INSTANCE_IDENTIFIER)
+														.withInstanceIdentifier(conversationId)
 										)
 						)
 		)

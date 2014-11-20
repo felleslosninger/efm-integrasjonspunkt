@@ -3,12 +3,11 @@ package no.difi.meldingsutveksling.dokumentpakking.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.difi.meldingsutveksling.dokumentpakking.crypto.CreateSignature;
-import no.difi.meldingsutveksling.dokumentpakking.crypto.Signature;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Archive;
-import no.difi.meldingsutveksling.dokumentpakking.domain.AsicEAttachable;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Avsender;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Mottaker;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Signature;
+import no.difi.meldingsutveksling.domain.Avsender;
+import no.difi.meldingsutveksling.domain.ByteArrayFile;
+import no.difi.meldingsutveksling.domain.Mottaker;
 
 public class CreateAsice {
 	private CreateSignature createSignature;
@@ -21,12 +20,12 @@ public class CreateAsice {
 		this.createManifest = createManifest;
 	}
 
-	public Archive createAsice(AsicEAttachable forsendelse, Avsender avsender, Mottaker mottaker) {
-		List<AsicEAttachable> files = new ArrayList<AsicEAttachable>();
+	public Archive createAsice(ByteArrayFile forsendelse, Avsender avsender, Mottaker mottaker) {
+		List<ByteArrayFile> files = new ArrayList<ByteArrayFile>();
 		files.add(forsendelse);
 		files.add(createManifest.createManifest(avsender.getOrgNummer(), mottaker.getOrgNummer(), forsendelse));
 
-		Signature signature = createSignature.createSignature(avsender.getNoekkelpar(), new ArrayList<AsicEAttachable>(files));
+		Signature signature = createSignature.createSignature(avsender.getNoekkelpar(), new ArrayList<ByteArrayFile>(files));
 		files.add(signature);
 		
 		Archive archive = createZip.zipIt(files);

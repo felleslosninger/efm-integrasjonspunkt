@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "mottaker")
 public class Mottaker {
 	@XmlElement
-	protected Organisasjon organisasjon;
+	private Organisasjon organisasjon;
 
 	public Mottaker(Organisasjon organisasjon) {
 		super();
@@ -21,6 +21,13 @@ public class Mottaker {
 	public Mottaker() {
 		super();
 	}
-	
-	
+
+	public Organisasjon getOrganisasjon() {
+		return organisasjon;
+	}
+
+	public void setOrganisasjon(Organisasjon organisasjon) {
+		this.organisasjon = organisasjon;
+	}
+
 }

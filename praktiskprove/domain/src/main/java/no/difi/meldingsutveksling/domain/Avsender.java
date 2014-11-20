@@ -1,6 +1,5 @@
-package no.difi.meldingsutveksling.dokumentpakking.domain;
+package no.difi.meldingsutveksling.domain;
 
-import no.difi.meldingsutveksling.dokumentpakking.crypto.Noekkelpar;
 
 public class Avsender extends Aktor {
 	private Noekkelpar noekkelpar;
