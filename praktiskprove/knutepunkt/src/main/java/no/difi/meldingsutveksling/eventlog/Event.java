@@ -89,7 +89,8 @@ public class Event {
         return message;
     }
 
-    public void setMessage(String message) {
+    public Event setMessage(String message) {
         this.message = message;
+        return this;
     }
 }

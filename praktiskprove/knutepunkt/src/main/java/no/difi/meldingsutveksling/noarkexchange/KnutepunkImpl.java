@@ -32,7 +32,7 @@ public class KnutepunkImpl extends noarkExchange_NoarkExchangePortImpl {
     EventLog eventLog;
 
     @Autowired
-    SendMessageTemplate template;
+    ISendMessageTemplate template;
 
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType putMessageRequest) {
