@@ -4,7 +4,6 @@ import no.difi.meldingsutveksling.domain.BestEduMessage;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.eventlog.ProcessState;
-
 import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -18,7 +17,6 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBException;
-import javax.xml.soap.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -43,29 +41,36 @@ public abstract class MessageReceieverTemplate {
     private static final String PRIVATE_KEY_FILE = "958935429-oslo-kommune.pkcs8";
     private static final String PAYLOAD_ZIP =System.getProperty("user.home")+File.separator + "payload.zip";
     private static final String PAYLOAD = "payload";
+
     private EventLog eventLog = EventLog.create();
     private List<Object> toRemoveAfterIntegration = new ArrayList();
 
-    abstract void sendLeveringskvittering();
+    abstract void sendLeveringskvittering(Map list);
 
     abstract void sendApningskvittering();
 
     public void receive( Document document) throws  GeneralSecurityException {
-
+        Node n = null;
         Map documentElements = null;
         try {
             documentElements = documentMapping(document);
+            n = (Node) documentElements.get("DocumentIdentification");
         } catch (JAXBException e) {
             eventLog.log(new Event().setExceptionMessage(e));
         }
-        Node n = (Node) documentElements.get("DocumentIdentification");
 
         eventLog.log(new Event().setProcessStates(ProcessState.MESSAGE_RECIEVED).setTimeStamp(getTimeStamp()));
 
         if (isSBD(n)) {
 
             eventLog.log(new Event().setProcessStates(ProcessState.SBD_RECIEVED).setTimeStamp(getTimeStamp()));
-            sendLeveringskvittering();
+            try {
+                documentElements.put("privateKey",loadPrivateKey());
+            } catch (IOException e) {
+                //TODO:log exception
+                e.printStackTrace();
+            }
+            sendLeveringskvittering(documentElements);
             eventLog.log(new Event().setProcessStates(ProcessState.LEVERINGS_KVITTERING_SENT).setTimeStamp(getTimeStamp()));
 
             // get payloaed and encryption key
@@ -98,9 +103,7 @@ public abstract class MessageReceieverTemplate {
         }
     }
 
-    public void sendToHub(Document document) {
-      //TODO:her skal dokument videreformidles til knytepunkt
-    }
+
     private long getTimeStamp() {
         return System.currentTimeMillis();
     }
@@ -138,30 +141,11 @@ public abstract class MessageReceieverTemplate {
 
 
     protected void senToNoark(BestEduMessage bestEduMessage) {
-        try {
-            SOAPConnectionFactory soapConnectionFactory = SOAPConnectionFactory.newInstance();
-            SOAPConnection soapConnection = soapConnectionFactory.createConnection();
 
-            // Send SOAP Message to SOAP Server
-            String url = "http://muv-knutepunkt.herokuapp.com:80/noarkExchange";
-            SOAPMessage soapResponse = soapConnection.call(createSOAPRequest(), url);
-        } catch (SOAPException e) {
-            e.printStackTrace();
-        }
         toRemoveAfterIntegration.add(bestEduMessage);
     }
 
-    private SOAPMessage createSOAPRequest() {
-        MessageFactory messageFactory = null;
-        try {
-            messageFactory = MessageFactory.newInstance();
-            SOAPMessage soapMessage = messageFactory.createMessage();
-        } catch (SOAPException e) {
-            e.printStackTrace();
-        }
 
-        return null;
-    }
 
     private BestEduMessage getBestEduFromAsic(ZipFile asicFile) {
         toRemoveAfterIntegration.add(asicFile);
@@ -230,7 +214,7 @@ public abstract class MessageReceieverTemplate {
         return  cipher.doFinal(aesInDisc);
     }
     private boolean isSBD(Node node) {
-        return node.getTextContent().contains("Sbd");
+        return node.getTextContent().toLowerCase().contains("sbd");
     }
 
     /**
@@ -270,6 +254,7 @@ public abstract class MessageReceieverTemplate {
         } catch (NoSuchAlgorithmException e) {
             eventLog.log(new Event().setExceptionMessage(e));
         } finally {
+          if (null!= is)
           is.close();
         }
         return key;

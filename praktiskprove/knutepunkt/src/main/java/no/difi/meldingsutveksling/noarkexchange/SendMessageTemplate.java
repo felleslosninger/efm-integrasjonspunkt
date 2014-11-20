@@ -1,19 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.cert.Certificate;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-
 import no.difi.meldingsutveksling.adresseregmock.AdressRegisterFactory;
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
 import no.difi.meldingsutveksling.domain.Avsender;
@@ -28,8 +14,20 @@ import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
 import no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-
 import org.apache.commons.codec.binary.Base64;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.cert.Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 
 public abstract class SendMessageTemplate {
 

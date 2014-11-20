@@ -10,7 +10,7 @@ import org.junit.Test;
 public class NoarkWSClientTest {
     @Test
     public void soapClientProbe() {
-        NoarkWSClient noarkWSClient = new NoarkWSClient();
+        //NoarkWSClient noarkWSClient = new NoarkWSClient();
 
     }
 }
