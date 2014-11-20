@@ -97,7 +97,7 @@ public abstract class SendMessageTemplate {
 	
 	PrivateKey findPrivateKey(){
 		 PrivateKey key = null;
-	        try(InputStream is = PrivateKeyUtil.class.getClassLoader().getResourceAsStream("knutepunkt_privatekey.pkcs8")) {
+	        try(InputStream is = getClass().getClassLoader().getResourceAsStream("knutepunkt_privatekey.pkcs8")) {
 	            BufferedReader br = new BufferedReader(new InputStreamReader(is));
 	            StringBuilder builder = new StringBuilder();
 	            boolean inKey = false;
