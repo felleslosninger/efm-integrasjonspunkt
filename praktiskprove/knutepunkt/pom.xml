@@ -201,6 +201,13 @@
             <version>1.4</version>
         </dependency>
 
+        <!-- for the cloud deployment -->
+        <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>9.1-901.jdbc4</version>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
