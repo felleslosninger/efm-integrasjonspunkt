@@ -72,7 +72,8 @@ public class EventLogDAO {
                 e.setSender(resultSet.getString("sender"));
                 e.setReceiver(resultSet.getString("receiver"));
                 e.setTimeStamp(resultSet.getLong("event_timestamp"));
-                e.setExceptionMessage(new Exception(resultSet.getString("error_message")));
+                e.setExceptionMessage(null);
+                e.setMessage(resultSet.getString("message"));
                 e.setProcessStates(ProcessState.valueOf(resultSet.getString("state")));
                 return e;
             }
