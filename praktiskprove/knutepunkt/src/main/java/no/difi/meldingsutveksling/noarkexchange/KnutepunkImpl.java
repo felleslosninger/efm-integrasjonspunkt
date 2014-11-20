@@ -1,10 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import no.difi.meldingsutveksling.noarkexchange.schema.noarkExchange_NoarkExchangePortImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import no.difi.meldingsutveksling.noarkexchange.schema.*;
 
 import javax.jws.WebService;
 import javax.xml.ws.BindingType;
@@ -26,14 +22,16 @@ import javax.xml.ws.BindingType;
 
 @WebService(portName = "NoarkExchangePort", serviceName = "noarkExchange", targetNamespace = "http://www.arkivverket.no/Noark/Exchange", wsdlLocation = "http://hardcodeme.not", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.SOAPport")
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
-@Component
 public class KnutepunkImpl extends noarkExchange_NoarkExchangePortImpl {
 
-    @Autowired
-    ISendMessageTemplate template = new LogToEventLogOnlySendMessageTemplate();
+    @Override
+    public GetCanReceiveMessageResponseType getCanReceiveMessage(GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
+        return super.getCanReceiveMessage(getCanReceiveMessageRequest);
+    }
 
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType putMessageRequest) {
+        SendMessageTemplate template = new LogToEventLogOnlySendMessageTemplate();
         return template.sendMessage(putMessageRequest);
     }
 
