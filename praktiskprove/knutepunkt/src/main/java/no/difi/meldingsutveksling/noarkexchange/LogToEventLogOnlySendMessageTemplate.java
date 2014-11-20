@@ -36,8 +36,10 @@ public class LogToEventLogOnlySendMessageTemplate implements ISendMessageTemplat
             textMessage = new String(os.toByteArray(), "UTF-8");
 
         } catch (JAXBException e) {
+            e.printStackTrace();
             return null;
         } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
             return null;
         }
 
