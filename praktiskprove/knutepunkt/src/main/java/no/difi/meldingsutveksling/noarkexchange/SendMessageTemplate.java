@@ -33,8 +33,6 @@ public abstract class SendMessageTemplate {
     @Autowired
     EventLog eventLog;
 
-	private EventLog eventLog = EventLog.create();
-
 	SBD createSBD(PutMessageRequestType sender, KnutepunktContext context) {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 

@@ -213,13 +213,20 @@
             <version>${jerseyVersion}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
+            <version>1.3</version>
+            <scope>test</scope>
+        </dependency>
 
-			<dependency>
+
+        <dependency>
 			<groupId>no.difi.meldingsutveksling</groupId>
 			<artifactId>adresseregister-mock</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
-	
+
 
     </dependencies>
 

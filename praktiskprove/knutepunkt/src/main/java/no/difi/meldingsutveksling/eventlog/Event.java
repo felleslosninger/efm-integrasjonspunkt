@@ -73,7 +73,6 @@ public class Event {
         return this;
     }
 
-
     @Override
     public String toString() {
         return "Event{" +
@@ -82,7 +81,7 @@ public class Event {
                 ", receiver='" + receiver + '\'' +
                 ", timeStamp=" + timeStamp +
                 ", processState=" + processState +
-                ", exceptionMessage='" + exceptionMessage.toString() + '\'' +
+                ", exceptionMessage='" + exceptionMessage + '\'' +
                 '}';
     }
 
