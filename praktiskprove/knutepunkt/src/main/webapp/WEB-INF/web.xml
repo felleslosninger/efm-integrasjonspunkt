@@ -23,7 +23,6 @@
         <load-on-startup>1</load-on-startup>
     </servlet>
 
-
     <servlet-mapping>
         <servlet-name>wsServlet</servlet-name>
         <url-pattern>/noarkExchange</url-pattern>

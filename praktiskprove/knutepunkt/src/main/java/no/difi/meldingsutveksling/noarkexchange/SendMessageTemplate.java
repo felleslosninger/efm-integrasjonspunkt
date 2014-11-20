@@ -6,12 +6,16 @@ import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+@Component
 public abstract class SendMessageTemplate {
 
-    private EventLog eventLog = EventLog.create();
+    @Autowired
+    EventLog eventLog;
 
     SBD createSBD(PutMessageRequestType sender) {
         return new SBD();
@@ -20,12 +24,10 @@ public abstract class SendMessageTemplate {
     abstract void sendSBD(SBD sbd) throws IOException;
 
     boolean verifySender(AddressType sender) {
-        // bruk adresseregister
         return true;
     }
 
     boolean verifyRecipient(AddressType sender) {
-        // bruk adresseregister
         return true;
     }
 

@@ -15,6 +15,7 @@ public class Event {
     private long timeStamp;
     private ProcessState processState;
     private String exceptionMessage;
+    private Object message;
 
     public String getExceptionMessage() {
         return exceptionMessage;
@@ -82,5 +83,13 @@ public class Event {
                 ", processState=" + processState +
                 ", exceptionMessage='" + exceptionMessage + '\'' +
                 '}';
+    }
+
+    public Object getMessage() {
+        return message;
+    }
+
+    public void setMessage(Object message) {
+        this.message = message;
     }
 }

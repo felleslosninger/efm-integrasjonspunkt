@@ -1,28 +1,27 @@
 package no.difi.meldingsutveksling.eventlog;
 
-import org.junit.Ignore;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.junit.Test;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.util.UUID;
 
 /**
- *
+ * These tests use flyway to establish an in memory database before they are run.
  */
 
-@Ignore
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"/spring-rest.xml"})
 
 public class EventLogIntegrationTest {
 
-    @Autowired
-    private EventLogDAO dao;
 
+    @Test
     public void shouldInsert() {
-        Event e = new Event().setUuid(UUID.randomUUID()).setProcessStates(ProcessState.AAPNINGS_KVITTERING_SENT).setSender("111111111").setReceiver("222222222");
-        dao.insertEventLog(e);
+        AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+        ctx.getEnvironment().setActiveProfiles("dev");
+        ctx.scan("no.difi");
+        ctx.refresh();
+
+        EventLogDAO eventLogDAO = ctx.getBean(EventLogDAO.class);
+        Event e = new Event().setUuid(UUID.randomUUID()).setProcessStates(ProcessState.AAPNINGS_KVITTERING_SENT).setSender("111111111").setReceiver("222222222").setTimeStamp(System.currentTimeMillis());
+        eventLogDAO.insertEventLog(e);
     }
 }

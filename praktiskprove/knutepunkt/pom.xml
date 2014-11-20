@@ -7,11 +7,16 @@
     <artifactId>knutepunkt</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>war</packaging>
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.1.9.RELEASE</version>
-    </parent>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <compilerPluginVersion>2.3.2</compilerPluginVersion>
+        <jersey-version>1.8</jersey-version>
+        <jstlVersion>1.2</jstlVersion>
+        <jerseyVersion>1.17</jerseyVersion>
+        <jettyVersion>7.5.3.v20111011</jettyVersion>
+        <springVersion>4.1.2.RELEASE</springVersion>
+    </properties>
+
 
     <build>
         <plugins>
@@ -19,11 +24,6 @@
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
                 <version>3.0</version>
-                <configuration>
-                    <url>jdbc:derby:eventlogDB</url>
-                    <user></user>
-                    <password></password>
-                </configuration>
                 <dependencies>
                     <dependency>
                         <groupId>org.apache.derby</groupId>
@@ -128,11 +128,23 @@
     <dependencies>
 
         <dependency>
-            <groupId>javax.xml.ws</groupId>
-            <artifactId>jaxws-api</artifactId>
-            <version>2.2</version>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>4.1.2.RELEASE</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.flywaydb.flyway-test-extensions</groupId>
+            <artifactId>flyway-spring-test</artifactId>
+            <version>3.0</version>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>javax.xml.ws</groupId>
@@ -165,11 +177,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
             <version>4.1.2.RELEASE</version>
@@ -188,13 +195,51 @@
             <version>1.4</version>
         </dependency>
 
-
         <dependency>
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
             <version>10.11.1.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-servlet</artifactId>
+            <version>${jerseyVersion}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-json</artifactId>
+            <version>${jerseyVersion}</version>
+        </dependency>
+
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>integrationtest</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <flyway.driver>org.apache.derby.jdbc.EmbeddedDriver</flyway.driver>
+                                <flyway.url>jdbc:derby:memory:eventLogDB:create=true</flyway.url>
+                                <flyway.user></flyway.user>
+                                <flyway.password></flyway.password>
+                            </systemPropertyVariables>
+                            <threadCount>1</threadCount>
+                        </configuration>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <executions>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
