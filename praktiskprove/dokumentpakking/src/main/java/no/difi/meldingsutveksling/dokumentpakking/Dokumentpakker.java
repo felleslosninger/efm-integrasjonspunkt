@@ -28,9 +28,9 @@ public class Dokumentpakker {
 		createAsice = new CreateAsice(new CreateSignature(), new CreateZip(), new CreateManifest());
 	}
 
-	public byte[] pakkDokumentISbd(ByteArrayFile document, Avsender avsender, Mottaker mottaker) {
+	public byte[] pakkDokumentISbd(ByteArrayFile document, Avsender avsender, Mottaker mottaker, String conversationId) {
 		Payload payload = new Payload(encryptPayload.encrypt(createAsice.createAsice(document, avsender, mottaker).getBytes(), mottaker));
-		StandardBusinessDocument doc = createSBD.createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload);
+		StandardBusinessDocument doc = createSBD.createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload, conversationId);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		MarshalSBD.marshal(doc, os);
 		return os.toByteArray();

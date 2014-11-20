@@ -60,6 +60,6 @@ public class PakkeTest {
 								(Certificate) AdressRegisterFactory.createAdressRegister().getCertificate("960885406"))).build();
 		Mottaker mottaker = new Mottaker(new Organisasjonsnummer("958935429"), mottakerpublicKey);
 
-		datapakker.pakkDokumentISbd(forsendelse, avsender, mottaker);
+		datapakker.pakkDokumentISbd(forsendelse, avsender, mottaker, "1234");
 	}
 }

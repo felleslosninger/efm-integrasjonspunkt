@@ -9,6 +9,7 @@ import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.UUID;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -48,7 +49,7 @@ public abstract class SendMessageTemplate {
 		}
 		Dokumentpakker dokumentpakker = new Dokumentpakker();
 
-		return new SBD(dokumentpakker.pakkDokumentISbd(new BestEduMessage(os.toByteArray()), context.getAvsender(), context.getMottaker()));
+		return new SBD(dokumentpakker.pakkDokumentISbd(new BestEduMessage(os.toByteArray()), context.getAvsender(), context.getMottaker(), UUID.randomUUID().toString()));
 	}
 
 	abstract void sendSBD(SBD sbd) throws IOException;
