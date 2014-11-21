@@ -7,6 +7,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
 @Configuration
+@Profile("dev")
 public class LocalDatabaseConfiguration implements DataBaseConfig {
 
     @Bean
