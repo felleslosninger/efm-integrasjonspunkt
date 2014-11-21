@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.domain.Noekkelpar;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -34,6 +35,10 @@ class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
 
         Node senderNode=(Node)nodeList.get("Sender");
         Node reciverNode=(Node)nodeList.get("Receiver");
+        Node businessScopeNode=(Node) nodeList.get("BusinessScope");
+        NodeList businessChildNodes = businessScopeNode.getChildNodes();
+        Node instanceIdentifierNoden=businessChildNodes.item(1);
+        String conversationId=instanceIdentifierNoden.getTextContent();
         String[] sendToAr=senderNode.getTextContent().split(":");
         String[] recievedByAr=reciverNode.getTextContent().split(":");
         String sendTo = sendToAr[1].trim();
@@ -45,7 +50,7 @@ class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
 
         Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo),AdressRegisterFactory.createAdressRegister().getPublicKey(sendTo));
         ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering(nodeList, LEVERINGSKVITTERING),LEVERINGSKVITTERING,MIME_TYPE);
-        byte[] resultSbd = dokumentpakker.pakkDokumentISbd(byteArray, avsender, mottaker);
+       // byte[] resultSbd = dokumentpakker.pakkDokumentISbd(byteArray, avsender, mottaker,"12345678-id");
 
     }
 
