@@ -1,7 +1,5 @@
 package no.difi.meldingsutveksling.dokumentpakking;
 
-import java.io.ByteArrayOutputStream;
-
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateAsice;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateManifest;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateSBD;
@@ -13,8 +11,9 @@ import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.ByteArrayFile;
 import no.difi.meldingsutveksling.domain.Mottaker;
-
 import org.unece.cefact.namespaces.standardbusinessdocumentheader.StandardBusinessDocument;
+
+import java.io.ByteArrayOutputStream;
 
 public class Dokumentpakker {
 
