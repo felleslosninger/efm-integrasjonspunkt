@@ -18,3 +18,4 @@ eventLogDB/
 log/
 target/
 knutepunkt/src/main/java/no/difi/meldingsutveksling/noarkexchange/schema/noarkExchange_NoarkExchangePortImpl.java
+knutepunkt/src/test/resources/sonar-project.properties

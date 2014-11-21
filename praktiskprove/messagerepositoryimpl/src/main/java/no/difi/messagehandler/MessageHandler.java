@@ -65,7 +65,7 @@ public class MessageHandler {
      * @throws IOException
      *
      */
-    void unmarshall(File sdbXml) throws JAXBException, GeneralSecurityException, IOException  {
+    void unmarshall(File sdbXml) throws JAXBException, GeneralSecurityException, IOException {
         //*** Unmarshall xml*****
         JAXBContext jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class);
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
