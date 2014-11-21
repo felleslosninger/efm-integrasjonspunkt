@@ -90,10 +90,10 @@ public abstract class MessageReceieverTemplate {
             eventLog.log(new Event().setProcessStates(ProcessState.SIGNATURE_VALIDATED).setTimeStamp(getTimeStamp()));
 
             BestEduMessage bestEduMessage = getBestEduFromAsic(asicFile);
-            senToNoark(bestEduMessage);
+            senToNoark(bestEduMessage,documentElements);
             eventLog.log(new Event().setProcessStates(ProcessState.BEST_EDU_SENT).setTimeStamp(getTimeStamp()));
 
-            sendApningskvittering(documentElements);
+
             eventLog.log(new Event().setProcessStates(ProcessState.AAPNINGS_KVITTERING_SENT).setTimeStamp(getTimeStamp()));
 
         } else {
@@ -139,9 +139,9 @@ public abstract class MessageReceieverTemplate {
     }
 
 
-    protected void senToNoark(BestEduMessage bestEduMessage) {
+    protected void senToNoark(BestEduMessage bestEduMessage,Map documentElements) {
 
-        toRemoveAfterIntegration.add(bestEduMessage);
+        sendApningskvittering(documentElements);
     }
 
 
@@ -253,8 +253,9 @@ public abstract class MessageReceieverTemplate {
         } catch (NoSuchAlgorithmException e) {
             eventLog.log(new Event().setExceptionMessage(e));
         } finally {
-            if (null != is)
+            if (null != is){
                 is.close();
+            }
         }
         return key;
     }
