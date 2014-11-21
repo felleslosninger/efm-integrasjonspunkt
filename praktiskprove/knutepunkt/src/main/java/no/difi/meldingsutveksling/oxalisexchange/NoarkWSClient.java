@@ -12,7 +12,6 @@ public class NoarkWSClient   {
     SOAPport soaPport;
     public NoarkWSClient () {
         soaPport= noarkExchange.getNoarkExchangePort();
-
         System.out.println(soaPport.getCanReceiveMessage(new GetCanReceiveMessageRequestType()));
     }
 }

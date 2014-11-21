@@ -3,7 +3,6 @@ package no.difi.messagehandler;
 
 
 import org.apache.commons.io.FileUtils;
-import org.bouncycastle.cms.CMSException;
 import org.unece.cefact.namespaces.standardbusinessdocumentheader.Partner;
 import org.unece.cefact.namespaces.standardbusinessdocumentheader.PartnerIdentification;
 import org.unece.cefact.namespaces.standardbusinessdocumentheader.StandardBusinessDocument;
@@ -64,9 +63,9 @@ public class MessageHandler {
      * @throws JAXBException
      * @throws GeneralSecurityException
      * @throws IOException
-     * @throws CMSException
+     *
      */
-    void unmarshall(File sdbXml) throws JAXBException, GeneralSecurityException, IOException, CMSException {
+    void unmarshall(File sdbXml) throws JAXBException, GeneralSecurityException, IOException  {
         //*** Unmarshall xml*****
         JAXBContext jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class);
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();

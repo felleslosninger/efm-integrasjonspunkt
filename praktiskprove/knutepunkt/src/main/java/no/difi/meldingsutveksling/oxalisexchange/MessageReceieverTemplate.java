@@ -39,7 +39,7 @@ import java.util.zip.ZipFile;
 public abstract class MessageReceieverTemplate {
 
     private static final String PRIVATE_KEY_FILE = "958935429-oslo-kommune.pkcs8";
-    private static final String PAYLOAD_ZIP =System.getProperty("user.home")+File.separator + "payload.zip";
+    private static final String PAYLOAD_ZIP = System.getProperty("user.home") + File.separator + "payload.zip";
     private static final String PAYLOAD = "payload";
 
     private EventLog eventLog = EventLog.create();
@@ -47,9 +47,9 @@ public abstract class MessageReceieverTemplate {
 
     abstract void sendLeveringskvittering(Map list);
 
-    abstract void sendApningskvittering();
+    abstract void sendApningskvittering(Map list);
 
-    public void receive( Document document) throws  GeneralSecurityException {
+    public void receive(Document document) throws GeneralSecurityException {
         Node n = null;
         Map documentElements = null;
         try {
@@ -65,16 +65,15 @@ public abstract class MessageReceieverTemplate {
 
             eventLog.log(new Event().setProcessStates(ProcessState.SBD_RECIEVED).setTimeStamp(getTimeStamp()));
             try {
-                documentElements.put("privateKey",loadPrivateKey());
+                documentElements.put("privateKey", loadPrivateKey());
             } catch (IOException e) {
-                //TODO:log exception
-                e.printStackTrace();
+                eventLog.log(new Event().setExceptionMessage(e));
             }
             sendLeveringskvittering(documentElements);
             eventLog.log(new Event().setProcessStates(ProcessState.LEVERINGS_KVITTERING_SENT).setTimeStamp(getTimeStamp()));
 
             // get payloaed and encryption key
-            Node  payload=(Node) documentElements.get(PAYLOAD);
+            Node payload = (Node) documentElements.get(PAYLOAD);
 
 
             // dekryptert payload (AES)
@@ -87,14 +86,14 @@ public abstract class MessageReceieverTemplate {
             eventLog.log(new Event().setProcessStates(ProcessState.DECRYPTION_SUCCESS).setTimeStamp(getTimeStamp()));
 
             // Signaturvalidering
-            ZipFile asicFile=verifySignature(asicFileBytes,payload);
+            ZipFile asicFile = verifySignature(asicFileBytes, payload);
             eventLog.log(new Event().setProcessStates(ProcessState.SIGNATURE_VALIDATED).setTimeStamp(getTimeStamp()));
 
             BestEduMessage bestEduMessage = getBestEduFromAsic(asicFile);
             senToNoark(bestEduMessage);
             eventLog.log(new Event().setProcessStates(ProcessState.BEST_EDU_SENT).setTimeStamp(getTimeStamp()));
 
-            sendApningskvittering();
+            sendApningskvittering(documentElements);
             eventLog.log(new Event().setProcessStates(ProcessState.AAPNINGS_KVITTERING_SENT).setTimeStamp(getTimeStamp()));
 
         } else {
@@ -115,7 +114,7 @@ public abstract class MessageReceieverTemplate {
      * @return List of node extended objects
      * @throws JAXBException
      */
-    private Map<String,Node> documentMapping(Document document) throws JAXBException {
+    private Map<String, Node> documentMapping(Document document) throws JAXBException {
 
         Map list = new HashMap();
         NodeList sbdhNodes = document.getElementsByTagName("ns2:StandardBusinessDocumentHeader");
@@ -146,31 +145,30 @@ public abstract class MessageReceieverTemplate {
     }
 
 
-
     private BestEduMessage getBestEduFromAsic(ZipFile asicFile) {
         toRemoveAfterIntegration.add(asicFile);
         return null;
     }
 
-    private ZipFile verifySignature(byte[] aesKey,Node payload) {
+    private ZipFile verifySignature(byte[] aesKey, Node payload) {
         String payloadTextContent = payload.getTextContent();
         byte[] aesEncZip = DatatypeConverter.parseBase64Binary(payloadTextContent);
-        ZipFile zipFile=null;
+        ZipFile zipFile = null;
         //*** get aes cipher decrypt *****
         Cipher aesCipher = null;
         try {
             aesCipher = Cipher.getInstance("AES");
         } catch (NoSuchAlgorithmException e) {
-           eventLog.log(new Event().setExceptionMessage(e ));
+            eventLog.log(new Event().setExceptionMessage(e));
         } catch (NoSuchPaddingException e) {
-            eventLog.log(new Event().setExceptionMessage(e ));
+            eventLog.log(new Event().setExceptionMessage(e));
         }
         SecretKeySpec secretKeySpec = new SecretKeySpec(aesKey, "AES");
         SecureRandom secureRandom = null;
         try {
             secureRandom = SecureRandom.getInstance("SHA1PRNG");
         } catch (NoSuchAlgorithmException e) {
-            eventLog.log(new Event().setExceptionMessage(e ));
+            eventLog.log(new Event().setExceptionMessage(e));
         }
 
         try {
@@ -181,7 +179,7 @@ public abstract class MessageReceieverTemplate {
         byte[] zipTobe = new byte[0];
         try {
             zipTobe = aesCipher.doFinal(aesEncZip);
-        } catch (  IllegalBlockSizeException e) {
+        } catch (IllegalBlockSizeException e) {
             eventLog.log(new Event().setExceptionMessage(e));
         } catch (BadPaddingException e) {
             eventLog.log(new Event().setExceptionMessage(e));
@@ -192,18 +190,18 @@ public abstract class MessageReceieverTemplate {
         try {
             FileUtils.writeByteArrayToFile(file, zipTobe);
         } catch (IOException e) {
-            eventLog.log(new Event().setExceptionMessage(e ));
+            eventLog.log(new Event().setExceptionMessage(e));
         }
         try {
-             zipFile = new ZipFile(file);
+            zipFile = new ZipFile(file);
         } catch (IOException e) {
-            eventLog.log(new Event().setExceptionMessage(e ));
+            eventLog.log(new Event().setExceptionMessage(e));
         }
         return zipFile;
     }
 
     private byte[] getZipBytesFromDocument(Node payload) throws GeneralSecurityException, IOException {
-        NamedNodeMap namedNodeMap= payload.getAttributes();
+        NamedNodeMap namedNodeMap = payload.getAttributes();
         String aesInRsa = namedNodeMap.getNamedItem("encryptionKey").getTextContent();
         byte[] aesInDisc = DatatypeConverter.parseBase64Binary(aesInRsa);
 
@@ -211,8 +209,9 @@ public abstract class MessageReceieverTemplate {
         Cipher cipher = Cipher.getInstance("RSA");
         PrivateKey privateKey = loadPrivateKey();
         cipher.init(Cipher.DECRYPT_MODE, privateKey);
-        return  cipher.doFinal(aesInDisc);
+        return cipher.doFinal(aesInDisc);
     }
+
     private boolean isSBD(Node node) {
         return node.getTextContent().toLowerCase().contains("sbd");
     }
@@ -223,7 +222,7 @@ public abstract class MessageReceieverTemplate {
      * @return an private key
      * @throws java.io.IOException
      */
-    public PrivateKey loadPrivateKey() throws IOException  {
+    public PrivateKey loadPrivateKey() throws IOException {
         PrivateKey key = null;
         InputStream is = null;
         try {
@@ -232,9 +231,9 @@ public abstract class MessageReceieverTemplate {
             StringBuilder builder = new StringBuilder();
             boolean inKey = false;
             for (String line = br.readLine(); line != null; line = br.readLine()) {
-                if (!inKey &&  line.startsWith("-----BEGIN ") &&
-                        line.endsWith(" PRIVATE KEY-----") ) {
-                        inKey = true;
+                if (!inKey && line.startsWith("-----BEGIN ") &&
+                        line.endsWith(" PRIVATE KEY-----")) {
+                    inKey = true;
                 } else {
                     if (line.startsWith("-----END ") &&
                             line.endsWith(" PRIVATE KEY-----")) {
@@ -254,13 +253,11 @@ public abstract class MessageReceieverTemplate {
         } catch (NoSuchAlgorithmException e) {
             eventLog.log(new Event().setExceptionMessage(e));
         } finally {
-          if (null!= is)
-          is.close();
+            if (null != is)
+                is.close();
         }
         return key;
     }
-
-
 
 
 }
