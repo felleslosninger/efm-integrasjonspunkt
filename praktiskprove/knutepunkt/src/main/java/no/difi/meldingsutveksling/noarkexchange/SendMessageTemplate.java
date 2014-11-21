@@ -9,6 +9,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
+import no.difi.meldingsutveksling.services.AdresseregisterMock;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -40,12 +42,13 @@ public abstract class SendMessageTemplate {
 
 	Dokumentpakker dokumentpakker;
 
-	public SendMessageTemplate(Dokumentpakker dokumentpakker) {
+	public SendMessageTemplate(Dokumentpakker dokumentpakker, AdresseregisterService adresseregister) {
 		this.dokumentpakker = dokumentpakker;
+		this.adresseregister = adresseregister;
 	}
 
 	public SendMessageTemplate() {
-		this(new Dokumentpakker());
+		this(new Dokumentpakker(), new AdresseregisterMock());
 	}
 
 	SBD createSBD(PutMessageRequestType sender, KnutepunktContext context) {
@@ -67,14 +70,14 @@ public abstract class SendMessageTemplate {
 	abstract void sendSBD(SBD sbd) throws IOException;
 
 	boolean verifySender(AddressType sender, KnutepunktContext context) {
-		try{
-		Avsender avsender = null;
-		Certificate sertifikat = (Certificate) adresseregister.getCertificate(sender.getOrgnr());
-		if (sertifikat == null)
-			throw new InvalidSender();
-		avsender = Avsender.builder(new Organisasjonsnummer(sender.getOrgnr()), new Noekkelpar(findPrivateKey(), sertifikat)).build();
-		context.setAvsender(avsender);
-		}catch (IllegalArgumentException e){
+		try {
+			Avsender avsender = null;
+			Certificate sertifikat = (Certificate) adresseregister.getCertificate(sender.getOrgnr());
+			if (sertifikat == null)
+				throw new InvalidSender();
+			avsender = Avsender.builder(new Organisasjonsnummer(sender.getOrgnr()), new Noekkelpar(findPrivateKey(), sertifikat)).build();
+			context.setAvsender(avsender);
+		} catch (IllegalArgumentException e) {
 			throw new InvalidSender();
 		}
 		return true;
@@ -126,8 +129,8 @@ public abstract class SendMessageTemplate {
 
 	PrivateKey findPrivateKey() {
 		PrivateKey key = null;
-		try (InputStream is = getClass().getClassLoader().getResourceAsStream("knutepunkt_privatekey.pkcs8")) {
-			BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("knutepunkt_privatekey.pkcs8"),
+				Charset.forName("UTF-8")))) {
 			StringBuilder builder = new StringBuilder();
 			boolean inKey = false;
 			for (String line = br.readLine(); line != null; line = br.readLine()) {
@@ -154,5 +157,9 @@ public abstract class SendMessageTemplate {
 
 	public void setAdresseregister(AdresseregisterService adresseregister) {
 		this.adresseregister = adresseregister;
+	}
+
+	public void setEventLog(EventLog eventLog) {
+		this.eventLog = eventLog;
 	}
 }
