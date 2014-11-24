@@ -61,7 +61,7 @@ public class EventLogDAO {
      * @param since the point in time to return log entries after
      */
     public List<Event> getEventLog(long since) {
-        String q = "select * from EVENT_LOG where event_timestamp >= :since";
+        String q = "select * from EVENT_LOG where event_timestamp >= :since order by event_timestamp desc";
         Map<String, Long> params = new HashMap<>();
         params.put("since", since);
         return jdbcTemplate.query(q, params, new RowMapper<Event>() {
