@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.eventlog;
 
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -9,19 +10,28 @@ import java.util.UUID;
  */
 
 public class Event {
+
     private UUID uuid;
     private String sender;
     private String receiver;
     private long timeStamp;
+    private String formattedDate;
     private ProcessState processState;
 
     private String exceptionMessage;
     private String message;
 
     public Event() {
-        uuid = UUID.randomUUID();
+        this(System.currentTimeMillis(), UUID.randomUUID());
     }
 
+    public Event(long timeStamp, UUID uuid) {
+        this.timeStamp = timeStamp;
+        this.uuid = uuid;
+        timeStamp = System.currentTimeMillis();
+        formattedDate = new Date(timeStamp).toString();
+
+    }
 
     public String getExceptionMessage() {
         return exceptionMessage;
@@ -36,19 +46,10 @@ public class Event {
         return uuid;
     }
 
-    public Event setUuid(UUID uuid) {
-        this.uuid = uuid;
-        return this;
-    }
-
     public long getTimeStamp() {
         return timeStamp;
     }
 
-    public Event setTimeStamp(long timeStamp) {
-        this.timeStamp = timeStamp;
-        return this;
-    }
 
     public ProcessState getProcessState() {
         return processState;
@@ -78,16 +79,16 @@ public class Event {
         return this;
     }
 
-    @Override
-    public String toString() {
-        return "Event{" +
-                "uuid=" + uuid +
-                ", sender='" + sender + '\'' +
-                ", receiver='" + receiver + '\'' +
-                ", timeStamp=" + timeStamp +
-                ", processState=" + processState +
-                ", exceptionMessage='" + exceptionMessage + '\'' +
-                '}';
+    public String getFormattedDate() {
+        return formattedDate;
+    }
+
+    public void setFormattedDate(String formattedDate) {
+        this.formattedDate = formattedDate;
+    }
+
+    public void setProcessState(ProcessState processState) {
+        this.processState = processState;
     }
 
     public String getMessage() {
@@ -97,5 +98,19 @@ public class Event {
     public Event setMessage(String message) {
         this.message = message;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "Event{" +
+                "uuid=" + uuid +
+                ", sender='" + sender + '\'' +
+                ", receiver='" + receiver + '\'' +
+                ", timeStamp=" + timeStamp +
+                ", formattedDate='" + formattedDate + '\'' +
+                ", processState=" + processState +
+                ", exceptionMessage='" + exceptionMessage + '\'' +
+                ", message='" + message + '\'' +
+                '}';
     }
 }

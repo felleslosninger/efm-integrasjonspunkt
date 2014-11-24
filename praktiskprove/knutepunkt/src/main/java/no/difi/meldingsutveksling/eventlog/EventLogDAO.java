@@ -67,11 +67,9 @@ public class EventLogDAO {
         return jdbcTemplate.query(q, params, new RowMapper<Event>() {
             @Override
             public Event mapRow(ResultSet resultSet, int i) throws SQLException {
-                Event e = new Event();
-                e.setUuid(UUID.fromString(resultSet.getString("uuid")));
+                Event e = new Event(resultSet.getLong("event_timestamp"), UUID.fromString(resultSet.getString("uuid")));
                 e.setSender(resultSet.getString("sender"));
                 e.setReceiver(resultSet.getString("receiver"));
-                e.setTimeStamp(resultSet.getLong("event_timestamp"));
                 e.setExceptionMessage(null);
                 e.setMessage(resultSet.getString("message"));
                 e.setProcessStates(ProcessState.valueOf(resultSet.getString("state")));

@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.IOException;
-import java.util.UUID;
 
 @Component
 @Profile("heroku")
@@ -30,7 +29,7 @@ public class LogToEventLogOnlySendMessageTemplate extends SendMessageTemplate {
         String textMessage;
         XStream xs = new XStream();
         textMessage = xs.toXML(message);
-        Event e = new Event().setTimeStamp(System.currentTimeMillis()).setUuid(UUID.randomUUID()).setMessage(textMessage).setProcessStates(ProcessState.LEVERINGS_KVITTERING_SENT);
+        Event e = new Event().setMessage(textMessage).setProcessStates(ProcessState.LEVERINGS_KVITTERING_SENT);
         EventLogDAO dao = new EventLogDAO(new HerokuDatabaseConfig().getDataSource());
         dao.insertEventLog(e);
         return new PutMessageResponseType();

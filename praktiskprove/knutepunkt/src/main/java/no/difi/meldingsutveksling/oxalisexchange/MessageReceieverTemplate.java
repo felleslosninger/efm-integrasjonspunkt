@@ -50,18 +50,18 @@ public abstract class MessageReceieverTemplate {
             eventLog.log(new Event());
         }
 
-        eventLog.log(new Event().setProcessStates(ProcessState.MESSAGE_RECIEVED).setTimeStamp(getTimeStamp()));
+        eventLog.log(new Event().setProcessStates(ProcessState.MESSAGE_RECIEVED));
 
         if (isSBD(n)) {
 
-            eventLog.log(new Event().setProcessStates(ProcessState.SBD_RECIEVED).setTimeStamp(getTimeStamp()));
+            eventLog.log(new Event().setProcessStates(ProcessState.SBD_RECIEVED));
             try {
                 documentElements.put("privateKey", loadPrivateKey());
             } catch (IOException e) {
                 eventLog.log(new Event().setExceptionMessage(e.toString()));
             }
             sendLeveringskvittering(documentElements);
-            eventLog.log(new Event().setProcessStates(ProcessState.LEVERINGS_KVITTERING_SENT).setTimeStamp(getTimeStamp()));
+            eventLog.log(new Event().setProcessStates(ProcessState.LEVERINGS_KVITTERING_SENT));
 
             // get payloaed and encryption key
             Node payload = (Node) documentElements.get(PAYLOAD);
@@ -74,18 +74,18 @@ public abstract class MessageReceieverTemplate {
             } catch (IOException e) {
                 eventLog.log(new Event().setExceptionMessage(e.toString()));
             }
-            eventLog.log(new Event().setProcessStates(ProcessState.DECRYPTION_SUCCESS).setTimeStamp(getTimeStamp()));
+            eventLog.log(new Event().setProcessStates(ProcessState.DECRYPTION_SUCCESS));
 
             // Signaturvalidering
             ZipFile asicFile = verifySignature(asicFileBytes, payload);
-            eventLog.log(new Event().setProcessStates(ProcessState.SIGNATURE_VALIDATED).setTimeStamp(getTimeStamp()));
+            eventLog.log(new Event().setProcessStates(ProcessState.SIGNATURE_VALIDATED));
 
             BestEduMessage bestEduMessage = getBestEduFromAsic(asicFile);
             senToNoark(bestEduMessage,documentElements);
-            eventLog.log(new Event().setProcessStates(ProcessState.BEST_EDU_SENT).setTimeStamp(getTimeStamp()));
+            eventLog.log(new Event().setProcessStates(ProcessState.BEST_EDU_SENT));
 
 
-            eventLog.log(new Event().setProcessStates(ProcessState.AAPNINGS_KVITTERING_SENT).setTimeStamp(getTimeStamp()));
+            eventLog.log(new Event().setProcessStates(ProcessState.AAPNINGS_KVITTERING_SENT));
 
         } else {
             // BestEdu recieved

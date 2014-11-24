@@ -15,6 +15,7 @@ import no.difi.meldingsutveksling.services.AdresseregisterMock;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import javax.xml.bind.DatatypeConverter;
@@ -172,7 +173,6 @@ public abstract class SendMessageTemplate {
         event.setSender(anyOject.getEnvelope().getSender().getOrgnr());
         event.setReceiver(anyOject.getEnvelope().getReceiver().getOrgnr());
         event.setExceptionMessage(event.getMessage());
-        event.setTimeStamp(System.currentTimeMillis());
         event.setProcessStates(state);
         event.setMessage(xs.toXML(anyOject));
         return event;
@@ -184,7 +184,6 @@ public abstract class SendMessageTemplate {
         event.setSender(anyOject.getEnvelope().getSender().getOrgnr());
         event.setReceiver(anyOject.getEnvelope().getReceiver().getOrgnr());
         event.setMessage(xs.toXML(anyOject));
-        event.setTimeStamp(System.currentTimeMillis());
         event.setProcessStates(state);
         return event;
     }

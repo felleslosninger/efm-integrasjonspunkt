@@ -19,7 +19,7 @@ public class EventLogIntegrationTest {
         ctx.refresh();
 
         EventLogDAO eventLogDAO = ctx.getBean(EventLogDAO.class);
-        Event e = new Event().setProcessStates(ProcessState.AAPNINGS_KVITTERING_SENT).setSender("111111111").setReceiver("222222222").setTimeStamp(System.currentTimeMillis());
+        Event e = new Event().setProcessStates(ProcessState.AAPNINGS_KVITTERING_SENT).setSender("111111111").setReceiver("222222222");
         eventLogDAO.insertEventLog(e);
     }
 }

@@ -34,7 +34,7 @@ public class KnutepunkImpl implements SOAPport {
     @Resource
     private WebServiceContext context;
 
-    SendMessageTemplate template;
+    private SendMessageTemplate template;
 
     @Override
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
@@ -47,7 +47,6 @@ public class KnutepunkImpl implements SOAPport {
         ServletContext servletContext =
                 (ServletContext) context.getMessageContext().get(MessageContext.SERVLET_CONTEXT);
         ApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-
         template = ctx.getBean(SendMessageTemplate.class);
         System.out.println(template.getClass().getName());
         return template.sendMessage(putMessageRequest);
