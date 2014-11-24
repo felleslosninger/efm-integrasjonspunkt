@@ -1,11 +1,8 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
-<<<<<<< HEAD
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
-=======
->>>>>>> herokuhack
 
 import javax.annotation.Resource;
 import javax.jws.WebParam;
@@ -32,7 +29,6 @@ import javax.xml.ws.handler.MessageContext;
 
 @WebService(portName = "NoarkExchangePort", serviceName = "noarkExchange", targetNamespace = "http://www.arkivverket.no/Noark/Exchange", wsdlLocation = "http://hardcodeme.not", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.SOAPport")
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
-<<<<<<< HEAD
 public class KnutepunkImpl implements SOAPport {
 
     @Resource
@@ -43,18 +39,10 @@ public class KnutepunkImpl implements SOAPport {
     @Override
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
         return null;
-=======
-public class KnutepunkImpl extends noarkExchange_NoarkExchangePortImpl {
-
-    @Override
-    public GetCanReceiveMessageResponseType getCanReceiveMessage(GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
-        return super.getCanReceiveMessage(getCanReceiveMessageRequest);
->>>>>>> herokuhack
     }
 
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType putMessageRequest) {
-<<<<<<< HEAD
 
         ServletContext servletContext =
                 (ServletContext) context.getMessageContext().get(MessageContext.SERVLET_CONTEXT);
@@ -62,9 +50,6 @@ public class KnutepunkImpl extends noarkExchange_NoarkExchangePortImpl {
 
         template = ctx.getBean(SendMessageTemplate.class);
         System.out.println(template.getClass().getName());
-=======
-        SendMessageTemplate template = new LogToEventLogOnlySendMessageTemplate();
->>>>>>> herokuhack
         return template.sendMessage(putMessageRequest);
     }
 
