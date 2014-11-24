@@ -3,8 +3,6 @@ package no.difi.meldingsutveksling.eventlog;
 import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import java.util.UUID;
-
 /**
  * These tests use flyway to establish an in memory database before they are run.
  */
@@ -21,7 +19,7 @@ public class EventLogIntegrationTest {
         ctx.refresh();
 
         EventLogDAO eventLogDAO = ctx.getBean(EventLogDAO.class);
-        Event e = new Event().setUuid(UUID.randomUUID()).setProcessStates(ProcessState.AAPNINGS_KVITTERING_SENT).setSender("111111111").setReceiver("222222222").setTimeStamp(System.currentTimeMillis());
+        Event e = new Event().setProcessStates(ProcessState.AAPNINGS_KVITTERING_SENT).setSender("111111111").setReceiver("222222222").setTimeStamp(System.currentTimeMillis());
         eventLogDAO.insertEventLog(e);
     }
 }

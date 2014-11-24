@@ -14,7 +14,7 @@ public class LocalDatabaseConfiguration implements DataBaseConfig {
     public javax.sql.DataSource getDataSource() {
         return new EmbeddedDatabaseBuilder()
                 .setType(EmbeddedDatabaseType.DERBY)
-                .setName("eventLogDB")
+                .setName("eventLogDB").continueOnError(true)
                 .addScript("classpath:db/schema/ddl.sql")
                 .build();
     }

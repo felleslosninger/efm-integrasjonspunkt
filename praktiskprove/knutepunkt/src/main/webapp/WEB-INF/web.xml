@@ -36,4 +36,14 @@
     <session-config>
         <session-timeout>60</session-timeout>
     </session-config>
+
+    <listener>
+        <listener-class>
+            org.springframework.web.context.ContextLoaderListener
+        </listener-class>
+    </listener>
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>/WEB-INF/rest-servlet.xml</param-value>
+    </context-param>
 </web-app>

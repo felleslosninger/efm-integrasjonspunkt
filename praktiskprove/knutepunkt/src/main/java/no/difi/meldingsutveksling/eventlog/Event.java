@@ -15,14 +15,19 @@ public class Event {
     private long timeStamp;
     private ProcessState processState;
 
-    private Exception exceptionMessage;
+    private String exceptionMessage;
     private String message;
 
-    public Exception getExceptionMessage() {
+    public Event() {
+        uuid = UUID.randomUUID();
+    }
+
+
+    public String getExceptionMessage() {
         return exceptionMessage;
     }
 
-    public Event setExceptionMessage(Exception exceptionMessage) {
+    public Event setExceptionMessage(String exceptionMessage) {
         this.exceptionMessage = exceptionMessage;
         return this;
     }

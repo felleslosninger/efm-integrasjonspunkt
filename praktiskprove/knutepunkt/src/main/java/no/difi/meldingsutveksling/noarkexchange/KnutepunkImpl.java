@@ -1,13 +1,16 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import no.difi.meldingsutveksling.noarkexchange.schema.noarkExchange_NoarkExchangePortImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import no.difi.meldingsutveksling.noarkexchange.schema.*;
+import org.springframework.context.ApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
+import javax.annotation.Resource;
+import javax.jws.WebParam;
 import javax.jws.WebService;
+import javax.servlet.ServletContext;
 import javax.xml.ws.BindingType;
+import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.handler.MessageContext;
 
 /**
  * This is the implementation of the wenbservice that case managenent systems supporting
@@ -26,13 +29,35 @@ import javax.xml.ws.BindingType;
 
 @WebService(portName = "NoarkExchangePort", serviceName = "noarkExchange", targetNamespace = "http://www.arkivverket.no/Noark/Exchange", wsdlLocation = "http://hardcodeme.not", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.SOAPport")
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
-public class KnutepunkImpl extends noarkExchange_NoarkExchangePortImpl {
+public class KnutepunkImpl implements SOAPport {
 
-    SendMessageTemplate template = new OxalisSendMessageTemplate();
+    @Resource
+    private WebServiceContext context;
+
+    SendMessageTemplate template;
+
+    @Override
+    public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
+        return null;
+    }
 
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType putMessageRequest) {
+
+        ServletContext servletContext =
+                (ServletContext) context.getMessageContext().get(MessageContext.SERVLET_CONTEXT);
+        ApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+
+        template = ctx.getBean(SendMessageTemplate.class);
+        System.out.println(template.getClass().getName());
         return template.sendMessage(putMessageRequest);
     }
 
+    public WebServiceContext getContext() {
+        return context;
+    }
+
+    public void setContext(WebServiceContext context) {
+        this.context = context;
+    }
 }

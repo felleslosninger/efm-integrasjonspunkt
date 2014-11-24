@@ -72,7 +72,7 @@ class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
         try {
             FileUtils.writeByteArrayToFile(file, resultSbd);
         } catch (IOException e) {
-            eventLog.log(new Event().setExceptionMessage(e));
+            eventLog.log(new Event().setExceptionMessage(e.toString()));
         }
     }
 
@@ -89,7 +89,7 @@ class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
             kvittering.appendChild(rootElement);
 
         } catch (ParserConfigurationException e) {
-           eventLog.log(new Event().setExceptionMessage(e));
+            eventLog.log(new Event().setExceptionMessage(e.getMessage()));
 
         }
         return kvittering.toString().getBytes();
