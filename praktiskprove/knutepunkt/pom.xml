@@ -21,18 +21,6 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.flywaydb</groupId>
-                <artifactId>flyway-maven-plugin</artifactId>
-                <version>3.0</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.derby</groupId>
-                        <artifactId>derby</artifactId>
-                        <version>10.11.1.1</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>2.3</version>
