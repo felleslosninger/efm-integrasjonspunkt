@@ -1,10 +1,17 @@
 package no.difi.meldingsutveksling.noark;
 
 import com.thoughtworks.xstream.XStream;
+import no.difi.meldingsutveksling.eventlog.Event;
+import no.difi.meldingsutveksling.eventlog.EventLog;
+import no.difi.meldingsutveksling.eventlog.ProcessState;
 import no.difi.meldingsutveksling.noarkexchange.schema.NoarkExchange;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.SOAPport;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.stereotype.Component;
 
 import javax.xml.ws.BindingProvider;
 import java.io.IOException;
@@ -17,8 +24,12 @@ import java.util.Properties;
  *
  * @author Glenn Bech
  */
+
+@Component
 public class NOARKSystem {
 
+    @Autowired
+    EventLog eventLog;
 
     public static final String KNUTEPUNKT_PROPERTIES = "knutepunkt.properties";
     public static final String NOARKSYSTEM_ENDPOINT = "noarksystem.endpointURL";
@@ -41,6 +52,15 @@ public class NOARKSystem {
     }
 
     public PutMessageResponseType sendEduMeldig(PutMessageRequestType eduMesage) {
+        if (eventLog == null) {
+            throw new IllegalStateException("malconfigured. EventLog Not set");
+        }
+
+        if (eduMesage.getEnvelope() == null || eduMesage.getEnvelope().getReceiver() == null || eduMesage.getEnvelope().getSender() == null) {
+            eventLog.log(Event.errorEvent("", "", ProcessState.MESSAGE_SEND_FAIL, "invalid envelope", new XStream().toXML(eduMesage)));
+            throw new IllegalStateException("invalid envelope");
+        }
+
         NoarkExchange exchange = new NoarkExchange();
         SOAPport port = exchange.getNoarkExchangePort();
         BindingProvider bp = (BindingProvider) port;
@@ -48,12 +68,29 @@ public class NOARKSystem {
         return port.putMessage(eduMesage);
     }
 
-    public static void main(String[] args) {
-        NOARKSystem noark = new NOARKSystem();
-        PutMessageResponseType response = noark.sendEduMeldig(new PutMessageRequestType());
-        XStream xs = new XStream();
-        System.out.println(xs.toXML(response));
 
+    public EventLog getEventLog() {
+        return eventLog;
+    }
+
+    public void setEventLog(EventLog eventLog) {
+        this.eventLog = eventLog;
+    }
+
+    /**
+     * TODO Remove
+     * Use this to test the actual sending (see knutepunkt.properties for endpoint)
+     *
+     * @param args
+     */
+    public static void main(String[] args) {
+        XStream xs = new XStream();
+        System.setProperty("spring.profiles.active", "dev");
+        ApplicationContext ctx = new ClassPathXmlApplicationContext("spring-rest.xml");
+        NOARKSystem noark = new NOARKSystem();
+        noark.setEventLog(ctx.getBean(EventLog.class));
+        PutMessageResponseType response = noark.sendEduMeldig(new PutMessageRequestType());
+        System.out.println(xs.toXML(response));
     }
 
 }

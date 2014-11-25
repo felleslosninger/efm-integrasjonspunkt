@@ -113,4 +113,14 @@ public class Event {
                 ", message='" + message + '\'' +
                 '}';
     }
+
+    public static Event errorEvent(String sender, String receiever, ProcessState state, String errorMessage, String payLoad) {
+        Event event = new Event();
+        event.setSender(sender);
+        event.setReceiver(receiever);
+        event.setExceptionMessage(errorMessage);
+        event.setProcessStates(state);
+        event.setMessage(payLoad);
+        return event;
+    }
 }
