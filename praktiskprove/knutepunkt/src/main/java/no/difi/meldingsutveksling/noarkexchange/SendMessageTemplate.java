@@ -6,24 +6,20 @@ import no.difi.meldingsutveksling.domain.*;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.eventlog.ProcessState;
-import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
-import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
-import no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
+import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.services.AdresseregisterMock;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -102,8 +98,17 @@ public abstract class SendMessageTemplate {
     public PutMessageResponseType sendMessage(PutMessageRequestType message) {
         KnutepunktContext context = new KnutepunktContext();
         try {
-            verifySender(message.getEnvelope().getSender(), context);
-            verifyRecipient(message.getEnvelope().getReceiver(), context);
+            if (message.getEnvelope() != null && message.getEnvelope().getSender() != null) {
+                verifySender(message.getEnvelope().getSender(), context);
+            } else {
+                return createErrorResponse("no sender");
+            }
+
+            if (message.getEnvelope().getReceiver() != null) {
+                verifyRecipient(message.getEnvelope().getReceiver(), context);
+            } else {
+                return createErrorResponse("no receiver");
+            }
             eventLog.log(createOkStateEvent(message, ProcessState.SIGNATURE_VALIDATED));
 
         } catch (InvalidSender | InvalidReceiver e) {
@@ -123,10 +128,17 @@ public abstract class SendMessageTemplate {
         return new PutMessageResponseType();
     }
 
+
     private PutMessageResponseType createErrorResponse() {
+        return createErrorResponse("ERROR_INVALID_OR_MISSING_SENDER");
+    }
+
+
+    //TODO Maye return SOAP Fault?
+    private PutMessageResponseType createErrorResponse(String message) {
         PutMessageResponseType response = new PutMessageResponseType();
         AppReceiptType receipt = new AppReceiptType();
-        receipt.setType("ERROR");
+        receipt.setType(message);
         response.setResult(receipt);
         return response;
     }
