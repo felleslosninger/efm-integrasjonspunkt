@@ -93,24 +93,44 @@
                 <groupId>org.jvnet.jax-ws-commons</groupId>
                 <artifactId>jaxws-maven-plugin</artifactId>
                 <version>2.3</version>
+
                 <executions>
                     <execution>
+                        <id>knutepunkt-exec</id>
                         <goals>
                             <goal>wsimport</goal>
                         </goals>
+                        <configuration>
+                            <packageName>no.difi.meldingsutveksling.noarkexchange.schema</packageName>
+                            <wsdlFiles>
+                                <wsdlFile>${basedir}/src/main/webapp/WEB-INF/wsdl/noarkExchange.wsdl</wsdlFile>
+                            </wsdlFiles>
+                            <vmArgs>
+                                <vmArg>-Djavax.xml.accessExternalDTD=all</vmArg>
+                                <vmArg>-Djavax.xml.accessExternalSchema=all</vmArg>
+                            </vmArgs>
+                            <verbose>true</verbose>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>knutepunktReceive-exec</id>
+                        <goals>
+                            <goal>wsimport</goal>
+                        </goals>
+                        <configuration>
+                            <genJWS>true</genJWS>
+                            <packageName>no.difi.meldingsutveksling.noarkexchange.schema.receive</packageName>
+                            <wsdlFiles>
+                                <wsdlFile>${basedir}/src/main/webapp/WEB-INF/wsdl/knutepunktReceive.wsdl</wsdlFile>
+                            </wsdlFiles>
+                            <vmArgs>
+                                <vmArg>-Djavax.xml.accessExternalDTD=all</vmArg>
+                                <vmArg>-Djavax.xml.accessExternalSchema=all</vmArg>
+                            </vmArgs>
+                            <verbose>true</verbose>
+                        </configuration>
                     </execution>
                 </executions>
-
-                <configuration>
-                    <genJWS>true</genJWS>
-                    <packageName>no.difi.meldingsutveksling.noarkexchange.schema</packageName>
-                    <wsdlDirectory>src\main\webapp\WEB-INF\wsdl</wsdlDirectory>
-                    <sei/>
-                    <vmArgs>
-                        <vmArg>-Djavax.xml.accessExternalDTD=all</vmArg>
-                        <vmArg>-Djavax.xml.accessExternalSchema=all</vmArg>
-                    </vmArgs>
-                </configuration>
 
                 <dependencies>
                     <dependency>
@@ -240,13 +260,13 @@
             <version>1.3</version>
             <scope>test</scope>
         </dependency>
-        
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-all</artifactId>
-			<version>1.9.5</version>
-			<scope>test</scope>
-		</dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.9.5</version>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>

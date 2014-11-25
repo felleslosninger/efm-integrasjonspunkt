@@ -29,6 +29,11 @@
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>wsServlet</servlet-name>
+        <url-pattern>/receive</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>rest</servlet-name>
         <url-pattern>/api/*</url-pattern>
     </servlet-mapping>
