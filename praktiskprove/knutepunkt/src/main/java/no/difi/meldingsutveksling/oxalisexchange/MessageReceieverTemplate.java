@@ -25,13 +25,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 public abstract class MessageReceieverTemplate {
 
     private static final String PRIVATE_KEY_FILE = "958935429-oslo-kommune.pkcs8";
-    private static final String PAYLOAD_ZIP = System.getProperty("user.home") + File.separator + "payload.zip";
+    private static final String PAYLOAD_ZIP = System.getProperty("user.home")+ File.separator +"testToRemove" + File.separator + "payload.zip";
     private static final String PAYLOAD = "payload";
+    private static final int MAGIC_NR = 1024;
 
     private EventLog eventLog = EventLog.create();
     private List<Object> toRemoveAfterIntegration = new ArrayList();
@@ -78,6 +81,7 @@ public abstract class MessageReceieverTemplate {
 
             // Signaturvalidering
             ZipFile asicFile = verifySignature(asicFileBytes, payload);
+            System.out.println(asicFile.entries());
             eventLog.log(new Event().setProcessStates(ProcessState.SIGNATURE_VALIDATED));
 
             BestEduMessage bestEduMessage = getBestEduFromAsic(asicFile);
@@ -118,6 +122,8 @@ public abstract class MessageReceieverTemplate {
             if (name.contains("ns2:")) {
                 name = name.replace("ns2:", "");
             }
+            if (name.equals("#text"))
+                continue;
 
             list.put(name, n);
         }
@@ -131,13 +137,13 @@ public abstract class MessageReceieverTemplate {
 
 
     protected void senToNoark(BestEduMessage bestEduMessage,Map documentElements) {
-
-        sendApningskvittering(documentElements);
+       //TODO:dette er implimentert men komentert bort med hensyn på debugging .
+      //  sendApningskvittering(documentElements);
     }
 
 
     private BestEduMessage getBestEduFromAsic(ZipFile asicFile) {
-        toRemoveAfterIntegration.add(asicFile);
+
         return null;
     }
 
@@ -251,5 +257,50 @@ public abstract class MessageReceieverTemplate {
         return key;
     }
 
+    public void unZipIt(String zipFile, String outputFolder) {
+
+        byte[] buffer = new byte[MAGIC_NR];
+
+        try {
+
+            //create output directory is not exists
+            File folder = new File(outputFolder);
+            if (!folder.exists()) {
+                folder.mkdir();
+            }
+
+            //get the zip file content
+            ZipInputStream zis =
+                    new ZipInputStream(new FileInputStream(zipFile));
+            //get the zipped file list entry
+            ZipEntry ze = zis.getNextEntry();
+
+            while (ze != null) {
+
+                String fileName = ze.getName();
+                File newFile = new File(outputFolder + File.separator + fileName);
+
+                //create all non exists folders
+                //else you will hit FileNotFoundException for compressed folder
+                new File(newFile.getParent()).mkdirs();
+
+                FileOutputStream fos = new FileOutputStream(newFile);
+
+                int len;
+                while ((len = zis.read(buffer)) > 0) {
+                    fos.write(buffer, 0, len);
+                }
+
+                fos.close();
+                ze = zis.getNextEntry();
+            }
+
+            zis.closeEntry();
+            zis.close();
+
+        } catch (IOException ex) {
+            eventLog.log(new Event().setExceptionMessage(ex.toString()));
+        }
+    }
 
 }

@@ -48,11 +48,11 @@ public class MessageHandler {
 
     private static final String PAYLOAD_ZIP = System.getProperty("user.home") + File.separator + "payload.zip";
     private static final int MAGIC_NR = 1024;
-    private String pemFileName = "958935429-oslo-kommune.pkcs8";
-    private String publicKeyFileName = "958935429-oslo-kommune.publickey";
+    private String pemFileName = "960885406-statens-laanekasse.pkcs8";
+    private String publicKeyFileName = "960885406-statens-laanekasse.publickey";
     private static final String outputFolder = "C:" + File.separator + "output.zip";
-    private String payloadExtractDestination =  System.getProperty("user.home") + File.separator + "Dropbox" + File.separator +"DifiCmnDocs" +
-            File.separator + "demo"+ File.separator+"Zip Output";
+    private String payloadExtractDestination =  System.getProperty("user.home") + File.separator+"testToRemove"+
+            File.separator+ "Zip Output";
     private java.lang.String RSA_INSTANCE = "RSA";
     private List<Exception> list;
 
