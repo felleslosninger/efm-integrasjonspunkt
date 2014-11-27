@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.oxalisexchange;
 
-import com.sun.org.apache.xml.internal.security.utils.XMLUtils;
 import no.difi.meldingsutveksling.adresseregmock.AdressRegisterFactory;
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
 import no.difi.meldingsutveksling.domain.Avsender;
@@ -17,6 +16,12 @@ import org.w3c.dom.NodeList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -101,7 +106,20 @@ class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
 
         }
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        XMLUtils.outputDOM(kvittering,baos,true);
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer =null;
+        DOMSource source = new DOMSource(kvittering);
+        StreamResult result= new StreamResult(baos);
+
+        try {
+            transformer= transformerFactory.newTransformer();
+            transformer.transform(source,result);
+        } catch (TransformerConfigurationException e) {
+            e.printStackTrace();
+        } catch (TransformerException e) {
+            e.printStackTrace();
+        }
+
         return baos.toByteArray();
 
     }
