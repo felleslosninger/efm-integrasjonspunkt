@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.oxalisexchange;
 
+import com.sun.org.apache.xml.internal.security.utils.XMLUtils;
 import no.difi.meldingsutveksling.adresseregmock.AdressRegisterFactory;
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
 import no.difi.meldingsutveksling.domain.Avsender;
@@ -16,6 +17,7 @@ import org.w3c.dom.NodeList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.security.PrivateKey;
@@ -33,9 +35,14 @@ class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
     private static final String LEVERINGSKVITTERING = "leveringskvittering";
     private static final String AAPNINGSKVITTERING = "aapningskvittering";
     private static final String MIME_TYPE = "application/xml";
-    private static final String WRITE_TO = System.getProperty("user.home") + File.separator + "somethingSbd.xml";
+    private static final String WRITE_TO = System.getProperty("user.home") + File.separator +"testToRemove"+File.separator +"somethingSbd.xml";
     private static final int INSTANCEIDENTIFIER_FIELD = 3;
+    private static final int MAGIC_NR = 1024;
     private EventLog eventLog = EventLog.create();
+    private static final String PAYLOAD_ZIP = System.getProperty("user.home") + File.separator+"testToRemove"+File.separator + "payload.zip";
+    private String payloadExtractDestination =  System.getProperty("user.home") + File.separator+"testToRemove"+File.separator+"Zip Output";
+
+
 
     @Override
     void sendLeveringskvittering(Map nodeList) {
@@ -47,7 +54,7 @@ class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
         forberedKvitering(nodeList, AAPNINGSKVITTERING);
     }
 
-    private void forberedKvitering(Map nodeList, String leveringskvittering) {
+    private void forberedKvitering(Map nodeList, String kvitteringsType) {
         Dokumentpakker dokumentpakker = new Dokumentpakker();
         Node senderNode = (Node) nodeList.get("Sender");
         Node reciverNode = (Node) nodeList.get("Receiver");
@@ -66,7 +73,7 @@ class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
         Avsender.Builder avsenderBuilder = Avsender.builder(new Organisasjonsnummer(recievedBy), noekkelpar);
         Avsender avsender = avsenderBuilder.build();
         Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo), AdressRegisterFactory.createAdressRegister().getPublicKey(sendTo));
-        ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering(nodeList, leveringskvittering), leveringskvittering, MIME_TYPE);
+        ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering(nodeList,kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
         byte[] resultSbd = dokumentpakker.pakkDokumentISbd(byteArray, avsender, mottaker, instanceIdentifier);
         File file = new File(WRITE_TO);
         try {
@@ -74,6 +81,7 @@ class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
         } catch (IOException e) {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
         }
+
     }
 
     private byte[] genererKvittering(Map nodeList, String kvitteringsType) {
@@ -92,8 +100,17 @@ class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
             eventLog.log(new Event().setExceptionMessage(e.getMessage()));
 
         }
-        return kvittering.toString().getBytes();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        XMLUtils.outputDOM(kvittering,baos,true);
+        return baos.toByteArray();
 
     }
+
+    /**
+     * Unzips the Zip payload
+     *
+     * @param zipFile      payload
+     * @param outputFolder destination folder
+     */
 
 }
