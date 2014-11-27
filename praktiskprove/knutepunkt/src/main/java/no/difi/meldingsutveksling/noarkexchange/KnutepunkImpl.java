@@ -47,7 +47,7 @@ public class KnutepunkImpl implements SOAPport {
         ServletContext servletContext =
                 (ServletContext) context.getMessageContext().get(MessageContext.SERVLET_CONTEXT);
         ApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-        template = ctx.getBean(SendMessageTemplate.class);
+        template = new FileSendMessageTemplate();
         System.out.println(template.getClass().getName());
         return template.sendMessage(putMessageRequest);
     }
