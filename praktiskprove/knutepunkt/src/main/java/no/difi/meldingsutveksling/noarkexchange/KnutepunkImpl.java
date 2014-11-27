@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.noarkexchange;
 import com.thoughtworks.xstream.XStream;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
+import no.difi.meldingsutveksling.eventlog.ProcessState;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -46,8 +47,10 @@ public class KnutepunkImpl implements SOAPport {
         ApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext);
 
         EventLog eventLog = ctx.getBean(EventLog.class);
-        eventLog.log(new Event().setMessage(new XStream().toXML(getCanReceiveMessageRequest)).
-                setReceiver(getCanReceiveMessageRequest.getReceiver().getOrgnr()).setSender("NA"));
+        eventLog.log(new Event()
+                .setMessage(new XStream().toXML(getCanReceiveMessageRequest))
+                .setProcessStates(ProcessState.CAN_RECEIVE_INVOKED)
+                .setReceiver(getCanReceiveMessageRequest.getReceiver().getOrgnr()).setSender("NA"));
 
         GetCanReceiveMessageResponseType response = new GetCanReceiveMessageResponseType();
         response.setResult(true);
