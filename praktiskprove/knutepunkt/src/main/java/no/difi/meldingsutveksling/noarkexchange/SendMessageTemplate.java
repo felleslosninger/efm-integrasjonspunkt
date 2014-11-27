@@ -96,6 +96,8 @@ public abstract class SendMessageTemplate {
     }
 
     public PutMessageResponseType sendMessage(PutMessageRequestType message) {
+        eventLog.log(createOkStateEvent(message, ProcessState.SIGNATURE_VALIDATED));
+
         KnutepunktContext context = new KnutepunktContext();
         try {
             if (message.getEnvelope() != null && message.getEnvelope().getSender() != null) {
