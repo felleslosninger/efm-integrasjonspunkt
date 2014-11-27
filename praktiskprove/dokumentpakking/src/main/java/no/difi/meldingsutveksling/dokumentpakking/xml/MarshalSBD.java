@@ -6,7 +6,9 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
-import org.unece.cefact.namespaces.standardbusinessdocumentheader.StandardBusinessDocument;
+import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+
 
 public final class MarshalSBD {
 	
@@ -17,7 +19,7 @@ public final class MarshalSBD {
 			JAXBContext jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class);
 			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
 			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-			jaxbMarshaller.marshal(doc, os);
+			jaxbMarshaller.marshal(new ObjectFactory().createStandardBusinessDocument(doc), os);
 		} catch (JAXBException e) {
 			e.printStackTrace();
 		}

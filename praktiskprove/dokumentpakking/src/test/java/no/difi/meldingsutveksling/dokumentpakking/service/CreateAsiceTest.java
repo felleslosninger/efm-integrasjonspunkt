@@ -92,12 +92,14 @@ public class CreateAsiceTest {
 		Archive returnedArchive = createAsice.createAsice(hoveddokument, avsender, mottaker);
 
 		verify(createZip, times(1)).zipIt(zipItCaptor.capture());
-		verify(createSignature, times(1)).createSignature(noekkelparCaptor.capture(), createSignatureFileCaptor.capture());
+		verify(createSignature, times(0)).createSignature(noekkelparCaptor.capture(), createSignatureFileCaptor.capture());
 		verify(createManifest, times(1)).createManifest(orgNrCaptor1.capture(), orgNrCaptor2.capture(), fileCaptor.capture());
 
-		assertThat(zipItCaptor.getValue(), contains(hoveddokument, manifest, signature));
-		assertThat(createSignatureFileCaptor.getValue(), contains(hoveddokument, manifest));
-		assertThat(noekkelparCaptor.getValue(), is(sameInstance(noekkelpar)));
+		//assertThat(zipItCaptor.getValue(), contains(hoveddokument, manifest, signature));
+		assertThat(zipItCaptor.getValue(), contains(hoveddokument, manifest));
+
+		//assertThat(createSignatureFileCaptor.getValue(), contains(hoveddokument, manifest));
+		//assertThat(noekkelparCaptor.getValue(), is(sameInstance(noekkelpar)));
 		assertThat(returnedArchive, is(sameInstance(archive)));
 		assertThat(orgNrCaptor1.getValue(), is(sameInstance(orgNrAvsender)));
 		assertThat(orgNrCaptor2.getValue(), is(sameInstance(orgNrMottaker)));

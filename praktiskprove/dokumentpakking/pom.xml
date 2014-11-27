@@ -17,6 +17,14 @@
 					<target>1.7</target>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>jaxb2-maven-plugin</artifactId>
+				<version>1.6</version>
+				<configuration>
+					<packageName>no.difi.meldingsutveksling</packageName>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -43,11 +51,6 @@
 			<version>1.9</version>
 		</dependency>
 		<dependency>
-			<groupId>no.digipost</groupId>
-			<artifactId>sdp-xsd</artifactId>
-			<version>1.1.6</version>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.ws</groupId>
 			<artifactId>spring-xml</artifactId>
 			<version>2.2.0.RELEASE</version>
@@ -57,6 +60,13 @@
 			<artifactId>spring-oxm</artifactId>
 			<version>4.0.5.RELEASE</version>
 		</dependency>
+
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>2.5</version>
+		</dependency>
+
 
 		<dependency>
 			<groupId>no.difi.meldingsutveksling</groupId>

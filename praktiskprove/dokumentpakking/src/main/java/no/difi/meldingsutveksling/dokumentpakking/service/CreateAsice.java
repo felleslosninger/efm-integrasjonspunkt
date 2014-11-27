@@ -25,8 +25,8 @@ public class CreateAsice {
 		files.add(forsendelse);
 		files.add(createManifest.createManifest(avsender.getOrgNummer(), mottaker.getOrgNummer(), forsendelse));
 
-		Signature signature = createSignature.createSignature(avsender.getNoekkelpar(), new ArrayList<ByteArrayFile>(files));
-		files.add(signature);
+		//Signature signature = createSignature.createSignature(avsender.getNoekkelpar(), new ArrayList<ByteArrayFile>(files));
+		//files.add(signature);
 		
 		Archive archive = createZip.zipIt(files);
 		

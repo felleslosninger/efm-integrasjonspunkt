@@ -15,67 +15,103 @@
  */
 package no.difi.meldingsutveksling.dokumentpakking.service;
 
-import no.difi.meldingsutveksling.domain.ByteArrayFile;
-import no.difi.meldingsutveksling.domain.Sertifikat;
+import static java.lang.String.format;
+import static org.apache.commons.codec.digest.DigestUtils.sha1;
 
-import org.etsi.uri._01903.v1_3.CertIDType;
-import org.etsi.uri._01903.v1_3.DataObjectFormat;
-import org.etsi.uri._01903.v1_3.DigestAlgAndValueType;
-import org.etsi.uri._01903.v1_3.QualifyingProperties;
-import org.etsi.uri._01903.v1_3.SignedDataObjectProperties;
-import org.etsi.uri._01903.v1_3.SignedProperties;
-import org.etsi.uri._01903.v1_3.SignedSignatureProperties;
-import org.etsi.uri._01903.v1_3.SigningCertificate;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
-import org.w3.xmldsig.X509IssuerSerialType;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
 
 import javax.xml.crypto.dsig.DigestMethod;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.List;
+import no.difi.meldingsutveksling.domain.ByteArrayFile;
+import no.difi.meldingsutveksling.domain.Sertifikat;
+import no.difi.meldingsutveksling.domain.xades.CertIDListType;
+import no.difi.meldingsutveksling.domain.xades.CertIDType;
+import no.difi.meldingsutveksling.domain.xades.DataObjectFormatType;
+import no.difi.meldingsutveksling.domain.xades.DigestAlgAndValueType;
+import no.difi.meldingsutveksling.domain.xades.DigestMethodType;
+import no.difi.meldingsutveksling.domain.xades.ObjectFactory;
+import no.difi.meldingsutveksling.domain.xades.QualifyingPropertiesType;
+import no.difi.meldingsutveksling.domain.xades.SignedDataObjectPropertiesType;
+import no.difi.meldingsutveksling.domain.xades.SignedPropertiesType;
+import no.difi.meldingsutveksling.domain.xades.SignedSignaturePropertiesType;
+import no.difi.meldingsutveksling.domain.xades.X509IssuerSerialType;
 
-import static java.lang.String.format;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
-import static org.apache.commons.codec.digest.DigestUtils.sha1;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public class CreateXAdESProperties {
 
-	private final org.w3.xmldsig.DigestMethod sha1DigestMethod = new org.w3.xmldsig.DigestMethod(emptyList(), DigestMethod.SHA1);
-
+	private final DigestMethodType sha1DigestMethod;
 	private static Jaxb2Marshaller marshaller;
 
 	static {
 		marshaller = new Jaxb2Marshaller();
-		marshaller.setClassesToBeBound(QualifyingProperties.class);
+		marshaller.setClassesToBeBound(QualifyingPropertiesType.class);
 	}
 
+	public CreateXAdESProperties() {
+		sha1DigestMethod = new DigestMethodType();
+		sha1DigestMethod.setAlgorithm(DigestMethod.SHA1);
+	}
 	public Document createPropertiesToSign(List<ByteArrayFile> files, Sertifikat sertifikat) {
 		X509Certificate certificate = sertifikat.getX509Certificate();
 		byte[] certificateDigestValue = sha1(sertifikat.getEncoded());
 
-		DigestAlgAndValueType certificateDigest = new DigestAlgAndValueType(sha1DigestMethod, certificateDigestValue);
-		X509IssuerSerialType certificateIssuer = new X509IssuerSerialType(certificate.getIssuerDN().getName(), certificate.getSerialNumber());
-		SigningCertificate signingCertificate = new SigningCertificate(singletonList(new CertIDType(certificateDigest, certificateIssuer, null)));
+		DigestAlgAndValueType certificateDigest = new DigestAlgAndValueType();
+		certificateDigest.setDigestMethod(sha1DigestMethod);
+		certificateDigest.setDigestValue(certificateDigestValue);
+				
+		X509IssuerSerialType certificateIssuer = new X509IssuerSerialType();
+		certificateIssuer.setX509IssuerName(certificate.getIssuerDN().getName());
+		certificateIssuer.setX509SerialNumber(certificate.getSerialNumber());
+		
+		
+		CertIDListType signingCertificate =new CertIDListType();
+		CertIDType certIDType= new CertIDType();
+		certIDType.setCertDigest(certificateDigest);
+		certIDType.setIssuerSerial(certificateIssuer);
+		signingCertificate.getCert().add(certIDType);
+		
+		
+		SignedSignaturePropertiesType signedSignatureProperties = new SignedSignaturePropertiesType();
 
-		DateTime now = DateTime.now(DateTimeZone.UTC);
-		SignedSignatureProperties signedSignatureProperties = new SignedSignatureProperties(now, signingCertificate, null, null, null, null);
-		SignedDataObjectProperties signedDataObjectProperties = new SignedDataObjectProperties(dataObjectFormats(files), null, null, null, null);
-		SignedProperties signedProperties = new SignedProperties(signedSignatureProperties, signedDataObjectProperties, "SignedProperties");
-		QualifyingProperties qualifyingProperties = new QualifyingProperties(signedProperties, null, "#Signature", null);
+		GregorianCalendar gCal = new GregorianCalendar();
+		gCal.setTime(new Date());
+		XMLGregorianCalendar xmlDate;
+		try {
+			xmlDate = DatatypeFactory.newInstance().newXMLGregorianCalendar(gCal);
+			signedSignatureProperties.setSigningTime(xmlDate);
+		} catch (DatatypeConfigurationException e) {
+			throw new RuntimeException(e);
+		}
+		
+		signedSignatureProperties.setSigningCertificate(signingCertificate);
+		
+		SignedDataObjectPropertiesType signedDataObjectProperties = new SignedDataObjectPropertiesType();
+		signedDataObjectProperties.getDataObjectFormat().addAll(dataObjectFormats(files));
+		SignedPropertiesType signedProperties = new SignedPropertiesType();
+		signedProperties.setSignedSignatureProperties(signedSignatureProperties);
+		signedProperties.setSignedDataObjectProperties(signedDataObjectProperties);
+		signedProperties.setId("SignedProperties");
+		QualifyingPropertiesType qualifyingProperties = new QualifyingPropertiesType();
+		qualifyingProperties.setSignedProperties(signedProperties);
+		qualifyingProperties.setTarget("#Signature");
 
 		DOMResult domResult = new DOMResult();
-		marshaller.marshal(qualifyingProperties, domResult);
+		marshaller.marshal(new ObjectFactory().createQualifyingProperties(qualifyingProperties), domResult);
 		Document document = (Document) domResult.getNode();
 
 		// Explicitly mark the SignedProperties Id as an Document ID attribute,
@@ -86,11 +122,14 @@ public class CreateXAdESProperties {
 		return document;
 	}
 
-	private List<DataObjectFormat> dataObjectFormats(List<ByteArrayFile> files) {
-		List<DataObjectFormat> result = new ArrayList<DataObjectFormat>();
+	private List<DataObjectFormatType> dataObjectFormats(List<ByteArrayFile> files) {
+		List<DataObjectFormatType> result = new ArrayList<DataObjectFormatType>();
 		for (int i = 0; i < files.size(); i++) {
 			String signatureElementIdReference = format("#ID_%s", i);
-			result.add(new DataObjectFormat(null, null, files.get(i).getMimeType(), null, signatureElementIdReference));
+			DataObjectFormatType obj = new DataObjectFormatType();
+			obj.setMimeType(files.get(i).getMimeType());
+			obj.setObjectReference(signatureElementIdReference);
+			result.add(obj);
 		}
 		return result;
 	}

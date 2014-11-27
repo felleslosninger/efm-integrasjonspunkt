@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.dokumentpakking;
 
+import java.io.File;
 import java.io.IOException;
 import java.security.KeyFactory;
 import java.security.KeyStoreException;
@@ -18,6 +19,7 @@ import no.difi.meldingsutveksling.domain.Noekkelpar;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
 public class PakkeTest {
@@ -60,6 +62,9 @@ public class PakkeTest {
 								(Certificate) AdressRegisterFactory.createAdressRegister().getCertificate("960885406"))).build();
 		Mottaker mottaker = new Mottaker(new Organisasjonsnummer("958935429"), mottakerpublicKey);
 
-		datapakker.pakkDokumentISbd(forsendelse, avsender, mottaker, "1234");
+		
+		FileUtils.writeByteArrayToFile(new File("/Users/lars/sbd2.xml"), datapakker.pakkDokumentISbd(forsendelse, avsender, mottaker, "1234"));
+		
+		
 	}
 }

@@ -96,7 +96,6 @@ public class CreateSignature {
 		} catch (InvalidAlgorithmParameterException e) {
 			throw new RuntimeException("Kunne ikke initialisere xml-signering", e);
 		}
-
 		schema = loadSchema();
 	}
 
