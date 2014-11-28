@@ -46,7 +46,7 @@ import java.util.zip.ZipInputStream;
  */
 public class MessageHandler {
 
-    private static final String PAYLOAD_ZIP = System.getProperty("user.home") + File.separator + "payload.zip";
+    private static final String PAYLOAD_ZIP = System.getProperty("user.home") + File.separator +"testToRemove"+File.separator+ "payload.zip";
     private static final int MAGIC_NR = 1024;
     private String pemFileName = "960885406-statens-laanekasse.pkcs8";
     private String publicKeyFileName = "960885406-statens-laanekasse.publickey";

@@ -98,9 +98,7 @@ public abstract class MessageReceieverTemplate {
     }
 
 
-    private long getTimeStamp() {
-        return System.currentTimeMillis();
-    }
+
 
     /**
      * Maps out document elements as nodes

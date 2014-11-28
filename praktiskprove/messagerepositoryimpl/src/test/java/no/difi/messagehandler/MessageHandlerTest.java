@@ -21,7 +21,7 @@ public class MessageHandlerTest {
 
          //File file = new File(classLoader.getResource("sbdUt.xml").getFile());
        /* */ File file1= new File(
-                 System.getProperty("user.home")+ File.separator+"testToRemove"+File.separator +"somethingSbd.xml");
+                 System.getProperty("user.home")+ File.separator+"testToRemove"+File.separator +"kvitteringSbd.xml");
           messageHandler.unmarshall(file1);
      /*  // assertEquals(textToEncrypt, messageHandler.cryptAtext(textToEncrypt));
          DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
