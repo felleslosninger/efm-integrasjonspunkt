@@ -22,6 +22,7 @@ import no.difi.meldingsutveksling.oxalisexchange.ByteArrayImpl;
 import no.difi.meldingsutveksling.oxalisexchange.Kvittering;
 import no.difi.meldingsutveksling.oxalisexchange.OxalisMessageReceiverTemplate;
 import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -34,6 +35,7 @@ import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.BindingType;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -63,13 +65,17 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
     private EventLog eventLog = EventLog.create();
     private static final String MIME_TYPE = "application/xml";
     private static final String WRITE_TO = System.getProperty("user.home") + File.separator +"testToRemove"+File.separator +"kvitteringSbd.xml";
+
+    @Autowired
+    private NOARKSystem noarkSystem;
+
     public CorrelationInformation receive(@WebParam(name = "StandardBusinessDocument", targetNamespace = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader", partName = "receiveResponse") StandardBusinessDocument receiveResponse)  {
 
       eventLogManager(receiveResponse,null,ProcessState.SBD_RECIEVED);
         try {
             forberedKvittering(receiveResponse, "leveringsKvittering");
         } catch (IOException e) {
-            eventLogManager(receiveResponse, e, ProcessState.LEVERINGS_KVITTERING_SENT_FAILED);
+        //    eventLogManager(receiveResponse, e, ProcessState.LEVERINGS_KVITTERING_SENT_FAILED);
         }
 
         String RSA_INSTANCE = "RSA";
@@ -78,9 +84,28 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
         Partner sender = senders.get(0);
         PartnerIdentification orgNr = sender.getIdentifier();
         String[] orgNrArr = orgNr.getValue().split(":");
+        Payload payload =null;
 
         //*** get payload *****
-        Payload payload = (Payload) receiveResponse.getAny();
+
+        JAXBContext jaxbContextP = null;
+        try {
+            jaxbContextP = JAXBContext.newInstance(Payload.class);
+        } catch (JAXBException e) {
+
+        }
+        Unmarshaller unMarshallerP=null;
+        try {
+             unMarshallerP = jaxbContextP.createUnmarshaller();
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        }
+
+        try {
+         payload=    unMarshallerP.unmarshal((org.w3c.dom.Node) receiveResponse.getAny() , Payload.class).getValue();
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        }
         String aesInRsa = payload.getEncryptionKey();
         String payloadString = payload.getAsice();
         byte[] aesInDisc = DatatypeConverter.parseBase64Binary(aesInRsa);
@@ -172,13 +197,13 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
             Unmarshaller unMarshaller = jaxbContext.createUnmarshaller();
-            //putMessageRequestType = (PutMessageRequestType) unMarshaller.unmarshal(bestEdu);
+            putMessageRequestType = (PutMessageRequestType) unMarshaller.unmarshal(new StreamSource(bestEdu) , PutMessageRequestType.class).getValue();
         } catch (JAXBException e) {
-            eventLogManager(receiveResponse,e,ProcessState.SOME_OTHER_EXCEPTION);
+            eventLogManager(receiveResponse, e, ProcessState.SOME_OTHER_EXCEPTION);
         }
 
-         NOARKSystem noarkSystem = new NOARKSystem();
-      //  noarkSystem.sendEduMeldig( putMessageRequestType);
+
+        // noarkSystem.sendEduMeldig( putMessageRequestType);
 
         return new CorrelationInformation();
     }
@@ -234,7 +259,7 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
                 try {
                     fos = new FileOutputStream(newFile);
                 } catch (FileNotFoundException e) {
-                    eventLogManager(sbd,e,ProcessState.SOME_OTHER_EXCEPTION);
+                    eventLogManager(sbd, e, ProcessState.SOME_OTHER_EXCEPTION);
                 }
                 byte[] bufbyte = new byte[1024];
                 int len;

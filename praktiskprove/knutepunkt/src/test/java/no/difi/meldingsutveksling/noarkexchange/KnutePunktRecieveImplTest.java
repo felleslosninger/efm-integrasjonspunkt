@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.junit.Test;
 
@@ -21,7 +20,7 @@ public class KnutePunktRecieveImplTest {
         File file = new File(getClass().getClassLoader().getResource("sbdUt.xml").getFile());
         JAXBContext jaxbContext = null;
         try {
-            jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class);
+            jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class);
         } catch (JAXBException e) {
             e.printStackTrace();
         }
