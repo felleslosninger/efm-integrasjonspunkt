@@ -156,7 +156,8 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
         // Lage zip fil av byteArray
         File bestEdu = null;
         try {
-            bestEdu = goGetBestEdu(zipTobe);
+            bestEdu = goGetBestEdu(receiveResponse,zipTobe);
+            eventLogManager(receiveResponse,null,ProcessState.BESTEDU_EXTRACTED);
         } catch (IOException e) {
             eventLogManager(receiveResponse,e,ProcessState.SOME_OTHER_EXCEPTION);
         }
@@ -173,12 +174,10 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
             Unmarshaller unMarshaller = jaxbContext.createUnmarshaller();
             //putMessageRequestType = (PutMessageRequestType) unMarshaller.unmarshal(bestEdu);
         } catch (JAXBException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            eventLogManager(receiveResponse,e,ProcessState.SOME_OTHER_EXCEPTION);
         }
 
-        // Send the edu
-
-        NOARKSystem noarkSystem = new NOARKSystem();
+         NOARKSystem noarkSystem = new NOARKSystem();
       //  noarkSystem.sendEduMeldig( putMessageRequestType);
 
         return new CorrelationInformation();
@@ -214,7 +213,7 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
         return kvitteringXml.getBytes();
     }
 
-    private File goGetBestEdu(byte[] bytes) throws IOException {
+    private File goGetBestEdu(StandardBusinessDocument sbd,byte[] bytes) throws IOException {
         ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes));
         ZipEntry zipEntry = null;
         String outputFolder = System.getProperty("user.home") + File.separator + "testToRemove" +
@@ -223,7 +222,7 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
         try {
             zipEntry = zipInputStream.getNextEntry();
         } catch (IOException e) {
-            e.printStackTrace();
+            eventLogManager(sbd,e,ProcessState.SOME_OTHER_EXCEPTION);
         }
         while (null != zipEntry) {
             String fileName = zipEntry.getName();
@@ -235,7 +234,7 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
                 try {
                     fos = new FileOutputStream(newFile);
                 } catch (FileNotFoundException e) {
-                    e.printStackTrace();
+                    eventLogManager(sbd,e,ProcessState.SOME_OTHER_EXCEPTION);
                 }
                 byte[] bufbyte = new byte[1024];
                 int len;
