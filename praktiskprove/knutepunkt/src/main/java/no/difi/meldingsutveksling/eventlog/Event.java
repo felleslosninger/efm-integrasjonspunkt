@@ -28,7 +28,6 @@ public class Event {
     public Event(long timeStamp, UUID uuid) {
         this.timeStamp = timeStamp;
         this.uuid = uuid;
-        timeStamp = System.currentTimeMillis();
         formattedDate = new Date(timeStamp).toString();
 
     }
