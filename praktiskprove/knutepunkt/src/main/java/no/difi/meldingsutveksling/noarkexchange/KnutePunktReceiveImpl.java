@@ -288,6 +288,11 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
                     .setSender(receiveResponse.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue().split(":")[1]));
     }
 
+    public NOARKSystem getNoarkSystem() {
+        return noarkSystem;
+    }
 
-
+    public void setNoarkSystem(NOARKSystem noarkSystem) {
+        this.noarkSystem = noarkSystem;
+    }
 }
