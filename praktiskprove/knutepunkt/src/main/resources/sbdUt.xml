@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ns2:StandardBusinessDocument xmlns:ns2="http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader">
-    <ns2:StandardBusinessDocumentHeader>
-        <ns2:HeaderVersion>1.0</ns2:HeaderVersion>
-        <ns2:Sender>
-            <ns2:Identifier Authority="9908:960885406">9908:960885406</ns2:Identifier>
-        </ns2:Sender>
-        <ns2:Receiver>
-            <ns2:Identifier Authority="9908:958935429">9908:958935429</ns2:Identifier>
-        </ns2:Receiver>
-        <ns2:DocumentIdentification>
-            <ns2:Standard>urn:no:difi:meldingsutveksling:1.0</ns2:Standard>
-            <ns2:TypeVersion>1.0</ns2:TypeVersion>
-            <ns2:InstanceIdentifier>444ad101-c488-460e-aa10-93f0b2cdfd9a</ns2:InstanceIdentifier>
-            <ns2:Type>BEST/EDU</ns2:Type>
-            <ns2:CreationDateAndTime>2014-11-27T14:54:55.133+01:00</ns2:CreationDateAndTime>
-        </ns2:DocumentIdentification>
-        <ns2:BusinessScope>
-            <ns2:Scope>
-                <ns2:Type>ConversationId</ns2:Type>
-                <ns2:InstanceIdentifier>39b3635c-cb8f-44d8-b058-add2746d2bc0</ns2:InstanceIdentifier>
-                <ns2:Identifier>urn:no:difi:meldingsutveksling:1.0</ns2:Identifier>
-            </ns2:Scope>
-        </ns2:BusinessScope>
-    </ns2:StandardBusinessDocumentHeader>
+<stan:StandardBusinessDocument xmlns:stan="http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader">
+    <stan:StandardBusinessDocumentHeader>
+        <stan:HeaderVersion>1.0</stan:HeaderVersion>
+        <stan:Sender>
+            <stan:Identifier Authority="9908:960885406">9908:960885406</stan:Identifier>
+        </stan:Sender>
+        <stan:Receiver>
+            <stan:Identifier Authority="9908:958935429">9908:958935429</stan:Identifier>
+        </stan:Receiver>
+        <stan:DocumentIdentification>
+            <stan:Standard>urn:no:difi:meldingsutveksling:1.0</stan:Standard>
+            <stan:TypeVersion>1.0</stan:TypeVersion>
+            <stan:InstanceIdentifier>444ad101-c488-460e-aa10-93f0b2cdfd9a</stan:InstanceIdentifier>
+            <stan:Type>BEST/EDU</stan:Type>
+            <stan:CreationDateAndTime>2014-11-27T14:54:55.133+01:00</stan:CreationDateAndTime>
+        </stan:DocumentIdentification>
+        <stan:BusinessScope>
+            <stan:Scope>
+                <stan:Type>ConversationId</stan:Type>
+                <stan:InstanceIdentifier>39b3635c-cb8f-44d8-b058-add2746d2bc0</stan:InstanceIdentifier>
+                <stan:Identifier>urn:no:difi:meldingsutveksling:1.0</stan:Identifier>
+            </stan:Scope>
+        </stan:BusinessScope>
+    </stan:StandardBusinessDocumentHeader>
     <payload encryptionKey="2LUhsCb8ZqnhoBuC5CZEPzYG73Z4Q1/VDRH8+zcVUk/9J2J0BE+yutTURCTwu6X/6NDOy5vvbKwLos70HPZer48QZwQ4rwVRReqLbBHmm5y1mwGi3ixJFZFuGQzibMCndADbwHIOYorVXKw8WCP9TKISbN9n0uB5IAmcwjoJKfg=">HuRlfxYJfTwmIZNNlQOoM63q99HqFEsF9Ji8mZHF3HJXb58lE5E1Snoc3K3moLmWO0GFuyumd2s0cJLW5WxvCG9I1qr20ZJTse8d0LACWARViwzy8YViHI+vz1q8Fo0XysfQNqzjJR7/OTHRztHW1sUf/DicKLDjKzW8lArGEoRo9moiR+SE0QtxVOEhJDshRmgkefl9dSmefjyhOvNulbSxDG4tjcg2IJcg07CaRKXEFPGcIDrOc8sOa31sJ0PwG79HjKTbvGJwNLQL1xttazgoW60Cje4Uhf0Dw/5iWKevF8Lbxp24mXH1rqGPjDW8h3gqFXkXxUe2vnbSq7/1Kjgc/t81ZDnKzuIq1+AAjgZ2v5b4Jm6p99A/fvDrISbCbwka1Bma6MMPjJL65uSiCEcWFLHDGTxwsx2MYPGRtVf51s6n6O3l1YVYEoRtbZg9u9qy1se+w5EgAfZrDPtggR4ue6tsIaQusQHJ3gHEbxBMWjYqOThr/sWoj72MOjIefnZkYxRwyTG4DkLFtRWsJRHqGoASXGyIfYOeeHYV4vI4/LzYCblWcOsg0OuYLMqRFkLZSMloTghTjeI90SXX2s7+mCrcdo7498gBTJ5nGNBC3/un8jk7+P2qhcYpiBNzHbzJkYpEudOn2BLcGdBf+JMRgcb0FVGSKHUCpdjJsZWJLGg7WOhJ/zL/2W3dlB+fA7DtWs9B7m2y3jzuDelJiDuN39Gzc8nlhmmyDcfMLeLHZ1J7svEyGRYrtXxNN8xDqQIGAhgRbnz5jP5CY39QV2WiAAJfE3ssQI9EmeZqrbFqkK/Uz2+0j1tAXJX6o1cpYNxet7crwFKZXNsnumdHjVsST5SfMafrTgtvptpHeRbkRzadpXA/WFOtH7aGEN1yS3+z40XxbZFgx8Dxj5lsiTpkh5Osdv7ywSuSYKogsahYbG8A6JNBTm68UxfK71sch6+5yqXgUsfHdqEkVld65Puvt+nl5SP+OR1IUyVhkI0CCXYi9ewS1g0f1nJiejSX1I9+p+l40fs662OcNy/n+H0gvG6w5B7wKTncP4SWWyrZb3cqd0i5lsdXylkCjQtW</payload>
-</ns2:StandardBusinessDocument>
+</stan:StandardBusinessDocument>
