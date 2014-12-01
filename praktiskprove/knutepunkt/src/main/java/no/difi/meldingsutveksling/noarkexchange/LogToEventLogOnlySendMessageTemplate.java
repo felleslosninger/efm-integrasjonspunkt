@@ -29,7 +29,7 @@ public class LogToEventLogOnlySendMessageTemplate extends SendMessageTemplate {
         String textMessage;
         XStream xs = new XStream();
         textMessage = xs.toXML(message);
-        Event e = new Event().setMessage(textMessage).setProcessStates(ProcessState.LEVERINGS_KVITTERING_SENT);
+        Event e = new Event().setMessage(textMessage).setProcessStates(ProcessState.NO_ARKIVE_UNAVAILABLE);
         EventLogDAO dao = new EventLogDAO(new HerokuDatabaseConfig().getDataSource());
         dao.insertEventLog(e);
         return new PutMessageResponseType();

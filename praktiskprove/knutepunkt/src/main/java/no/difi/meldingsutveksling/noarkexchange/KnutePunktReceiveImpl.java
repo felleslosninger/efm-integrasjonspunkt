@@ -23,7 +23,10 @@ import no.difi.meldingsutveksling.oxalisexchange.Kvittering;
 import no.difi.meldingsutveksling.oxalisexchange.OxalisMessageReceiverTemplate;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
+import javax.annotation.Resource;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -31,12 +34,15 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 import javax.jws.WebParam;
 import javax.jws.WebService;
+import javax.servlet.ServletContext;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.BindingType;
+import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.handler.MessageContext;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -66,10 +72,17 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
     private static final String MIME_TYPE = "application/xml";
     private static final String WRITE_TO = System.getProperty("user.home") + File.separator +"testToRemove"+File.separator +"kvitteringSbd.xml";
 
-    @Autowired
+
+    @Resource
+    private WebServiceContext context;
+
     private NOARKSystem noarkSystem;
 
     public CorrelationInformation receive(@WebParam(name = "StandardBusinessDocument", targetNamespace = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader", partName = "receiveResponse") StandardBusinessDocument receiveResponse)  {
+        ServletContext servletContext =
+                (ServletContext) context.getMessageContext().get(MessageContext.SERVLET_CONTEXT);
+        ApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+        noarkSystem = ctx.getBean(NOARKSystem.class);
 
       eventLogManager(receiveResponse,null,ProcessState.SBD_RECIEVED);
         try {
@@ -193,17 +206,19 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
         PutMessageRequestType mrt = new PutMessageRequestType();
 
         //*** Unmarshall xml*****
-        PutMessageRequestType putMessageRequestType = null;
+        PutMessageRequestType putMessageRequestType;
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
             Unmarshaller unMarshaller = jaxbContext.createUnmarshaller();
             putMessageRequestType = (PutMessageRequestType) unMarshaller.unmarshal(new StreamSource(bestEdu) , PutMessageRequestType.class).getValue();
         } catch (JAXBException e) {
+            e.printStackTrace();
             eventLogManager(receiveResponse, e, ProcessState.SOME_OTHER_EXCEPTION);
+            throw new IllegalStateException(e.getMessage(), e);
         }
-
-
-        // noarkSystem.sendEduMeldig( putMessageRequestType);
+        XStream xs = new XStream();
+        System.out.println(xs.toXML(putMessageRequestType));
+        noarkSystem.sendEduMeldig(putMessageRequestType);
 
         return new CorrelationInformation();
     }
@@ -288,6 +303,11 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
                     .setSender(receiveResponse.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue().split(":")[1]));
     }
 
+    public NOARKSystem getNoarkSystem() {
+        return noarkSystem;
+    }
 
-
+    public void setNoarkSystem(NOARKSystem noarkSystem) {
+        this.noarkSystem = noarkSystem;
+    }
 }
