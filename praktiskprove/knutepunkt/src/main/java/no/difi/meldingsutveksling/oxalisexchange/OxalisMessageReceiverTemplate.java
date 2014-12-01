@@ -36,7 +36,7 @@ import java.util.Map;
  * Time: 10:45
  * To change this template use File | Settings | File Templates.
  */
-class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
+public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
     private static final String LEVERINGSKVITTERING = "leveringskvittering";
     private static final String AAPNINGSKVITTERING = "aapningskvittering";
     private static final String MIME_TYPE = "application/xml";
@@ -124,11 +124,5 @@ class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
 
     }
 
-    /**
-     * Unzips the Zip payload
-     *
-     * @param zipFile      payload
-     * @param outputFolder destination folder
-     */
 
 }
