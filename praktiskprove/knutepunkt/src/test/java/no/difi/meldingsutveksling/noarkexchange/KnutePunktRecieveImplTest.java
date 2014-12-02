@@ -14,11 +14,11 @@ import java.io.File;
  * Created by kubkaray on 27.11.2014.
  */
 public class KnutePunktRecieveImplTest {
-@Ignore
+    @Ignore
     @Test
     public void recieverTesting() {
         KnutePunktReceiveImpl knutePunktReceive = new KnutePunktReceiveImpl();
-        File file = new File(System.getProperty("user.home") + File.separator +"testToRemove"+File.separator +"kvitteringSbd.xml");
+        File file = new File(getClass().getClassLoader().getResource("sbdUt.xml").getFile());
         JAXBContext jaxbContext = null;
         try {
             jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class);

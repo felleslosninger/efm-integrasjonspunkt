@@ -12,7 +12,10 @@ import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.eventlog.ProcessState;
 import no.difi.meldingsutveksling.noark.NOARKSystem;
+import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
+import no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.CorrelationInformation;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.Partner;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.PartnerIdentification;
@@ -81,7 +84,10 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
     private NOARKSystem noarkSystem;
 
     public CorrelationInformation receive(@WebParam(name = "StandardBusinessDocument", targetNamespace = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader", partName = "receiveResponse") StandardBusinessDocument receiveResponse)  {
-
+       ServletContext servletContext =
+                (ServletContext) context.getMessageContext().get(MessageContext.SERVLET_CONTEXT);
+        ApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+        noarkSystem = ctx.getBean(NOARKSystem.class);
 
         if (isReciept(receiveResponse.getStandardBusinessDocumentHeader())) {
             eventLogManager(receiveResponse,null,ProcessState.KVITTERING_MOTTATT);
@@ -218,7 +224,19 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
             eventLogManager(receiveResponse, e, ProcessState.SOME_OTHER_EXCEPTION);
             throw new IllegalStateException(e.getMessage(), e);
         }
-       noarkSystem.sendEduMeldig(putMessageRequestType);
+
+        PutMessageResponseType response= noarkSystem.sendEduMeldig(putMessageRequestType);
+        if (null != response) {
+            System.out.println("response not null ");
+            AppReceiptType result = response.getResult();
+            if (null == result) {
+                eventLogManager(receiveResponse,null,ProcessState. ARKIVE_RESPONSE_NULL);
+            }else {
+                eventLogManager(receiveResponse,null,ProcessState.BEST_EDU_SENT);
+            }
+        }else {
+            eventLogManager(receiveResponse,null,ProcessState.NO_ARKIVE_UNAVAILABLE);
+        }
 
         return new CorrelationInformation();
     }
@@ -238,7 +256,7 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
         if (instanceIdentifier.contains("BEST/EDU")) {
             instanceIdentifier.replace("BEST/EDU","Kvittering");
         }
-        Certificate certificate = (Certificate) AdressRegisterFactory.createAdressRegister().getCertificate(sendTo);
+        Certificate certificate = (Certificate) AdressRegisterFactory.createAdressRegister().getCertificate(recievedBy);
         Noekkelpar noekkelpar = new Noekkelpar(loadPrivateKey(),certificate);
         Avsender.Builder avsenderBuilder = Avsender.builder(new Organisasjonsnummer(recievedBy), noekkelpar);
         Avsender avsender = avsenderBuilder.build();
