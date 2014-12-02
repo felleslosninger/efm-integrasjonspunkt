@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.xml.bind.JAXBContext;
@@ -14,11 +13,11 @@ import java.io.File;
  * Created by kubkaray on 27.11.2014.
  */
 public class KnutePunktRecieveImplTest {
-    @Ignore
+
     @Test
     public void recieverTesting() {
         KnutePunktReceiveImpl knutePunktReceive = new KnutePunktReceiveImpl();
-        File file = new File(getClass().getClassLoader().getResource("sbdUt.xml").getFile());
+        File file = new File(System.getProperty("user.home") + File.separator +"testToRemove"+File.separator +"kvitteringSbd.xml");
         JAXBContext jaxbContext = null;
         try {
             jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class);

@@ -1,5 +1,16 @@
 package no.difi.meldingsutveksling.dokumentpakking;
 
+import no.difi.meldingsutveksling.adresseregmock.AdressRegisterFactory;
+import no.difi.meldingsutveksling.domain.Avsender;
+import no.difi.meldingsutveksling.domain.ByteArrayFile;
+import no.difi.meldingsutveksling.domain.Mottaker;
+import no.difi.meldingsutveksling.domain.Noekkelpar;
+import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FileUtils;
+import org.junit.Ignore;
+import org.junit.Test;
+
 import java.io.File;
 import java.io.IOException;
 import java.security.KeyFactory;
@@ -10,18 +21,6 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
-
-import no.difi.meldingsutveksling.adresseregmock.AdressRegisterFactory;
-import no.difi.meldingsutveksling.domain.Avsender;
-import no.difi.meldingsutveksling.domain.ByteArrayFile;
-import no.difi.meldingsutveksling.domain.Mottaker;
-import no.difi.meldingsutveksling.domain.Noekkelpar;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.FileUtils;
-import org.junit.Ignore;
-import org.junit.Test;
 
 public class PakkeTest {
 	final PublicKey mottakerpublicKey = AdressRegisterFactory.createAdressRegister().getPublicKey("958935429");
@@ -64,7 +63,7 @@ public class PakkeTest {
 		Mottaker mottaker = new Mottaker(new Organisasjonsnummer("958935429"), mottakerpublicKey);
 
 		
-		FileUtils.writeByteArrayToFile(new File("/Users/lars/sbd2.xml"), datapakker.pakkDokumentISbd(forsendelse, avsender, mottaker, "1234"));
+		FileUtils.writeByteArrayToFile(new File("/Users/lars/sbd2.xml"), datapakker.pakkDokumentISbd(forsendelse, avsender, mottaker, "1234","BEST/EDU"));
 		
 		
 	}

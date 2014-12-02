@@ -22,6 +22,7 @@ public class RecieveFromOxalisTest {
         OxalisMessageReceiverTemplate oxalisMessageReceiverTemplate = new OxalisMessageReceiverTemplate();
         ClassLoader classLoader = getClass().getClassLoader();
         File file = new File(classLoader.getResource("sbdUt.xml").getFile());
+
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = null;
         try {

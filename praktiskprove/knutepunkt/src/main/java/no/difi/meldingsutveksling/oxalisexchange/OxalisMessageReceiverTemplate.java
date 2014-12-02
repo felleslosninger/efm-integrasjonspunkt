@@ -43,6 +43,7 @@ public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
     private static final String WRITE_TO = System.getProperty("user.home") + File.separator +"testToRemove"+File.separator +"somethingSbd.xml";
     private static final int INSTANCEIDENTIFIER_FIELD = 3;
     private static final int MAGIC_NR = 1024;
+    private static final String KVITTERING = "Kvittering";
     private EventLog eventLog = EventLog.create();
     private static final String PAYLOAD_ZIP = System.getProperty("user.home") + File.separator+"testToRemove"+File.separator + "payload.zip";
     private String payloadExtractDestination =  System.getProperty("user.home") + File.separator+"testToRemove"+File.separator+"Zip Output";
@@ -79,7 +80,7 @@ public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
         Avsender avsender = avsenderBuilder.build();
         Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo), AdressRegisterFactory.createAdressRegister().getPublicKey(sendTo));
         ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering(nodeList,kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
-        byte[] resultSbd = dokumentpakker.pakkDokumentISbd(byteArray, avsender, mottaker, instanceIdentifier);
+        byte[] resultSbd = dokumentpakker.pakkDokumentISbd(byteArray, avsender, mottaker, instanceIdentifier,KVITTERING);
         File file = new File(WRITE_TO);
         try {
             FileUtils.writeByteArrayToFile(file, resultSbd);

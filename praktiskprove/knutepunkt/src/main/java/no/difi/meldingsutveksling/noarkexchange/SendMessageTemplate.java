@@ -63,7 +63,7 @@ public abstract class SendMessageTemplate {
         }
 
         return new SBD(dokumentpakker.pakkDokumentISbd(new BestEduMessage(os.toByteArray()), context.getAvsender(), context.getMottaker(), UUID.randomUUID()
-                .toString()));
+                .toString(),"BEST/EDU"));
     }
 
     abstract void sendSBD(SBD sbd) throws IOException;

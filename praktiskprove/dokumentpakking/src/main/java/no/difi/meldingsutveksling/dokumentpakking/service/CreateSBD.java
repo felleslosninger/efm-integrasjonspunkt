@@ -1,13 +1,5 @@
 package no.difi.meldingsutveksling.dokumentpakking.service;
 
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.UUID;
-
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
-
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.BusinessScope;
@@ -18,26 +10,31 @@ import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.UUID;
+
 public class CreateSBD {
 	public static final String STANDARD = "urn:no:difi:meldingsutveksling:1.0";
 	public static final String HEADER_VERSION = "1.0";
 	public static final String TYPE_VERSION = "1.0";
 	public static final String CONVERSATIONID = "ConversationId";
-	public static final String TYPE = "BEST/EDU";
-
-	public StandardBusinessDocument createSBD(Organisasjonsnummer avsender, Organisasjonsnummer mottaker, Payload payload, String conversationId) {
+	public StandardBusinessDocument createSBD(Organisasjonsnummer avsender, Organisasjonsnummer mottaker, Payload payload, String conversationId,String type) {
 		StandardBusinessDocument doc = new StandardBusinessDocument();
-		doc.setStandardBusinessDocumentHeader(createHeader(avsender, mottaker, conversationId));
+		doc.setStandardBusinessDocumentHeader(createHeader(avsender, mottaker, conversationId, type));
 		doc.setAny(payload);
 		return doc;
 	}
 
-	private StandardBusinessDocumentHeader createHeader(Organisasjonsnummer avsender, Organisasjonsnummer mottaker, String conversationId) {
+	private StandardBusinessDocumentHeader createHeader(Organisasjonsnummer avsender, Organisasjonsnummer mottaker, String conversationId,String type) {
 		StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader();
 		header.setHeaderVersion(HEADER_VERSION);
 		header.getSender().add(createPartner(avsender));
 		header.getReceiver().add(createPartner(mottaker));
-		header.setDocumentIdentification(createDocumentIdentification());
+		header.setDocumentIdentification(createDocumentIdentification(type));
 		header.setBusinessScope(createBusinessScope(conversationId));
 		return header;
 	}
@@ -51,7 +48,7 @@ public class CreateSBD {
 		return partner;
 	}
 
-	private DocumentIdentification createDocumentIdentification() {
+	private DocumentIdentification createDocumentIdentification(String type) {
 		DocumentIdentification doc = new DocumentIdentification();
 
 		GregorianCalendar gCal = new GregorianCalendar();
@@ -65,7 +62,7 @@ public class CreateSBD {
 		}
 
 		doc.setStandard(STANDARD);
-		doc.setType(TYPE);
+		doc.setType(type);
 		doc.setTypeVersion(TYPE_VERSION);
 		doc.setInstanceIdentifier(UUID.randomUUID().toString());
 

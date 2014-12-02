@@ -1,13 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-
-import java.io.IOException;
-import java.security.PrivateKey;
-
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.ByteArrayFile;
@@ -18,13 +10,20 @@ import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
 import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.services.AdresseregisterMock;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import java.io.IOException;
+import java.security.PrivateKey;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SendMessageTemplateTest {
@@ -49,7 +48,7 @@ public class SendMessageTemplateTest {
 		};
 		Mockito.when(
 				dokumentpakker.pakkDokumentISbd(Mockito.any(ByteArrayFile.class), Mockito.any(Avsender.class), Mockito.any(Mottaker.class),
-						Mockito.any(String.class))).thenReturn(new byte[1]);
+						Mockito.any(String.class),"BEST/EDU")).thenReturn(new byte[1]);
 	}
 
 	@Test
