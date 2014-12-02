@@ -81,11 +81,6 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
     private NOARKSystem noarkSystem;
 
     public CorrelationInformation receive(@WebParam(name = "StandardBusinessDocument", targetNamespace = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader", partName = "receiveResponse") StandardBusinessDocument receiveResponse)  {
-      /* ServletContext servletContext =
-                (ServletContext) context.getMessageContext().get(MessageContext.SERVLET_CONTEXT);
-        ApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-        noarkSystem = ctx.getBean(NOARKSystem.class);
-*/
 
 
         if (isReciept(receiveResponse.getStandardBusinessDocumentHeader())) {

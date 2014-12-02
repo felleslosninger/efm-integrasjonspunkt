@@ -48,7 +48,7 @@ public class SendMessageTemplateTest {
 		};
 		Mockito.when(
 				dokumentpakker.pakkDokumentISbd(Mockito.any(ByteArrayFile.class), Mockito.any(Avsender.class), Mockito.any(Mottaker.class),
-						Mockito.any(String.class),"BEST/EDU")).thenReturn(new byte[1]);
+						Mockito.any(String.class),Mockito.anyString())).thenReturn(new byte[1]);
 	}
 
 	@Test
