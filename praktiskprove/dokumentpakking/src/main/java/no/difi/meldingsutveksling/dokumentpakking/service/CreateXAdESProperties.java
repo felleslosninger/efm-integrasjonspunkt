@@ -34,19 +34,19 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import no.difi.meldingsutveksling.dokumentpakking.xades.CertIDListType;
+import no.difi.meldingsutveksling.dokumentpakking.xades.CertIDType;
+import no.difi.meldingsutveksling.dokumentpakking.xades.DataObjectFormatType;
+import no.difi.meldingsutveksling.dokumentpakking.xades.DigestAlgAndValueType;
+import no.difi.meldingsutveksling.dokumentpakking.xades.DigestMethodType;
+import no.difi.meldingsutveksling.dokumentpakking.xades.ObjectFactory;
+import no.difi.meldingsutveksling.dokumentpakking.xades.QualifyingPropertiesType;
+import no.difi.meldingsutveksling.dokumentpakking.xades.SignedDataObjectPropertiesType;
+import no.difi.meldingsutveksling.dokumentpakking.xades.SignedPropertiesType;
+import no.difi.meldingsutveksling.dokumentpakking.xades.SignedSignaturePropertiesType;
+import no.difi.meldingsutveksling.dokumentpakking.xades.X509IssuerSerialType;
 import no.difi.meldingsutveksling.domain.ByteArrayFile;
 import no.difi.meldingsutveksling.domain.Sertifikat;
-import no.difi.meldingsutveksling.domain.xades.CertIDListType;
-import no.difi.meldingsutveksling.domain.xades.CertIDType;
-import no.difi.meldingsutveksling.domain.xades.DataObjectFormatType;
-import no.difi.meldingsutveksling.domain.xades.DigestAlgAndValueType;
-import no.difi.meldingsutveksling.domain.xades.DigestMethodType;
-import no.difi.meldingsutveksling.domain.xades.ObjectFactory;
-import no.difi.meldingsutveksling.domain.xades.QualifyingPropertiesType;
-import no.difi.meldingsutveksling.domain.xades.SignedDataObjectPropertiesType;
-import no.difi.meldingsutveksling.domain.xades.SignedPropertiesType;
-import no.difi.meldingsutveksling.domain.xades.SignedSignaturePropertiesType;
-import no.difi.meldingsutveksling.domain.xades.X509IssuerSerialType;
 
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.w3c.dom.Document;
@@ -66,6 +66,7 @@ public class CreateXAdESProperties {
 		sha1DigestMethod = new DigestMethodType();
 		sha1DigestMethod.setAlgorithm(DigestMethod.SHA1);
 	}
+
 	public Document createPropertiesToSign(List<ByteArrayFile> files, Sertifikat sertifikat) {
 		X509Certificate certificate = sertifikat.getX509Certificate();
 		byte[] certificateDigestValue = sha1(sertifikat.getEncoded());
@@ -73,19 +74,17 @@ public class CreateXAdESProperties {
 		DigestAlgAndValueType certificateDigest = new DigestAlgAndValueType();
 		certificateDigest.setDigestMethod(sha1DigestMethod);
 		certificateDigest.setDigestValue(certificateDigestValue);
-				
+
 		X509IssuerSerialType certificateIssuer = new X509IssuerSerialType();
 		certificateIssuer.setX509IssuerName(certificate.getIssuerDN().getName());
 		certificateIssuer.setX509SerialNumber(certificate.getSerialNumber());
-		
-		
-		CertIDListType signingCertificate =new CertIDListType();
-		CertIDType certIDType= new CertIDType();
+
+		CertIDListType signingCertificate = new CertIDListType();
+		CertIDType certIDType = new CertIDType();
 		certIDType.setCertDigest(certificateDigest);
 		certIDType.setIssuerSerial(certificateIssuer);
 		signingCertificate.getCert().add(certIDType);
-		
-		
+
 		SignedSignaturePropertiesType signedSignatureProperties = new SignedSignaturePropertiesType();
 
 		GregorianCalendar gCal = new GregorianCalendar();
@@ -97,9 +96,9 @@ public class CreateXAdESProperties {
 		} catch (DatatypeConfigurationException e) {
 			throw new RuntimeException(e);
 		}
-		
+
 		signedSignatureProperties.setSigningCertificate(signingCertificate);
-		
+
 		SignedDataObjectPropertiesType signedDataObjectProperties = new SignedDataObjectPropertiesType();
 		signedDataObjectProperties.getDataObjectFormat().addAll(dataObjectFormats(files));
 		SignedPropertiesType signedProperties = new SignedPropertiesType();
