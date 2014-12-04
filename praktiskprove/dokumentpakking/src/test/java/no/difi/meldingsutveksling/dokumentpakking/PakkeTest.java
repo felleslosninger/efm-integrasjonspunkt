@@ -50,7 +50,7 @@ public class PakkeTest {
 	};
 	Dokumentpakker datapakker = new Dokumentpakker();
 
-	@Test @Ignore
+	@Test
 	public void testPakkingAvXML() throws IOException, InvalidKeySpecException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
 		PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(Base64.decodeBase64(avsenderPrivateKey));
 		KeyFactory kf = KeyFactory.getInstance("RSA");
@@ -62,9 +62,5 @@ public class PakkeTest {
 								(Certificate) AdressRegisterFactory.createAdressRegister().getCertificate("960885406"))).build();
 		Mottaker mottaker = new Mottaker(new Organisasjonsnummer("958935429"), mottakerpublicKey);
 
-		
-		FileUtils.writeByteArrayToFile(new File("/Users/lars/sbd2.xml"), datapakker.pakkDokumentISbd(forsendelse, avsender, mottaker, "1234","BEST/EDU"));
-		
-		
 	}
 }

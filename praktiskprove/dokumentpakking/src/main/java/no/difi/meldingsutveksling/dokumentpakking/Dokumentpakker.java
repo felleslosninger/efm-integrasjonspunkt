@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.dokumentpakking;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateAsice;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateManifest;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateSBD;
+import no.difi.meldingsutveksling.dokumentpakking.service.CreateSignature;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateZip;
 import no.difi.meldingsutveksling.dokumentpakking.service.EncryptPayload;
 import no.difi.meldingsutveksling.dokumentpakking.xml.MarshalSBD;
@@ -22,7 +23,7 @@ public class Dokumentpakker {
 	public Dokumentpakker() {
 		createSBD = new CreateSBD();
 		encryptPayload = new EncryptPayload();
-		createAsice = new CreateAsice(null, new CreateZip(), new CreateManifest());
+		createAsice = new CreateAsice(new CreateSignature(), new CreateZip(), new CreateManifest());
 	}
 
 	public byte[] pakkDokumentISbd(ByteArrayFile document, Avsender avsender, Mottaker mottaker, String conversationId,String type) {
