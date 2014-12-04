@@ -61,6 +61,5 @@ public class PakkeTest {
 						new Noekkelpar(kf.generatePrivate(keySpec),
 								(Certificate) AdressRegisterFactory.createAdressRegister().getCertificate("960885406"))).build();
 		Mottaker mottaker = new Mottaker(new Organisasjonsnummer("958935429"), mottakerpublicKey);
-
 	}
 }

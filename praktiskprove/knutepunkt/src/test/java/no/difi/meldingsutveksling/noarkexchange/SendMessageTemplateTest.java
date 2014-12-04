@@ -5,6 +5,7 @@ import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.ByteArrayFile;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.SBD;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
@@ -46,7 +47,7 @@ public class SendMessageTemplateTest {
 				setEventLog(eventLogMock);
 			}
 			@Override
-			void sendSBD(SBD sbd) throws IOException {
+			void sendSBD(StandardBusinessDocument sbd) throws IOException {
 			}
 		};
 		Mockito.when(

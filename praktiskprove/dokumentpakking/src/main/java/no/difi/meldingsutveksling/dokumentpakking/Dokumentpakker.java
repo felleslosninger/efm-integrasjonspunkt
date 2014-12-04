@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.ByteArrayFile;
 import no.difi.meldingsutveksling.domain.Mottaker;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 
 import java.io.ByteArrayOutputStream;
 
@@ -26,11 +27,15 @@ public class Dokumentpakker {
 		createAsice = new CreateAsice(new CreateSignature(), new CreateZip(), new CreateManifest());
 	}
 
-	public byte[] pakkDokumentISbd(ByteArrayFile document, Avsender avsender, Mottaker mottaker, String conversationId,String type) {
-		Payload payload = new Payload(encryptPayload.encrypt(createAsice.createAsice(document, avsender, mottaker).getBytes(), mottaker));
-		no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument doc = createSBD.createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload, conversationId,type);
+	public byte[] pakkDokumentISbd(ByteArrayFile document, Avsender avsender, Mottaker mottaker, String conversationId, String type) {
+		StandardBusinessDocument doc = pakkDokumentIStandardBusinessDocument(document, avsender, mottaker, conversationId, type);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		MarshalSBD.marshal(doc, os);
 		return os.toByteArray();
+	}
+
+	public StandardBusinessDocument pakkDokumentIStandardBusinessDocument(ByteArrayFile document, Avsender avsender, Mottaker mottaker, String conversationId, String type) {
+		Payload payload = new Payload(encryptPayload.encrypt(createAsice.createAsice(document, avsender, mottaker).getBytes(), mottaker));
+		return createSBD.createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload, conversationId, type);
 	}
 }

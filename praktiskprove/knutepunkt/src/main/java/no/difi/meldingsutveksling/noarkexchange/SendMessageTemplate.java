@@ -1,41 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 
-import com.thoughtworks.xstream.XStream;
-import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
-import no.difi.meldingsutveksling.domain.Avsender;
-import no.difi.meldingsutveksling.domain.BestEduMessage;
-import no.difi.meldingsutveksling.domain.Mottaker;
-import no.difi.meldingsutveksling.domain.Noekkelpar;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
-import no.difi.meldingsutveksling.domain.SBD;
-import no.difi.meldingsutveksling.eventlog.Event;
-import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.eventlog.ProcessState;
-import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
-import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
-import no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import no.difi.meldingsutveksling.services.AdresseregisterMock;
-import no.difi.meldingsutveksling.services.AdresseregisterService;
-import org.apache.commons.io.FileUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import javax.xml.bind.DatatypeConverter;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -51,6 +16,44 @@ import java.security.cert.Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.UUID;
+
+import javax.xml.bind.DatatypeConverter;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
+import no.difi.meldingsutveksling.domain.Avsender;
+import no.difi.meldingsutveksling.domain.BestEduMessage;
+import no.difi.meldingsutveksling.domain.Mottaker;
+import no.difi.meldingsutveksling.domain.Noekkelpar;
+import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.eventlog.Event;
+import no.difi.meldingsutveksling.eventlog.EventLog;
+import no.difi.meldingsutveksling.eventlog.ProcessState;
+import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
+import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
+import no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
+import no.difi.meldingsutveksling.services.AdresseregisterMock;
+import no.difi.meldingsutveksling.services.AdresseregisterService;
+
+import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import com.thoughtworks.xstream.XStream;
 
 @Component
 public abstract class SendMessageTemplate {
@@ -72,7 +75,7 @@ public abstract class SendMessageTemplate {
         this(new Dokumentpakker(), new AdresseregisterMock());
     }
 
-    SBD createSBD(PutMessageRequestType sender, KnutepunktContext context) {
+    StandardBusinessDocument createSBD(PutMessageRequestType sender, KnutepunktContext context) {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
        
         try {
@@ -84,11 +87,11 @@ public abstract class SendMessageTemplate {
             throw new RuntimeException(e);
         }
 
-        return new SBD(dokumentpakker.pakkDokumentISbd(new BestEduMessage(os.toByteArray()), context.getAvsender(), context.getMottaker(), UUID.randomUUID()
-                .toString(), "BEST/EDU"));
+        return dokumentpakker.pakkDokumentIStandardBusinessDocument(new BestEduMessage(os.toByteArray()), context.getAvsender(), context.getMottaker(), UUID.randomUUID()
+                .toString(), "melding");
     }
 
-    abstract void sendSBD(SBD sbd) throws IOException;
+    abstract void sendSBD(StandardBusinessDocument sbd) throws IOException;
 
     boolean verifySender(AddressType sender, KnutepunktContext context) {
         try {
@@ -168,7 +171,7 @@ public abstract class SendMessageTemplate {
             return createErrorResponse();
         }
 
-        SBD sbd = createSBD(message, context);
+        StandardBusinessDocument sbd = createSBD(message, context);
         try {
             sendSBD(sbd);
         } catch (IOException e) {
