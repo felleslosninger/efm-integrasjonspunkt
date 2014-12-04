@@ -15,7 +15,6 @@ import no.difi.meldingsutveksling.noark.NOARKSystem;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.CorrelationInformation;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.Partner;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.PartnerIdentification;
@@ -93,7 +92,6 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
             eventLogManager(receiveResponse,null,ProcessState.KVITTERING_MOTTATT);
         }else {
             eventLogManager(receiveResponse,null,ProcessState.SBD_RECIEVED);
-        }
 
         try {
             forberedKvittering(receiveResponse, "leveringsKvittering");
@@ -237,7 +235,7 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
         }else {
             eventLogManager(receiveResponse,null,ProcessState.NO_ARKIVE_UNAVAILABLE);
         }
-
+    }
         return new CorrelationInformation();
     }
 

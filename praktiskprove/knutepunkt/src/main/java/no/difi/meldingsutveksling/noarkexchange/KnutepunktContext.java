@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.domain.Mottaker;
 public class KnutepunktContext {
 	private Avsender avsender;
 	private Mottaker mottaker;
+    private String jpId;
 	
 	public KnutepunktContext(Avsender avsender, Mottaker mottaker) {
 		super();
@@ -27,6 +28,13 @@ public class KnutepunktContext {
 	public void setMottaker(Mottaker mottaker) {
 		this.mottaker = mottaker;
 	}
-	
-	
+
+    public String getJpId() {
+        return jpId;
+    }
+
+    public KnutepunktContext setJpId(String jpId) {
+        this.jpId = jpId;
+        return this;
+    }
 }

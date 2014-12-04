@@ -7,7 +7,6 @@ import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.SBD;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
-import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.services.AdresseregisterMock;
 import org.junit.Before;
@@ -17,12 +16,16 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
+import java.io.File;
 import java.io.IOException;
 import java.security.PrivateKey;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -96,17 +99,17 @@ public class SendMessageTemplateTest {
 		assertThat(pk, is(notNullValue()));
 	}
 
-	@Test
-	public void testSendMessage() throws Exception {
-		PutMessageRequestType request = new PutMessageRequestType();
-		request.setEnvelope(new EnvelopeType());
-		request.getEnvelope().setReceiver(new AddressType());
-		request.getEnvelope().setSender(new AddressType());
-		request.getEnvelope().getReceiver().setOrgnr("960885406");
-		request.getEnvelope().getSender().setOrgnr("960885406");
-		
-		assertThat(subject.sendMessage(request).getResult(), is(nullValue()));
-		
-	}
-
+    @Test
+    public  void testSendMessageWithFileExample() {
+        File file = new File(getClass().getClassLoader().getResource("putmessageEksampel.xml").getFile());
+        PutMessageRequestType putMessageRequestType ;
+        try{
+            JAXBContext jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
+            Unmarshaller unMarshaller = jaxbContext.createUnmarshaller();
+            putMessageRequestType =   unMarshaller.unmarshal(new StreamSource(file) , PutMessageRequestType.class).getValue();
+        } catch (JAXBException e) {
+            throw new RuntimeException(e);
+        }
+        subject.sendMessage(putMessageRequestType);
+    }
 }
