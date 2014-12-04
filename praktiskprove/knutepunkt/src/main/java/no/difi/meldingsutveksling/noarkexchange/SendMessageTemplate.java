@@ -74,7 +74,7 @@ public abstract class SendMessageTemplate {
 
     SBD createSBD(PutMessageRequestType sender, KnutepunktContext context) {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-
+       
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();

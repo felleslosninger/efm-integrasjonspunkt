@@ -6,4 +6,7 @@ CREATE TABLE EVENT_LOG (
                 STATE VARCHAR(50), 
                 ERROR_MESSAGE  LONG VARCHAR,
                 MESSAGE LONG VARCHAR,
+                ARCHIVE_CONVERSATION_ID VARCHAR(36) ,
+                HUB_CONVERSATION_ID VARCHAR(36) ,
+                JPID VARCHAR(36),
                 PRIMARY KEY(UUID));

@@ -42,8 +42,8 @@ public class EventLogDAO {
      * @param e the Event
      */
     public void insertEventLog(Event e) {
-        String insertSQL = "insert into EVENT_LOG(UUID, SENDER, RECEIVER, EVENT_TIMESTAMP, STATE, ERROR_MESSAGE, MESSAGE) " +
-                "values (:uuid, :sender, :receiver, :timestamp, :state, :errorMessage, :message) ";
+        String insertSQL = "insert into EVENT_LOG(UUID, SENDER, RECEIVER, EVENT_TIMESTAMP, STATE, ERROR_MESSAGE, MESSAGE, ARCHIVE_CONVERSATION_ID,HUB_CONVERSATION_ID,JPID) " +
+                "values (:uuid, :sender, :receiver, :timestamp, :state, :errorMessage, :message, :arcCid, :hubCid, :jpid) ";
         Map<String, Object> params = new HashMap<>();
         params.put("uuid", e.getUuid().toString());
         params.put("sender", e.getSender());
@@ -52,6 +52,9 @@ public class EventLogDAO {
         params.put("timestamp", e.getTimeStamp());
         params.put("state", e.getProcessState().toString());
         params.put("errorMessage", e.getExceptionMessage());
+        params.put("arcCid", e.getArkiveConversationId());
+        params.put("hubCid", e.getHubConversationId());
+        params.put("jpid", e.getJpId());
         jdbcTemplate.update(insertSQL, params);
     }
 
@@ -78,4 +81,23 @@ public class EventLogDAO {
         });
     }
 
+    public List<Event> getEventEntries(String id,String conversationType) {
+        String q = "select * from EVENT_LOG where " + conversationType +" = " + id;
+
+        return jdbcTemplate.query(q,new RowMapper<Event>() {
+            @Override
+            public Event mapRow(ResultSet resultSet, int i) throws SQLException {
+                Event e = new Event(resultSet.getLong("event_timestamp"), UUID.fromString(resultSet.getString("uuid")));
+                e.setSender(resultSet.getString("sender"));
+                e.setReceiver(resultSet.getString("receiver"));
+                e.setExceptionMessage(null);
+                e.setMessage(resultSet.getString("message"));
+                e.setProcessStates(ProcessState.valueOf(resultSet.getString("state")));
+                e.setJpId(resultSet.getString("jpid"));
+                e.setArkiveConversationId(resultSet.getString("arcCid"));
+                e.setHubConversationId(resultSet.getString("hubCid"));
+                return e;
+            }
+        } );
+    }
 }

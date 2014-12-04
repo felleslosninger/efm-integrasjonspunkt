@@ -21,6 +21,10 @@ public class Event {
     private String exceptionMessage;
     private String message;
 
+    private String hubConversationId;
+    private String arkiveConversationId;
+    private String jpId;
+
     public Event() {
         this(System.currentTimeMillis(), UUID.randomUUID());
     }
@@ -99,6 +103,30 @@ public class Event {
         return this;
     }
 
+    public String getHubConversationId() {
+        return hubConversationId;
+    }
+
+    public void setHubConversationId(String hubConversationId) {
+        this.hubConversationId = hubConversationId;
+    }
+
+    public String getArkiveConversationId() {
+        return arkiveConversationId;
+    }
+
+    public void setArkiveConversationId(String arkiveConversationId) {
+        this.arkiveConversationId = arkiveConversationId;
+    }
+
+    public String getJpId() {
+        return jpId;
+    }
+
+    public void setJpId(String jpId) {
+        this.jpId = jpId;
+    }
+
     @Override
     public String toString() {
         return "Event{" +
@@ -122,4 +150,6 @@ public class Event {
         event.setMessage(payLoad);
         return event;
     }
+
+
 }

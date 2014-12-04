@@ -1,11 +1,16 @@
 package no.difi.meldingsutveksling.eventlog;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -29,6 +34,12 @@ public class EventLogController {
         eventLogDAO.insertEventLog(event);
     }
 
+
+    @RequestMapping(value = "/conversation", method = RequestMethod.GET )
+    public List<Event> getConvrEntries(@RequestParam String id,@RequestParam String convType) {
+
+      return eventLogDAO.getEventEntries(id,convType);
+    }
     public EventLogDAO getEventLogDAO() {
         return eventLogDAO;
     }
@@ -36,6 +47,8 @@ public class EventLogController {
     public void setEventLogDAO(EventLogDAO eventLogDAO) {
         this.eventLogDAO = eventLogDAO;
     }
+
+
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
