@@ -44,6 +44,7 @@ public class EventLogDAO {
     public void insertEventLog(Event e) {
         String insertSQL = "insert into EVENT_LOG(UUID, SENDER, RECEIVER, EVENT_TIMESTAMP, STATE, ERROR_MESSAGE, MESSAGE, ARCHIVE_CONVERSATION_ID,HUB_CONVERSATION_ID,JPID) " +
                 "values (:uuid, :sender, :receiver, :timestamp, :state, :errorMessage, :message, :arcCid, :hubCid, :jpid) ";
+
         Map<String, Object> params = new HashMap<>();
         params.put("uuid", e.getUuid().toString());
         params.put("sender", e.getSender());

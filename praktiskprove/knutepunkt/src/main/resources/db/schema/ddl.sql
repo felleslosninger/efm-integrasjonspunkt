@@ -5,7 +5,7 @@ CREATE TABLE EVENT_LOG (
                 EVENT_TIMESTAMP BIGINT,
                 STATE VARCHAR(50), 
                 ERROR_MESSAGE  LONG VARCHAR,
-                MESSAGE LONG VARCHAR,
+                MESSAGE CLOB,
                 ARCHIVE_CONVERSATION_ID VARCHAR(36) ,
                 HUB_CONVERSATION_ID VARCHAR(36) ,
                 JPID VARCHAR(36),

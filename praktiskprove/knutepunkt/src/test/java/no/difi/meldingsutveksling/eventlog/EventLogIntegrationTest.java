@@ -23,6 +23,7 @@ public class EventLogIntegrationTest {
         e.setHubConversationId("99999999999999");
         e.setArkiveConversationId("88888888888");
         e.setJpId("7777777777777");
+        e.setMessage("this is a message)");
         eventLogDAO.insertEventLog(e);
     }
 }
