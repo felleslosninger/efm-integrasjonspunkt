@@ -1,13 +1,13 @@
 <no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType>
     <envelope>
         <sender>
-            <orgnr>974763907</orgnr>
+            <orgnr>960885406</orgnr>
             <name>Fylkesmannen i Sogn og Fjordane</name>
             <email>fmsfpost@fylkesmannen.no</email>
             <ref>2014/2703</ref>
         </sender>
         <receiver>
-            <orgnr>974764687</orgnr>
+            <orgnr>958935429</orgnr>
             <name>Fylkesmannen i Nordland</name>
             <email>postmottak@fmno.no</email>
             <ref/>

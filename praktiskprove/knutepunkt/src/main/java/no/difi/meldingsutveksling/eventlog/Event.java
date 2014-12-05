@@ -107,25 +107,25 @@ public class Event {
         return hubConversationId;
     }
 
-    public void setHubConversationId(String hubConversationId) {
-        this.hubConversationId = hubConversationId;
+    public Event setHubConversationId(String hubConversationId) {
+        this.hubConversationId = hubConversationId;return this;
     }
 
     public String getArkiveConversationId() {
         return arkiveConversationId;
     }
 
-    public void setArkiveConversationId(String arkiveConversationId) {
-        this.arkiveConversationId = arkiveConversationId;
+    public Event setArkiveConversationId(String arkiveConversationId) {
+        this.arkiveConversationId = arkiveConversationId;return this;
     }
 
     public String getJpId() {
         return jpId;
     }
 
-    public void setJpId(String jpId) {
+    public Event setJpId(String jpId) {
         this.jpId = jpId;
-    }
+        return this;    }
 
     @Override
     public String toString() {

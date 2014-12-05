@@ -36,7 +36,7 @@ public class EventLogController {
 
 
     @RequestMapping(value = "/conversation", method = RequestMethod.GET )
-    public List<Event> getConvrEntries(@RequestParam String id,@RequestParam String convType) {
+    public List<Event> getConvrEntries(@RequestParam String id,@RequestParam ConversationIdTypes convType) {
 
       return eventLogDAO.getEventEntries(id,convType);
     }

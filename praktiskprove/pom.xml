@@ -15,6 +15,7 @@
         <module>knutepunkt</module>
         <module>adresseregister</module>
         <module>domain</module>
+
     </modules>
 
     <build>

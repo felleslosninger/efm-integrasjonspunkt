@@ -71,18 +71,23 @@ public class EventLogDAO {
         return jdbcTemplate.query(q, params, new RowMapper<Event>() {
             @Override
             public Event mapRow(ResultSet resultSet, int i) throws SQLException {
+
                 Event e = new Event(resultSet.getLong("event_timestamp"), UUID.fromString(resultSet.getString("uuid")));
                 e.setSender(resultSet.getString("sender"));
                 e.setReceiver(resultSet.getString("receiver"));
                 e.setExceptionMessage(null);
                 e.setMessage(resultSet.getString("message"));
                 e.setProcessStates(ProcessState.valueOf(resultSet.getString("state")));
+                e.setJpId(resultSet.getString("JPID"));
+                TODO://spær glenn om hvborfor values fungerer ikke
+                e.setHubConversationId(resultSet.getString("HUB_CONVERSATION_ID"));
+                e.setArkiveConversationId(resultSet.getString("ARCHIVE_CONVERSATION_ID"));
                 return e;
             }
         });
     }
 
-    public List<Event> getEventEntries(String id,String conversationType) {
+    public List<Event> getEventEntries(String id,ConversationIdTypes conversationType) {
         String q = "select * from EVENT_LOG where " + conversationType +" = " + id;
 
         return jdbcTemplate.query(q,new RowMapper<Event>() {
@@ -94,9 +99,9 @@ public class EventLogDAO {
                 e.setExceptionMessage(null);
                 e.setMessage(resultSet.getString("message"));
                 e.setProcessStates(ProcessState.valueOf(resultSet.getString("state")));
-                e.setJpId(resultSet.getString("jpid"));
-                e.setArkiveConversationId(resultSet.getString("arcCid"));
-                e.setHubConversationId(resultSet.getString("hubCid"));
+                e.setJpId(resultSet.getString("JPID"));
+                e.setHubConversationId(resultSet.getString("HUB_CONVERSATION_ID"));
+                e.setArkiveConversationId(resultSet.getString("ARCHIVE_CONVERSATION_ID"));
                 return e;
             }
         } );

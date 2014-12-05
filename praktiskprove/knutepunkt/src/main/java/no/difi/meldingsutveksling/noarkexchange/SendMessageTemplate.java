@@ -1,36 +1,14 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.cert.Certificate;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.UUID;
-
-import javax.xml.bind.DatatypeConverter;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
+import com.thoughtworks.xstream.XStream;
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.BestEduMessage;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.Noekkelpar;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
@@ -42,8 +20,6 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.services.AdresseregisterMock;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
-
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
@@ -53,7 +29,27 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.thoughtworks.xstream.XStream;
+import javax.xml.bind.DatatypeConverter;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.cert.Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.UUID;
 
 @Component
 public abstract class SendMessageTemplate {
@@ -129,6 +125,7 @@ public abstract class SendMessageTemplate {
         } catch (ParserConfigurationException e) {
             throw new RuntimeException(e);
         }
+        String arcCid=message.getEnvelope().getConversationId();
         Element element = (Element) message.getPayload();
         NodeList dataElement = (NodeList) element.getElementsByTagName("com.sun.org.apache.xerces.internal.dom.CharacterDataImpl");
         NodeList nodeList = element.getElementsByTagName("data");
@@ -144,12 +141,6 @@ public abstract class SendMessageTemplate {
         }
         NodeList messageElement = document.getElementsByTagName("jpId");
         String jpId = messageElement.item(0).getTextContent();
-        File payloadFile = new File(System.getProperty("user.home") + File.separator + "testToRemove" + File.separator + "payloadFromNoArkive.xml");
-        try {
-            FileUtils.writeByteArrayToFile(payloadFile, payloadDataTextContent.getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         KnutepunktContext context = new KnutepunktContext();
         context.setJpId(jpId);
         try {
@@ -165,6 +156,7 @@ public abstract class SendMessageTemplate {
             }
             eventLog.log(createOkStateEvent(message, ProcessState.SIGNATURE_VALIDATED));
 
+
         } catch (InvalidSender | InvalidReceiver e) {
             Event errorEvent = createErrorEvent(message, ProcessState.SIGNATURE_VALIDATION_ERROR, e);
             eventLog.log(errorEvent);
@@ -172,6 +164,10 @@ public abstract class SendMessageTemplate {
         }
 
         StandardBusinessDocument sbd = createSBD(message, context);
+
+        Scope item = sbd.getStandardBusinessDocumentHeader().getBusinessScope().getScope().get(0);
+        String hubCid=item.getInstanceIdentifier();
+        eventLog.log(new Event().setJpId(jpId).setArkiveConversationId(arcCid).setHubConversationId(hubCid).setProcessStates(ProcessState.CONVERSATION_ID_LOGGED));
         try {
             sendSBD(sbd);
         } catch (IOException e) {

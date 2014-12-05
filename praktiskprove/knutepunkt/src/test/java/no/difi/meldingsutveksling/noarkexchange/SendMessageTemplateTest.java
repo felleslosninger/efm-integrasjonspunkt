@@ -1,10 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
-import no.difi.meldingsutveksling.domain.Avsender;
-import no.difi.meldingsutveksling.domain.ByteArrayFile;
-import no.difi.meldingsutveksling.domain.Mottaker;
-import no.difi.meldingsutveksling.domain.SBD;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
@@ -14,7 +10,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.xml.bind.JAXBContext;
@@ -32,7 +27,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 @RunWith(MockitoJUnitRunner.class)
 public class SendMessageTemplateTest {
 
-	@Mock
+
 	Dokumentpakker dokumentpakker;
 
 	@Mock
@@ -42,6 +37,7 @@ public class SendMessageTemplateTest {
 
 	@Before
 	public void setUp() {
+        dokumentpakker = new Dokumentpakker();
 		subject = new SendMessageTemplate(dokumentpakker, new AdresseregisterMock()) {
 			{
 				setEventLog(eventLogMock);
@@ -50,15 +46,10 @@ public class SendMessageTemplateTest {
 			void sendSBD(StandardBusinessDocument sbd) throws IOException {
 			}
 		};
-		Mockito.when(
-				dokumentpakker.pakkDokumentISbd(Mockito.any(ByteArrayFile.class), Mockito.any(Avsender.class), Mockito.any(Mottaker.class),
-						Mockito.any(String.class),Mockito.anyString())).thenReturn(new byte[1]);
+
 	}
 
-	@Test
-	public void testCreateSBD() {
-		subject.createSBD(new PutMessageRequestType(), new KnutepunktContext());
-	}
+
 
 	@Test
 	public void testVerifySender() throws Exception {
