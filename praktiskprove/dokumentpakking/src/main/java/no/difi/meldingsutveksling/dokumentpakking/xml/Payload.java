@@ -13,7 +13,7 @@ import no.difi.meldingsutveksling.dokumentpakking.domain.EncryptedContent;
 import org.apache.commons.codec.binary.Base64;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name = "payload")
+@XmlRootElement(name = "payload", namespace = "urn:no:difi:meldingsutveksling:1.0")
 public class Payload {
 	public Payload(EncryptedContent payload) {
 		this.asice = new String(Base64.encodeBase64(payload.getContent()),Charset.forName("UTF-8"));

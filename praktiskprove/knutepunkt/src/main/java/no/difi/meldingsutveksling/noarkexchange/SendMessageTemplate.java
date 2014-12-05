@@ -112,7 +112,7 @@ public abstract class SendMessageTemplate {
             PublicKey mottakerpublicKey = adresseregister.getPublicKey(receiver.getOrgnr());
             if (mottakerpublicKey == null)
                 throw new InvalidReceiver();
-            Mottaker mottaker = new Mottaker(new Organisasjonsnummer(receiver.getOrgnr()), mottakerpublicKey);
+            Mottaker mottaker = new Mottaker(new Organisasjonsnummer("810418052"), mottakerpublicKey);
             context.setMottaker(mottaker);
         } catch (IllegalArgumentException e) {
             throw new InvalidReceiver();
