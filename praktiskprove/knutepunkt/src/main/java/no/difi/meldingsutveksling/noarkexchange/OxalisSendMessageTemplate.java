@@ -1,26 +1,20 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import eu.peppol.outbound.OxalisOutboundModule;
+import eu.peppol.outbound.transmission.TransmissionRequest;
+import eu.peppol.outbound.transmission.TransmissionRequestBuilder;
+import eu.peppol.outbound.transmission.Transmitter;
+import no.difi.meldingsutveksling.dokumentpakking.xml.MarshalSBD;
+import no.difi.meldingsutveksling.domain.sbdh.Scope;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.difi.meldingsutveksling.dokumentpakking.xml.MarshalSBD;
-import no.difi.meldingsutveksling.domain.sbdh.Scope;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
-
-import eu.peppol.outbound.OxalisOutboundModule;
-import eu.peppol.outbound.transmission.TransmissionRequest;
-import eu.peppol.outbound.transmission.TransmissionRequestBuilder;
-import eu.peppol.outbound.transmission.TransmissionResponse;
-import eu.peppol.outbound.transmission.Transmitter;
-
-@Component
-@Profile("dev")
 public class OxalisSendMessageTemplate extends SendMessageTemplate {
 
 	@Override
