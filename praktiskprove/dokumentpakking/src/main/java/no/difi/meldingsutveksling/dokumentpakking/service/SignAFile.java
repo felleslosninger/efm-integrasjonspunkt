@@ -112,6 +112,7 @@ public class SignAFile {
         referenceType.setTransforms(new TransformsType());
         DigestMethodType digestMethodType = new DigestMethodType();
         digestMethodType.setAlgorithm("http://www.w3.org/2001/04/xmlenc#sha256");
+        System.out.println();
 
 
         //************************TIDSPUNKT ELEMENT************************************
