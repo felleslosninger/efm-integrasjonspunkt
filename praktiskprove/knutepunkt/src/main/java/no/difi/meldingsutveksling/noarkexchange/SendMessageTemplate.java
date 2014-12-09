@@ -93,7 +93,7 @@ public abstract class SendMessageTemplate {
     boolean verifySender(AddressType sender, KnutepunktContext context) {
         try {
             Avsender avsender = null;
-            Certificate sertifikat = (Certificate) adresseregister.getCertificate(sender.getOrgnr());
+            Certificate sertifikat = adresseregister.getCertificate(sender.getOrgnr());
             if (sertifikat == null)
                 throw new InvalidSender();
             avsender = Avsender.builder(new Organisasjonsnummer(sender.getOrgnr()), new Noekkelpar(findPrivateKey(), sertifikat)).build();

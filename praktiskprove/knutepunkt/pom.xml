@@ -259,7 +259,7 @@
 
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>adresseregister-mock</artifactId>
+            <artifactId>adresseregister-domain</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
 

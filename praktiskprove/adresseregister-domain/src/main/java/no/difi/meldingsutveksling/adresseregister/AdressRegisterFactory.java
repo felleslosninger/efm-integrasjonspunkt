@@ -1,15 +1,20 @@
 package no.difi.meldingsutveksling.adresseregister;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.HashMap;
 
 import static java.security.cert.CertificateFactory.getInstance;
-import static no.difi.meldingsutveksling.adresseregister.PublicKeyParser.*;
+
 
 /**
  * A very simple mock of an Lookup service providing public certificates
@@ -131,4 +136,18 @@ public class AdressRegisterFactory {
         };
     }
 
+    private static PublicKey toPublicKey(String key) {
+        try {
+            byte[] keyBytes = DatatypeConverter.parseBase64Binary(key);
+            KeyFactory fact = KeyFactory.getInstance("RSA");
+            X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(keyBytes);
+            return fact.generatePublic(x509KeySpec);
+
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("RSA aglorithm not suppoirted ", e);
+        } catch (InvalidKeySpecException e) {
+            throw new IllegalArgumentException("the bytes provided can not be parsed to an RSA public key", e);
+        }
+
+    }
 }
