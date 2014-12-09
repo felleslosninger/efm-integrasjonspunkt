@@ -57,6 +57,17 @@
 							<packageName>no.difi.meldingsutveksling.dokumentpakking.xades</packageName>
 						</configuration>
 					</execution>
+                    <execution>
+                        <id>xjc-kvit</id>
+                        <goals>
+                            <goal>xjc</goal>
+                        </goals>
+                        <configuration>
+                            <schemaFiles>sdp-kvittering.xsd</schemaFiles>
+                            <packageName>no.difi.meldingsutveksling.dokumentpakking.kvit</packageName>
+                            <clearOutputDir>false</clearOutputDir>
+                        </configuration>
+                    </execution>
 					<execution>
 						<id>xjc-asice</id>
 						<goals>
