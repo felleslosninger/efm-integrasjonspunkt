@@ -29,13 +29,11 @@ public class AdressRegisterFactory {
     static {
         // Oslo kommune
         keymap.put("958935429",
-                "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjQl9PL7To6JzkQG7uNZ7" +
-                        "qUtculIKOzpNOkvUtXVV9iGVyvPeEhGN5r4Yh8/ygVHNh/dEbFDhHhkK0lSvZSOC" +
-                        "scy2X5UOv/V28O8iMQ8ysbUoJmsQCQwUFV34/4G+G2If6AIq/hrbkMulb+r+TxAd" +
-                        "zDbXmZsIZ4PwRYcfP1OS3wMfOsO+Sh2uWI8342PtR8CDw20WHT9p/USd0BhpXZ/5" +
-                        "rM0J5EvFVdOlM3zliWe2AHUcEFlsdjSvNe6M0sl8Zm6oIWnsXeqPUsRooEGtRzg0" +
-                        "wnHiUs7YclU1qJBiliVMAMYpX87+ie+v21NH1NB1/OHiFusB27eOW65VLCD91zlj" +
-                        "DwIDAQAB");
+                "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDeLY9lI9jpDSTEjWkulWo9grWQ" +
+                        "0lIjq2EXpV4pjlo8jIAA4+z47oqYnmgMgDZFa+fG/V3HR+KMNikltMFIepDOj9RE" +
+                        "hpd/W5c8BZqugUTzoQ6lpj4o1qwKgzOrg3mASUp8YGp+D2dyNXkSaiAsOlQ67Jha" +
+                        "p0aZJxilYCGED00lkwIDAQAB");
+
 
         // Lånekassen
         keymap.put("960885406",
