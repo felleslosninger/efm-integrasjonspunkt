@@ -161,7 +161,7 @@ public abstract class MessageReceieverTemplate {
         SecretKeySpec secretKeySpec = new SecretKeySpec(aesKey, "AES");
         SecureRandom secureRandom = null;
         try {
-            secureRandom = SecureRandom.getInstance("SHA1PRNG");
+            secureRandom = SecureRandom.getInstance("6");
         } catch (NoSuchAlgorithmException e) {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
         }
@@ -208,7 +208,7 @@ public abstract class MessageReceieverTemplate {
     }
 
     private boolean isSBD(Node node) {
-        return node.getTextContent().toLowerCase().contains("sbd");
+        return node.getTextContent().toLowerCase().contains("melding");
     }
 
     /**

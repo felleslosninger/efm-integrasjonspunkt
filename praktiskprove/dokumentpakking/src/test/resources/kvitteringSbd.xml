@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:StandardBusinessDocument xmlns:ns2="http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader">
+    <ns2:StandardBusinessDocumentHeader>
+        <ns2:HeaderVersion>1.0</ns2:HeaderVersion>
+        <ns2:Sender>
+            <ns2:Identifier Authority="9908:958935429">9908:958935429</ns2:Identifier>
+        </ns2:Sender>
+        <ns2:Receiver>
+            <ns2:Identifier Authority="9908:960885406">9908:960885406</ns2:Identifier>
+        </ns2:Receiver>
+        <ns2:DocumentIdentification>
+            <ns2:Standard>urn:no:difi:meldingsutveksling:1.0</ns2:Standard>
+            <ns2:TypeVersion>1.0</ns2:TypeVersion>
+            <ns2:InstanceIdentifier>f93ac3f4-3d64-4383-b5f3-946c3ca45521</ns2:InstanceIdentifier>
+            <ns2:Type>Kvittering</ns2:Type>
+            <ns2:CreationDateAndTime>2014-12-02T14:41:53.406+01:00</ns2:CreationDateAndTime>
+        </ns2:DocumentIdentification>
+        <ns2:BusinessScope>
+            <ns2:Scope>
+                <ns2:Type>ConversationId</ns2:Type>
+                <ns2:InstanceIdentifier>39b3635c-cb8f-44d8-b058-add2746d2bc0</ns2:InstanceIdentifier>
+                <ns2:Identifier>urn:no:difi:meldingsutveksling:1.0</ns2:Identifier>
+            </ns2:Scope>
+        </ns2:BusinessScope>
+    </ns2:StandardBusinessDocumentHeader>
+    <payload encryptionKey="kC7WPylKPlUH5y92Y6dO0mYHmKto4j1ECgFgdD9levGYnNgdSUplp0s6p7psyw/21KyBDvzrWzOGGfg67+RAtGvdt9OnCWLfHRONzJs49QZY/mOHCfNCARTMZ8ouuTdxUu5dgdlNPSqeNB8E1YnfZBp7SbhTL1E5Ir3PvReo9HM=">JdFyH/eVGHTcl6y7xJpTnqYwdyelAfjffiWyDbKuvefzuS9gChSKOUo7qMsIZrFdKOtJPtsgk9ywrqG2HIFMukY1JJprU/1VgvY9hRgNs/f29iMuGEaDcSx5y0PbdDCV2olOcVcXCFm1VcWcO7Z+DB5HvNVd07TZc1JOS/QknL5i+/XFpzYFZlL5CKPF2/79niCBmfphfw7EdisbDjrrQsdZayUPNRnrBwC/p/UHYS0l0XIf95UYdNyXrLvEmlOe7NwA3dHWGNBpoVrb/9knDitwBcPLFSrmgqO9oRZJlb7UGpx5PhszgM3Tye8xzzlVn2wSGUC+nXfDhYnj+/gRkYwMdTGN5Kv0ARkCyDf5AmtMyxACpsv3K30T+GrPuQrUKFDjffl6fG/W2qferdSAmRB+5eZcIL9pcf2yYDpbevqlFcbWOX+hvTyEDzGJSFFvrnXBChXdtUFN0t/9vsuP8PPSeEKAQRFf9sQPt8TweK6W3TPoroTMX4r62SrlQKlTmZx9ynRxyCENffOjPzqr9ms0gMQqSpydnvhQABIjnF8UiaFgkaIUBFgVAzcj1NZHIJMXLPZ99RDoILvu9vo7YpIuNEWS1sdNT3OeK004PS/aT11Tmf6LP+SwH9mMfcmplwLlPCIPsGw+lzx6TzpksP/1StOqOkBe8AtosiTT0fOs84af+bD1XYc5gM2/V+TrpaBaF1cIDbeW9JquLVPg/AA/Ew4aC02meTyn3bKuVpnNcGURNp+i6ShyC8CzzBtkrBCSs6weErcy9O0TX3iQ2tX0hNN7tibYWIPyms5CQm0wozPFHYDSHEyVYesKKENf</payload>
+</ns2:StandardBusinessDocument>
