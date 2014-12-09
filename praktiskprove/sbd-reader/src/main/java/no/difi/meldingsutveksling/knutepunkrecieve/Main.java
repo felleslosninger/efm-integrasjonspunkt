@@ -1,56 +1,35 @@
 package no.difi.meldingsutveksling.knutepunkrecieve;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Paths;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.commons.cli.BasicParser;
+import no.difi.meldingsutveksling.knutepunkrecieve.exception.CouldNotLoadXML;
+import no.difi.meldingsutveksling.knutepunkrecieve.exception.NoValidProcessId;
+import no.difi.meldingsutveksling.noarkexchange.schema.receive.Scope;
+import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
+
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
-import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
-
 public class Main {
 
-	File workingDir; 
 	Receive receive;
-	
-	
+	CommandLine cmd;
+	Options options;
+
 	public Main(String[] args) throws ParseException, IOException {
-		Options options = new Options();
-		
-		OptionBuilder.withArgName( "inFolder" )
-                .hasArg()
-                .withDescription(  "inFolder" )
-                .create( "inFolder");
-		options.addOption(OptionBuilder.create("inFolder"));
-		
-		OptionBuilder.withArgName( "knutepunkt" )
-                .hasArg()
-                .withDescription(  "knutepunkt" );
-        options.addOption(OptionBuilder .create( "knutepunkt"));
-		
-		CommandLineParser parser = new PosixParser();
-		CommandLine cmd = parser.parse( options, args);
-		
-		if (!cmd.hasOption("inFolder")) workingDir = new File("c:\\data\\oxalis-filer").getCanonicalFile();
-		else workingDir = new File(cmd.getOptionValue("inFolder"));
-		if (!workingDir.isDirectory()) throw new IllegalArgumentException("provided input folder is not a folder");
-		if (!cmd.hasOption("knutepunkt")) receive = new Receive("http://localhost:9090/knutepunkt/receive");
-		else receive = new Receive(cmd.getOptionValue("knutepunkt"));
-		
-		
-		
+		options = new CliOptions();
+		cmd = new PosixParser().parse(options, args);
 	}
 
 	public static void main(String[] args) throws IOException, JAXBException, ParseException {
@@ -58,14 +37,78 @@ public class Main {
 	}
 
 	private void run() throws IOException, JAXBException {
-		for(File f : workingDir.listFiles()){
-			if(f.getAbsolutePath().endsWith(".xml")){
-				Unmarshaller unmarshaller = JAXBContext.newInstance(StandardBusinessDocument.class).createUnmarshaller();
-				StandardBusinessDocument sbd  = unmarshaller.unmarshal(new StreamSource(f), StandardBusinessDocument.class).getValue();
-				System.out.println(sbd.getStandardBusinessDocumentHeader().getReceiver().get(0).getIdentifier().getValue());
+		initializeReceiver();
+		if (cmd.hasOption("help")) {
+			HelpFormatter formatter = new HelpFormatter();
+			formatter.printHelp("sbdreader", options);
+		} else if (cmd.hasOption("d")) {
+			File workingDir = Paths.get(cmd.getOptionValue("d")).normalize().toFile();
+			if (!workingDir.isDirectory())
+				throw new IllegalArgumentException("provided input folder is not a folder");
+			for (File f : workingDir.listFiles()) {
+				if (f.getAbsolutePath().endsWith(".xml")) {
+					StreamSource stream = new StreamSource(f);
+					try {
+						handleStream(stream);
+					} catch (CouldNotLoadXML e) {
 
-				receive.sendEduMeldig(sbd);
+						System.out.println("Could not read " + f.getAbsolutePath() + " as a standard Business Document.");
+					} catch (NoValidProcessId e) {
+
+						System.out.println(f.getAbsolutePath() + " does not have any acceptable PROCESSIDs");
+					}
+				}
 			}
+		} else if (cmd.hasOption("f")) {
+			String uri = cmd.getOptionValue("f");
+			StreamSource stream;
+			if (uri.startsWith("http://") || uri.startsWith("https://")) {
+				stream = new StreamSource(new URL(uri).openStream());
+			} else {
+				stream = new StreamSource(Paths.get(uri).normalize().toFile());
+			}
+			try {
+				handleStream(stream);
+			} catch (CouldNotLoadXML | NoValidProcessId e) {
+				throw new IllegalArgumentException(e);
+			}
+
+		} else {
+			HelpFormatter formatter = new HelpFormatter();
+			formatter.printHelp("sbdreader", options);
 		}
+	}
+
+	private void handleStream(StreamSource stream) throws CouldNotLoadXML, NoValidProcessId {
+		StandardBusinessDocument sbd;
+		try {
+			sbd = unMarshalSBD(stream);
+			if (sbd == null || sbd.getStandardBusinessDocumentHeader() == null) throw new CouldNotLoadXML();
+			for (Scope scope : sbd.getStandardBusinessDocumentHeader().getBusinessScope().getScope()) {
+				if (scope.getType().equals("PROCESSID") && scope.getInstanceIdentifier().equals("urn:www.difi.no:profile:meldingsutveksling:ver1.0")) {
+					receive.callReceive(sbd);
+					return;
+				}
+			}
+			throw new NoValidProcessId();
+		} catch (JAXBException e) {
+			throw new CouldNotLoadXML(e);
+		}
+		
+	}
+
+	private StandardBusinessDocument unMarshalSBD(StreamSource stream) throws JAXBException {
+		Unmarshaller unmarshaller = JAXBContext.newInstance(StandardBusinessDocument.class).createUnmarshaller();
+		StandardBusinessDocument sbd = unmarshaller.unmarshal(stream, StandardBusinessDocument.class).getValue();	
+		return sbd;
+	}
+
+	private void initializeReceiver() throws IOException {
+
+		if (!cmd.hasOption("k"))
+			receive = new Receive("http://localhost:9090/knutepunkt/receive");
+		else
+			receive = new Receive(cmd.getOptionValue("k"));
+
 	}
 }

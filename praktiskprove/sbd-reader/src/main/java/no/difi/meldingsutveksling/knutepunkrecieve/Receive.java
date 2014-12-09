@@ -16,7 +16,7 @@ public class Receive {
 		bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endPointURL);
 	}
 
-	public CorrelationInformation sendEduMeldig(StandardBusinessDocument sbd) {
+	public CorrelationInformation callReceive(StandardBusinessDocument sbd) {
 		return port.receive(sbd);
 	}
 
