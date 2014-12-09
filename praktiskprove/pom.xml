@@ -9,7 +9,6 @@
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <name>Multiproject for meldingsutveksling</name>
-
     <modules>
         <module>adresseregister-web</module>
         <module>adresseregister-domain</module>
