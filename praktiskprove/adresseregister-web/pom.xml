@@ -6,8 +6,7 @@
     <artifactId>adresseregister-web</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>war</packaging>
-
-    <name>adresseregister-mock</name>
+    <name>adresseregister-web</name>
     <url>http://maven.apache.org</url>
 
     <properties>
