@@ -18,13 +18,8 @@ import java.io.IOException;
 public class LogToEventLogOnlySendMessageTemplate extends SendMessageTemplate {
 
     @Override
-<<<<<<< HEAD
     void sendSBD(StandardBusinessDocument sbd) throws IOException {
-        throw new NotImplementedException();
-=======
-    void sendSBD(SBD sbd) throws IOException {
         throw new RuntimeException("Not implemented");
->>>>>>> MIIF-82-adresseregister-som-webservice
     }
 
     @Override

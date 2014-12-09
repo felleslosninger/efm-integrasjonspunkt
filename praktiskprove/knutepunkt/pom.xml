@@ -260,12 +260,7 @@
             <artifactId>adresseregister-domain</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-<<<<<<< HEAD
-        
-        
-        
-        <!-- Start OXALIS -->
-=======
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -273,13 +268,12 @@
             <scope>test</scope>
         </dependency>
 
-        <!--
->>>>>>> MIIF-82-adresseregister-som-webservice
         <dependency>
             <groupId>no.sendregning.ap</groupId>
             <artifactId>oxalis-outbound</artifactId>
-            <version>3.0.2-SNAPSHOT</version>
+            <version>3.1.0-SNAPSHOT</version>
         </dependency>
+
  		<dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
@@ -297,6 +291,6 @@
                 <artifactId>logback-classic</artifactId>
                 <version>1.0.7</version>
             </dependency>
-            <!-- Slutt OXALIS -->
+
     </dependencies>
 </project>
