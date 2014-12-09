@@ -42,23 +42,10 @@ public class Main {
 			HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp("sbdreader", options);
 		} else if (cmd.hasOption("d")) {
-			File workingDir = Paths.get(cmd.getOptionValue("d")).normalize().toFile();
+			File workingDir = Paths.get(cmd.getOptionValue("d")).normalize().toFile().getCanonicalFile();
 			if (!workingDir.isDirectory())
 				throw new IllegalArgumentException("provided input folder is not a folder");
-			for (File f : workingDir.listFiles()) {
-				if (f.getAbsolutePath().endsWith(".xml")) {
-					StreamSource stream = new StreamSource(f);
-					try {
-						handleStream(stream);
-					} catch (CouldNotLoadXML e) {
-
-						System.out.println("Could not read " + f.getAbsolutePath() + " as a standard Business Document.");
-					} catch (NoValidProcessId e) {
-
-						System.out.println(f.getAbsolutePath() + " does not have any acceptable PROCESSIDs");
-					}
-				}
-			}
+			sendAllSbdsInDir(workingDir);
 		} else if (cmd.hasOption("f")) {
 			String uri = cmd.getOptionValue("f");
 			StreamSource stream;
@@ -79,6 +66,26 @@ public class Main {
 		}
 	}
 
+	private void sendAllSbdsInDir(File workingDir) {
+		for (File f : workingDir.listFiles()) {
+			if(f.isDirectory() && cmd.hasOption("r"))
+				sendAllSbdsInDir(f);
+			else if (f.getAbsolutePath().endsWith(".xml")) {
+				StreamSource stream = new StreamSource(f);
+				try {
+					handleStream(stream);
+					System.out.println("Delivered: " + f.getName());
+					
+				} catch (CouldNotLoadXML e) {
+					System.out.println("Could not read " + f.getName() + " as a standard Business Document.");
+				} catch (NoValidProcessId e) {
+
+					System.out.println(f.getName() + " does not have any acceptable PROCESSIDs");
+				}
+			}
+		}
+	}
+
 	private void handleStream(StreamSource stream) throws CouldNotLoadXML, NoValidProcessId {
 		StandardBusinessDocument sbd;
 		try {
@@ -86,7 +93,7 @@ public class Main {
 			if (sbd == null || sbd.getStandardBusinessDocumentHeader() == null) throw new CouldNotLoadXML();
 			for (Scope scope : sbd.getStandardBusinessDocumentHeader().getBusinessScope().getScope()) {
 				if (scope.getType().equals("PROCESSID") && scope.getInstanceIdentifier().equals("urn:www.difi.no:profile:meldingsutveksling:ver1.0")) {
-					receive.callReceive(sbd);
+					//receive.callReceive(sbd);
 					return;
 				}
 			}
