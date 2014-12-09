@@ -1,0 +1,5 @@
+#!/bin/bash
+
+wget -nv -r -np  $1
+
+java -jar $(dirname $0)/sbd-reader-1.0-SNAPSHOT-jar-with-dependencies.jar -r -d ./
