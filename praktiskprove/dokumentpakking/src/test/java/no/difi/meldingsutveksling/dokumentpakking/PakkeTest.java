@@ -1,11 +1,7 @@
 package no.difi.meldingsutveksling.dokumentpakking;
 
-import no.difi.meldingsutveksling.adresseregmock.AdressRegisterFactory;
-import no.difi.meldingsutveksling.domain.Avsender;
-import no.difi.meldingsutveksling.domain.ByteArrayFile;
-import no.difi.meldingsutveksling.domain.Mottaker;
-import no.difi.meldingsutveksling.domain.Noekkelpar;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.adresseregister.AdressRegisterFactory;
+import no.difi.meldingsutveksling.domain.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.junit.Ignore;

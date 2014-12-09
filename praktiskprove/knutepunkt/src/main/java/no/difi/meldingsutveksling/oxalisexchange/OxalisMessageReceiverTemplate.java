@@ -1,33 +1,33 @@
-package no.difi.meldingsutveksling.oxalisexchange;
+    package no.difi.meldingsutveksling.oxalisexchange;
 
-import no.difi.meldingsutveksling.adresseregmock.AdressRegisterFactory;
-import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
-import no.difi.meldingsutveksling.domain.Avsender;
-import no.difi.meldingsutveksling.domain.Mottaker;
-import no.difi.meldingsutveksling.domain.Noekkelpar;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
-import no.difi.meldingsutveksling.eventlog.Event;
-import no.difi.meldingsutveksling.eventlog.EventLog;
-import org.apache.commons.io.FileUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+    import no.difi.meldingsutveksling.adresseregister.AdressRegisterFactory;
+    import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
+    import no.difi.meldingsutveksling.domain.Avsender;
+    import no.difi.meldingsutveksling.domain.Mottaker;
+    import no.difi.meldingsutveksling.domain.Noekkelpar;
+    import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+    import no.difi.meldingsutveksling.eventlog.Event;
+    import no.difi.meldingsutveksling.eventlog.EventLog;
+    import org.apache.commons.io.FileUtils;
+    import org.w3c.dom.Document;
+    import org.w3c.dom.Node;
+    import org.w3c.dom.NodeList;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.security.PrivateKey;
-import java.security.cert.Certificate;
-import java.util.Map;
+    import javax.xml.parsers.DocumentBuilder;
+    import javax.xml.parsers.DocumentBuilderFactory;
+    import javax.xml.parsers.ParserConfigurationException;
+    import javax.xml.transform.Transformer;
+    import javax.xml.transform.TransformerConfigurationException;
+    import javax.xml.transform.TransformerException;
+    import javax.xml.transform.TransformerFactory;
+    import javax.xml.transform.dom.DOMSource;
+    import javax.xml.transform.stream.StreamResult;
+    import java.io.ByteArrayOutputStream;
+    import java.io.File;
+    import java.io.IOException;
+    import java.security.PrivateKey;
+    import java.security.cert.Certificate;
+    import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.

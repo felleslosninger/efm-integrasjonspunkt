@@ -10,7 +10,6 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.IOException;
 
@@ -19,8 +18,13 @@ import java.io.IOException;
 public class LogToEventLogOnlySendMessageTemplate extends SendMessageTemplate {
 
     @Override
+<<<<<<< HEAD
     void sendSBD(StandardBusinessDocument sbd) throws IOException {
         throw new NotImplementedException();
+=======
+    void sendSBD(SBD sbd) throws IOException {
+        throw new RuntimeException("Not implemented");
+>>>>>>> MIIF-82-adresseregister-som-webservice
     }
 
     @Override

@@ -1,0 +1,1 @@
+web:    java  -Dspring.profiles.active=heroku $JAVA_OPTS -jar knutepunkt/target/dependency/jetty-runner.jar --port  $PORT knutepunkt/target/*.war

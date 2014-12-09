@@ -17,8 +17,6 @@
         <springVersion>4.1.2.RELEASE</springVersion>
         <jetty.port>9090</jetty.port>
     </properties>
-
-
     <build>
         <plugins>
             <plugin>
@@ -259,13 +257,24 @@
 
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>adresseregister-mock</artifactId>
+            <artifactId>adresseregister-domain</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+<<<<<<< HEAD
         
         
         
         <!-- Start OXALIS -->
+=======
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.8.2</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!--
+>>>>>>> MIIF-82-adresseregister-som-webservice
         <dependency>
             <groupId>no.sendregning.ap</groupId>
             <artifactId>oxalis-outbound</artifactId>
