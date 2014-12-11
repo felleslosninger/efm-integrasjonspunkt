@@ -1,26 +1,30 @@
 package no.difi.meldingsutveksling.dokumentpakking.service;
 
 import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
-import no.difi.meldingsutveksling.dokumentpakking.asice.CanonicalizationMethodType;
-import no.difi.meldingsutveksling.dokumentpakking.asice.SignedInfoType;
+import no.difi.meldingsutveksling.dokumentpakking.kvit.Aapning;
+import no.difi.meldingsutveksling.dokumentpakking.kvit.CanonicalizationMethodType;
 import no.difi.meldingsutveksling.dokumentpakking.kvit.DigestMethodType;
 import no.difi.meldingsutveksling.dokumentpakking.kvit.KeyInfoType;
 import no.difi.meldingsutveksling.dokumentpakking.kvit.Kvittering;
 import no.difi.meldingsutveksling.dokumentpakking.kvit.Levering;
+import no.difi.meldingsutveksling.dokumentpakking.kvit.ObjectFactory;
 import no.difi.meldingsutveksling.dokumentpakking.kvit.ReferenceType;
 import no.difi.meldingsutveksling.dokumentpakking.kvit.SignatureType;
 import no.difi.meldingsutveksling.dokumentpakking.kvit.SignatureValueType;
+import no.difi.meldingsutveksling.dokumentpakking.kvit.SignedInfoType;
+import no.difi.meldingsutveksling.dokumentpakking.kvit.TransformType;
 import no.difi.meldingsutveksling.dokumentpakking.kvit.TransformsType;
+import no.difi.meldingsutveksling.dokumentpakking.kvit.X509DataType;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Sertifikat;
-import org.apache.commons.io.FileUtils;
 
+import javax.xml.bind.DatatypeConverter;
+import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
@@ -29,7 +33,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
-import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Date;
@@ -42,11 +46,11 @@ public class SignAFile {
 
     public SignAFile(File file,Avsender avsender) {
 
-        signIt(file,avsender);
+        signIt(file,avsender,"levering");
 
     }
 
-    private void signIt(File file,Avsender avsender) {
+    private void signIt(File file,Avsender avsender,String kvitType) {
         PrivateKey privateKey;
         PublicKey publicKey;
         privateKey = avsender.getNoekkelpar().getPrivateKey();
@@ -57,15 +61,17 @@ public class SignAFile {
         Signature rsa;
         BufferedInputStream bufin;
         byte[] signedBytes;
+        Sertifikat certificate;
+        X509Certificate x509Certificate;
         try {
             keyFactory = KeyFactory.getInstance("RSA");
-            Sertifikat certificate= avsender.getNoekkelpar().getSertifikat();
-            Certificate certificate1=certificate.getX509Certificate();
-            myPublicKey=certificate1.getPublicKey();
-            rsa = Signature.getInstance("SHA1withRSA");
+            certificate= avsender.getNoekkelpar().getSertifikat();
+             x509Certificate=certificate.getX509Certificate();
+            myPublicKey=x509Certificate.getPublicKey();
+            rsa = Signature.getInstance("SHA256withRSA");
             rsa.initSign(privateKey);
             FileInputStream fis = new FileInputStream(file);
-             bufin = new BufferedInputStream(fis);
+            bufin = new BufferedInputStream(fis);
 
             byte[] buffer = new byte[1024];
             int len;
@@ -75,10 +81,7 @@ public class SignAFile {
             }
             bufin.close();
             signedBytes = rsa.sign();
-            FileOutputStream fileOutputStream = new FileOutputStream(new File(System.getProperty("user.home")+File.separator+"testToRemove"+
-            File.separator + "signedXml.xml"));
-            fileOutputStream.write(signedBytes);
-            FileUtils.writeByteArrayToFile(file, signedBytes);
+
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         } catch (InvalidKeyException e) {
@@ -92,27 +95,58 @@ public class SignAFile {
         }
 
         Kvittering kvittering = new Kvittering();
-        Levering levering = new Levering();
-
-        kvittering.setLevering(new Levering());
+        if (kvitType.toLowerCase().equals("levering")) {
+            kvittering.setLevering(new Levering());
+        }else {
+            kvittering.setAapning(new Aapning());
+        }
 
         //************************SIGNATURE ELEMENT************************************
         SignatureType signature = new SignatureType();
         //************************CHILDS OF SIGNATURE*********************************
+        ///1. child
         SignedInfoType signedInfoType= new SignedInfoType();
+            CanonicalizationMethodType canonicalizationMethodType = new CanonicalizationMethodType();
+            canonicalizationMethodType.setAlgorithm("http://www.w3.org/2001/10/xml-exc-c14n#");
+            no.difi.meldingsutveksling.dokumentpakking.kvit.SignatureMethodType signatureMethodType = new no.difi.meldingsutveksling.dokumentpakking.kvit.SignatureMethodType();
+            signatureMethodType.setAlgorithm("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
+            signedInfoType.setCanonicalizationMethod(canonicalizationMethodType);
+            signedInfoType.setSignatureMethod(signatureMethodType);
+            ReferenceType referenceType = new ReferenceType();
+            TransformsType transformsType= new TransformsType();
+            TransformType transformType =new TransformType();
+            transformType.setAlgorithm("http://www.w3.org/2000/09/xmldsig#enveloped-signature");
+            transformsType.getTransform().add(transformType);
+            referenceType.setTransforms(transformsType);
+            DigestMethodType digestMethodType = new DigestMethodType();
+            digestMethodType.setAlgorithm("http://www.w3.org/2001/04/xmlenc#sha256");
+            referenceType.setDigestMethod(digestMethodType);
+            referenceType.setDigestValue(signedBytes);
+            signedInfoType.getReference().add(referenceType);
+
+
+
+
+        ///2.child
         SignatureValueType signatureValueType = new SignatureValueType();
+            String signatureValue=DatatypeConverter.printBase64Binary(signedBytes);
+            signatureValueType.setValue(signatureValue.getBytes());
+        ///3.child
         KeyInfoType keyInfoType = new KeyInfoType();
 
-        CanonicalizationMethodType canonicalizationMethodType = new CanonicalizationMethodType();
-        canonicalizationMethodType.setAlgorithm("http://www.w3.org/2001/10/xml-exc-c14n#");
-        no.difi.meldingsutveksling.dokumentpakking.kvit.SignatureMethodType signatureMethodType = new no.difi.meldingsutveksling.dokumentpakking.kvit.SignatureMethodType();
-        signatureMethodType.setAlgorithm("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
-        signedInfoType.setCanonicalizationMethod(canonicalizationMethodType);
-        ReferenceType referenceType = new ReferenceType();
-        referenceType.setTransforms(new TransformsType());
-        DigestMethodType digestMethodType = new DigestMethodType();
-        digestMethodType.setAlgorithm("http://www.w3.org/2001/04/xmlenc#sha256");
-        System.out.println();
+        X509DataType x509DataType = new ObjectFactory().createX509DataType();
+        JAXBElement<byte[]> resultCert = new ObjectFactory().createX509DataTypeX509Certificate(certificate.getEncoded());
+
+        JAXBElement<X509DataType> x509Data = new ObjectFactory().createX509Data(x509DataType);
+
+         x509DataType.getX509IssuerSerialOrX509SKIOrX509SubjectName().add(resultCert);
+         keyInfoType.getContent().add(x509Data);
+        signature.setSignedInfo(signedInfoType);
+        signature.setKeyInfo(keyInfoType);
+        signature.setSignatureValue(signatureValueType);
+        kvittering.setSignature(signature);
+
+
 
 
         //************************TIDSPUNKT ELEMENT************************************
@@ -120,6 +154,19 @@ public class SignAFile {
         gCal.setTime(new Date());
         XMLGregorianCalendar xmlGeorgianCalendar = new XMLGregorianCalendarImpl(gCal);
         kvittering.setTidspunkt(xmlGeorgianCalendar);
+
+        //turn on while debugging
+       /* JAXBContext jaxbContext ;
+        try {
+            jaxbContext = JAXBContext.newInstance(Kvittering.class);
+            Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            jaxbMarshaller.marshal(new ObjectFactory().createKvittering(kvittering) , System.out);
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        }*/
+
+
 
     }
 
