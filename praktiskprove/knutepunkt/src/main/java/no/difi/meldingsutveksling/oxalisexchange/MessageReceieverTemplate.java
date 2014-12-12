@@ -55,7 +55,7 @@ public abstract class MessageReceieverTemplate {
 
         eventLog.log(new Event().setProcessStates(ProcessState.MESSAGE_RECIEVED));
 
-        if (isSBD(n)) {
+        if (isMessage(n)) {
 
             eventLog.log(new Event().setProcessStates(ProcessState.SBD_RECIEVED));
             try {
@@ -207,7 +207,7 @@ public abstract class MessageReceieverTemplate {
         return cipher.doFinal(aesInDisc);
     }
 
-    private boolean isSBD(Node node) {
+    private boolean isMessage(Node node) {
         return node.getTextContent().toLowerCase().contains("melding");
     }
 

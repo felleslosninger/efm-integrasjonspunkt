@@ -19,13 +19,14 @@ import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Sertifikat;
 
 import javax.xml.bind.DatatypeConverter;
+import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -44,13 +45,8 @@ import java.util.GregorianCalendar;
  */
 public class SignAFile {
 
-    public SignAFile(File file,Avsender avsender) {
 
-        signIt(file,avsender,"levering");
-
-    }
-
-    private void signIt(File file,Avsender avsender,String kvitType) {
+    public Kvittering signIt(Object obj, Avsender avsender,KvitteringType kvitType) {
         PrivateKey privateKey;
         PublicKey publicKey;
         privateKey = avsender.getNoekkelpar().getPrivateKey();
@@ -70,7 +66,12 @@ public class SignAFile {
             myPublicKey=x509Certificate.getPublicKey();
             rsa = Signature.getInstance("SHA256withRSA");
             rsa.initSign(privateKey);
-            FileInputStream fis = new FileInputStream(file);
+
+            ByteArrayOutputStream b = new ByteArrayOutputStream();
+            ObjectOutputStream o = new ObjectOutputStream(b);
+            o.writeObject(obj);
+            rsa.update(b.toByteArray());
+            /*FileInputStream fis = new FileInputStream(file);
             bufin = new BufferedInputStream(fis);
 
             byte[] buffer = new byte[1024];
@@ -79,7 +80,7 @@ public class SignAFile {
                 len = bufin.read(buffer);
                 rsa.update(buffer,0,len);
             }
-            bufin.close();
+            bufin.close();*/
             signedBytes = rsa.sign();
 
         } catch (NoSuchAlgorithmException e) {
@@ -95,7 +96,7 @@ public class SignAFile {
         }
 
         Kvittering kvittering = new Kvittering();
-        if (kvitType.toLowerCase().equals("levering")) {
+        if (kvitType.equals(KvitteringType.LEVERING)) {
             kvittering.setLevering(new Levering());
         }else {
             kvittering.setAapning(new Aapning());
@@ -156,18 +157,18 @@ public class SignAFile {
         kvittering.setTidspunkt(xmlGeorgianCalendar);
 
         //turn on while debugging
-       /* JAXBContext jaxbContext ;
-        try {
+        JAXBContext jaxbContext ;
+       /* try {
             jaxbContext = JAXBContext.newInstance(Kvittering.class);
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
             jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             jaxbMarshaller.marshal(new ObjectFactory().createKvittering(kvittering) , System.out);
         } catch (JAXBException e) {
-            e.printStackTrace();
-        }*/
+            throw new RuntimeException(e);
+        }
+*/
 
-
-
+         return kvittering;
     }
 
 

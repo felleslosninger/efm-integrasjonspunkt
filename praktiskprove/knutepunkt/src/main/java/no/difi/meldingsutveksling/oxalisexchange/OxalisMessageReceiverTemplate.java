@@ -8,7 +8,9 @@
     import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
     import no.difi.meldingsutveksling.eventlog.Event;
     import no.difi.meldingsutveksling.eventlog.EventLog;
+    import no.difi.meldingsutveksling.services.AdresseregisterRest;
     import org.apache.commons.io.FileUtils;
+    import org.springframework.beans.factory.annotation.Autowired;
     import org.w3c.dom.Document;
     import org.w3c.dom.Node;
     import org.w3c.dom.NodeList;
@@ -48,6 +50,9 @@ public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
     private static final String PAYLOAD_ZIP = System.getProperty("user.home") + File.separator+"testToRemove"+File.separator + "payload.zip";
     private String payloadExtractDestination =  System.getProperty("user.home") + File.separator+"testToRemove"+File.separator+"Zip Output";
 
+    @Autowired
+    private AdresseregisterRest adresseregisterRest;
+
 
 
     @Override
@@ -78,7 +83,7 @@ public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
         Noekkelpar noekkelpar = new Noekkelpar((PrivateKey) nodeList.get("privateKey"), certificate);
         Avsender.Builder avsenderBuilder = Avsender.builder(new Organisasjonsnummer(recievedBy), noekkelpar);
         Avsender avsender = avsenderBuilder.build();
-        Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo), AdressRegisterFactory.createAdressRegister().getPublicKey(sendTo));
+        Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo), adresseregisterRest.getPublicKey(sendTo));
         ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering(nodeList,kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
         byte[] resultSbd = dokumentpakker.pakkDokumentISbd(byteArray, avsender, mottaker, instanceIdentifier,KVITTERING);
         File file = new File(WRITE_TO);

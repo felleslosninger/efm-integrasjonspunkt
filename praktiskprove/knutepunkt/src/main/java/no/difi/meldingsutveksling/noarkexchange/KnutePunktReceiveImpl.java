@@ -3,6 +3,9 @@ package no.difi.meldingsutveksling.noarkexchange;
 import com.thoughtworks.xstream.XStream;
 import no.difi.meldingsutveksling.adresseregister.AdressRegisterFactory;
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
+import no.difi.meldingsutveksling.dokumentpakking.service.CreateSBD;
+import no.difi.meldingsutveksling.dokumentpakking.service.KvitteringType;
+import no.difi.meldingsutveksling.dokumentpakking.service.SignAFile;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Mottaker;
@@ -19,7 +22,9 @@ import no.difi.meldingsutveksling.noarkexchange.schema.receive.*;
 import no.difi.meldingsutveksling.oxalisexchange.ByteArrayImpl;
 import no.difi.meldingsutveksling.oxalisexchange.Kvittering;
 import no.difi.meldingsutveksling.oxalisexchange.OxalisMessageReceiverTemplate;
+import no.difi.meldingsutveksling.services.AdresseregisterRest;
 import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -69,12 +74,19 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
 
     private NOARKSystem noarkSystem;
 
+    @Autowired
+    private  AdresseregisterRest adresseregisterRest;
+
     public CorrelationInformation receive(@WebParam(name = "StandardBusinessDocument", targetNamespace = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader", partName = "receiveResponse") StandardBusinessDocument receiveResponse) {
-        ServletContext servletContext =
-                (ServletContext) context.getMessageContext().get(MessageContext.SERVLET_CONTEXT);
+            ServletContext servletContext =
+                    (ServletContext) context.getMessageContext().get(MessageContext.SERVLET_CONTEXT);
         ApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext);
         noarkSystem = ctx.getBean(NOARKSystem.class);
-
+        Organisasjonsnummer sender;
+        Organisasjonsnummer reciever;
+        String convId;
+        Avsender avsender;
+        SignAFile signAFile;
         if (isReciept(receiveResponse.getStandardBusinessDocumentHeader())) {
             eventLogManager(receiveResponse, null, ProcessState.KVITTERING_MOTTATT);
         } else {
@@ -82,15 +94,24 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
 
             try {
                 forberedKvittering(receiveResponse, "leveringsKvittering");
+                  sender = new Organisasjonsnummer( receiveResponse.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue());
+                  reciever= new Organisasjonsnummer( receiveResponse.getStandardBusinessDocumentHeader().getReceiver().get(0).getIdentifier().getValue());
+                  convId = receiveResponse.getStandardBusinessDocumentHeader().getBusinessScope().getScope().get(0).getInstanceIdentifier();
+                  Noekkelpar noekkelpar = new Noekkelpar(loadPrivateKey(),  adresseregisterRest.getCertificate(reciever.toString().split(":")[1]));
+                  avsender= new Avsender(reciever,noekkelpar);
+                 signAFile = new SignAFile();
+
+                new OxalisSendMessageTemplate().sendSBD(new CreateSBD().createSBD(sender,reciever,signAFile.signIt(receiveResponse.getAny(),avsender, KvitteringType.LEVERING),convId,"kvittering"));
             } catch (IOException e) {
                 eventLogManager(receiveResponse, e, ProcessState.LEVERINGS_KVITTERING_SENT_FAILED);
+                throw new RuntimeException(e);
             }
 
             String RSA_INSTANCE = "RSA";
             //*** query to Elma to get PK
             List<Partner> senders = receiveResponse.getStandardBusinessDocumentHeader().getSender();
-            Partner sender = senders.get(0);
-            PartnerIdentification orgNr = sender.getIdentifier();
+            Partner senderPartner = senders.get(0);
+            PartnerIdentification orgNr = senderPartner.getIdentifier();
             String[] orgNrArr = orgNr.getValue().split(":");
             Payload payload = null;
 
@@ -218,6 +239,13 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
                     eventLogManager(receiveResponse, null, ProcessState.ARKIVE_RESPONSE_NULL);
                 } else {
                     eventLogManager(receiveResponse, null, ProcessState.BEST_EDU_SENT);
+
+                    try {
+                        new OxalisSendMessageTemplate().sendSBD(new CreateSBD().createSBD(sender,reciever,signAFile.signIt(receiveResponse.getAny(),avsender, KvitteringType.AAPNING),convId,"kvittering"));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+
                 }
             } else {
                 eventLogManager(receiveResponse, null, ProcessState.NO_ARKIVE_UNAVAILABLE);
@@ -241,11 +269,11 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
         if (instanceIdentifier.contains("BEST/EDU")) {
             instanceIdentifier.replace("BEST/EDU", "Kvittering");
         }
-        Certificate certificate = (Certificate) AdressRegisterFactory.createAdressRegister().getCertificate(recievedBy);
+        Certificate certificate =adresseregisterRest.getCertificate(recievedBy);
         Noekkelpar noekkelpar = new Noekkelpar(loadPrivateKey(), certificate);
         Avsender.Builder avsenderBuilder = Avsender.builder(new Organisasjonsnummer(recievedBy), noekkelpar);
         Avsender avsender = avsenderBuilder.build();
-        Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo), AdressRegisterFactory.createAdressRegister().getPublicKey(sendTo));
+        Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo),adresseregisterRest.getPublicKey(sendTo));
         ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering(receiveResponse, kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
         byte[] resultSbd = dokumentpakker.pakkDokumentISbd(byteArray, avsender, mottaker, instanceIdentifier, KVITTERING);
         File file = new File(WRITE_TO);
