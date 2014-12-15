@@ -51,9 +51,7 @@ public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
     private String payloadExtractDestination =  System.getProperty("user.home") + File.separator+"testToRemove"+File.separator+"Zip Output";
 
     @Autowired
-    private AdresseregisterRest adresseregisterRest;
-
-
+    private AdresseregisterRest adresseRegisterClient;
 
     @Override
     void sendLeveringskvittering(Map nodeList) {
@@ -83,7 +81,7 @@ public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
         Noekkelpar noekkelpar = new Noekkelpar((PrivateKey) nodeList.get("privateKey"), certificate);
         Avsender.Builder avsenderBuilder = Avsender.builder(new Organisasjonsnummer(recievedBy), noekkelpar);
         Avsender avsender = avsenderBuilder.build();
-        Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo), adresseregisterRest.getPublicKey(sendTo));
+        Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo), adresseRegisterClient.getPublicKey(sendTo));
         ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering(nodeList,kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
         byte[] resultSbd = dokumentpakker.pakkDokumentISbd(byteArray, avsender, mottaker, instanceIdentifier,KVITTERING);
         File file = new File(WRITE_TO);
