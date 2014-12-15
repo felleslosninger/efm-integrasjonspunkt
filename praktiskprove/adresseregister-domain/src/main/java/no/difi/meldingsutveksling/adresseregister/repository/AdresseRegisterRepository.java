@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @RepositoryRestResource(collectionResourceRel = "certificates", path = "certificates")
-public interface AdresseRegisterRepository extends PagingAndSortingRepository<VirksomhetsSertifikat, String> {
+public interface AdresseRegisterRepository extends PagingAndSortingRepository<VirksomhetsSertifikat, Integer> {
         VirksomhetsSertifikat findByorganizationNumber(@Param("organizationNumber") String organizationNumber);
 
 }

@@ -8,7 +8,7 @@ import javax.persistence.*;
  * @author Glenn Bech
  */
 @Entity
-@Table(name = "ACCOUNT")
+@Table(name = "CERTIFICATE")
 public class VirksomhetsSertifikat {
 
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -19,16 +19,18 @@ public class VirksomhetsSertifikat {
 
     private String orgName;
 
-    private String pemFormatedCertficiate;
+
+    @Column(length=64000)
+    private String pem;
 
     private boolean active;
 
-    public String getPemFormatedCertficiate() {
-        return pemFormatedCertficiate;
+    public String getPem() {
+        return pem;
     }
 
-    public void setPemFormatedCertficiate(String pemFormatedCertficiate) {
-        this.pemFormatedCertficiate = pemFormatedCertficiate;
+    public void setPem(String pem) {
+        this.pem = pem;
     }
 
     public Integer getId() {

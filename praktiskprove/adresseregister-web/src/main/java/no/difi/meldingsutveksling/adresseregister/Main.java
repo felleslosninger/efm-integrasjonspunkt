@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 @ComponentScan
 @PropertySource({"classpath:application.properties"})
 @Import(RepositoryRestMvcConfiguration.class)
+
 @EnableAutoConfiguration
 @EnableJpaRepositories
 public class Main extends SpringBootServletInitializer {
