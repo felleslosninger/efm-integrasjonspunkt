@@ -1,9 +1,6 @@
 package no.difi.meldingsutveksling.adresseregister.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 /**
  * Virksomhetssertfikat is stored in the database as PEM data.
@@ -15,6 +12,7 @@ import javax.persistence.Table;
 public class VirksomhetsSertifikat {
 
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Id
     private Integer id;
 
     private String organizationNumber;
@@ -64,4 +62,5 @@ public class VirksomhetsSertifikat {
     public void setActive(boolean active) {
         this.active = active;
     }
+
 }

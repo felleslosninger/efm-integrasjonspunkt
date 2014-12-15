@@ -1,0 +1,45 @@
+[
+    {
+        "organizationNumber": "123456789",
+        "orgName": "DIFI",
+        "pemFormatedCertficiate": "-----BEGIN PRIVATE KEY-----{
+        MIICdQIBADANBgkqhkiG9w0BAQEFAASCAl8wggJbAgEAAoGBAN4tj2Uj2OkNJMSN
+            aS6Vaj2CtZDSUiOrYRelXimOWjyMgADj7PjuipieaAyANkVr58b9XcdH4ow2KSW0
+        wUh6kM6P1ESGl39blzwFmq6BRPOhDqWmPijWrAqDM6uDeYBJSnxgan4PZ3I1eRJq
+            ICw6VDrsmFqnRpknGKVgIYQPTSWTAgMBAAECgYBeh6v3MGVd4wW9yxzxgQkO2so9
+        r/7axlQtJ2ME81hZYr4jotZ0o6m8fclvaC2vI9YdyDdaTq+JUJH5RQrnt55cOcr+
+1TLffeWVoivOZXwAqyUhCxPCkA8b4LO1oK5kXDbVyc2lV/0xFLmAU07DE2p1DYaD
+CIh2jZzsuBwj7EPUAQJBAPAzyX9VVXWlsx/H7Pa0PggB6Xo4czn+MTDv56X3aDRk
+XUtqukRFIcjcy6l5Zl7ER4CVu3aswgtGw40ds0Dji4ECQQDsyk2QEyayOhFwLziD
+h29tS6QK7U9WqysuDx5sCDxXMT1MtsQlTcj4W02Ak8PRYDS3ccdpMlMttYKXLy+W
+C0sTAkBsVn9AXkWwTW8wG2VGlF8SD4K17HYUJxEayGnL0n3+e3IUzOt8VU36oZN+
+OdIxVggF+ALYcO0IVv9mS4oI71iBAkByWawlVKpOTa6YL6WqFyCfdnTs9fdnklfS
+8WguobeKH/RLdMO6hBr2nRkLa9CX707l/CNh0PTMUSiUnCvt2NxTAkBPwCWmARS4
+cZjrWFtnjw4mUjH+fR//WnLqYRFETNasROMr64uX+rtNxrvCXI4VB0oiuvKHwXd3
+uc9j/4wX04Kk
+-----END PRIVATE KEY-----"
+
+    },
+    {
+        "organizationNumber": "123456789",
+        "orgName": "DIFI",
+    "pemFormatedCertificate":"-----BEGIN PRIVATE KEY-----
+MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAM7w0IG4Cj7Pr7KH
+DD4fM3LFlzvN5Pju2bnNnsDRhoR7wsK+xxVXLcsl+kScNxNIjy2+6BaR+pniM4bA
+TqK1fjrN2oEZ6MinITHJzuQYp/MTg4+afCV4vKXmkl+siopjjwWWD7a4FhP6TQfj
+gcApPIEf1iwo8bghL2tQGwUjohLFAgMBAAECgYAling44Bszs9eKyocFCgH6UzAR
+UFO2eRYUZ+Hh1uDRTeZSD+vryinrjZMuOSygmewnf1d5KLhOjEOOsXpSeBxS2RYo
+csteW78txCRsSEJo7i9ASmw7w0vvN0tVqTCbjNokI8xS6Kn+GH96vMCNq4ImuBkg
+zWuaDA6GP/FQorSCzQJBAOvxwJIWvc44aSTceYYOVQUJZ3b9a6y2rpuvdcpuPwJL
+Y2YbPq5SlQAhsh5Yss2d8aAGvaDXbZOPVZyvCaeAMf8CQQDgh+4uNMQAu556DNPa
+GDl3JI4JmgZl8bbiRQRFU5h02AkoNv03izyafOqpl61X1WCeHBx1nn2ivIXJ/0ub
+X3M7AkBshC3rguYdOLizKWwDCgh0XpTllzy0nPjFxfdI+VeleILo7VLw3i6Fdvnz
+Fxx1kVUWIsOIfEx7d4sKmz63eTCFAkB+MafabGmlB84gRsljEK5rmi4Ck4D5Fwt0
+zNmDpWJQeYNcCNv0tdsP8RlqzAbvEMxG0QHl0XhHWLHRQB1cbB81AkEAtnzxewKS
+P40rj3bkKSj8tuSOBbnpzWp93P8FFkyHNZCKbEArf89gYHLopwoe3kixp3u8QiXl
+s2TPH0mjyb7Keg==
+-----END PRIVATE KEY-----"
+
+    }
+]
+

@@ -9,14 +9,17 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.rest.webmvc.config.RepositoryRestMvcConfiguration;
 
 import java.util.logging.Logger;
 
 @ComponentScan
 @PropertySource({"classpath:application.properties"})
+@Import(RepositoryRestMvcConfiguration.class)
 @EnableAutoConfiguration
 @EnableJpaRepositories
 public class Main extends SpringBootServletInitializer {

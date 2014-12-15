@@ -1,1 +1,1 @@
-web: java  -Dspring.profiles.active=heroku $JAVA_OPTS -jar adresseregister/target/dependency/jetty-runner.jar --port  $PORT adresseregister-web/target/*.war
+web: java  -Dspring.profiles.active=heroku $JAVA_OPTS -jar adresseregister/target/dependency/jetty-runner.jar --port  $PORT adresseregister-web/target/*.war;

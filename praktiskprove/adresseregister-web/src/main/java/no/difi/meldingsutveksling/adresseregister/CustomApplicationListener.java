@@ -1,23 +1,31 @@
 package no.difi.meldingsutveksling.adresseregister;
 
+import no.difi.meldingsutveksling.adresseregister.data.DataGenerator;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
+import org.springframework.context.event.ContextStartedEvent;
 
-import java.util.logging.Level;
+import java.io.IOException;
 import java.util.logging.Logger;
 
 /**
- * Created with IntelliJ IDEA.
- * User: glennbech
- * Date: 09.12.14
- * Time: 16:40
- * To change this template use File | Settings | File Templates.
+ * @author Glenn Bech
  */
 public class CustomApplicationListener implements org.springframework.context.ApplicationListener {
 
     private final Logger log = Logger.getLogger(CustomApplicationListener.class.getName());
 
+    @Override
     public void onApplicationEvent(final ApplicationEvent event) {
-        log.log(Level.INFO, "Event = " + event);
+        if (event instanceof ContextStartedEvent) {
+            final ApplicationContext context = ((ContextStartedEvent) event).getApplicationContext();
+            DataGenerator loader = new DataGenerator();
+            try {
+                loader.load(context);
+            } catch (IOException e) {
+                throw new RuntimeException(e.getMessage(), e);
+            }
+        }
     }
 }
 
