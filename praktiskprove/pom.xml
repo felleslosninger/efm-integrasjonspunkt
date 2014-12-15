@@ -20,7 +20,22 @@
     </modules>
     <build>
         <pluginManagement>
+
             <plugins>
+                <plugin>
+                    <groupId>com.heroku.sdk</groupId>
+                    <artifactId>heroku-maven-plugin</artifactId>
+                    <version>0.1.9</version>
+                    <configuration>
+                        <appName>muv-adresseregister</appName>
+                        <processTypes>
+                            <web>java $JAVA_OPTS -jar
+                                adresseregister-web/target/{project.artifactId}-{project.version}.{project.packaging}
+                            </web>
+                        </processTypes>
+                    </configuration>
+                </plugin>
+
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>sonar-maven-plugin</artifactId>
@@ -43,6 +58,8 @@
                 <artifactId>sonar-maven-plugin</artifactId>
                 <version>2.4</version>
             </plugin>
+
+
         </plugins>
     </build>
 

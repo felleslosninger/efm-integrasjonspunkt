@@ -17,15 +17,7 @@ public class CustomApplicationListener implements org.springframework.context.Ap
 
     @Override
     public void onApplicationEvent(final ApplicationEvent event) {
-        if (event instanceof ContextStartedEvent) {
-            final ApplicationContext context = ((ContextStartedEvent) event).getApplicationContext();
-            DataGenerator loader = new DataGenerator();
-            try {
-                loader.load(context);
-            } catch (IOException e) {
-                throw new RuntimeException(e.getMessage(), e);
-            }
-        }
+
     }
 }
 
