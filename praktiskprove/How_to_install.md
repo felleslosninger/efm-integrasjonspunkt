@@ -4,6 +4,8 @@
 ###  1.  Application uses *Oxalis* outbound module to send messages
 ###      &nbsp;&nbsp;&nbsp;&nbsp;so first off all you need to set up home catalog ".oxalis" under user catalog "C:\Users\user\.oxalis windows or ~/.oxalis in unix".
 
+###  2.  Put oxalis-global.properties, oxalis-keystore.jks, truststore-test.jks in the ".oxalis" catalog. Dont have the proper files contact to peppol authority in Difi
+
 ###  2.  Build with maven in root catalog "mvn clean install"
 
 ###  3.  Optional: You can use adresseregister-web module for address registry simulation under development. To turn on 
