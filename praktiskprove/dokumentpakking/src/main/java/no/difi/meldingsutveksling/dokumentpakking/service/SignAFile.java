@@ -71,16 +71,6 @@ public class SignAFile {
             ObjectOutputStream o = new ObjectOutputStream(b);
             o.writeObject(obj);
             rsa.update(b.toByteArray());
-            /*FileInputStream fis = new FileInputStream(file);
-            bufin = new BufferedInputStream(fis);
-
-            byte[] buffer = new byte[1024];
-            int len;
-            while (bufin.available() !=0) {
-                len = bufin.read(buffer);
-                rsa.update(buffer,0,len);
-            }
-            bufin.close();*/
             signedBytes = rsa.sign();
 
         } catch (NoSuchAlgorithmException e) {
@@ -170,7 +160,5 @@ public class SignAFile {
 
          return kvittering;
     }
-
-
 
 }

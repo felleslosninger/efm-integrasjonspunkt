@@ -1,10 +1,10 @@
 # *Secure message hub installation guide, powered by:*  *Inmeta*
 
 
-###  1. Application manager is "Apache maven" so make sure meven is installed.
+###  1. Application manager is "Apache maven" so make sure maven is installed.
 
 ###  2.  Application uses *Oxalis* outbound module to send messages
-###      &nbsp;&nbsp;&nbsp;&nbsp;so first of all you need to set up home catalog ".oxalis" under user catalog "C:\Users\user\.oxalis windows or ~/.oxalis in unix".
+###      &nbsp;&nbsp;&nbsp;&nbsp;so first of all you need to set up home catalog ".oxalis" under user catalog "C:\Users\user\\.oxalis windows or ~/.oxalis in unix".
 
 ###  3.  Put oxalis-global.properties, oxalis-keystore.jks, truststore-test.jks in the ".oxalis" catalog. Dont have the proper files contact to peppol authority in Difi
 

@@ -125,19 +125,22 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
             try {
                 jaxbContextP = JAXBContext.newInstance(Payload.class);
             } catch (JAXBException e) {
-
+                eventLogManager(receiveResponse, e, ProcessState.SOME_OTHER_EXCEPTION);
+                throw new RuntimeException(e);
             }
             Unmarshaller unMarshallerP = null;
             try {
                 unMarshallerP = jaxbContextP.createUnmarshaller();
             } catch (JAXBException e) {
-                e.printStackTrace();
+                eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
+                throw new RuntimeException(e);
             }
 
             try {
                 payload = unMarshallerP.unmarshal((org.w3c.dom.Node) receiveResponse.getAny(), Payload.class).getValue();
             } catch (JAXBException e) {
-                e.printStackTrace();
+                eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
+                throw new RuntimeException(e);
             }
             String aesInRsa = payload.getEncryptionKey();
             String payloadString = payload.getAsice();
@@ -150,15 +153,17 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
                 cipher = Cipher.getInstance(RSA_INSTANCE);
             } catch (NoSuchAlgorithmException e) {
                 eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
-
+                throw new RuntimeException(e);
             } catch (NoSuchPaddingException e) {
                 eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
+                throw new RuntimeException(e);
             }
             PrivateKey privateKey = null;
             try {
                 privateKey = loadPrivateKey();
             } catch (IOException e) {
                 eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
+                throw new RuntimeException(e);
             }
             try {
                 cipher.init(Cipher.DECRYPT_MODE, privateKey);
