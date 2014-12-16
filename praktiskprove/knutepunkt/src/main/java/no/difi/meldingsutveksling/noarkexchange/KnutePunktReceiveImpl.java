@@ -24,6 +24,11 @@ import no.difi.meldingsutveksling.noarkexchange.schema.receive.*;
 import no.difi.meldingsutveksling.oxalisexchange.ByteArrayImpl;
 import no.difi.meldingsutveksling.oxalisexchange.Kvittering;
 import no.difi.meldingsutveksling.oxalisexchange.OxalisMessageReceiverTemplate;
+<<<<<<< HEAD
+=======
+import no.difi.meldingsutveksling.services.AdresseregisterRest;
+
+>>>>>>> Replaced homebrew encryption with CMS envelope
 import org.apache.commons.io.FileUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -45,9 +50,11 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.BindingType;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
+
 import java.io.*;
 import java.security.*;
 import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -137,8 +144,8 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
                 eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
                 throw new MeldingsUtvekslingRuntimeException(e);
             }
-            String aesInRsa = payload.getEncryptionKey();
-            String payloadString = payload.getAsice();
+            String aesInRsa = "";
+            String payloadString = "";
             byte[] aesInDisc = DatatypeConverter.parseBase64Binary(aesInRsa);
             byte[] aesEncZip = DatatypeConverter.parseBase64Binary(payloadString);
 
@@ -291,8 +298,13 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
         Noekkelpar noekkelpar = new Noekkelpar(loadPrivateKey(), certificate);
         Avsender.Builder avsenderBuilder = Avsender.builder(new Organisasjonsnummer(recievedBy), noekkelpar);
         Avsender avsender = avsenderBuilder.build();
+<<<<<<< HEAD
         Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo),certificate.getPublicKey());
         ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering( kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
+=======
+        Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo),(X509Certificate) certificate);
+        ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering(receiveResponse, kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
+>>>>>>> Replaced homebrew encryption with CMS envelope
         byte[] resultSbd = dokumentpakker.pakkDokumentISbd(byteArray, avsender, mottaker, instanceIdentifier, KVITTERING);
         File file = new File(WRITE_TO);
         try {

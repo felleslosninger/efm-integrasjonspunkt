@@ -1,13 +1,9 @@
 package no.difi.meldingsutveksling.dokumentpakking;
 
-import no.difi.meldingsutveksling.adresseregister.AdressRegisterFactory;
-import no.difi.meldingsutveksling.domain.*;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.FileUtils;
-import org.junit.Ignore;
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
-import java.io.File;
 import java.io.IOException;
 import java.security.KeyFactory;
 import java.security.KeyStoreException;
@@ -15,8 +11,23 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.text.ParseException;
+
+import no.difi.meldingsutveksling.adresseregister.AdressRegisterFactory;
+import no.difi.meldingsutveksling.domain.Avsender;
+import no.difi.meldingsutveksling.domain.ByteArrayFile;
+import no.difi.meldingsutveksling.domain.Mottaker;
+import no.difi.meldingsutveksling.domain.Noekkelpar;
+import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+
+import org.apache.commons.codec.binary.Base64;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.junit.Ignore;
+import org.junit.Test;
 
 public class PakkeTest {
 	final PublicKey mottakerpublicKey = AdressRegisterFactory.createAdressRegister().getPublicKey("958935429");
@@ -46,16 +57,17 @@ public class PakkeTest {
 	};
 	Dokumentpakker datapakker = new Dokumentpakker();
 
-	@Test
-	public void testPakkingAvXML() throws IOException, InvalidKeySpecException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
+	@Test @Ignore
+	public void testPakkingAvXML() throws IOException, InvalidKeySpecException, KeyStoreException, NoSuchAlgorithmException, CertificateException, CMSException, OperatorCreationException, ParseException {
 		PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(Base64.decodeBase64(avsenderPrivateKey));
 		KeyFactory kf = KeyFactory.getInstance("RSA");
 
-		Avsender avsender = Avsender
-				.builder(
-						new Organisasjonsnummer("960885406"),
-						new Noekkelpar(kf.generatePrivate(keySpec),
-								(Certificate) AdressRegisterFactory.createAdressRegister().getCertificate("960885406"))).build();
-		Mottaker mottaker = new Mottaker(new Organisasjonsnummer("958935429"), mottakerpublicKey);
+		Avsender avsender = Avsender.builder(new Organisasjonsnummer("960885406"),
+				new Noekkelpar(kf.generatePrivate(keySpec), (Certificate) AdressRegisterFactory.createAdressRegister().getCertificate("960885406"))).build();
+		Mottaker mottaker = new Mottaker(new Organisasjonsnummer("958935429"), (X509Certificate) AdressRegisterFactory.createAdressRegister().getCertificate(
+				"958935429"));
+		 assertThat(new Dokumentpakker().pakkDokumentIStandardBusinessDocument(forsendelse, avsender, mottaker, "123", "Melding"), is(notNullValue()));
+		
 	}
+	
 }

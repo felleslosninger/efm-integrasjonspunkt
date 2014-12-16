@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.dokumentpakking.service;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.BusinessScope;
 import no.difi.meldingsutveksling.domain.sbdh.DocumentIdentification;
+import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.domain.sbdh.Partner;
 import no.difi.meldingsutveksling.domain.sbdh.PartnerIdentification;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
@@ -12,6 +13,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
+
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.UUID;

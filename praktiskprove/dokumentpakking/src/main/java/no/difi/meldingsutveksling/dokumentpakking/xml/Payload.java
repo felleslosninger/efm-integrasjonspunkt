@@ -4,36 +4,42 @@ import java.nio.charset.Charset;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlValue;
 
-import no.difi.meldingsutveksling.dokumentpakking.domain.EncryptedContent;
+import no.difi.meldingsutveksling.dokumentpakking.xades.SignatureType;
 
 import org.apache.commons.codec.binary.Base64;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "payload", namespace = "urn:no:difi:meldingsutveksling:1.0")
 public class Payload {
-	public Payload(EncryptedContent payload) {
-		this.asice = new String(Base64.encodeBase64(payload.getContent()),Charset.forName("UTF-8"));
-		this.encryptionKey = new String(Base64.encodeBase64(payload.getKey()),Charset.forName("UTF-8"));
+
+	public Payload(byte[] payload) {
+		this.Content =  new Content( new String(Base64.encodeBase64(payload),Charset.forName("UTF-8")));
+		this.Signature = new SignatureType();
 	}
 	public Payload() {
 		// Need no-arg constructor for JAXB
 	}
+//	
+	@XmlElement
+	private SignatureType Signature;
 	
-	@XmlValue
-	private String asice;
+	@XmlElement
+	private Content Content;
 
-	@XmlAttribute
-	private String encryptionKey;
+	public String getContent() {
+		return Content.getContent();
+	}
 
-	public String getAsice() {
-		return asice;
+	public SignatureType getSignature() {
+		return Signature;
 	}
-	public String getEncryptionKey() {
-		return encryptionKey;
+	public void setSignature(SignatureType signature) {
+		Signature = signature;
 	}
+	
+
 
 }

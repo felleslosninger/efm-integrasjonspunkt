@@ -1,22 +1,22 @@
 package no.difi.meldingsutveksling.domain;
 
-import java.security.PublicKey;
+import java.security.cert.X509Certificate;
 
 public class Mottaker extends Aktor {
 
-	private PublicKey publicKey;
+	private X509Certificate sertifikat;
 	
-	public Mottaker(Organisasjonsnummer orgNummer, PublicKey publicKey) {
+	public Mottaker(Organisasjonsnummer orgNummer, X509Certificate sertifikat) {
 		super(orgNummer);
-		setPublicKey(publicKey);
+		setSertifikat(sertifikat);
 	}
 
-	public PublicKey getPublicKey() {
-		return publicKey;
+	public X509Certificate getSertifikat() {
+		return sertifikat;
 	}
 
-	private void setPublicKey(PublicKey publicKey) {
-		this.publicKey = publicKey;
+	private void setSertifikat(X509Certificate sertifikat) {
+		this.sertifikat = sertifikat;
 	}
 
 }

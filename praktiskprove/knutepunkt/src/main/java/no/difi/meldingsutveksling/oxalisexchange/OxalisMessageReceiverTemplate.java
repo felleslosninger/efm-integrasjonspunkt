@@ -1,36 +1,39 @@
-    package no.difi.meldingsutveksling.oxalisexchange;
+package no.difi.meldingsutveksling.oxalisexchange;
 
-    import no.difi.meldingsutveksling.adresseregister.AdressRegisterFactory;
-    import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
-    import no.difi.meldingsutveksling.domain.Avsender;
-    import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-    import no.difi.meldingsutveksling.domain.Mottaker;
-    import no.difi.meldingsutveksling.domain.Noekkelpar;
-    import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
-    import no.difi.meldingsutveksling.eventlog.Event;
-    import no.difi.meldingsutveksling.eventlog.EventLog;
-    import no.difi.meldingsutveksling.services.AdresseregisterRest;
-    import org.apache.commons.io.FileUtils;
-    import org.springframework.beans.factory.annotation.Autowired;
-    import org.w3c.dom.Document;
-    import org.w3c.dom.Node;
-    import org.w3c.dom.NodeList;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
+import java.util.Map;
 
-    import javax.xml.parsers.DocumentBuilder;
-    import javax.xml.parsers.DocumentBuilderFactory;
-    import javax.xml.parsers.ParserConfigurationException;
-    import javax.xml.transform.Transformer;
-    import javax.xml.transform.TransformerConfigurationException;
-    import javax.xml.transform.TransformerException;
-    import javax.xml.transform.TransformerFactory;
-    import javax.xml.transform.dom.DOMSource;
-    import javax.xml.transform.stream.StreamResult;
-    import java.io.ByteArrayOutputStream;
-    import java.io.File;
-    import java.io.IOException;
-    import java.security.PrivateKey;
-    import java.security.cert.Certificate;
-    import java.util.Map;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import no.difi.meldingsutveksling.adresseregister.AdressRegisterFactory;
+import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
+import no.difi.meldingsutveksling.domain.Avsender;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.Mottaker;
+import no.difi.meldingsutveksling.domain.Noekkelpar;
+import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.eventlog.Event;
+import no.difi.meldingsutveksling.eventlog.EventLog;
+import no.difi.meldingsutveksling.services.AdresseregisterRest;
+
+import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Created with IntelliJ IDEA.
@@ -82,7 +85,7 @@ public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
         Noekkelpar noekkelpar = new Noekkelpar((PrivateKey) nodeList.get("privateKey"), certificate);
         Avsender.Builder avsenderBuilder = Avsender.builder(new Organisasjonsnummer(recievedBy), noekkelpar);
         Avsender avsender = avsenderBuilder.build();
-        Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo), adresseRegisterClient.getPublicKey(sendTo));
+        Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo), (X509Certificate) adresseRegisterClient.getCertificate(sendTo));
         ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering(nodeList,kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
         byte[] resultSbd = dokumentpakker.pakkDokumentISbd(byteArray, avsender, mottaker, instanceIdentifier,KVITTERING);
         File file = new File(WRITE_TO);

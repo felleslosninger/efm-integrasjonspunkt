@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 
 import com.thoughtworks.xstream.XStream;
+
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.BestEduMessage;
@@ -21,6 +22,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.services.AdresseregisterMock;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
@@ -37,6 +39,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -48,6 +51,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.UUID;
@@ -108,10 +112,10 @@ public abstract class SendMessageTemplate {
 
     boolean verifyRecipient(AddressType receiver, KnutepunktContext context) {
         try {
-            PublicKey mottakerpublicKey = adresseregister.getPublicKey(receiver.getOrgnr());
-            if (mottakerpublicKey == null)
+        	Certificate sertifikat = adresseregister.getCertificate(receiver.getOrgnr());
+            if (sertifikat == null)
                 throw new InvalidReceiver();
-            Mottaker mottaker = new Mottaker(new Organisasjonsnummer("810418052"), mottakerpublicKey);
+            Mottaker mottaker = new Mottaker(new Organisasjonsnummer("810418052"), (X509Certificate) sertifikat);
             context.setMottaker(mottaker);
         } catch (IllegalArgumentException e) {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
