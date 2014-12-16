@@ -79,7 +79,7 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
     private AdresseRegisterClient adresseRegisterClient;
 
     public CorrelationInformation receive(@WebParam(name = "StandardBusinessDocument", targetNamespace = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader", partName = "receiveResponse") StandardBusinessDocument receiveResponse) {
-            ServletContext servletContext =
+        ServletContext servletContext =
                     (ServletContext) context.getMessageContext().get(MessageContext.SERVLET_CONTEXT);
         ApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext);
         noarkSystem = ctx.getBean(NOARKSystem.class);
@@ -96,15 +96,15 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
             eventLogManager(receiveResponse, null, ProcessState.SBD_RECIEVED);
 
             try {
-                forberedKvittering(receiveResponse, "leveringsKvittering");
-                  sender = new Organisasjonsnummer( receiveResponse.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue());
-                  reciever= new Organisasjonsnummer( receiveResponse.getStandardBusinessDocumentHeader().getReceiver().get(0).getIdentifier().getValue());
+                  forberedKvittering(receiveResponse, "leveringsKvittering");
+                  sender = new Organisasjonsnummer( receiveResponse.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue().split(":")[1]);
+                  reciever= new Organisasjonsnummer( receiveResponse.getStandardBusinessDocumentHeader().getReceiver().get(0).getIdentifier().getValue().split(":")[1]);
                   convId = receiveResponse.getStandardBusinessDocumentHeader().getBusinessScope().getScope().get(0).getInstanceIdentifier();
-                  Noekkelpar noekkelpar = new Noekkelpar(loadPrivateKey(),  adresseRegisterClient.getCertificate(reciever.toString().split(":")[1]));
+                  Noekkelpar noekkelpar = new Noekkelpar(loadPrivateKey(),  adresseRegisterClient.getCertificate(reciever.toString()));
                   avsender= new Avsender(reciever,noekkelpar);
-                 signAFile = new SignAFile();
+                  signAFile = new SignAFile();
 
-                new OxalisSendMessageTemplate().sendSBD(new CreateSBD().createSBD(sender,reciever, new ObjectFactory().createKvittering(signAFile.signIt(receiveResponse.getAny(),avsender, KvitteringType.LEVERING)),convId,"kvittering"));
+                new OxalisSendMessageTemplate().sendSBD(new CreateSBD().createSBD(reciever,sender, new ObjectFactory().createKvittering(signAFile.signIt(receiveResponse.getAny(),avsender, KvitteringType.LEVERING)),convId,"kvittering"));
                 eventLogManager(receiveResponse,null, ProcessState.LEVERINGS_KVITTERING_SENT);
             } catch (IOException e) {
                 eventLogManager(receiveResponse, e, ProcessState.LEVERINGS_KVITTERING_SENT_FAILED);

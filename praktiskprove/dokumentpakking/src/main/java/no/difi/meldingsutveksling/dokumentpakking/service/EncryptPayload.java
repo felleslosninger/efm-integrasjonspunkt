@@ -52,7 +52,7 @@ public class EncryptPayload {
 		return null;
 	}
 	
-	private Key generateKey() throws NoSuchAlgorithmException{
+	private Key <generateKey() throws NoSuchAlgorithmException{
 	      KeyGenerator kg = KeyGenerator.getInstance(AES_MODE);
 	      SecureRandom random = new SecureRandom();
 	      kg.init(AES_LENGTH, random);
