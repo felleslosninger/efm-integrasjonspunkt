@@ -1,18 +1,17 @@
 package no.difi.meldingsutveksling.dokumentpakking.service;
 
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import no.difi.meldingsutveksling.dokumentpakking.domain.EncryptedContent;
+import no.difi.meldingsutveksling.domain.Mottaker;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
-
-import no.difi.meldingsutveksling.dokumentpakking.domain.EncryptedContent;
-import no.difi.meldingsutveksling.domain.Mottaker;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 
 
 public class EncryptPayload {
@@ -52,7 +51,7 @@ public class EncryptPayload {
 		return null;
 	}
 	
-	private Key <generateKey() throws NoSuchAlgorithmException{
+	private Key generateKey() throws NoSuchAlgorithmException{
 	      KeyGenerator kg = KeyGenerator.getInstance(AES_MODE);
 	      SecureRandom random = new SecureRandom();
 	      kg.init(AES_LENGTH, random);
