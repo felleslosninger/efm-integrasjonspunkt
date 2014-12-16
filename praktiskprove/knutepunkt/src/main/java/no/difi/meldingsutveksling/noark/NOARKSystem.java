@@ -46,6 +46,7 @@ public class NOARKSystem {
             p.load(is);
 
         } catch (IOException e) {
+            eventLog.log(new Event().setExceptionMessage(e.toString()));
             throw new IllegalStateException(KNUTEPUNKT_PROPERTIES + " can not be read");
         }
         endPointURL = p.getProperty(NOARKSYSTEM_ENDPOINT);
@@ -89,8 +90,7 @@ public class NOARKSystem {
         ApplicationContext ctx = new ClassPathXmlApplicationContext("spring-rest.xml");
         NOARKSystem noark = new NOARKSystem();
         noark.setEventLog(ctx.getBean(EventLog.class));
-        PutMessageResponseType response = noark.sendEduMeldig(new PutMessageRequestType());
-        System.out.println(xs.toXML(response));
+
     }
 
 }

@@ -1,10 +1,8 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import com.thoughtworks.xstream.XStream;
-import no.difi.meldingsutveksling.adresseregister.AdressRegisterFactory;
 import no.difi.meldingsutveksling.adresseregister.client.AdresseRegisterClient;
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
-import no.difi.meldingsutveksling.dokumentpakking.kvit.*;
 import no.difi.meldingsutveksling.dokumentpakking.kvit.ObjectFactory;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateSBD;
 import no.difi.meldingsutveksling.dokumentpakking.service.KvitteringType;
@@ -14,6 +12,7 @@ import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.Noekkelpar;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.eventlog.CustomRuntimeExceptions;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.eventlog.ProcessState;
@@ -25,9 +24,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.receive.*;
 import no.difi.meldingsutveksling.oxalisexchange.ByteArrayImpl;
 import no.difi.meldingsutveksling.oxalisexchange.Kvittering;
 import no.difi.meldingsutveksling.oxalisexchange.OxalisMessageReceiverTemplate;
-import no.difi.meldingsutveksling.services.AdresseregisterRest;
 import org.apache.commons.io.FileUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -66,7 +63,9 @@ import java.util.zip.ZipInputStream;
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
 public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate implements SOAReceivePort {
     private static final String KVITTERING = "Kvittering";
-    private static final String BEST_EDU = "BEST/EDU";
+    private static final String BEST_EDU = "BEST_EDU";
+    private static final String KVITTERING_CONSTANT="kvittering";
+    private static final int MAGIC_NR = 1024;
     private EventLog eventLog = EventLog.create();
     private static final String MIME_TYPE = "application/xml";
     private static final String WRITE_TO = System.getProperty("user.home") + File.separator + "testToRemove" + File.separator + "kvitteringSbd.xml";
@@ -104,11 +103,11 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
                   avsender= new Avsender(reciever,noekkelpar);
                   signAFile = new SignAFile();
 
-                new OxalisSendMessageTemplate().sendSBD(new CreateSBD().createSBD(reciever,sender, new ObjectFactory().createKvittering(signAFile.signIt(receiveResponse.getAny(),avsender, KvitteringType.LEVERING)),convId,"kvittering"));
+                new OxalisSendMessageTemplate().sendSBD(new CreateSBD().createSBD(reciever,sender, new ObjectFactory().createKvittering(signAFile.signIt(receiveResponse.getAny(),avsender, KvitteringType.LEVERING)),convId,KVITTERING_CONSTANT));
                 eventLogManager(receiveResponse,null, ProcessState.LEVERINGS_KVITTERING_SENT);
             } catch (IOException e) {
                 eventLogManager(receiveResponse, e, ProcessState.LEVERINGS_KVITTERING_SENT_FAILED);
-                throw new RuntimeException(e);
+                throw new CustomRuntimeExceptions(e);
             }
 
             String RSA_INSTANCE = "RSA";
@@ -228,14 +227,12 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
                 Unmarshaller unMarshaller = jaxbContext.createUnmarshaller();
                 putMessageRequestType = unMarshaller.unmarshal(new StreamSource(bestEdu), PutMessageRequestType.class).getValue();
             } catch (JAXBException e) {
-                e.printStackTrace();
                 eventLogManager(receiveResponse, e, ProcessState.SOME_OTHER_EXCEPTION);
                 throw new IllegalStateException(e.getMessage(), e);
             }
 
             PutMessageResponseType response = noarkSystem.sendEduMeldig(putMessageRequestType);
             if (null != response) {
-                System.out.println("response not null ");
                 AppReceiptType result = response.getResult();
                 if (null == result) {
                     eventLogManager(receiveResponse, null, ProcessState.ARKIVE_RESPONSE_NULL);
@@ -243,7 +240,7 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
                     eventLogManager(receiveResponse, null, ProcessState.BEST_EDU_SENT);
 
                     try {
-                        new OxalisSendMessageTemplate().sendSBD(new CreateSBD().createSBD(sender,reciever,signAFile.signIt(receiveResponse.getAny(),avsender, KvitteringType.AAPNING),convId,"kvittering"));
+                        new OxalisSendMessageTemplate().sendSBD(new CreateSBD().createSBD(sender,reciever,signAFile.signIt(receiveResponse.getAny(),avsender, KvitteringType.AAPNING),convId,KVITTERING_CONSTANT));
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -265,7 +262,7 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
     }
 
     private boolean isReciept(StandardBusinessDocumentHeader standardBusinessDocumentHeader) {
-        return standardBusinessDocumentHeader.getDocumentIdentification().getType().toLowerCase().equals("kvittering");
+        return standardBusinessDocumentHeader.getDocumentIdentification().getType().equalsIgnoreCase(KVITTERING_CONSTANT);
     }
 
 
@@ -276,8 +273,8 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
         String sendTo = partnerList.get(0).getIdentifier().getValue().split(":")[1];
         String recievedBy = recieverList.get(0).getIdentifier().getValue().split(":")[1];
         String instanceIdentifier = receiveResponse.getStandardBusinessDocumentHeader().getBusinessScope().getScope().get(0).getInstanceIdentifier();
-        if (instanceIdentifier.contains("BEST/EDU")) {
-            instanceIdentifier.replace("BEST/EDU", "Kvittering");
+        if (instanceIdentifier.contains(BEST_EDU)) {
+            instanceIdentifier.replace(BEST_EDU, "Kvittering");
         }
 
         Certificate certificate =adresseRegisterClient.getCertificate(recievedBy);
@@ -285,7 +282,7 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
         Avsender.Builder avsenderBuilder = Avsender.builder(new Organisasjonsnummer(recievedBy), noekkelpar);
         Avsender avsender = avsenderBuilder.build();
         Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo),certificate.getPublicKey());
-        ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering(receiveResponse, kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
+        ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering( kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
         byte[] resultSbd = dokumentpakker.pakkDokumentISbd(byteArray, avsender, mottaker, instanceIdentifier, KVITTERING);
         File file = new File(WRITE_TO);
         try {
@@ -295,7 +292,7 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
         }
     }
 
-    private byte[] genererKvittering(StandardBusinessDocument receiveResponse, String kvitteringsType) {
+    private byte[] genererKvittering(  String kvitteringsType) {
         Kvittering kvittering = new Kvittering(kvitteringsType);
         XStream xStream = new XStream();
         String kvitteringXml = xStream.toXML(kvittering);
@@ -325,7 +322,7 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
                 } catch (FileNotFoundException e) {
                     eventLogManager(sbd, e, ProcessState.SOME_OTHER_EXCEPTION);
                 }
-                byte[] bufbyte = new byte[1024];
+                byte[] bufbyte = new byte[MAGIC_NR];
                 int len;
                 while ((len = zipInputStream.read(bufbyte)) > 0) {
 
@@ -342,14 +339,15 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
     }
 
     private void eventLogManager(StandardBusinessDocument receiveResponse, Throwable e, ProcessState processState) {
-        if (null != e)
+        if (null != e) {
             eventLog.log(new Event().setProcessStates(processState).setExceptionMessage(e.toString())
                     .setReceiver(receiveResponse.getStandardBusinessDocumentHeader().getReceiver().get(0).getIdentifier().getValue().split(":")[1])
                     .setSender(receiveResponse.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue().split(":")[1]));
-        else
+        } else {
             eventLog.log(new Event().setProcessStates(processState)
                     .setReceiver(receiveResponse.getStandardBusinessDocumentHeader().getReceiver().get(0).getIdentifier().getValue().split(":")[1])
                     .setSender(receiveResponse.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue().split(":")[1]));
+        }
     }
 
     public NOARKSystem getNoarkSystem() {

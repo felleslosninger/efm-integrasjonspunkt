@@ -98,6 +98,7 @@ public abstract class SendMessageTemplate {
             avsender = Avsender.builder(new Organisasjonsnummer(sender.getOrgnr()), new Noekkelpar(findPrivateKey(), sertifikat)).build();
             context.setAvsender(avsender);
         } catch (IllegalArgumentException e) {
+            eventLog.log(new Event().setExceptionMessage(e.toString()));
             throw new InvalidSender();
         }
         return true;
@@ -111,6 +112,7 @@ public abstract class SendMessageTemplate {
             Mottaker mottaker = new Mottaker(new Organisasjonsnummer("810418052"), mottakerpublicKey);
             context.setMottaker(mottaker);
         } catch (IllegalArgumentException e) {
+            eventLog.log(new Event().setExceptionMessage(e.toString()));
             throw new InvalidReceiver();
         }
         return true;
