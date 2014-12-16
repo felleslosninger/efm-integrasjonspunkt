@@ -127,7 +127,6 @@ public abstract class SendMessageTemplate {
         }
         String arcCid=message.getEnvelope().getConversationId();
         Element element = (Element) message.getPayload();
-        NodeList dataElement = (NodeList) element.getElementsByTagName("com.sun.org.apache.xerces.internal.dom.CharacterDataImpl");
         NodeList nodeList = element.getElementsByTagName("data");
         Node payloadData = nodeList.item(0);
         String payloadDataTextContent = payloadData.getTextContent();

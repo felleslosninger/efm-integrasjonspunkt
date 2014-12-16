@@ -19,24 +19,17 @@ import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Sertifikat;
 
 import javax.xml.bind.DatatypeConverter;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
-import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.security.InvalidKeyException;
-import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
-import java.security.cert.X509Certificate;
-import java.security.interfaces.RSAPrivateCrtKey;
-import java.security.spec.RSAPublicKeySpec;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
@@ -48,31 +41,22 @@ public class SignAFile {
 
     public Kvittering signIt(Object obj, Avsender avsender,KvitteringType kvitType) {
         PrivateKey privateKey;
-        PublicKey publicKey;
         privateKey = avsender.getNoekkelpar().getPrivateKey();
-        RSAPrivateCrtKey privk = (RSAPrivateCrtKey)privateKey;
-        RSAPublicKeySpec publicKeySpec = new java.security.spec.RSAPublicKeySpec(privk.getPublicExponent(), privk.getModulus());
-        KeyFactory keyFactory ;
-        PublicKey myPublicKey;
+
         Signature rsa;
-        BufferedInputStream bufin;
+
         byte[] signedBytes;
         Sertifikat certificate;
-        X509Certificate x509Certificate;
+
         try {
-            keyFactory = KeyFactory.getInstance("RSA");
             certificate= avsender.getNoekkelpar().getSertifikat();
-             x509Certificate=certificate.getX509Certificate();
-            myPublicKey=x509Certificate.getPublicKey();
             rsa = Signature.getInstance("SHA256withRSA");
             rsa.initSign(privateKey);
-
             ByteArrayOutputStream b = new ByteArrayOutputStream();
             ObjectOutputStream o = new ObjectOutputStream(b);
             o.writeObject(obj);
             rsa.update(b.toByteArray());
             signedBytes = rsa.sign();
-
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         } catch (InvalidKeyException e) {
@@ -145,18 +129,6 @@ public class SignAFile {
         gCal.setTime(new Date());
         XMLGregorianCalendar xmlGeorgianCalendar = new XMLGregorianCalendarImpl(gCal);
         kvittering.setTidspunkt(xmlGeorgianCalendar);
-
-        //turn on while debugging
-        JAXBContext jaxbContext ;
-       /* try {
-            jaxbContext = JAXBContext.newInstance(Kvittering.class);
-            Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-            jaxbMarshaller.marshal(new ObjectFactory().createKvittering(kvittering) , System.out);
-        } catch (JAXBException e) {
-            throw new RuntimeException(e);
-        }
-*/
 
          return kvittering;
     }

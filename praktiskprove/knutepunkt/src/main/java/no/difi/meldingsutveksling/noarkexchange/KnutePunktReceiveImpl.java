@@ -112,11 +112,7 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
             }
 
             String RSA_INSTANCE = "RSA";
-            //*** query to Elma to get PK
-            List<Partner> senders = receiveResponse.getStandardBusinessDocumentHeader().getSender();
-            Partner senderPartner = senders.get(0);
-            PartnerIdentification orgNr = senderPartner.getIdentifier();
-            String[] orgNrArr = orgNr.getValue().split(":");
+
             Payload payload = null;
 
             //*** get payload *****
@@ -224,9 +220,6 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
                 eventLogManager(receiveResponse, e, ProcessState.SOME_OTHER_EXCEPTION);
             }
 
-
-            // Best/EDU Melding er en PutMesssageRequestType - må gjøres om
-            PutMessageRequestType mrt = new PutMessageRequestType();
 
             //*** Unmarshall xml*****
             PutMessageRequestType putMessageRequestType;
