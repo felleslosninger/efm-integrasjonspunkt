@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.oxalisexchange;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -15,7 +16,7 @@ import java.security.GeneralSecurityException;
  * Created by kubkaray on 20.11.2014.
  */
 public class RecieveFromOxalisTest {
-
+    @Ignore
     @Test
     public void recieve( ) {
         OxalisMessageReceiverTemplate oxalisMessageReceiverTemplate = new OxalisMessageReceiverTemplate();

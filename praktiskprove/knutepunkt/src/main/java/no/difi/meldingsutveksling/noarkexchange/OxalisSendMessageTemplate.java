@@ -7,6 +7,8 @@ import eu.peppol.outbound.transmission.Transmitter;
 import no.difi.meldingsutveksling.dokumentpakking.xml.MarshalSBD;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -14,7 +16,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-
+@Component
+@Profile("dev")
 public class OxalisSendMessageTemplate extends SendMessageTemplate {
 
 	@Override

@@ -3,12 +3,14 @@ package no.difi.meldingsutveksling.knutepunkrecieve;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
+import javax.xml.ws.soap.SOAPFaultException;
 
 import no.difi.meldingsutveksling.knutepunkrecieve.exception.CouldNotLoadXML;
 import no.difi.meldingsutveksling.knutepunkrecieve.exception.NoValidProcessId;
@@ -26,6 +28,7 @@ public class Main {
 	Receive receive;
 	CommandLine cmd;
 	Options options;
+	Path userDir = Paths.get(System.getProperty("user.dir")).normalize();
 
 	public Main(String[] args) throws ParseException, IOException {
 		options = new CliOptions();
@@ -42,9 +45,7 @@ public class Main {
 			HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp("sbdreader", options);
 		} else if (cmd.hasOption("d")) {
-			File workingDir = Paths.get(cmd.getOptionValue("d")).normalize().toFile().getCanonicalFile();
-			if (!workingDir.isDirectory())
-				throw new IllegalArgumentException("provided input folder is not a folder");
+			File workingDir = findWorkingDir();
 			sendAllSbdsInDir(workingDir);
 		} else if (cmd.hasOption("f")) {
 			String uri = cmd.getOptionValue("f");
@@ -66,34 +67,52 @@ public class Main {
 		}
 	}
 
+	private File findWorkingDir() {
+		File workingDir;
+		if (cmd.getOptionValue("d") == null || cmd.getOptionValue("d").equals(".")) {
+			workingDir = userDir.toFile();
+		} else {
+			workingDir = Paths.get(cmd.getOptionValue("d")).normalize().toFile();
+		}
+		if (!workingDir.isDirectory())
+			throw new IllegalArgumentException("provided input folder is not a folder");
+		return workingDir;
+	}
+
 	private void sendAllSbdsInDir(File workingDir) {
 		for (File f : workingDir.listFiles()) {
-			if(f.isDirectory() && cmd.hasOption("r"))
+			if (f.isDirectory() && cmd.hasOption("r"))
 				sendAllSbdsInDir(f);
 			else if (f.getAbsolutePath().endsWith(".xml")) {
 				StreamSource stream = new StreamSource(f);
 				try {
 					handleStream(stream);
-					System.out.println("Delivered: " + f.getName());
-					
-				} catch (CouldNotLoadXML e) {
-					System.out.println("Could not read " + f.getName() + " as a standard Business Document.");
-				} catch (NoValidProcessId e) {
+					System.out.println("Delivered: " + findReletivePathFromUserDirectory(f));
 
-					System.out.println(f.getName() + " does not have any acceptable PROCESSIDs");
+				} catch (CouldNotLoadXML e) {
+					System.out.println("Could not read " + findReletivePathFromUserDirectory(f) + " as a standard Business Document.");
+				} catch (NoValidProcessId e) {
+					System.out.println(findReletivePathFromUserDirectory(f) + " does not have any acceptable PROCESSIDs");
+				} catch (SOAPFaultException e) {
+					System.out.println("Failed sending " + findReletivePathFromUserDirectory(f) + ": " + e.getMessage());
 				}
 			}
 		}
+	}
+
+	private String findReletivePathFromUserDirectory(File file) {
+		return userDir.relativize(file.toPath()).toString();
 	}
 
 	private void handleStream(StreamSource stream) throws CouldNotLoadXML, NoValidProcessId {
 		StandardBusinessDocument sbd;
 		try {
 			sbd = unMarshalSBD(stream);
-			if (sbd == null || sbd.getStandardBusinessDocumentHeader() == null) throw new CouldNotLoadXML();
+			if (sbd == null || sbd.getStandardBusinessDocumentHeader() == null)
+				throw new CouldNotLoadXML();
 			for (Scope scope : sbd.getStandardBusinessDocumentHeader().getBusinessScope().getScope()) {
 				if (scope.getType().equals("PROCESSID") && scope.getInstanceIdentifier().equals("urn:www.difi.no:profile:meldingsutveksling:ver1.0")) {
-					//receive.callReceive(sbd);
+					receive.callReceive(sbd);
 					return;
 				}
 			}
@@ -101,12 +120,12 @@ public class Main {
 		} catch (JAXBException e) {
 			throw new CouldNotLoadXML(e);
 		}
-		
+
 	}
 
 	private StandardBusinessDocument unMarshalSBD(StreamSource stream) throws JAXBException {
 		Unmarshaller unmarshaller = JAXBContext.newInstance(StandardBusinessDocument.class).createUnmarshaller();
-		StandardBusinessDocument sbd = unmarshaller.unmarshal(stream, StandardBusinessDocument.class).getValue();	
+		StandardBusinessDocument sbd = unmarshaller.unmarshal(stream, StandardBusinessDocument.class).getValue();
 		return sbd;
 	}
 

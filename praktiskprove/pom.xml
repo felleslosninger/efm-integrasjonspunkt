@@ -17,6 +17,7 @@
         <module>knutepunkt</module>
         <module>domain</module>
 
+
     </modules>
     <build>
         <pluginManagement>

@@ -1,25 +1,31 @@
 package no.difi.meldingsutveksling.dokumentpakking.service;
 
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import no.difi.meldingsutveksling.dokumentpakking.domain.EncryptedContent;
+import no.difi.meldingsutveksling.domain.Mottaker;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 
-import no.difi.meldingsutveksling.dokumentpakking.domain.EncryptedContent;
-import no.difi.meldingsutveksling.domain.Mottaker;
 
 public class EncryptPayload {
-
+	//public static final String RSA_MODE = "RSA/ECB/OAEPWITHSHA-256ANDMGF1PADDING";
+	public static final String RSA_MODE = "RSA";
+	public static final String AES_MODE = "AES"; 
+	public static final int AES_LENGTH = 128; 
+	
+	
+	
 	public EncryptedContent encrypt(byte[] payload, Mottaker mottaker) {
 		try {
-			Cipher keyCipher = Cipher.getInstance("RSA");
-			Cipher contentCipher = Cipher.getInstance("AES");
+			Cipher keyCipher = Cipher.getInstance(RSA_MODE);
+			Cipher contentCipher = Cipher.getInstance(AES_MODE);
 			Key contentKey = generateKey();
 			
 			keyCipher.init(Cipher.ENCRYPT_MODE, mottaker.getPublicKey());
@@ -46,9 +52,9 @@ public class EncryptPayload {
 	}
 	
 	private Key generateKey() throws NoSuchAlgorithmException{
-	      KeyGenerator kg = KeyGenerator.getInstance("AES");
+	      KeyGenerator kg = KeyGenerator.getInstance(AES_MODE);
 	      SecureRandom random = new SecureRandom();
-	      kg.init(random);
+	      kg.init(AES_LENGTH, random);
 	      return kg.generateKey();
 	}
 }
