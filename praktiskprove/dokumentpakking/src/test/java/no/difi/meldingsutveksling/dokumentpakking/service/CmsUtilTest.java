@@ -1,5 +1,9 @@
 package no.difi.meldingsutveksling.dokumentpakking.service;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -14,7 +18,6 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -27,10 +30,6 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.junit.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-
-import static org.hamcrest.Matchers.*;
-
 public class CmsUtilTest {
 
 	@Test
@@ -38,12 +37,16 @@ public class CmsUtilTest {
 		CmsUtil util = new CmsUtil();
 		KeyPair keyPair = generateKeyPair();
 		Certificate certificate = generateCertificate(keyPair.getPublic(), keyPair.getPrivate());
-		
+
 		byte[] plaintext = "Text to be encrypted".getBytes();
 		byte[] ciphertext = (new CmsUtil()).createCMS(plaintext, (X509Certificate) certificate);
 		byte[] plaintextRecovered = util.decryptCMS(ciphertext, keyPair.getPrivate());
-		
+
 		assertThat(plaintextRecovered, is(equalTo(plaintext)));
+	}
+
+	@Test
+	public void testDecryptCMS2() throws Exception {
 	}
 
 	public KeyPair generateKeyPair() throws NoSuchAlgorithmException {

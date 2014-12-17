@@ -1,13 +1,14 @@
 package no.difi.meldingsutveksling.dokumentpakking.xml;
 
-import no.difi.meldingsutveksling.dokumentpakking.kvit.Kvittering;
-import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import java.io.OutputStream;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import java.io.OutputStream;
+
+import no.difi.meldingsutveksling.dokumentpakking.kvit.Kvittering;
+import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 
 
 public final class MarshalSBD {
@@ -22,7 +23,7 @@ public final class MarshalSBD {
 			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 			jaxbMarshaller.marshal(new ObjectFactory().createStandardBusinessDocument(doc), os);
 		} catch (JAXBException e) {
-			e.printStackTrace();
+			throw new RuntimeException("Was not able to marshall Standard Business Document", e);
 		}
 	}
 }
