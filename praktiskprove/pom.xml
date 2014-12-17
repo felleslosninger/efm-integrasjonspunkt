@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>no.difi.meldingsutveksling</groupId>
-    <artifactId>parent-pom</artifactId>
+    <artifactId>muv-parent</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <name>Multiproject for meldingsutveksling</name>
@@ -16,8 +16,7 @@
         <module>dokumentpakking</module>
         <module>knutepunkt</module>
         <module>domain</module>
-
-    </modules>
+        </modules>
     <build>
         <pluginManagement>
 
