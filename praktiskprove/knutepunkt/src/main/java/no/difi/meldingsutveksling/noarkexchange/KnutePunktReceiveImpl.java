@@ -24,11 +24,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.receive.*;
 import no.difi.meldingsutveksling.oxalisexchange.ByteArrayImpl;
 import no.difi.meldingsutveksling.oxalisexchange.Kvittering;
 import no.difi.meldingsutveksling.oxalisexchange.OxalisMessageReceiverTemplate;
-<<<<<<< HEAD
-=======
-import no.difi.meldingsutveksling.services.AdresseregisterRest;
 
->>>>>>> Replaced homebrew encryption with CMS envelope
 import org.apache.commons.io.FileUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -298,13 +294,8 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
         Noekkelpar noekkelpar = new Noekkelpar(loadPrivateKey(), certificate);
         Avsender.Builder avsenderBuilder = Avsender.builder(new Organisasjonsnummer(recievedBy), noekkelpar);
         Avsender avsender = avsenderBuilder.build();
-<<<<<<< HEAD
-        Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo),certificate.getPublicKey());
-        ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering( kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
-=======
         Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo),(X509Certificate) certificate);
-        ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering(receiveResponse, kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
->>>>>>> Replaced homebrew encryption with CMS envelope
+        ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering( kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
         byte[] resultSbd = dokumentpakker.pakkDokumentISbd(byteArray, avsender, mottaker, instanceIdentifier, KVITTERING);
         File file = new File(WRITE_TO);
         try {
