@@ -5,6 +5,7 @@ import com.thoughtworks.xstream.XStream;
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.BestEduMessage;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.Noekkelpar;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
@@ -12,7 +13,7 @@ import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.eventlog.ProcessState;
+import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory;
@@ -80,7 +81,7 @@ public abstract class SendMessageTemplate {
             jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             jaxbMarshaller.marshal(new ObjectFactory().createPutMessageRequest(sender), os);
         } catch (JAXBException e) {
-            throw new RuntimeException(e);
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
 
         return dokumentpakker.pakkDokumentIStandardBusinessDocument(new BestEduMessage(os.toByteArray()), context.getAvsender(), context.getMottaker(), UUID.randomUUID()
@@ -93,8 +94,9 @@ public abstract class SendMessageTemplate {
         try {
             Avsender avsender = null;
             Certificate sertifikat = adresseregister.getCertificate(sender.getOrgnr());
-            if (sertifikat == null)
+            if (sertifikat == null) {
                 throw new InvalidSender();
+            }
             avsender = Avsender.builder(new Organisasjonsnummer(sender.getOrgnr()), new Noekkelpar(findPrivateKey(), sertifikat)).build();
             context.setAvsender(avsender);
         } catch (IllegalArgumentException e) {
@@ -219,7 +221,7 @@ public abstract class SendMessageTemplate {
             key = kf.generatePrivate(keySpec);
 
         } catch (InvalidKeySpecException | NoSuchAlgorithmException | IOException e) {
-            throw new RuntimeException(e);
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
         return key;
     }

@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.eventlog;
 
+import no.difi.meldingsutveksling.domain.ProcessState;
 import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 

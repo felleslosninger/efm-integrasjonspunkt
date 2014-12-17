@@ -5,7 +5,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLogDAO;
 import no.difi.meldingsutveksling.eventlog.HerokuDatabaseConfig;
-import no.difi.meldingsutveksling.eventlog.ProcessState;
+import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import org.springframework.context.annotation.Profile;

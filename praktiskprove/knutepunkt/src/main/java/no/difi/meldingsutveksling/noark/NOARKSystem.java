@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.noark;
 import com.thoughtworks.xstream.XStream;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.eventlog.ProcessState;
+import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.noarkexchange.schema.NoarkExchange;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;

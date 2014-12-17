@@ -3,6 +3,7 @@
     import no.difi.meldingsutveksling.adresseregister.AdressRegisterFactory;
     import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
     import no.difi.meldingsutveksling.domain.Avsender;
+    import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
     import no.difi.meldingsutveksling.domain.Mottaker;
     import no.difi.meldingsutveksling.domain.Noekkelpar;
     import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
@@ -89,6 +90,7 @@ public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
             FileUtils.writeByteArrayToFile(file, resultSbd);
         } catch (IOException e) {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
 
     }
@@ -107,7 +109,7 @@ public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
 
         } catch (ParserConfigurationException e) {
             eventLog.log(new Event().setExceptionMessage(e.getMessage()));
-
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -119,9 +121,9 @@ public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
             transformer= transformerFactory.newTransformer();
             transformer.transform(source,result);
         } catch (TransformerConfigurationException e) {
-            e.printStackTrace();
+             throw new MeldingsUtvekslingRuntimeException(e);
         } catch (TransformerException e) {
-            e.printStackTrace();
+             throw new MeldingsUtvekslingRuntimeException(e);
         }
 
         return baos.toByteArray();

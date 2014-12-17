@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.eventlog;
 
+import no.difi.meldingsutveksling.domain.ProcessState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;

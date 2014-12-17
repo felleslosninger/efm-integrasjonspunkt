@@ -1,9 +1,9 @@
 package no.difi.meldingsutveksling.oxalisexchange;
 
-import no.difi.meldingsutveksling.eventlog.CustomRuntimeExceptions;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.eventlog.ProcessState;
 import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -59,7 +59,7 @@ public abstract class MessageReceieverTemplate {
             n = (Node) documentElements.get("DocumentIdentification");
         } catch (JAXBException e) {
             eventLog.log(new Event().setProcessStates(ProcessState.SOME_OTHER_EXCEPTION).setExceptionMessage(e.toString()));
-            throw new CustomRuntimeExceptions(e);
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
 
         eventLog.log(new Event().setProcessStates(ProcessState.MESSAGE_RECIEVED));
@@ -71,6 +71,7 @@ public abstract class MessageReceieverTemplate {
                 documentElements.put("privateKey", loadPrivateKey());
             } catch (IOException e) {
                 eventLog.log(new Event().setExceptionMessage(e.toString()));
+                throw new MeldingsUtvekslingRuntimeException(e);
             }
             sendLeveringskvittering(documentElements);
             eventLog.log(new Event().setProcessStates(ProcessState.LEVERINGS_KVITTERING_SENT));
@@ -85,6 +86,7 @@ public abstract class MessageReceieverTemplate {
                 asicFileBytes = getZipBytesFromDocument(payload);
             } catch (IOException e) {
                 eventLog.log(new Event().setExceptionMessage(e.toString()));
+                throw new MeldingsUtvekslingRuntimeException(e);
             }
             eventLog.log(new Event().setProcessStates(ProcessState.DECRYPTION_SUCCESS));
 

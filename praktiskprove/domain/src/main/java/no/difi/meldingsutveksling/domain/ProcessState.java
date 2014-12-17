@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.eventlog;
+package no.difi.meldingsutveksling.domain;
 
 /**
  * @author Kubilay Karayilan

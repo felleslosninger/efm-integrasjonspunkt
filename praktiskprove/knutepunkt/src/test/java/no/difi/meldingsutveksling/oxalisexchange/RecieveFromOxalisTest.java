@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.oxalisexchange;
 
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -30,13 +31,14 @@ public class RecieveFromOxalisTest {
             Document doc = dBuilder.parse(file);
             oxalisMessageReceiverTemplate.receive(doc);
         } catch (ParserConfigurationException e) {
-            e.printStackTrace();
+            throw new MeldingsUtvekslingRuntimeException(e);
+
         } catch (SAXException e) {
-            e.printStackTrace();
+            throw new MeldingsUtvekslingRuntimeException(e);
         } catch (GeneralSecurityException e) {
-            e.printStackTrace();
+            throw new MeldingsUtvekslingRuntimeException(e);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
     }
 }

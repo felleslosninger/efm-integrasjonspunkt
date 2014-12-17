@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -23,20 +24,22 @@ public class KnutePunktRecieveImplTest {
         try {
             jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class);
         } catch (JAXBException e) {
-            e.printStackTrace();
+
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
         Unmarshaller unmarshaller = null;
         try {
             unmarshaller = jaxbContext.createUnmarshaller();
         } catch (JAXBException e) {
-            e.printStackTrace();
+
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
         StandardBusinessDocument standardBusinessDocument =null;
         try {
             JAXBElement<StandardBusinessDocument> element = (JAXBElement<StandardBusinessDocument>) unmarshaller.unmarshal(file);
             standardBusinessDocument = element.getValue();
         } catch (JAXBException e) {
-            e.printStackTrace();
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
 
             knutePunktReceive.receive(standardBusinessDocument);

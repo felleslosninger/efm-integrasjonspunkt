@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import com.thoughtworks.xstream.XStream;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.adresseregister.client.AdresseRegisterClient;
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
 import no.difi.meldingsutveksling.dokumentpakking.kvit.ObjectFactory;
@@ -12,10 +13,9 @@ import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.Noekkelpar;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
-import no.difi.meldingsutveksling.eventlog.CustomRuntimeExceptions;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.eventlog.ProcessState;
+import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.noark.NOARKSystem;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
@@ -77,7 +77,7 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
 
     private AdresseRegisterClient adresseRegisterClient;
 
-    public CorrelationInformation receive(@WebParam(name = "StandardBusinessDocument", targetNamespace = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader", partName = "receiveResponse") StandardBusinessDocument receiveResponse) {
+    public CorrelationInformation receive(@WebParam(name = "StandardBusinessDocument", targetNamespace = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader", partName = "receiveResponse") StandardBusinessDocument receiveResponse){
         ServletContext servletContext =
                     (ServletContext) context.getMessageContext().get(MessageContext.SERVLET_CONTEXT);
         ApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext);
@@ -107,7 +107,7 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
                 eventLogManager(receiveResponse,null, ProcessState.LEVERINGS_KVITTERING_SENT);
             } catch (IOException e) {
                 eventLogManager(receiveResponse, e, ProcessState.LEVERINGS_KVITTERING_SENT_FAILED);
-                throw new CustomRuntimeExceptions(e);
+                throw new MeldingsUtvekslingRuntimeException(e);
             }
 
             String RSA_INSTANCE = "RSA";
@@ -121,21 +121,21 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
                 jaxbContextP = JAXBContext.newInstance(Payload.class);
             } catch (JAXBException e) {
                 eventLogManager(receiveResponse, e, ProcessState.SOME_OTHER_EXCEPTION);
-                throw new RuntimeException(e);
+                throw new MeldingsUtvekslingRuntimeException(e);
             }
             Unmarshaller unMarshallerP = null;
             try {
                 unMarshallerP = jaxbContextP.createUnmarshaller();
             } catch (JAXBException e) {
                 eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
-                throw new RuntimeException(e);
+                throw new MeldingsUtvekslingRuntimeException(e);
             }
 
             try {
                 payload = unMarshallerP.unmarshal((org.w3c.dom.Node) receiveResponse.getAny(), Payload.class).getValue();
             } catch (JAXBException e) {
                 eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
-                throw new RuntimeException(e);
+                throw new MeldingsUtvekslingRuntimeException(e);
             }
             String aesInRsa = payload.getEncryptionKey();
             String payloadString = payload.getAsice();
@@ -148,22 +148,23 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
                 cipher = Cipher.getInstance(RSA_INSTANCE);
             } catch (NoSuchAlgorithmException e) {
                 eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
-                throw new RuntimeException(e);
+                throw new MeldingsUtvekslingRuntimeException(e);
             } catch (NoSuchPaddingException e) {
                 eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
-                throw new RuntimeException(e);
+                throw new MeldingsUtvekslingRuntimeException(e);
             }
             PrivateKey privateKey = null;
             try {
                 privateKey = loadPrivateKey();
             } catch (IOException e) {
                 eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
-                throw new RuntimeException(e);
+                throw new MeldingsUtvekslingRuntimeException(e);
             }
             try {
                 cipher.init(Cipher.DECRYPT_MODE, privateKey);
             } catch (InvalidKeyException e) {
                 eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
+                throw new MeldingsUtvekslingRuntimeException(e);
             }
             byte[] aesKey = new byte[0];
             try {
@@ -172,6 +173,7 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
                 eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
             } catch (BadPaddingException e) {
                 eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
+                throw new MeldingsUtvekslingRuntimeException(e);
             }
 
             //*** get aes cipher decrypt *****
@@ -180,8 +182,10 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
                 aesCipher = Cipher.getInstance("AES");
             } catch (NoSuchAlgorithmException e) {
                 eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
+                throw new MeldingsUtvekslingRuntimeException(e);
             } catch (NoSuchPaddingException e) {
                 eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
+                throw new MeldingsUtvekslingRuntimeException(e);
             }
             SecretKeySpec secretKeySpec = new SecretKeySpec(aesKey, "AES");
             SecureRandom secureRandom = null;
@@ -189,6 +193,7 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
                 secureRandom = SecureRandom.getInstance("SHA1PRNG");
             } catch (NoSuchAlgorithmException e) {
                 eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
+                throw new MeldingsUtvekslingRuntimeException(e);
             }
 
 
@@ -197,6 +202,7 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
 
             } catch (InvalidKeyException e) {
                 eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
+                throw new MeldingsUtvekslingRuntimeException(e);
             }
             byte[] zipTobe = new byte[0];
             try {
@@ -204,10 +210,13 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
 
             } catch (IllegalBlockSizeException e) {
                 eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
+                throw new MeldingsUtvekslingRuntimeException(e);
             } catch (BadPaddingException e) {
                 eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
+                throw new MeldingsUtvekslingRuntimeException(e);
             } catch (GeneralSecurityException e) {
                 eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
+                throw new MeldingsUtvekslingRuntimeException(e);
             }
             eventLogManager(receiveResponse, null, ProcessState.DECRYPTION_SUCCESS);
             // Lage zip fil av byteArray
@@ -217,6 +226,7 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
                 eventLogManager(receiveResponse, null, ProcessState.BESTEDU_EXTRACTED);
             } catch (IOException e) {
                 eventLogManager(receiveResponse, e, ProcessState.SOME_OTHER_EXCEPTION);
+                throw new MeldingsUtvekslingRuntimeException(e);
             }
 
 
@@ -242,7 +252,7 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
                     try {
                         new OxalisSendMessageTemplate().sendSBD(new CreateSBD().createSBD(sender,reciever,signAFile.signIt(receiveResponse.getAny(),avsender, KvitteringType.AAPNING),convId,KVITTERING_CONSTANT));
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        throw new MeldingsUtvekslingRuntimeException(e);
                     }
 
                 }

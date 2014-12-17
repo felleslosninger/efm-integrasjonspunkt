@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.eventlog;
 
+import no.difi.meldingsutveksling.domain.ProcessState;
+
 import java.util.Date;
 import java.util.UUID;
 
