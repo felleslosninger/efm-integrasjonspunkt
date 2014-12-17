@@ -48,11 +48,8 @@ public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
     private static final String MIME_TYPE = "application/xml";
     private static final String WRITE_TO = System.getProperty("user.home") + File.separator +"testToRemove"+File.separator +"somethingSbd.xml";
     private static final int INSTANCEIDENTIFIER_FIELD = 3;
-    private static final int MAGIC_NR = 1024;
     private static final String KVITTERING = "Kvittering";
     private EventLog eventLog = EventLog.create();
-    private static final String PAYLOAD_ZIP = System.getProperty("user.home") + File.separator+"testToRemove"+File.separator + "payload.zip";
-    private String payloadExtractDestination =  System.getProperty("user.home") + File.separator+"testToRemove"+File.separator+"Zip Output";
 
     @Autowired
     private AdresseregisterRest adresseRegisterClient;

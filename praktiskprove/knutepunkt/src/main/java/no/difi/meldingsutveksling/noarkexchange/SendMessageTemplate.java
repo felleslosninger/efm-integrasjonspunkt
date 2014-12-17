@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 
 import com.thoughtworks.xstream.XStream;
-
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.BestEduMessage;
@@ -10,11 +9,11 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.Noekkelpar;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory;
@@ -22,7 +21,6 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.services.AdresseregisterMock;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
@@ -39,7 +37,6 @@ import javax.xml.bind.Marshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -49,7 +46,6 @@ import java.nio.charset.Charset;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
@@ -99,13 +95,13 @@ public abstract class SendMessageTemplate {
             Avsender avsender = null;
             Certificate sertifikat = adresseregister.getCertificate(sender.getOrgnr());
             if (sertifikat == null) {
-                throw new InvalidSender();
+                throw new InvalidSender(new RuntimeException("invalid sender"));
             }
             avsender = Avsender.builder(new Organisasjonsnummer(sender.getOrgnr()), new Noekkelpar(findPrivateKey(), sertifikat)).build();
             context.setAvsender(avsender);
         } catch (IllegalArgumentException e) {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
-            throw new InvalidSender();
+            throw new InvalidSender(new RuntimeException("invalid sender"));
         }
         return true;
     }
@@ -114,12 +110,12 @@ public abstract class SendMessageTemplate {
         try {
         	Certificate sertifikat = adresseregister.getCertificate(receiver.getOrgnr());
             if (sertifikat == null)
-                throw new InvalidReceiver();
+                throw new InvalidReceiver(new RuntimeException("invalid receiver"));
             Mottaker mottaker = new Mottaker(new Organisasjonsnummer("810418052"), (X509Certificate) sertifikat);
             context.setMottaker(mottaker);
         } catch (IllegalArgumentException e) {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
-            throw new InvalidReceiver();
+            throw new InvalidReceiver(new RuntimeException("invalid receiver"));
         }
         return true;
     }

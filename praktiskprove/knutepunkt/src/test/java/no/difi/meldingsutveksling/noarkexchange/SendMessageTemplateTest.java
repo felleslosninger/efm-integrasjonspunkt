@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
@@ -44,6 +45,7 @@ public class SendMessageTemplateTest {
 			}
 			@Override
 			void sendSBD(StandardBusinessDocument sbd) throws IOException {
+
 			}
 		};
 
@@ -52,7 +54,7 @@ public class SendMessageTemplateTest {
 
 
 	@Test
-	public void testVerifySender() throws Exception {
+	public void testVerifySender() throws MeldingsUtvekslingRuntimeException {
 		AddressType adresseType = new AddressType();
 		adresseType.setOrgnr("960885406");
 		KnutepunktContext context = new KnutepunktContext();
@@ -61,7 +63,7 @@ public class SendMessageTemplateTest {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testVerifySenderInvalid() throws Exception {
+	public void testVerifySenderInvalid() throws MeldingsUtvekslingRuntimeException  {
 		AddressType adresseType = new AddressType();
 		adresseType.setOrgnr("12345678");
 		KnutepunktContext context = new KnutepunktContext();
@@ -69,7 +71,7 @@ public class SendMessageTemplateTest {
 	}
 
 	@Test
-	public void testVerifyRecipient() throws Exception {
+	public void testVerifyRecipient() throws MeldingsUtvekslingRuntimeException  {
 		AddressType adresseType = new AddressType();
 		adresseType.setOrgnr("960885406");
 		KnutepunktContext context = new KnutepunktContext();
@@ -78,7 +80,7 @@ public class SendMessageTemplateTest {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testVerifyRecipientInvalid() throws Exception {
+	public void testVerifyRecipientInvalid()  throws MeldingsUtvekslingRuntimeException  {
 		AddressType adresseType = new AddressType();
 		adresseType.setOrgnr("12345678");
 		KnutepunktContext context = new KnutepunktContext();
@@ -86,7 +88,7 @@ public class SendMessageTemplateTest {
 	}
 
 	@Test
-	public void testFindPrivateKey() throws Exception {
+	public void testFindPrivateKey()throws MeldingsUtvekslingRuntimeException  {
 		PrivateKey pk = subject.findPrivateKey();
 		assertThat(pk, is(notNullValue()));
 	}
@@ -100,7 +102,7 @@ public class SendMessageTemplateTest {
             Unmarshaller unMarshaller = jaxbContext.createUnmarshaller();
             putMessageRequestType =   unMarshaller.unmarshal(new StreamSource(file) , PutMessageRequestType.class).getValue();
         } catch (JAXBException e) {
-            throw new RuntimeException(e);
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
         subject.sendMessage(putMessageRequestType);
     }
