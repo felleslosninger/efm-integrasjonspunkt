@@ -155,7 +155,9 @@ public abstract class SendMessageTemplate {
             } else {
                 return createErrorResponse("no receiver");
             }
-            eventLog.log(createOkStateEvent(message, ProcessState.SIGNATURE_VALIDATED));
+
+            eventLog.log(new Event().setProcessStates(ProcessState.SIGNATURE_VALIDATED));
+            //eventLog.log(createOkStateEvent(message, ProcessState.SIGNATURE_VALIDATED));
 
 
         } catch (InvalidSender | InvalidReceiver e) {
