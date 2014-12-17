@@ -23,8 +23,12 @@ import java.util.UUID;
 @Repository
 public class EventLogDAO {
 
-    private NamedParameterJdbcTemplate jdbcTemplate;
 
+    private static final String RECIEVER = "receiver";
+    private static final String MESSAGE = "message";
+    private static final String STATE = "state";
+    private NamedParameterJdbcTemplate jdbcTemplate;
+    private static final String SENDER = "sender";
     public EventLogDAO() {
     }
 
@@ -38,7 +42,7 @@ public class EventLogDAO {
     }
 
     /**
-     * Creates an event log entry
+     * Creatintes an event log entry
      *
      * @param e the Event
      */
@@ -48,11 +52,11 @@ public class EventLogDAO {
 
         Map<String, Object> params = new HashMap<>();
         params.put("uuid", e.getUuid().toString());
-        params.put("sender", e.getSender());
-        params.put("receiver", e.getReceiver());
-        params.put("message", e.getMessage());
+        params.put(SENDER, e.getSender());
+        params.put(RECIEVER, e.getReceiver());
+        params.put(MESSAGE, e.getMessage());
         params.put("timestamp", e.getTimeStamp());
-        params.put("state", e.getProcessState().toString());
+        params.put(STATE, e.getProcessState().toString());
         params.put("errorMessage", e.getExceptionMessage());
         params.put("arcCid", e.getArkiveConversationId());
         params.put("hubCid", e.getHubConversationId());
@@ -74,13 +78,12 @@ public class EventLogDAO {
             public Event mapRow(ResultSet resultSet, int i) throws SQLException {
 
                 Event e = new Event(resultSet.getLong("event_timestamp"), UUID.fromString(resultSet.getString("uuid")));
-                e.setSender(resultSet.getString("sender"));
-                e.setReceiver(resultSet.getString("receiver"));
+                e.setSender(resultSet.getString(SENDER));
+                e.setReceiver(resultSet.getString(RECIEVER));
                 e.setExceptionMessage(null);
-                e.setMessage(resultSet.getString("message"));
-                e.setProcessStates(ProcessState.valueOf(resultSet.getString("state")));
+                e.setMessage(resultSet.getString(MESSAGE));
+                e.setProcessStates(ProcessState.valueOf(resultSet.getString(STATE)));
                 e.setJpId(resultSet.getString("JPID"));
-                TODO://spær glenn om hvborfor values fungerer ikke
                 e.setHubConversationId(resultSet.getString("HUB_CONVERSATION_ID"));
                 e.setArkiveConversationId(resultSet.getString("ARCHIVE_CONVERSATION_ID"));
                 return e;
@@ -95,11 +98,11 @@ public class EventLogDAO {
             @Override
             public Event mapRow(ResultSet resultSet, int i) throws SQLException {
                 Event e = new Event(resultSet.getLong("event_timestamp"), UUID.fromString(resultSet.getString("uuid")));
-                e.setSender(resultSet.getString("sender"));
-                e.setReceiver(resultSet.getString("receiver"));
+                e.setSender(resultSet.getString(SENDER));
+                e.setReceiver(resultSet.getString(RECIEVER));
                 e.setExceptionMessage(null);
-                e.setMessage(resultSet.getString("message"));
-                e.setProcessStates(ProcessState.valueOf(resultSet.getString("state")));
+                e.setMessage(resultSet.getString(MESSAGE));
+                e.setProcessStates(ProcessState.valueOf(resultSet.getString(STATE)));
                 e.setJpId(resultSet.getString("JPID"));
                 e.setHubConversationId(resultSet.getString("HUB_CONVERSATION_ID"));
                 e.setArkiveConversationId(resultSet.getString("ARCHIVE_CONVERSATION_ID"));

@@ -19,8 +19,6 @@ import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBException;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -34,9 +32,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 
 public abstract class MessageReceieverTemplate {
 
@@ -90,18 +86,17 @@ public abstract class MessageReceieverTemplate {
             }
             eventLog.log(new Event().setProcessStates(ProcessState.DECRYPTION_SUCCESS));
 
-            // Signaturvalidering
+
             ZipFile asicFile = verifySignature(asicFileBytes, payload);
-            eventLog.log(new Event().setProcessStates(ProcessState.SIGNATURE_VALIDATED));
+            if (null!=asicFile) {
+                eventLog.log(new Event().setProcessStates(ProcessState.SIGNATURE_VALIDATED));
+            }
 
 
-            eventLog.log(new Event().setProcessStates(ProcessState.BEST_EDU_SENT));
 
-
-            eventLog.log(new Event().setProcessStates(ProcessState.AAPNINGS_KVITTERING_SENT));
 
         } else {
-            // BestEdu recieved
+
             eventLog.log(new Event().setProcessStates(ProcessState.BEST_EDU_RECIEVED));
         }
     }
@@ -154,10 +149,9 @@ public abstract class MessageReceieverTemplate {
         Cipher aesCipher = null;
         try {
             aesCipher = Cipher.getInstance("AES");
-        } catch (NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
-        } catch (NoSuchPaddingException e) {
-            eventLog.log(new Event().setExceptionMessage(e.toString()));
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
         SecretKeySpec secretKeySpec = new SecretKeySpec(aesKey, "AES");
         SecureRandom secureRandom = null;
@@ -165,34 +159,33 @@ public abstract class MessageReceieverTemplate {
             secureRandom = SecureRandom.getInstance("6");
         } catch (NoSuchAlgorithmException e) {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
 
         try {
             aesCipher.init(Cipher.DECRYPT_MODE, secretKeySpec, secureRandom);
         } catch (InvalidKeyException e) {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
         byte[] zipTobe = new byte[0];
         try {
             zipTobe = aesCipher.doFinal(aesEncZip);
-        } catch (IllegalBlockSizeException e) {
+        } catch (IllegalBlockSizeException  | BadPaddingException e) {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
-        } catch (BadPaddingException e) {
-            eventLog.log(new Event().setExceptionMessage(e.toString()));
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
 
         File file = new File(PAYLOAD_ZIP);
         file.setWritable(true, false);
         try {
             FileUtils.writeByteArrayToFile(file, zipTobe);
-        } catch (IOException e) {
-            eventLog.log(new Event().setExceptionMessage(e.toString()));
-        }
-        try {
             zipFile = new ZipFile(file);
         } catch (IOException e) {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
+
         return zipFile;
     }
 
@@ -246,60 +239,16 @@ public abstract class MessageReceieverTemplate {
 
         } catch (InvalidKeySpecException e) {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
+            throw new MeldingsUtvekslingRuntimeException(e);
         } catch (NoSuchAlgorithmException e) {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
+            throw new MeldingsUtvekslingRuntimeException(e);
         } finally {
             if (null != is){
                 is.close();
             }
         }
         return key;
-    }
-
-    public void unZipIt(String zipFile, String outputFolder) {
-
-        byte[] buffer = new byte[MAGIC_NR];
-
-        try {
-
-            //create output directory is not exists
-            File folder = new File(outputFolder);
-            if (!folder.exists()) {
-                folder.mkdir();
-            }
-
-            //get the zip file content
-            ZipInputStream zis =
-                    new ZipInputStream(new FileInputStream(zipFile));
-            //get the zipped file list entry
-            ZipEntry ze = zis.getNextEntry();
-
-            while (ze != null) {
-
-                String fileName = ze.getName();
-                File newFile = new File(outputFolder + File.separator + fileName);
-
-                //create all non exists folders
-                //else you will hit FileNotFoundException for compressed folder
-                new File(newFile.getParent()).mkdirs();
-
-                FileOutputStream fos = new FileOutputStream(newFile);
-
-                int len;
-                while ((len = zis.read(buffer)) > 0) {
-                    fos.write(buffer, 0, len);
-                }
-
-                fos.close();
-                ze = zis.getNextEntry();
-            }
-
-            zis.closeEntry();
-            zis.close();
-
-        } catch (IOException ex) {
-            eventLog.log(new Event().setExceptionMessage(ex.toString()));
-        }
     }
 
 }
