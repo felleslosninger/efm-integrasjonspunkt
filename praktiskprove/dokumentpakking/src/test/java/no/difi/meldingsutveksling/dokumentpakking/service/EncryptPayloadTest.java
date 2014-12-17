@@ -5,6 +5,7 @@ import no.difi.meldingsutveksling.dokumentpakking.domain.EncryptedContent;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
@@ -15,8 +16,10 @@ import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+
 import java.io.*;
 import java.security.*;
+import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 
@@ -32,13 +35,13 @@ public class EncryptPayloadTest {
 		EncryptedContent c = new EncryptPayload()
 				.encrypt("Encrypted content".getBytes(), new Mottaker(new Organisasjonsnummer("958935429"), mottakerpublicKey));
 		
-		Cipher keyCipher = Cipher.getInstance("RSA");
-		Cipher contentCipher = Cipher.getInstance("AES");
+		Cipher keyCipher = Cipher.getInstance(EncryptPayload.RSA_MODE);
+		Cipher contentCipher = Cipher.getInstance(EncryptPayload.AES_MODE);
 
 		keyCipher.init(Cipher.DECRYPT_MODE, loadPrivateKey("958935429-oslo-kommune.pkcs8"));
 		byte[] decryptedContentKey = keyCipher.doFinal(c.getKey());
 
-		Key contentKey = new SecretKeySpec(decryptedContentKey, "AES");
+		Key contentKey = new SecretKeySpec(decryptedContentKey, EncryptPayload.AES_MODE);
 
 		contentCipher.init(Cipher.DECRYPT_MODE, contentKey);
 		byte[] decryptedContent = contentCipher.doFinal(c.getContent());
@@ -64,19 +67,20 @@ public class EncryptPayloadTest {
 		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 		Payload kopi = (Payload) jaxbUnmarshaller.unmarshal(is);
 		
-		Cipher keyCipher = Cipher.getInstance("RSA");
-		Cipher contentCipher = Cipher.getInstance("AES");
+		Cipher keyCipher = Cipher.getInstance(EncryptPayload.RSA_MODE);
+		Cipher contentCipher = Cipher.getInstance(EncryptPayload.AES_MODE);
 		
 		keyCipher.init(Cipher.DECRYPT_MODE, loadPrivateKey("958935429-oslo-kommune.pkcs8"));
 		byte[] decryptedContentKey = keyCipher.doFinal(Base64.decodeBase64(kopi.getEncryptionKey()));
 
-		Key contentKey = new SecretKeySpec(decryptedContentKey, "AES");
+		Key contentKey = new SecretKeySpec(decryptedContentKey, EncryptPayload.AES_MODE);
 
 		contentCipher.init(Cipher.DECRYPT_MODE, contentKey);
 		byte[] decryptedContent = contentCipher.doFinal(Base64.decodeBase64(kopi.getAsice()));
 		
 		assertThat(new String(decryptedContent), is(equalTo("Encrypted content")));
 	}
+	
 	
     public PrivateKey loadPrivateKey(String fileName) throws IOException  {
         PrivateKey key = null;
@@ -101,6 +105,7 @@ public class EncryptPayloadTest {
 
             byte[] encoded = DatatypeConverter.parseBase64Binary(builder.toString());
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
+            System.out.println(keySpec.getFormat());
             KeyFactory kf = KeyFactory.getInstance("RSA");
             key = kf.generatePrivate(keySpec);
 

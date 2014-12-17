@@ -7,7 +7,7 @@ public class CliOptions extends Options {
 	public CliOptions() {
 		super();
 		
-		OptionBuilder.hasArg().withDescription("The folder from which to read XMLs").withLongOpt("inputdirectiory");
+		OptionBuilder.hasOptionalArg().withDescription("The folder from which to read XMLs").withLongOpt("inputdirectiory");
 		addOption(OptionBuilder.create("d"));
 
 		OptionBuilder.hasArg().withDescription("URL for the knutepunkt to call").withLongOpt("knutepunkt");

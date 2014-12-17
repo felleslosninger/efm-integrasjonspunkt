@@ -25,7 +25,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <springVersion>4.1.2.RELEASE</springVersion>
-        <jetty.port>9090</jetty.port>
+        <jetty.port>9091</jetty.port>
         <additionalparam>-Xdoclint:none</additionalparam>
         <project.stage>default</project.stage>
         <jdbc.driverClassName>org.hsqldb.jdbcDriver</jdbc.driverClassName>
@@ -40,7 +40,6 @@
         <hibernate.connection.autocommit>true</hibernate.connection.autocommit>
         <hibernate.search.default.directory_provider>ram</hibernate.search.default.directory_provider>
         <hibernate.search.default.indexBase>src/main/resources/index</hibernate.search.default.indexBase>
-
     </properties>
     <build>
         <plugins>

@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.dokumentpakking.service;
 
-import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.BusinessScope;
 import no.difi.meldingsutveksling.domain.sbdh.DocumentIdentification;
@@ -22,7 +21,7 @@ public class CreateSBD {
 	public static final String HEADER_VERSION = "1.0";
 	public static final String TYPE_VERSION = "1.0";
 	public static final String CONVERSATIONID = "ConversationId";
-	public StandardBusinessDocument createSBD(Organisasjonsnummer avsender, Organisasjonsnummer mottaker, Payload payload, String conversationId,String type) {
+	public StandardBusinessDocument createSBD(Organisasjonsnummer avsender, Organisasjonsnummer mottaker, Object payload, String conversationId,String type) {
 		StandardBusinessDocument doc = new StandardBusinessDocument();
 		doc.setStandardBusinessDocumentHeader(createHeader(avsender, mottaker, conversationId, type));
 		doc.setAny(payload);

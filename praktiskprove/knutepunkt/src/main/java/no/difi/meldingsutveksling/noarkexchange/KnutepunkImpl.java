@@ -1,10 +1,12 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import com.thoughtworks.xstream.XStream;
+import no.difi.meldingsutveksling.adresseregister.client.AdresseRegisterClient;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.eventlog.ProcessState;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -38,6 +40,9 @@ public class KnutepunkImpl implements SOAPport {
     @Resource
     private WebServiceContext context;
 
+    @Autowired
+    private AdresseRegisterClient adresseRegisterClient;
+
     private SendMessageTemplate template;
 
     @Override
@@ -45,7 +50,8 @@ public class KnutepunkImpl implements SOAPport {
         ServletContext servletContext =
                 (ServletContext) context.getMessageContext().get(MessageContext.SERVLET_CONTEXT);
         ApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-
+        adresseRegisterClient =ctx.getBean(AdresseRegisterClient.class);
+        String organisasjonsnummer =getCanReceiveMessageRequest.getReceiver().getOrgnr();
         EventLog eventLog = ctx.getBean(EventLog.class);
         eventLog.log(new Event()
                 .setMessage(new XStream().toXML(getCanReceiveMessageRequest))
@@ -53,8 +59,8 @@ public class KnutepunkImpl implements SOAPport {
                 .setReceiver(getCanReceiveMessageRequest.getReceiver().getOrgnr()).setSender("NA"));
 
         GetCanReceiveMessageResponseType response = new GetCanReceiveMessageResponseType();
-        response.setResult(true);
-
+        adresseRegisterClient.getCertificate(organisasjonsnummer);
+        response.setResult((null != organisasjonsnummer)?true:false);
         return response;
     }
 

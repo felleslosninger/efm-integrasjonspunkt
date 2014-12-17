@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.oxalisexchange;
 
-import no.difi.meldingsutveksling.domain.BestEduMessage;
+import no.difi.meldingsutveksling.eventlog.CustomRuntimeExceptions;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.eventlog.ProcessState;
@@ -17,13 +17,22 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBException;
-import java.io.*;
-import java.security.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -37,7 +46,6 @@ public abstract class MessageReceieverTemplate {
     private static final int MAGIC_NR = 1024;
 
     private EventLog eventLog = EventLog.create();
-    private List<Object> toRemoveAfterIntegration = new ArrayList();
 
     abstract void sendLeveringskvittering(Map list);
 
@@ -50,12 +58,13 @@ public abstract class MessageReceieverTemplate {
             documentElements = documentMapping(document);
             n = (Node) documentElements.get("DocumentIdentification");
         } catch (JAXBException e) {
-            eventLog.log(new Event());
+            eventLog.log(new Event().setProcessStates(ProcessState.SOME_OTHER_EXCEPTION).setExceptionMessage(e.toString()));
+            throw new CustomRuntimeExceptions(e);
         }
 
         eventLog.log(new Event().setProcessStates(ProcessState.MESSAGE_RECIEVED));
 
-        if (isSBD(n)) {
+        if (isMessage(n)) {
 
             eventLog.log(new Event().setProcessStates(ProcessState.SBD_RECIEVED));
             try {
@@ -81,11 +90,9 @@ public abstract class MessageReceieverTemplate {
 
             // Signaturvalidering
             ZipFile asicFile = verifySignature(asicFileBytes, payload);
-            System.out.println(asicFile.entries());
             eventLog.log(new Event().setProcessStates(ProcessState.SIGNATURE_VALIDATED));
 
-            BestEduMessage bestEduMessage = getBestEduFromAsic(asicFile);
-            senToNoark(bestEduMessage,documentElements);
+
             eventLog.log(new Event().setProcessStates(ProcessState.BEST_EDU_SENT));
 
 
@@ -120,9 +127,9 @@ public abstract class MessageReceieverTemplate {
             if (name.contains("ns2:")) {
                 name = name.replace("ns2:", "");
             }
-            if (name.equals("#text"))
+            if ("#text".equals(name)) {
                 continue;
-
+            }
             list.put(name, n);
         }
         for (int i = 0; i < payloadNodes.getLength(); i++) {
@@ -134,16 +141,8 @@ public abstract class MessageReceieverTemplate {
     }
 
 
-    protected void senToNoark(BestEduMessage bestEduMessage,Map documentElements) {
-       //TODO:dette er implimentert men komentert bort med hensyn på debugging .
-      //  sendApningskvittering(documentElements);
-    }
 
 
-    private BestEduMessage getBestEduFromAsic(ZipFile asicFile) {
-
-        return null;
-    }
 
     private ZipFile verifySignature(byte[] aesKey, Node payload) {
         String payloadTextContent = payload.getTextContent();
@@ -207,7 +206,7 @@ public abstract class MessageReceieverTemplate {
         return cipher.doFinal(aesInDisc);
     }
 
-    private boolean isSBD(Node node) {
+    private boolean isMessage(Node node) {
         return node.getTextContent().toLowerCase().contains("melding");
     }
 
