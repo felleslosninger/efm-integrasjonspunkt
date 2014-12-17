@@ -17,7 +17,7 @@ public class AdresseRegisterController {
     private AddressRegister adressRegister = AdressRegisterFactory.createAdressRegister(); // step 1 mock
 
     @RequestMapping(value = "/{orgNr}/crt", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public CertificateResponse getCertificate(@PathVariable(value = "organizationNumber") String orgNr) {
+    public CertificateResponse getCertificate(@PathVariable(value = "orgNr") String orgNr) {
         CertificateResponse response = new CertificateResponse();
         response.setBase64EncondedCertificate(adressRegister.getCeritifcateString(orgNr));
         return response;

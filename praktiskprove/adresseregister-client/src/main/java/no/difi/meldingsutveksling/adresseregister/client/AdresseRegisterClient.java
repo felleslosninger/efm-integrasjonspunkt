@@ -78,10 +78,4 @@ public class AdresseRegisterClient {
         @GET("/adresseregister/{" + PATH_PARAM_ORG_NR + "}/crt")
         CertificateResponse getCertificate(@Path(PATH_PARAM_ORG_NR) String orgNr);
     }
-
-    public static void main(String[] args) {
-        AdresseRegisterClient client = new AdresseRegisterClient();
-        client.getCertificate("958935429");
-    }
-
 }
