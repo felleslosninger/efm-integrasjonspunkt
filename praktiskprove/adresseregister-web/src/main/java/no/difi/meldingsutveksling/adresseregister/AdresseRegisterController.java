@@ -1,5 +1,9 @@
 package no.difi.meldingsutveksling.adresseregister;
 
+import no.difi.meldingsutveksling.adresseregister.domain.VirksomhetsSertifikat;
+import no.difi.meldingsutveksling.adresseregister.repository.AdresseRegisterRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,21 +18,30 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/adresseregister")
 public class AdresseRegisterController {
 
-    private AddressRegister adressRegister = AdressRegisterFactory.createAdressRegister(); // step 1 mock
+    @Autowired
+    AdresseRegisterRepository repository;
 
     @RequestMapping(value = "/{orgNr}/crt", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
     public CertificateResponse getCertificate(@PathVariable(value = "orgNr") String orgNr) {
         CertificateResponse response = new CertificateResponse();
-        response.setBase64EncondedCertificate(adressRegister.getCeritifcateString(orgNr));
+        VirksomhetsSertifikat sertifikat = repository.findByorganizationNumber(orgNr);
+        if (sertifikat == null) {
+            throw new ResourceNotFoundException();
+        }
+        response.setBase64EncondedCertificate(sertifikat.getPem());
         return response;
     }
 
-    public AddressRegister getAdressRegister() {
-        return adressRegister;
-    }
 
-    public void setAdressRegister(AddressRegister adressRegister) {
-        this.adressRegister = adressRegister;
+    @RequestMapping(value = "/{orgNr}/crt", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_VALUE})
+    public void putCertificate(@PathVariable(value = "orgNr") String orgNr, String pemString) {
+        CertificateResponse response = new CertificateResponse();
+        response.setBase64EncondedCertificate(pemString);
+        VirksomhetsSertifikat sertifikat = new VirksomhetsSertifikat();
+        sertifikat.setActive(true);
+        sertifikat.setOrganizationNumber(orgNr);
+        sertifikat.setPem(pemString);
+        repository.save(sertifikat);
     }
 
 }

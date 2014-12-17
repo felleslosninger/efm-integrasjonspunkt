@@ -77,5 +77,6 @@ public class AdresseRegisterClient {
     interface AdresseRegisterService {
         @GET("/adresseregister/{" + PATH_PARAM_ORG_NR + "}/crt")
         CertificateResponse getCertificate(@Path(PATH_PARAM_ORG_NR) String orgNr);
+
     }
 }
