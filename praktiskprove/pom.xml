@@ -39,6 +39,7 @@
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>sonar-maven-plugin</artifactId>
                     <version>2.4</version>
+
                 </plugin>
 
                 <plugin>
@@ -76,6 +77,7 @@
                 <sonar.jdbc.username>sonar</sonar.jdbc.username>
                 <sonar.jdbc.password>sonar114Ameta</sonar.jdbc.password>
                 <sonar.host.url>http://sonar.inbeta.ws</sonar.host.url>
+                <sonar.java.source>1.7</sonar.java.source>
             </properties>
         </profile>
     </profiles>
