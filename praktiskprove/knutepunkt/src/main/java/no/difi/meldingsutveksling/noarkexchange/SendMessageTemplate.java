@@ -111,7 +111,7 @@ public abstract class SendMessageTemplate {
         	Certificate sertifikat = adresseregister.getCertificate(receiver.getOrgnr());
             if (sertifikat == null)
                 throw new InvalidReceiver(new RuntimeException("invalid receiver"));
-            Mottaker mottaker = new Mottaker(new Organisasjonsnummer("810418052"), (X509Certificate) sertifikat);
+             Mottaker mottaker = new Mottaker(new Organisasjonsnummer(receiver.getOrgnr()), (X509Certificate) sertifikat);
             context.setMottaker(mottaker);
         } catch (IllegalArgumentException e) {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
