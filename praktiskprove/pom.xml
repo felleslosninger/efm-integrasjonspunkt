@@ -16,6 +16,7 @@
         <module>dokumentpakking</module>
         <module>knutepunkt</module>
         <module>domain</module>
+        <module>sbd-reader</module>
         </modules>
     <build>
         <pluginManagement>

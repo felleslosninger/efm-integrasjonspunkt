@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Noekkelpar;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.xml.bind.DatatypeConverter;
@@ -30,6 +31,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 
 
 public class SignAFileTest {
+    @Ignore
     @Test
     public void signIt(){
         File f= new File(getClass().getClassLoader().getResource("kvitteringSbd.xml").getFile());
@@ -59,7 +61,7 @@ public class SignAFileTest {
         PrivateKey key = null;
         InputStream is = null;
         try {
-            is = getClass().getClassLoader().getResourceAsStream("difi-key.pem");
+            is = getClass().getClassLoader().getResourceAsStream("difi-privkey.pem");
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
             StringBuilder builder = new StringBuilder();
             boolean inKey = false;
