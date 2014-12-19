@@ -59,7 +59,7 @@ public class SignAFileTest {
         PrivateKey key = null;
         InputStream is = null;
         try {
-            is = getClass().getClassLoader().getResourceAsStream(  "958935429-oslo-kommune.pkcs8" );
+            is = getClass().getClassLoader().getResourceAsStream("difi-key.pem");
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
             StringBuilder builder = new StringBuilder();
             boolean inKey = false;

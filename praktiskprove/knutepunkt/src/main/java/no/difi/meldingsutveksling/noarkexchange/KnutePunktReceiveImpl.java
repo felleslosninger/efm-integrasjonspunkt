@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import com.thoughtworks.xstream.XStream;
+import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.adresseregister.client.AdresseRegisterClient;
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
@@ -140,22 +141,10 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
                 eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
                 throw new MeldingsUtvekslingRuntimeException(e);
             }
-            String aesInRsa = "";
-            String payloadString = "";
-            byte[] aesInDisc = DatatypeConverter.parseBase64Binary(aesInRsa);
-            byte[] aesEncZip = DatatypeConverter.parseBase64Binary(payloadString);
 
-            //*** get rsa cipher decrypt *****
-            Cipher cipher = null;
-            try {
-                cipher = Cipher.getInstance(RSA_INSTANCE);
-            } catch (NoSuchAlgorithmException e) {
-                eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
-                throw new MeldingsUtvekslingRuntimeException(e);
-            } catch (NoSuchPaddingException e) {
-                eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
-                throw new MeldingsUtvekslingRuntimeException(e);
-            }
+            byte[] cmsEncZip = DatatypeConverter.parseBase64Binary(payload.getContent());
+
+
             PrivateKey privateKey = null;
             try {
                 privateKey = loadPrivateKey();
@@ -163,68 +152,14 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
                 eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
                 throw new MeldingsUtvekslingRuntimeException(e);
             }
-            try {
-                cipher.init(Cipher.DECRYPT_MODE, privateKey);
-            } catch (InvalidKeyException e) {
-                eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
-                throw new MeldingsUtvekslingRuntimeException(e);
-            }
-            byte[] aesKey = new byte[0];
-            try {
-                aesKey = cipher.doFinal(aesInDisc);
-            } catch (IllegalBlockSizeException e) {
-                eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
-            } catch (BadPaddingException e) {
-                eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
-                throw new MeldingsUtvekslingRuntimeException(e);
-            }
 
-            //*** get aes cipher decrypt *****
-            Cipher aesCipher = null;
-            try {
-                aesCipher = Cipher.getInstance("AES");
-            } catch (NoSuchAlgorithmException e) {
-                eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
-                throw new MeldingsUtvekslingRuntimeException(e);
-            } catch (NoSuchPaddingException e) {
-                eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
-                throw new MeldingsUtvekslingRuntimeException(e);
-            }
-            SecretKeySpec secretKeySpec = new SecretKeySpec(aesKey, "AES");
-            SecureRandom secureRandom = null;
-            try {
-                secureRandom = SecureRandom.getInstance("SHA1PRNG");
-            } catch (NoSuchAlgorithmException e) {
-                eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
-                throw new MeldingsUtvekslingRuntimeException(e);
-            }
-
-
-            try {
-                aesCipher.init(Cipher.DECRYPT_MODE, secretKeySpec, secureRandom);
-
-            } catch (InvalidKeyException e) {
-                eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
-                throw new MeldingsUtvekslingRuntimeException(e);
-            }
-            byte[] zipTobe = new byte[0];
-            try {
-                zipTobe = aesCipher.doFinal(aesEncZip);
-
-            } catch (IllegalBlockSizeException e) {
-                eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
-                throw new MeldingsUtvekslingRuntimeException(e);
-            } catch (BadPaddingException e) {
-                eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
-                throw new MeldingsUtvekslingRuntimeException(e);
-            } catch (GeneralSecurityException e) {
-                eventLogManager(receiveResponse, e, ProcessState.DECRYPTION_ERROR);
-                throw new MeldingsUtvekslingRuntimeException(e);
-            }
+            CmsUtil cmsUtil = new CmsUtil();
+           byte[] zipTobe= cmsUtil.decryptCMS(cmsEncZip,privateKey);
             eventLogManager(receiveResponse, null, ProcessState.DECRYPTION_SUCCESS);
             // Lage zip fil av byteArray
-            File bestEdu = null;
+            File bestEdu;
             try {
+
                 bestEdu = goGetBestEdu(receiveResponse, zipTobe);
                 eventLogManager(receiveResponse, null, ProcessState.BESTEDU_EXTRACTED);
             } catch (IOException e) {

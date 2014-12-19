@@ -36,7 +36,7 @@ import java.util.zip.ZipFile;
 
 public abstract class MessageReceieverTemplate {
 
-    private static final String PRIVATE_KEY_FILE = "958935429-oslo-kommune.pkcs8";
+    private static final String PRIVATE_KEY_FILE = "difi-key.pem";
     private static final String PAYLOAD_ZIP = System.getProperty("user.home")+ File.separator +"testToRemove" + File.separator + "payload.zip";
     private static final String PAYLOAD = "payload";
     private static final int MAGIC_NR = 1024;

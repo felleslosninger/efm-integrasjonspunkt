@@ -19,7 +19,7 @@ public class KnutePunktRecieveImplTest {
     @Test
     public void recieverTesting() {
         KnutePunktReceiveImpl knutePunktReceive = new KnutePunktReceiveImpl();
-        File file = new File(getClass().getClassLoader().getResource("sbdUt.xml").getFile());
+        File file = new File(getClass().getClassLoader().getResource("sbdV4.xml").getFile());
         JAXBContext jaxbContext = null;
         try {
             jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class);
