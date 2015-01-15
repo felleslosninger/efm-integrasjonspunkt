@@ -96,13 +96,13 @@ public abstract class SendMessageTemplateImpl {
             Avsender avsender;
             Certificate sertifikat = adresseregister.getCertificate(sender.getOrgnr());
             if (sertifikat == null) {
-                throw new InvalidSender(new RuntimeException("invalid sender"));
+                throw new InvalidSenderException("invalid sender");
             }
             avsender = Avsender.builder(new Organisasjonsnummer(sender.getOrgnr()), new Noekkelpar(findPrivateKey(), sertifikat)).build();
             context.setAvsender(avsender);
         } catch (IllegalArgumentException e) {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
-            throw new InvalidSender(new RuntimeException("invalid sender"));
+            throw new InvalidSenderException(("invalid sender"));
         }
         return true;
     }
@@ -114,12 +114,12 @@ public abstract class SendMessageTemplateImpl {
         try {
             Certificate sertifikat = adresseregister.getCertificate(receiver.getOrgnr());
             if (sertifikat == null)
-                throw new InvalidReceiver(new RuntimeException("invalid receiver"));
+                throw new InvalidReceiverException("invalid receiver");
             Mottaker mottaker = new Mottaker(new Organisasjonsnummer(receiver.getOrgnr()), (X509Certificate) sertifikat);
             context.setMottaker(mottaker);
         } catch (IllegalArgumentException e) {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
-            throw new InvalidReceiver(new RuntimeException("invalid receiver"));
+            throw new InvalidReceiverException("invalid receiver");
         }
         return true;
     }
@@ -195,7 +195,7 @@ public abstract class SendMessageTemplateImpl {
         try {
             builder = factory.newDocumentBuilder();
         } catch (ParserConfigurationException e) {
-            throw new RuntimeException(e);
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
         return builder;
     }

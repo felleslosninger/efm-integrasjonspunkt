@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import com.thoughtworks.xstream.XStream;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLogDAO;
@@ -19,7 +20,7 @@ public class LogToEventLogOnlySendMessageTemplate extends SendMessageTemplateImp
 
     @Override
     void sendSBD(StandardBusinessDocument sbd) throws IOException {
-        throw new RuntimeException("Not implemented");
+        throw new MeldingsUtvekslingRuntimeException("Not implemented");
     }
 
     @Override

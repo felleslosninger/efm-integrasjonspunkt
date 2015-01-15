@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.dokumentpakking.service;
 import no.difi.meldingsutveksling.adresseregister.AdressRegisterFactory;
 import no.difi.meldingsutveksling.dokumentpakking.kvit.Kvittering;
 import no.difi.meldingsutveksling.domain.Avsender;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Noekkelpar;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -33,25 +34,26 @@ import java.security.spec.PKCS8EncodedKeySpec;
 public class SignAFileTest {
     @Ignore
     @Test
-    public void signIt(){
-        File f= new File(getClass().getClassLoader().getResource("kvitteringSbd.xml").getFile());
+    public void signIt() {
+        File f = new File(getClass().getClassLoader().getResource("kvitteringSbd.xml").getFile());
         StandardBusinessDocument sbd;
         JAXBElement<StandardBusinessDocument> standardBusinessDocumentJAXBElement;
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class);
-             standardBusinessDocumentJAXBElement= (JAXBElement<StandardBusinessDocument>) jaxbContext.createUnmarshaller().unmarshal(f);
+            standardBusinessDocumentJAXBElement = (JAXBElement<StandardBusinessDocument>) jaxbContext.createUnmarshaller().unmarshal(f);
 
         } catch (JAXBException e) {
-            throw new RuntimeException(e);
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
+
         Certificate certificate = (Certificate) AdressRegisterFactory.createAdressRegister().getCertificate("958935429");
         Noekkelpar noekkelpar;
         try {
-            noekkelpar= new Noekkelpar(loadPrivateKey(),certificate);
+            noekkelpar = new Noekkelpar(loadPrivateKey(), certificate);
         } catch (IOException e) {
-          throw  new RuntimeException(e);
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
-        Avsender avsender = new Avsender(new Organisasjonsnummer("958935429"),noekkelpar);
+        Avsender avsender = new Avsender(new Organisasjonsnummer("958935429"), noekkelpar);
         SignAFile signAFile = new SignAFile();
         Kvittering signedFile = signAFile.signIt(standardBusinessDocumentJAXBElement.getValue().getAny(), avsender, KvitteringType.LEVERING);
         org.junit.Assert.assertNotNull(signedFile);
@@ -83,12 +85,10 @@ public class SignAFileTest {
             KeyFactory kf = KeyFactory.getInstance("RSA");
             key = kf.generatePrivate(keySpec);
 
-        } catch (InvalidKeySpecException e) {
-          throw new RuntimeException(e);
-        } catch (NoSuchAlgorithmException e) {
-          throw new RuntimeException(e);
+        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+            throw new MeldingsUtvekslingRuntimeException(e);
         } finally {
-            if (null != is){
+            if (null != is) {
                 is.close();
             }
         }

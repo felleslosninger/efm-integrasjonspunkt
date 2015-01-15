@@ -1,31 +1,6 @@
 package no.difi.meldingsutveksling.dokumentpakking.service;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.math.BigInteger;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Security;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.security.interfaces.RSAPrivateKey;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -43,6 +18,22 @@ import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.junit.Test;
+
+import java.io.*;
+import java.math.BigInteger;
+import java.security.*;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPrivateKey;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
 public class CmsUtilTest {
 
@@ -69,7 +60,7 @@ public class CmsUtilTest {
 
 		while ((o = pemRd.readObject()) != null) {
 			if (!(o instanceof X509CertificateHolder)) {
-				throw new RuntimeException();
+				throw new MeldingsUtvekslingRuntimeException();
 			} else {
 				 cert =  new JcaX509CertificateConverter().setProvider( "BC" )
 						  .getCertificate( (X509CertificateHolder) o );
@@ -117,7 +108,7 @@ public class CmsUtilTest {
 
 	
 
-	private KeyPair doOpenSslTestFile(String fileName, Class expectedPrivKeyClass) throws IOException {
+	private KeyPair doOpenSslTestFile(String fileName, Class expectedPrivKeyClass) throws IOException, MeldingsUtvekslingRuntimeException {
 		JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
 		PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder().setProvider("BC").build("changeit".toCharArray());
 
@@ -125,7 +116,7 @@ public class CmsUtilTest {
 		Object o = pr.readObject();
 
 		if (o == null || !((o instanceof PEMKeyPair) || (o instanceof PEMEncryptedKeyPair))) {
-			throw new RuntimeException();
+			throw new MeldingsUtvekslingRuntimeException();
 		}
 
 		KeyPair kp;

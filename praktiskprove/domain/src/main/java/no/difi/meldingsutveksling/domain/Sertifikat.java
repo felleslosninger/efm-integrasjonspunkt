@@ -38,7 +38,7 @@ public final class Sertifikat {
         try {
             return x509Certificate.getEncoded();
         } catch (CertificateEncodingException e) {
-            throw new RuntimeException("Kunne ikke hente encoded utgave av sertifikatet", e);
+            throw new MeldingsUtvekslingRuntimeException("Kunne ikke hente encoded utgave av sertifikatet", e);
         }
     }
 
@@ -46,7 +46,7 @@ public final class Sertifikat {
         try {
             return lagSertifikat(Base64.decodeBase64(base64));
         } catch (CertificateException e) {
-            throw new RuntimeException("Kunne ikke lese sertifikat fra base64-streng", e);
+            throw new MeldingsUtvekslingRuntimeException("Kunne ikke lese sertifikat fra base64-streng", e);
         }
     }
 
@@ -54,7 +54,7 @@ public final class Sertifikat {
         try {
             return lagSertifikat(certificate);
         } catch (CertificateException e) {
-            throw new RuntimeException("Kunne ikke lese sertifikat fra byte array", e);
+            throw new MeldingsUtvekslingRuntimeException("Kunne ikke lese sertifikat fra byte array", e);
         }
     }
 
@@ -67,15 +67,15 @@ public final class Sertifikat {
         try {
             certificate = keyStore.getCertificate(alias);
         } catch (KeyStoreException e) {
-            throw new RuntimeException("Klarte ikke lese sertifikat fra keystore", e);
+            throw new MeldingsUtvekslingRuntimeException("Klarte ikke lese sertifikat fra keystore", e);
         }
 
         if (certificate == null) {
-            throw new RuntimeException("Kunne ikke finne sertifikat i keystore. Er du sikker på at det er brukt keystore med et sertifikat og at du har oppgitt riktig alias?");
+            throw new MeldingsUtvekslingRuntimeException("Kunne ikke finne sertifikat i keystore. Er du sikker på at det er brukt keystore med et sertifikat og at du har oppgitt riktig alias?");
         }
 
         if (!(certificate instanceof X509Certificate)) {
-            throw new RuntimeException("Klienten støtter kun X509-sertifikater. Fikk sertifikat av typen " + certificate.getClass().getSimpleName());
+            throw new MeldingsUtvekslingRuntimeException("Klienten støtter kun X509-sertifikater. Fikk sertifikat av typen " + certificate.getClass().getSimpleName());
         }
 
         return new Sertifikat((X509Certificate) certificate);

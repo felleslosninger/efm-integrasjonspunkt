@@ -15,14 +15,13 @@
  */
 package no.difi.meldingsutveksling.dokumentpakking.service;
 
-import static java.lang.String.format;
-import static org.apache.commons.codec.digest.DigestUtils.sha1;
-
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
+import no.difi.meldingsutveksling.dokumentpakking.xades.*;
+import no.difi.meldingsutveksling.domain.ByteArrayFile;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.Sertifikat;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.xml.crypto.dsig.DigestMethod;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -33,24 +32,14 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
 
-import no.difi.meldingsutveksling.dokumentpakking.xades.CertIDListType;
-import no.difi.meldingsutveksling.dokumentpakking.xades.CertIDType;
-import no.difi.meldingsutveksling.dokumentpakking.xades.DataObjectFormatType;
-import no.difi.meldingsutveksling.dokumentpakking.xades.DigestAlgAndValueType;
-import no.difi.meldingsutveksling.dokumentpakking.xades.DigestMethodType;
-import no.difi.meldingsutveksling.dokumentpakking.xades.ObjectFactory;
-import no.difi.meldingsutveksling.dokumentpakking.xades.QualifyingPropertiesType;
-import no.difi.meldingsutveksling.dokumentpakking.xades.SignedDataObjectPropertiesType;
-import no.difi.meldingsutveksling.dokumentpakking.xades.SignedPropertiesType;
-import no.difi.meldingsutveksling.dokumentpakking.xades.SignedSignaturePropertiesType;
-import no.difi.meldingsutveksling.dokumentpakking.xades.X509IssuerSerialType;
-import no.difi.meldingsutveksling.domain.ByteArrayFile;
-import no.difi.meldingsutveksling.domain.Sertifikat;
-
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import static java.lang.String.format;
+import static org.apache.commons.codec.digest.DigestUtils.sha1;
 
 public class CreateXAdESProperties {
 
@@ -94,7 +83,7 @@ public class CreateXAdESProperties {
 			xmlDate = DatatypeFactory.newInstance().newXMLGregorianCalendar(gCal);
 			signedSignatureProperties.setSigningTime(xmlDate);
 		} catch (DatatypeConfigurationException e) {
-			throw new RuntimeException(e);
+			throw new MeldingsUtvekslingRuntimeException(e);
 		}
 
 		signedSignatureProperties.setSigningCertificate(signingCertificate);
@@ -140,7 +129,7 @@ public class CreateXAdESProperties {
 			idElement.setIdAttribute(property, true);
 
 		} catch (XPathExpressionException e) {
-			throw new RuntimeException("XPath på generert XML feilet.", e);
+			throw new MeldingsUtvekslingRuntimeException("XPath på generert XML feilet.", e);
 		}
 	}
 }

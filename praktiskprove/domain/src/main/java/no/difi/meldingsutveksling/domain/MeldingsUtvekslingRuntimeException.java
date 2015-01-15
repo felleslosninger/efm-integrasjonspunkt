@@ -12,4 +12,12 @@ public class MeldingsUtvekslingRuntimeException extends RuntimeException {
     public MeldingsUtvekslingRuntimeException(String message) {
         super(message);
     }
+
+    public MeldingsUtvekslingRuntimeException(String s, Exception e) {
+        super(s, e);
+    }
+
+    public MeldingsUtvekslingRuntimeException() {
+        super();
+    }
 }
