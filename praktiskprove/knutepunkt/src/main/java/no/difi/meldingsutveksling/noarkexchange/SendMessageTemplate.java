@@ -14,11 +14,7 @@ import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
-import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
-import no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
+import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.services.AdresseregisterMock;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -122,57 +118,31 @@ public abstract class SendMessageTemplate {
 
     public PutMessageResponseType sendMessage(PutMessageRequestType message) {
 
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder;
-        try {
-            builder = factory.newDocumentBuilder();
-        } catch (ParserConfigurationException e) {
-            throw new RuntimeException(e);
-        }
+
         String arcCid=message.getEnvelope().getConversationId();
-        Element element = (Element) message.getPayload();
-        NodeList nodeList = element.getElementsByTagName("data");
-        Node payloadData = nodeList.item(0);
-        String payloadDataTextContent = payloadData.getTextContent();
-        Document document;
-        try {
-            document = builder.parse(new InputSource(new ByteArrayInputStream(payloadDataTextContent.getBytes("utf-8"))));
-        } catch (SAXException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        NodeList messageElement = document.getElementsByTagName("jpId");
-        String jpId = messageElement.item(0).getTextContent();
+
+        String jpId = GetJpId(message);
+
         KnutepunktContext context = new KnutepunktContext();
         context.setJpId(jpId);
-        try {
-            if (message.getEnvelope() != null && message.getEnvelope().getSender() != null) {
-                verifySender(message.getEnvelope().getSender(), context);
-            } else {
-                return createErrorResponse("no sender");
-            }
-            if (message.getEnvelope().getReceiver() != null) {
-                verifyRecipient(message.getEnvelope().getReceiver(), context);
-            } else {
-                return createErrorResponse("no receiver");
-            }
 
-            eventLog.log(new Event().setProcessStates(ProcessState.SIGNATURE_VALIDATED));
-            //eventLog.log(createOkStateEvent(message, ProcessState.SIGNATURE_VALIDATED));
+        EnvelopeType envelope = message.getEnvelope();
+        if(envelope == null) return createErrorResponse("Missing envelope");
 
+        PutMessageResponseType putMessageResponseType =  VerifyRecipients(message, context, envelope);
 
-        } catch (InvalidSender | InvalidReceiver e) {
-            Event errorEvent = createErrorEvent(message, ProcessState.SIGNATURE_VALIDATION_ERROR, e);
-            eventLog.log(errorEvent);
-            return createErrorResponse();
+        if (putMessageResponseType != null){
+            return putMessageResponseType;
         }
+
+        eventLog.log(new Event().setProcessStates(ProcessState.SIGNATURE_VALIDATED));
 
         StandardBusinessDocument sbd = createSBD(message, context);
 
         Scope item = sbd.getStandardBusinessDocumentHeader().getBusinessScope().getScope().get(0);
         String hubCid=item.getInstanceIdentifier();
         eventLog.log(new Event().setJpId(jpId).setArkiveConversationId(arcCid).setHubConversationId(hubCid).setProcessStates(ProcessState.CONVERSATION_ID_LOGGED));
+
         try {
             sendSBD(sbd);
         } catch (IOException e) {
@@ -181,6 +151,76 @@ public abstract class SendMessageTemplate {
         }
         eventLog.log(createOkStateEvent(message, ProcessState.SBD_SENT));
         return new PutMessageResponseType();
+    }
+
+    private PutMessageResponseType VerifyRecipients(PutMessageRequestType message, KnutepunktContext context, EnvelopeType envelope) {
+        PutMessageResponseType putMessageResponseType = new PutMessageResponseType();
+        AddressType sender = envelope.getSender();
+        if (sender == null) {
+            putMessageResponseType =  createErrorResponse("Missing sender");
+        }
+
+        try {
+            verifySender(sender, context);
+        }
+        catch (InvalidSender e) {
+            putMessageResponseType =   getErrorResponse(message,e);
+        }
+
+
+        AddressType receiver = envelope.getReceiver();
+        if (receiver == null) {
+            putMessageResponseType =   createErrorResponse("Missing receiver");
+        }
+        try {
+            verifyRecipient(receiver, context);
+        }
+        catch (InvalidSender e) {
+            putMessageResponseType =   getErrorResponse(message,e);
+        }
+
+        return putMessageResponseType;
+    }
+
+    private PutMessageResponseType getErrorResponse(PutMessageRequestType message, IllegalArgumentException e) {
+        Event errorEvent = createErrorEvent(message, ProcessState.SIGNATURE_VALIDATION_ERROR, e);
+        eventLog.log(errorEvent);
+        return createErrorResponse(e.getMessage());
+    }
+
+    private String GetJpId(PutMessageRequestType message) {
+        Document document = getDocument(message);
+        NodeList messageElement = document.getElementsByTagName("jpId");
+        return messageElement.item(0).getTextContent();
+    }
+
+    private Document getDocument(PutMessageRequestType message) {
+        DocumentBuilder documentBuilder = getDocumentBuilder();
+        Element element = (Element) message.getPayload();
+        NodeList nodeList = element.getElementsByTagName("data");
+        Node payloadData = nodeList.item(0);
+        String payloadDataTextContent = payloadData.getTextContent();
+        Document document;
+
+        try {
+            document = documentBuilder.parse(new InputSource(new ByteArrayInputStream(payloadDataTextContent.getBytes("utf-8"))));
+        } catch (SAXException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return document;
+    }
+
+    private DocumentBuilder getDocumentBuilder() {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder;
+        try {
+            builder = factory.newDocumentBuilder();
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException(e);
+        }
+        return builder;
     }
 
 
