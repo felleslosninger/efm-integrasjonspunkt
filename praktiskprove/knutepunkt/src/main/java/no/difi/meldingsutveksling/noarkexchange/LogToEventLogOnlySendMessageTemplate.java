@@ -15,7 +15,7 @@ import java.io.IOException;
 
 @Component
 @Profile("heroku")
-public class LogToEventLogOnlySendMessageTemplate extends SendMessageTemplate {
+public class LogToEventLogOnlySendMessageTemplate extends SendMessageTemplateImpl {
 
     @Override
     void sendSBD(StandardBusinessDocument sbd) throws IOException {

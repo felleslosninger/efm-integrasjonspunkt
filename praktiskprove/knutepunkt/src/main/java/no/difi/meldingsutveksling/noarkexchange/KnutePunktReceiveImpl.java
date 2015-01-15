@@ -1,22 +1,17 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import com.thoughtworks.xstream.XStream;
-import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.adresseregister.client.AdresseRegisterClient;
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
 import no.difi.meldingsutveksling.dokumentpakking.kvit.ObjectFactory;
+import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateSBD;
 import no.difi.meldingsutveksling.dokumentpakking.service.KvitteringType;
 import no.difi.meldingsutveksling.dokumentpakking.service.SignAFile;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
-import no.difi.meldingsutveksling.domain.Avsender;
-import no.difi.meldingsutveksling.domain.Mottaker;
-import no.difi.meldingsutveksling.domain.Noekkelpar;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.*;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.noark.NOARKSystem;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
@@ -25,17 +20,11 @@ import no.difi.meldingsutveksling.noarkexchange.schema.receive.*;
 import no.difi.meldingsutveksling.oxalisexchange.ByteArrayImpl;
 import no.difi.meldingsutveksling.oxalisexchange.Kvittering;
 import no.difi.meldingsutveksling.oxalisexchange.OxalisMessageReceiverTemplate;
-
 import org.apache.commons.io.FileUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import javax.annotation.Resource;
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.SecretKeySpec;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.servlet.ServletContext;
@@ -47,9 +36,8 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.BindingType;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
-
 import java.io.*;
-import java.security.*;
+import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -66,6 +54,7 @@ import java.util.zip.ZipInputStream;
 @WebService(portName = "ReceivePort", serviceName = "receive", targetNamespace = "", wsdlLocation = "file:/Users/glennbech/dev/meldingsutvikling-mellom-offentlige-virksomheter/praktiskprove/knutepunkt/src/main/webapp/WEB-INF/wsdl/knutepunktReceive.wsdl", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort")
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
 public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate implements SOAReceivePort {
+
     private static final String KVITTERING = "Kvittering";
     private static final String BEST_EDU = "BEST_EDU";
     private static final String KVITTERING_CONSTANT="kvittering";
@@ -73,6 +62,9 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
     private EventLog eventLog = EventLog.create();
     private static final String MIME_TYPE = "application/xml";
     private static final String WRITE_TO = System.getProperty("user.home") + File.separator + "testToRemove" + File.separator + "kvitteringSbd.xml";
+
+
+    private SendMessageTemplateImpl sendMessageTemplate ;
 
     @Resource
     private WebServiceContext context;
@@ -90,6 +82,7 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
 
         Organisasjonsnummer sender;
         Organisasjonsnummer reciever;
+
         String convId;
         Avsender avsender;
         SignAFile signAFile;
@@ -107,6 +100,7 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
                   avsender= new Avsender(reciever,noekkelpar);
                   signAFile = new SignAFile();
 
+                //todo hvordan endrer vi implementasjon, se på jspf
                 new OxalisSendMessageTemplate().sendSBD(new CreateSBD().createSBD(reciever,sender, new ObjectFactory().createKvittering(signAFile.signIt(receiveResponse.getAny(),avsender, KvitteringType.LEVERING)),convId,KVITTERING_CONSTANT));
                 eventLogManager(receiveResponse,null, ProcessState.LEVERINGS_KVITTERING_SENT);
             } catch (IOException e) {
@@ -117,8 +111,6 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
             String RSA_INSTANCE = "RSA";
 
             Payload payload = null;
-
-            //*** get payload *****
 
             JAXBContext jaxbContextP = null;
             try {
