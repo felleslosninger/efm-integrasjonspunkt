@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.dokumentpakking.service;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Archive;
 import no.difi.meldingsutveksling.domain.ByteArrayFile;
 
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.utils.Charsets;
@@ -37,7 +38,7 @@ public class CreateZip {
             return new Archive(archive.toByteArray());
         }
         catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
         finally {
             IOUtils.closeQuietly(archive);

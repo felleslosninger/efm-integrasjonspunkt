@@ -50,8 +50,8 @@ public class KnutepunkImpl implements SOAPport {
         ServletContext servletContext =
                 (ServletContext) context.getMessageContext().get(MessageContext.SERVLET_CONTEXT);
         ApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-        adresseRegisterClient =ctx.getBean(AdresseRegisterClient.class);
-        String organisasjonsnummer =getCanReceiveMessageRequest.getReceiver().getOrgnr();
+        adresseRegisterClient = ctx.getBean(AdresseRegisterClient.class);
+        String organisasjonsnummer = getCanReceiveMessageRequest.getReceiver().getOrgnr();
         EventLog eventLog = ctx.getBean(EventLog.class);
         eventLog.log(new Event()
                 .setMessage(new XStream().toXML(getCanReceiveMessageRequest))
@@ -59,8 +59,13 @@ public class KnutepunkImpl implements SOAPport {
                 .setReceiver(getCanReceiveMessageRequest.getReceiver().getOrgnr()).setSender("NA"));
 
         GetCanReceiveMessageResponseType response = new GetCanReceiveMessageResponseType();
-        adresseRegisterClient.getCertificate(organisasjonsnummer);
-        response.setResult((null != organisasjonsnummer)?true:false);
+        boolean canReceive = true;
+        try {
+            adresseRegisterClient.getCertificate(organisasjonsnummer);
+        } catch (Exception e) {
+            canReceive = false;
+        }
+        response.setResult((canReceive));
         return response;
     }
 

@@ -27,6 +27,10 @@ public class Event {
     private String arkiveConversationId;
     private String jpId;
 
+    public Event(ProcessState processState) {
+        this.processState = processState;
+    }
+
     public Event() {
         this(System.currentTimeMillis(), UUID.randomUUID());
     }
@@ -110,7 +114,8 @@ public class Event {
     }
 
     public Event setHubConversationId(String hubConversationId) {
-        this.hubConversationId = hubConversationId;return this;
+        this.hubConversationId = hubConversationId;
+        return this;
     }
 
     public String getArkiveConversationId() {
@@ -118,7 +123,8 @@ public class Event {
     }
 
     public Event setArkiveConversationId(String arkiveConversationId) {
-        this.arkiveConversationId = arkiveConversationId;return this;
+        this.arkiveConversationId = arkiveConversationId;
+        return this;
     }
 
     public String getJpId() {
@@ -127,7 +133,8 @@ public class Event {
 
     public Event setJpId(String jpId) {
         this.jpId = jpId;
-        return this;    }
+        return this;
+    }
 
     @Override
     public String toString() {

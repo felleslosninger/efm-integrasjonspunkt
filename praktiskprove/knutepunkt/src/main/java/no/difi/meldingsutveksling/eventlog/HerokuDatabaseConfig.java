@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.eventlog;
 
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,7 +22,7 @@ public class HerokuDatabaseConfig implements DataBaseConfig {
         try {
             dbUri = new URI(System.getenv(DATABASE_URL_ENV_PARAM));
         } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
         String username = dbUri.getUserInfo().split(":")[0];
         String password = dbUri.getUserInfo().split(":")[1];

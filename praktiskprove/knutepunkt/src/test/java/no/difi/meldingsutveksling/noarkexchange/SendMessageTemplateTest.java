@@ -34,12 +34,12 @@ public class SendMessageTemplateTest {
 	@Mock
 	EventLog eventLogMock;
 
-	SendMessageTemplate subject;
+	SendMessageTemplateImpl subject;
 
 	@Before
 	public void setUp() {
         dokumentpakker = new Dokumentpakker();
-		subject = new SendMessageTemplate(dokumentpakker, new AdresseregisterMock()) {
+		subject = new SendMessageTemplateImpl(dokumentpakker, new AdresseregisterMock()) {
 			{
 				setEventLog(eventLogMock);
 			}

@@ -8,7 +8,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
-public class FileSendMessageTemplate extends SendMessageTemplate {
+public class FileSendMessageTemplate extends SendMessageTemplateImpl {
 
 	@Override
 	void sendSBD(StandardBusinessDocument sbd) throws IOException {

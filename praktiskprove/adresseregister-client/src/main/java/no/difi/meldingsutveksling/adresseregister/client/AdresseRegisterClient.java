@@ -62,6 +62,8 @@ public class AdresseRegisterClient {
      * @see java.security.cert.X509Certificate
      */
     public Certificate getCertificate(String orgNr) {
+
+        //todo sjekk hva slags feilmelding vi faar her.
         CertificateResponse response = adresseRegister.getCertificate(orgNr);
         Certificate certificate;
         try {
