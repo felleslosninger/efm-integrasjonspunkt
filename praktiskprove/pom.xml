@@ -17,7 +17,8 @@
         <module>knutepunkt</module>
         <module>domain</module>
         <module>sbd-reader</module>
-        </modules>
+        <module>transport-oxalis</module>
+    </modules>
     <build>
         <pluginManagement>
 
