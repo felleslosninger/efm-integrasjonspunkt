@@ -37,7 +37,7 @@ import java.util.zip.ZipFile;
 public abstract class MessageReceieverTemplate {
 
     private static final String PRIVATE_KEY_FILE = "difi-key.pem";
-    private static final String PAYLOAD_ZIP = System.getProperty("user.home")+ File.separator +"testToRemove" + File.separator + "payload.zip";
+    private static final String PAYLOAD_ZIP = System.getProperty("user.home") + File.separator + "testToRemove" + File.separator + "payload.zip";
     private static final String PAYLOAD = "payload";
     private static final int MAGIC_NR = 1024;
 
@@ -63,12 +63,8 @@ public abstract class MessageReceieverTemplate {
         if (isMessage(n)) {
 
             eventLog.log(new Event().setProcessStates(ProcessState.SBD_RECIEVED));
-            try {
-                documentElements.put("privateKey", loadPrivateKey());
-            } catch (IOException e) {
-                eventLog.log(new Event().setExceptionMessage(e.toString()));
-                throw new MeldingsUtvekslingRuntimeException(e);
-            }
+            documentElements.put("privateKey", loadPrivateKey());
+
             sendLeveringskvittering(documentElements);
             eventLog.log(new Event().setProcessStates(ProcessState.LEVERINGS_KVITTERING_SENT));
 
@@ -88,11 +84,9 @@ public abstract class MessageReceieverTemplate {
 
 
             ZipFile asicFile = verifySignature(asicFileBytes, payload);
-            if (null!=asicFile) {
+            if (null != asicFile) {
                 eventLog.log(new Event().setProcessStates(ProcessState.SIGNATURE_VALIDATED));
             }
-
-
 
 
         } else {
@@ -100,8 +94,6 @@ public abstract class MessageReceieverTemplate {
             eventLog.log(new Event().setProcessStates(ProcessState.BEST_EDU_RECIEVED));
         }
     }
-
-
 
 
     /**
@@ -138,9 +130,6 @@ public abstract class MessageReceieverTemplate {
     }
 
 
-
-
-
     private ZipFile verifySignature(byte[] aesKey, Node payload) {
         String payloadTextContent = payload.getTextContent();
         byte[] aesEncZip = DatatypeConverter.parseBase64Binary(payloadTextContent);
@@ -171,7 +160,7 @@ public abstract class MessageReceieverTemplate {
         byte[] zipTobe = new byte[0];
         try {
             zipTobe = aesCipher.doFinal(aesEncZip);
-        } catch (IllegalBlockSizeException  | BadPaddingException e) {
+        } catch (IllegalBlockSizeException | BadPaddingException e) {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
             throw new MeldingsUtvekslingRuntimeException(e);
         }
@@ -211,11 +200,9 @@ public abstract class MessageReceieverTemplate {
      * @return an private key
      * @throws java.io.IOException
      */
-    public PrivateKey loadPrivateKey() throws IOException {
-        PrivateKey key = null;
-        InputStream is = null;
-        try {
-            is = getClass().getClassLoader().getResourceAsStream(PRIVATE_KEY_FILE);
+    public PrivateKey loadPrivateKey() {
+        PrivateKey key;
+        try (InputStream is = MessageReceieverTemplate.class.getResourceAsStream(PRIVATE_KEY_FILE)) {
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
             StringBuilder builder = new StringBuilder();
             boolean inKey = false;
@@ -231,22 +218,14 @@ public abstract class MessageReceieverTemplate {
                     builder.append(line);
                 }
             }
-
             byte[] encoded = DatatypeConverter.parseBase64Binary(builder.toString());
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
             KeyFactory kf = KeyFactory.getInstance("RSA");
             key = kf.generatePrivate(keySpec);
 
-        } catch (InvalidKeySpecException e) {
+        } catch (InvalidKeySpecException | IOException | NoSuchAlgorithmException e) {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
             throw new MeldingsUtvekslingRuntimeException(e);
-        } catch (NoSuchAlgorithmException e) {
-            eventLog.log(new Event().setExceptionMessage(e.toString()));
-            throw new MeldingsUtvekslingRuntimeException(e);
-        } finally {
-            if (null != is){
-                is.close();
-            }
         }
         return key;
     }

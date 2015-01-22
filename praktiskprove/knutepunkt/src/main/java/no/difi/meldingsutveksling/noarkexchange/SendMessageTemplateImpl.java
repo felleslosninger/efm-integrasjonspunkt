@@ -53,6 +53,7 @@ public abstract class SendMessageTemplateImpl {
 
     private static final String JP_ID = "jpId";
     private static final String DATA = "data";
+
     @Autowired
     EventLog eventLog;
 

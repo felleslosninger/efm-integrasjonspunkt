@@ -57,19 +57,21 @@ public class Dokumentpakker {
     }
 
     private SignatureType createXmlSignature(byte[] signedBytes, byte[] x509EncodedCert) {
-        SignatureType signature = new SignatureType();
-        SignedInfoType signedInfoType = new SignedInfoType();
+
         CanonicalizationMethodType canonicalizationMethodType = new CanonicalizationMethodType();
         canonicalizationMethodType.setAlgorithm("http://www.w3.org/2001/10/xml-exc-c14n#");
         SignatureMethodType signatureMethodType = new SignatureMethodType();
         signatureMethodType.setAlgorithm("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
+        SignedInfoType signedInfoType = new SignedInfoType();
         signedInfoType.setCanonicalizationMethod(canonicalizationMethodType);
         signedInfoType.setSignatureMethod(signatureMethodType);
-        ReferenceType referenceType = new ReferenceType();
+
         TransformsType transformsType = new TransformsType();
         TransformType transformType = new TransformType();
         transformType.setAlgorithm("http://www.w3.org/2000/09/xmldsig#enveloped-signature");
         transformsType.getTransform().add(transformType);
+
+        ReferenceType referenceType = new ReferenceType();
         referenceType.setTransforms(transformsType);
         DigestMethodType digestMethodType = new DigestMethodType();
         digestMethodType.setAlgorithm("http://www.w3.org/2001/04/xmlenc#sha256");
@@ -82,13 +84,15 @@ public class Dokumentpakker {
         signatureValueType.setValue(signatureValue.getBytes());
         KeyInfoType keyInfoType = new KeyInfoType();
 
-        X509DataType x509DataType = new ObjectFactory().createX509DataType();
-        JAXBElement<byte[]> resultCert = new ObjectFactory().createX509DataTypeX509Certificate(x509EncodedCert);
 
+        X509DataType x509DataType = new ObjectFactory().createX509DataType();
         JAXBElement<X509DataType> x509Data = new ObjectFactory().createX509Data(x509DataType);
 
+        JAXBElement<byte[]> resultCert = new ObjectFactory().createX509DataTypeX509Certificate(x509EncodedCert);
         x509DataType.getX509IssuerSerialOrX509SKIOrX509SubjectName().add(resultCert);
         keyInfoType.getContent().add(x509Data);
+
+        SignatureType signature = new SignatureType();
         signature.setSignedInfo(signedInfoType);
         signature.setKeyInfo(keyInfoType);
         signature.setSignatureValue(signatureValueType);

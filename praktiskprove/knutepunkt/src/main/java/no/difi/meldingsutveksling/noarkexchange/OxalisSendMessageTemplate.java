@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +21,7 @@ import static no.difi.meldingsutveksling.dokumentpakking.xml.MarshalSBD.marshal;
 public class OxalisSendMessageTemplate extends SendMessageTemplateImpl {
 
 	@Override
-	void sendSBD(StandardBusinessDocument sbd) throws IOException {
+	void sendSBD(StandardBusinessDocument sbd) {
 
 		sbd.getStandardBusinessDocumentHeader().getBusinessScope().getScope().addAll(createOxalisSpecificScopes());
 
