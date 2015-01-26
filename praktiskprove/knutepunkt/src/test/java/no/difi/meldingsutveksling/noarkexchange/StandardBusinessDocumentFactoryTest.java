@@ -1,21 +1,30 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import static org.junit.Assert.assertNotNull;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
+
+import static junit.framework.Assert.assertNotNull;
 
 /**
  */
 public class StandardBusinessDocumentFactoryTest {
 
 
+    public static final String HELLO = "hello";
+
     @Test
-    @Ignore
-    public void testConvertFromSBDtoSB() {
-        no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument fromDocument = new no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument();
-        StandardBusinessDocument result = StandardBusinessDocumentFactory.create(fromDocument);
+    public void testConvertFromSBDtoSB() throws JAXBException {
+        JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument> fromDocument;
+        JAXBContext ctx = JAXBContext.newInstance(no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument.class);
+        Unmarshaller unmarshaller = ctx.createUnmarshaller();
+        fromDocument = unmarshaller.unmarshal(new StreamSource(getClass().getClassLoader().getResourceAsStream("sample_dbd_document.xml")), no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument.class);
+        StandardBusinessDocument result = StandardBusinessDocumentFactory.create(fromDocument.getValue());
         assertNotNull(result);
     }
 
