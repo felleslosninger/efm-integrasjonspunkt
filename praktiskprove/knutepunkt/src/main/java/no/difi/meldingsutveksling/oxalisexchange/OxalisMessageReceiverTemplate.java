@@ -1,12 +1,16 @@
 package no.difi.meldingsutveksling.oxalisexchange;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.security.PrivateKey;
-import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
-import java.util.Map;
+import no.difi.meldingsutveksling.adresseregister.AdressRegisterFactory;
+import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
+import no.difi.meldingsutveksling.domain.*;
+import no.difi.meldingsutveksling.eventlog.Event;
+import no.difi.meldingsutveksling.eventlog.EventLog;
+import no.difi.meldingsutveksling.services.AdresseregisterRest;
+import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -17,23 +21,13 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
-import no.difi.meldingsutveksling.adresseregister.AdressRegisterFactory;
-import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
-import no.difi.meldingsutveksling.domain.Avsender;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.Mottaker;
-import no.difi.meldingsutveksling.domain.Noekkelpar;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
-import no.difi.meldingsutveksling.eventlog.Event;
-import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.services.AdresseregisterRest;
-
-import org.apache.commons.io.FileUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -84,7 +78,7 @@ public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
         Avsender avsender = avsenderBuilder.build();
         Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo), (X509Certificate) adresseRegisterClient.getCertificate(sendTo));
         ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering(nodeList,kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
-        byte[] resultSbd = dokumentpakker.pakkDokumentISbd(byteArray, avsender, mottaker, instanceIdentifier,KVITTERING);
+        byte[] resultSbd = dokumentpakker.pakkTilByteArray(byteArray, avsender, mottaker, instanceIdentifier, KVITTERING);
         File file = new File(WRITE_TO);
         try {
             FileUtils.writeByteArrayToFile(file, resultSbd);

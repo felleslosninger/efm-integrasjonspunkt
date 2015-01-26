@@ -3,13 +3,7 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import com.thoughtworks.xstream.XStream;
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
-import no.difi.meldingsutveksling.domain.Avsender;
-import no.difi.meldingsutveksling.domain.BestEduMessage;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.Mottaker;
-import no.difi.meldingsutveksling.domain.Noekkelpar;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
-import no.difi.meldingsutveksling.domain.ProcessState;
+import no.difi.meldingsutveksling.domain.*;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.eventlog.Event;
@@ -17,7 +11,10 @@ import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.services.AdresseregisterMock;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
+import no.difi.meldingsutveksling.transport.Transport;
+import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -27,15 +24,11 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.DatatypeConverter;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
@@ -46,10 +39,11 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.UUID;
+
+import static no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory.create;
 
 @Component
-public abstract class SendMessageTemplateImpl {
+public class MessageSender {
 
     private static final String JP_ID = "jpId";
     private static final String DATA = "data";
@@ -58,36 +52,22 @@ public abstract class SendMessageTemplateImpl {
     EventLog eventLog;
 
     @Autowired
+    @Qualifier("multiTransport")
+    TransportFactory transportFactory;
+
+    @Autowired
     AdresseregisterService adresseregister;
 
     private final Dokumentpakker dokumentpakker;
 
-    public SendMessageTemplateImpl(Dokumentpakker dokumentpakker, AdresseregisterService adresseregister) {
+    public MessageSender(Dokumentpakker dokumentpakker, AdresseregisterService adresseregister) {
         this.dokumentpakker = dokumentpakker;
         this.adresseregister = adresseregister;
     }
 
-    public SendMessageTemplateImpl() {
+    public MessageSender() {
         this(new Dokumentpakker(), new AdresseregisterMock());
     }
-
-    StandardBusinessDocument createSBD(PutMessageRequestType sender, KnutepunktContext context) {
-        final ByteArrayOutputStream os = new ByteArrayOutputStream();
-
-        try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
-            Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-            jaxbMarshaller.marshal(new ObjectFactory().createPutMessageRequest(sender), os);
-        } catch (JAXBException e) {
-            throw new MeldingsUtvekslingRuntimeException(e);
-        }
-        return dokumentpakker.pakkDokumentIStandardBusinessDocument(new BestEduMessage(os.toByteArray()), context.getAvsender(), context.getMottaker(), UUID.randomUUID()
-                .toString(), "melding");
-    }
-
-    abstract void sendSBD(StandardBusinessDocument sbd) throws IOException;
-
 
     boolean verifySender(AddressType sender, KnutepunktContext context) {
         if (sender == null) {
@@ -143,21 +123,16 @@ public abstract class SendMessageTemplateImpl {
         if (verifySender(message.getEnvelope().getSender(), context)) {
             return createErrorResponse("invalid sender");
         }
-
         eventLog.log(new Event(ProcessState.SIGNATURE_VALIDATED));
 
-        StandardBusinessDocument sbd = createSBD(message, context);
-
+        StandardBusinessDocument sbd = create(message, context.getAvsender(), context.getMottaker());
         Scope item = sbd.getStandardBusinessDocumentHeader().getBusinessScope().getScope().get(0);
         String hubCid = item.getInstanceIdentifier();
         eventLog.log(new Event().setJpId(journalPostId).setArkiveConversationId(conversationId).setHubConversationId(hubCid).setProcessStates(ProcessState.CONVERSATION_ID_LOGGED));
 
-        try {
-            sendSBD(sbd);
-        } catch (IOException e) {
-            eventLog.log(createErrorEvent(message, e));
-            return createErrorResponse("Error on message send, check event log.");
-        }
+        Transport t = transportFactory.createTransport(sbd);
+        t.send(sbd);
+
         eventLog.log(createOkStateEvent(message));
         return new PutMessageResponseType();
     }

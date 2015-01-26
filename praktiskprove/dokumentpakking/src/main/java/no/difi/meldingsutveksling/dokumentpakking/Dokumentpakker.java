@@ -27,19 +27,19 @@ public class Dokumentpakker {
         createAsice = new CreateAsice(new CreateSignature(), new CreateZip(), new CreateManifest());
     }
 
-    public byte[] pakkDokumentISbd(ByteArrayFile document, Avsender avsender, Mottaker mottaker, String conversationId, String type) {
-        StandardBusinessDocument doc = pakkDokumentIStandardBusinessDocument(document, avsender, mottaker, conversationId, type);
+    public byte[] pakkTilByteArray(ByteArrayFile document, Avsender avsender, Mottaker mottaker, String id, String type) {
+        StandardBusinessDocument doc = pakk(document, avsender, mottaker, id, type);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         MarshalSBD.marshal(doc, os);
         return os.toByteArray();
     }
 
-    public StandardBusinessDocument pakkDokumentIStandardBusinessDocument(ByteArrayFile document, Avsender avsender, Mottaker mottaker, String conversationId,
-                                                                          String type) {
+    public StandardBusinessDocument pakk(ByteArrayFile document, Avsender avsender, Mottaker mottaker,
+                                         String id, String type) {
         Payload payload = new Payload(encryptPayload.createCMS(createAsice.createAsice(document, avsender, mottaker).getBytes(), mottaker.getSertifikat()));
         payload.setSignature(createXmlSignature(createRsaSignature(avsender.getNoekkelpar().getPrivateKey(), payload.getContent().getBytes()), avsender
                 .getNoekkelpar().getSertifikat().getEncoded()));
-        return createSBD.createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload, conversationId, type);
+        return createSBD.createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload, id, type);
     }
 
     private byte[] createRsaSignature(PrivateKey privateKey, byte[] contentToBeSigned) {

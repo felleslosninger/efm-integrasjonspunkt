@@ -20,7 +20,9 @@ import no.difi.meldingsutveksling.noarkexchange.schema.receive.*;
 import no.difi.meldingsutveksling.oxalisexchange.ByteArrayImpl;
 import no.difi.meldingsutveksling.oxalisexchange.Kvittering;
 import no.difi.meldingsutveksling.oxalisexchange.OxalisMessageReceiverTemplate;
+import no.difi.meldingsutveksling.transport.Transport;
 import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -49,6 +51,7 @@ import java.util.zip.ZipInputStream;
  *
  *
  */
+
 @WebService(portName = "ReceivePort", serviceName = "receive", targetNamespace = "", wsdlLocation = "file:/Users/glennbech/dev/meldingsutvikling-mellom-offentlige-virksomheter/praktiskprove/knutepunkt/src/main/webapp/WEB-INF/wsdl/knutepunktReceive.wsdl", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort")
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
 public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate implements SOAReceivePort {
@@ -61,10 +64,11 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
     private static final String MIME_TYPE = "application/xml";
     private static final String WRITE_TO = System.getProperty("user.home") + File.separator + "testToRemove" + File.separator + "kvitteringSbd.xml";
 
+    @Autowired
+    Transport transport;
+
     public KnutePunktReceiveImpl() {
     }
-
-    private SendMessageTemplateImpl sendMessageTemplate;
 
     @Resource
     private WebServiceContext context;
@@ -96,15 +100,13 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
         Avsender avsender = new Avsender(reciever, noekkelpar);
         SignAFile signAFile = new SignAFile();
 
-        //todo hvordan endrer vi implementasjon, se på jspf
-        new OxalisSendMessageTemplate().sendSBD(new CreateSBD().createSBD(reciever, sender, new ObjectFactory().createKvittering(signAFile.signIt(receiveResponse.getAny(), avsender, KvitteringType.LEVERING)), convId, KVITTERING_CONSTANT));
+        transport.send(new CreateSBD().createSBD(reciever, sender, new ObjectFactory().createKvittering(signAFile.signIt(receiveResponse.getAny(), avsender, KvitteringType.LEVERING)), convId, KVITTERING_CONSTANT));
         logEvent(receiveResponse, null, ProcessState.LEVERINGS_KVITTERING_SENT);
 
-        String RSA_INSTANCE = "RSA";
         JAXBContext jaxbContextP;
         Unmarshaller unMarshallerP;
 
-        Payload payload ;
+        Payload payload;
         try {
             jaxbContextP = JAXBContext.newInstance(Payload.class);
             unMarshallerP = jaxbContextP.createUnmarshaller();
@@ -152,7 +154,8 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
                 logEvent(receiveResponse, null, ProcessState.ARCHIVE_NULL_RESPONSE);
             } else {
                 logEvent(receiveResponse, null, ProcessState.BEST_EDU_SENT);
-                new OxalisSendMessageTemplate().sendSBD(new CreateSBD().createSBD(sender, reciever, signAFile.signIt(receiveResponse.getAny(), avsender, KvitteringType.AAPNING), convId, KVITTERING_CONSTANT));
+                no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument receipt = new CreateSBD().createSBD(sender, reciever, signAFile.signIt(receiveResponse.getAny(), avsender, KvitteringType.AAPNING), convId, KVITTERING_CONSTANT);
+                transport.send(receipt);
             }
         } else {
             logEvent(receiveResponse, null, ProcessState.ARCHIVE_NOT_AVAILABLE);
@@ -190,7 +193,7 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
         Avsender avsender = avsenderBuilder.build();
         Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo), (X509Certificate) certificate);
         ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering(kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
-        byte[] resultSbd = dokumentpakker.pakkDokumentISbd(byteArray, avsender, mottaker, instanceIdentifier, KVITTERING);
+        byte[] resultSbd = dokumentpakker.pakkTilByteArray(byteArray, avsender, mottaker, instanceIdentifier, KVITTERING);
         File file = new File(WRITE_TO);
         try {
             FileUtils.writeByteArrayToFile(file, resultSbd);
