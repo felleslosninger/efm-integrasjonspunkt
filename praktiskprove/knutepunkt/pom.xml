@@ -304,5 +304,11 @@
             <version>1.0.7</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.modelmapper</groupId>
+            <artifactId>modelmapper</artifactId>
+            <version>0.7.3</version>
+        </dependency>
+
     </dependencies>
 </project>
