@@ -20,7 +20,7 @@
         <module>adresseregister-domain</module>
         <module>adresseregister-client</module>
         <module>dokumentpakking</module>
-        <module>knutepunkt</module>
+        <module>integrasjonspunkt</module>
         <module>domain</module>
         <module>sbd-reader</module>
         <module>transport</module>
