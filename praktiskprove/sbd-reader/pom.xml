@@ -31,7 +31,7 @@
 
 				<executions>
 					<execution>
-						<id>knutepunktReceive-exec</id>
+						<id>IntegrasjonspunktReceive-exec</id>
 						<goals>
 							<goal>wsimport</goal>
 						</goals>
@@ -39,7 +39,7 @@
 							<genJWS>true</genJWS>
 							<packageName>no.difi.meldingsutveksling.noarkexchange.schema.receive</packageName>
 							<wsdlFiles>
-								<wsdlFile>${basedir}/src/main/webapp/WEB-INF/wsdl/knutepunktReceive.wsdl</wsdlFile>
+								<wsdlFile>${basedir}/src/main/webapp/WEB-INF/wsdl/integrasjonspunktReceive.wsdl</wsdlFile>
 							</wsdlFiles>
 							<vmArgs>
 								<vmArg>-Djavax.xml.accessExternalDTD=all</vmArg>

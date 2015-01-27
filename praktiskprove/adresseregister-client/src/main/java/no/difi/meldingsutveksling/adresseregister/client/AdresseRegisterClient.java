@@ -2,7 +2,10 @@ package no.difi.meldingsutveksling.adresseregister.client;
 
 import no.difi.meldingsutveksling.adresseregister.CertificateResponse;
 import org.springframework.stereotype.Component;
+import retrofit.ErrorHandler;
 import retrofit.RestAdapter;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 import retrofit.http.GET;
 import retrofit.http.Path;
 
@@ -50,7 +53,7 @@ public class AdresseRegisterClient {
             throw new IllegalStateException("no property with key " + ADRESSEREGISTER_ENDPOINT +
                     " in config file " + ADRESSEREGISTER_PROPERTIESFILE);
         }
-        RestAdapter restAdapter = new RestAdapter.Builder().setEndpoint(endPointURL).setLogLevel(RestAdapter.LogLevel.FULL).build();
+        RestAdapter restAdapter = new RestAdapter.Builder().setErrorHandler(new CertificateMissingErrorHandler()).setEndpoint(endPointURL).setLogLevel(RestAdapter.LogLevel.FULL).build();
         adresseRegister = restAdapter.create(AdresseRegisterService.class);
     }
 
@@ -63,7 +66,6 @@ public class AdresseRegisterClient {
      */
     public Certificate getCertificate(String orgNr) {
 
-        //todo sjekk hva slags feilmelding vi faar her.
         CertificateResponse response = adresseRegister.getCertificate(orgNr);
         Certificate certificate;
         try {
@@ -81,4 +83,16 @@ public class AdresseRegisterClient {
         CertificateResponse getCertificate(@Path(PATH_PARAM_ORG_NR) String orgNr);
 
     }
+
+    class CertificateMissingErrorHandler implements ErrorHandler {
+        @Override
+        public Throwable handleError(RetrofitError cause) {
+            Response r = cause.getResponse();
+            if (r != null && r.getStatus() == 404) {
+                return new CertificateNotFoundException(cause);
+            }
+            return cause;
+        }
+    }
+
 }

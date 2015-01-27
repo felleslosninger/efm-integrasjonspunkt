@@ -1,4 +1,4 @@
-# *Secure message hub installation guide, powered by:*  *Inmeta*
+# *Secure message hub installation guide
 
 
 ###  1. Application manager is "Apache maven" so make sure maven is installed.

@@ -178,4 +178,6 @@ public class ContactInformation {
         this.contactTypeIdentifier = value;
     }
 
+
+
 }

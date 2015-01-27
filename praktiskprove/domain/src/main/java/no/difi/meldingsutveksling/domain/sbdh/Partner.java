@@ -8,12 +8,12 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -101,4 +101,7 @@ public class Partner {
         return this.contactInformation;
     }
 
+    public void setContactInformation(List<ContactInformation> contactInformation) {
+        this.contactInformation = contactInformation;
+    }
 }
