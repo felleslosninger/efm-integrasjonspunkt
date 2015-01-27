@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 
 import com.thoughtworks.xstream.XStream;
+import no.difi.meldingsutveksling.adresseregister.client.CertificateNotFoundException;
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
 import no.difi.meldingsutveksling.domain.*;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
@@ -36,7 +37,6 @@ import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 
@@ -69,38 +69,33 @@ public class MessageSender {
         this(new Dokumentpakker(), new AdresseregisterMock());
     }
 
-    boolean verifySender(AddressType sender, IntegrasjonspunktContext context) {
+    boolean setSender(IntegrasjonspunktContext context, AddressType sender) {
         if (sender == null) {
             return false;
         }
+        Avsender avsender;
+        Certificate sertifikat;
         try {
-            Avsender avsender;
-            Certificate sertifikat = adresseregister.getCertificate(sender.getOrgnr());
-            if (sertifikat == null) {
-                throw new InvalidSenderException("invalid sender");
-            }
-            avsender = Avsender.builder(new Organisasjonsnummer(sender.getOrgnr()), new Noekkelpar(findPrivateKey(), sertifikat)).build();
-            context.setAvsender(avsender);
-        } catch (IllegalArgumentException e) {
+            sertifikat = adresseregister.getCertificate(sender.getOrgnr());
+        } catch (CertificateNotFoundException e) {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
-            throw new InvalidSenderException(("invalid sender"));
+            return false;
         }
+        avsender = Avsender.builder(new Organisasjonsnummer(sender.getOrgnr()), new Noekkelpar(findPrivateKey(), sertifikat)).build();
+        context.setAvsender(avsender);
         return true;
     }
 
-    boolean verifyRecipient(AddressType receiver, IntegrasjonspunktContext context) {
+    boolean setRecipient(IntegrasjonspunktContext context, AddressType receiver) {
         if (receiver == null) {
             return false;
         }
         try {
             Certificate sertifikat = adresseregister.getCertificate(receiver.getOrgnr());
-            if (sertifikat == null)
-                throw new InvalidReceiverException("invalid receiver");
-            Mottaker mottaker = new Mottaker(new Organisasjonsnummer(receiver.getOrgnr()), (X509Certificate) sertifikat);
-            context.setMottaker(mottaker);
-        } catch (IllegalArgumentException e) {
+
+        } catch (CertificateNotFoundException e) {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
-            throw new InvalidReceiverException("invalid receiver");
+            return false;
         }
         return true;
     }
@@ -117,11 +112,15 @@ public class MessageSender {
         if (envelope == null) {
             return createErrorResponse("Missing envelope");
         }
-        if (verifyRecipient(message.getEnvelope().getReceiver(), context)) {
-            return createErrorResponse("invalid recipient");
+
+        AddressType receiver = message.getEnvelope().getReceiver();
+        if (setRecipient(context, receiver)) {
+            return createErrorResponse("invalid recipient, no recipient or missing certificate for " + receiver.getOrgnr());
         }
-        if (verifySender(message.getEnvelope().getSender(), context)) {
-            return createErrorResponse("invalid sender");
+
+        AddressType sender = message.getEnvelope().getSender();
+        if (setSender(context, sender)) {
+            return createErrorResponse("invalid sender, no sender or missing certificate for " + receiver.getOrgnr());
         }
         eventLog.log(new Event(ProcessState.SIGNATURE_VALIDATED));
 
@@ -151,7 +150,7 @@ public class MessageSender {
         Element element = (Element) message.getPayload();
         NodeList nodeList = element.getElementsByTagName(DATA);
         if (nodeList.getLength() == 0) {
-            throw new MeldingsUtvekslingRuntimeException("no " + DATA + "  element in payload");
+            throw new MeldingsUtvekslingRuntimeException("no " + DATA + " element in payload");
         }
         Node payloadData = nodeList.item(0);
         String payloadDataTextContent = payloadData.getTextContent();
