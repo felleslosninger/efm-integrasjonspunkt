@@ -47,14 +47,11 @@ import java.util.zip.ZipInputStream;
 
 /**
  *
- *
- *
- *
  */
 
-@WebService(portName = "ReceivePort", serviceName = "receive", targetNamespace = "", wsdlLocation = "file:/Users/glennbech/dev/meldingsutvikling-mellom-offentlige-virksomheter/praktiskprove/knutepunkt/src/main/webapp/WEB-INF/wsdl/knutepunktReceive.wsdl", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort")
+@WebService(portName = "ReceivePort", serviceName = "receive", targetNamespace = "",  endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort")
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
-public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate implements SOAReceivePort {
+public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate implements SOAReceivePort {
 
     private static final String KVITTERING = "Kvittering";
     private static final String BEST_EDU = "BEST_EDU";
@@ -67,7 +64,7 @@ public class KnutePunktReceiveImpl extends OxalisMessageReceiverTemplate impleme
     @Autowired
     Transport transport;
 
-    public KnutePunktReceiveImpl() {
+    public IntegrajonspunktReceiveImpl() {
     }
 
     @Resource

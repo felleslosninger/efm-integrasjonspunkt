@@ -39,9 +39,7 @@ public class OxalisTransport implements Transport {
 
         Transmitter transmitter = oxalisOutboundModule.getTransmitter();
         transmitter.transmit(transmissionRequest);
-
     }
-
 
     private List<Scope> createOxalisSpecificScopes() {
         List<Scope> scopes = new ArrayList<Scope>();
@@ -60,4 +58,5 @@ public class OxalisTransport implements Transport {
 
         return scope;
     }
+
 }

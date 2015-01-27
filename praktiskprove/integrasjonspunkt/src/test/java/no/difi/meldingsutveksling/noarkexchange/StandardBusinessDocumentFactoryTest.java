@@ -15,9 +15,6 @@ import static junit.framework.Assert.assertNotNull;
  */
 public class StandardBusinessDocumentFactoryTest {
 
-
-    public static final String HELLO = "hello";
-
     @Test
     public void testConvertFromSBDtoSB() throws JAXBException {
         JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument> fromDocument;

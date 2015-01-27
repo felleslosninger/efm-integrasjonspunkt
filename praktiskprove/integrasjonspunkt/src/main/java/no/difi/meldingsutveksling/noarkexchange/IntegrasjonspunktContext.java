@@ -3,18 +3,12 @@ package no.difi.meldingsutveksling.noarkexchange;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Mottaker;
 
-public class KnutepunktContext {
+public class IntegrasjonspunktContext {
 	private Avsender avsender;
 	private Mottaker mottaker;
     private String jpId;
 	
-	public KnutepunktContext(Avsender avsender, Mottaker mottaker) {
-		super();
-		this.avsender = avsender;
-		this.mottaker = mottaker;
-	}
-	
-	public KnutepunktContext(){}
+	public IntegrasjonspunktContext(){}
 	
 	public Avsender getAvsender() {
 		return avsender;
@@ -29,11 +23,7 @@ public class KnutepunktContext {
 		this.mottaker = mottaker;
 	}
 
-    public String getJpId() {
-        return jpId;
-    }
-
-    public KnutepunktContext setJpId(String jpId) {
+    public IntegrasjonspunktContext setJpId(String jpId) {
         this.jpId = jpId;
         return this;
     }

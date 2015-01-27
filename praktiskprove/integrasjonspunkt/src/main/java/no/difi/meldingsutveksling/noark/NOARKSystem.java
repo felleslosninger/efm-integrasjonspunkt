@@ -19,7 +19,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 /**
- * Simple wrapper around the Web Service client for a knutepunkt. Reads the end point URL
+ * Simple wrapper around the Web Service client for a integrasjonspunkt. Reads the end point URL
  * from a property file and sends a request to the given URL.
  *
  * @author Glenn Bech
@@ -31,23 +31,23 @@ public class NOARKSystem {
     @Autowired
     EventLog eventLog;
 
-    public static final String KNUTEPUNKT_PROPERTIES = "knutepunkt.properties";
+    public static final String INTEGRASJONSPUNKT_PROPERTIES = "integrasjonspunkt.properties";
     public static final String NOARKSYSTEM_ENDPOINT = "noarksystem.endpointURL";
     private String endPointURL;
 
     public NOARKSystem() {
 
         Properties p;
-        try (InputStream is = NOARKSystem.class.getClassLoader().getResourceAsStream(KNUTEPUNKT_PROPERTIES)) {
+        try (InputStream is = NOARKSystem.class.getClassLoader().getResourceAsStream(INTEGRASJONSPUNKT_PROPERTIES)) {
             if (is == null) {
-                throw new IllegalStateException(KNUTEPUNKT_PROPERTIES + " is not on classpath");
+                throw new IllegalStateException(INTEGRASJONSPUNKT_PROPERTIES + " is not on classpath");
             }
             p = new Properties();
             p.load(is);
 
         } catch (IOException e) {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
-            throw new IllegalStateException(KNUTEPUNKT_PROPERTIES + " can not be read");
+            throw new IllegalStateException(INTEGRASJONSPUNKT_PROPERTIES + " can not be read");
         }
         endPointURL = p.getProperty(NOARKSYSTEM_ENDPOINT);
     }
@@ -80,7 +80,7 @@ public class NOARKSystem {
 
     /**
      * TODO Remove
-     * Use this to test the actual sending (see knutepunkt.properties for endpoint)
+     * Use this to test the actual sending (see integrasjonspunkt.properties for endpoint)
      *
      * @param args
      */

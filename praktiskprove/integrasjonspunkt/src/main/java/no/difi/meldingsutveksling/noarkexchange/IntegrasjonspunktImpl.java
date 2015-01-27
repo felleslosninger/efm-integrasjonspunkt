@@ -32,10 +32,9 @@ import javax.xml.ws.handler.MessageContext;
  * Time: 15:26
  */
 
-
 @WebService(portName = "NoarkExchangePort", serviceName = "noarkExchange", targetNamespace = "http://www.arkivverket.no/Noark/Exchange", wsdlLocation = "http://hardcodeme.not", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.SOAPport")
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
-public class KnutepunkImpl implements SOAPport {
+public class IntegrasjonspunktImpl implements SOAPport {
 
     @Resource
     private WebServiceContext context;

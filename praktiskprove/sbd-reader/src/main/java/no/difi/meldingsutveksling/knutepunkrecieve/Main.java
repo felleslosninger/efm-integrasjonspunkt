@@ -1,27 +1,21 @@
 package no.difi.meldingsutveksling.knutepunkrecieve;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import no.difi.meldingsutveksling.knutepunkrecieve.exception.CouldNotLoadXML;
+import no.difi.meldingsutveksling.knutepunkrecieve.exception.NoValidProcessId;
+import no.difi.meldingsutveksling.noarkexchange.schema.receive.Scope;
+import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
+import org.apache.commons.cli.*;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.soap.SOAPFaultException;
-
-import no.difi.meldingsutveksling.knutepunkrecieve.exception.CouldNotLoadXML;
-import no.difi.meldingsutveksling.knutepunkrecieve.exception.NoValidProcessId;
-import no.difi.meldingsutveksling.noarkexchange.schema.receive.Scope;
-import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
-
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class Main {
 
@@ -132,7 +126,7 @@ public class Main {
 	private void initializeReceiver() throws IOException {
 
 		if (!cmd.hasOption("k"))
-			receive = new Receive("http://localhost:9090/knutepunkt/receive");
+			receive = new Receive("http://localhost:9090/integrasjonspunkt/receive");
 		else
 			receive = new Receive(cmd.getOptionValue("k"));
 

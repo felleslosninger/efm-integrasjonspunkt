@@ -55,7 +55,7 @@
                 </dependencies>
                 <configuration>
                     <webApp>
-                        <contextPath>/knutepunkt</contextPath>
+                        <contextPath>/integrasjonspunkt</contextPath>
                         <!-- <jettyEnvXml>${basedir}/src/test/resources/jetty-env.xml</jettyEnvXml> -->
                     </webApp>
                     <systemProperties>
@@ -82,7 +82,7 @@
 
                 <executions>
                     <execution>
-                        <id>knutepunkt-exec</id>
+                        <id>integrasjonspunkt-exec</id>
                         <goals>
                             <goal>wsimport</goal>
                         </goals>
@@ -99,7 +99,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>knutepunktReceive-exec</id>
+                        <id>integrasjonspunktReceive-exec</id>
                         <goals>
                             <goal>wsimport</goal>
                         </goals>
@@ -107,7 +107,7 @@
                             <genJWS>true</genJWS>
                             <packageName>no.difi.meldingsutveksling.noarkexchange.schema.receive</packageName>
                             <wsdlFiles>
-                                <wsdlFile>${basedir}/src/main/webapp/WEB-INF/wsdl/knutepunktReceive.wsdl</wsdlFile>
+                                <wsdlFile>${basedir}/src/main/webapp/WEB-INF/wsdl/integrasjonspunktReceive.wsdl</wsdlFile>
                             </wsdlFiles>
                             <vmArgs>
                                 <vmArg>-Djavax.xml.accessExternalDTD=all</vmArg>

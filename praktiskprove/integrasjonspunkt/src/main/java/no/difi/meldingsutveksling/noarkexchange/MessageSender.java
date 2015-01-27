@@ -69,7 +69,7 @@ public class MessageSender {
         this(new Dokumentpakker(), new AdresseregisterMock());
     }
 
-    boolean verifySender(AddressType sender, KnutepunktContext context) {
+    boolean verifySender(AddressType sender, IntegrasjonspunktContext context) {
         if (sender == null) {
             return false;
         }
@@ -88,7 +88,7 @@ public class MessageSender {
         return true;
     }
 
-    boolean verifyRecipient(AddressType receiver, KnutepunktContext context) {
+    boolean verifyRecipient(AddressType receiver, IntegrasjonspunktContext context) {
         if (receiver == null) {
             return false;
         }
@@ -110,7 +110,7 @@ public class MessageSender {
         String conversationId = message.getEnvelope().getConversationId();
         String journalPostId = getJpId(message);
 
-        KnutepunktContext context = new KnutepunktContext();
+        IntegrasjonspunktContext context = new IntegrasjonspunktContext();
         context.setJpId(journalPostId);
 
         EnvelopeType envelope = message.getEnvelope();
@@ -176,9 +176,6 @@ public class MessageSender {
         return builder;
     }
 
-    private PutMessageResponseType createErrorResponse() {
-        return createErrorResponse("ERROR_INVALID_OR_MISSING_SENDER");
-    }
 
     private PutMessageResponseType createErrorResponse(String message) {
         PutMessageResponseType response = new PutMessageResponseType();
