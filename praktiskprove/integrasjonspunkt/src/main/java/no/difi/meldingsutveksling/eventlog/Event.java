@@ -28,6 +28,7 @@ public class Event {
     private String jpId;
 
     public Event(ProcessState processState) {
+        this(System.currentTimeMillis(), UUID.randomUUID());
         this.processState = processState;
     }
 
@@ -39,7 +40,6 @@ public class Event {
         this.timeStamp = timeStamp;
         this.uuid = uuid;
         formattedDate = new Date(timeStamp).toString();
-
     }
 
     public String getExceptionMessage() {

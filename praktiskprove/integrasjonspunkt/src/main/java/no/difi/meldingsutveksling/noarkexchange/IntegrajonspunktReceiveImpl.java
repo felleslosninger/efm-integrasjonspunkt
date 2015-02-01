@@ -3,11 +3,7 @@ package no.difi.meldingsutveksling.noarkexchange;
 import com.thoughtworks.xstream.XStream;
 import no.difi.meldingsutveksling.adresseregister.client.AdresseRegisterClient;
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
-import no.difi.meldingsutveksling.dokumentpakking.kvit.ObjectFactory;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
-import no.difi.meldingsutveksling.dokumentpakking.service.CreateSBD;
-import no.difi.meldingsutveksling.dokumentpakking.service.KvitteringType;
-import no.difi.meldingsutveksling.dokumentpakking.service.SignAFile;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.*;
 import no.difi.meldingsutveksling.eventlog.Event;
@@ -48,8 +44,7 @@ import java.util.zip.ZipInputStream;
 /**
  *
  */
-
-@WebService(portName = "ReceivePort", serviceName = "receive", targetNamespace = "",  endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort")
+@WebService(portName = "ReceivePort", serviceName = "receive", targetNamespace = "", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort")
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
 public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate implements SOAReceivePort {
 
@@ -89,16 +84,11 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
 
         logEvent(receiveResponse, ProcessState.SBD_RECIEVED);
 
-        forberedKvittering(receiveResponse, "leveringsKvittering");
         Organisasjonsnummer sender = new Organisasjonsnummer(receiveResponse.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue().split(":")[1]);
         Organisasjonsnummer reciever = new Organisasjonsnummer(receiveResponse.getStandardBusinessDocumentHeader().getReceiver().get(0).getIdentifier().getValue().split(":")[1]);
         String convId = receiveResponse.getStandardBusinessDocumentHeader().getBusinessScope().getScope().get(0).getInstanceIdentifier();
         Noekkelpar noekkelpar = new Noekkelpar(loadPrivateKey(), adresseRegisterClient.getCertificate(reciever.toString()));
         Avsender avsender = new Avsender(reciever, noekkelpar);
-        SignAFile signAFile = new SignAFile();
-
-        transport.send(new CreateSBD().createSBD(reciever, sender, new ObjectFactory().createKvittering(signAFile.signIt(receiveResponse.getAny(), avsender, KvitteringType.LEVERING)), convId, KVITTERING_CONSTANT));
-        logEvent(receiveResponse, null, ProcessState.LEVERINGS_KVITTERING_SENT);
 
         JAXBContext jaxbContextP;
         Unmarshaller unMarshallerP;
@@ -124,9 +114,8 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
             logEvent(receiveResponse, e, ProcessState.SOME_OTHER_EXCEPTION);
             throw new MeldingsUtvekslingRuntimeException(e);
         }
-
         PutMessageRequestType putMessageRequestType = extractBestEdu(receiveResponse, bestEdu);
-        forwardToNoarkSystemAndSendReceipt(receiveResponse, sender, reciever, convId, avsender, signAFile, putMessageRequestType);
+        forwardToNoarkSystemAndSendReceipt(receiveResponse, sender, reciever, convId, avsender,  putMessageRequestType);
         return new CorrelationInformation();
     }
 
@@ -143,7 +132,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         return putMessageRequestType;
     }
 
-    private void forwardToNoarkSystemAndSendReceipt(StandardBusinessDocument receiveResponse, Organisasjonsnummer sender, Organisasjonsnummer reciever, String convId, Avsender avsender, SignAFile signAFile, PutMessageRequestType putMessageRequestType) {
+    private void forwardToNoarkSystemAndSendReceipt(StandardBusinessDocument receiveResponse, Organisasjonsnummer sender, Organisasjonsnummer reciever, String convId, Avsender avsender,  PutMessageRequestType putMessageRequestType) {
         PutMessageResponseType response = noarkSystem.sendEduMeldig(putMessageRequestType);
         if (response != null) {
             AppReceiptType result = response.getResult();
@@ -151,14 +140,11 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
                 logEvent(receiveResponse, null, ProcessState.ARCHIVE_NULL_RESPONSE);
             } else {
                 logEvent(receiveResponse, null, ProcessState.BEST_EDU_SENT);
-                no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument receipt = new CreateSBD().createSBD(sender, reciever, signAFile.signIt(receiveResponse.getAny(), avsender, KvitteringType.AAPNING), convId, KVITTERING_CONSTANT);
-                transport.send(receipt);
             }
         } else {
             logEvent(receiveResponse, null, ProcessState.ARCHIVE_NOT_AVAILABLE);
         }
     }
-
 
     public AdresseRegisterClient getAdresseRegisterClient() {
         return adresseRegisterClient;

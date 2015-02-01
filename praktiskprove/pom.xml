@@ -16,6 +16,7 @@
     </properties>
 
     <modules>
+        <module>noarkexchange</module>
         <module>adresseregister-web</module>
         <module>adresseregister-domain</module>
         <module>adresseregister-client</module>
@@ -25,6 +26,7 @@
         <module>sbd-reader</module>
         <module>transport</module>
         <module>transport-oxalis</module>
+        <module>transport-file</module>
     </modules>
     <build>
         <pluginManagement>

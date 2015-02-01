@@ -48,5 +48,14 @@ public class StandardBusinessDocumentFactory {
         return mapper.map(fromDocument, StandardBusinessDocument.class);
     }
 
+    /**
+     * @param fromDocument
+     * @return
+     */
+    static no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument create(StandardBusinessDocument fromDocument) {
+        ModelMapper mapper = new ModelMapper();
+        return mapper.map(fromDocument, no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument.class);
+    }
+
 
 }

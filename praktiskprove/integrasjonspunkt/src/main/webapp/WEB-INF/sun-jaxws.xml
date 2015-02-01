@@ -3,10 +3,8 @@
            version='2.0'>
     <endpoint name='noarkExchange'
               implementation='no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl'
-              wsdl='WEB-INF/wsdl/noarkExchange.wsdl'
               url-pattern='/noarkExchange'/>
     <endpoint name='receive'
               implementation='no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl'
-              wsdl='WEB-INF/wsdl/IntegrasjonspunktReceive.wsdl'
               url-pattern='/receive'/>
 </endpoints>

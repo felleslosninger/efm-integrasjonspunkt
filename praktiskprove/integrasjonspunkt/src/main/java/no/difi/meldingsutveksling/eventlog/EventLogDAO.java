@@ -56,7 +56,7 @@ public class EventLogDAO {
         params.put(RECIEVER, e.getReceiver());
         params.put(MESSAGE, e.getMessage());
         params.put("timestamp", e.getTimeStamp());
-        params.put(STATE, e.getProcessState().toString());
+        params.put(STATE, e.getProcessState() != null ? e.getProcessState().toString() : "");
         params.put("errorMessage", e.getExceptionMessage());
         params.put("arcCid", e.getArkiveConversationId());
         params.put("hubCid", e.getHubConversationId());

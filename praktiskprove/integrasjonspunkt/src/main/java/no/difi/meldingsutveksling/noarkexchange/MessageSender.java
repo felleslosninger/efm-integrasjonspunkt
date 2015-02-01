@@ -37,6 +37,7 @@ import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 
@@ -90,13 +91,16 @@ public class MessageSender {
         if (receiver == null) {
             return false;
         }
+        X509Certificate receiverCertificate;
         try {
-            Certificate sertifikat = adresseregister.getCertificate(receiver.getOrgnr());
+            receiverCertificate = (X509Certificate) adresseregister.getCertificate(receiver.getOrgnr());
 
         } catch (CertificateNotFoundException e) {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
             return false;
         }
+        Mottaker mottaker = Mottaker.builder(new Organisasjonsnummer(receiver.getOrgnr()), receiverCertificate).build();
+        context.setMottaker(mottaker);
         return true;
     }
 
@@ -114,12 +118,12 @@ public class MessageSender {
         }
 
         AddressType receiver = message.getEnvelope().getReceiver();
-        if (setRecipient(context, receiver)) {
+        if (!setRecipient(context, receiver)) {
             return createErrorResponse("invalid recipient, no recipient or missing certificate for " + receiver.getOrgnr());
         }
 
         AddressType sender = message.getEnvelope().getSender();
-        if (setSender(context, sender)) {
+        if (!setSender(context, sender)) {
             return createErrorResponse("invalid sender, no sender or missing certificate for " + receiver.getOrgnr());
         }
         eventLog.log(new Event(ProcessState.SIGNATURE_VALIDATED));

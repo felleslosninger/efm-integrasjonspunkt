@@ -75,57 +75,6 @@
                 </configuration>
             </plugin>
 
-            <plugin>
-                <groupId>org.jvnet.jax-ws-commons</groupId>
-                <artifactId>jaxws-maven-plugin</artifactId>
-                <version>2.3</version>
-
-                <executions>
-                    <execution>
-                        <id>integrasjonspunkt-exec</id>
-                        <goals>
-                            <goal>wsimport</goal>
-                        </goals>
-                        <configuration>
-                            <packageName>no.difi.meldingsutveksling.noarkexchange.schema</packageName>
-                            <wsdlFiles>
-                                <wsdlFile>${basedir}/src/main/webapp/WEB-INF/wsdl/noarkExchange.wsdl</wsdlFile>
-                            </wsdlFiles>
-                            <vmArgs>
-                                <vmArg>-Djavax.xml.accessExternalDTD=all</vmArg>
-                                <vmArg>-Djavax.xml.accessExternalSchema=all</vmArg>
-                            </vmArgs>
-                            <verbose>true</verbose>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>integrasjonspunktReceive-exec</id>
-                        <goals>
-                            <goal>wsimport</goal>
-                        </goals>
-                        <configuration>
-                            <genJWS>true</genJWS>
-                            <packageName>no.difi.meldingsutveksling.noarkexchange.schema.receive</packageName>
-                            <wsdlFiles>
-                                <wsdlFile>${basedir}/src/main/webapp/WEB-INF/wsdl/integrasjonspunktReceive.wsdl</wsdlFile>
-                            </wsdlFiles>
-                            <vmArgs>
-                                <vmArg>-Djavax.xml.accessExternalDTD=all</vmArg>
-                                <vmArg>-Djavax.xml.accessExternalSchema=all</vmArg>
-                            </vmArgs>
-                            <verbose>true</verbose>
-                        </configuration>
-                    </execution>
-                </executions>
-
-                <dependencies>
-                    <dependency>
-                        <groupId>com.sun.xml.ws</groupId>
-                        <artifactId>jaxws-tools</artifactId>
-                        <version>2.2.8</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
 
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -187,6 +136,13 @@
             <artifactId>transport-oxalis</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>transport-file</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
 
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
@@ -308,6 +264,12 @@
             <groupId>org.modelmapper</groupId>
             <artifactId>modelmapper</artifactId>
             <version>0.7.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>noarkexchange</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>

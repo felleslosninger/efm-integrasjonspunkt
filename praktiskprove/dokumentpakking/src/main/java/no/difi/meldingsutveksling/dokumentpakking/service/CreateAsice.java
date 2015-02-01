@@ -1,13 +1,13 @@
 package no.difi.meldingsutveksling.dokumentpakking.service;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import no.difi.meldingsutveksling.dokumentpakking.domain.Archive;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Signature;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.ByteArrayFile;
 import no.difi.meldingsutveksling.domain.Mottaker;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CreateAsice {
 	private CreateSignature createSignature;
@@ -21,11 +21,11 @@ public class CreateAsice {
 	}
 
 	public Archive createAsice(ByteArrayFile forsendelse, Avsender avsender, Mottaker mottaker) {
-		List<ByteArrayFile> files = new ArrayList<ByteArrayFile>();
+		List<ByteArrayFile> files = new ArrayList<>();
 		files.add(forsendelse);
 		files.add(createManifest.createManifest(avsender.getOrgNummer(), mottaker.getOrgNummer(), forsendelse));
 
-		Signature signature = createSignature.createSignature(avsender.getNoekkelpar(), new ArrayList<ByteArrayFile>(files));
+		Signature signature = createSignature.createSignature(avsender.getNoekkelpar(), new ArrayList<>(files));
 
 		files.add(signature);
 
