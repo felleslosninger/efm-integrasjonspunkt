@@ -17,29 +17,18 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBException;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipFile;
 
 public abstract class MessageReceieverTemplate {
 
-    private static final String PRIVATE_KEY_FILE = "difi-key.pem";
     private static final String PAYLOAD_ZIP = System.getProperty("user.home") + File.separator + "testToRemove" + File.separator + "payload.zip";
     private static final String PAYLOAD = "payload";
-    private static final int MAGIC_NR = 1024;
+
 
     private EventLog eventLog = EventLog.create();
 
@@ -63,7 +52,7 @@ public abstract class MessageReceieverTemplate {
         if (isMessage(n)) {
 
             eventLog.log(new Event().setProcessStates(ProcessState.SBD_RECIEVED));
-            documentElements.put("privateKey", loadPrivateKey());
+            documentElements.put("privateKey", new IntegrasjonspunktNokkel().loadPrivateKey());
 
             sendLeveringskvittering(documentElements);
             eventLog.log(new Event().setProcessStates(ProcessState.LEVERINGS_KVITTERING_SENT));
@@ -185,7 +174,7 @@ public abstract class MessageReceieverTemplate {
 
         //*** get rsa cipher decrypt *****
         Cipher cipher = Cipher.getInstance("RSA");
-        PrivateKey privateKey = loadPrivateKey();
+        PrivateKey privateKey = new IntegrasjonspunktNokkel().loadPrivateKey();
         cipher.init(Cipher.DECRYPT_MODE, privateKey);
         return cipher.doFinal(aesInDisc);
     }
@@ -194,40 +183,5 @@ public abstract class MessageReceieverTemplate {
         return node.getTextContent().toLowerCase().contains("melding");
     }
 
-    /**
-     * Loads the private key from a pkcs8 file
-     *
-     * @return an private key
-     * @throws java.io.IOException
-     */
-    public PrivateKey loadPrivateKey() {
-        PrivateKey key;
-        try (InputStream is = MessageReceieverTemplate.class.getResourceAsStream(PRIVATE_KEY_FILE)) {
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            StringBuilder builder = new StringBuilder();
-            boolean inKey = false;
-            for (String line = br.readLine(); line != null; line = br.readLine()) {
-                if (!inKey && line.startsWith("-----BEGIN ") &&
-                        line.endsWith(" PRIVATE KEY-----")) {
-                    inKey = true;
-                } else {
-                    if (line.startsWith("-----END ") &&
-                            line.endsWith(" PRIVATE KEY-----")) {
-                        inKey = false;
-                    }
-                    builder.append(line);
-                }
-            }
-            byte[] encoded = DatatypeConverter.parseBase64Binary(builder.toString());
-            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
-            KeyFactory kf = KeyFactory.getInstance("RSA");
-            key = kf.generatePrivate(keySpec);
-
-        } catch (InvalidKeySpecException | IOException | NoSuchAlgorithmException e) {
-            eventLog.log(new Event().setExceptionMessage(e.toString()));
-            throw new MeldingsUtvekslingRuntimeException(e);
-        }
-        return key;
-    }
 
 }
