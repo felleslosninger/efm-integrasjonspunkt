@@ -23,6 +23,7 @@ import no.difi.meldingsutveksling.oxalisexchange.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.oxalisexchange.Kvittering;
 import no.difi.meldingsutveksling.oxalisexchange.OxalisMessageReceiverTemplate;
 import no.difi.meldingsutveksling.transport.Transport;
+import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -66,7 +67,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
     private static final PrivateKey privatNokkel = new IntegrasjonspunktNokkel().loadPrivateKey();
 
     @Autowired
-    Transport transport;
+    TransportFactory transportFactory;
 
     public IntegrajonspunktReceiveImpl() {
     }
@@ -84,6 +85,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
             logEvent(receiveResponse, ProcessState.KVITTERING_MOTTATT);
             return new CorrelationInformation();
         }
+
 
         ServletContext servletContext =
                 (ServletContext) context.getMessageContext().get(MessageContext.SERVLET_CONTEXT);
@@ -108,7 +110,9 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         Avsender avsender = new Avsender(reciever, noekkelpar);
         SignAFile signAFile = new SignAFile();
 
-        transport.send(new CreateSBD().createSBD(reciever, sender, new ObjectFactory().createKvittering(signAFile.signIt(receiveResponse.getAny(), avsender, KvitteringType.LEVERING)), convId, KVITTERING_CONSTANT));
+        no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument kvittering = new CreateSBD().createSBD(reciever, sender, new ObjectFactory().createKvittering(signAFile.signIt(receiveResponse.getAny(), avsender, KvitteringType.LEVERING)), convId, KVITTERING_CONSTANT);
+        Transport transport = transportFactory.createTransport(kvittering);
+        transport.send(kvittering);
         logEvent(receiveResponse, null, ProcessState.LEVERINGS_KVITTERING_SENT);
 
         JAXBContext jaxbContextP;
@@ -169,6 +173,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
             } else {
                 logEvent(receiveResponse, null, ProcessState.BEST_EDU_SENT);
                 no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument receipt = new CreateSBD().createSBD(sender, reciever, signAFile.signIt(receiveResponse.getAny(), avsender, KvitteringType.AAPNING), convId, KVITTERING_CONSTANT);
+                Transport transport = transportFactory.createTransport(receipt);
                 transport.send(receipt);
             }
         } else {

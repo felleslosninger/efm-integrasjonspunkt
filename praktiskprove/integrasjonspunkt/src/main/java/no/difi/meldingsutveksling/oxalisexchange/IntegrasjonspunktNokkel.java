@@ -22,17 +22,17 @@ public class IntegrasjonspunktNokkel {
 
     public IntegrasjonspunktNokkel() {
 
-        String pkAlias = System.getProperty(PRIVATEKEYALIAS);
-        String pkResoruce = System.getProperty(PRIVATEKEYLOACATION);
-        String pkPass = System.getProperty(PRIVATEKEYPASSWORD);
+        pkAlias = System.getProperty(PRIVATEKEYALIAS);
+        pkResource = System.getProperty(PRIVATEKEYLOACATION);
+        pkPasswprd = System.getProperty(PRIVATEKEYPASSWORD);
 
         if (pkAlias == null) {
             throw new MeldingsUtvekslingRuntimeException("please start the integrajonspunkt with a system property called " + PRIVATEKEYALIAS + ", that names the alias e of the private key within the keystore.");
         }
-        if (pkResoruce == null) {
+        if (pkResource == null) {
             throw new MeldingsUtvekslingRuntimeException("please start the integrajonspunkt with a system property called " + PRIVATEKEYLOACATION + ", that points to a class path resource of the private key file");
         }
-        if (pkPass == null) {
+        if (pkPasswprd == null) {
             throw new MeldingsUtvekslingRuntimeException("please start the integrajonspunkt with a system property called " + PRIVATEKEYPASSWORD);
         }
 

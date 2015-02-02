@@ -29,8 +29,9 @@ public class CertificateValidator {
 
         VirksomhetCertificateChainValidator chainValidator = new VirksomhetCertificateChainValidator(util, new AcceptedCertificatePolicyProvider(ACCEPTED_OIDS.split(",")));
         VirksomheCriticalOidValidator oidValidator = new VirksomheCriticalOidValidator(ACCEPTED_OIDS.split(","));
+        VirksomhetExpirationDateValidator expirationDateValidator = new VirksomhetExpirationDateValidator();
         try {
-            return chainValidator.isValid(certificate) && oidValidator.isValid(certificate);
+            return chainValidator.isValid(certificate) && oidValidator.isValid(certificate) && expirationDateValidator.isValid(certificate);
         } catch (VirksomhetsValidationException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
