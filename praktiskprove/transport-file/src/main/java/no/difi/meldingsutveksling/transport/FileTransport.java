@@ -35,10 +35,10 @@ public class FileTransport implements Transport {
 
         File f = new File(fileName);
         try {
-           JAXBContext jaxbContext = JAXBContext.newInstance(new Class[] {StandardBusinessDocument.class, Payload.class, Kvittering.class});
-           Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-           jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-           jaxbMarshaller.marshal(new ObjectFactory().createStandardBusinessDocument(document), new FileOutputStream(f));
+            JAXBContext jaxbContext = JAXBContext.newInstance(new Class[]{StandardBusinessDocument.class, Payload.class, Kvittering.class});
+            Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            jaxbMarshaller.marshal(new ObjectFactory().createStandardBusinessDocument(document), new FileOutputStream(f));
             JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument> element =
                     new JAXBElement<>(new QName("ns"),
                             no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument.class, toWrite);
@@ -50,7 +50,7 @@ public class FileTransport implements Transport {
     }
 
     private String createFilename(StandardBusinessDocument document) {
-        return document.getStandardBusinessDocumentHeader().getReceiver().get(0).getIdentifier().getValue() + "-" + System.currentTimeMillis();
+        return System.currentTimeMillis() + ".xml";
     }
 
 }
