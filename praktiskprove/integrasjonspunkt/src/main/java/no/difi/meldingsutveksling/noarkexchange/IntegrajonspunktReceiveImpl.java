@@ -13,6 +13,7 @@ import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.*;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
+import no.difi.meldingsutveksling.noark.MultiTransportFactory;
 import no.difi.meldingsutveksling.noark.NOARKSystem;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
@@ -92,7 +93,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         ApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext);
         noarkSystem = ctx.getBean(NOARKSystem.class);
         adresseRegisterClient = ctx.getBean(AdresseRegisterClient.class);
-
+        transportFactory = ctx.getBean(MultiTransportFactory.class);
         String orgNumberSender = receiveResponse.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue().split(":")[1];
         Organisasjonsnummer sender = new Organisasjonsnummer(orgNumberSender);
         String orgNumberReceiver = receiveResponse.getStandardBusinessDocumentHeader().getReceiver().get(0).getIdentifier().getValue().split(":")[1];

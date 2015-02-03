@@ -101,14 +101,13 @@ public class Main {
         StandardBusinessDocument sbd;
         try {
             sbd = unMarshalSBD(stream);
-            if (sbd == null || sbd.getStandardBusinessDocumentHeader() == null)
+            if (sbd == null || sbd.getStandardBusinessDocumentHeader() == null) {
                 throw new CouldNotLoadXML();
+            }
             receive.callReceive(sbd);
-            throw new NoValidProcessId();
         } catch (JAXBException e) {
             throw new CouldNotLoadXML(e);
         }
-
     }
 
     private StandardBusinessDocument unMarshalSBD(StreamSource stream) throws JAXBException {

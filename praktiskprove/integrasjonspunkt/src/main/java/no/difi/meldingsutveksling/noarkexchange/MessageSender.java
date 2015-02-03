@@ -10,7 +10,6 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
-import no.difi.meldingsutveksling.services.AdresseregisterMock;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
@@ -61,13 +60,12 @@ public class MessageSender {
 
     private final Dokumentpakker dokumentpakker;
 
-    public MessageSender(Dokumentpakker dokumentpakker, AdresseregisterService adresseregister) {
-        this.dokumentpakker = dokumentpakker;
-        this.adresseregister = adresseregister;
+    public MessageSender() {
+        dokumentpakker = new Dokumentpakker();
     }
 
-    public MessageSender() {
-        this(new Dokumentpakker(), new AdresseregisterMock());
+    public MessageSender(Dokumentpakker dokumentpakker) {
+        this.dokumentpakker = dokumentpakker;
     }
 
     boolean setSender(IntegrasjonspunktContext context, AddressType sender) {

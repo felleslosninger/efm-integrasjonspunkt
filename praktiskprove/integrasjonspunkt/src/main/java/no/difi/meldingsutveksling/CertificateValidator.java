@@ -14,7 +14,7 @@ import java.security.cert.X509Certificate;
 public class CertificateValidator {
 
     // todo this should not be hard coded...
-    private static final String ACCEPTED_OIDS = "2.16.578.1.26.1.3.5,2.16.578.1.29.13.1.1.0,2.16.578.1.26.1.3.2,2.16.578.1.26.1.0.3.2,2.16.578.1.29.913.1.1.0,2.16.578.1.1.1.1.100";
+    private static final String ACCEPTED_OIDS = "2.5.29.15,2.16.578.1.26.1.3.5,2.16.578.1.29.13.1.1.0,2.16.578.1.26.1.3.2,2.16.578.1.26.1.0.3.2,2.16.578.1.29.913.1.1.0,2.16.578.1.1.1.1.100";
     public static final String RESOURCE = "classpath:test-certificates.jks";
     public static final String KEYSTOREPASSWORD = "changeit";
     public static final String KEYSTORE_TYPE = "JKS";

@@ -1,10 +1,10 @@
 package no.difi.meldingsutveksling.knutepunkrecieve;
 
-import javax.xml.ws.BindingProvider;
-
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.CorrelationInformation;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
+
+import javax.xml.ws.BindingProvider;
 
 public class Receive {
 	private SOAReceivePort port;
@@ -18,6 +18,6 @@ public class Receive {
 
 	public CorrelationInformation callReceive(StandardBusinessDocument sbd) {
 		return port.receive(sbd);
-	}
+}
 
 }
