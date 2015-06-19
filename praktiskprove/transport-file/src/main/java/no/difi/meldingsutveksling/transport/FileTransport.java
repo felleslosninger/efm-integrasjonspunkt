@@ -9,10 +9,8 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.modelmapper.ModelMapper;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -39,13 +37,9 @@ public class FileTransport implements Transport {
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
             jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             jaxbMarshaller.marshal(new ObjectFactory().createStandardBusinessDocument(document), new FileOutputStream(f));
-            JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument> element =
-                    new JAXBElement<>(new QName("ns"),
-                            no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument.class, toWrite);
-        } catch (JAXBException e) {
+
+        } catch (FileNotFoundException | JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException("file write error ", e);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
     }
 
