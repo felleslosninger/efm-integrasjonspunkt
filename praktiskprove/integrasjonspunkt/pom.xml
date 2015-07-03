@@ -16,6 +16,12 @@
         <springVersion>4.1.2.RELEASE</springVersion>
         <jetty.port>9090</jetty.port>
     </properties>
+    <repositories>
+        <repository>
+            <id>Jsch</id>
+            <url>http://jsch.sf.net/maven2/</url>
+        </repository>
+    </repositories>
     <build>
         <plugins>
             <plugin>
@@ -277,6 +283,13 @@
             <artifactId>Virksomhetssertifikatvalidator</artifactId>
             <version>1.1.1-SNAPSHOT</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>0.1.53</version>
+        </dependency>
+
 
     </dependencies>
 </project>
