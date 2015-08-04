@@ -4,9 +4,7 @@ import no.altinn.schemas.services.intermediary.receipt._2009._10.*;
 import no.altinn.schemas.services.intermediary.receipt._2015._06.*;
 
 import javax.jws.WebService;
-import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
-import javax.xml.namespace.QName;
 
 @WebService(wsdlLocation = "/wsdl/ReceiptExternalBasic.wsdl", endpointInterface = "no.altinn.services.intermediary.receipt._2009._10.IReceiptExternalBasic")
 public class IReceiptExternalBasicImpl implements IReceiptExternalBasic {
@@ -19,7 +17,6 @@ public class IReceiptExternalBasicImpl implements IReceiptExternalBasic {
         ReceiptExternal receiptExternal = new ReceiptExternal();
         receiptExternal.setReceiptStatusCode(ReceiptStatusEnum.OK);
         receiptExternal.setReceiptId(123);
-        receiptExternal.setReceiptText(new JAXBElement<>(new QName("donald"), String.class, "Hei"));
         return receiptExternal;
     }
 

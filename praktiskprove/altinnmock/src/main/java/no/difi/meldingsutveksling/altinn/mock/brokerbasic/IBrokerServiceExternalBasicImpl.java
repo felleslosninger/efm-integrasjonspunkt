@@ -18,7 +18,7 @@ public class IBrokerServiceExternalBasicImpl implements IBrokerServiceExternalBa
         ObjectFactory objectFactory = new ObjectFactory();
         BrokerServiceAvailableFileList result = objectFactory.createBrokerServiceAvailableFileList();
         BrokerServiceAvailableFile file = objectFactory.createBrokerServiceAvailableFile();
-        file.setFileReference("donald");
+        file.setFileReference("somefilereference");
         result.getBrokerServiceAvailableFile().add(file);
         return result;
     }
