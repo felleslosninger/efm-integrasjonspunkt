@@ -27,6 +27,7 @@
         <module>transport</module>
         <module>transport-oxalis</module>
         <module>transport-file</module>
+        <module>transport-altinn</module>
     </modules>
     <build>
         <pluginManagement>
