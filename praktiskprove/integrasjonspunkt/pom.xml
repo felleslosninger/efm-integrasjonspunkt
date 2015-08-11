@@ -208,7 +208,7 @@
 
 
         <dependency>
-            <groupId>xstream</groupId>
+            <groupId>com.thoughtworks.xstream</groupId>
             <artifactId>xstream</artifactId>
             <version>1.2.2</version>
         </dependency>
@@ -275,7 +275,7 @@
         <dependency>
             <groupId>no.difi</groupId>
             <artifactId>Virksomhetssertifikatvalidator</artifactId>
-            <version>1.1-SNAPSHOT</version>
+            <version>1.1.1-SNAPSHOT</version>
         </dependency>
 
     </dependencies>
