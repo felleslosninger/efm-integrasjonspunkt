@@ -58,15 +58,6 @@ public class MessageSender {
     @Autowired
     AdresseregisterService adresseregister;
 
-    private final Dokumentpakker dokumentpakker;
-
-    public MessageSender() {
-        dokumentpakker = new Dokumentpakker();
-    }
-
-    public MessageSender(Dokumentpakker dokumentpakker) {
-        this.dokumentpakker = dokumentpakker;
-    }
 
     boolean setSender(IntegrasjonspunktContext context, AddressType sender) {
         if (sender == null) {
