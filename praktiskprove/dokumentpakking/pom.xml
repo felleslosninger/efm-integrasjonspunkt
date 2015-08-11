@@ -170,6 +170,14 @@
             <artifactId>bcprov-jdk15on</artifactId>
             <version>1.50</version>
         </dependency>
-	</dependencies>
+
+        <dependency>
+            <groupId>no.difi.commons</groupId>
+            <artifactId>commons-asic</artifactId>
+            <version>0.9.1</version>
+        </dependency>
+
+
+    </dependencies>
 
 </project>
