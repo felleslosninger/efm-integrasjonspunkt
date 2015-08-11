@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.altinn.mock.brokerbasic;
 
 import javax.jws.WebService;
 
-@WebService(endpointInterface="no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasic")
+@WebService(targetNamespace = "http://www.altinn.no/services/ServiceEngine/Broker/2015/06", endpointInterface="no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasic", portName = "BasicHttpBinding_IBrokerServiceExternalBasic")
 public class IBrokerServiceExternalBasicImpl implements IBrokerServiceExternalBasic {
     @Override
     public void test() throws IBrokerServiceExternalBasicTestAltinnFaultFaultFaultMessage {

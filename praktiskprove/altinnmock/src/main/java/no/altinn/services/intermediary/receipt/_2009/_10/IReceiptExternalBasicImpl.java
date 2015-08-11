@@ -6,7 +6,7 @@ import no.altinn.schemas.services.intermediary.receipt._2015._06.*;
 import javax.jws.WebService;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-@WebService(wsdlLocation = "/wsdl/ReceiptExternalBasic.wsdl", endpointInterface = "no.altinn.services.intermediary.receipt._2009._10.IReceiptExternalBasic")
+@WebService(targetNamespace = "http://www.altinn.no/services/Intermediary/Receipt/2009/10", portName = "BasicHttpBinding_IReceiptExternalBasic", wsdlLocation = "/wsdl/ReceiptExternalBasic.wsdl", endpointInterface = "no.altinn.services.intermediary.receipt._2009._10.IReceiptExternalBasic")
 public class IReceiptExternalBasicImpl implements IReceiptExternalBasic {
     @Override
     public void test() throws IReceiptExternalBasicTestAltinnFaultFaultFaultMessage {

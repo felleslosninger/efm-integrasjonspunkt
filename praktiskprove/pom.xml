@@ -16,6 +16,7 @@
     </properties>
 
     <modules>
+        <module>altinnexchange</module>
         <module>noarkexchange</module>
         <module>adresseregister-web</module>
         <module>adresseregister-domain</module>
