@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.altinnexchange;
+package no.difi.meldingsutveksling;
 
 import com.jcraft.jsch.*;
 
@@ -10,6 +10,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public class SFtpClient {
 
@@ -36,18 +38,12 @@ public class SFtpClient {
 
         System.out.println("--> " + keyfile);
 
-        java.util.Properties config = new java.util.Properties();
-        config.put("StrictHostKeyChecking", "no");
+
 
         try {
             jSch.addIdentity(keyfile);
-            Session localhost = jSch.getSession(url);
-            localhost.setConfig(config);
-            localhost.connect();
-            Channel channel = localhost.openChannel("sftp");
-            channel.connect();
-            ChannelSftp sftp = (ChannelSftp) channel;
-            return new Connection(sftp);
+
+            return new Connection(jSch);
         } catch (JSchException e) {
             throw new ConnectException(e);
         }
@@ -64,13 +60,22 @@ public class SFtpClient {
         }
     }
 
-    public class Connection {
+    public class Connection implements AutoCloseable {
         private final ChannelSftp sftp;
         private String remoteDirectory = "";
         private String localDirectory = "";
+        private Session localhost;
+        private Channel channel;
 
-        public Connection(ChannelSftp sftp) {
-            this.sftp = sftp;
+        public Connection(JSch jsch) throws JSchException {
+            java.util.Properties config = new java.util.Properties();
+            config.put("StrictHostKeyChecking", "no");
+            localhost = jsch.getSession(url);
+            localhost.setConfig(config);
+            localhost.connect();
+            channel = localhost.openChannel("sftp");
+            channel.connect();
+            sftp = (ChannelSftp) channel;
         }
 
         /**
@@ -99,12 +104,35 @@ public class SFtpClient {
             return this;
         }
 
+        public void upload(AltinnPackage altinnPackage) {
+            try {
+                OutputStream outputStream = sftp.put("test.zip");
+                ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);
+                ZipEntry zipEntry = new ZipEntry("Manifest.xml");
+                zipOutputStream.putNextEntry(zipEntry);
+                zipOutputStream.write(altinnPackage.getManifestContent());
+                zipOutputStream.closeEntry();
+                zipOutputStream.finish();
+                zipOutputStream.flush();
+                zipOutputStream.close();
+                sftp.quit();
+            } catch (SftpException | IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         public void upload(File file) {
             try(InputStream inputStream = Files.newInputStream(file.toPath())) {
                 sftp.put(inputStream, Paths.get(remoteDirectory, file.getName()).toString());
             } catch(SftpException | IOException exception) {
                 throw new UploadException(exception);
             }
+        }
+
+        @Override
+        public void close() throws Exception {
+            channel.disconnect();
+            localhost.disconnect();
         }
 
         public class UploadException extends RuntimeException {

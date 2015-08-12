@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.altinnexchange;
+package no.difi.meldingsutveksling;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
@@ -10,9 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 @Ignore("Kept for documentation purposes. To run tests successfully you need to setup a SFTP server running at localhost with a ssh key files")
 public class SFtpClientTest {
@@ -29,6 +27,7 @@ public class SFtpClientTest {
     @Test
     public void canConnect() throws JSchException {
         SFtpClient.Connection connection = sFtpClient.connect(sshPrivateKeyFileName);
+
 
         assertNotNull(connection);
     }
@@ -47,11 +46,12 @@ public class SFtpClientTest {
     }
 
     @Test(expected = SFtpClient.Connection.UploadException.class)
-    public void cannotUploadFile() {
+    public void cannotUploadFile() throws Exception {
         File file = new File("adsfasdfasdf.txt");
-        SFtpClient.Connection connection = sFtpClient.connect(sshPrivateKeyFileName);
 
-        connection.remoteDirectory("temp").upload(file);
+        try(SFtpClient.Connection connection = sFtpClient.connect(sshPrivateKeyFileName)) {
+            connection.remoteDirectory("temp").upload(file);
+        }
     }
 
     @Test
