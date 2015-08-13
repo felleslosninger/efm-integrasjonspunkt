@@ -4,17 +4,20 @@
         "http://java.sun.com/j2ee/dtds/web-app_2_3.dtd">
 <web-app xmlns="http://java.sun.com/xml/ns/javaee" version="3.0">
 
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>/WEB-INF/rest-servlet.xml</param-value>
+    </context-param>
     <listener>
-        <listener-class>
-            com.sun.xml.ws.transport.http.servlet.WSServletContextListener
-        </listener-class>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
+
     <servlet>
-        <servlet-name>wsServlet</servlet-name>
-        <servlet-class>com.sun.xml.ws.transport.http.servlet.WSServlet
-        </servlet-class>
+        <servlet-name>jaxws-servlet</servlet-name>
+        <servlet-class>com.sun.xml.ws.transport.http.servlet.WSSpringServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
+
     <servlet>
         <servlet-name>rest</servlet-name>
         <servlet-class>
@@ -24,12 +27,12 @@
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>wsServlet</servlet-name>
+        <servlet-name>jaxws-servlet</servlet-name>
         <url-pattern>/noarkExchange</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
-        <servlet-name>wsServlet</servlet-name>
+        <servlet-name>jaxws-servlet</servlet-name>
         <url-pattern>/receive</url-pattern>
     </servlet-mapping>
 
@@ -42,13 +45,4 @@
         <session-timeout>60</session-timeout>
     </session-config>
 
-    <listener>
-        <listener-class>
-            org.springframework.web.context.ContextLoaderListener
-        </listener-class>
-    </listener>
-    <context-param>
-        <param-name>contextConfigLocation</param-name>
-        <param-value>/WEB-INF/rest-servlet.xml</param-value>
-    </context-param>
 </web-app>
