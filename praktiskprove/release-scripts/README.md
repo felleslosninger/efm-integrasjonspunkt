@@ -1,4 +1,10 @@
-## Kommandolinje-verktøy for deployment og release
+## Kommandolinje-verktøy for release og distribusjon av Integrasjonspunktet
+
+BinTray er en gratis tjeneste i skyen for kontinuerlig release og distribusjon. Den tilbyr mange ulike typer repositories slik som Maven, 
+Vagrant, Docker og mange flere. BinTray tilbyr også et REST-grensesnitt som gjør det enkelt scripte opp release og distribusjons delen 
+av en deploymentprosess, enten via byggservere (som feks Jenkins) eller via kommandolinje-verktøy slik som presentert i denne pakken.
+
+## BinTray.com Maven repository
 
 ### Setup
 
