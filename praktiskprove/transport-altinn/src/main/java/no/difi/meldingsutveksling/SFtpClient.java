@@ -10,8 +10,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 public class SFtpClient {
 
@@ -106,15 +104,8 @@ public class SFtpClient {
 
         public void upload(AltinnPackage altinnPackage) {
             try {
-                OutputStream outputStream = sftp.put("test.zip");
-                ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);
-                ZipEntry zipEntry = new ZipEntry("Manifest.xml");
-                zipOutputStream.putNextEntry(zipEntry);
-                zipOutputStream.write(altinnPackage.getManifestContent());
-                zipOutputStream.closeEntry();
-                zipOutputStream.finish();
-                zipOutputStream.flush();
-                zipOutputStream.close();
+                OutputStream outputStream = sftp.put("test.zip"); // filename generator
+                altinnPackage.write(outputStream);
                 sftp.quit();
             } catch (SftpException | IOException e) {
                 e.printStackTrace();
