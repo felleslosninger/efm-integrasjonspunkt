@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.ws.server.endpoint.annotation.Endpoint;
 
 import javax.jws.WebParam;
 import javax.jws.WebService;
@@ -27,6 +28,7 @@ import javax.xml.ws.BindingType;
  * Time: 15:26
  */
 
+@Endpoint
 @Component("noarkExchangeService")
 @WebService(portName = "NoarkExchangePort", serviceName = "noarkExchange", targetNamespace = "http://www.arkivverket.no/Noark/Exchange", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.SOAPport")
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")

@@ -1,14 +1,35 @@
 package no.difi.meldingsutveksling;
 
+import com.sun.xml.ws.transport.http.servlet.WSServletContextListener;
+import com.sun.xml.ws.transport.http.servlet.WSSpringServlet;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.embedded.ServletRegistrationBean;
+import org.springframework.boot.context.web.SpringBootServletInitializer;
+import org.springframework.context.annotation.Bean;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 
 /**
  * @author Dervis M, 13/08/15.
  */
 
 @SpringBootApplication
-public class IntegrasjonspunktApplication {
+public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
+
+    @Bean
+    public ServletRegistrationBean servletNoArk() {
+        ServletRegistrationBean reg = new ServletRegistrationBean(new WSSpringServlet(),"/noarkExchange", "/receive");
+        reg.setLoadOnStartup(1);
+        return reg;
+    }
+
+    @Override
+    public void onStartup(final ServletContext servletContext) throws ServletException {
+        super.onStartup(servletContext);
+        servletContext.addListener(new WSServletContextListener());
+    }
 
     public static void main(String[] args) {
         SpringApplication.run(IntegrasjonspunktApplication.class, args);
