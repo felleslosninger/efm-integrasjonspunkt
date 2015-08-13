@@ -22,7 +22,7 @@ Upload? [y/n]
 
 Jar version will be automatically extracted from the filename.
 
-### Delete a version in BinTray Maven repository
+### Slette en versjon i BinTray Maven repository
 
 Format ./delete.sh bintrayPackageName version
 
@@ -34,7 +34,7 @@ Delete? [y/n]y
 {"message":"success"}
 ```
 
-### Latest version
+### Finne ut hva som er nyeste versjon
 
  Format ./latestversion.sh bintrayPackageName
 
