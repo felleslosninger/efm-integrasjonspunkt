@@ -18,7 +18,6 @@
        http://jax-ws.java.net/spring/servlet.xsd">
     <mvc:annotation-driven/>
     <import resource="classpath:spring-rest.xml"/>
-    <context:component-scan base-package="no.difi.meldingsutveksling.eventlog"/>
 
     <wss:binding url="/noarkExchange">
         <wss:service>

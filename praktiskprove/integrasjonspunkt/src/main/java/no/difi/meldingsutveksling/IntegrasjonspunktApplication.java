@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.embedded.ServletRegistrationBean;
 import org.springframework.boot.context.web.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.ClassPathResource;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -18,13 +19,6 @@ import javax.servlet.ServletException;
 @SpringBootApplication
 public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
 
-    @Bean
-    public ServletRegistrationBean servletNoArk() {
-        ServletRegistrationBean reg = new ServletRegistrationBean(new WSSpringServlet(),"/noarkExchange", "/receive");
-        reg.setLoadOnStartup(1);
-        return reg;
-    }
-
     @Override
     public void onStartup(final ServletContext servletContext) throws ServletException {
         super.onStartup(servletContext);
@@ -32,7 +26,11 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(IntegrasjonspunktApplication.class, args);
+        //SpringApplication.run(IntegrasjonspunktApplication.class, args);
+        SpringApplication.run(new Object[] {
+                IntegrasjonspunktApplication.class,
+                new ClassPathResource("rest-servlet.xml")
+        }, args);
     }
 
 }
