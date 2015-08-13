@@ -5,7 +5,14 @@
     <groupId>no.difi.meldingsutveksling</groupId>
     <artifactId>integrasjonspunkt</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <packaging>war</packaging>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>1.2.4.RELEASE</version>
+        <relativePath/>
+    </parent>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <compilerPluginVersion>2.3.2</compilerPluginVersion>
@@ -16,8 +23,13 @@
         <springVersion>4.1.2.RELEASE</springVersion>
         <jetty.port>9090</jetty.port>
     </properties>
+
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -248,11 +260,11 @@
             <version>1.6.6</version>
         </dependency>
 
-        <dependency>
+        <!--dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jul-to-slf4j</artifactId>
             <version>1.6.6</version>
-        </dependency>
+        </dependency-->
 
         <dependency>
             <groupId>ch.qos.logback</groupId>
