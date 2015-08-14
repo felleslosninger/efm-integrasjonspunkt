@@ -1,9 +1,7 @@
 package no.difi.meldingsutveksling;
 
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.ArrayOfRecipient;
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.Manifest;
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.ObjectFactory;
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.Recipient;
+import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceManifest;
+import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceRecipientList;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.shipping.ManifestBuilder;
 import no.difi.meldingsutveksling.shipping.RecipientBuilder;
@@ -19,17 +17,17 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class AltinnPackage {
-    private final Manifest manifest;
-    private final Recipient recipient;
+    private final BrokerServiceManifest manifest;
+    private final BrokerServiceRecipientList recipient;
     private final StandardBusinessDocument document;
     private final JAXBContext ctx;
 
-    private AltinnPackage(Manifest manifest, Recipient recipient, StandardBusinessDocument document) {
+    private AltinnPackage(BrokerServiceManifest manifest, BrokerServiceRecipientList recipient, StandardBusinessDocument document) {
         this.manifest = manifest;
         this.recipient = recipient;
         this.document = document;
         try {
-            ctx = JAXBContext.newInstance(Manifest.class, Recipient.class, StandardBusinessDocument.class);
+            ctx = JAXBContext.newInstance(BrokerServiceManifest.class, BrokerServiceRecipientList.class, StandardBusinessDocument.class);
         } catch (JAXBException e) {
             throw new RuntimeException(e);
         }
@@ -46,15 +44,11 @@ public class AltinnPackage {
     }
 
     public byte[] getManifestContent() {
-        ObjectFactory objectFactory = new ObjectFactory();
-        return marshallObject(objectFactory.createManifest(manifest));
+        return marshallObject(manifest);
     }
 
     public byte[] getRecipientsContent() {
-        ObjectFactory objectFactory = new ObjectFactory();
-        ArrayOfRecipient arrayOfRecipient = objectFactory.createArrayOfRecipient();
-        arrayOfRecipient.getRecipient().add(recipient);
-        return marshallObject(objectFactory.createArrayOfRecipient(arrayOfRecipient));
+        return marshallObject(recipient);
     }
 
     public byte[] getPayload() {

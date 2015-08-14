@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.shipping;
 
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.Recipient;
+import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceRecipientList;
 
 public class RecipientBuilder {
     private final String partyNumber;
@@ -9,9 +9,12 @@ public class RecipientBuilder {
         this.partyNumber = partyNumber;
     }
 
-    public Recipient build() {
-        Recipient recipient = new Recipient();
+    public BrokerServiceRecipientList build() {
+        BrokerServiceRecipientList.Recipient recipient = new BrokerServiceRecipientList.Recipient();
         recipient.setPartyNumber(partyNumber);
-        return recipient;
+
+        BrokerServiceRecipientList recipientList = new BrokerServiceRecipientList();
+        recipientList.getRecipient().add(recipient);
+        return recipientList;
     }
 }

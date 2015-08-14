@@ -1,9 +1,6 @@
 package no.difi.meldingsutveksling.shipping;
 
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.ArrayOfFile;
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.File;
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.Manifest;
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.ObjectFactory;
+import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceManifest;
 
 /**
  * Builder for Manifest.xml need by Altinn formidlingstjeneste
@@ -28,17 +25,16 @@ public class ManifestBuilder {
         return this;
     }
 
-    public Manifest build() {
-        Manifest manifest = new Manifest();
+    public BrokerServiceManifest build() {
+        BrokerServiceManifest manifest = new BrokerServiceManifest();
         manifest.setReportee(partyNumber);
         manifest.setSendersReference(senderReference);
 
-        ObjectFactory objectFactory = new ObjectFactory();
-        File file = objectFactory.createFile();
+        BrokerServiceManifest.FileList fileList = new BrokerServiceManifest.FileList();
+        BrokerServiceManifest.FileList.File file = new BrokerServiceManifest.FileList.File();
         file.setFileName(CONTENT_FILE_NAME);
-        ArrayOfFile arrayOfFile = objectFactory.createArrayOfFile();
-        arrayOfFile.getFile().add(file);
-        manifest.setFileList(objectFactory.createManifestFileList(arrayOfFile));
+        fileList.getFile().add(file);
+        manifest.setFileList(fileList);
 
         return manifest;
     }
