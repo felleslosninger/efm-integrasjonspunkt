@@ -26,7 +26,7 @@ Neste gang en instans av Integrasjonspunktet starter, vil du kunne se dette i gr
 3) Dersom du tester på lokalt utviklingsmiljø, kan du starte en instans av Integrasjonspunktet slik:
 
 ```shell
-java -jar -Dprivatekeyalias=974720760 -Dprivatekeyloacation=test-certificates.jks -Dprivatekeypassword=changeit 
+$ java -jar -Dprivatekeyalias=974720760 -Dprivatekeyloacation=test-certificates.jks -Dprivatekeypassword=changeit 
 target/integrasjonspunkt-1.0-SNAPSHOT.jar no.difi.meldingsutveksling.IntegrasjonspunktApplication --spring.profiles.active=dev
 ```
 
