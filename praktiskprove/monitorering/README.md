@@ -29,3 +29,9 @@ Neste gang en instans av Integrasjonspunktet starter, vil du kunne se dette i gr
 java -jar -Dprivatekeyalias=974720760 -Dprivatekeyloacation=test-certificates.jks -Dprivatekeypassword=changeit 
 target/integrasjonspunkt-1.0-SNAPSHOT.jar no.difi.meldingsutveksling.IntegrasjonspunktApplication --spring.profiles.active=dev
 ```
+
+## Screenshots
+
+![bilde](https://github.com/difi/meldingsutveksling-mellom-offentlige-virksomheter/tree/SpringBoot/praktiskprove/monitorering/metrics1.png "Toppmeny med statusinfo")
+
+![bilde](https://github.com/difi/meldingsutveksling-mellom-offentlige-virksomheter/tree/SpringBoot/praktiskprove/monitorering/metrics2.png "Grafer og metrikker")
