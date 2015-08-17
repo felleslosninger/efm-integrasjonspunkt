@@ -50,7 +50,6 @@ import java.util.zip.ZipInputStream;
  *
  */
 
-@Endpoint
 @Component("recieveService")
 @WebService(portName = "ReceivePort", serviceName = "receive", targetNamespace = "", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort")
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")

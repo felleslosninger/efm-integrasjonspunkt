@@ -28,7 +28,6 @@ import javax.xml.ws.BindingType;
  * Time: 15:26
  */
 
-@Endpoint
 @Component("noarkExchangeService")
 @WebService(portName = "NoarkExchangePort", serviceName = "noarkExchange", targetNamespace = "http://www.arkivverket.no/Noark/Exchange", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.SOAPport")
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")

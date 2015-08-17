@@ -27,7 +27,6 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
     }
 
     public static void main(String[] args) {
-        //SpringApplication.run(IntegrasjonspunktApplication.class, args);
         SpringApplication.run(new Object[] {
                 IntegrasjonspunktApplication.class,
                 new ClassPathResource("rest-servlet.xml")

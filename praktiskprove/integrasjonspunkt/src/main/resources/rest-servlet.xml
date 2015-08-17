@@ -16,8 +16,9 @@
        http://jax-ws.java.net/spring/core.xsd
        http://jax-ws.dev.java.net/spring/servlet
        http://jax-ws.java.net/spring/servlet.xsd">
+
     <mvc:annotation-driven/>
-    <import resource="classpath:spring-rest.xml"/>
+    <context:property-placeholder location="classpath:jdbc.properties"/>
 
     <wss:binding url="/noarkExchange">
         <wss:service>
