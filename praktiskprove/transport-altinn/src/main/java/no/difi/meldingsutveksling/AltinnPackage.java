@@ -8,31 +8,38 @@ import no.difi.meldingsutveksling.shipping.ManifestBuilder;
 import no.difi.meldingsutveksling.shipping.RecipientBuilder;
 import no.difi.meldingsutveksling.shipping.Request;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import javax.xml.bind.*;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import java.io.*;
 import java.math.BigInteger;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+/**
+ * Represents an Altinn package to be used with the formidlingstjeneste SFTP channel.
+ *
+ * Has factory methods of writing/reading from to zip files via input/output streams.
+ */
 public class AltinnPackage {
+    private static JAXBContext ctx;
     private final BrokerServiceManifest manifest;
     private final BrokerServiceRecipientList recipient;
     private final StandardBusinessDocument document;
-    private final JAXBContext ctx;
+
+    static {
+        try {
+            ctx = JAXBContext.newInstance(BrokerServiceManifest.class, BrokerServiceRecipientList.class, StandardBusinessDocument.class);
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        }
+    }
 
     private AltinnPackage(BrokerServiceManifest manifest, BrokerServiceRecipientList recipient, StandardBusinessDocument document) {
         this.manifest = manifest;
         this.recipient = recipient;
         this.document = document;
-        try {
-            ctx = JAXBContext.newInstance(BrokerServiceManifest.class, BrokerServiceRecipientList.class, StandardBusinessDocument.class);
-        } catch (JAXBException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public static AltinnPackage from(Request document) {
@@ -81,6 +88,35 @@ public class AltinnPackage {
         zipOutputStream.close();
     }
 
+    public static AltinnPackage from(InputStream inputStream) throws IOException, JAXBException {
+        ZipInputStream zipInputStream = new ZipInputStream(inputStream);
+        InputStream inputStreamProxy = new FilterInputStream(zipInputStream) {
+            @Override
+            public void close() throws IOException {
+                // do nothing to avoid unmarshaller to close it before the Zip file is fully processed
+            }
+        };
+
+        Unmarshaller unmarshaller = ctx.createUnmarshaller();
+
+        ZipEntry zipEntry;
+        BrokerServiceManifest manifest = null;
+        BrokerServiceRecipientList recipientList = null;
+        StandardBusinessDocument document = null;
+        while((zipEntry = zipInputStream.getNextEntry()) != null) {
+            if(zipEntry.getName().equals("manifest.xml")) {
+                 manifest = (BrokerServiceManifest) unmarshaller.unmarshal(inputStreamProxy);
+            } else if(zipEntry.getName().equals("recipients.xml")) {
+                 recipientList = (BrokerServiceRecipientList) unmarshaller.unmarshal(inputStreamProxy);
+            } else if(zipEntry.getName().equals("content.xml")) {
+                Source source = new StreamSource(inputStreamProxy);
+                document = unmarshaller.unmarshal(source, StandardBusinessDocument.class).getValue();
+            }
+        }
+
+        return new AltinnPackage(manifest, recipientList, document);
+    }
+
     private void zipContent(ZipOutputStream zipOutputStream, String fileName, byte[] fileContent) throws IOException {
         zipOutputStream.putNextEntry(new ZipEntry(fileName));
         zipOutputStream.write(fileContent);
@@ -103,4 +139,7 @@ public class AltinnPackage {
         }
     }
 
+    public StandardBusinessDocument getDocument() {
+        return document;
+    }
 }

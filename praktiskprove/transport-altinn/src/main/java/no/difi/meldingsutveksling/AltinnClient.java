@@ -4,11 +4,14 @@ import no.altinn.schemas.services.intermediary.receipt._2009._10.*;
 import no.altinn.schemas.services.intermediary.shipment._2009._10.ReferenceType;
 import no.altinn.services.intermediary.receipt._2009._10.IReceiptExternalBasicGetReceiptBasicAltinnFaultFaultFaultMessage;
 import no.altinn.services.intermediary.receipt._2009._10.ReceiptExternalBasicSF;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.shipping.Request;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -25,6 +28,29 @@ public class AltinnClient {
         }
         return new Receipt();
     }
+
+    public void download(String fileName) {
+        SFtpClient sFtpClient = new SFtpClient("localhost");
+        try (SFtpClient.Connection connection = sFtpClient.connect("test_key")) {
+            InputStream inputStream = connection.getInputStream(fileName);
+            AltinnPackage altinnPackage = AltinnPackage.from(inputStream);
+            printIt(altinnPackage);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void printIt(AltinnPackage altinnPackage) {
+        try {
+            JAXBContext ctx = JAXBContext.newInstance(StandardBusinessDocument.class);
+            Marshaller marshaller = ctx.createMarshaller();
+            no.difi.meldingsutveksling.domain.sbdh.ObjectFactory objectFactory = new no.difi.meldingsutveksling.domain.sbdh.ObjectFactory();
+            marshaller.marshal(objectFactory.createStandardBusinessDocument(altinnPackage.getDocument()), System.out);
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private ReceiptExternal getReceipt(Request request) {
         try {

@@ -147,6 +147,14 @@ public class SFtpClient {
             return path;
         }
 
+        public InputStream getInputStream(String fileName) {
+            try {
+                return sftp.get(Paths.get(remoteDirectory, fileName).toString());
+            } catch (SftpException e) {
+                throw new UploadException(e);
+            }
+        }
+
         public class DownloadException extends RuntimeException {
             public DownloadException(Exception e) {
                 super(e);
