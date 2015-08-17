@@ -8,7 +8,6 @@ import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.ws.server.endpoint.annotation.Endpoint;
 
 import javax.jws.WebParam;
 import javax.jws.WebService;

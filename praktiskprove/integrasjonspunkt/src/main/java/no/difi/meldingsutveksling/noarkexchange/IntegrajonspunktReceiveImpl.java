@@ -28,7 +28,6 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.springframework.ws.server.endpoint.annotation.Endpoint;
 
 import javax.jws.WebParam;
 import javax.jws.WebService;
