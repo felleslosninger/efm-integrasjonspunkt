@@ -30,7 +30,7 @@ public class IntegrasjonspunktWSConfiguration extends WsConfigurerAdapter{
         return reg;
     }
 
-    Etter@Bean
+    @Bean
     public DispatcherServlet dispatcherServlet() {
         return new DispatcherServlet();
     }
