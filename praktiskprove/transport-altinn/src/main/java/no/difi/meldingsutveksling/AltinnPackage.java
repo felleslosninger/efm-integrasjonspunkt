@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling;
 import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceManifest;
 import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceRecipientList;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.shipping.ExternalServiceBuilder;
 import no.difi.meldingsutveksling.shipping.ManifestBuilder;
 import no.difi.meldingsutveksling.shipping.RecipientBuilder;
 import no.difi.meldingsutveksling.shipping.Request;
@@ -13,6 +14,7 @@ import javax.xml.bind.Marshaller;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -37,7 +39,11 @@ public class AltinnPackage {
         ManifestBuilder manifest = new ManifestBuilder();
         manifest.withSender(document.getSender());
         manifest.withSenderReference(document.getSenderReference());
-
+        manifest.withExternalService(
+                new ExternalServiceBuilder()
+                .withExternalServiceCode("v3888")
+                .withExternalServiceEditionCode(new BigInteger("070515"))
+                .build());
 
         RecipientBuilder recipient = new RecipientBuilder(document.getReceiver());
         return new AltinnPackage(manifest.build(), recipient.build(), document.getPayload());

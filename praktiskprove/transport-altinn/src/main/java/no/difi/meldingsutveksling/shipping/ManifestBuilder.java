@@ -9,6 +9,7 @@ public class ManifestBuilder {
     public static final String CONTENT_FILE_NAME = "content.xml";
     private String partyNumber;
     private String senderReference;
+    private ExternalServiceBuilder.ExternalService externalService;
 
     /**
      *
@@ -25,10 +26,17 @@ public class ManifestBuilder {
         return this;
     }
 
+    public ManifestBuilder withExternalService(ExternalServiceBuilder.ExternalService externalService) {
+        this.externalService = externalService;
+        return this;
+    }
+
     public BrokerServiceManifest build() {
         BrokerServiceManifest manifest = new BrokerServiceManifest();
         manifest.setReportee(partyNumber);
         manifest.setSendersReference(senderReference);
+        manifest.setExternalServiceCode(externalService.getExternalServiceCode());
+        manifest.setExternalServiceEditionCode(externalService.getExternalServiceEditionCode());
 
         BrokerServiceManifest.FileList fileList = new BrokerServiceManifest.FileList();
         BrokerServiceManifest.FileList.File file = new BrokerServiceManifest.FileList.File();

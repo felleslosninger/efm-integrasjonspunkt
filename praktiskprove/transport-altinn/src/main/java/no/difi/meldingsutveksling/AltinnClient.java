@@ -14,13 +14,10 @@ import java.net.URL;
 
 public class AltinnClient {
     public Receipt send(Request request) {
-        AltinnPackage.from(request);
-
         // må ha inn properties for ssh key file name og url for sftp server
         SFtpClient sftpClient = new SFtpClient("localhost");
         try (SFtpClient.Connection connection = sftpClient.connect("test_key")) {
             AltinnPackage altinnPackage = AltinnPackage.from(request);
-            altinnPackage.getManifestContent();
             connection.upload(altinnPackage);
             getReceipt(request); // TODO: add receipt handling
         } catch (Exception e) {
