@@ -37,7 +37,9 @@ import static org.hamcrest.Matchers.is;
 
 public class CmsUtilTest {
 
-    public static final String FILENAME = "difi-cert.pem";
+    public static final String FILENAME_CERT = "difi-cert.pem";
+
+    public static final String FILENAME_PRIVKEY = "difi-privkey.pem";
 
     @Test
     public void testDecryptCMSKeysGeneratedProgrammatically() throws Exception {
@@ -48,7 +50,6 @@ public class CmsUtilTest {
         byte[] plaintext = "Text to be encrypted".getBytes();
         byte[] ciphertext = (new CmsUtil()).createCMS(plaintext, (X509Certificate) certificate);
         byte[] plaintextRecovered = util.decryptCMS(ciphertext, keyPair.getPrivate());
-
         assertThat(plaintextRecovered, is(equalTo(plaintext)));
     }
 
@@ -57,7 +58,7 @@ public class CmsUtilTest {
         Security.addProvider(new BouncyCastleProvider());
 
         X509Certificate cert = null;
-        PEMParser pemRd = openPEMResource(FILENAME);
+        PEMParser pemRd = openPEMResource(FILENAME_CERT);
         Object o = null;
 
         while ((o = pemRd.readObject()) != null) {
@@ -70,7 +71,7 @@ public class CmsUtilTest {
         }
 
         CmsUtil util = new CmsUtil();
-        KeyPair keyPair = doOpenSslTestFile(RSAPrivateKey.class);
+        KeyPair keyPair = doOpenSslTestFile(FILENAME_PRIVKEY, RSAPrivateKey.class);
 
         byte[] plaintext = "Text to be encrypted".getBytes();
         byte[] ciphertext = (new CmsUtil()).createCMS(plaintext, cert);
@@ -109,11 +110,11 @@ public class CmsUtilTest {
     }
 
 
-    private KeyPair doOpenSslTestFile(Class expectedPrivKeyClass) throws IOException, MeldingsUtvekslingRuntimeException {
+    private KeyPair doOpenSslTestFile(String fileName, Class expectedPrivKeyClass) throws IOException, MeldingsUtvekslingRuntimeException {
         JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
         PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder().setProvider("BC").build("changeit".toCharArray());
 
-        PEMParser pr = openPEMResource(FILENAME);
+        PEMParser pr = openPEMResource(fileName);
         Object o = pr.readObject();
 
         if (o == null || !((o instanceof PEMKeyPair) || (o instanceof PEMEncryptedKeyPair))) {

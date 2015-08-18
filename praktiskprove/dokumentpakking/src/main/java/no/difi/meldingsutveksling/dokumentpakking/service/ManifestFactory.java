@@ -16,7 +16,6 @@ public class ManifestFactory {
 		HovedDokument hoveddokumentXml = new HovedDokument(hoveddokument.getFileName(), hoveddokument.getMimeType(), "Hoveddokument", "no");
 		
 		Manifest xmlManifest = new Manifest(mottaker, avsender, hoveddokumentXml);
-		
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		MarshalManifest.marshal(xmlManifest, os);
 		return new no.difi.meldingsutveksling.dokumentpakking.domain.Manifest(os.toByteArray());
