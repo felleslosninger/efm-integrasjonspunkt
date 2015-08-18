@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.oxalisexchange;
 
+import no.difi.asic.SignatureHelper;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 
 import java.io.IOException;
@@ -15,10 +16,10 @@ public class IntegrasjonspunktNokkel {
 
     public static final String PRIVATEKEYALIAS = "privatekeyalias";
     public static final String PRIVATEKEYLOACATION = "privatekeyloacation";
+
     public static final String PRIVATEKEYPASSWORD = "privatekeypassword";
 
     private String pkResource, pkAlias, pkPasswprd;
-
 
     public IntegrasjonspunktNokkel() {
 
@@ -74,4 +75,13 @@ public class IntegrasjonspunktNokkel {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
     }
+
+    public SignatureHelper getSignatureHelper() {
+        InputStream resourceAsStream = IntegrasjonspunktNokkel.class.getResourceAsStream(pkResource);
+        if (resourceAsStream == null) {
+            throw new IllegalStateException("keystore " + pkResource + " not found on classpath.");
+        }
+        return new SignatureHelper(resourceAsStream, pkPasswprd, pkAlias, pkPasswprd);
+    }
+
 }

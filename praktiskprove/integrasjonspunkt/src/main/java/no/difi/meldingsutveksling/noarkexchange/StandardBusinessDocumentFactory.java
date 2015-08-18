@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import no.difi.asic.SignatureHelper;
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.BestEduMessage;
@@ -14,6 +15,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.UUID;
 
 
@@ -22,11 +24,11 @@ import java.util.UUID;
  */
 public class StandardBusinessDocumentFactory {
 
-    static StandardBusinessDocument create(PutMessageRequestType sender, Avsender avsender, Mottaker mottaker) {
-        return create(sender, UUID.randomUUID().toString(), avsender, mottaker);
+    static StandardBusinessDocument create(PutMessageRequestType sender, SignatureHelper signatureHelper, Avsender avsender, Mottaker mottaker) throws IOException {
+        return create(sender, UUID.randomUUID().toString(), signatureHelper, avsender, mottaker);
     }
 
-    static StandardBusinessDocument create(PutMessageRequestType sender, String id, Avsender avsender, Mottaker mottaker) {
+    static StandardBusinessDocument create(PutMessageRequestType sender, String id, SignatureHelper signatureHelper, Avsender avsender, Mottaker mottaker) throws IOException {
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
@@ -36,7 +38,7 @@ public class StandardBusinessDocumentFactory {
         } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
-        return new Dokumentpakker().pakk(new BestEduMessage(os.toByteArray()), avsender, mottaker, UUID.randomUUID().toString(), "melding");
+        return new Dokumentpakker().pakk(new BestEduMessage(os.toByteArray()), signatureHelper, avsender, mottaker, UUID.randomUUID().toString(), "melding");
     }
 
     /**
