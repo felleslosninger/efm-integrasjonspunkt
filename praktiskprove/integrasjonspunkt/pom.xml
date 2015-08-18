@@ -19,9 +19,7 @@
         <jersey-version>1.8</jersey-version>
         <jstlVersion>1.2</jstlVersion>
         <jerseyVersion>1.17</jerseyVersion>
-        <jettyVersion>7.5.3.v20111011</jettyVersion>
         <springVersion>4.1.2.RELEASE</springVersion>
-        <jetty.port>9090</jetty.port>
     </properties>
 
     <build>
@@ -78,7 +76,7 @@
                     </systemProperties>
                     <connectors>
                         <connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
-                            <port>${jetty.port}</port>
+                            <port>8080</port>
                             <maxIdleTime>60000</maxIdleTime>
                         </connector>
                     </connectors>
