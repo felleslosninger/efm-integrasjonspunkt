@@ -84,7 +84,7 @@ public class NOARKSystem {
      *
      * @param args
      */
-    public static void main(String[] args) {
+    public static void majin(String[] args) {
         XStream xs = new XStream();
         System.setProperty("spring.profiles.active", "dev");
         ApplicationContext ctx = new ClassPathXmlApplicationContext("spring-rest.xml");
