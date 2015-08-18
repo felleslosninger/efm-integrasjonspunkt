@@ -59,7 +59,7 @@ public class CmsUtilTest {
 
         X509Certificate cert = null;
         PEMParser pemRd = openPEMResource(FILENAME_CERT);
-        Object o = null;
+        Object o;
 
         while ((o = pemRd.readObject()) != null) {
             if (!(o instanceof X509CertificateHolder)) {
