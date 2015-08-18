@@ -56,19 +56,6 @@ public class AltinnPackage {
         return new AltinnPackage(manifest.build(), recipient.build(), document.getPayload());
     }
 
-    public byte[] getManifestContent() {
-        return marshallObject(manifest);
-    }
-
-    public byte[] getRecipientsContent() {
-        return marshallObject(recipient);
-    }
-
-    public byte[] getPayload() {
-        no.difi.meldingsutveksling.domain.sbdh.ObjectFactory objectFactory = new no.difi.meldingsutveksling.domain.sbdh.ObjectFactory();
-        return marshallObject(objectFactory.createStandardBusinessDocument(document));
-    }
-
     /**
      * Writes the Altinn package as a Zip file
      * @param outputStream where the Zip file is written
@@ -77,11 +64,18 @@ public class AltinnPackage {
     public void write(OutputStream outputStream) throws IOException {
         ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);
 
-        zipContent(zipOutputStream, "manifest.xml", getManifestContent());
+        zipOutputStream.putNextEntry(new ZipEntry("manifest.xml"));
+        marshallObject(manifest, zipOutputStream);
+        zipOutputStream.closeEntry();
 
-        zipContent(zipOutputStream, "recipients.xml", getRecipientsContent());
+        zipOutputStream.putNextEntry(new ZipEntry("recipients.xml"));
+        marshallObject(recipient, zipOutputStream);
+        zipOutputStream.closeEntry();
 
-        zipContent(zipOutputStream, "content.xml", getPayload());
+        zipOutputStream.putNextEntry(new ZipEntry("content.xml"));
+        no.difi.meldingsutveksling.domain.sbdh.ObjectFactory objectFactory = new no.difi.meldingsutveksling.domain.sbdh.ObjectFactory();
+        marshallObject(objectFactory.createStandardBusinessDocument(document), zipOutputStream);
+        zipOutputStream.closeEntry();
 
         zipOutputStream.finish();
         zipOutputStream.flush();
@@ -117,26 +111,15 @@ public class AltinnPackage {
         return new AltinnPackage(manifest, recipientList, document);
     }
 
-    private void zipContent(ZipOutputStream zipOutputStream, String fileName, byte[] fileContent) throws IOException {
-        zipOutputStream.putNextEntry(new ZipEntry(fileName));
-        zipOutputStream.write(fileContent);
-        zipOutputStream.closeEntry();
-    }
-
-    private byte[] marshallObject(Object object) {
+    private void marshallObject(Object object, OutputStream outputStream) {
         try {
-
             Marshaller marshaller = ctx.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-
-
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             marshaller.marshal(object, outputStream);
-            return outputStream.toByteArray();
         } catch (JAXBException e) {
             e.printStackTrace();
-            return new byte[0];
         }
+
     }
 
     public StandardBusinessDocument getDocument() {
