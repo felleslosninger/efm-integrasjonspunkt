@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.shipping;
+package no.difi.meldingsutveksling.shipping.sftp;
 
 import java.math.BigInteger;
 

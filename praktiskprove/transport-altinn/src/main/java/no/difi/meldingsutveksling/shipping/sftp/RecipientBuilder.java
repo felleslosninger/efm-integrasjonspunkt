@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.shipping;
+package no.difi.meldingsutveksling.shipping.sftp;
 
 import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceRecipientList;
 

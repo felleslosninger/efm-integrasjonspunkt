@@ -1,11 +1,11 @@
-package no.difi.meldingsutveksling.shipping;
+package no.difi.meldingsutveksling.shipping.sftp;
 
 import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceManifest;
 
 /**
  * Builder for Manifest.xml need by Altinn formidlingstjeneste
  */
-public class ManifestBuilder {
+public class BrokerServiceManifestBuilder {
     public static final String CONTENT_FILE_NAME = "content.xml";
     private String partyNumber;
     private String senderReference;
@@ -16,17 +16,17 @@ public class ManifestBuilder {
      * @param partyNumber is an organisation number or a person number
      * @return the builder according to the builder pattern
      */
-    public ManifestBuilder withSender(String partyNumber) {
+    public BrokerServiceManifestBuilder withSender(String partyNumber) {
         this.partyNumber = partyNumber;
         return this;
     }
 
-    public ManifestBuilder withSenderReference(String senderReference) {
+    public BrokerServiceManifestBuilder withSenderReference(String senderReference) {
         this.senderReference = senderReference;
         return this;
     }
 
-    public ManifestBuilder withExternalService(ExternalServiceBuilder.ExternalService externalService) {
+    public BrokerServiceManifestBuilder withExternalService(ExternalServiceBuilder.ExternalService externalService) {
         this.externalService = externalService;
         return this;
     }
