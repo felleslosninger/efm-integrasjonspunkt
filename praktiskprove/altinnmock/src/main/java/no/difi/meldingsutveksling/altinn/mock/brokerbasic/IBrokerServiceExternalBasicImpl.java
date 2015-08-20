@@ -10,7 +10,7 @@ public class IBrokerServiceExternalBasicImpl implements IBrokerServiceExternalBa
 
     @Override
     public String initiateBrokerServiceBasic(String systemUserName, String systemPassword, BrokerServiceInitiation brokerServiceInitiation) throws IBrokerServiceExternalBasicInitiateBrokerServiceBasicAltinnFaultFaultFaultMessage {
-        return null;
+        return "123456789";
     }
 
     @Override
