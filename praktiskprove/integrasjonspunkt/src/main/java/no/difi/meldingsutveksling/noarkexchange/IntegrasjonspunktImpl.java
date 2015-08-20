@@ -2,21 +2,16 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import com.thoughtworks.xstream.XStream;
 import no.difi.meldingsutveksling.adresseregister.client.AdresseRegisterClient;
+import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import javax.jws.WebParam;
 import javax.jws.WebService;
-import javax.servlet.ServletContext;
 import javax.xml.ws.BindingType;
-import javax.xml.ws.WebServiceContext;
-import javax.xml.ws.handler.MessageContext;
 
 /**
  * This is the implementation of the wenbservice that case managenent systems supporting
@@ -32,25 +27,25 @@ import javax.xml.ws.handler.MessageContext;
  * Time: 15:26
  */
 
-@WebService(portName = "NoarkExchangePort", serviceName = "noarkExchange", targetNamespace = "http://www.arkivverket.no/Noark/Exchange", wsdlLocation = "http://hardcodeme.not", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.SOAPport")
+@Component("noarkExchangeService")
+@WebService(portName = "NoarkExchangePort", serviceName = "noarkExchange", targetNamespace = "http://www.arkivverket.no/Noark/Exchange", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.SOAPport")
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
 public class IntegrasjonspunktImpl implements SOAPport {
-
-    @Resource
-    private WebServiceContext context;
 
     @Autowired
     private AdresseRegisterClient adresseRegisterClient;
 
+    @Autowired
+    private MessageSender messageSender;
+
+    @Autowired
+    private EventLog eventLog;
 
     @Override
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
-        ServletContext servletContext =
-                (ServletContext) context.getMessageContext().get(MessageContext.SERVLET_CONTEXT);
-        ApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-        adresseRegisterClient = ctx.getBean(AdresseRegisterClient.class);
+
         String organisasjonsnummer = getCanReceiveMessageRequest.getReceiver().getOrgnr();
-        EventLog eventLog = ctx.getBean(EventLog.class);
+
         eventLog.log(new Event()
                 .setMessage(new XStream().toXML(getCanReceiveMessageRequest))
                 .setProcessStates(ProcessState.CAN_RECEIVE_INVOKED)
@@ -69,19 +64,30 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType putMessageRequest) {
-
-        ServletContext servletContext =
-                (ServletContext) context.getMessageContext().get(MessageContext.SERVLET_CONTEXT);
-        ApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-        MessageSender template = ctx.getBean(MessageSender.class);
-        return template.sendMessage(putMessageRequest);
+        return messageSender.sendMessage(putMessageRequest);
     }
 
-    public WebServiceContext getContext() {
-        return context;
+    public AdresseRegisterClient getAdresseRegisterClient() {
+        return adresseRegisterClient;
     }
 
-    public void setContext(WebServiceContext context) {
-        this.context = context;
+    public void setAdresseRegisterClient(AdresseRegisterClient adresseRegisterClient) {
+        this.adresseRegisterClient = adresseRegisterClient;
+    }
+
+    public MessageSender getMessageSender() {
+        return messageSender;
+    }
+
+    public void setMessageSender(MessageSender messageSender) {
+        this.messageSender = messageSender;
+    }
+
+    public EventLog getEventLog() {
+        return eventLog;
+    }
+
+    public void setEventLog(EventLog eventLog) {
+        this.eventLog = eventLog;
     }
 }

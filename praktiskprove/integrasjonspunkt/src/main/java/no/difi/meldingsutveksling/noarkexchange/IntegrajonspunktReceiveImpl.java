@@ -13,7 +13,6 @@ import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.*;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.noark.MultiTransportFactory;
 import no.difi.meldingsutveksling.noark.NOARKSystem;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
@@ -27,21 +26,17 @@ import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import javax.jws.WebParam;
 import javax.jws.WebService;
-import javax.servlet.ServletContext;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.BindingType;
-import javax.xml.ws.WebServiceContext;
-import javax.xml.ws.handler.MessageContext;
 import java.io.*;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -54,6 +49,7 @@ import java.util.zip.ZipInputStream;
  *
  */
 
+@Component("recieveService")
 @WebService(portName = "ReceivePort", serviceName = "receive", targetNamespace = "", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort")
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
 public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate implements SOAReceivePort {
@@ -68,17 +64,17 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
     private static final PrivateKey privatNokkel = new IntegrasjonspunktNokkel().loadPrivateKey();
 
     @Autowired
+    @Qualifier(value="multiTransport")
     TransportFactory transportFactory;
+
+    @Autowired
+    private NOARKSystem noarkSystem;
+
+    @Autowired
+    private AdresseRegisterClient adresseRegisterClient;
 
     public IntegrajonspunktReceiveImpl() {
     }
-
-    @Resource
-    private WebServiceContext context;
-
-    private NOARKSystem noarkSystem;
-
-    private AdresseRegisterClient adresseRegisterClient;
 
     public CorrelationInformation receive(@WebParam(name = "StandardBusinessDocument", targetNamespace = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader", partName = "receiveResponse") StandardBusinessDocument receiveResponse) {
 
@@ -87,13 +83,6 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
             return new CorrelationInformation();
         }
 
-
-        ServletContext servletContext =
-                (ServletContext) context.getMessageContext().get(MessageContext.SERVLET_CONTEXT);
-        ApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-        noarkSystem = ctx.getBean(NOARKSystem.class);
-        adresseRegisterClient = ctx.getBean(AdresseRegisterClient.class);
-        transportFactory = ctx.getBean(MultiTransportFactory.class);
         String orgNumberSender = receiveResponse.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue().split(":")[1];
         Organisasjonsnummer sender = new Organisasjonsnummer(orgNumberSender);
         String orgNumberReceiver = receiveResponse.getStandardBusinessDocumentHeader().getReceiver().get(0).getIdentifier().getValue().split(":")[1];
@@ -182,19 +171,9 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         }
     }
 
-
-    public AdresseRegisterClient getAdresseRegisterClient() {
-        return adresseRegisterClient;
-    }
-
-    public void setAdresseRegisterClient(AdresseRegisterClient adresseRegisterClient) {
-        this.adresseRegisterClient = adresseRegisterClient;
-    }
-
     private boolean isReciept(StandardBusinessDocumentHeader standardBusinessDocumentHeader) {
         return standardBusinessDocumentHeader.getDocumentIdentification().getType().equalsIgnoreCase(KVITTERING_CONSTANT);
     }
-
 
     private void forberedKvittering(StandardBusinessDocument receiveResponse, String kvitteringsType) {
         Dokumentpakker dokumentpakker = new Dokumentpakker();
@@ -285,6 +264,14 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         }
     }
 
+    public TransportFactory getTransportFactory() {
+        return transportFactory;
+    }
+
+    public void setTransportFactory(TransportFactory transportFactory) {
+        this.transportFactory = transportFactory;
+    }
+
     public NOARKSystem getNoarkSystem() {
         return noarkSystem;
     }
@@ -293,5 +280,11 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         this.noarkSystem = noarkSystem;
     }
 
+    public AdresseRegisterClient getAdresseRegisterClient() {
+        return adresseRegisterClient;
+    }
 
+    public void setAdresseRegisterClient(AdresseRegisterClient adresseRegisterClient) {
+        this.adresseRegisterClient = adresseRegisterClient;
+    }
 }

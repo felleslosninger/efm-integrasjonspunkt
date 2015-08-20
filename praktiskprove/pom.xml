@@ -27,6 +27,7 @@
         <module>transport</module>
         <module>transport-oxalis</module>
         <module>transport-file</module>
+	<module>virksomhetsvalidator</module>
     </modules>
     <build>
         <pluginManagement>
