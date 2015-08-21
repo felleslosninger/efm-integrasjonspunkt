@@ -57,6 +57,7 @@
                                 <vmArg>-Djavax.xml.accessExternalSchema=all</vmArg>
                             </vmArgs>
                             <verbose>true</verbose>
+                            <xadditionalHeaders>true</xadditionalHeaders>
                         </configuration>
                     </execution>
                     <execution>
