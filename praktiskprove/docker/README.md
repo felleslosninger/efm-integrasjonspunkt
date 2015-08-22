@@ -2,19 +2,21 @@
 
 ### Innhold
 ---
-[Docker og Java](#about)
-[Hva kan imaget brukes til](#bruk)
-[Bruke dette imaget for å andre starte Java-applikasjoner](#andrejavaapps)
-[Integrasjonstesting](#integrasjonstest)
-[Installere Docker](#installeredocker)
-[Bygge Docker-image for Integrasjonspunktet](#byggeimage)
-[Opprette og starte en container](#opprettecontainer)
-[Aksessere tjenestene fra egen nettleser](#nettleseraksess)
-[Aksessere shellet / terminalen til linux distroen](#shelltilgang)
-[Starte flere instanser](#flereinstanser)
-[Kontrollere system-informasjonen til Docker-containeren](#inspect)
-[Følge consol outputen fra Docker-containeren](#logging)
-[Starte og stopp Docker-containeren](#startstopp)
+
++ [Docker og Java](#about)
++ [Hva kan imaget brukes til](#bruk)
++ [Bruke dette imaget for å andre starte Java-applikasjoner](#andrejavaapps)
++ [Integrasjonstesting](#integrasjonstest)
++ [Installere Docker](#installeredocker)
++ [Bygge Docker-image for Integrasjonspunktet](#byggeimage)
++ [Opprette og starte en container](#opprettecontainer)
++ [Aksessere tjenestene fra egen nettleser](#nettleseraksess)
++ [Aksessere shellet / terminalen til linux distroen](#shelltilgang)
++ [Starte flere instanser](#flereinstanser)
++ [Kontrollere system-informasjonen til Docker-containeren](#inspect)
++ [Følge consol outputen fra Docker-containeren](#logging)
++ [Starte og stopp Docker-containeren](#startstopp)
+
 ---
 
 <a name="about">
