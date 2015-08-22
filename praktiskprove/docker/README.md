@@ -166,7 +166,7 @@ shellet.
 ## Starte flere instanser
 
 Samme kommando som over, med unntak av at "run" i tillegg automatisk starter containeren når den er opprettet.
-Merk at de to containere må ha forskjellige navn og være mappet må ulike utgående porter (se beskrivelse nedenfor).
+Merk at de to containere må ha forskjellige navn og være mappet på ulike utgående porter (se beskrivelse nedenfor).
 
 ```shell
 $ docker run --name Difi_Integrasjonspunkt1 -d -p 8088:8080 dervism/difi_integrasjonspunkt
