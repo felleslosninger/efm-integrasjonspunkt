@@ -28,9 +28,9 @@ gir de vanligste Ubuntu-distroene (Trusty og Precise 64-bit) størrelser fra 800
 
 Difi_Integrasjonspunkt-imaget du finner her er bygd lagvis
 
-- alpine:3.2 (minimal linux distro, https://hub.docker.com/_/alpine/)
-- dervism/dockerjava:jre7 (utvidelse med Java 7: https://hub.docker.com/r/dervism/dockerjava/)
-- dervism/difi_integrasjonspunkt (Integrasjonspunktet)
+1. alpine:3.2 (minimal linux distro, https://hub.docker.com/_/alpine/)
+2. dervism/dockerjava:jre7 (utvidelse med Java 7: https://hub.docker.com/r/dervism/dockerjava/)
+3. dervism/difi_integrasjonspunkt (Integrasjonspunktet)
 
 <a name="bruk">
 ## Hva kan imaget brukes til
