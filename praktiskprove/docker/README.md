@@ -56,7 +56,6 @@ Alt du trenger å gjøre for å starte andre Java-applikasjoner med dette imaget
 - **APP_PREFIX:** Her skriver du prefixet til jar-filen du vil kjøre. Eks: xyz-1.0.jar, prefix = xyz.
 - **APP_MAIN_CLASS:** Navnet på den kjørbare klassen
 - **APP_PROFILE:** Dersom Java-applikasjonen bruker Spring-profiles, så angir du hvilken som skal aktiveres her.
-
 - **CMD:** Dette er kommandoen Docker kjører for å starte *din* applikasjon når all provisjonering er ferdig. I dette scriptet, 
 vil denne kommandoen identifisere og starte opp en standalone Java-applikasjon. Om du ønsker å starte et shell-script, 
 en database, ulike typer servere og etc kan du endre kommandoen slik du normalt sett ville starte applikasjonen: 
