@@ -116,7 +116,7 @@ og deretter starte den:
 $ docker start Difi_Integrasjonspunkt
 ```
 
-hvis du i tillegg ønsker å se console outputen, les videre om [logging](#logging)
+hvis du i tillegg ønsker å se console outputen, les videre om [logging](#logging).
 
 
 <a name="nettleseraksess">
@@ -157,9 +157,9 @@ Skriv "exit" for å avslutte shellet til linux distroen.
 
 Flag:
 
-- -it: Interactive mode / tty: Starter linux distroen i en isolert prosess og gjør det mulig å kjøre kommandoer "live" rett i
+- **-it: Interactive mode / tty:** Starter linux distroen i en isolert prosess og gjør det mulig å kjøre kommandoer "live" rett i
 shellet.
-- --rm: Clean Up: Sletter containeren når du er ferdig.
+- **--rm: Clean Up:** Sletter containeren når du er ferdig.
 
 
 <a name="flereinstanser">
@@ -170,16 +170,29 @@ Merk at de to containere må ha forskjellige navn og være mappet må ulike utg�
 
 ```shell
 $ docker run --name Difi_Integrasjonspunkt1 -d -p 8088:8080 dervism/difi_integrasjonspunkt
-$ docker run --name Difi_Integrasjonspunkt2 -d -p 8089:8080 dervism/difi_integrasjonspunkt
+$ docker run --name Difi_Integrasjonspunkt2 --link Difi_Integrasjonspunkt1 -d -p 8089:8080 dervism/difi_integrasjonspunkt
 ```
+
+Dermed kan du aksessere dem via hver sin port på den virtuelle maskinen:
+
+http://192.168.99.100:8088/noarkExchange og http://192.168.99.100:8089/noarkExchange
 
 Flagg som brukes:
 
-- --name: Gir et navn som gjør det enklere å starte og avslutte containeren
+- **--name:** Gir et navn som gjør det enklere å starte og avslutte containeren
 
-- p, Port forwarding: -p hostPort:containerPort (dinMaskin:VirtuellMaskin)
+- **-p, Port forwarding:** Videresender informasjon fra din fysiske maskin til den virtuelle Docker-maskinen.
+Format: -p hostPort:containerPort (dinMaskin:virtuellMaskin)
 
-- d, Detached mode: Kjører containeren din i en bakgrunnsprosess
+- **-d, Detached mode:** Kjører containeren din i en bakgrunnsprosess
+
+- **--link Difi_Integrasjonspunkt1:** Gjør det mulig for container Difi_Integrasjonspunkt2 å bruke tjenester fra 
+Difi_Integrasjonspunkt1.
+
+Dersom du har flere tjenester og ønsker å opprette kommunikasjon mellom 
+dem (typisk micro-services arkitektur), kan du lese videre om 
+[container linking her](https://docs.docker.com/userguide/dockerlinks/#communication-across-links).
+
 
 <a name="inspect">
 ## Kontrollere system-informasjonen til Docker-containeren
