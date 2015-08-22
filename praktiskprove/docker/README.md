@@ -1,5 +1,22 @@
 # Kjøre Integrasjonspunktet i en isolert Docker-container
 
+### Innhold
+
+#### [Docker og Java](#about)
+#### [Hva kan imaget brukes til](#bruk)
+#### [Bruke dette imaget for å andre starte Java-applikasjoner](#andrejavaapps)
+#### [Integrasjonstesting](#integrasjonstest)
+#### [nstallere Docker](#installeredocker)
+#### [Bygge Docker-image for Integrasjonspunktet](#byggeimage)
+#### [Opprette og starte en container](#opprettecontainer)
+#### [Aksessere tjenestene fra egen nettleser](#nettleseraksess)
+#### [Aksessere shellet / terminalen til linux distroen](#shelltilgang)
+#### [Starte flere instanser](#flereinstanser)
+#### [Kontrollere system-informasjonen til Docker-containeren](#inspect)
+#### [Følge consol outputen fra Docker-containeren](#logging)
+#### [Starte og stopp Docker-containeren](#startstopp)
+
+<a name="about">
 ## Docker og Java
 
 Dette imaget baserer seg på en Linux distro som heter Alpine Linux. Denne er blant de aller minste av størrelse 
@@ -12,7 +29,7 @@ Difi_Integrasjonspunkt-imaget du finner her er bygd lagvis
 - dervism/dockerjava:jre7 (utvidelse med Java 7: https://hub.docker.com/r/dervism/dockerjava/)
 - dervism/difi_integrasjonspunkt (Integrasjonspunktet)
 
-
+<a name="bruk">
 ## Hva kan imaget brukes til
 
 Docker-imaget gjør det enkelt å starte flere containere som kjører Integrasjonspunktet. Dette gjør det enklere å 
@@ -28,6 +45,7 @@ Scriptet henter automatisk jar-filen fra "target" mappen og
 provisjonerer denne i imaget. Scriptet installerer også automatisk Unlimited Security Profile i Java-installasjonen 
 på imaget.
 
+<a name="andrejavaapps">
 ### Bruke dette imaget for å andre starte Java-applikasjoner
 
 Alt du trenger å gjøre for å starte andre Java-applikasjoner med dette imaget, er å endre miljøvariablene i scriptet:
@@ -41,6 +59,7 @@ vil denne kommandoen identifisere og starte opp en standalone Java-applikasjon. 
 en database, ulike typer servere og etc kan du endre kommandoen slik du normalt sett ville starte applikasjonen: 
 CMD *<kommando som starter din app her>*
 
+<a name="integrasjonstest">
 ## Integrasjonstesting
 
 For integrasjonstester kan man bruke 
@@ -53,6 +72,7 @@ Se også Spotify sin Docker-klient for Java: https://github.com/spotify/docker-c
 Eksempel på hvordan man kan lage en integrasjonstest med Maven Docker Plugin står forklart her: 
 http://www.javacodegeeks.com/2014/04/a-docker-maven-plugin-for-integration-testing.html
 
+<a name="installeredocker">
 ## Installere Docker
 
 Tidligere måtte man installere Boot2Docker for å kunne bruke Docker på Mac og Windows. Denne har nå blitt depricated og 
@@ -71,58 +91,33 @@ Dersom "default" ikke finnes, kan denne installeres ved å følge guidene:
 Mac: https://docs.docker.com/installation/mac/#from-your-shell
 Windows: https://docs.docker.com/installation/windows/#from-your-shell
 
-## Bygge Docker imaget
+<a name="byggeimage">
+## Bygge Docker-image for Integrasjonspunktet
 
 ```shell
 $ docker build --no-cache -t dervism/difi_integrasjonspunkt .
 ```
 
+<a name="opprettecontainer">
 ## Opprette og starte en container
 
-```shell
-$ docker run --name Difi_Integrasjonspunkt -d -p 8080:8080 dervism/difi_integrasjonspunkt
-```
-
-Beskrivelse av flagg:
-
-- --name: Gir et navn som gjør det enklere å starte og avslutte containeren
-
-- p, Port forwarding: -p hostPort:containerPort (dinMaskin:VirtuellMaskin)
-
-- d, Detached mode: Kjører containeren din i en bakgrunnsprosess
-
-## Starte flere instanser
-
-Samme kommando som over, men med forskjellige navn og port for Docker-containeren:
+Først må du opprette en container
 
 ```shell
-$ docker run --name Difi_Integrasjonspunkt1 -d -p 8088:8080 dervism/difi_integrasjonspunkt
-$ docker run --name Difi_Integrasjonspunkt2 -d -p 8089:8080 dervism/difi_integrasjonspunkt
+$ docker create --name Difi_Integrasjonspunkt -p 8080:8080 dervism/difi_integrasjonspunkt
+18c87e6730917abd5d2530abb5fddae60638285c35cd792b8e184772e21a562e
 ```
 
-
-## Kontrollere systeminformasjonen til containeren/image/etc
-
-```shell
-$ docker inspect dervism/difi_integrasjonspunkt
-```
-
-## Følge consol outputen fra Docker-containeren
-
-```shell
-$ docker logs -f Difi_Integrasjonspunkt
-```
-
-## Starte og stopp Docker-containeren
+og deretter starte den:
 
 ```shell
 $ docker start Difi_Integrasjonspunkt
 ```
 
-```shell
-$ docker stop Difi_Integrasjonspunkt
-```
+hvis du i tillegg ønsker å se console outputen, les videre om [logging](#logging)
 
+
+<a name="nettleseraksess">
 ## Aksessere tjenestene fra egen nettleser
 
 Først må du finne IP-adressen til den virtuelle maskinen som kjører Docker-serveren (i dette tilfellet er det VirtualBox):
@@ -135,6 +130,80 @@ $ docker-machine ip default
 Åpne en nettleser og gå til url'en:
 
 http://192.168.99.100:8080/noarkExchange
+
+<a name="shelltilgang">
+## Aksessere shellet / terminalen til linux distroen
+
+Det kan av å til være nødvendig å kontrollere imaget etter at den er bygget med "docker build", feks for å
+sjekke at jar-filen din ble kopiert til riktig mappe eller for å teste linux distroen. Følgende kommando starter opp 
+linux distroen imaget ble bygd med og gir deg en "one-time" tilgang til shellet. I dette tilfellet, er det kun /bin/sh som
+distribueres med Alpine Linux.
+
+```shell
+$ docker run -it --rm dervism/difi_integrasjonspunkt /bin/sh
+/var/lib/difi # <dine shell-kommandoer her>
+```
+
+Skriv feks "ls" og du vil se jar-filen som ble kopiert inn i imaget:
+
+```shell
+/var/lib/difi # ls
+integrasjonspunkt-1.0-SNAPSHOT.jar
+```
+
+Skriv "exit" for å avslutte shellet til linux distroen.
+
+Flag:
+
+- -it: Interactive mode / tty: Starter linux distroen i en isolert prosess og gjør det mulig å kjøre kommandoer "live" rett i
+shellet.
+- --rm: Clean Up: Sletter containeren når du er ferdig.
+
+
+<a name="flereinstanser">
+## Starte flere instanser
+
+Samme kommando som over, med unntak av at "run" i tillegg automatisk starter containeren når den er opprettet.
+Merk at de to containere må ha forskjellige navn og være mappet må ulike utgående porter (se beskrivelse nedenfor).
+
+```shell
+$ docker run --name Difi_Integrasjonspunkt1 -d -p 8088:8080 dervism/difi_integrasjonspunkt
+$ docker run --name Difi_Integrasjonspunkt2 -d -p 8089:8080 dervism/difi_integrasjonspunkt
+```
+
+Flagg som brukes:
+
+- --name: Gir et navn som gjør det enklere å starte og avslutte containeren
+
+- p, Port forwarding: -p hostPort:containerPort (dinMaskin:VirtuellMaskin)
+
+- d, Detached mode: Kjører containeren din i en bakgrunnsprosess
+
+<a name="inspect">
+## Kontrollere system-informasjonen til Docker-containeren
+
+```shell
+$ docker inspect dervism/difi_integrasjonspunkt
+```
+
+<a name="logging">
+## Følge consol outputen fra Docker-containeren
+
+```shell
+$ docker logs -f Difi_Integrasjonspunkt
+```
+
+<a name="startstopp">
+## Starte og stopp Docker-containeren
+
+```shell
+$ docker start Difi_Integrasjonspunkt
+```
+
+```shell
+$ docker stop Difi_Integrasjonspunkt
+```
+
 
 
 
