@@ -36,7 +36,7 @@ Difi_Integrasjonspunkt-imaget du finner her er bygd lagvis
 ## Hva kan imaget brukes til
 
 Docker-imaget gjør det enkelt å starte flere containere som kjører Integrasjonspunktet. Dette gjør det enklere å 
-**integrasjonsteste** med flere endpoints både på lokal utviklingsmiljø og via Jenkins (i kombinasjon Docker-basert 
+blant annet integrasjonsteste med flere endpoints både på lokal utviklingsmiljø og via Jenkins (i kombinasjon Docker-basert 
 Adresse-Register og "Docker Container Linking").
 
 For å bygge imaget sammen med Maven, må Dockerfile-filen ligge i rot-katalogen til Integrasjonspunktet. Dermed 
