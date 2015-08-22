@@ -28,6 +28,19 @@ Scriptet henter automatisk jar-filen fra "target" mappen og
 provisjonerer denne i imaget. Scriptet installerer også automatisk Unlimited Security Profile i Java-installasjonen 
 på imaget.
 
+### Bruke dette imaget for å andre starte Java-applikasjoner
+
+Alt du trenger å gjøre for å starte andre Java-applikasjoner med dette imaget, er å endre miljøvariablene i scriptet:
+
+- **APP_PREFIX:** Her skriver du prefixet til jar-filen du vil kjøre. Eks: xyz-1.0.jar, prefix = xyz.
+- **APP_MAIN_CLASS:** Navnet på den kjørbare klassen
+- **APP_PROFILE:** Dersom Java-applikasjonen bruker Spring-profiles, så angir du hvilken som skal aktiveres her.
+
+- **CMD:** Dette er kommandoen Docker kjører for å starte *din* applikasjon når all provisjonering er ferdig. I dette scriptet, 
+vil denne kommandoen identifisere og starte opp en standalone Java-applikasjon. Om du ønsker å starte et shell-script, 
+en database, ulike typer servere og etc kan du endre kommandoen slik du normalt sett ville starte applikasjonen: 
+CMD *<kommando som starter din app her>*
+
 ## Integrasjonstesting
 
 For integrasjonstester kan man bruke 
@@ -45,7 +58,7 @@ http://www.javacodegeeks.com/2014/04/a-docker-maven-plugin-for-integration-testi
 Tidligere måtte man installere Boot2Docker for å kunne bruke Docker på Mac og Windows. Denne har nå blitt depricated og 
 erstattet av Docker Maskin. Last ned og installer: https://docs.docker.com/machine/install-machine/
 
-Verifiser etter installering at det finnes en virtuell maskin med "default":
+Verifiser etter installering at det finnes en virtuell maskin med navnet "default":
 
 ```shell
 $ docker-machine ls
@@ -67,17 +80,24 @@ $ docker build --no-cache -t dervism/difi_integrasjonspunkt .
 ## Opprette og starte en container
 
 ```shell
-$ docker run --name Difi_Integrasjonspunkt -p -d 8080:8080 dervism/difi_integrasjonspunkt
+$ docker run --name Difi_Integrasjonspunkt -d -p 8080:8080 dervism/difi_integrasjonspunkt
 ```
 
+Beskrivelse av flagg:
+
+- --name: Gir et navn som gjør det enklere å starte og avslutte containeren
+
+- p, Port forwarding: -p hostPort:containerPort (dinMaskin:VirtuellMaskin)
+
+- d, Detached mode: Kjører containeren din i en bakgrunnsprosess
 
 ## Starte flere instanser
 
 Samme kommando som over, men med forskjellige navn og port for Docker-containeren:
 
 ```shell
-$ docker run --name Difi_Integrasjonspunkt1 -p -d 8088:8080 dervism/difi_integrasjonspunkt
-$ docker run --name Difi_Integrasjonspunkt2 -p -d 8089:8080 dervism/difi_integrasjonspunkt
+$ docker run --name Difi_Integrasjonspunkt1 -d -p 8088:8080 dervism/difi_integrasjonspunkt
+$ docker run --name Difi_Integrasjonspunkt2 -d -p 8089:8080 dervism/difi_integrasjonspunkt
 ```
 
 
