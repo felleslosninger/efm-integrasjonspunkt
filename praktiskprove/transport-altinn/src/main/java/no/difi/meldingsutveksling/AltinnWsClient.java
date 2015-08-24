@@ -41,14 +41,12 @@ public class AltinnWsClient {
         IBrokerServiceExternalBasicStreamed streamingService = brokerServiceExternalBasicStreamedSF.getBasicHttpBindingIBrokerServiceExternalBasicStreamed();
 
         try {
-            //brokerServiceExternalBasicStreamedSF.
             StreamedPayloadBasicBE parameters = new StreamedPayloadBasicBE();
             AltinnPackage altinnPackage = AltinnPackage.from(request);
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream(65536);
             altinnPackage.write(outputStream);
             parameters.setDataStream(outputStream.toByteArray());
 
-            //parameters.setDataStream();
             streamingService.uploadFileStreamedBasic(parameters, "sbd.xml", senderReference, request.getSender(), "password", "username");
         } catch (IBrokerServiceExternalBasicStreamedUploadFileStreamedBasicAltinnFaultFaultFaultMessage e) {
             throw new AltinnWsException(e);
