@@ -3,10 +3,7 @@ package no.difi.meldingsutveksling;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceExternalBasicSF;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceInitiation;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasicInitiateBrokerServiceBasicAltinnFaultFaultFaultMessage;
-import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.BrokerServiceExternalBasicStreamedSF;
-import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExternalBasicStreamed;
-import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExternalBasicStreamedUploadFileStreamedBasicAltinnFaultFaultFaultMessage;
-import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.StreamedPayloadBasicBE;
+import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.*;
 import no.difi.meldingsutveksling.shipping.Request;
 import no.difi.meldingsutveksling.shipping.ws.AltinnWsException;
 import no.difi.meldingsutveksling.shipping.ws.ManifestBuilder;
@@ -19,6 +16,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class AltinnWsClient {
+    public static final String INVALID_URL_FOR_ALTINN_BROKER_SERVICE = "Invalid url for Altinn broker service";
+    public static final String FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE = "Failed to upload a message to Altinn broker service";
+    public static final String FAILED_TO_INITATE_ALTINN_BROKER_SERVICE = "Failed to initate Altinn broker service";
+    public static final String FILE_NAME = "sbd.zip";
+    private static final int BUFFER_SIZE = 65536;
+
     private final URL url;
 
     public AltinnWsClient(String url) throws MalformedURLException {
@@ -26,32 +29,32 @@ public class AltinnWsClient {
     }
 
     public void send(Request request) {
-        // 1. Reference <-- Initiate broker service
-        // 2. Receipt <-- UploadFileStreamed w. reference
         String senderReference = initiateBrokerService(request);
-        System.out.println(senderReference);
-        BrokerServiceExternalBasicStreamedSF brokerServiceExternalBasicStreamedSF = null;
+        upload(request, senderReference);
+    }
+
+    private void upload(Request request, String senderReference) {
+        BrokerServiceExternalBasicStreamedSF brokerServiceExternalBasicStreamedSF;
+        URL wsdlLocation;
         try {
-            //MTOMFeature feature = new MTOMFeature(true, 128);
-            brokerServiceExternalBasicStreamedSF = new BrokerServiceExternalBasicStreamedSF(new URL("http://localhost:7777/altinn/streamedmessage"), new QName("http://www.altinn.no/services/ServiceEngine/Broker/2015/06", "BrokerServiceExternalBasicStreamedSF"));
+            wsdlLocation = new URL("http://localhost:7777/altinn/streamedmessage");
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            throw new AltinnWsException(INVALID_URL_FOR_ALTINN_BROKER_SERVICE, e);
         }
+        brokerServiceExternalBasicStreamedSF = new BrokerServiceExternalBasicStreamedSF(wsdlLocation, new QName("http://www.altinn.no/services/ServiceEngine/Broker/2015/06", "BrokerServiceExternalBasicStreamedSF"));
 
         IBrokerServiceExternalBasicStreamed streamingService = brokerServiceExternalBasicStreamedSF.getBasicHttpBindingIBrokerServiceExternalBasicStreamed();
 
         try {
             StreamedPayloadBasicBE parameters = new StreamedPayloadBasicBE();
             AltinnPackage altinnPackage = AltinnPackage.from(request);
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream(65536);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream(BUFFER_SIZE);
             altinnPackage.write(outputStream);
             parameters.setDataStream(outputStream.toByteArray());
 
-            streamingService.uploadFileStreamedBasic(parameters, "sbd.xml", senderReference, request.getSender(), "password", "username");
-        } catch (IBrokerServiceExternalBasicStreamedUploadFileStreamedBasicAltinnFaultFaultFaultMessage e) {
-            throw new AltinnWsException(e);
-        } catch (IOException e) {
-            e.printStackTrace();
+            ReceiptExternalStreamedBE receiptExternal = streamingService.uploadFileStreamedBasic(parameters, FILE_NAME, senderReference, request.getSender(), "password", "username");
+        } catch (IBrokerServiceExternalBasicStreamedUploadFileStreamedBasicAltinnFaultFaultFaultMessage | IOException e) {
+            throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, e);
         }
     }
 
@@ -61,7 +64,7 @@ public class AltinnWsClient {
             BrokerServiceExternalBasicSF brokerService = new BrokerServiceExternalBasicSF(url, new QName("http://www.altinn.no/services/ServiceEngine/Broker/2015/06", "IBrokerServiceExternalBasicImplService"));
             return brokerService.getBasicHttpBindingIBrokerServiceExternalBasic().initiateBrokerServiceBasic("username", "password", brokerServiceInitiation);
         } catch (IBrokerServiceExternalBasicInitiateBrokerServiceBasicAltinnFaultFaultFaultMessage e) {
-            throw new AltinnWsException(e);
+            throw new AltinnWsException(FAILED_TO_INITATE_ALTINN_BROKER_SERVICE, e);
         }
     }
 
@@ -71,7 +74,7 @@ public class AltinnWsClient {
         ManifestBuilder manifestBuilder = new ManifestBuilder()
                 .withSender(request.getSender())
                 .withSenderReference(request.getSenderReference())
-                .withFilename("sbd.xml");
+                .withFilename("FILE_NAME");
         initiateRequest.setManifest(manifestBuilder.build());
         initiateRequest.setRecipientList(new RecipientBuilder().withPartyNumber(request.getReceiver()).build());
 
