@@ -1,8 +1,6 @@
 package no.difi.meldingsutveksling;
 
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceExternalBasicSF;
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceInitiation;
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasicInitiateBrokerServiceBasicAltinnFaultFaultFaultMessage;
+import no.difi.meldingsutveksling.altinn.mock.brokerbasic.*;
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.*;
 import no.difi.meldingsutveksling.shipping.Request;
 import no.difi.meldingsutveksling.shipping.ws.AltinnWsException;
@@ -56,6 +54,32 @@ public class AltinnWsClient {
         } catch (IBrokerServiceExternalBasicStreamedUploadFileStreamedBasicAltinnFaultFaultFaultMessage | IOException e) {
             throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, e);
         }
+    }
+
+    public java.util.List<BrokerServiceAvailableFile> availableFiles(Request request, BrokerServiceAvailableFileStatus serviceStatus) {
+        String senderReference = initiateBrokerService(request);
+        BrokerServiceExternalBasicSF brokerServiceExternalBasicSF = null;
+        try {
+            brokerServiceExternalBasicSF = new BrokerServiceExternalBasicSF(new URL("http://localhost:7777/altinn/messages"), new QName("http://www.altinn.no/services/ServiceEngine/Broker/2015/06", "IBrokerServiceExternalBasicImplService"));
+        }
+        catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        IBrokerServiceExternalBasic service = brokerServiceExternalBasicSF.getBasicHttpBindingIBrokerServiceExternalBasic();
+
+        try {
+            BrokerServiceSearch searchParameters = new BrokerServiceSearch();
+            searchParameters.setFileStatus(serviceStatus);
+            searchParameters.setReportee(senderReference);
+
+            BrokerServiceAvailableFileList filesBasic = service.getAvailableFilesBasic("2422", "ROBSTAD1", searchParameters);
+            return filesBasic.getBrokerServiceAvailableFile();
+
+        } catch (IBrokerServiceExternalBasicGetAvailableFilesBasicAltinnFaultFaultFaultMessage iBrokerServiceExternalBasicGetAvailableFilesBasicAltinnFaultFaultFaultMessage) {
+            iBrokerServiceExternalBasicGetAvailableFilesBasicAltinnFaultFaultFaultMessage.printStackTrace();
+        }
+        return null;
     }
 
     private String initiateBrokerService(Request request) {
