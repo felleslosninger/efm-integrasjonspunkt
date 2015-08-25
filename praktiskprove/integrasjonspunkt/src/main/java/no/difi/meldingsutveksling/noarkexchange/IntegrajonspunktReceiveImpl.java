@@ -64,7 +64,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
     private static final PrivateKey privatNokkel = new IntegrasjonspunktNokkel().loadPrivateKey();
 
     @Autowired
-    @Qualifier(value="multiTransport")
+    @Qualifier(value = "multiTransport")
     TransportFactory transportFactory;
 
     @Autowired
@@ -191,10 +191,10 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         Avsender.Builder avsenderBuilder = Avsender.builder(new Organisasjonsnummer(recievedBy), noekkelpar);
         Avsender avsender = avsenderBuilder.build();
         Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo), (X509Certificate) certificate);
-        ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering(kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
-        byte[] resultSbd = dokumentpakker.pakkTilByteArray(byteArray, avsender, mottaker, instanceIdentifier, KVITTERING);
-        File file = new File(WRITE_TO);
         try {
+            ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering(kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
+            byte[] resultSbd = dokumentpakker.pakkTilByteArray(byteArray, new IntegrasjonspunktNokkel().getSignatureHelper(), avsender, mottaker, instanceIdentifier, KVITTERING);
+            File file = new File(WRITE_TO);
             FileUtils.writeByteArrayToFile(file, resultSbd);
         } catch (IOException e) {
             logEvent(receiveResponse, e, ProcessState.SOME_OTHER_EXCEPTION);

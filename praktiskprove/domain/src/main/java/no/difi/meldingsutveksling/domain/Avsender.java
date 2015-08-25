@@ -10,7 +10,7 @@ public class Avsender extends Aktor {
 	}
 
 	/**
-	 * @param organisasjonsnummer
+	 * @param organisasjonsnummer          Pakk
 	 *            Organisasjonsnummeret til avsender av brevet.
 	 * @param noekkelpar
 	 *            Avsenders nøkkelpar: signert virksomhetssertifikat og

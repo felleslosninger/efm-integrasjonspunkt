@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.oxalisexchange;
 
+import no.difi.asic.SignatureHelper;
 import no.difi.meldingsutveksling.adresseregister.AdressRegisterFactory;
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
 import no.difi.meldingsutveksling.domain.*;
@@ -29,18 +30,12 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Map;
 
-/**
- * Created with IntelliJ IDEA.
- * User: glennbech
- * Date: 10.11.14
- * Time: 10:45
- * To change this template use File | Settings | File Templates.
- */
+
 public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
     private static final String LEVERINGSKVITTERING = "leveringskvittering";
     private static final String AAPNINGSKVITTERING = "aapningskvittering";
     private static final String MIME_TYPE = "application/xml";
-    private static final String WRITE_TO = System.getProperty("user.home") + File.separator +"testToRemove"+File.separator +"somethingSbd.xml";
+    private static final String WRITE_TO = System.getProperty("user.home") + File.separator + "testToRemove" + File.separator + "somethingSbd.xml";
     private static final int INSTANCEIDENTIFIER_FIELD = 3;
     private static final String KVITTERING = "Kvittering";
     private EventLog eventLog = EventLog.create();
@@ -77,10 +72,12 @@ public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
         Avsender.Builder avsenderBuilder = Avsender.builder(new Organisasjonsnummer(recievedBy), noekkelpar);
         Avsender avsender = avsenderBuilder.build();
         Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo), (X509Certificate) adresseRegisterClient.getCertificate(sendTo));
-        ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering(nodeList,kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
-        byte[] resultSbd = dokumentpakker.pakkTilByteArray(byteArray, avsender, mottaker, instanceIdentifier, KVITTERING);
-        File file = new File(WRITE_TO);
+        ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering(nodeList, kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
+
         try {
+            SignatureHelper helper = new IntegrasjonspunktNokkel().getSignatureHelper();
+            byte[] resultSbd = dokumentpakker.pakkTilByteArray(byteArray, helper, avsender, mottaker, instanceIdentifier, KVITTERING);
+            File file = new File(WRITE_TO);
             FileUtils.writeByteArrayToFile(file, resultSbd);
         } catch (IOException e) {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
@@ -107,17 +104,17 @@ public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
         }
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        Transformer transformer =null;
+        Transformer transformer = null;
         DOMSource source = new DOMSource(kvittering);
-        StreamResult result= new StreamResult(baos);
+        StreamResult result = new StreamResult(baos);
 
         try {
-            transformer= transformerFactory.newTransformer();
-            transformer.transform(source,result);
+            transformer = transformerFactory.newTransformer();
+            transformer.transform(source, result);
         } catch (TransformerConfigurationException e) {
-             throw new MeldingsUtvekslingRuntimeException(e);
+            throw new MeldingsUtvekslingRuntimeException(e);
         } catch (TransformerException e) {
-             throw new MeldingsUtvekslingRuntimeException(e);
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
 
         return baos.toByteArray();

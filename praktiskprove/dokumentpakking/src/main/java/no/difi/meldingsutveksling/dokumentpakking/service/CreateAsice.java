@@ -1,36 +1,39 @@
 package no.difi.meldingsutveksling.dokumentpakking.service;
 
+import no.difi.asic.AsicWriter;
+import no.difi.asic.AsicWriterFactory;
+import no.difi.asic.SignatureHelper;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Archive;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Signature;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Manifest;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.ByteArrayFile;
 import no.difi.meldingsutveksling.domain.Mottaker;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 
 public class CreateAsice {
-	private CreateSignature createSignature;
-	private CreateZip createZip;
-	private CreateManifest createManifest;
 
-	public CreateAsice(CreateSignature createSignature, CreateZip createZip, CreateManifest createManifest) {
-		this.createSignature = createSignature;
-		this.createZip = createZip;
-		this.createManifest = createManifest;
-	}
+    ManifestFactory manifestFactory;
 
-	public Archive createAsice(ByteArrayFile forsendelse, Avsender avsender, Mottaker mottaker) {
-		List<ByteArrayFile> files = new ArrayList<>();
-		files.add(forsendelse);
-		files.add(createManifest.createManifest(avsender.getOrgNummer(), mottaker.getOrgNummer(), forsendelse));
+    public CreateAsice() {
+        manifestFactory = new ManifestFactory();
+    }
 
-		Signature signature = createSignature.createSignature(avsender.getNoekkelpar(), new ArrayList<>(files));
+    public Archive createAsice(ByteArrayFile forsendelse, SignatureHelper signatureHelper, Avsender avsender, Mottaker mottaker) throws IOException {
 
-		files.add(signature);
+        Manifest manifest = manifestFactory.createManifest(avsender.getOrgNummer(), mottaker.getOrgNummer(), forsendelse);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        AsicWriter asicWriter = AsicWriterFactory.newFactory()
+                .newContainer(bos)
+                .add(new ByteArrayInputStream(forsendelse.getBytes()), "edu_test.xml")
+                .add(new ByteArrayInputStream(manifest.getBytes()), "manifest.xml");
+        asicWriter.sign(signatureHelper);
+        Archive result = new Archive(bos.toByteArray());
+        return result;
+    }
 
-		Archive archive = createZip.zipIt(files);
 
-		return archive;
-	}
 }
