@@ -2,14 +2,15 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 
 import com.thoughtworks.xstream.XStream;
+import no.difi.asic.SignatureHelper;
 import no.difi.meldingsutveksling.adresseregister.client.CertificateNotFoundException;
-import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
 import no.difi.meldingsutveksling.domain.*;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
+import no.difi.meldingsutveksling.oxalisexchange.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
@@ -23,22 +24,14 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import javax.xml.bind.DatatypeConverter;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
 
 import static no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory.create;
 
@@ -58,15 +51,6 @@ public class MessageSender {
     @Autowired
     AdresseregisterService adresseregister;
 
-    private final Dokumentpakker dokumentpakker;
-
-    public MessageSender() {
-        dokumentpakker = new Dokumentpakker();
-    }
-
-    public MessageSender(Dokumentpakker dokumentpakker) {
-        this.dokumentpakker = dokumentpakker;
-    }
 
     boolean setSender(IntegrasjonspunktContext context, AddressType sender) {
         if (sender == null) {
@@ -126,7 +110,16 @@ public class MessageSender {
         }
         eventLog.log(new Event(ProcessState.SIGNATURE_VALIDATED));
 
-        StandardBusinessDocument sbd = create(message, context.getAvsender(), context.getMottaker());
+        SignatureHelper helper = new IntegrasjonspunktNokkel().getSignatureHelper();
+        StandardBusinessDocument sbd ;
+        try {
+            sbd = create(message, helper, context.getAvsender(), context.getMottaker());
+
+        } catch (IOException e) {
+            eventLog.log(new Event().setJpId(journalPostId).setArkiveConversationId(conversationId).setProcessStates(ProcessState.MESSAGE_SEND_FAIL));
+            return createErrorResponse("IO Error on Asic-e or sbd creation " + e.getMessage() + ", see log.");
+
+        }
         Scope item = sbd.getStandardBusinessDocumentHeader().getBusinessScope().getScope().get(0);
         String hubCid = item.getInstanceIdentifier();
         eventLog.log(new Event().setJpId(journalPostId).setArkiveConversationId(conversationId).setHubConversationId(hubCid).setProcessStates(ProcessState.CONVERSATION_ID_LOGGED));
@@ -189,31 +182,8 @@ public class MessageSender {
 
     //todo refactor
     PrivateKey findPrivateKey() {
-        PrivateKey key;
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("knutepunkt_privatekey.pkcs8"),
-                Charset.forName("UTF-8")))) {
-            StringBuilder builder = new StringBuilder();
-            boolean inKey = false;
-            for (String line = br.readLine(); line != null; line = br.readLine()) {
-                if (!inKey && line.startsWith("-----BEGIN ") && line.endsWith(" PRIVATE KEY-----")) {
-                    inKey = true;
-                } else {
-                    if (line.startsWith("-----END ") && line.endsWith(" PRIVATE KEY-----")) {
-                        inKey = false;
-                    }
-                    builder.append(line);
-                }
-            }
-
-            byte[] encoded = DatatypeConverter.parseBase64Binary(builder.toString());
-            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
-            KeyFactory kf = KeyFactory.getInstance("RSA");
-            key = kf.generatePrivate(keySpec);
-
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException | IOException e) {
-            throw new MeldingsUtvekslingRuntimeException(e);
-        }
-        return key;
+        IntegrasjonspunktNokkel nokkel = new IntegrasjonspunktNokkel();
+        return nokkel.loadPrivateKey();
     }
 
     public void setAdresseregister(AdresseregisterService adresseregister) {

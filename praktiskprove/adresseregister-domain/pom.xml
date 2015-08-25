@@ -21,6 +21,7 @@
         <jdbc.url>jdbc:hsqldb:mem:adresseregister</jdbc.url>
         <jdbc.username>sa</jdbc.username>
         <jdbc.password></jdbc.password>
+        <java.version>1.7</java.version>
 
         <hibernate.dialect>org.hibernate.dialect.HSQLDialect</hibernate.dialect>
         <hibernate.show_sql>false</hibernate.show_sql>

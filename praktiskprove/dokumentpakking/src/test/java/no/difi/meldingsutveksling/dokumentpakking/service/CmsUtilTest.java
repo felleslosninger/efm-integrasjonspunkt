@@ -37,100 +37,102 @@ import static org.hamcrest.Matchers.is;
 
 public class CmsUtilTest {
 
-	@Test
-	public void testDecryptCMSKeysGeneratedProgrammatically() throws Exception {
-		CmsUtil util = new CmsUtil();
-		KeyPair keyPair = generateKeyPair();
-		Certificate certificate = generateCertificate(keyPair.getPublic(), keyPair.getPrivate());
+    public static final String FILENAME_CERT = "difi-cert.pem";
 
-		byte[] plaintext = "Text to be encrypted".getBytes();
-		byte[] ciphertext = (new CmsUtil()).createCMS(plaintext, (X509Certificate) certificate);
-		byte[] plaintextRecovered = util.decryptCMS(ciphertext, keyPair.getPrivate());
+    public static final String FILENAME_PRIVKEY = "difi-privkey.pem";
 
-		assertThat(plaintextRecovered, is(equalTo(plaintext)));
-	}
+    @Test
+    public void testDecryptCMSKeysGeneratedProgrammatically() throws Exception {
+        CmsUtil util = new CmsUtil();
+        KeyPair keyPair = generateKeyPair();
+        Certificate certificate = generateCertificate(keyPair.getPublic(), keyPair.getPrivate());
 
-	@Test
-	public void test() throws IOException, CertificateException {
-		Security.addProvider(new BouncyCastleProvider());
+        byte[] plaintext = "Text to be encrypted".getBytes();
+        byte[] ciphertext = (new CmsUtil()).createCMS(plaintext, (X509Certificate) certificate);
+        byte[] plaintextRecovered = util.decryptCMS(ciphertext, keyPair.getPrivate());
+        assertThat(plaintextRecovered, is(equalTo(plaintext)));
+    }
 
-		X509Certificate cert = null;
-		PEMParser pemRd = openPEMResource("difi-cert.pem");
-		Object o = null;
+    @Test
+    public void test() throws IOException, CertificateException {
+        Security.addProvider(new BouncyCastleProvider());
 
-		while ((o = pemRd.readObject()) != null) {
-			if (!(o instanceof X509CertificateHolder)) {
-				throw new MeldingsUtvekslingRuntimeException();
-			} else {
-				 cert =  new JcaX509CertificateConverter().setProvider( "BC" )
-						  .getCertificate( (X509CertificateHolder) o );
-			}
-		}
-		
-		CmsUtil util = new CmsUtil();
-		KeyPair keyPair = doOpenSslTestFile("difi-privkey.pem", RSAPrivateKey.class);
+        X509Certificate cert = null;
+        PEMParser pemRd = openPEMResource(FILENAME_CERT);
+        Object o;
 
-		byte[] plaintext = "Text to be encrypted".getBytes();
-		byte[] ciphertext = (new CmsUtil()).createCMS(plaintext, cert);
-		byte[] plaintextRecovered = util.decryptCMS(ciphertext, keyPair.getPrivate());
+        while ((o = pemRd.readObject()) != null) {
+            if (!(o instanceof X509CertificateHolder)) {
+                throw new MeldingsUtvekslingRuntimeException();
+            } else {
+                cert = new JcaX509CertificateConverter().setProvider("BC")
+                        .getCertificate((X509CertificateHolder) o);
+            }
+        }
 
-		assertThat(plaintextRecovered, is(equalTo(plaintext)));
-	}
+        CmsUtil util = new CmsUtil();
+        KeyPair keyPair = doOpenSslTestFile(FILENAME_PRIVKEY, RSAPrivateKey.class);
 
-	public KeyPair generateKeyPair() throws NoSuchAlgorithmException {
-		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-		keyPairGenerator.initialize(2048);
-		return keyPairGenerator.generateKeyPair();
-	}
+        byte[] plaintext = "Text to be encrypted".getBytes();
+        byte[] ciphertext = (new CmsUtil()).createCMS(plaintext, cert);
+        byte[] plaintextRecovered = util.decryptCMS(ciphertext, keyPair.getPrivate());
 
-	private Certificate generateCertificate(PublicKey subjectPublicKey, PrivateKey issuerPrivateKey) throws ParseException, OperatorCreationException,
-			CertificateException, IOException {
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        assertThat(plaintextRecovered, is(equalTo(plaintext)));
+    }
 
-		X500Name issuer = new X500Name("CN=Issuer and subject (self signed)");
-		BigInteger serial = new BigInteger("100");
-		Date notBefore = df.parse("2010-01-01");
-		Date notAfter = df.parse("2050-01-01");
-		X500Name subject = issuer;
-		SubjectPublicKeyInfo publicKeyInfo = new SubjectPublicKeyInfo(ASN1Sequence.getInstance(subjectPublicKey.getEncoded()));
+    public KeyPair generateKeyPair() throws NoSuchAlgorithmException {
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+        keyPairGenerator.initialize(2048);
+        return keyPairGenerator.generateKeyPair();
+    }
 
-		X509v3CertificateBuilder certBuilder = new X509v3CertificateBuilder(issuer, serial, notBefore, notAfter, subject, publicKeyInfo);
+    private Certificate generateCertificate(PublicKey subjectPublicKey, PrivateKey issuerPrivateKey) throws ParseException, OperatorCreationException,
+            CertificateException, IOException {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
-		ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA").build(issuerPrivateKey);
+        X500Name issuer = new X500Name("CN=Issuer and subject (self signed)");
+        BigInteger serial = new BigInteger("100");
+        Date notBefore = df.parse("2010-01-01");
+        Date notAfter = df.parse("2050-01-01");
+        X500Name subject = issuer;
+        SubjectPublicKeyInfo publicKeyInfo = new SubjectPublicKeyInfo(ASN1Sequence.getInstance(subjectPublicKey.getEncoded()));
 
-		X509CertificateHolder holder = certBuilder.build(signer);
+        X509v3CertificateBuilder certBuilder = new X509v3CertificateBuilder(issuer, serial, notBefore, notAfter, subject, publicKeyInfo);
 
-		CertificateFactory factory = CertificateFactory.getInstance("X.509");
-		X509Certificate cert = (X509Certificate) factory.generateCertificate(new ByteArrayInputStream(holder.getEncoded()));
+        ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA").build(issuerPrivateKey);
 
-		return cert;
-	}
+        X509CertificateHolder holder = certBuilder.build(signer);
 
-	
+        CertificateFactory factory = CertificateFactory.getInstance("X.509");
+        X509Certificate cert = (X509Certificate) factory.generateCertificate(new ByteArrayInputStream(holder.getEncoded()));
 
-	private KeyPair doOpenSslTestFile(String fileName, Class expectedPrivKeyClass) throws IOException, MeldingsUtvekslingRuntimeException {
-		JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
-		PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder().setProvider("BC").build("changeit".toCharArray());
+        return cert;
+    }
 
-		PEMParser pr = openPEMResource(fileName);
-		Object o = pr.readObject();
 
-		if (o == null || !((o instanceof PEMKeyPair) || (o instanceof PEMEncryptedKeyPair))) {
-			throw new MeldingsUtvekslingRuntimeException();
-		}
+    private KeyPair doOpenSslTestFile(String fileName, Class expectedPrivKeyClass) throws IOException, MeldingsUtvekslingRuntimeException {
+        JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
+        PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder().setProvider("BC").build("changeit".toCharArray());
 
-		KeyPair kp;
-		if (o instanceof PEMEncryptedKeyPair)
-			kp = converter.getKeyPair(((PEMEncryptedKeyPair) o).decryptKeyPair(decProv));
-		else
-			kp = converter.getKeyPair((PEMKeyPair) o);
+        PEMParser pr = openPEMResource(fileName);
+        Object o = pr.readObject();
 
-		return kp;
-	}
+        if (o == null || !((o instanceof PEMKeyPair) || (o instanceof PEMEncryptedKeyPair))) {
+            throw new MeldingsUtvekslingRuntimeException();
+        }
 
-	private PEMParser openPEMResource(String fileName) {
-		InputStream res = getClass().getClassLoader().getResourceAsStream(fileName);
-		Reader fRd = new BufferedReader(new InputStreamReader(res));
-		return new PEMParser(fRd);
-	}
+        KeyPair kp;
+        if (o instanceof PEMEncryptedKeyPair)
+            kp = converter.getKeyPair(((PEMEncryptedKeyPair) o).decryptKeyPair(decProv));
+        else
+            kp = converter.getKeyPair((PEMKeyPair) o);
+
+        return kp;
+    }
+
+    private PEMParser openPEMResource(String fileName) {
+        InputStream res = getClass().getClassLoader().getResourceAsStream(fileName);
+        Reader fRd = new BufferedReader(new InputStreamReader(res));
+        return new PEMParser(fRd);
+    }
 }
