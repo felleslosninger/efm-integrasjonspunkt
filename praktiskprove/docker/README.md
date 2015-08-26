@@ -6,16 +6,16 @@
 + [Docker og Java](#about)
 + [Hva kan imaget brukes til](#bruk)
 + [Bruke dette imaget for å andre starte Java-applikasjoner](#andrejavaapps)
-+ [Integrasjonstesting](#integrasjonstest)
 + [Installere Docker](#installeredocker)
 + [Bygge Docker-image for Integrasjonspunktet](#byggeimage)
 + [Opprette og starte en container](#opprettecontainer)
 + [Aksessere tjenestene fra egen nettleser](#nettleseraksess)
++ [Følge consol outputen fra Docker-containeren](#logging)
++ [Starte og stopp Docker-containeren](#startstopp)
 + [Aksessere shellet / terminalen til linux distroen](#shelltilgang)
 + [Starte flere instanser](#flereinstanser)
 + [Kontrollere system-informasjonen til Docker-containeren](#inspect)
-+ [Følge consol outputen fra Docker-containeren](#logging)
-+ [Starte og stopp Docker-containeren](#startstopp)
++ [Integrasjonstesting](#integrasjonstest)
 
 ---
 
@@ -61,19 +61,6 @@ vil denne kommandoen identifisere og starte opp en standalone Java-applikasjon. 
 en database, ulike typer servere og etc kan du endre kommandoen slik du normalt sett ville starte applikasjonen: 
 CMD *<kommando som starter din app her>*
 
-<a name="integrasjonstest">
-## Integrasjonstesting
-
-For integrasjonstester kan man bruke 
-[Maven Docker Plugin](https://github.com/bibryam/docker-maven-plugin). Denne bruker [Docker Java Client]
-(https://github.com/docker-java/docker-java) som for øvrig kan brukes uavhengig av hverandre.
-
-Eksempel på hvordan man kan bruke Docker Java Client: https://github.com/docker-java/docker-java/wiki
-Se også Spotify sin Docker-klient for Java: https://github.com/spotify/docker-client
-
-Eksempel på hvordan man kan lage en integrasjonstest med Maven Docker Plugin står forklart her: 
-http://www.javacodegeeks.com/2014/04/a-docker-maven-plugin-for-integration-testing.html
-
 <a name="installeredocker">
 ## Installere Docker
 
@@ -87,7 +74,7 @@ fungere. Dette kan aktiveres i maskinens BIOS-innstillinger.*
 
 3. Når prosessen er ferdig, skriv "docker-machine ls" for å verifisere at det finnes en Docker-server med navnet "default".
 
-    Her må du kontrollere at "state" er "running":
+    Her må du kontrollere at "state" er "Running":
     
     ```shell
     $ docker-machine ls
@@ -127,25 +114,25 @@ Dersom state vises som "error" eller du får meldingen *machine does not exist*,
 
 3. Koble terminalen/commandline til Docker-serveren:
 
-Mac og Linux: 
+    Mac og Linux: 
+    
+    ```shell
+    $ eval "$(docker-machine env default)" 
+    ```
 
-```shell
-$ eval "$(docker-machine env default)" 
-```
+    Windows: Kjør det vedlagte scriptet "setup-docker.bat" som du finner i rot-katalogen til Integrasjonspunktet.
+    
+    ```shell
+    C:\> cd <path til kildekoden>\...\praktiskprove\integrasjonspunkt
+    C:\...\praktiskprove\integrasjonspunkt> setup-docker.bat
+    Kontrollerer Docker-VM...
+    Konfigurerer kommandolinjen...
+    Kommandolinjen er klar.
+    ```
 
-Windows: Kjør det vedlagte scriptet "setup-docker.bat" som du finner i rot-katalogen til Integrasjonspunktet.
-
-```shell
-C:\> cd <path til kildekoden>\...\praktiskprove\integrasjonspunkt
-C:\...\praktiskprove\integrasjonspunkt> setup-docker.bat
-Kontrollerer Docker-VM...
-Konfigurerer kommandolinjen...
-Kommandolinjen er klar.
-```
-
-Les mer på Docker sine egne sider:
-Mac: https://docs.docker.com/installation/mac/#from-your-shell
-Windows: https://docs.docker.com/installation/windows/#using-docker-from-windows-command-line-prompt-cmd-exe
+    Les mer på Docker sine egne sider:
+    Mac: https://docs.docker.com/installation/mac/#from-your-shell
+    Windows: https://docs.docker.com/installation/windows/#using-docker-from-windows-command-line-prompt-cmd-exe
 
 <a name="byggeimage">
 ## Bygge Docker-image for Integrasjonspunktet
@@ -186,6 +173,26 @@ $ docker-machine ip default
 Åpne en nettleser og gå til url'en:
 
 http://192.168.99.100:8080/noarkExchange
+
+<a name="logging">
+## Følge consol outputen fra Docker-containeren
+
+```shell
+$ docker logs -f Difi_Integrasjonspunkt
+```
+
+<a name="startstopp">
+## Starte og stopp Docker-containeren
+
+Start og Stop kommandoene funker kun dersom du først har opprettet en container med "docker create"
+
+```shell
+$ docker start Difi_Integrasjonspunkt
+```
+
+```shell
+$ docker stop Difi_Integrasjonspunkt
+```
 
 <a name="shelltilgang">
 ## Aksessere shellet / terminalen til linux distroen
@@ -255,24 +262,16 @@ dem (typisk micro-services arkitektur), kan du lese videre om
 $ docker inspect dervism/difi_integrasjonspunkt
 ```
 
-<a name="logging">
-## Følge consol outputen fra Docker-containeren
+<a name="integrasjonstest">
+## Integrasjonstesting
 
-```shell
-$ docker logs -f Difi_Integrasjonspunkt
-```
+For integrasjonstester kan man bruke 
+[Maven Docker Plugin](https://github.com/bibryam/docker-maven-plugin). Denne bruker [Docker Java Client]
+(https://github.com/docker-java/docker-java) som for øvrig kan brukes uavhengig av hverandre.
 
-<a name="startstopp">
-## Starte og stopp Docker-containeren
+Eksempel på hvordan man kan bruke Docker Java Client: https://github.com/docker-java/docker-java/wiki
+Se også Spotify sin Docker-klient for Java: https://github.com/spotify/docker-client
 
-```shell
-$ docker start Difi_Integrasjonspunkt
-```
-
-```shell
-$ docker stop Difi_Integrasjonspunkt
-```
-
-
-
+Eksempel på hvordan man kan lage en integrasjonstest med Maven Docker Plugin står forklart her: 
+http://www.javacodegeeks.com/2014/04/a-docker-maven-plugin-for-integration-testing.html
 
