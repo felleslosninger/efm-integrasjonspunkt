@@ -11,7 +11,7 @@ import javax.xml.ws.BindingType;
  * Generated source version: 2.2
  * 
  */
-@WebService(portName = "ReceivePort", serviceName = "receive", targetNamespace = "http://noarkexchange.meldingsutveksling.difi.no/", wsdlLocation = "file:/Users/glennbech/dev/meldingsutvikling-mellom-offentlige-virksomheter/praktiskprove/noarkexchange/src/wsdl/IntegrasjonspunktReceive.wsdl", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort")
+@WebService(portName = "ReceivePort", serviceName = "receive", targetNamespace = "http://noarkexchange.meldingsutveksling.difi.no/", wsdlLocation = "file:/Users/steinbjarne/projects/meldingsutveksling-mellom-offentlige-virksomheter/praktiskprove/noarkexchange/src/wsdl/IntegrasjonspunktReceive.wsdl", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort")
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
 public class receive_ReceivePortImpl
     implements SOAReceivePort
