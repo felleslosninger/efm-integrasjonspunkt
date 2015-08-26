@@ -110,7 +110,7 @@ en vanlig Mac-terminal / Windows Commandline for Docker. Sistnevnte er anbefalt 
 1. Åpne en ny terminal (Mac) eller CMD.exe (Windows, Trykk Start->Kjør->Skriv "cmd" og trykk Enter)
 2. Skriv "docker-machine ls" og sjekk at Docker-serveren kjører (dsv state=running som vist i steg 3 over)
 
-Dersom state vises som "error" eller du får meldingen *machine does not exist*, kan du enten kjøre QuickStart Terminal
+    Dersom state vises som "error" eller du får meldingen *machine does not exist*, kan du enten kjøre QuickStart Terminal
 
 3. Koble terminalen/commandline til Docker-serveren:
 
