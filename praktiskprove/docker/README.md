@@ -77,10 +77,16 @@ http://www.javacodegeeks.com/2014/04/a-docker-maven-plugin-for-integration-testi
 <a name="installeredocker">
 ## Installere Docker
 
-Tidligere måtte man installere Boot2Docker for å kunne bruke Docker på Mac og Windows. Denne har nå blitt depricated og 
-erstattet av Docker Maskin. Last ned og installer: https://docs.docker.com/machine/install-machine/
+Denne guiden forteller deg hvordan du installerer og tar i bruk Docker. 
 
-Verifiser etter installering at det finnes en virtuell maskin med navnet "default":
+1. Last ned og installer: https://docs.docker.com/machine/install-machine/  
+*NB, Windows-brukere: Pass på at virtualisering ("Virtualization") er aktivert på din maskin, ellers vil ikke Docker 
+fungere. Dette kan aktiveres i maskinens BIOS-innstillinger.*
+
+2. Finn Docker QuickStart Terminal og start den. Docker vil nå bli konfigurert for din maskin.
+3. Når prosessen er ferdig, skriv "docker-machine ls" for å verifisere at det finnes en Docker-server med navnet "default".
+
+Her må du kontrollere at "state" er "running":
 
 ```shell
 $ docker-machine ls
@@ -88,10 +94,57 @@ NAME      ACTIVE   DRIVER       STATE     URL
 default   *        virtualbox   Running   tcp://192.168.99.100:2376
 ```
 
-Dersom "default" ikke finnes, kan denne installeres ved å følge guidene:
+Dersom state er angitt som "Stopped" eller "Saved", må du først starte Docker-serveren:
 
+```shell
+$ docker-machine start default
+Starting VM...
+```
+
+4. Skriv "docker run hello-world" og sjekk i konsoll-outputen at du ser meldingen "Hello from Docker."
+
+```shell
+$ docker run hello-world  
+Unable to find image 'hello-world:latest' locally  
+latest: Pulling from library/hello-world  
+535020c3e8ad: Pull complete  
+
+Hello from Docker.  
+This message shows that your installation appears to be working correctly.
+```
+
+5. Docker er nå installert og du kan enten velge å fortsette med QuickStart Terminal eller konfigurere 
+en vanlig Mac-terminal / Windows Commandline for Docker. Sistnevnte er anbefalt for avanserte brukere.
+
+6. Les videre på kapittelet [Bygge Docker-image](#byggeimage) for å bygge og kjøre Integrasjonspunktet.
+
+#### Bruke Docker med en vanlig Mac Terminal eller Windows Commandline
+1. Åpne en ny terminal (Mac) eller CMD.exe (Windows, Trykk Start->Kjør->Skriv "cmd" og trykk Enter)
+2. Skriv "docker-machine ls" og sjekk at Docker-serveren kjører (dsv state=running som vist i steg 3 over)
+
+Dersom state vises som "error" eller du får meldingen *machine does not exist*, kan du enten kjøre QuickStart Terminal
+
+3. Koble terminalen/commandline til Docker-serveren:
+
+Mac og Linux: 
+
+```shell
+$ eval "$(docker-machine env default)" 
+```
+
+Windows: Kjør det vedlagte scriptet "setup-docker.bat" som du finner i rot-katalogen til Integrasjonspunktet.
+
+```shell
+C:\> cd <path til kildekoden>\...\praktiskprove\integrasjonspunkt
+C:\...\praktiskprove\integrasjonspunkt> setup-docker.bat
+Kontrollerer Docker-VM...
+Konfigurerer kommandolinjen...
+Kommandolinjen er klar.
+```
+
+Les mer på Docker sine egne sider:
 Mac: https://docs.docker.com/installation/mac/#from-your-shell
-Windows: https://docs.docker.com/installation/windows/#from-your-shell
+Windows: https://docs.docker.com/installation/windows/#using-docker-from-windows-command-line-prompt-cmd-exe
 
 <a name="byggeimage">
 ## Bygge Docker-image for Integrasjonspunktet
