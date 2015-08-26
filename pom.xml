@@ -10,13 +10,6 @@
     </modules>
     <packaging>pom</packaging>
 
-  <scm>
-    <connection>scm:git:https://github.com/difi/meldingsutveksling-mellom-offentlige-virksomheter.git</connection>
-    <developerConnection>scm:git:git@github.com:difi/meldingsutveksling-mellom-offentlige-virksomheter.git</developerConnection>
-    <url>https://github.com/difi/meldingsutveksling-mellom-offentlige-virksomheter.git</url>
-    <tag>v/1.0-RC</tag>
-  </scm>
-
   <name>miif</name>
   <url>http://maven.apache.org</url>
 
@@ -33,17 +26,4 @@
     </dependency>
   </dependencies>
 
-  <build>
-    <plugins>
-      <!-- Used for release cycle -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-release-plugin</artifactId>
-        <version>2.5.2</version>
-        <configuration>
-          <tagNameFormat>v/@{project.version}-RC</tagNameFormat>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>
