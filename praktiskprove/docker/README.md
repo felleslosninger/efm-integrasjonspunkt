@@ -84,34 +84,35 @@ Denne guiden forteller deg hvordan du installerer og tar i bruk Docker.
 fungere. Dette kan aktiveres i maskinens BIOS-innstillinger.*
 
 2. Finn Docker QuickStart Terminal og start den. Docker vil nå bli konfigurert for din maskin.
+
 3. Når prosessen er ferdig, skriv "docker-machine ls" for å verifisere at det finnes en Docker-server med navnet "default".
 
-Her må du kontrollere at "state" er "running":
-
-```shell
-$ docker-machine ls
-NAME      ACTIVE   DRIVER       STATE     URL                     
-default   *        virtualbox   Running   tcp://192.168.99.100:2376
-```
-
-Dersom state er angitt som "Stopped" eller "Saved", må du først starte Docker-serveren:
-
-```shell
-$ docker-machine start default
-Starting VM...
-```
+    Her må du kontrollere at "state" er "running":
+    
+    ```shell
+    $ docker-machine ls
+    NAME      ACTIVE   DRIVER       STATE     URL                     
+    default   *        virtualbox   Running   tcp://192.168.99.100:2376
+    ```
+    
+    Dersom state er angitt som "Stopped" eller "Saved", må du først starte Docker-serveren:
+    
+    ```shell
+    $ docker-machine start default
+    Starting VM...
+    ```
 
 4. Skriv "docker run hello-world" og sjekk i konsoll-outputen at du ser meldingen "Hello from Docker."
 
-```shell
-$ docker run hello-world  
-Unable to find image 'hello-world:latest' locally  
-latest: Pulling from library/hello-world  
-535020c3e8ad: Pull complete  
-
-Hello from Docker.  
-This message shows that your installation appears to be working correctly.
-```
+    ```shell
+    $ docker run hello-world  
+    Unable to find image 'hello-world:latest' locally  
+    latest: Pulling from library/hello-world  
+    535020c3e8ad: Pull complete  
+    
+    Hello from Docker.  
+    This message shows that your installation appears to be working correctly.
+    ```
 
 5. Docker er nå installert og du kan enten velge å fortsette med QuickStart Terminal eller konfigurere 
 en vanlig Mac-terminal / Windows Commandline for Docker. Sistnevnte er anbefalt for avanserte brukere.
