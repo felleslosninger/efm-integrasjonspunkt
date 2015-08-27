@@ -4,7 +4,7 @@
 
 	<groupId>no.difi.meldingsutveksling</groupId>
 	<artifactId>dokumentpakking</artifactId>
-	<version>0.2-SNAPSHOT</version>
+	<version>0.2</version>
 
 	<build>
 		<plugins>
@@ -87,7 +87,7 @@
 		<dependency>
 			<groupId>no.difi.meldingsutveksling</groupId>
 			<artifactId>adresseregister-domain</artifactId>
-			<version>1.1-SNAPSHOT</version>
+			<version>1.1</version>
 			<scope>test</scope>
 			<exclusions>
 				<exclusion>
@@ -138,7 +138,7 @@
 		<dependency>
 			<groupId>no.difi.meldingsutveksling</groupId>
 			<artifactId>domain</artifactId>
-			<version>1.1-SNAPSHOT</version>
+			<version>1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>adresseregister-client</artifactId>
     <groupId>no.difi.meldingsutveksling</groupId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1</version>
 
 
     <build>
@@ -46,13 +46,13 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>domain</artifactId>
-            <version>1.1-SNAPSHOT</version>
+            <version>1.1</version>
         </dependency>
 
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>adresseregister-domain</artifactId>
-            <version>1.1-SNAPSHOT</version>
+            <version>1.1</version>
         </dependency>
 
     </dependencies>

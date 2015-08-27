@@ -3,14 +3,14 @@
     <groupId>no.difi</groupId>
     <artifactId>Virksomhetssertifikatvalidator</artifactId>
     <packaging>jar</packaging>
-    <version>1.1.2-SNAPSHOT</version>
+    <version>1.1.2</version>
     <name>Virksomhetssertifikatvalidator</name>
     <url>http://www.difi.no</url>
 
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>1.2-SNAPSHOT</version>
+        <version>1.2</version>
     </parent>
 
     <properties>

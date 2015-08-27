@@ -9,7 +9,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>no.difi.meldingsutveksling</groupId>
     <artifactId>adresseregister-domain</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1</version>
 
     <properties>
         <project.stage>default</project.stage>
@@ -123,6 +123,6 @@
     </dependencies>
 
   <scm>
-    <tag>v/1.1-RC</tag>
+    <tag>v/1.2-RC</tag>
   </scm>
 </project>

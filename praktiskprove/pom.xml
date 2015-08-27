@@ -4,14 +4,14 @@
   <groupId>no.difi.meldingsutveksling</groupId>
   <artifactId>parent-pom</artifactId>
   <packaging>pom</packaging>
-  <version>1.2-SNAPSHOT</version>
+  <version>1.2</version>
   <name>Multiproject for meldingsutveksling</name>
 
   <scm>
     <connection>scm:git:https://github.com/difi/meldingsutveksling-mellom-offentlige-virksomheter.git</connection>
     <!--<developerConnection>scm:git:git@github.com:difi/meldingsutveksling-mellom-offentlige-virksomheter.git</developerConnection>-->
     <url>https://github.com/difi/meldingsutveksling-mellom-offentlige-virksomheter.git</url>
-    <tag>v/1.1-RC</tag>
+    <tag>v/1.2-RC</tag>
   </scm>
 
   <properties>

@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>no.difi.meldingsutveksling</groupId>
   <artifactId>integrasjonspunkt</artifactId>
-  <version>1.2-SNAPSHOT</version>
+  <version>1.2</version>
 
   <parent>
     <groupId>org.springframework.boot</groupId>
@@ -190,38 +190,38 @@
     <dependency>
       <groupId>no.difi.meldingsutveksling</groupId>
       <artifactId>transport</artifactId>
-      <version>1.2-SNAPSHOT</version>
+      <version>1.2</version>
     </dependency>
 
     <dependency>
       <groupId>no.difi.meldingsutveksling</groupId>
       <artifactId>transport-oxalis</artifactId>
-      <version>1.2-SNAPSHOT</version>
+      <version>1.2</version>
     </dependency>
 
     <dependency>
       <groupId>no.difi.meldingsutveksling</groupId>
       <artifactId>transport-file</artifactId>
-      <version>1.2-SNAPSHOT</version>
+      <version>1.2</version>
     </dependency>
 
 
     <dependency>
       <groupId>no.difi.meldingsutveksling</groupId>
       <artifactId>domain</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>1.1</version>
     </dependency>
 
     <dependency>
       <artifactId>adresseregister-client</artifactId>
       <groupId>no.difi.meldingsutveksling</groupId>
-      <version>1.1-SNAPSHOT</version>
+      <version>1.1</version>
     </dependency>
 
     <dependency>
       <groupId>no.difi.meldingsutveksling</groupId>
       <artifactId>dokumentpakking</artifactId>
-      <version>0.2-SNAPSHOT</version>
+      <version>0.2</version>
     </dependency>
 
     <dependency>
@@ -293,7 +293,7 @@
     <dependency>
       <groupId>no.difi.meldingsutveksling</groupId>
       <artifactId>adresseregister-domain</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>1.1</version>
     </dependency>
 
     <dependency>
@@ -330,18 +330,18 @@
     <dependency>
       <groupId>no.difi.meldingsutveksling</groupId>
       <artifactId>noarkexchange</artifactId>
-      <version>1.2-SNAPSHOT</version>
+      <version>1.2</version>
     </dependency>
 
     <dependency>
       <groupId>no.difi</groupId>
       <artifactId>Virksomhetssertifikatvalidator</artifactId>
-      <version>1.1.2-SNAPSHOT</version>
+      <version>1.1.2</version>
     </dependency>
 
   </dependencies>
 
   <scm>
-    <tag>v/1.1-RC</tag>
+    <tag>v/1.2-RC</tag>
   </scm>
 </project>
