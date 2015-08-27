@@ -30,7 +30,7 @@ Difi_Integrasjonspunkt-imaget du finner her er bygd lagvis
 
 1. alpine:3.2 (minimal linux distro, https://hub.docker.com/_/alpine/)
 2. dervism/dockerjava:jre7 (utvidelse med Java 7: https://hub.docker.com/r/dervism/dockerjava/)
-3. dervism/difi_integrasjonspunkt (Integrasjonspunktet)
+3. difi/difi_integrasjonspunkt (Integrasjonspunktet)
 
 <a name="bruk">
 ## Hva kan imaget brukes til
@@ -139,7 +139,7 @@ en vanlig Mac-terminal / Windows Commandline for Docker. Sistnevnte er anbefalt 
 ## Bygge Docker-image for Integrasjonspunktet
 
 ```shell
-$ docker build --no-cache -t dervism/difi_integrasjonspunkt .
+$ docker build --no-cache -t difi/difi_integrasjonspunkt .
 ```
 
 <a name="opprettecontainer">
@@ -148,7 +148,7 @@ $ docker build --no-cache -t dervism/difi_integrasjonspunkt .
 Først må du opprette en container
 
 ```shell
-$ docker create --name Difi_Integrasjonspunkt -p 8080:8080 dervism/difi_integrasjonspunkt
+$ docker create --name Difi_Integrasjonspunkt -p 8080:8080 difi/difi_integrasjonspunkt
 18c87e6730917abd5d2530abb5fddae60638285c35cd792b8e184772e21a562e
 ```
 
@@ -204,7 +204,7 @@ linux distroen imaget ble bygd med og gir deg en "one-time" tilgang til shellet.
 distribueres med Alpine Linux.
 
 ```shell
-$ docker run -it --rm dervism/difi_integrasjonspunkt /bin/sh
+$ docker run -it --rm difi/difi_integrasjonspunkt /bin/sh
 /var/lib/difi # <dine shell-kommandoer her>
 ```
 
@@ -231,8 +231,8 @@ Samme kommando som over, med unntak av at "run" i tillegg automatisk starter con
 Merk at de to containere må ha forskjellige navn og være mappet på ulike utgående porter (se beskrivelse nedenfor).
 
 ```shell
-$ docker run --name Difi_Integrasjonspunkt1 -d -p 8088:8080 dervism/difi_integrasjonspunkt
-$ docker run --name Difi_Integrasjonspunkt2 --link Difi_Integrasjonspunkt1 -d -p 8089:8080 dervism/difi_integrasjonspunkt
+$ docker run --name Difi_Integrasjonspunkt1 -d -p 8088:8080 difi/difi_integrasjonspunkt
+$ docker run --name Difi_Integrasjonspunkt2 --link Difi_Integrasjonspunkt1 -d -p 8089:8080 difi/difi_integrasjonspunkt
 ```
 
 Dermed kan du aksessere dem via hver sin port på den virtuelle maskinen:
@@ -260,7 +260,7 @@ dem (typisk micro-services arkitektur), kan du lese videre om
 ## Kontrollere system-informasjonen til Docker-containeren
 
 ```shell
-$ docker inspect dervism/difi_integrasjonspunkt
+$ docker inspect difi/difi_integrasjonspunkt
 ```
 
 <a name="integrasjonstest">
