@@ -190,19 +190,19 @@
     <dependency>
       <groupId>no.difi.meldingsutveksling</groupId>
       <artifactId>transport</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>1.1</version>
     </dependency>
 
     <dependency>
       <groupId>no.difi.meldingsutveksling</groupId>
       <artifactId>transport-oxalis</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>1.1</version>
     </dependency>
 
     <dependency>
       <groupId>no.difi.meldingsutveksling</groupId>
       <artifactId>transport-file</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>1.1</version>
     </dependency>
 
 
@@ -330,7 +330,7 @@
     <dependency>
       <groupId>no.difi.meldingsutveksling</groupId>
       <artifactId>noarkexchange</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>1.1</version>
     </dependency>
 
     <dependency>
@@ -342,6 +342,6 @@
   </dependencies>
 
   <scm>
-    <tag>v/1.0-RC</tag>
+    <tag>v/1.1-RC</tag>
   </scm>
 </project>
