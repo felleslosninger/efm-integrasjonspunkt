@@ -107,7 +107,8 @@ en vanlig Mac-terminal / Windows Commandline for Docker. Sistnevnte er anbefalt 
 6. Les videre på kapittelet [Bygge Docker-image](#byggeimage) for å bygge og kjøre Integrasjonspunktet.
 
 #### Bruke Docker med en vanlig Mac Terminal eller Windows Commandline
-1. Åpne en ny terminal (Mac) eller CMD.exe (Windows, Trykk Start->Kjør->Skriv "cmd" og trykk Enter)
+1. Lukk QuickStart Terminal-vinduet dersom den er oppe og åpne en ny terminal (Mac) eller CMD.exe 
+(Windows, Trykk Start->Kjør->Skriv "cmd" og trykk Enter)
 2. Skriv "docker-machine ls" og sjekk at Docker-serveren kjører (dsv state=running som vist i steg 3 over)
 
     Dersom state vises som "error" eller du får meldingen *machine does not exist*, kan du enten kjøre QuickStart Terminal
