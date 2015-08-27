@@ -3,6 +3,8 @@ package no.difi.meldingsutveksling.oxalisexchange;
 import no.difi.asic.SignatureHelper;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.*;
@@ -56,7 +58,7 @@ public class IntegrasjonspunktNokkel {
         PrivateKey key = null;
         try {
             KeyStore keystore = KeyStore.getInstance("JKS");
-            InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(pkResource);
+            InputStream resourceAsStream = new FileInputStream(pkResource);
             keystore.load(resourceAsStream, pkPasswprd.toCharArray());
 
             Enumeration aliases = keystore.aliases();
@@ -77,9 +79,11 @@ public class IntegrasjonspunktNokkel {
     }
 
     public SignatureHelper getSignatureHelper() {
-        InputStream resourceAsStream = IntegrasjonspunktNokkel.class.getResourceAsStream(pkResource);
-        if (resourceAsStream == null) {
-            throw new IllegalStateException("keystore " + pkResource + " not found on classpath.");
+        InputStream resourceAsStream;
+        try {
+            resourceAsStream = new FileInputStream(pkResource);
+        } catch (FileNotFoundException e) {
+            throw new IllegalStateException("keystore " + pkResource + " not found on file path " + pkResource);
         }
         return new SignatureHelper(resourceAsStream, pkPasswprd, pkAlias, pkPasswprd);
     }

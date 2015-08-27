@@ -75,7 +75,6 @@ public class BinaryDataClient {
         port.putMessage(pmrt);
     }
 
-
     static String readFile(String path) throws IOException {
         byte[] encoded = Files.readAllBytes(Paths.get(path));
         return new String(encoded, "UTF-8");

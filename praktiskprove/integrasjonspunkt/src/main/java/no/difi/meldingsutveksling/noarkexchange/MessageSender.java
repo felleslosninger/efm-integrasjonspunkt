@@ -87,7 +87,7 @@ public class MessageSender {
     }
 
     public PutMessageResponseType sendMessage(PutMessageRequestType message) {
-
+        long backThen = System.currentTimeMillis();
         String conversationId = message.getEnvelope().getConversationId();
         String journalPostId = getJpId(message);
 
@@ -114,11 +114,9 @@ public class MessageSender {
         StandardBusinessDocument sbd ;
         try {
             sbd = create(message, helper, context.getAvsender(), context.getMottaker());
-
         } catch (IOException e) {
             eventLog.log(new Event().setJpId(journalPostId).setArkiveConversationId(conversationId).setProcessStates(ProcessState.MESSAGE_SEND_FAIL));
             return createErrorResponse("IO Error on Asic-e or sbd creation " + e.getMessage() + ", see log.");
-
         }
         Scope item = sbd.getStandardBusinessDocumentHeader().getBusinessScope().getScope().get(0);
         String hubCid = item.getInstanceIdentifier();
@@ -128,6 +126,8 @@ public class MessageSender {
         t.send(sbd);
 
         eventLog.log(createOkStateEvent(message));
+        System.out.println("Message handled in " + (System.currentTimeMillis() - backThen) + " ms" ) ;
+
         return new PutMessageResponseType();
     }
 

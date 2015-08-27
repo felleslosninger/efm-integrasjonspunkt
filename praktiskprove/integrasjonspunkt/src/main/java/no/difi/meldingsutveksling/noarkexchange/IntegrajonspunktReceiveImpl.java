@@ -90,7 +90,6 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
 
         verifyCertificatesForSenderAndReceiver(orgNumberReceiver, orgNumberSender);
 
-
         logEvent(receiveResponse, ProcessState.SBD_RECIEVED);
 
         forberedKvittering(receiveResponse, "leveringsKvittering");
