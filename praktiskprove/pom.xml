@@ -9,8 +9,7 @@
 
   <scm>
     <connection>scm:git:https://github.com/difi/meldingsutveksling-mellom-offentlige-virksomheter.git</connection>
-    <developerConnection>scm:git:git@github.com:difi/meldingsutveksling-mellom-offentlige-virksomheter.git
-    </developerConnection>
+    <!--<developerConnection>scm:git:git@github.com:difi/meldingsutveksling-mellom-offentlige-virksomheter.git</developerConnection>-->
     <url>https://github.com/difi/meldingsutveksling-mellom-offentlige-virksomheter.git</url>
     <tag>v/1.1-RC</tag>
   </scm>
