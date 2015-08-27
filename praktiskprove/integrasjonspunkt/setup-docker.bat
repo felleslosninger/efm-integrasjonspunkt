@@ -1,5 +1,6 @@
 @echo off
 REM author Dervis M
+REM  about Eksporterer environment variabler slik at Docker-kommandoer kan kjøres i en vanlig CMD-konsoll.
  
 ECHO Kontrollerer Docker-VM...
 docker-machine start default >nul
