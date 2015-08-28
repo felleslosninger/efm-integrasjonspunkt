@@ -42,10 +42,10 @@ public class IntegrasjonspunktNokkel {
 
     }
 
-    public IntegrasjonspunktNokkel(String pkResource, String pkAlias, String pkPasswprd) {
+    public IntegrasjonspunktNokkel(String pkResource, String pkAlias, String pkPassword) {
         this.pkResource = pkResource;
         this.pkAlias = pkAlias;
-        this.pkPassword = pkPasswprd;
+        this.pkPassword = pkPassword;
     }
 
     /**
@@ -58,7 +58,7 @@ public class IntegrasjonspunktNokkel {
         PrivateKey key = null;
         try {
             KeyStore keystore = KeyStore.getInstance("JKS");
-            InputStream resourceAsStream = getKeyInputStream();
+            InputStream resourceAsStream = openKeyInputStream();
             keystore.load(resourceAsStream, pkPassword.toCharArray());
 
             Enumeration aliases = keystore.aliases();
@@ -80,14 +80,14 @@ public class IntegrasjonspunktNokkel {
 
     public SignatureHelper getSignatureHelper() {
         try {
-            InputStream keyInputStream = getKeyInputStream();
+            InputStream keyInputStream = openKeyInputStream();
             return new SignatureHelper(keyInputStream, pkPassword, pkAlias, pkPassword);
         } catch (FileNotFoundException e) {
             throw new MeldingsUtvekslingRuntimeException("keystore " + pkResource + " not found on file system.");
         }
     }
 
-    private InputStream getKeyInputStream() throws FileNotFoundException {
+    private InputStream openKeyInputStream() throws FileNotFoundException {
         return new FileInputStream(pkResource);
     }
 
