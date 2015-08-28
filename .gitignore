@@ -1,4 +1,10 @@
 *.class
+/**/*.iml
+/**/target
+/**/generated-sources
+/**/generated-sources/jaxb
+/**/generated-sources/wsimport
+/noarkexchange/src/main/java/no/difi/meldingsutveksling/noarkexchange/schema/receive/receive_ReceivePortImpl.java
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
@@ -23,7 +29,8 @@ hs_err_pid*
 .LSOverride
 
 # Icon must ends with two \r.
-Icon
+Icon
+
 
 # Thumbnails
 ._*
