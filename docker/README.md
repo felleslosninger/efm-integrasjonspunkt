@@ -132,7 +132,7 @@ en vanlig Mac-terminal / Windows Commandline for Docker. Sistnevnte er anbefalt 
     ```
 
     Les mer på Docker sine egne sider:
-    Mac: https://docs.docker.com/installation/mac/#from-your-shell
+    Mac: https://docs.docker.com/installation/mac/#from-your-shell  
     Windows: https://docs.docker.com/installation/windows/#using-docker-from-windows-command-line-prompt-cmd-exe
 
 <a name="byggeimage">
