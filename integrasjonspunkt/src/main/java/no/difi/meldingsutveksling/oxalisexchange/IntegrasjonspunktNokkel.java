@@ -56,10 +56,9 @@ public class IntegrasjonspunktNokkel {
     public PrivateKey loadPrivateKey() {
 
         PrivateKey key = null;
-        try {
+        try (InputStream i = openKeyInputStream()) {
             KeyStore keystore = KeyStore.getInstance("JKS");
-            InputStream resourceAsStream = openKeyInputStream();
-            keystore.load(resourceAsStream, pkPassword.toCharArray());
+            keystore.load(i, pkPassword.toCharArray());
 
             Enumeration aliases = keystore.aliases();
             for (; aliases.hasMoreElements(); ) {
