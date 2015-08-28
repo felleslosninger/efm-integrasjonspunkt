@@ -17,6 +17,7 @@
 
     <modules>
         <module>noarkexchange</module>
+        <module>altinnexchange</module>
         <module>adresseregister-web</module>
         <module>adresseregister-domain</module>
         <module>adresseregister-client</module>
@@ -28,6 +29,8 @@
         <module>transport-oxalis</module>
         <module>transport-file</module>
         <module>virksomhetssertifikatvalidator</module>
+        <module>transport-altinn</module>
+        <module>altinnmock</module>
     </modules>
     <build>
         <pluginManagement>
