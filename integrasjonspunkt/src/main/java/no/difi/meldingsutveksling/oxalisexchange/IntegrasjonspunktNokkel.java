@@ -3,6 +3,8 @@ package no.difi.meldingsutveksling.oxalisexchange;
 import no.difi.asic.SignatureHelper;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.*;
@@ -10,16 +12,17 @@ import java.security.cert.CertificateException;
 import java.util.Enumeration;
 
 /**
-
+ * Class responsible for accessing the keystore for the Integrasjonspunkt.
+ *
+ * @author Glebnn Bech
  */
 public class IntegrasjonspunktNokkel {
 
-    public static final String PRIVATEKEYALIAS = "privatekeyalias";
-    public static final String PRIVATEKEYLOACATION = "privatekeyloacation";
+    private static final String PRIVATEKEYALIAS = "privatekeyalias";
+    private static final String PRIVATEKEYLOACATION = "keystorelocation";
+    private static final String PRIVATEKEYPASSWORD = "privatekeypassword";
 
-    public static final String PRIVATEKEYPASSWORD = "privatekeypassword";
-
-    private String pkResource, pkAlias, pkPasswprd;
+    private final String pkResource, pkAlias, pkPasswprd;
 
     public IntegrasjonspunktNokkel() {
 
@@ -28,13 +31,13 @@ public class IntegrasjonspunktNokkel {
         pkPasswprd = System.getProperty(PRIVATEKEYPASSWORD);
 
         if (pkAlias == null) {
-            throw new MeldingsUtvekslingRuntimeException("please start the integrajonspunkt with a system property called " + PRIVATEKEYALIAS + ", that names the alias e of the private key within the keystore.");
+            throw new MeldingsUtvekslingRuntimeException("please start the process with a system property called " + PRIVATEKEYALIAS + ", that names the alias e of the private key within the keystore.");
         }
         if (pkResource == null) {
-            throw new MeldingsUtvekslingRuntimeException("please start the integrajonspunkt with a system property called " + PRIVATEKEYLOACATION + ", that points to a class path resource of the private key file");
+            throw new MeldingsUtvekslingRuntimeException("please start the process with a system property called " + PRIVATEKEYLOACATION + ", that points to a file the keytstore");
         }
         if (pkPasswprd == null) {
-            throw new MeldingsUtvekslingRuntimeException("please start the integrajonspunkt with a system property called " + PRIVATEKEYPASSWORD);
+            throw new MeldingsUtvekslingRuntimeException("please start the process with a system property called " + PRIVATEKEYPASSWORD);
         }
 
     }
@@ -46,17 +49,16 @@ public class IntegrasjonspunktNokkel {
     }
 
     /**
-     * Loads the private key from a pkcs8 file
+     * Loads the private key from the keystore
      *
-     * @return an private key
-     * @throws java.io.IOException
+     * @return the private key
      */
     public PrivateKey loadPrivateKey() {
 
         PrivateKey key = null;
         try {
             KeyStore keystore = KeyStore.getInstance("JKS");
-            InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(pkResource);
+            InputStream resourceAsStream = getKeyInputStream();
             keystore.load(resourceAsStream, pkPasswprd.toCharArray());
 
             Enumeration aliases = keystore.aliases();
@@ -68,7 +70,7 @@ public class IntegrasjonspunktNokkel {
                 }
             }
             if (key == null) {
-                throw new MeldingsUtvekslingRuntimeException("no key with alias " + pkAlias + " found in the class path location " + pkResource);
+                throw new MeldingsUtvekslingRuntimeException("no key with alias " + pkAlias + " found in the keystore " + pkResource);
             }
             return key;
         } catch (CertificateException | KeyStoreException | IOException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
@@ -77,11 +79,17 @@ public class IntegrasjonspunktNokkel {
     }
 
     public SignatureHelper getSignatureHelper() {
-        InputStream resourceAsStream = IntegrasjonspunktNokkel.class.getResourceAsStream(pkResource);
-        if (resourceAsStream == null) {
-            throw new IllegalStateException("keystore " + pkResource + " not found on classpath.");
+        try {
+            InputStream keyInputStream = getKeyInputStream();
+            return new SignatureHelper(keyInputStream, pkPasswprd, pkAlias, pkPasswprd);
+        } catch (FileNotFoundException e) {
+            throw new MeldingsUtvekslingRuntimeException("keystore " + pkResource + " not found on classpath.");
         }
-        return new SignatureHelper(resourceAsStream, pkPasswprd, pkAlias, pkPasswprd);
+    }
+
+    private InputStream getKeyInputStream() throws FileNotFoundException {
+        return new FileInputStream(pkResource);
     }
 
 }
+

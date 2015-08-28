@@ -14,7 +14,7 @@ public class IngegrasjonspunktNokkelTest {
     @Test
     public void testLastingavprivatnokkelfraTestressurser() {
 
-        IntegrasjonspunktNokkel nokkel = new IntegrasjonspunktNokkel("test-certificates.jks", "974720760", "changeit");
+        IntegrasjonspunktNokkel nokkel = new IntegrasjonspunktNokkel("src/main/resources/test-certificates.jks", "974720760", "changeit");
         PrivateKey key = nokkel.loadPrivateKey();
         assertNotNull(key.getFormat());
     }
