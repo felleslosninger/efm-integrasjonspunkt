@@ -191,6 +191,11 @@ Og til slutt, om du ønsker å kontrollere konsoll-outputen:
 $ docker logs -f Difi_AdresseRegister
 ```
 
+Og når du er ferdig og ønsker å stoppe prosessen:
+
+```shell
+$ docker stop Difi_AdresseRegister
+```
 
 <a name="nettleseraksess">
 ## Aksessere tjenestene fra egen nettleser
@@ -202,9 +207,20 @@ $ docker-machine ip default
 192.168.99.100
 ```
 
-Åpne en nettleser og gå til url'en:
+Åpne en nettleser og gå til url'en (ip-adressen her kan være forskjellig på din maskin):
 
 http://192.168.99.100:8080/noarkExchange
+
+Har du også startet Adresse-Registeret, vil du finne denne her:
+
+http://192.168.99.100:9999/certificates
+
+Om du lurer på hvorfor portene 8080 og 9999 angis her, kommer dette av en kombinasjon av parameteren "-p 9999:9999" i *docker create* 
+kommandoen og EXPOSE-kommandoen som er angitt i Dockerfile. Disse to sammen sørger for korrekt port-forwarding slik at data blir eksponert 
+ut fra containeren, til Docker VM og til slutt til din nettleser. Dataflyten er omtrent slik:
+
+Din nettleser (fysisk maskin) <-- "-p 8080:8080" --> Docker-VM (virtuell maskin) <-- EXPOSE 8080 --> Container (isolerte prosessen)
+
 
 <a name="logging">
 ## Følge consol outputen fra Docker-containeren
