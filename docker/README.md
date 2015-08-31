@@ -9,6 +9,7 @@
 + [Installere Docker](#installeredocker)
 + [Bygge Docker-image for Integrasjonspunktet](#byggeimage)
 + [Opprette og starte en container](#opprettecontainer)
++ [Bygge og kjøre Adresse-Registeret](#adresseregisteret)
 + [Aksessere tjenestene fra egen nettleser](#nettleseraksess)
 + [Følge consol outputen fra Docker-containeren](#logging)
 + [Starte og stopp Docker-containeren](#startstopp)
@@ -142,6 +143,12 @@ en vanlig Mac-terminal / Windows Commandline for Docker. Sistnevnte er anbefalt 
 $ docker build --no-cache -t difi/difi_integrasjonspunkt .
 ```
 
+Når du bygget et image, må du angi et navn. I eksemplet over blir imaget som lagres på maskinen kalt "difi/difi_integrasjonspunkt" og
+dette er navnet du må angi når du skal opprette en container som kjører imaget. Formatet er "dockerhub-brukerNavn / imageNavn", men dette er 
+kun nødvendig om du senere skal opensource imaget til feks DockerHub. Du kan altså fint kalle den hva som helst, feks 
+kun "integrasjonspunkt". 
+
+
 <a name="opprettecontainer">
 ## Opprette og starte en container
 
@@ -159,6 +166,30 @@ $ docker start Difi_Integrasjonspunkt
 ```
 
 hvis du i tillegg ønsker å se console outputen, les videre om [logging](#logging).
+
+**NB:** Legg merke til at du først må bygge et Docker-image med *docker build* (beskrevet over), og deretter bruke navnet 
+til imaget i *docker create* kommandoen. Merk at det i dette eksemplet er "difi/difi_integrasjonspunkt". Når du så 
+skal starte containeren, er det navnet du har angitt etter "--name" du skal bruke.
+
+<a name="adresseregisteret">
+## Bygge og kjøre Adresse-Registeret
+
+Den samme fremgangsmåten som beskrevet over:
+
+```shell
+$ docker build --no-cache -t difi/adresseregister .
+...
+$ docker create --name Difi_AdresseRegister -p 9999:9999 difi/adresseregister
+...
+$ docker start Difi_AdresseRegister
+...
+```
+
+Og til slutt, om du ønsker å kontrollere konsoll-outputen:
+
+```shell
+$ docker logs -f Difi_AdresseRegister
+```
 
 
 <a name="nettleseraksess">
