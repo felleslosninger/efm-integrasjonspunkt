@@ -197,6 +197,11 @@ Og når du er ferdig og ønsker å stoppe prosessen:
 $ docker stop Difi_AdresseRegister
 ```
 
+Dockerfile for Adresse-Registeret finner du i rot-katalogen til adresseregister-web:
+
+https://github.com/difi/meldingsutveksling-mellom-offentlige-virksomheter/tree/master/adresseregister-web
+
+
 <a name="nettleseraksess">
 ## Aksessere tjenestene fra egen nettleser
 
