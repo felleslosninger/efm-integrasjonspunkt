@@ -16,7 +16,7 @@ EXPOSE 9999
 # Install application
 #
 
-ENV APP_DIR /var/lib/monitor/eureka
+ENV APP_DIR /var/lib/adresseregister
 ENV APP_PREFIX adresseregister-web-1.0-SNAPSHOT
 ENV APP_MAIN_CLASS no.difi.meldingsutveksling.adresseregister.Main
 ENV JAVA_PARAMS ""
