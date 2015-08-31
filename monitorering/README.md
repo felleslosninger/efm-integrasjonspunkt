@@ -32,6 +32,6 @@ target/integrasjonspunkt-1.0-SNAPSHOT.jar no.difi.meldingsutveksling.Integrasjon
 
 ## Screenshots
 
-![bilde](https://github.com/difi/meldingsutveksling-mellom-offentlige-virksomheter/blob/SpringBoot/praktiskprove/monitorering/metrics1.png "Toppmeny med statusinfo")
+![bilde](https://github.com/difi/meldingsutveksling-mellom-offentlige-virksomheter/blob/master/monitorering/metrics1.png "Toppmeny med statusinfo")
 
-![bilde](https://github.com/difi/meldingsutveksling-mellom-offentlige-virksomheter/blob/SpringBoot/praktiskprove/monitorering/metrics2.png "Grafer og metrikker")
+![bilde](https://github.com/difi/meldingsutveksling-mellom-offentlige-virksomheter/blob/master/monitorering/metrics2.png "Grafer og metrikker")
