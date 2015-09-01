@@ -5,17 +5,26 @@ import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceAvailable
 import no.difi.meldingsutveksling.shipping.Request;
 
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 public class TryAltinnWsClient {
 
     public static void main(String[] args) {
         AltinnWsClient client;
+
+        AltinnWsConfiguration configuration;
         try {
-            client = new AltinnWsClient("http://localhost:7777/altinn/messages");
+            configuration = new AltinnWsConfiguration.Builder()
+                    .withStreamingServiceUrl(new URL("http://localhost:7777/altinn/streamedmessage"))
+                    .withBrokerServiceUrl(new URL("http://localhost:7777/altinn/messages"))
+                    .withUsername("2422")
+                    .withPassword("ROBSTAD1")
+            .build();
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
+        client = new AltinnWsClient(configuration);
         Request request = new MockRequest();
         System.out.println("Testing send");
         client.send(request);
