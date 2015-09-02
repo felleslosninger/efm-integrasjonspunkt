@@ -30,4 +30,4 @@ docker build --no-cache -t ${IMAGE_NAME} . &&\
 docker create --name ${CONTAINER_NAME} -v ${RESOURCES_DIR}:/var/lib/difi/crt -p 8080:8080 ${IMAGE_NAME}
 
 # Done
-echo "Success. $CONTAINER_NAME is build."
+echo "$CONTAINER_NAME is build."

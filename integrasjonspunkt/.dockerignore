@@ -1,0 +1,15 @@
+.git
+*.ipr
+*.iws
+*.iml
+*.bat
+*.xml
+*.properties
+*.sh
+integransjonpunkt-logs/*.log
+target
+src
+!security.tar.gz
+!target/crt/*
+!target/*.jar
+!src/main/resources/*.jks
