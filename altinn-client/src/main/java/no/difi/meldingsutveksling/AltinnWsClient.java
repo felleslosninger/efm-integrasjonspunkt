@@ -69,6 +69,20 @@ public class AltinnWsClient {
         return filesBasic.getBrokerServiceAvailableFile();
     }
 
+    public void download(DownloadRequest request) {
+        BrokerServiceExternalBasicStreamedSF brokerServiceExternalBasicStreamedSF;
+
+        brokerServiceExternalBasicStreamedSF = new BrokerServiceExternalBasicStreamedSF(configuration.getStreamingServiceUrl());
+
+        IBrokerServiceExternalBasicStreamed streamingService = brokerServiceExternalBasicStreamedSF.getBasicHttpBindingIBrokerServiceExternalBasicStreamed();
+
+        try {
+            byte[] message = streamingService.downloadFileStreamedBasic(configuration.getUsername(), configuration.getPassword(), request.getFileReference(), request.getReciever());
+        } catch (IBrokerServiceExternalBasicStreamedDownloadFileStreamedBasicAltinnFaultFaultFaultMessage e) {
+            throw new AltinnWsException("Cannot download file", e);
+        }
+    }
+
     private String initiateBrokerService(Request request) {
         BrokerServiceInitiation brokerServiceInitiation = createInitiationRequest(request);
         try {
