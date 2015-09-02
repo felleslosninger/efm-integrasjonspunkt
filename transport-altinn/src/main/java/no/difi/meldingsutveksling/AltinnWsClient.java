@@ -10,8 +10,7 @@ import no.difi.meldingsutveksling.shipping.ws.RecipientBuilder;
 import javax.xml.namespace.QName;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.List;
 
 public class AltinnWsClient {
     public static final String INVALID_URL_FOR_ALTINN_BROKER_SERVICE = "Invalid url for Altinn broker service";
@@ -19,11 +18,11 @@ public class AltinnWsClient {
     public static final String FAILED_TO_INITATE_ALTINN_BROKER_SERVICE = "Failed to initate Altinn broker service";
     public static final String FILE_NAME = "sbd.zip";
     private static final int BUFFER_SIZE = 65536;
+    public static final String AVAILABLE_FILES_ERROR_MESSAGE = "Could not get list of available files from Altinn formidlingstjeneste";
+    private final AltinnWsConfiguration configuration;
 
-    private final URL url;
-
-    public AltinnWsClient(String url) throws MalformedURLException {
-        this.url = new URL(url);
+    public AltinnWsClient(AltinnWsConfiguration configuration) {
+        this.configuration = configuration;
     }
 
     public void send(Request request) {
@@ -33,13 +32,8 @@ public class AltinnWsClient {
 
     private void upload(Request request, String senderReference) {
         BrokerServiceExternalBasicStreamedSF brokerServiceExternalBasicStreamedSF;
-        URL wsdlLocation;
-        try {
-            wsdlLocation = new URL("http://localhost:7777/altinn/streamedmessage");
-        } catch (MalformedURLException e) {
-            throw new AltinnWsException(INVALID_URL_FOR_ALTINN_BROKER_SERVICE, e);
-        }
-        brokerServiceExternalBasicStreamedSF = new BrokerServiceExternalBasicStreamedSF(wsdlLocation, new QName("http://www.altinn.no/services/ServiceEngine/Broker/2015/06", "BrokerServiceExternalBasicStreamedSF"));
+
+        brokerServiceExternalBasicStreamedSF = new BrokerServiceExternalBasicStreamedSF(configuration.getStreamingServiceUrl());
 
         IBrokerServiceExternalBasicStreamed streamingService = brokerServiceExternalBasicStreamedSF.getBasicHttpBindingIBrokerServiceExternalBasicStreamed();
 
@@ -58,35 +52,31 @@ public class AltinnWsClient {
 
     public java.util.List<BrokerServiceAvailableFile> availableFiles(Request request, BrokerServiceAvailableFileStatus serviceStatus) {
         String senderReference = initiateBrokerService(request);
-        BrokerServiceExternalBasicSF brokerServiceExternalBasicSF = null;
-        try {
-            brokerServiceExternalBasicSF = new BrokerServiceExternalBasicSF(new URL("http://localhost:7777/altinn/messages"), new QName("http://www.altinn.no/services/ServiceEngine/Broker/2015/06", "IBrokerServiceExternalBasicImplService"));
-        }
-        catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
+        BrokerServiceExternalBasicSF brokerServiceExternalBasicSF;
+
+        brokerServiceExternalBasicSF = new BrokerServiceExternalBasicSF(configuration.getBrokerServiceUrl(), new QName("http://www.altinn.no/services/ServiceEngine/Broker/2015/06", "IBrokerServiceExternalBasicImplService"));
 
         IBrokerServiceExternalBasic service = brokerServiceExternalBasicSF.getBasicHttpBindingIBrokerServiceExternalBasic();
 
+        BrokerServiceSearch searchParameters = new BrokerServiceSearch();
+        searchParameters.setFileStatus(serviceStatus);
+        searchParameters.setReportee(senderReference);
+
+        BrokerServiceAvailableFileList filesBasic;
         try {
-            BrokerServiceSearch searchParameters = new BrokerServiceSearch();
-            searchParameters.setFileStatus(serviceStatus);
-            searchParameters.setReportee(senderReference);
-
-            BrokerServiceAvailableFileList filesBasic = service.getAvailableFilesBasic("2422", "ROBSTAD1", searchParameters);
-            return filesBasic.getBrokerServiceAvailableFile();
-
-        } catch (IBrokerServiceExternalBasicGetAvailableFilesBasicAltinnFaultFaultFaultMessage iBrokerServiceExternalBasicGetAvailableFilesBasicAltinnFaultFaultFaultMessage) {
-            iBrokerServiceExternalBasicGetAvailableFilesBasicAltinnFaultFaultFaultMessage.printStackTrace();
+            filesBasic = service.getAvailableFilesBasic(configuration.getUsername(), configuration.getPassword(), searchParameters);
+        } catch (IBrokerServiceExternalBasicGetAvailableFilesBasicAltinnFaultFaultFaultMessage e) {
+            throw new AltinnWsException(AVAILABLE_FILES_ERROR_MESSAGE, e);
         }
-        return null;
+        List<BrokerServiceAvailableFile> result = filesBasic.getBrokerServiceAvailableFile();
+        return result;
     }
 
     private String initiateBrokerService(Request request) {
         BrokerServiceInitiation brokerServiceInitiation = createInitiationRequest(request);
         try {
-            BrokerServiceExternalBasicSF brokerService = new BrokerServiceExternalBasicSF(url, new QName("http://www.altinn.no/services/ServiceEngine/Broker/2015/06", "IBrokerServiceExternalBasicImplService"));
-            return brokerService.getBasicHttpBindingIBrokerServiceExternalBasic().initiateBrokerServiceBasic("username", "password", brokerServiceInitiation);
+            BrokerServiceExternalBasicSF brokerService = new BrokerServiceExternalBasicSF(configuration.getBrokerServiceUrl(), new QName("http://www.altinn.no/services/ServiceEngine/Broker/2015/06", "IBrokerServiceExternalBasicImplService"));
+            return brokerService.getBasicHttpBindingIBrokerServiceExternalBasic().initiateBrokerServiceBasic(configuration.getUsername(), configuration.getPassword(), brokerServiceInitiation);
         } catch (IBrokerServiceExternalBasicInitiateBrokerServiceBasicAltinnFaultFaultFaultMessage e) {
             throw new AltinnWsException(FAILED_TO_INITATE_ALTINN_BROKER_SERVICE, e);
         }
@@ -98,7 +88,7 @@ public class AltinnWsClient {
         ManifestBuilder manifestBuilder = new ManifestBuilder()
                 .withSender(request.getSender())
                 .withSenderReference(request.getSenderReference())
-                .withFilename("FILE_NAME");
+                .withFilename(FILE_NAME);
         initiateRequest.setManifest(manifestBuilder.build());
         initiateRequest.setRecipientList(new RecipientBuilder().withPartyNumber(request.getReceiver()).build());
 
