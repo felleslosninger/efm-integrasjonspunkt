@@ -31,6 +31,7 @@
         <module>virksomhetssertifikatvalidator</module>
         <module>transport-altinn</module>
         <module>altinnmock</module>
+        <module>altinn-client</module>
     </modules>
     <build>
         <pluginManagement>

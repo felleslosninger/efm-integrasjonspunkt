@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -9,8 +10,6 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-
-import static org.junit.Assert.*;
 
 @Ignore("Kept for documentation purposes. To run tests successfully you need to setup a SFTP server running at localhost with a ssh key files")
 public class SFtpClientTest {
@@ -29,7 +28,7 @@ public class SFtpClientTest {
         SFtpClient.Connection connection = sFtpClient.connect(sshPrivateKeyFileName);
 
 
-        assertNotNull(connection);
+        Assert.assertNotNull(connection);
     }
 
     @Test(expected = SFtpClient.ConnectException.class)
@@ -60,7 +59,7 @@ public class SFtpClientTest {
 
         Path file = connection.localDirectory("./").remoteDirectory("temp").download("test.txt");
 
-        assertTrue(file.toFile().exists());
+        Assert.assertTrue(file.toFile().exists());
     }
 
     @Test(expected = SFtpClient.Connection.DownloadException.class)
@@ -69,6 +68,6 @@ public class SFtpClientTest {
 
         connection.download("adsfdfsdkjfksjdfkjsd.txt");
 
-        fail();
+        Assert.fail();
     }
 }

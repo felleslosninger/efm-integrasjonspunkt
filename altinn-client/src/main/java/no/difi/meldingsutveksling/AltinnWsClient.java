@@ -10,10 +10,8 @@ import no.difi.meldingsutveksling.shipping.ws.RecipientBuilder;
 import javax.xml.namespace.QName;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.List;
 
 public class AltinnWsClient {
-    public static final String INVALID_URL_FOR_ALTINN_BROKER_SERVICE = "Invalid url for Altinn broker service";
     public static final String FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE = "Failed to upload a message to Altinn broker service";
     public static final String FAILED_TO_INITATE_ALTINN_BROKER_SERVICE = "Failed to initate Altinn broker service";
     public static final String FILE_NAME = "sbd.zip";
@@ -68,8 +66,7 @@ public class AltinnWsClient {
         } catch (IBrokerServiceExternalBasicGetAvailableFilesBasicAltinnFaultFaultFaultMessage e) {
             throw new AltinnWsException(AVAILABLE_FILES_ERROR_MESSAGE, e);
         }
-        List<BrokerServiceAvailableFile> result = filesBasic.getBrokerServiceAvailableFile();
-        return result;
+        return filesBasic.getBrokerServiceAvailableFile();
     }
 
     private String initiateBrokerService(Request request) {

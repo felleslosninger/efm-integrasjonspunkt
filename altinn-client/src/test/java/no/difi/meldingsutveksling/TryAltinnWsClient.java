@@ -40,14 +40,14 @@ public class TryAltinnWsClient {
             throw new RuntimeException(e);
         }
 
-        AltinnWsConfiguration configuration = null;
+        AltinnWsConfiguration configuration;
         URL brokerServiceUrl;
         try {
             brokerServiceUrl = new URL(properties.getProperty("altinn.brokerservice.url"));
         } catch (MalformedURLException e) {
             throw new RuntimeException("Broker service url is wrong ", e);
         }
-        URL streamingServiceUrl = null;
+        URL streamingServiceUrl;
         try {
             streamingServiceUrl = new URL(properties.getProperty("altinn.streamingservice.url"));
         } catch (MalformedURLException e) {
