@@ -1,12 +1,5 @@
 *.class
-/**/*.iml
-/**/target
-/**/generated-sources
-/**/generated-sources/jaxb
-/**/generated-sources/wsimport
-/noarkexchange/src/main/java/no/difi/meldingsutveksling/noarkexchange/schema/receive/receive_ReceivePortImpl.java
-/integransjonpunkt-logs
-/integransjonpunkt-logs/application.log
+target
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
@@ -65,7 +58,7 @@ $RECYCLE.BIN/
 ### Intellij ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm
 
-/*.iml
+*.iml
 
 ## Directory-based project format:
 .idea/

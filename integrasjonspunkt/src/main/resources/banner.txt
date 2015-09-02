@@ -1,0 +1,29 @@
+${color.blink}
+${color.green}
+                        `.---------.          .:////-`                   ```.....`      `-:///:-`
+                        .sssssssssso`       -ossssssss/`             `-/ossssssss+    `:sssssssso:
+                        .sssssssssso`      :sssssssssss+`          `:osssssssssss+    /sssssssssss:
+                        .sssssssssso`      +ssssssssssss.         `+sssssssssssss+   `ossssssssssso`
+                        .sssssssssso`      /ssssssssssso`        `+ssssssssssssss+   `+sssssssssss/
+                        .sssssssssso`      `/ssssssssso.         -sssssssssss+-.``    `+sssssssss+`
+                        .sssssssssso`        ./+ooo+/-`          /ssssssssss/`         `-/+ooo+/.
+              ```  ``   .sssssssssso`           ````             /ssssssssss.              ```
+         ${color.gray}`-/+oss: ${color.green}.+o+/:-sssssssssso`       -----------`     ---:ossssssssss:-----    `-----------
+      ${color.gray}.:+syyyyyyo/:${color.green}.-sssssssssssssso`      `ossssssssss.    `osssssssssssssssssss+    `sssssssssso`
+    ${color.gray}./syyyyyyyyyyyy: ${color.green}+ssssssssssssso`      `ossssssssss.    `osssssssssssssssssss+    `sssssssssso`
+  ${color.gray}`:syyyyyyyyyyyo+:${color.green}.-sssssssssssssso`      `ossssssssss.    `osssssssssssssssssss+    `sssssssssso`
+ ${color.gray}`+yyyyyyyyyyyys: ${color.green}`+ssssssssssssssso`      `ossssssssss.     :::/ossssssssss/:::/-    `sssssssssso`
+${color.gray}`+yyyyyyyyyys/-.`  ${color.green}.-/osssssssssssso`      `ossssssssss.         /ssssssssss`         `sssssssssso`
+${color.gray}-yyyyyyyyys/`         ${color.green}`:ssssssssssso`      `ossssssssss.         /ssssssssss`         `sssssssssso`
+${color.gray}oyyyyyyyyy:             ${color.green}-sssssssssso`      `ossssssssss.         /ssssssssss`         `sssssssssso`
+${color.gray}syyyyyyyys`             ${color.green}`+ssssssssso`      `ossssssssss.         /ssssssssss`         `sssssssssso`
+${color.gray}syyyyyyyys`             ${color.green}`ossssssssso`      `ossssssssss.         /ssssssssss`         `sssssssssso`
+${color.gray}oyyyyyyyyy/             ${color.green}:sssssssssso`      `ossssssssss.         /ssssssssss`         `sssssssssso`
+${color.gray}-syyyyyyyyy/`         ${color.green}`:ssssssssssso`      `ossssssssss.         /ssssssssss`         `sssssssssso`
+ ${color.gray}/yyyyyyyyyys+:.`  ${color.green}.-/osssssssssssso`      `ossssssssss.         /ssssssssss`         `sssssssssso`
+ ${color.gray}`/yyyyyyyyyyyyo- ${color.green}.sssssssssssssssso`      `ossssssssss.         /ssssssssss`         `sssssssssso`
+   ${color.gray}:syyyyyyyyy:`${color.green}:/+sssssssssssssssso`      `ossssssssss.         /ssssssssss`         `sssssssssso`
+    ${color.gray}`/syyyyyyo`-s${color.green}sssssssssssssssssso`      `ossssssssss.         /ssssssssss`         `sssssssssso`
+      ${color.gray}`-+syyyy/`-${color.green}:+sssssssssssssssso`      `ossssssssss.         /ssssssssss`         `sssssssssso`
+         ${color.gray}`.:/+oo- ${color.green}.oo+/-./ooooooooo+`      `/oooooooooo.         :ooooooooo+`         `+oooooooo++`
+${spring-boot.version}${color.blinkoff}${color.reset}
