@@ -31,6 +31,7 @@ RUN rm -rf local_policy.jar US_export_policy.jar && \
 ENV APP_DIR /var/lib/difi
 ENV APP_PREFIX integrasjonspunkt
 ENV APP_MAIN_CLASS no.difi.meldingsutveksling.IntegrasjonspunktApplication
+ENV APP_JAVA_PARAMS "-Dprivatekeyalias=974720760 -Dkeystorelocation=crt/test-certificates.jks -Dprivatekeypassword=changeit"
 ENV APP_PROFILE dev
 
 ADD target/${APP_PREFIX}*.jar ${APP_DIR}/
@@ -41,4 +42,4 @@ ADD target/${APP_PREFIX}*.jar ${APP_DIR}/
 
 WORKDIR ${APP_DIR}
 
-CMD APP_NAME=$(ls ${APP_PREFIX}*.jar) && java -jar -Dprivatekeyalias=974720760 -Dprivatekeyloacation=test-certificates.jks -Dprivatekeypassword=changeit ${APP_NAME} ${APP_MAIN_CLASS} --spring.profiles.active=${APP_PROFILE}
+CMD APP_NAME=$(ls ${APP_PREFIX}*.jar) && java -jar ${APP_JAVA_PARAMS} ${APP_NAME} ${APP_MAIN_CLASS} --spring.profiles.active=${APP_PROFILE}
