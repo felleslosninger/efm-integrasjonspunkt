@@ -1,0 +1,1 @@
+java -jar -Dprivatekeyalias=974720760 -Dkeystorelocation=src/manin/resources/test-certificates.jks -Dprivatekeypassword=changeit target/integrasjonspunkt-1.0-SNAPSHOT.jar no.difi.meldingsutveksling.IntegrasjonspunktApplication --spring.profiles.active=dev
