@@ -5,10 +5,8 @@
 
 + [Docker og Java](#about)
 + [Hva kan imaget brukes til](#bruk)
-+ [Bruke dette imaget for å andre starte Java-applikasjoner](#andrejavaapps)
 + [Installere Docker](#installeredocker)
 + [Bygge Docker-image for Integrasjonspunktet](#byggeimage)
-+ [Opprette og starte en container](#opprettecontainer)
 + [Bygge og kjøre Adresse-Registeret](#adresseregisteret)
 + [Aksessere tjenestene fra egen nettleser](#nettleseraksess)
 + [Følge consol outputen fra Docker-containeren](#logging)
@@ -33,6 +31,15 @@ Difi_Integrasjonspunkt-imaget du finner her er bygd lagvis
 2. dervism/dockerjava:jre7 (utvidelse med Java 7: https://hub.docker.com/r/dervism/dockerjava/)
 3. difi/difi_integrasjonspunkt (Integrasjonspunktet)
 
+# Quick Start
+
+1. Installer Docker Machine (beskrevet under)
+2. Åpne en terminal (beskrevet [her](#commandline))
+3. Kjør kommando: chmod u+x build-docker.sh
+4. Kjør kommando: ./build-docker.sh
+5. Kjør kommando: docker start Difi_Integrasjonspunkt
+6. Valgfritt: docker logs -f Difi_Integrasjonspunkt (trykk CTRL+C for å lukke loggen)
+
 <a name="bruk">
 ## Hva kan imaget brukes til
 
@@ -48,19 +55,6 @@ Docker-image uten å endre Docker-scriptet.
 Scriptet henter automatisk jar-filen fra "target" mappen og 
 provisjonerer denne i imaget. Scriptet installerer også automatisk Unlimited Security Profile i Java-installasjonen 
 på imaget.
-
-<a name="andrejavaapps">
-### Bruke dette imaget for å andre starte Java-applikasjoner
-
-Alt du trenger å gjøre for å starte andre Java-applikasjoner med dette imaget, er å endre miljøvariablene i scriptet:
-
-- **APP_PREFIX:** Her skriver du prefixet til jar-filen du vil kjøre. Eks: xyz-1.0.jar, prefix = xyz.
-- **APP_MAIN_CLASS:** Navnet på den kjørbare klassen
-- **APP_PROFILE:** Dersom Java-applikasjonen bruker Spring-profiles, så angir du hvilken som skal aktiveres her.
-- **CMD:** Dette er kommandoen Docker kjører for å starte *din* applikasjon når all provisjonering er ferdig. I dette scriptet, 
-vil denne kommandoen identifisere og starte opp en standalone Java-applikasjon. Om du ønsker å starte et shell-script, 
-en database, ulike typer servere og etc kan du endre kommandoen slik du normalt sett ville starte applikasjonen: 
-CMD *<kommando som starter din app her>*
 
 <a name="installeredocker">
 ## Installere Docker
@@ -107,6 +101,7 @@ en vanlig Mac-terminal / Windows Commandline for Docker. Sistnevnte er anbefalt 
 
 6. Les videre på kapittelet [Bygge Docker-image](#byggeimage) for å bygge og kjøre Integrasjonspunktet.
 
+<a name="commandline">
 #### Bruke Docker med en vanlig Mac Terminal eller Windows Commandline
 1. Lukk QuickStart Terminal-vinduet dersom den er oppe og åpne en ny terminal (Mac) eller CMD.exe 
 (Windows, Trykk Start->Kjør->Skriv "cmd" og trykk Enter)
@@ -116,13 +111,13 @@ en vanlig Mac-terminal / Windows Commandline for Docker. Sistnevnte er anbefalt 
 
 3. Koble terminalen/commandline til Docker-serveren:
 
-    Mac og Linux: 
+    **Mac og Linux:** 
     
     ```shell
     $ eval "$(docker-machine env default)" 
     ```
 
-    Windows: Kjør det vedlagte scriptet "setup-docker.bat" som du finner i rot-katalogen til Integrasjonspunktet.
+    **Windows:** Kjør det vedlagte scriptet "setup-docker.bat" som du finner i rot-katalogen til Integrasjonspunktet.
     
     ```shell
     C:\> cd <path til kildekoden>\...\praktiskprove\integrasjonspunkt
@@ -139,37 +134,52 @@ en vanlig Mac-terminal / Windows Commandline for Docker. Sistnevnte er anbefalt 
 <a name="byggeimage">
 ## Bygge Docker-image for Integrasjonspunktet
 
+Dersom du bruker Windows, må du bygge manuelt. Se neste avsnitt om "Manuell bygging".
+
+#### Automatisk bygging (kun for Mac og Linux)
+
+Bygg med det medfølgende scriptet:
+
+```shell
+$ ./build-docker.sh
+```
+
+Deretter start:
+
+```shell
+$ docker start Difi_Integrasjonspunkt
+```
+
+#### Manuell bygging
+
+I  dette eksemplet blir imaget som lagres på maskinen kalt "difi/difi_integrasjonspunkt" og 
+dette er navnet du må angi når du skal opprette en container som kjører imaget. Formatet er "dockerHubBrukernavn / imageNavn", men dette er 
+kun nødvendig om du senere skal opensource imaget til feks DockerHub. Du kan altså fint kalle den hva som helst, feks 
+kun "integrasjonspunkt". 
+
 ```shell
 $ docker build --no-cache -t difi/difi_integrasjonspunkt .
 ```
 
-Når du bygget et image, må du angi et navn. I eksemplet over blir imaget som lagres på maskinen kalt "difi/difi_integrasjonspunkt" og
-dette er navnet du må angi når du skal opprette en container som kjører imaget. Formatet er "dockerhub-brukerNavn / imageNavn", men dette er 
-kun nødvendig om du senere skal opensource imaget til feks DockerHub. Du kan altså fint kalle den hva som helst, feks 
-kun "integrasjonspunkt". 
+Når en applikasjonen er pakket i et *image*, kan du kjøre den i en *container*.
 
-
-<a name="opprettecontainer">
-## Opprette og starte en container
-
-Først må du opprette en container
+Opprette container:
 
 ```shell
 $ docker create --name Difi_Integrasjonspunkt -p 8080:8080 difi/difi_integrasjonspunkt
 18c87e6730917abd5d2530abb5fddae60638285c35cd792b8e184772e21a562e
 ```
 
-og deretter starte den:
+og deretter start den:
 
 ```shell
 $ docker start Difi_Integrasjonspunkt
 ```
 
-hvis du i tillegg ønsker å se console outputen, les videre om [logging](#logging).
+Hvis du i tillegg ønsker å se console outputen, les videre om [logging](#logging).
 
-**NB:** Legg merke til at du først må bygge et Docker-image med *docker build* (beskrevet over), og deretter bruke navnet 
-til imaget i *docker create* kommandoen. Merk at det i dette eksemplet er "difi/difi_integrasjonspunkt". Når du så 
-skal starte containeren, er det navnet du har angitt etter "--name" du skal bruke.
+**NB:** Når du så skal starte en container, er det navnet du har angitt etter "--name" som må angis!
+
 
 <a name="adresseregisteret">
 ## Bygge og kjøre Adresse-Registeret
@@ -275,7 +285,6 @@ Flag:
 shellet.
 - **--rm: Clean Up:** Sletter containeren når du er ferdig.
 
-
 <a name="flereinstanser">
 ## Starte flere instanser
 
@@ -284,7 +293,7 @@ Merk at de to containere må ha forskjellige navn og være mappet på ulike utg�
 
 ```shell
 $ docker run --name Difi_Integrasjonspunkt1 -d -p 8088:8080 difi/difi_integrasjonspunkt
-$ docker run --name Difi_Integrasjonspunkt2 --link Difi_Integrasjonspunkt1 -d -p 8089:8080 difi/difi_integrasjonspunkt
+$ docker run --name Difi_Integrasjonspunkt2 -d -p 8089:8080 difi/difi_integrasjonspunkt
 ```
 
 Dermed kan du aksessere dem via hver sin port på den virtuelle maskinen:
@@ -299,21 +308,6 @@ Flagg som brukes:
 Format: -p hostPort:containerPort (dinMaskin:virtuellMaskin)
 
 - **-d, Detached mode:** Kjører containeren din i en bakgrunnsprosess
-
-- **--link Difi_Integrasjonspunkt1:** Gjør det mulig for container Difi_Integrasjonspunkt2 å bruke tjenester fra 
-Difi_Integrasjonspunkt1.
-
-Dersom du har flere tjenester og ønsker å opprette kommunikasjon mellom 
-dem (typisk micro-services arkitektur), kan du lese videre om 
-[container linking her](https://docs.docker.com/userguide/dockerlinks/#communication-across-links).
-
-
-<a name="inspect">
-## Kontrollere system-informasjonen til Docker-containeren
-
-```shell
-$ docker inspect difi/difi_integrasjonspunkt
-```
 
 <a name="integrasjonstest">
 ## Integrasjonstesting
