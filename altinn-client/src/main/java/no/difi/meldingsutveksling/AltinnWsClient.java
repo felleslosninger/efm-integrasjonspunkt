@@ -2,14 +2,13 @@ package no.difi.meldingsutveksling;
 
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.*;
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.*;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.shipping.Request;
 import no.difi.meldingsutveksling.shipping.ws.AltinnWsException;
 import no.difi.meldingsutveksling.shipping.ws.ManifestBuilder;
 import no.difi.meldingsutveksling.shipping.ws.RecipientBuilder;
 
 import javax.xml.namespace.QName;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 public class AltinnWsClient {
     public static final String FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE = "Failed to upload a message to Altinn broker service";
@@ -37,13 +36,12 @@ public class AltinnWsClient {
 
         try {
             StreamedPayloadBasicBE parameters = new StreamedPayloadBasicBE();
-            AltinnPackage altinnPackage = AltinnPackage.from(request);
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream(BUFFER_SIZE);
-            altinnPackage.write(outputStream);
-            parameters.setDataStream(outputStream.toByteArray());
+
+            StandardBusinessDocumentConverter converter = new StandardBusinessDocumentConverter();
+            parameters.setDataStream(converter.marshallToBytes(request.getPayload()));
 
             ReceiptExternalStreamedBE receiptExternal = streamingService.uploadFileStreamedBasic(parameters, FILE_NAME, senderReference, request.getSender(), "password", "username");
-        } catch (IBrokerServiceExternalBasicStreamedUploadFileStreamedBasicAltinnFaultFaultFaultMessage | IOException e) {
+        } catch (IBrokerServiceExternalBasicStreamedUploadFileStreamedBasicAltinnFaultFaultFaultMessage e) {
             throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, e);
         }
     }
@@ -69,18 +67,22 @@ public class AltinnWsClient {
         return filesBasic.getBrokerServiceAvailableFile();
     }
 
-    public void download(DownloadRequest request) {
+    public StandardBusinessDocument download(DownloadRequest request) {
         BrokerServiceExternalBasicStreamedSF brokerServiceExternalBasicStreamedSF;
 
         brokerServiceExternalBasicStreamedSF = new BrokerServiceExternalBasicStreamedSF(configuration.getStreamingServiceUrl());
 
         IBrokerServiceExternalBasicStreamed streamingService = brokerServiceExternalBasicStreamedSF.getBasicHttpBindingIBrokerServiceExternalBasicStreamed();
 
+        byte[] message;
         try {
-            byte[] message = streamingService.downloadFileStreamedBasic(configuration.getUsername(), configuration.getPassword(), request.getFileReference(), request.getReciever());
+            message = streamingService.downloadFileStreamedBasic(configuration.getUsername(), configuration.getPassword(), request.getFileReference(), request.getReciever());
         } catch (IBrokerServiceExternalBasicStreamedDownloadFileStreamedBasicAltinnFaultFaultFaultMessage e) {
             throw new AltinnWsException("Cannot download file", e);
         }
+
+        StandardBusinessDocumentConverter converter = new StandardBusinessDocumentConverter();
+        return converter.unmarshallFrom(message);
     }
 
     private String initiateBrokerService(Request request) {
