@@ -117,15 +117,17 @@ en vanlig Mac-terminal / Windows Commandline for Docker. Sistnevnte er anbefalt 
     $ eval "$(docker-machine env default)" 
     ```
 
-    **Windows:** Kjør det vedlagte scriptet "setup-docker.bat" som du finner i rot-katalogen til Integrasjonspunktet.
+    **Windows:** Kjør det vedlagte scriptet "setup-docker.bat" som du finner i "build" til Integrasjonspunktet.
     
     ```shell
-    C:\> cd <path til kildekoden>\...\praktiskprove\integrasjonspunkt
-    C:\...\praktiskprove\integrasjonspunkt> setup-docker.bat
+    C:\> cd <path til kildekoden>\...\integrasjonspunkt
+    C:\...\integrasjonspunkt> build\setup-docker.bat
     Kontrollerer Docker-VM...
     Konfigurerer kommandolinjen...
     Kommandolinjen er klar.
     ```
+    
+    NB: Merk at kommandoen må kalles fra rot-katalogen!
 
     Les mer på Docker sine egne sider:
     Mac: https://docs.docker.com/installation/mac/#from-your-shell  
