@@ -9,6 +9,10 @@
 + [Installere Docker](#installeredocker)
 + [Bygge Docker-image for Integrasjonspunktet](#byggeimage)
 + [Opprette og starte en container](#opprettecontainer)
+<<<<<<< HEAD
+=======
++ [Bygge og kjøre Adresse-Registeret](#adresseregisteret)
+>>>>>>> 147b3510e61ccc665bb69deddea5364191a4c975
 + [Aksessere tjenestene fra egen nettleser](#nettleseraksess)
 + [Følge consol outputen fra Docker-containeren](#logging)
 + [Starte og stopp Docker-containeren](#startstopp)
@@ -142,6 +146,15 @@ en vanlig Mac-terminal / Windows Commandline for Docker. Sistnevnte er anbefalt 
 $ docker build --no-cache -t difi/difi_integrasjonspunkt .
 ```
 
+<<<<<<< HEAD
+=======
+Når du bygget et image, må du angi et navn. I eksemplet over blir imaget som lagres på maskinen kalt "difi/difi_integrasjonspunkt" og
+dette er navnet du må angi når du skal opprette en container som kjører imaget. Formatet er "dockerhub-brukerNavn / imageNavn", men dette er 
+kun nødvendig om du senere skal opensource imaget til feks DockerHub. Du kan altså fint kalle den hva som helst, feks 
+kun "integrasjonspunkt". 
+
+
+>>>>>>> 147b3510e61ccc665bb69deddea5364191a4c975
 <a name="opprettecontainer">
 ## Opprette og starte en container
 
@@ -160,6 +173,43 @@ $ docker start Difi_Integrasjonspunkt
 
 hvis du i tillegg ønsker å se console outputen, les videre om [logging](#logging).
 
+<<<<<<< HEAD
+=======
+**NB:** Legg merke til at du først må bygge et Docker-image med *docker build* (beskrevet over), og deretter bruke navnet 
+til imaget i *docker create* kommandoen. Merk at det i dette eksemplet er "difi/difi_integrasjonspunkt". Når du så 
+skal starte containeren, er det navnet du har angitt etter "--name" du skal bruke.
+
+<a name="adresseregisteret">
+## Bygge og kjøre Adresse-Registeret
+
+Den samme fremgangsmåten som beskrevet over:
+
+```shell
+$ docker build --no-cache -t difi/adresseregister .
+...
+$ docker create --name Difi_AdresseRegister -p 9999:9999 difi/adresseregister
+...
+$ docker start Difi_AdresseRegister
+...
+```
+
+Og til slutt, om du ønsker å kontrollere konsoll-outputen:
+
+```shell
+$ docker logs -f Difi_AdresseRegister
+```
+
+Og når du er ferdig og ønsker å stoppe prosessen:
+
+```shell
+$ docker stop Difi_AdresseRegister
+```
+
+Dockerfile for Adresse-Registeret finner du i rot-katalogen til adresseregister-web:
+
+https://github.com/difi/meldingsutveksling-mellom-offentlige-virksomheter/tree/master/adresseregister-web
+
+>>>>>>> 147b3510e61ccc665bb69deddea5364191a4c975
 
 <a name="nettleseraksess">
 ## Aksessere tjenestene fra egen nettleser
@@ -171,10 +221,28 @@ $ docker-machine ip default
 192.168.99.100
 ```
 
+<<<<<<< HEAD
 Åpne en nettleser og gå til url'en:
 
 http://192.168.99.100:8080/noarkExchange
 
+=======
+Åpne en nettleser og gå til url'en (ip-adressen her kan være forskjellig på din maskin):
+
+http://192.168.99.100:8080/noarkExchange
+
+Har du også startet Adresse-Registeret, vil du finne denne her:
+
+http://192.168.99.100:9999/certificates
+
+Om du lurer på hvorfor portene 8080 og 9999 angis her, kommer dette av en kombinasjon av parameteren "-p 9999:9999" i *docker create* 
+kommandoen og EXPOSE-kommandoen som er angitt i Dockerfile. Disse to sammen sørger for korrekt port-forwarding slik at data blir eksponert 
+ut fra containeren, til Docker VM og til slutt til din nettleser. Dataflyten er omtrent slik:
+
+Din nettleser (fysisk maskin) <-- "-p 8080:8080" --> Docker-VM (virtuell maskin) <-- EXPOSE 8080 --> Container (isolerte prosessen)
+
+
+>>>>>>> 147b3510e61ccc665bb69deddea5364191a4c975
 <a name="logging">
 ## Følge consol outputen fra Docker-containeren
 
