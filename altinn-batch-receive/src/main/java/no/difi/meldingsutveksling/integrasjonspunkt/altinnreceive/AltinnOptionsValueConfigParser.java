@@ -26,7 +26,7 @@ public class AltinnOptionsValueConfigParser {
      * @return and AltinnWSConfiguration with values parsed from the command line arguments
      */
 
-    public static AltinnWsConfiguration getConfiguration(String[] args) throws ParseException {
+    public static AltinnWsConfiguration getAltinnWsClientConfiguration(String[] args) throws ParseException {
         CommandLine cmd = new PosixParser().parse(new CliOptions(), args);
 
         URL urlBrokerService = parseURLOption(cmd, OPTION_ALTINN_BROKER_SERVICE);
@@ -38,6 +38,11 @@ public class AltinnOptionsValueConfigParser {
                 .withStreamingServiceUrl(urlStreaming)
                 .withUsername(userName)
                 .withPassword(passord).build();
+    }
+
+    public static BatchOptions getBatchOptions(String[] args) throws ParseException {
+        CommandLine cmd = new PosixParser().parse(new CliOptions(), args);
+        return new BatchOptions();
     }
 
     private static URL parseURLOption(CommandLine cmd, String optionName) throws ParseException {
@@ -75,9 +80,11 @@ public class AltinnOptionsValueConfigParser {
             OptionBuilder.hasArg().withDescription("URL for the integrasjonspunkt ").withLongOpt("integrasjonspunkt");
             addOption(OptionBuilder.create(OPTION_INTEGRASJONSPUNKT));
 
+            OptionBuilder.hasArg().withDescription("OrganisarionNumber the integrasjonspunkt ").withLongOpt("integrasjonspunkt");
+            addOption(OptionBuilder.create(OPTION_INTEGRASJONSPUNKT));
+
             OptionBuilder.withDescription("print this message").withLongOpt("help");
             addOption(OptionBuilder.create(OPTION_HELP));
-
 
         }
     }

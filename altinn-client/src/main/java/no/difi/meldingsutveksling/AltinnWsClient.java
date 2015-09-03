@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.shipping.ws.RecipientBuilder;
 import javax.xml.namespace.QName;
 
 public class AltinnWsClient {
+
     public static final String FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE = "Failed to upload a message to Altinn broker service";
     public static final String FAILED_TO_INITATE_ALTINN_BROKER_SERVICE = "Failed to initate Altinn broker service";
     public static final String FILE_NAME = "sbd.zip";
