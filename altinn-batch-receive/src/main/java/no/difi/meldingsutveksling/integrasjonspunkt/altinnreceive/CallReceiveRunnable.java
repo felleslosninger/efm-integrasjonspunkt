@@ -8,8 +8,10 @@ import no.difi.meldingsutveksling.noarkexchange.schema.receive.CorrelationInform
 import org.modelmapper.ModelMapper;
 
 /**
- * The actual call to the web service is implemented as a runnable to enable
- * thread pooling and paralell execution
+ * Runnable wrapper for web service calls to the integrasjonspunkt receiving documents from Altinn
+ * Enables thread pooling / paralell execution
+ *
+ * @author Glenn Bech
  */
 class CallReceiveRunnable implements Runnable {
 

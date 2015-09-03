@@ -1,6 +1,9 @@
 package no.difi.meldingsutveksling.integrasjonspunkt.altinnreceive;
 
 /**
+ * Wrapper class to hold configuration options used in this program
+ *
+ * @author Glenn Bech
  */
 public class AltinnBatchImportOptions {
 

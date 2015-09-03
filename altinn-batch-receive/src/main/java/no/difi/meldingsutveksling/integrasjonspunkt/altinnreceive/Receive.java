@@ -6,6 +6,12 @@ import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessD
 
 import javax.xml.ws.BindingProvider;
 
+/**
+ * This class is responsible for involing the web service methos "receive" on the
+ * "integrasjonspunkt" receiving the document
+ *
+ * @author Glenn Bech
+ */
 class Receive {
 
     private SOAReceivePort port;

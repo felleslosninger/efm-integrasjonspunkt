@@ -1,6 +1,8 @@
 package no.difi.meldingsutveksling.integrasjonspunkt.altinnreceive;
 
 /**
+ * Constants class to avoid coding in "magic numbers"
+ *
  * @author Glenn Bech
  */
 class Constants {
