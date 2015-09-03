@@ -1,7 +1,5 @@
 package no.difi.meldingsutveksling;
 
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceAvailableFile;
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceAvailableFileStatus;
 import no.difi.meldingsutveksling.shipping.Request;
 
 import java.io.IOException;
@@ -24,10 +22,10 @@ public class TryAltinnWsClient {
         client.send(request);
 
         System.out.println("Testing available files");
-        List<BrokerServiceAvailableFile> result = client.availableFiles(request, BrokerServiceAvailableFileStatus.UPLOADED);
-        for (BrokerServiceAvailableFile saf : result) {
-            System.out.println(saf.getReceiptID());
-            System.out.println(saf.getFileStatus().value());
+        List<FileReference> result = client.availableFiles(request.getReceiver());
+        for (FileReference fileReference : result) {
+            System.out.println(fileReference.getReceiptID());
+            System.out.println(fileReference.getValue());
         }
     }
 

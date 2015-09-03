@@ -9,6 +9,8 @@ import no.difi.meldingsutveksling.shipping.ws.ManifestBuilder;
 import no.difi.meldingsutveksling.shipping.ws.RecipientBuilder;
 
 import javax.xml.namespace.QName;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AltinnWsClient {
     public static final String FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE = "Failed to upload a message to Altinn broker service";
@@ -46,8 +48,7 @@ public class AltinnWsClient {
         }
     }
 
-    public java.util.List<BrokerServiceAvailableFile> availableFiles(Request request, BrokerServiceAvailableFileStatus serviceStatus) {
-        String senderReference = initiateBrokerService(request);
+    public List<FileReference> availableFiles(String partyNumber) {
         BrokerServiceExternalBasicSF brokerServiceExternalBasicSF;
 
         brokerServiceExternalBasicSF = new BrokerServiceExternalBasicSF(configuration.getBrokerServiceUrl(), new QName("http://www.altinn.no/services/ServiceEngine/Broker/2015/06", "IBrokerServiceExternalBasicImplService"));
@@ -55,8 +56,8 @@ public class AltinnWsClient {
         IBrokerServiceExternalBasic service = brokerServiceExternalBasicSF.getBasicHttpBindingIBrokerServiceExternalBasic();
 
         BrokerServiceSearch searchParameters = new BrokerServiceSearch();
-        searchParameters.setFileStatus(serviceStatus);
-        searchParameters.setReportee(senderReference);
+        searchParameters.setFileStatus(BrokerServiceAvailableFileStatus.UPLOADED);
+        searchParameters.setReportee(partyNumber);
 
         BrokerServiceAvailableFileList filesBasic;
         try {
@@ -64,7 +65,13 @@ public class AltinnWsClient {
         } catch (IBrokerServiceExternalBasicGetAvailableFilesBasicAltinnFaultFaultFaultMessage e) {
             throw new AltinnWsException(AVAILABLE_FILES_ERROR_MESSAGE, e);
         }
-        return filesBasic.getBrokerServiceAvailableFile();
+
+        List<FileReference> fileReferences = new ArrayList<>();
+        for(BrokerServiceAvailableFile f: filesBasic.getBrokerServiceAvailableFile()) {
+            fileReferences.add(new FileReference(f.getFileReference(), f.getReceiptID()));
+        }
+
+        return fileReferences;
     }
 
     public StandardBusinessDocument download(DownloadRequest request) {
