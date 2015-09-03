@@ -2,17 +2,15 @@ package no.difi.meldingsutveksling.integrasjonspunkt.altinnreceive;
 
 import no.difi.meldingsutveksling.AltinnWsClient;
 import no.difi.meldingsutveksling.AltinnWsConfiguration;
-import no.difi.meldingsutveksling.DownloadRequest;
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceAvailableFile;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import org.apache.commons.cli.CommandLine;
+import no.difi.meldingsutveksling.FileReference;
 import org.apache.commons.cli.ParseException;
-import org.modelmapper.ModelMapper;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static no.difi.meldingsutveksling.integrasjonspunkt.altinnreceive.AltinnOptionsValueConfigParser.getAltinnWsClientConfiguration;
-import static no.difi.meldingsutveksling.integrasjonspunkt.altinnreceive.AltinnOptionsValueConfigParser.getBatchOptions;
+import static no.difi.meldingsutveksling.integrasjonspunkt.altinnreceive.AltinnOptionsValueConfigParser.getAltinnBatchImportOptions;
 
 /**
  * Class responsible for downloading of Documents from the Altinn Webservice, and sending them to the
@@ -23,29 +21,23 @@ import static no.difi.meldingsutveksling.integrasjonspunkt.altinnreceive.AltinnO
 
 public class Main {
 
-    private static CliOptions options;
-    private static CommandLine cmd;
-
     public static void main(String[] args) throws ParseException {
 
-        BatchOptions batchOptions = getBatchOptions(args);
-        String integrasjonspunktEndPointURL = batchOptions.getIntegrasjonspunktEndPointURL();
-        String orgNumber = batchOptions.getOrganisationNumber();
-        batchOptions.getIntegrasjonspunktEndPointURL();
+        AltinnBatchImportOptions batchOptions = getAltinnBatchImportOptions(args);
+        final String integrasjonspunktEndPointURL = batchOptions.getIntegrasjonspunktEndPointURL();
+        final String orgNumber = batchOptions.getOrganisationNumber();
+        final int threadPoolSize = batchOptions.getThreadPoolSize();
 
+        AltinnWsConfiguration altinnConfig = getAltinnWsClientConfiguration(args);
+        AltinnWsClient wsClient = new AltinnWsClient(altinnConfig);
         Receive receive = new Receive(integrasjonspunktEndPointURL);
 
-        ModelMapper mapper = new ModelMapper();
-        AltinnWsConfiguration config = getAltinnWsClientConfiguration(args);
-        AltinnWsClient wsClient = new AltinnWsClient(config);
+        ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize);
+        List<FileReference> files = wsClient.availableFiles(orgNumber);
 
-        List<BrokerServiceAvailableFile> files = wsClient.availableFiles(orgNumber);
-
-        for (BrokerServiceAvailableFile file : files) {
-            StandardBusinessDocument doc =
-                    wsClient.download(new DownloadRequest(file.getFileReference(), orgNumber));
-            receive.callReceive(mapper.map(doc, no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument.class))
+        for (FileReference file : files) {
+            CallReceiveRunnable command = new CallReceiveRunnable(wsClient, receive, file, orgNumber);
+            executor.execute(command);
         }
-
     }
 }

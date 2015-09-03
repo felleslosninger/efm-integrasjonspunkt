@@ -6,17 +6,23 @@ import org.apache.commons.cli.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import static no.difi.meldingsutveksling.integrasjonspunkt.altinnreceive.Constants.*;
+
 /**
  * Class with a utility that creates a AltinnWSConfiguration from the command line given to the Java application
+ *
+ * @author Glenn Bech
  */
-public class AltinnOptionsValueConfigParser {
+class AltinnOptionsValueConfigParser {
 
-    public static final String OPTION_INTEGRASJONSPUNKT = "i";
-    public static final String OPTION_ALTINN_BROKER_SERVICE = "a";
-    public static final String OPTION_ALTINN_STREAMING = "s";
-    public static final String OPTION_ALTINN_USERNAME = "au";
-    public static final String OPTION_ALTINN_PASSWORD = "ap";
-    public static final String OPTION_HELP = "h";
+    private static final String OPTION_ALTINN_BROKER_SERVICE = "a";
+    private static final String OPTION_ALTINN_STREAMING = "s";
+    private static final String OPTION_ALTINN_USERNAME = "au";
+    private static final String OPTION_ALTINN_PASSWORD = "ap";
+    private static final String OPTION_ORGNUMBER = "o";
+    private static final String OPTION_INTEGRASJONSPUNKT = "i";
+    private static final String OPTION_THREAD_POOL_SIZE = "t";
+    private static final String OPTION_HELP = "h";
 
     /**
      * Creates a AltinnWSConfiguration from the command line given to the Java application, using the Apache
@@ -27,10 +33,10 @@ public class AltinnOptionsValueConfigParser {
      */
 
     public static AltinnWsConfiguration getAltinnWsClientConfiguration(String[] args) throws ParseException {
-        CommandLine cmd = new PosixParser().parse(new CliOptions(), args);
+        CommandLine cmd = new DefaultParser().parse(new CliOptions(), args);
 
-        URL urlBrokerService = parseURLOption(cmd, OPTION_ALTINN_BROKER_SERVICE);
-        URL urlStreaming = parseURLOption(cmd, OPTION_ALTINN_STREAMING);
+        URL urlBrokerService = getMandatoryURLOption(cmd, OPTION_ALTINN_BROKER_SERVICE);
+        URL urlStreaming = getMandatoryURLOption(cmd, OPTION_ALTINN_STREAMING);
         String userName = cmd.getOptionValue(OPTION_ALTINN_USERNAME);
         String passord = cmd.getOptionValue(OPTION_ALTINN_PASSWORD);
 
@@ -40,12 +46,19 @@ public class AltinnOptionsValueConfigParser {
                 .withPassword(passord).build();
     }
 
-    public static BatchOptions getBatchOptions(String[] args) throws ParseException {
-        CommandLine cmd = new PosixParser().parse(new CliOptions(), args);
-        return new BatchOptions();
+    public static AltinnBatchImportOptions getAltinnBatchImportOptions(String[] args) throws ParseException {
+        CommandLine cmd = new DefaultParser().parse(new CliOptions(), args);
+        URL ipUrl = getMandatoryURLOption(cmd, OPTION_INTEGRASJONSPUNKT);
+        String orgNumber = cmd.getOptionValue(OPTION_ORGNUMBER);
+        int threadPoolSize = DEFAULT_THREAD_POOL_SIZE;
+        String t = cmd.getOptionValue(OPTION_THREAD_POOL_SIZE);
+        if (t != null) {
+            threadPoolSize = Integer.parseInt(t);
+        }
+        return new AltinnBatchImportOptions(ipUrl.toString(), orgNumber, threadPoolSize);
     }
 
-    private static URL parseURLOption(CommandLine cmd, String optionName) throws ParseException {
+    private static URL getMandatoryURLOption(CommandLine cmd, String optionName) throws ParseException {
         URL urlBrokerService;
         String stringValue = cmd.getOptionValue(optionName);
         try {
@@ -59,33 +72,19 @@ public class AltinnOptionsValueConfigParser {
     /**
      * There is no need for the world to see this, we hide it in here...
      */
-
     static class CliOptions extends Options {
 
         public CliOptions() {
             super();
 
-            OptionBuilder.hasArg().withDescription("URL for the AltinnBrokerService").withLongOpt("integrasjonspunkt");
-            addOption(OptionBuilder.create(OPTION_ALTINN_BROKER_SERVICE));
-
-            OptionBuilder.hasArg().withDescription("URL for the AltinnBrokerService for Streaming").withLongOpt("integrasjonspunkt");
-            addOption(OptionBuilder.create(OPTION_ALTINN_STREAMING));
-
-            OptionBuilder.hasArg().withDescription("URL for the Altinn services username").withLongOpt("integrasjonspunkt");
-            addOption(OptionBuilder.create(OPTION_ALTINN_USERNAME));
-
-            OptionBuilder.hasArg().withDescription("URL for the Altinn services password").withLongOpt("integrasjonspunkt");
-            addOption(OptionBuilder.create(OPTION_ALTINN_PASSWORD));
-
-            OptionBuilder.hasArg().withDescription("URL for the integrasjonspunkt ").withLongOpt("integrasjonspunkt");
-            addOption(OptionBuilder.create(OPTION_INTEGRASJONSPUNKT));
-
-            OptionBuilder.hasArg().withDescription("OrganisarionNumber the integrasjonspunkt ").withLongOpt("integrasjonspunkt");
-            addOption(OptionBuilder.create(OPTION_INTEGRASJONSPUNKT));
-
-            OptionBuilder.withDescription("print this message").withLongOpt("help");
-            addOption(OptionBuilder.create(OPTION_HELP));
-
+            addOption(Option.builder(OPTION_ALTINN_BROKER_SERVICE).hasArg().required().build());
+            addOption(Option.builder(OPTION_ALTINN_STREAMING).hasArg().required().build());
+            addOption(Option.builder(OPTION_ALTINN_USERNAME).hasArg().required().build());
+            addOption(Option.builder(OPTION_ALTINN_PASSWORD).hasArg().required().build());
+            addOption(Option.builder(OPTION_ORGNUMBER).hasArg().required().build());
+            addOption(Option.builder(OPTION_INTEGRASJONSPUNKT).hasArg().required().build());
+            addOption(Option.builder(OPTION_THREAD_POOL_SIZE).hasArg().build());
+            addOption(Option.builder(OPTION_HELP).build());
         }
     }
 }

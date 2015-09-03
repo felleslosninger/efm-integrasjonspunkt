@@ -6,7 +6,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessD
 
 import javax.xml.ws.BindingProvider;
 
-public class Receive {
+class Receive {
 
     private SOAReceivePort port;
 
