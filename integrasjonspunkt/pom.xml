@@ -9,7 +9,12 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
+<<<<<<< HEAD
         <version>1.2.4.RELEASE</version>
+=======
+        <version>1.2.5.RELEASE</version>
+        <relativePath/>
+>>>>>>> master
     </parent>
 
     <properties>
@@ -100,12 +105,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-logging</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
@@ -313,6 +312,15 @@
             <scope>test</scope>
         </dependency>
 
+<<<<<<< HEAD
+=======
+        <dependency>
+            <groupId>org.modelmapper</groupId>
+            <artifactId>modelmapper</artifactId>
+            <version>0.7.3</version>
+        </dependency>
+
+>>>>>>> master
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>noarkexchange</artifactId>

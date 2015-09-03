@@ -9,10 +9,7 @@
 + [Installere Docker](#installeredocker)
 + [Bygge Docker-image for Integrasjonspunktet](#byggeimage)
 + [Opprette og starte en container](#opprettecontainer)
-<<<<<<< HEAD
-=======
 + [Bygge og kjøre Adresse-Registeret](#adresseregisteret)
->>>>>>> 147b3510e61ccc665bb69deddea5364191a4c975
 + [Aksessere tjenestene fra egen nettleser](#nettleseraksess)
 + [Følge consol outputen fra Docker-containeren](#logging)
 + [Starte og stopp Docker-containeren](#startstopp)
@@ -146,15 +143,12 @@ en vanlig Mac-terminal / Windows Commandline for Docker. Sistnevnte er anbefalt 
 $ docker build --no-cache -t difi/difi_integrasjonspunkt .
 ```
 
-<<<<<<< HEAD
-=======
 Når du bygget et image, må du angi et navn. I eksemplet over blir imaget som lagres på maskinen kalt "difi/difi_integrasjonspunkt" og
 dette er navnet du må angi når du skal opprette en container som kjører imaget. Formatet er "dockerhub-brukerNavn / imageNavn", men dette er 
 kun nødvendig om du senere skal opensource imaget til feks DockerHub. Du kan altså fint kalle den hva som helst, feks 
 kun "integrasjonspunkt". 
 
 
->>>>>>> 147b3510e61ccc665bb69deddea5364191a4c975
 <a name="opprettecontainer">
 ## Opprette og starte en container
 
@@ -173,8 +167,6 @@ $ docker start Difi_Integrasjonspunkt
 
 hvis du i tillegg ønsker å se console outputen, les videre om [logging](#logging).
 
-<<<<<<< HEAD
-=======
 **NB:** Legg merke til at du først må bygge et Docker-image med *docker build* (beskrevet over), og deretter bruke navnet 
 til imaget i *docker create* kommandoen. Merk at det i dette eksemplet er "difi/difi_integrasjonspunkt". Når du så 
 skal starte containeren, er det navnet du har angitt etter "--name" du skal bruke.
@@ -209,7 +201,6 @@ Dockerfile for Adresse-Registeret finner du i rot-katalogen til adresseregister-
 
 https://github.com/difi/meldingsutveksling-mellom-offentlige-virksomheter/tree/master/adresseregister-web
 
->>>>>>> 147b3510e61ccc665bb69deddea5364191a4c975
 
 <a name="nettleseraksess">
 ## Aksessere tjenestene fra egen nettleser
@@ -221,12 +212,6 @@ $ docker-machine ip default
 192.168.99.100
 ```
 
-<<<<<<< HEAD
-Åpne en nettleser og gå til url'en:
-
-http://192.168.99.100:8080/noarkExchange
-
-=======
 Åpne en nettleser og gå til url'en (ip-adressen her kan være forskjellig på din maskin):
 
 http://192.168.99.100:8080/noarkExchange
@@ -242,7 +227,6 @@ ut fra containeren, til Docker VM og til slutt til din nettleser. Dataflyten er 
 Din nettleser (fysisk maskin) <-- "-p 8080:8080" --> Docker-VM (virtuell maskin) <-- EXPOSE 8080 --> Container (isolerte prosessen)
 
 
->>>>>>> 147b3510e61ccc665bb69deddea5364191a4c975
 <a name="logging">
 ## Følge consol outputen fra Docker-containeren
 
