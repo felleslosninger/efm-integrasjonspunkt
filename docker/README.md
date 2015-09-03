@@ -31,14 +31,17 @@ Difi_Integrasjonspunkt-imaget du finner her er bygd lagvis
 2. dervism/dockerjava:jre7 (utvidelse med Java 7: https://hub.docker.com/r/dervism/dockerjava/)
 3. difi/difi_integrasjonspunkt (Integrasjonspunktet)
 
-# Quick Start
+### Quick Start for Mac og Linux
+
+Windows-brukere må foreløpig bygge manuelt: [Les her](#byggeimage)
 
 1. Installer Docker Machine (beskrevet under)
 2. Åpne en terminal (beskrevet [her](#commandline))
-3. Kjør kommando: chmod u+x build-docker.sh
-4. Kjør kommando: ./build-docker.sh
-5. Kjør kommando: docker start Difi_Integrasjonspunkt
-6. Valgfritt: docker logs -f Difi_Integrasjonspunkt (trykk CTRL+C for å lukke loggen)
+3. Naviger deg til integrasjonspunkt-mappen
+4. Kjør kommando: chmod u+x build-docker.sh
+5. Kjør kommando: ./build-docker.sh
+6. Kjør kommando: docker start Difi_Integrasjonspunkt
+7. Valgfritt: docker logs -f Difi_Integrasjonspunkt (trykk CTRL+C for å lukke loggen)
 
 <a name="bruk">
 ## Hva kan imaget brukes til
@@ -59,7 +62,8 @@ på imaget.
 <a name="installeredocker">
 ## Installere Docker
 
-Denne guiden forteller deg hvordan du installerer og tar i bruk Docker. 
+Denne guiden forteller deg hvordan du installerer og tar i bruk Docker på Mac og Windows. Bruker du Linux, følger du i stedet 
+guiden til Docker finnes her: https://docs.docker.com/linux/step_one/
 
 1. Last ned og installer: https://docs.docker.com/machine/install-machine/  
 *NB, Windows-brukere: Pass på at virtualisering ("Virtualization") er aktivert på din maskin, ellers vil ikke Docker 
