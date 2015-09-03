@@ -36,6 +36,6 @@ public class AltinnTransport implements Transport {
                 return new StandardBusinessDocument();
             }
         };
-        new AltinnClient().send(request1);
+        new AltinnFTPClient().send(request1);
     }
 }

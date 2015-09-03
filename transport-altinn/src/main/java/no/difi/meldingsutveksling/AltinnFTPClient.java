@@ -15,7 +15,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class AltinnClient {
+public class AltinnFTPClient {
     public Receipt send(Request request) {
         // må ha inn properties for ssh key file name og url for sftp server
         SFtpClient sftpClient = new SFtpClient("localhost");
