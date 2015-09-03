@@ -30,7 +30,7 @@ public class TryAltinnClient {
     }
 
     public static void main(String[] args) {
-        AltinnClient altinnClient = new AltinnClient();
+        AltinnFTPClient altinnClient = new AltinnFTPClient();
 
         System.out.println(".... Uploading test.zip");
         altinnClient.send(new TryAltinnClient.MockRequest());
