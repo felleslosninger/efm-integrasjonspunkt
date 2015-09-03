@@ -1,8 +1,9 @@
 package no.difi.meldingsutveksling.integrasjonspunkt.altinnreceive;
 
+import no.difi.meldingsutveksling.AltinnWsClient;
+import no.difi.meldingsutveksling.AltinnWsConfiguration;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
 
 /**
  * Class responsible for downloading SBD Documents from the Altinn Serivce, and sending the to the
@@ -17,12 +18,12 @@ public class Main {
     private static CommandLine cmd;
 
     public static void main(String[] args) throws ParseException {
-        options = new CliOptions();
-        cmd = new PosixParser().parse(options, args);
 
+        AltinnWsConfiguration config = AltinnOptionsValueConfigParser.getConfiguration(args);
+        AltinnWsClient wsClient = new AltinnWsClient(config);
+        wsClient.availableFiles();
 
-
-        AltinnCon
     }
+
 
 }

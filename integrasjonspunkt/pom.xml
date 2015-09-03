@@ -9,12 +9,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-<<<<<<< HEAD:integrasjonspunkt/pom.xml
         <version>1.2.4.RELEASE</version>
-=======
-        <version>1.2.5.RELEASE</version>
->>>>>>> 147b3510e61ccc665bb69deddea5364191a4c975:integrasjonspunkt/pom.xml
-        <relativePath/>
     </parent>
 
     <properties>
@@ -105,15 +100,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
-<<<<<<< HEAD:integrasjonspunkt/pom.xml
             <exclusions>
                 <exclusion>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-starter-logging</artifactId>
                 </exclusion>
             </exclusions>
-=======
->>>>>>> 147b3510e61ccc665bb69deddea5364191a4c975:integrasjonspunkt/pom.xml
         </dependency>
 
         <dependency>
@@ -321,33 +313,6 @@
             <scope>test</scope>
         </dependency>
 
-<<<<<<< HEAD:integrasjonspunkt/pom.xml
-        <!--dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.6.6</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jul-to-slf4j</artifactId>
-            <version>1.6.6</version>
-        </dependency-->
-
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.0.7</version>
-        </dependency>
-
-=======
->>>>>>> 147b3510e61ccc665bb69deddea5364191a4c975:integrasjonspunkt/pom.xml
-        <dependency>
-            <groupId>org.modelmapper</groupId>
-            <artifactId>modelmapper</artifactId>
-            <version>0.7.3</version>
-        </dependency>
-
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>noarkexchange</artifactId>
@@ -363,8 +328,6 @@
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-simple</artifactId>
                 </exclusion>
-<<<<<<< HEAD:integrasjonspunkt/pom.xml
-=======
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-log4j12</artifactId>
@@ -373,7 +336,6 @@
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
                 </exclusion>
->>>>>>> 147b3510e61ccc665bb69deddea5364191a4c975:integrasjonspunkt/pom.xml
             </exclusions>
         </dependency>
 
