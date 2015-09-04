@@ -5,7 +5,7 @@ import no.altinn.schemas.services.intermediary.shipment._2009._10.ReferenceType;
 import no.altinn.services.intermediary.receipt._2009._10.IReceiptExternalBasicGetReceiptBasicAltinnFaultFaultFaultMessage;
 import no.altinn.services.intermediary.receipt._2009._10.ReceiptExternalBasicSF;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.shipping.Request;
+import no.difi.meldingsutveksling.shipping.UploadRequest;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -16,7 +16,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class AltinnClient {
-    public Receipt send(Request request) {
+    public Receipt send(UploadRequest request) {
         // må ha inn properties for ssh key file name og url for sftp server
         SFtpClient sftpClient = new SFtpClient("localhost");
         try (SFtpClient.Connection connection = sftpClient.connect("test_key")) {
@@ -52,7 +52,7 @@ public class AltinnClient {
     }
 
 
-    private ReceiptExternal getReceipt(Request request) {
+    private ReceiptExternal getReceipt(UploadRequest request) {
         try {
             ReceiptExternalBasicSF abinn;
             abinn = new ReceiptExternalBasicSF(new URL("http://localhost:7777/altinn/receipt"), new QName("http://www.altinn.no/services/Intermediary/Receipt/2009/10", "IReceiptExternalBasicImplService"));

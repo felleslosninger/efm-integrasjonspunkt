@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.integrasjonspunkt.altinnreceive;
 
-import no.difi.meldingsutveksling.AltinnWsClient;
 import no.difi.meldingsutveksling.DownloadRequest;
 import no.difi.meldingsutveksling.FileReference;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -15,23 +14,21 @@ import org.modelmapper.ModelMapper;
  */
 class CallReceiveRunnable implements Runnable {
 
-    private AltinnWsClient wsClient;
-    private Receive receive;
+    private ReceiveClientContext ctx;
     private FileReference file;
-    private String orgNumber;
 
-    public CallReceiveRunnable(AltinnWsClient wsClient, Receive receive, FileReference file, String orgNumber) {
-        this.wsClient = wsClient;
-        this.receive = receive;
+    public CallReceiveRunnable(ReceiveClientContext ctx, FileReference file) {
+        this.ctx = ctx;
         this.file = file;
-        this.orgNumber = orgNumber;
     }
 
     @Override
     public void run() {
-        DownloadRequest request = new DownloadRequest(file.getValue(), orgNumber);
-        StandardBusinessDocument doc = wsClient.download(request);
-        CorrelationInformation result = receive.callReceive(new ModelMapper().map(doc, no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument.class));
+        DownloadRequest request = new DownloadRequest(file.getValue(), ctx.getOrgNr());
+        StandardBusinessDocument doc = ctx.getAltinnWsClient().download(request);
+        CorrelationInformation result = ctx.getReceiveClient().callReceive(new ModelMapper().map(doc, no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument.class));
         System.out.println(result.getRequestingDocumentInstanceIdentifier() + " sent ");
     }
+
+
 }

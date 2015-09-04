@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling;
 
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.shipping.Request;
+import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.transport.Transport;
 
 public class AltinnTransport implements Transport {
@@ -14,7 +14,7 @@ public class AltinnTransport implements Transport {
     // get receipt <-- ok
     @Override
     public void send(StandardBusinessDocument document) {
-        Request request1 = new Request() {
+        UploadRequest request1 = new UploadRequest() {
 
             @Override
             public String getSender() {
@@ -36,6 +36,5 @@ public class AltinnTransport implements Transport {
                 return new StandardBusinessDocument();
             }
         };
-        new AltinnFTPClient().send(request1);
     }
 }

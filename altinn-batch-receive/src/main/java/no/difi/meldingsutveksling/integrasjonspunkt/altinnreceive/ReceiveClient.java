@@ -7,16 +7,16 @@ import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessD
 import javax.xml.ws.BindingProvider;
 
 /**
- * This class is responsible for involing the web service methos "receive" on the
- * "integrasjonspunkt" receiving the document
+ * This class is responsible for calleing the web service method "receive" on the
+ * "integrasjonspunkt" that is receiving the document
  *
  * @author Glenn Bech
  */
-class Receive {
+class ReceiveClient {
 
     private SOAReceivePort port;
 
-    public Receive(String endPointURL) {
+    public ReceiveClient(String endPointURL) {
         no.difi.meldingsutveksling.noarkexchange.schema.receive.Receive exchange = new no.difi.meldingsutveksling.noarkexchange.schema.receive.Receive();
         port = exchange.getReceivePort();
         BindingProvider bp = (BindingProvider) port;

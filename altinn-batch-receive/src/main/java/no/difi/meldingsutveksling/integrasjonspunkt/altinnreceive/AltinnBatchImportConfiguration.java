@@ -5,13 +5,13 @@ package no.difi.meldingsutveksling.integrasjonspunkt.altinnreceive;
  *
  * @author Glenn Bech
  */
-public class AltinnBatchImportOptions {
+public class AltinnBatchImportConfiguration {
 
     private String integrasjonspunktEndPointURL;
     private String organisationNumber;
     private int threadPoolSize;
 
-    public AltinnBatchImportOptions(String integrasjonspunktEndPointURL, String organisationNumber, int threadPoolSize) {
+    public AltinnBatchImportConfiguration(String integrasjonspunktEndPointURL, String organisationNumber, int threadPoolSize) {
         this.integrasjonspunktEndPointURL = integrasjonspunktEndPointURL;
         this.organisationNumber = organisationNumber;
         this.threadPoolSize = threadPoolSize;
@@ -26,6 +26,6 @@ public class AltinnBatchImportOptions {
     }
 
     public int getThreadPoolSize() {
-        return this.threadPoolSize;
+        return threadPoolSize;
     }
 }

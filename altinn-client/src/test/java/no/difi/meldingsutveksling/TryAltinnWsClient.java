@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling;
 
-import no.difi.meldingsutveksling.shipping.Request;
+import no.difi.meldingsutveksling.shipping.UploadRequest;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +17,7 @@ public class TryAltinnWsClient {
         AltinnWsConfiguration configuration = configurationFromProperties();
 
         client = new AltinnWsClient(configuration);
-        Request request = new MockRequest();
+        UploadRequest request = new MockRequest();
         System.out.println("Testing send");
         client.send(request);
 
