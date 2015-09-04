@@ -30,6 +30,7 @@
         <module>transport-file</module>
         <module>virksomhetssertifikatvalidator</module>
         <module>transport-altinn</module>
+        <module>altinn-batch-receive</module>
         <module>altinnmock</module>
         <module>altinn-client</module>
     </modules>

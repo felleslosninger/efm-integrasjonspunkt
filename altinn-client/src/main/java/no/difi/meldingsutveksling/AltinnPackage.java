@@ -2,11 +2,12 @@ package no.difi.meldingsutveksling;
 
 import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceManifest;
 import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceRecipientList;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.shipping.sftp.BrokerServiceManifestBuilder;
 import no.difi.meldingsutveksling.shipping.sftp.ExternalServiceBuilder;
 import no.difi.meldingsutveksling.shipping.sftp.RecipientBuilder;
-import no.difi.meldingsutveksling.shipping.Request;
 
 import javax.xml.bind.*;
 import javax.xml.transform.Source;
@@ -19,7 +20,7 @@ import java.util.zip.ZipOutputStream;
 
 /**
  * Represents an Altinn package to be used with the formidlingstjeneste SFTP channel.
- *
+ * <p/>
  * Has factory methods of writing/reading from to zip files via input/output streams.
  */
 public class AltinnPackage {
@@ -42,15 +43,15 @@ public class AltinnPackage {
         this.document = document;
     }
 
-    public static AltinnPackage from(Request document) {
+    public static AltinnPackage from(UploadRequest document) {
         BrokerServiceManifestBuilder manifest = new BrokerServiceManifestBuilder();
         manifest.withSender(document.getSender());
         manifest.withSenderReference(document.getSenderReference());
         manifest.withExternalService(
                 new ExternalServiceBuilder()
-                .withExternalServiceCode("v3888")
-                .withExternalServiceEditionCode(new BigInteger("070515"))
-                .build());
+                        .withExternalServiceCode("v3888")
+                        .withExternalServiceEditionCode(new BigInteger("070515"))
+                        .build());
 
         RecipientBuilder recipient = new RecipientBuilder(document.getReceiver());
         return new AltinnPackage(manifest.build(), recipient.build(), document.getPayload());
@@ -58,6 +59,7 @@ public class AltinnPackage {
 
     /**
      * Writes the Altinn package as a Zip file
+     *
      * @param outputStream where the Zip file is written
      * @throws IOException
      */
@@ -97,17 +99,26 @@ public class AltinnPackage {
         BrokerServiceManifest manifest = null;
         BrokerServiceRecipientList recipientList = null;
         StandardBusinessDocument document = null;
-        while((zipEntry = zipInputStream.getNextEntry()) != null) {
-            if(zipEntry.getName().equals("manifest.xml")) {
-                 manifest = (BrokerServiceManifest) unmarshaller.unmarshal(inputStreamProxy);
-            } else if(zipEntry.getName().equals("recipients.xml")) {
-                 recipientList = (BrokerServiceRecipientList) unmarshaller.unmarshal(inputStreamProxy);
-            } else if(zipEntry.getName().equals("content.xml")) {
+
+        while ((zipEntry = zipInputStream.getNextEntry()) != null) {
+            if (zipEntry.getName().equals("manifest.xml")) {
+                manifest = (BrokerServiceManifest) unmarshaller.unmarshal(inputStreamProxy);
+            } else if (zipEntry.getName().equals("recipients.xml")) {
+                recipientList = (BrokerServiceRecipientList) unmarshaller.unmarshal(inputStreamProxy);
+            } else if (zipEntry.getName().equals("content.xml")) {
                 Source source = new StreamSource(inputStreamProxy);
                 document = unmarshaller.unmarshal(source, StandardBusinessDocument.class).getValue();
             }
         }
-
+        if (manifest == null) {
+            throw new MeldingsUtvekslingRuntimeException();
+        }
+        if (recipientList == null) {
+            throw new MeldingsUtvekslingRuntimeException();
+        }
+        if (document == null) {
+            throw new MeldingsUtvekslingRuntimeException();
+        }
         return new AltinnPackage(manifest, recipientList, document);
     }
 

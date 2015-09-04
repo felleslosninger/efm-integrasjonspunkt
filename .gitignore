@@ -5,8 +5,9 @@
 /**/generated-sources/jaxb
 /**/generated-sources/wsimport
 /noarkexchange/src/main/java/no/difi/meldingsutveksling/noarkexchange/schema/receive/receive_ReceivePortImpl.java
-/integransjonpunkt-logs
-/integransjonpunkt-logs/application.log
+/integrasjonspunkt-logs
+/integrasjonspunkt-logs/application.log
+/integrasjonspunkt/build/certificate
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/

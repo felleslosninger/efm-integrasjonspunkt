@@ -22,6 +22,5 @@ public class CliOptions extends Options {
 		OptionBuilder.withDescription("Recursively go trough sub-folders");
 		addOption(OptionBuilder.create("r"));
 		
-		
 	}
 }

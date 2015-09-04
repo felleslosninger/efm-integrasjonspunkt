@@ -1,9 +1,9 @@
 package no.difi.meldingsutveksling;
 
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.shipping.Request;
+import no.difi.meldingsutveksling.shipping.UploadRequest;
 
-public class MockRequest implements Request{
+public class MockRequest implements UploadRequest {
         @Override
         public String getSender() {
         return "123456789";

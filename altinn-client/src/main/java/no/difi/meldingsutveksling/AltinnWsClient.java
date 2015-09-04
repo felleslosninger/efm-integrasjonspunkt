@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.*;
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.*;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.shipping.Request;
+import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.shipping.ws.AltinnWsException;
 import no.difi.meldingsutveksling.shipping.ws.ManifestBuilder;
 import no.difi.meldingsutveksling.shipping.ws.RecipientBuilder;
@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AltinnWsClient {
+
     public static final String FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE = "Failed to upload a message to Altinn broker service";
     public static final String FAILED_TO_INITATE_ALTINN_BROKER_SERVICE = "Failed to initate Altinn broker service";
     public static final String FILE_NAME = "sbd.zip";
@@ -24,12 +25,12 @@ public class AltinnWsClient {
         this.configuration = configuration;
     }
 
-    public void send(Request request) {
+    public void send(UploadRequest request) {
         String senderReference = initiateBrokerService(request);
         upload(request, senderReference);
     }
 
-    private void upload(Request request, String senderReference) {
+    private void upload(UploadRequest request, String senderReference) {
         BrokerServiceExternalBasicStreamedSF brokerServiceExternalBasicStreamedSF;
 
         brokerServiceExternalBasicStreamedSF = new BrokerServiceExternalBasicStreamedSF(configuration.getStreamingServiceUrl());
@@ -92,7 +93,7 @@ public class AltinnWsClient {
         return converter.unmarshallFrom(message);
     }
 
-    private String initiateBrokerService(Request request) {
+    private String initiateBrokerService(UploadRequest request) {
         BrokerServiceInitiation brokerServiceInitiation = createInitiationRequest(request);
         try {
             BrokerServiceExternalBasicSF brokerService = new BrokerServiceExternalBasicSF(configuration.getBrokerServiceUrl(), new QName("http://www.altinn.no/services/ServiceEngine/Broker/2015/06", "IBrokerServiceExternalBasicImplService"));
@@ -102,7 +103,7 @@ public class AltinnWsClient {
         }
     }
 
-    private BrokerServiceInitiation createInitiationRequest(Request request) {
+    private BrokerServiceInitiation createInitiationRequest(UploadRequest request) {
         BrokerServiceInitiation initiateRequest = new BrokerServiceInitiation();
 
         ManifestBuilder manifestBuilder = new ManifestBuilder()

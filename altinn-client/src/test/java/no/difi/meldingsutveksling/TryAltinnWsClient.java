@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling;
 
+import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.shipping.Request;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +18,7 @@ public class TryAltinnWsClient {
         AltinnWsConfiguration configuration = configurationFromProperties();
 
         client = new AltinnWsClient(configuration);
-        Request request = new MockRequest();
+        UploadRequest request = new MockRequest();
         System.out.println("Testing send");
         client.send(request);
 
@@ -31,7 +31,6 @@ public class TryAltinnWsClient {
             StandardBusinessDocument sbd = client.download(new DownloadRequest(fileReference.getValue(), request.getReceiver()));
             System.out.println("downloaded sbd " + sbd);
         }
-
     }
 
     public static AltinnWsConfiguration configurationFromProperties() {
