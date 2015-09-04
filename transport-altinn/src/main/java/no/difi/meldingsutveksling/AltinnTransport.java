@@ -1,10 +1,20 @@
 package no.difi.meldingsutveksling;
 
+import no.difi.meldingsutveksling.common.PropertyLoader;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.transport.Transport;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 public class AltinnTransport implements Transport {
+    PropertyLoader propertyLoader;
+
+    public AltinnTransport() {
+
+    }
+
     public static void main(String[] args) {
         new AltinnTransport().send(new StandardBusinessDocument());
     }
@@ -14,6 +24,13 @@ public class AltinnTransport implements Transport {
     // get receipt <-- ok
     @Override
     public void send(StandardBusinessDocument document) {
+        try {
+            new AltinnWsConfiguration.Builder().withBrokerServiceUrl(new URL("")).withStreamingServiceUrl(new URL("")).withUsername("donald").withPassword("password").build();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        AltinnWsClient client = new AltinnWsClient(AltinnWsConfiguration.fromProperties());
+
         UploadRequest request1 = new UploadRequest() {
 
             @Override
@@ -36,5 +53,15 @@ public class AltinnTransport implements Transport {
                 return new StandardBusinessDocument();
             }
         };
+
+        client.send(request1);
+    }
+
+
+
+    private class AltinnTransportException extends RuntimeException {
+        public AltinnTransportException(String message, Exception exception) {
+            super(message, exception);
+        }
     }
 }
