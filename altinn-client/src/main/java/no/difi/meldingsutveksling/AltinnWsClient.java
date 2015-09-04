@@ -8,7 +8,6 @@ import no.difi.meldingsutveksling.shipping.ws.AltinnWsException;
 import no.difi.meldingsutveksling.shipping.ws.ManifestBuilder;
 import no.difi.meldingsutveksling.shipping.ws.RecipientBuilder;
 
-import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,7 +51,7 @@ public class AltinnWsClient {
     public List<FileReference> availableFiles(String partyNumber) {
         BrokerServiceExternalBasicSF brokerServiceExternalBasicSF;
 
-        brokerServiceExternalBasicSF = new BrokerServiceExternalBasicSF(configuration.getBrokerServiceUrl(), new QName("http://www.altinn.no/services/ServiceEngine/Broker/2015/06", "IBrokerServiceExternalBasicImplService"));
+        brokerServiceExternalBasicSF = new BrokerServiceExternalBasicSF(configuration.getBrokerServiceUrl());
 
         IBrokerServiceExternalBasic service = brokerServiceExternalBasicSF.getBasicHttpBindingIBrokerServiceExternalBasic();
 
@@ -96,7 +95,7 @@ public class AltinnWsClient {
     private String initiateBrokerService(UploadRequest request) {
         BrokerServiceInitiation brokerServiceInitiation = createInitiationRequest(request);
         try {
-            BrokerServiceExternalBasicSF brokerService = new BrokerServiceExternalBasicSF(configuration.getBrokerServiceUrl(), new QName("http://www.altinn.no/services/ServiceEngine/Broker/2015/06", "IBrokerServiceExternalBasicImplService"));
+            BrokerServiceExternalBasicSF brokerService = new BrokerServiceExternalBasicSF(configuration.getBrokerServiceUrl());
             return brokerService.getBasicHttpBindingIBrokerServiceExternalBasic().initiateBrokerServiceBasic(configuration.getUsername(), configuration.getPassword(), brokerServiceInitiation);
         } catch (IBrokerServiceExternalBasicInitiateBrokerServiceBasicAltinnFaultFaultFaultMessage e) {
             throw new AltinnWsException(FAILED_TO_INITATE_ALTINN_BROKER_SERVICE, e);
