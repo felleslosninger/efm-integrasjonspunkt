@@ -8,6 +8,9 @@ import no.difi.meldingsutveksling.shipping.ws.AltinnWsException;
 import no.difi.meldingsutveksling.shipping.ws.ManifestBuilder;
 import no.difi.meldingsutveksling.shipping.ws.RecipientBuilder;
 
+import javax.xml.ws.BindingProvider;
+import javax.xml.ws.soap.MTOMFeature;
+import javax.xml.ws.soap.SOAPBinding;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,11 +52,12 @@ public class AltinnWsClient {
     }
 
     public List<FileReference> availableFiles(String partyNumber) {
+
         BrokerServiceExternalBasicSF brokerServiceExternalBasicSF;
-
-        brokerServiceExternalBasicSF = new BrokerServiceExternalBasicSF(configuration.getBrokerServiceUrl());
-
+        brokerServiceExternalBasicSF = new BrokerServiceExternalBasicSF();
         IBrokerServiceExternalBasic service = brokerServiceExternalBasicSF.getBasicHttpBindingIBrokerServiceExternalBasic();
+        BindingProvider bp = (BindingProvider) service;
+        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, configuration.getBrokerServiceUrl().toString());
 
         BrokerServiceSearch searchParameters = new BrokerServiceSearch();
         searchParameters.setFileStatus(BrokerServiceAvailableFileStatus.UPLOADED);
@@ -67,7 +71,7 @@ public class AltinnWsClient {
         }
 
         List<FileReference> fileReferences = new ArrayList<>();
-        for(BrokerServiceAvailableFile f: filesBasic.getBrokerServiceAvailableFile()) {
+        for (BrokerServiceAvailableFile f : filesBasic.getBrokerServiceAvailableFile()) {
             fileReferences.add(new FileReference(f.getFileReference(), f.getReceiptID()));
         }
 
@@ -76,10 +80,14 @@ public class AltinnWsClient {
 
     public StandardBusinessDocument download(DownloadRequest request) {
         BrokerServiceExternalBasicStreamedSF brokerServiceExternalBasicStreamedSF;
+        brokerServiceExternalBasicStreamedSF = new BrokerServiceExternalBasicStreamedSF();
 
-        brokerServiceExternalBasicStreamedSF = new BrokerServiceExternalBasicStreamedSF(configuration.getStreamingServiceUrl());
+        IBrokerServiceExternalBasicStreamed streamingService = brokerServiceExternalBasicStreamedSF.getBasicHttpBindingIBrokerServiceExternalBasicStreamed(new MTOMFeature());
+        BindingProvider bp = (BindingProvider) streamingService;
+        SOAPBinding binding = (SOAPBinding) bp.getBinding();
+        binding.setMTOMEnabled(true);
 
-        IBrokerServiceExternalBasicStreamed streamingService = brokerServiceExternalBasicStreamedSF.getBasicHttpBindingIBrokerServiceExternalBasicStreamed();
+        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, configuration.getBrokerServiceUrl().toString());
 
         byte[] message;
         try {
