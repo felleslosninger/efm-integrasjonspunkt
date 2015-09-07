@@ -11,10 +11,11 @@ import static org.apache.commons.lang.StringEscapeUtils.unescapeHtml;
 import static org.junit.Assert.assertEquals;
 
 /**
-
+ * TOOD: Add test for payload of type ElementNSImpl and other variants
+ *
+ * @author Glenn Bech
  */
 public class JournalPostIdTest {
-
 
     String payloadAsString = "&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;\n" +
             "&lt;Melding xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.arkivverket.no/Noark4-1-WS-WD/types\"&gt;\n" +
