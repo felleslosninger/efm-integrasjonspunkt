@@ -14,6 +14,8 @@ import no.difi.meldingsutveksling.oxalisexchange.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -37,6 +39,8 @@ import static no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentF
 
 @Component
 public class MessageSender {
+
+    private Logger log = LoggerFactory.getLogger(MessageSender.class);
 
     private static final String JP_ID = "jpId";
     private static final String DATA = "data";
@@ -143,6 +147,9 @@ public class MessageSender {
 
     private Document getDocument(PutMessageRequestType message) throws MeldingsUtvekslingRuntimeException {
         DocumentBuilder documentBuilder = getDocumentBuilder();
+
+        log.info("getDocument: ", message.getPayload());
+
         Element element = (Element) message.getPayload();
         NodeList nodeList = element.getElementsByTagName(DATA);
         if (nodeList.getLength() == 0) {
