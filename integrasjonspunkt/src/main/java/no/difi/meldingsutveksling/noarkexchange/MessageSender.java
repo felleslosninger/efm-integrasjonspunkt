@@ -148,7 +148,8 @@ public class MessageSender {
     private Document getDocument(PutMessageRequestType message) throws MeldingsUtvekslingRuntimeException {
         DocumentBuilder documentBuilder = getDocumentBuilder();
 
-        log.info("getDocument: ", message.getPayload());
+        System.out.println(message.getPayload() != null ? message.getPayload() : "Payload was null.");
+        log.info("getDocument: \n" + (message.getPayload() != null ? message.getPayload() : "Payload was null."));
 
         Element element = (Element) message.getPayload();
         NodeList nodeList = element.getElementsByTagName(DATA);
