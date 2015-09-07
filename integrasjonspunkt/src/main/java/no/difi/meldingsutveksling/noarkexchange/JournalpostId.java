@@ -17,7 +17,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 /**
- * Wrapper for a NOARK JournalpostID
+ * Wrapper for a NOARK JournalpostID. The class will extract The NOARK jpID field for different
+ * payload styles
  *
  * @author Glenn Bech
  */
