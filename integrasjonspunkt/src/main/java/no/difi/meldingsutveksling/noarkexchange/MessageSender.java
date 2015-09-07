@@ -128,7 +128,8 @@ public class MessageSender {
         t.send(sbd);
 
         eventLog.log(createOkStateEvent(message));
-        return new PutMessageResponseType();
+
+        return CreateOkResponse();
     }
 
     private String getJpId(PutMessageRequestType message) {
@@ -171,10 +172,21 @@ public class MessageSender {
     }
 
 
+    //TODO: Denne returnerer feil response, noe rart i generet kode
+    //Type skal være ERROR, får ikke satt message i generert kode
     private PutMessageResponseType createErrorResponse(String message) {
         PutMessageResponseType response = new PutMessageResponseType();
         AppReceiptType receipt = new AppReceiptType();
-        receipt.setType(message);
+        receipt.setType("ERROR");
+        response.setResult(receipt);
+        return response;
+    }
+
+    //TODO: Se på setting av melding, se i sammenheng med metoden over
+    private PutMessageResponseType CreateOkResponse() {
+        PutMessageResponseType response = new PutMessageResponseType();
+        AppReceiptType receipt = new AppReceiptType();
+        receipt.setType("OK");
         response.setResult(receipt);
         return response;
     }
