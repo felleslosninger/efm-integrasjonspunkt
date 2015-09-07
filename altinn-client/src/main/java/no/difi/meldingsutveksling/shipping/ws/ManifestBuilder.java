@@ -7,6 +7,8 @@ public class ManifestBuilder {
     private String sender;
     private String senderReference;
     private String filename;
+    private String serviceCode;
+    private int editionCode;
 
     public ManifestBuilder withSender(String sender) {
         this.sender = sender;
@@ -28,7 +30,18 @@ public class ManifestBuilder {
         manifest.setReportee(sender);
         manifest.setSendersReference(senderReference);
         manifest.setFileList(new FileListBuilder().withFilename(filename).build());
+        manifest.setExternalServiceCode(serviceCode);
+        manifest.setExternalServiceEditionCode(editionCode);
         return manifest;
     }
 
+    public ManifestBuilder withExternalServiceCode(String serviceCode) {
+        this.serviceCode = serviceCode;
+        return this;
+    }
+
+    public ManifestBuilder withExternalServiceEditionCode(int editionCode) {
+        this.editionCode = editionCode;
+        return this;
+    }
 }

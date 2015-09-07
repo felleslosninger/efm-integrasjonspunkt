@@ -6,12 +6,12 @@ import no.difi.meldingsutveksling.shipping.UploadRequest;
 public class MockRequest implements UploadRequest {
         @Override
         public String getSender() {
-        return "123456789";
+        return "910075918";
     }
 
         @Override
         public String getReceiver() {
-        return "987654321";
+        return "910077473";
     }
 
         @Override
