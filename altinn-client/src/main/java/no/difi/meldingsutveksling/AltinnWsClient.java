@@ -8,9 +8,13 @@ import no.difi.meldingsutveksling.shipping.ws.AltinnWsException;
 import no.difi.meldingsutveksling.shipping.ws.ManifestBuilder;
 import no.difi.meldingsutveksling.shipping.ws.RecipientBuilder;
 
+import javax.xml.bind.JAXBException;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.soap.MTOMFeature;
 import javax.xml.ws.soap.SOAPBinding;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,20 +37,27 @@ public class AltinnWsClient {
     }
 
     private void upload(UploadRequest request, String senderReference) {
+
         BrokerServiceExternalBasicStreamedSF brokerServiceExternalBasicStreamedSF;
 
-        brokerServiceExternalBasicStreamedSF = new BrokerServiceExternalBasicStreamedSF(configuration.getStreamingServiceUrl());
+        brokerServiceExternalBasicStreamedSF = new BrokerServiceExternalBasicStreamedSF();
 
         IBrokerServiceExternalBasicStreamed streamingService = brokerServiceExternalBasicStreamedSF.getBasicHttpBindingIBrokerServiceExternalBasicStreamed();
+
+        BindingProvider bp = (BindingProvider) streamingService;
+        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, configuration.getStreamingServiceUrl().toString());
 
         try {
             StreamedPayloadBasicBE parameters = new StreamedPayloadBasicBE();
 
             StandardBusinessDocumentConverter converter = new StandardBusinessDocumentConverter();
-            parameters.setDataStream(converter.marshallToBytes(request.getPayload()));
+            AltinnPackage altinnPackage = AltinnPackage.from(request);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream(2048);
+            altinnPackage.write(outputStream);
+            parameters.setDataStream(outputStream.toByteArray());
 
-            ReceiptExternalStreamedBE receiptExternal = streamingService.uploadFileStreamedBasic(parameters, FILE_NAME, senderReference, request.getSender(), "password", "username");
-        } catch (IBrokerServiceExternalBasicStreamedUploadFileStreamedBasicAltinnFaultFaultFaultMessage e) {
+            ReceiptExternalStreamedBE receiptExternal = streamingService.uploadFileStreamedBasic(parameters, FILE_NAME, senderReference, request.getSender(), configuration.getPassword(), configuration.getUsername());
+        } catch (IBrokerServiceExternalBasicStreamedUploadFileStreamedBasicAltinnFaultFaultFaultMessage | IOException e) {
             throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, e);
         }
     }
@@ -81,30 +92,37 @@ public class AltinnWsClient {
     public StandardBusinessDocument download(DownloadRequest request) {
         BrokerServiceExternalBasicStreamedSF brokerServiceExternalBasicStreamedSF;
         brokerServiceExternalBasicStreamedSF = new BrokerServiceExternalBasicStreamedSF();
-
-        IBrokerServiceExternalBasicStreamed streamingService = brokerServiceExternalBasicStreamedSF.getBasicHttpBindingIBrokerServiceExternalBasicStreamed(new MTOMFeature());
+        IBrokerServiceExternalBasicStreamed streamingService = brokerServiceExternalBasicStreamedSF.getBasicHttpBindingIBrokerServiceExternalBasicStreamed(new MTOMFeature(true));
         BindingProvider bp = (BindingProvider) streamingService;
+        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, configuration.getStreamingServiceUrl().toString());
         SOAPBinding binding = (SOAPBinding) bp.getBinding();
         binding.setMTOMEnabled(true);
-
-        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, configuration.getBrokerServiceUrl().toString());
 
         byte[] message;
         try {
             message = streamingService.downloadFileStreamedBasic(configuration.getUsername(), configuration.getPassword(), request.getFileReference(), request.getReciever());
-        } catch (IBrokerServiceExternalBasicStreamedDownloadFileStreamedBasicAltinnFaultFaultFaultMessage e) {
+            AltinnPackage altinnPackage = AltinnPackage.from(new ByteArrayInputStream(message));
+            return altinnPackage.getDocument();
+
+        } catch (IBrokerServiceExternalBasicStreamedDownloadFileStreamedBasicAltinnFaultFaultFaultMessage | IOException | JAXBException e) {
             throw new AltinnWsException("Cannot download file", e);
         }
-
-        StandardBusinessDocumentConverter converter = new StandardBusinessDocumentConverter();
-        return converter.unmarshallFrom(message);
     }
 
     private String initiateBrokerService(UploadRequest request) {
+
+
+
+
+
         BrokerServiceInitiation brokerServiceInitiation = createInitiationRequest(request);
         try {
-            BrokerServiceExternalBasicSF brokerService = new BrokerServiceExternalBasicSF(configuration.getBrokerServiceUrl());
-            return brokerService.getBasicHttpBindingIBrokerServiceExternalBasic().initiateBrokerServiceBasic(configuration.getUsername(), configuration.getPassword(), brokerServiceInitiation);
+            BrokerServiceExternalBasicSF brokerServiceExternalBasicSF;
+            brokerServiceExternalBasicSF = new BrokerServiceExternalBasicSF();
+            IBrokerServiceExternalBasic service = brokerServiceExternalBasicSF.getBasicHttpBindingIBrokerServiceExternalBasic();
+            BindingProvider bp = (BindingProvider) service;
+            bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, configuration.getBrokerServiceUrl().toString());
+            return service.initiateBrokerServiceBasic(configuration.getUsername(), configuration.getPassword(), brokerServiceInitiation);
         } catch (IBrokerServiceExternalBasicInitiateBrokerServiceBasicAltinnFaultFaultFaultMessage e) {
             throw new AltinnWsException(FAILED_TO_INITATE_ALTINN_BROKER_SERVICE, e);
         }
@@ -116,6 +134,8 @@ public class AltinnWsClient {
         ManifestBuilder manifestBuilder = new ManifestBuilder()
                 .withSender(request.getSender())
                 .withSenderReference(request.getSenderReference())
+                .withExternalServiceCode("v3888")
+                .withExternalServiceEditionCode(70515)
                 .withFilename(FILE_NAME);
         initiateRequest.setManifest(manifestBuilder.build());
         initiateRequest.setRecipientList(new RecipientBuilder().withPartyNumber(request.getReceiver()).build());
