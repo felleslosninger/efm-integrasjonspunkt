@@ -23,7 +23,6 @@ public class AltinnWsClient {
     public static final String FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE = "Failed to upload a message to Altinn broker service";
     public static final String FAILED_TO_INITATE_ALTINN_BROKER_SERVICE = "Failed to initate Altinn broker service";
     public static final String FILE_NAME = "sbd.zip";
-    private static final int BUFFER_SIZE = 65536;
     public static final String AVAILABLE_FILES_ERROR_MESSAGE = "Could not get list of available files from Altinn formidlingstjeneste";
     private final AltinnWsConfiguration configuration;
 
@@ -50,9 +49,8 @@ public class AltinnWsClient {
         try {
             StreamedPayloadBasicBE parameters = new StreamedPayloadBasicBE();
 
-            StandardBusinessDocumentConverter converter = new StandardBusinessDocumentConverter();
             AltinnPackage altinnPackage = AltinnPackage.from(request);
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream(2048);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             altinnPackage.write(outputStream);
             parameters.setDataStream(outputStream.toByteArray());
 

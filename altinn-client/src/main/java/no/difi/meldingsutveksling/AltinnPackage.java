@@ -2,20 +2,26 @@ package no.difi.meldingsutveksling;
 
 import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceManifest;
 import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceRecipientList;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.shipping.sftp.BrokerServiceManifestBuilder;
 import no.difi.meldingsutveksling.shipping.sftp.ExternalServiceBuilder;
 import no.difi.meldingsutveksling.shipping.sftp.RecipientBuilder;
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 
-import javax.xml.bind.*;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
-import java.io.*;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 /**
@@ -85,7 +91,7 @@ public class AltinnPackage {
     }
 
     public static AltinnPackage from(InputStream inputStream) throws IOException, JAXBException {
-        ZipInputStream zipInputStream = new ZipInputStream(inputStream);
+        ZipArchiveInputStream zipInputStream = new ZipArchiveInputStream(inputStream);
         InputStream inputStreamProxy = new FilterInputStream(zipInputStream) {
             @Override
             public void close() throws IOException {
@@ -95,7 +101,7 @@ public class AltinnPackage {
 
         Unmarshaller unmarshaller = ctx.createUnmarshaller();
 
-        ZipEntry zipEntry;
+        ArchiveEntry zipEntry;
         BrokerServiceManifest manifest = null;
         BrokerServiceRecipientList recipientList = null;
         StandardBusinessDocument document = null;
@@ -109,15 +115,6 @@ public class AltinnPackage {
                 Source source = new StreamSource(inputStreamProxy);
                 document = unmarshaller.unmarshal(source, StandardBusinessDocument.class).getValue();
             }
-        }
-        if (manifest == null) {
-            throw new MeldingsUtvekslingRuntimeException();
-        }
-        if (recipientList == null) {
-            throw new MeldingsUtvekslingRuntimeException();
-        }
-        if (document == null) {
-            throw new MeldingsUtvekslingRuntimeException();
         }
         return new AltinnPackage(manifest, recipientList, document);
     }
