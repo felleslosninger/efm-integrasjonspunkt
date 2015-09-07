@@ -129,7 +129,7 @@ public class MessageSender {
 
         eventLog.log(createOkStateEvent(message));
 
-        return CreateOkResponse();
+        return createOkResponse();
     }
 
     private String getJpId(PutMessageRequestType message) {
@@ -183,7 +183,7 @@ public class MessageSender {
     }
 
     //TODO: Se på setting av melding, se i sammenheng med metoden over
-    private PutMessageResponseType CreateOkResponse() {
+    private PutMessageResponseType createOkResponse() {
         PutMessageResponseType response = new PutMessageResponseType();
         AppReceiptType receipt = new AppReceiptType();
         receipt.setType("OK");
