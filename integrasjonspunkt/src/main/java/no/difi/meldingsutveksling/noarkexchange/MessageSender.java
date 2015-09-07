@@ -24,7 +24,7 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
 import static no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory.create;
-import static no.difi.meldingsutveksling.noarkexchange.schema.JournalpostId.fromPutMessage;
+import static no.difi.meldingsutveksling.noarkexchange.JournalpostId.fromPutMessage;
 
 @Component
 public class MessageSender {

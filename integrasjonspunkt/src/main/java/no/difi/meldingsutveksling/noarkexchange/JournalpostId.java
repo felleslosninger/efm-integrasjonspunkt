@@ -1,7 +1,8 @@
-package no.difi.meldingsutveksling.noarkexchange.schema;
+package no.difi.meldingsutveksling.noarkexchange;
 
 import com.sun.org.apache.xerces.internal.dom.ElementNSImpl;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
