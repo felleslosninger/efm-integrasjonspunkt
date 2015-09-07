@@ -17,29 +17,18 @@ import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
 import static no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory.create;
+import static no.difi.meldingsutveksling.noarkexchange.schema.JournalpostId.fromPutMessage;
 
 @Component
 public class MessageSender {
 
-    private static final String JP_ID = "jpId";
-    private static final String DATA = "data";
 
     @Autowired
     EventLog eventLog;
@@ -89,7 +78,8 @@ public class MessageSender {
     public PutMessageResponseType sendMessage(PutMessageRequestType message) {
 
         String conversationId = message.getEnvelope().getConversationId();
-        String journalPostId = getJpId(message);
+        JournalpostId p = fromPutMessage(message);
+        String journalPostId = p.value();
 
         IntegrasjonspunktContext context = new IntegrasjonspunktContext();
         context.setJpId(journalPostId);
@@ -111,7 +101,7 @@ public class MessageSender {
         eventLog.log(new Event(ProcessState.SIGNATURE_VALIDATED));
 
         SignatureHelper helper = new IntegrasjonspunktNokkel().getSignatureHelper();
-        StandardBusinessDocument sbd ;
+        StandardBusinessDocument sbd;
         try {
             sbd = create(message, helper, context.getAvsender(), context.getMottaker());
 
@@ -129,45 +119,6 @@ public class MessageSender {
 
         eventLog.log(createOkStateEvent(message));
         return new PutMessageResponseType();
-    }
-
-    private String getJpId(PutMessageRequestType message) {
-        Document document = getDocument(message);
-        NodeList messageElement = document.getElementsByTagName(JP_ID);
-        if (messageElement.getLength() == 0) {
-            throw new MeldingsUtvekslingRuntimeException("no " + JP_ID + " element in document ");
-        }
-        return messageElement.item(0).getTextContent();
-    }
-
-    private Document getDocument(PutMessageRequestType message) throws MeldingsUtvekslingRuntimeException {
-        DocumentBuilder documentBuilder = getDocumentBuilder();
-        Element element = (Element) message.getPayload();
-        NodeList nodeList = element.getElementsByTagName(DATA);
-        if (nodeList.getLength() == 0) {
-            throw new MeldingsUtvekslingRuntimeException("no " + DATA + " element in payload");
-        }
-        Node payloadData = nodeList.item(0);
-        String payloadDataTextContent = payloadData.getTextContent();
-        Document document;
-
-        try {
-            document = documentBuilder.parse(new InputSource(new ByteArrayInputStream(payloadDataTextContent.getBytes("utf-8"))));
-        } catch (SAXException | IOException e) {
-            throw new MeldingsUtvekslingRuntimeException(e);
-        }
-        return document;
-    }
-
-    private DocumentBuilder getDocumentBuilder() {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder;
-        try {
-            builder = factory.newDocumentBuilder();
-        } catch (ParserConfigurationException e) {
-            throw new MeldingsUtvekslingRuntimeException(e);
-        }
-        return builder;
     }
 
 
