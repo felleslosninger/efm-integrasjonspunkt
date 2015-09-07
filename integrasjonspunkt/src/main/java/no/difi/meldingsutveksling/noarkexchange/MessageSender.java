@@ -14,6 +14,8 @@ import no.difi.meldingsutveksling.oxalisexchange.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -29,6 +31,7 @@ import static no.difi.meldingsutveksling.noarkexchange.JournalpostId.fromPutMess
 @Component
 public class MessageSender {
 
+    private Logger log = LoggerFactory.getLogger(MessageSender.class);
 
     @Autowired
     EventLog eventLog;
@@ -118,14 +121,26 @@ public class MessageSender {
         t.send(sbd);
 
         eventLog.log(createOkStateEvent(message));
-        return new PutMessageResponseType();
+
+        return createOkResponse();
     }
 
 
+    //TODO: Denne returnerer feil response, noe rart i generet kode
+    //Type skal være ERROR, får ikke satt message i generert kode
     private PutMessageResponseType createErrorResponse(String message) {
         PutMessageResponseType response = new PutMessageResponseType();
         AppReceiptType receipt = new AppReceiptType();
-        receipt.setType(message);
+        receipt.setType("ERROR");
+        response.setResult(receipt);
+        return response;
+    }
+
+    //TODO: Se på setting av melding, se i sammenheng med metoden over
+    private PutMessageResponseType createOkResponse() {
+        PutMessageResponseType response = new PutMessageResponseType();
+        AppReceiptType receipt = new AppReceiptType();
+        receipt.setType("OK");
         response.setResult(receipt);
         return response;
     }
