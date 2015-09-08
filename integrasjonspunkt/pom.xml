@@ -15,89 +15,17 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <compilerPluginVersion>2.3.2</compilerPluginVersion>
+    <compiler.plugin.version>2.3.2</compiler.plugin.version>
     <jersey-version>1.8</jersey-version>
-    <jstlVersion>1.2</jstlVersion>
-    <jerseyVersion>1.17</jerseyVersion>
-    <springVersion>4.1.2.RELEASE</springVersion>
+    <jstl.version>1.2</jstl.version>
+    <jersey.version>1.17</jersey.version>
+    <spring.version>4.1.2.RELEASE</spring.version>
+    <jackson.version>2.6.1</jackson.version>
+    <flyway.test.version>3.2.1</flyway.test.version>
+    <codecentric.springboot.starter>1.2.2</codecentric.springboot.starter>
   </properties>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.3</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>copy</goal>
-            </goals>
-            <configuration>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
-                  <artifactId>jetty-runner</artifactId>
-                  <version>7.5.4.v20111024</version>
-                  <destFileName>jetty-runner.jar</destFileName>
-                </artifactItem>
-              </artifactItems>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.mortbay.jetty</groupId>
-        <artifactId>jetty-maven-plugin</artifactId>
-        <dependencies>
-          <dependency>
-            <groupId>com.sun.xml.ws</groupId>
-            <artifactId>jaxws-rt</artifactId>
-            <version>2.2.8</version>
-          </dependency>
-
-        </dependencies>
-        <configuration>
-          <webApp>
-            <contextPath>/integrasjonspunkt</contextPath>
-            <!-- <jettyEnvXml>${basedir}/src/test/resources/jetty-env.xml</jettyEnvXml> -->
-          </webApp>
-          <systemProperties>
-            <systemProperty>
-              <name>spring.profiles.active</name>
-              <value>dev</value>
-            </systemProperty>
-          </systemProperties>
-          <connectors>
-            <connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
-              <port>9090</port>
-              <maxIdleTime>60000</maxIdleTime>
-            </connector>
-          </connectors>
-          <stopKey/>
-          <stopPort/>
-        </configuration>
-      </plugin>
-
-
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-
   <dependencies>
-
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-aop</artifactId>
@@ -126,7 +54,7 @@
     <dependency>
       <groupId>de.codecentric</groupId>
       <artifactId>spring-boot-admin-starter-client</artifactId>
-      <version>1.2.2</version>
+      <version>${codecentric.springboot.starter}</version>
     </dependency>
 
     <dependency>
@@ -142,20 +70,12 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-webmvc</artifactId>
-      <version>4.1.2.RELEASE</version>
     </dependency>
 
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.3.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.flywaydb.flyway-test-extensions</groupId>
-      <artifactId>flyway-spring-test</artifactId>
-      <version>3.0</version>
-      <scope>test</scope>
+      <version>${jackson.version}</version>
     </dependency>
 
     <dependency>
@@ -203,7 +123,6 @@
       <artifactId>transport-file</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
-
 
     <dependency>
       <groupId>no.difi.meldingsutveksling</groupId>
@@ -258,13 +177,13 @@
     <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-servlet</artifactId>
-      <version>${jerseyVersion}</version>
+      <version>${jersey.version}</version>
     </dependency>
 
     <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-json</artifactId>
-      <version>${jerseyVersion}</version>
+      <version>${jersey.version}</version>
     </dependency>
 
 
@@ -334,9 +253,88 @@
     </dependency>
 
     <dependency>
+      <groupId>org.flywaydb.flyway-test-extensions</groupId>
+      <artifactId>flyway-spring-test</artifactId>
+      <version>${flyway.test.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
     </dependency>
-
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.3</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>jetty-runner</artifactId>
+                  <version>7.5.4.v20111024</version>
+                  <destFileName>jetty-runner.jar</destFileName>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+        <dependencies>
+          <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>jaxws-rt</artifactId>
+            <version>2.2.8</version>
+          </dependency>
+
+        </dependencies>
+        <configuration>
+          <webApp>
+            <contextPath>/integrasjonspunkt</contextPath>
+            <!-- <jettyEnvXml>${basedir}/src/test/resources/jetty-env.xml</jettyEnvXml> -->
+          </webApp>
+          <systemProperties>
+            <systemProperty>
+              <name>spring.profiles.active</name>
+              <value>dev</value>
+            </systemProperty>
+          </systemProperties>
+          <connectors>
+            <connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
+              <port>9090</port>
+              <maxIdleTime>60000</maxIdleTime>
+            </connector>
+          </connectors>
+          <stopKey/>
+          <stopPort/>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.7</source>
+          <target>1.7</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

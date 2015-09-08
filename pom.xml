@@ -14,7 +14,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <spring.version>4.1.2.RELEASE</spring.version>
     <heroku.plugin.version>0.1.9</heroku.plugin.version>
-    <junit.test.version>4.12</junit.test.version>
+    <spring.webmvc.version>4.1.2.RELEASE</spring.webmvc.version>
+    <junit.version>4.12</junit.version>
   </properties>
 
   <modules>
@@ -36,6 +37,21 @@
     <module>altinnmock</module>
     <module>altinn-client</module>
   </modules>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-webmvc</artifactId>
+      <version>${spring.webmvc.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
   <build>
     <pluginManagement>
@@ -98,13 +114,4 @@
       </properties>
     </profile>
   </profiles>
-
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>${junit.test.version}</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
 </project>
