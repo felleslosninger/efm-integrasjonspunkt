@@ -194,7 +194,7 @@
 
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>transport-oxalis</artifactId>
+            <artifactId>transport-altinn</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
 
