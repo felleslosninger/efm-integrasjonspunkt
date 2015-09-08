@@ -9,6 +9,7 @@
 
   <properties>
     <junit.test.version>4.12</junit.test.version>
+    <commons.codec.version>1.9</commons.codec.version>
   </properties>
 
   <build>
@@ -111,11 +112,13 @@
       <artifactId>commons-io</artifactId>
       <version>2.4</version>
     </dependency>
+
     <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
-      <version>1.9</version>
+      <version>${commons.codec.version}</version>
     </dependency>
+
     <dependency>
       <groupId>org.springframework.ws</groupId>
       <artifactId>spring-xml</artifactId>
@@ -138,7 +141,6 @@
       <artifactId>joda-time</artifactId>
       <version>2.5</version>
     </dependency>
-
 
     <dependency>
       <groupId>no.difi.meldingsutveksling</groupId>
