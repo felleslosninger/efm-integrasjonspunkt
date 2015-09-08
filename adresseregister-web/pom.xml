@@ -24,6 +24,8 @@
 
   <properties>
     <xalan.version>2.7.2</xalan.version>
+    <postgresql.version>9.4-1202-jdbc42</postgresql.version>
+    <adresseregister.domain.version>1.0-SNAPSHOT</adresseregister.domain.version>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jetty.port>9091</jetty.port>
@@ -147,9 +149,9 @@
 
     <!-- for Heroku deployment -->
     <dependency>
-      <groupId>postgresql</groupId>
+      <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>9.1-901.jdbc4</version>
+      <version>${postgresql.version}</version>
     </dependency>
 
     <dependency>
@@ -177,18 +179,18 @@
     <dependency>
       <groupId>no.difi.meldingsutveksling</groupId>
       <artifactId>adresseregister-domain</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
+      <version>${adresseregister.domain.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
       <version>${spring.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
     </dependency>
   </dependencies>
 </project>

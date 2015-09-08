@@ -22,6 +22,7 @@
     <jackson.version>2.6.1</jackson.version>
     <flyway.test.version>3.2.1</flyway.test.version>
     <codecentric.springboot.starter>1.2.2</codecentric.springboot.starter>
+    <postgresql.version>9.4-1202-jdbc42</postgresql.version>
   </properties>
 
   <dependencies>
@@ -161,9 +162,9 @@
 
     <!-- for the cloud deployment -->
     <dependency>
-      <groupId>postgresql</groupId>
+      <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>9.1-901.jdbc4</version>
+      <version>${postgresql.version}</version>
     </dependency>
 
     <dependency>
