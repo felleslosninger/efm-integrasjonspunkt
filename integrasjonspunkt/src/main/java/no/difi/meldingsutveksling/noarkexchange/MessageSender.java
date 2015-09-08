@@ -25,9 +25,6 @@ import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
-import static no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory.create;
-import static no.difi.meldingsutveksling.noarkexchange.JournalpostId.fromPutMessage;
-
 @Component
 public class MessageSender {
 
@@ -81,7 +78,7 @@ public class MessageSender {
     public PutMessageResponseType sendMessage(PutMessageRequestType message) {
 
         String conversationId = message.getEnvelope().getConversationId();
-        JournalpostId p = fromPutMessage(message);
+        JournalpostId p = JournalpostId.fromPutMessage(message);
         String journalPostId = p.value();
 
         IntegrasjonspunktContext context = new IntegrasjonspunktContext();
@@ -106,7 +103,7 @@ public class MessageSender {
         SignatureHelper helper = new IntegrasjonspunktNokkel().getSignatureHelper();
         StandardBusinessDocument sbd;
         try {
-            sbd = create(message, helper, context.getAvsender(), context.getMottaker());
+            sbd = StandardBusinessDocumentFactory.create(message, helper, context.getAvsender(), context.getMottaker());
 
         } catch (IOException e) {
             eventLog.log(new Event().setJpId(journalPostId).setArkiveConversationId(conversationId).setProcessStates(ProcessState.MESSAGE_SEND_FAIL));

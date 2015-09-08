@@ -52,7 +52,7 @@ public class JournalpostId {
     }
 
     private static String getJpIdFromParentNode(PutMessageRequestType message) {
-        Document document = getDocument(message);
+        Document document = getDocumentFrom(message);
         NodeList messageElement = document.getElementsByTagName(JP_ID);
         if (messageElement.getLength() == 0) {
             throw new MeldingsUtvekslingRuntimeException("no " + JP_ID + " element in document ");
@@ -60,8 +60,8 @@ public class JournalpostId {
         return messageElement.item(0).getTextContent();
     }
 
-    private static Document getDocument(PutMessageRequestType message) throws MeldingsUtvekslingRuntimeException {
-        DocumentBuilder documentBuilder = getDocumentBuilder();
+    private static Document getDocumentFrom(PutMessageRequestType message) throws MeldingsUtvekslingRuntimeException {
+        DocumentBuilder documentBuilder = createDocumentBuilder();
         Element element = (Element) message.getPayload();
         NodeList nodeList = element.getElementsByTagName(DATA);
         if (nodeList.getLength() == 0) {
@@ -80,7 +80,7 @@ public class JournalpostId {
     }
 
 
-    private static DocumentBuilder getDocumentBuilder() {
+    private static DocumentBuilder createDocumentBuilder() {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder;
         try {
