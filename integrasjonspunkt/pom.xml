@@ -16,10 +16,9 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <compiler.plugin.version>2.3.2</compiler.plugin.version>
-    <jersey-version>1.8</jersey-version>
     <jstl.version>1.2</jstl.version>
+    <jersey-version>1.8</jersey-version>
     <jersey.version>1.17</jersey.version>
-    <spring.version>4.1.2.RELEASE</spring.version>
     <jackson.version>2.6.1</jackson.version>
     <flyway.test.version>3.2.1</flyway.test.version>
     <codecentric.springboot.starter>1.2.2</codecentric.springboot.starter>
