@@ -9,6 +9,8 @@
 
   <properties>
     <spring.version>4.2.1.RELEASE</spring.version>
+    <gson.version>2.3.1</gson.version>
+    <retrofit.version>1.9.0</retrofit.version>
   </properties>
 
     <build>
@@ -27,13 +29,13 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.3.1</version>
+            <version>${gson.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.squareup.retrofit</groupId>
             <artifactId>retrofit</artifactId>
-            <version>1.8.0</version>
+            <version>${retrofit.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.google.code.gson</groupId>
