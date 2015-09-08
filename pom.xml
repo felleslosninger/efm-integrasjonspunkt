@@ -15,6 +15,7 @@
     <spring.version>4.1.2.RELEASE</spring.version>
     <heroku.plugin.version>0.1.9</heroku.plugin.version>
     <spring.webmvc.version>4.1.2.RELEASE</spring.webmvc.version>
+    <hsqldb.version>2.3.3</hsqldb.version>
     <junit.version>4.12</junit.version>
   </properties>
 
@@ -43,6 +44,12 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-webmvc</artifactId>
       <version>${spring.webmvc.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.hsqldb</groupId>
+      <artifactId>hsqldb</artifactId>
+      <version>${hsqldb.version}</version>
     </dependency>
 
     <dependency>
