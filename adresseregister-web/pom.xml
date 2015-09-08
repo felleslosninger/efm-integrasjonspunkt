@@ -23,8 +23,9 @@
   </distributionManagement>
 
   <properties>
+    <xalan.version>2.7.2</xalan.version>
+
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <springVersion>4.1.2.RELEASE</springVersion>
     <jetty.port>9091</jetty.port>
     <additionalparam>-Xdoclint:none</additionalparam>
     <project.stage>default</project.stage>
@@ -131,7 +132,7 @@
     <dependency>
       <groupId>xalan</groupId>
       <artifactId>xalan</artifactId>
-      <version>2.7.1</version>
+      <version>${xalan.version}</version>
     </dependency>
 
     <dependency>
@@ -142,13 +143,6 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-jdbc</artifactId>
-      <version>4.1.2.RELEASE</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-test</artifactId>
-      <version>4.1.2.RELEASE</version>
     </dependency>
 
     <!-- for Heroku deployment -->
@@ -189,6 +183,12 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>
+      <version>${spring.version}</version>
     </dependency>
   </dependencies>
 </project>
