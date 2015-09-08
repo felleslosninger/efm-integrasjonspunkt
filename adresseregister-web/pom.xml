@@ -27,6 +27,7 @@
     <postgresql.version>9.4-1202-jdbc42</postgresql.version>
     <adresseregister.domain.version>1.0-SNAPSHOT</adresseregister.domain.version>
     <apache.derby.version>10.11.1.1</apache.derby.version>
+    <commons.dbcp.version>1.4</commons.dbcp.version>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jetty.port>9091</jetty.port>
@@ -164,7 +165,7 @@
     <dependency>
       <groupId>commons-dbcp</groupId>
       <artifactId>commons-dbcp</artifactId>
-      <version>1.4</version>
+      <version>${commons.dbcp.version}</version>
     </dependency>
 
     <dependency>
