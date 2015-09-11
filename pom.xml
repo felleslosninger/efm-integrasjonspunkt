@@ -15,7 +15,10 @@
     <spring.version>4.2.1.RELEASE</spring.version>
     <heroku.plugin.version>0.1.9</heroku.plugin.version>
     <hsqldb.version>2.3.3</hsqldb.version>
+    <modelmapper.version>0.7.5</modelmapper.version>
+
     <junit.version>4.12</junit.version>
+    <mockito.version>1.9.5</mockito.version>
   </properties>
 
   <modules>
