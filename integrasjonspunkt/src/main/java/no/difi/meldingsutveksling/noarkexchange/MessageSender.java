@@ -14,32 +14,21 @@ import no.difi.meldingsutveksling.oxalisexchange.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
-import static no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory.create;
-
 @Component
 public class MessageSender {
 
-    private static final String JP_ID = "jpId";
-    private static final String DATA = "data";
+    private Logger log = LoggerFactory.getLogger(MessageSender.class);
 
     @Autowired
     EventLog eventLog;
@@ -89,7 +78,8 @@ public class MessageSender {
     public PutMessageResponseType sendMessage(PutMessageRequestType message) {
 
         String conversationId = message.getEnvelope().getConversationId();
-        String journalPostId = getJpId(message);
+        JournalpostId p = JournalpostId.fromPutMessage(message);
+        String journalPostId = p.value();
 
         IntegrasjonspunktContext context = new IntegrasjonspunktContext();
         context.setJpId(journalPostId);
@@ -111,9 +101,9 @@ public class MessageSender {
         eventLog.log(new Event(ProcessState.SIGNATURE_VALIDATED));
 
         SignatureHelper helper = new IntegrasjonspunktNokkel().getSignatureHelper();
-        StandardBusinessDocument sbd ;
+        StandardBusinessDocument sbd;
         try {
-            sbd = create(message, helper, context.getAvsender(), context.getMottaker());
+            sbd = StandardBusinessDocumentFactory.create(message, helper, context.getAvsender(), context.getMottaker());
 
         } catch (IOException e) {
             eventLog.log(new Event().setJpId(journalPostId).setArkiveConversationId(conversationId).setProcessStates(ProcessState.MESSAGE_SEND_FAIL));
@@ -128,53 +118,26 @@ public class MessageSender {
         t.send(sbd);
 
         eventLog.log(createOkStateEvent(message));
-        return new PutMessageResponseType();
-    }
 
-    private String getJpId(PutMessageRequestType message) {
-        Document document = getDocument(message);
-        NodeList messageElement = document.getElementsByTagName(JP_ID);
-        if (messageElement.getLength() == 0) {
-            throw new MeldingsUtvekslingRuntimeException("no " + JP_ID + " element in document ");
-        }
-        return messageElement.item(0).getTextContent();
-    }
-
-    private Document getDocument(PutMessageRequestType message) throws MeldingsUtvekslingRuntimeException {
-        DocumentBuilder documentBuilder = getDocumentBuilder();
-        Element element = (Element) message.getPayload();
-        NodeList nodeList = element.getElementsByTagName(DATA);
-        if (nodeList.getLength() == 0) {
-            throw new MeldingsUtvekslingRuntimeException("no " + DATA + " element in payload");
-        }
-        Node payloadData = nodeList.item(0);
-        String payloadDataTextContent = payloadData.getTextContent();
-        Document document;
-
-        try {
-            document = documentBuilder.parse(new InputSource(new ByteArrayInputStream(payloadDataTextContent.getBytes("utf-8"))));
-        } catch (SAXException | IOException e) {
-            throw new MeldingsUtvekslingRuntimeException(e);
-        }
-        return document;
-    }
-
-    private DocumentBuilder getDocumentBuilder() {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder;
-        try {
-            builder = factory.newDocumentBuilder();
-        } catch (ParserConfigurationException e) {
-            throw new MeldingsUtvekslingRuntimeException(e);
-        }
-        return builder;
+        return createOkResponse();
     }
 
 
+    //TODO: Denne returnerer feil response, noe rart i generet kode
+    //Type skal være ERROR, får ikke satt message i generert kode
     private PutMessageResponseType createErrorResponse(String message) {
         PutMessageResponseType response = new PutMessageResponseType();
         AppReceiptType receipt = new AppReceiptType();
-        receipt.setType(message);
+        receipt.setType("ERROR");
+        response.setResult(receipt);
+        return response;
+    }
+
+    //TODO: Se på setting av melding, se i sammenheng med metoden over
+    private PutMessageResponseType createOkResponse() {
+        PutMessageResponseType response = new PutMessageResponseType();
+        AppReceiptType receipt = new AppReceiptType();
+        receipt.setType("OK");
         response.setResult(receipt);
         return response;
     }

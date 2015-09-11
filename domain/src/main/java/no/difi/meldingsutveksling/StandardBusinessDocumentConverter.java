@@ -12,7 +12,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
 public class StandardBusinessDocumentConverter {
-    public static final int BUFFER_SIZE = 2024;
     static JAXBContext ctx;
 
     static {
@@ -29,9 +28,10 @@ public class StandardBusinessDocumentConverter {
         } catch (JAXBException e) {
             throw new RuntimeException("Could not create marshaller for " + StandardBusinessDocument.class, e);
         }
-        ByteArrayOutputStream output = new ByteArrayOutputStream(BUFFER_SIZE);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        ObjectFactory objectFactory = new ObjectFactory();
+
         try {
-            ObjectFactory objectFactory = new ObjectFactory();
             marshaller.marshal(objectFactory.createStandardBusinessDocument(standardBusinessDocument), output);
         } catch (JAXBException e) {
             throw new RuntimeException("Could not marshall " + standardBusinessDocument, e);
@@ -48,7 +48,7 @@ public class StandardBusinessDocumentConverter {
             throw new RuntimeException("Could not create Unmarshaller for " + StandardBusinessDocument.class, e);
         }
 
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(new byte[BUFFER_SIZE]);
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
         StreamSource streamSource = new StreamSource(inputStream);
 
         StandardBusinessDocument sbd;

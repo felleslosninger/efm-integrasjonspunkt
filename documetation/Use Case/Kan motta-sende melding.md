@@ -1,19 +1,21 @@
-----------
-
-> Blockquote
-> 
-
-**Kan motta/sende melding**
+**Kan sende melding**
 ------------
 
-> **Kan motta/sende melding**
+> **Kan sende melding**
 > 
- 1. sjekk om orgnummer avsender/mottaker finnes i adresseregister
- 2. finnes begge orgnummera, send melding. 
+ 1. Sjekk om orgnummer mottaker finnes i adresseregister
+ 2. Begge orgnummera finnes i Adresseregisteret, send melding. 
 
-**Kan ikke motta/sende melde**
- 1. sjekk om orgnummer avsender/mottaker finnes i adresseregister
- 2. finnes ikke en av orgnummera, ikkje mulig å sende melding ex : send knapp i arkivsystem disables
+> **Kan ikke sende melde**
+> 
+>  1. Sjekk om orgnummer mottaker finnes i adresseregister
+>  2. Orgnummera finnes ikkje i Adresseregisteret, kan ikkje sende melding.
 
-> **Gyldig sertifikat**
-> Written with [StackEdit](https://stackedit.io/).
+> **Adresse register nede**
+> 
+ 1. List item
+
+>  **er det et orgnummer**
+>  
+
+ 1. List item

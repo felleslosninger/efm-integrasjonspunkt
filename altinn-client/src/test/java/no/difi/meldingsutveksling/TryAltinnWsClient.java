@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling;
 
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 
 import java.io.IOException;
@@ -10,6 +11,16 @@ import java.util.List;
 import java.util.Properties;
 
 public class TryAltinnWsClient {
+    static Properties properties;
+    static {
+        properties = new Properties();
+        try (InputStream is = AltinnWsConfiguration.class.getResourceAsStream("/altinn.properties")){
+
+            properties.load(is);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static void main(String[] args) {
         AltinnWsClient client;
@@ -18,25 +29,29 @@ public class TryAltinnWsClient {
 
         client = new AltinnWsClient(configuration);
         UploadRequest request = new MockRequest();
-        System.out.println("Testing send");
+        System.out.println("Uploading as " + request.getSender() + " with credentials " + configuration.getUsername() + "/" + configuration.getPassword() + " sender reference: " + request.getSenderReference());
+        System.out.println("Recieving orgnumber: " + request.getReceiver());
         client.send(request);
-
         System.out.println("Testing available files");
-        List<FileReference> result = client.availableFiles(request.getReceiver());
+        AltinnWsConfiguration receiverConfiguration = new AltinnWsConfiguration.Builder()
+                .withUsername(properties.getProperty("receiver.username"))
+                .withPassword(properties.getProperty("receiver.password"))
+                .withStreamingServiceUrl(configuration.getStreamingServiceUrl())
+                .withBrokerServiceUrl(configuration.getBrokerServiceUrl())
+                .build();
+        AltinnWsClient recieverClient = new AltinnWsClient(receiverConfiguration);
+        List<FileReference> result = recieverClient.availableFiles(request.getReceiver());
         for (FileReference fileReference : result) {
             System.out.println(fileReference.getReceiptID());
             System.out.println(fileReference.getValue());
+
+            StandardBusinessDocument sbd = recieverClient.download(new DownloadRequest(fileReference.getValue(), request.getReceiver()));
+            System.out.println("downloaded sbd " + sbd);
         }
     }
 
     public static AltinnWsConfiguration configurationFromProperties() {
-        Properties properties = new Properties();
-        try (InputStream is = AltinnWsConfiguration.class.getResourceAsStream("/altinn.properties")){
 
-            properties.load(is);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
 
         AltinnWsConfiguration configuration;
         URL brokerServiceUrl;
