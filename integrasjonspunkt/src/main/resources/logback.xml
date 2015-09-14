@@ -23,7 +23,7 @@
             <onMismatch>DENY</onMismatch>
         </filter>
 
-        <file>${user.dir}/integrasjonpunkt-logs/application.log</file>
+        <file>${user.dir}/integrasjonspunkt-logs/application.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- daily rollover. Make sure the path matches the one in the file element or else
              the rollover logs are placed in the working directory. -->
