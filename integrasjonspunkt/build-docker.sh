@@ -3,20 +3,24 @@
 # Builds an image and creates a container.
 
 # Build params
-IMAGE_NAME=difi/difi_integrasjonspunkt
-CONTAINER_NAME=Difi_Integrasjonspunkt
+IMAGE_NAME=difi/difi_integrasjonspunkt_$1
+CONTAINER_NAME=Difi_Integrasjonspunkt_$1
+
+echo ${CONTAINER_NAME}
+
+# Must stop any running container to continue
+docker stop ${CONTAINER_NAME}
 
 # Must be the root folder
-WORKING_DIR=$(pwd)
-RESOURCES_DIR=${WORKING_DIR}/src/main/resources/
-CERTIFICATE_DIR=${WORKING_DIR}/build/certificate
-BUILD_DIR=build/certificate
+WORKING_DIR="/home/miif/builds"
+CERTIFICATE_DIR=${WORKING_DIR}/certificates
+PORT=$1
 
-# Copy the certificate to the build folder
-CERTIFICATE_FILE=$(ls ${BUILD_DIR}/*.jks)
-if [ "$TMP" == "" ]; then
-  echo "Copying certificate to build folder"
-  cp ${RESOURCES_DIR}/*.jks ${BUILD_DIR}
+echo "Working dir: $WORKING_DIR"
+
+if [ -z "$1" ]; then
+  echo "You have to specify a port number. Format ./build-docker.sh portNumber"
+  exit
 fi
 
 # Remove any existing container
@@ -34,11 +38,13 @@ if [ "$OLD_IMAGES" != "" ]; then
 fi
 
 # Build new image
-docker build --no-cache -t ${IMAGE_NAME} . &&\
+docker build --no-cache -t ${IMAGE_NAME} /home/miif/builds &&\
 
 # Create new container
-docker create --name ${CONTAINER_NAME} -v ${CERTIFICATE_DIR}:/var/lib/difi/crt -p 8080:8080 ${IMAGE_NAME}
+docker create --name ${CONTAINER_NAME} -v ${CERTIFICATE_DIR}:/var/lib/difi/crt -p ${PORT}:8080 ${IMAGE_NAME}
 
 # Done
-echo "$CONTAINER_NAME is build. To start the container, write: docker start $CONTAINER_NAME"
+echo "$CONTAINER_NAME is build. Starting the container. To see log output, run docker logs -f $CONTAINER_NAME (CTRL+C to exit logs)."
 echo
+
+docker start $CONTAINER_NAME
