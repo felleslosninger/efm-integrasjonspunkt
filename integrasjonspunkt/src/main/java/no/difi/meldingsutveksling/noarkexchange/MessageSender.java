@@ -41,24 +41,30 @@ public class MessageSender {
     AdresseregisterService adresseregister;
 
 
-    boolean setSender(IntegrasjonspunktContext context, AddressType sender) {
+    void setSender(IntegrasjonspunktContext context, AddressType sender) {
         if (sender == null) {
-            return false;
+            throw new InvalidEnvelopeException();
         }
         Avsender avsender;
         Certificate sertifikat;
         try {
-            sertifikat = adresseregister.getCertificate(sender.getOrgnr());
+
+            String orgnr = sender.getOrgnr();
+            if (orgnr == null) {
+                orgnr = System.getProperty(Constants.)
+            }
+            sertifikat = adresseregister.getCertificate(orgnr);
         } catch (CertificateNotFoundException e) {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
-            return false;
+            throw new InvalidEnvelopeException();
+            InvalidReceiverException
         }
         avsender = Avsender.builder(new Organisasjonsnummer(sender.getOrgnr()), new Noekkelpar(findPrivateKey(), sertifikat)).build();
         context.setAvsender(avsender);
-        return true;
+
     }
 
-    boolean setRecipient(IntegrasjonspunktContext context, AddressType receiver) {
+    void setRecipient(IntegrasjonspunktContext context, AddressType receiver) {
         if (receiver == null) {
             return false;
         }
@@ -177,6 +183,19 @@ public class MessageSender {
         event.setProcessStates(ProcessState.SBD_SENT);
         return event;
     }
+
+    private String addresstypeToString(AddressType addressType) {
+        return "AddressType{" +
+                "orgnr='" + addressType.getOrgnr() + '\'' +
+                ", name='" + addressType.getName() + '\'' +
+                ", email='" + addressType.getEmail() + '\'' +
+                ", ref='" + addressType.getRef() + '\'' +
+                '}';
+    }
+}
+
+private class InvalidEnvelopeException extends RuntimeException {
+}
 
 }
 
