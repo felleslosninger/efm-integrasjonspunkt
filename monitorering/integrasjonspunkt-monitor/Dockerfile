@@ -10,15 +10,15 @@ LABEL description="Direktoratet for forvaltning og IKT (Difi)"
 # Open ports for incoming connections
 #
 
-EXPOSE 8761
+EXPOSE 8090
 
 #
 # Install application
 #
 
 ENV APP_DIR /var/lib/monitor
-ENV APP_PREFIX eureka-1.0
-ENV APP_MAIN_CLASS eureka.IntegrasjonspunktEureka
+ENV APP_PREFIX integrasjonspunkt-monitor-1.0
+ENV APP_MAIN_CLASS integrasjonspunkt.IntegrasjonspunktMonitorApplication
 ENV JAVA_PARAMS ""
 
 ADD target/${APP_PREFIX}*.jar ${APP_DIR}/
