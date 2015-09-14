@@ -1,5 +1,9 @@
 package no.difi.meldingsutveksling;
 
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
+
+import java.net.MalformedURLException;
 import java.net.URL;
 
 public class AltinnWsConfiguration {
@@ -26,6 +30,39 @@ public class AltinnWsConfiguration {
 
     private AltinnWsConfiguration() {
     }
+
+    public static AltinnWsConfiguration fromProperties() {
+        PropertiesConfiguration propertiesConfiguration;
+        try {
+            propertiesConfiguration = new PropertiesConfiguration("application.properties");
+        } catch (ConfigurationException e) {
+            throw new AltinnWsConfigurationException("Could not create configuration for the Altinn formidlingstjeneste client", e);
+        }
+
+        URL streamingserviceUrl = createUrl(propertiesConfiguration.getString("streamingservice.url"));
+        URL brokerserviceUrl = createUrl(propertiesConfiguration.getString("brokerservice.url"));
+
+
+        return new Builder()
+                .withUsername(propertiesConfiguration.getString("altinn.username"))
+                .withPassword(propertiesConfiguration.getString("altinn.password"))
+                .withStreamingServiceUrl(streamingserviceUrl)
+                .withBrokerServiceUrl(brokerserviceUrl)
+                .build();
+    }
+
+    private static URL createUrl(String url) {
+        URL u;
+        try {
+            u = new URL(url);
+        } catch (MalformedURLException e) {
+            throw new AltinnWsConfigurationException("The configured URL is invalid", e);
+        }
+        return u;
+    }
+
+
+
 
     public static class Builder {
         AltinnWsConfiguration configuration;
@@ -58,4 +95,11 @@ public class AltinnWsConfiguration {
             return configuration;
         }
     }
+
+    private static class AltinnWsConfigurationException extends RuntimeException {
+        public AltinnWsConfigurationException(String message, Exception e) {
+            super(message, e);
+        }
+    }
+
 }

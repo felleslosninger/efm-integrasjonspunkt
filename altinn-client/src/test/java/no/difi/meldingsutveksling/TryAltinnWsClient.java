@@ -25,20 +25,15 @@ public class TryAltinnWsClient {
     public static void main(String[] args) {
         AltinnWsClient client;
 
-        AltinnWsConfiguration configuration = configurationFromProperties();
+        AltinnWsConfiguration senderConfiguration = configurationFromProperties("altinn.username", "altinn.password");
 
-        client = new AltinnWsClient(configuration);
+        client = new AltinnWsClient(senderConfiguration);
         UploadRequest request = new MockRequest();
-        System.out.println("Uploading as " + request.getSender() + " with credentials " + configuration.getUsername() + "/" + configuration.getPassword() + " sender reference: " + request.getSenderReference());
+        System.out.println("Uploading as " + request.getSender() + " with credentials " + senderConfiguration.getUsername() + "/" + senderConfiguration.getPassword() + " sender reference: " + request.getSenderReference());
         System.out.println("Recieving orgnumber: " + request.getReceiver());
         client.send(request);
         System.out.println("Testing available files");
-        AltinnWsConfiguration receiverConfiguration = new AltinnWsConfiguration.Builder()
-                .withUsername(properties.getProperty("receiver.username"))
-                .withPassword(properties.getProperty("receiver.password"))
-                .withStreamingServiceUrl(configuration.getStreamingServiceUrl())
-                .withBrokerServiceUrl(configuration.getBrokerServiceUrl())
-                .build();
+        AltinnWsConfiguration receiverConfiguration = configurationFromProperties("receiver.username", "receiver.password");
         AltinnWsClient recieverClient = new AltinnWsClient(receiverConfiguration);
         List<FileReference> result = recieverClient.availableFiles(request.getReceiver());
         for (FileReference fileReference : result) {
@@ -50,7 +45,7 @@ public class TryAltinnWsClient {
         }
     }
 
-    public static AltinnWsConfiguration configurationFromProperties() {
+    public static AltinnWsConfiguration configurationFromProperties(String username, String password) {
 
 
         AltinnWsConfiguration configuration;
@@ -69,8 +64,8 @@ public class TryAltinnWsClient {
         configuration = new AltinnWsConfiguration.Builder()
                 .withBrokerServiceUrl(brokerServiceUrl)
                 .withStreamingServiceUrl(streamingServiceUrl)
-                .withUsername(properties.getProperty("altinn.username"))
-                .withPassword(properties.getProperty("altinn.password"))
+                .withUsername(properties.getProperty(username))
+                .withPassword(properties.getProperty(password))
                 .build();
 
         return configuration;
