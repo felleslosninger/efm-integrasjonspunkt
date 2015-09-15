@@ -1,10 +1,9 @@
-Feature: Finne ut om mottaker kan motta melding
+Feature: Kan sende melding
 
-  Scenario Outline: sjekke om mottaker kan motta meldinger
-    Given en mottakende organisasjon med organisasjonsnummer <organisasjonsnummer>
-    When vi sjekker om mottaker kan motta melding
-    Then skal vi få <resultat> i svar
+  Scenario Outline:  mottaker sitt orgnummer finnes i adresseregister.
+    Given mottaker med organisasjonsnummer <organisasjonsnummer>
+    When  mottaker finnes i adresseregister
+    Then  skal vi fÃ¥r <resultat> i svar
   Examples: values
     | organisasjonsnummer | resultat |
     | 974720760           | sann     |
-    | 123456789           | usann    |
