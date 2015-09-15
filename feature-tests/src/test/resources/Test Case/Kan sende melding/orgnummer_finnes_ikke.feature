@@ -1,7 +1,11 @@
-Feature: Kan ikke sende melding - Orgnummer finnes ikke
+Feature: Kan sende melding
 
-  Scenario Outline: sjekke om mottaker orgnummer finnes i adresseregister
-    Given en mottakende organisasjon med organisasjonsnummer ?????????
-    When vi sjekker om mottaker finnes i adresseregister
-    Then skal vi få false i svar
+  Scenario Outline: mottaker sitt orgnummer finnes ikke i adresseregister.
+    Given mottaker med organisasjonsnummer <organisasjonsnummer>
+    When  organisasjonsnummer ikke finnes
+    Then  skal vi får <resultat> i svar
+    Examples: values
+      | organisasjonsnummer | resultat |
+      | 123456789           | usann     |
+
   
