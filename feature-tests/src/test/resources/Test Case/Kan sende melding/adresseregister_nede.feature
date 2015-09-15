@@ -1,8 +1,9 @@
-Feature: Kan ikke sende melding - Adresseregister nede
+Feature: Kan sende melding
 
-  Scenario Outline: adresseregister svarer ikkje når integrasjonspunktet henter org nummer
-	Given en mottakende organisasjon med organisasjonsnummer ?????????
-    When vi sjekker om mottaker finnes i adresseregister
-    Then skal vi få feilmelding om at adresseregister ikke svarer
-	
-  
+  Scenario Outline:  Adresseregister nede.
+    Given mottaker med organisasjonsnummer <organisasjonsnummer>
+    When  adresseregister svarer ikkje
+    Then  skal vi får <resultat> i svar
+    Examples: values
+      | organisasjonsnummer | resultat |
+      | 974720760           | usann     |
