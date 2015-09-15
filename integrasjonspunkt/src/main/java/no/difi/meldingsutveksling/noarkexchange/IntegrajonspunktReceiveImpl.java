@@ -2,7 +2,9 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import com.thoughtworks.xstream.XStream;
 import no.difi.meldingsutveksling.CertificateValidator;
+import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.adresseregister.client.AdresseRegisterClient;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
 import no.difi.meldingsutveksling.dokumentpakking.kvit.ObjectFactory;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
@@ -19,7 +21,6 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.*;
 import no.difi.meldingsutveksling.oxalisexchange.ByteArrayImpl;
-import no.difi.meldingsutveksling.oxalisexchange.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.oxalisexchange.Kvittering;
 import no.difi.meldingsutveksling.oxalisexchange.OxalisMessageReceiverTemplate;
 import no.difi.meldingsutveksling.transport.Transport;
@@ -102,7 +103,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
 
         no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument kvittering = new CreateSBD().createSBD(reciever, sender, new ObjectFactory().createKvittering(signAFile.signIt(receiveResponse.getAny(), avsender, KvitteringType.LEVERING)), convId, KVITTERING_CONSTANT);
         Transport transport = transportFactory.createTransport(kvittering);
-        transport.send(kvittering);
+        transport.send(IntegrasjonspunktConfig.getInstance().getConfiguration(), kvittering);
         logEvent(receiveResponse, null, ProcessState.LEVERINGS_KVITTERING_SENT);
 
         JAXBContext jaxbContextP;
@@ -164,7 +165,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
                 logEvent(receiveResponse, null, ProcessState.BEST_EDU_SENT);
                 no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument receipt = new CreateSBD().createSBD(sender, reciever, signAFile.signIt(receiveResponse.getAny(), avsender, KvitteringType.AAPNING), convId, KVITTERING_CONSTANT);
                 Transport transport = transportFactory.createTransport(receipt);
-                transport.send(receipt);
+                transport.send(IntegrasjonspunktConfig.getInstance().getConfiguration(), receipt);
             }
         } else {
             logEvent(receiveResponse, null, ProcessState.ARCHIVE_NOT_AVAILABLE);

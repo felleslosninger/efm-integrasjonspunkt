@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.transport;
 
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import org.apache.commons.configuration.Configuration;
 
 /**
  * Defines a transport. The responsibility of a transport is to receive an SBD ducument and transfer it over some
@@ -16,6 +17,6 @@ public interface Transport {
     /**
      * @param document An SBD document with a payload consisting of an CMS encrypted ASIC package
      */
-    public void send(StandardBusinessDocument document);
+    public void send(Configuration configuration, StandardBusinessDocument document);
 
 }

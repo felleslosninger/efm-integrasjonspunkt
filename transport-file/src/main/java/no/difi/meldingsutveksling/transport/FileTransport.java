@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import org.apache.commons.configuration.Configuration;
 import org.modelmapper.ModelMapper;
 
 import javax.xml.bind.JAXBContext;
@@ -26,7 +27,7 @@ import java.io.FileOutputStream;
 public class FileTransport implements Transport {
 
     @Override
-    public void send(StandardBusinessDocument document) {
+    public void send(Configuration configuration, StandardBusinessDocument document) {
         String fileName = createFilename(document);
         ModelMapper mapper = new ModelMapper();
 

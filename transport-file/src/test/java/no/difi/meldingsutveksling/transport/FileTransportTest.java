@@ -25,7 +25,7 @@ public class FileTransportTest {
         no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument domainDoc
                 = mapper.map(doc, no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument.class);
 
-        t.send(domainDoc);
+        t.send(null, domainDoc);
 
     }
 }

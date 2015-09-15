@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.xml.bind.JAXBContext;
@@ -16,6 +17,7 @@ import static junit.framework.Assert.assertNotNull;
 public class StandardBusinessDocumentFactoryTest {
 
     @Test
+
     public void testConvertFromSBDtoSB() throws JAXBException {
         JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument> fromDocument;
         JAXBContext ctx = JAXBContext.newInstance(no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument.class);

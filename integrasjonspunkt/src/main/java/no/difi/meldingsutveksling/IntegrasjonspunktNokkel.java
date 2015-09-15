@@ -1,6 +1,7 @@
-package no.difi.meldingsutveksling.oxalisexchange;
+package no.difi.meldingsutveksling;
 
 import no.difi.asic.SignatureHelper;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 
 import java.io.FileInputStream;
@@ -18,32 +19,30 @@ import java.util.Enumeration;
  */
 public class IntegrasjonspunktNokkel {
 
-    private static final String PRIVATEKEYALIAS = "privatekeyalias";
-    private static final String PRIVATEKEYLOACATION = "keystorelocation";
-    private static final String PRIVATEKEYPASSWORD = "privatekeypassword";
 
-    private final String pkResource, pkAlias, pkPassword;
+    private final String pkLocation, pkAlias, pkPassword;
 
     public IntegrasjonspunktNokkel() {
 
-        pkAlias = System.getProperty(PRIVATEKEYALIAS);
-        pkResource = System.getProperty(PRIVATEKEYLOACATION);
-        pkPassword = System.getProperty(PRIVATEKEYPASSWORD);
+        IntegrasjonspunktConfig config = IntegrasjonspunktConfig.getInstance();
+
+        pkAlias = config.getPrivateKeyAlias();
+        pkLocation = config.getKeyStoreLocation();
+        pkPassword = config.getPrivateKeyPassword();
 
         if (pkAlias == null) {
-            throw new MeldingsUtvekslingRuntimeException("please start the process with a system property called " + PRIVATEKEYALIAS + ", that names the alias e of the private key within the keystore.");
+            throw new MeldingsUtvekslingRuntimeException("Missing private key alias system property");
         }
-        if (pkResource == null) {
-            throw new MeldingsUtvekslingRuntimeException("please start the process with a system property called " + PRIVATEKEYLOACATION + ", that points to a file the keytstore");
+        if (pkLocation == null) {
+            throw new MeldingsUtvekslingRuntimeException("Missing private key location system property");
         }
         if (pkPassword == null) {
-            throw new MeldingsUtvekslingRuntimeException("please start the process with a system property called " + PRIVATEKEYPASSWORD);
+            throw new MeldingsUtvekslingRuntimeException("Missing private key password system property");
         }
-
     }
 
-    public IntegrasjonspunktNokkel(String pkResource, String pkAlias, String pkPassword) {
-        this.pkResource = pkResource;
+    public IntegrasjonspunktNokkel(String pkLocation, String pkAlias, String pkPassword) {
+        this.pkLocation = pkLocation;
         this.pkAlias = pkAlias;
         this.pkPassword = pkPassword;
     }
@@ -69,7 +68,7 @@ public class IntegrasjonspunktNokkel {
                 }
             }
             if (key == null) {
-                throw new MeldingsUtvekslingRuntimeException("no key with alias " + pkAlias + " found in the keystore " + pkResource);
+                throw new MeldingsUtvekslingRuntimeException("no key with alias " + pkAlias + " found in the keystore " + pkLocation);
             }
             return key;
         } catch (CertificateException | KeyStoreException | IOException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
@@ -82,12 +81,12 @@ public class IntegrasjonspunktNokkel {
             InputStream keyInputStream = openKeyInputStream();
             return new SignatureHelper(keyInputStream, pkPassword, pkAlias, pkPassword);
         } catch (FileNotFoundException e) {
-            throw new MeldingsUtvekslingRuntimeException("keystore " + pkResource + " not found on file system.");
+            throw new MeldingsUtvekslingRuntimeException("keystore " + pkLocation + " not found on file system.");
         }
     }
 
     private InputStream openKeyInputStream() throws FileNotFoundException {
-        return new FileInputStream(pkResource);
+        return new FileInputStream(pkLocation);
     }
 
 }

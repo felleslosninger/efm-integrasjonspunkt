@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.oxalisexchange;
 
 import no.difi.asic.SignatureHelper;
+import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.adresseregister.AdressRegisterFactory;
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
 import no.difi.meldingsutveksling.domain.*;
