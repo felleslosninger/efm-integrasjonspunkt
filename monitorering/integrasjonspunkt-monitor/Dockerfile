@@ -19,6 +19,7 @@ EXPOSE 8090
 ENV APP_DIR /var/lib/monitor
 ENV APP_PREFIX integrasjonspunkt-monitor-1.0
 ENV APP_MAIN_CLASS integrasjonspunkt.IntegrasjonspunktMonitorApplication
+ENV APP_PROFILE docker
 ENV JAVA_PARAMS ""
 
 ADD target/${APP_PREFIX}*.jar ${APP_DIR}/
@@ -29,4 +30,4 @@ ADD target/${APP_PREFIX}*.jar ${APP_DIR}/
 
 WORKDIR ${APP_DIR}
 
-CMD APP_NAME=$(ls ${APP_PREFIX}*.jar) && java -jar ${JAVA_PARAMS} ${APP_NAME} ${APP_MAIN_CLASS}
+CMD APP_NAME=$(ls ${APP_PREFIX}*.jar) && java -jar ${JAVA_PARAMS} ${APP_NAME} ${APP_MAIN_CLASS} --spring.profiles.active=${APP_PROFILE}
