@@ -89,6 +89,18 @@
         <version>${project.version}</version>
       </dependency>
 
+      <dependency>
+        <groupId>no.difi.meldingsutveksling</groupId>
+        <artifactId>noarkexchange</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>no.difi.meldingsutveksling</groupId>
+        <artifactId>altinn-client</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
       <!-- 3rd party dependencies -->
       <dependency>
         <groupId>org.modelmapper</groupId>
