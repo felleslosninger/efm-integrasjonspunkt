@@ -37,6 +37,12 @@ public class MessageSender {
     @Autowired
     AdresseregisterService adresseregister;
 
+    @Autowired
+    IntegrasjonspunktConfig configuration;
+
+    @Autowired
+    IntegrasjonspunktNokkel keyInfo;
+
     boolean setSender(IntegrasjonspunktContext context, AddressType sender) {
         if (sender == null) {
             return false;
@@ -49,7 +55,8 @@ public class MessageSender {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
             return false;
         }
-        avsender = Avsender.builder(new Organisasjonsnummer(sender.getOrgnr()), new Noekkelpar(findPrivateKey(), sertifikat)).build();
+        PrivateKey privatNoekkel = keyInfo.loadPrivateKey();
+        avsender = Avsender.builder(new Organisasjonsnummer(sender.getOrgnr()), new Noekkelpar(privatNoekkel, sertifikat)).build();
         context.setAvsender(avsender);
         return true;
     }
@@ -97,7 +104,7 @@ public class MessageSender {
         }
         eventLog.log(new Event(ProcessState.SIGNATURE_VALIDATED));
 
-        SignatureHelper helper = new IntegrasjonspunktNokkel().getSignatureHelper();
+        SignatureHelper helper = keyInfo.getSignatureHelper();
         StandardBusinessDocument sbd;
         try {
             sbd = StandardBusinessDocumentFactory.create(message, helper, context.getAvsender(), context.getMottaker());
@@ -112,7 +119,7 @@ public class MessageSender {
         eventLog.log(new Event().setJpId(journalPostId).setArkiveConversationId(conversationId).setHubConversationId(hubCid).setProcessStates(ProcessState.CONVERSATION_ID_LOGGED));
 
         Transport t = transportFactory.createTransport(sbd);
-        t.send(IntegrasjonspunktConfig.getInstance().getConfiguration(), sbd);
+        t.send(configuration.getConfiguration(), sbd);
 
         eventLog.log(createOkStateEvent(message));
 
@@ -139,13 +146,6 @@ public class MessageSender {
         return response;
     }
 
-
-    //todo refactor
-    PrivateKey findPrivateKey() {
-        IntegrasjonspunktNokkel nokkel = new IntegrasjonspunktNokkel();
-        return nokkel.loadPrivateKey();
-    }
-
     public void setAdresseregister(AdresseregisterService adresseregister) {
         this.adresseregister = adresseregister;
     }
@@ -154,6 +154,22 @@ public class MessageSender {
         this.eventLog = eventLog;
     }
 
+
+    public IntegrasjonspunktConfig getConfiguration() {
+        return configuration;
+    }
+
+    public void setConfiguration(IntegrasjonspunktConfig configuration) {
+        this.configuration = configuration;
+    }
+
+    public IntegrasjonspunktNokkel getKeyInfo() {
+        return keyInfo;
+    }
+
+    public void setKeyInfo(IntegrasjonspunktNokkel keyInfo) {
+        this.keyInfo = keyInfo;
+    }
 
     private Event createOkStateEvent(PutMessageRequestType anyOject) {
         XStream xs = new XStream();

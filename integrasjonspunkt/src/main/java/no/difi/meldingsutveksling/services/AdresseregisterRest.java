@@ -2,8 +2,10 @@ package no.difi.meldingsutveksling.services;
 
 import no.difi.meldingsutveksling.adresseregister.client.AdresseRegisterClient;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 
@@ -11,7 +13,19 @@ import java.security.cert.Certificate;
 @Component
 public class AdresseregisterRest implements AdresseregisterService {
 
-    AdresseRegisterClient client = new AdresseRegisterClient(IntegrasjonspunktConfig.getInstance().getAdresseRegisterEndPointURL());
+    @Autowired
+    IntegrasjonspunktConfig configuration;
+
+    AdresseRegisterClient client;
+
+    public AdresseregisterRest() {
+    }
+
+    @PostConstruct
+    public void init() {
+        String adresseRegisterEndPointURL = configuration.getAdresseRegisterEndPointURL();
+        client = new AdresseRegisterClient(adresseRegisterEndPointURL);
+    }
 
     @Override
     public PublicKey getPublicKey(String orgNumber) {
@@ -23,4 +37,11 @@ public class AdresseregisterRest implements AdresseregisterService {
         return client.getCertificate(orgNumber);
     }
 
+    public IntegrasjonspunktConfig getConfiguration() {
+        return configuration;
+    }
+
+    public void setConfiguration(IntegrasjonspunktConfig configuration) {
+        this.configuration = configuration;
+    }
 }

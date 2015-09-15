@@ -27,11 +27,9 @@ public class NOARKSystem {
     @Autowired
     EventLog eventLog;
 
-    private String endPointURL;
 
-    public NOARKSystem() {
-        endPointURL = IntegrasjonspunktConfig.getInstance().getNOARKSystemEndPointURL();
-    }
+    @Autowired
+    IntegrasjonspunktConfig config;
 
     public PutMessageResponseType sendEduMeldig(PutMessageRequestType eduMesage) {
         if (eventLog == null) {
@@ -46,10 +44,19 @@ public class NOARKSystem {
         NoarkExchange exchange = new NoarkExchange();
         SOAPport port = exchange.getNoarkExchangePort();
         BindingProvider bp = (BindingProvider) port;
+        String endPointURL = config.getNOARKSystemEndPointURL();
         bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endPointURL);
         return port.putMessage(eduMesage);
     }
 
+
+    public IntegrasjonspunktConfig getConfig() {
+        return config;
+    }
+
+    public void setConfig(IntegrasjonspunktConfig config) {
+        this.config = config;
+    }
 
     public EventLog getEventLog() {
         return eventLog;

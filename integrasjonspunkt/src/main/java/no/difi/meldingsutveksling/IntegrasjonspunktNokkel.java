@@ -3,7 +3,10 @@ package no.difi.meldingsutveksling;
 import no.difi.asic.SignatureHelper;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -17,14 +20,19 @@ import java.util.Enumeration;
  *
  * @author Glebnn Bech
  */
+@Component
 public class IntegrasjonspunktNokkel {
 
+    private String pkLocation, pkAlias, pkPassword;
 
-    private final String pkLocation, pkAlias, pkPassword;
+    @Autowired
+    IntegrasjonspunktConfig config;
 
     public IntegrasjonspunktNokkel() {
+    }
 
-        IntegrasjonspunktConfig config = IntegrasjonspunktConfig.getInstance();
+    @PostConstruct
+    public void init() {
 
         pkAlias = config.getPrivateKeyAlias();
         pkLocation = config.getKeyStoreLocation();
@@ -83,6 +91,14 @@ public class IntegrasjonspunktNokkel {
         } catch (FileNotFoundException e) {
             throw new MeldingsUtvekslingRuntimeException("keystore " + pkLocation + " not found on file system.");
         }
+    }
+
+    public IntegrasjonspunktConfig getConfig() {
+        return config;
+    }
+
+    public void setConfig(IntegrasjonspunktConfig config) {
+        this.config = config;
     }
 
     private InputStream openKeyInputStream() throws FileNotFoundException {

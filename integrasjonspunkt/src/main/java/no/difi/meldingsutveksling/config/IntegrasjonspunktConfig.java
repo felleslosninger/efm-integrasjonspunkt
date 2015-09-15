@@ -2,26 +2,25 @@ package no.difi.meldingsutveksling.config;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import org.apache.commons.configuration.*;
+import org.springframework.stereotype.Component;
 
 /**
  * Class with responsibility of keeping track of configuration of the "integrasjonspunkt". The configruation
- * is loaded from two sources. application.proeprties, a file located in the working directory and System
- * properties that the VM is started with (-D options).
+ * is loaded from three sources.
  * <p/>
- * <p>
- * If integrasjonspunkt-local.properties is not found in the working directory, the classpath will be searched.
- * <p/>
- * <p/>
- * The class is implemented as a singleton to avoid expensive loading properites on every instantiation
- * <p/>
- * <p>
- * Configuration properties for the integrasjonspunkt itself are given explicit methods in this class. Properties
- * for alternative transports are accessed through the exposed configuration object accessed via getConfiguration()
- * <p/>
- * </p>
+ * When a property is loaded, it is searched for in the following order;
+ * <ol>
+ * <li> System property suplied when the VM starts up (-D option on the command line) </li>
+ * <li> integrasjonspunkt-local.properties, usualy a file placed in the working directory. Use this
+ * to override properties for you local dev. environment</li>
+ * <li> integrasjonspunkt.properties, a file packaged inside the application (from src/main/resources/) This provides
+ * default values and contain end point and properties for the test-environment </li>
+ * </li>
+ * </ol>
  *
  * @author Glenn Bech
  */
+@Component
 public class IntegrasjonspunktConfig {
 
     private static final String PROPERTIES_FILE_NAME = "integrasjonspunkt.properties";
@@ -34,15 +33,6 @@ public class IntegrasjonspunktConfig {
     static final String KEY_ADRESSEREGISTER_ENDPOINT = "adresseregister.endPointURL";
 
     private final CompositeConfiguration config;
-
-    private static IntegrasjonspunktConfig instance;
-
-    public static IntegrasjonspunktConfig getInstance() {
-        if (instance == null) {
-            instance = new IntegrasjonspunktConfig();
-        }
-        return instance;
-    }
 
     private IntegrasjonspunktConfig() {
 
