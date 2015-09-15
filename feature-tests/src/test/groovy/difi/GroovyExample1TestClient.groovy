@@ -6,7 +6,7 @@ import wslite.soap.SOAPClient
  * Eksempel på hvordan man bruker Groovy med SOAP request som xml
  */
 class GroovyExample1TestClient {
-    def url = "http://localhost:9091/integrasjonspunkt/noarkExchange"
+    def url = "http://localhost:9091/noarkExchange"
     def client = new SOAPClient(url)
 
     def canGetReceiveMessage(int orgnr) {
@@ -27,6 +27,6 @@ class GroovyExample1TestClient {
       </typ:GetCanReceiveMessageRequest>
    </soapenv:Body>
 </soapenv:Envelope>"""
-        return client.send().body.toString().toBoolean()
+        return client.send(request).body.toString().toBoolean()
     }
 }
