@@ -23,8 +23,6 @@
     <jodatime.version>2.8.2</jodatime.version>
     <bouncycastle.version>1.52</bouncycastle.version>
     <commons.asic.version>0.9.1</commons.asic.version>
-
-    <hamcrest.version>1.3</hamcrest.version>
   </properties>
 
   <build>
@@ -60,6 +58,7 @@
               <value>all</value>
             </property>
           </properties>
+          <outputFile/>
         </configuration>
       </plugin>
       <plugin>
@@ -192,8 +191,6 @@
     <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest-all</artifactId>
-      <version>${hamcrest.version}</version>
-      <scope>test</scope>
     </dependency>
 
     <dependency>
