@@ -50,11 +50,6 @@
     </dependency>
 
     <dependency>
-      <groupId>no.difi.meldingsutveksling</groupId>
-      <artifactId>domain</artifactId>
-    </dependency>
-
-    <dependency>
       <artifactId>adresseregister-client</artifactId>
       <groupId>no.difi.meldingsutveksling</groupId>
       <version>1.0-SNAPSHOT</version>
@@ -64,6 +59,11 @@
       <groupId>no.difi.meldingsutveksling</groupId>
       <artifactId>dokumentpakking</artifactId>
       <version>0.1-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>no.difi.meldingsutveksling</groupId>
+      <artifactId>domain</artifactId>
     </dependency>
 
     <dependency>
@@ -211,6 +211,16 @@
     </dependency>
 
     <dependency>
+      <groupId>com.thoughtworks.xstream</groupId>
+      <artifactId>xstream</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.modelmapper</groupId>
+      <artifactId>modelmapper</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-servlet</artifactId>
       <version>${jersey.version}</version>
@@ -220,16 +230,6 @@
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-json</artifactId>
       <version>${jersey.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.thoughtworks.xstream</groupId>
-      <artifactId>xstream</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.modelmapper</groupId>
-      <artifactId>modelmapper</artifactId>
     </dependency>
 
     <!-- Dependencies for testing -->
