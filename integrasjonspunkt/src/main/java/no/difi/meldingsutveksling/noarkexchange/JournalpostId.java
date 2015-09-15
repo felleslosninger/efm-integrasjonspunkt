@@ -92,8 +92,7 @@ public class JournalpostId {
     }
 
     private static String extractJpId(String from) {
-        String result = from.substring(from.indexOf("<jpId>") + "<jpId>".length(), from.indexOf("</jpId>"));
-        return result;
+        return from.substring(from.indexOf("<jpId>") + "<jpId>".length(), from.indexOf("</jpId>"));
     }
 
     @Override
@@ -103,9 +102,8 @@ public class JournalpostId {
 
         JournalpostId that = (JournalpostId) o;
 
-        if (jpId != null ? !jpId.equals(that.jpId) : that.jpId != null) return false;
+        return !(jpId != null ? !jpId.equals(that.jpId) : that.jpId != null);
 
-        return true;
     }
 
     @Override

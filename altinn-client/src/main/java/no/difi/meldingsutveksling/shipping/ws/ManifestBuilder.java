@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.shipping.ws;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.Manifest;
 
 public class ManifestBuilder {
-    //private ExternalService externalService;
     private String sender;
     private String senderReference;
     private String filename;
