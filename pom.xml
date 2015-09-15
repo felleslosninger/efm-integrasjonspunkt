@@ -76,6 +76,19 @@
         <scope>import</scope>
       </dependency>
 
+      <!-- Dependencies from internal projects -->
+      <dependency>
+        <groupId>no.difi.meldingsutveksling</groupId>
+        <artifactId>altinnexchange</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>no.difi.meldingsutveksling</groupId>
+        <artifactId>domain</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
       <!-- 3rd party dependencies -->
       <dependency>
         <groupId>org.modelmapper</groupId>
