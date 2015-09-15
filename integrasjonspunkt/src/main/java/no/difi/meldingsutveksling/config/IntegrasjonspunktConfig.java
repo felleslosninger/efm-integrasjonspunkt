@@ -25,13 +25,13 @@ import org.apache.commons.configuration.*;
 public class IntegrasjonspunktConfig {
 
     private static final String PROPERTIES_FILE_NAME = "integrasjonspunkt.properties";
+    private static final String PROPERTIES_FILE_NAME_OVERRIDE = "integrasjonspunkt-local.properties";
 
     static final String KEY_NOARKSYSTEM_ENDPOINT = "noarksystem.endpointURL";
     static final String KEY_PRIVATEKEYALIAS = "privatekeyalias";
     static final String KEY_KEYSTORE_LOCATION = "keystorelocation";
     static final String KEY_PRIVATEKEYPASSWORD = "privatekeypassword";
     static final String KEY_ADRESSEREGISTER_ENDPOINT = "adresseregister.endPointURL";
-    private static final String PROPERTIES_FILE_NAME_OVERRIDE = "integrasjonspunkt-local.properties";
 
     private final CompositeConfiguration config;
 
