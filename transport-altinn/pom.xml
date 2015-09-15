@@ -27,7 +27,6 @@
     <dependency>
       <groupId>no.difi.meldingsutveksling</groupId>
       <artifactId>domain</artifactId>
-      <version>${parent.version}</version>
     </dependency>
   </dependencies>
 </project>

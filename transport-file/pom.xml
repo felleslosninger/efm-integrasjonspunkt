@@ -36,7 +36,6 @@
     <dependency>
       <groupId>org.modelmapper</groupId>
       <artifactId>modelmapper</artifactId>
-      <version>${modelmapper.version}</version>
     </dependency>
   </dependencies>
 </project>
