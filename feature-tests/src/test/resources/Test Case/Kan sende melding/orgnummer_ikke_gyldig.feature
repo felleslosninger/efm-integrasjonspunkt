@@ -1,7 +1,11 @@
-Feature: Kan ikke sende melding - orgnummer ikke gyldig
+Feature: Kan sende melding
 
-  Scenario Outline: validerer mottaker orgnummer
-    Given en mottakende organisasjon med organisasjonsnummer ????????? finnes i adresseregister
-    When vi sjekker om organisasjonsnummer er gyldig 
-    Then skal vi få false i svar
-  
+  Scenario Outline: mottaker orgnummer er ikke gyldig
+    Given  mottaker med organisasjonsnummer <organisasjonsnummer>
+    When   organisasjonsnummer er ikkje gyldig
+    Then   skal vi får <resultat> i svar
+    Examples: values
+      | organisasjonsnummer | resultat |
+      | ?????????           | usann    |
+
+ #Business Need: Trenger et ugyldig orgnummer, et som ikkje validerer
