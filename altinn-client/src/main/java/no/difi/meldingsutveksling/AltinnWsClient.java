@@ -132,7 +132,7 @@ public class AltinnWsClient {
         ManifestBuilder manifestBuilder = new ManifestBuilder()
                 .withSender(request.getSender())
                 .withSenderReference(request.getSenderReference())
-                .withExternalServiceCode("v3888")
+                .withExternalServiceCode("v3888") // TODO: extract into properties
                 .withExternalServiceEditionCode(70515)
                 .withFilename(FILE_NAME);
         initiateRequest.setManifest(manifestBuilder.build());
