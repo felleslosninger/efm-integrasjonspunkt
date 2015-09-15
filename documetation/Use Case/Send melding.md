@@ -1,7 +1,4 @@
-----------
 
-> Blockquote
-> 
 
 **Send melding**
 ------------

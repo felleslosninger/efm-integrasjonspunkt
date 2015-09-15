@@ -1,7 +1,4 @@
-----------
 
-> Blockquote
-> 
 
 **Motta melding**
 ------------
