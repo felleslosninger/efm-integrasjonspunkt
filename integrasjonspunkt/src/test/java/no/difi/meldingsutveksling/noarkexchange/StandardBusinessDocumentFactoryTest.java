@@ -17,7 +17,6 @@ import static junit.framework.Assert.assertNotNull;
 public class StandardBusinessDocumentFactoryTest {
 
     @Test
-
     public void testConvertFromSBDtoSB() throws JAXBException {
         JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument> fromDocument;
         JAXBContext ctx = JAXBContext.newInstance(no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument.class);
