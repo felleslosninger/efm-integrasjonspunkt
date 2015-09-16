@@ -7,6 +7,7 @@ import eu.peppol.outbound.transmission.TransmissionRequestBuilder;
 import eu.peppol.outbound.transmission.Transmitter;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import org.apache.commons.configuration.Configuration;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -22,8 +23,13 @@ import static no.difi.meldingsutveksling.dokumentpakking.xml.MarshalSBD.marshal;
  */
 public class OxalisTransport implements Transport {
 
+    /**
+     * @param config   a configuration object given by the integrasjonspunkt, this implementation can read
+     *                 transport specific properties from this object
+     * @param document An SBD document with a payload consisting of an CMS encrypted ASIC package
+     */
     @Override
-    public void send(StandardBusinessDocument document) {
+    public void send(Configuration config, StandardBusinessDocument document) {
         document.getStandardBusinessDocumentHeader().getBusinessScope().getScope().addAll(createOxalisSpecificScopes());
 
         OxalisOutboundModule oxalisOutboundModule = new OxalisOutboundModule();

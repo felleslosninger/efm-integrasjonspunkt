@@ -3,19 +3,18 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import com.thoughtworks.xstream.XStream;
 import no.difi.asic.SignatureHelper;
+import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.adresseregister.client.CertificateNotFoundException;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
 import no.difi.meldingsutveksling.domain.*;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
-import no.difi.meldingsutveksling.oxalisexchange.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -28,8 +27,6 @@ import java.security.cert.X509Certificate;
 @Component
 public class MessageSender {
 
-    private Logger log = LoggerFactory.getLogger(MessageSender.class);
-
     @Autowired
     EventLog eventLog;
 
@@ -40,6 +37,11 @@ public class MessageSender {
     @Autowired
     AdresseregisterService adresseregister;
 
+    @Autowired
+    IntegrasjonspunktConfig configuration;
+
+    @Autowired
+    IntegrasjonspunktNokkel keyInfo;
 
     boolean setSender(IntegrasjonspunktContext context, AddressType sender) {
         if (sender == null) {
@@ -53,7 +55,8 @@ public class MessageSender {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
             return false;
         }
-        avsender = Avsender.builder(new Organisasjonsnummer(sender.getOrgnr()), new Noekkelpar(findPrivateKey(), sertifikat)).build();
+        PrivateKey privatNoekkel = keyInfo.loadPrivateKey();
+        avsender = Avsender.builder(new Organisasjonsnummer(sender.getOrgnr()), new Noekkelpar(privatNoekkel, sertifikat)).build();
         context.setAvsender(avsender);
         return true;
     }
@@ -62,6 +65,7 @@ public class MessageSender {
         if (receiver == null) {
             return false;
         }
+
         X509Certificate receiverCertificate;
         try {
             receiverCertificate = (X509Certificate) adresseregister.getCertificate(receiver.getOrgnr());
@@ -100,7 +104,7 @@ public class MessageSender {
         }
         eventLog.log(new Event(ProcessState.SIGNATURE_VALIDATED));
 
-        SignatureHelper helper = new IntegrasjonspunktNokkel().getSignatureHelper();
+        SignatureHelper helper = keyInfo.getSignatureHelper();
         StandardBusinessDocument sbd;
         try {
             sbd = StandardBusinessDocumentFactory.create(message, helper, context.getAvsender(), context.getMottaker());
@@ -115,7 +119,7 @@ public class MessageSender {
         eventLog.log(new Event().setJpId(journalPostId).setArkiveConversationId(conversationId).setHubConversationId(hubCid).setProcessStates(ProcessState.CONVERSATION_ID_LOGGED));
 
         Transport t = transportFactory.createTransport(sbd);
-        t.send(sbd);
+        t.send(configuration.getConfiguration(), sbd);
 
         eventLog.log(createOkStateEvent(message));
 
@@ -128,7 +132,7 @@ public class MessageSender {
     private PutMessageResponseType createErrorResponse(String message) {
         PutMessageResponseType response = new PutMessageResponseType();
         AppReceiptType receipt = new AppReceiptType();
-        receipt.setType("ERROR");
+        receipt.setType("ERROR ");
         response.setResult(receipt);
         return response;
     }
@@ -142,13 +146,6 @@ public class MessageSender {
         return response;
     }
 
-
-    //todo refactor
-    PrivateKey findPrivateKey() {
-        IntegrasjonspunktNokkel nokkel = new IntegrasjonspunktNokkel();
-        return nokkel.loadPrivateKey();
-    }
-
     public void setAdresseregister(AdresseregisterService adresseregister) {
         this.adresseregister = adresseregister;
     }
@@ -157,15 +154,21 @@ public class MessageSender {
         this.eventLog = eventLog;
     }
 
-    private Event createErrorEvent(PutMessageRequestType anyOject, Exception e) {
-        XStream xs = new XStream();
-        Event event = new Event();
-        event.setSender(anyOject.getEnvelope().getSender().getOrgnr());
-        event.setReceiver(anyOject.getEnvelope().getReceiver().getOrgnr());
-        event.setExceptionMessage(event.getMessage());
-        event.setProcessStates(ProcessState.MESSAGE_SEND_FAIL);
-        event.setMessage(xs.toXML(anyOject));
-        return event;
+
+    public IntegrasjonspunktConfig getConfiguration() {
+        return configuration;
+    }
+
+    public void setConfiguration(IntegrasjonspunktConfig configuration) {
+        this.configuration = configuration;
+    }
+
+    public IntegrasjonspunktNokkel getKeyInfo() {
+        return keyInfo;
+    }
+
+    public void setKeyInfo(IntegrasjonspunktNokkel keyInfo) {
+        this.keyInfo = keyInfo;
     }
 
     private Event createOkStateEvent(PutMessageRequestType anyOject) {

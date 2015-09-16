@@ -2,7 +2,9 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import com.thoughtworks.xstream.XStream;
 import no.difi.meldingsutveksling.CertificateValidator;
+import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.adresseregister.client.AdresseRegisterClient;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
 import no.difi.meldingsutveksling.dokumentpakking.kvit.ObjectFactory;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
@@ -19,7 +21,6 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.*;
 import no.difi.meldingsutveksling.oxalisexchange.ByteArrayImpl;
-import no.difi.meldingsutveksling.oxalisexchange.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.oxalisexchange.Kvittering;
 import no.difi.meldingsutveksling.oxalisexchange.OxalisMessageReceiverTemplate;
 import no.difi.meldingsutveksling.transport.Transport;
@@ -38,7 +39,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.BindingType;
 import java.io.*;
-import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -61,7 +61,6 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
     private EventLog eventLog = EventLog.create();
     private static final String MIME_TYPE = "application/xml";
     private static final String WRITE_TO = System.getProperty("user.home") + File.separator + "testToRemove" + File.separator + "kvitteringSbd.xml";
-    private static final PrivateKey privatNokkel = new IntegrasjonspunktNokkel().loadPrivateKey();
 
     @Autowired
     @Qualifier(value = "multiTransport")
@@ -72,6 +71,14 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
 
     @Autowired
     private AdresseRegisterClient adresseRegisterClient;
+
+    @Autowired
+    private IntegrasjonspunktConfig config;
+
+
+    @Autowired
+    private IntegrasjonspunktNokkel keyInfo;
+
 
     public IntegrajonspunktReceiveImpl() {
     }
@@ -96,13 +103,13 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         forberedKvittering(receiveResponse, "leveringsKvittering");
 
         String convId = receiveResponse.getStandardBusinessDocumentHeader().getBusinessScope().getScope().get(0).getInstanceIdentifier();
-        Noekkelpar noekkelpar = new Noekkelpar(privatNokkel, adresseRegisterClient.getCertificate(reciever.toString()));
+        Noekkelpar noekkelpar = new Noekkelpar(keyInfo.loadPrivateKey(), adresseRegisterClient.getCertificate(reciever.toString()));
         Avsender avsender = new Avsender(reciever, noekkelpar);
         SignAFile signAFile = new SignAFile();
 
         no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument kvittering = new CreateSBD().createSBD(reciever, sender, new ObjectFactory().createKvittering(signAFile.signIt(receiveResponse.getAny(), avsender, KvitteringType.LEVERING)), convId, KVITTERING_CONSTANT);
         Transport transport = transportFactory.createTransport(kvittering);
-        transport.send(kvittering);
+        transport.send(config.getConfiguration(), kvittering);
         logEvent(receiveResponse, null, ProcessState.LEVERINGS_KVITTERING_SENT);
 
         JAXBContext jaxbContextP;
@@ -119,7 +126,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         }
         byte[] cmsEncZip = DatatypeConverter.parseBase64Binary(payload.getContent());
         CmsUtil cmsUtil = new CmsUtil();
-        byte[] zipTobe = cmsUtil.decryptCMS(cmsEncZip, privatNokkel);
+        byte[] zipTobe = cmsUtil.decryptCMS(cmsEncZip, keyInfo.loadPrivateKey());
         logEvent(receiveResponse, null, ProcessState.DECRYPTION_SUCCESS);
         File bestEdu;
         try {
@@ -155,7 +162,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
     }
 
     private void forwardToNoarkSystemAndSendReceipt(StandardBusinessDocument receiveResponse, Organisasjonsnummer sender, Organisasjonsnummer reciever, String convId, Avsender avsender, SignAFile signAFile, PutMessageRequestType putMessageRequestType) {
-        PutMessageResponseType response = noarkSystem.sendEduMeldig(putMessageRequestType);
+        PutMessageResponseType response = noarkSystem.sendEduMelding(putMessageRequestType);
         if (response != null) {
             AppReceiptType result = response.getResult();
             if (null == result) {
@@ -164,7 +171,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
                 logEvent(receiveResponse, null, ProcessState.BEST_EDU_SENT);
                 no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument receipt = new CreateSBD().createSBD(sender, reciever, signAFile.signIt(receiveResponse.getAny(), avsender, KvitteringType.AAPNING), convId, KVITTERING_CONSTANT);
                 Transport transport = transportFactory.createTransport(receipt);
-                transport.send(receipt);
+                transport.send(config.getConfiguration(), receipt);
             }
         } else {
             logEvent(receiveResponse, null, ProcessState.ARCHIVE_NOT_AVAILABLE);
@@ -187,7 +194,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         }
 
         Certificate certificate = adresseRegisterClient.getCertificate(recievedBy);
-        Noekkelpar noekkelpar = new Noekkelpar(privatNokkel, certificate);
+        Noekkelpar noekkelpar = new Noekkelpar(keyInfo.loadPrivateKey(), certificate);
         Avsender.Builder avsenderBuilder = Avsender.builder(new Organisasjonsnummer(recievedBy), noekkelpar);
         Avsender avsender = avsenderBuilder.build();
         Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo), (X509Certificate) certificate);
@@ -286,5 +293,21 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
 
     public void setAdresseRegisterClient(AdresseRegisterClient adresseRegisterClient) {
         this.adresseRegisterClient = adresseRegisterClient;
+    }
+
+    public IntegrasjonspunktConfig getConfig() {
+        return config;
+    }
+
+    public void setConfig(IntegrasjonspunktConfig config) {
+        this.config = config;
+    }
+
+    public IntegrasjonspunktNokkel getKeyInfo() {
+        return keyInfo;
+    }
+
+    public void setKeyInfo(IntegrasjonspunktNokkel keyInfo) {
+        this.keyInfo = keyInfo;
     }
 }

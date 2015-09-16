@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.oxalisexchange;
 
+import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.eventlog.Event;

@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling;
 
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.configuration.Configuration;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -31,21 +30,13 @@ public class AltinnWsConfiguration {
     private AltinnWsConfiguration() {
     }
 
-    public static AltinnWsConfiguration fromProperties() {
-        PropertiesConfiguration propertiesConfiguration;
-        try {
-            propertiesConfiguration = new PropertiesConfiguration("application.properties");
-        } catch (ConfigurationException e) {
-            throw new AltinnWsConfigurationException("Could not create configuration for the Altinn formidlingstjeneste client", e);
-        }
-
-        URL streamingserviceUrl = createUrl(propertiesConfiguration.getString("streamingservice.url"));
-        URL brokerserviceUrl = createUrl(propertiesConfiguration.getString("brokerservice.url"));
-
+    public static AltinnWsConfiguration fromConfiguration(Configuration config) {
+        URL streamingserviceUrl = createUrl(config.getString("altinn.streamingservice.url"));
+        URL brokerserviceUrl = createUrl(config.getString("altinn.brokerservice.url"));
 
         return new Builder()
-                .withUsername(propertiesConfiguration.getString("altinn.username"))
-                .withPassword(propertiesConfiguration.getString("altinn.password"))
+                .withUsername(config.getString("altinn.username"))
+                .withPassword(config.getString("altinn.password"))
                 .withStreamingServiceUrl(streamingserviceUrl)
                 .withBrokerServiceUrl(brokerserviceUrl)
                 .build();
@@ -56,12 +47,10 @@ public class AltinnWsConfiguration {
         try {
             u = new URL(url);
         } catch (MalformedURLException e) {
-            throw new AltinnWsConfigurationException("The configured URL is invalid", e);
+            throw new AltinnWsConfigurationException("The configured URL is invalid ", e);
         }
         return u;
     }
-
-
 
 
     public static class Builder {

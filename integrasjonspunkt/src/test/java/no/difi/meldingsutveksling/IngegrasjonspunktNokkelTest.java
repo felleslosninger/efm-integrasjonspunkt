@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling;
 
 
-import no.difi.meldingsutveksling.oxalisexchange.IntegrasjonspunktNokkel;
 import org.junit.Test;
 
 import java.security.PrivateKey;
