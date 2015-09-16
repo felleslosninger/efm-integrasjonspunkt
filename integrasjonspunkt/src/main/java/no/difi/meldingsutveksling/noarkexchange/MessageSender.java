@@ -52,12 +52,12 @@ public class MessageSender {
         }
 
         if (!sender.hasOrgNumber()) {
-            s.setOrgnr(configuration.getOrganisationNumber());
+            sender.setOrgnr(configuration.getOrganisationNumber());
         }
 
-        Certificate certificate = adresseregister.getCertificate(s.getOrgnr());
+        Certificate certificate = adresseregister.getCertificate(sender.getOrgnr());
         PrivateKey privatNoekkel = keyInfo.loadPrivateKey();
-        Avsender avsender = Avsender.builder(new Organisasjonsnummer(s.getOrgnr()), new Noekkelpar(privatNoekkel, certificate)).build();
+        Avsender avsender = Avsender.builder(new Organisasjonsnummer(sender.getOrgnr()), new Noekkelpar(privatNoekkel, certificate)).build();
         context.setAvsender(avsender);
         return true;
     }
@@ -184,6 +184,7 @@ public class MessageSender {
     class AddressTypeWrapper {
 
         private AddressType addressType;
+        private String orgnr;
 
         AddressTypeWrapper(AddressType addressType) {
             this.addressType = addressType;
@@ -193,6 +194,13 @@ public class MessageSender {
             return addressType.getOrgnr() == null || addressType.getOrgnr().isEmpty();
         }
 
+        public void setOrgnr(String orgnr) {
+            addressType.setOrgnr(orgnr);
+        }
+
+        public String getOrgnr() {
+            return addressType.getOrgnr();
+        }
     }
 
 }
