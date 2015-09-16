@@ -31,6 +31,7 @@ public class IntegrasjonspunktConfig {
     static final String KEY_KEYSTORE_LOCATION = "keystorelocation";
     static final String KEY_PRIVATEKEYPASSWORD = "privatekeypassword";
     static final String KEY_ADRESSEREGISTER_ENDPOINT = "adresseregister.endPointURL";
+    private static final String KEY_ORGANISATION_NUMBER = "orgnumber";
 
     private final CompositeConfiguration config;
 
@@ -38,19 +39,20 @@ public class IntegrasjonspunktConfig {
 
         config = new CompositeConfiguration();
         config.addConfiguration(new SystemConfiguration());
-
         try {
             PropertiesConfiguration configurationFileOverride = new PropertiesConfiguration(PROPERTIES_FILE_NAME_OVERRIDE);
             config.addConfiguration(configurationFileOverride);
+        } catch (ConfigurationException e) {
+            // okey to not have local config
+        }
 
+        try {
             PropertiesConfiguration configurationFile = new PropertiesConfiguration(PROPERTIES_FILE_NAME);
             config.addConfiguration(configurationFile);
-
         } catch (ConfigurationException e) {
-            throw new MeldingsUtvekslingRuntimeException("The configuration file application.properties not found in working directory.");
+            throw new MeldingsUtvekslingRuntimeException("The configuration file " + PROPERTIES_FILE_NAME + " not found on classpath.", e);
         }
     }
-
 
     public String getAdresseRegisterEndPointURL() {
         return config.getString(KEY_ADRESSEREGISTER_ENDPOINT);
@@ -75,4 +77,9 @@ public class IntegrasjonspunktConfig {
     public Configuration getConfiguration() {
         return config;
     }
+
+    public String getOrganisationNumber() {
+        return config.getString(KEY_ORGANISATION_NUMBER);
+    }
+
 }
