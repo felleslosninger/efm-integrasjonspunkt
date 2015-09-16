@@ -44,19 +44,24 @@ public class MessageSender {
     IntegrasjonspunktNokkel keyInfo;
 
     boolean setSender(IntegrasjonspunktContext context, AddressType sender) {
-        if (sender == null) {
-            return false;
+
+        String orgNumberFromConfig = configuration.getOrganisationNumber();
+        String orgNumberFromMessage = sender.getOrgnr();
+
+        boolean nullSenderInMessage = orgNumberFromMessage == null;
+        boolean emptySenderInMessage = !nullSenderInMessage && orgNumberFromMessage.isEmpty();
+        boolean missingSenderInConfig = orgNumberFromConfig == null;
+
+        if (missingSenderInConfig && (emptySenderInMessage || nullSenderInMessage)) {
+            throw new MeldingsUtvekslingRuntimeException();
         }
-        Avsender avsender;
-        Certificate sertifikat;
-        try {
-            sertifikat = adresseregister.getCertificate(sender.getOrgnr());
-        } catch (CertificateNotFoundException e) {
-            eventLog.log(new Event().setExceptionMessage(e.toString()));
-            return false;
+
+        if (nullSenderInMessage || emptySenderInMessage) {
+            sender.setOrgnr(orgNumberFromConfig);
         }
+        Certificate certificate = adresseregister.getCertificate(sender.getOrgnr());
         PrivateKey privatNoekkel = keyInfo.loadPrivateKey();
-        avsender = Avsender.builder(new Organisasjonsnummer(sender.getOrgnr()), new Noekkelpar(privatNoekkel, sertifikat)).build();
+        Avsender avsender = Avsender.builder(new Organisasjonsnummer(sender.getOrgnr()), new Noekkelpar(privatNoekkel, certificate)).build();
         context.setAvsender(avsender);
         return true;
     }
@@ -65,7 +70,6 @@ public class MessageSender {
         if (receiver == null) {
             return false;
         }
-
         X509Certificate receiverCertificate;
         try {
             receiverCertificate = (X509Certificate) adresseregister.getCertificate(receiver.getOrgnr());
