@@ -1,22 +1,18 @@
 package no.difi.meldingsutveksling.noark;
 
 import com.thoughtworks.xstream.XStream;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
+import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.noarkexchange.schema.NoarkExchange;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.SOAPport;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.xml.ws.BindingProvider;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
 
 /**
  * Simple wrapper around the Web Service client for a integrasjonspunkt. Reads the end point URL
@@ -31,26 +27,9 @@ public class NOARKSystem {
     @Autowired
     EventLog eventLog;
 
-    public static final String INTEGRASJONSPUNKT_PROPERTIES = "integrasjonspunkt.properties";
-    public static final String NOARKSYSTEM_ENDPOINT = "noarksystem.endpointURL";
-    private String endPointURL;
 
-    public NOARKSystem() {
-
-        Properties p;
-        try (InputStream is = NOARKSystem.class.getClassLoader().getResourceAsStream(INTEGRASJONSPUNKT_PROPERTIES)) {
-            if (is == null) {
-                throw new IllegalStateException(INTEGRASJONSPUNKT_PROPERTIES + " is not on classpath");
-            }
-            p = new Properties();
-            p.load(is);
-
-        } catch (IOException e) {
-            eventLog.log(new Event().setExceptionMessage(e.toString()));
-            throw new IllegalStateException(INTEGRASJONSPUNKT_PROPERTIES + " can not be read");
-        }
-        endPointURL = p.getProperty(NOARKSYSTEM_ENDPOINT);
-    }
+    @Autowired
+    IntegrasjonspunktConfig config;
 
     public PutMessageResponseType sendEduMelding(PutMessageRequestType eduMesage) {
         if (eventLog == null) {
@@ -65,10 +44,19 @@ public class NOARKSystem {
         NoarkExchange exchange = new NoarkExchange();
         SOAPport port = exchange.getNoarkExchangePort();
         BindingProvider bp = (BindingProvider) port;
+        String endPointURL = config.getNOARKSystemEndPointURL();
         bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endPointURL);
         return port.putMessage(eduMesage);
     }
 
+
+    public IntegrasjonspunktConfig getConfig() {
+        return config;
+    }
+
+    public void setConfig(IntegrasjonspunktConfig config) {
+        this.config = config;
+    }
 
     public EventLog getEventLog() {
         return eventLog;
@@ -77,20 +65,4 @@ public class NOARKSystem {
     public void setEventLog(EventLog eventLog) {
         this.eventLog = eventLog;
     }
-
-    /**
-     * TODO Remove
-     * Use this to test the actual sending (see integrasjonspunkt.properties for endpoint)
-     *
-     * @param args
-     */
-    public static void majin(String[] args) {
-        XStream xs = new XStream();
-        System.setProperty("spring.profiles.active", "dev");
-        ApplicationContext ctx = new ClassPathXmlApplicationContext("spring-rest.xml");
-        NOARKSystem noark = new NOARKSystem();
-        noark.setEventLog(ctx.getBean(EventLog.class));
-
-    }
-
 }
