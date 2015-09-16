@@ -82,4 +82,9 @@ public class IntegrasjonspunktConfig {
         return config.getString(KEY_ORGANISATION_NUMBER);
     }
 
+    public boolean hasOrganisationNumber() {
+        String orgNumber = config.getString(KEY_ORGANISATION_NUMBER);
+        return orgNumber != null && !orgNumber.isEmpty();
+    }
+
 }

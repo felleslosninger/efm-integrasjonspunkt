@@ -43,25 +43,21 @@ public class MessageSender {
     @Autowired
     IntegrasjonspunktNokkel keyInfo;
 
-    boolean setSender(IntegrasjonspunktContext context, AddressType sender) {
+    boolean setSender(IntegrasjonspunktContext context, AddressType s) {
 
-        String orgNumberFromConfig = configuration.getOrganisationNumber();
-        String orgNumberFromMessage = sender.getOrgnr();
+        AddressTypeWrapper sender = new AddressTypeWrapper(s);
 
-        boolean nullSenderInMessage = orgNumberFromMessage == null;
-        boolean emptySenderInMessage = !nullSenderInMessage && orgNumberFromMessage.isEmpty();
-        boolean missingSenderInConfig = orgNumberFromConfig == null;
-
-        if (missingSenderInConfig && (emptySenderInMessage || nullSenderInMessage)) {
+        if (!sender.hasOrgNumber() && !configuration.hasOrganisationNumber()) {
             throw new MeldingsUtvekslingRuntimeException();
         }
 
-        if (nullSenderInMessage || emptySenderInMessage) {
-            sender.setOrgnr(orgNumberFromConfig);
+        if (!sender.hasOrgNumber()) {
+            s.setOrgnr(configuration.getOrganisationNumber());
         }
-        Certificate certificate = adresseregister.getCertificate(sender.getOrgnr());
+
+        Certificate certificate = adresseregister.getCertificate(s.getOrgnr());
         PrivateKey privatNoekkel = keyInfo.loadPrivateKey();
-        Avsender avsender = Avsender.builder(new Organisasjonsnummer(sender.getOrgnr()), new Noekkelpar(privatNoekkel, certificate)).build();
+        Avsender avsender = Avsender.builder(new Organisasjonsnummer(s.getOrgnr()), new Noekkelpar(privatNoekkel, certificate)).build();
         context.setAvsender(avsender);
         return true;
     }
@@ -183,6 +179,20 @@ public class MessageSender {
         event.setMessage(xs.toXML(anyOject));
         event.setProcessStates(ProcessState.SBD_SENT);
         return event;
+    }
+
+    class AddressTypeWrapper {
+
+        private AddressType addressType;
+
+        AddressTypeWrapper(AddressType addressType) {
+            this.addressType = addressType;
+        }
+
+        public boolean hasOrgNumber() {
+            return addressType.getOrgnr() == null || addressType.getOrgnr().isEmpty();
+        }
+
     }
 
 }
