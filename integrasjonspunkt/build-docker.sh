@@ -12,8 +12,8 @@ echo ${CONTAINER_NAME}
 docker stop ${CONTAINER_NAME}
 
 # Must be the root folder
-WORKING_DIR="/home/miif/builds"
-CERTIFICATE_DIR=${WORKING_DIR}/certificates
+WORKING_DIR=$(pwd)
+CERTIFICATE_DIR=${WORKING_DIR}/src/main/resources
 PORT=$1
 
 echo "Working dir: $WORKING_DIR"
@@ -38,13 +38,14 @@ if [ "$OLD_IMAGES" != "" ]; then
 fi
 
 # Build new image
-docker build --no-cache -t ${IMAGE_NAME} /home/miif/builds &&\
+docker build --no-cache -t ${IMAGE_NAME} ${WORKING_DIR} &&\
 
 # Create new container
 docker create --name ${CONTAINER_NAME} -v ${CERTIFICATE_DIR}:/var/lib/difi/crt -p ${PORT}:8080 ${IMAGE_NAME}
 
 # Done
-echo "$CONTAINER_NAME is build. Starting the container. To see log output, run docker logs -f $CONTAINER_NAME (CTRL+C to exit logs)."
+echo "$CONTAINER_NAME is build."
+echo "Starting the container. To see log output, run docker logs -f $CONTAINER_NAME (CTRL+C to exit logs)."
 echo
 
 docker start $CONTAINER_NAME
