@@ -155,7 +155,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
     }
 
     private void forwardToNoarkSystemAndSendReceipt(StandardBusinessDocument receiveResponse, Organisasjonsnummer sender, Organisasjonsnummer reciever, String convId, Avsender avsender, SignAFile signAFile, PutMessageRequestType putMessageRequestType) {
-        PutMessageResponseType response = noarkSystem.sendEduMeldig(putMessageRequestType);
+        PutMessageResponseType response = noarkSystem.sendEduMelding(putMessageRequestType);
         if (response != null) {
             AppReceiptType result = response.getResult();
             if (null == result) {

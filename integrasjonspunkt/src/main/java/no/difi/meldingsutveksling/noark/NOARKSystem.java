@@ -52,7 +52,7 @@ public class NOARKSystem {
         endPointURL = p.getProperty(NOARKSYSTEM_ENDPOINT);
     }
 
-    public PutMessageResponseType sendEduMeldig(PutMessageRequestType eduMesage) {
+    public PutMessageResponseType sendEduMelding(PutMessageRequestType eduMesage) {
         if (eventLog == null) {
             throw new IllegalStateException("malconfigured. EventLog Not set");
         }
