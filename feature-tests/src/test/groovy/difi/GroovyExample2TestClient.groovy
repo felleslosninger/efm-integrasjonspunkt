@@ -6,7 +6,7 @@ import wslite.soap.SOAPClient
  * Eksempel på hvordan man bruker kaller på SOAP tjeneste med SOAPMessageBuilder api
  */
 class GroovyExample2TestClient {
-    def url = "http://localhost:9091/noarkExchange"
+    def url = "http://localhost:8080/noarkExchange"
     def client = new SOAPClient(url)
 
     boolean canGetRecieveMessage(int partynumber) {
