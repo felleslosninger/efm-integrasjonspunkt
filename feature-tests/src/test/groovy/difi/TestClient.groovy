@@ -1,6 +1,7 @@
 package difi
 
 import wslite.soap.SOAPClient
+import wslite.soap.SOAPResponse
 
 /**
  * Eksempel på hvordan man bruker kaller på SOAP tjeneste med SOAPMessageBuilder api
@@ -24,7 +25,7 @@ class TestClient {
         return client.send(request).body.text().toBoolean()
     }
 
-    def putMessage(String senderPartynumber, String recieverPartyNumber, String payload) {
+    SOAPResponse putMessage(String senderPartynumber, String recieverPartyNumber, byte[] bestedu) {
         def request = {
             soapNamespacePrefix "soapenv"
             envelopeAttributes 'xmlns:typ': "http://www.arkivverket.no/Noark/Exchange/types"
@@ -36,12 +37,10 @@ class TestClient {
                         }
                         reciever(recieverPartyNumber)
                     }
-                    payload {
-
-                    }
+                    new String(bestedu)
                 }
             }
         }
-        client.send(request)
+        def response = client.send(request)
     }
 }
