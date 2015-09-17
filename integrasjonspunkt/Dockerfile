@@ -35,6 +35,7 @@ ENV APP_JAVA_PARAMS "-Dprivatekeyalias=974720760 -Dkeystorelocation=crt/test-cer
 ENV APP_PROFILE dev
 
 ADD target/${APP_PREFIX}*.jar ${APP_DIR}/
+ADD ./integrasjonspunkt-local.properties ${APP_DIR}/
 
 #
 # Start the application

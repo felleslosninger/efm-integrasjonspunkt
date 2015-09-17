@@ -5,22 +5,29 @@
 # Build params
 IMAGE_NAME=difi/difi_integrasjonspunkt_$1
 CONTAINER_NAME=Difi_Integrasjonspunkt_$1
-
 echo ${CONTAINER_NAME}
 
 # Must stop any running container to continue
 docker stop ${CONTAINER_NAME}
 
-# Must be the root folder
+# Specify where the Dockerfile and Certificate is
 WORKING_DIR=$(pwd)
 CERTIFICATE_DIR=${WORKING_DIR}/src/main/resources
 PORT=$1
-
 echo "Working dir: $WORKING_DIR"
 
+# Require a port
 if [ -z "$1" ]; then
-  echo "You have to specify a port number. Format ./build-docker.sh portNumber"
-  exit
+  echo "You have to specify a port number. Format ./build-docker.sh portNumber orgNumber"
+  exit 1
+fi
+
+# Require an organization number
+if [ -z "$2" ]; then
+  echo "You have to specify an organization number. Format ./build-docker.sh portNumber orgNumber"
+  exit 1
+else
+  echo "orgnumber=$2" > integrasjonspunkt-local.properties
 fi
 
 # Remove any existing container
