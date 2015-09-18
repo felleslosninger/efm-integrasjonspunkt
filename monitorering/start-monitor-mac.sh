@@ -3,6 +3,9 @@
 # Builds and starts the monitoring server for the Integrasjonspunkt application
 # This is version should be used when running Mac.
 
+dir=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
+cd ${dir}
+
 # Build parameters
 WORKING_DIR=$(pwd)
 SPRING_EUREKA=${WORKING_DIR}/integrasjonspunkt-eureka
@@ -27,7 +30,7 @@ __jar ${SPRING_ADMIN}
 
 # Build Docker-images and then start the containers.
 echo "Building and starting Spring Eureka Server"
-${SRING_EUREKA}/build-docker.sh
+${SPRING_EUREKA}/build-docker.sh mac
 
 echo "Building and starting Spring Boot Admin UI"
-${SPRING_ADMIN}/build-docker.sh 8090
+${SPRING_ADMIN}/build-docker.sh 8090 mac

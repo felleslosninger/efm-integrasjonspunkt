@@ -3,7 +3,12 @@
 # Builds an image and creates a container.
 
 # Set current execution dir to this folder
-cd $(dirname $(readlink -f $0))
+if [ -z "$2" ]; then
+  cd $(dirname $(readlink -f $0))
+else
+  dir=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
+  cd ${dir}
+fi
 
 # Build params
 IMAGE_NAME=difi/monitorui
