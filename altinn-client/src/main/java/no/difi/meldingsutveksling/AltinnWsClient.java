@@ -108,7 +108,6 @@ public class AltinnWsClient {
     }
 
     private String initiateBrokerService(UploadRequest request) {
-        System.setProperty("com.sun.xml.internal.ws.transport.http.client.HttpTransportPipe.dump", "true");
         BrokerServiceInitiation brokerServiceInitiation = createInitiationRequest(request);
         try {
             BrokerServiceExternalBasicSF brokerServiceExternalBasicSF;
@@ -133,7 +132,6 @@ public class AltinnWsClient {
                 .withFilename(FILE_NAME);
         initiateRequest.setManifest(manifestBuilder.build());
         initiateRequest.setRecipientList(new RecipientBuilder().withPartyNumber(request.getReceiver()).build());
-
         return initiateRequest;
     }
 
