@@ -2,6 +2,9 @@
 # author: Dervis M
 # Builds an image and creates a container.
 
+# Set current execution dir to this folder
+cd $(dirname $(readlink -f $0))
+
 # Build params
 IMAGE_NAME=difi/springbooteurekaserver
 CONTAINER_NAME=Difi_SpringBootEurekaServer
@@ -14,7 +17,7 @@ docker stop ${CONTAINER_NAME}
 # Must be the root folder
 WORKING_DIR=$(pwd)
 
-echo "Working dir: $WORKING_DIR"
+echo "$CONTAINER_NAME Working dir: $WORKING_DIR"
 
 # Remove any existing container
 OLD_CONTAINERS=$(docker ps -a | grep ${IMAGE_NAME})

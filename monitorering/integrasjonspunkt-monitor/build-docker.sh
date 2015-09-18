@@ -2,6 +2,9 @@
 # author: Dervis M
 # Builds an image and creates a container.
 
+# Set current execution dir to this folder
+cd $(dirname $(readlink -f $0))
+
 # Build params
 IMAGE_NAME=difi/monitorui
 CONTAINER_NAME=Difi_MonitorUI
