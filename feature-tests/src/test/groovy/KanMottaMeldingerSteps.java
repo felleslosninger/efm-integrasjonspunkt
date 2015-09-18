@@ -16,7 +16,7 @@ public class KanMottaMeldingerSteps {
         this.orgnummer = orgnummer;
     }
 
-    @When("^vi sjekker om mottaker kan motta meldinger$")
+    @When("^vi sjekker om mottaker kan motta melding$")
     public void vi_sjekker_om_mottaker_kan_motta_meldinger() throws Throwable {
         // Express the Regexp above with the code you wish you had
         GroovyExample2TestClient integrasjonspunkt = new GroovyExample2TestClient();

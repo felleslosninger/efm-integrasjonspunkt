@@ -8,3 +8,4 @@ Feature: Finne ut om mottaker kan motta melding
     | organisasjonsnummer | resultat |
     | 974720760           | sann     |
     | 123456789           | usann    |
+
