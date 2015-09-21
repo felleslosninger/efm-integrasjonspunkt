@@ -38,7 +38,6 @@ public class IntegrasjonspunktCustomPropertyListener implements ApplicationListe
         // this class is called several times, this makes sure it runs only once
         if (config == null) {
             config = new CompositeConfiguration();
-            config.addConfiguration(new SystemConfiguration());
             try {
                 PropertiesConfiguration configurationFileOverride = new PropertiesConfiguration(PROPERTIES_FILE_NAME_OVERRIDE);
                 config.addConfiguration(configurationFileOverride);
