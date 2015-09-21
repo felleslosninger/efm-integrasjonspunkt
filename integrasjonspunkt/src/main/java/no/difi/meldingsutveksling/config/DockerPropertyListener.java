@@ -31,8 +31,6 @@ public class DockerPropertyListener implements ApplicationListener<ApplicationEn
                 PropertiesConfiguration configurationFileOverride = new PropertiesConfiguration(PROPERTIES_FILE_NAME_OVERRIDE);
                 config.addConfiguration(configurationFileOverride);
             } catch (ConfigurationException e) {
-                System.out.println(e);
-                System.exit(1);
             }
 
             if (config.getString(KEY_SERVICEURL) != null) {
