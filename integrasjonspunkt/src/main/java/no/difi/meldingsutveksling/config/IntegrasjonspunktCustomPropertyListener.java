@@ -48,7 +48,7 @@ public class IntegrasjonspunktCustomPropertyListener implements ApplicationListe
             ConfigurableEnvironment environment = event.getEnvironment();
             Properties props = new Properties();
 
-            // Add the custom properties (only the once you specify here) into the application context
+            // Add the custom properties (only the ones you specify here) into the application context
 
             if (config.getString(KEY_SERVICEURL) != null) {
                 props.put(KEY_SERVICEURL, config.getString(KEY_SERVICEURL));
