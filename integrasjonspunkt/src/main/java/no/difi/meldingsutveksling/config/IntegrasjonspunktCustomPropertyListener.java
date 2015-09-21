@@ -15,8 +15,9 @@ import java.util.Properties;
 
 /**
  * This file will read custom properties from integrasjonspunkt-local.properties
- * and put them in to the Spring Application Context as if they were specified
- * in application.properties or as a system property.
+ * and put them into the Spring Application Context as if they were specified
+ * in the application.properties file or as system properties. Only the properties
+ * you specify below are added (see comment in code).
  *
  * Property initialization such as this class give us great freedom when doing custom
  * configuration in for example linked Docker-containers.
