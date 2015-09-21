@@ -28,7 +28,7 @@ public class FileTransport implements Transport {
 
     @Override
     public void send(Configuration configuration, StandardBusinessDocument document) {
-        String fileName = createFilename(document);
+        String fileName = createFilename();
         ModelMapper mapper = new ModelMapper();
 
         no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument toWrite =
@@ -46,11 +46,11 @@ public class FileTransport implements Transport {
         } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException("file write error ", e);
         } catch (FileNotFoundException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            throw new MeldingsUtvekslingRuntimeException();
         }
     }
 
-    private String createFilename(StandardBusinessDocument document) {
+    private String createFilename() {
         return System.currentTimeMillis() + ".xml";
     }
 
