@@ -25,8 +25,8 @@ import java.util.Properties;
  */
 public class IntegrasjonspunktCustomPropertyListener implements ApplicationListener<ApplicationEnvironmentPreparedEvent> {
 
-    private Logger log = LoggerFactory.getLogger(this.getClass());
-    static final String KEY_SERVICEURL = "spring.boot.admin.client.serviceUrl";
+    private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktCustomPropertyListener.class);
+    private static final String KEY_SERVICEURL = "spring.boot.admin.client.serviceUrl";
     private static final String PROPERTIES_FILE_NAME_OVERRIDE = "integrasjonspunkt-local.properties";
 
     private CompositeConfiguration config;
