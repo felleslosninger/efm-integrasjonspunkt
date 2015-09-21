@@ -13,9 +13,50 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 
 public class SendMeldingSteps {
+    @Given("^en melding med mottaker (\\d+)$")
+    public void en_melding_med_mottaker(int arg1) throws Throwable {
+        // Write code here that turns the phrase above into concrete actions
+        throw new PendingException();
+    }
+
+    @When("^vi skal sende melding$")
+    public void vi_skal_sende_melding() throws Throwable {
+        // Write code here that turns the phrase above into concrete actions
+        throw new PendingException();
+    }
+
+    @Then("^Vi skal få beskjed om at mottaker ikke kan motta meldinger$")
+    public void vi_skal_få_beskjed_om_at_mottaker_ikke_kan_motta_meldinger() throws Throwable {
+        // Write code here that turns the phrase above into concrete actions
+        throw new PendingException();
+    }
+
+    @Given("^mottaker finnes i adresseregister$")
+    public void mottaker_finnes_i_adresseregister() throws Throwable {
+        // Write code here that turns the phrase above into concrete actions
+        throw new PendingException();
+    }
+
+    @When("^vi sender melding$")
+    public void vi_sender_melding() throws Throwable {
+        // Write code here that turns the phrase above into concrete actions
+        throw new PendingException();
+    }
+
+    @Then("^vi skal få svar om at melding har blitt formidlet$")
+    public void vi_skal_få_svar_om_at_melding_har_blitt_formidlet() throws Throwable {
+        // Write code here that turns the phrase above into concrete actions
+        throw new PendingException();
+    }
+
+    @And("^mottaker finnes ikke i adresseregisteret$")
+    public void mottaker_finnes_ikke_i_adresseregisteret() throws Throwable {
+        // Express the Regexp above with the code you wish you had
+        throw new PendingException();
+    }
     private byte[] bestEduMessage;
     private String sender, reciever;
-    @Given("^en melding på (\\d+) MB$")
+    
     public void en_melding_på_MB(int meldingStoerrelse) throws Throwable {
         // Express the Regexp above with the code you wish you had
         BestEduTestMessageFactory messageFactory = new BestEduTestMessageFactory();
@@ -30,24 +71,4 @@ public class SendMeldingSteps {
 
     }
 
-    @When("^integrasjonspunkt mottar meldingen$")
-    public void integrasjonspunkt_mottar_meldingen() throws Throwable {
-        // Express the Regexp above with the code you wish you had
-
-        //TestClient integrasjonspunkt = new TestClient();
-        //SOAPResponse soapResponse = integrasjonspunkt.putMessage(sender, reciever, bestEduMessage);
-        throw new PendingException("Kalle på putMessage i integrasjonspunktet");
-    }
-
-    @Then("^meldingen blir sent til Altinn$")
-    public void meldingen_blir_sent_til_Altinn() throws Throwable {
-        // Express the Regexp above with the code you wish you had
-        throw new PendingException("Skrive kode for å sjekke at returverdi fra integrasjonspunkt viser at melding ble sendt til Altinn");
-    }
-
-    @And("^integrasjonspunkt returnerer Ok$")
-    public void integrasjonspunkt_returnerer_Ok() throws Throwable {
-        // Express the Regexp above with the code you wish you had
-        throw new PendingException("Skrive kode for å sjekke at returverdi fra integrasjonspunkt er Ok");
-    }
 }

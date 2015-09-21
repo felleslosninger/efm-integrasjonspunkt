@@ -6,6 +6,6 @@ Feature: Kan sende melding
     Then   skal vi får <resultat> i svar
     Examples: values
       | organisasjonsnummer | resultat |
-      | ?????????           | usann    |
+      | 123456789           | usann    |
 
  #Business Need: Trenger et ugyldig orgnummer, et som ikkje validerer

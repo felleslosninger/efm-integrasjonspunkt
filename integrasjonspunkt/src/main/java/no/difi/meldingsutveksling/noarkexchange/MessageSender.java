@@ -43,20 +43,21 @@ public class MessageSender {
     @Autowired
     IntegrasjonspunktNokkel keyInfo;
 
-    boolean setSender(IntegrasjonspunktContext context, AddressType sender) {
-        if (sender == null) {
-            return false;
+    boolean setSender(IntegrasjonspunktContext context, AddressType s) {
+
+        AddressTypeWrapper sender = new AddressTypeWrapper(s);
+
+        if (!sender.hasOrgNumber() && !configuration.hasOrganisationNumber()) {
+            throw new MeldingsUtvekslingRuntimeException();
         }
-        Avsender avsender;
-        Certificate sertifikat;
-        try {
-            sertifikat = adresseregister.getCertificate(sender.getOrgnr());
-        } catch (CertificateNotFoundException e) {
-            eventLog.log(new Event().setExceptionMessage(e.toString()));
-            return false;
+
+        if (!sender.hasOrgNumber()) {
+            sender.setOrgnr(configuration.getOrganisationNumber());
         }
+
+        Certificate certificate = adresseregister.getCertificate(sender.getOrgnr());
         PrivateKey privatNoekkel = keyInfo.loadPrivateKey();
-        avsender = Avsender.builder(new Organisasjonsnummer(sender.getOrgnr()), new Noekkelpar(privatNoekkel, sertifikat)).build();
+        Avsender avsender = Avsender.builder(new Organisasjonsnummer(sender.getOrgnr()), new Noekkelpar(privatNoekkel, certificate)).build();
         context.setAvsender(avsender);
         return true;
     }
@@ -65,7 +66,6 @@ public class MessageSender {
         if (receiver == null) {
             return false;
         }
-
         X509Certificate receiverCertificate;
         try {
             receiverCertificate = (X509Certificate) adresseregister.getCertificate(receiver.getOrgnr());
@@ -179,6 +179,28 @@ public class MessageSender {
         event.setMessage(xs.toXML(anyOject));
         event.setProcessStates(ProcessState.SBD_SENT);
         return event;
+    }
+
+    class AddressTypeWrapper {
+
+        private AddressType addressType;
+        private String orgnr;
+
+        AddressTypeWrapper(AddressType addressType) {
+            this.addressType = addressType;
+        }
+
+        public boolean hasOrgNumber() {
+            return addressType.getOrgnr() == null || addressType.getOrgnr().isEmpty();
+        }
+
+        public void setOrgnr(String orgnr) {
+            addressType.setOrgnr(orgnr);
+        }
+
+        public String getOrgnr() {
+            return addressType.getOrgnr();
+        }
     }
 
 }
