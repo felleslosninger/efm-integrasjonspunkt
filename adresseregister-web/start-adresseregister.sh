@@ -2,8 +2,18 @@
 # author: Dervis M
 # Builds and starts the Adresseregister-Web module
 
+# Set current execution dir to this folder
+if [ -z "$1" ]; then
+  # Linux
+  cd $(dirname $(readlink -f $0))
+  WORKING_DIR=/home/miif/github_source/meldingsutveksling-mellom-offentlige-virksomheter/adresseregister-web
+else
+  # Mac
+  cd $(cd -P -- "$(dirname -- "$0")" && pwd -P)
+  WORKING_DIR=$(pwd)
+fi
+
 # Build parameters
-WORKING_DIR=/home/miif/github_source/meldingsutveksling-mellom-offentlige-virksomheter/adresseregister-web
 ADRESSEREGISTER_WEB=${WORKING_DIR}/
 
 # Trigger a Maven build if jar files 

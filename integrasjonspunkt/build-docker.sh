@@ -30,6 +30,11 @@ else
   echo "orgnumber=$2" > integrasjonspunkt-local.properties
 fi
 
+# If specified, add a custom Admin ServiceUrl
+if [ -n "$3" ]; then
+  echo "spring.boot.admin.client.serviceUrl=$3" >> integrasjonspunkt-local.properties
+fi
+
 # Remove any existing container
 OLD_CONTAINERS=$(docker ps -a | grep ${IMAGE_NAME})
 if [ "$OLD_CONTAINERS" != "" ]; then
