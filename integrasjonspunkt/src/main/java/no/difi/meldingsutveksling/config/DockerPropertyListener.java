@@ -21,10 +21,6 @@ public class DockerPropertyListener implements ApplicationListener<ApplicationEn
 
     private CompositeConfiguration config;
 
-    public DockerPropertyListener() {
-
-    }
-
     @Override
     public void onApplicationEvent(ApplicationEnvironmentPreparedEvent event) {
 
