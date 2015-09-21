@@ -37,7 +37,8 @@ class TestClient {
                         }
                         reciever(recieverPartyNumber)
                     }
-                    new String(bestedu)
+
+                    mkp.yieldUnescaped(bestedu)
                 }
             }
         }

@@ -6,6 +6,7 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import difi.BestEduTestMessageFactory;
+import difi.TestClient;
 import groovy.lang.Writable;
 
 import java.io.BufferedWriter;
@@ -13,10 +14,19 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 
 public class SendMeldingSteps {
+
+    private String mottaker;
+
     @Given("^en melding med mottaker (\\d+)$")
-    public void en_melding_med_mottaker(int arg1) throws Throwable {
+    public void en_melding_med_mottaker(String arg1) throws Throwable {
         // Write code here that turns the phrase above into concrete actions
-        throw new PendingException();
+        BestEduTestMessageFactory messageFactory = new BestEduTestMessageFactory();
+        Writable message = messageFactory.createMessage(sender, arg1, 128);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        message.writeTo(new BufferedWriter(new OutputStreamWriter(outputStream)));
+        bestEduMessage = outputStream.toByteArray();
+        mottaker = arg1;
+        sender = "974720760";
     }
 
     @When("^vi skal sende melding$")
@@ -34,13 +44,14 @@ public class SendMeldingSteps {
     @Given("^mottaker finnes i adresseregister$")
     public void mottaker_finnes_i_adresseregister() throws Throwable {
         // Write code here that turns the phrase above into concrete actions
-        throw new PendingException();
+        //
     }
 
     @When("^vi sender melding$")
     public void vi_sender_melding() throws Throwable {
         // Write code here that turns the phrase above into concrete actions
-        throw new PendingException();
+        TestClient testClient = new TestClient();
+        testClient.putMessage(sender, reciever, bestEduMessage);
     }
 
     @Then("^vi skal få svar om at melding har blitt formidlet$")
@@ -60,8 +71,6 @@ public class SendMeldingSteps {
     public void en_melding_på_MB(int meldingStoerrelse) throws Throwable {
         // Express the Regexp above with the code you wish you had
         BestEduTestMessageFactory messageFactory = new BestEduTestMessageFactory();
-        sender = "974720760";
-        reciever = "974720760";
         Writable message = messageFactory.createMessage(sender, reciever, 128);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         message.writeTo(new BufferedWriter(new OutputStreamWriter(outputStream)));

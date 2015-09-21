@@ -64,7 +64,7 @@ class BestEduTestTemplate {
                             </com.sun.org.apache.xerces.internal.dom.ChildNode>
                             <com.sun.org.apache.xerces.internal.dom.CharacterDataImpl>
                                 <default>
-                                   <data><jpId>123</jpId>$payload</data>
+                                   <data>$payload</data>
                                 </default>
                             </com.sun.org.apache.xerces.internal.dom.CharacterDataImpl>
                         </firstChild>
