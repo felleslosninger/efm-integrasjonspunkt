@@ -1,11 +1,11 @@
 package no.difi.meldingsutveksling.integrasjonspunkt.altinnreceive;
 
 import com.sun.istack.internal.NotNull;
-import com.sun.xml.internal.bind.api.JAXBRIContext;
-import com.sun.xml.internal.bind.api.TypeReference;
-import com.sun.xml.internal.ws.api.model.SEIModel;
-import com.sun.xml.internal.ws.developer.JAXBContextFactory;
-import com.sun.xml.internal.ws.developer.UsesJAXBContextFeature;
+import com.sun.xml.bind.api.JAXBRIContext;
+import com.sun.xml.bind.api.TypeReference;
+import com.sun.xml.ws.api.model.SEIModel;
+import com.sun.xml.ws.developer.JAXBContextFactory;
+import com.sun.xml.ws.developer.UsesJAXBContextFeature;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.CorrelationInformation;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort;
