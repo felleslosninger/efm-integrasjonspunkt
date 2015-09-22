@@ -11,6 +11,8 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -28,8 +30,13 @@ public class IntegrasjonspunktCustomPropertyListener implements ApplicationListe
 
     private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktCustomPropertyListener.class);
     private static final String KEY_SERVICEURL = "spring.boot.admin.client.serviceUrl";
-    private static final String PROPERTIES_FILE_NAME_OVERRIDE = "integrasjonspunkt-local.properties";
+    private static final String KEY_SERVERURL = "spring.boot.admin.url";
+    private static final String KEY_CLIENTNAME = "spring.boot.admin.client.name";
+    private static final String KEY_DEREGISTRATION = "spring.boot.admin.autoDeregistration";
 
+    // NB: autowiring does not work so good at the early stage when this listener is called,
+    // so will not not use the existing IntegrasjonspunktConfig class yet.
+    private static final String PROPERTIES_FILE_NAME_OVERRIDE = "integrasjonspunkt-local.properties";
     private CompositeConfiguration config;
 
     @Override
@@ -42,20 +49,32 @@ public class IntegrasjonspunktCustomPropertyListener implements ApplicationListe
                 PropertiesConfiguration configurationFileOverride = new PropertiesConfiguration(PROPERTIES_FILE_NAME_OVERRIDE);
                 config.addConfiguration(configurationFileOverride);
             } catch (ConfigurationException e) {
-                log.error("Coulndt not initialize properties: ", e);
+                log.error("Could not initialize properties: ", e);
             }
 
             ConfigurableEnvironment environment = event.getEnvironment();
             Properties props = new Properties();
 
             // Add the custom properties (only the ones you specify here) into the application context
+            List<String> list = Arrays.asList(
+                    KEY_SERVICEURL,
+                    KEY_SERVERURL,
+                    KEY_CLIENTNAME,
+                    KEY_DEREGISTRATION);
 
-            if (config.getString(KEY_SERVICEURL) != null) {
-                props.put(KEY_SERVICEURL, config.getString(KEY_SERVICEURL));
+            for (String customProperty : list) {
+                if (config.getString(customProperty) != null) {
+                    props.put(customProperty, config.getString(customProperty));
+                    log.info("Added custom property " + customProperty);
+                } else {
+                    log.error("Property " + customProperty + " was not found.");
+                }
+            }
+
+            if (!props.isEmpty()) {
                 environment.getPropertySources().addFirst(new PropertiesPropertySource("docker", props));
             }
         }
-
 
     }
 
