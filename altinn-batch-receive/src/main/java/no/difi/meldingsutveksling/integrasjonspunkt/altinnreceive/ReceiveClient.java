@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.integrasjonspunkt.altinnreceive;
 
-import com.sun.istack.internal.NotNull;
+import com.sun.istack.NotNull;
 import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.ws.api.model.SEIModel;
@@ -14,6 +14,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessD
 
 import javax.xml.bind.JAXBException;
 import javax.xml.ws.BindingProvider;
+import javax.xml.ws.WebServiceFeature;
 import java.util.List;
 
 /**
@@ -29,7 +30,7 @@ class ReceiveClient {
     public ReceiveClient(String endPointURL) {
         no.difi.meldingsutveksling.noarkexchange.schema.receive.Receive exchange = new no.difi.meldingsutveksling.noarkexchange.schema.receive.Receive();
 
-        UsesJAXBContextFeature jaxbContxtFeature = new UsesJAXBContextFeature(new JAXBContextFactory() {
+        WebServiceFeature feature = new UsesJAXBContextFeature(new JAXBContextFactory() {
             @Override
             public JAXBRIContext createJAXBContext(@NotNull SEIModel seiModel, @NotNull List<Class> classes, @NotNull List<TypeReference> typeReferences) throws JAXBException {
                 classes.add(Payload.class);
@@ -37,7 +38,7 @@ class ReceiveClient {
             }
         });
 
-        port = exchange.getReceivePort(jaxbContxtFeature);
+        port = exchange.getReceivePort(feature);
         BindingProvider bp = (BindingProvider) port;
         bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endPointURL);
     }
