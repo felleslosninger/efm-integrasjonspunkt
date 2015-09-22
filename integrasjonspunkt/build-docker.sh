@@ -21,8 +21,15 @@ if [ -n "$STATUS_ID" ]; then
   docker stop ${CONTAINER_NAME}
 fi
 
-# Specify where the Dockerfile and Certificate is
-CERTIFICATE_DIR=${WORKING_DIR}/src/main/resources
+# Specify where the Certificate is
+if [ -d "$WORKING_DIR/certificate" ]; then
+  # When running from Linux
+  CERTIFICATE_DIR=${WORKING_DIR}/certificate
+else
+  # When running from source folder
+  CERTIFICATE_DIR=${WORKING_DIR}/src/main/resources
+fi
+
 PORT=$1
 echo "Working dir: $WORKING_DIR"
 
