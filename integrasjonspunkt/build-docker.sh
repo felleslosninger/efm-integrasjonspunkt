@@ -1,14 +1,21 @@
 #!/bin/sh
 # author: Dervis M
 # Builds an image and creates a container.
+# DAVID: Difi Application Deployer
 
 # Build params
 IMAGE_NAME=difi/difi_integrasjonspunkt_$1
 CONTAINER_NAME=Difi_Integrasjonspunkt_$1
-echo ${CONTAINER_NAME}
+
+# Debug info
+echo "Building Docker image $IMAGE_NAME and container $CONTAINER_NAME"
 
 # Must stop any running container to continue
-docker stop ${CONTAINER_NAME}
+STATUS_ID=$(docker ps -q -f name=${CONTAINER_NAME})
+if [ -n "$STATUS_ID" ]; then
+  echo "Stopping $CONTAINER_NAME..."
+  docker stop ${CONTAINER_NAME}
+fi
 
 # Specify where the Dockerfile and Certificate is
 WORKING_DIR=$(pwd)
@@ -16,23 +23,60 @@ CERTIFICATE_DIR=${WORKING_DIR}/src/main/resources
 PORT=$1
 echo "Working dir: $WORKING_DIR"
 
-# Require a port
-if [ -z "$1" ]; then
-  echo "You have to specify a port number. Format ./build-docker.sh portNumber orgNumber"
-  exit 1
-fi
+if [ $# -ge 2 ]; then
 
-# Require an organization number
-if [ -z "$2" ]; then
-  echo "You have to specify an organization number. Format ./build-docker.sh portNumber orgNumber"
-  exit 1
+  # Required parameteres
+  # ---------------------
+
+  # Port number
+  if [ -z "$1" ]; then
+    echo "You have to specify a port number. Format ./build-docker.sh portNumber orgNumber"
+    exit 1
+  fi
+
+  # Organization number
+  if [ -z "$2" ]; then
+    echo "You have to specify an organization number. Format ./build-docker.sh portNumber orgNumber"
+    exit 1
+  else
+    echo "orgnumber=$2" > integrasjonspunkt-local.properties
+  fi
+
+  # Optional parameteres
+  # ---------------------
+
+  if [ $# -gt 2 ]; then
+
+    # If specified, add a custom Admin serviceUrl
+      if [ -n "$3" ]; then
+        echo "spring.boot.admin.client.serviceUrl=$3" >> integrasjonspunkt-local.properties
+      fi
+
+      # If specified, add a Admin serverUrl
+      if [ -n "$4" ]; then
+        echo "spring.boot.admin.url=$4" >> integrasjonspunkt-local.properties
+      fi
+
+      # If specified, add a custom Admin clientName
+      # This will override the 'spring.application.name' property
+      if [ -n "$5" ]; then
+        echo "spring.boot.admin.client.name=$5" >> integrasjonspunkt-local.properties
+      fi
+  fi
+
+  # Misc settings
+  echo "spring.boot.admin.autoDeregistration=true" >> integrasjonspunkt-local.properties
 else
-  echo "orgnumber=$2" > integrasjonspunkt-local.properties
-fi
-
-# If specified, add a custom Admin ServiceUrl
-if [ -n "$3" ]; then
-  echo "spring.boot.admin.client.serviceUrl=$3" >> integrasjonspunkt-local.properties
+  echo
+  echo "Invalid number of arguments."
+  echo "Required parameters missing: portNumber orgNumber (1) (2) (3)"
+  echo
+  echo "Optional parameters:"
+  echo "(1) local serviceUrl: This application's monitoring URL, typically just its server ip and port number"
+  echo "(2) monitor serverUrl: The URL to the external monitoring application"
+  echo "(3) clientName: The name that such be used when registering the application into the monitoring application."
+  echo
+  exit 1
 fi
 
 # Remove any existing container
