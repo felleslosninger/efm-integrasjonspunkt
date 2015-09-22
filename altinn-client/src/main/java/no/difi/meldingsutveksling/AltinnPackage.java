@@ -40,7 +40,7 @@ public class AltinnPackage {
         try {
             ctx = JAXBContext.newInstance(BrokerServiceManifest.class, BrokerServiceRecipientList.class, StandardBusinessDocument.class, Payload.class);
         } catch (JAXBException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Could not create JAXBContext", e);
         }
     }
 
