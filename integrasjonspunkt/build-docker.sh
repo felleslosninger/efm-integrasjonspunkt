@@ -8,15 +8,8 @@ IMAGE_NAME=difi/difi_integrasjonspunkt_$1
 CONTAINER_NAME=Difi_Integrasjonspunkt_$1
 
 # Set current execution dir to this folder
-if [ -z "$1" ]; then
-  # Linux
-  cd $(dirname $(readlink -f $0))
-  WORKING_DIR=$(pwd)
-else
-  # Mac
-  cd $(cd -P -- "$(dirname -- "$0")" && pwd -P)
-  WORKING_DIR=$(pwd)
-fi
+cd $(cd -P -- "$(dirname -- "$0")" && pwd -P)
+WORKING_DIR=$(pwd)
 
 # Debug info
 echo "Building Docker image $IMAGE_NAME and container $CONTAINER_NAME"
