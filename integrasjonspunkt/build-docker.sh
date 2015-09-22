@@ -24,7 +24,7 @@ fi
 # Specify where the Certificate is
 if [ -d "$WORKING_DIR/certificates" ]; then
   # When running from Linux
-  CERTIFICATE_DIR=${WORKING_DIR}/certificate
+  CERTIFICATE_DIR=${WORKING_DIR}/certificates
 else
   # When running from source folder
   CERTIFICATE_DIR=${WORKING_DIR}/src/main/resources
