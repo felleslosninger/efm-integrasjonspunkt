@@ -91,7 +91,7 @@ public class JournalPostIdTest {
             "  &lt;/noarksak&gt;\n" +
             "&lt;/Melding&gt;";
 
-    PutMessageRequestType testDataWithStringPayload, tedtDataWithElementPayLoad;
+    PutMessageRequestType testDataWithStringPayload, testDataWithElementPayLoad;
 
     @Before
     public void createTestdata() throws JAXBException {

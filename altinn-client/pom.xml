@@ -55,5 +55,10 @@
         <artifactId>commons-configuration</artifactId>
         <version>1.8</version>
     </dependency>
+    <dependency>
+        <groupId>no.difi.meldingsutveksling</groupId>
+        <artifactId>dokumentpakking</artifactId>
+        <version>0.1-SNAPSHOT</version>
+    </dependency>
 </dependencies>
 </project>

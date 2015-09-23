@@ -4,7 +4,6 @@
 *.iml
 *.bat
 *.xml
-*.properties
 *.sh
 integransjonpunkt-logs/*.log
 target

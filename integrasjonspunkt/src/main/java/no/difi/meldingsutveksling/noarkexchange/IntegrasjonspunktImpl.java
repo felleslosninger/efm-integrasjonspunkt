@@ -1,11 +1,11 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import com.thoughtworks.xstream.XStream;
-import no.difi.meldingsutveksling.adresseregister.client.AdresseRegisterClient;
 import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
+import no.difi.meldingsutveksling.services.AdresseregisterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +33,7 @@ import javax.xml.ws.BindingType;
 public class IntegrasjonspunktImpl implements SOAPport {
 
     @Autowired
-    private AdresseRegisterClient adresseRegisterClient;
+    AdresseregisterService adresseregister;
 
     @Autowired
     private MessageSender messageSender;
@@ -54,7 +54,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
         GetCanReceiveMessageResponseType response = new GetCanReceiveMessageResponseType();
         boolean canReceive = true;
         try {
-            adresseRegisterClient.getCertificate(organisasjonsnummer);
+            adresseregister.getCertificate(organisasjonsnummer);
         } catch (Exception e) {
             canReceive = false;
         }
@@ -67,12 +67,12 @@ public class IntegrasjonspunktImpl implements SOAPport {
         return messageSender.sendMessage(putMessageRequest);
     }
 
-    public AdresseRegisterClient getAdresseRegisterClient() {
-        return adresseRegisterClient;
+    public AdresseregisterService getAdresseRegisterClient() {
+        return adresseregister;
     }
 
-    public void setAdresseRegisterClient(AdresseRegisterClient adresseRegisterClient) {
-        this.adresseRegisterClient = adresseRegisterClient;
+    public void setAdresseRegisterClient(AdresseregisterService adresseRegisterClient) {
+        this.adresseregister = adresseRegisterClient;
     }
 
     public MessageSender getMessageSender() {

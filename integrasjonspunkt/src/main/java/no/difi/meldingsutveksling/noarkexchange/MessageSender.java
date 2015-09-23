@@ -191,7 +191,7 @@ public class MessageSender {
         }
 
         public boolean hasOrgNumber() {
-            return addressType.getOrgnr() == null || addressType.getOrgnr().isEmpty();
+            return addressType.getOrgnr() != null && !addressType.getOrgnr().isEmpty();
         }
 
         public void setOrgnr(String orgnr) {

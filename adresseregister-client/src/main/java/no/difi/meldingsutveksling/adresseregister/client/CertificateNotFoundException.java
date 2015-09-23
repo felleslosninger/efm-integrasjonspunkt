@@ -8,5 +8,6 @@ import retrofit.RetrofitError;
  */
 public class CertificateNotFoundException extends MeldingsUtvekslingRuntimeException {
     public CertificateNotFoundException(RetrofitError cause) {
+        super(cause);
     }
 }

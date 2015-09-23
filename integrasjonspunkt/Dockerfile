@@ -33,8 +33,17 @@ ENV APP_PREFIX integrasjonspunkt
 ENV APP_MAIN_CLASS no.difi.meldingsutveksling.IntegrasjonspunktApplication
 ENV APP_JAVA_PARAMS "-Dprivatekeyalias=974720760 -Dkeystorelocation=crt/test-certificates.jks -Dprivatekeypassword=changeit"
 ENV APP_PROFILE dev
+ENV HOST at06.altinn.basefarm.net
+ENV PORT 443
+ENV KEYSTOREFILE ${JAVA_HOME}/lib/security/cacerts
+ENV KEYSTOREPASS changeit
 
 ADD target/${APP_PREFIX}*.jar ${APP_DIR}/
+ADD ./integrasjonspunkt-local.properties ${APP_DIR}/
+
+RUN openssl s_client -connect ${HOST}:${PORT} </dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ${HOST}.cert && \
+    keytool -import -noprompt -trustcacerts -alias ${HOST} -file ${HOST}.cert -keystore ${KEYSTOREFILE} -storepass ${KEYSTOREPASS}
+
 
 #
 # Start the application
