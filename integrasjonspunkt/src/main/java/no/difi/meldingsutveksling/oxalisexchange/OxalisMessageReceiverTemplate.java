@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.oxalisexchange;
 
 import no.difi.asic.SignatureHelper;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
-import no.difi.meldingsutveksling.adresseregister.AdressRegisterFactory;
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
 import no.difi.meldingsutveksling.domain.*;
 import no.difi.meldingsutveksling.eventlog.Event;
@@ -68,7 +67,7 @@ public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
         String[] recievedByAr = reciverNode.getTextContent().split(":");
         String sendTo = sendToAr[1].trim();
         String recievedBy = recievedByAr[1].trim();
-        Certificate certificate = (Certificate) AdressRegisterFactory.createAdressRegister().getCertificate(recievedBy);
+        Certificate certificate = adresseRegisterClient.getCertificate(recievedBy);
         Noekkelpar noekkelpar = new Noekkelpar((PrivateKey) nodeList.get("privateKey"), certificate);
         Avsender.Builder avsenderBuilder = Avsender.builder(new Organisasjonsnummer(recievedBy), noekkelpar);
         Avsender avsender = avsenderBuilder.build();
