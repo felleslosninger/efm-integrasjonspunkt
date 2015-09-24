@@ -4,7 +4,7 @@ package difi
  * Created by mfhoel on 16.09.15.
  */
 class BestEduTestTemplate {
-    def text = '''
+    String text = '''
             <payload class="com.sun.org.apache.xerces.internal.dom.ElementNSImpl" serialization="custom">
                 <com.sun.org.apache.xerces.internal.dom.NodeImpl>
                     <default>
@@ -15,7 +15,7 @@ class BestEduTestTemplate {
                                     <flags>0</flags>
                                 </default>
                             </com.sun.org.apache.xerces.internal.dom.NodeImpl>
-                            <com.sun.org.apache.xerces.internal.dom.ParentNode>best
+                            <com.sun.org.apache.xerces.internal.dom.ParentNode>
                                 <default>
                                     <firstChild class="com.sun.org.apache.xerces.internal.dom.ElementNSImpl" reference="../../../../../.."/>
                                     <ownerDocument class="com.sun.org.apache.xerces.internal.dom.DocumentImpl" reference="../../.."/>

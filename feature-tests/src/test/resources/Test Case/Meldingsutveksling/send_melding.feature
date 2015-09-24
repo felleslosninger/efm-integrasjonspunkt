@@ -7,7 +7,7 @@ Feature: Ekspedere melding fra sak/arkivløsning som lagres i altinn sin formidl
     Then Vi skal få beskjed om at mottaker ikke kan motta meldinger
 
   Scenario: Mottaker finnes i adresseregister
-    Given en melding med mottaker 99887744
+    Given en melding med mottaker 910077473
     And mottaker finnes i adresseregister
     When vi sender melding
     Then vi skal få svar om at melding har blitt formidlet

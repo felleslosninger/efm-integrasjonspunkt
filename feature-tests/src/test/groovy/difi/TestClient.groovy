@@ -1,10 +1,8 @@
 package difi
-
 import wslite.soap.SOAPClient
-import wslite.soap.SOAPResponse
 
 /**
- * Eksempel på hvordan man bruker kaller på SOAP tjeneste med SOAPMessageBuilder api
+ * Test client for integration tests
  */
 class TestClient {
     def url = "http://localhost:9091/noarkExchange"
@@ -25,7 +23,14 @@ class TestClient {
         return client.send(request).body.text().toBoolean()
     }
 
-    SOAPResponse putMessage(String senderPartynumber, String recieverPartyNumber, byte[] bestedu) {
+    /**
+     *
+     * @param senderPartynumber
+     * @param recieverPartyNumber
+     * @param bestedu
+     * @return the status type of the PutMessage operation
+     */
+    String putMessage(String senderPartynumber, String recieverPartyNumber, String bestedu) {
         def request = {
             soapNamespacePrefix "soapenv"
             envelopeAttributes 'xmlns:typ': "http://www.arkivverket.no/Noark/Exchange/types"
@@ -35,13 +40,16 @@ class TestClient {
                         sender {
                             orgnr(senderPartynumber)
                         }
-                        reciever(recieverPartyNumber)
+                        receiver {
+                            orgnr(recieverPartyNumber)
+                        }
                     }
-
                     mkp.yieldUnescaped(bestedu)
                 }
             }
         }
         def response = client.send(request)
+        return response.body.PutMessageResponse.result.@type
+
     }
 }
