@@ -3,17 +3,11 @@
 # Builds an image and creates a container.
 
 # Set current execution dir to this folder
-if [ -z "$1" ]; then
-  cd $(dirname $(readlink -f $0))
-else
-  dir=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
-  cd ${dir}
-fi
+cd $(cd -P -- "$(dirname -- "$0")" && pwd -P)
 
 # Build params
 IMAGE_NAME=difi/springbooteurekaserver
 CONTAINER_NAME=Difi_SpringBootEurekaServer
-
 echo ${CONTAINER_NAME}
 
 # Must stop any running container to continue

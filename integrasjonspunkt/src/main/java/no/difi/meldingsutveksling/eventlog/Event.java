@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.eventlog;
 
 import no.difi.meldingsutveksling.domain.ProcessState;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
@@ -12,6 +13,9 @@ import java.util.UUID;
  */
 
 public class Event {
+
+    private static SimpleDateFormat DATEFORMAT = new SimpleDateFormat("dd.MM.yyyy");
+
 
     private UUID uuid;
     private String sender;
@@ -39,7 +43,7 @@ public class Event {
     public Event(long timeStamp, UUID uuid) {
         this.timeStamp = timeStamp;
         this.uuid = uuid;
-        formattedDate = new Date(timeStamp).toString();
+        formattedDate = DATEFORMAT.format(new Date(timeStamp));
     }
 
     public String getExceptionMessage() {

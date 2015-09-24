@@ -112,8 +112,7 @@ public class Main {
 
     private StandardBusinessDocument unMarshalSBD(StreamSource stream) throws JAXBException {
         Unmarshaller unmarshaller = JAXBContext.newInstance(StandardBusinessDocument.class).createUnmarshaller();
-        StandardBusinessDocument sbd = unmarshaller.unmarshal(stream, StandardBusinessDocument.class).getValue();
-        return sbd;
+        return unmarshaller.unmarshal(stream, StandardBusinessDocument.class).getValue();
     }
 
     private void initializeReceiver() throws IOException {

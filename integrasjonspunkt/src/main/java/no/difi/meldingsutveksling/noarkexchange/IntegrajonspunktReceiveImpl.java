@@ -190,7 +190,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         String recievedBy = recieverList.get(0).getIdentifier().getValue().split(":")[1];
         String instanceIdentifier = receiveResponse.getStandardBusinessDocumentHeader().getBusinessScope().getScope().get(0).getInstanceIdentifier();
         if (instanceIdentifier.contains(BEST_EDU)) {
-            instanceIdentifier.replace(BEST_EDU, "Kvittering");
+            instanceIdentifier = instanceIdentifier.replace(BEST_EDU, "Kvittering");
         }
 
         Certificate certificate = adresseRegisterClient.getCertificate(recievedBy);
