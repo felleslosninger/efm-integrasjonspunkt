@@ -1,8 +1,10 @@
+info:
+  version: ${pom.version}
 server:
   port: 8090
 spring:
   application:
-    name: Spring-Boot-Monitor-UI-Localhost
+    name: Monitor-UI-Localhost
   cloud:
     config:
       enabled: false
@@ -20,7 +22,7 @@ eureka:
 spring:
     profiles: docker
     application:
-      name: Spring-Boot-Monitor-UI-Docker
+      name: Monitor-UI-Docker
     cloud:
       config:
         enabled: false
@@ -34,3 +36,5 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://eurekaserver:8761/eureka/
+info:
+  version: ${pom.version}
