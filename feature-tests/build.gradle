@@ -4,10 +4,6 @@ apply plugin: "application"
 
 repositories {
     mavenCentral()
-    maven {
-        name "Soapui maven repo"
-        url "http://www.eviware.com/repository/maven2/"
-    }
 }
 
 dependencies {

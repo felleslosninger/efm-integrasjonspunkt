@@ -31,8 +31,7 @@ public class CreateAsice {
                 .add(new ByteArrayInputStream(forsendelse.getBytes()), "edu_test.xml")
                 .add(new ByteArrayInputStream(manifest.getBytes()), "manifest.xml");
         asicWriter.sign(signatureHelper);
-        Archive result = new Archive(bos.toByteArray());
-        return result;
+        return new Archive(bos.toByteArray());
     }
 
 

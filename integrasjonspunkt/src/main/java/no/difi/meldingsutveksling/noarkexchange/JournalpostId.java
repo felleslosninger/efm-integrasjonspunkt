@@ -68,11 +68,11 @@ public class JournalpostId {
             throw new MeldingsUtvekslingRuntimeException("no " + DATA + " element in payload");
         }
         Node payloadData = nodeList.item(0);
-        String payloadDataTextContent = payloadData.getTextContent();
+        String payloadDataTextContent = payloadData.getTextContent().trim();
         Document document;
 
         try {
-            document = documentBuilder.parse(new InputSource(new ByteArrayInputStream(payloadDataTextContent.getBytes("utf-8"))));
+            document = documentBuilder.parse(new InputSource(new ByteArrayInputStream(payloadDataTextContent.getBytes())));
         } catch (SAXException | IOException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }

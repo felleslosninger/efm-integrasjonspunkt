@@ -1,25 +1,38 @@
+package difi.steps;
+
+import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-import difi.GroovyExample2TestClient;
+import difi.TestClient;
+import org.apache.commons.configuration.CompositeConfiguration;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.configuration.SystemConfiguration;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertFalse;
 
-public class KanMottaMeldingerSteps {
+public class KanMottaMeldingSteps {
     int orgnummer;
     boolean result;
+    private CompositeConfiguration configuration;
+
+    @Before
+    public void setup() throws ConfigurationException {
+        configuration = new CompositeConfiguration();
+        configuration.addConfiguration(new SystemConfiguration());
+        configuration.addConfiguration(new PropertiesConfiguration("test-configuration.properties"));
+    }
 
     @Given("^en mottakende organisasjon med organisasjonsnummer (\\d+)$")
     public void en_mottakende_organisasjon_med_organisasjonsnummer_organisasjonsnummer(int orgnummer) throws Throwable {
-        // Express the Regexp above with the code you wish you had
         this.orgnummer = orgnummer;
     }
 
     @When("^vi sjekker om mottaker kan motta melding$")
     public void vi_sjekker_om_mottaker_kan_motta_meldinger() throws Throwable {
-        // Express the Regexp above with the code you wish you had
-        GroovyExample2TestClient integrasjonspunkt = new GroovyExample2TestClient();
+        TestClient integrasjonspunkt = new TestClient(configuration.getString("integrasjonspunkt.url"));
         result = integrasjonspunkt.canGetRecieveMessage(orgnummer);
     }
 

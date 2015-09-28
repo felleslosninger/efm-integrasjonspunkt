@@ -2,10 +2,12 @@
 # author: Dervis M
 # Builds an image and creates a container.
 
+# Set current execution dir to this folder
+cd $(cd -P -- "$(dirname -- "$0")" && pwd -P)
+
 # Build params
 IMAGE_NAME=difi/monitorui
 CONTAINER_NAME=Difi_MonitorUI
-
 echo ${CONTAINER_NAME}
 
 # Must stop any running container to continue
