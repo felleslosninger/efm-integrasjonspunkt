@@ -13,11 +13,11 @@ Feature: Ekspedere melding fra sak/arkivløsning som lagres i altinn sin formidl
     When    vi sender melding
     Then    vi skal få svar om at melding har blitt formidlet
 
-  Scenario: Mottaker finnes ikke i adresseregister
-    Given   en melding med mottaker 998877665
-    And     mottaker finnes ikke i adresseregisteret
-    When    vi skal sende melding
-    Then    vi skal få beskjed om at mottaker ikke kan motta meldinger
+  Scenario: mottaker orgnummer er ikke gyldig
+    Given   en melding med mottaker 1234
+    And     organisasjonsnummer ikkje er gyldig
+    When    vi sender melding
+    Then    Vi skal få beskjed om at mottaker ikke kan motta meldinger
 
   Scenario:  Adresseregister nede.
     Given   en melding med mottaker 998877445

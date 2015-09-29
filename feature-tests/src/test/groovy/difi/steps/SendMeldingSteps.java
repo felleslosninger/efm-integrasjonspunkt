@@ -66,7 +66,7 @@ public class SendMeldingSteps {
     }
 
     @Given("^en melding med mottaker (\\d+)$")
-    public void en_melding_med_mottaker(String arg1) throws Throwable {
+    public void melding_med_mottaker(String arg1) throws Throwable {
         throw new PendingException();
     }
 
