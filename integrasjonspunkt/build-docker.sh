@@ -105,20 +105,20 @@ if [ $# -ge 2 ]; then
   if [ $# -gt 2 ]; then
 
     # If specified, add a custom Admin serviceUrl
-      if [ -v "$INTERNAL_SERVER_IP" ]; then
+      if [ -n "$INTERNAL_SERVER_IP" ]; then
         echo "Configuring application ip: $INTERNAL_SERVER_IP"
         echo "spring.boot.admin.client.serviceUrl=$INTERNAL_SERVER_IP" >> integrasjonspunkt-local.properties
       fi
 
       # If specified, add a Admin serverUrl
-      if [ -v "$EXTERNAL_MONITOR_IP" ]; then
+      if [ -n "$EXTERNAL_MONITOR_IP" ]; then
         echo "Configuring external monitor ip: $EXTERNAL_MONITOR_IP"
         echo "spring.boot.admin.url=$EXTERNAL_MONITOR_IP" >> integrasjonspunkt-local.properties
       fi
 
       # If specified, add a custom Admin clientName
       # This will override the 'spring.application.name' property
-      if [ -v "$DOCKER_NAME" ]; then
+      if [ -n "$DOCKER_NAME" ]; then
         echo "Configuring Docker container name: $DOCKER_NAME"
         echo "spring.boot.admin.client.name=$DOCKER_NAME" >> integrasjonspunkt-local.properties
       fi
