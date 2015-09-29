@@ -4,10 +4,6 @@ apply plugin: "application"
 
 repositories {
     mavenCentral()
-    maven {
-        name "Soapui maven repo"
-        url "http://www.eviware.com/repository/maven2/"
-    }
 }
 
 dependencies {
@@ -15,6 +11,4 @@ dependencies {
     testCompile "info.cukes:cucumber-junit:1.2.2"
     testCompile "info.cukes:cucumber-java:1.2.2"
     testCompile "com.github.groovy-wslite:groovy-wslite:1.1.0"
-    //testCompile "com.smartbear.soapui:soapui-project:5.1.3" // virker ikke men er med for eksempel
-    //testCompile "com.smartbear.soapui:soapui:5.1.3" // virker ikke men er med for eksempel
 }
