@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.xml.ws.BindingProvider;
+import java.net.Authenticator;
 
 /**
  * Simple wrapper around the Web Service client for a integrasjonspunkt. Reads the end point URL
@@ -41,6 +42,9 @@ public class NOARKSystem {
             throw new IllegalStateException("invalid envelope");
         }
 
+        Authenticator authenticator = new NTLMAuthenticator(config.getKeyNoarksystemUsername(), config.getKeyNoarksystemPassword());
+        Authenticator.setDefault(authenticator);
+
         NoarkExchange exchange = new NoarkExchange();
         SOAPport port = exchange.getNoarkExchangePort();
         BindingProvider bp = (BindingProvider) port;
@@ -48,7 +52,6 @@ public class NOARKSystem {
         bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endPointURL);
         return port.putMessage(eduMesage);
     }
-
 
     public IntegrasjonspunktConfig getConfig() {
         return config;
