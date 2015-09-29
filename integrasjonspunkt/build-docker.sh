@@ -105,26 +105,26 @@ if [ $# -ge 2 ]; then
   if [ $# -gt 2 ]; then
 
     # If specified, add a custom Admin serviceUrl
-      if [ -n "$INTERNAL_SERVER_IP" ]; then
+      if [ -v "$INTERNAL_SERVER_IP" ]; then
         echo "Configuring application ip: $INTERNAL_SERVER_IP"
         echo "spring.boot.admin.client.serviceUrl=$INTERNAL_SERVER_IP" >> integrasjonspunkt-local.properties
       fi
 
       # If specified, add a Admin serverUrl
-      if [ -n "$EXTERNAL_MONITOR_IP" ]; then
+      if [ -v "$EXTERNAL_MONITOR_IP" ]; then
         echo "Configuring external monitor ip: $EXTERNAL_MONITOR_IP"
         echo "spring.boot.admin.url=$EXTERNAL_MONITOR_IP" >> integrasjonspunkt-local.properties
       fi
 
       # If specified, add a custom Admin clientName
       # This will override the 'spring.application.name' property
-      if [ -n "$DOCKER_NAME" ]; then
+      if [ -v "$DOCKER_NAME" ]; then
         echo "Configuring Docker container name: $DOCKER_NAME"
         echo "spring.boot.admin.client.name=$DOCKER_NAME" >> integrasjonspunkt-local.properties
       fi
 
       # If specified, add a custom Transport channel
-      if [ "$TRANSPORT" == "mock" ]; then
+      if [ "$TRANSPORT" = "mock" ]; then
         echo "Configuring Transport channel: $TRANSPORT"
         echo "altinn.streamingservice.url=http://10.243.200.51:9999/" >> integrasjonspunkt-local.properties
         echo "altinn.brokerservice.url=http://10.243.200.51:9999/" >> integrasjonspunkt-local.properties
