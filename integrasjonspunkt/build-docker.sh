@@ -11,6 +11,10 @@
 # Init
 set -e
 
+# Set current execution dir to this folder
+cd $(cd -P -- "$(dirname -- "$0")" && pwd -P)
+WORKING_DIR=$(pwd)
+
 # Configure some colors if we
 # running in terminal mode.
 RED=""; BLACK=""; RESET=""
@@ -90,10 +94,6 @@ if [ $# -ge 2 ]; then
   IMAGE_NAME=difi/difi_integrasjonspunkt_$PORT
   CONTAINER_NAME=Difi_Integrasjonspunkt_$PORT
   TRANSPORT=altinn
-
-  # Set current execution dir to this folder
-  cd $(cd -P -- "$(dirname -- "$0")" && pwd -P)
-  WORKING_DIR=$(pwd)
 
   # Debug info
   echo "Building Docker image $IMAGE_NAME and container $CONTAINER_NAME"
