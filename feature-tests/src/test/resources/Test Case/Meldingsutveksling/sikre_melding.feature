@@ -1,8 +1,8 @@
 Feature: klargjøre melding for sikker sending
 
   Scenario: sender og mottakers virksomhetssertifikat er gyldig
-    Given   mottaker med orgnummer 998877442 har gyldig sertifikat
-    And     avsender med orgnummer 998877300 har gyldig sertifikat
+    Given   mottaker med orgnummer 910075918 har gyldig sertifikat
+    And     avsender med orgnummer 910075918 har gyldig sertifikat
     When    vi sender melding
     Then    vi skal få svar om at melding har blitt formidlet
 
@@ -22,7 +22,7 @@ Feature: klargjøre melding for sikker sending
     Given   mottaker med orgnummer 998877400 som finnes i adresseregisteret
     And     avsender med orgnummer 998877333 som finnes i adresseresiteret
     When    vi sender melding
-    Then   vi skal få svar om at melding ikkje kan sendes
+    Then    vi skal få svar om at melding ikkje kan sendes
 
   Scenario: avsender eller mottakers virksomhetssertifikat finnes ikke
     Given   mottaker med orgnummer 998877444 som finnes i adresseregisteret
