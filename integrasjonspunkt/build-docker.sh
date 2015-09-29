@@ -40,6 +40,9 @@ __help() {
   echo
 }
 
+# Standard value
+TRANSPORT=altinn
+
 # Verbose parsing of parameters
 for i in "$@"; do
   case $i in
@@ -93,7 +96,6 @@ if [ $# -ge 2 ]; then
   # Build params
   IMAGE_NAME=difi/difi_integrasjonspunkt_$PORT
   CONTAINER_NAME=Difi_Integrasjonspunkt_$PORT
-  TRANSPORT=altinn
 
   # Debug info
   echo "Building Docker image $IMAGE_NAME and container $CONTAINER_NAME"
@@ -124,11 +126,13 @@ if [ $# -ge 2 ]; then
       fi
 
       # If specified, add a custom Transport channel
-      if [ "$TRANSPORT" = "mock" ]; then
-        echo "Configuring Transport channel: $TRANSPORT"
-        echo "altinn.streamingservice.url=http://10.243.200.51:9999/" >> integrasjonspunkt-local.properties
-        echo "altinn.brokerservice.url=http://10.243.200.51:9999/" >> integrasjonspunkt-local.properties
-      fi
+      case $TRANSPORT in
+        mock*)
+            echo "Configuring Transport channel: $TRANSPORT"
+            echo "altinn.streamingservice.url=http://10.243.200.51:9999/" >> integrasjonspunkt-local.properties
+            echo "altinn.brokerservice.url=http://10.243.200.51:9999/" >> integrasjonspunkt-local.properties
+        ;;
+      esac
   fi
 
   # Misc settings
