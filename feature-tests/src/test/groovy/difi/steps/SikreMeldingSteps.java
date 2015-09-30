@@ -2,11 +2,10 @@ package difi.steps;
 
 import cucumber.api.PendingException;
 import cucumber.api.java.Before;
-import cucumber.api.java.en.Given;
 import cucumber.api.java.en.And;
-import cucumber.api.java.en.When;
+import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
-
+import cucumber.api.java.en.When;
 import difi.BestEduTestMessageFactory;
 import difi.CertificatesClient;
 import difi.TestClient;
@@ -76,8 +75,8 @@ public class SikreMeldingSteps {
         throw new PendingException();
     }
 
-    @Then("^vi skal få svar om at melding har blitt formidlet$")
-    public void vi_skal_få_svar_om_at_melding_har_blitt_formidlet() throws Throwable {
+    @Then("^vi skal fÃ¥ svar om at melding har blitt formidlet$")
+    public void vi_skal_fÃ¥_svar_om_at_melding_har_blitt_formidlet() throws Throwable {
         assertEquals("OK", soapResponse);
         throw new PendingException();
     }

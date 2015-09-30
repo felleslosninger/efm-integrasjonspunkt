@@ -9,7 +9,7 @@ Feature: klargjøre melding for sikker sending
   Scenario: sender og mottakers virksomhetssertifikat er ugyldig
     Given   mottaker med orgnummer 998877450 har ugyldig sertifikat
     And     avsender med orgnummer 998877310 har ugyldig sertifikat
-    When    vi sender melding
+    When    vi sender melding relatert til ugyldige sertifikater
     Then    vi skal få svar om at melding ikkje kan sendes
 
   Scenario: avsender eller mottaker sitt virksomhetssertifikat er ugyldig

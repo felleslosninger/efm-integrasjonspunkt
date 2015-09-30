@@ -1,4 +1,4 @@
-Feature: Bruke Altinn formidlingstjeneste til å finne nye meldinger og lagre i sak/arkivløsningen
+Feature: Hente meldinger fra Altinn formidlingstjeneste og sende tilsak/arkivløsningen sin importmodul
 
   Scenario: Altinn har nye meldinger
     Given Altinn har melding til mottaker som mottaker finner
