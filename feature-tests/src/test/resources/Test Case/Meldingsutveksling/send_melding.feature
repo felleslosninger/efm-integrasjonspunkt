@@ -1,4 +1,67 @@
-Feature: Ekspedere melding fra sak/arkivløsning som lagres i altinn sin formidlingstjeneste
+Feature: Motta dokument fra SAK/ARKIV og videresende
+
+
+  Scenario: Altinn nede
+    Given SBD dokument skal videresendes til Altinn
+    And Altinn er nede
+    When vi sender dokumentet
+    Then vi svarer med feilmelding tilbake til SAK/ARKIV
+
+  Scenario: JournalpostId hentes fra Best/EDU melding formatert ihht, Fylkesmannen i Sogn og Fjordane  sitt sak/arkiv-system
+    Given BEST/EDU dokument fra Fylkesmannen i Sogn og Fjordane
+    When vi sender dokumentet
+    Then JournalpostId skal finnes i SBD dokumentet
+
+  Scenario: JournalpostId hentes fra public 360 formatert best/EDU
+    Given BEST/EDU dokument fra public 360
+    When vi sender dokumentet
+    Then JournalpostId skal finnes i SBD dokumentet
+
+  Scenario: Avsender eller mottaker har ugyldige virksomhetssertifikater
+    Given avsender med ugyldig virksomhetssertifikat
+    And mottaker med ugyldig virksomhetssertifikat
+    When vi sender dokumentet
+    Then dokumentet blir ikke sendt
+    And feilmelding returneres til SAK/ARKIV system
+
+  Scenario: Sender melding
+    Given all is well
+    When vi sender dokumentet
+    Then dokumentet blir sendt videre
+    And melding om at dokument er sendt videre returneres til SAK/ARKIV
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   Scenario: Mottaker finnes ikke i adresseregister
