@@ -147,14 +147,13 @@ Dersom du bruker Windows, må du bygge manuelt. Se neste avsnitt om "Manuell byg
 Bygg med det medfølgende scriptet:
 
 ```shell
-$ ./build-docker.sh
+$ ./build-docker.sh 8098 12345678
 ```
 
-Deretter start:
+Merk at vi må angi et portnummer (8098) og et organisasjonsnummer (12345678). Erstatt disse med eget portnummer på din server
+og virksomhetens organisasjonsnummer.
 
-```shell
-$ docker start Difi_Integrasjonspunkt
-```
+Deretter startes Integrasjonspunktet automatisk under navnet "Difi_Integrasjonspunkt_8098".
 
 #### Manuell bygging
 

@@ -10,6 +10,8 @@ public class AltinnWsConfiguration {
     private URL brokerServiceUrl;
     private String username;
     private String password;
+    private String externalServiceCode;
+    private int externalServiceEditionCode;
 
     public URL getStreamingServiceUrl() {
         return streamingServiceUrl;
@@ -39,6 +41,8 @@ public class AltinnWsConfiguration {
                 .withPassword(config.getString("altinn.password"))
                 .withStreamingServiceUrl(streamingserviceUrl)
                 .withBrokerServiceUrl(brokerserviceUrl)
+                .withExternalServiceCode(config.getString("altinn.external_service_code"))
+                .withExternalServiceEditionCode(config.getInt("altinn.external_service_edition_code"))
                 .build();
     }
 
@@ -52,6 +56,13 @@ public class AltinnWsConfiguration {
         return u;
     }
 
+    public String getExternalServiceCode() {
+        return externalServiceCode;
+    }
+
+    public int getExternalServiceEditionCode() {
+        return externalServiceEditionCode;
+    }
 
     public static class Builder {
         AltinnWsConfiguration configuration;
@@ -82,6 +93,16 @@ public class AltinnWsConfiguration {
 
         public AltinnWsConfiguration build() {
             return configuration;
+        }
+
+        public Builder withExternalServiceCode(String externalServiceCode) {
+            configuration.externalServiceCode = externalServiceCode;
+            return this;
+        }
+
+        public Builder withExternalServiceEditionCode(int externalServiceEditionCode) {
+            configuration.externalServiceEditionCode = externalServiceEditionCode;
+            return this;
         }
     }
 
