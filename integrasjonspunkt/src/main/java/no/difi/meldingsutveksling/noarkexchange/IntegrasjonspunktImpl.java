@@ -13,6 +13,8 @@ import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.xml.ws.BindingType;
 
+import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.*;
+
 /**
  * This is the implementation of the wenbservice that case managenent systems supporting
  * the BEST/EDU stadard communicates with. The responsibility of this component is to
@@ -64,7 +66,15 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType putMessageRequest) {
-        return messageSender.sendMessage(putMessageRequest);
+        Object payload = putMessageRequest.getPayload();
+        if (payload instanceof AppReceiptType) {
+            AppReceiptType receipt = (AppReceiptType) payload;
+            for (StatusMessageType sm : receipt.getMessage())
+                eventLog.log(new Event(ProcessState.APP_RECEIPT).setMessage(sm.getCode() + ", " + sm.getText()));
+            return createOkResponse();
+        } else {
+            return messageSender.sendMessage(putMessageRequest);
+        }
     }
 
     public AdresseregisterService getAdresseRegisterClient() {

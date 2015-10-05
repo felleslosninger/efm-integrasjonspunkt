@@ -24,6 +24,8 @@ import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
+import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.*;
+
 @Component
 public class MessageSender {
 
@@ -127,24 +129,6 @@ public class MessageSender {
     }
 
 
-    //TODO: Denne returnerer feil response, noe rart i generet kode
-    //Type skal være ERROR, får ikke satt message i generert kode
-    private PutMessageResponseType createErrorResponse(String message) {
-        PutMessageResponseType response = new PutMessageResponseType();
-        AppReceiptType receipt = new AppReceiptType();
-        receipt.setType("ERROR ");
-        response.setResult(receipt);
-        return response;
-    }
-
-    //TODO: Se på setting av melding, se i sammenheng med metoden over
-    private PutMessageResponseType createOkResponse() {
-        PutMessageResponseType response = new PutMessageResponseType();
-        AppReceiptType receipt = new AppReceiptType();
-        receipt.setType("OK");
-        response.setResult(receipt);
-        return response;
-    }
 
     public void setAdresseregister(AdresseregisterService adresseregister) {
         this.adresseregister = adresseregister;
