@@ -65,7 +65,7 @@ public class SendMeldingSteps {
     @When("^vi sender dokumentet til Røn sitt integrasjonspunkt$")
     public void vi_sender_dokumentet_til_Røn_sitt_integrasjonspunkt() throws Throwable {
         // Express the Regexp above with the code you wish you had
-        TestClient testClient = new TestClient(configuration.getString("ron.integrasjonspunkt.url"));
+        TestClient testClient = new TestClient(configuration.getString("biristrand.integrasjonspunkt.url"));
         soapResponse = testClient.putMessage(sender, reciever, bestEduMessage);
     }
 
