@@ -13,8 +13,6 @@ import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.xml.ws.BindingType;
 
-import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.*;
-
 /**
  * This is the implementation of the wenbservice that case managenent systems supporting
  * the BEST/EDU stadard communicates with. The responsibility of this component is to
@@ -47,7 +45,6 @@ public class IntegrasjonspunktImpl implements SOAPport {
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
 
         String organisasjonsnummer = getCanReceiveMessageRequest.getReceiver().getOrgnr();
-
         eventLog.log(new Event()
                 .setMessage(new XStream().toXML(getCanReceiveMessageRequest))
                 .setProcessStates(ProcessState.CAN_RECEIVE_INVOKED)
@@ -65,16 +62,10 @@ public class IntegrasjonspunktImpl implements SOAPport {
     }
 
     @Override
-    public PutMessageResponseType putMessage(PutMessageRequestType putMessageRequest) {
-        Object payload = putMessageRequest.getPayload();
-        if (payload instanceof AppReceiptType) {
-            AppReceiptType receipt = (AppReceiptType) payload;
-            for (StatusMessageType sm : receipt.getMessage())
-                eventLog.log(new Event(ProcessState.APP_RECEIPT).setMessage(sm.getCode() + ", " + sm.getText()));
-            return createOkResponse();
-        } else {
-            return messageSender.sendMessage(putMessageRequest);
-        }
+    public PutMessageResponseType putMessage(PutMessageRequestType req) {
+        PutMessageContext pmx = new PutMessageContext(eventLog, messageSender);
+        PutMessageStrategy strategy = PutMessageStrategyFactory.createStrategy(pmx, req.getPayload());
+        return strategy.putMessage(req);
     }
 
     public AdresseregisterService getAdresseRegisterClient() {
