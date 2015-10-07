@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.noarkexchange;
+package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import com.sun.org.apache.xerces.internal.dom.ElementNSImpl;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
@@ -10,19 +10,26 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
  * @author Glenn Bech
  */
 
-final class PutMessageStrategyFactory {
+public final class PutMessageStrategyFactory {
 
     public static final String APP_RECEIPT_INDICATOR = "AppReceipt";
     public static final String MESSAGE_INDICATOR = "Melding";
 
-    private PutMessageStrategyFactory() {
+    private PutMessageContext context;
+
+    private PutMessageStrategyFactory(PutMessageContext context) {
+        this.context = context;
     }
 
-    static PutMessageStrategy createStrategy(PutMessageContext context, Object payload) {
+    public static PutMessageStrategyFactory newInstance(PutMessageContext context) {
+        return new PutMessageStrategyFactory(context);
+    }
+
+    public PutMessageStrategy create(Object payload) {
 
         //EPhorte
         if (payload instanceof ElementNSImpl) {
-            return new BestEDUPutMessageStrategy(context);
+            return new BestEDUPutMessageStrategy(context.getMessageSender());
         }
 
         //P360, AppReceipt or any other NOARK system dispatching as text
@@ -34,10 +41,10 @@ final class PutMessageStrategyFactory {
         boolean isAppReceipt = ((String) payload).contains(APP_RECEIPT_INDICATOR);
         boolean isBestEDUMessage = ((String) payload).contains(MESSAGE_INDICATOR);
         if (isAppReceipt) {
-            return new AppReceiptPutMessageStrategy(context);
+            return new AppReceiptPutMessageStrategy(context.getEventlog());
             // is Message
         } else if (isBestEDUMessage) {
-            return new BestEDUPutMessageStrategy(context);
+            return new BestEDUPutMessageStrategy(context.getMessageSender() );
         } else
             throw new MeldingsUtvekslingRuntimeException("Unknown String based payload " + payload);
         // is unknown string variant

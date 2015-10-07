@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.noarkexchange;
+package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
@@ -7,6 +7,6 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
  * Abstract
  * @author Glenn Bech
  */
-interface PutMessageStrategy {
+public interface PutMessageStrategy {
     PutMessageResponseType putMessage(PutMessageRequestType requestType);
 }

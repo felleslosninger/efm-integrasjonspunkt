@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.noarkexchange;
+package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
@@ -6,6 +6,8 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
+import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
+import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
 
@@ -20,11 +22,9 @@ import static org.mockito.Mockito.times;
 /**
  * Makes sure that the integrasjonspunkt can handle receipt messages on
  * the putMessage interface
- *
  * @author Glenn Bech
  */
-
-public class ReceiveSteps {
+public class PutMessageSteps {
 
     private String appReceiptPayload = "&lt;AppReceipt type=\"OK\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.arkivverket.no/Noark/Exchange/types\"&gt;\n" +
             "    &lt;message code=\"ID\" xmlns=\"\"&gt;\n" +
@@ -51,8 +51,8 @@ public class ReceiveSteps {
         integrasjonspunkt.setMessageSender(messageSender);
   }
 
-    @Given("^en kvitering$")
-    public void et_dokument_mottatt_på_receive_grensesnittet() {
+    @Given("^en kvittering$")
+    public void et_dokument_mottatt_på_putmessage_grensesnittet() {
 
         // envelope
         message = new PutMessageRequestType();
@@ -66,23 +66,20 @@ public class ReceiveSteps {
         envelope.setReceiver(receiver);
         message.setEnvelope(envelope);
         message.setPayload(appReceiptPayload);
-
     }
 
     @When("^integrasjonspunktet mottar en kvittering på putMessage grensesnittet$")
     public void integrasjonspunkt_mottar_kvittering(){
         integrasjonspunkt.putMessage(message);
-
     }
 
     @Then("^kvitteringen logges i integrasjonspunktet sin hendelseslogg$")
     public void kvitteringen_logges_i_eventlog()  {
-        verify(eventLog, times(1)).log(any(Event.class));
+        verify(eventLog).log(any(Event.class));
     }
 
     @Then("^kvitteringen sendes ikke videre til transport$")
     public void kvitteringen_sendes_ikke_videre()  {
-        verify(messageSender, times(0)).sendMessage(any(PutMessageRequestType.class));
+        verify(messageSender, never()).sendMessage(any(PutMessageRequestType.class));
     }
-
 }

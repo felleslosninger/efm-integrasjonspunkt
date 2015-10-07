@@ -1,7 +1,8 @@
-package no.difi.meldingsutveksling.noarkexchange;
+package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.eventlog.EventLog;
+import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -12,7 +13,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import static junit.framework.TestCase.fail;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -94,6 +95,8 @@ public class PutMessageStrategyFactoryTest {
             "&lt;/Melding&gt;</payload></PutMessageRequest></s:Body></s:Envelope>";
 
 
+    private PutMessageStrategyFactory putMessageStrategyFactory;
+
     private String appReceiptPayload = "lt;AppReceipt type=\"OK\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.arkivverket.no/Noark/Exchange/types\"&gt;\n" +
             "    &lt;message code=\"ID\" xmlns=\"\"&gt;\n" +
             "    &lt;text&gt;210725&lt;/text&gt;\n" +
@@ -105,45 +108,35 @@ public class PutMessageStrategyFactoryTest {
     @Before
     public void createContxt() {
         context = new PutMessageContext(Mockito.mock(EventLog.class), Mockito.mock(MessageSender.class));
+        putMessageStrategyFactory = putMessageStrategyFactory.newInstance(context);
     }
 
     @Test
-    public void testShouldCreteBestEDUStrategy() {
-        assertTrue(PutMessageStrategyFactory.createStrategy(context, p360Message) instanceof BestEDUPutMessageStrategy);
+    public void testShouldCreateBestEDUStrategy() {
+        assertEquals(BestEDUPutMessageStrategy.class, putMessageStrategyFactory.create(p360Message).getClass());
     }
 
     @Test
-    public void testShouldCreateEphorteStrategy() throws ParserConfigurationException {
+    public void testShouldCreateBestEDUStrategyForEhporteMessage() throws ParserConfigurationException {
         DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         Document doc = builder.newDocument();
         Element element = doc.createElementNS("http://www.arkivverket.no/Noark4-1-WS-WD/types", "Melding");
-        assertTrue(PutMessageStrategyFactory.createStrategy(context, element) instanceof BestEDUPutMessageStrategy);
+        assertEquals(BestEDUPutMessageStrategy.class, putMessageStrategyFactory.create(element).getClass());
     }
 
     @Test
     public void testShouldCreateAppReceiptStrategy() {
-        assertTrue(PutMessageStrategyFactory.createStrategy(context, appReceiptPayload) instanceof AppReceiptPutMessageStrategy);
+        assertTrue(putMessageStrategyFactory.newInstance(context).create(appReceiptPayload) instanceof AppReceiptPutMessageStrategy);
+        assertEquals(AppReceiptPutMessageStrategy.class, putMessageStrategyFactory.create(appReceiptPayload).getClass());
     }
 
-    @Test
+    @Test(expected = MeldingsUtvekslingRuntimeException.class)
     public void testShoudThrowExceptionOnUnknownStringPayload() {
-        try {
-            PutMessageStrategyFactory.createStrategy(context, "dette burde ikke fungere");
-            fail();
-        } catch (MeldingsUtvekslingRuntimeException e) {
-        } catch (Throwable t) {
-            fail();
-        }
+        putMessageStrategyFactory.create("dette burde ikke fungere");
     }
 
-    @Test
+    @Test(expected = MeldingsUtvekslingRuntimeException.class)
     public void testShouldFailOnUnknownPayloadClass() {
-        try {
-            PutMessageStrategyFactory.createStrategy(context, 1337);
-            fail();
-        } catch (MeldingsUtvekslingRuntimeException e) {
-        } catch (Throwable t) {
-            fail();
-        }
+        putMessageStrategyFactory.create(1337);
     }
 }

@@ -1,7 +1,10 @@
-package no.difi.meldingsutveksling.noarkexchange;
+package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.eventlog.EventLog;
+import no.difi.meldingsutveksling.noarkexchange.MessageSender;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.BestEDUPutMessageStrategy;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageContext;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import org.junit.Test;
@@ -213,7 +216,7 @@ public class BestEDUStrategyTest {
     public void shouldHandleP360StylePayload() {
 
         PutMessageContext ctx = new PutMessageContext(Mockito.mock(EventLog.class), Mockito.mock(MessageSender.class));
-        BestEDUPutMessageStrategy strategy = new BestEDUPutMessageStrategy(ctx);
+        BestEDUPutMessageStrategy strategy = new BestEDUPutMessageStrategy(ctx.getMessageSender());
         PutMessageResponseType t = new PutMessageResponseType();
         when(strategy.putMessage(any(PutMessageRequestType.class))).thenReturn(t);
 
@@ -228,7 +231,7 @@ public class BestEDUStrategyTest {
     public void testShouldHandleEPhortePaload() throws ParserConfigurationException {
         MessageSender messageSenderMock = Mockito.mock(MessageSender.class);
         PutMessageContext ctx = new PutMessageContext(Mockito.mock(EventLog.class), messageSenderMock);
-        BestEDUPutMessageStrategy strategy = new BestEDUPutMessageStrategy(ctx);
+        BestEDUPutMessageStrategy strategy = new BestEDUPutMessageStrategy(ctx.getMessageSender());
         Document document;
         try {
             DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();

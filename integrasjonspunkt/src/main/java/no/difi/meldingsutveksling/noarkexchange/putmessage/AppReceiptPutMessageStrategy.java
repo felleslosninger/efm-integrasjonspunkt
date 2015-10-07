@@ -1,8 +1,9 @@
-package no.difi.meldingsutveksling.noarkexchange;
+package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.eventlog.Event;
+import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
@@ -22,12 +23,12 @@ import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory
  *
  * @author Glenn Bech
  */
-public class AppReceiptPutMessageStrategy implements PutMessageStrategy {
+class AppReceiptPutMessageStrategy implements PutMessageStrategy {
 
-    private PutMessageContext context;
+    private final EventLog eventLog;
 
-    public AppReceiptPutMessageStrategy(PutMessageContext context) {
-        this.context = context;
+    public AppReceiptPutMessageStrategy(EventLog eventLog) {
+        this.eventLog = eventLog;
     }
 
     @Override
@@ -40,19 +41,11 @@ public class AppReceiptPutMessageStrategy implements PutMessageStrategy {
             AppReceiptType receipt = t.getValue();
 
             for (StatusMessageType sm : receipt.getMessage())
-                context.getEventlog().log(new Event(ProcessState.APP_RECEIPT).setMessage(sm.getCode() + ", " + sm.getText()));
-            return createOkResponse(); // do NOT process further, this is just an "ack" from the NOAKR system
+                eventLog.log(new Event(ProcessState.APP_RECEIPT).setMessage(sm.getCode() + ", " + sm.getText()));
+            return createOkResponse();
 
         } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
-    }
-
-    public PutMessageContext getContext() {
-        return context;
-    }
-
-    public void setContext(PutMessageContext context) {
-        this.context = context;
     }
 }

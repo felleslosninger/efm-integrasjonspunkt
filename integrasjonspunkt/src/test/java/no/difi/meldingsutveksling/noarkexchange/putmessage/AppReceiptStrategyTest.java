@@ -1,7 +1,10 @@
-package no.difi.meldingsutveksling.noarkexchange;
+package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
+import no.difi.meldingsutveksling.noarkexchange.MessageSender;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.AppReceiptPutMessageStrategy;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageContext;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 
@@ -10,7 +13,7 @@ import org.mockito.Mockito;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -35,18 +38,13 @@ public class AppReceiptStrategyTest {
     public void shouldOnlyLogApplicationReceipts() {
 
         PutMessageContext ctx = new PutMessageContext(Mockito.mock(EventLog.class), Mockito.mock(MessageSender.class));
-
-        AppReceiptPutMessageStrategy strategy = new AppReceiptPutMessageStrategy(ctx);
-        strategy.setContext(ctx);
-
+        AppReceiptPutMessageStrategy strategy = new AppReceiptPutMessageStrategy(ctx.getEventlog());
         PutMessageRequestType request = new PutMessageRequestType();
         request.setPayload(receiptPayload);
 
         PutMessageResponseType response = strategy.putMessage(request);
-        assertTrue(response.getResult() != null);
-        verify(ctx.getEventlog(), times(1)).log(any(Event.class));
-        assertTrue(response.getResult() != null);
+        verify(ctx.getEventlog()).log(any(Event.class));
         // message sender should not be called for receipts, only log
-        verify(ctx.getMessageSender(), times(0)).sendMessage(any(PutMessageRequestType.class));
+        verify(ctx.getMessageSender(), never()).sendMessage(any(PutMessageRequestType.class));
     }
 }
