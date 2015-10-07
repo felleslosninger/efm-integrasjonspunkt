@@ -18,7 +18,7 @@
  1. Sjekk om orgnummer mottaker finnes i adresseregister
  2. Adresseregister er nede å returnerer feilmelding.
 
-> **Kan ikke sende melding - orgnummer ikke gyldig**
+>  **Kan ikke sende melding - orgnummer ikke gyldig**
 >  
 > 1. Sjekk om orgnummer mottaker finnes i adresseregister
 > 2. Orgnummer finne, men er ikkje gyldig. 

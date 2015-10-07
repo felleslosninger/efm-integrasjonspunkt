@@ -1,5 +1,6 @@
 package difi.steps;
 
+
 import cucumber.api.PendingException;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.And;
@@ -23,6 +24,7 @@ import static org.junit.Assert.assertEquals;
 
 public class SendMeldingSteps {
 
+    public static final String STALHEIM = "910094092";
     private String soapResponse;
     private String bestEduMessage;
     private String sender, reciever;
@@ -35,26 +37,14 @@ public class SendMeldingSteps {
         configuration.addConfiguration(new PropertiesConfiguration("test-configuration.properties"));
     }
 
-    @Given("^en melding med mottaker (\\d+)$")
-    public void en_melding_med_mottaker(String arg1) throws Throwable {
+    @Given("^en velformert melding med mottaker Stålheim$")
+    public void en_velformert_melding_med_mottaker_Stålheim() throws Throwable {
         Writable message = BestEduTestMessageFactory.createMessage(128);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         message.writeTo(new BufferedWriter(new OutputStreamWriter(outputStream)));
         bestEduMessage = message.toString();
-        reciever = arg1;
+        reciever = configuration.getString("stalheim.partynumber");
         sender = ""; // this value comes from local properties on the integration point
-    }
-
-    @When("^vi skal sende melding$")
-    public void vi_skal_sende_melding() throws Throwable {
-        // Write code here that turns the phrase above into concrete actions
-        throw new PendingException();
-    }
-
-    @Then("^Vi skal få beskjed om at mottaker ikke kan motta meldinger$")
-    public void vi_skal_få_beskjed_om_at_mottaker_ikke_kan_motta_meldinger() throws Throwable {
-        // Write code here that turns the phrase above into concrete actions
-        throw new PendingException();
     }
 
     @Given("^mottaker finnes i adresseregister$")
@@ -66,21 +56,82 @@ public class SendMeldingSteps {
         }
     }
 
-    @When("^vi sender melding$")
-    public void vi_sender_melding() throws Throwable {
-        TestClient testClient = new TestClient(configuration.getString("integrasjonspunkt.url"));
+    @Then("^Vi skal få beskjed om at mottaker ikke kan motta meldinger$")
+    public void vi_skal_få_beskjed_om_at_mottaker_ikke_kan_motta_meldinger() throws Throwable {
+        // Write code here that turns the phrase above into concrete actions
+        throw new PendingException();
+    }
+
+    @When("^vi sender dokumentet til Røn sitt integrasjonspunkt$")
+    public void vi_sender_dokumentet_til_Røn_sitt_integrasjonspunkt() throws Throwable {
+        // Express the Regexp above with the code you wish you had
+        TestClient testClient = new TestClient(configuration.getString("biristrand.integrasjonspunkt.url"));
         soapResponse = testClient.putMessage(sender, reciever, bestEduMessage);
     }
 
-    @Then("^vi skal få svar om at melding har blitt formidlet$")
-    public void vi_skal_få_svar_om_at_melding_har_blitt_formidlet() throws Throwable {
+    @Then("^dokumentet blir videreformidlet til Stålheim$")
+    public void dokumentet_blir_videreformidlet_til_Stålheim() throws Throwable {
+        // Express the Regexp above with the code you wish you had
+        throw new PendingException("Check if Stålheim has the message in Altinn?");
+    }
+
+    @And("^melding om at dokument er sendt videre returneres til SAK/ARKIV$")
+    public void melding_om_at_dokument_er_sendt_videre_returneres_til_SAK_ARKIV() throws Throwable {
+        // Express the Regexp above with the code you wish you had
         assertEquals("OK", soapResponse);
     }
 
-    @And("^mottaker finnes ikke i adresseregisteret$")
-    public void mottaker_finnes_ikke_i_adresseregisteret() throws Throwable {
+    @Given("^SBD dokument skal videresendes til Altinn$")
+    public void SBD_dokument_skal_videresendes_til_Altinn() throws Throwable {
         // Express the Regexp above with the code you wish you had
         throw new PendingException();
     }
 
+    @And("^Altinn er nede$")
+    public void Altinn_er_nede() throws Throwable {
+        // Express the Regexp above with the code you wish you had
+        throw new PendingException("Hvordan simulere at Altinn er nede?");
+    }
+
+    @Then("^feilmelding returneres tilbake til SAK/ARKIV$")
+    public void feilmelding_returneres_tilbake_til_SAK_ARKIV() throws Throwable {
+        // Express the Regexp above with the code you wish you had
+        assertEquals("ERROR", soapResponse);
+    }
+
+    @Given("^BEST/EDU dokument fra Fylkesmannen i Sogn og Fjordane$")
+    public void BEST_EDU_dokument_fra_Fylkesmannen_i_Sogn_og_Fjordane() throws Throwable {
+        // Express the Regexp above with the code you wish you had
+        throw new PendingException();
+    }
+
+    @Then("^JournalpostId skal finnes i SBD dokumentet$")
+    public void JournalpostId_skal_finnes_i_SBD_dokumentet() throws Throwable {
+        // Express the Regexp above with the code you wish you had
+        throw new PendingException("Hvordan kan vi verifisere SBD dokumentet?");
+    }
+
+    @Given("^BEST/EDU dokument fra public 360$")
+    public void BEST_EDU_dokument_fra_public() throws Throwable {
+        // Express the Regexp above with the code you wish you had
+        throw new PendingException();
+    }
+
+    @Given("^avsender med ugyldig virksomhetssertifikat$")
+    public void avsender_med_ugyldig_virksomhetssertifikat() throws Throwable {
+        // Express the Regexp above with the code you wish you had
+        throw new PendingException("Bruker certificates client til å legge inn et ugyldig virksomhetssertifikat");
+    }
+
+    @And("^mottaker med ugyldig virksomhetssertifikat$")
+    public void mottaker_med_ugyldig_virksomhetssertifikat() throws Throwable {
+        // Express the Regexp above with the code you wish you had
+        throw new PendingException("Bruker certificates client til å legge inn et ugyldig virksomhetssertifikat");
+    }
+
+    @Then("^dokumentet blir ikke sendt$")
+    public void dokumentet_blir_ikke_sendt() throws Throwable {
+        // Express the Regexp above with the code you wish you had
+        throw new PendingException("Kalle på Altinn og sjekke at dokumentet ikke ligger i mottakers filer");
+    }
 }
