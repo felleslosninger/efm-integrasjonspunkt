@@ -74,11 +74,11 @@ public class IntegrasjonspunktImpl implements SOAPport {
         return strategy.putMessage(req);
     }
 
-    public AdresseregisterService getAdresseRegisterClient() {
+    public AdresseregisterService getAdresseRegister() {
         return adresseregister;
     }
 
-    public void setAdresseRegisterClient(AdresseregisterService adresseRegisterClient) {
+    public void setAdresseRegister(AdresseregisterService adresseRegisterClient) {
         this.adresseregister = adresseRegisterClient;
     }
 
