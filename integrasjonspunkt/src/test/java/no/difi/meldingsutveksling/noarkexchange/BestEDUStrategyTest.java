@@ -18,6 +18,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Test for hte AppReceiptStrategy
@@ -213,13 +214,13 @@ public class BestEDUStrategyTest {
 
         PutMessageContext ctx = new PutMessageContext(Mockito.mock(EventLog.class), Mockito.mock(MessageSender.class));
         BestEDUPutMessageStrategy strategy = new BestEDUPutMessageStrategy(ctx);
+        PutMessageResponseType t = new PutMessageResponseType();
+        when(strategy.putMessage(any(PutMessageRequestType.class))).thenReturn(t);
 
         PutMessageRequestType request = new PutMessageRequestType();
         request.setPayload(p360Style);
 
-        PutMessageResponseType response = strategy.putMessage(request);
-
-        assertTrue(response.getResult() != null);
+        strategy.putMessage(request);
         verify(ctx.getMessageSender(), times(1)).sendMessage(any(PutMessageRequestType.class));
     }
 

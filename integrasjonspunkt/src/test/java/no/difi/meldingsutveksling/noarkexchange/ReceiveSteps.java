@@ -14,35 +14,44 @@ import org.mockito.Mockito;
 
 import static junit.framework.TestCase.assertNotNull;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.times;
 
 /**
- * Makes sure that the integrasjonspunkt can handle receipt messages on the receive interface
+ * Makes sure that the integrasjonspunkt can handle receipt messages on
+ * the putMessage interface
  *
  * @author Glenn Bech
  */
 
 public class ReceiveSteps {
 
+    private String appReceiptPayload = "&lt;AppReceipt type=\"OK\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.arkivverket.no/Noark/Exchange/types\"&gt;\n" +
+            "    &lt;message code=\"ID\" xmlns=\"\"&gt;\n" +
+            "    &lt;text&gt;210725&lt;/text&gt;\n" +
+            "    &lt;/message&gt;\n" +
+            "    &lt;/AppReceipt&gt;";
+
     private IntegrasjonspunktImpl integrasjonspunkt;
     private AdresseregisterService adresseregister ;
     private EventLog eventLog ;
     private PutMessageRequestType message;
+    private MessageSender messageSender;
 
     @Before
     public void setup() {
         integrasjonspunkt = new IntegrasjonspunktImpl();
-        adresseregister = Mockito.mock(AdresseregisterService.class);
-        eventLog = Mockito.mock(EventLog.class);
+        adresseregister = mock(AdresseregisterService.class);
+        eventLog = mock(EventLog.class);
         integrasjonspunkt.setEventLog(eventLog);
 
-        MessageSender messageSender = new MessageSender();
+        messageSender = mock(MessageSender.class);
         messageSender.setAdresseregister(adresseregister);
         messageSender.setEventLog(eventLog);
         integrasjonspunkt.setMessageSender(messageSender);
   }
 
-    @Given("^et dokument mottatt på integrasjospunktet sitt receive grensesnitt er en kvittering$")
+    @Given("^en kvitering$")
     public void et_dokument_mottatt_på_receive_grensesnittet() {
 
         // envelope
@@ -56,28 +65,24 @@ public class ReceiveSteps {
         receiver.setOrgnr("9874643");
         envelope.setReceiver(receiver);
         message.setEnvelope(envelope);
-
-        //body
-        AppReceiptType receiptType = new AppReceiptType() ;
-        receiptType.setType("OK");
-        StatusMessageType statusMessage =  new StatusMessageType();
-        statusMessage.setCode("ID");
-        statusMessage.setText("210725");
-        receiptType.getMessage().add(statusMessage);
-        message.setPayload(receiptType);
+        message.setPayload(appReceiptPayload);
 
     }
 
-    @When("^integrasjonspunktet mottar et dokument på receive rensesnit$")
-    public void vi_skal_sende_melding(){
+    @When("^integrasjonspunktet mottar en kvittering på putMessage grensesnittet$")
+    public void integrasjonspunkt_mottar_kvittering(){
         integrasjonspunkt.putMessage(message);
 
     }
 
     @Then("^kvitteringen logges i integrasjonspunktet sin hendelseslogg$")
     public void kvitteringen_logges_i_eventlog()  {
-        // Write code here that turns the phrase above into concrete actions
-        Mockito.verify(eventLog, times(1)).log(any(Event.class));
+        verify(eventLog, times(1)).log(any(Event.class));
+    }
+
+    @Then("^kvitteringen sendes ikke videre til transport$")
+    public void kvitteringen_sendes_ikke_videre()  {
+        verify(messageSender, times(0)).sendMessage(any(PutMessageRequestType.class));
     }
 
 }

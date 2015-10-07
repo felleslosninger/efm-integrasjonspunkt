@@ -24,21 +24,22 @@ final class PutMessageStrategyFactory {
         if (payload instanceof ElementNSImpl) {
             return new BestEDUPutMessageStrategy(context);
         }
+
         //P360, AppReceipt or any other NOARK system dispatching as text
-        if (payload instanceof String) {
-            // app receipt?
-            boolean isAppReceipt = ((String) payload).contains(APP_RECEIPT_INDICATOR);
-            boolean isBestEDUMessage = ((String) payload).contains(MESSAGE_INDICATOR);
-            if (isAppReceipt) {
-                return new AppReceiptPutMessageStrategy(context);
-                // is Message
-            } else if (isBestEDUMessage) {
-                return new BestEDUPutMessageStrategy(context);
-            } else
-                throw new MeldingsUtvekslingRuntimeException("Unknown String based payload " + payload);
-            // is unknown string variant
-        } else {
+        if (!(payload instanceof String)) {
             throw new MeldingsUtvekslingRuntimeException("unknown payload class " + payload);
         }
+
+        // app receipt?
+        boolean isAppReceipt = ((String) payload).contains(APP_RECEIPT_INDICATOR);
+        boolean isBestEDUMessage = ((String) payload).contains(MESSAGE_INDICATOR);
+        if (isAppReceipt) {
+            return new AppReceiptPutMessageStrategy(context);
+            // is Message
+        } else if (isBestEDUMessage) {
+            return new BestEDUPutMessageStrategy(context);
+        } else
+            throw new MeldingsUtvekslingRuntimeException("Unknown String based payload " + payload);
+        // is unknown string variant
     }
 }

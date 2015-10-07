@@ -63,8 +63,8 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType req) {
-        PutMessageContext pmx = new PutMessageContext(eventLog, messageSender);
-        PutMessageStrategy strategy = PutMessageStrategyFactory.createStrategy(pmx, req.getPayload());
+        PutMessageContext context = new PutMessageContext(eventLog, messageSender);
+        PutMessageStrategy strategy = PutMessageStrategyFactory.createStrategy(context, req.getPayload());
         return strategy.putMessage(req);
     }
 

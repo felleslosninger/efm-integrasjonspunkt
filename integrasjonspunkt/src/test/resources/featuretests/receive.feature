@@ -1,6 +1,8 @@
-Feature: Mottak av kvitterin på sendt medling fra sak/arkivløsning til /receive grensesnittet i integrasjonspunkt
+Feature: Mottak av kvittering sendt fra sak/arkivløsning. Kvittering er ikke en melding og skal bare logges.
 
-  Scenario: Mottatt dokument på Receive er en kvittering
-    Given et dokument mottatt på integrasjospunktet sitt receive grensesnitt er en kvittering
-    When integrasjonspunktet mottar et dokument på receive rensesnit
+  Scenario: Vi sender en kvittering til integrasjonspunktet
+    Given en kvitering
+    When integrasjonspunktet mottar en kvittering på putMessage grensesnittet
     Then kvitteringen logges i integrasjonspunktet sin hendelseslogg
+    And kvitteringen sendes ikke videre til transport
+
