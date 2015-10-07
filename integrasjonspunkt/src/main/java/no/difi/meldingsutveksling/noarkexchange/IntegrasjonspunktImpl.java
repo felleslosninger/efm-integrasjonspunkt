@@ -4,6 +4,9 @@ import com.thoughtworks.xstream.XStream;
 import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageContext;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategy;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +48,6 @@ public class IntegrasjonspunktImpl implements SOAPport {
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
 
         String organisasjonsnummer = getCanReceiveMessageRequest.getReceiver().getOrgnr();
-
         eventLog.log(new Event()
                 .setMessage(new XStream().toXML(getCanReceiveMessageRequest))
                 .setProcessStates(ProcessState.CAN_RECEIVE_INVOKED)
@@ -63,8 +65,13 @@ public class IntegrasjonspunktImpl implements SOAPport {
     }
 
     @Override
-    public PutMessageResponseType putMessage(PutMessageRequestType putMessageRequest) {
-        return messageSender.sendMessage(putMessageRequest);
+    public PutMessageResponseType putMessage(PutMessageRequestType req) {
+
+        PutMessageContext context = new PutMessageContext(eventLog, messageSender);
+        PutMessageStrategyFactory putMessageStrategyFactory = PutMessageStrategyFactory.newInstance(context);
+
+        PutMessageStrategy strategy = putMessageStrategyFactory.create(req.getPayload());
+        return strategy.putMessage(req);
     }
 
     public AdresseregisterService getAdresseRegisterClient() {
