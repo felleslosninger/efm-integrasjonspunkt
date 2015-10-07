@@ -26,27 +26,33 @@ public final class PutMessageStrategyFactory {
     }
 
     public PutMessageStrategy create(Object payload) {
-
-        //EPhorte
-        if (payload instanceof ElementNSImpl) {
+        if (isEPhorte(payload)) {
             return new BestEDUPutMessageStrategy(context.getMessageSender());
         }
-
-        //P360, AppReceipt or any other NOARK system dispatching as text
-        if (!(payload instanceof String)) {
+        if (isUnknown(payload)) {
             throw new MeldingsUtvekslingRuntimeException("unknown payload class " + payload);
         }
-
-        // app receipt?
-        boolean isAppReceipt = ((String) payload).contains(APP_RECEIPT_INDICATOR);
-        boolean isBestEDUMessage = ((String) payload).contains(MESSAGE_INDICATOR);
-        if (isAppReceipt) {
+        if (isAppReceipt(payload)) {
             return new AppReceiptPutMessageStrategy(context.getEventlog());
-            // is Message
-        } else if (isBestEDUMessage) {
-            return new BestEDUPutMessageStrategy(context.getMessageSender() );
+        } else if (isBestEDUMessage(payload)) {
+            return new BestEDUPutMessageStrategy(context.getMessageSender());
         } else
             throw new MeldingsUtvekslingRuntimeException("Unknown String based payload " + payload);
-        // is unknown string variant
+    }
+
+    private boolean isUnknown(Object payload) {
+        return !(payload instanceof String);
+    }
+
+    private boolean isEPhorte(Object payload) {
+        return payload instanceof ElementNSImpl;
+    }
+
+    private boolean isBestEDUMessage(Object payload) {
+        return ((String) payload).contains(MESSAGE_INDICATOR);
+    }
+
+    private boolean isAppReceipt(Object payload) {
+        return ((String) payload).contains(APP_RECEIPT_INDICATOR);
     }
 }

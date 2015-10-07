@@ -27,23 +27,31 @@ class AppReceiptPutMessageStrategy implements PutMessageStrategy {
 
     private final EventLog eventLog;
 
+    private static final JAXBContext jaxbContext;
+
+    static {
+        try {
+              jaxbContext = JAXBContext.newInstance("no.difi.meldingsutveksling.noarkexchange.schema");
+        } catch (JAXBException e) {
+            throw new MeldingsUtvekslingRuntimeException(e);
+        }
+    }
     public AppReceiptPutMessageStrategy(EventLog eventLog) {
         this.eventLog = eventLog;
     }
 
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType request) {
-        try {
-            String payload = StringEscapeUtils.unescapeHtml((String) request.getPayload());
-            JAXBContext jaxbContext = JAXBContext.newInstance("no.difi.meldingsutveksling.noarkexchange.schema");
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            JAXBElement<AppReceiptType> t = unmarshaller.unmarshal(new StringSource(payload), AppReceiptType.class);
-            AppReceiptType receipt = t.getValue();
 
+        final String payload = StringEscapeUtils.unescapeHtml((String) request.getPayload());
+        try {
+            StringSource source = new StringSource(payload);
+            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+            JAXBElement<AppReceiptType> r = unmarshaller.unmarshal(source, AppReceiptType.class);
+            AppReceiptType receipt = r.getValue();
             for (StatusMessageType sm : receipt.getMessage())
                 eventLog.log(new Event(ProcessState.APP_RECEIPT).setMessage(sm.getCode() + ", " + sm.getText()));
             return createOkResponse();
-
         } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }

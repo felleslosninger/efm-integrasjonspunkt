@@ -3,11 +3,10 @@ package no.difi.meldingsutveksling.noarkexchange.putmessage;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
-import no.difi.meldingsutveksling.noarkexchange.putmessage.AppReceiptPutMessageStrategy;
-import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageContext;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -21,7 +20,6 @@ import static org.mockito.Mockito.verify;
  *
  * @author Glenn Bech
  */
-
 public class AppReceiptStrategyTest {
 
     private String receiptPayload = "&lt;AppReceipt type=\"OK\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.arkivverket.no/Noark/Exchange/types\"&gt;\n" +
@@ -30,20 +28,26 @@ public class AppReceiptStrategyTest {
             "  &lt;/message&gt;\n" +
             "&lt;/AppReceipt&gt;";
 
+        private PutMessageContext ctx;
+
+    @Before
+    public void init() {
+         ctx = new PutMessageContext(Mockito.mock(EventLog.class), Mockito.mock(MessageSender.class));
+    }
+
     /**
      * The AppReceiptStrategy should only log the message to the eventlog,
      * and return an OK response type
      */
     @Test
     public void shouldOnlyLogApplicationReceipts() {
-
-        PutMessageContext ctx = new PutMessageContext(Mockito.mock(EventLog.class), Mockito.mock(MessageSender.class));
         AppReceiptPutMessageStrategy strategy = new AppReceiptPutMessageStrategy(ctx.getEventlog());
         PutMessageRequestType request = new PutMessageRequestType();
         request.setPayload(receiptPayload);
 
-        PutMessageResponseType response = strategy.putMessage(request);
+        strategy.putMessage(request);
         verify(ctx.getEventlog()).log(any(Event.class));
+
         // message sender should not be called for receipts, only log
         verify(ctx.getMessageSender(), never()).sendMessage(any(PutMessageRequestType.class));
     }
