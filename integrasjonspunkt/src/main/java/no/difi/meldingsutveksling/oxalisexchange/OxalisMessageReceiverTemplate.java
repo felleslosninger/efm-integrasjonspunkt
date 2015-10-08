@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.oxalisexchange;
 
 import no.difi.asic.SignatureHelper;
-import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.config.KeyConfiguration;
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
 import no.difi.meldingsutveksling.domain.*;
 import no.difi.meldingsutveksling.eventlog.Event;
@@ -75,7 +75,7 @@ public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
         ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering(nodeList, kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
 
         try {
-            SignatureHelper helper = new IntegrasjonspunktNokkel().getSignatureHelper();
+            SignatureHelper helper = new KeyConfiguration().getSignatureHelper();
             byte[] resultSbd = dokumentpakker.pakkTilByteArray(byteArray, helper, avsender, mottaker, instanceIdentifier, KVITTERING);
             File file = new File(WRITE_TO);
             FileUtils.writeByteArrayToFile(file, resultSbd);
