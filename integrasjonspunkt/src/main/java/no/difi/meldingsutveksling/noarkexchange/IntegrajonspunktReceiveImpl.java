@@ -67,7 +67,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
     TransportFactory transportFactory;
 
     @Autowired
-    private NoarkClient noarkClient;
+    private NoarkClient localNoark;
 
     @Autowired
     private AdresseRegisterClient adresseRegisterClient;
@@ -162,7 +162,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
     }
 
     private void forwardToNoarkSystemAndSendReceipt(StandardBusinessDocument receiveResponse, Organisasjonsnummer sender, Organisasjonsnummer reciever, String convId, Avsender avsender, SignAFile signAFile, PutMessageRequestType putMessageRequestType) {
-        PutMessageResponseType response = noarkClient.sendEduMelding(putMessageRequestType);
+        PutMessageResponseType response = localNoark.sendEduMelding(putMessageRequestType);
         if (response != null) {
             AppReceiptType result = response.getResult();
             if (null == result) {
@@ -280,11 +280,11 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
     }
 
     public NoarkClient getNoarkClient() {
-        return noarkClient;
+        return localNoark;
     }
 
     public void setNoarkClient(NoarkClient noarkClient) {
-        this.noarkClient = noarkClient;
+        this.localNoark = noarkClient;
     }
 
     public AdresseRegisterClient getAdresseRegisterClient() {

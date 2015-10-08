@@ -5,10 +5,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
 import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.noarkexchange.schema.NoarkExchange;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import no.difi.meldingsutveksling.noarkexchange.schema.SOAPport;
+import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,16 +17,12 @@ import javax.xml.ws.BindingProvider;
  *
  * @author Glenn Bech
  */
-
-@Component
 public class NoarkClient {
 
     @Autowired
     EventLog eventLog;
 
-
-    @Autowired
-    IntegrasjonspunktConfig config;
+    IntegrasjonspunktConfig.NoarkClientSettings settings;
 
     public PutMessageResponseType sendEduMelding(PutMessageRequestType eduMesage) {
         if (eventLog == null) {
@@ -41,21 +34,26 @@ public class NoarkClient {
             throw new IllegalStateException("invalid envelope");
         }
 
-        NoarkExchange exchange = new NoarkExchange();
-        SOAPport port = exchange.getNoarkExchangePort();
-        BindingProvider bp = (BindingProvider) port;
-        String endPointURL = config.getNOARKSystemEndPointURL();
-        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endPointURL);
+        SOAPport port = getSoapPport();
         return port.putMessage(eduMesage);
     }
 
-
-    public IntegrasjonspunktConfig getConfig() {
-        return config;
+    private SOAPport getSoapPport() {
+        NoarkExchange exchange = new NoarkExchange();
+        SOAPport port = exchange.getNoarkExchangePort();
+        BindingProvider bp = (BindingProvider) port;
+        String endPointURL = settings.getEndpointUrl();
+        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endPointURL);
+        return port;
     }
 
-    public void setConfig(IntegrasjonspunktConfig config) {
-        this.config = config;
+
+    public IntegrasjonspunktConfig.NoarkClientSettings getSettings() {
+        return settings;
+    }
+
+    public void setSettings(IntegrasjonspunktConfig.NoarkClientSettings settings) {
+        this.settings = settings;
     }
 
     public EventLog getEventLog() {
@@ -64,5 +62,14 @@ public class NoarkClient {
 
     public void setEventLog(EventLog eventLog) {
         this.eventLog = eventLog;
+    }
+
+    public boolean canGetRecieveMessage(String orgnr) {
+        GetCanReceiveMessageRequestType req = new GetCanReceiveMessageRequestType();
+        AddressType addressType = new AddressType();
+        addressType.setOrgnr(orgnr);
+        req.setReceiver(addressType);
+        GetCanReceiveMessageResponseType responseType = getSoapPport().getCanReceiveMessage(req);
+        return responseType.isResult();
     }
 }
