@@ -77,7 +77,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
 
 
     @Autowired
-    private KeyConfiguration keyInfo;
+    private KeyConfiguration keyConfig;
 
 
     public IntegrajonspunktReceiveImpl() {
@@ -103,7 +103,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         forberedKvittering(receiveResponse, "leveringsKvittering");
 
         String convId = receiveResponse.getStandardBusinessDocumentHeader().getBusinessScope().getScope().get(0).getInstanceIdentifier();
-        Noekkelpar noekkelpar = new Noekkelpar(keyInfo.loadPrivateKey(), adresseRegisterClient.getCertificate(reciever.toString()));
+        Noekkelpar noekkelpar = new Noekkelpar(keyConfig.loadPrivateKey(), adresseRegisterClient.getCertificate(reciever.toString()));
         Avsender avsender = new Avsender(reciever, noekkelpar);
         SignAFile signAFile = new SignAFile();
 
@@ -126,7 +126,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         }
         byte[] cmsEncZip = DatatypeConverter.parseBase64Binary(payload.getContent());
         CmsUtil cmsUtil = new CmsUtil();
-        byte[] zipTobe = cmsUtil.decryptCMS(cmsEncZip, keyInfo.loadPrivateKey());
+        byte[] zipTobe = cmsUtil.decryptCMS(cmsEncZip, keyConfig.loadPrivateKey());
         logEvent(receiveResponse, null, ProcessState.DECRYPTION_SUCCESS);
         File bestEdu;
         try {
@@ -194,13 +194,13 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         }
 
         Certificate certificate = adresseRegisterClient.getCertificate(recievedBy);
-        Noekkelpar noekkelpar = new Noekkelpar(keyInfo.loadPrivateKey(), certificate);
+        Noekkelpar noekkelpar = new Noekkelpar(keyConfig.loadPrivateKey(), certificate);
         Avsender.Builder avsenderBuilder = Avsender.builder(new Organisasjonsnummer(recievedBy), noekkelpar);
         Avsender avsender = avsenderBuilder.build();
         Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo), (X509Certificate) certificate);
         try {
             ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering(kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
-            byte[] resultSbd = dokumentpakker.pakkTilByteArray(byteArray, new KeyConfiguration().getSignatureHelper(), avsender, mottaker, instanceIdentifier, KVITTERING);
+            byte[] resultSbd = dokumentpakker.pakkTilByteArray(byteArray, keyConfig.getSignatureHelper(), avsender, mottaker, instanceIdentifier, KVITTERING);
             File file = new File(WRITE_TO);
             FileUtils.writeByteArrayToFile(file, resultSbd);
         } catch (IOException e) {
@@ -303,11 +303,11 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         this.config = config;
     }
 
-    public KeyConfiguration getKeyInfo() {
-        return keyInfo;
+    public KeyConfiguration getKeyConfig() {
+        return keyConfig;
     }
 
-    public void setKeyInfo(KeyConfiguration keyInfo) {
-        this.keyInfo = keyInfo;
+    public void setKeyConfig(KeyConfiguration keyConfig) {
+        this.keyConfig = keyConfig;
     }
 }
