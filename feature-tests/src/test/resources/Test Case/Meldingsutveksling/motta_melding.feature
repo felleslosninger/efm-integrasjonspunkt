@@ -1,12 +1,12 @@
 Feature: Bruke Altinn formidlingstjeneste til å finne nye meldinger og lagre i sak/arkivløsningen
 
   Scenario: Altinn har nye meldinger
-    Given Altinn har melding til mottaker som mottaker finner
+    Given Altinn har melding til mottaker 910094092 som mottaker finner
     When mottaker sjekker etter nye meldinger
     Then mottaker mottar liste over nye meldinger
 
   Scenario: Altinn har ikke nye meldinger
-    Given Altinn har ikke melding til mottaker
+    Given Altinn har ikke melding til mottaker 810076402
     When mottaker sjekker etter nye meldinger
     Then mottaker mottar tom liste
 
