@@ -15,7 +15,7 @@ import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.*;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.noark.NOARKSystem;
+import no.difi.meldingsutveksling.noark.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
@@ -67,7 +67,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
     TransportFactory transportFactory;
 
     @Autowired
-    private NOARKSystem noarkSystem;
+    private NoarkClient noarkClient;
 
     @Autowired
     private AdresseRegisterClient adresseRegisterClient;
@@ -162,7 +162,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
     }
 
     private void forwardToNoarkSystemAndSendReceipt(StandardBusinessDocument receiveResponse, Organisasjonsnummer sender, Organisasjonsnummer reciever, String convId, Avsender avsender, SignAFile signAFile, PutMessageRequestType putMessageRequestType) {
-        PutMessageResponseType response = noarkSystem.sendEduMelding(putMessageRequestType);
+        PutMessageResponseType response = noarkClient.sendEduMelding(putMessageRequestType);
         if (response != null) {
             AppReceiptType result = response.getResult();
             if (null == result) {
@@ -279,12 +279,12 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         this.transportFactory = transportFactory;
     }
 
-    public NOARKSystem getNoarkSystem() {
-        return noarkSystem;
+    public NoarkClient getNoarkClient() {
+        return noarkClient;
     }
 
-    public void setNoarkSystem(NOARKSystem noarkSystem) {
-        this.noarkSystem = noarkSystem;
+    public void setNoarkClient(NoarkClient noarkClient) {
+        this.noarkClient = noarkClient;
     }
 
     public AdresseRegisterClient getAdresseRegisterClient() {

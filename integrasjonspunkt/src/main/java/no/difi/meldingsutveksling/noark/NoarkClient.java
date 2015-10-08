@@ -22,7 +22,7 @@ import javax.xml.ws.BindingProvider;
  */
 
 @Component
-public class NOARKSystem {
+public class NoarkClient {
 
     @Autowired
     EventLog eventLog;
