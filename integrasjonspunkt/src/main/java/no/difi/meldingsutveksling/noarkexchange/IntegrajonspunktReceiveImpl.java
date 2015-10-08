@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import com.thoughtworks.xstream.XStream;
 import no.difi.meldingsutveksling.CertificateValidator;
-import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.config.KeyConfiguration;
 import no.difi.meldingsutveksling.adresseregister.client.AdresseRegisterClient;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
@@ -77,7 +77,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
 
 
     @Autowired
-    private IntegrasjonspunktNokkel keyInfo;
+    private KeyConfiguration keyInfo;
 
 
     public IntegrajonspunktReceiveImpl() {
@@ -200,7 +200,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo), (X509Certificate) certificate);
         try {
             ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering(kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
-            byte[] resultSbd = dokumentpakker.pakkTilByteArray(byteArray, new IntegrasjonspunktNokkel().getSignatureHelper(), avsender, mottaker, instanceIdentifier, KVITTERING);
+            byte[] resultSbd = dokumentpakker.pakkTilByteArray(byteArray, new KeyConfiguration().getSignatureHelper(), avsender, mottaker, instanceIdentifier, KVITTERING);
             File file = new File(WRITE_TO);
             FileUtils.writeByteArrayToFile(file, resultSbd);
         } catch (IOException e) {
@@ -303,11 +303,11 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         this.config = config;
     }
 
-    public IntegrasjonspunktNokkel getKeyInfo() {
+    public KeyConfiguration getKeyInfo() {
         return keyInfo;
     }
 
-    public void setKeyInfo(IntegrasjonspunktNokkel keyInfo) {
+    public void setKeyInfo(KeyConfiguration keyInfo) {
         this.keyInfo = keyInfo;
     }
 }

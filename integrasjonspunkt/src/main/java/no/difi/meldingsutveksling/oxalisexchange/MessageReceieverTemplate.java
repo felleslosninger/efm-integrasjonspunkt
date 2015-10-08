@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.oxalisexchange;
 
-import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.config.KeyConfiguration;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.eventlog.Event;
@@ -53,7 +53,7 @@ public abstract class MessageReceieverTemplate {
         if (isMessage(n)) {
 
             eventLog.log(new Event().setProcessStates(ProcessState.SBD_RECIEVED));
-            documentElements.put("privateKey", new IntegrasjonspunktNokkel().loadPrivateKey());
+            documentElements.put("privateKey", new KeyConfiguration().loadPrivateKey());
 
             sendLeveringskvittering(documentElements);
             eventLog.log(new Event().setProcessStates(ProcessState.LEVERINGS_KVITTERING_SENT));
@@ -175,7 +175,7 @@ public abstract class MessageReceieverTemplate {
 
         //*** get rsa cipher decrypt *****
         Cipher cipher = Cipher.getInstance("RSA");
-        PrivateKey privateKey = new IntegrasjonspunktNokkel().loadPrivateKey();
+        PrivateKey privateKey = new KeyConfiguration().loadPrivateKey();
         cipher.init(Cipher.DECRYPT_MODE, privateKey);
         return cipher.doFinal(aesInDisc);
     }

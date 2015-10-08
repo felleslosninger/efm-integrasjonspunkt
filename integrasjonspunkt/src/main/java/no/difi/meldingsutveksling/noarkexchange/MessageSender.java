@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import com.thoughtworks.xstream.XStream;
 import no.difi.asic.SignatureHelper;
-import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.config.KeyConfiguration;
 import no.difi.meldingsutveksling.adresseregister.client.CertificateNotFoundException;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
 import no.difi.meldingsutveksling.domain.*;
@@ -41,7 +41,7 @@ public class MessageSender {
     IntegrasjonspunktConfig configuration;
 
     @Autowired
-    IntegrasjonspunktNokkel keyInfo;
+    KeyConfiguration keyInfo;
 
     boolean setSender(IntegrasjonspunktContext context, AddressType s) {
 
@@ -163,11 +163,11 @@ public class MessageSender {
         this.configuration = configuration;
     }
 
-    public IntegrasjonspunktNokkel getKeyInfo() {
+    public KeyConfiguration getKeyInfo() {
         return keyInfo;
     }
 
-    public void setKeyInfo(IntegrasjonspunktNokkel keyInfo) {
+    public void setKeyInfo(KeyConfiguration keyInfo) {
         this.keyInfo = keyInfo;
     }
 

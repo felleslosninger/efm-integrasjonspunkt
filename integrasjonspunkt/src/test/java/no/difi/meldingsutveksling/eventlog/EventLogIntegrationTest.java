@@ -9,7 +9,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
  * These tests use flyway to establish an in memory database before they are run.
  */
 @Ignore("Since IntegrasjonspunktReceiveImpl now is a Spring bean and it instantiates an instance of " +
-        "IntegrasjonspunktNokkel we would need to provide environment variables: privatekeyalias, privatekeyloacation " +
+        "KeyConfiguration we would need to provide environment variables: privatekeyalias, privatekeyloacation " +
         "and privatekeypassword. But we do not want to need that to run this junit test. This test needs to be " +
         "rewritten or removed")
 public class EventLogIntegrationTest {

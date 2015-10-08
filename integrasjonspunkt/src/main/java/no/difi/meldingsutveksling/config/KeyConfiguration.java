@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling;
+package no.difi.meldingsutveksling.config;
 
 import no.difi.asic.SignatureHelper;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
@@ -21,14 +21,14 @@ import java.util.Enumeration;
  * @author Glebnn Bech
  */
 @Component
-public class IntegrasjonspunktNokkel {
+public class KeyConfiguration {
 
     private String pkLocation, pkAlias, pkPassword;
 
     @Autowired
     IntegrasjonspunktConfig config;
 
-    public IntegrasjonspunktNokkel() {
+    public KeyConfiguration() {
     }
 
     @PostConstruct
@@ -39,17 +39,21 @@ public class IntegrasjonspunktNokkel {
         pkPassword = config.getPrivateKeyPassword();
 
         if (pkAlias == null) {
-            throw new MeldingsUtvekslingRuntimeException("Missing private key alias system property");
+            throw new MeldingsUtvekslingRuntimeException("Missing private key alias system property" +
+                    ", this can be fixed by adding this to the java argument list -D" + config.KEY_PRIVATEKEYALIAS + "=<alias>\n");
         }
         if (pkLocation == null) {
-            throw new MeldingsUtvekslingRuntimeException("Missing private key location system property");
+            throw new MeldingsUtvekslingRuntimeException("Missing private key location system property," +
+                    ", this can be fixed by adding this to the java argument list -D" + config.KEY_KEYSTORE_LOCATION + "=/some/path\n");
+
         }
         if (pkPassword == null) {
-            throw new MeldingsUtvekslingRuntimeException("Missing private key password system property");
+            throw new MeldingsUtvekslingRuntimeException("Missing private key password system property" +
+                    ", this can be fixed by adding this to the java argument list -D" + config.KEY_PRIVATEKEYPASSWORD + "=<secret>\n");
         }
     }
 
-    public IntegrasjonspunktNokkel(String pkLocation, String pkAlias, String pkPassword) {
+    public KeyConfiguration(String pkLocation, String pkAlias, String pkPassword) {
         this.pkLocation = pkLocation;
         this.pkAlias = pkAlias;
         this.pkPassword = pkPassword;
