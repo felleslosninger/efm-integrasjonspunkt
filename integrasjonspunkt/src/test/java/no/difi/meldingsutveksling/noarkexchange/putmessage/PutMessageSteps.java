@@ -8,16 +8,13 @@ import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
-import no.difi.meldingsutveksling.noarkexchange.schema.*;
+import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
+import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
 
-
-import org.mockito.Mockito;
-
-import static junit.framework.TestCase.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
 
 /**
  * Makes sure that the integrasjonspunkt can handle receipt messages on

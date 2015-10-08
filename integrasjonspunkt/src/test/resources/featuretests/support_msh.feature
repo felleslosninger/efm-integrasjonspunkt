@@ -14,3 +14,9 @@ Feature: Integrasjonspunkt skal kunne støtte å sende meldinger til eksisterend
     | finnes          | finnes      | sann  |
     | finnes ikke     | finnes      | sann  |
     | finnes ikke     | finnes ikke | usann |
+
+  Scenario: Vi sender en melding til MSH
+    Given virksomhet finnes ikke i Adresseregisteret
+    And virksomhet finnes i MSH
+    When integrasjonspunktet mottar en melding
+    Then skal melding sendes til MSH

@@ -58,24 +58,37 @@ public class IntegrasjonspunktImpl implements SOAPport {
                 .setReceiver(getCanReceiveMessageRequest.getReceiver().getOrgnr()).setSender("NA"));
 
         GetCanReceiveMessageResponseType response = new GetCanReceiveMessageResponseType();
-        boolean canReceive = true;
-        try {
-            adresseregister.getCertificate(organisasjonsnummer);
-        } catch (Exception e) {
+        boolean canReceive;
+        if (hasAdresseregisterCertificate(organisasjonsnummer)) {
+            canReceive = true;
+        } else {
             canReceive = mshClient.canGetRecieveMessage(organisasjonsnummer);
         }
-        response.setResult((canReceive));
+        response.setResult(canReceive);
         return response;
+    }
+
+    private boolean hasAdresseregisterCertificate(String organisasjonsnummer) {
+        try {
+            adresseregister.getCertificate(organisasjonsnummer);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType req) {
+        if(hasAdresseregisterCertificate(req.getEnvelope().getReceiver().getOrgnr())) {
+            PutMessageContext context = new PutMessageContext(eventLog, messageSender);
+            PutMessageStrategyFactory putMessageStrategyFactory = PutMessageStrategyFactory.newInstance(context);
 
-        PutMessageContext context = new PutMessageContext(eventLog, messageSender);
-        PutMessageStrategyFactory putMessageStrategyFactory = PutMessageStrategyFactory.newInstance(context);
+            PutMessageStrategy strategy = putMessageStrategyFactory.create(req.getPayload());
+            return strategy.putMessage(req);
+        } else {
+            return mshClient.sendEduMelding(req);
+        }
 
-        PutMessageStrategy strategy = putMessageStrategyFactory.create(req.getPayload());
-        return strategy.putMessage(req);
     }
 
     public AdresseregisterService getAdresseRegister() {
