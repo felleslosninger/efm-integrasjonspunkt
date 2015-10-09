@@ -6,7 +6,7 @@ Feature: Integrasjonspunkt skal kunne støtte å sende meldinger til eksisterend
 
   Scenario Outline: Sjekke om mottaker kan motta meldinger
     Given virksomhet <adresseregister> i Adresseregisteret
-    And virksomhet <msh> i MSH
+    And virksomhet <msh> i MSH sitt adresseregister
     When vi spør integrasjonspunktet om virksomhet kan motta meldinger
     Then skal vi få <svar> om at de kan motta meldinger
   Examples:
@@ -17,6 +17,6 @@ Feature: Integrasjonspunkt skal kunne støtte å sende meldinger til eksisterend
 
   Scenario: Vi sender en melding til MSH
     Given virksomhet finnes ikke i Adresseregisteret
-    And virksomhet finnes i MSH
+    And virksomhet finnes i MSH sitt adresseregister
     When integrasjonspunktet mottar en melding
     Then skal melding sendes til MSH

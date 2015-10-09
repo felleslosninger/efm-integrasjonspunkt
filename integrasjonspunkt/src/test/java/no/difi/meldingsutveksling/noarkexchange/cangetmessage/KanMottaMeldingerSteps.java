@@ -127,7 +127,7 @@ public class KanMottaMeldingerSteps {
         }
     }
 
-    @And("^virksomhet (.+) i MSH$")
+    @And("^virksomhet (.+) i MSH sitt adresseregister$")
     public void virksomhet_finnes_i_MSH(String finnes) throws Throwable {
         if("finnes".equals(finnes)) {
             when(mshClient.canGetRecieveMessage(any(String.class))).thenReturn(true);

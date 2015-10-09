@@ -6,7 +6,7 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
  * @author Glenn Bech
  */
 public class CertificateNotFoundException extends MeldingsUtvekslingRuntimeException {
-    public CertificateNotFoundException(RuntimeException cause) {
+    public CertificateNotFoundException(Exception cause) {
         super(cause);
     }
 }
