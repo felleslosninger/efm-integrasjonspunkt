@@ -30,6 +30,10 @@ public class IntegrasjonspunktConfig {
     static final String KEY_NOARKSYSTEM_USERNAME = "noarksystem.userName";
     static final String KEY_NOARKSYSTEM_PASSWORD = "noarksystem.password";
 
+    static final String KEY_MSH_ENDPOINT = "msh.endpointURL";
+    static final String KEY_MSH_USERNAME = "msh.userName";
+    static final String KEY_MSH_PASSWORD = "msh.password";
+
     static final String KEY_ADRESSEREGISTER_ENDPOINT = "adresseregister.endPointURL";
     static final String KEY_ADRESSEREGISTER_USERNAME = "adresseregister.userName";
     static final String KEY_ADRESSEREGISTER_PASSWORD = "adresseregister.password";
@@ -72,16 +76,28 @@ public class IntegrasjonspunktConfig {
         return config.getString(KEY_ADRESSEREGISTER_PASSWORD);
     }
 
-    public String getNOARKSystemEndPointURL() {
+    private String getNOARKSystemEndPointURL() {
         return config.getString(KEY_NOARKSYSTEM_ENDPOINT);
     }
 
-    public String getKeyNoarksystemUsername() {
+    private String getKeyNoarksystemUsername() {
         return config.getString(KEY_NOARKSYSTEM_USERNAME);
     }
 
-    public String getKeyNoarksystemPassword() {
+    private String getKeyNoarksystemPassword() {
         return config.getString(KEY_NOARKSYSTEM_PASSWORD);
+    }
+
+    private String getMshEndpointUrl() {
+        return config.getString(KEY_MSH_ENDPOINT);
+    }
+
+    private String getKeyMshUsername() {
+        return config.getString(KEY_MSH_USERNAME);
+    }
+
+    private String getKeyMshPassword() {
+        return config.getString(KEY_MSH_PASSWORD);
     }
 
     public String getKeyStoreLocation() {
@@ -109,4 +125,35 @@ public class IntegrasjonspunktConfig {
         return orgNumber != null && !orgNumber.isEmpty();
     }
 
+    public NoarkClientSettings getLocalNoarkClientSettings() {
+        return new NoarkClientSettings(getNOARKSystemEndPointURL(), getKeyNoarksystemUsername(), getKeyNoarksystemPassword());
+    }
+
+    public NoarkClientSettings getMshNoarkClientSettings() {
+        return new NoarkClientSettings(getMshEndpointUrl(), getKeyMshUsername(), getKeyMshPassword());
+    }
+
+    public static class NoarkClientSettings {
+        private final String endpointUrl;
+        private final String userName;
+        private final String password;
+
+        public NoarkClientSettings(String endpointUrl, String userName, String password) {
+            this.endpointUrl = endpointUrl;
+            this.userName = userName;
+            this.password = password;
+        }
+
+        public String getEndpointUrl() {
+            return endpointUrl;
+        }
+
+        public String getUserName() {
+            return userName;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+    }
 }

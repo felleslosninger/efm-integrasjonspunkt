@@ -4,6 +4,7 @@ import com.thoughtworks.xstream.XStream;
 import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
+import no.difi.meldingsutveksling.noark.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageContext;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategy;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategyFactory;
@@ -44,6 +45,9 @@ public class IntegrasjonspunktImpl implements SOAPport {
     @Autowired
     private EventLog eventLog;
 
+    @Autowired
+    private NoarkClient mshClient;
+
     @Override
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
 
@@ -54,31 +58,44 @@ public class IntegrasjonspunktImpl implements SOAPport {
                 .setReceiver(getCanReceiveMessageRequest.getReceiver().getOrgnr()).setSender("NA"));
 
         GetCanReceiveMessageResponseType response = new GetCanReceiveMessageResponseType();
-        boolean canReceive = true;
+        boolean canReceive;
+        if (hasAdresseregisterCertificate(organisasjonsnummer)) {
+            canReceive = true;
+        } else {
+            canReceive = mshClient.canGetRecieveMessage(organisasjonsnummer);
+        }
+        response.setResult(canReceive);
+        return response;
+    }
+
+    private boolean hasAdresseregisterCertificate(String organisasjonsnummer) {
         try {
             adresseregister.getCertificate(organisasjonsnummer);
+            return true;
         } catch (Exception e) {
-            canReceive = false;
+            return false;
         }
-        response.setResult((canReceive));
-        return response;
     }
 
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType req) {
+        if(hasAdresseregisterCertificate(req.getEnvelope().getReceiver().getOrgnr())) {
+            PutMessageContext context = new PutMessageContext(eventLog, messageSender);
+            PutMessageStrategyFactory putMessageStrategyFactory = PutMessageStrategyFactory.newInstance(context);
 
-        PutMessageContext context = new PutMessageContext(eventLog, messageSender);
-        PutMessageStrategyFactory putMessageStrategyFactory = PutMessageStrategyFactory.newInstance(context);
+            PutMessageStrategy strategy = putMessageStrategyFactory.create(req.getPayload());
+            return strategy.putMessage(req);
+        } else {
+            return mshClient.sendEduMelding(req);
+        }
 
-        PutMessageStrategy strategy = putMessageStrategyFactory.create(req.getPayload());
-        return strategy.putMessage(req);
     }
 
-    public AdresseregisterService getAdresseRegisterClient() {
+    public AdresseregisterService getAdresseRegister() {
         return adresseregister;
     }
 
-    public void setAdresseRegisterClient(AdresseregisterService adresseRegisterClient) {
+    public void setAdresseRegister(AdresseregisterService adresseRegisterClient) {
         this.adresseregister = adresseRegisterClient;
     }
 
@@ -96,5 +113,13 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
     public void setEventLog(EventLog eventLog) {
         this.eventLog = eventLog;
+    }
+
+    public void setMshClient(NoarkClient mshClient) {
+        this.mshClient = mshClient;
+    }
+
+    public NoarkClient getMshClient() {
+        return mshClient;
     }
 }

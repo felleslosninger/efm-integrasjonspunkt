@@ -30,7 +30,7 @@ public class AdresseRegisterClient {
     public static final String X_509 = "X.509";
     public static final String PATH_PARAM_ORG_NR = "orgNr";
 
-    private AdresseRegisterService adresseRegister;
+    private AdresseRegisterService adresseRegisterService;
 
 
     public AdresseRegisterClient() {
@@ -41,7 +41,7 @@ public class AdresseRegisterClient {
             throw new MeldingsUtvekslingRuntimeException();
         }
         RestAdapter restAdapter = new RestAdapter.Builder().setErrorHandler(new CertificateMissingErrorHandler()).setEndpoint(endPointURL).setLogLevel(RestAdapter.LogLevel.FULL).build();
-        adresseRegister = restAdapter.create(AdresseRegisterService.class);
+        adresseRegisterService = restAdapter.create(AdresseRegisterService.class);
     }
 
     /**
@@ -53,7 +53,7 @@ public class AdresseRegisterClient {
      */
     public Certificate getCertificate(String orgNr) {
 
-        CertificateResponse response = adresseRegister.getCertificate(orgNr);
+        CertificateResponse response = adresseRegisterService.getCertificate(orgNr);
         Certificate certificate;
         try {
             CertificateFactory f;
