@@ -8,16 +8,14 @@ import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
-import no.difi.meldingsutveksling.noarkexchange.schema.*;
+import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
+import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
+import sun.security.x509.X509CertImpl;
 
-
-import org.mockito.Mockito;
-
-import static junit.framework.TestCase.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
 
 /**
  * Makes sure that the integrasjonspunkt can handle receipt messages on
@@ -42,6 +40,7 @@ public class PutMessageSteps {
     public void setup() {
         integrasjonspunkt = new IntegrasjonspunktImpl();
         adresseregister = mock(AdresseregisterService.class);
+        when(adresseregister.getCertificate(any(String.class))).thenReturn(new X509CertImpl());
         eventLog = mock(EventLog.class);
         integrasjonspunkt.setEventLog(eventLog);
 
@@ -49,6 +48,7 @@ public class PutMessageSteps {
         messageSender.setAdresseregister(adresseregister);
         messageSender.setEventLog(eventLog);
         integrasjonspunkt.setMessageSender(messageSender);
+        integrasjonspunkt.setAdresseRegister(adresseregister);
   }
 
     @Given("^en kvittering$")
