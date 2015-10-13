@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 
 import com.thoughtworks.xstream.XStream;
-import no.difi.asic.SignatureHelper;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.adresseregister.client.CertificateNotFoundException;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
@@ -11,7 +10,10 @@ import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.noarkexchange.schema.*;
+import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
+import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
@@ -24,7 +26,8 @@ import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
-import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.*;
+import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createErrorResponse;
+import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createOkResponse;
 
 @Component
 public class MessageSender {
@@ -44,6 +47,9 @@ public class MessageSender {
 
     @Autowired
     IntegrasjonspunktNokkel keyInfo;
+
+    @Autowired
+    StandardBusinessDocumentFactory standardBusinessDocumentFactory;
 
     boolean setSender(IntegrasjonspunktContext context, AddressType s) {
 
@@ -106,10 +112,9 @@ public class MessageSender {
         }
         eventLog.log(new Event(ProcessState.SIGNATURE_VALIDATED));
 
-        SignatureHelper helper = keyInfo.getSignatureHelper();
         StandardBusinessDocument sbd;
         try {
-            sbd = StandardBusinessDocumentFactory.create(message, helper, context.getAvsender(), context.getMottaker());
+            sbd = standardBusinessDocumentFactory.create(message, context.getAvsender(), context.getMottaker());
 
         } catch (IOException e) {
             eventLog.log(new Event().setJpId(journalPostId).setArkiveConversationId(conversationId).setProcessStates(ProcessState.MESSAGE_SEND_FAIL));
@@ -128,8 +133,6 @@ public class MessageSender {
         return createOkResponse();
     }
 
-
-
     public void setAdresseregister(AdresseregisterService adresseregister) {
         this.adresseregister = adresseregister;
     }
@@ -137,7 +140,6 @@ public class MessageSender {
     public void setEventLog(EventLog eventLog) {
         this.eventLog = eventLog;
     }
-
 
     public IntegrasjonspunktConfig getConfiguration() {
         return configuration;
@@ -155,6 +157,10 @@ public class MessageSender {
         this.keyInfo = keyInfo;
     }
 
+    public void setTransportFactory(TransportFactory transportFactory) {
+        this.transportFactory = transportFactory;
+    }
+
     private Event createOkStateEvent(PutMessageRequestType anyOject) {
         XStream xs = new XStream();
         Event event = new Event();
@@ -163,6 +169,14 @@ public class MessageSender {
         event.setMessage(xs.toXML(anyOject));
         event.setProcessStates(ProcessState.SBD_SENT);
         return event;
+    }
+
+    public void setStandardBusinessDocumentFactory(StandardBusinessDocumentFactory standardBusinessDocumentFactory) {
+        this.standardBusinessDocumentFactory = standardBusinessDocumentFactory;
+    }
+
+    public StandardBusinessDocumentFactory getStandardBusinessDocumentFactory() {
+        return standardBusinessDocumentFactory;
     }
 
     class AddressTypeWrapper {

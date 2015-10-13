@@ -16,24 +16,26 @@ import java.io.IOException;
 
 public class Dokumentpakker {
 
+    private final SignatureHelper signatureHelper;
     private CmsUtil encryptPayload;
     private CreateSBD createSBD;
     private CreateAsice createAsice;
 
-    public Dokumentpakker() {
+    public Dokumentpakker(SignatureHelper signatureHelper) {
         createSBD = new CreateSBD();
         encryptPayload = new CmsUtil();
         createAsice = new CreateAsice();
+        this.signatureHelper = signatureHelper;
     }
 
-    public byte[] pakkTilByteArray(ByteArrayFile document, SignatureHelper helper, Avsender avsender, Mottaker mottaker, String id, String type) throws IOException {
-        StandardBusinessDocument doc = pakk(document, helper, avsender, mottaker, id, type);
+    public byte[] pakkTilByteArray(ByteArrayFile document, Avsender avsender, Mottaker mottaker, String id, String type) throws IOException {
+        StandardBusinessDocument doc = pakk(document, avsender, mottaker, id, type);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         MarshalSBD.marshal(doc, os);
         return os.toByteArray();
     }
 
-    public StandardBusinessDocument pakk(ByteArrayFile document, SignatureHelper signatureHelper, Avsender avsender, Mottaker mottaker, String id, String type) throws IOException {
+    public StandardBusinessDocument pakk(ByteArrayFile document, Avsender avsender, Mottaker mottaker, String id, String type) throws IOException {
         byte[] bytes = createAsice.createAsice(document, signatureHelper, avsender, mottaker).getBytes();
         Payload payload = new Payload(encryptPayload.createCMS(bytes
                 , mottaker.getSertifikat()));

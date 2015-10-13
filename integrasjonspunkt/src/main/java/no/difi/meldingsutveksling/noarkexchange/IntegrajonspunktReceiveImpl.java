@@ -183,7 +183,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
     }
 
     private void forberedKvittering(StandardBusinessDocument receiveResponse, String kvitteringsType) {
-        Dokumentpakker dokumentpakker = new Dokumentpakker();
+        Dokumentpakker dokumentpakker = new Dokumentpakker(new IntegrasjonspunktNokkel().getSignatureHelper());
         List<Partner> partnerList = receiveResponse.getStandardBusinessDocumentHeader().getSender();
         List<Partner> recieverList = receiveResponse.getStandardBusinessDocumentHeader().getReceiver();
         String sendTo = partnerList.get(0).getIdentifier().getValue().split(":")[1];
@@ -200,7 +200,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo), (X509Certificate) certificate);
         try {
             ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering(kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
-            byte[] resultSbd = dokumentpakker.pakkTilByteArray(byteArray, new IntegrasjonspunktNokkel().getSignatureHelper(), avsender, mottaker, instanceIdentifier, KVITTERING);
+            byte[] resultSbd = dokumentpakker.pakkTilByteArray(byteArray, avsender, mottaker, instanceIdentifier, KVITTERING);
             File file = new File(WRITE_TO);
             FileUtils.writeByteArrayToFile(file, resultSbd);
         } catch (IOException e) {

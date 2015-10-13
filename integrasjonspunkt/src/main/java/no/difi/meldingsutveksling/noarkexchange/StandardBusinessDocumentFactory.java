@@ -1,7 +1,11 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import no.difi.asic.SignatureHelper;
-import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
+import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Archive;
+import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
+import no.difi.meldingsutveksling.dokumentpakking.service.CreateAsice;
+import no.difi.meldingsutveksling.dokumentpakking.service.CreateSBD;
+import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.BestEduMessage;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
@@ -10,6 +14,8 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -22,13 +28,40 @@ import java.util.UUID;
 /**
  * Factory class for StandardBusinessDocument instances
  */
+@Component
 public class StandardBusinessDocumentFactory {
 
-    static StandardBusinessDocument create(PutMessageRequestType sender, SignatureHelper signatureHelper, Avsender avsender, Mottaker mottaker) throws IOException {
-        return create(sender, UUID.randomUUID().toString(), signatureHelper, avsender, mottaker);
+    @Autowired
+    private final IntegrasjonspunktNokkel integrasjonspunktNokkel;
+
+    public StandardBusinessDocumentFactory(IntegrasjonspunktNokkel integrasjonspunktNokkel) {
+        this.integrasjonspunktNokkel = integrasjonspunktNokkel;
     }
 
-    static StandardBusinessDocument create(PutMessageRequestType sender, String id, SignatureHelper signatureHelper, Avsender avsender, Mottaker mottaker) throws IOException {
+    public StandardBusinessDocument create(PutMessageRequestType sender, Avsender avsender, Mottaker mottaker) throws IOException {
+        return create(sender, UUID.randomUUID().toString(), avsender, mottaker);
+    }
+
+    public StandardBusinessDocument create(PutMessageRequestType shipment, String id, Avsender avsender, Mottaker mottaker) throws IOException {
+        final byte[] marshalledShipment = marshall(shipment);
+
+        BestEduMessage bestEduMessage = new BestEduMessage(marshalledShipment);
+        Archive archive = createAsicePackage(avsender, mottaker, bestEduMessage);
+        Payload payload = new Payload(encryptArchive(mottaker, archive));
+
+        return new CreateSBD().createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload, id, "melding");
+    }
+
+    private byte[] encryptArchive(Mottaker mottaker, Archive archive) {
+        return new CmsUtil().createCMS(archive.getBytes()
+                , mottaker.getSertifikat());
+    }
+
+    private Archive createAsicePackage(Avsender avsender, Mottaker mottaker, BestEduMessage bestEduMessage) throws IOException {
+        return new CreateAsice().createAsice(bestEduMessage, integrasjonspunktNokkel.getSignatureHelper(), avsender, mottaker);
+    }
+
+    private byte[] marshall(PutMessageRequestType sender) {
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
@@ -38,7 +71,7 @@ public class StandardBusinessDocumentFactory {
         } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
-        return new Dokumentpakker().pakk(new BestEduMessage(os.toByteArray()), signatureHelper, avsender, mottaker, UUID.randomUUID().toString(), "melding");
+        return os.toByteArray();
     }
 
     /**
