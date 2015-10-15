@@ -8,7 +8,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>noarkexchange</artifactId>
+    <artifactId>noarkexchange-ephorte</artifactId>
     <build>
         <plugins>
             <plugin>
@@ -17,33 +17,14 @@
 
                 <executions>
                     <execution>
-                        <id>integrasjonspunkt-exec</id>
+                        <id>ephorte-exec</id>
                         <goals>
                             <goal>wsimport</goal>
                         </goals>
                         <configuration>
-                            <packageName>no.difi.meldingsutveksling.noarkexchange.schema</packageName>
+                            <packageName>no.difi.meldingsutveksling.noarkexchange.ephorte.schema</packageName>
                             <wsdlFiles>
-                                <wsdlFile>${basedir}/src/wsdl/noarkExchange.wsdl</wsdlFile>
-                            </wsdlFiles>
-                            <vmArgs>
-                                <vmArg>-Djavax.xml.accessExternalDTD=all</vmArg>
-                                <vmArg>-Djavax.xml.accessExternalSchema=all</vmArg>
-                            </vmArgs>
-                            <verbose>true</verbose>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>integrasjonspunktReceive-exec</id>
-                        <goals>
-                            <goal>wsimport</goal>
-                        </goals>
-                        <configuration>
-                            <genJWS>true</genJWS>
-                            <packageName>no.difi.meldingsutveksling.noarkexchange.schema.receive</packageName>
-                            <wsdlFiles>
-                                <wsdlFile>${basedir}/src/wsdl/IntegrasjonspunktReceive.wsdl
-                                </wsdlFile>
+                                <wsdlFile>${basedir}/src/wsdl/ephorte.wsdl</wsdlFile>
                             </wsdlFiles>
                             <vmArgs>
                                 <vmArg>-Djavax.xml.accessExternalDTD=all</vmArg>
