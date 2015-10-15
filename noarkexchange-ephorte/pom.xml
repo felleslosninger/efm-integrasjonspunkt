@@ -8,16 +8,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>noarkexchange-p360</artifactId>
-
-    <dependencies>
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>noarkexchange</artifactId>
-            <version>${parent.version}</version>
-        </dependency>
-    </dependencies>
-
+    <artifactId>noarkexchange-ephorte</artifactId>
     <build>
         <plugins>
             <plugin>
@@ -26,14 +17,14 @@
 
                 <executions>
                     <execution>
-                        <id>p360-exec</id>
+                        <id>ephorte-exec</id>
                         <goals>
                             <goal>wsimport</goal>
                         </goals>
                         <configuration>
-                            <packageName>no.difi.meldingsutveksling.noarkexchange.p360.schema</packageName>
+                            <packageName>no.difi.meldingsutveksling.noarkexchange.ephorte.schema</packageName>
                             <wsdlFiles>
-                                <wsdlFile>${basedir}/src/wsdl/eduImportService.wsdl</wsdlFile>
+                                <wsdlFile>${basedir}/src/wsdl/ephorte.wsdl</wsdlFile>
                             </wsdlFiles>
                             <vmArgs>
                                 <vmArg>-Djavax.xml.accessExternalDTD=all</vmArg>
@@ -43,6 +34,7 @@
                         </configuration>
                     </execution>
                 </executions>
+
             </plugin>
         </plugins>
     </build>

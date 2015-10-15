@@ -67,6 +67,20 @@
                         <target>1.7</target>
                     </configuration>
                 </plugin>
+
+                <plugin>
+                    <groupId>org.jvnet.jax-ws-commons</groupId>
+                    <artifactId>jaxws-maven-plugin</artifactId>
+                    <version>2.3</version>
+
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.sun.xml.ws</groupId>
+                            <artifactId>jaxws-tools</artifactId>
+                            <version>2.2.8</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
