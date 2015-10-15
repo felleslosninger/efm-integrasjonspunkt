@@ -14,7 +14,6 @@
             <plugin>
                 <groupId>org.jvnet.jax-ws-commons</groupId>
                 <artifactId>jaxws-maven-plugin</artifactId>
-                <version>2.3</version>
 
                 <executions>
                     <execution>
@@ -35,14 +34,6 @@
                         </configuration>
                     </execution>
                 </executions>
-
-                <dependencies>
-                    <dependency>
-                        <groupId>com.sun.xml.ws</groupId>
-                        <artifactId>jaxws-tools</artifactId>
-                        <version>2.2.8</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>
