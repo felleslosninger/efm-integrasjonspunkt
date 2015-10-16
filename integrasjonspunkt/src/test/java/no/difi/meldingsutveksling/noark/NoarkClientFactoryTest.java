@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.noark;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
 import no.difi.meldingsutveksling.noarkexchange.EphorteClient;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClientSettings;
 import no.difi.meldingsutveksling.noarkexchange.P360Client;
 import org.junit.Test;
 
@@ -16,8 +17,9 @@ public class NoarkClientFactoryTest {
     public void config_specifies_p360_creates_p360_client() throws Exception {
         IntegrasjonspunktConfig config = mock(IntegrasjonspunktConfig.class);
         when(config.getNoarkType()).thenReturn("P360");
+        NoarkClientSettings settings = mock(NoarkClientSettings.class);
 
-        NoarkClient client = new NoarkClientFactory().from(config);
+        NoarkClient client = new NoarkClientFactory(settings).from(config);
 
         assertEquals(P360Client.class, client.getClass());
     }
@@ -26,8 +28,9 @@ public class NoarkClientFactoryTest {
     public void config_specifies_ephorte_create_ephorte_client() {
         IntegrasjonspunktConfig config = mock(IntegrasjonspunktConfig.class);
         when(config.getNoarkType()).thenReturn("ePhorte");
+        NoarkClientSettings settings = mock(NoarkClientSettings.class);
 
-        NoarkClient client = new NoarkClientFactory().from(config);
+        NoarkClient client = new NoarkClientFactory(settings).from(config);
 
         assertEquals(EphorteClient.class, client.getClass());
     }
@@ -36,14 +39,16 @@ public class NoarkClientFactoryTest {
     public void config_specifies_unknownarchive_throws_exception() {
         IntegrasjonspunktConfig config = mock(IntegrasjonspunktConfig.class);
         when(config.getNoarkType()).thenReturn("UNKNOWNARCHIVESYSTEM");
+        NoarkClientSettings settings = mock(NoarkClientSettings.class);
 
-        new NoarkClientFactory().from(config);
+        new NoarkClientFactory(settings).from(config);
     }
 
     @Test(expected = MissingConfigurationException.class)
     public void config_missing_throws_exception() {
         IntegrasjonspunktConfig config = mock(IntegrasjonspunktConfig.class);
+        NoarkClientSettings settings = mock(NoarkClientSettings.class);
 
-        new NoarkClientFactory().from(config);
+        new NoarkClientFactory(settings).from(config);
     }
 }
