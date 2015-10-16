@@ -109,7 +109,6 @@ public class IntegrasjonspunktConfig {
         return config.getString(KEY_KEYSTORE_LOCATION);
     }
 
-    public String get
 
     public String getPrivateKeyPassword() {
         return config.getString(KEY_PRIVATEKEYPASSWORD);

@@ -14,7 +14,7 @@ import org.apache.http.auth.AuthState;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.NTCredentials;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.auth.NTLMScheme;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.protocol.HTTP;
@@ -32,16 +32,16 @@ import javax.xml.ws.BindingProvider;
 import java.io.IOException;
 
 /**
- *
  * @author Glenn Bech
  */
 @Component
-public class NoarkClient {
+public class NoarkClientOld {
 
     @Autowired
     EventLog eventLog;
 
-    IntegrasjonspunktConfig.NoarkClientSettings settings;
+    @Autowired
+    IntegrasjonspunktConfig config;
 
     public PutMessageResponseType sendEduMelding(PutMessageRequestType eduMesage) {
         if (eventLog == null) {
@@ -52,6 +52,7 @@ public class NoarkClient {
             eventLog.log(Event.errorEvent("", "", ProcessState.MESSAGE_SEND_FAIL, "invalid envelope", new XStream().toXML(eduMesage)));
             throw new IllegalStateException("invalid envelope");
         }
+
         WebServiceTemplate webServiceTemplate = new WebServiceTemplate();
         Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
         marshaller.setContextPath("no.difi.meldingsutveksling.noarkexchange.p360.schema");
@@ -59,45 +60,48 @@ public class NoarkClient {
         webServiceTemplate.setUnmarshaller(marshaller);
         ModelMapper mapper = new ModelMapper();
 
-        no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType p360Message =
+        no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType p360request =
                 new no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType();
 
-        mapper.map(eduMesage, p360Message);
+        mapper.map(eduMesage, p360request);
         JAXBElement<no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType> request
-                = new no.difi.meldingsutveksling.noarkexchange.p360.schema.ObjectFactory().createPutMessageRequest(p360Message);
+                = new no.difi.meldingsutveksling.noarkexchange.p360.schema.ObjectFactory().createPutMessageRequest(p360request);
 
-        HttpComponentsMessageSender httpComponentsMessageSender = new HttpComponentsMessageSender();
-        HttpClient httpClient = HttpClientBuilder.create()
-                .addInterceptorFirst(new PreemtiveNTLMRequestInterceptor()).build();
-        httpComponentsMessageSender.setHttpClient(httpClient);
-        webServiceTemplate.setMessageSender(httpComponentsMessageSender);
+        if (isAuthenticationEnabled() && isNTLMAuthentication()) {
+            HttpComponentsMessageSender httpComponentsMessageSender = new HttpComponentsMessageSender();
+            HttpClient httpClient = HttpClientBuilder.create()
+                    .addInterceptorFirst(new PreemtiveNTLMRequestInterceptor()).build();
+            httpComponentsMessageSender.setHttpClient(httpClient);
+            webServiceTemplate.setMessageSender(httpComponentsMessageSender);
+        }
 
         JAXBElement<no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageResponseType> response
-                = (JAXBElement) webServiceTemplate.marshalSendAndReceive(settings.getEndpointUrl(), request,
+                = (JAXBElement) webServiceTemplate.marshalSendAndReceive(config.getLocalNoarkClientSettings().getEndpointUrl(), request,
                 new SoapActionCallback("http://www.arkivverket.no/Noark/Exchange/IEDUImport/PutMessage"));
 
-        PutMessageResponseType thrResponse = new PutMessageResponseType();
-        mapper.map(response.getValue(), thrResponse);
+        PutMessageResponseType theResponse = new PutMessageResponseType();
+        mapper.map(response.getValue(), theResponse);
 
-        return thrResponse;
+        return theResponse;
+    }
+
+    private boolean isNTLMAuthentication() {
+        IntegrasjonspunktConfig.NoarkClientSettings localNoarkClientSettings = config.getLocalNoarkClientSettings();
+        return localNoarkClientSettings.getDomain() != null && !localNoarkClientSettings.getDomain().isEmpty();
+    }
+
+    private boolean isAuthenticationEnabled() {
+        IntegrasjonspunktConfig.NoarkClientSettings localNoarkClientSettings = config.getLocalNoarkClientSettings();
+        return localNoarkClientSettings.getUserName() != null && !localNoarkClientSettings.getUserName().isEmpty();
     }
 
     private SOAPport getSoapPport() {
         NoarkExchange exchange = new NoarkExchange();
         SOAPport port = exchange.getNoarkExchangePort();
         BindingProvider bp = (BindingProvider) port;
-        String endPointURL = settings.getEndpointUrl();
+        String endPointURL = config.getLocalNoarkClientSettings().getEndpointUrl();
         bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endPointURL);
         return port;
-    }
-
-
-    public IntegrasjonspunktConfig.NoarkClientSettings getSettings() {
-        return settings;
-    }
-
-    public void setSettings(IntegrasjonspunktConfig.NoarkClientSettings settings) {
-        this.settings = settings;
     }
 
     public EventLog getEventLog() {
@@ -117,7 +121,6 @@ public class NoarkClient {
         return responseType.isResult();
     }
 
-
     private class PreemtiveNTLMRequestInterceptor implements HttpRequestInterceptor {
         @Override
         public void process(HttpRequest httpRequest, HttpContext httpContext) throws HttpException, IOException {
@@ -125,41 +128,13 @@ public class NoarkClient {
                 httpRequest.removeHeaders(HTTP.CONTENT_LEN);
             }
 
-            AuthState authState = (AuthState) httpContext.getAttribute(ClientContext.TARGET_AUTH_STATE);
+            IntegrasjonspunktConfig.NoarkClientSettings settings = config.getLocalNoarkClientSettings();
+            AuthState authState = (AuthState) httpContext.getAttribute(HttpClientContext.TARGET_AUTH_STATE);
             if (authState.getAuthScheme() == null) {
                 AuthScheme ntlmScheme = new NTLMScheme();
-                Credentials creds = new NTCredentials("svc_sakark", settings.getPassword(), null, "difi");
+                Credentials creds = new NTCredentials(settings.getUserName(), settings.getPassword(), null, settings.getDomain());
                 authState.update(ntlmScheme, creds);
             }
         }
-    }
-
-    public static void main(String[] args) {
-
-        NoarkClient client = new NoarkClient();
-        EventLog consoleEventLog = new EventLog() {
-            @Override
-            public void log(Event event) {
-                System.out.println(event);
-            }
-        };
-        client.setEventLog(consoleEventLog);
-        client.setSettings(new IntegrasjonspunktConfig.NoarkClientSettings("http://localhost:4444/SI.WS.Core/Integration/EDUImport.svc/EDUImportService", "difi\\\\svc_sakark", "L3!k4ng3R"));
-
-        PutMessageRequestType eduMesage = new PutMessageRequestType();
-
-        EnvelopeType envelopeType = new EnvelopeType();
-        AddressType from= new AddressType();
-        from.setOrgnr("910075918");
-
-        AddressType to = new AddressType();
-        to.setOrgnr("910077473");
-
-        envelopeType.setSender(from);
-        envelopeType.setReceiver(to);
-        eduMesage.setEnvelope(envelopeType);
-
-        AppReceiptType result = client.sendEduMelding(eduMesage).getResult();
-        System.out.println(result.getType());
     }
 }
