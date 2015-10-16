@@ -32,20 +32,18 @@ public class NoarkClientFactoryTest {
         assertEquals(EphorteClient.class, client.getClass());
     }
 
-    @Test(expected = UnkownArchiveSystemException.class)
+    @Test(expected = UnknownArchiveSystemException.class)
     public void config_specifies_unknownarchive_throws_exception() {
         IntegrasjonspunktConfig config = mock(IntegrasjonspunktConfig.class);
         when(config.getNoarkType()).thenReturn("UNKNOWNARCHIVESYSTEM");
 
-        NoarkClient client = new NoarkClientFactory().from(config);
+        new NoarkClientFactory().from(config);
     }
 
     @Test(expected = MissingConfigurationException.class)
     public void config_missing_throws_exception() {
         IntegrasjonspunktConfig config = mock(IntegrasjonspunktConfig.class);
 
-        NoarkClient client = new NoarkClientFactory().from(config);
-
-
+        new NoarkClientFactory().from(config);
     }
 }

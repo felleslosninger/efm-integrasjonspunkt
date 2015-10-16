@@ -15,7 +15,7 @@ public class NoarkClientFactory {
     private static final String E_PHORTE = "ePhorte";
     private static final String P360 = "P360";
 
-    public NoarkClient from(IntegrasjonspunktConfig config) throws UnkownArchiveSystemException {
+    public NoarkClient from(IntegrasjonspunktConfig config) throws UnknownArchiveSystemException {
         String noarkType = config.getNoarkType();
         if(noarkType == null) {
             String message = "You need to configure what type of archive system you are using. Valid ones are %s, %s";
@@ -26,7 +26,7 @@ public class NoarkClientFactory {
         } else if(P360.equals(noarkType)) {
             return new P360Client();
         } else {
-            throw new UnkownArchiveSystemException(noarkType);
+            throw new UnknownArchiveSystemException(noarkType);
         }
     }
 }
