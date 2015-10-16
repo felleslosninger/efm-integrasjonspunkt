@@ -7,7 +7,6 @@ import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import javax.xml.ws.BindingProvider;
 
@@ -17,7 +16,7 @@ import javax.xml.ws.BindingProvider;
  *
  * @author Glenn Bech
  */
-public class NoarkClient {
+public class NoarkClientOld {
 
     @Autowired
     EventLog eventLog;

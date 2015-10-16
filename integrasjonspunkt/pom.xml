@@ -190,6 +190,18 @@
 
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>noarkexchange-ephorte</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>noarkexchange-p360</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>transport</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>

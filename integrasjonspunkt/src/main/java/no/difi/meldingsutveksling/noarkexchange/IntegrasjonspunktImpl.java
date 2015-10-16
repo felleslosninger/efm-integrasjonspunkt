@@ -4,7 +4,7 @@ import com.thoughtworks.xstream.XStream;
 import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.noark.NoarkClient;
+import no.difi.meldingsutveksling.noark.NoarkClientOld;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageContext;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategy;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategyFactory;
@@ -46,7 +46,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
     private EventLog eventLog;
 
     @Autowired
-    private NoarkClient mshClient;
+    private NoarkClientOld mshClient;
 
     @Override
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
@@ -115,11 +115,11 @@ public class IntegrasjonspunktImpl implements SOAPport {
         this.eventLog = eventLog;
     }
 
-    public void setMshClient(NoarkClient mshClient) {
+    public void setMshClient(NoarkClientOld mshClient) {
         this.mshClient = mshClient;
     }
 
-    public NoarkClient getMshClient() {
+    public NoarkClientOld getMshClient() {
         return mshClient;
     }
 }

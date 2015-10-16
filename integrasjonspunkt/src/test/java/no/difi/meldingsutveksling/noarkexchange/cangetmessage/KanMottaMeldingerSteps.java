@@ -7,7 +7,7 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import no.difi.meldingsutveksling.adresseregister.client.CertificateNotFoundException;
 import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.noark.NoarkClient;
+import no.difi.meldingsutveksling.noark.NoarkClientOld;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
@@ -25,7 +25,7 @@ public class KanMottaMeldingerSteps {
     private AdresseregisterService adresseRegister;
     private GetCanReceiveMessageResponseType responseType;
     private MessageSender messageSender;
-    private NoarkClient mshClient;
+    private NoarkClientOld mshClient;
 
     private String message = "&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;\n" +
             "                &lt;Melding xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"\n" +
@@ -109,7 +109,7 @@ public class KanMottaMeldingerSteps {
     public void setup() {
         integrasjonspunkt = new IntegrasjonspunktImpl();
         adresseRegister = mock(AdresseregisterService.class);
-        mshClient = mock(NoarkClient.class);
+        mshClient = mock(NoarkClientOld.class);
         messageSender = mock(MessageSender.class);
         integrasjonspunkt.setMessageSender(messageSender);
         integrasjonspunkt.setEventLog(mock(EventLog.class));
