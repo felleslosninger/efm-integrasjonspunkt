@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.config;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClientSettings;
 import org.apache.commons.configuration.*;
 import org.springframework.stereotype.Component;
 
@@ -138,27 +139,4 @@ public class IntegrasjonspunktConfig {
         return config.getString(NOARKSYSTEM_TYPE);
     }
 
-    public static class NoarkClientSettings {
-        private final String endpointUrl;
-        private final String userName;
-        private final String password;
-
-        public NoarkClientSettings(String endpointUrl, String userName, String password) {
-            this.endpointUrl = endpointUrl;
-            this.userName = userName;
-            this.password = password;
-        }
-
-        public String getEndpointUrl() {
-            return endpointUrl;
-        }
-
-        public String getUserName() {
-            return userName;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-    }
 }
