@@ -1,10 +1,10 @@
 package no.difi.meldingsutveksling.noark;
 
 import com.thoughtworks.xstream.XStream;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
 import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClientSettings;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -21,7 +21,7 @@ public class NoarkClientOld {
     @Autowired
     EventLog eventLog;
 
-    IntegrasjonspunktConfig.NoarkClientSettings settings;
+    NoarkClientSettings settings;
 
     public PutMessageResponseType sendEduMelding(PutMessageRequestType eduMesage) {
         if (eventLog == null) {
@@ -47,11 +47,11 @@ public class NoarkClientOld {
     }
 
 
-    public IntegrasjonspunktConfig.NoarkClientSettings getSettings() {
+    public NoarkClientSettings getSettings() {
         return settings;
     }
 
-    public void setSettings(IntegrasjonspunktConfig.NoarkClientSettings settings) {
+    public void setSettings(NoarkClientSettings settings) {
         this.settings = settings;
     }
 
