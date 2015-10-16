@@ -42,6 +42,7 @@ public class IntegrasjonspunktConfig {
     static final String KEY_KEYSTORE_LOCATION = "keystorelocation";
     static final String KEY_PRIVATEKEYPASSWORD = "privatekeypassword";
     private static final String KEY_ORGANISATION_NUMBER = "orgnumber";
+    public static final String NOARKSYSTEM_TYPE = "noarksystem.type";
 
     private final CompositeConfiguration config;
 
@@ -131,6 +132,10 @@ public class IntegrasjonspunktConfig {
 
     public NoarkClientSettings getMshNoarkClientSettings() {
         return new NoarkClientSettings(getMshEndpointUrl(), getKeyMshUsername(), getKeyMshPassword());
+    }
+
+    public String getNoarkType() {
+        return config.getString(NOARKSYSTEM_TYPE);
     }
 
     public static class NoarkClientSettings {
