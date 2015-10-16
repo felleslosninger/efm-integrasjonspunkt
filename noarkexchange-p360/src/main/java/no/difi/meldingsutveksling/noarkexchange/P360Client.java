@@ -6,13 +6,12 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 public class P360Client implements NoarkClient {
     private NoarkClientSettings settings;
 
-    @Override
-    public PutMessageResponseType putMessage(PutMessageRequestType request) {
-        return null;
+    public P360Client(NoarkClientSettings settings) {
+        this.settings = settings;
     }
 
     @Override
-    public void setSettings(NoarkClientSettings noarkClientSettings) {
-        this.settings = noarkClientSettings;
+    public PutMessageResponseType putMessage(PutMessageRequestType request) {
+        return null;
     }
 }

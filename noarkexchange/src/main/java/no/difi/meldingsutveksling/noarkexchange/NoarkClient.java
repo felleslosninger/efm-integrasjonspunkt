@@ -5,6 +5,4 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 
 public interface NoarkClient {
     public PutMessageResponseType putMessage(PutMessageRequestType request);
-
-    void setSettings(NoarkClientSettings noarkClientSettings);
 }

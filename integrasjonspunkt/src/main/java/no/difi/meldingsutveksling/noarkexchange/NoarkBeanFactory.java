@@ -13,15 +13,15 @@ public class NoarkBeanFactory {
 
     @Bean(name="localNoark")
     public NoarkClient localNoark() {
-        NoarkClient client = new NoarkClientFactory().from(integrasjonspunktConfig);
-        client.setSettings(integrasjonspunktConfig.getLocalNoarkClientSettings());
+        NoarkClientSettings clientSettings = integrasjonspunktConfig.getLocalNoarkClientSettings();
+        NoarkClient client = new NoarkClientFactory(clientSettings).from(integrasjonspunktConfig);
         return client;
     }
 
     @Bean(name="mshClient")
     public NoarkClient mshClient() {
-        NoarkClient client = new NoarkClientFactory().from(integrasjonspunktConfig);
-        client.setSettings(integrasjonspunktConfig.getMshNoarkClientSettings());
+        NoarkClientSettings clientSettings = integrasjonspunktConfig.getMshNoarkClientSettings();
+        NoarkClient client = new NoarkClientFactory(clientSettings).from(integrasjonspunktConfig);
         return client;
     }
 
