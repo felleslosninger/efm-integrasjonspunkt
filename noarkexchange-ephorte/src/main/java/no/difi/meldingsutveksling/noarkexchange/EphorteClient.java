@@ -9,7 +9,6 @@ import javax.xml.ws.BindingProvider;
 import java.util.Map;
 
 public class EphorteClient implements NoarkClient {
-    private NoarkClientSettings settings;
     private final NoarkExchange noarkExchange;
 
     public EphorteClient(NoarkClientSettings settings) {
@@ -17,9 +16,9 @@ public class EphorteClient implements NoarkClient {
         NoarkExchangeBinding binding = noarkExchange.getNoarkExchangeBinding();
         BindingProvider bindingProvider = (BindingProvider) binding;
         Map<String, Object> requestContext = bindingProvider.getRequestContext();
-        requestContext.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, this.settings.getEndpointUrl());
-        requestContext.put(BindingProvider.USERNAME_PROPERTY, this.settings.getUserName());
-        requestContext.put(BindingProvider.PASSWORD_PROPERTY, this.settings.getPassword());
+        requestContext.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, settings.getEndpointUrl());
+        requestContext.put(BindingProvider.USERNAME_PROPERTY, settings.getUserName());
+        requestContext.put(BindingProvider.PASSWORD_PROPERTY, settings.getPassword());
     }
 
     @Override
