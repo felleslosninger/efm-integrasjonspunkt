@@ -1,7 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageRequestType;
-import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 
@@ -13,12 +11,12 @@ public class P360Client implements NoarkClient {
     }
 
     @Override
-    public GetCanReceiveMessageResponseType canRecieveMessage(GetCanReceiveMessageRequestType request) {
-        return null;
+    public boolean canRecieveMessage(String orgnr) {
+        return false;
     }
 
     @Override
-    public PutMessageResponseType putMessage(PutMessageRequestType request) {
+    public PutMessageResponseType sendEduMelding(PutMessageRequestType request) {
         return null;
     }
 }

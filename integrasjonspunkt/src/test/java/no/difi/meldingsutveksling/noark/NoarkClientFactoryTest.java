@@ -17,7 +17,7 @@ public class NoarkClientFactoryTest {
     public void config_specifies_p360_creates_p360_client() throws Exception {
         IntegrasjonspunktConfig config = mock(IntegrasjonspunktConfig.class);
         when(config.getNoarkType()).thenReturn("P360");
-        NoarkClientSettings settings = mock(NoarkClientSettings.class);
+        NoarkClientSettings settings = new NoarkClientSettings("http://localhost", "username", "password");
 
         NoarkClient client = new NoarkClientFactory(settings).from(config);
 
@@ -28,7 +28,7 @@ public class NoarkClientFactoryTest {
     public void config_specifies_ephorte_create_ephorte_client() {
         IntegrasjonspunktConfig config = mock(IntegrasjonspunktConfig.class);
         when(config.getNoarkType()).thenReturn("ePhorte");
-        NoarkClientSettings settings = mock(NoarkClientSettings.class);
+        NoarkClientSettings settings = new NoarkClientSettings("http://localhost", "username", "password");
 
         NoarkClient client = new NoarkClientFactory(settings).from(config);
 
@@ -39,7 +39,7 @@ public class NoarkClientFactoryTest {
     public void config_specifies_unknownarchive_throws_exception() {
         IntegrasjonspunktConfig config = mock(IntegrasjonspunktConfig.class);
         when(config.getNoarkType()).thenReturn("UNKNOWNARCHIVESYSTEM");
-        NoarkClientSettings settings = mock(NoarkClientSettings.class);
+        NoarkClientSettings settings = new NoarkClientSettings("http://localhost", "username", "password");
 
         new NoarkClientFactory(settings).from(config);
     }
@@ -47,7 +47,7 @@ public class NoarkClientFactoryTest {
     @Test(expected = MissingConfigurationException.class)
     public void config_missing_throws_exception() {
         IntegrasjonspunktConfig config = mock(IntegrasjonspunktConfig.class);
-        NoarkClientSettings settings = mock(NoarkClientSettings.class);
+        NoarkClientSettings settings = new NoarkClientSettings("http://localhost", "username", "password");
 
         new NoarkClientFactory(settings).from(config);
     }

@@ -2,8 +2,6 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.noarkexchange.ephorte.schema.NoarkExchange;
 import no.difi.meldingsutveksling.noarkexchange.ephorte.schema.NoarkExchangeBinding;
-import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageRequestType;
-import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 
@@ -24,12 +22,12 @@ public class EphorteClient implements NoarkClient {
     }
 
     @Override
-    public GetCanReceiveMessageResponseType canRecieveMessage(GetCanReceiveMessageRequestType request) {
-        return null;
+    public boolean canRecieveMessage(String orgnr) {
+        return false;
     }
 
     @Override
-    public PutMessageResponseType putMessage(PutMessageRequestType request) {
-        return new PutMessageResponseType();
+    public PutMessageResponseType sendEduMelding(PutMessageRequestType request) {
+        return null;
     }
 }
