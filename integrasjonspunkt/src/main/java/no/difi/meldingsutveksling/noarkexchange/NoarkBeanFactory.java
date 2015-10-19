@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class NoarkBeanFactory {
+
     @Autowired
     IntegrasjonspunktConfig integrasjonspunktConfig;
 
