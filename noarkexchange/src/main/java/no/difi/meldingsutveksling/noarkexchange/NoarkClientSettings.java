@@ -36,4 +36,20 @@ public class NoarkClientSettings {
     public String getDomain() {
         return domain;
     }
+
+    public WebServiceTemplateFactory createTemplateFactory() {
+        if(hasDomain() && hasUsername()){
+            return new NtlmTemplateFactory(this);
+        } else {
+            return new DefaultTemplateFactory();
+        }
+    }
+
+    private boolean hasDomain() {
+        return domain != null && !domain.isEmpty();
+    }
+
+    private boolean hasUsername() {
+        return userName != null && !userName.isEmpty();
+    }
 }
