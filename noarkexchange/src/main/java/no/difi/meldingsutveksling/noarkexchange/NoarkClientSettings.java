@@ -1,14 +1,13 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 public class NoarkClientSettings {
-
     private final String endpointUrl;
     private final String userName;
     private final String password;
     private final String domain;
 
 
-    public NoarkClientSettings(String password, String userName, String endpointUrl) {
+    public NoarkClientSettings(String endpointUrl, String password, String userName) {
         this.password = password;
         this.userName = userName;
         this.endpointUrl = endpointUrl;
