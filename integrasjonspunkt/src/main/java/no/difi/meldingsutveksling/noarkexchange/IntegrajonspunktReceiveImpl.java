@@ -22,6 +22,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.receive.*;
 import no.difi.meldingsutveksling.oxalisexchange.ByteArrayImpl;
 import no.difi.meldingsutveksling.oxalisexchange.Kvittering;
 import no.difi.meldingsutveksling.oxalisexchange.OxalisMessageReceiverTemplate;
+import no.difi.meldingsutveksling.services.AdresseregisterService;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.apache.commons.io.FileUtils;
@@ -69,7 +70,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
     private NoarkClient localNoark;
 
     @Autowired
-    private AdresseRegisterClient adresseRegisterClient;
+    private AdresseregisterService adresseRegisterClient;
 
     @Autowired
     private IntegrasjonspunktConfig config;
@@ -95,7 +96,6 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         Organisasjonsnummer reciever = new Organisasjonsnummer(orgNumberReceiver);
 
         verifyCertificatesForSenderAndReceiver(orgNumberReceiver, orgNumberSender);
-
 
         logEvent(receiveResponse, ProcessState.SBD_RECIEVED);
 
@@ -199,7 +199,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo), (X509Certificate) certificate);
         try {
             ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering(kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
-            byte[] resultSbd = dokumentpakker.pakkTilByteArray(byteArray, new IntegrasjonspunktNokkel().getSignatureHelper(), avsender, mottaker, instanceIdentifier, KVITTERING);
+            byte[] resultSbd = dokumentpakker.pakkTilByteArray(byteArray, keyInfo.getSignatureHelper(), avsender, mottaker, instanceIdentifier, KVITTERING);
             File file = new File(WRITE_TO);
             FileUtils.writeByteArrayToFile(file, resultSbd);
         } catch (IOException e) {
@@ -227,7 +227,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         }
         while (null != zipEntry) {
             String fileName = zipEntry.getName();
-            if ("edu_best.xml".equals(fileName)) {
+            if ("edu_test.xml".equals(fileName)) {
 
                 newFile = new File(outputFolder + File.separator + fileName);
                 FileOutputStream fos = null;
@@ -284,14 +284,6 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
 
     public void setLocalNoark(NoarkClient localNoark) {
         this.localNoark = localNoark;
-    }
-
-    public AdresseRegisterClient getAdresseRegisterClient() {
-        return adresseRegisterClient;
-    }
-
-    public void setAdresseRegisterClient(AdresseRegisterClient adresseRegisterClient) {
-        this.adresseRegisterClient = adresseRegisterClient;
     }
 
     public IntegrasjonspunktConfig getConfig() {

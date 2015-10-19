@@ -25,5 +25,4 @@ public class NoarkBeanFactory {
         NoarkClient client = new NoarkClientFactory(clientSettings).from(integrasjonspunktConfig);
         return client;
     }
-
 }

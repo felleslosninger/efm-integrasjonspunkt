@@ -43,21 +43,17 @@ public class P360Client implements NoarkClient {
     @Override
     public PutMessageResponseType sendEduMelding(PutMessageRequestType request) {
 
-        WebServiceTemplate webServiceTemplate = WebServiceTemplateFactory.createWebServiceTemplate(settings);
+        WebServiceTemplate webServiceTemplate = new WebServiceTemplate();
         Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
         marshaller.setContextPath("no.difi.meldingsutveksling.noarkexchange.p360.schema");
         webServiceTemplate.setMarshaller(marshaller);
         webServiceTemplate.setUnmarshaller(marshaller);
-        //     ModelMapper mapper = new ModelMapper();
 
         no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType r =
                 new no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType();
 
         ModelMapper mapper = new ModelMapper();
         mapper.map(request, r);
-
-        JAXBElement<no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType> p360request
-                = new no.difi.meldingsutveksling.noarkexchange.p360.schema.ObjectFactory().createPutMessageRequest(r);
 
         if (isAuthenticationEnabled() && isNTLMAuthentication()) {
             HttpComponentsMessageSender httpComponentsMessageSender = new HttpComponentsMessageSender();
@@ -67,8 +63,11 @@ public class P360Client implements NoarkClient {
             webServiceTemplate.setMessageSender(httpComponentsMessageSender);
         }
 
+        JAXBElement<no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType> p360request
+                = new no.difi.meldingsutveksling.noarkexchange.p360.schema.ObjectFactory().createPutMessageRequest(r);
+
         JAXBElement<no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageResponseType> response
-                = (JAXBElement) webServiceTemplate.marshalSendAndReceive(settings.getEndpointUrl(), request,
+                = (JAXBElement) webServiceTemplate.marshalSendAndReceive(settings.getEndpointUrl(), p360request,
                 new SoapActionCallback(SOAP_ACTION));
 
         PutMessageResponseType theResponse = new PutMessageResponseType();
