@@ -7,9 +7,9 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import no.difi.meldingsutveksling.adresseregister.client.CertificateNotFoundException;
 import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.noark.NoarkClientOld;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
 import sun.security.x509.X509CertImpl;
@@ -25,7 +25,7 @@ public class KanMottaMeldingerSteps {
     private AdresseregisterService adresseRegister;
     private GetCanReceiveMessageResponseType responseType;
     private MessageSender messageSender;
-    private NoarkClientOld mshClient;
+    private NoarkClient mshClient;
 
     private String message = "&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;\n" +
             "                &lt;Melding xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"\n" +
@@ -109,7 +109,7 @@ public class KanMottaMeldingerSteps {
     public void setup() {
         integrasjonspunkt = new IntegrasjonspunktImpl();
         adresseRegister = mock(AdresseregisterService.class);
-        mshClient = mock(NoarkClientOld.class);
+        mshClient = mock(NoarkClient.class);
         messageSender = mock(MessageSender.class);
         integrasjonspunkt.setMessageSender(messageSender);
         integrasjonspunkt.setEventLog(mock(EventLog.class));
@@ -130,9 +130,9 @@ public class KanMottaMeldingerSteps {
     @And("^virksomhet (.+) i MSH sitt adresseregister$")
     public void virksomhet_finnes_i_MSH(String finnes) throws Throwable {
         if("finnes".equals(finnes)) {
-            when(mshClient.canGetRecieveMessage(any(String.class))).thenReturn(true);
+            when(mshClient.canRecieveMessage(any(String.class))).thenReturn(true);
         } else if("finnes ikke".equals(finnes)) {
-            when(mshClient.canGetRecieveMessage(any(String.class))).thenReturn(false);
+            when(mshClient.canRecieveMessage(any(String.class))).thenReturn(false);
         }
     }
 

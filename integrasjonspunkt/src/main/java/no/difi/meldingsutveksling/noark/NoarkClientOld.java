@@ -5,6 +5,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
 import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClientSettings;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
@@ -104,6 +105,18 @@ public class NoarkClientOld {
         return port;
     }
 
+<<<<<<< HEAD
+=======
+
+    public NoarkClientSettings getSettings() {
+        return settings;
+    }
+
+    public void setSettings(NoarkClientSettings settings) {
+        this.settings = settings;
+    }
+
+>>>>>>> 4b9b727a7fc4a33293f219b8679e80ed90b3a99e
     public EventLog getEventLog() {
         return eventLog;
     }

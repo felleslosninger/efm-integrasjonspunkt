@@ -15,7 +15,6 @@ import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.*;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.noark.NoarkClientOld;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
@@ -67,7 +66,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
     TransportFactory transportFactory;
 
     @Autowired
-    private NoarkClientOld localNoark;
+    private NoarkClient localNoark;
 
     @Autowired
     private AdresseRegisterClient adresseRegisterClient;
@@ -279,12 +278,12 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         this.transportFactory = transportFactory;
     }
 
-    public NoarkClientOld getNoarkClient() {
+    public NoarkClient getLocalNoark() {
         return localNoark;
     }
 
-    public void setNoarkClient(NoarkClientOld noarkClient) {
-        this.localNoark = noarkClient;
+    public void setLocalNoark(NoarkClient localNoark) {
+        this.localNoark = localNoark;
     }
 
     public AdresseRegisterClient getAdresseRegisterClient() {

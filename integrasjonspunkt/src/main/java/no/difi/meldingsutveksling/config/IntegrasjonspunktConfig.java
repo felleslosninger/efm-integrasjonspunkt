@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.config;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClientSettings;
 import org.apache.commons.configuration.*;
 import org.springframework.stereotype.Component;
 
@@ -43,6 +44,7 @@ public class IntegrasjonspunktConfig {
     static final String KEY_KEYSTORE_LOCATION = "keystorelocation";
     static final String KEY_PRIVATEKEYPASSWORD = "privatekeypassword";
     private static final String KEY_ORGANISATION_NUMBER = "orgnumber";
+    public static final String NOARKSYSTEM_TYPE = "noarksystem.type";
 
     private final CompositeConfiguration config;
 
@@ -118,6 +120,10 @@ public class IntegrasjonspunktConfig {
         return config.getString(KEY_PRIVATEKEYALIAS);
     }
 
+    public String getNoarkType() {
+        return config.getString(NOARKSYSTEM_TYPE);
+    }
+
     public Configuration getConfiguration() {
         return config;
     }
@@ -138,6 +144,7 @@ public class IntegrasjonspunktConfig {
     public NoarkClientSettings getMshNoarkClientSettings() {
         return new NoarkClientSettings(getNOARKSystemEndPointURL(), getNoarksystemUsername(), getKeyNoarksystemPassword(), getNoarksystemDomain());
     }
+
 
     public static class NoarkClientSettings {
         private final String endpointUrl;
@@ -167,5 +174,6 @@ public class IntegrasjonspunktConfig {
         public String getDomain() {
             return domain;
         }
+
     }
 }
