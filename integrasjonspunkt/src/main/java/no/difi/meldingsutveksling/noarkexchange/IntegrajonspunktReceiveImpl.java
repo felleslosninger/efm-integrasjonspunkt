@@ -183,7 +183,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
     }
 
     private void forberedKvittering(StandardBusinessDocument receiveResponse, String kvitteringsType) {
-        Dokumentpakker dokumentpakker = new Dokumentpakker(new IntegrasjonspunktNokkel().getSignatureHelper());
+        Dokumentpakker dokumentpakker = new Dokumentpakker(keyInfo.getSignatureHelper());
         List<Partner> partnerList = receiveResponse.getStandardBusinessDocumentHeader().getSender();
         List<Partner> recieverList = receiveResponse.getStandardBusinessDocumentHeader().getReceiver();
         String sendTo = partnerList.get(0).getIdentifier().getValue().split(":")[1];
