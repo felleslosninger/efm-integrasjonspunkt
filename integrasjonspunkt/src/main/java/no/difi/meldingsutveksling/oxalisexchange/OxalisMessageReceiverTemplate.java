@@ -40,6 +40,9 @@ public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
     private EventLog eventLog = EventLog.create();
 
     @Autowired
+    private IntegrasjonspunktNokkel integrasjonspunktNokkel;
+
+    @Autowired
     private AdresseregisterRest adresseRegisterClient;
 
     @Override
@@ -73,7 +76,7 @@ public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
         ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering(nodeList, kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
 
         try {
-            Dokumentpakker dokumentpakker = new Dokumentpakker(new IntegrasjonspunktNokkel().getSignatureHelper());
+            Dokumentpakker dokumentpakker = new Dokumentpakker(integrasjonspunktNokkel.getSignatureHelper());
             byte[] resultSbd = dokumentpakker.pakkTilByteArray(byteArray, avsender, mottaker, instanceIdentifier, KVITTERING);
             File file = new File(WRITE_TO);
             FileUtils.writeByteArrayToFile(file, resultSbd);
