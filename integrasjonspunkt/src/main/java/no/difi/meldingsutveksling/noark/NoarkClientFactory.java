@@ -28,7 +28,7 @@ public class NoarkClientFactory {
         WebServiceTemplateFactory templateFactory = settings.createTemplateFactory();
 
         if(E_PHORTE.equals(noarkType)) {
-            return new EphorteClient(settings);
+            return new EphorteClient(settings, templateFactory);
         } else if(P360.equals(noarkType)) {
             return new P360Client(settings, templateFactory);
         } else {

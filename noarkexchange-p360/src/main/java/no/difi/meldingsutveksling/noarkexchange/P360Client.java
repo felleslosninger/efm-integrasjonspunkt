@@ -36,7 +36,7 @@ public class P360Client implements NoarkClient {
                 = new no.difi.meldingsutveksling.noarkexchange.p360.schema.ObjectFactory().createPutMessageRequest(r);
 
         JAXBElement<no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageResponseType> response
-                = (JAXBElement) template.marshalSendAndReceive(settings.getEndpointUrl(), request,
+                = (JAXBElement) template.marshalSendAndReceive(settings.getEndpointUrl(), p360request,
                 new SoapActionCallback(SOAP_ACTION));
 
         PutMessageResponseType theResponse = new PutMessageResponseType();
