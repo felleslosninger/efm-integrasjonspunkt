@@ -32,7 +32,10 @@ import java.util.UUID;
 public class StandardBusinessDocumentFactory {
 
     @Autowired
-    private final IntegrasjonspunktNokkel integrasjonspunktNokkel;
+    private IntegrasjonspunktNokkel integrasjonspunktNokkel;
+
+    public StandardBusinessDocumentFactory() {
+    }
 
     public StandardBusinessDocumentFactory(IntegrasjonspunktNokkel integrasjonspunktNokkel) {
         this.integrasjonspunktNokkel = integrasjonspunktNokkel;
