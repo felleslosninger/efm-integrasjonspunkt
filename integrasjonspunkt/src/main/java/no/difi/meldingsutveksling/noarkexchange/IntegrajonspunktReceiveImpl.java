@@ -15,7 +15,7 @@ import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.*;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.noark.NoarkClient;
+
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
@@ -23,6 +23,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.receive.*;
 import no.difi.meldingsutveksling.oxalisexchange.ByteArrayImpl;
 import no.difi.meldingsutveksling.oxalisexchange.Kvittering;
 import no.difi.meldingsutveksling.oxalisexchange.OxalisMessageReceiverTemplate;
+import no.difi.meldingsutveksling.services.AdresseregisterService;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.apache.commons.io.FileUtils;
@@ -70,7 +71,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
     private NoarkClient localNoark;
 
     @Autowired
-    private AdresseRegisterClient adresseRegisterClient;
+    private AdresseregisterService adresseRegisterClient;
 
     @Autowired
     private IntegrasjonspunktConfig config;
@@ -228,7 +229,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         }
         while (null != zipEntry) {
             String fileName = zipEntry.getName();
-            if ("edu_best.xml".equals(fileName)) {
+            if ("edu_test.xml".equals(fileName)) {
 
                 newFile = new File(outputFolder + File.separator + fileName);
                 FileOutputStream fos = null;
@@ -279,20 +280,12 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         this.transportFactory = transportFactory;
     }
 
-    public NoarkClient getNoarkClient() {
+    public NoarkClient getLocalNoark() {
         return localNoark;
     }
 
-    public void setNoarkClient(NoarkClient noarkClient) {
-        this.localNoark = noarkClient;
-    }
-
-    public AdresseRegisterClient getAdresseRegisterClient() {
-        return adresseRegisterClient;
-    }
-
-    public void setAdresseRegisterClient(AdresseRegisterClient adresseRegisterClient) {
-        this.adresseRegisterClient = adresseRegisterClient;
+    public void setLocalNoark(NoarkClient localNoark) {
+        this.localNoark = localNoark;
     }
 
     public IntegrasjonspunktConfig getConfig() {

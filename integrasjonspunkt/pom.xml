@@ -190,6 +190,18 @@
 
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>noarkexchange-ephorte</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>noarkexchange-p360</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>transport</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
@@ -276,7 +288,6 @@
             <version>1.2.2</version>
         </dependency>
 
-
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-all</artifactId>
@@ -319,6 +330,12 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>noarkexchange</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>noarkexchange-p360</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
 

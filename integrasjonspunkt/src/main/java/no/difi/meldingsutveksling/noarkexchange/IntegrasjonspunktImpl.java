@@ -4,7 +4,6 @@ import com.thoughtworks.xstream.XStream;
 import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.noark.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageContext;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategy;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategyFactory;
@@ -62,7 +61,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
         if (hasAdresseregisterCertificate(organisasjonsnummer)) {
             canReceive = true;
         } else {
-            canReceive = mshClient.canGetRecieveMessage(organisasjonsnummer);
+            canReceive = mshClient.canRecieveMessage(organisasjonsnummer);
         }
         response.setResult(canReceive);
         return response;

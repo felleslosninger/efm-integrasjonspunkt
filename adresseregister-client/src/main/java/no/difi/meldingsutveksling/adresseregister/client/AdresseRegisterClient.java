@@ -26,7 +26,6 @@ import java.security.cert.CertificateFactory;
 @Component
 public class AdresseRegisterClient {
 
-
     public static final String X_509 = "X.509";
     public static final String PATH_PARAM_ORG_NR = "orgNr";
 
