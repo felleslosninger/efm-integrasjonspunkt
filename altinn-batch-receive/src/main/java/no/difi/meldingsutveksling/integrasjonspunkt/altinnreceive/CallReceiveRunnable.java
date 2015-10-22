@@ -57,7 +57,7 @@ class CallReceiveRunnable implements Runnable {
 
         try {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
-            JAXBElement<StandardBusinessDocument>  d = new ObjectFactory().createStandardBusinessDocument(doc);
+            JAXBElement<StandardBusinessDocument> d = new ObjectFactory().createStandardBusinessDocument(doc);
 
             jaxbContextdomain.createMarshaller().marshal(d, os);
             byte[] tmp = os.toByteArray();
@@ -67,12 +67,9 @@ class CallReceiveRunnable implements Runnable {
                     jaxbContext.createUnmarshaller().unmarshal(new ByteArrayInputStream(tmp));
 
             ctx.getReceiveClient().callReceive(toDocument.getValue());
-            logger.info("successfully wrote " + toDocument.getValue().getStandardBusinessDocumentHeader().getDocumentIdentification().getInstanceIdentifier());
-
         } catch (JAXBException e) {
             e.printStackTrace();
             logger.error(e.getMessage(), e);
         }
-
     }
 }
