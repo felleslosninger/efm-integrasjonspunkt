@@ -7,9 +7,9 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import no.difi.meldingsutveksling.adresseregister.client.CertificateNotFoundException;
 import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.noark.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
 import sun.security.x509.X509CertImpl;
@@ -128,9 +128,9 @@ public class KanMottaMeldingerSteps {
     @And("^virksomhet (.+) i MSH sitt adresseregister$")
     public void virksomhet_finnes_i_MSH(String finnes) throws Throwable {
         if("finnes".equals(finnes)) {
-            when(mshClient.canGetRecieveMessage(any(String.class))).thenReturn(true);
+            when(mshClient.canRecieveMessage(any(String.class))).thenReturn(true);
         } else if("finnes ikke".equals(finnes)) {
-            when(mshClient.canGetRecieveMessage(any(String.class))).thenReturn(false);
+            when(mshClient.canRecieveMessage(any(String.class))).thenReturn(false);
         }
     }
 

@@ -1,13 +1,14 @@
 package no.difi.meldingsutveksling.config;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClientSettings;
 import org.apache.commons.configuration.*;
 import org.springframework.stereotype.Component;
 
 /**
  * Class with responsibility of keeping track of configuration of the "integrasjonspunkt". The configruation
  * is loaded from three sources.
- * <p/>
+ * <p>
  * When a property is loaded, it is searched for in the following order;
  * <ol>
  * <li> System property suplied when the VM starts up (-D option on the command line) </li>
@@ -29,6 +30,7 @@ public class IntegrasjonspunktConfig {
     static final String KEY_NOARKSYSTEM_ENDPOINT = "noarksystem.endpointURL";
     static final String KEY_NOARKSYSTEM_USERNAME = "noarksystem.userName";
     static final String KEY_NOARKSYSTEM_PASSWORD = "noarksystem.password";
+    static final String KEY_NOARKSYSTEM_DOMAIN = "noarksystem.domain";
 
     static final String KEY_MSH_ENDPOINT = "msh.endpointURL";
     static final String KEY_MSH_USERNAME = "msh.userName";
@@ -42,6 +44,7 @@ public class IntegrasjonspunktConfig {
     static final String KEY_KEYSTORE_LOCATION = "keystorelocation";
     static final String KEY_PRIVATEKEYPASSWORD = "privatekeypassword";
     private static final String KEY_ORGANISATION_NUMBER = "orgnumber";
+    public static final String NOARKSYSTEM_TYPE = "noarksystem.type";
 
     private final CompositeConfiguration config;
 
@@ -68,7 +71,7 @@ public class IntegrasjonspunktConfig {
         return config.getString(KEY_ADRESSEREGISTER_ENDPOINT);
     }
 
-    public  String getKeyAdresseregisterUsername() {
+    public String getKeyAdresseregisterUsername() {
         return config.getString(KEY_ADRESSEREGISTER_USERNAME);
     }
 
@@ -80,7 +83,7 @@ public class IntegrasjonspunktConfig {
         return config.getString(KEY_NOARKSYSTEM_ENDPOINT);
     }
 
-    private String getKeyNoarksystemUsername() {
+    private String getNoarksystemUsername() {
         return config.getString(KEY_NOARKSYSTEM_USERNAME);
     }
 
@@ -88,15 +91,19 @@ public class IntegrasjonspunktConfig {
         return config.getString(KEY_NOARKSYSTEM_PASSWORD);
     }
 
+    private String getNoarksystemDomain() {
+        return config.getString(KEY_NOARKSYSTEM_DOMAIN);
+    }
+
     private String getMshEndpointUrl() {
         return config.getString(KEY_MSH_ENDPOINT);
     }
 
-    private String getKeyMshUsername() {
+    private String getMshUsername() {
         return config.getString(KEY_MSH_USERNAME);
     }
 
-    private String getKeyMshPassword() {
+    private String getMshPassword() {
         return config.getString(KEY_MSH_PASSWORD);
     }
 
@@ -104,12 +111,17 @@ public class IntegrasjonspunktConfig {
         return config.getString(KEY_KEYSTORE_LOCATION);
     }
 
+
     public String getPrivateKeyPassword() {
         return config.getString(KEY_PRIVATEKEYPASSWORD);
     }
 
     public String getPrivateKeyAlias() {
         return config.getString(KEY_PRIVATEKEYALIAS);
+    }
+
+    public String getNoarkType() {
+        return config.getString(NOARKSYSTEM_TYPE);
     }
 
     public Configuration getConfiguration() {
@@ -126,34 +138,11 @@ public class IntegrasjonspunktConfig {
     }
 
     public NoarkClientSettings getLocalNoarkClientSettings() {
-        return new NoarkClientSettings(getNOARKSystemEndPointURL(), getKeyNoarksystemUsername(), getKeyNoarksystemPassword());
+        return new NoarkClientSettings(getNOARKSystemEndPointURL(), getNoarksystemUsername(), getKeyNoarksystemPassword(), getNoarksystemDomain());
     }
 
     public NoarkClientSettings getMshNoarkClientSettings() {
-        return new NoarkClientSettings(getMshEndpointUrl(), getKeyMshUsername(), getKeyMshPassword());
+        return new NoarkClientSettings(getNOARKSystemEndPointURL(), getNoarksystemUsername(), getKeyNoarksystemPassword(), getNoarksystemDomain());
     }
 
-    public static class NoarkClientSettings {
-        private final String endpointUrl;
-        private final String userName;
-        private final String password;
-
-        public NoarkClientSettings(String endpointUrl, String userName, String password) {
-            this.endpointUrl = endpointUrl;
-            this.userName = userName;
-            this.password = password;
-        }
-
-        public String getEndpointUrl() {
-            return endpointUrl;
-        }
-
-        public String getUserName() {
-            return userName;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-    }
 }
