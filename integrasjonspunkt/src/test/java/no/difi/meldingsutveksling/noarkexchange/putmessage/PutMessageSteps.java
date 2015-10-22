@@ -1,18 +1,40 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
+import cucumber.api.PendingException;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import no.difi.asic.SignatureHelper;
+import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
+import no.difi.meldingsutveksling.domain.Mottaker;
+import no.difi.meldingsutveksling.domain.sbdh.BusinessScope;
+import no.difi.meldingsutveksling.domain.sbdh.Scope;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
+import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
 import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
+import no.difi.meldingsutveksling.transport.Transport;
+import no.difi.meldingsutveksling.transport.TransportFactory;
+import org.apache.commons.configuration.Configuration;
 import sun.security.x509.X509CertImpl;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -35,21 +57,53 @@ public class PutMessageSteps {
     private EventLog eventLog ;
     private PutMessageRequestType message;
     private MessageSender messageSender;
+    private Transport transport;
+    private IntegrasjonspunktNokkel integrasjonspunktNokkel;
+
 
     @Before
-    public void setup() {
+    public void setup() throws IOException {
         integrasjonspunkt = new IntegrasjonspunktImpl();
         adresseregister = mock(AdresseregisterService.class);
         when(adresseregister.getCertificate(any(String.class))).thenReturn(new X509CertImpl());
         eventLog = mock(EventLog.class);
         integrasjonspunkt.setEventLog(eventLog);
 
-        messageSender = mock(MessageSender.class);
+        messageSender = new MessageSender();
         messageSender.setAdresseregister(adresseregister);
         messageSender.setEventLog(eventLog);
+        integrasjonspunktNokkel = mock(IntegrasjonspunktNokkel.class);
+        when(integrasjonspunktNokkel.getSignatureHelper()).thenReturn(mock(SignatureHelper.class));
+        StandardBusinessDocumentFactory documentFactory = mock(StandardBusinessDocumentFactory.class);
+
+        StandardBusinessDocument document = createStandardBusinessDocument();
+
+        when(documentFactory.create(any(PutMessageRequestType.class), any(no.difi.meldingsutveksling.domain.Avsender.class), any(Mottaker.class))).thenReturn(document);
+        messageSender.setStandardBusinessDocumentFactory(documentFactory);
+        messageSender.setKeyInfo(integrasjonspunktNokkel);
+        messageSender.setConfiguration(mock(IntegrasjonspunktConfig.class));
+
+        TransportFactory transportFactory = mock(TransportFactory.class);
+        transport = mock(Transport.class);
+        when(transportFactory.createTransport(any(StandardBusinessDocument.class))).thenReturn(transport);
+        messageSender.setTransportFactory(transportFactory);
+
         integrasjonspunkt.setMessageSender(messageSender);
         integrasjonspunkt.setAdresseRegister(adresseregister);
   }
+
+    private StandardBusinessDocument createStandardBusinessDocument() {
+        StandardBusinessDocument document = new StandardBusinessDocument();
+        StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader();
+        BusinessScope scope = new BusinessScope();
+        ArrayList<Scope> scopes = new ArrayList<>();
+        scopes.add(new Scope());
+        scope.setScope(scopes);
+        header.setBusinessScope(scope);
+        document.setStandardBusinessDocumentHeader(header);
+        return document;
+    }
+
 
     @Given("^en kvittering$")
     public void et_dokument_mottatt_på_putmessage_grensesnittet() {
@@ -80,6 +134,31 @@ public class PutMessageSteps {
 
     @Then("^kvitteringen sendes ikke videre til transport$")
     public void kvitteringen_sendes_ikke_videre()  {
-        verify(messageSender, never()).sendMessage(any(PutMessageRequestType.class));
+        verify(transport, never()).send(any(Configuration.class), any(StandardBusinessDocument.class));
+    }
+
+    @Given("^en velformet melding fra (.+)$")
+    public void en_velformet_melding_fra_arkivsystem(String arkivSystem) throws Throwable {
+        JAXBContext jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+
+        Path testDataPath = Paths.get("/testdata", String.format("%s.xml", arkivSystem));
+
+        InputStream stream = this.getClass().getResourceAsStream(testDataPath.toString());
+        if(stream != null) {
+            message = unmarshaller.unmarshal(new StreamSource(stream), PutMessageRequestType.class).getValue();
+        } else {
+            throw new PendingException(String.format("missing test data for %s. Add a request in location %s", arkivSystem, testDataPath.toAbsolutePath().toString()));
+        }
+    }
+
+    @Then("^skal melding bli videresendt$")
+    public void skal_melding_bli_videresendt() throws Throwable {
+        verify(transport).send(any(Configuration.class), any(StandardBusinessDocument.class));
+    }
+
+    @When("^integrasjonspunktet mottar meldingen$")
+    public void integrasjonspunktet_mottar_meldingen() throws Throwable {
+        integrasjonspunkt.putMessage(message);
     }
 }

@@ -102,8 +102,6 @@ public class KanMottaMeldingerSteps {
             "                &lt;/sakspart&gt;\n" +
             "                &lt;/noarksak&gt;\n" +
             "                &lt;/Melding&gt;";
-    private PutMessageResponseType response;
-
 
     @Before
     public void setup() {
@@ -166,7 +164,7 @@ public class KanMottaMeldingerSteps {
         envelope.setReceiver(addressType);
         req.setEnvelope(envelope);
         req.setPayload(message);
-        response = integrasjonspunkt.putMessage(req);
+        integrasjonspunkt.putMessage(req);
 
     }
 

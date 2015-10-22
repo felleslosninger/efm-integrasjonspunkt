@@ -15,6 +15,7 @@ import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.*;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
+
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
@@ -96,6 +97,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         Organisasjonsnummer reciever = new Organisasjonsnummer(orgNumberReceiver);
 
         verifyCertificatesForSenderAndReceiver(orgNumberReceiver, orgNumberSender);
+
 
         logEvent(receiveResponse, ProcessState.SBD_RECIEVED);
 
@@ -182,7 +184,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
     }
 
     private void forberedKvittering(StandardBusinessDocument receiveResponse, String kvitteringsType) {
-        Dokumentpakker dokumentpakker = new Dokumentpakker();
+        Dokumentpakker dokumentpakker = new Dokumentpakker(keyInfo.getSignatureHelper());
         List<Partner> partnerList = receiveResponse.getStandardBusinessDocumentHeader().getSender();
         List<Partner> recieverList = receiveResponse.getStandardBusinessDocumentHeader().getReceiver();
         String sendTo = partnerList.get(0).getIdentifier().getValue().split(":")[1];
@@ -199,7 +201,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo), (X509Certificate) certificate);
         try {
             ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering(kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
-            byte[] resultSbd = dokumentpakker.pakkTilByteArray(byteArray, keyInfo.getSignatureHelper(), avsender, mottaker, instanceIdentifier, KVITTERING);
+            byte[] resultSbd = dokumentpakker.pakkTilByteArray(byteArray, avsender, mottaker, instanceIdentifier, KVITTERING);
             File file = new File(WRITE_TO);
             FileUtils.writeByteArrayToFile(file, resultSbd);
         } catch (IOException e) {

@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.oxalisexchange;
 
-import no.difi.asic.SignatureHelper;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
 import no.difi.meldingsutveksling.domain.*;
@@ -41,6 +40,9 @@ public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
     private EventLog eventLog = EventLog.create();
 
     @Autowired
+    private IntegrasjonspunktNokkel integrasjonspunktNokkel;
+
+    @Autowired
     private AdresseregisterRest adresseRegisterClient;
 
     @Override
@@ -54,7 +56,6 @@ public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
     }
 
     private void forberedKvitering(Map nodeList, String kvitteringsType) {
-        Dokumentpakker dokumentpakker = new Dokumentpakker();
         Node senderNode = (Node) nodeList.get("Sender");
         Node reciverNode = (Node) nodeList.get("Receiver");
         Node businessScopeNode = (Node) nodeList.get("BusinessScope");
@@ -75,8 +76,8 @@ public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
         ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering(nodeList, kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
 
         try {
-            SignatureHelper helper = new IntegrasjonspunktNokkel().getSignatureHelper();
-            byte[] resultSbd = dokumentpakker.pakkTilByteArray(byteArray, helper, avsender, mottaker, instanceIdentifier, KVITTERING);
+            Dokumentpakker dokumentpakker = new Dokumentpakker(integrasjonspunktNokkel.getSignatureHelper());
+            byte[] resultSbd = dokumentpakker.pakkTilByteArray(byteArray, avsender, mottaker, instanceIdentifier, KVITTERING);
             File file = new File(WRITE_TO);
             FileUtils.writeByteArrayToFile(file, resultSbd);
         } catch (IOException e) {
