@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.services;
 
 import no.difi.meldingsutveksling.adresseregister.client.AdresseRegisterClient;
+import no.difi.meldingsutveksling.adresseregister.client.AdresseRegisterPilotClient;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,7 +25,7 @@ public class AdresseregisterRest implements AdresseregisterService {
     @PostConstruct
     public void init() {
         String adresseRegisterEndPointURL = configuration.getAdresseRegisterEndPointURL();
-        client = new AdresseRegisterClient(adresseRegisterEndPointURL);
+        client = new AdresseRegisterPilotClient(adresseRegisterEndPointURL);
     }
 
     @Override

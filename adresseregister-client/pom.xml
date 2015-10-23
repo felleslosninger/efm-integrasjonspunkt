@@ -57,6 +57,12 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
 
+        <dependency>
+            <artifactId>virksert-client</artifactId>
+            <groupId>no.difi.virksert</groupId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        
     </dependencies>
 
 
