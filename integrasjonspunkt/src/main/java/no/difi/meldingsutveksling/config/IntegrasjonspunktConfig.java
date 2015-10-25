@@ -3,7 +3,11 @@ package no.difi.meldingsutveksling.config;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClientSettings;
 import org.apache.commons.configuration.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import static org.apache.commons.lang.StringUtils.isBlank;
 
 /**
  * Class with responsibility of keeping track of configuration of the "integrasjonspunkt". The configruation
@@ -23,6 +27,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class IntegrasjonspunktConfig {
+    private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktConfig.class);
 
     private static final String PROPERTIES_FILE_NAME = "integrasjonspunkt.properties";
     private static final String PROPERTIES_FILE_NAME_OVERRIDE = "integrasjonspunkt-local.properties";
@@ -46,6 +51,8 @@ public class IntegrasjonspunktConfig {
     private static final String KEY_ORGANISATION_NUMBER = "orgnumber";
     public static final String NOARKSYSTEM_TYPE = "noarksystem.type";
 
+    //unlimited kryptering - required
+
     private final CompositeConfiguration config;
 
     private IntegrasjonspunktConfig() {
@@ -65,6 +72,14 @@ public class IntegrasjonspunktConfig {
         } catch (ConfigurationException e) {
             throw new MeldingsUtvekslingRuntimeException("The configuration file " + PROPERTIES_FILE_NAME + " not found on classpath.", e);
         }
+
+        validateProperty(KEY_NOARKSYSTEM_ENDPOINT);
+        validateProperty(KEY_MSH_ENDPOINT);
+        validateProperty(KEY_ADRESSEREGISTER_ENDPOINT);
+        validateProperty(KEY_PRIVATEKEYALIAS);
+        validateProperty(KEY_KEYSTORE_LOCATION);
+        validateProperty(KEY_PRIVATEKEYPASSWORD);
+        validateProperty(NOARKSYSTEM_TYPE);
     }
 
     public String getAdresseRegisterEndPointURL() {
@@ -111,7 +126,6 @@ public class IntegrasjonspunktConfig {
         return config.getString(KEY_KEYSTORE_LOCATION);
     }
 
-
     public String getPrivateKeyPassword() {
         return config.getString(KEY_PRIVATEKEYPASSWORD);
     }
@@ -145,4 +159,12 @@ public class IntegrasjonspunktConfig {
         return new NoarkClientSettings(getNOARKSystemEndPointURL(), getNoarksystemUsername(), getKeyNoarksystemPassword(), getNoarksystemDomain());
     }
 
+    private boolean validateProperty(String key) {
+        if (isBlank(config.getString(key))) {
+            String message = String.format("Required property %s is missing.", key);
+            log.error(message);
+            throw new MeldingsUtvekslingRuntimeException(message);
+        }
+        return true;
+    }
 }
