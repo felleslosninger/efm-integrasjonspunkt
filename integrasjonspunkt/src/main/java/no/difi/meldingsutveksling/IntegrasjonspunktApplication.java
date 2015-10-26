@@ -31,6 +31,14 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
             SpringApplication.run(IntegrasjonspunktApplication.class, args);
         }
         catch (SecurityException se) {
+            String message =
+                    "Failed startup. Possibly unlimited security policy files that is not updated." +
+                            "/r/nTo fix this, download and replace policy files for the apropriate java version (found in ${java.home}/jre/lib/security/)" +
+                            "/r/n- Java7: http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html" +
+                            "/r/n- Java8: http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html";
+
+            System.out.println(message);
+            log.error(message);
             log.error(se.getMessage());
         }
     }

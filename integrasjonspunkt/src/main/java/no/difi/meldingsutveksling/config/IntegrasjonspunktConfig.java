@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.config;
 
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRequiredPropertyException;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClientSettings;
 import org.apache.commons.configuration.*;
@@ -51,11 +52,9 @@ public class IntegrasjonspunktConfig {
     private static final String KEY_ORGANISATION_NUMBER = "orgnumber";
     public static final String NOARKSYSTEM_TYPE = "noarksystem.type";
 
-    //unlimited kryptering - required
-
     private final CompositeConfiguration config;
 
-    private IntegrasjonspunktConfig() {
+    private IntegrasjonspunktConfig() throws MeldingsUtvekslingRequiredPropertyException {
 
         config = new CompositeConfiguration();
         config.addConfiguration(new SystemConfiguration());
@@ -159,11 +158,11 @@ public class IntegrasjonspunktConfig {
         return new NoarkClientSettings(getNOARKSystemEndPointURL(), getNoarksystemUsername(), getKeyNoarksystemPassword(), getNoarksystemDomain());
     }
 
-    private boolean validateProperty(String key) {
+    private boolean validateProperty(String key) throws MeldingsUtvekslingRequiredPropertyException {
         if (isBlank(config.getString(key))) {
-            String message = String.format("Required property %s is missing.", key);
+            String message = String.format("Required property %s is missing. Check if parameter for key is set, either in integrasjonspunkt-local.properties or set as in-parameter on startup.", key);
             log.error(message);
-            throw new MeldingsUtvekslingRuntimeException(message);
+            throw new MeldingsUtvekslingRequiredPropertyException(message);
         }
         return true;
     }
