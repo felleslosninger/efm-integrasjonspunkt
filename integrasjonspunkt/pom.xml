@@ -360,6 +360,7 @@
             <scope>test</scope>
         </dependency>
 
+
         <dependency>
             <groupId>no.difi</groupId>
             <artifactId>Virksomhetssertifikatvalidator</artifactId>

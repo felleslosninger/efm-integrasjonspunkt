@@ -11,7 +11,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 
 public interface TransportFactory {
 
-    public abstract Transport createTransport(StandardBusinessDocument message);
+    Transport createTransport(StandardBusinessDocument message);
 
 }
 
