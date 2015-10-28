@@ -11,13 +11,13 @@ import no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType;
  */
 public class PutMessageResponseFactory {
 
-    public static PutMessageResponseType createErrorResponse(String message, ErrorStatus missingSender) {
+    public static PutMessageResponseType createErrorResponse(ErrorStatus errorStatus) {
         PutMessageResponseType response = new PutMessageResponseType();
         AppReceiptType receipt = new AppReceiptType();
         receipt.setType("ERROR ");
         StatusMessageType statusMessageType = new StatusMessageType();
-        statusMessageType.setText(message);
-        statusMessageType.setCode(String.valueOf(missingSender.id));
+        statusMessageType.setText(errorStatus.enduserErrorMessage());
+        statusMessageType.setCode(String.valueOf(errorStatus.id));
         receipt.getMessage().add(statusMessageType);
         response.setResult(receipt);
         return response;

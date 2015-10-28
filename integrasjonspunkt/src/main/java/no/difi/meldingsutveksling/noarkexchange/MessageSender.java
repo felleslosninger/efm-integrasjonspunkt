@@ -33,8 +33,6 @@ import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory
 @Component
 public class MessageSender {
 
-    public static final String TEKNISK_FEIL = "Teknisk feil ";
-    public static final String CANNOT_RECIEVE = "Mottakende organisasjon kan ikke motta meldinger";
     @Autowired
     EventLog eventLog;
 
@@ -91,7 +89,7 @@ public class MessageSender {
         PutMessageRequestAdapter message = new PutMessageRequestAdapter(messageRequest);
         if(!message.hasRecieverPartyNumber()) {
             log.severe(ErrorStatus.MISSING_RECIPIENT.toString());
-            return createErrorResponse(TEKNISK_FEIL, ErrorStatus.MISSING_RECIPIENT);
+            return createErrorResponse(ErrorStatus.MISSING_RECIPIENT);
         }
 
 
@@ -104,12 +102,12 @@ public class MessageSender {
 
         if (!setRecipient(context, message.getRecieverPartyNumber())) {
             log.info(ErrorStatus.CANNOT_RECIEVE + message.getRecieverPartyNumber());
-            return createErrorResponse(CANNOT_RECIEVE, ErrorStatus.CANNOT_RECIEVE);
+            return createErrorResponse(ErrorStatus.CANNOT_RECIEVE);
         }
 
         if (!setSender(context, message)) {
             log.severe(ErrorStatus.MISSING_SENDER.toString());
-            return createErrorResponse(TEKNISK_FEIL, ErrorStatus.MISSING_SENDER);
+            return createErrorResponse(ErrorStatus.MISSING_SENDER);
         }
         eventLog.log(new Event(ProcessState.SIGNATURE_VALIDATED));
 
@@ -120,7 +118,7 @@ public class MessageSender {
         } catch (IOException e) {
             eventLog.log(new Event().setJpId(journalPostId).setArkiveConversationId(message.getConversationId()).setProcessStates(ProcessState.MESSAGE_SEND_FAIL));
             log.severe("IO Error on Asic-e or sbd creation " + e.getMessage());
-            return createErrorResponse(TEKNISK_FEIL, ErrorStatus.MISSING_SENDER);
+            return createErrorResponse(ErrorStatus.MISSING_SENDER);
 
         }
         Scope item = sbd.getStandardBusinessDocumentHeader().getBusinessScope().getScope().get(0);
