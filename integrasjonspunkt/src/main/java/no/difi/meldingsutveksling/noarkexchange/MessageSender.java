@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import com.thoughtworks.xstream.XStream;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
-import no.difi.meldingsutveksling.adresseregister.client.CertificateNotFoundException;
+import no.difi.meldingsutveksling.adresseregister.client.CertificateException;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
 import no.difi.meldingsutveksling.domain.*;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
@@ -78,7 +78,7 @@ public class MessageSender {
         try {
             receiverCertificate = (X509Certificate) adresseregister.getCertificate(receiver.getOrgnr());
 
-        } catch (CertificateNotFoundException e) {
+        } catch (CertificateException e) {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
             return false;
         }

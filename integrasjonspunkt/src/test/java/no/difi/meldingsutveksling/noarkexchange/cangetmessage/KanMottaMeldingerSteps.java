@@ -5,7 +5,7 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-import no.difi.meldingsutveksling.adresseregister.client.CertificateNotFoundException;
+import no.difi.meldingsutveksling.adresseregister.client.CertificateException;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
@@ -121,7 +121,7 @@ public class KanMottaMeldingerSteps {
         if("finnes".equals(finnes)) {
             when(adresseRegister.getCertificate(any(String.class))).thenReturn(new X509CertImpl());
         } else if("finnes ikke".equals(finnes)) {
-            when(adresseRegister.getCertificate(any(String.class))).thenThrow(CertificateNotFoundException.class);
+            when(adresseRegister.getCertificate(any(String.class))).thenThrow(CertificateException.class);
         }
     }
 

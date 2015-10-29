@@ -58,7 +58,7 @@
         </dependency>
 
         <dependency>
-            <artifactId>virksert-client</artifactId>
+            <artifactId>virksert-client-gb-forked</artifactId>
             <groupId>no.difi.virksert</groupId>
             <version>1.0-SNAPSHOT</version>
         </dependency>

@@ -1,36 +1,30 @@
 package no.difi.meldingsutveksling.services;
 
 import no.difi.meldingsutveksling.adresseregister.client.AdresseRegisterClient;
-import no.difi.meldingsutveksling.adresseregister.client.AdresseRegisterPilotClient;
+import no.difi.meldingsutveksling.adresseregister.client.AdresseregisterVirksertClient;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.security.PublicKey;
 import java.security.cert.Certificate;
 
 
 @Component
-public class AdresseregisterRest implements AdresseregisterService {
+public class AdresseregisterVirksert implements AdresseregisterService {
 
     @Autowired
     IntegrasjonspunktConfig configuration;
 
     AdresseRegisterClient client;
 
-    public AdresseregisterRest() {
+    public AdresseregisterVirksert() {
     }
 
     @PostConstruct
     public void init() {
         String adresseRegisterEndPointURL = configuration.getAdresseRegisterEndPointURL();
-        client = new AdresseRegisterPilotClient(adresseRegisterEndPointURL);
-    }
-
-    @Override
-    public PublicKey getPublicKey(String orgNumber) {
-        return client.getCertificate(orgNumber).getPublicKey();
+        client = new AdresseregisterVirksertClient(adresseRegisterEndPointURL);
     }
 
     @Override

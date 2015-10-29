@@ -35,10 +35,11 @@
         <module>altinn-batch-receive</module>
         <module>altinnmock</module>
         <module>altinn-client</module>
+        <module>virksert-client-gb-forked</module>
+        <module>virksert-common</module>
     </modules>
     <build>
         <pluginManagement>
-
             <plugins>
                 <plugin>
                     <groupId>com.heroku.sdk</groupId>

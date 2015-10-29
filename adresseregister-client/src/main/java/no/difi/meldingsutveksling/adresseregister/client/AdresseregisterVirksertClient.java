@@ -6,22 +6,23 @@ import no.difi.virksert.client.VirksertClientException;
 
 import java.security.cert.Certificate;
 
-public class AdresseregisterVirkCertClient implements AdresseRegisterClient{
+public class AdresseregisterVirksertClient implements AdresseRegisterClient {
     private final String uri;
-    private final String scope;
 
-    public AdresseregisterVirkCertClient(String uri, String scope) {
+    public AdresseregisterVirksertClient(String uri) {
         this.uri = uri;
-        this.scope = scope;
     }
 
     @Override
     public Certificate getCertificate(String orgNr) {
-        VirksertClient client = VirksertClientBuilder.newInstance().setUri(uri).setScope(scope).build();
+        VirksertClient client = VirksertClientBuilder.newInstance().setUri(uri)
+                .setScope("demotrust")
+                .setIntermediateAliases(new String[]{"difi_demo"})
+                .setRootAliases(new String[]{"mykey"}).build();
         try {
             return client.fetch(orgNr);
         } catch (VirksertClientException e) {
-            throw new CertificateNotFoundException(e);
+            throw new CertificateException(e);
         }
     }
 }

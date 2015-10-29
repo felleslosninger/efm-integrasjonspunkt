@@ -5,7 +5,7 @@ import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
 import no.difi.meldingsutveksling.domain.*;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.services.AdresseregisterRest;
+import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.w3c.dom.Document;
@@ -43,7 +43,7 @@ public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
     private IntegrasjonspunktNokkel integrasjonspunktNokkel;
 
     @Autowired
-    private AdresseregisterRest adresseRegisterClient;
+    private AdresseregisterVirksert adresseRegisterClient;
 
     @Override
     void sendLeveringskvittering(Map nodeList) {
