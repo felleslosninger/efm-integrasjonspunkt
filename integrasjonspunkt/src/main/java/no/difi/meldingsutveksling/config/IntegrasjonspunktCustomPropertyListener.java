@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.config;
 import org.apache.commons.configuration.CompositeConfiguration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
-import org.apache.commons.configuration.SystemConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
@@ -11,7 +10,9 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * This file will read custom properties from integrasjonspunkt-local.properties
@@ -41,14 +42,12 @@ public class IntegrasjonspunktCustomPropertyListener implements ApplicationListe
 
     @Override
     public void onApplicationEvent(ApplicationEnvironmentPreparedEvent event) {
-
         // Add the these custom properties (only the ones you specify here) into the application context
         List<String> list = Arrays.asList(
                 KEY_SERVICEURL,
                 KEY_SERVERURL,
                 KEY_CLIENTNAME,
                 KEY_DEREGISTRATION);
-
 
         // this class is called several times, this makes sure it runs only once
         if (config == null) {
