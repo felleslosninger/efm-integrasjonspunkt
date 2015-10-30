@@ -6,8 +6,10 @@ import no.difi.meldingsutveksling.AltinnWsConfiguration;
 import no.difi.meldingsutveksling.DownloadRequest;
 import no.difi.meldingsutveksling.FileReference;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
+import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory;
+import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,10 +38,10 @@ public class MessagePolling {
         List<FileReference> fileReferences = client.availableFiles(config.getOrganisationNumber());
 
         for(FileReference reference : fileReferences) {
-            StandardBusinessDocument sbd = client.download(new DownloadRequest(reference.getValue(), config.getOrganisationNumber()));
-            //integrajonspunktReceive.receive(sbd);
+            Document document = client.download(new DownloadRequest(reference.getValue(), config.getOrganisationNumber()));
+            StandardBusinessDocument standardBusinessDocument = StandardBusinessDocumentFactory.create(document);
+            integrajonspunktReceive.receive(standardBusinessDocument);
         }
-
     }
 }
 

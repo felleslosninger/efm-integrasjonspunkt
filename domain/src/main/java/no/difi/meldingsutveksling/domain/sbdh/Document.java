@@ -34,11 +34,11 @@ import javax.xml.bind.annotation.*;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "StandardBusinessDocument", propOrder = {
+@XmlType(name = "Document", propOrder = {
     "standardBusinessDocumentHeader",
     "any"
 })
-public class StandardBusinessDocument {
+public class Document {
 
     @XmlElement(name = "StandardBusinessDocumentHeader")
     protected StandardBusinessDocumentHeader standardBusinessDocumentHeader;

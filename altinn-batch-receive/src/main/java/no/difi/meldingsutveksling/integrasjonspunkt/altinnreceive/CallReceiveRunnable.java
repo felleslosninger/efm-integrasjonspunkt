@@ -1,19 +1,13 @@
 package no.difi.meldingsutveksling.integrasjonspunkt.altinnreceive;
 
-import com.thoughtworks.xstream.XStream;
 import no.difi.meldingsutveksling.DownloadRequest;
 import no.difi.meldingsutveksling.FileReference;
 import no.difi.meldingsutveksling.StandardBusinessDocumentConverter;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.noarkexchange.schema.receive.CorrelationInformation;
-
-import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.InputStreamSource;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -35,7 +29,7 @@ class CallReceiveRunnable implements Runnable {
     static {
         try {
             jaxbContext = JAXBContext.newInstance(no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument.class, Payload.class);
-            jaxbContextdomain = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class);
+            jaxbContextdomain = JAXBContext.newInstance(Document.class, Payload.class);
 
         } catch (JAXBException e) {
             throw new RuntimeException("Could not initialize " + StandardBusinessDocumentConverter.class, e);
@@ -53,11 +47,11 @@ class CallReceiveRunnable implements Runnable {
     @Override
     public void run() {
         DownloadRequest request = new DownloadRequest(file.getValue(), ctx.getOrgNr());
-        StandardBusinessDocument doc = ctx.getAltinnWsClient().download(request);
+        Document doc = ctx.getAltinnWsClient().download(request);
 
         try {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
-            JAXBElement<StandardBusinessDocument> d = new ObjectFactory().createStandardBusinessDocument(doc);
+            JAXBElement<Document> d = new ObjectFactory().createStandardBusinessDocument(doc);
 
             jaxbContextdomain.createMarshaller().marshal(d, os);
             byte[] tmp = os.toByteArray();

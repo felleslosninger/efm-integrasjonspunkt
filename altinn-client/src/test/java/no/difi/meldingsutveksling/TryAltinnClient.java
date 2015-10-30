@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling;
 
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 
 public class TryAltinnClient {
@@ -23,8 +23,8 @@ public class TryAltinnClient {
         }
 
         @Override
-        public StandardBusinessDocument getPayload() {
-            return new StandardBusinessDocument();
+        public Document getPayload() {
+            return new Document();
         }
 
     }

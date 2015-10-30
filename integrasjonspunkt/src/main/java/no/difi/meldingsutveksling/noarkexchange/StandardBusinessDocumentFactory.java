@@ -10,7 +10,7 @@ import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.BestEduMessage;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Mottaker;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import org.modelmapper.ModelMapper;
@@ -41,11 +41,11 @@ public class StandardBusinessDocumentFactory {
         this.integrasjonspunktNokkel = integrasjonspunktNokkel;
     }
 
-    public StandardBusinessDocument create(PutMessageRequestType sender, Avsender avsender, Mottaker mottaker) throws IOException {
+    public Document create(PutMessageRequestType sender, Avsender avsender, Mottaker mottaker) throws IOException {
         return create(sender, UUID.randomUUID().toString(), avsender, mottaker);
     }
 
-    public StandardBusinessDocument create(PutMessageRequestType shipment, String id, Avsender avsender, Mottaker mottaker) throws IOException {
+    public Document create(PutMessageRequestType shipment, String id, Avsender avsender, Mottaker mottaker) throws IOException {
         final byte[] marshalledShipment = marshall(shipment);
 
         BestEduMessage bestEduMessage = new BestEduMessage(marshalledShipment);
@@ -81,16 +81,16 @@ public class StandardBusinessDocumentFactory {
      * @param fromDocument
      * @return
      */
-    static StandardBusinessDocument create(no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument fromDocument) {
+    public static Document create(no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument fromDocument) {
         ModelMapper mapper = new ModelMapper();
-        return mapper.map(fromDocument, StandardBusinessDocument.class);
+        return mapper.map(fromDocument, Document.class);
     }
 
     /**
      * @param fromDocument
      * @return
      */
-    static no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument create(StandardBusinessDocument fromDocument) {
+    public static no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument create(Document fromDocument) {
         ModelMapper mapper = new ModelMapper();
         return mapper.map(fromDocument, no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument.class);
     }
