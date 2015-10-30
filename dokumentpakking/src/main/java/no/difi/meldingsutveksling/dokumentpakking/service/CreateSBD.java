@@ -17,8 +17,8 @@ public class CreateSBD {
 	public static final String TYPE_VERSION = "1.0";
 	public static final String CONVERSATIONID = "ConversationId";
 
-    public StandardBusinessDocument createSBD(Organisasjonsnummer avsender, Organisasjonsnummer mottaker, Object payload, String conversationId,String type) {
-		StandardBusinessDocument doc = new StandardBusinessDocument();
+    public Document createSBD(Organisasjonsnummer avsender, Organisasjonsnummer mottaker, Object payload, String conversationId,String type) {
+		Document doc = new Document();
 		doc.setStandardBusinessDocumentHeader(createHeader(avsender, mottaker, conversationId, type));
 		doc.setAny(payload);
 		return doc;
