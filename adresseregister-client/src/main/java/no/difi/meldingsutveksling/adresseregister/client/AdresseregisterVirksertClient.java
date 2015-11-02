@@ -16,9 +16,9 @@ public class AdresseregisterVirksertClient implements AdresseRegisterClient {
     @Override
     public Certificate getCertificate(String orgNr) {
         VirksertClient client = VirksertClientBuilder.newInstance().setUri(uri)
-                .setScope("demotrust")
-                .setIntermediateAliases(new String[]{"difi_demo"})
-                .setRootAliases(new String[]{"mykey"}).build();
+                .setScope("demo")
+                .setIntermediateAliases(new String[]{"intermediate"})
+                .setRootAliases(new String[]{"rootcert"}).build();
         try {
             return client.fetch(orgNr);
         } catch (VirksertClientException e) {

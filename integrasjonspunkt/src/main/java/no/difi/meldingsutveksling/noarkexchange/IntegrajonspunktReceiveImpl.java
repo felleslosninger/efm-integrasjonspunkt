@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import com.thoughtworks.xstream.XStream;
-import no.difi.meldingsutveksling.CertificateValidator;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
@@ -94,8 +93,6 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         String orgNumberReceiver = receiveResponse.getStandardBusinessDocumentHeader().getReceiver().get(0).getIdentifier().getValue().split(":")[1];
         Organisasjonsnummer reciever = new Organisasjonsnummer(orgNumberReceiver);
 
-        verifyCertificatesForSenderAndReceiver(orgNumberReceiver, orgNumberSender);
-
 
         logEvent(receiveResponse, ProcessState.SBD_RECIEVED);
 
@@ -140,12 +137,6 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         return new CorrelationInformation();
     }
 
-    private void verifyCertificatesForSenderAndReceiver(String orgNumberReceiver, String orgNumberSender) {
-
-        CertificateValidator validator = new CertificateValidator();
-        validator.validate((X509Certificate) adresseRegisterClient.getCertificate(orgNumberReceiver));
-        validator.validate((X509Certificate) adresseRegisterClient.getCertificate(orgNumberSender));
-    }
 
     private PutMessageRequestType extractBestEdu(StandardBusinessDocument receiveResponse, File bestEdu) {
         PutMessageRequestType putMessageRequestType;
