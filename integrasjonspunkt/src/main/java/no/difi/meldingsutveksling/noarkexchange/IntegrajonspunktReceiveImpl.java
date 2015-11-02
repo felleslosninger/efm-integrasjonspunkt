@@ -5,20 +5,28 @@ import no.difi.meldingsutveksling.CertificateValidator;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
 import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
-import no.difi.meldingsutveksling.dokumentpakking.kvit.ObjectFactory;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateSBD;
 import no.difi.meldingsutveksling.dokumentpakking.service.KvitteringType;
 import no.difi.meldingsutveksling.dokumentpakking.service.SignAFile;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
-import no.difi.meldingsutveksling.domain.*;
+import no.difi.meldingsutveksling.domain.Avsender;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.Mottaker;
+import no.difi.meldingsutveksling.domain.Noekkelpar;
+import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import no.difi.meldingsutveksling.noarkexchange.schema.receive.*;
+import no.difi.meldingsutveksling.noarkexchange.schema.receive.CorrelationInformation;
+import no.difi.meldingsutveksling.noarkexchange.schema.receive.Partner;
+import no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort;
+import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
+import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.oxalisexchange.ByteArrayImpl;
 import no.difi.meldingsutveksling.oxalisexchange.Kvittering;
 import no.difi.meldingsutveksling.oxalisexchange.OxalisMessageReceiverTemplate;
@@ -38,7 +46,11 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.BindingType;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -107,11 +119,6 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         Avsender avsender = new Avsender(reciever, noekkelpar);
         SignAFile signAFile = new SignAFile();
 
-        Document kvittering = new CreateSBD().createSBD(reciever, sender, new ObjectFactory().createKvittering(signAFile.signIt(receiveResponse.getAny(), avsender, KvitteringType.LEVERING)), convId, KVITTERING_CONSTANT);
-        Transport transport = transportFactory.createTransport(kvittering);
-        transport.send(config.getConfiguration(), kvittering);
-        logEvent(receiveResponse, null, ProcessState.LEVERINGS_KVITTERING_SENT);
-
         JAXBContext jaxbContextP;
         Unmarshaller unMarshallerP;
 
@@ -138,6 +145,49 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         }
         PutMessageRequestType putMessageRequestType = extractBestEdu(receiveResponse, bestEdu);
         forwardToNoarkSystemAndSendReceipt(receiveResponse, sender, reciever, convId, avsender, signAFile, putMessageRequestType);
+        return new CorrelationInformation();
+    }
+
+    public CorrelationInformation forwardToNoarkSystem(StandardBusinessDocument standardBusinessDocument) {        //storeToFile(((Payload) standardBusinessDocument
+        if (isReciept(standardBusinessDocument.getStandardBusinessDocumentHeader())) {
+            logEvent(standardBusinessDocument, ProcessState.KVITTERING_MOTTATT);
+            return new CorrelationInformation();
+        }
+
+        String orgNumberSender = standardBusinessDocument.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue().split(":")[1];
+        Organisasjonsnummer sender = new Organisasjonsnummer(orgNumberSender);
+        String orgNumberReceiver = standardBusinessDocument.getStandardBusinessDocumentHeader().getReceiver().get(0).getIdentifier().getValue().split(":")[1];
+        Organisasjonsnummer reciever = new Organisasjonsnummer(orgNumberReceiver);
+
+        verifyCertificatesForSenderAndReceiver(orgNumberReceiver, orgNumberSender);
+
+
+        logEvent(standardBusinessDocument, ProcessState.SBD_RECIEVED);
+
+        forberedKvittering(standardBusinessDocument, "leveringsKvittering");
+
+        String convId = standardBusinessDocument.getStandardBusinessDocumentHeader().getBusinessScope().getScope().get(0).getInstanceIdentifier();
+        Noekkelpar noekkelpar = new Noekkelpar(keyInfo.loadPrivateKey(), adresseRegisterClient.getCertificate(reciever.toString()));
+        Avsender avsender = new Avsender(reciever, noekkelpar);
+        SignAFile signAFile = new SignAFile();
+
+        Payload payload = (Payload) standardBusinessDocument.getAny();
+
+        byte[] cmsEncZip = DatatypeConverter.parseBase64Binary(payload.getContent());
+        CmsUtil cmsUtil = new CmsUtil();
+        byte[] zipTobe = cmsUtil.decryptCMS(cmsEncZip, keyInfo.loadPrivateKey());
+        logEvent(standardBusinessDocument, null, ProcessState.DECRYPTION_SUCCESS);
+        File bestEdu;
+        try {
+            bestEdu = goGetBestEdu(standardBusinessDocument, zipTobe);
+            logEvent(standardBusinessDocument, null, ProcessState.BESTEDU_EXTRACTED);
+        } catch (IOException e) {
+            logEvent(standardBusinessDocument, e, ProcessState.SOME_OTHER_EXCEPTION);
+            throw new MeldingsUtvekslingRuntimeException(e);
+        }
+        PutMessageRequestType putMessageRequestType = extractBestEdu(standardBusinessDocument, bestEdu);
+        forwardToNoarkSystemAndSendReceipt(standardBusinessDocument, sender, reciever, convId, avsender, signAFile, putMessageRequestType);
+
         return new CorrelationInformation();
     }
 
