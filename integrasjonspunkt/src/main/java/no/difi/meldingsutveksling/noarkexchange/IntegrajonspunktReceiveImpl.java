@@ -79,47 +79,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
     }
 
     public CorrelationInformation receive(@WebParam(name = "StandardBusinessDocument", targetNamespace = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader", partName = "receiveResponse") StandardBusinessDocument standardBusinessDocument) {
-
-        StandardBusinessDocumentWrapper inputDocument = new StandardBusinessDocumentWrapper(standardBusinessDocument);
-        if (isReciept(standardBusinessDocument.getStandardBusinessDocumentHeader())) {
-            logEvent(inputDocument, ProcessState.KVITTERING_MOTTATT);
-            return new CorrelationInformation();
-        }
-
-
-        String orgNumberSender = inputDocument.getSenderOrgNumber();
-        String orgNumberReceiver = inputDocument.getReceiverOrgNumber();
-
-        verifyCertificatesForSenderAndReceiver(orgNumberReceiver, orgNumberSender);
-
-
-        logEvent(inputDocument, ProcessState.SBD_RECIEVED);
-
-        JAXBContext jaxbContextP;
-        Unmarshaller unMarshallerP;
-
-        Payload payload;
-        try {
-            jaxbContextP = JAXBContext.newInstance(Payload.class);
-            unMarshallerP = jaxbContextP.createUnmarshaller();
-            payload = unMarshallerP.unmarshal((org.w3c.dom.Node) standardBusinessDocument.getAny(), Payload.class).getValue();
-        } catch (JAXBException e) {
-            logEvent(inputDocument, e, ProcessState.SOME_OTHER_EXCEPTION);
-            throw new MeldingsUtvekslingRuntimeException(e);
-        }
-        byte[] zipTobe = decrypt(payload);
-        logEvent(inputDocument, null, ProcessState.DECRYPTION_SUCCESS);
-        File bestEdu;
-        try {
-            bestEdu = decompressToFile(inputDocument, zipTobe);
-            logEvent(inputDocument, null, ProcessState.BESTEDU_EXTRACTED);
-        } catch (IOException e) {
-            logEvent(inputDocument, e, ProcessState.SOME_OTHER_EXCEPTION);
-            throw new MeldingsUtvekslingRuntimeException(e);
-        }
-        PutMessageRequestType putMessageRequestType = extractBestEdu(standardBusinessDocument, bestEdu);
-        forwardToNoarkSystemAndSendReceipt(inputDocument, putMessageRequestType);
-        return new CorrelationInformation();
+        return forwardToNoarkSystem(standardBusinessDocument);
     }
 
     public CorrelationInformation forwardToNoarkSystem(StandardBusinessDocument standardBusinessDocument) {
@@ -134,7 +94,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
 
         logEvent(inputDocument, ProcessState.SBD_RECIEVED);
 
-        Payload payload = (Payload) standardBusinessDocument.getAny();
+        Payload payload = inputDocument.getPayload();
 
         byte[] decryptedPayload = decrypt(payload);
         logEvent(inputDocument, null, ProcessState.DECRYPTION_SUCCESS);
