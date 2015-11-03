@@ -1,9 +1,23 @@
 package no.difi.meldingsutveksling;
 
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.*;
-import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.*;
+import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceAvailableFile;
+import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceAvailableFileList;
+import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceAvailableFileStatus;
+import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceExternalBasicSF;
+import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceInitiation;
+import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceSearch;
+import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasic;
+import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasicGetAvailableFilesBasicAltinnFaultFaultFaultMessage;
+import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasicInitiateBrokerServiceBasicAltinnFaultFaultFaultMessage;
+import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.BrokerServiceExternalBasicStreamedSF;
+import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExternalBasicStreamed;
+import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExternalBasicStreamedDownloadFileStreamedBasicAltinnFaultFaultFaultMessage;
+import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExternalBasicStreamedUploadFileStreamedBasicAltinnFaultFaultFaultMessage;
+import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.ReceiptExternalStreamedBE;
+import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.StreamedPayloadBasicBE;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
+import no.difi.meldingsutveksling.shipping.ws.AltinnReason;
 import no.difi.meldingsutveksling.shipping.ws.AltinnWsException;
 import no.difi.meldingsutveksling.shipping.ws.ManifestBuilder;
 import no.difi.meldingsutveksling.shipping.ws.RecipientBuilder;
@@ -24,6 +38,7 @@ public class AltinnWsClient {
     public static final String FAILED_TO_INITATE_ALTINN_BROKER_SERVICE = "Failed to initate Altinn broker service";
     public static final String FILE_NAME = "sbd.zip";
     public static final String AVAILABLE_FILES_ERROR_MESSAGE = "Could not get list of available files from Altinn formidlingstjeneste";
+    public static final String CANNOT_DOWNLOAD_FILE = "Cannot download file";
     private final AltinnWsConfiguration configuration;
 
     public AltinnWsClient(AltinnWsConfiguration configuration) {
@@ -55,7 +70,9 @@ public class AltinnWsClient {
             parameters.setDataStream(outputStream.toByteArray());
 
             ReceiptExternalStreamedBE receiptExternal = streamingService.uploadFileStreamedBasic(parameters, FILE_NAME, senderReference, request.getSender(), configuration.getPassword(), configuration.getUsername());
-        } catch (IBrokerServiceExternalBasicStreamedUploadFileStreamedBasicAltinnFaultFaultFaultMessage | IOException e) {
+        } catch (IBrokerServiceExternalBasicStreamedUploadFileStreamedBasicAltinnFaultFaultFaultMessage e) {
+            throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, AltinnReason.from(e), e);
+        } catch (IOException e) {
             throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, e);
         }
     }
@@ -76,7 +93,7 @@ public class AltinnWsClient {
         try {
             filesBasic = service.getAvailableFilesBasic(configuration.getUsername(), configuration.getPassword(), searchParameters);
         } catch (IBrokerServiceExternalBasicGetAvailableFilesBasicAltinnFaultFaultFaultMessage e) {
-            throw new AltinnWsException(AVAILABLE_FILES_ERROR_MESSAGE, e);
+            throw new AltinnWsException(AVAILABLE_FILES_ERROR_MESSAGE, AltinnReason.from(e), e);
         }
 
         List<FileReference> fileReferences = new ArrayList<>();
@@ -102,8 +119,10 @@ public class AltinnWsClient {
             AltinnPackage altinnPackage = AltinnPackage.from(new ByteArrayInputStream(message));
             return altinnPackage.getDocument();
 
-        } catch (IBrokerServiceExternalBasicStreamedDownloadFileStreamedBasicAltinnFaultFaultFaultMessage | IOException | JAXBException e) {
-            throw new AltinnWsException("Cannot download file", e);
+        } catch (IBrokerServiceExternalBasicStreamedDownloadFileStreamedBasicAltinnFaultFaultFaultMessage e) {
+            throw new AltinnWsException(CANNOT_DOWNLOAD_FILE, AltinnReason.from(e), e);
+        } catch (IOException | JAXBException e) {
+            throw new AltinnWsException(CANNOT_DOWNLOAD_FILE, e);
         }
     }
 
@@ -117,7 +136,7 @@ public class AltinnWsClient {
             bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, configuration.getBrokerServiceUrl().toString());
             return service.initiateBrokerServiceBasic(configuration.getUsername(), configuration.getPassword(), brokerServiceInitiation);
         } catch (IBrokerServiceExternalBasicInitiateBrokerServiceBasicAltinnFaultFaultFaultMessage e) {
-            throw new AltinnWsException(FAILED_TO_INITATE_ALTINN_BROKER_SERVICE, e);
+            throw new AltinnWsException(FAILED_TO_INITATE_ALTINN_BROKER_SERVICE, AltinnReason.from(e), e);
         }
     }
 
