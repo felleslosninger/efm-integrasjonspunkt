@@ -10,8 +10,8 @@ import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.sbdh.BusinessScope;
+import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
@@ -76,7 +76,7 @@ public class PutMessageSteps {
         when(integrasjonspunktNokkel.getSignatureHelper()).thenReturn(mock(SignatureHelper.class));
         StandardBusinessDocumentFactory documentFactory = mock(StandardBusinessDocumentFactory.class);
 
-        StandardBusinessDocument document = createStandardBusinessDocument();
+        Document document = createStandardBusinessDocument();
 
         when(documentFactory.create(any(PutMessageRequestType.class), any(no.difi.meldingsutveksling.domain.Avsender.class), any(Mottaker.class))).thenReturn(document);
         messageSender.setStandardBusinessDocumentFactory(documentFactory);
@@ -85,15 +85,15 @@ public class PutMessageSteps {
 
         TransportFactory transportFactory = mock(TransportFactory.class);
         transport = mock(Transport.class);
-        when(transportFactory.createTransport(any(StandardBusinessDocument.class))).thenReturn(transport);
+        when(transportFactory.createTransport(any(Document.class))).thenReturn(transport);
         messageSender.setTransportFactory(transportFactory);
 
         integrasjonspunkt.setMessageSender(messageSender);
         integrasjonspunkt.setAdresseRegister(adresseregister);
   }
 
-    private StandardBusinessDocument createStandardBusinessDocument() {
-        StandardBusinessDocument document = new StandardBusinessDocument();
+    private Document createStandardBusinessDocument() {
+        Document document = new Document();
         StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader();
         BusinessScope scope = new BusinessScope();
         ArrayList<Scope> scopes = new ArrayList<>();
@@ -134,7 +134,7 @@ public class PutMessageSteps {
 
     @Then("^kvitteringen sendes ikke videre til transport$")
     public void kvitteringen_sendes_ikke_videre()  {
-        verify(transport, never()).send(any(Configuration.class), any(StandardBusinessDocument.class));
+        verify(transport, never()).send(any(Configuration.class), any(Document.class));
     }
 
     @Given("^en velformet melding fra (.+)$")
@@ -154,7 +154,7 @@ public class PutMessageSteps {
 
     @Then("^skal melding bli videresendt$")
     public void skal_melding_bli_videresendt() throws Throwable {
-        verify(transport).send(any(Configuration.class), any(StandardBusinessDocument.class));
+        verify(transport).send(any(Configuration.class), any(Document.class));
     }
 
     @When("^integrasjonspunktet mottar meldingen$")

@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling;
 
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.*;
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.*;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.shipping.ws.AltinnWsException;
 import no.difi.meldingsutveksling.shipping.ws.ManifestBuilder;
@@ -87,7 +87,7 @@ public class AltinnWsClient {
         return fileReferences;
     }
 
-    public StandardBusinessDocument download(DownloadRequest request) {
+    public Document download(DownloadRequest request) {
         BrokerServiceExternalBasicStreamedSF brokerServiceExternalBasicStreamedSF;
         brokerServiceExternalBasicStreamedSF = new BrokerServiceExternalBasicStreamedSF(configuration.getStreamingServiceUrl());
         IBrokerServiceExternalBasicStreamed streamingService = brokerServiceExternalBasicStreamedSF.getBasicHttpBindingIBrokerServiceExternalBasicStreamed(new MTOMFeature(true));
