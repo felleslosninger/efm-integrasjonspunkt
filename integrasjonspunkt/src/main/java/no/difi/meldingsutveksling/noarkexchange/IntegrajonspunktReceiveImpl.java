@@ -53,6 +53,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
     private static final String BEST_EDU = "BEST_EDU";
     private static final String KVITTERING_CONSTANT = "kvittering";
     private static final int MAGIC_NR = 1024;
+    public static final String SBD_NAMESPACE = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader";
     private EventLog eventLog = EventLog.create();
     private static final String MIME_TYPE = "application/xml";
     private static final String WRITE_TO = System.getProperty("user.home") + File.separator + "testToRemove" + File.separator + "kvitteringSbd.xml";
@@ -78,7 +79,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
     public IntegrajonspunktReceiveImpl() {
     }
 
-    public CorrelationInformation receive(@WebParam(name = "StandardBusinessDocument", targetNamespace = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader", partName = "receiveResponse") StandardBusinessDocument standardBusinessDocument) {
+    public CorrelationInformation receive(@WebParam(name = "StandardBusinessDocument", targetNamespace = SBD_NAMESPACE, partName = "receiveResponse") StandardBusinessDocument standardBusinessDocument) {
         return forwardToNoarkSystem(standardBusinessDocument);
     }
 

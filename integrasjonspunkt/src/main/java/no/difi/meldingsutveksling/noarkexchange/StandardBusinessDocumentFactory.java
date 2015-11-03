@@ -25,11 +25,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.UUID;
 
 
@@ -67,27 +63,12 @@ public class StandardBusinessDocumentFactory {
         return create(sender, UUID.randomUUID().toString(), avsender, mottaker);
     }
 
-    private void storeToFile(String any) {
-        File file = new File("beforeSendPayload.txt");
-
-        try(PrintWriter bos = new PrintWriter(new FileOutputStream(file))) {
-            bos.write(any);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
     public Document create(PutMessageRequestType shipment, String id, Avsender avsender, Mottaker mottaker) throws IOException {
         final byte[] marshalledShipment = marshall(shipment);
 
         BestEduMessage bestEduMessage = new BestEduMessage(marshalledShipment);
         Archive archive = createAsicePackage(avsender, mottaker, bestEduMessage);
         Payload payload = new Payload(encryptArchive(mottaker, archive));
-
-        //storeToFile(payload.getContent());
 
         return new CreateSBD().createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload, id, "melding");
     }

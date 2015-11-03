@@ -24,6 +24,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
 
+/**
+ * MessagePolling periodically checks Altinn Formidlingstjeneste for new messages. If new messages are discovered they
+ * are downloaded forwarded to the Archive system.
+ */
 @Component
 public class MessagePolling {
     Logger logger = LoggerFactory.getLogger(MessagePolling.class);
@@ -76,7 +80,6 @@ public class MessagePolling {
                     jaxbContext.createUnmarshaller().unmarshal(new ByteArrayInputStream(tmp));
 
             integrajonspunktReceive.forwardToNoarkSystem(toDocument.getValue());
-            //rc.callReceive(toDocument.getValue());
         } catch (JAXBException e) {
             e.printStackTrace();
             logger.error(e.getMessage(), e);

@@ -9,6 +9,9 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+/**
+ * Wrapper class for StandardBusinessDocument to simplify the interface and hide implementation details
+ */
 public class StandardBusinessDocumentWrapper {
 
     private final StandardBusinessDocument document;
