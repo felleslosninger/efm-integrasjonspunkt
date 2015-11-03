@@ -73,7 +73,6 @@ public class IntegrasjonspunktConfig {
         }
 
         validateProperty(KEY_NOARKSYSTEM_ENDPOINT);
-        validateProperty(KEY_MSH_ENDPOINT);
         validateProperty(KEY_ADRESSEREGISTER_ENDPOINT);
         validateProperty(KEY_PRIVATEKEYALIAS);
         validateProperty(KEY_KEYSTORE_LOCATION);
