@@ -12,21 +12,21 @@ public class VirksertClientBuilder {
     public static VirksertClientBuilder forProduction() {
         return newInstance().setUri("https://virksomhetssertifikat.difi.no/")
                 .setScope("production")
-                .setIntermediateAliases(new String[]{"buypass-intermediate", "commfides-intermediate"})
-                .setRootAliases(new String[]{"buypass-root", "commfides-root"});
+                .setTrustedIntermediateAliases(new String[]{"buypass-intermediate", "commfides-intermediate"})
+                .setTrustedRootAliases(new String[]{"buypass-root", "commfides-root"});
     }
 
     public static VirksertClientBuilder forTest() {
         return newInstance().setUri("https://test-virksomhetssertifikat.difi.no/")
                 .setScope("test")
-                .setIntermediateAliases(new String[]{"buypass-intermediate", "commfides-intermediate"})
-                .setRootAliases(new String[]{"buypass-root", "commfides-root"});
+                .setTrustedIntermediateAliases(new String[]{"buypass-intermediate", "commfides-intermediate"})
+                .setTrustedRootAliases(new String[]{"buypass-root", "commfides-root"});
     }
 
-    public static VirksertClientBuilder forTest(String uri, String scope, String[] rootAliases, String[] intermediateAliases) {
+    public static VirksertClientBuilder forCustom(String uri, String scope, String[] rootAliases, String[] intermediateAliases) {
         return newInstance().setUri(uri).setScope(scope)
-                .setIntermediateAliases(intermediateAliases)
-                .setRootAliases(rootAliases);
+                .setTrustedIntermediateAliases(intermediateAliases)
+                .setTrustedRootAliases(rootAliases);
     }
 
     VirksertClientBuilder() {
@@ -45,16 +45,15 @@ public class VirksertClientBuilder {
         return this;
     }
 
-    public VirksertClientBuilder setRootAliases(String[] rootAliases) {
+    public VirksertClientBuilder setTrustedRootAliases(String... rootAliases) {
         this.rootAliases = rootAliases;
         return this;
     }
 
-    public VirksertClientBuilder setIntermediateAliases(String[] intermediateAliases) {
+    public VirksertClientBuilder setTrustedIntermediateAliases(String... intermediateAliases) {
         this.intermediateAliases = intermediateAliases;
         return this;
     }
-
 
     public VirksertClient build() {
         return new VirksertClient(uri, scope, rootAliases, intermediateAliases);
