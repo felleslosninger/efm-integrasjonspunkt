@@ -20,15 +20,10 @@
         <module>noarkexchange-p360</module>
         <module>noarkexchange-ephorte</module>
         <module>altinnexchange</module>
-        <module>adresseregister-web</module>
-        <module>adresseregister-domain</module>
-        <module>adresseregister-client</module>
         <module>dokumentpakking</module>
         <module>integrasjonspunkt</module>
         <module>domain</module>
-        <module>sbd-reader</module>
         <module>transport</module>
-        <module>transport-oxalis</module>
         <module>transport-file</module>
         <module>transport-altinn</module>
         <module>altinn-batch-receive</module>
