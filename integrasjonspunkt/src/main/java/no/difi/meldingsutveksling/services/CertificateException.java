@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.adresseregister.client;
+package no.difi.meldingsutveksling.services;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 
