@@ -44,6 +44,9 @@ ADD ./integrasjonspunkt-local.properties ${APP_DIR}/
 RUN openssl s_client -connect ${HOST}:${PORT} </dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ${HOST}.cert && \
     keytool -import -noprompt -trustcacerts -alias ${HOST} -file ${HOST}.cert -keystore ${KEYSTOREFILE} -storepass ${KEYSTOREPASS}
 
+RUN echo "noarksystem.endpointURL=${noarksystem.endpointURL}" >>   integrasjonspunkt-local.properties
+RUN echo "noarksystem.type=${noarksystem.type}" >>  integrasjonspunkt-local.properties
+
 
 #
 # Start the application

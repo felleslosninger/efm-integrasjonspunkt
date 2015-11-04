@@ -22,3 +22,295 @@
 2015-11-02 15:44:40,221 1331 [main] INFO  o.s.w.s.saaj.SaajSoapMessageFactory - Creating SAAJ 1.3 MessageFactory with SOAP 1.1 Protocol
 2015-11-02 15:46:56,382 1113 [main] INFO  o.s.w.s.saaj.SaajSoapMessageFactory - Creating SAAJ 1.3 MessageFactory with SOAP 1.1 Protocol
 2015-11-02 15:46:56,429 1160 [main] INFO  o.s.w.s.saaj.SaajSoapMessageFactory - Creating SAAJ 1.3 MessageFactory with SOAP 1.1 Protocol
+2015-11-04 11:47:22,432 1374 [main] INFO  o.s.w.s.saaj.SaajSoapMessageFactory - Creating SAAJ 1.3 MessageFactory with SOAP 1.1 Protocol
+2015-11-04 11:47:22,460 1402 [main] INFO  o.s.w.s.saaj.SaajSoapMessageFactory - Creating SAAJ 1.3 MessageFactory with SOAP 1.1 Protocol
+2015-11-04 12:55:08,350 1205 [main] INFO  o.s.w.s.saaj.SaajSoapMessageFactory - Creating SAAJ 1.3 MessageFactory with SOAP 1.1 Protocol
+2015-11-04 12:55:08,372 1227 [main] INFO  o.s.w.s.saaj.SaajSoapMessageFactory - Creating SAAJ 1.3 MessageFactory with SOAP 1.1 Protocol
+2015-11-04 12:59:01,454 1247 [main] INFO  o.s.w.s.saaj.SaajSoapMessageFactory - Creating SAAJ 1.3 MessageFactory with SOAP 1.1 Protocol
+2015-11-04 12:59:01,474 1267 [main] INFO  o.s.w.s.saaj.SaajSoapMessageFactory - Creating SAAJ 1.3 MessageFactory with SOAP 1.1 Protocol
+2015-11-04 13:47:38,443 1322 [main] INFO  o.s.w.s.saaj.SaajSoapMessageFactory - Creating SAAJ 1.3 MessageFactory with SOAP 1.1 Protocol
+2015-11-04 13:47:38,474 1353 [main] INFO  o.s.w.s.saaj.SaajSoapMessageFactory - Creating SAAJ 1.3 MessageFactory with SOAP 1.1 Protocol
+2015-11-04 22:29:38,860 1214 [main] INFO  n.d.m.c.IntegrasjonspunktCustomPropertyListener - Added custom property from local properties: spring.boot.admin.autoDeregistration=true
+2015-11-04 22:29:38,982 1336 [main] INFO  n.d.m.IntegrasjonspunktApplication - Starting IntegrasjonspunktApplication on Mac-28cfe919eda3.lan with PID 11269 (/Users/glennbech/dev/meldingsutveksling-mellom-offentlige-virksomheter/integrasjonspunkt/target/classes started by glennbech in /Users/glennbech/dev/meldingsutveksling-mellom-offentlige-virksomheter/integrasjonspunkt)
+2015-11-04 22:29:39,029 1383 [main] INFO  o.s.b.c.e.AnnotationConfigEmbeddedWebApplicationContext - Refreshing org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext@2d9b57ca: startup date [Wed Nov 04 22:29:39 CET 2015]; root of context hierarchy
+2015-11-04 22:29:40,764 3118 [main] INFO  o.s.c.a.ConfigurationClassBeanDefinitionReader - Skipping bean definition for [BeanMethod:name=eventLogDAO,declaringClass=no.difi.meldingsutveksling.eventlog.EventLogConfigurarion]: a definition for bean 'eventLogDAO' already exists. This top-level bean definition is considered as an override.
+2015-11-04 22:29:40,766 3120 [main] INFO  o.s.b.f.xml.XmlBeanDefinitionReader - Loading XML bean definitions from URL [file:/Users/glennbech/dev/meldingsutveksling-mellom-offentlige-virksomheter/integrasjonspunkt/target/classes/rest-servlet.xml]
+2015-11-04 22:29:41,116 3470 [main] INFO  o.s.b.f.s.DefaultListableBeanFactory - Overriding bean definition for bean 'mvcContentNegotiationManager': replacing [Root bean: class [org.springframework.web.accept.ContentNegotiationManagerFactoryBean]; scope=; abstract=false; lazyInit=false; autowireMode=0; dependencyCheck=0; autowireCandidate=true; primary=false; factoryBeanName=null; factoryMethodName=null; initMethodName=null; destroyMethodName=null] with [Root bean: class [null]; scope=; abstract=false; lazyInit=false; autowireMode=3; dependencyCheck=0; autowireCandidate=true; primary=false; factoryBeanName=org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration$EnableWebMvcConfiguration; factoryMethodName=mvcContentNegotiationManager; initMethodName=null; destroyMethodName=(inferred); defined in class path resource [org/springframework/boot/autoconfigure/web/WebMvcAutoConfiguration$EnableWebMvcConfiguration.class]]
+2015-11-04 22:29:41,119 3473 [main] INFO  o.s.c.a.ConfigurationClassBeanDefinitionReader - Skipping bean definition for [BeanMethod:name=mvcUriComponentsContributor,declaringClass=org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport]: a definition for bean 'mvcUriComponentsContributor' already exists. This top-level bean definition is considered as an override.
+2015-11-04 22:29:41,156 3510 [main] INFO  o.s.b.f.s.DefaultListableBeanFactory - Overriding bean definition for bean 'beanNameViewResolver': replacing [Root bean: class [null]; scope=; abstract=false; lazyInit=false; autowireMode=3; dependencyCheck=0; autowireCandidate=true; primary=false; factoryBeanName=org.springframework.boot.autoconfigure.web.ErrorMvcAutoConfiguration$WhitelabelErrorViewConfiguration; factoryMethodName=beanNameViewResolver; initMethodName=null; destroyMethodName=(inferred); defined in class path resource [org/springframework/boot/autoconfigure/web/ErrorMvcAutoConfiguration$WhitelabelErrorViewConfiguration.class]] with [Root bean: class [null]; scope=; abstract=false; lazyInit=false; autowireMode=3; dependencyCheck=0; autowireCandidate=true; primary=false; factoryBeanName=org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration$WebMvcAutoConfigurationAdapter; factoryMethodName=beanNameViewResolver; initMethodName=null; destroyMethodName=(inferred); defined in class path resource [org/springframework/boot/autoconfigure/web/WebMvcAutoConfiguration$WebMvcAutoConfigurationAdapter.class]]
+2015-11-04 22:29:42,170 4524 [main] INFO  o.s.c.s.PropertySourcesPlaceholderConfigurer - Loading properties file from class path resource [jdbc.properties]
+2015-11-04 22:29:42,244 4598 [main] INFO  o.s.b.f.a.AutowiredAnnotationBeanPostProcessor - JSR-330 'javax.inject.Inject' annotation found and supported for autowiring
+2015-11-04 22:29:42,605 4959 [main] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration' of type [class org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration$$EnhancerBySpringCGLIB$$8ef52ace] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2015-11-04 22:29:42,643 4997 [main] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'transactionAttributeSource' of type [class org.springframework.transaction.annotation.AnnotationTransactionAttributeSource] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2015-11-04 22:29:42,657 5011 [main] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'transactionInterceptor' of type [class org.springframework.transaction.interceptor.TransactionInterceptor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2015-11-04 22:29:42,664 5018 [main] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.transaction.config.internalTransactionAdvisor' of type [class org.springframework.transaction.interceptor.BeanFactoryTransactionAttributeSourceAdvisor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2015-11-04 22:29:43,167 5521 [main] INFO  o.s.b.c.e.j.JettyEmbeddedServletContainerFactory - Server initialized with port: 8080
+2015-11-04 22:29:43,173 5527 [main] INFO  org.eclipse.jetty.server.Server - jetty-9.2.11.v20150529
+2015-11-04 22:29:43,308 5662 [main] INFO  / - Initializing Spring embedded WebApplicationContext
+2015-11-04 22:29:43,308 5662 [main] INFO  o.s.web.context.ContextLoader - Root WebApplicationContext: initialization completed in 4279 ms
+2015-11-04 22:29:44,560 6914 [main] INFO  o.s.j.d.e.EmbeddedDatabaseFactory - Creating embedded database 'eventLogDB'
+2015-11-04 22:29:45,442 7796 [main] INFO  o.s.j.datasource.init.ScriptUtils - Executing SQL script from class path resource [db/schema/ddl.sql]
+2015-11-04 22:29:45,707 8061 [main] INFO  o.s.j.datasource.init.ScriptUtils - Executed SQL script from class path resource [db/schema/ddl.sql] in 265 ms.
+2015-11-04 22:29:46,157 8511 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Building JPA container EntityManagerFactory for persistence unit 'default'
+2015-11-04 22:29:46,179 8533 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [
+	name: default
+	...]
+2015-11-04 22:29:46,323 8677 [main] INFO  org.hibernate.Version - HHH000412: Hibernate Core {4.3.5.Final}
+2015-11-04 22:29:46,326 8680 [main] INFO  org.hibernate.cfg.Environment - HHH000206: hibernate.properties not found
+2015-11-04 22:29:46,328 8682 [main] INFO  org.hibernate.cfg.Environment - HHH000021: Bytecode provider name : javassist
+2015-11-04 22:29:46,649 9003 [main] INFO  o.h.annotations.common.Version - HCANN000001: Hibernate Commons Annotations {4.0.4.Final}
+2015-11-04 22:29:47,017 9371 [main] INFO  org.hibernate.dialect.Dialect - HHH000400: Using dialect: org.hibernate.dialect.DerbyTenSevenDialect
+2015-11-04 22:29:47,169 9523 [main] INFO  o.h.h.i.a.ASTQueryTranslatorFactory - HHH000397: Using ASTQueryTranslatorFactory
+2015-11-04 22:29:47,359 9713 [main] INFO  org.hibernate.search.Version - HSEARCH000034: Hibernate Search 4.5.1.Final
+2015-11-04 22:29:47,631 9985 [main] INFO  o.h.tool.hbm2ddl.SchemaExport - HHH000227: Running hbm2ddl schema export
+2015-11-04 22:29:47,646 10000 [main] INFO  o.h.tool.hbm2ddl.SchemaExport - HHH000230: Schema export complete
+2015-11-04 22:29:48,563 10917 [main] INFO  o.s.b.c.e.ServletRegistrationBean - Mapping servlet: 'WSSpringServlet' to [/noarkExchange, /receive]
+2015-11-04 22:29:48,565 10919 [main] INFO  o.s.b.c.e.ServletRegistrationBean - Mapping servlet: 'dispatcherServlet' to [/]
+2015-11-04 22:29:48,567 10921 [main] INFO  o.s.b.c.e.FilterRegistrationBean - Mapping filter: 'metricFilter' to: [/*]
+2015-11-04 22:29:48,567 10921 [main] INFO  o.s.b.c.e.FilterRegistrationBean - Mapping filter: 'characterEncodingFilter' to: [/*]
+2015-11-04 22:29:48,568 10922 [main] INFO  o.s.b.c.e.FilterRegistrationBean - Mapping filter: 'hiddenHttpMethodFilter' to: [/*]
+2015-11-04 22:29:48,568 10922 [main] INFO  o.s.b.c.e.FilterRegistrationBean - Mapping filter: 'webRequestLoggingFilter' to: [/*]
+2015-11-04 22:29:48,568 10922 [main] INFO  o.s.b.c.e.FilterRegistrationBean - Mapping filter: 'applicationContextIdFilter' to: [/*]
+2015-11-04 22:29:49,280 11634 [main] INFO  o.e.j.server.handler.ContextHandler - Started o.s.b.c.e.j.JettyEmbeddedWebAppContext@7b5b7ecf{/,file:/Users/glennbech/dev/meldingsutveksling-mellom-offentlige-virksomheter/integrasjonspunkt/src/main/webapp/,AVAILABLE}
+2015-11-04 22:29:49,281 11635 [main] INFO  org.eclipse.jetty.server.Server - Started @12024ms
+2015-11-04 22:29:49,450 11804 [main] INFO  o.s.w.s.saaj.SaajSoapMessageFactory - Creating SAAJ 1.3 MessageFactory with SOAP 1.1 Protocol
+2015-11-04 22:29:49,481 11835 [main] INFO  o.s.w.s.saaj.SaajSoapMessageFactory - Creating SAAJ 1.3 MessageFactory with SOAP 1.1 Protocol
+2015-11-04 22:29:49,650 12004 [main] INFO  o.s.b.f.c.PropertiesFactoryBean - Loading properties file from class path resource [rest-default-messages.properties]
+2015-11-04 22:29:49,757 12111 [main] INFO  o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped "{[/eventLog/event],methods=[PUT],params=[],headers=[],consumes=[application/json],produces=[],custom=[]}" onto public void no.difi.meldingsutveksling.eventlog.EventLogController.log(no.difi.meldingsutveksling.eventlog.Event)
+2015-11-04 22:29:49,758 12112 [main] INFO  o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped "{[/eventLog/event],methods=[GET],params=[],headers=[],consumes=[],produces=[application/json],custom=[]}" onto public java.util.List<no.difi.meldingsutveksling.eventlog.Event> no.difi.meldingsutveksling.eventlog.EventLogController.getEventsSince(long)
+2015-11-04 22:29:49,758 12112 [main] INFO  o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped "{[/eventLog/conversation],methods=[GET],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public java.util.List<no.difi.meldingsutveksling.eventlog.Event> no.difi.meldingsutveksling.eventlog.EventLogController.getConvrEntries(java.lang.String,no.difi.meldingsutveksling.eventlog.ConversationIdTypes)
+2015-11-04 22:29:49,761 12115 [main] INFO  o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped "{[/error],methods=[],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.http.ResponseEntity<java.util.Map<java.lang.String, java.lang.Object>> org.springframework.boot.autoconfigure.web.BasicErrorController.error(javax.servlet.http.HttpServletRequest)
+2015-11-04 22:29:49,761 12115 [main] INFO  o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped "{[/error],methods=[],params=[],headers=[],consumes=[],produces=[text/html],custom=[]}" onto public org.springframework.web.servlet.ModelAndView org.springframework.boot.autoconfigure.web.BasicErrorController.errorHtml(javax.servlet.http.HttpServletRequest)
+2015-11-04 22:29:49,851 12205 [main] INFO  o.s.w.s.m.m.a.RequestMappingHandlerAdapter - Looking for @ControllerAdvice: org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext@2d9b57ca: startup date [Wed Nov 04 22:29:39 CET 2015]; root of context hierarchy
+2015-11-04 22:29:49,917 12271 [main] INFO  o.s.w.s.m.m.a.RequestMappingHandlerAdapter - Looking for @ControllerAdvice: org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext@2d9b57ca: startup date [Wed Nov 04 22:29:39 CET 2015]; root of context hierarchy
+2015-11-04 22:29:51,027 13381 [main] INFO  o.s.w.s.m.m.a.RequestMappingHandlerAdapter - Looking for @ControllerAdvice: org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext@2d9b57ca: startup date [Wed Nov 04 22:29:39 CET 2015]; root of context hierarchy
+2015-11-04 22:29:51,054 13408 [main] INFO  o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped "{[/eventLog/event],methods=[PUT],params=[],headers=[],consumes=[application/json],produces=[],custom=[]}" onto public void no.difi.meldingsutveksling.eventlog.EventLogController.log(no.difi.meldingsutveksling.eventlog.Event)
+2015-11-04 22:29:51,055 13409 [main] INFO  o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped "{[/eventLog/event],methods=[GET],params=[],headers=[],consumes=[],produces=[application/json],custom=[]}" onto public java.util.List<no.difi.meldingsutveksling.eventlog.Event> no.difi.meldingsutveksling.eventlog.EventLogController.getEventsSince(long)
+2015-11-04 22:29:51,055 13409 [main] INFO  o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped "{[/eventLog/conversation],methods=[GET],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public java.util.List<no.difi.meldingsutveksling.eventlog.Event> no.difi.meldingsutveksling.eventlog.EventLogController.getConvrEntries(java.lang.String,no.difi.meldingsutveksling.eventlog.ConversationIdTypes)
+2015-11-04 22:29:51,057 13411 [main] INFO  o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped "{[/error],methods=[],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.http.ResponseEntity<java.util.Map<java.lang.String, java.lang.Object>> org.springframework.boot.autoconfigure.web.BasicErrorController.error(javax.servlet.http.HttpServletRequest)
+2015-11-04 22:29:51,057 13411 [main] INFO  o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped "{[/error],methods=[],params=[],headers=[],consumes=[],produces=[text/html],custom=[]}" onto public org.springframework.web.servlet.ModelAndView org.springframework.boot.autoconfigure.web.BasicErrorController.errorHtml(javax.servlet.http.HttpServletRequest)
+2015-11-04 22:29:51,082 13436 [main] INFO  o.s.w.s.h.SimpleUrlHandlerMapping - Mapped URL path [/**] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2015-11-04 22:29:51,082 13436 [main] INFO  o.s.w.s.h.SimpleUrlHandlerMapping - Mapped URL path [/webjars/**] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2015-11-04 22:29:51,122 13476 [main] INFO  o.s.w.s.h.SimpleUrlHandlerMapping - Mapped URL path [/**/favicon.ico] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2015-11-04 22:29:51,457 13811 [main] INFO  / - jolokia: No access restrictor found at classpath:/jolokia-access.xml, access to all MBeans is allowed
+2015-11-04 22:29:52,223 14577 [main] INFO  o.s.b.a.e.m.EndpointHandlerMapping - Mapped "{[/jolokia/**],methods=[],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.web.servlet.ModelAndView org.springframework.boot.actuate.endpoint.mvc.JolokiaMvcEndpoint.handle(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse) throws java.lang.Exception
+2015-11-04 22:29:52,224 14578 [main] INFO  o.s.b.a.e.m.EndpointHandlerMapping - Mapped "{[/trace],methods=[GET],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.mvc.EndpointMvcAdapter.invoke()
+2015-11-04 22:29:52,225 14579 [main] INFO  o.s.b.a.e.m.EndpointHandlerMapping - Mapped "{[/logfile],methods=[GET],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public void de.codecentric.boot.admin.actuate.LogfileMvcEndpoint.invoke(javax.servlet.http.HttpServletResponse) throws java.io.IOException
+2015-11-04 22:29:52,225 14579 [main] INFO  o.s.b.a.e.m.EndpointHandlerMapping - Mapped "{[/logfile],methods=[HEAD],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.http.ResponseEntity<java.lang.Object> de.codecentric.boot.admin.actuate.LogfileMvcEndpoint.available()
+2015-11-04 22:29:52,226 14580 [main] INFO  o.s.b.a.e.m.EndpointHandlerMapping - Mapped "{[/dump],methods=[GET],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.mvc.EndpointMvcAdapter.invoke()
+2015-11-04 22:29:52,226 14580 [main] INFO  o.s.b.a.e.m.EndpointHandlerMapping - Mapped "{[/beans],methods=[GET],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.mvc.EndpointMvcAdapter.invoke()
+2015-11-04 22:29:52,226 14580 [main] INFO  o.s.b.a.e.m.EndpointHandlerMapping - Mapped "{[/info],methods=[GET],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.mvc.EndpointMvcAdapter.invoke()
+2015-11-04 22:29:52,227 14581 [main] INFO  o.s.b.a.e.m.EndpointHandlerMapping - Mapped "{[/configprops],methods=[GET],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.mvc.EndpointMvcAdapter.invoke()
+2015-11-04 22:29:52,227 14581 [main] INFO  o.s.b.a.e.m.EndpointHandlerMapping - Mapped "{[/mappings],methods=[GET],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.mvc.EndpointMvcAdapter.invoke()
+2015-11-04 22:29:52,227 14581 [main] INFO  o.s.b.a.e.m.EndpointHandlerMapping - Mapped "{[/autoconfig],methods=[GET],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.mvc.EndpointMvcAdapter.invoke()
+2015-11-04 22:29:52,228 14582 [main] INFO  o.s.b.a.e.m.EndpointHandlerMapping - Mapped "{[/env/{name:.*}],methods=[GET],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.mvc.EnvironmentMvcEndpoint.value(java.lang.String)
+2015-11-04 22:29:52,228 14582 [main] INFO  o.s.b.a.e.m.EndpointHandlerMapping - Mapped "{[/env],methods=[GET],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.mvc.EndpointMvcAdapter.invoke()
+2015-11-04 22:29:52,229 14583 [main] INFO  o.s.b.a.e.m.EndpointHandlerMapping - Mapped "{[/health],methods=[],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.mvc.HealthMvcEndpoint.invoke(java.security.Principal)
+2015-11-04 22:29:52,229 14583 [main] INFO  o.s.b.a.e.m.EndpointHandlerMapping - Mapped "{[/metrics/{name:.*}],methods=[GET],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.mvc.MetricsMvcEndpoint.value(java.lang.String)
+2015-11-04 22:29:52,229 14583 [main] INFO  o.s.b.a.e.m.EndpointHandlerMapping - Mapped "{[/metrics],methods=[GET],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.mvc.EndpointMvcAdapter.invoke()
+2015-11-04 22:29:52,414 14768 [main] INFO  o.s.d.r.w.RepositoryRestHandlerAdapter - Looking for @ControllerAdvice: org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext@2d9b57ca: startup date [Wed Nov 04 22:29:39 CET 2015]; root of context hierarchy
+2015-11-04 22:29:52,434 14788 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/{repository}],methods=[OPTIONS],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.http.ResponseEntity<?> org.springframework.data.rest.webmvc.RepositoryEntityController.optionsForCollectionResource(org.springframework.data.rest.webmvc.RootResourceInformation)
+2015-11-04 22:29:52,435 14789 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/{repository}],methods=[HEAD],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.http.ResponseEntity<?> org.springframework.data.rest.webmvc.RepositoryEntityController.headCollectionResource(org.springframework.data.rest.webmvc.RootResourceInformation) throws org.springframework.web.HttpRequestMethodNotSupportedException
+2015-11-04 22:29:52,435 14789 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/{repository}],methods=[GET],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.hateoas.Resources<?> org.springframework.data.rest.webmvc.RepositoryEntityController.getCollectionResource(org.springframework.data.rest.webmvc.RootResourceInformation,org.springframework.data.rest.webmvc.support.DefaultedPageable,org.springframework.data.domain.Sort,org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler) throws org.springframework.data.rest.webmvc.ResourceNotFoundException,org.springframework.web.HttpRequestMethodNotSupportedException
+2015-11-04 22:29:52,436 14790 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/{repository}],methods=[GET],params=[],headers=[],consumes=[],produces=[application/x-spring-data-compact+json || text/uri-list],custom=[]}" onto public org.springframework.hateoas.Resources<?> org.springframework.data.rest.webmvc.RepositoryEntityController.getCollectionResourceCompact(org.springframework.data.rest.webmvc.RootResourceInformation,org.springframework.data.rest.webmvc.support.DefaultedPageable,org.springframework.data.domain.Sort,org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler) throws org.springframework.data.rest.webmvc.ResourceNotFoundException,org.springframework.web.HttpRequestMethodNotSupportedException
+2015-11-04 22:29:52,436 14790 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/{repository}],methods=[POST],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.http.ResponseEntity<org.springframework.hateoas.ResourceSupport> org.springframework.data.rest.webmvc.RepositoryEntityController.postCollectionResource(org.springframework.data.rest.webmvc.RootResourceInformation,org.springframework.data.rest.webmvc.PersistentEntityResource,org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler) throws org.springframework.web.HttpRequestMethodNotSupportedException
+2015-11-04 22:29:52,436 14790 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/{repository}/{id}],methods=[OPTIONS],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.http.ResponseEntity<?> org.springframework.data.rest.webmvc.RepositoryEntityController.optionsForItemResource(org.springframework.data.rest.webmvc.RootResourceInformation)
+2015-11-04 22:29:52,437 14791 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/{repository}/{id}],methods=[HEAD],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.http.ResponseEntity<?> org.springframework.data.rest.webmvc.RepositoryEntityController.headForItemResource(org.springframework.data.rest.webmvc.RootResourceInformation,java.io.Serializable) throws org.springframework.web.HttpRequestMethodNotSupportedException
+2015-11-04 22:29:52,437 14791 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/{repository}/{id}],methods=[GET],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.http.ResponseEntity<org.springframework.hateoas.Resource<?>> org.springframework.data.rest.webmvc.RepositoryEntityController.getItemResource(org.springframework.data.rest.webmvc.RootResourceInformation,java.io.Serializable,org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler) throws org.springframework.web.HttpRequestMethodNotSupportedException
+2015-11-04 22:29:52,437 14791 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/{repository}/{id}],methods=[PUT],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.http.ResponseEntity<? extends org.springframework.hateoas.ResourceSupport> org.springframework.data.rest.webmvc.RepositoryEntityController.putItemResource(org.springframework.data.rest.webmvc.RootResourceInformation,org.springframework.data.rest.webmvc.PersistentEntityResource,java.io.Serializable,org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler) throws org.springframework.web.HttpRequestMethodNotSupportedException
+2015-11-04 22:29:52,437 14791 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/{repository}/{id}],methods=[PATCH],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.http.ResponseEntity<org.springframework.hateoas.ResourceSupport> org.springframework.data.rest.webmvc.RepositoryEntityController.patchItemResource(org.springframework.data.rest.webmvc.RootResourceInformation,org.springframework.data.rest.webmvc.PersistentEntityResource,java.io.Serializable,org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler) throws org.springframework.web.HttpRequestMethodNotSupportedException,org.springframework.data.rest.webmvc.ResourceNotFoundException
+2015-11-04 22:29:52,438 14792 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/{repository}/{id}],methods=[DELETE],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.http.ResponseEntity<?> org.springframework.data.rest.webmvc.RepositoryEntityController.deleteItemResource(org.springframework.data.rest.webmvc.RootResourceInformation,java.io.Serializable) throws org.springframework.data.rest.webmvc.ResourceNotFoundException,org.springframework.web.HttpRequestMethodNotSupportedException
+2015-11-04 22:29:52,439 14793 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/],methods=[OPTIONS],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.http.HttpEntity<?> org.springframework.data.rest.webmvc.RepositoryController.optionsForRepositories()
+2015-11-04 22:29:52,439 14793 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/],methods=[HEAD],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.http.ResponseEntity<?> org.springframework.data.rest.webmvc.RepositoryController.headForRepositories()
+2015-11-04 22:29:52,440 14794 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/],methods=[GET],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.http.HttpEntity<org.springframework.data.rest.webmvc.RepositoryLinksResource> org.springframework.data.rest.webmvc.RepositoryController.listRepositories()
+2015-11-04 22:29:52,441 14795 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/{repository}/{id}/{property}/{propertyId}],methods=[GET],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.http.ResponseEntity<org.springframework.hateoas.ResourceSupport> org.springframework.data.rest.webmvc.RepositoryPropertyReferenceController.followPropertyReference(org.springframework.data.rest.webmvc.RootResourceInformation,java.io.Serializable,java.lang.String,java.lang.String,org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler) throws java.lang.Exception
+2015-11-04 22:29:52,441 14795 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/{repository}/{id}/{property}],methods=[GET],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.http.ResponseEntity<org.springframework.hateoas.ResourceSupport> org.springframework.data.rest.webmvc.RepositoryPropertyReferenceController.followPropertyReference(org.springframework.data.rest.webmvc.RootResourceInformation,java.io.Serializable,java.lang.String,org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler) throws java.lang.Exception
+2015-11-04 22:29:52,442 14796 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/{repository}/{id}/{property}],methods=[DELETE],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.http.ResponseEntity<? extends org.springframework.hateoas.ResourceSupport> org.springframework.data.rest.webmvc.RepositoryPropertyReferenceController.deletePropertyReference(org.springframework.data.rest.webmvc.RootResourceInformation,java.io.Serializable,java.lang.String) throws java.lang.Exception
+2015-11-04 22:29:52,442 14796 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/{repository}/{id}/{property}],methods=[GET],params=[],headers=[],consumes=[],produces=[application/x-spring-data-compact+json || text/uri-list],custom=[]}" onto public org.springframework.http.ResponseEntity<org.springframework.hateoas.ResourceSupport> org.springframework.data.rest.webmvc.RepositoryPropertyReferenceController.followPropertyReferenceCompact(org.springframework.data.rest.webmvc.RootResourceInformation,java.io.Serializable,java.lang.String,org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler) throws java.lang.Exception
+2015-11-04 22:29:52,442 14796 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/{repository}/{id}/{property}],methods=[PATCH || PUT],params=[],headers=[],consumes=[application/json || application/x-spring-data-compact+json || text/uri-list],produces=[],custom=[]}" onto public org.springframework.http.ResponseEntity<? extends org.springframework.hateoas.ResourceSupport> org.springframework.data.rest.webmvc.RepositoryPropertyReferenceController.createPropertyReference(org.springframework.data.rest.webmvc.RootResourceInformation,org.springframework.http.HttpMethod,org.springframework.hateoas.Resources<java.lang.Object>,java.io.Serializable,java.lang.String) throws java.lang.Exception
+2015-11-04 22:29:52,443 14797 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/{repository}/{id}/{property}/{propertyId}],methods=[DELETE],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.http.ResponseEntity<org.springframework.hateoas.ResourceSupport> org.springframework.data.rest.webmvc.RepositoryPropertyReferenceController.deletePropertyReferenceId(org.springframework.data.rest.webmvc.RootResourceInformation,java.io.Serializable,java.lang.String,java.lang.String) throws java.lang.Exception
+2015-11-04 22:29:52,443 14797 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/{repository}/schema],methods=[GET],params=[],headers=[],consumes=[],produces=[application/schema+json],custom=[]}" onto public org.springframework.http.HttpEntity<org.springframework.data.rest.webmvc.json.JsonSchema> org.springframework.data.rest.webmvc.RepositorySchemaController.schema(org.springframework.data.rest.webmvc.RootResourceInformation)
+2015-11-04 22:29:52,445 14799 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/{repository}/search],methods=[HEAD],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.http.HttpEntity<?> org.springframework.data.rest.webmvc.RepositorySearchController.headForSearches(org.springframework.data.rest.webmvc.RootResourceInformation)
+2015-11-04 22:29:52,445 14799 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/{repository}/search],methods=[GET],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.hateoas.ResourceSupport org.springframework.data.rest.webmvc.RepositorySearchController.listSearches(org.springframework.data.rest.webmvc.RootResourceInformation)
+2015-11-04 22:29:52,445 14799 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/{repository}/search],methods=[OPTIONS],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.http.HttpEntity<?> org.springframework.data.rest.webmvc.RepositorySearchController.optionsForSearches(org.springframework.data.rest.webmvc.RootResourceInformation)
+2015-11-04 22:29:52,446 14800 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/{repository}/search/{search}],methods=[GET],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.http.ResponseEntity<java.lang.Object> org.springframework.data.rest.webmvc.RepositorySearchController.executeSearch(org.springframework.data.rest.webmvc.RootResourceInformation,org.springframework.web.context.request.WebRequest,java.lang.String,org.springframework.data.rest.webmvc.support.DefaultedPageable,org.springframework.data.domain.Sort,org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler)
+2015-11-04 22:29:52,446 14800 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/{repository}/search/{search}],methods=[GET],params=[],headers=[],consumes=[],produces=[application/x-spring-data-compact+json],custom=[]}" onto public org.springframework.hateoas.ResourceSupport org.springframework.data.rest.webmvc.RepositorySearchController.executeSearchCompact(org.springframework.data.rest.webmvc.RootResourceInformation,org.springframework.web.context.request.WebRequest,java.lang.String,java.lang.String,org.springframework.data.rest.webmvc.support.DefaultedPageable,org.springframework.data.domain.Sort,org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler)
+2015-11-04 22:29:52,446 14800 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/{repository}/search/{search}],methods=[OPTIONS],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.http.ResponseEntity<java.lang.Object> org.springframework.data.rest.webmvc.RepositorySearchController.optionsForSearch(org.springframework.data.rest.webmvc.RootResourceInformation,java.lang.String)
+2015-11-04 22:29:52,447 14801 [main] INFO  o.s.d.r.w.RepositoryRestHandlerMapping - Mapped "{[/{repository}/search/{search}],methods=[HEAD],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.http.ResponseEntity<java.lang.Object> org.springframework.data.rest.webmvc.RepositorySearchController.headForSearch(org.springframework.data.rest.webmvc.RootResourceInformation,java.lang.String)
+2015-11-04 22:29:52,454 14808 [main] INFO  o.s.d.r.w.BaseUriAwareHandlerMapping - Mapped "{[/alps],methods=[GET],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto org.springframework.http.HttpEntity<org.springframework.hateoas.alps.Alps> org.springframework.data.rest.webmvc.alps.AlpsController.alps()
+2015-11-04 22:29:52,454 14808 [main] INFO  o.s.d.r.w.BaseUriAwareHandlerMapping - Mapped "{[/alps || /alps/{repository}],methods=[OPTIONS],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto org.springframework.http.HttpEntity<?> org.springframework.data.rest.webmvc.alps.AlpsController.alpsOptions()
+2015-11-04 22:29:52,454 14808 [main] INFO  o.s.d.r.w.BaseUriAwareHandlerMapping - Mapped "{[/alps/{repository}],methods=[GET],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto org.springframework.http.HttpEntity<org.springframework.data.rest.webmvc.RootResourceInformation> org.springframework.data.rest.webmvc.alps.AlpsController.descriptor(org.springframework.data.rest.webmvc.RootResourceInformation)
+2015-11-04 22:29:52,509 14863 [main] INFO  o.s.j.e.a.AnnotationMBeanExporter - Registering beans for JMX exposure on startup
+2015-11-04 22:29:52,520 14874 [main] INFO  o.s.c.s.DefaultLifecycleProcessor - Starting beans in phase 0
+2015-11-04 22:29:52,615 14969 [main] INFO  / - Initializing Spring FrameworkServlet 'dispatcherServlet'
+2015-11-04 22:29:52,615 14969 [main] INFO  o.s.web.servlet.DispatcherServlet - FrameworkServlet 'dispatcherServlet': initialization started
+2015-11-04 22:29:52,636 14990 [main] INFO  o.s.web.servlet.DispatcherServlet - FrameworkServlet 'dispatcherServlet': initialization completed in 21 ms
+2015-11-04 22:29:52,699 15053 [main] INFO  com.sun.xml.ws.servlet.http - WSSERVLET14: JAX-WS servlet initializing
+2015-11-04 22:29:52,764 15118 [main] INFO  o.e.jetty.server.ServerConnector - Started ServerConnector@5a053469{HTTP/1.1}{0.0.0.0:8080}
+2015-11-04 22:29:52,769 15123 [main] INFO  o.s.b.c.e.j.JettyEmbeddedServletContainer - Jetty started on port(s) 8080 (http/1.1)
+2015-11-04 22:29:52,881 15235 [main] INFO  n.d.m.IntegrasjonspunktApplication - Started IntegrasjonspunktApplication in 14.554 seconds (JVM running for 15.624)
+2015-11-04 22:33:15,546 217900 [qtp173454268-21] INFO  n.d.virksert.client.VirksertClient - Operation timed out
+java.net.ConnectException: Operation timed out
+	at java.net.PlainSocketImpl.socketConnect(Native Method) ~[na:1.7.0_40]
+	at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:339) ~[na:1.7.0_40]
+	at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:200) ~[na:1.7.0_40]
+	at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:182) ~[na:1.7.0_40]
+	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:392) ~[na:1.7.0_40]
+	at java.net.Socket.connect(Socket.java:579) ~[na:1.7.0_40]
+	at java.net.Socket.connect(Socket.java:528) ~[na:1.7.0_40]
+	at sun.net.NetworkClient.doConnect(NetworkClient.java:180) ~[na:1.7.0_40]
+	at sun.net.www.http.HttpClient.openServer(HttpClient.java:432) ~[na:1.7.0_40]
+	at sun.net.www.http.HttpClient.openServer(HttpClient.java:527) ~[na:1.7.0_40]
+	at sun.net.www.http.HttpClient.<init>(HttpClient.java:211) ~[na:1.7.0_40]
+	at sun.net.www.http.HttpClient.New(HttpClient.java:308) ~[na:1.7.0_40]
+	at sun.net.www.http.HttpClient.New(HttpClient.java:326) ~[na:1.7.0_40]
+	at sun.net.www.protocol.http.HttpURLConnection.getNewHttpClient(HttpURLConnection.java:996) ~[na:1.7.0_40]
+	at sun.net.www.protocol.http.HttpURLConnection.plainConnect(HttpURLConnection.java:932) ~[na:1.7.0_40]
+	at sun.net.www.protocol.http.HttpURLConnection.connect(HttpURLConnection.java:850) ~[na:1.7.0_40]
+	at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1300) ~[na:1.7.0_40]
+	at java.net.HttpURLConnection.getResponseCode(HttpURLConnection.java:468) ~[na:1.7.0_40]
+	at no.difi.virksert.client.VirksertClient.fetch(VirksertClient.java:38) ~[classes/:na]
+	at no.difi.meldingsutveksling.services.AdresseregisterVirksertClient.getCertificate(AdresseregisterVirksertClient.java:40) [classes/:na]
+	at no.difi.meldingsutveksling.services.AdresseregisterVirksert.getCertificate(AdresseregisterVirksert.java:31) [classes/:na]
+	at no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl.hasAdresseregisterCertificate(IntegrasjonspunktImpl.java:72) [classes/:na]
+	at no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl.putMessage(IntegrasjonspunktImpl.java:81) [classes/:na]
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:1.7.0_40]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57) ~[na:1.7.0_40]
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:1.7.0_40]
+	at java.lang.reflect.Method.invoke(Method.java:606) ~[na:1.7.0_40]
+	at com.sun.xml.ws.api.server.InstanceResolver$1.invoke(InstanceResolver.java:250) [jaxws-rt-2.2.8.jar:2.2.8]
+	at com.sun.xml.ws.server.InvokerTube$2.invoke(InvokerTube.java:149) [jaxws-rt-2.2.8.jar:2.2.8]
+	at com.sun.xml.ws.server.sei.SEIInvokerTube.processRequest(SEIInvokerTube.java:88) [jaxws-rt-2.2.8.jar:2.2.8]
+	at com.sun.xml.ws.api.pipe.Fiber.__doRun(Fiber.java:1136) [jaxws-rt-2.2.8.jar:2.2.8]
+	at com.sun.xml.ws.api.pipe.Fiber._doRun(Fiber.java:1050) [jaxws-rt-2.2.8.jar:2.2.8]
+	at com.sun.xml.ws.api.pipe.Fiber.doRun(Fiber.java:1019) [jaxws-rt-2.2.8.jar:2.2.8]
+	at com.sun.xml.ws.api.pipe.Fiber.run(Fiber.java:813) [jaxws-rt-2.2.8.jar:2.2.8]
+	at com.sun.xml.ws.api.pipe.Fiber.start(Fiber.java:420) [jaxws-rt-2.2.8.jar:2.2.8]
+	at com.sun.xml.ws.server.WSEndpointImpl.processAsync(WSEndpointImpl.java:369) [jaxws-rt-2.2.8.jar:2.2.8]
+	at com.sun.xml.ws.server.WSEndpointImpl.process(WSEndpointImpl.java:399) [jaxws-rt-2.2.8.jar:2.2.8]
+	at com.sun.xml.ws.transport.http.HttpAdapter.invokeAsync(HttpAdapter.java:562) [jaxws-rt-2.2.8.jar:2.2.8]
+	at com.sun.xml.ws.transport.http.servlet.ServletAdapter.invokeAsync(ServletAdapter.java:212) [jaxws-rt-2.2.8.jar:na]
+	at com.sun.xml.ws.transport.http.servlet.WSServletDelegate.doGet(WSServletDelegate.java:161) [jaxws-rt-2.2.8.jar:na]
+	at com.sun.xml.ws.transport.http.servlet.WSServletDelegate.doPost(WSServletDelegate.java:197) [jaxws-rt-2.2.8.jar:na]
+	at com.sun.xml.ws.transport.http.servlet.WSSpringServlet.doPost(WSSpringServlet.java:104) [jaxws-spring-1.9.jar:na]
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:707) [javax.servlet-api-3.1.0.jar:3.1.0]
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:790) [javax.servlet-api-3.1.0.jar:3.1.0]
+	at org.eclipse.jetty.servlet.ServletHolder.handle(ServletHolder.java:808) [jetty-servlet-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1669) [jetty-servlet-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter.doFilter(WebSocketUpgradeFilter.java:224) [websocket-server-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1652) [jetty-servlet-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.springframework.boot.actuate.autoconfigure.EndpointWebMvcAutoConfiguration$ApplicationContextHeaderFilter.doFilterInternal(EndpointWebMvcAutoConfiguration.java:295) [spring-boot-actuator-1.2.5.RELEASE.jar:1.2.5.RELEASE]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:107) [spring-web-4.1.7.RELEASE.jar:4.1.7.RELEASE]
+	at org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1652) [jetty-servlet-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.springframework.boot.actuate.trace.WebRequestTraceFilter.doFilterInternal(WebRequestTraceFilter.java:102) [spring-boot-actuator-1.2.5.RELEASE.jar:1.2.5.RELEASE]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:107) [spring-web-4.1.7.RELEASE.jar:4.1.7.RELEASE]
+	at org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1652) [jetty-servlet-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.springframework.web.filter.HiddenHttpMethodFilter.doFilterInternal(HiddenHttpMethodFilter.java:77) [spring-web-4.1.7.RELEASE.jar:4.1.7.RELEASE]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:107) [spring-web-4.1.7.RELEASE.jar:4.1.7.RELEASE]
+	at org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1652) [jetty-servlet-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:85) [spring-web-4.1.7.RELEASE.jar:4.1.7.RELEASE]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:107) [spring-web-4.1.7.RELEASE.jar:4.1.7.RELEASE]
+	at org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1652) [jetty-servlet-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.springframework.boot.actuate.autoconfigure.MetricsFilter.doFilterInternal(MetricsFilter.java:68) [spring-boot-actuator-1.2.5.RELEASE.jar:1.2.5.RELEASE]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:107) [spring-web-4.1.7.RELEASE.jar:4.1.7.RELEASE]
+	at org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1652) [jetty-servlet-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.servlet.ServletHandler.doHandle(ServletHandler.java:585) [jetty-servlet-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:143) [jetty-server-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.security.SecurityHandler.handle(SecurityHandler.java:577) [jetty-security-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.server.session.SessionHandler.doHandle(SessionHandler.java:223) [jetty-server-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.server.handler.ContextHandler.doHandle(ContextHandler.java:1127) [jetty-server-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.servlet.ServletHandler.doScope(ServletHandler.java:515) [jetty-servlet-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.server.session.SessionHandler.doScope(SessionHandler.java:185) [jetty-server-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.server.handler.ContextHandler.doScope(ContextHandler.java:1061) [jetty-server-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:141) [jetty-server-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:97) [jetty-server-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.server.Server.handle(Server.java:499) [jetty-server-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.server.HttpChannel.handle(HttpChannel.java:310) [jetty-server-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.server.HttpConnection.onFillable(HttpConnection.java:257) [jetty-server-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.io.AbstractConnection$2.run(AbstractConnection.java:540) [jetty-io-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.util.thread.QueuedThreadPool.runJob(QueuedThreadPool.java:635) [jetty-util-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.util.thread.QueuedThreadPool$3.run(QueuedThreadPool.java:555) [jetty-util-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at java.lang.Thread.run(Thread.java:724) [na:1.7.0_40]
+2015-11-04 22:33:15,695 218049 [qtp173454268-21] INFO  o.s.oxm.jaxb.Jaxb2Marshaller - Creating JAXBContext with context path [no.difi.meldingsutveksling.noarkexchange.p360.schema]
+2015-11-04 22:40:51,560 673914 [qtp173454268-21] INFO  n.d.virksert.client.VirksertClient - Operation timed out
+java.net.ConnectException: Operation timed out
+	at java.net.PlainSocketImpl.socketConnect(Native Method) ~[na:1.7.0_40]
+	at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:339) ~[na:1.7.0_40]
+	at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:200) ~[na:1.7.0_40]
+	at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:182) ~[na:1.7.0_40]
+	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:392) ~[na:1.7.0_40]
+	at java.net.Socket.connect(Socket.java:579) ~[na:1.7.0_40]
+	at java.net.Socket.connect(Socket.java:528) ~[na:1.7.0_40]
+	at sun.net.NetworkClient.doConnect(NetworkClient.java:180) ~[na:1.7.0_40]
+	at sun.net.www.http.HttpClient.openServer(HttpClient.java:432) ~[na:1.7.0_40]
+	at sun.net.www.http.HttpClient.openServer(HttpClient.java:527) ~[na:1.7.0_40]
+	at sun.net.www.http.HttpClient.<init>(HttpClient.java:211) ~[na:1.7.0_40]
+	at sun.net.www.http.HttpClient.New(HttpClient.java:308) ~[na:1.7.0_40]
+	at sun.net.www.http.HttpClient.New(HttpClient.java:326) ~[na:1.7.0_40]
+	at sun.net.www.protocol.http.HttpURLConnection.getNewHttpClient(HttpURLConnection.java:996) ~[na:1.7.0_40]
+	at sun.net.www.protocol.http.HttpURLConnection.plainConnect(HttpURLConnection.java:932) ~[na:1.7.0_40]
+	at sun.net.www.protocol.http.HttpURLConnection.connect(HttpURLConnection.java:850) ~[na:1.7.0_40]
+	at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1300) ~[na:1.7.0_40]
+	at java.net.HttpURLConnection.getResponseCode(HttpURLConnection.java:468) ~[na:1.7.0_40]
+	at no.difi.virksert.client.VirksertClient.fetch(VirksertClient.java:38) ~[classes/:na]
+	at no.difi.meldingsutveksling.services.AdresseregisterVirksertClient.getCertificate(AdresseregisterVirksertClient.java:40) [classes/:na]
+	at no.difi.meldingsutveksling.services.AdresseregisterVirksert.getCertificate(AdresseregisterVirksert.java:31) [classes/:na]
+	at no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl.hasAdresseregisterCertificate(IntegrasjonspunktImpl.java:72) [classes/:na]
+	at no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl.putMessage(IntegrasjonspunktImpl.java:81) [classes/:na]
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:1.7.0_40]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57) ~[na:1.7.0_40]
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:1.7.0_40]
+	at java.lang.reflect.Method.invoke(Method.java:606) ~[na:1.7.0_40]
+	at com.sun.xml.ws.api.server.InstanceResolver$1.invoke(InstanceResolver.java:250) [jaxws-rt-2.2.8.jar:2.2.8]
+	at com.sun.xml.ws.server.InvokerTube$2.invoke(InvokerTube.java:149) [jaxws-rt-2.2.8.jar:2.2.8]
+	at com.sun.xml.ws.server.sei.SEIInvokerTube.processRequest(SEIInvokerTube.java:88) [jaxws-rt-2.2.8.jar:2.2.8]
+	at com.sun.xml.ws.api.pipe.Fiber.__doRun(Fiber.java:1136) [jaxws-rt-2.2.8.jar:2.2.8]
+	at com.sun.xml.ws.api.pipe.Fiber._doRun(Fiber.java:1050) [jaxws-rt-2.2.8.jar:2.2.8]
+	at com.sun.xml.ws.api.pipe.Fiber.doRun(Fiber.java:1019) [jaxws-rt-2.2.8.jar:2.2.8]
+	at com.sun.xml.ws.api.pipe.Fiber.run(Fiber.java:813) [jaxws-rt-2.2.8.jar:2.2.8]
+	at com.sun.xml.ws.api.pipe.Fiber.start(Fiber.java:420) [jaxws-rt-2.2.8.jar:2.2.8]
+	at com.sun.xml.ws.server.WSEndpointImpl.processAsync(WSEndpointImpl.java:369) [jaxws-rt-2.2.8.jar:2.2.8]
+	at com.sun.xml.ws.server.WSEndpointImpl.process(WSEndpointImpl.java:399) [jaxws-rt-2.2.8.jar:2.2.8]
+	at com.sun.xml.ws.transport.http.HttpAdapter.invokeAsync(HttpAdapter.java:562) [jaxws-rt-2.2.8.jar:2.2.8]
+	at com.sun.xml.ws.transport.http.servlet.ServletAdapter.invokeAsync(ServletAdapter.java:212) [jaxws-rt-2.2.8.jar:na]
+	at com.sun.xml.ws.transport.http.servlet.WSServletDelegate.doGet(WSServletDelegate.java:161) [jaxws-rt-2.2.8.jar:na]
+	at com.sun.xml.ws.transport.http.servlet.WSServletDelegate.doPost(WSServletDelegate.java:197) [jaxws-rt-2.2.8.jar:na]
+	at com.sun.xml.ws.transport.http.servlet.WSSpringServlet.doPost(WSSpringServlet.java:104) [jaxws-spring-1.9.jar:na]
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:707) [javax.servlet-api-3.1.0.jar:3.1.0]
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:790) [javax.servlet-api-3.1.0.jar:3.1.0]
+	at org.eclipse.jetty.servlet.ServletHolder.handle(ServletHolder.java:808) [jetty-servlet-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1669) [jetty-servlet-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter.doFilter(WebSocketUpgradeFilter.java:224) [websocket-server-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1652) [jetty-servlet-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.springframework.boot.actuate.autoconfigure.EndpointWebMvcAutoConfiguration$ApplicationContextHeaderFilter.doFilterInternal(EndpointWebMvcAutoConfiguration.java:295) [spring-boot-actuator-1.2.5.RELEASE.jar:1.2.5.RELEASE]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:107) [spring-web-4.1.7.RELEASE.jar:4.1.7.RELEASE]
+	at org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1652) [jetty-servlet-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.springframework.boot.actuate.trace.WebRequestTraceFilter.doFilterInternal(WebRequestTraceFilter.java:102) [spring-boot-actuator-1.2.5.RELEASE.jar:1.2.5.RELEASE]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:107) [spring-web-4.1.7.RELEASE.jar:4.1.7.RELEASE]
+	at org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1652) [jetty-servlet-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.springframework.web.filter.HiddenHttpMethodFilter.doFilterInternal(HiddenHttpMethodFilter.java:77) [spring-web-4.1.7.RELEASE.jar:4.1.7.RELEASE]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:107) [spring-web-4.1.7.RELEASE.jar:4.1.7.RELEASE]
+	at org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1652) [jetty-servlet-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:85) [spring-web-4.1.7.RELEASE.jar:4.1.7.RELEASE]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:107) [spring-web-4.1.7.RELEASE.jar:4.1.7.RELEASE]
+	at org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1652) [jetty-servlet-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.springframework.boot.actuate.autoconfigure.MetricsFilter.doFilterInternal(MetricsFilter.java:68) [spring-boot-actuator-1.2.5.RELEASE.jar:1.2.5.RELEASE]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:107) [spring-web-4.1.7.RELEASE.jar:4.1.7.RELEASE]
+	at org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1652) [jetty-servlet-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.servlet.ServletHandler.doHandle(ServletHandler.java:585) [jetty-servlet-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:143) [jetty-server-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.security.SecurityHandler.handle(SecurityHandler.java:577) [jetty-security-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.server.session.SessionHandler.doHandle(SessionHandler.java:223) [jetty-server-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.server.handler.ContextHandler.doHandle(ContextHandler.java:1127) [jetty-server-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.servlet.ServletHandler.doScope(ServletHandler.java:515) [jetty-servlet-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.server.session.SessionHandler.doScope(SessionHandler.java:185) [jetty-server-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.server.handler.ContextHandler.doScope(ContextHandler.java:1061) [jetty-server-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:141) [jetty-server-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:97) [jetty-server-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.server.Server.handle(Server.java:499) [jetty-server-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.server.HttpChannel.handle(HttpChannel.java:310) [jetty-server-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.server.HttpConnection.onFillable(HttpConnection.java:257) [jetty-server-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.io.AbstractConnection$2.run(AbstractConnection.java:540) [jetty-io-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.util.thread.QueuedThreadPool.runJob(QueuedThreadPool.java:635) [jetty-util-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at org.eclipse.jetty.util.thread.QueuedThreadPool$3.run(QueuedThreadPool.java:555) [jetty-util-9.2.11.v20150529.jar:9.2.11.v20150529]
+	at java.lang.Thread.run(Thread.java:724) [na:1.7.0_40]
