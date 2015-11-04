@@ -47,16 +47,13 @@ class ReceiveClient {
         return port.receive(sbd);
     }
 
-
     public static void main(String[] args) {
-
         StandardBusinessDocument sbd = new StandardBusinessDocument();
         sbd.setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader());
         sbd.setAny(new Payload(new byte[10]));
 
         ReceiveClient rc = new ReceiveClient("http://localhost:8080/noarkExchange");
         rc.callReceive(sbd) ;
-
     }
 
 }
