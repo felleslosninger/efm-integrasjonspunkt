@@ -23,4 +23,13 @@ public class ErrorStatusTest {
 
         assertEquals(ErrorStatus.TEKNISK_FEIL, errorMessage);
     }
+
+    @Test
+    public void shouldGetTekniskFeilWhenMissingSender() {
+        ErrorStatus errorStatus = ErrorStatus.MISSING_SENDER;
+
+        String errorMessage = errorStatus.enduserErrorMessage();
+
+        assertEquals(ErrorStatus.TEKNISK_FEIL, errorMessage);
+    }
 }
