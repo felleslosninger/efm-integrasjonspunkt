@@ -114,7 +114,7 @@ public class MessageSender {
         }
         eventLog.log(new Event(ProcessState.SIGNATURE_VALIDATED));
 
-        Document sbd;
+        no.difi.meldingsutveksling.domain.sbdh.Document sbd;
         try {
             sbd = standardBusinessDocumentFactory.create(messageRequest, context.getAvsender(), context.getMottaker());
 
