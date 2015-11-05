@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.noarkexchange.putmessage;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
 
 /**
- * Created by mfhoel on 26.10.15.
+ * Enum to contain error messages for the logs and for the end user
  */
 public enum ErrorStatus {
     MISSING_RECIPIENT(1, "Request is missing recipient party number"),

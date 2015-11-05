@@ -7,7 +7,7 @@ import static org.junit.Assert.assertEquals;
 public class ErrorStatusTest {
 
     @Test
-    public void organizationCannotRecieveErrorMessage() throws Exception {
+    public void shouldGetMotakendeOrganisasjonKanIkkeMottaMeldingerWhenErrorStatusIsCannotRecieve() throws Exception {
         ErrorStatus errorStatus = ErrorStatus.CANNOT_RECIEVE;
 
         String errorMessage = errorStatus.enduserErrorMessage();
@@ -16,7 +16,7 @@ public class ErrorStatusTest {
     }
 
     @Test
-    public void missingRecipientLeadsToTekniskFeil() {
+    public void shouldGetTekniskFeilWhenMissingRecipient() {
         ErrorStatus errorStatus = ErrorStatus.MISSING_RECIPIENT;
 
         String errorMessage = errorStatus.enduserErrorMessage();

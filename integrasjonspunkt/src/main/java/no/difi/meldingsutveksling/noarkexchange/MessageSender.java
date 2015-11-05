@@ -5,13 +5,17 @@ import com.thoughtworks.xstream.XStream;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.adresseregister.client.CertificateNotFoundException;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
-import no.difi.meldingsutveksling.domain.*;
+import no.difi.meldingsutveksling.domain.Avsender;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.Mottaker;
+import no.difi.meldingsutveksling.domain.Noekkelpar;
+import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.ErrorStatus;
-import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
@@ -34,25 +38,25 @@ import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory
 public class MessageSender {
 
     @Autowired
-    EventLog eventLog;
+    private EventLog eventLog;
 
     Logger log = Logger.getLogger(MessageSender.class.getName());
 
     @Autowired
     @Qualifier("multiTransport")
-    TransportFactory transportFactory;
+    private TransportFactory transportFactory;
 
     @Autowired
-    AdresseregisterService adresseregister;
+    private AdresseregisterService adresseregister;
 
     @Autowired
-    IntegrasjonspunktConfig configuration;
+    private IntegrasjonspunktConfig configuration;
 
     @Autowired
-    IntegrasjonspunktNokkel keyInfo;
+    private IntegrasjonspunktNokkel keyInfo;
 
     @Autowired
-    StandardBusinessDocumentFactory standardBusinessDocumentFactory;
+    private StandardBusinessDocumentFactory standardBusinessDocumentFactory;
 
     boolean setSender(IntegrasjonspunktContext context, PutMessageRequestAdapter message) {
 
@@ -177,28 +181,6 @@ public class MessageSender {
 
     public StandardBusinessDocumentFactory getStandardBusinessDocumentFactory() {
         return standardBusinessDocumentFactory;
-    }
-
-    class AddressTypeWrapper {
-
-        private AddressType addressType;
-        private String orgnr;
-
-        AddressTypeWrapper(AddressType addressType) {
-            this.addressType = addressType;
-        }
-
-        public boolean hasOrgNumber() {
-            return addressType.getOrgnr() != null && !addressType.getOrgnr().isEmpty();
-        }
-
-        public void setOrgnr(String orgnr) {
-            addressType.setOrgnr(orgnr);
-        }
-
-        public String getOrgnr() {
-            return addressType.getOrgnr();
-        }
     }
 
 }
