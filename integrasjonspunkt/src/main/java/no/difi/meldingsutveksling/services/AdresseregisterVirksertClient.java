@@ -14,6 +14,7 @@ public class AdresseregisterVirksertClient implements AdresseRegisterClient {
     private final String keyStoreName;
     private final String trustedIntermediateCerts;
     private final String trustedRootCertificateAlias;
+    private final VirksertClient virksertClient;
 
     /**
      * @param url                         the URL of the Viksert server
@@ -27,17 +28,17 @@ public class AdresseregisterVirksertClient implements AdresseRegisterClient {
         this.keyStoreName = keyStoreName;
         this.trustedIntermediateCerts = trustedIntermediateCertificateAlias;
         this.trustedRootCertificateAlias = trustedRootCertificateAlias;
+        virksertClient = VirksertClientBuilder.newInstance().setUri(url)
+                .setScope(keyStoreName)
+                .setTrustedIntermediateAliases(trustedIntermediateCerts)
+                .setTrustedRootAliases(trustedRootCertificateAlias).build();
 
     }
 
     @Override
     public Certificate getCertificate(String orgNr) {
-        VirksertClient client = VirksertClientBuilder.newInstance().setUri(url)
-                .setScope(keyStoreName)
-                .setTrustedIntermediateAliases(trustedIntermediateCerts)
-                .setTrustedRootAliases(trustedRootCertificateAlias).build();
         try {
-            return client.fetch(orgNr);
+            return virksertClient.fetch(orgNr);
         } catch (VirksertClientException e) {
             throw new CertificateException(e);
         }
