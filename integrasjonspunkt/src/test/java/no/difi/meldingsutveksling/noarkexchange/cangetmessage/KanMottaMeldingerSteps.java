@@ -135,7 +135,7 @@ public class KanMottaMeldingerSteps {
     }
 
     @When("^vi spør integrasjonspunktet om virksomhet kan motta meldinger$")
-    public void vi_spor_integrasjonspunktet_om_virksomhet_kan_motta_meldinger() throws Throwable {
+    public void vi_spør_integrasjonspunktet_om_virksomhet_kan_motta_meldinger() throws Throwable {
         // Express the Regexp above with the code you wish you had
         GetCanReceiveMessageRequestType request = new GetCanReceiveMessageRequestType();
         AddressType addressType = new AddressType();
