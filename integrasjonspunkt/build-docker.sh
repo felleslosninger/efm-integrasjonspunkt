@@ -28,11 +28,8 @@ __help() {
   echo
   echo "${BLACK}Required parameters:${RESET}"
   echo
-  echo  "   -p | -port :          Which port Docker should map this container on your computer"
-  echo  "   -o | -orgnr :         The organization number that should be used by this Integrasjonspunkt"
-  echo  "   -ne | -noarkEndpoint: Endpoint of the Import module of the Noark system"
-  echo  "   -nt | -noarkType :    Type of the Noark system"
-
+  echo  "   -p | -port :         Which port Docker should map this container on your computer"
+  echo  "   -o | -orgnr :        The organization number that should be used by this Integrasjonspunkt"
   echo
   echo "${BLACK}Optional parameters:${RESET}"
   echo
@@ -52,12 +49,6 @@ for i in "$@"; do
       -p=*|-port=*)
         PORT="${i#*=}"
       ;;
-      -ne=*|-noarkEndpoint=*)
-         NOARK_ENDPOINT="${i#*=}"
-      ;;
-      -nt=*|-noarktype=*)
-         NOARK_TYPE="${i#*=}"
-      ;;
       -o=*|-orgnr=*)
         ORGNUM="${i#*=}"
       ;;
@@ -73,7 +64,6 @@ for i in "$@"; do
       -t=*|-transport=*)
         TRANSPORT="${i#*=}"
       ;;
-
       -h|-help)
         __help && exit
       ;;
@@ -94,19 +84,6 @@ if [ $# -ge 2 ]; then
     echo "You have to specify a port number. Run with -h or -help parameter to see usage."
     exit 1
   fi
-
-    # Port number
-    if [ -z "NOARK_ENDPOINT" ]; then
-      echo "You have to specify a Noark EndPoint number. Run with -ne or -help parameter to see usage."
-      exit 1
-    fi
-
-  # Port number
-  if [ -z "NOARK_TYPE" ]; then
-    echo "You have to specify a Noark System type. Run with -nt or -help parameter to see usage."
-    exit 1
-  fi
-
 
   # Organization number
   if [ -z "$ORGNUM" ]; then
@@ -167,14 +144,16 @@ else
   __help
   exit 1
 fi
-  echo "stopping any running co"
+
+exit
+
 # Must stop any running container to continue
 STATUS_ID=$(docker ps -q -f name=${CONTAINER_NAME})
 if [ -n "$STATUS_ID" ]; then
   echo "Stopping $CONTAINER_NAME..."
   docker stop ${CONTAINER_NAME}
 fi
-    echo "stopping any running co"
+
 # Specify where the Certificate is
 if [ -d "$WORKING_DIR/certificates" ]; then
   # When running from Linux
@@ -184,13 +163,25 @@ else
   CERTIFICATE_DIR=${WORKING_DIR}/src/main/resources
 fi
 
-echo "build new image"
+# Remove any existing container
+OLD_CONTAINERS=$(docker ps -a | grep ${IMAGE_NAME})
+if [ "$OLD_CONTAINERS" != "" ]; then
+  echo "Removing old containers:"
+  docker rm $(docker ps -a | grep ${IMAGE_NAME} | awk '{print $1}')
+fi
+
+# Remove all unused images
+OLD_IMAGES=$(docker images | grep '<none>')
+if [ "$OLD_IMAGES" != "" ]; then
+  echo "Removing old images:"
+  docker rmi $(docker images | grep '<none>' | awk '{print $3}')
+fi
 
 # Build new image
 docker build --no-cache -t ${IMAGE_NAME} ${WORKING_DIR} &&\
 
 # Create new container
-docker run --name ${CONTAINER_NAME} -e noark.endpoint=${NOARK_ENDPOINT} -e noark.type=${NOARK_TYPE} -v ${CERTIFICATE_DIR}:/var/lib/difi/crt -p ${PORT}:8080 ${IMAGE_NAME}
+docker create --name ${CONTAINER_NAME} -v ${CERTIFICATE_DIR}:/var/lib/difi/crt -p ${PORT}:8080 ${IMAGE_NAME}
 
 # Done
 echo "$CONTAINER_NAME is build."
