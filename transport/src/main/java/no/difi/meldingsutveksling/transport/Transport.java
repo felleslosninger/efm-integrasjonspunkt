@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.transport;
 
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.domain.sbdh.Document;
 import org.apache.commons.configuration.Configuration;
 
 /**
@@ -17,6 +17,6 @@ public interface Transport {
     /**
      * @param document An SBD document with a payload consisting of an CMS encrypted ASIC package
      */
-    public void send(Configuration configuration, StandardBusinessDocument document);
+    public void send(Configuration configuration, Document document);
 
 }

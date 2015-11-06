@@ -1,29 +1,24 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import com.thoughtworks.xstream.XStream;
+import no.difi.meldingsutveksling.CertificateValidator;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
-import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
-import no.difi.meldingsutveksling.dokumentpakking.kvit.ObjectFactory;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
-import no.difi.meldingsutveksling.dokumentpakking.service.CreateSBD;
-import no.difi.meldingsutveksling.dokumentpakking.service.KvitteringType;
-import no.difi.meldingsutveksling.dokumentpakking.service.SignAFile;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
-import no.difi.meldingsutveksling.domain.*;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import no.difi.meldingsutveksling.noarkexchange.schema.receive.*;
-import no.difi.meldingsutveksling.oxalisexchange.ByteArrayImpl;
-import no.difi.meldingsutveksling.oxalisexchange.Kvittering;
+import no.difi.meldingsutveksling.noarkexchange.schema.receive.CorrelationInformation;
+import no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort;
+import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
+import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.oxalisexchange.OxalisMessageReceiverTemplate;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
-import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -36,10 +31,12 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.BindingType;
-import java.io.*;
-import java.security.cert.Certificate;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.security.cert.X509Certificate;
-import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -56,6 +53,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
     private static final String BEST_EDU = "BEST_EDU";
     private static final String KVITTERING_CONSTANT = "kvittering";
     private static final int MAGIC_NR = 1024;
+    public static final String SBD_NAMESPACE = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader";
     private EventLog eventLog = EventLog.create();
     private static final String MIME_TYPE = "application/xml";
     private static final String WRITE_TO = System.getProperty("user.home") + File.separator + "testToRemove" + File.separator + "kvitteringSbd.xml";
@@ -81,90 +79,78 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
     public IntegrajonspunktReceiveImpl() {
     }
 
-    public CorrelationInformation receive(@WebParam(name = "StandardBusinessDocument", targetNamespace = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader", partName = "receiveResponse") StandardBusinessDocument receiveResponse) {
+    public CorrelationInformation receive(@WebParam(name = "StandardBusinessDocument", targetNamespace = SBD_NAMESPACE, partName = "receiveResponse") StandardBusinessDocument standardBusinessDocument) {
+        return forwardToNoarkSystem(standardBusinessDocument);
+    }
 
-        if (isReciept(receiveResponse.getStandardBusinessDocumentHeader())) {
-            logEvent(receiveResponse, ProcessState.KVITTERING_MOTTATT);
+    public CorrelationInformation forwardToNoarkSystem(StandardBusinessDocument standardBusinessDocument) {
+        StandardBusinessDocumentWrapper inputDocument = new StandardBusinessDocumentWrapper(standardBusinessDocument);
+        if (isReciept(standardBusinessDocument.getStandardBusinessDocumentHeader())) {
+            logEvent(inputDocument, ProcessState.KVITTERING_MOTTATT);
             return new CorrelationInformation();
         }
 
-        String orgNumberSender = receiveResponse.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue().split(":")[1];
-        Organisasjonsnummer sender = new Organisasjonsnummer(orgNumberSender);
-        String orgNumberReceiver = receiveResponse.getStandardBusinessDocumentHeader().getReceiver().get(0).getIdentifier().getValue().split(":")[1];
-        Organisasjonsnummer reciever = new Organisasjonsnummer(orgNumberReceiver);
+        verifyCertificatesForSenderAndReceiver(inputDocument.getReceiverOrgNumber(), inputDocument.getSenderOrgNumber());
 
 
-        logEvent(receiveResponse, ProcessState.SBD_RECIEVED);
+        logEvent(inputDocument, ProcessState.SBD_RECIEVED);
 
-        forberedKvittering(receiveResponse, "leveringsKvittering");
+        Payload payload = inputDocument.getPayload();
 
-        String convId = receiveResponse.getStandardBusinessDocumentHeader().getBusinessScope().getScope().get(0).getInstanceIdentifier();
-        Noekkelpar noekkelpar = new Noekkelpar(keyInfo.loadPrivateKey(), adresseRegisterClient.getCertificate(reciever.toString()));
-        Avsender avsender = new Avsender(reciever, noekkelpar);
-        SignAFile signAFile = new SignAFile();
-
-        no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument kvittering = new CreateSBD().createSBD(reciever, sender, new ObjectFactory().createKvittering(signAFile.signIt(receiveResponse.getAny(), avsender, KvitteringType.LEVERING)), convId, KVITTERING_CONSTANT);
-        Transport transport = transportFactory.createTransport(kvittering);
-        transport.send(config.getConfiguration(), kvittering);
-        logEvent(receiveResponse, null, ProcessState.LEVERINGS_KVITTERING_SENT);
-
-        JAXBContext jaxbContextP;
-        Unmarshaller unMarshallerP;
-
-        Payload payload;
+        byte[] decryptedPayload = decrypt(payload);
+        logEvent(inputDocument, null, ProcessState.DECRYPTION_SUCCESS);
+        File decompressedPayload;
         try {
-            jaxbContextP = JAXBContext.newInstance(Payload.class);
-            unMarshallerP = jaxbContextP.createUnmarshaller();
-            payload = unMarshallerP.unmarshal((org.w3c.dom.Node) receiveResponse.getAny(), Payload.class).getValue();
-        } catch (JAXBException e) {
-            logEvent(receiveResponse, e, ProcessState.SOME_OTHER_EXCEPTION);
-            throw new MeldingsUtvekslingRuntimeException(e);
-        }
-        byte[] cmsEncZip = DatatypeConverter.parseBase64Binary(payload.getContent());
-        CmsUtil cmsUtil = new CmsUtil();
-        byte[] zipTobe = cmsUtil.decryptCMS(cmsEncZip, keyInfo.loadPrivateKey());
-        logEvent(receiveResponse, null, ProcessState.DECRYPTION_SUCCESS);
-        File bestEdu;
-        try {
-            bestEdu = goGetBestEdu(receiveResponse, zipTobe);
-            logEvent(receiveResponse, null, ProcessState.BESTEDU_EXTRACTED);
+            decompressedPayload = decompressToFile(inputDocument, decryptedPayload);
+            logEvent(inputDocument, null, ProcessState.BESTEDU_EXTRACTED);
         } catch (IOException e) {
-            logEvent(receiveResponse, e, ProcessState.SOME_OTHER_EXCEPTION);
+            logEvent(inputDocument, e, ProcessState.SOME_OTHER_EXCEPTION);
             throw new MeldingsUtvekslingRuntimeException(e);
         }
-        PutMessageRequestType putMessageRequestType = extractBestEdu(receiveResponse, bestEdu);
-        forwardToNoarkSystemAndSendReceipt(receiveResponse, sender, reciever, convId, avsender, signAFile, putMessageRequestType);
+        PutMessageRequestType putMessageRequestType = extractBestEdu(standardBusinessDocument, decompressedPayload);
+        forwardToNoarkSystemAndSendReceipt(inputDocument, putMessageRequestType);
+
         return new CorrelationInformation();
     }
 
+    private byte[] decrypt(Payload payload) {
+        byte[] cmsEncZip = DatatypeConverter.parseBase64Binary(payload.getContent());
+        CmsUtil cmsUtil = new CmsUtil();
+        return cmsUtil.decryptCMS(cmsEncZip, keyInfo.loadPrivateKey());
+    }
 
-    private PutMessageRequestType extractBestEdu(StandardBusinessDocument receiveResponse, File bestEdu) {
+    private void verifyCertificatesForSenderAndReceiver(String orgNumberReceiver, String orgNumberSender) {
+
+        CertificateValidator validator = new CertificateValidator();
+        validator.validate((X509Certificate) adresseRegisterClient.getCertificate(orgNumberReceiver));
+        validator.validate((X509Certificate) adresseRegisterClient.getCertificate(orgNumberSender));
+    }
+
+    private PutMessageRequestType extractBestEdu(StandardBusinessDocument standardBusinessDocument, File bestEdu) {
         PutMessageRequestType putMessageRequestType;
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
             Unmarshaller unMarshaller = jaxbContext.createUnmarshaller();
             putMessageRequestType = unMarshaller.unmarshal(new StreamSource(bestEdu), PutMessageRequestType.class).getValue();
         } catch (JAXBException e) {
-            logEvent(receiveResponse, e, ProcessState.SOME_OTHER_EXCEPTION);
+            StandardBusinessDocumentWrapper inputDocument = new StandardBusinessDocumentWrapper(standardBusinessDocument);
+            logEvent(inputDocument, e, ProcessState.SOME_OTHER_EXCEPTION);
             throw new IllegalStateException(e.getMessage(), e);
         }
         return putMessageRequestType;
     }
 
-    private void forwardToNoarkSystemAndSendReceipt(StandardBusinessDocument receiveResponse, Organisasjonsnummer sender, Organisasjonsnummer reciever, String convId, Avsender avsender, SignAFile signAFile, PutMessageRequestType putMessageRequestType) {
+    private void forwardToNoarkSystemAndSendReceipt(StandardBusinessDocumentWrapper inputDocument, PutMessageRequestType putMessageRequestType) {
         PutMessageResponseType response = localNoark.sendEduMelding(putMessageRequestType);
         if (response != null) {
             AppReceiptType result = response.getResult();
             if (null == result) {
-                logEvent(receiveResponse, null, ProcessState.ARCHIVE_NULL_RESPONSE);
+                logEvent(inputDocument, null, ProcessState.ARCHIVE_NULL_RESPONSE);
             } else {
-                logEvent(receiveResponse, null, ProcessState.BEST_EDU_SENT);
-                no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument receipt = new CreateSBD().createSBD(sender, reciever, signAFile.signIt(receiveResponse.getAny(), avsender, KvitteringType.AAPNING), convId, KVITTERING_CONSTANT);
-                Transport transport = transportFactory.createTransport(receipt);
-                transport.send(config.getConfiguration(), receipt);
+                logEvent(inputDocument, null, ProcessState.BEST_EDU_SENT);
             }
         } else {
-            logEvent(receiveResponse, null, ProcessState.ARCHIVE_NOT_AVAILABLE);
+            logEvent(inputDocument, null, ProcessState.ARCHIVE_NOT_AVAILABLE);
         }
     }
 
@@ -172,40 +158,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         return standardBusinessDocumentHeader.getDocumentIdentification().getType().equalsIgnoreCase(KVITTERING_CONSTANT);
     }
 
-    private void forberedKvittering(StandardBusinessDocument receiveResponse, String kvitteringsType) {
-        Dokumentpakker dokumentpakker = new Dokumentpakker(keyInfo.getSignatureHelper());
-        List<Partner> partnerList = receiveResponse.getStandardBusinessDocumentHeader().getSender();
-        List<Partner> recieverList = receiveResponse.getStandardBusinessDocumentHeader().getReceiver();
-        String sendTo = partnerList.get(0).getIdentifier().getValue().split(":")[1];
-        String recievedBy = recieverList.get(0).getIdentifier().getValue().split(":")[1];
-        String instanceIdentifier = receiveResponse.getStandardBusinessDocumentHeader().getBusinessScope().getScope().get(0).getInstanceIdentifier();
-        if (instanceIdentifier.contains(BEST_EDU)) {
-            instanceIdentifier = instanceIdentifier.replace(BEST_EDU, "Kvittering");
-        }
-
-        Certificate certificate = adresseRegisterClient.getCertificate(recievedBy);
-        Noekkelpar noekkelpar = new Noekkelpar(keyInfo.loadPrivateKey(), certificate);
-        Avsender.Builder avsenderBuilder = Avsender.builder(new Organisasjonsnummer(recievedBy), noekkelpar);
-        Avsender avsender = avsenderBuilder.build();
-        Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo), (X509Certificate) certificate);
-        try {
-            ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering(kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
-            byte[] resultSbd = dokumentpakker.pakkTilByteArray(byteArray, avsender, mottaker, instanceIdentifier, KVITTERING);
-            File file = new File(WRITE_TO);
-            FileUtils.writeByteArrayToFile(file, resultSbd);
-        } catch (IOException e) {
-            logEvent(receiveResponse, e, ProcessState.SOME_OTHER_EXCEPTION);
-        }
-    }
-
-    private byte[] genererKvittering(String kvitteringsType) {
-        Kvittering kvittering = new Kvittering(kvitteringsType);
-        XStream xStream = new XStream();
-        String kvitteringXml = xStream.toXML(kvittering);
-        return kvitteringXml.getBytes();
-    }
-
-    private File goGetBestEdu(StandardBusinessDocument sbd, byte[] bytes) throws IOException {
+    private File decompressToFile(StandardBusinessDocumentWrapper inputDocument, byte[] bytes) throws IOException {
         ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes));
         ZipEntry zipEntry = null;
         String outputFolder = System.getProperty("user.home") + File.separator + "testToRemove" +
@@ -214,7 +167,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         try {
             zipEntry = zipInputStream.getNextEntry();
         } catch (IOException e) {
-            logEvent(sbd, e, ProcessState.SOME_OTHER_EXCEPTION);
+            logEvent(inputDocument, e, ProcessState.SOME_OTHER_EXCEPTION);
         }
         while (null != zipEntry) {
             String fileName = zipEntry.getName();
@@ -226,7 +179,7 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
                 try {
                     fos = new FileOutputStream(newFile);
                 } catch (FileNotFoundException e) {
-                    logEvent(sbd, e, ProcessState.SOME_OTHER_EXCEPTION);
+                    logEvent(inputDocument, e, ProcessState.SOME_OTHER_EXCEPTION);
                 }
                 byte[] bufbyte = new byte[MAGIC_NR];
                 int len;
@@ -245,19 +198,19 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
     }
 
 
-    private void logEvent(StandardBusinessDocument receiveResponse, ProcessState sbdRecieved) {
-        logEvent(receiveResponse, null, sbdRecieved);
+    private void logEvent(StandardBusinessDocumentWrapper inputDocument, ProcessState sbdRecieved) {
+        logEvent(inputDocument, null, sbdRecieved);
     }
 
-    private void logEvent(StandardBusinessDocument receiveResponse, Throwable e, ProcessState processState) {
+    private void logEvent(StandardBusinessDocumentWrapper inputDocument, Throwable e, ProcessState processState) {
         if (null != e) {
             eventLog.log(new Event().setProcessStates(processState).setExceptionMessage(e.toString())
-                    .setReceiver(receiveResponse.getStandardBusinessDocumentHeader().getReceiver().get(0).getIdentifier().getValue().split(":")[1])
-                    .setSender(receiveResponse.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue().split(":")[1]));
+                    .setReceiver(inputDocument.getReceiverOrgNumber())
+                    .setSender(inputDocument.getSenderOrgNumber()));
         } else {
             eventLog.log(new Event().setProcessStates(processState)
-                    .setReceiver(receiveResponse.getStandardBusinessDocumentHeader().getReceiver().get(0).getIdentifier().getValue().split(":")[1])
-                    .setSender(receiveResponse.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue().split(":")[1]));
+                    .setReceiver(inputDocument.getReceiverOrgNumber())
+                    .setSender(inputDocument.getSenderOrgNumber()));
         }
     }
 

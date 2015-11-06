@@ -24,7 +24,7 @@
       </s:complexType>
       <s:element name="GetCanReceiveMessageResponse" type="s0:GetCanReceiveMessageResponseType" />
       <s:complexType name="GetCanReceiveMessageResponseType">
-        <s:sequence>Add
+        <s:sequence>
           <s:element minOccurs="1" maxOccurs="1" form="unqualified" name="result" type="s:boolean" />
         </s:sequence>
       </s:complexType>

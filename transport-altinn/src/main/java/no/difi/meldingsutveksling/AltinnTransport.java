@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling;
 
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.transport.Transport;
 import org.apache.commons.configuration.Configuration;
@@ -19,7 +19,7 @@ public class AltinnTransport implements Transport {
      * @param document      An SBD document with a payload consisting of an CMS encrypted ASIC package
      */
     @Override
-    public void send(Configuration configuration, final StandardBusinessDocument document) {
+    public void send(Configuration configuration, final Document document) {
         AltinnWsClient client = new AltinnWsClient(AltinnWsConfiguration.fromConfiguration(configuration));
 
         UploadRequest request1 = new UploadRequest() {
@@ -42,7 +42,7 @@ public class AltinnTransport implements Transport {
             }
 
             @Override
-            public StandardBusinessDocument getPayload() {
+            public Document getPayload() {
                 return document;
             }
         };

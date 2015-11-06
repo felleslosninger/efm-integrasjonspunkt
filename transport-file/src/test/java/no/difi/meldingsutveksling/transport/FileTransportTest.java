@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.transport;
 
+import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.modelmapper.ModelMapper;
 
@@ -22,8 +23,8 @@ public class FileTransportTest {
 
         ModelMapper mapper = new ModelMapper();
 
-        no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument domainDoc
-                = mapper.map(doc, no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument.class);
+        Document domainDoc
+                = mapper.map(doc, Document.class);
 
         t.send(null, domainDoc);
 

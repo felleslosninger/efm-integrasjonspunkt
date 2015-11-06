@@ -9,7 +9,7 @@ import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.ByteArrayFile;
 import no.difi.meldingsutveksling.domain.Mottaker;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.domain.sbdh.Document;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -29,13 +29,13 @@ public class Dokumentpakker {
     }
 
     public byte[] pakkTilByteArray(ByteArrayFile document, Avsender avsender, Mottaker mottaker, String id, String type) throws IOException {
-        StandardBusinessDocument doc = pakk(document, avsender, mottaker, id, type);
+        Document doc = pakk(document, avsender, mottaker, id, type);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         MarshalSBD.marshal(doc, os);
         return os.toByteArray();
     }
 
-    public StandardBusinessDocument pakk(ByteArrayFile document, Avsender avsender, Mottaker mottaker, String id, String type) throws IOException {
+    public Document pakk(ByteArrayFile document, Avsender avsender, Mottaker mottaker, String id, String type) throws IOException {
         byte[] bytes = createAsice.createAsice(document, signatureHelper, avsender, mottaker).getBytes();
         Payload payload = new Payload(encryptPayload.createCMS(bytes
                 , mottaker.getSertifikat()));

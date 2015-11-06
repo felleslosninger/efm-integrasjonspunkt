@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling;
 
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 
 public class MockRequest implements UploadRequest {
@@ -27,7 +27,7 @@ public class MockRequest implements UploadRequest {
         }
 
         @Override
-        public StandardBusinessDocument getPayload() {
-        return new StandardBusinessDocument();
+        public Document getPayload() {
+        return new Document();
     }
 }
