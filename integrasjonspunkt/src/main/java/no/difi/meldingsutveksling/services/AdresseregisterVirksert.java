@@ -1,6 +1,9 @@
 package no.difi.meldingsutveksling.services;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
+import no.difi.virksert.client.VirksertClient;
+import no.difi.virksert.client.VirksertClientBuilder;
+import no.difi.virksert.client.VirksertClientException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +17,7 @@ public class AdresseregisterVirksert implements AdresseregisterService {
     @Autowired
     IntegrasjonspunktConfig configuration;
 
-    AdresseregisterVirksertClient client;
+    private VirksertClient virksertClient;
 
     public AdresseregisterVirksert() {
     }
@@ -22,13 +25,19 @@ public class AdresseregisterVirksert implements AdresseregisterService {
     @PostConstruct
     public void init() {
         String adresseRegisterEndPointURL = configuration.getAdresseRegisterEndPointURL();
-        // Lets hard code this for now. (see MIIF-219 & 22)
-        client = new AdresseregisterVirksertClient(adresseRegisterEndPointURL, "test-certificates", "rootcert", "intermediate");
+        virksertClient = VirksertClientBuilder.newInstance().setUri(adresseRegisterEndPointURL)
+                .setScope("test-certificates")
+                .setTrustedIntermediateAliases("intermediate")
+                .setTrustedRootAliases("rootcert").build();
     }
 
     @Override
     public Certificate getCertificate(String orgNumber) {
-        return client.getCertificate(orgNumber);
+        try {
+            return virksertClient.fetch(orgNumber);
+        } catch (VirksertClientException e) {
+            throw new CertificateException(e);
+        }
     }
 
     public IntegrasjonspunktConfig getConfiguration() {

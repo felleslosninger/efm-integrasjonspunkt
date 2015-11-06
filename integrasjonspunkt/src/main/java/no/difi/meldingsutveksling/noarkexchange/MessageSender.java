@@ -95,13 +95,11 @@ public class MessageSender {
             return createErrorResponse(ErrorStatus.MISSING_RECIPIENT);
         }
 
-
         JournalpostId p = JournalpostId.fromPutMessage(messageRequest);
         String journalPostId = p.value();
 
         IntegrasjonspunktContext context = new IntegrasjonspunktContext();
         context.setJpId(journalPostId);
-
 
         if (!setRecipient(context, message.getRecieverPartyNumber())) {
             log.info(ErrorStatus.CANNOT_RECIEVE + message.getRecieverPartyNumber());
