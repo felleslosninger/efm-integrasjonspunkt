@@ -25,6 +25,7 @@ public class AdresseregisterVirksert implements AdresseregisterService {
     @PostConstruct
     public void init() {
         String adresseRegisterEndPointURL = configuration.getAdresseRegisterEndPointURL();
+        //todo we hard code this for now. See MIIF-219& MIIF-220
         virksertClient = VirksertClientBuilder.newInstance().setUri(adresseRegisterEndPointURL)
                 .setScope("test-certificates")
                 .setTrustedIntermediateAliases("intermediate")
