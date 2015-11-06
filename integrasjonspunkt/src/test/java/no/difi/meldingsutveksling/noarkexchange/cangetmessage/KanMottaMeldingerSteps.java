@@ -5,13 +5,13 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-import no.difi.meldingsutveksling.adresseregister.client.CertificateException;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
+import no.difi.meldingsutveksling.services.CertificateException;
 import sun.security.x509.X509CertImpl;
 
 import static junit.framework.TestCase.assertFalse;
@@ -118,24 +118,24 @@ public class KanMottaMeldingerSteps {
 
     @Given("^virksomhet (.+) i Adresseregisteret$")
     public void virksomhet_i_Adresseregisteret(String finnes) throws Throwable {
-        if("finnes".equals(finnes)) {
+        if ("finnes".equals(finnes)) {
             when(adresseRegister.getCertificate(any(String.class))).thenReturn(new X509CertImpl());
-        } else if("finnes ikke".equals(finnes)) {
+        } else if ("finnes ikke".equals(finnes)) {
             when(adresseRegister.getCertificate(any(String.class))).thenThrow(CertificateException.class);
         }
     }
 
     @And("^virksomhet (.+) i MSH sitt adresseregister$")
     public void virksomhet_finnes_i_MSH(String finnes) throws Throwable {
-        if("finnes".equals(finnes)) {
+        if ("finnes".equals(finnes)) {
             when(mshClient.canRecieveMessage(any(String.class))).thenReturn(true);
-        } else if("finnes ikke".equals(finnes)) {
+        } else if ("finnes ikke".equals(finnes)) {
             when(mshClient.canRecieveMessage(any(String.class))).thenReturn(false);
         }
     }
 
     @When("^vi spør integrasjonspunktet om virksomhet kan motta meldinger$")
-    public void vi_spør_integrasjonspunktet_om_virksomhet_kan_motta_meldinger() throws Throwable {
+    public void vi_spØr_integrasjonspunktet_om_virksomhet_kan_motta_meldinger() throws Throwable {
         // Express the Regexp above with the code you wish you had
         GetCanReceiveMessageRequestType request = new GetCanReceiveMessageRequestType();
         AddressType addressType = new AddressType();
@@ -146,9 +146,9 @@ public class KanMottaMeldingerSteps {
 
     @Then("^skal vi få (.+) om at de kan motta meldinger$")
     public void skal_vi_få_svar_om_at_de_kan_motta_meldinger(String svar) throws Throwable {
-        if("sann".equals(svar)) {
+        if ("sann".equals(svar)) {
             assertTrue(responseType.isResult());
-        } else if("usann".equals(svar)) {
+        } else if ("usann".equals(svar)) {
             assertFalse(responseType.isResult());
         }
 
