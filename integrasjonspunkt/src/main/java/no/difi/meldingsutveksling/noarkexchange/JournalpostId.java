@@ -48,7 +48,7 @@ public class JournalpostId {
 
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            Document document = builder.parse(new ByteArrayInputStream(doc.getBytes()));
+            Document document = builder.parse(new ByteArrayInputStream(doc.getBytes(java.nio.charset.Charset.forName("utf-8"))));
             result = new JournalpostId(expression.evaluate(document));
         } catch (XPathExpressionException | ParserConfigurationException | SAXException | IOException e) {
             throw new MeldingsUtvekslingRuntimeException("Could not extract jpId from the payload", e);
