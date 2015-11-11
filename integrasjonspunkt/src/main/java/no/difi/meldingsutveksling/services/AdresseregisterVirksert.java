@@ -25,20 +25,7 @@ public class AdresseregisterVirksert implements AdresseregisterService {
     @PostConstruct
     public void init() {
         String adresseRegisterEndPointURL = configuration.getAdresseRegisterEndPointURL();
-        //todo we hard code this for now. See MIIF-219& MIIF-220
-        virksertClient = VirksertClientBuilder.newInstance().setUri(adresseRegisterEndPointURL)
-                .setScope("test-certificates")
-                .setTrustedIntermediateAliases("intermediate")
-                .setTrustedRootAliases("rootcert").build();
-    }
 
-    @Override
-    public Certificate getCertificate(String orgNumber) {
-        try {
-            return virksertClient.fetch(orgNumber);
-        } catch (VirksertClientException e) {
-            throw new CertificateException(e);
-        }
     }
 
     public IntegrasjonspunktConfig getConfiguration() {
@@ -47,5 +34,10 @@ public class AdresseregisterVirksert implements AdresseregisterService {
 
     public void setConfiguration(IntegrasjonspunktConfig configuration) {
         this.configuration = configuration;
+    }
+
+    @Override
+    public Certificate getCertificate(String orgNumber) {
+        return null;
     }
 }

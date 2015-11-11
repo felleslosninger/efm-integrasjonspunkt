@@ -101,10 +101,9 @@
     </build>
 
     <dependencies>
-
         <dependency>
             <groupId>no.difi.virksert</groupId>
-            <artifactId>virksert-client-gb-forked</artifactId>
+            <artifactId>virksert-client</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
 
@@ -282,7 +281,6 @@
             <artifactId>jersey-json</artifactId>
             <version>${jerseyVersion}</version>
         </dependency>
-
 
         <dependency>
             <groupId>com.thoughtworks.xstream</groupId>

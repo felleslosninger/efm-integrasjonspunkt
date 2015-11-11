@@ -29,8 +29,8 @@
         <module>altinn-batch-receive</module>
         <module>altinnmock</module>
         <module>altinn-client</module>
-        <module>virksert-client-gb-forked</module>
-        <module>virksert-common</module>
+        <module>virksert-forked</module>
+        <module>virksert-demoscope</module>
     </modules>
     <build>
         <pluginManagement>
