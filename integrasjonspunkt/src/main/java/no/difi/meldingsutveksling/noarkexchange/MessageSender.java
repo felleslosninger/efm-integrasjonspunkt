@@ -3,14 +3,8 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import com.thoughtworks.xstream.XStream;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
-import no.difi.meldingsutveksling.adresseregister.client.CertificateNotFoundException;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
-import no.difi.meldingsutveksling.domain.Avsender;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.Mottaker;
-import no.difi.meldingsutveksling.domain.Noekkelpar;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
-import no.difi.meldingsutveksling.domain.ProcessState;
+import no.difi.meldingsutveksling.domain.*;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
@@ -18,6 +12,7 @@ import no.difi.meldingsutveksling.noarkexchange.putmessage.ErrorStatus;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
+import no.difi.meldingsutveksling.services.CertificateException;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +74,7 @@ public class MessageSender {
         try {
             receiverCertificate = (X509Certificate) adresseregister.getCertificate(orgnr);
 
-        } catch (CertificateNotFoundException e) {
+        } catch (CertificateException e) {
             eventLog.log(new Event().setExceptionMessage(e.toString()));
             return false;
         }
@@ -95,13 +90,11 @@ public class MessageSender {
             return createErrorResponse(ErrorStatus.MISSING_RECIPIENT);
         }
 
-
         JournalpostId p = JournalpostId.fromPutMessage(messageRequest);
         String journalPostId = p.value();
 
         IntegrasjonspunktContext context = new IntegrasjonspunktContext();
         context.setJpId(journalPostId);
-
 
         if (!setRecipient(context, message.getRecieverPartyNumber())) {
             log.info(ErrorStatus.CANNOT_RECIEVE + message.getRecieverPartyNumber());

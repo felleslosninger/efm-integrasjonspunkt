@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import no.difi.meldingsutveksling.CertificateValidator;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
@@ -18,6 +17,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessD
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.oxalisexchange.OxalisMessageReceiverTemplate;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
+import no.difi.meldingsutveksling.services.CertificateException;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,12 +31,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.BindingType;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.security.cert.X509Certificate;
+import java.io.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -85,12 +80,14 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
 
     public CorrelationInformation forwardToNoarkSystem(StandardBusinessDocument standardBusinessDocument) {
         StandardBusinessDocumentWrapper inputDocument = new StandardBusinessDocumentWrapper(standardBusinessDocument);
+        if (!verifyCertificatesForSenderAndReceiver(inputDocument.getReceiverOrgNumber(), inputDocument.getSenderOrgNumber())) {
+            throw new MeldingsUtvekslingRuntimeException("invalid certificate for sender or recipient (" + inputDocument.getSenderOrgNumber() + "," + inputDocument.getReceiverOrgNumber());
+        }
+
         if (isReciept(standardBusinessDocument.getStandardBusinessDocumentHeader())) {
             logEvent(inputDocument, ProcessState.KVITTERING_MOTTATT);
             return new CorrelationInformation();
         }
-
-        verifyCertificatesForSenderAndReceiver(inputDocument.getReceiverOrgNumber(), inputDocument.getSenderOrgNumber());
 
 
         logEvent(inputDocument, ProcessState.SBD_RECIEVED);
@@ -119,11 +116,16 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
         return cmsUtil.decryptCMS(cmsEncZip, keyInfo.loadPrivateKey());
     }
 
-    private void verifyCertificatesForSenderAndReceiver(String orgNumberReceiver, String orgNumberSender) {
-
-        CertificateValidator validator = new CertificateValidator();
-        validator.validate((X509Certificate) adresseRegisterClient.getCertificate(orgNumberReceiver));
-        validator.validate((X509Certificate) adresseRegisterClient.getCertificate(orgNumberSender));
+    private boolean verifyCertificatesForSenderAndReceiver(String orgNumberReceiver, String orgNumberSender) {
+        boolean validCertificates;
+        try {
+            adresseRegisterClient.getCertificate(orgNumberReceiver);
+            adresseRegisterClient.getCertificate(orgNumberSender);
+            validCertificates = true;
+        } catch (CertificateException e) {
+            validCertificates = false;
+        }
+        return validCertificates;
     }
 
     private PutMessageRequestType extractBestEdu(StandardBusinessDocument standardBusinessDocument, File bestEdu) {
