@@ -44,7 +44,6 @@ ADD ./integrasjonspunkt-local.properties ${APP_DIR}/
 RUN openssl s_client -connect ${HOST}:${PORT} </dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ${HOST}.cert && \
     keytool -import -noprompt -trustcacerts -alias ${HOST} -file ${HOST}.cert -keystore ${KEYSTOREFILE} -storepass ${KEYSTOREPASS}
 
-
 #
 # Start the application
 #

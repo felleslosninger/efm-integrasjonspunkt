@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling;
 
+import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.junit.Test;
 
 public class StandardBusinessDocumentConverterTest {
@@ -10,14 +10,10 @@ public class StandardBusinessDocumentConverterTest {
     public void testMarshallToBytes() throws Exception {
         StandardBusinessDocumentConverter converter = new StandardBusinessDocumentConverter();
 
-        StandardBusinessDocument sbd = new StandardBusinessDocument();
+        Document sbd = new Document();
 
         sbd.setAny(new ObjectFactory().createScopeInformation("Hello world!"));
         converter.marshallToBytes(sbd);
     }
 
-    @Test
-    public void testUnmarshallFrom() throws Exception {
-
-    }
 }

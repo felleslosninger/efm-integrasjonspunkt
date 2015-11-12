@@ -87,18 +87,25 @@
                 </configuration>
             </plugin>
 
-
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
+                    <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>no.difi.virksert</groupId>
+            <artifactId>virksert-client</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -226,12 +233,6 @@
         </dependency>
 
         <dependency>
-            <artifactId>adresseregister-client</artifactId>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>dokumentpakking</artifactId>
             <version>0.1-SNAPSHOT</version>
@@ -281,7 +282,6 @@
             <version>${jerseyVersion}</version>
         </dependency>
 
-
         <dependency>
             <groupId>com.thoughtworks.xstream</groupId>
             <artifactId>xstream</artifactId>
@@ -300,18 +300,6 @@
             <artifactId>mockito-all</artifactId>
             <version>1.9.5</version>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>adresseregister-domain</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-log4j</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
@@ -334,17 +322,10 @@
         </dependency>
 
         <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>noarkexchange-p360</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
             <version>2.3</version>
         </dependency>
-
 
         <dependency>
             <groupId>info.cukes</groupId>
@@ -359,27 +340,5 @@
             <version>1.2.4</version>
             <scope>test</scope>
         </dependency>
-
-
-        <dependency>
-            <groupId>no.difi</groupId>
-            <artifactId>Virksomhetssertifikatvalidator</artifactId>
-            <version>1.1.1-SNAPSHOT</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-simple</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
     </dependencies>
 </project>
