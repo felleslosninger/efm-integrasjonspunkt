@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.services;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.virksert.client.VirksertClient;
 import no.difi.virksert.client.VirksertClientBuilder;
 import no.difi.virksert.client.VirksertClientException;
@@ -25,7 +26,9 @@ public class AdresseregisterVirksert implements AdresseregisterService {
     @PostConstruct
     public void init() {
         String adresseRegisterEndPointURL = configuration.getAdresseRegisterEndPointURL();
-
+        virksertClient = VirksertClientBuilder.newInstance()
+                .setScope("no.difi.virksert.scope.DemoScope")
+                .setUri(adresseRegisterEndPointURL).build();
     }
 
     public IntegrasjonspunktConfig getConfiguration() {
@@ -38,6 +41,10 @@ public class AdresseregisterVirksert implements AdresseregisterService {
 
     @Override
     public Certificate getCertificate(String orgNumber) {
-        return null;
+        try {
+            return virksertClient.fetch(orgNumber);
+        } catch (VirksertClientException e) {
+            throw new MeldingsUtvekslingRuntimeException(e.getMessage(), e);
+        }
     }
 }
