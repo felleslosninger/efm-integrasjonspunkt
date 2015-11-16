@@ -10,7 +10,7 @@ public class DemoScope extends AbstractScope {
 
     @Override
     public KeyStoreCertificateBucket getKeyStore() throws CertificateBucketException {
-        return new KeyStoreCertificateBucket(this.getClass().getResourceAsStream("/demo.jks"), "changeit");
+        return new KeyStoreCertificateBucket(this.getClass().getResourceAsStream("/test-certificates.jks"), "changeit");
     }
 
     @Override
