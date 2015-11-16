@@ -328,6 +328,12 @@
         </dependency>
 
         <dependency>
+            <groupId>no.difi.vefa</groupId>
+            <artifactId>peppol-lookup</artifactId>
+            <version>0.9.3</version>
+        </dependency>
+
+        <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
             <version>2.3</version>

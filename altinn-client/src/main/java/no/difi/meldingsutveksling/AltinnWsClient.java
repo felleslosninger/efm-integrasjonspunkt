@@ -14,6 +14,7 @@ import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExter
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExternalBasicStreamedDownloadFileStreamedBasicAltinnFaultFaultFaultMessage;
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExternalBasicStreamedUploadFileStreamedBasicAltinnFaultFaultFaultMessage;
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.StreamedPayloadBasicBE;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.shipping.ws.AltinnReasonFactory;
@@ -28,6 +29,8 @@ import javax.xml.ws.soap.SOAPBinding;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,9 +42,11 @@ public class AltinnWsClient {
     private static final String AVAILABLE_FILES_ERROR_MESSAGE = "Could not get list of available files from Altinn formidlingstjeneste";
     private static final String CANNOT_DOWNLOAD_FILE = "Cannot download file";
     private final AltinnWsConfiguration configuration;
+    private String endPointHostName;
 
-    public AltinnWsClient(AltinnWsConfiguration configuration) {
-        this.configuration = configuration;
+    public AltinnWsClient(String endPointHostName, AltinnWsConfiguration altinnWsConfiguration) {
+        this.endPointHostName = endPointHostName;
+        this.configuration = altinnWsConfiguration;
     }
 
     public void send(UploadRequest request) {
@@ -52,12 +57,12 @@ public class AltinnWsClient {
     private void upload(UploadRequest request, String senderReference) {
 
         BrokerServiceExternalBasicStreamedSF brokerServiceExternalBasicStreamedSF
-                = new BrokerServiceExternalBasicStreamedSF(configuration.getStreamingServiceUrl());
+                = new BrokerServiceExternalBasicStreamedSF(getStreamingServiceUrl());
 
         IBrokerServiceExternalBasicStreamed streamingService = brokerServiceExternalBasicStreamedSF.getBasicHttpBindingIBrokerServiceExternalBasicStreamed();
 
         BindingProvider bp = (BindingProvider) streamingService;
-        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, configuration.getStreamingServiceUrl().toString());
+        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, getStreamingServiceUrl().toString());
 
         try {
             StreamedPayloadBasicBE parameters = new StreamedPayloadBasicBE();
@@ -75,13 +80,14 @@ public class AltinnWsClient {
         }
     }
 
+
     public List<FileReference> availableFiles(String partyNumber) {
 
         BrokerServiceExternalBasicSF brokerServiceExternalBasicSF;
-        brokerServiceExternalBasicSF = new BrokerServiceExternalBasicSF(configuration.getBrokerServiceUrl());
+        brokerServiceExternalBasicSF = new BrokerServiceExternalBasicSF(getBrokerServiceUrl());
         IBrokerServiceExternalBasic service = brokerServiceExternalBasicSF.getBasicHttpBindingIBrokerServiceExternalBasic();
         BindingProvider bp = (BindingProvider) service;
-        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, configuration.getBrokerServiceUrl().toString());
+        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, getBrokerServiceUrl().toString());
 
         BrokerServiceSearch searchParameters = new BrokerServiceSearch();
         searchParameters.setFileStatus(BrokerServiceAvailableFileStatus.UPLOADED);
@@ -102,12 +108,13 @@ public class AltinnWsClient {
         return fileReferences;
     }
 
+
     public Document download(DownloadRequest request) {
         BrokerServiceExternalBasicStreamedSF brokerServiceExternalBasicStreamedSF;
-        brokerServiceExternalBasicStreamedSF = new BrokerServiceExternalBasicStreamedSF(configuration.getStreamingServiceUrl());
+        brokerServiceExternalBasicStreamedSF = new BrokerServiceExternalBasicStreamedSF(getStreamingServiceUrl());
         IBrokerServiceExternalBasicStreamed streamingService = brokerServiceExternalBasicStreamedSF.getBasicHttpBindingIBrokerServiceExternalBasicStreamed(new MTOMFeature(true));
         BindingProvider bp = (BindingProvider) streamingService;
-        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, configuration.getStreamingServiceUrl().toString());
+        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, getStreamingServiceUrl().toString());
         SOAPBinding binding = (SOAPBinding) bp.getBinding();
         binding.setMTOMEnabled(true);
 
@@ -128,10 +135,10 @@ public class AltinnWsClient {
         BrokerServiceInitiation brokerServiceInitiation = createInitiationRequest(request);
         try {
             BrokerServiceExternalBasicSF brokerServiceExternalBasicSF;
-            brokerServiceExternalBasicSF = new BrokerServiceExternalBasicSF(configuration.getBrokerServiceUrl());
+            brokerServiceExternalBasicSF = new BrokerServiceExternalBasicSF(getBrokerServiceUrl());
             IBrokerServiceExternalBasic service = brokerServiceExternalBasicSF.getBasicHttpBindingIBrokerServiceExternalBasic();
             BindingProvider bp = (BindingProvider) service;
-            bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, configuration.getBrokerServiceUrl().toString());
+            bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, getBrokerServiceUrl().toString());
             return service.initiateBrokerServiceBasic(configuration.getUsername(), configuration.getPassword(), brokerServiceInitiation);
         } catch (IBrokerServiceExternalBasicInitiateBrokerServiceBasicAltinnFaultFaultFaultMessage e) {
             throw new AltinnWsException(FAILED_TO_INITATE_ALTINN_BROKER_SERVICE, AltinnReasonFactory.from(e), e);
@@ -152,5 +159,22 @@ public class AltinnWsClient {
         return initiateRequest;
     }
 
+    private URL getBrokerServiceUrl() {
+        final String url = endPointHostName + configuration.getBrokerServiceUrl();
+        try {
+            return new URL(url);
+        } catch (MalformedURLException e) {
+            throw new MeldingsUtvekslingRuntimeException("can not create Altinn-Host from URL String " + url);
+        }
+    }
+
+    private URL getStreamingServiceUrl() {
+        final String url = endPointHostName + configuration.getStreamingServiceUrl();
+        try {
+            return new URL(url);
+        } catch (MalformedURLException e) {
+            throw new MeldingsUtvekslingRuntimeException("can not create Altinn-Host from URL String " + url);
+        }
+    }
 
 }
