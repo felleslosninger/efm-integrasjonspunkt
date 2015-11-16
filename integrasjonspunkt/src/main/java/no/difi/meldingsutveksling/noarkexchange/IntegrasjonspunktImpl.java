@@ -86,6 +86,16 @@ public class IntegrasjonspunktImpl implements SOAPport {
         queueService.put(request);
 
         return PutMessageResponseFactory.createOkResponse();
+
+        //        if(hasAdresseregisterCertificate(req.getEnvelope().getReceiver().getOrgnr())) {
+        //            PutMessageContext context = new PutMessageContext(eventLog, messageSender);
+        //            PutMessageStrategyFactory putMessageStrategyFactory = PutMessageStrategyFactory.newInstance(context);
+        //
+        //            PutMessageStrategy strategy = putMessageStrategyFactory.create(req.getPayload());
+        //            return strategy.putMessage(req);
+        //        } else {
+        //            return mshClient.sendEduMelding(req);
+        //        }
     }
 
     public AdresseregisterService getAdresseRegister() {

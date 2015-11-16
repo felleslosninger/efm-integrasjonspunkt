@@ -12,6 +12,7 @@ public class Queue {
     private String location;
     private String checksum;
     private Status status;
+    private int numberAttempts;
 
     private Queue(String unique, int numberAttempt, Rule rule, Date lastAttemptTime, String location, String checksum, Status status) {
         this.unique = unique;
@@ -29,6 +30,30 @@ public class Queue {
 
     private int getNextAttempt() {
         return rule.getInterval(++numberAttempt);
+    }
+
+    public int getNumberAttempts() {
+        return numberAttempts;
+    }
+
+    public Rule getRule() {
+        return rule;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public String requestLocation() {
+        return location;
+    }
+
+    public Date getLastAttemptTime() {
+        return lastAttemptTime;
+    }
+
+    public String getChecksum() {
+        return checksum;
     }
 
     public static class Builder {
@@ -73,6 +98,15 @@ public class Queue {
         public Builder status(Status status) {
             this.status = status;
             return this;
+        }
+
+        public Builder status(String status) {
+            this.status = Status.statusFromString(status);
+            return this;
+        }
+
+        public Queue build() {
+            return new Queue(unique, numberAttempt, rule, lastAttemptTime, location, checksum, status);
         }
     }
 }
