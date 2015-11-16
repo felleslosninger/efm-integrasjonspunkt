@@ -138,6 +138,18 @@
             <artifactId>spring-boot-starter-jetty</artifactId>
         </dependency>
 
+        <!-- start of logging/monitoring dependencies -->
+        <dependency>
+            <groupId>net.logstash.logback</groupId> <!-- needed for ELK stack -->
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>4.5.1</version>
+        </dependency>
+
+        <!-- spring-boot-starter-aop gives transitive dependency to logback-classic which includes SLF4J bindings.
+         If it weren't we would need to import logback-classic here. -->
+
+        <!-- end logging/monitoring -->
+
         <dependency>
             <groupId>de.codecentric</groupId>
             <artifactId>spring-boot-admin-starter-client</artifactId>
