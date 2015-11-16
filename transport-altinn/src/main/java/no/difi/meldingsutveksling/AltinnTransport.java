@@ -50,7 +50,6 @@ public class AltinnTransport implements Transport {
         String endPointHostName = endpoint.getAddress();
         AltinnWsClient client = new AltinnWsClient(endPointHostName, AltinnWsConfiguration.fromConfiguration(configuration));
 
-
         UploadRequest request1 = new UploadRequest() {
 
             @Override
