@@ -88,7 +88,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
             return mshClient.sendEduMelding(req);
         }
 
-    }
+    }   
 
     public AdresseregisterService getAdresseRegister() {
         return adresseregister;
