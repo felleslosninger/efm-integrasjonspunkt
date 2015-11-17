@@ -3,7 +3,7 @@
     <jmxConfigurator/>
 
     <appender name="stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>10.243.200.51:5043</destination>
+        <destination>127.0.0.1:4560</destination>
 
         <!-- encoder is required -->
         <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
