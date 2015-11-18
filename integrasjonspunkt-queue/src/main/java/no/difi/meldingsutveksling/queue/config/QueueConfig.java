@@ -22,7 +22,7 @@ public class QueueConfig {
     public DataSource dataSource() {
         EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
         return builder
-                .setName("queue_metadata")
+                .setName("queue")
                 .setType(EmbeddedDatabaseType.HSQL)
                 .addScript("queuedb/create-db.sql")
                 .build();

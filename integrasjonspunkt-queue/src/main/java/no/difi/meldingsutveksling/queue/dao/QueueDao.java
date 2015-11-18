@@ -9,39 +9,53 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 public class QueueDao {
     @Autowired
-    JdbcTemplate template;
+    private JdbcTemplate template;
 
     public void saveEntry(Queue queue) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("unique_id", queue.getUnique());
-        params.put("numberAttempt", queue.getNumberAttempts());
-        params.put("rule", queue.getRule());
-        params.put("status", queue.getStatus());
-        params.put("requestLocation", queue.requestLocation());
-        params.put("lastAttempt", queue.getLastAttemptTime());
-        params.put("checksum", queue.getChecksum());
+        String sql = "INSERT INTO queue_metadata "
+                + "(unique_id, numberAttempt, rule, status, requestLocation, lastAttemptTime, checksum) "
+                + "VALUES (:unique_id, :numberAttempt, :rule, :status, :requestLocation, :lastAttempt, :checksum)";
 
-        String sql = "INSERT INTO queue_metadata " +
-                "(unique_id, numberAttempt, rule, status, requestLocation, lastAttemptTime, checksum) " +
-                "VALUES (:unique_id, :numberAttempt, :rule, :status, :requestLocation, :lastAttempt, :checksum)";
-
-        template.update(sql, params);
+        template.update(sql, queue.getUnique(), queue.getNumberAttempts(), queue.getRuleName(), queue.getStatus(),
+                queue.getRequestLocation(), queue.getLastAttemptTime(), queue.getChecksum());
     }
 
-    public Queue retrieve(Status status) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("status", status.name());
+    public List<Queue> retrieve(Status status) {
+        String sql = "SELECT unique_id, numberAttempt, rule, status, requestLocation, lastAttemptTime, checksum FROM queue_metadata "
+                + "WHERE status = :status ";
 
-        String sql = "SELECT * FROM queue_metadata " +
-                "WHERE status=:status";
+        List<Queue> queue = QueueMapper.map(template.queryForList(sql, status));
 
-        return template.queryForObject(sql, new QueueMapper(), params);
+        Collections.sort(queue, new Comparator<Queue>() {
+            public int compare(Queue o1, Queue o2) {
+                return o1.getLastAttemptTime().compareTo(o2.getLastAttemptTime());
+            }
+        });
 
+        return queue;
+    }
+
+    public void updateStatus(String unique, Status status) {
+        String sql = "UPDATE queue_metadata "
+                + "SET status = :status "
+                + "WHERE unique_id = :unique ";
+
+        template.update(sql, status, unique);
+    }
+
+    protected void removeAll() {
+        String sql = "DELETE FROM queue_metadata ";
+
+        template.execute(sql);
     }
 
     private static final class QueueMapper implements RowMapper<Queue> {
@@ -53,9 +67,18 @@ public class QueueDao {
                     .rule((Rule) rs.getObject("rule"))
                     .status(rs.getString("status"))
                     .location(rs.getString("requestLocation"))
-                    .lastAttemptTime(rs.getTimestamp("lastAttempt"))
+                    .lastAttemptTime(rs.getTimestamp("lastAttemptTime"))
                     .checksum(rs.getString("checksum"))
                     .build();
+        }
+
+        public static List<Queue> map(List<Map<String, Object>> maps) {
+            ArrayList<Queue> queueList = new ArrayList<>();
+
+            for (Map map : maps) {
+                queueList.add(new Queue.Builder().unique(map.get("unique_id").toString()).numberAttempt(Integer.parseInt(map.get("numberAttempt").toString())).rule(map.get("rule").toString()).status(Status.statusFromString(map.get("status").toString())).location(map.get("requestLocation").toString()).lastAttemptTime((Date) map.get("lastAttemptTime")).checksum(map.get("checksum").toString()).build());
+            }
+            return queueList;
         }
     }
 }

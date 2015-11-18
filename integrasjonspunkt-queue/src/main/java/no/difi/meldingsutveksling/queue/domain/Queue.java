@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.queue.domain;
 
 import no.difi.meldingsutveksling.queue.rule.Rule;
+import no.difi.meldingsutveksling.queue.rule.RuleDefault;
 
 import java.util.Date;
 
@@ -12,7 +13,6 @@ public class Queue {
     private String location;
     private String checksum;
     private Status status;
-    private int numberAttempts;
 
     private Queue(String unique, int numberAttempt, Rule rule, Date lastAttemptTime, String location, String checksum, Status status) {
         this.unique = unique;
@@ -33,18 +33,22 @@ public class Queue {
     }
 
     public int getNumberAttempts() {
-        return numberAttempts;
+        return numberAttempt;
     }
 
     public Rule getRule() {
         return rule;
     }
 
+    public String getRuleName() {
+        return rule.getClass().getName();
+    }
+
     public Status getStatus() {
         return status;
     }
 
-    public String requestLocation() {
+    public String getRequestLocation() {
         return location;
     }
 
@@ -77,6 +81,13 @@ public class Queue {
 
         public Builder rule(Rule rule) {
             this.rule = rule;
+            return this;
+        }
+
+        public Builder rule(String rule) {
+            if (rule.contains("RuleDefault")) {
+                this.rule = RuleDefault.getRule();
+            }
             return this;
         }
 
