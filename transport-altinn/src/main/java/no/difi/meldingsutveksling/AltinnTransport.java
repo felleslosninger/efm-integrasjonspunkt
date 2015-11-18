@@ -18,8 +18,6 @@ import static no.difi.meldingsutveksling.domain.Organisasjonsnummer.fromIso6523;
  */
 public class AltinnTransport implements Transport {
 
-    public static final String DOCUMENT_IDENTIFIER = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:www.cenbii.eu:transaction:biitrns010:ver2.0:extended:urn:www.peppol.eu:bis:peppol4a:ver2.0::2.1";
-    public static final String PROCESS_IDENTIFIER = "urn:www.cenbii.eu:profile:bii04:ver2.0";
     private final String hostName;
 
     public AltinnTransport(String hostName) {

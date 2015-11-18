@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 
 /**
- * TransportFactory that uses the Peppa ELMA adressing mechanism to look up Endpoints for
+ * TransportFactory that uses the Peppol ELMA adressing mechanism to look up Endpoints for
  * the Altinn document storage service. The endPoint can vary between
  *
  * @author Glenn Bech
