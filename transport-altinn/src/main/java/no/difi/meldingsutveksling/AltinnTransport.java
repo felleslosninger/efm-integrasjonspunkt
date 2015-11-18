@@ -2,13 +2,9 @@ package no.difi.meldingsutveksling;
 
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
-import no.difi.meldingsutveksling.domain.sbdh.Partner;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.transport.Transport;
 import org.apache.commons.configuration.Configuration;
-
-import java.util.List;
 
 import static no.difi.meldingsutveksling.domain.Organisasjonsnummer.fromIso6523;
 
@@ -57,25 +53,5 @@ public class AltinnTransport implements Transport {
         };
 
         client.send(request1);
-    }
-
-    private String getReceiverOrgNr(Document document) {
-        StandardBusinessDocumentHeader standardBusinessDocumentHeader = document.getStandardBusinessDocumentHeader();
-        if (standardBusinessDocumentHeader == null) {
-            throw new IllegalStateException();
-        }
-        final List<Partner> receiver = standardBusinessDocumentHeader.getReceiver();
-        if (receiver == null || receiver.size() != 1) {
-            throw new IllegalStateException("receiver is not valid " + receiver);
-        }
-        final String value = receiver.get(0).getIdentifier().getValue();
-        return value;
-    }
-
-
-    private class AltinnTransportException extends RuntimeException {
-        public AltinnTransportException(String message, Exception exception) {
-            super(message, exception);
-        }
     }
 }
