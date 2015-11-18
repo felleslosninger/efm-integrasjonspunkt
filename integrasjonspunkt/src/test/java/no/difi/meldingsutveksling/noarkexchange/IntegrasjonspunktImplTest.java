@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-import no.difi.meldingsutveksling.queue.service.IntegrasjonspunktQueue;
+import no.difi.meldingsutveksling.queue.service.QueueService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -16,7 +16,7 @@ public class IntegrasjonspunktImplTest {
     private IntegrasjonspunktImpl integrasjonspunkt = new IntegrasjonspunktImpl();
 
     @Mock
-    IntegrasjonspunktQueue queueServiceMock;
+    QueueService queueServiceMock;
 
     @Before
     public void setUp() {

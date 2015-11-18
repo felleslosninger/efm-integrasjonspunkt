@@ -9,7 +9,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageRespo
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.SOAPport;
-import no.difi.meldingsutveksling.queue.service.IntegrasjonspunktQueue;
+import no.difi.meldingsutveksling.queue.service.QueueService;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -50,7 +50,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
     private NoarkClient mshClient;
 
     @Autowired
-    private IntegrasjonspunktQueue queueService;
+    private QueueService queueService;
 
     @Override
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {

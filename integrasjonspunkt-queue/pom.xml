@@ -39,6 +39,18 @@
     </dependency>
 
     <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+      <version>20030203.000129</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.glassfish.external</groupId>
+      <artifactId>apache-commons</artifactId>
+      <version>10.0-b28</version>
+    </dependency>
+
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
