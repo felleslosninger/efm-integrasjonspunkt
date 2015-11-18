@@ -7,10 +7,14 @@ import no.difi.meldingsutveksling.DownloadRequest;
 import no.difi.meldingsutveksling.FileReference;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
+import no.difi.meldingsutveksling.elma.ELMALookup;
 import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
+import no.difi.vefa.peppol.common.model.Endpoint;
+import no.difi.vefa.peppol.lookup.api.LookupException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +42,10 @@ public class MessagePolling {
     @Autowired
     IntegrajonspunktReceiveImpl integrajonspunktReceive;
 
+    @Autowired
+    ELMALookup elmaLookup;
+
+
     private static JAXBContext jaxbContextdomain;
 
     static {
@@ -54,13 +62,18 @@ public class MessagePolling {
     @Scheduled(fixedRate = 15000)
     public void checkForNewMessages() {
         logger.debug("Checking for new messages");
-
+        Endpoint endpoint;
+        try {
+            endpoint = elmaLookup.lookup(config.getOrganisationNumber());
+        } catch (LookupException e) {
+            throw new MeldingsUtvekslingRuntimeException(e.getMessage(), e);
+        }
         AltinnWsConfiguration configuration = AltinnWsConfiguration.fromConfiguration(config.getConfiguration());
-        AltinnWsClient client = new AltinnWsClient(configuration);
+        AltinnWsClient client = new AltinnWsClient(endpoint.getAddress(), configuration);
 
         List<FileReference> fileReferences = client.availableFiles(config.getOrganisationNumber());
 
-        for(FileReference reference : fileReferences) {
+        for (FileReference reference : fileReferences) {
             Document document = client.download(new DownloadRequest(reference.getValue(), config.getOrganisationNumber()));
             forwardToNoark(document);
 

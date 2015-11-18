@@ -16,7 +16,6 @@ import no.difi.meldingsutveksling.services.CertificateException;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -37,7 +36,6 @@ public class MessageSender {
     Logger log = Logger.getLogger(MessageSender.class.getName());
 
     @Autowired
-    @Qualifier("multiTransport")
     private TransportFactory transportFactory;
 
     @Autowired
@@ -85,7 +83,7 @@ public class MessageSender {
 
     public PutMessageResponseType sendMessage(PutMessageRequestType messageRequest) {
         PutMessageRequestAdapter message = new PutMessageRequestAdapter(messageRequest);
-        if(!message.hasRecieverPartyNumber()) {
+        if (!message.hasRecieverPartyNumber()) {
             log.severe(ErrorStatus.MISSING_RECIPIENT.toString());
             return createErrorResponse(ErrorStatus.MISSING_RECIPIENT);
         }

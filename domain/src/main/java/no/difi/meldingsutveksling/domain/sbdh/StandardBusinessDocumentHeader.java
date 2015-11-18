@@ -8,6 +8,8 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -18,9 +20,9 @@ import java.util.List;
 
 /**
  * <p>Java class for StandardBusinessDocumentHeader complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="StandardBusinessDocumentHeader">
  *   &lt;complexContent>
@@ -37,17 +39,15 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "StandardBusinessDocumentHeader", propOrder = {
-    "headerVersion",
-    "sender",
-    "receiver",
-    "documentIdentification",
-    "manifest",
-    "businessScope"
+        "headerVersion",
+        "sender",
+        "receiver",
+        "documentIdentification",
+        "manifest",
+        "businessScope"
 })
 public class StandardBusinessDocumentHeader {
 
@@ -66,11 +66,9 @@ public class StandardBusinessDocumentHeader {
 
     /**
      * Gets the value of the headerVersion property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getHeaderVersion() {
         return headerVersion;
@@ -78,11 +76,9 @@ public class StandardBusinessDocumentHeader {
 
     /**
      * Sets the value of the headerVersion property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setHeaderVersion(String value) {
         this.headerVersion = value;
@@ -90,25 +86,23 @@ public class StandardBusinessDocumentHeader {
 
     /**
      * Gets the value of the sender property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the sender property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getSender().add(newItem);
      * </pre>
-     * 
-     * 
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link Partner }
-     * 
-     * 
      */
     public List<Partner> getSender() {
         if (sender == null) {
@@ -119,25 +113,23 @@ public class StandardBusinessDocumentHeader {
 
     /**
      * Gets the value of the receiver property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the receiver property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getReceiver().add(newItem);
      * </pre>
-     * 
-     * 
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link Partner }
-     * 
-     * 
      */
     public List<Partner> getReceiver() {
         if (receiver == null) {
@@ -146,13 +138,24 @@ public class StandardBusinessDocumentHeader {
         return this.receiver;
     }
 
+    public String getReceiverOrganisationNumber() {
+        if (receiver.size() != 0) {
+            throw new MeldingsUtvekslingRuntimeException(String.valueOf(receiver.size()));
+        }
+        Partner partner = receiver.get(0);
+        PartnerIdentification identifier = partner.getIdentifier();
+        if (identifier == null) {
+            throw new MeldingsUtvekslingRuntimeException();
+        }
+        return identifier.getValue();
+    }
+
+
     /**
      * Gets the value of the documentIdentification property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link DocumentIdentification }
-     *     
+     *
+     * @return possible object is
+     *         {@link DocumentIdentification }
      */
     public DocumentIdentification getDocumentIdentification() {
         return documentIdentification;
@@ -160,11 +163,9 @@ public class StandardBusinessDocumentHeader {
 
     /**
      * Sets the value of the documentIdentification property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link DocumentIdentification }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link DocumentIdentification }
      */
     public void setDocumentIdentification(DocumentIdentification value) {
         this.documentIdentification = value;
@@ -172,11 +173,9 @@ public class StandardBusinessDocumentHeader {
 
     /**
      * Gets the value of the manifest property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Manifest }
-     *     
+     *
+     * @return possible object is
+     *         {@link Manifest }
      */
     public Manifest getManifest() {
         return manifest;
@@ -184,11 +183,9 @@ public class StandardBusinessDocumentHeader {
 
     /**
      * Sets the value of the manifest property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Manifest }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Manifest }
      */
     public void setManifest(Manifest value) {
         this.manifest = value;
@@ -196,11 +193,9 @@ public class StandardBusinessDocumentHeader {
 
     /**
      * Gets the value of the businessScope property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link BusinessScope }
-     *     
+     *
+     * @return possible object is
+     *         {@link BusinessScope }
      */
     public BusinessScope getBusinessScope() {
         return businessScope;
@@ -208,11 +203,9 @@ public class StandardBusinessDocumentHeader {
 
     /**
      * Sets the value of the businessScope property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link BusinessScope }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link BusinessScope }
      */
     public void setBusinessScope(BusinessScope value) {
         this.businessScope = value;

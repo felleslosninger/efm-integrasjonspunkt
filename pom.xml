@@ -26,8 +26,6 @@
         <module>transport</module>
         <module>transport-file</module>
         <module>transport-altinn</module>
-        <module>altinn-batch-receive</module>
-        <module>altinnmock</module>
         <module>altinn-client</module>
         <module>virksert-demoscope</module>
     </modules>
@@ -42,7 +40,8 @@
                     <configuration>
                         <junitArtifactName>junit:junit</junitArtifactName>
                         <argLine>-Xms256m -Xmx512m -XX:MaxPermSize=128m -ea
-                            -Dfile.encoding=UTF-8</argLine>
+                            -Dfile.encoding=UTF-8
+                        </argLine>
                     </configuration>
                 </plugin>
 
@@ -80,14 +79,14 @@
             </plugins>
         </pluginManagement>
         <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.15</version>
-                    <configuration>
-                        <argLine>-Dfile.encoding=UTF-8</argLine>
-                    </configuration>
-                </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.15</version>
+                <configuration>
+                    <argLine>-Dfile.encoding=UTF-8</argLine>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>

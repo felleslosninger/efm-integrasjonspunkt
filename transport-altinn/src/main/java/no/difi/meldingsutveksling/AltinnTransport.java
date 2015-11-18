@@ -1,18 +1,11 @@
 package no.difi.meldingsutveksling;
 
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.domain.sbdh.Partner;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.transport.Transport;
-import no.difi.vefa.peppol.common.api.EndpointNotFoundException;
-import no.difi.vefa.peppol.common.model.*;
-import no.difi.vefa.peppol.lookup.LookupClient;
-import no.difi.vefa.peppol.lookup.LookupClientBuilder;
-import no.difi.vefa.peppol.lookup.api.LookupException;
-import no.difi.vefa.peppol.security.api.PeppolSecurityException;
 import org.apache.commons.configuration.Configuration;
 
 import java.util.List;
@@ -27,6 +20,11 @@ public class AltinnTransport implements Transport {
 
     public static final String DOCUMENT_IDENTIFIER = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:www.cenbii.eu:transaction:biitrns010:ver2.0:extended:urn:www.peppol.eu:bis:peppol4a:ver2.0::2.1";
     public static final String PROCESS_IDENTIFIER = "urn:www.cenbii.eu:profile:bii04:ver2.0";
+    private final String hostName;
+
+    public AltinnTransport(String hostName) {
+        this.hostName = hostName;
+    }
 
     /**
      * @param configuration a configuration object given by the integrasjonspunkt
@@ -34,22 +32,7 @@ public class AltinnTransport implements Transport {
      */
     @Override
     public void send(Configuration configuration, final Document document) {
-        LookupClient lClient = LookupClientBuilder.forTest().build();
-        Endpoint endpoint;
-        try {
-            endpoint = lClient.getEndpoint(
-                    new ParticipantIdentifier(getReceiverOrgNr(document)),
-                    new DocumentIdentifier(DOCUMENT_IDENTIFIER),
-                    new ProcessIdentifier(PROCESS_IDENTIFIER),
-                    TransportProfile.AS2_1_0
-            );
-        } catch (LookupException | PeppolSecurityException | EndpointNotFoundException e) {
-            throw new MeldingsUtvekslingRuntimeException(e.getMessage(), e);
-        }
-
-        String endPointHostName = endpoint.getAddress();
-        AltinnWsClient client = new AltinnWsClient(endPointHostName, AltinnWsConfiguration.fromConfiguration(configuration));
-
+        AltinnWsClient client = new AltinnWsClient(hostName, AltinnWsConfiguration.fromConfiguration(configuration));
         UploadRequest request1 = new UploadRequest() {
 
             @Override

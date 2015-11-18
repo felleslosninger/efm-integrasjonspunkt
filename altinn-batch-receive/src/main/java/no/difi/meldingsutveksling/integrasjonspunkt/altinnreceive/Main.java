@@ -42,7 +42,7 @@ public class Main {
         final int threadPoolSize = batchOptions.getThreadPoolSize();
 
         AltinnWsConfiguration altinnConfig = getAltinnWsClientConfiguration(commandLine);
-        AltinnWsClient wsClient = new AltinnWsClient(altinnConfig);
+        AltinnWsClient wsClient = new AltinnWsClient('altinnConfig);
         ReceiveClient receiveClient = new ReceiveClient(integrasjonspunktEndPointURL);
 
         ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize);
