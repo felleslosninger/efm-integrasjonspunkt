@@ -25,7 +25,7 @@ public class ELMALookup {
      * this value is creaed in TransportProfileConfiguration
      */
     @Autowired
-    private TransportProfile transportProfile;
+    private TransportProfile configuredTransportProfile;
 
     public Endpoint lookup(String organisationNumber) throws LookupException {
         try {
@@ -33,7 +33,7 @@ public class ELMALookup {
             return client.getEndpoint(new ParticipantIdentifier(organisationNumber),
                     DOCUMENT_IDENTIFIER,
                     PROCESS_IDENTIFIER,
-                    transportProfile);
+                    configuredTransportProfile);
         } catch (PeppolSecurityException | EndpointNotFoundException e) {
             throw new MeldingsUtvekslingRuntimeException();
         }
