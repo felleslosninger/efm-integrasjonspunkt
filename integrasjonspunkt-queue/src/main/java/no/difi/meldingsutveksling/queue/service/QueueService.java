@@ -80,7 +80,7 @@ public class QueueService {
 
         StringBuffer buffer = retrieveFileFromDisk(retrieve);
 
-        byte[] bytes = decryptMessage(buffer);
+        byte[] bytes = decryptMessage(buffer.toString());
 
 
         return bytes;
@@ -91,7 +91,7 @@ public class QueueService {
      *
      * @param request Request to be put on queue
      */
-    public void put(Object request) {
+    public void put(String request) {
         byte[] crypted = encryptMessage(request);
         String uniqueFilename = generateUniqueFileName();
         String filenameWithPath = ammendPath(uniqueFilename);
@@ -160,7 +160,7 @@ public class QueueService {
             ObjectOutput output = new ObjectOutputStream(byteOutputStream);
             output.writeObject(request);
 
-            Cipher cipher = Cipher.getInstance("RSA");
+            Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.ENCRYPT_MODE, privateKey);
             return cipher.doFinal(byteOutputStream.toByteArray());
 
@@ -173,13 +173,13 @@ public class QueueService {
         return new byte[0];
     }
 
-    private byte[] decryptMessage(Object request) {
+    private byte[] decryptMessage(String request) {
         try {
             ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
             ObjectOutput output = new ObjectOutputStream(byteOutputStream);
             output.writeObject(request);
 
-            Cipher cipher = Cipher.getInstance("RSA");
+            Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.DECRYPT_MODE, privateKey);
             return cipher.doFinal(byteOutputStream.toByteArray());
 

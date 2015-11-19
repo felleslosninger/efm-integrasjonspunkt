@@ -6,7 +6,6 @@ import no.difi.meldingsutveksling.queue.domain.Queue;
 import no.difi.meldingsutveksling.queue.domain.Status;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 
@@ -74,14 +73,13 @@ public class QueueServiceTest {
         assertEquals(next.getLastAttemptTime().getTime(), DATE_20TH_OCT_2015);
     }
 
-    @Ignore
     @Test
     public void shouldDecryptFileWhenLoadingEntryFromFile() {
         //This method will test both encryption and decryption
         String file = createEncryptedFile();
-        when(queueDaoMock.retrieve(Status.NEW)).thenReturn(asList(createQueue("1", QueueService.FILE_PATH + file)));
+        when(queueDaoMock.retrieve("1")).thenReturn(createQueue("1", QueueService.FILE_PATH + file));
 
-        queueService.getNext(Status.NEW);
+        queueService.getMessage("1");
         Object message = queueService.getMessage("1");
 
         assertEquals(message.toString(), NOT_ENCRYPTED_TEST_STRING);
@@ -107,8 +105,8 @@ public class QueueServiceTest {
     }
 
     public class AsymmetricCipher {
-        static final String asymmetricAlgorithm = "RSA";
-        static final String asymmetricAlgorithmModePadding = "RSA/ECB/PKCS1Padding";
+        static final String asymmetricAlgorithm = "AES";
+        static final String asymmetricAlgorithmModePadding = "AES/CBC/PKCS5Padding";
         static final int keySize = 1024;
 
         KeyPair keyPair;
