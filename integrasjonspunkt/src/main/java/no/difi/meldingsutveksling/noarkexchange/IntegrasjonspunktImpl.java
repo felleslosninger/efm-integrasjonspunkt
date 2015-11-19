@@ -83,7 +83,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType request) {
-        queueService.put(request);
+        queueService.put(request.toString());
 
         return PutMessageResponseFactory.createOkResponse();
 

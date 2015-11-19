@@ -9,41 +9,37 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.util.Arrays;
 import java.util.Date;
+
+import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
 
 @Service
 public class QueueService {
     protected static final String FILE_PATH = System.getProperty("user.dir") + "/queue/";
     private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("windows");
+    private static final String BASE64_KEY = "ABEiM0RVZneImaq7zN3u/w==";
+    private static final String BASE64_IV = "AAECAwQFBgcICQoLDA0ODw==";
+
 
     private final QueueDao queueDao;
-    private PrivateKey privateKey;
 
     @Autowired
     public QueueService(QueueDao queueDao) {
         this.queueDao = queueDao;
-    }
-
-    public void setPrivateKey(PrivateKey privateKey) {
-        this.privateKey = privateKey;
     }
 
     /**
@@ -75,15 +71,14 @@ public class QueueService {
      * @param unique id of the message to get
      * @return the original request ready to send
      */
-    public Object getMessage(String unique) {
+    public String getMessage(String unique) {
         Queue retrieve = queueDao.retrieve(unique);
 
         StringBuffer buffer = retrieveFileFromDisk(retrieve);
 
         byte[] bytes = decryptMessage(buffer.toString());
 
-
-        return bytes;
+        return Arrays.toString(bytes);
     }
 
     /**
@@ -154,19 +149,10 @@ public class QueueService {
         }
     }
 
-    private byte[] encryptMessage(Object request) {
+    private byte[] encryptMessage(String request) {
         try {
-            ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
-            ObjectOutput output = new ObjectOutputStream(byteOutputStream);
-            output.writeObject(request);
-
-            Cipher cipher = Cipher.getInstance("AES");
-            cipher.init(Cipher.ENCRYPT_MODE, privateKey);
-            return cipher.doFinal(byteOutputStream.toByteArray());
-
-        } catch (NoSuchAlgorithmException | InvalidKeyException
-                | NoSuchPaddingException | BadPaddingException
-                | IllegalBlockSizeException | IOException e) {
+            return AES.encrypt(parseBase64Binary(BASE64_KEY), parseBase64Binary(BASE64_IV), parseBase64Binary(request));
+        } catch (NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException | InvalidAlgorithmParameterException e) {
             //TODO: Better logging
             e.printStackTrace();
         }
@@ -175,17 +161,9 @@ public class QueueService {
 
     private byte[] decryptMessage(String request) {
         try {
-            ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
-            ObjectOutput output = new ObjectOutputStream(byteOutputStream);
-            output.writeObject(request);
+            return AES.decrypt(parseBase64Binary(BASE64_KEY), parseBase64Binary(BASE64_IV), parseBase64Binary(request));
 
-            Cipher cipher = Cipher.getInstance("AES");
-            cipher.init(Cipher.DECRYPT_MODE, privateKey);
-            return cipher.doFinal(byteOutputStream.toByteArray());
-
-        } catch (NoSuchAlgorithmException | InvalidKeyException
-                | NoSuchPaddingException | BadPaddingException
-                | IllegalBlockSizeException | IOException e) {
+        } catch (NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException | InvalidAlgorithmParameterException e) {
             //TODO: Better logging
             e.printStackTrace();
         }

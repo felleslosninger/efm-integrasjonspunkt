@@ -29,6 +29,6 @@ public class IntegrasjonspunktImplTest {
 
         integrasjonspunkt.putMessage(request);
 
-        verify(queueServiceMock, times(1)).put(request);
+        verify(queueServiceMock, times(1)).put(request.toString());
     }
 }
