@@ -4,6 +4,9 @@ import com.thoughtworks.xstream.XStream;
 import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageContext;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategy;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
@@ -86,16 +89,20 @@ public class IntegrasjonspunktImpl implements SOAPport {
         queueService.put(request.toString());
 
         return PutMessageResponseFactory.createOkResponse();
+    }
 
-        //        if(hasAdresseregisterCertificate(req.getEnvelope().getReceiver().getOrgnr())) {
-        //            PutMessageContext context = new PutMessageContext(eventLog, messageSender);
-        //            PutMessageStrategyFactory putMessageStrategyFactory = PutMessageStrategyFactory.newInstance(context);
-        //
-        //            PutMessageStrategy strategy = putMessageStrategyFactory.create(req.getPayload());
-        //            return strategy.putMessage(req);
-        //        } else {
-        //            return mshClient.sendEduMelding(req);
-        //        }
+    public boolean sendMessage(PutMessageRequestType request) {
+        PutMessageRequestType message = (PutMessageRequestType) queueService.getMessage("");
+        if (hasAdresseregisterCertificate(message.getEnvelope().getReceiver().getOrgnr())) {
+            PutMessageContext context = new PutMessageContext(eventLog, messageSender);
+            PutMessageStrategyFactory putMessageStrategyFactory = PutMessageStrategyFactory.newInstance(context);
+
+            PutMessageStrategy strategy = putMessageStrategyFactory.create(request.getPayload());
+            strategy.putMessage(request);
+        } else {
+            mshClient.sendEduMelding(request);
+        }
+        return true;
     }
 
     public AdresseregisterService getAdresseRegister() {

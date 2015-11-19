@@ -32,7 +32,8 @@ public class QueueDao {
     }
 
     public List<Queue> retrieve(Status status) {
-        String sql = "SELECT unique_id, numberAttempt, rule, status, requestLocation, lastAttemptTime, checksum FROM queue_metadata "
+        String sql = "SELECT unique_id, numberAttempt, rule, status, requestLocation, lastAttemptTime, checksum "
+                + "FROM queue_metadata "
                 + "WHERE status = :status ";
 
         List<Queue> queue = QueueMapper.map(template.queryForList(sql, status));

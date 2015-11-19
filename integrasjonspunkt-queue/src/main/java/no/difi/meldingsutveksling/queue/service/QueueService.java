@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.queue.rule.RuleDefault;
 import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -71,7 +72,7 @@ public class QueueService {
      * @param unique id of the message to get
      * @return the original request ready to send
      */
-    public String getMessage(String unique) {
+    public Object getMessage(String unique) {
         Queue retrieve = queueDao.retrieve(unique);
 
         StringBuffer buffer = retrieveFileFromDisk(retrieve);
@@ -210,5 +211,13 @@ public class QueueService {
             e.printStackTrace();
         }
         return sb.toString();
+    }
+
+    public void success(String unique) {
+        throw new NotImplementedException();
+    }
+
+    public void fail(String unique) {
+        throw new NotImplementedException();
     }
 }
