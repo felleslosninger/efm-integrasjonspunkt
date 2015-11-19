@@ -26,6 +26,7 @@ public class QueueServiceTest {
     private static final String NOT_ENCRYPTED_TEST_STRING = "TestObject";
     private static final long DATE_25TH_OCT_2015 = 61406118000000L;
     private static final long DATE_20TH_OCT_2015 = 61406550000000L;
+    public static final String UNIQUE_ID = "1";
 
     private QueueService queueService;
 
@@ -61,10 +62,10 @@ public class QueueServiceTest {
     public void shouldDecryptFileWhenLoadingEntryFromFile() {
         //This method will test both encryption and decryption
         String file = createEncryptedFile();
-        when(queueDaoMock.retrieve("1")).thenReturn(createQueue("1", QueueService.FILE_PATH + file));
+        when(queueDaoMock.retrieve(UNIQUE_ID)).thenReturn(createQueue(UNIQUE_ID, QueueService.FILE_PATH + file));
 
-        queueService.getMessage("1");
-        Object message = queueService.getMessage("1");
+        queueService.getMessage(UNIQUE_ID);
+        Object message = queueService.getMessage(UNIQUE_ID);
 
         assertEquals(message.toString(), NOT_ENCRYPTED_TEST_STRING);
     }
