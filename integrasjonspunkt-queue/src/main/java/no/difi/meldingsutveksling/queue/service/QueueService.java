@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.queue.service;
 import no.difi.meldingsutveksling.queue.dao.QueueDao;
 import no.difi.meldingsutveksling.queue.domain.Queue;
 import no.difi.meldingsutveksling.queue.domain.Status;
-import no.difi.meldingsutveksling.queue.rule.Rule;
 import no.difi.meldingsutveksling.queue.rule.RuleDefault;
 import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +12,12 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectOutput;
@@ -30,17 +31,18 @@ import java.util.Date;
 
 @Service
 public class QueueService {
-    private static final String FILE_PATH = System.getProperty("user.dir") + "/queue/";
+    protected static final String FILE_PATH = System.getProperty("user.dir") + "/queue/";
     private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("windows");
 
-    private final Rule rule;
-    private final PrivateKey privateKey;
+    private final QueueDao queueDao;
+    private PrivateKey privateKey;
 
     @Autowired
-    QueueDao queueDao;
+    public QueueService(QueueDao queueDao) {
+        this.queueDao = queueDao;
+    }
 
-    public QueueService(Rule rule, PrivateKey privateKey) {
-        this.rule = rule;
+    public void setPrivateKey(PrivateKey privateKey) {
         this.privateKey = privateKey;
     }
 
@@ -57,14 +59,31 @@ public class QueueService {
     }
 
     /**
-     * Get messages with a certain status.
+     * Get metadata for first element
      *
      * @param statusToGet Type messages to check for in queue
+     * @return Metadata for the top element to process
      */
-    public void get(Status statusToGet) {
-        //Oppdater status (aktiv melding)
-        //Dekrypter
-        //returner melding
+    public Queue getNext(Status statusToGet) {
+        //TODO: Only gets first for a certain status. Getting real next is not implemented.
+        return queueDao.retrieve(statusToGet).get(0);
+    }
+
+    /***
+     * Get message based on metadata
+     *
+     * @param unique id of the message to get
+     * @return the original request ready to send
+     */
+    public Object getMessage(String unique) {
+        Queue retrieve = queueDao.retrieve(unique);
+
+        StringBuffer buffer = retrieveFileFromDisk(retrieve);
+
+        byte[] bytes = decryptMessage(buffer);
+
+
+        return bytes;
     }
 
     /**
@@ -73,11 +92,11 @@ public class QueueService {
      * @param request Request to be put on queue
      */
     public void put(Object request) {
-        byte[] crypted = cryptMessage(request);
+        byte[] crypted = encryptMessage(request);
         String uniqueFilename = generateUniqueFileName();
         String filenameWithPath = ammendPath(uniqueFilename);
 
-        saveFileOnDisk(crypted, uniqueFilename);
+        saveFileOnDisk(crypted, filenameWithPath);
 
         Queue newEntry = new Queue.Builder()
                 .unique(uniqueFilename)
@@ -92,10 +111,40 @@ public class QueueService {
         queueDao.saveEntry(newEntry);
     }
 
+    private StringBuffer retrieveFileFromDisk(Queue retrieve) {
+        StringBuffer buffer = new StringBuffer();
+        BufferedReader reader = null;
+
+        try {
+            String currentLine;
+            reader = new BufferedReader(new FileReader(retrieve.getRequestLocation()));
+
+            while ((currentLine = reader.readLine()) != null) {
+                buffer.append(currentLine);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (reader != null)
+                    reader.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+        return buffer;
+    }
+
     private void saveFileOnDisk(byte[] crypted, String filename) {
+        if (!new File(FILE_PATH).exists()) {
+            new File(FILE_PATH).mkdir();
+        }
+
         File file = new File(filename);
         try {
-            FileWriter writer = new FileWriter(file.getAbsoluteFile());
+            file.createNewFile();
+            FileWriter writer = new FileWriter(file);
             BufferedWriter buffer = new BufferedWriter(writer);
             buffer.write(Arrays.toString(crypted));
             buffer.close();
@@ -105,7 +154,7 @@ public class QueueService {
         }
     }
 
-    private byte[] cryptMessage(Object request) {
+    private byte[] encryptMessage(Object request) {
         try {
             ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
             ObjectOutput output = new ObjectOutputStream(byteOutputStream);
@@ -124,8 +173,27 @@ public class QueueService {
         return new byte[0];
     }
 
+    private byte[] decryptMessage(Object request) {
+        try {
+            ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
+            ObjectOutput output = new ObjectOutputStream(byteOutputStream);
+            output.writeObject(request);
+
+            Cipher cipher = Cipher.getInstance("RSA");
+            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+            return cipher.doFinal(byteOutputStream.toByteArray());
+
+        } catch (NoSuchAlgorithmException | InvalidKeyException
+                | NoSuchPaddingException | BadPaddingException
+                | IllegalBlockSizeException | IOException e) {
+            //TODO: Better logging
+            e.printStackTrace();
+        }
+        return new byte[0];
+    }
+
     private String ammendPath(String filename) {
-        String fullFilename = FILE_PATH + filename + ".file";
+        String fullFilename = FILE_PATH + filename + ".queue";
 
         if (IS_WINDOWS) {
             return fullFilename.replace("/", "\\");
@@ -135,11 +203,8 @@ public class QueueService {
 
     private String generateUniqueFileName() {
         long millis = System.currentTimeMillis();
-        String datetime = new Date().toString();
-        datetime = datetime.replace(" ", "");
-        datetime = datetime.replace(":", "");
-        String rndchars = RandomStringUtils.randomAlphanumeric(16);
-        return rndchars + "_" + datetime + "_" + millis;
+        String rndchars = RandomStringUtils.randomAlphanumeric(10);
+        return rndchars + "_" + millis;
     }
 
     private String generateChecksum(String filenameWithPath) {

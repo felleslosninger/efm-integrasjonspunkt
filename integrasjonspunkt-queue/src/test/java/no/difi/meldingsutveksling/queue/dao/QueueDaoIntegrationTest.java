@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.queue.dao;
 import no.difi.meldingsutveksling.queue.config.QueueConfig;
 import no.difi.meldingsutveksling.queue.domain.Queue;
 import no.difi.meldingsutveksling.queue.domain.Status;
-import no.difi.meldingsutveksling.queue.rule.RuleDefault;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,6 +15,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import static no.difi.meldingsutveksling.queue.objectmother.QueueObjectMother.assertQueue;
+import static no.difi.meldingsutveksling.queue.objectmother.QueueObjectMother.createQueue;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -97,38 +98,5 @@ public class QueueDaoIntegrationTest {
         c.setTime(sdf.parse(dt));
         c.add(Calendar.DATE, addDays);
         return c.getTime();
-    }
-
-    private Queue createQueue(String unique, Date lastAttemptTime) {
-        return createQueueBuilder().unique(unique).lastAttemptTime(lastAttemptTime).build();
-    }
-
-    private Queue createQueue(String unique, Status status) {
-        return createQueueBuilder().unique(unique).status(status).build();
-    }
-
-    private Queue createQueue(String unique) {
-        return createQueueBuilder().unique(unique).build();
-    }
-
-    private static Queue.Builder createQueueBuilder() {
-        return new Queue.Builder()
-                .unique("unique1")
-                .numberAttempt(2)
-                .rule(RuleDefault.getRule())
-                .checksum("checksum")
-                .lastAttemptTime(new Date())
-                .location("file.123.xml")
-                .status(Status.NEW);
-    }
-
-    private static void assertQueue(Queue expected, Queue result) {
-        assertEquals(result.getRuleName(), expected.getRuleName());
-        assertEquals(result.getChecksum(), expected.getChecksum());
-        assertEquals(result.getUnique(), expected.getUnique());
-        assertEquals(result.getLastAttemptTime().getTime(), expected.getLastAttemptTime().getTime());
-        assertEquals(result.getNumberAttempts(), expected.getNumberAttempts());
-        assertEquals(result.getStatus(), expected.getStatus());
-        assertEquals(result.getRequestLocation(), expected.getRequestLocation());
     }
 }

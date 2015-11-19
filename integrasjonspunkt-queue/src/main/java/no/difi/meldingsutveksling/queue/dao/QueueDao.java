@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.queue.rule.Rule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,6 +17,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+@Repository
 public class QueueDao {
     @Autowired
     private JdbcTemplate template;
@@ -56,6 +58,12 @@ public class QueueDao {
         String sql = "DELETE FROM queue_metadata ";
 
         template.execute(sql);
+    }
+
+    public Queue retrieve(String unique) {
+        String sql = "SELECT * FROM queue_metadata WHERE unique_id = :unique ";
+
+        return QueueMapper.map(template.queryForList(sql, unique)).get(0);
     }
 
     private static final class QueueMapper implements RowMapper<Queue> {
