@@ -86,6 +86,16 @@ public class QueueDaoIntegrationTest {
         assertEquals(tomorrow.getTime(), actual.get(2).getLastAttemptTime().getTime());
     }
 
+    @Test
+    public void shouldRetrieveSingleRowWhenCallingWithUniqueId() {
+        queueDao.saveEntry(createQueue("uniqueE1"));
+        queueDao.saveEntry(createQueue("uniqueE2"));
+
+        Queue actual = queueDao.retrieve("uniqueE2");
+
+        assertEquals(actual.getUnique(), "uniqueE2");
+    }
+
     @After
     public void tearDown() {
         queueDao.removeAll();
