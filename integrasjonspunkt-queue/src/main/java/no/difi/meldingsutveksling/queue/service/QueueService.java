@@ -76,9 +76,11 @@ public class QueueService {
 
         StringBuffer buffer = retrieveFileFromDisk(retrieve);
 
-        byte[] bytes = decryptMessage(buffer.toString());
+        return String.valueOf(buffer);
 
-        return Arrays.toString(bytes);
+//        byte[] bytes = decryptMessage(String.valueOf(buffer));
+//
+//        return Arrays.toString(bytes);
     }
 
     /**
@@ -87,11 +89,12 @@ public class QueueService {
      * @param request Request to be put on queue
      */
     public void put(String request) {
-        byte[] crypted = encryptMessage(request);
+//        byte[] crypted = encryptMessage(request);
         String uniqueFilename = generateUniqueFileName();
         String filenameWithPath = ammendPath(uniqueFilename);
 
-        saveFileOnDisk(crypted, filenameWithPath);
+//        saveFileOnDisk(crypted, filenameWithPath);
+        saveFileOnDisk(request.getBytes(), filenameWithPath);
 
         Queue newEntry = new Queue.Builder()
                 .unique(uniqueFilename)
