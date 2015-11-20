@@ -26,7 +26,7 @@ public class AltinnTransport implements Transport {
      */
     @Override
     public void send(Configuration configuration, final Document document) {
-        AltinnWsClient client = new AltinnWsClient(hostName, AltinnWsConfiguration.fromConfiguration(configuration));
+        AltinnWsClient client = new AltinnWsClient(AltinnWsConfiguration.fromConfiguration(hostName, configuration));
         UploadRequest request1 = new UploadRequest() {
 
             @Override

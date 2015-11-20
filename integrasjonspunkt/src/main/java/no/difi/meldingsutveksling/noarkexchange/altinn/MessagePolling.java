@@ -68,8 +68,8 @@ public class MessagePolling {
         } catch (LookupException e) {
             throw new MeldingsUtvekslingRuntimeException(e.getMessage(), e);
         }
-        AltinnWsConfiguration configuration = AltinnWsConfiguration.fromConfiguration(config.getConfiguration());
-        AltinnWsClient client = new AltinnWsClient(endpoint.getAddress(), configuration);
+        AltinnWsConfiguration configuration = AltinnWsConfiguration.fromConfiguration(endpoint.getAddress(), config.getConfiguration());
+        AltinnWsClient client = new AltinnWsClient(configuration);
 
         List<FileReference> fileReferences = client.availableFiles(config.getOrganisationNumber());
 

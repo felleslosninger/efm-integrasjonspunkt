@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.elma;
 
+import no.difi.meldingsutveksling.transport.TransportFactory;
 import no.difi.vefa.peppol.common.model.TransportProfile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -27,7 +28,7 @@ public class TransportProfileConfiguration {
         List<String> activeProfiles = Arrays.asList(environment.getActiveProfiles());
         boolean isRunneingInDevEnv = activeProfiles.contains("dev");
         if (isRunneingInDevEnv) {
-            return TRANSPORT_PROFILE_ALTINN_DEV;
+            return TransportProfile.AS2_1_0;
         } else {
             return TRANSPORT_PROFILE_ALTINN_PROD;
         }
