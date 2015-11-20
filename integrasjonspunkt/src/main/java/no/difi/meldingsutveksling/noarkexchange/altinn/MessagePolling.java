@@ -64,7 +64,7 @@ public class MessagePolling {
         logger.debug("Checking for new messages");
         Endpoint endpoint;
         try {
-            endpoint = elmaLookup.lookup(config.getOrganisationNumber());
+            endpoint = elmaLookup.lookup("9908:" + config.getOrganisationNumber());
         } catch (LookupException e) {
             throw new MeldingsUtvekslingRuntimeException(e.getMessage(), e);
         }

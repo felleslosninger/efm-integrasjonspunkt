@@ -38,5 +38,4 @@ public class ELMALookup {
             throw new MeldingsUtvekslingRuntimeException();
         }
     }
-
-}
+    }
