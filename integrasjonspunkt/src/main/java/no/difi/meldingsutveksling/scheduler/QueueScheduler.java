@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 @EnableScheduling
 public class QueueScheduler {
-    public static final String FIRE_EVERY_5_MINUTE = "0 0/5 * * * ?";
+    public static final String FIRE_EVERY_1_MINUTE = "0 0/1 * * * ?";
     private final QueueService queueService;
     private final IntegrasjonspunktImpl integrasjonspunkt;
 
@@ -23,7 +23,7 @@ public class QueueScheduler {
         this.integrasjonspunkt = integrasjonspunkt;
     }
 
-    @Scheduled(cron = FIRE_EVERY_5_MINUTE)
+    @Scheduled(cron = FIRE_EVERY_1_MINUTE)
     public void sendMessage() {
         Queue next = queueService.getNext(Status.NEW);
         boolean success = integrasjonspunkt.sendMessage((PutMessageRequestType) queueService.getMessage(next.getUnique()));
@@ -31,7 +31,7 @@ public class QueueScheduler {
         applyResultToQueue(next.getUnique(), success);
     }
 
-    @Scheduled(cron = FIRE_EVERY_5_MINUTE)
+    @Scheduled(cron = FIRE_EVERY_1_MINUTE)
     public void retryMessages() {
         Queue next = queueService.getNext(Status.FAILED);
         boolean success = integrasjonspunkt.sendMessage((PutMessageRequestType) queueService.getMessage(next.getUnique()));
