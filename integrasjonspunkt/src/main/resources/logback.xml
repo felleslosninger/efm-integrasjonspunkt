@@ -2,6 +2,13 @@
 <configuration scan="true">
     <jmxConfigurator/>
 
+    <appender name="stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>10.243.200.51:8300</destination>
+
+        <!-- encoder is required -->
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
+    </appender>
+
     <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
 
         <encoder>
@@ -34,6 +41,7 @@
     <root level="INFO">
         <appender-ref ref="consoleAppender" />
         <appender-ref ref="FILE"/>
+        <appender-ref ref="stash"/>
     </root>
 
 </configuration>
