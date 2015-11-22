@@ -47,12 +47,14 @@ public class QueueDao {
         return queue;
     }
 
-    public void updateStatus(String unique, Status status) {
+    public void updateStatus(Queue object) {
         String sql = "UPDATE queue_metadata "
-                + "SET status = :status "
+                + "SET status = :status, "
+                + "lastAttemptTime = :lastAttemptTime, "
+                + "numberAttempt = :numberAttempt "
                 + "WHERE unique_id = :unique ";
 
-        template.update(sql, status, unique);
+        template.update(sql, object.getStatus(), object.getLastAttemptTime(), object.getNumberAttempts(), object.getUnique());
     }
 
     protected void removeAll() {

@@ -10,13 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import static no.difi.meldingsutveksling.queue.objectmother.QueueObjectMother.assertQueue;
 import static no.difi.meldingsutveksling.queue.objectmother.QueueObjectMother.createQueue;
+import static no.difi.meldingsutveksling.queue.objectmother.QueueObjectMother.dateHelper;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -64,7 +63,7 @@ public class QueueDaoIntegrationTest {
     @Test
     public void shouldUpdateStatus() {
         queueDao.saveEntry(createQueue("uniqueC1", Status.NEW));
-        queueDao.updateStatus("uniqueC1", Status.FAILED);
+        queueDao.updateStatus(createQueue("uniqueC1", Status.FAILED));
         Queue actual = queueDao.retrieve(Status.FAILED).get(0);
 
         assertEquals(Status.FAILED, actual.getStatus());
@@ -72,9 +71,9 @@ public class QueueDaoIntegrationTest {
 
     @Test
     public void shouldRetrieveResultBasedOnStatusSortedOnTimestamp() throws Exception {
-        Date now = date(0);
-        Date tomorrow = date(1);
-        Date yesterday = date(-1);
+        Date now = dateHelper(0);
+        Date tomorrow = dateHelper(1);
+        Date yesterday = dateHelper(-1);
         queueDao.saveEntry(createQueue("uniqueD1", now));
         queueDao.saveEntry(createQueue("uniqueD2", tomorrow));
         queueDao.saveEntry(createQueue("uniqueD3", yesterday));
@@ -99,14 +98,5 @@ public class QueueDaoIntegrationTest {
     @After
     public void tearDown() {
         queueDao.removeAll();
-    }
-
-    private Date date(int addDays) throws Exception {
-        String dt = "2015-01-01";
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Calendar c = Calendar.getInstance();
-        c.setTime(sdf.parse(dt));
-        c.add(Calendar.DATE, addDays);
-        return c.getTime();
     }
 }

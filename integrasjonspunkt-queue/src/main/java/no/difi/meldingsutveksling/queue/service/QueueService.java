@@ -7,7 +7,6 @@ import no.difi.meldingsutveksling.queue.rule.RuleDefault;
 import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -108,6 +107,41 @@ public class QueueService {
                 .build();
 
         queueDao.saveEntry(newEntry);
+    }
+
+    public void success(String unique) {
+        Queue queue = queueDao.retrieve(unique);
+        removeFile(queue.getRequestLocation());
+
+        int numberAttempts = queue.getNumberAttempts();
+
+        Queue updatedQueue = queue.getOpenObjectBuilder()
+                .status(Status.DONE)
+                .lastAttemptTime(new Date())
+                .location("")
+                .numberAttempt(++numberAttempts)
+                .build();
+
+        queueDao.updateStatus(updatedQueue);
+    }
+
+    public void fail(String unique) {
+        Queue queue = queueDao.retrieve(unique);
+
+        int numberAttempts = queue.getNumberAttempts();
+        Queue.Builder openObject = queue.getOpenObjectBuilder()
+                .numberAttempt(++numberAttempts)
+                .lastAttemptTime(new Date());
+
+        if (numberAttempts > queue.getRule().getMaxAttempt()) {
+            openObject.status(Status.ERROR);
+            removeFile(queue.getRequestLocation());
+        }
+        else {
+            openObject.status(Status.FAILED);
+        }
+
+        queueDao.saveEntry(openObject.build());
     }
 
     private StringBuffer retrieveFileFromDisk(Queue retrieve) {
@@ -213,11 +247,8 @@ public class QueueService {
         return sb.toString();
     }
 
-    public void success(String unique) {
-        throw new NotImplementedException();
-    }
-
-    public void fail(String unique) {
-        throw new NotImplementedException();
+    private boolean removeFile(String filename) {
+        File file = new File(filename);
+        return file.delete();
     }
 }
