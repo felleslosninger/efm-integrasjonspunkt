@@ -204,6 +204,16 @@ public class QueueServiceTest {
 
     @AfterClass
     public static void cleanUp() {
-        //TODO: Remove all files in queue folder
+        String filePath = FILE_PATH;
+        if (QueueService.IS_WINDOWS) {
+            filePath = filePath.replace("/", "\\");
+        }
+
+        File downloadFile = new File(filePath);
+
+        downloadFile.delete();
+        if (downloadFile.exists()) {
+            System.out.println(String.format("Cleanup of file %s failed. Manually cleanup necessary! ", filePath));
+        }
     }
 }

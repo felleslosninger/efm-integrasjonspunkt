@@ -30,7 +30,7 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
 @Service
 public class QueueService {
     protected static final String FILE_PATH = System.getProperty("user.dir") + "/queue/";
-    private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("windows");
+    protected static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("windows");
     private static final String BASE64_KEY = "ABEiM0RVZneImaq7zN3u/w==";
     private static final String BASE64_IV = "AAECAwQFBgcICQoLDA0ODw==";
 
