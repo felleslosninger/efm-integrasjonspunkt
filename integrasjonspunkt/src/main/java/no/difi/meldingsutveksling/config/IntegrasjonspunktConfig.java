@@ -3,7 +3,11 @@ package no.difi.meldingsutveksling.config;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRequiredPropertyException;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClientSettings;
-import org.apache.commons.configuration.*;
+import org.apache.commons.configuration.CompositeConfiguration;
+import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.configuration.SystemConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -142,6 +146,11 @@ public class IntegrasjonspunktConfig {
 
     public String getOrganisationNumber() {
         return config.getString(KEY_ORGANISATION_NUMBER);
+    }
+
+    public boolean isQueueEnabled() {
+        String queueEnabled = config.getString("toggle.enable.queue");
+        return queueEnabled.equals("on") || queueEnabled.equals("true");
     }
 
     public boolean hasOrganisationNumber() {
