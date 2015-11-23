@@ -151,7 +151,7 @@ public class QueueService {
             openObject.status(Status.FAILED);
         }
 
-        queueDao.saveEntry(openObject.build());
+        queueDao.updateEntry(openObject.build());
     }
 
     private StringBuffer retrieveFileFromDisk(Queue retrieve) {

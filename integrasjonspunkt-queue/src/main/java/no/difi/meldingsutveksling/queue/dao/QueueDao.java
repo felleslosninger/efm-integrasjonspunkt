@@ -35,6 +35,20 @@ public class QueueDao {
                 queue.getStatus().name(), queue.getRequestLocation(), queue.getLastAttemptTime(), queue.getChecksum());
     }
 
+    public void updateEntry(Queue queue) {
+        String sql = "UPDATE queue_metadata "
+                + "SET numberAttempt = :numberAttempt, "
+                + "rule = :rule, "
+                + "status = :status, "
+                + "requestLocation = :requestLocation, "
+                + "lastAttemptTime = :lastAttemptTime, "
+                + "checksum = :checksum "
+                + "WHERE unique_id = :uniqueId ";
+
+        template.update(sql, queue.getNumberAttempts(), queue.getRuleName(), queue.getStatus().name(),
+                queue.getRequestLocation(), queue.getLastAttemptTime(), queue.getChecksum(), queue.getUnique());
+    }
+
     public List<Queue> retrieve(Status status) {
         String sql = "SELECT unique_id, numberAttempt, rule, status, requestLocation, lastAttemptTime, checksum "
                 + "FROM queue_metadata "
@@ -56,9 +70,10 @@ public class QueueDao {
                 + "SET status = :status, "
                 + "lastAttemptTime = :lastAttemptTime, "
                 + "numberAttempt = :numberAttempt "
-                + "WHERE unique_id = :unique ";
+                + "WHERE unique_id = :uniqueId";
 
-        template.update(sql, object.getStatus(), object.getLastAttemptTime(), object.getNumberAttempts(), object.getUnique());
+        template.update(sql, object.getStatus().name(), object.getLastAttemptTime(), object.getNumberAttempts(),
+                object.getUnique());
     }
 
     protected void removeAll() {
@@ -71,7 +86,7 @@ public class QueueDao {
         String sql = "SELECT unique_id, numberAttempt, rule, status, requestLocation, lastAttemptTime, checksum "
                 + "FROM queue_metadata "
                 + "WHERE unique_id = :uniqueId ";
-        System.out.println(sql);
+
         List<Queue> queue = QueueMapper.map(template.queryForList(sql, uniqueId));
         return queue.get(0);
     }

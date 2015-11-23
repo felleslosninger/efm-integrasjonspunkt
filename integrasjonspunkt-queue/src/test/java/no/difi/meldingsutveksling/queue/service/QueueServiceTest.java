@@ -116,7 +116,7 @@ public class QueueServiceTest {
         queueService.fail(UNIQUE_ID);
 
         verify(queueDaoMock, times(1)).retrieve(anyString());
-        verify(queueDaoMock, times(1)).saveEntry(args.capture());
+        verify(queueDaoMock, times(1)).updateEntry(args.capture());
 
         Queue actual = args.getValue();
         assertEquals(2, actual.getNumberAttempts());
@@ -129,7 +129,7 @@ public class QueueServiceTest {
 
         queueService.fail(UNIQUE_ID);
 
-        verify(queueDaoMock, times(1)).saveEntry(args.capture());
+        verify(queueDaoMock, times(1)).updateEntry(args.capture());
 
         Queue actual = args.getValue();
         assertTrue(actual.getRule().getMaxAttempt() > actual.getNumberAttempts());
@@ -143,7 +143,7 @@ public class QueueServiceTest {
 
         queueService.fail(UNIQUE_ID);
 
-        verify(queueDaoMock, times(1)).saveEntry(args.capture());
+        verify(queueDaoMock, times(1)).updateEntry(args.capture());
 
         Queue actual = args.getValue();
         assertEquals(actual.getRule().getMaxAttempt(), actual.getNumberAttempts());
@@ -157,7 +157,7 @@ public class QueueServiceTest {
 
         queueService.fail(UNIQUE_ID);
 
-        verify(queueDaoMock, times(1)).saveEntry(args.capture());
+        verify(queueDaoMock, times(1)).updateEntry(args.capture());
 
         Queue actual = args.getValue();
         assertTrue(actual.getRule().getMaxAttempt() < actual.getNumberAttempts());
@@ -172,7 +172,7 @@ public class QueueServiceTest {
 
         queueService.fail(UNIQUE_ID);
 
-        verify(queueDaoMock, times(1)).saveEntry(args.capture());
+        verify(queueDaoMock, times(1)).updateEntry(args.capture());
 
         Queue actual = args.getValue();
         assertFalse(yesterday.getTime() == actual.getLastAttemptTime().getTime());

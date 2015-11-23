@@ -21,7 +21,8 @@ public class QueueScheduler {
     private IntegrasjonspunktConfig integrasjonspunktConfig;
 
     @Autowired
-    public QueueScheduler(QueueService queueService, IntegrasjonspunktImpl integrasjonspunkt,
+    public QueueScheduler(QueueService queueService,
+                          IntegrasjonspunktImpl integrasjonspunkt,
                           IntegrasjonspunktConfig integrasjonspunktConfig) {
         this.queueService = queueService;
         this.integrasjonspunkt = integrasjonspunkt;
@@ -31,10 +32,6 @@ public class QueueScheduler {
     @Scheduled(cron = FIRE_EVERY_1_MINUTE)
     public void sendMessage() {
         if (integrasjonspunktConfig.isQueueEnabled()) {
-            System.out.println("************************************************");
-            System.out.println("Attempting to sent messages that have status new");
-            System.out.println("************************************************");
-
             Queue next = queueService.getNext(Status.NEW);
             if (next != null) {
                 boolean success = integrasjonspunkt.sendMessage((PutMessageRequestType) queueService.getMessage(next.getUnique()));
@@ -45,9 +42,6 @@ public class QueueScheduler {
 
     @Scheduled(cron = FIRE_EVERY_1_MINUTE)
     public void retryMessages() {
-        System.out.println("***************************************************");
-        System.out.println("Attempting to sent messages that have status failed");
-        System.out.println("***************************************************");
         if (integrasjonspunktConfig.isQueueEnabled()) {
             Queue next = queueService.getNext(Status.FAILED);
             if (next != null) {
