@@ -7,7 +7,6 @@ import no.difi.meldingsutveksling.queue.domain.Queue;
 import no.difi.meldingsutveksling.queue.domain.Status;
 import no.difi.meldingsutveksling.queue.service.QueueService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -32,20 +31,29 @@ public class QueueScheduler {
     @Scheduled(cron = FIRE_EVERY_1_MINUTE)
     public void sendMessage() {
         if (integrasjonspunktConfig.isQueueEnabled()) {
-            Queue next = queueService.getNext(Status.NEW);
-            boolean success = integrasjonspunkt.sendMessage((PutMessageRequestType) queueService.getMessage(next.getUnique()));
+            System.out.println("************************************************");
+            System.out.println("Attempting to sent messages that have status new");
+            System.out.println("************************************************");
 
-            applyResultToQueue(next.getUnique(), success);
+            Queue next = queueService.getNext(Status.NEW);
+            if (next != null) {
+                boolean success = integrasjonspunkt.sendMessage((PutMessageRequestType) queueService.getMessage(next.getUnique()));
+                applyResultToQueue(next.getUnique(), success);
+            }
         }
     }
 
     @Scheduled(cron = FIRE_EVERY_1_MINUTE)
     public void retryMessages() {
+        System.out.println("***************************************************");
+        System.out.println("Attempting to sent messages that have status failed");
+        System.out.println("***************************************************");
         if (integrasjonspunktConfig.isQueueEnabled()) {
             Queue next = queueService.getNext(Status.FAILED);
-            boolean success = integrasjonspunkt.sendMessage((PutMessageRequestType) queueService.getMessage(next.getUnique()));
-
-            applyResultToQueue(next.getUnique(), success);
+            if (next != null) {
+                boolean success = integrasjonspunkt.sendMessage((PutMessageRequestType) queueService.getMessage(next.getUnique()));
+                applyResultToQueue(next.getUnique(), success);
+            }
         }
     }
 

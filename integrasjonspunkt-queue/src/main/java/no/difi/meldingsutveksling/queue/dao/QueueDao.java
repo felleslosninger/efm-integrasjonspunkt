@@ -31,8 +31,8 @@ public class QueueDao {
                 + "(unique_id, numberAttempt, rule, status, requestLocation, lastAttemptTime, checksum) "
                 + "VALUES (:unique_id, :numberAttempt, :rule, :status, :requestLocation, :lastAttempt, :checksum)";
 
-        template.update(sql, queue.getUnique(), queue.getNumberAttempts(), queue.getRuleName(), queue.getStatus(),
-                queue.getRequestLocation(), queue.getLastAttemptTime(), queue.getChecksum());
+        template.update(sql, queue.getUnique(), queue.getNumberAttempts(), queue.getRuleName(),
+                queue.getStatus().name(), queue.getRequestLocation(), queue.getLastAttemptTime(), queue.getChecksum());
     }
 
     public List<Queue> retrieve(Status status) {
@@ -40,7 +40,7 @@ public class QueueDao {
                 + "FROM queue_metadata "
                 + "WHERE status = :status ";
 
-        List<Queue> queue = QueueMapper.map(template.queryForList(sql, status));
+        List<Queue> queue = QueueMapper.map(template.queryForList(sql, status.name()));
 
         Collections.sort(queue, new Comparator<Queue>() {
             public int compare(Queue o1, Queue o2) {
@@ -67,10 +67,13 @@ public class QueueDao {
         template.execute(sql);
     }
 
-    public Queue retrieve(String unique) {
-        String sql = "SELECT * FROM queue_metadata WHERE unique_id = :unique ";
-
-        return QueueMapper.map(template.queryForList(sql, unique)).get(0);
+    public Queue retrieve(String uniqueId) {
+        String sql = "SELECT unique_id, numberAttempt, rule, status, requestLocation, lastAttemptTime, checksum "
+                + "FROM queue_metadata "
+                + "WHERE unique_id = :uniqueId ";
+        System.out.println(sql);
+        List<Queue> queue = QueueMapper.map(template.queryForList(sql, uniqueId));
+        return queue.get(0);
     }
 
     private static final class QueueMapper implements RowMapper<Queue> {
@@ -103,4 +106,26 @@ public class QueueDao {
         return countCallback.getRowCount();
     }
 
+    public int getQueueReadySize() {
+        RowCountCallbackHandler countCallback = new RowCountCallbackHandler();
+        template.query("select * from queue_metadata where status = 'NEW'", countCallback);
+        return countCallback.getRowCount();
+    }
+
+    public int getQueueFailedSize() {
+        RowCountCallbackHandler countCallback = new RowCountCallbackHandler();
+        template.query("select * from queue_metadata where status = 'FAILED'", countCallback);
+        return countCallback.getRowCount();
+    }
+
+    public int getQueueErrorSize() {
+        RowCountCallbackHandler countCallback = new RowCountCallbackHandler();
+        template.query("select * from queue_metadata where status = 'ERROR'", countCallback);
+        return countCallback.getRowCount();
+    }
+    public int getQueueCompletedSize() {
+        RowCountCallbackHandler countCallback = new RowCountCallbackHandler();
+        template.query("select * from queue_metadata where status = 'DONE'", countCallback);
+        return countCallback.getRowCount();
+    }
 }

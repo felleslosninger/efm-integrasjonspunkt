@@ -26,6 +26,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
 
@@ -65,7 +66,13 @@ public class QueueService {
      */
     public Queue getNext(Status statusToGet) {
         //TODO: Only gets first for a certain status. Getting real next is not implemented.
-        return queueDao.retrieve(statusToGet).get(0);
+        List<Queue> retrieve = queueDao.retrieve(statusToGet);
+        if  (retrieve.size() > 0) {
+            return retrieve.get(0);
+        }
+        else {
+            return null;
+        }
     }
 
     /***
@@ -258,6 +265,25 @@ public class QueueService {
     @ManagedAttribute
     public int getQueueSize() {
         return queueDao.getQueueTotalSize();
+    }
+
+    @ManagedAttribute
+    public int getQueueNewSize() {
+        return queueDao.getQueueReadySize();
+    }
+
+    @ManagedAttribute
+    public int getQueueFailedSize() {
+        return queueDao.getQueueFailedSize();
+    }
+
+    @ManagedAttribute
+    public int getQueueErrorSize() {
+        return queueDao.getQueueErrorSize();
+    }
+    @ManagedAttribute
+    public int getQueueDoneSize() {
+        return queueDao.getQueueCompletedSize();
     }
 
 }

@@ -1,7 +1,7 @@
 CREATE TABLE queue_metadata (
   unique_id VARCHAR(32) PRIMARY KEY,
   numberAttempt INTEGER,
-  rule VARCHAR(16),
+  rule VARCHAR(64),
   lastAttemptTime TIMESTAMP,
   requestLocation VARCHAR(256),
   status VARCHAR(16),

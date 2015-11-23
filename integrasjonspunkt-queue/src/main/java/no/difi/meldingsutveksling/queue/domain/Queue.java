@@ -17,11 +17,11 @@ public class Queue {
     private Queue(String unique, int numberAttempt, Rule rule, Date lastAttemptTime, String location, String checksum, Status status) {
         this.unique = unique;
         this.numberAttempt = numberAttempt;
-        this.rule = rule;
+        this.rule = rule == null ? RuleDefault.getRule() : rule;
         this.lastAttemptTime = lastAttemptTime;
-        this.location = location;
-        this.checksum = checksum;
-        this.status = status;
+        this.location = checkBlank(location);
+        this.checksum = checkBlank(checksum);
+        this.status = status == null ? Status.NEW : status;
     }
 
     public String getUnique() {
@@ -130,5 +130,9 @@ public class Queue {
         public Queue build() {
             return new Queue(unique, numberAttempt, rule, lastAttemptTime, location, checksum, status);
         }
+    }
+
+    private String checkBlank(String value) {
+        return value == null ? "" : value;
     }
 }
