@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
@@ -32,7 +31,7 @@ public class JournalpostId {
         this.jpId = jpId;
     }
 
-    public static JournalpostId fromPutMessage(PutMessageRequestType message) {
+    public static JournalpostId fromPutMessage(PutMessageRequestAdapter message) {
         JournalpostId result;
         XPathFactory xPathFactory = XPathFactory.newInstance();
         XPath xPath = xPathFactory.newXPath();
