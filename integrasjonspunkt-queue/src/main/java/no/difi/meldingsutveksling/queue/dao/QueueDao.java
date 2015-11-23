@@ -4,7 +4,9 @@ import no.difi.meldingsutveksling.queue.domain.Queue;
 import no.difi.meldingsutveksling.queue.domain.Status;
 import no.difi.meldingsutveksling.queue.rule.Rule;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCountCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
@@ -19,7 +21,9 @@ import java.util.Map;
 
 @Repository
 public class QueueDao {
+
     @Autowired
+    @Qualifier("queueJDBCTemplate")
     private JdbcTemplate template;
 
     public void saveEntry(Queue queue) {
@@ -90,4 +94,11 @@ public class QueueDao {
             return queueList;
         }
     }
+
+    public int getQueueTotalSize() {
+        RowCountCallbackHandler countCallback = new RowCountCallbackHandler();
+        template.query("select * from queue_metadata", countCallback);
+        return countCallback.getRowCount();
+    }
+
 }

@@ -6,6 +6,8 @@ import no.difi.meldingsutveksling.queue.domain.Status;
 import no.difi.meldingsutveksling.queue.rule.RuleDefault;
 import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jmx.export.annotation.ManagedAttribute;
+import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
@@ -29,6 +31,7 @@ import java.util.Date;
 import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
 
 @Service
+@ManagedResource
 public class QueueService {
     protected static final String FILE_PATH = System.getProperty("user.dir") + "/queue/";
     private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("windows");
@@ -220,4 +223,10 @@ public class QueueService {
     public void fail(String unique) {
         throw new NotImplementedException();
     }
+
+    @ManagedAttribute
+    public int getQueueSize() {
+        return queueDao.getQueueTotalSize();
+    }
+
 }

@@ -18,9 +18,4 @@ public class IntegrasjonspunktBeans {
     public QueueService queueService() {
         return new QueueService(new QueueDao());
     }
-
-    @Bean
-    public IntegrasjonspunktImpl integrasjonspunktImpl() {
-        return new IntegrasjonspunktImpl();
-    }
 }
