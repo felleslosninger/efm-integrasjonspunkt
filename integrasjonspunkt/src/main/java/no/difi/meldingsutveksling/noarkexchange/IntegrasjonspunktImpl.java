@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import com.thoughtworks.xstream.XStream;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
 import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
@@ -55,6 +56,9 @@ public class IntegrasjonspunktImpl implements SOAPport {
     @Autowired
     private QueueService queueService;
 
+    @Autowired
+    IntegrasjonspunktConfig integrasjonspunktConfig;
+
     @Override
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
 
@@ -86,9 +90,21 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType request) {
-        queueService.put(request.toString());
+        if (integrasjonspunktConfig.isQueueEnabled()) {
+            queueService.put(request.toString());
+            return PutMessageResponseFactory.createOkResponse();
+        }
+        else {
+            if (hasAdresseregisterCertificate(request.getEnvelope().getReceiver().getOrgnr())) {
+                PutMessageContext context = new PutMessageContext(eventLog, messageSender);
+                PutMessageStrategyFactory putMessageStrategyFactory = PutMessageStrategyFactory.newInstance(context);
 
-        return PutMessageResponseFactory.createOkResponse();
+                PutMessageStrategy strategy = putMessageStrategyFactory.create(request.getPayload());
+                return strategy.putMessage(request);
+            } else {
+                return mshClient.sendEduMelding(request);
+            }
+        }
     }
 
     public boolean sendMessage(PutMessageRequestType request) {

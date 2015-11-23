@@ -60,6 +60,17 @@ public class Queue {
         return checksum;
     }
 
+    public Builder getOpenObjectBuilder() {
+        return new Builder()
+                .unique(this.unique)
+                .numberAttempt(this.numberAttempt)
+                .rule(this.rule)
+                .lastAttemptTime(this.lastAttemptTime)
+                .location(this.location)
+                .checksum(this.checksum)
+                .status(this.status);
+    }
+
     public static class Builder {
         private String unique;
         private int numberAttempt;

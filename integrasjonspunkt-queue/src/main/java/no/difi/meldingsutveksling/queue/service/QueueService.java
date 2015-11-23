@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -34,7 +33,7 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
 @ManagedResource
 public class QueueService {
     protected static final String FILE_PATH = System.getProperty("user.dir") + "/queue/";
-    private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("windows");
+    protected static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("windows");
     private static final String BASE64_KEY = "ABEiM0RVZneImaq7zN3u/w==";
     private static final String BASE64_IV = "AAECAwQFBgcICQoLDA0ODw==";
 
@@ -111,6 +110,41 @@ public class QueueService {
                 .build();
 
         queueDao.saveEntry(newEntry);
+    }
+
+    public void success(String unique) {
+        Queue queue = queueDao.retrieve(unique);
+        removeFile(queue.getRequestLocation());
+
+        int numberAttempts = queue.getNumberAttempts();
+
+        Queue updatedQueue = queue.getOpenObjectBuilder()
+                .status(Status.DONE)
+                .lastAttemptTime(new Date())
+                .location("")
+                .numberAttempt(++numberAttempts)
+                .build();
+
+        queueDao.updateStatus(updatedQueue);
+    }
+
+    public void fail(String unique) {
+        Queue queue = queueDao.retrieve(unique);
+
+        int numberAttempts = queue.getNumberAttempts();
+        Queue.Builder openObject = queue.getOpenObjectBuilder()
+                .numberAttempt(++numberAttempts)
+                .lastAttemptTime(new Date());
+
+        if (numberAttempts > queue.getRule().getMaxAttempt()) {
+            openObject.status(Status.ERROR);
+            removeFile(queue.getRequestLocation());
+        }
+        else {
+            openObject.status(Status.FAILED);
+        }
+
+        queueDao.saveEntry(openObject.build());
     }
 
     private StringBuffer retrieveFileFromDisk(Queue retrieve) {
@@ -216,12 +250,9 @@ public class QueueService {
         return sb.toString();
     }
 
-    public void success(String unique) {
-        throw new NotImplementedException();
-    }
-
-    public void fail(String unique) {
-        throw new NotImplementedException();
+    private boolean removeFile(String filename) {
+        File file = new File(filename);
+        return file.delete();
     }
 
     @ManagedAttribute

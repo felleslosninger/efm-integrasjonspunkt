@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.scheduler;
 
+import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.queue.domain.Queue;
@@ -18,26 +19,34 @@ public class QueueScheduler {
     private final QueueService queueService;
     private final IntegrasjonspunktImpl integrasjonspunkt;
 
+    private IntegrasjonspunktConfig integrasjonspunktConfig;
+
     @Autowired
-    public QueueScheduler(QueueService queueService, IntegrasjonspunktImpl integrasjonspunkt) {
+    public QueueScheduler(QueueService queueService, IntegrasjonspunktImpl integrasjonspunkt,
+                          IntegrasjonspunktConfig integrasjonspunktConfig) {
         this.queueService = queueService;
         this.integrasjonspunkt = integrasjonspunkt;
+        this.integrasjonspunktConfig = integrasjonspunktConfig;
     }
 
     @Scheduled(cron = FIRE_EVERY_1_MINUTE)
     public void sendMessage() {
-        Queue next = queueService.getNext(Status.NEW);
-        boolean success = integrasjonspunkt.sendMessage((PutMessageRequestType) queueService.getMessage(next.getUnique()));
+        if (integrasjonspunktConfig.isQueueEnabled()) {
+            Queue next = queueService.getNext(Status.NEW);
+            boolean success = integrasjonspunkt.sendMessage((PutMessageRequestType) queueService.getMessage(next.getUnique()));
 
-        applyResultToQueue(next.getUnique(), success);
+            applyResultToQueue(next.getUnique(), success);
+        }
     }
 
     @Scheduled(cron = FIRE_EVERY_1_MINUTE)
     public void retryMessages() {
-        Queue next = queueService.getNext(Status.FAILED);
-        boolean success = integrasjonspunkt.sendMessage((PutMessageRequestType) queueService.getMessage(next.getUnique()));
+        if (integrasjonspunktConfig.isQueueEnabled()) {
+            Queue next = queueService.getNext(Status.FAILED);
+            boolean success = integrasjonspunkt.sendMessage((PutMessageRequestType) queueService.getMessage(next.getUnique()));
 
-        applyResultToQueue(next.getUnique(), success);
+            applyResultToQueue(next.getUnique(), success);
+        }
     }
 
     private void applyResultToQueue(String unique, boolean result) {

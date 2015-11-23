@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.scheduler;
 
+import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.queue.domain.Queue;
@@ -8,6 +9,7 @@ import no.difi.meldingsutveksling.queue.rule.RuleDefault;
 import no.difi.meldingsutveksling.queue.service.QueueService;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import java.util.Date;
@@ -22,16 +24,21 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 public class QueueSchedulerTest {
     public static final String UNIQUE_ID = "unique1";
+
+    @InjectMocks
     private QueueScheduler queueScheduler;
 
     @Mock private QueueService queueServiceMock;
     @Mock private IntegrasjonspunktImpl integrasjonspunktMock;
+    @Mock private IntegrasjonspunktConfig integrasjonspunktConfigMock;
 
     @Before
     public void setUp() {
         initMocks(this);
 
-        queueScheduler = new QueueScheduler(queueServiceMock, integrasjonspunktMock);
+        when(integrasjonspunktConfigMock.isQueueEnabled()).thenReturn(true);
+
+        queueScheduler = new QueueScheduler(queueServiceMock, integrasjonspunktMock, integrasjonspunktConfigMock);
     }
 
     @Test
