@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "anifest", propOrder = { "mottaker", "avsender", "hoveddokument", })
+@XmlType(name = "Manifest", propOrder = { "mottaker", "avsender", "hoveddokument", })
 @XmlRootElement(name = "manifest")
 public class Manifest {
 

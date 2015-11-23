@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.shipping.sftp;
 import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceManifest;
 
 /**
- * Builder for anifest.xml need by Altinn formidlingstjeneste
+ * Builder for Manifest.xml need by Altinn formidlingstjeneste
  */
 public class BrokerServiceManifestBuilder {
     public static final String CONTENT_FILE_NAME = "content.xml";
