@@ -52,4 +52,8 @@ public class PutMessageRequestAdapter {
     public void setSenderPartyNumber(String senderPartyNumber) {
         this.requestType.getEnvelope().getSender().setOrgnr(senderPartyNumber);
     }
+
+    public Object getPayload() {
+        return requestType.getPayload();
+    }
 }
