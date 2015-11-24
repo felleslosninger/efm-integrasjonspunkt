@@ -47,18 +47,6 @@ public class QueueService {
     }
 
     /**
-     * Used for existing messages when trying to resend failed messages or remove messages from queue that is sent.
-     *
-     * @param key Unique key for request to update
-     */
-    public void put(String key, int i) {
-        //Krypter
-        //Valider om ny melding
-        //Lagre melding
-        //Oppdater status
-    }
-
-    /**
      * Get metadata for first element
      *
      * @param statusToGet Type messages to check for in queue
