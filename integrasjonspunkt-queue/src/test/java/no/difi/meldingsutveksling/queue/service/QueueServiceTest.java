@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.queue.service;
 import no.difi.meldingsutveksling.queue.dao.QueueDao;
 import no.difi.meldingsutveksling.queue.domain.Queue;
 import no.difi.meldingsutveksling.queue.domain.Status;
+import no.difi.meldingsutveksling.queue.messageutil.QueueMessageFile;
 import no.difi.meldingsutveksling.queue.rule.RuleDefault;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -16,9 +17,9 @@ import java.io.FilenameFilter;
 import java.util.Date;
 
 import static java.util.Arrays.asList;
+import static no.difi.meldingsutveksling.queue.messageutil.QueueMessageFile.FILE_PATH;
 import static no.difi.meldingsutveksling.queue.objectmother.QueueObjectMother.createQueue;
 import static no.difi.meldingsutveksling.queue.objectmother.QueueObjectMother.dateHelper;
-import static no.difi.meldingsutveksling.queue.service.QueueService.FILE_PATH;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -205,7 +206,7 @@ public class QueueServiceTest {
     @AfterClass
     public static void cleanUp() {
         String filePath = FILE_PATH;
-        if (QueueService.IS_WINDOWS) {
+        if (QueueMessageFile.IS_WINDOWS) {
             filePath = filePath.replace("/", "\\");
         }
 
