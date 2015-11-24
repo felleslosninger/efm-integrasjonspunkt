@@ -79,6 +79,16 @@ public class QueueServiceTest {
     }
 
     @Test
+    public void shouldGetMessageWhenRequested() {
+        String filename = FILE_PATH + createEncryptedFile();
+        when(queueDaoMock.retrieve(anyString())).thenReturn(createQueue(UNIQUE_ID, filename));
+
+        Object message = queueService.getMessage(UNIQUE_ID);
+
+        assertEquals(NOT_ENCRYPTED_TEST_STRING, message);
+    }
+
+    @Test
     public void shouldRemoveFileWhenSuccessReported() {
         String filename = FILE_PATH + createEncryptedFile();
         when(queueDaoMock.retrieve(anyString())).thenReturn(createQueue(UNIQUE_ID, filename));

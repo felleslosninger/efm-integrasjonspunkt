@@ -64,9 +64,7 @@ public class QueueService {
     public Object getMessage(String unique) {
         Queue retrieve = queueDao.retrieve(unique);
 
-        StringBuffer buffer = QueueMessageFile.retrieveFileFromDisk(retrieve);
-
-        return String.valueOf(buffer);
+        return String.valueOf(QueueMessageFile.retrieveFileFromDisk(retrieve));
 
 //        byte[] bytes = decryptMessage(String.valueOf(buffer));
 //
@@ -198,9 +196,9 @@ public class QueueService {
     public int getQueueErrorSize() {
         return queueDao.getQueueErrorSize();
     }
+
     @ManagedAttribute
     public int getQueueDoneSize() {
         return queueDao.getQueueCompletedSize();
     }
-
 }
