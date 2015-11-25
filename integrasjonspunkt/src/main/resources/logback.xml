@@ -3,7 +3,7 @@
     <jmxConfigurator/>
 
     <appender name="stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>10.243.200.51:8300</destination>
+        <destination>localhost:5678</destination>
 
         <!-- encoder is required -->
         <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
@@ -13,7 +13,7 @@
 
         <encoder>
             <charset>UTF-8</charset>
-            <Pattern>%d %-4relative [%thread] %-5level %logger{35} - %msg%n</Pattern>
+            <Pattern>%d %-4relative [%thread] %-5level %logger{35} (%marker) - %msg%n</Pattern>
         </encoder>
     </appender>
 
