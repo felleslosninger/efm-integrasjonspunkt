@@ -92,19 +92,19 @@ public class QueueSchedulerTest {
 
     @Test
     public void shouldGetNextFromQueueWhenRetryQueueIsTriggered() {
-        when(queueServiceMock.getNext(Status.FAILED)).thenReturn(createQueue(UNIQUE_ID, Status.FAILED));
+        when(queueServiceMock.getNext(Status.RETRY)).thenReturn(createQueue(UNIQUE_ID, Status.RETRY));
 
         queueScheduler.retryMessages();
 
-        verify(queueServiceMock, times(1)).getNext(Status.FAILED);
+        verify(queueServiceMock, times(1)).getNext(Status.RETRY);
     }
 
     @Test
     public void shouldAttemptToResendMessageWhenNextRetryMessageIsFound() {
-        Queue element = createQueue(UNIQUE_ID, Status.FAILED);
+        Queue element = createQueue(UNIQUE_ID, Status.RETRY);
         PutMessageRequestType requestType = new PutMessageRequestType();
 
-        when(queueServiceMock.getNext(Status.FAILED)).thenReturn(element);
+        when(queueServiceMock.getNext(Status.RETRY)).thenReturn(element);
         when(queueServiceMock.getMessage(element.getUnique())).thenReturn(requestType);
         when(integrasjonspunktMock.sendMessage(any(PutMessageRequestType.class))).thenReturn(true);
 
@@ -115,9 +115,9 @@ public class QueueSchedulerTest {
 
     @Test
     public void shouldUpdateResultToQueueWithStatusForSuccessWhenRetryMessageIsSent() {
-        Queue element = createQueue(UNIQUE_ID, Status.FAILED);
+        Queue element = createQueue(UNIQUE_ID, Status.RETRY);
 
-        when(queueServiceMock.getNext(Status.FAILED)).thenReturn(element);
+        when(queueServiceMock.getNext(Status.RETRY)).thenReturn(element);
         when(integrasjonspunktMock.sendMessage(any(PutMessageRequestType.class))).thenReturn(true);
 
         queueScheduler.retryMessages();
@@ -128,9 +128,9 @@ public class QueueSchedulerTest {
 
     @Test
     public void shouldUpdateResultToQueueWithStatusFailedWhenRetryMessageFails() {
-        Queue element = createQueue(UNIQUE_ID, Status.FAILED);
+        Queue element = createQueue(UNIQUE_ID, Status.RETRY);
 
-        when(queueServiceMock.getNext(Status.FAILED)).thenReturn(element);
+        when(queueServiceMock.getNext(Status.RETRY)).thenReturn(element);
         when(integrasjonspunktMock.sendMessage(any(PutMessageRequestType.class))).thenReturn(false);
 
         queueScheduler.retryMessages();
