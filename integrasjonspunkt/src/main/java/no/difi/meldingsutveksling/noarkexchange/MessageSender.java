@@ -5,7 +5,6 @@ import com.thoughtworks.xstream.XStream;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
 import no.difi.meldingsutveksling.domain.Avsender;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.Noekkelpar;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
@@ -132,9 +131,6 @@ public class MessageSender {
         if(!message.hasRecieverPartyNumber()) {
             log.error(ErrorStatus.MISSING_RECIPIENT.toString());
             context.addError(ErrorStatus.MISSING_RECIPIENT);
-        }
-        if (!message.hasSenderPartyNumber() && !configuration.hasOrganisationNumber()) {
-            throw new MeldingsUtvekslingRuntimeException();
         }
 
         JournalpostId p = JournalpostId.fromPutMessage(message);

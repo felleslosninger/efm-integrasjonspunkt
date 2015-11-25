@@ -3,10 +3,17 @@ package no.difi.meldingsutveksling.config;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRequiredPropertyException;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClientSettings;
-import org.apache.commons.configuration.*;
+import org.apache.commons.configuration.CompositeConfiguration;
+import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.configuration.SystemConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
@@ -51,8 +58,14 @@ public class IntegrasjonspunktConfig {
     static final String KEY_PRIVATEKEYPASSWORD = "privatekeypassword";
     public static final String KEY_ORGANISATION_NUMBER = "orgnumber";
     public static final String NOARKSYSTEM_TYPE = "noarksystem.type";
+    public static final String PARTY_NUMBER = "party_number";
 
     private final CompositeConfiguration config;
+
+    @PostConstruct
+    public void addMDCFields() {
+        MDC.put(PARTY_NUMBER, getOrganisationNumber());
+    }
 
     private IntegrasjonspunktConfig() throws MeldingsUtvekslingRequiredPropertyException {
 
