@@ -50,11 +50,11 @@ public class QueueDaoIntegrationTest {
     @Test
     public void shouldOnlyRetrieveWithStatusFailedWhenRequestedStatusFailed() {
         Queue expected0 = createQueue("uniqueB1", Status.NEW);
-        Queue expected1 = createQueue("uniqueB2", Status.FAILED);
+        Queue expected1 = createQueue("uniqueB2", Status.RETRY);
 
         queueDao.saveEntry(expected0);
         queueDao.saveEntry(expected1);
-        List<Queue> retrieve = queueDao.retrieve(Status.FAILED);
+        List<Queue> retrieve = queueDao.retrieve(Status.RETRY);
 
         assertEquals(1, retrieve.size());
         assertQueue(expected1, retrieve.get(0));
@@ -63,10 +63,10 @@ public class QueueDaoIntegrationTest {
     @Test
     public void shouldUpdateStatus() {
         queueDao.saveEntry(createQueue("uniqueC1", Status.NEW));
-        queueDao.updateStatus(createQueue("uniqueC1", Status.FAILED));
-        Queue actual = queueDao.retrieve(Status.FAILED).get(0);
+        queueDao.updateStatus(createQueue("uniqueC1", Status.RETRY));
+        Queue actual = queueDao.retrieve(Status.RETRY).get(0);
 
-        assertEquals(Status.FAILED, actual.getStatus());
+        assertEquals(Status.RETRY, actual.getStatus());
     }
 
     @Test

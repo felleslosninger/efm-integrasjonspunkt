@@ -30,7 +30,6 @@ public class QueueService {
     private static final String BASE64_KEY = "ABEiM0RVZneImaq7zN3u/w==";
     private static final String BASE64_IV = "AAECAwQFBgcICQoLDA0ODw==";
 
-
     private final QueueDao queueDao;
 
     @Autowired
@@ -97,6 +96,12 @@ public class QueueService {
         queueDao.saveEntry(newEntry);
     }
 
+    /***
+     * This method should be called when a message have successfully been processed.
+     * It will clean up the message on disk, and update meta-data to reflect successfully sent message.
+     *
+     * @param unique unique id for the queue element
+     */
     public void success(String unique) {
         Queue queue = queueDao.retrieve(unique);
         QueueMessageFile.removeFile(queue.getRequestLocation());
@@ -113,7 +118,15 @@ public class QueueService {
         queueDao.updateStatus(updatedQueue);
     }
 
-    public void fail(String unique) {
+    /***
+     * When an item that have been picked up by the queue fails, this method should be called.
+     * It contains logic for retries and updating meta-data for the element, and will return if it is a fail
+     * for retry or a permanent error.
+     *
+     * @param unique unique message id
+     * @return Status.RETRY if it should be tried again at a later time, Status.ERROR if it is a permanent error.
+     */
+    public Status fail(String unique) {
         Queue queue = queueDao.retrieve(unique);
 
         int numberAttempts = queue.getNumberAttempts();
@@ -126,10 +139,13 @@ public class QueueService {
             QueueMessageFile.removeFile(queue.getRequestLocation());
         }
         else {
-            openObject.status(Status.FAILED);
+            openObject.status(Status.RETRY);
         }
 
-        queueDao.updateEntry(openObject.build());
+        Queue builtObject = openObject.build();
+        queueDao.updateEntry(builtObject);
+
+        return builtObject.getStatus();
     }
 
     private byte[] encryptMessage(String request) {

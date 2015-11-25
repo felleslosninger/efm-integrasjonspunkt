@@ -144,7 +144,7 @@ public class QueueServiceTest {
 
         Queue actual = args.getValue();
         assertTrue(actual.getRule().getMaxAttempt() > actual.getNumberAttempts());
-        assertEquals(actual.getStatus(), Status.FAILED);
+        assertEquals(actual.getStatus(), Status.RETRY);
     }
 
     @Test
@@ -158,7 +158,7 @@ public class QueueServiceTest {
 
         Queue actual = args.getValue();
         assertEquals(actual.getRule().getMaxAttempt(), actual.getNumberAttempts());
-        assertEquals(actual.getStatus(), Status.FAILED);
+        assertEquals(actual.getStatus(), Status.RETRY);
     }
 
     @Test

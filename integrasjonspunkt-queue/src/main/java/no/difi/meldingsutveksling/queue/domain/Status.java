@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.queue.domain;
 public enum Status {
     NEW,
     DONE,
-    FAILED,
+    RETRY,
     ERROR;
 
     public static Status statusFromString(String status) {
