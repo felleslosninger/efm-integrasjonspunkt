@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true">
-    <include resource="org/springframework/boot/logging/logback/base.xml"/>
     <jmxConfigurator/>
 
+    <appender name="stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>10.243.200.51:8300</destination>
+
+        <!-- encoder is required -->
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
+    </appender>
+
     <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>INFO</level>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>
-        </filter>
 
         <encoder>
             <charset>UTF-8</charset>
@@ -17,11 +18,6 @@
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>INFO</level>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>
-        </filter>
 
         <file>${user.dir}/integrasjonspunkt-logs/application.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -45,6 +41,7 @@
     <root level="INFO">
         <appender-ref ref="consoleAppender" />
         <appender-ref ref="FILE"/>
+        <appender-ref ref="stash"/>
     </root>
 
 </configuration>
