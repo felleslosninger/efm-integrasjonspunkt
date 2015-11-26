@@ -94,7 +94,7 @@ public class QueueSchedulerTest {
     public void shouldGetNextFromQueueWhenRetryQueueIsTriggered() {
         when(queueServiceMock.getNext(Status.RETRY)).thenReturn(createQueue(UNIQUE_ID, Status.RETRY));
 
-        queueScheduler.retryMessages();
+        queueScheduler.sendMessage();
 
         verify(queueServiceMock, times(1)).getNext(Status.RETRY);
     }
@@ -108,7 +108,7 @@ public class QueueSchedulerTest {
         when(queueServiceMock.getMessage(element.getUnique())).thenReturn(requestType);
         when(integrasjonspunktMock.sendMessage(any(PutMessageRequestType.class))).thenReturn(true);
 
-        queueScheduler.retryMessages();
+        queueScheduler.sendMessage();
 
         verify(integrasjonspunktMock, times(1)).sendMessage(requestType);
     }
@@ -120,7 +120,7 @@ public class QueueSchedulerTest {
         when(queueServiceMock.getNext(Status.RETRY)).thenReturn(element);
         when(integrasjonspunktMock.sendMessage(any(PutMessageRequestType.class))).thenReturn(true);
 
-        queueScheduler.retryMessages();
+        queueScheduler.sendMessage();
 
         verify(queueServiceMock, times(1)).success(element.getUnique());
         verify(queueServiceMock, never()).fail(anyString());
@@ -133,7 +133,7 @@ public class QueueSchedulerTest {
         when(queueServiceMock.getNext(Status.RETRY)).thenReturn(element);
         when(integrasjonspunktMock.sendMessage(any(PutMessageRequestType.class))).thenReturn(false);
 
-        queueScheduler.retryMessages();
+        queueScheduler.sendMessage();
 
         verify(queueServiceMock, never()).success(anyString());
         verify(queueServiceMock, times(1)).fail(element.getUnique());

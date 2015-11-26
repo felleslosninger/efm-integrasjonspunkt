@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.queue.domain;
 public enum Status {
     NEW,
     DONE,
+    IN_PROGRESS,
     RETRY,
     ERROR;
 

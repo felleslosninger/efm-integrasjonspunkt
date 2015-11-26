@@ -8,17 +8,12 @@ import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageContext;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategy;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategyFactory;
-import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageRequestType;
-import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageResponseType;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import no.difi.meldingsutveksling.noarkexchange.schema.SOAPport;
+import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.queue.service.QueueService;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import javax.jws.WebParam;
 import javax.jws.WebService;
@@ -39,7 +34,7 @@ import java.io.IOException;
  * Time: 15:26
  */
 
-@Component("noarkExchangeService")
+@org.springframework.stereotype.Component("noarkExchangeService")
 @WebService(portName = "NoarkExchangePort", serviceName = "noarkExchange", targetNamespace = "http://www.arkivverket.no/Noark/Exchange", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.SOAPport")
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
 public class IntegrasjonspunktImpl implements SOAPport {

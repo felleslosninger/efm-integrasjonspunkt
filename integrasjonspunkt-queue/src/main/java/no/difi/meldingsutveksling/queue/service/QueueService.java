@@ -40,17 +40,21 @@ public class QueueService {
     /**
      * Get metadata for first element
      *
-     * @param statusToGet Type messages to check for in queue
      * @return Metadata for the top element to process
      */
-    public Queue getNext(Status statusToGet) {
-        //TODO: Only gets first for a certain status. Getting real next is not implemented.
-        List<Queue> retrieve = queueDao.retrieve(statusToGet);
-        if  (retrieve.size() > 0) {
-            return retrieve.get(0);
+    public Queue getNext() {
+        List<Queue> retrieveRetry = queueDao.retrieve(Status.RETRY);
+        if  (retrieveRetry.size() > 0) {
+            return retrieveRetry.get(0);
         }
         else {
-            return null;
+            List<Queue> retrieveNew = queueDao.retrieve(Status.NEW);
+            if (retrieveNew.size() > 0) {
+                return retrieveRetry.get(0);
+            }
+            else {
+                return null;
+            }
         }
     }
 

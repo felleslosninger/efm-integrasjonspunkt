@@ -37,33 +37,16 @@ public class QueueScheduler {
     @Scheduled(cron = FIRE_EVERY_1_MINUTE)
     public void sendMessage() {
         if (integrasjonspunktConfig.isQueueEnabled()) {
-            Queue next = queueService.getNext(Status.NEW);
+            Queue next = queueService.getNext();
             if (next != null) {
-                boolean success = false;
                 try {
-                    success = integrasjonspunkt.sendMessage((PutMessageRequestType) queueService.getMessage(next.getUnique()));
-                    applyResultToQueue(next.getUnique(), success);
-                } catch (IOException e) {
-                    log.error(e.getMessage(), e);
-                }
-            }
-        }
-    }
-
-    @Scheduled(cron = FIRE_EVERY_1_MINUTE)
-    public void retryMessages() {
-        if (integrasjonspunktConfig.isQueueEnabled()) {
-            Queue next = queueService.getNext(Status.RETRY);
-            if (next != null) {
-                PutMessageRequestType request = null;
-                try {
-                    request = (PutMessageRequestType) queueService.getMessage(next.getUnique());
+                    PutMessageRequestType request = (PutMessageRequestType) queueService.getMessage(next.getUnique());
                     boolean success = integrasjonspunkt.sendMessage(request);
                     applyResultToQueue(next.getUnique(), success);
+                    sendMessage();
                 } catch (IOException e) {
                     log.error(e.getMessage(), e);
                 }
-
             }
         }
     }
