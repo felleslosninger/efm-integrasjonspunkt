@@ -32,7 +32,7 @@ public class QueueDao {
                 + "VALUES (:unique_id, :numberAttempt, :rule, :status, :requestLocation, :lastAttempt, :checksum)";
 
         template.update(sql, queue.getUnique(), queue.getNumberAttempts(), queue.getRuleName(),
-                queue.getStatus().name(), queue.getRequestLocation(), queue.getLastAttemptTime(), queue.getChecksum());
+                queue.getStatus().name(), queue.getFileLocation(), queue.getLastAttemptTime(), queue.getChecksum());
     }
 
     public void updateEntry(Queue queue) {
@@ -46,7 +46,7 @@ public class QueueDao {
                 + "WHERE unique_id = :uniqueId ";
 
         template.update(sql, queue.getNumberAttempts(), queue.getRuleName(), queue.getStatus().name(),
-                queue.getRequestLocation(), queue.getLastAttemptTime(), queue.getChecksum(), queue.getUnique());
+                queue.getFileLocation(), queue.getLastAttemptTime(), queue.getChecksum(), queue.getUnique());
     }
 
     public List<Queue> retrieve(Status status) {

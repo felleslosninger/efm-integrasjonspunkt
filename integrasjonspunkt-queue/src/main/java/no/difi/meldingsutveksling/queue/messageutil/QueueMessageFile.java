@@ -1,12 +1,17 @@
 package no.difi.meldingsutveksling.queue.messageutil;
 
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.xml.DomDriver;
 import no.difi.meldingsutveksling.queue.domain.Queue;
 import org.apache.commons.lang.RandomStringUtils;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
 
 public class QueueMessageFile {
     public static final String FILE_PATH = System.getProperty("user.dir") + "/queue/";
@@ -17,36 +22,19 @@ public class QueueMessageFile {
         return file.delete();
     }
 
-    public static StringBuffer retrieveFileFromDisk(Queue retrieve) {
-        FileInputStream inputStream;
-        StringBuffer output = new StringBuffer();
-        try {
-            inputStream = new FileInputStream(retrieve.getRequestLocation());
-            System.out.println("Total file size read (in bytes  ) : " + inputStream.available());
-
-            int content;
-            while ((content = inputStream.read()) != -1) {
-                output.append((char)content);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return output;
+    public static Object retrieveFileFromDisk(Queue queueElement) throws IOException {
+        InputStream is = new FileInputStream(queueElement.getFileLocation());
+        return new XStream(new DomDriver()).fromXML(is);
     }
 
-    public static void saveFileOnDisk(byte[] crypted, String filename) {
+    public static void saveFileOnDisk(Object crypted, String filename) throws IOException {
         if (!new File(FILE_PATH).exists()) {
             new File(FILE_PATH).mkdir();
         }
-
-        FileOutputStream outputStream;
-        try {
-            outputStream = new FileOutputStream(filename);
-            outputStream.write(crypted);
-            outputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        String stringRepresentaiton = new XStream(new DomDriver()).toXML(crypted);
+        BufferedWriter br = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename)));
+        br.write(stringRepresentaiton);
+        br.close();
     }
 
     public static String ammendPath(String filename) {

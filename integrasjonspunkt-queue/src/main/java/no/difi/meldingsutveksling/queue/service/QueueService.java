@@ -60,10 +60,10 @@ public class QueueService {
      * @param unique id of the message to get
      * @return the original request ready to send
      */
-    public Object getMessage(String unique) {
+    public Object getMessage(String unique) throws IOException {
         Queue retrieve = queueDao.retrieve(unique);
 
-        return String.valueOf(QueueMessageFile.retrieveFileFromDisk(retrieve));
+        return QueueMessageFile.retrieveFileFromDisk(retrieve);
 
 //        byte[] bytes = decryptMessage(String.valueOf(buffer));
 //
@@ -75,13 +75,15 @@ public class QueueService {
      *
      * @param request Request to be put on queue
      */
-    public void put(String request) {
+    public void put(Object request) throws IOException {
+
+
 //        byte[] crypted = encryptMessage(request);
         String uniqueFilename = QueueMessageFile.generateUniqueFileName();
         String filenameWithPath = QueueMessageFile.ammendPath(uniqueFilename);
 
 //        saveFileOnDisk(crypted, filenameWithPath);
-        QueueMessageFile.saveFileOnDisk(request.getBytes(), filenameWithPath);
+        QueueMessageFile.saveFileOnDisk(request, filenameWithPath);
 
         Queue newEntry = new Queue.Builder()
                 .unique(uniqueFilename)
@@ -104,7 +106,7 @@ public class QueueService {
      */
     public void success(String unique) {
         Queue queue = queueDao.retrieve(unique);
-        QueueMessageFile.removeFile(queue.getRequestLocation());
+        QueueMessageFile.removeFile(queue.getFileLocation());
 
         int numberAttempts = queue.getNumberAttempts();
 
@@ -136,7 +138,7 @@ public class QueueService {
 
         if (numberAttempts > queue.getRule().getMaxAttempt()) {
             openObject.status(Status.ERROR);
-            QueueMessageFile.removeFile(queue.getRequestLocation());
+            QueueMessageFile.removeFile(queue.getFileLocation());
         }
         else {
             openObject.status(Status.RETRY);

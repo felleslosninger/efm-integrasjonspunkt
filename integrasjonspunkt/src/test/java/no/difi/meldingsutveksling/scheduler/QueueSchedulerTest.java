@@ -51,7 +51,7 @@ public class QueueSchedulerTest {
     }
 
     @Test
-    public void shouldAttemptToSendMessageWhenNextItemFoundOnQueue() {
+    public void shouldAttemptToSendMessageWhenNextItemFoundOnQueue() throws Exception {
         Queue element = createQueue(UNIQUE_ID, Status.NEW);
         PutMessageRequestType requestType = new PutMessageRequestType();
 
@@ -100,7 +100,7 @@ public class QueueSchedulerTest {
     }
 
     @Test
-    public void shouldAttemptToResendMessageWhenNextRetryMessageIsFound() {
+    public void shouldAttemptToResendMessageWhenNextRetryMessageIsFound() throws Exception {
         Queue element = createQueue(UNIQUE_ID, Status.RETRY);
         PutMessageRequestType requestType = new PutMessageRequestType();
 

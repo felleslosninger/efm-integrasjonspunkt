@@ -28,11 +28,11 @@ public class IntegrasjonspunktImplTest {
     }
 
     @Test
-    public void shouldPutRuleRequestOnQueueWhenIncomming() {
+    public void shouldPutRuleRequestOnQueueWhenIncomming() throws Exception {
         PutMessageRequestType request = new PutMessageRequestType();
 
         integrasjonspunkt.putMessage(request);
 
-        verify(queueServiceMock, times(1)).put(request.toString());
+        verify(queueServiceMock, times(1)).put(request);
     }
 }

@@ -14,6 +14,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+
 @Component
 @EnableScheduling
 public class QueueScheduler {
@@ -26,9 +28,7 @@ public class QueueScheduler {
     private static final Logger log = LoggerFactory.getLogger(QueueScheduler.class);
 
     @Autowired
-    public QueueScheduler(QueueService queueService,
-                          IntegrasjonspunktImpl integrasjonspunkt,
-                          IntegrasjonspunktConfig integrasjonspunktConfig) {
+    public QueueScheduler(QueueService queueService, IntegrasjonspunktImpl integrasjonspunkt, IntegrasjonspunktConfig integrasjonspunktConfig) {
         this.queueService = queueService;
         this.integrasjonspunkt = integrasjonspunkt;
         this.integrasjonspunktConfig = integrasjonspunktConfig;
@@ -39,8 +39,13 @@ public class QueueScheduler {
         if (integrasjonspunktConfig.isQueueEnabled()) {
             Queue next = queueService.getNext(Status.NEW);
             if (next != null) {
-                boolean success = integrasjonspunkt.sendMessage((PutMessageRequestType) queueService.getMessage(next.getUnique()));
-                applyResultToQueue(next.getUnique(), success);
+                boolean success = false;
+                try {
+                    success = integrasjonspunkt.sendMessage((PutMessageRequestType) queueService.getMessage(next.getUnique()));
+                    applyResultToQueue(next.getUnique(), success);
+                } catch (IOException e) {
+                    log.error(e.getMessage(), e);
+                }
             }
         }
     }
@@ -50,8 +55,15 @@ public class QueueScheduler {
         if (integrasjonspunktConfig.isQueueEnabled()) {
             Queue next = queueService.getNext(Status.RETRY);
             if (next != null) {
-                boolean success = integrasjonspunkt.sendMessage((PutMessageRequestType) queueService.getMessage(next.getUnique()));
-                applyResultToQueue(next.getUnique(), success);
+                PutMessageRequestType request = null;
+                try {
+                    request = (PutMessageRequestType) queueService.getMessage(next.getUnique());
+                    boolean success = integrasjonspunkt.sendMessage(request);
+                    applyResultToQueue(next.getUnique(), success);
+                } catch (IOException e) {
+                    log.error(e.getMessage(), e);
+                }
+
             }
         }
     }
@@ -60,14 +72,12 @@ public class QueueScheduler {
         if (result) {
             queueService.success(unique);
             log.info("Successfully sent message.");
-        }
-        else {
+        } else {
             Status status = queueService.fail(unique);
 
             if (status == Status.RETRY) {
                 log.warn("Message failed send. Will try later.");
-            }
-            else if (status == Status.ERROR) {
+            } else if (status == Status.ERROR) {
                 log.error(Marker.ANY_MARKER, "Message failed. Can not send message to receipient.");
             }
         }

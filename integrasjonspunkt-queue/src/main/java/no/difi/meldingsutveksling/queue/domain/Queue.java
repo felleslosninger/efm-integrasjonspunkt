@@ -48,7 +48,7 @@ public class Queue {
         return status;
     }
 
-    public String getRequestLocation() {
+    public String getFileLocation() {
         return location;
     }
 

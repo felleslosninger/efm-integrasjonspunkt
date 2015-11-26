@@ -46,7 +46,7 @@ public class QueueObjectMother {
         assertEquals(result.getLastAttemptTime().getTime(), expected.getLastAttemptTime().getTime());
         assertEquals(result.getNumberAttempts(), expected.getNumberAttempts());
         assertEquals(result.getStatus(), expected.getStatus());
-        assertEquals(result.getRequestLocation(), expected.getRequestLocation());
+        assertEquals(result.getFileLocation(), expected.getFileLocation());
     }
 
     public static Date dateHelper(int addDays) throws Exception {

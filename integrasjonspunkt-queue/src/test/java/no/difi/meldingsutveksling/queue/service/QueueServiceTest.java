@@ -14,6 +14,7 @@ import org.mockito.Mock;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.Date;
 
 import static java.util.Arrays.asList;
@@ -49,7 +50,7 @@ public class QueueServiceTest {
     }
 
     @Test
-    public void shouldSaveMetadataWhenSavingEntryOnQueue() {
+    public void shouldSaveMetadataWhenSavingEntryOnQueue() throws IOException {
         queueService.put(NOT_ENCRYPTED_TEST_STRING);
 
         verify(queueDaoMock, times(1)).saveEntry(any(Queue.class));
@@ -67,7 +68,7 @@ public class QueueServiceTest {
 
     @Ignore("Encrypt/decrypt is temporarily disabled")
     @Test
-    public void shouldDecryptFileWhenLoadingEntryFromFile() {
+    public void shouldDecryptFileWhenLoadingEntryFromFile() throws IOException {
         //This method will test both encryption and decryption
         String file = createEncryptedFile();
         when(queueDaoMock.retrieve(UNIQUE_ID)).thenReturn(createQueue(UNIQUE_ID, FILE_PATH + file));
@@ -79,7 +80,7 @@ public class QueueServiceTest {
     }
 
     @Test
-    public void shouldGetMessageWhenRequested() {
+    public void shouldGetMessageWhenRequested() throws IOException {
         String filename = FILE_PATH + createEncryptedFile();
         when(queueDaoMock.retrieve(anyString())).thenReturn(createQueue(UNIQUE_ID, filename));
 
@@ -89,7 +90,7 @@ public class QueueServiceTest {
     }
 
     @Test
-    public void shouldRemoveFileWhenSuccessReported() {
+    public void shouldRemoveFileWhenSuccessReported() throws IOException {
         String filename = FILE_PATH + createEncryptedFile();
         when(queueDaoMock.retrieve(anyString())).thenReturn(createQueue(UNIQUE_ID, filename));
 
@@ -110,7 +111,7 @@ public class QueueServiceTest {
     }
 
     @Test
-    public void shouldKeepFileWhenFailReportedAndMaxAttemptNotExceeded() {
+    public void shouldKeepFileWhenFailReportedAndMaxAttemptNotExceeded() throws IOException {
         String filename = FILE_PATH + createEncryptedFile();
         when(queueDaoMock.retrieve(anyString())).thenReturn(createQueue(UNIQUE_ID, filename));
 
@@ -190,7 +191,7 @@ public class QueueServiceTest {
     }
 
     @Test
-    public void shouldRemoveFileWhenFailReportedAndMaxAttemptsIsExceeded() {
+    public void shouldRemoveFileWhenFailReportedAndMaxAttemptsIsExceeded() throws IOException {
         String filename = FILE_PATH + createEncryptedFile();
         when(queueDaoMock.retrieve(anyString())).thenReturn(createQueue(UNIQUE_ID, RuleDefault.getRule().getMaxAttempt(), filename));
 
@@ -199,7 +200,7 @@ public class QueueServiceTest {
         assertFalse(new File(filename).exists());
     }
 
-    private String createEncryptedFile() {
+    private String createEncryptedFile() throws IOException {
         queueService.put(NOT_ENCRYPTED_TEST_STRING); //Create encrypted file
         File dir = new File(FILE_PATH);
 
