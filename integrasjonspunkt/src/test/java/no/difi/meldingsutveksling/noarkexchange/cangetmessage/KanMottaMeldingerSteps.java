@@ -5,7 +5,6 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
@@ -109,7 +108,6 @@ public class KanMottaMeldingerSteps {
             "                &lt;/sakspart&gt;\n" +
             "                &lt;/noarksak&gt;\n" +
             "                &lt;/Melding&gt;";
-    private IntegrasjonspunktConfig integrasjonspunktConfig;
 
     @Before
     public void setup() {
@@ -117,12 +115,10 @@ public class KanMottaMeldingerSteps {
         adresseRegister = mock(AdresseregisterService.class);
         mshClient = mock(NoarkClient.class);
         messageSender = mock(MessageSender.class);
-        //integrasjonspunktConfig = mock(IntegrasjonspunktConfig.class);
         integrasjonspunkt.setMessageSender(messageSender);
         integrasjonspunkt.setEventLog(mock(EventLog.class));
         integrasjonspunkt.setAdresseRegister(adresseRegister);
         integrasjonspunkt.setMshClient(mshClient);
-//        integrasjonspunkt.setIntegrasjonspunktConfig(integrasjonspunktConfig);
     }
 
 
