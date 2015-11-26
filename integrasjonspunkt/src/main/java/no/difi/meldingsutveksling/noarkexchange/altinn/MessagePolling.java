@@ -45,7 +45,6 @@ public class MessagePolling {
     @Autowired
     ELMALookup elmaLookup;
 
-
     private static JAXBContext jaxbContextdomain;
 
     static {
@@ -64,7 +63,7 @@ public class MessagePolling {
         logger.debug("Checking for new messages");
         Endpoint endpoint;
         try {
-            endpoint = elmaLookup.lookup("9908:" + config.getOrganisationNumber());
+            endpoint = elmaLookup.lookup(config.getOrganisationNumber());
         } catch (LookupException e) {
             throw new MeldingsUtvekslingRuntimeException(e.getMessage(), e);
         }

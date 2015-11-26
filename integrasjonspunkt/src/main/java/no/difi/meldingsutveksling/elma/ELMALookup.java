@@ -4,7 +4,6 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.vefa.peppol.common.api.EndpointNotFoundException;
 import no.difi.vefa.peppol.common.model.*;
 import no.difi.vefa.peppol.lookup.LookupClient;
-import no.difi.vefa.peppol.lookup.LookupClientBuilder;
 import no.difi.vefa.peppol.lookup.api.LookupException;
 import no.difi.vefa.peppol.security.api.PeppolSecurityException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,22 +19,24 @@ public class ELMALookup {
 
     private static final ProcessIdentifier PROCESS_IDENTIFIER = new ProcessIdentifier("urn:www.difi.no:profile:meldingsutveksling:ver1.0");
     private static final DocumentIdentifier DOCUMENT_IDENTIFIER = new DocumentIdentifier("urn:no:difi:meldingsuveksling:xsd::Melding##urn:www.difi.no:meldingsutveksling:melding:1.0:extended:urn:www.difi.no:encoded:aes-zip:1.0::1.0");
+    public static final String NORWAY_PREFIX = "9908:";
 
-    /**
-     * this value is creaed in TransportProfileConfiguration
-     */
     @Autowired
-    private TransportProfile configuredTransportProfile;
+    private LookupClient lookupClient;
+
+    @Autowired
+    private TransportProfile transportProfile;
 
     public Endpoint lookup(String organisationNumber) throws LookupException {
         try {
-            LookupClient client = LookupClientBuilder.forTest().build();
-            return client.getEndpoint(new ParticipantIdentifier(organisationNumber),
+            return lookupClient.getEndpoint(new ParticipantIdentifier(NORWAY_PREFIX + organisationNumber),
                     DOCUMENT_IDENTIFIER,
                     PROCESS_IDENTIFIER,
-                    configuredTransportProfile);
+                    transportProfile);
         } catch (PeppolSecurityException | EndpointNotFoundException e) {
             throw new MeldingsUtvekslingRuntimeException();
         }
     }
-    }
+
+
+}

@@ -1,0 +1,30 @@
+package no.difi.meldingsutveksling.elma;
+
+import no.difi.vefa.peppol.common.model.TransportProfile;
+import no.difi.vefa.peppol.lookup.LookupClient;
+import no.difi.vefa.peppol.lookup.LookupClientBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+
+/**
+ * @author Glenn Bech
+ */
+
+@Configuration
+@Profile("dev")
+public class ElmaDevConfig {
+
+    private static final TransportProfile TRANSPORT_PROFILE_ALTINN_DEV = new TransportProfile("bdxr-transport-altinn-dev");
+
+    @Bean
+    public TransportProfile getTransportProfile() {
+        return TRANSPORT_PROFILE_ALTINN_DEV;
+    }
+
+    @Bean
+    public LookupClient getElmaLookupClient() {
+        return LookupClientBuilder.forTest().build();
+    }
+
+}
