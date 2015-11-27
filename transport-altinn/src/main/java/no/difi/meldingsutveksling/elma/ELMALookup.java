@@ -29,7 +29,7 @@ public class ELMALookup {
 
     public Endpoint lookup(String organisationNumber) throws LookupException {
         try {
-            return lookupClient.getEndpoint(new ParticipantIdentifier(NORWAY_PREFIX + organisationNumber),
+            return lookupClient.getEndpoint(new ParticipantIdentifier(organisationNumber),
                     DOCUMENT_IDENTIFIER,
                     PROCESS_IDENTIFIER,
                     transportProfile);

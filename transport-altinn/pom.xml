@@ -21,6 +21,14 @@
         </dependency>
 
         <dependency>
+            <groupId>no.difi.vefa</groupId>
+            <artifactId>peppol-lookup</artifactId>
+            <version>0.9.3</version>
+        </dependency>
+
+
+
+        <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>domain</artifactId>
             <version>${parent.version}</version>

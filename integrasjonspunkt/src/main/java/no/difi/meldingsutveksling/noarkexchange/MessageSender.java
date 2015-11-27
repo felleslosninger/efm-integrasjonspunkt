@@ -41,7 +41,6 @@ public class MessageSender {
     org.slf4j.Logger log = LoggerFactory.getLogger(MessageSender.class.getName());
 
     @Autowired
-    @Qualifier("multiTransport")
     private TransportFactory transportFactory;
 
     @Autowired

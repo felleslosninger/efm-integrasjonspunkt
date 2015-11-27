@@ -14,7 +14,9 @@ import org.springframework.context.annotation.Profile;
 @Profile("production")
 @Configuration
 public class ElmaProdConfig {
-    private static final TransportProfile TRANSPORT_PROFILE_ALTINN = new TransportProfile("bdxr-transport-altinn");
+
+    public static final String ELMA_ENDPOINT_KEY = "bdxr-transport-altinn";
+    private static final TransportProfile TRANSPORT_PROFILE_ALTINN = new TransportProfile(ELMA_ENDPOINT_KEY);
 
     @Bean
     public TransportProfile getTransportProfile() {
