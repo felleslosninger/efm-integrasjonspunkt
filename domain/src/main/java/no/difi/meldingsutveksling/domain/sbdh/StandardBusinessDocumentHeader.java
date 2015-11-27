@@ -139,7 +139,8 @@ public class StandardBusinessDocumentHeader {
     }
 
     public String getReceiverOrganisationNumber() {
-        if (receiver.size() != 0) {
+
+        if (receiver.size() != 1) {
             throw new MeldingsUtvekslingRuntimeException(String.valueOf(receiver.size()));
         }
         Partner partner = receiver.get(0);
