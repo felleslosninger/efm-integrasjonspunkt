@@ -18,8 +18,8 @@ public class RuleDefaultTest {
     }
 
     @Test(expected = IndexOutOfBoundsException.class)
-    public void shouldFailWithQueueExceptionWhenAttemptLowerThan1() {
-        ruleDefault.getMinutesToNextAttempt(0);
+    public void shouldFailWithQueueExceptionWhenAttemptLowerThan0() {
+        ruleDefault.getMinutesToNextAttempt(-1);
     }
 
     @Test(expected = IndexOutOfBoundsException.class)

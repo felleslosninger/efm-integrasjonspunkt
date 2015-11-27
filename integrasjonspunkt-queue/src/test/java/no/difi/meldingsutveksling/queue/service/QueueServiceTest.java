@@ -169,13 +169,13 @@ public class QueueServiceTest {
         verify(queueDaoMock, times(1)).updateEntry(args.capture());
 
         Queue actual = args.getValue();
-        assertEquals(actual.getRule().getMaxAttempt(), actual.getNumberAttempts());
+        assertEquals(actual.getNumberAttempts(), actual.getRule().getMaxAttempt()-1); //-1 because first attempt is 0 {0,1,2,3}
         assertEquals(actual.getStatus(), Status.RETRY);
     }
 
     @Test
     public void shouldFailWithLastAttemptWhenRuleExceededNumberOfRetriesAndUpdateStatusToPermanentError() {
-        when(queueDaoMock.retrieve(anyString())).thenReturn(createQueue(UNIQUE_ID, 3));
+        when(queueDaoMock.retrieve(anyString())).thenReturn(createQueue(UNIQUE_ID, 4));
         ArgumentCaptor<Queue> args = ArgumentCaptor.forClass(Queue.class);
 
         queueService.fail(UNIQUE_ID);
@@ -183,8 +183,8 @@ public class QueueServiceTest {
         verify(queueDaoMock, times(1)).updateEntry(args.capture());
 
         Queue actual = args.getValue();
-        assertTrue(actual.getRule().getMaxAttempt() < actual.getNumberAttempts());
-        assertEquals(actual.getStatus(), Status.ERROR);
+        assertTrue(actual.getRule().getMaxAttempt() <= actual.getNumberAttempts());
+        assertEquals(Status.ERROR, actual.getStatus());
     }
 
     @Test
