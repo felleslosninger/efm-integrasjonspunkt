@@ -21,6 +21,7 @@ import java.util.Map;
 
 @Repository
 public class QueueDao {
+    public static final int ONE_MINUTE_IN_MILLIS = 60000;
 
     @Autowired
     @Qualifier("queueJDBCTemplate")
@@ -45,8 +46,7 @@ public class QueueDao {
                 + "checksum = :checksum "
                 + "WHERE unique_id = :uniqueId ";
 
-        template.update(sql, queue.getNumberAttempts(), queue.getRuleName(), queue.getStatus().name(),
-                queue.getFileLocation(), queue.getLastAttemptTime(), queue.getChecksum(), queue.getUnique());
+        template.update(sql, queue.getNumberAttempts(), queue.getRuleName(), queue.getStatus().name(), queue.getFileLocation(), queue.getLastAttemptTime(), queue.getChecksum(), queue.getUnique());
     }
 
     public List<Queue> retrieve(Status status) {
@@ -54,15 +54,19 @@ public class QueueDao {
                 + "FROM queue_metadata "
                 + "WHERE status = :status ";
 
-        List<Queue> queue = QueueMapper.map(template.queryForList(sql, status.name()));
+        List<Queue> unfilteredQueue = QueueMapper.map(template.queryForList(sql, status.name()));
+        List<Queue> queueList = filterQueue(unfilteredQueue);
 
-        Collections.sort(queue, new Comparator<Queue>() {
-            public int compare(Queue o1, Queue o2) {
-                return o1.getLastAttemptTime().compareTo(o2.getLastAttemptTime());
-            }
-        });
+        sortQueue(queueList);
 
-        return queue;
+        return queueList;
+    }
+
+    public static Date addMinutesToDate(Date beforeTime, int minutes) {
+        final long ONE_MINUTE_IN_MILLIS = 60000;
+
+        long curTimeInMs = beforeTime.getTime();
+        return new Date(curTimeInMs + (minutes * ONE_MINUTE_IN_MILLIS));
     }
 
     public void updateStatus(Queue object) {
@@ -80,6 +84,31 @@ public class QueueDao {
         String sql = "DELETE FROM queue_metadata ";
 
         template.execute(sql);
+    }
+
+    private void sortQueue(List<Queue> queueList) {
+        Collections.sort(queueList, new Comparator<Queue>() {
+            public int compare(Queue o1, Queue o2) {
+                return o1.getLastAttemptTime().compareTo(o2.getLastAttemptTime());
+            }
+        });
+    }
+
+    private List<Queue> filterQueue(List<Queue> queueList) {
+        List<Queue> queueToReturn = new ArrayList<>();
+
+        for (Queue queue : queueList) {
+            int minDelay = queue.getRule().getInterval(queue.getNumberAttempts());
+            Date now = new Date();
+            Date lastAttempt = queue.getLastAttemptTime();
+            Date newAttemptAfter = addMinutesToDate(lastAttempt, minDelay);
+
+            if (now.getTime() > newAttemptAfter.getTime()) {
+                queueToReturn.add(queue);
+            }
+        }
+
+        return queueToReturn;
     }
 
     public Queue retrieve(String uniqueId) {
@@ -138,6 +167,7 @@ public class QueueDao {
         template.query("select * from queue_metadata where status = 'ERROR'", countCallback);
         return countCallback.getRowCount();
     }
+
     public int getQueueCompletedSize() {
         RowCountCallbackHandler countCallback = new RowCountCallbackHandler();
         template.query("select * from queue_metadata where status = 'DONE'", countCallback);

@@ -15,8 +15,8 @@ import java.util.List;
 
 import static no.difi.meldingsutveksling.queue.objectmother.QueueObjectMother.assertQueue;
 import static no.difi.meldingsutveksling.queue.objectmother.QueueObjectMother.createQueue;
-import static no.difi.meldingsutveksling.queue.objectmother.QueueObjectMother.dateHelper;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = QueueConfig.class)
@@ -71,18 +71,18 @@ public class QueueDaoIntegrationTest {
 
     @Test
     public void shouldRetrieveResultBasedOnStatusSortedOnTimestamp() throws Exception {
-        Date now = dateHelper(0);
-        Date tomorrow = dateHelper(1);
-        Date yesterday = dateHelper(-1);
-        queueDao.saveEntry(createQueue("uniqueD1", now));
-        queueDao.saveEntry(createQueue("uniqueD2", tomorrow));
-        queueDao.saveEntry(createQueue("uniqueD3", yesterday));
+        Date date1 = QueueDao.addMinutesToDate(new Date(), -10);
+        Date date2 = QueueDao.addMinutesToDate(new Date(), -20);
+        Date date3 = QueueDao.addMinutesToDate(new Date(), -30);
+        queueDao.saveEntry(createQueue("uniqueD1", date1));
+        queueDao.saveEntry(createQueue("uniqueD2", date2));
+        queueDao.saveEntry(createQueue("uniqueD3", date3));
 
         List<Queue> actual = queueDao.retrieve(Status.NEW);
 
-        assertEquals(yesterday.getTime(), actual.get(0).getLastAttemptTime().getTime());
-        assertEquals(now.getTime(), actual.get(1).getLastAttemptTime().getTime());
-        assertEquals(tomorrow.getTime(), actual.get(2).getLastAttemptTime().getTime());
+        assertEquals(date3.getTime(), actual.get(0).getLastAttemptTime().getTime());
+        assertEquals(date2.getTime(), actual.get(1).getLastAttemptTime().getTime());
+        assertEquals(date1.getTime(), actual.get(2).getLastAttemptTime().getTime());
     }
 
     @Test
@@ -93,6 +93,23 @@ public class QueueDaoIntegrationTest {
         Queue actual = queueDao.retrieve("uniqueE2");
 
         assertEquals(actual.getUnique(), "uniqueE2");
+    }
+
+    @Test
+    public void shouldRemoveElementFromListWhenItIsNotTimeToRun() throws Exception {
+        String uniqueThatStick = "uniqueF2";
+        Date filterOut1 = QueueDao.addMinutesToDate(new Date(), 0);
+        Date stick = QueueDao.addMinutesToDate(new Date(), -10);
+        Date filterOut2 = QueueDao.addMinutesToDate(new Date(), -2);
+        queueDao.saveEntry(createQueue("uniqueF1", filterOut1));
+        queueDao.saveEntry(createQueue(uniqueThatStick, stick));
+        queueDao.saveEntry(createQueue("uniqueF3", filterOut2));
+
+        List<Queue> actual = queueDao.retrieve(Status.NEW);
+
+        assertEquals(1, actual.size());
+        assertTrue(stick.getTime() >= actual.get(0).getLastAttemptTime().getTime());
+        assertEquals(uniqueThatStick, actual.get(0).getUnique());
     }
 
     @After

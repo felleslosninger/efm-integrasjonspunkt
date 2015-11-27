@@ -20,7 +20,6 @@ import java.util.Date;
 import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.queue.messageutil.QueueMessageFile.FILE_PATH;
 import static no.difi.meldingsutveksling.queue.objectmother.QueueObjectMother.createQueue;
-import static no.difi.meldingsutveksling.queue.objectmother.QueueObjectMother.dateHelper;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -113,7 +112,7 @@ public class QueueServiceTest {
 
     @Test
     public void shouldUpdateStatusObjectWhenSuccessReported() throws Exception {
-        Queue queue = createQueue(UNIQUE_ID, Status.NEW, dateHelper(-1));
+        Queue queue = createQueue(UNIQUE_ID, Status.NEW, QueueDao.addMinutesToDate(new Date(), -60));
         when(queueDaoMock.retrieve(anyString())).thenReturn(queue);
 
         queueService.success(UNIQUE_ID);
@@ -190,7 +189,7 @@ public class QueueServiceTest {
 
     @Test
     public void shouldSetLastAttemptedTimeWhenFailReported() throws Exception {
-        Date yesterday = dateHelper(-1);
+        Date yesterday = QueueDao.addMinutesToDate(new Date(), -60);
         when(queueDaoMock.retrieve(anyString())).thenReturn(createQueue(UNIQUE_ID, yesterday));
         ArgumentCaptor<Queue> args = ArgumentCaptor.forClass(Queue.class);
 

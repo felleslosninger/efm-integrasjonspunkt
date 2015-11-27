@@ -1,11 +1,10 @@
 package no.difi.meldingsutveksling.queue.objectmother;
 
+import no.difi.meldingsutveksling.queue.dao.QueueDao;
 import no.difi.meldingsutveksling.queue.domain.Queue;
 import no.difi.meldingsutveksling.queue.domain.Status;
 import no.difi.meldingsutveksling.queue.rule.RuleDefault;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
@@ -49,22 +48,13 @@ public class QueueObjectMother {
         assertEquals(result.getFileLocation(), expected.getFileLocation());
     }
 
-    public static Date dateHelper(int addDays) throws Exception {
-        String dt = "2015-01-01";
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Calendar c = Calendar.getInstance();
-        c.setTime(sdf.parse(dt));
-        c.add(Calendar.DATE, addDays);
-        return c.getTime();
-    }
-
     private static Queue.Builder createQueueBuilder() {
         return new Queue.Builder()
                 .unique("unique1")
                 .numberAttempt(2)
                 .rule(RuleDefault.getRule())
                 .checksum("checksum")
-                .lastAttemptTime(new Date())
+                .lastAttemptTime(QueueDao.addMinutesToDate(new Date(), -10))
                 .location("file.123.xml")
                 .status(Status.NEW);
     }
