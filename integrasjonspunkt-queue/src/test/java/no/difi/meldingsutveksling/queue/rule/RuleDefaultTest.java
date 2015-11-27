@@ -19,12 +19,12 @@ public class RuleDefaultTest {
 
     @Test(expected = IndexOutOfBoundsException.class)
     public void shouldFailWithQueueExceptionWhenAttemptLowerThan1() {
-        ruleDefault.getInterval(0);
+        ruleDefault.getMinutesToNextAttempt(0);
     }
 
     @Test(expected = IndexOutOfBoundsException.class)
     public void shouldFailWithQueueExceptionWhenAttemptOverMax() {
-        ruleDefault.getInterval(4);
+        ruleDefault.getMinutesToNextAttempt(4);
     }
 
     @Test
@@ -36,21 +36,21 @@ public class RuleDefaultTest {
 
     @Test
     public void shouldReturnFirstAttemptMinutesWhenFirstAttempt() {
-        int actual = ruleDefault.getInterval(FIRST_ATTEMPT);
+        int actual = ruleDefault.getMinutesToNextAttempt(FIRST_ATTEMPT);
 
         assertEquals(RuleDefault.Attempt.FIRST.getDelayMinutes(), actual);
     }
 
     @Test
     public void shouldReturnSecondAttemptMinutesWhenSecondAttempt() {
-        int actual = ruleDefault.getInterval(SECOND_ATTEMPT);
+        int actual = ruleDefault.getMinutesToNextAttempt(SECOND_ATTEMPT);
 
         assertEquals(RuleDefault.Attempt.SECOND.getDelayMinutes(), actual);
     }
 
     @Test
     public void shouldReturnThirdAttemptMinutesWhenThirdAttempt() {
-        int actual = ruleDefault.getInterval(THIRD_ATTEMPT);
+        int actual = ruleDefault.getMinutesToNextAttempt(THIRD_ATTEMPT);
 
         assertEquals(RuleDefault.Attempt.THIRD.getDelayMinutes(), actual);
     }

@@ -97,9 +97,13 @@ public class QueueDao {
     private List<Queue> filterQueue(List<Queue> queueList) {
         List<Queue> queueToReturn = new ArrayList<>();
 
+        Date now = new Date();
+        System.out.println("***** Filtering queue");
         for (Queue queue : queueList) {
-            int minDelay = queue.getRule().getInterval(queue.getNumberAttempts());
-            Date now = new Date();
+            System.out.println("***** Date in ms for queue " + queue.getLastAttemptTime().getTime());
+            System.out.println("***** Date for queue " + queue.getLastAttemptTime());
+            System.out.println("***** Next attemt is at " + queue.getRule().getMinutesToNextAttempt(queue.getNumberAttempts()));
+            int minDelay = queue.getRule().getMinutesToNextAttempt(queue.getNumberAttempts());
             Date lastAttempt = queue.getLastAttemptTime();
             Date newAttemptAfter = addMinutesToDate(lastAttempt, minDelay);
 

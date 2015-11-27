@@ -29,7 +29,7 @@ public class Queue {
     }
 
     private int getNextAttempt() {
-        return rule.getInterval(++numberAttempt);
+        return rule.getMinutesToNextAttempt(++numberAttempt);
     }
 
     public int getNumberAttempts() {

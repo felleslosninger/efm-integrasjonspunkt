@@ -11,7 +11,7 @@ public class RuleDefault implements Rule {
     }
 
     @Override
-    public int getInterval(int attempt) {
+    public int getMinutesToNextAttempt(int attempt) {
         return Attempt.getInterval(attempt);
     }
 
