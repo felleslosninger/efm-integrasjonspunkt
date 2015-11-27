@@ -9,7 +9,11 @@ import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
-import no.difi.meldingsutveksling.noarkexchange.schema.*;
+import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
+import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
+import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageRequestType;
+import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageResponseType;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
 import no.difi.meldingsutveksling.services.CertificateException;
 import sun.security.x509.X509CertImpl;
@@ -17,7 +21,9 @@ import sun.security.x509.X509CertImpl;
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class KanMottaMeldingerSteps {
 
@@ -162,6 +168,9 @@ public class KanMottaMeldingerSteps {
         AddressType addressType = new AddressType();
         addressType.setOrgnr("12345678");
         envelope.setReceiver(addressType);
+        addressType = new AddressType();
+        addressType.setOrgnr("87654321");
+        envelope.setSender(addressType);
         req.setEnvelope(envelope);
         req.setPayload(message);
         integrasjonspunkt.putMessage(req);

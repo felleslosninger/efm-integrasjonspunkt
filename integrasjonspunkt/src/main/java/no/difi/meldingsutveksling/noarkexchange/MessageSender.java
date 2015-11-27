@@ -21,7 +21,6 @@ import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -41,7 +40,6 @@ public class MessageSender {
     org.slf4j.Logger log = LoggerFactory.getLogger(MessageSender.class.getName());
 
     @Autowired
-    @Qualifier("multiTransport")
     private TransportFactory transportFactory;
 
     @Autowired
