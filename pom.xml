@@ -40,9 +40,6 @@
     <module>noarkexchange-p360</module>
     <module>noarkexchange-ephorte</module>
     <module>altinnexchange</module>
-    <module>adresseregister-web</module>
-    <module>adresseregister-domain</module>
-    <module>adresseregister-client</module>
     <module>dokumentpakking</module>
     <module>integrasjonspunkt</module>
     <module>domain</module>
@@ -50,7 +47,6 @@
     <module>transport</module>
     <module>transport-oxalis</module>
     <module>transport-file</module>
-    <module>virksomhetssertifikatvalidator</module>
     <module>transport-altinn</module>
     <module>altinn-batch-receive</module>
     <module>altinnmock</module>
@@ -61,6 +57,17 @@
     <pluginManagement>
 
       <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.12</version>
+          <configuration>
+            <junitArtifactName>junit:junit</junitArtifactName>
+            <argLine>-Xms256m -Xmx512m -XX:MaxPermSize=128m -ea
+              -Dfile.encoding=UTF-8</argLine>
+          </configuration>
+        </plugin>
+
         <plugin>
           <groupId>com.heroku.sdk</groupId>
           <artifactId>heroku-maven-plugin</artifactId>
@@ -76,10 +83,20 @@
         </plugin>
 
         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+                <source>1.7</source>
+                <target>1.7</target>
+                <verbose>true</verbose>
+                <encoding>UTF-8</encoding>
+            </configuration>
+        </plugin>
+
+        <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>sonar-maven-plugin</artifactId>
           <version>2.4</version>
-
         </plugin>
 
         <plugin>

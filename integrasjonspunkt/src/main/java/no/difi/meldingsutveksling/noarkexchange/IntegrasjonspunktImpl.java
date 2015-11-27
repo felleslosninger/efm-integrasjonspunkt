@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import com.thoughtworks.xstream.XStream;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
@@ -15,6 +16,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.SOAPport;
 import no.difi.meldingsutveksling.queue.service.QueueService;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
+import org.jboss.logging.MDC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +62,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
     private QueueService queueService;
 
     @Autowired
-    IntegrasjonspunktConfig integrasjonspunktConfig;
+    IntegrasjonspunktConfig configuration;
 
     @Override
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
@@ -93,7 +95,15 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType request) {
-        if (integrasjonspunktConfig.isQueueEnabled()) {
+        PutMessageRequestAdapter message = new PutMessageRequestAdapter(request);
+        if (!message.hasSenderPartyNumber() && !configuration.hasOrganisationNumber()) {
+            throw new MeldingsUtvekslingRuntimeException();
+        }
+        final String partyNumber = message.hasSenderPartyNumber() ? message.getSenderPartynumber() : configuration.getOrganisationNumber();
+
+        MDC.put(IntegrasjonspunktConfig.PARTY_NUMBER, partyNumber);
+
+        if (configuration.isQueueEnabled()) {
             try {
                 queueService.put(request);
             } catch (IOException e) {
@@ -115,7 +125,15 @@ public class IntegrasjonspunktImpl implements SOAPport {
     }
 
     public boolean sendMessage(PutMessageRequestType request) {
-        if (hasAdresseregisterCertificate(request.getEnvelope().getReceiver().getOrgnr())) {
+        PutMessageRequestAdapter message = new PutMessageRequestAdapter(request);
+        if (!message.hasSenderPartyNumber() && !configuration.hasOrganisationNumber()) {
+            throw new MeldingsUtvekslingRuntimeException();
+        }
+        final String partyNumber = message.hasSenderPartyNumber() ? message.getSenderPartynumber() : configuration.getOrganisationNumber();
+
+        MDC.put(IntegrasjonspunktConfig.PARTY_NUMBER, partyNumber);
+
+        if(hasAdresseregisterCertificate(request.getEnvelope().getReceiver().getOrgnr())) {
             PutMessageContext context = new PutMessageContext(eventLog, messageSender);
             PutMessageStrategyFactory putMessageStrategyFactory = PutMessageStrategyFactory.newInstance(context);
 

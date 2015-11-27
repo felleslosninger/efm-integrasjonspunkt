@@ -1,9 +1,10 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-import org.apache.commons.lang3.StringUtils;
 
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
+
 
 public class PutMessageRequestAdapter {
     private PutMessageRequestType requestType;
@@ -29,7 +30,7 @@ public class PutMessageRequestAdapter {
     }
 
     public boolean hasSenderPartyNumber() {
-        return hasSender() && StringUtils.isNotBlank(requestType.getEnvelope().getSender().getOrgnr());
+        return hasSender() && isNotBlank(requestType.getEnvelope().getSender().getOrgnr());
     }
 
     public boolean hasRecieverPartyNumber() {
@@ -50,5 +51,9 @@ public class PutMessageRequestAdapter {
 
     public void setSenderPartyNumber(String senderPartyNumber) {
         this.requestType.getEnvelope().getSender().setOrgnr(senderPartyNumber);
+    }
+
+    public Object getPayload() {
+        return requestType.getPayload();
     }
 }
