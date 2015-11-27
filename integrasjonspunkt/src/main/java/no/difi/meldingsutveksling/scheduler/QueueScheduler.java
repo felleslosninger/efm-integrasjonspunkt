@@ -46,6 +46,9 @@ public class QueueScheduler {
                     sendMessage();
                 } catch (IOException e) {
                     log.error(e.getMessage(), e);
+                } catch (IndexOutOfBoundsException e) {
+                    applyResultToQueue(next.getUnique(), false);
+                    log.error("Could not send message.", e.getMessage(), e);
                 }
             }
         }

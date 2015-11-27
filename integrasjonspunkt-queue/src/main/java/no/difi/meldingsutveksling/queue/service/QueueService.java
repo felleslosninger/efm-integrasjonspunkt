@@ -210,8 +210,8 @@ public class QueueService {
     }
 
     @ManagedAttribute
-    public int getQueueFailedSize() {
-        return queueDao.getQueueFailedSize();
+    public int getQueueRetrySize() {
+        return queueDao.getQueueRetrySize();
     }
 
     @ManagedAttribute

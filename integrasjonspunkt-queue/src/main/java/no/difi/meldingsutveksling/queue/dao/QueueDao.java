@@ -161,7 +161,7 @@ public class QueueDao {
         return countCallback.getRowCount();
     }
 
-    public int getQueueFailedSize() {
+    public int getQueueRetrySize() {
         RowCountCallbackHandler countCallback = new RowCountCallbackHandler();
         template.query("select * from queue_metadata where status = 'RETRY'", countCallback);
         return countCallback.getRowCount();
