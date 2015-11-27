@@ -42,12 +42,10 @@ public class QueueSchedulerTest {
     }
 
     @Test
-    public void shouldGetNextNewFromQueueWhenSendMessageSchedulerTriggers() {
-        when(queueServiceMock.getNext(Status.NEW)).thenReturn(createQueue(UNIQUE_ID, Status.NEW));
-
+    public void shouldGetNextFromQueueWhenSendMessageSchedulerTriggers() {
         queueScheduler.sendMessage();
 
-        verify(queueServiceMock, times(1)).getNext(Status.NEW);
+        verify(queueServiceMock, times(1)).getNext();
     }
 
     @Test
@@ -55,7 +53,7 @@ public class QueueSchedulerTest {
         Queue element = createQueue(UNIQUE_ID, Status.NEW);
         PutMessageRequestType requestType = new PutMessageRequestType();
 
-        when(queueServiceMock.getNext(Status.NEW)).thenReturn(element);
+        when(queueServiceMock.getNext()).thenReturn(element).thenReturn(null);
         when(queueServiceMock.getMessage(element.getUnique())).thenReturn(requestType);
         when(integrasjonspunktMock.sendMessage(any(PutMessageRequestType.class))).thenReturn(true);
 
@@ -68,7 +66,7 @@ public class QueueSchedulerTest {
     public void shouldUpdateResultToQueueWithStatusForSuccessWhenMessageIsSent() {
         Queue element = createQueue(UNIQUE_ID, Status.NEW);
 
-        when(queueServiceMock.getNext(Status.NEW)).thenReturn(element);
+        when(queueServiceMock.getNext()).thenReturn(element).thenReturn(null);
         when(integrasjonspunktMock.sendMessage(any(PutMessageRequestType.class))).thenReturn(true);
 
         queueScheduler.sendMessage();
@@ -81,7 +79,7 @@ public class QueueSchedulerTest {
     public void shouldUpdateResultToQueueWithStatusFailedWhenMessageFails() {
         Queue element = createQueue(UNIQUE_ID, Status.NEW);
 
-        when(queueServiceMock.getNext(Status.NEW)).thenReturn(element);
+        when(queueServiceMock.getNext()).thenReturn(element).thenReturn(null);
         when(integrasjonspunktMock.sendMessage(any(PutMessageRequestType.class))).thenReturn(false);
 
         queueScheduler.sendMessage();
@@ -92,11 +90,9 @@ public class QueueSchedulerTest {
 
     @Test
     public void shouldGetNextFromQueueWhenRetryQueueIsTriggered() {
-        when(queueServiceMock.getNext(Status.RETRY)).thenReturn(createQueue(UNIQUE_ID, Status.RETRY));
-
         queueScheduler.sendMessage();
 
-        verify(queueServiceMock, times(1)).getNext(Status.RETRY);
+        verify(queueServiceMock, times(1)).getNext();
     }
 
     @Test
@@ -104,20 +100,37 @@ public class QueueSchedulerTest {
         Queue element = createQueue(UNIQUE_ID, Status.RETRY);
         PutMessageRequestType requestType = new PutMessageRequestType();
 
-        when(queueServiceMock.getNext(Status.RETRY)).thenReturn(element);
+        when(queueServiceMock.getNext()).thenReturn(element).thenReturn(null);
         when(queueServiceMock.getMessage(element.getUnique())).thenReturn(requestType);
         when(integrasjonspunktMock.sendMessage(any(PutMessageRequestType.class))).thenReturn(true);
 
         queueScheduler.sendMessage();
 
         verify(integrasjonspunktMock, times(1)).sendMessage(requestType);
+        verify(queueServiceMock, times(2)).getNext();
+    }
+
+    @Test
+    public void shouldProcessNewAndRetryWhenBothAreInQueue() throws Exception {
+        Queue retryElement = createQueue("retry", Status.RETRY);
+        Queue newElement = createQueue("new", Status.NEW);
+        PutMessageRequestType requestType = new PutMessageRequestType();
+
+        when(queueServiceMock.getNext()).thenReturn(retryElement).thenReturn(newElement).thenReturn(null);
+        when(queueServiceMock.getMessage(anyString())).thenReturn(requestType);
+        when(integrasjonspunktMock.sendMessage(any(PutMessageRequestType.class))).thenReturn(true);
+
+        queueScheduler.sendMessage();
+
+        verify(integrasjonspunktMock, times(2)).sendMessage(requestType);
+        verify(queueServiceMock, times(3)).getNext();
     }
 
     @Test
     public void shouldUpdateResultToQueueWithStatusForSuccessWhenRetryMessageIsSent() {
         Queue element = createQueue(UNIQUE_ID, Status.RETRY);
 
-        when(queueServiceMock.getNext(Status.RETRY)).thenReturn(element);
+        when(queueServiceMock.getNext()).thenReturn(element).thenReturn(null);
         when(integrasjonspunktMock.sendMessage(any(PutMessageRequestType.class))).thenReturn(true);
 
         queueScheduler.sendMessage();
@@ -130,7 +143,7 @@ public class QueueSchedulerTest {
     public void shouldUpdateResultToQueueWithStatusFailedWhenRetryMessageFails() {
         Queue element = createQueue(UNIQUE_ID, Status.RETRY);
 
-        when(queueServiceMock.getNext(Status.RETRY)).thenReturn(element);
+        when(queueServiceMock.getNext()).thenReturn(element).thenReturn(null);
         when(integrasjonspunktMock.sendMessage(any(PutMessageRequestType.class))).thenReturn(false);
 
         queueScheduler.sendMessage();

@@ -57,14 +57,25 @@ public class QueueServiceTest {
     }
 
     @Test
-    public void shouldLoadMetadataWhenRetrievingFromQueue() {
-        when(queueDaoMock.retrieve(Status.NEW)).thenReturn(asList(createQueue("1", new Date(DATE_20TH_OCT_2015)), createQueue("2", new Date(DATE_25TH_OCT_2015))));
+    public void shouldLoadMetadataForNewWhenRetrievingFromQueue() {
+        when(queueDaoMock.retrieve(Status.NEW)).thenReturn(asList(createQueue("1", Status.NEW)));
 
-        Queue next = queueService.getNext();
+        Queue actual = queueService.getNext();
 
         verify(queueDaoMock, times(1)).retrieve(Status.NEW);
         verify(queueDaoMock, times(1)).retrieve(Status.RETRY);
-        assertEquals(next.getLastAttemptTime().getTime(), DATE_20TH_OCT_2015);
+        assertEquals(actual.getStatus(), Status.NEW);
+    }
+
+    @Test
+    public void shouldLoadMetadataForRetryWhenRetrievingFromQueue() {
+        when(queueDaoMock.retrieve(Status.RETRY)).thenReturn(asList(createQueue("1", Status.RETRY)));
+
+        Queue actual = queueService.getNext();
+
+        verify(queueDaoMock, never()).retrieve(Status.NEW);
+        verify(queueDaoMock, times(1)).retrieve(Status.RETRY);
+        assertEquals(actual.getStatus(), Status.RETRY);
     }
 
     @Ignore("Encrypt/decrypt is temporarily disabled")

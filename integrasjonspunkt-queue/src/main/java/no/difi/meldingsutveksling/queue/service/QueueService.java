@@ -50,7 +50,7 @@ public class QueueService {
         else {
             List<Queue> retrieveNew = queueDao.retrieve(Status.NEW);
             if (retrieveNew.size() > 0) {
-                return retrieveRetry.get(0);
+                return retrieveNew.get(0);
             }
             else {
                 return null;
