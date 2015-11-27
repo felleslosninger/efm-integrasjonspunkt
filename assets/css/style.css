@@ -1,0 +1,88 @@
+body{
+  font-size: 16px;
+}
+
+.branding.sub-portal { /*Padding under logo i topp*/
+  padding-bottom: 25px;
+  font-size: 1.3em;
+}
+
+.button.custom{
+  font-size: 20px;
+}
+
+.bs-docs-masthead {
+  padding-top:50px;
+  padding-bottom:40px;
+  margin-bottom:20px;
+}
+
+.bs-docs-header h1, .bs-docs-header p {
+  margin-right:0px;
+}
+
+#content {
+  position:relative;
+}
+
+#content:after {
+  content:"";
+  position:absolute;
+  bottom:0px;
+  right:0px;
+  height:50px;
+  width:30%;
+  background:linear-gradient(135deg, transparent 50px, white 50px);
+}
+.list-group {
+  margin-top:10px ;
+}
+
+.list-versions {
+  position: fixed;
+  bottom: 10%;
+  width: 75px;
+}
+@media (max-width: 768px){
+  .list-versions{
+    top:0%;
+    font-size: 0.5em;
+    right: 0%;
+  }
+}
+
+@media (min-width: 768px) {
+  
+  nav > ul > li.active > ul {
+    display:block !important;
+  }
+
+  nav > ul {
+    text-align: left
+  }
+  
+  .content-article #content>article h3 {
+    padding-top:20px;
+    font-size:1.15em;
+  }
+
+  .content-article #content>article code {
+    padding:2px;
+    display:inline;
+    border-top: 0px;
+    border-bottom: 0px;
+    font-weight: 400;
+    font-size: 0.9em;
+    font-family: Menlo,Monaco,Consolas,"Courier New",monospace      
+  }
+
+  .content-article #content>article blockquote {
+    font-weight: 700;
+    color: #b9426d;
+    letter-spacing: -1px;
+  }
+
+  .content-article #content>article ol li {
+    margin-bottom: 2px;
+  }
+}

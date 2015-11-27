@@ -1,0 +1,71 @@
+# name of the software
+name: Om Meldingsutveksling i offentlig sektor
+siteUrlText: http://difi.github.io/meldingsutveksling-mellom-offentlige-virksomheter/
+
+# current version of the software
+version: 1.3
+# url of the download button
+downloadUrl: https://beta-meldingsutveksling.difi.no/
+
+# licence of the software
+license: GPL-3 License
+licenseUrl: http://opensource.org/licenses/GPL-3.0
+
+#baseurl: "/meldingsutveksling-mellom-offentlige-virksomheter" # the subpath of your site, e.g. /blog/
+baseurl: "/meldingsutveksling-mellom-offentlige-virksomheter"
+
+##Version handling
+currentCollecion: "vStaging"
+currentVersion: "Staging"
+versions: ["Staging"]
+
+# Collection of versions
+collections:
+  vStaging:  
+    output: true
+    permalink: /vStaging/
+
+aboutSide: "about.html"
+## End of Version handling
+
+# list of additional links on the right of the top menu
+headerLinks:
+  - title: Om Meldingsutveksling mellom offentlige virksomheter
+    url: /meldingsutveksling-mellom-offentlige-virksomheter/about.html
+  - title: GitHub
+    url: https://github.com/difi/meldingsutveksling-mellom-offentlige-virksomheter
+  - title: Issues
+    url: https://github.com/difi/meldingsutveksling-mellom-offentlige-virksomheter/issues
+
+# github buttons
+githubButton:
+  user: difi
+  repo: meldingsutveksling-mellom-offentlige-virksomheter
+
+# twitter buttons
+twitter:
+  enabled: false
+  via:
+  hash:
+  account:
+
+# facebook buttons
+facebook:
+  enabled: false
+  profileUrl:
+
+# google analytics
+analytics:
+  account:
+  domain:
+
+# DON'T MODIFY
+highlight: rouge
+
+gems:
+  - jekyll-redirect-from
+
+exclude: ['README.md', 'Gemfile.lock', 'Gemfile']
+
+kramdown:
+  input: GFM

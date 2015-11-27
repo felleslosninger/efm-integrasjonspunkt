@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="no">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<link rel="shortcut icon" href="//www.difi.no/profiles/difino/themes/difi3_difino/favicon.ico" type="image/vnd.microsoft.icon" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link type="text/css" rel="stylesheet" href="//www.difi.no/_style/site/difino/style.css" media="screen" />
+	<link href="{{site.baseurl}}/assets/css/docs.min.css" rel="stylesheet">
+	<link href="{{site.baseurl}}/assets/css/style.css" rel="stylesheet">
+	<link type="text/css" rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800%7COpen+Sans+Condensed:300,700%7CSource+Sans+Pro:200,300,regular,600,700,900&amp;subset=latin-ext,vietnamese,latin" media="all" />
+	{% if page.url contains version %}
+		{% assign active = "active" %}
+	{% else %}
+		{% assign active = "" %}
+	{% endif %}
+	<!--[if lt IE 9]>
+	<script type="text/javascript" src="//www.difi.no/_style/lib/html5shiv/html5shiv-3.7.2.min.js"></script>
+	<script type="text/javascript" src="//www.difi.no/_style/lib/respond/respond-1.4.2.min.js"></script>
+	<![endif]-->
+	<body class="nodetype-blogg content-article aside-right" >
+		<a id="top"/>
+			<div id="skip-link">
+				<a href="#content">Hopp til hovedinnhold</a>
+			</div>
+			<div id="page">
+				<header>
+					<div class="branding sub-portal">
+						<div class="logo">
+							<a href="{{site.baseurl}}/"><span>{{site.siteUrlText}}</span></a>
+						</div>
+						<div class="seperator"></div>
+						<div class="sub-portal">
+							<h1>{{site.name}}</h1>
+							<p>{{site.siteUrlText}}</p>
+						</div>
+					</div>
+					<div class="tools">
+						<div class="menu">
+							<h2>Sekundærmeny</h2>
+							<ul class="links">
+								{% for l in site.headerLinks %}
+									<li {% if forloop.first == true %} class="first" {% endif %}{% if forloop.last == true %} class="last" {% endif %}><a href="{{l.url}}">{{l.title}}</a></li>
+								{% endfor %}
+							</ul>
+						</div>
+					</div>
+					
+				</header>
+				<div id="above-content">
+					<div>
+						<section class="box title">
+							<div class="heading">
+							</div>
+							<div class="body">
+								<h1>
+								<span style="opacity: 1; transition: opacity 500ms; -webkit-transition: opacity 500ms;">
+									{{page.title}}
+								</span>
+								</h1>
+							</div>
+						</section>
+						<div class="col-md-9" role="main">
+							<!-- Info box notifying that you are using old documentation -->
+							{% if page.url contains site.currentVersion %}
+							{% elsif page.url contains site.aboutSide %}
+							{% else %}
+								<div class="alert alert-info">
+									Du ser nå på dokumentasjonen for Meldingsutveksling-mellom-offentlige-virksomheter {{ page.url | replace: '/', '' | replace: 'v', ''}}, som ikke er den nyeste versjonen. Den nyeste versjonen er {{ site.currentVersion}} og kan nåes <a href="{{ site.baseurl }}/">her</a>.
+								</div>
+							{% endif %}
+						</div>
+					</div>
+				</div>
+				{% if page.url contains site.aboutSide %}
+					{{content}}
+				{% else %}
+					<div id="main" class="with-aside">
+						<section id="content" tabindex="-1">
+							<article class="one-col">
+								{% if site.downloadUrl != "" %}
+									<div class="body">
+										<div class="button custom" data-button-type="0" data-url="{{ site.downloadUrl }}" role="button" tabindex="0">
+											<div class="logo">
+												<img alt="logo" src="//www.difi.no/modules/contrib/difi_ckeditor_widgets/plugins/difibutton/icons/difibutton.png">
+											</div>
+											<div class="text">
+												<div class="title">Last ned</div>
+												<div class="sub-title">Gå til {{ site.downloadUrl }}</div>
+											</div>
+											<div class="arrow">›</div>
+										</div>
+									</div>
+								{% endif %}
+								{{content}}
+							</article>
+						</section>
+						<aside>
+							<section class="box">
+								<div class="heading hidden-print hidden-xs hidden-sm">
+									<h2>Innhold</h2>
+								</div>
+								<div class="body">
+									<nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix-top" id="aside-nav">
+									</nav>
+								</div>
+							</section>
+							<!-- List of documentation versions -->
+							<div class="list-group col-md-1 list-versions ">
+								{% for version in site.versions %}
+									{% if page.url contains version %}
+										{% assign active = "active" %}
+									{% else %}
+										{% assign active = "" %}
+									{% endif %}
+									<a href="{{site.baseurl}}/v{{version}}/" class="list-group-item {{ active }}"> v{{ version }}</a>
+								{% endfor %}
+							</div>
+						</aside>
+					</div>
+				{% endif %}
+				<footer>
+					<div class="seperator">
+						<hr />
+					</div>
+					<address>
+						<ul>
+							<li>Kontakt: <a href="mailto:espen.korra@difi.no">espen.korra@difi.no</a></li>
+							<li>Telefon: +47 95 73 61 03</li>
+							<li>E-post: <a href="mailto:postmottak@difi.no">postmottak@difi.no</a></li>
+							<li>Org.no: 991 825 827</li>
+							<li ><a href="http://www.difi.no/artikkel/2014/12/difis-nettsteder">Difis nettsteder</a></li>
+							<li class="last"><a href="http://www.difi.no/artikkel/2014/12/personvernerklaering">Personvern</a></li>
+						</ul>
+					</address>
+				</footer>
+			</div>
+			<div role="complementary">
+				<a class="scroll-to-top" href="#top">
+					<span class="hidden">Go to top of page </span>
+					<div class="up-arrow">↑</div>
+				</a>
+			</div>
+			
+			<script type="text/javascript" src="//www.difi.no/_style/lib/jquery/jquery-1.11.1.min.js"></script>
+			<script type="text/javascript" src="//www.difi.no/_style/lib/bootstrap3/js/bootstrap.js"></script>
+			<script type="text/javascript" src="//www.difi.no/themes/contrib/difi3/js/jquery.flexnav.min.js"></script>
+			<script type="text/javascript" src="{{site.baseurl}}/assets/js/docs.min.js"></script>
+		</body>
+	</html>
