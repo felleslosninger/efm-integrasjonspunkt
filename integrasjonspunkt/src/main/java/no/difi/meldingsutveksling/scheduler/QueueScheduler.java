@@ -52,6 +52,7 @@ public class QueueScheduler {
     }
 
     private void applyResultToQueue(String unique, boolean result) {
+        System.out.println("*****" + "unique " + unique + " result " + result);
         if (result) {
             queueService.success(unique);
             log.info("Successfully sent message.");
