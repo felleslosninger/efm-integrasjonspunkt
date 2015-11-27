@@ -8,7 +8,11 @@ import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageContext;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategy;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategyFactory;
-import no.difi.meldingsutveksling.noarkexchange.schema.*;
+import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageRequestType;
+import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageResponseType;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
+import no.difi.meldingsutveksling.noarkexchange.schema.SOAPport;
 import no.difi.meldingsutveksling.queue.service.QueueService;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
 import org.slf4j.Logger;
@@ -116,11 +120,12 @@ public class IntegrasjonspunktImpl implements SOAPport {
             PutMessageStrategyFactory putMessageStrategyFactory = PutMessageStrategyFactory.newInstance(context);
 
             PutMessageStrategy strategy = putMessageStrategyFactory.create(request.getPayload());
-            strategy.putMessage(request);
+            PutMessageResponseType response = strategy.putMessage(request);
+            return validateResult(response);
         } else {
-            mshClient.sendEduMelding(request);
+            PutMessageResponseType response = mshClient.sendEduMelding(request);
+            return validateResult(response);
         }
-        return true;
     }
 
     public AdresseregisterService getAdresseRegister() {
@@ -153,5 +158,9 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
     public NoarkClient getMshClient() {
         return mshClient;
+    }
+
+    private boolean validateResult(PutMessageResponseType response) {
+        return response.getResult().getType().equals("OK");
     }
 }
