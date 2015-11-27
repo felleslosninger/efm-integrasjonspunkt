@@ -34,6 +34,7 @@ import java.util.List;
  */
 @Component
 public class MessagePolling {
+    public static final String PREFIX_NORWAY = "9908:";
     Logger logger = LoggerFactory.getLogger(MessagePolling.class);
 
     @Autowired
@@ -63,7 +64,7 @@ public class MessagePolling {
         logger.debug("Checking for new messages");
         Endpoint endpoint;
         try {
-            endpoint = elmaLookup.lookup(config.getOrganisationNumber());
+            endpoint = elmaLookup.lookup(PREFIX_NORWAY + config.getOrganisationNumber());
         } catch (LookupException e) {
             throw new MeldingsUtvekslingRuntimeException(e.getMessage(), e);
         }
