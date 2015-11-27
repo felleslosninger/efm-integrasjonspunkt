@@ -25,16 +25,14 @@
     <module>dokumentpakking</module>
     <module>integrasjonspunkt</module>
     <module>domain</module>
-    <module>sbd-reader</module>
     <module>transport</module>
-    <module>transport-oxalis</module>
     <module>transport-file</module>
     <module>transport-altinn</module>
     <module>altinn-batch-receive</module>
     <module>altinnmock</module>
     <module>altinn-client</module>
-    <module>integrasjonspunkt-queue</module>
     <module>virksert-demoscope</module>
+    <module>integrasjonspunkt-queue</module>
   </modules>
 
   <dependencyManagement>
