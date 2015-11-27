@@ -99,6 +99,7 @@ public class QueueDao {
 
         Date now = new Date();
         System.out.println("***** Filtering queue");
+        System.out.println("***** Elements " + queueList.size());
         for (Queue queue : queueList) {
             System.out.println("***** Date in ms for queue " + queue.getLastAttemptTime().getTime());
             System.out.println("***** Date for queue " + queue.getLastAttemptTime());

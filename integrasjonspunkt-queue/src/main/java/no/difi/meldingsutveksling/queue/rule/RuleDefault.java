@@ -16,6 +16,7 @@ public class RuleDefault implements Rule {
     }
 
     protected enum Attempt {
+        NEW(0, 1),
         FIRST(1, 3),
         SECOND(2, 5),
         THIRD(3, 10);
