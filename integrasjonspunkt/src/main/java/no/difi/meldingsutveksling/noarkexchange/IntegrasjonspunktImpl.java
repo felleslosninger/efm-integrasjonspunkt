@@ -99,9 +99,6 @@ public class IntegrasjonspunktImpl implements SOAPport {
         if (!message.hasSenderPartyNumber() && !configuration.hasOrganisationNumber()) {
             throw new MeldingsUtvekslingRuntimeException();
         }
-        final String partyNumber = message.hasSenderPartyNumber() ? message.getSenderPartynumber() : configuration.getOrganisationNumber();
-
-        MDC.put(IntegrasjonspunktConfig.PARTY_NUMBER, partyNumber);
 
         if (configuration.isQueueEnabled()) {
             try {
@@ -112,6 +109,10 @@ public class IntegrasjonspunktImpl implements SOAPport {
             return PutMessageResponseFactory.createOkResponse();
         }
         else {
+            final String partyNumber = message.hasSenderPartyNumber() ? message.getSenderPartynumber() : configuration.getOrganisationNumber();
+
+            MDC.put(IntegrasjonspunktConfig.PARTY_NUMBER, partyNumber);
+
             if (hasAdresseregisterCertificate(request.getEnvelope().getReceiver().getOrgnr())) {
                 PutMessageContext context = new PutMessageContext(eventLog, messageSender);
                 PutMessageStrategyFactory putMessageStrategyFactory = PutMessageStrategyFactory.newInstance(context);

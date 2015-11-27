@@ -17,6 +17,26 @@
     <mockito.version>1.9.5</mockito.version>
   </properties>
 
+  <modules>
+    <module>noarkexchange</module>
+    <module>noarkexchange-p360</module>
+    <module>noarkexchange-ephorte</module>
+    <module>altinnexchange</module>
+    <module>dokumentpakking</module>
+    <module>integrasjonspunkt</module>
+    <module>domain</module>
+    <module>sbd-reader</module>
+    <module>transport</module>
+    <module>transport-oxalis</module>
+    <module>transport-file</module>
+    <module>transport-altinn</module>
+    <module>altinn-batch-receive</module>
+    <module>altinnmock</module>
+    <module>altinn-client</module>
+    <module>integrasjonspunkt-queue</module>
+    <module>virksert-demoscope</module>
+  </modules>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -35,24 +55,6 @@
     </dependencies>
   </dependencyManagement>
 
-  <modules>
-    <module>noarkexchange</module>
-    <module>noarkexchange-p360</module>
-    <module>noarkexchange-ephorte</module>
-    <module>altinnexchange</module>
-    <module>dokumentpakking</module>
-    <module>integrasjonspunkt</module>
-    <module>domain</module>
-    <module>sbd-reader</module>
-    <module>transport</module>
-    <module>transport-oxalis</module>
-    <module>transport-file</module>
-    <module>transport-altinn</module>
-    <module>altinn-batch-receive</module>
-    <module>altinnmock</module>
-    <module>altinn-client</module>
-    <module>integrasjonspunkt-queue</module>
-  </modules>
   <build>
     <pluginManagement>
 
@@ -137,8 +139,6 @@
         <artifactId>sonar-maven-plugin</artifactId>
         <version>2.4</version>
       </plugin>
-
-
     </plugins>
   </build>
 

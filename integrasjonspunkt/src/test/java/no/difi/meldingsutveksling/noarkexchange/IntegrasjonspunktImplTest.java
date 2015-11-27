@@ -1,6 +1,8 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import no.difi.meldingsutveksling.PutMessageObjectMother;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.queue.service.QueueService;
 import org.junit.Before;
@@ -18,18 +20,47 @@ public class IntegrasjonspunktImplTest {
     private IntegrasjonspunktImpl integrasjonspunkt = new IntegrasjonspunktImpl();
 
     @Mock private QueueService queueServiceMock;
-    @Mock private IntegrasjonspunktConfig integrasjonspunktConfigMock;
+    @Mock private IntegrasjonspunktConfig configurationMock;
 
     @Before
     public void setUp() {
         initMocks(this);
 
-        when(integrasjonspunktConfigMock.isQueueEnabled()).thenReturn(true);
+        when(configurationMock.isQueueEnabled()).thenReturn(true);
+    }
+
+    @Test(expected = MeldingsUtvekslingRuntimeException.class)
+    public void shouldFailWhenPartyAndOrganisationNumberIsMissing() {
+        when(configurationMock.hasOrganisationNumber()).thenReturn(false);
+        PutMessageRequestType request = PutMessageObjectMother.createMessageRequestType(null);
+
+        integrasjonspunkt.putMessage(request);
+    }
+
+    @Test
+    public void shouldNotFailWhenOnlyPartyNumberIsAvailable() throws Exception {
+        when(configurationMock.hasOrganisationNumber()).thenReturn(false);
+        PutMessageRequestType request = PutMessageObjectMother.createMessageRequestType("12345");
+
+        integrasjonspunkt.putMessage(request);
+
+        verify(queueServiceMock, times(1)).put(request);
+    }
+
+    @Test
+    public void shouldNotFailWhenOnlyOrganisationNumberIsAvailable() throws Exception {
+        when(configurationMock.hasOrganisationNumber()).thenReturn(true);
+        PutMessageRequestType request = PutMessageObjectMother.createMessageRequestType(null);
+
+        integrasjonspunkt.putMessage(request);
+
+        verify(queueServiceMock, times(1)).put(request);
     }
 
     @Test
     public void shouldPutRuleRequestOnQueueWhenIncomming() throws Exception {
-        PutMessageRequestType request = new PutMessageRequestType();
+        when(configurationMock.hasOrganisationNumber()).thenReturn(true);
+        PutMessageRequestType request = PutMessageObjectMother.createMessageRequestType("12345");
 
         integrasjonspunkt.putMessage(request);
 
