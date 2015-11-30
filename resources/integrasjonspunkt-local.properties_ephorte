@@ -1,0 +1,19 @@
+#Replace <....> with your systems values
+#remove _ephorte from filename and save. Name should be: integrasjonspunkt-local.properties
+
+noarksystem.endpointURL=http://<sakArkivSystemURL>:<port>/ePhorteWeb/shared/webservices/edu/ephorteedu.asmx 
+noarksystem.type=ePhorte
+
+adresseregister.endPointURL=http://virksert.herokuapp.com/
+orgnumber=<orgnr>
+
+#Altinn related properties (used by transport-altinn, ignored if other transport is in use
+altinn.external_service_code=<serviceCode>
+altinn.external_service_edition_code=<ServiceEditionCode>
+altinn.username= <username>
+altinn.password= <password>
+
+# configuration settings for accessing MSH. You only need to set this if you are already a BestEdu user
+# Url can be found here at your  360snapin
+#msh.endpointURL=
+
