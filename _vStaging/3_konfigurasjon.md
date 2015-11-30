@@ -33,4 +33,4 @@ msh.endpointURL\*\*			|url til msh
 
 \*\* Denne brukes bare dersom du allerede har BestEdu og ønsker å sende filer via gammel MSH til deltakere som ikke er en del av piloten. Integrasjonspunktet vil da opptre som en proxy.
 
-Last ned eksempel for [P360](//resources/integrasjonspunkt-local.properties_360), Acos, [ephorte](//resources/integrasjonspunkt-local.properties_ephorte)
+Last ned eksempel for [P360](../resources/integrasjonspunkt-local.properties_360), Acos, [ephorte](../resources/integrasjonspunkt-local.properties_ephorte)
