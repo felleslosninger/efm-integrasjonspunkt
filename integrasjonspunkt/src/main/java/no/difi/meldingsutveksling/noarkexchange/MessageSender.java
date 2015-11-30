@@ -12,7 +12,6 @@ import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.noarkexchange.putmessage.ErrorStatus;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
@@ -38,7 +37,7 @@ public class MessageSender {
     @Autowired
     private EventLog eventLog;
 
-    org.slf4j.Logger log = LoggerFactory.getLogger(MessageSender.class.getName());
+    org.slf4j.Logger log = LoggerFactory.getLogger(MessageSender.class);
 
     @Autowired
     @Qualifier("multiTransport")
@@ -56,7 +55,7 @@ public class MessageSender {
     @Autowired
     private StandardBusinessDocumentFactory standardBusinessDocumentFactory;
 
-    Avsender createAvsender(PutMessageRequestAdapter message) throws AvsenderException {
+    private Avsender createAvsender(PutMessageRequestAdapter message) throws MessageContextException {
         if (!message.hasSenderPartyNumber()) {
             message.setSenderPartyNumber(configuration.getOrganisationNumber());
         }
@@ -65,7 +64,7 @@ public class MessageSender {
         try {
             certificate = adresseregister.getCertificate(message.getSenderPartynumber());
         } catch (CertificateException e) {
-            throw new AvsenderException(e);
+            throw new MessageContextException(e, Status.MISSING_SENDER_CERTIFICATE);
         }
         PrivateKey privatNoekkel = keyInfo.loadPrivateKey();
         Avsender avsender = Avsender.builder(new Organisasjonsnummer(message.getSenderPartynumber()), new Noekkelpar(privatNoekkel, certificate)).build();
@@ -73,24 +72,33 @@ public class MessageSender {
         return avsender;
     }
 
-    private Mottaker createMottaker(String orgnr) throws MottakerException {
+    private Mottaker createMottaker(String orgnr) throws MessageContextException {
         X509Certificate receiverCertificate;
         try {
-            receiverCertificate = (X509Certificate) adresseregister.getCertificate(orgnr);
+            receiverCertificate = lookupCertificate(orgnr);
         } catch(CertificateException e) {
-            throw new MottakerException(e);
+            throw new MessageContextException(e, Status.MISSING_RECIEVER_CERTIFICATE);
         }
         Mottaker mottaker = Mottaker.builder(new Organisasjonsnummer(orgnr), receiverCertificate).build();
 
         return mottaker;
     }
 
+    private X509Certificate lookupCertificate(String orgnr) throws CertificateException {
+        X509Certificate certificate;
+        certificate = (X509Certificate) adresseregister.getCertificate(orgnr);
+        return certificate;
+    }
+
     public PutMessageResponseType sendMessage(PutMessageRequestType messageRequest) {
         PutMessageRequestAdapter message = new PutMessageRequestAdapter(messageRequest);
 
-        MessageContext messageContext = createMessageContext(message);
-        if(messageContext.hasErrors()) {
-            return createErrorResponse(messageContext.getErrors().iterator().next());
+        MessageContext messageContext = null;
+        try {
+            messageContext = createMessageContext(message);
+        } catch (MessageContextException e) {
+            log.error(e.getMessage());
+            return createErrorResponse(e.getMessage());
         }
 
         eventLog.log(new Event(ProcessState.SIGNATURE_VALIDATED));
@@ -98,11 +106,10 @@ public class MessageSender {
         no.difi.meldingsutveksling.domain.sbdh.Document sbd;
         try {
             sbd = standardBusinessDocumentFactory.create(messageRequest, messageContext.getAvsender(), messageContext.getMottaker());
-
         } catch (IOException e) {
             eventLog.log(new Event().setJpId(messageContext.getJournalPostId()).setArkiveConversationId(message.getConversationId()).setProcessStates(ProcessState.MESSAGE_SEND_FAIL));
-            log.error("IO Error on Asic-e or sbd creation " + e.getMessage());
-            return createErrorResponse(ErrorStatus.MISSING_SENDER);
+            log.error("IO Error on Asic-e or sbd creation ", e);
+            return createErrorResponse("Unable to create standard business document");
 
         }
         Scope item = sbd.getStandardBusinessDocumentHeader().getBusinessScope().getScope().get(0);
@@ -126,32 +133,23 @@ public class MessageSender {
      * @param message
      * @return
      */
-    private MessageContext createMessageContext(PutMessageRequestAdapter message) {
+    protected MessageContext createMessageContext(PutMessageRequestAdapter message) throws MessageContextException {
         MessageContext context = new MessageContext();
+
         if(!message.hasRecieverPartyNumber()) {
-            log.error(ErrorStatus.MISSING_RECIPIENT.toString());
-            context.addError(ErrorStatus.MISSING_RECIPIENT);
+            throw new MessageContextException(Status.MISSING_RECIEVER_ORGANIZATION_NUMBER);
         }
+        Avsender avsender;
+        final Mottaker mottaker;
+        avsender = createAvsender(message);
+        mottaker = createMottaker(message.getRecieverPartyNumber());
 
         JournalpostId p = JournalpostId.fromPutMessage(message);
         String journalPostId = p.value();
 
         context.setJpId(journalPostId);
-
-        try {
-            context.setMottaker(createMottaker(message.getRecieverPartyNumber()));
-        } catch (MottakerException e) {
-            log.error(ErrorStatus.CANNOT_RECIEVE + message.getRecieverPartyNumber() + e.toString());
-            context.addError(ErrorStatus.CANNOT_RECIEVE);
-        }
-
-        try {
-            context.setAvsender(createAvsender(message));
-        } catch (AvsenderException e) {
-            log.error(ErrorStatus.MISSING_SENDER + e.toString());
-            context.addError(ErrorStatus.MISSING_SENDER);
-        }
-
+        context.setMottaker(mottaker);
+        context.setAvsender(avsender);
         return context;
     }
 
@@ -199,6 +197,19 @@ public class MessageSender {
 
     public StandardBusinessDocumentFactory getStandardBusinessDocumentFactory() {
         return standardBusinessDocumentFactory;
+    }
+
+    public class MessageContextException extends Exception {
+        private final Status status;
+
+        public MessageContextException(Status status) {
+            this.status = status;
+        }
+
+        public MessageContextException(CertificateException exception, Status status) {
+            super(exception);
+            this.status = status;
+        }
     }
 
 }
