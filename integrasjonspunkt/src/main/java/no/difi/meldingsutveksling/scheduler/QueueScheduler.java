@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.scheduler;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.queue.domain.Queue;
@@ -49,6 +50,9 @@ public class QueueScheduler {
                 } catch (IndexOutOfBoundsException e) {
                     applyResultToQueue(next.getUnique(), false);
                     log.error("Could not send message.", e.getMessage(), e);
+                } catch (MeldingsUtvekslingRuntimeException e) {
+                    applyResultToQueue(next.getUnique(), false);
+                    log.error("Error in message.", e.getMessage(), e);
                 }
             }
         }
