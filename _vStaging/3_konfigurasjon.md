@@ -8,8 +8,8 @@ isHome: false
 
 Følgende verdier settest i integrasjonspunkt-local.properties
 
-Propertie               	| Beskrivelse 															| Eksempel
---------------------------  | ---------------------------------------------------------------------	| --------
+**Propertie**              	|**Beskrivelse**														|**Eksempel**
+----------------------------|-----------------------------------------------------------------------|-----------------
 noarksystem.endpointURL 	| URL integrasjonspunktet finner sak-/arkivsystemets BestEdu tjenester 	| 
 noarksystem.type        	| Sak/-arkivsystem type 												|P360/Acos/ePhorte																	
 noarksystem.userName\*   	|brukernavn for autentisering mot sakarkivsystem						|svc_sakark
@@ -25,9 +25,9 @@ privatekeyalias  			| alieas til virksomhetssertifikatet som brukes i  integrasj
 							|																		|
 altinn.external_service_code|																		|
 altinn.external_service_edition_code|																|
-altinn.username         	|brukernavnet du fikk når du opprettet AltInn systembruker
-altinn.password         	|passord du satte når du opprettet AltInn systembruker
-msh.endpointURL\*\*			|url til msh
+altinn.username         	|brukernavnet du fikk når du opprettet AltInn systembruker				|
+altinn.password         	|passord du satte når du opprettet AltInn systembruker					|
+msh.endpointURL\*\*			|url til msh															|
 
 \* Autentisering mot sakarkivsystem benyttes av P360
 
