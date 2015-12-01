@@ -9,11 +9,11 @@ Feature: Integrasjonspunkt skal kunne støtte å sende meldinger til eksisterend
     And virksomhet <msh> i MSH sitt adresseregister
     When vi spør integrasjonspunktet om virksomhet kan motta meldinger
     Then skal vi få <svar> om at de kan motta meldinger
-  Examples:
-    | adresseregister | msh         | svar  |
-    | finnes          | finnes      | sann  |
-    | finnes ikke     | finnes      | sann  |
-    | finnes ikke     | finnes ikke | usann |
+    Examples:
+      | adresseregister | msh         | svar  |
+      | finnes          | finnes      | sann  |
+      | finnes ikke     | finnes      | sann  |
+      | finnes ikke     | finnes ikke | usann |
 
   Scenario: Vi sender en melding til MSH
     Given virksomhet finnes ikke i Adresseregisteret

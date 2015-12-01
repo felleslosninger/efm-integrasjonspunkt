@@ -1,19 +1,7 @@
 package no.difi.meldingsutveksling;
 
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceAvailableFile;
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceAvailableFileList;
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceAvailableFileStatus;
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceExternalBasicSF;
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceInitiation;
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceSearch;
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasic;
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasicGetAvailableFilesBasicAltinnFaultFaultFaultMessage;
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasicInitiateBrokerServiceBasicAltinnFaultFaultFaultMessage;
-import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.BrokerServiceExternalBasicStreamedSF;
-import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExternalBasicStreamed;
-import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExternalBasicStreamedDownloadFileStreamedBasicAltinnFaultFaultFaultMessage;
-import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExternalBasicStreamedUploadFileStreamedBasicAltinnFaultFaultFaultMessage;
-import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.StreamedPayloadBasicBE;
+import no.difi.meldingsutveksling.altinn.mock.brokerbasic.*;
+import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.*;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.shipping.ws.AltinnReasonFactory;
@@ -40,8 +28,8 @@ public class AltinnWsClient {
     private static final String CANNOT_DOWNLOAD_FILE = "Cannot download file";
     private final AltinnWsConfiguration configuration;
 
-    public AltinnWsClient(AltinnWsConfiguration configuration) {
-        this.configuration = configuration;
+    public AltinnWsClient(AltinnWsConfiguration altinnWsConfiguration) {
+        this.configuration = altinnWsConfiguration;
     }
 
     public void send(UploadRequest request) {
@@ -75,6 +63,7 @@ public class AltinnWsClient {
         }
     }
 
+
     public List<FileReference> availableFiles(String partyNumber) {
 
         BrokerServiceExternalBasicSF brokerServiceExternalBasicSF;
@@ -101,6 +90,7 @@ public class AltinnWsClient {
 
         return fileReferences;
     }
+
 
     public Document download(DownloadRequest request) {
         BrokerServiceExternalBasicStreamedSF brokerServiceExternalBasicStreamedSF;

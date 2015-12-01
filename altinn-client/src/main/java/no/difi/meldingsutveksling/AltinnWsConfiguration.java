@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class AltinnWsConfiguration {
+    private static String hostName;
     private URL streamingServiceUrl;
     private URL brokerServiceUrl;
     private String username;
@@ -32,9 +33,9 @@ public class AltinnWsConfiguration {
     private AltinnWsConfiguration() {
     }
 
-    public static AltinnWsConfiguration fromConfiguration(Configuration config) {
-        URL streamingserviceUrl = createUrl(config.getString("altinn.streamingservice.url"));
-        URL brokerserviceUrl = createUrl(config.getString("altinn.brokerservice.url"));
+    public static AltinnWsConfiguration fromConfiguration(String hostName, Configuration config) {
+        URL streamingserviceUrl = createUrl(hostName + config.getString("altinn.streamingservice.url"));
+        URL brokerserviceUrl = createUrl(hostName + config.getString("altinn.brokerservice.url"));
 
         return new Builder()
                 .withUsername(config.getString("altinn.username"))
@@ -63,6 +64,7 @@ public class AltinnWsConfiguration {
     public int getExternalServiceEditionCode() {
         return externalServiceEditionCode;
     }
+
 
     public static class Builder {
         AltinnWsConfiguration configuration;

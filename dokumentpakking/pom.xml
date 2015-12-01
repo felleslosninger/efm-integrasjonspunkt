@@ -7,6 +7,12 @@
 	<artifactId>dokumentpakking</artifactId>
 	<version>0.1-SNAPSHOT</version>
 
+	<parent>
+		<artifactId>parent-pom</artifactId>
+		<groupId>no.difi.meldingsutveksling</groupId>
+		<version>1.0-SNAPSHOT</version>
+	</parent>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -46,40 +52,6 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>jaxb2-maven-plugin</artifactId>
 				<version>1.6</version>
-				<executions>
-					<execution>
-						<id>xjc-xades</id>
-						<goals>
-							<goal>xjc</goal>
-						</goals>
-						<configuration>
-							<schemaFiles>XAdES.xsd</schemaFiles>
-							<packageName>no.difi.meldingsutveksling.dokumentpakking.xades</packageName>
-						</configuration>
-					</execution>
-                    <execution>
-                        <id>xjc-kvit</id>
-                        <goals>
-                            <goal>xjc</goal>
-                        </goals>
-                        <configuration>
-                            <schemaFiles>sdp-kvittering.xsd</schemaFiles>
-                            <packageName>no.difi.meldingsutveksling.dokumentpakking.kvit</packageName>
-                            <clearOutputDir>false</clearOutputDir>
-                        </configuration>
-                    </execution>
-					<execution>
-						<id>xjc-asice</id>
-						<goals>
-							<goal>xjc</goal>
-						</goals>
-						<configuration>
-							<schemaFiles>ts_102918v010201.xsd</schemaFiles>
-							<packageName>no.difi.meldingsutveksling.dokumentpakking.asice</packageName>
-							<clearOutputDir>false</clearOutputDir>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>
@@ -159,11 +131,7 @@
             <version>1.50</version>
         </dependency>
 
-        <dependency>
-            <groupId>no.difi.commons</groupId>
-            <artifactId>commons-asic</artifactId>
-            <version>0.9.1</version>
-        </dependency>
+
 
     </dependencies>
 
