@@ -201,26 +201,26 @@ public class QueueService {
 
     @ManagedAttribute
     public int getQueueSize() {
-        return queueDao.getQueueTotalSize();
+        return queueDao.getQueueSize();
     }
 
     @ManagedAttribute
     public int getQueueNewSize() {
-        return queueDao.getQueueReadySize();
+        return queueDao.getQueueSize(Status.NEW);
     }
 
     @ManagedAttribute
     public int getQueueRetrySize() {
-        return queueDao.getQueueRetrySize();
+        return queueDao.getQueueSize(Status.RETRY);
     }
 
     @ManagedAttribute
     public int getQueueErrorSize() {
-        return queueDao.getQueueErrorSize();
+        return queueDao.getQueueSize(Status.ERROR);
     }
 
     @ManagedAttribute
     public int getQueueDoneSize() {
-        return queueDao.getQueueCompletedSize();
+        return queueDao.getQueueSize(Status.DONE);
     }
 }

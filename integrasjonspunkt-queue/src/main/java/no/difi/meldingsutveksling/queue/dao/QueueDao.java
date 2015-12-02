@@ -22,6 +22,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.String.format;
+
 @Repository
 public class QueueDao {
     public static final int ONE_MINUTE_IN_MILLIS = 60000;
@@ -162,33 +164,16 @@ public class QueueDao {
         }
     }
 
-    public int getQueueTotalSize() {
+    public int getQueueSize() {
         RowCountCallbackHandler countCallback = new RowCountCallbackHandler();
         template.query("select * from queue_metadata", countCallback);
         return countCallback.getRowCount();
     }
 
-    public int getQueueReadySize() {
+    public int getQueueSize(Status status) {
+        String sql = format("select * from queue_metadata where status = '%s'", status.name());
         RowCountCallbackHandler countCallback = new RowCountCallbackHandler();
-        template.query("select * from queue_metadata where status = 'NEW'", countCallback);
-        return countCallback.getRowCount();
-    }
-
-    public int getQueueRetrySize() {
-        RowCountCallbackHandler countCallback = new RowCountCallbackHandler();
-        template.query("select * from queue_metadata where status = 'RETRY'", countCallback);
-        return countCallback.getRowCount();
-    }
-
-    public int getQueueErrorSize() {
-        RowCountCallbackHandler countCallback = new RowCountCallbackHandler();
-        template.query("select * from queue_metadata where status = 'ERROR'", countCallback);
-        return countCallback.getRowCount();
-    }
-
-    public int getQueueCompletedSize() {
-        RowCountCallbackHandler countCallback = new RowCountCallbackHandler();
-        template.query("select * from queue_metadata where status = 'DONE'", countCallback);
+        template.query(sql, countCallback);
         return countCallback.getRowCount();
     }
 }
