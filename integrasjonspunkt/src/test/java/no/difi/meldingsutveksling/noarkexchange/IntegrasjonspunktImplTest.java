@@ -38,7 +38,7 @@ public class IntegrasjonspunktImplTest {
     }
 
     @Test
-    public void shouldNotFailWhenOnlyPartyNumberIsAvailable() throws Exception {
+    public void shouldPutMessageOnQueueWhenOrganisationNumberIsConfigured() throws Exception {
         when(configurationMock.hasOrganisationNumber()).thenReturn(false);
         PutMessageRequestType request = PutMessageObjectMother.createMessageRequestType("12345");
 
@@ -48,7 +48,7 @@ public class IntegrasjonspunktImplTest {
     }
 
     @Test
-    public void shouldNotFailWhenOnlyOrganisationNumberIsAvailable() throws Exception {
+    public void shouldPutMessageOnQueueWhenPartyNumberIsInRequest() throws Exception {
         when(configurationMock.hasOrganisationNumber()).thenReturn(true);
         PutMessageRequestType request = PutMessageObjectMother.createMessageRequestType(null);
 
@@ -58,7 +58,7 @@ public class IntegrasjonspunktImplTest {
     }
 
     @Test
-    public void shouldPutRuleRequestOnQueueWhenIncomming() throws Exception {
+    public void shouldPutMessageOnQueueWhenOrganisationNumberIsProvided() throws Exception {
         when(configurationMock.hasOrganisationNumber()).thenReturn(true);
         PutMessageRequestType request = PutMessageObjectMother.createMessageRequestType("12345");
 

@@ -43,21 +43,19 @@ public class QueueDaoIntegrationTest {
         queueDao.saveEntry(expected1);
         List<QueueElement> retrieve = queueDao.retrieve(Status.NEW);
 
-        assertQueue(expected0, retrieve.get(0));
-        assertQueue(expected1, retrieve.get(1));
+        assertEquals(2, retrieve.size());
     }
 
     @Test
-    public void shouldOnlyRetrieveWithStatusFailedWhenRequestedStatusFailed() {
-        QueueElement expected0 = createQueue("uniqueB1", Status.NEW);
+    public void shouldOnlyRetrieveElementsWithStatusRetryWhenRequestedStatusRetry() {
         QueueElement expected1 = createQueue("uniqueB2", Status.RETRY);
 
-        queueDao.saveEntry(expected0);
+        queueDao.saveEntry(createQueue("uniqueB1", Status.NEW));
         queueDao.saveEntry(expected1);
         List<QueueElement> retrieve = queueDao.retrieve(Status.RETRY);
 
         assertEquals(1, retrieve.size());
-        assertQueue(expected1, retrieve.get(0));
+        assertEquals(Status.RETRY, retrieve.get(0).getStatus());
     }
 
     @Test
@@ -70,7 +68,7 @@ public class QueueDaoIntegrationTest {
     }
 
     @Test
-    public void shouldRetrieveResultBasedOnStatusSortedOnTimestamp() throws Exception {
+    public void shouldRetrieveResultBasedOnStatusSortedOnDate() throws Exception {
         Date date1 = QueueDao.addMinutesToDate(new Date(), -10);
         Date date2 = QueueDao.addMinutesToDate(new Date(), -20);
         Date date3 = QueueDao.addMinutesToDate(new Date(), -30);

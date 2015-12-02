@@ -6,7 +6,6 @@ import no.difi.meldingsutveksling.queue.domain.Status;
 import no.difi.meldingsutveksling.queue.rule.RuleDefault;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -25,7 +24,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,8 +31,6 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 public class QueueTest {
     private static final String NOT_ENCRYPTED_TEST_STRING = "TestObject";
-    private static final long DATE_25TH_OCT_2015 = 61406118000000L;
-    private static final long DATE_20TH_OCT_2015 = 61406550000000L;
     public static final String UNIQUE_ID = "1";
 
     private Queue queue;
@@ -62,7 +58,6 @@ public class QueueTest {
         QueueElement actual = queue.getNext();
 
         verify(queueDaoMock, times(1)).retrieve(Status.NEW);
-        verify(queueDaoMock, times(1)).retrieve(Status.RETRY);
         assertEquals(actual.getStatus(), Status.NEW);
     }
 
@@ -72,22 +67,8 @@ public class QueueTest {
 
         QueueElement actual = queue.getNext();
 
-        verify(queueDaoMock, never()).retrieve(Status.NEW);
         verify(queueDaoMock, times(1)).retrieve(Status.RETRY);
         assertEquals(actual.getStatus(), Status.RETRY);
-    }
-
-    @Ignore("Encrypt/decrypt is temporarily disabled")
-    @Test
-    public void shouldDecryptFileWhenLoadingEntryFromFile() throws IOException {
-        //This method will test both encryption and decryption
-        String file = createEncryptedFile();
-        when(queueDaoMock.retrieve(UNIQUE_ID)).thenReturn(createQueue(UNIQUE_ID, FILE_PATH + file));
-
-        queue.getMessage(UNIQUE_ID);
-        Object message = queue.getMessage(UNIQUE_ID);
-
-        assertEquals(message.toString(), NOT_ENCRYPTED_TEST_STRING);
     }
 
     @Test
@@ -111,14 +92,13 @@ public class QueueTest {
     }
 
     @Test
-    public void shouldUpdateStatusObjectWhenSuccessReported() throws Exception {
-        QueueElement queueElement = createQueue(UNIQUE_ID, Status.NEW, QueueDao.addMinutesToDate(new Date(), -60));
-        when(queueDaoMock.retrieve(anyString())).thenReturn(queueElement);
+    public void shouldUpdateStatusOnQueueWhenSuccessReported() throws Exception {
+        when(queueDaoMock.retrieve(anyString())).thenReturn(
+                createQueue(UNIQUE_ID, Status.NEW, QueueDao.addMinutesToDate(new Date(), -60)));
 
         queue.success(UNIQUE_ID);
 
         verify(queueDaoMock, times(1)).updateStatus(any(QueueElement.class));
-        verify(queueDaoMock, never()).updateStatus(queueElement);
     }
 
     @Test
@@ -189,8 +169,8 @@ public class QueueTest {
 
     @Test
     public void shouldSetLastAttemptedTimeWhenFailReported() throws Exception {
-        Date yesterday = QueueDao.addMinutesToDate(new Date(), -60);
-        when(queueDaoMock.retrieve(anyString())).thenReturn(createQueue(UNIQUE_ID, yesterday));
+        Date oldDate = QueueDao.addMinutesToDate(new Date(), -60);
+        when(queueDaoMock.retrieve(anyString())).thenReturn(createQueue(UNIQUE_ID, oldDate));
         ArgumentCaptor<QueueElement> args = ArgumentCaptor.forClass(QueueElement.class);
 
         queue.fail(UNIQUE_ID);
@@ -198,7 +178,7 @@ public class QueueTest {
         verify(queueDaoMock, times(1)).updateEntry(args.capture());
 
         QueueElement actual = args.getValue();
-        assertFalse(yesterday.getTime() == actual.getLastAttemptTime().getTime());
+        assertFalse(oldDate.getTime() == actual.getLastAttemptTime().getTime());
     }
 
     @Test
@@ -212,7 +192,7 @@ public class QueueTest {
     }
 
     private String createEncryptedFile() throws IOException {
-        queue.put(NOT_ENCRYPTED_TEST_STRING); //Create encrypted file
+        queue.put(NOT_ENCRYPTED_TEST_STRING);
         File dir = new File(FILE_PATH);
 
         File[] files = dir.listFiles(new FilenameFilter()
@@ -229,10 +209,10 @@ public class QueueTest {
     public static void cleanUp() {
         String filePath = FileSystems.getDefault().getPath(FILE_PATH).toString();
 
-        File downloadFile = new File(filePath);
+        File file = new File(filePath);
 
-        downloadFile.delete();
-        if (downloadFile.exists()) {
+        file.delete();
+        if (file.exists()) {
             System.out.println(String.format("Cleanup of file %s failed. Manually cleanup necessary! ", filePath));
         }
     }
