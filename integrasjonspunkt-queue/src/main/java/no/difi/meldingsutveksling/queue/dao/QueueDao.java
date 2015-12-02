@@ -135,7 +135,7 @@ public class QueueDao {
 
         public Queue mapRow(ResultSet rs, int rowNum) throws SQLException {
             return new Queue.Builder()
-                    .unique(rs.getString("unique_id"))
+                    .uniqueId(rs.getString("unique_id"))
                     .numberAttempt(rs.getInt("numberAttempt"))
                     .rule((Rule) rs.getObject("rule"))
                     .status(rs.getString("status"))
@@ -146,12 +146,19 @@ public class QueueDao {
         }
 
         public static List<Queue> map(List<Map<String, Object>> maps) {
-            ArrayList<Queue> queueList = new ArrayList<>();
+            ArrayList<Queue> queues = new ArrayList<>();
 
             for (Map map : maps) {
-                queueList.add(new Queue.Builder().unique(map.get("unique_id").toString()).numberAttempt(Integer.parseInt(map.get("numberAttempt").toString())).rule(map.get("rule").toString()).status(Status.statusFromString(map.get("status").toString())).location(map.get("requestLocation").toString()).lastAttemptTime((Date) map.get("lastAttemptTime")).checksum(map.get("checksum").toString()).build());
+                queues.add(new Queue.Builder()
+                        .uniqueId(map.get("unique_id").toString())
+                        .numberAttempt(Integer.parseInt(map.get("numberAttempt").toString()))
+                        .rule(map.get("rule").toString())
+                        .status(Status.statusFromString(map.get("status").toString()))
+                        .location(map.get("requestLocation").toString()).lastAttemptTime((Date) map.get("lastAttemptTime"))
+                        .checksum(map.get("checksum").toString())
+                        .build());
             }
-            return queueList;
+            return queues;
         }
     }
 

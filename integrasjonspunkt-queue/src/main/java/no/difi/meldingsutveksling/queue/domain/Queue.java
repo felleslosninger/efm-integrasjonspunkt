@@ -6,7 +6,7 @@ import no.difi.meldingsutveksling.queue.rule.RuleDefault;
 import java.util.Date;
 
 public class Queue {
-    private String unique;
+    private String uniqueId;
     private int numberAttempt;
     private Rule rule;
     private Date lastAttemptTime;
@@ -14,8 +14,8 @@ public class Queue {
     private String checksum;
     private Status status;
 
-    private Queue(String unique, int numberAttempt, Rule rule, Date lastAttemptTime, String location, String checksum, Status status) {
-        this.unique = unique;
+    private Queue(String uniqueId, int numberAttempt, Rule rule, Date lastAttemptTime, String location, String checksum, Status status) {
+        this.uniqueId = uniqueId;
         this.numberAttempt = numberAttempt;
         this.rule = rule == null ? RuleDefault.getRule() : rule;
         this.lastAttemptTime = lastAttemptTime;
@@ -25,7 +25,7 @@ public class Queue {
     }
 
     public String getUniqueId() {
-        return unique;
+        return uniqueId;
     }
 
     private int getNextAttempt() {
@@ -66,7 +66,7 @@ public class Queue {
 
     public Builder getOpenObjectBuilder() {
         return new Builder()
-                .unique(this.unique)
+                .uniqueId(this.uniqueId)
                 .numberAttempt(this.numberAttempt)
                 .rule(this.rule)
                 .lastAttemptTime(this.lastAttemptTime)
@@ -76,7 +76,7 @@ public class Queue {
     }
 
     public static class Builder {
-        private String unique;
+        private String uniqueId;
         private int numberAttempt;
         private Rule rule;
         private Date lastAttemptTime;
@@ -84,8 +84,8 @@ public class Queue {
         private String checksum;
         private Status status;
 
-        public Builder unique(String unique) {
-            this.unique = unique;
+        public Builder uniqueId(String uniqueId) {
+            this.uniqueId = uniqueId;
             return this;
         }
 
@@ -132,7 +132,7 @@ public class Queue {
         }
 
         public Queue build() {
-            return new Queue(unique, numberAttempt, rule, lastAttemptTime, location, checksum, status);
+            return new Queue(uniqueId, numberAttempt, rule, lastAttemptTime, location, checksum, status);
         }
     }
 

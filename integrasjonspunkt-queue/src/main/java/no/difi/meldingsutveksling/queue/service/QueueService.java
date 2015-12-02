@@ -61,11 +61,11 @@ public class QueueService {
     /***
      * Get message based on metadata
      *
-     * @param unique id of the message to get
+     * @param uniqueId id of the message to get
      * @return the original request ready to send
      */
-    public Object getMessage(String unique) throws IOException {
-        Queue retrieve = queueDao.retrieve(unique);
+    public Object getMessage(String uniqueId) throws IOException {
+        Queue retrieve = queueDao.retrieve(uniqueId);
 
         return QueueMessageFile.retrieveFileFromDisk(retrieve);
 
@@ -90,7 +90,7 @@ public class QueueService {
         QueueMessageFile.saveFileOnDisk(request, filenameWithPath);
 
         Queue newEntry = new Queue.Builder()
-                .unique(uniqueFilename)
+                .uniqueId(uniqueFilename)
                 .location(filenameWithPath)
                 .status(Status.NEW)
                 .numberAttempt(0)
@@ -106,10 +106,10 @@ public class QueueService {
      * This method should be called when a message have successfully been processed.
      * It will clean up the message on disk, and update meta-data to reflect successfully sent message.
      *
-     * @param unique unique id for the queue element
+     * @param uniqueId unique id for the queue element
      */
-    public void success(String unique) {
-        Queue queue = queueDao.retrieve(unique);
+    public void success(String uniqueId) {
+        Queue queue = queueDao.retrieve(uniqueId);
         QueueMessageFile.removeFile(queue.getFileLocation());
 
         int numberAttempts = queue.getNumberAttempts();
@@ -129,11 +129,11 @@ public class QueueService {
      * It contains logic for retries and updating meta-data for the element, and will return if it is a fail
      * for retry or a permanent error.
      *
-     * @param unique unique message id
+     * @param uniqueId unique message id
      * @return Status.RETRY if it should be tried again at a later time, Status.ERROR if it is a permanent error.
      */
-    public Status fail(String unique) {
-        Queue queue = queueDao.retrieve(unique);
+    public Status fail(String uniqueId) {
+        Queue queue = queueDao.retrieve(uniqueId);
 
         int numberAttempts = queue.getNumberAttempts();
         Queue.Builder openObject = queue.getOpenObjectBuilder()

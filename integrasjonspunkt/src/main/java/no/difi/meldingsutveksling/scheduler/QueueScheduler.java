@@ -58,12 +58,12 @@ public class QueueScheduler {
         }
     }
 
-    private void applyResultToQueue(String unique, boolean result) {
+    private void applyResultToQueue(String uniqueId, boolean result) {
         if (result) {
-            queueService.success(unique);
+            queueService.success(uniqueId);
             log.info("Successfully sent message.");
         } else {
-            Status status = queueService.fail(unique);
+            Status status = queueService.fail(uniqueId);
 
             if (status == Status.RETRY) {
                 log.warn("Message failed send. Will try later.");

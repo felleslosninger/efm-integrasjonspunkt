@@ -10,32 +10,32 @@ import java.util.Date;
 import static org.junit.Assert.assertEquals;
 
 public class QueueObjectMother {
-    public static Queue createQueue(String unique, Date lastAttemptTime) {
-        return createQueueBuilder().unique(unique).lastAttemptTime(lastAttemptTime).build();
+    public static Queue createQueue(String uniqueId, Date lastAttemptTime) {
+        return createQueueBuilder().uniqueId(uniqueId).lastAttemptTime(lastAttemptTime).build();
     }
 
-    public static Queue createQueue(String unique, Status status) {
-        return createQueueBuilder().unique(unique).status(status).build();
+    public static Queue createQueue(String uniqueId, Status status) {
+        return createQueueBuilder().uniqueId(uniqueId).status(status).build();
     }
 
-    public static Queue createQueue(String unique, int numberOfErrors) {
-        return createQueueBuilder().unique(unique).numberAttempt(numberOfErrors).build();
+    public static Queue createQueue(String uniqueId, int numberOfErrors) {
+        return createQueueBuilder().uniqueId(uniqueId).numberAttempt(numberOfErrors).build();
     }
 
-    public static Queue createQueue(String unique) {
-        return createQueueBuilder().unique(unique).build();
+    public static Queue createQueue(String uniqueId) {
+        return createQueueBuilder().uniqueId(uniqueId).build();
     }
 
-    public static Queue createQueue(String unique, String filename) {
-        return createQueueBuilder().unique(unique).location(filename).build();
+    public static Queue createQueue(String uniqueId, String filename) {
+        return createQueueBuilder().uniqueId(uniqueId).location(filename).build();
     }
 
-    public static Queue createQueue(String unique, int numberAttempts, String filename) {
-        return createQueueBuilder().unique(unique).numberAttempt(numberAttempts).location(filename).build();
+    public static Queue createQueue(String uniqueId, int numberAttempts, String filename) {
+        return createQueueBuilder().uniqueId(uniqueId).numberAttempt(numberAttempts).location(filename).build();
     }
 
-    public static Queue createQueue(String unique, Status status, Date lastAttempt) {
-        return createQueueBuilder().unique(unique).status(status).lastAttemptTime(lastAttempt).build();
+    public static Queue createQueue(String uniqueId, Status status, Date lastAttempt) {
+        return createQueueBuilder().uniqueId(uniqueId).status(status).lastAttemptTime(lastAttempt).build();
     }
 
     public static void assertQueue(Queue expected, Queue result) {
@@ -50,7 +50,7 @@ public class QueueObjectMother {
 
     private static Queue.Builder createQueueBuilder() {
         return new Queue.Builder()
-                .unique("unique1")
+                .uniqueId("unique1")
                 .numberAttempt(2)
                 .rule(RuleDefault.getRule())
                 .checksum("checksum")

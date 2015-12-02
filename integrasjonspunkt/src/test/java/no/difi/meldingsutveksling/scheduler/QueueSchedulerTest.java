@@ -154,7 +154,7 @@ public class QueueSchedulerTest {
 
     private static Queue createQueue(String uniqueId, Status status) {
         return new Queue.Builder()
-                .unique(uniqueId)
+                .uniqueId(uniqueId)
                 .numberAttempt(0)
                 .rule(RuleDefault.getRule())
                 .status(status)
