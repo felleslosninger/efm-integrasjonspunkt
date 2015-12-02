@@ -155,7 +155,7 @@ public class QueueDao {
                         .uniqueId(map.get("unique_id").toString())
                         .numberAttempt(Integer.parseInt(map.get("numberAttempt").toString()))
                         .rule(map.get("rule").toString())
-                        .status(Status.statusFromString(map.get("status").toString()))
+                        .status(Status.valueOf(map.get("status").toString()))
                         .location(map.get("requestLocation").toString()).lastAttemptTime((Date) map.get("lastAttemptTime"))
                         .checksum(map.get("checksum").toString())
                         .build());

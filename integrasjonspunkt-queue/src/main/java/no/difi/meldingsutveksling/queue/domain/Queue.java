@@ -127,7 +127,7 @@ public class Queue {
         }
 
         public Builder status(String status) {
-            this.status = Status.statusFromString(status);
+            this.status = Status.valueOf(status);
             return this;
         }
 

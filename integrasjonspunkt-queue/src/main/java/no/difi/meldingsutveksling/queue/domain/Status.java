@@ -5,8 +5,4 @@ public enum Status {
     DONE,
     RETRY,
     ERROR;
-
-    public static Status statusFromString(String status) {
-        return Status.valueOf(status);
-    }
 }
