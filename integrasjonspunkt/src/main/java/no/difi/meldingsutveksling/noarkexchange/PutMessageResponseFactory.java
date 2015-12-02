@@ -10,6 +10,18 @@ import no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType;
  */
 public class PutMessageResponseFactory {
 
+    public static PutMessageResponseType createErrorResponse(MessageSender.MessageContextException exception) {
+        PutMessageResponseType response = new PutMessageResponseType();
+        AppReceiptType receipt = new AppReceiptType();
+        receipt.setType("ERROR ");
+        StatusMessageType statusMessageType = new StatusMessageType();
+        statusMessageType.setText(exception.getStatus().getEndUserMessage());
+        statusMessageType.setCode(exception.getStatus().getId());
+        receipt.getMessage().add(statusMessageType);
+        response.setResult(receipt);
+        return response;
+    }
+
     public static PutMessageResponseType createErrorResponse(String errorStatus) {
         PutMessageResponseType response = new PutMessageResponseType();
         AppReceiptType receipt = new AppReceiptType();

@@ -97,7 +97,7 @@ public class MessageSender {
             messageContext = createMessageContext(message);
         } catch (MessageContextException e) {
             log.error(markerFrom(message), e.getStatus().getTechnicalMessage(), e);
-            return createErrorResponse(e.getMessage());
+            return createErrorResponse(e);
         }
 
         eventLog.log(new Event(ProcessState.SIGNATURE_VALIDATED));
