@@ -7,11 +7,6 @@ public enum Status {
     ERROR;
 
     public static Status statusFromString(String status) {
-        for (Status statEnum : Status.values()) {
-            if (statEnum.name().equals(status)) {
-                return statEnum;
-            }
-        }
-        throw new IllegalArgumentException("Queue status not found");
+        return Status.valueOf(status);
     }
 }
