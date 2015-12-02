@@ -41,7 +41,7 @@ public class QueueObjectMother {
     public static void assertQueue(Queue expected, Queue result) {
         assertEquals(result.getRuleName(), expected.getRuleName());
         assertEquals(result.getChecksum(), expected.getChecksum());
-        assertEquals(result.getUnique(), expected.getUnique());
+        assertEquals(result.getUniqueId(), expected.getUniqueId());
         assertEquals(result.getLastAttemptTime().getTime(), expected.getLastAttemptTime().getTime());
         assertEquals(result.getNumberAttempts(), expected.getNumberAttempts());
         assertEquals(result.getStatus(), expected.getStatus());

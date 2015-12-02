@@ -24,7 +24,7 @@ public class Queue {
         this.status = status == null ? Status.NEW : status;
     }
 
-    public String getUnique() {
+    public String getUniqueId() {
         return unique;
     }
 
@@ -46,6 +46,10 @@ public class Queue {
 
     public Status getStatus() {
         return status;
+    }
+
+    public String getStatusName() {
+        return status.name();
     }
 
     public String getFileLocation() {

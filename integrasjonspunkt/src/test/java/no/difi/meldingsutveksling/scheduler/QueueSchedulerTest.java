@@ -54,7 +54,7 @@ public class QueueSchedulerTest {
         PutMessageRequestType requestType = new PutMessageRequestType();
 
         when(queueServiceMock.getNext()).thenReturn(element).thenReturn(null);
-        when(queueServiceMock.getMessage(element.getUnique())).thenReturn(requestType);
+        when(queueServiceMock.getMessage(element.getUniqueId())).thenReturn(requestType);
         when(integrasjonspunktMock.sendMessage(any(PutMessageRequestType.class))).thenReturn(true);
 
         queueScheduler.sendMessage();
@@ -71,7 +71,7 @@ public class QueueSchedulerTest {
 
         queueScheduler.sendMessage();
 
-        verify(queueServiceMock, times(1)).success(element.getUnique());
+        verify(queueServiceMock, times(1)).success(element.getUniqueId());
         verify(queueServiceMock, never()).fail(anyString());
     }
 
@@ -85,7 +85,7 @@ public class QueueSchedulerTest {
         queueScheduler.sendMessage();
 
         verify(queueServiceMock, never()).success(anyString());
-        verify(queueServiceMock, times(1)).fail(element.getUnique());
+        verify(queueServiceMock, times(1)).fail(element.getUniqueId());
     }
 
     @Test
@@ -101,7 +101,7 @@ public class QueueSchedulerTest {
         PutMessageRequestType requestType = new PutMessageRequestType();
 
         when(queueServiceMock.getNext()).thenReturn(element).thenReturn(null);
-        when(queueServiceMock.getMessage(element.getUnique())).thenReturn(requestType);
+        when(queueServiceMock.getMessage(element.getUniqueId())).thenReturn(requestType);
         when(integrasjonspunktMock.sendMessage(any(PutMessageRequestType.class))).thenReturn(true);
 
         queueScheduler.sendMessage();
@@ -135,7 +135,7 @@ public class QueueSchedulerTest {
 
         queueScheduler.sendMessage();
 
-        verify(queueServiceMock, times(1)).success(element.getUnique());
+        verify(queueServiceMock, times(1)).success(element.getUniqueId());
         verify(queueServiceMock, never()).fail(anyString());
     }
 
@@ -149,7 +149,7 @@ public class QueueSchedulerTest {
         queueScheduler.sendMessage();
 
         verify(queueServiceMock, never()).success(anyString());
-        verify(queueServiceMock, times(1)).fail(element.getUnique());
+        verify(queueServiceMock, times(1)).fail(element.getUniqueId());
     }
 
     private static Queue createQueue(String uniqueId, Status status) {

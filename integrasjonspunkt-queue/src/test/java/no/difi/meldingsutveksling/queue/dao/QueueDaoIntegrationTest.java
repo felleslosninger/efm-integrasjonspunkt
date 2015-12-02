@@ -92,7 +92,7 @@ public class QueueDaoIntegrationTest {
 
         Queue actual = queueDao.retrieve("uniqueE2");
 
-        assertEquals(actual.getUnique(), "uniqueE2");
+        assertEquals(actual.getUniqueId(), "uniqueE2");
     }
 
     @Test
@@ -109,7 +109,7 @@ public class QueueDaoIntegrationTest {
 
         assertEquals(1, actual.size());
         assertTrue(stick.getTime() >= actual.get(0).getLastAttemptTime().getTime());
-        assertEquals(uniqueThatStick, actual.get(0).getUnique());
+        assertEquals(uniqueThatStick, actual.get(0).getUniqueId());
     }
 
     @After

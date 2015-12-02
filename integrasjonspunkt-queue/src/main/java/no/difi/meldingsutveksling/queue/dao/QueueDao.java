@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCountCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
@@ -27,32 +30,39 @@ public class QueueDao {
     @Qualifier("queueJDBCTemplate")
     private JdbcTemplate template;
 
+    @Autowired
+    @Qualifier("queueJDBCNamedTemplate")
+    private NamedParameterJdbcTemplate namedTemplate;
+
     public void saveEntry(Queue queue) {
         String sql = "INSERT INTO queue_metadata "
                 + "(unique_id, numberAttempt, rule, status, requestLocation, lastAttemptTime, checksum) "
-                + "VALUES (:unique_id, :numberAttempt, :rule, :status, :requestLocation, :lastAttempt, :checksum)";
+                + "VALUES (:uniqueId, :numberAttempts, :ruleName, :statusName, :fileLocation, :lastAttemptTime, :checksum)";
 
-        template.update(sql, queue.getUnique(), queue.getNumberAttempts(), queue.getRuleName(),
-                queue.getStatus().name(), queue.getFileLocation(), queue.getLastAttemptTime(), queue.getChecksum());
+        SqlParameterSource params = new BeanPropertySqlParameterSource(queue);
+
+        namedTemplate.update(sql, params);
     }
 
     public void updateEntry(Queue queue) {
         String sql = "UPDATE queue_metadata "
-                + "SET numberAttempt = :numberAttempt, "
-                + "rule = :rule, "
-                + "status = :status, "
-                + "requestLocation = :requestLocation, "
+                + "SET numberAttempt = :numberAttempts, "
+                + "rule = :ruleName, "
+                + "status = :statusName, "
+                + "requestLocation = :fileLocation, "
                 + "lastAttemptTime = :lastAttemptTime, "
                 + "checksum = :checksum "
                 + "WHERE unique_id = :uniqueId ";
 
-        template.update(sql, queue.getNumberAttempts(), queue.getRuleName(), queue.getStatus().name(), queue.getFileLocation(), queue.getLastAttemptTime(), queue.getChecksum(), queue.getUnique());
+        SqlParameterSource params = new BeanPropertySqlParameterSource(queue);
+
+        namedTemplate.update(sql, params);
     }
 
     public List<Queue> retrieve(Status status) {
         String sql = "SELECT unique_id, numberAttempt, rule, status, requestLocation, lastAttemptTime, checksum "
                 + "FROM queue_metadata "
-                + "WHERE status = :status ";
+                + "WHERE status = :statusName ";
 
         List<Queue> unfilteredQueue = QueueMapper.map(template.queryForList(sql, status.name()));
         List<Queue> queueList = filterQueue(unfilteredQueue);
@@ -69,15 +79,16 @@ public class QueueDao {
         return new Date(curTimeInMs + (minutes * ONE_MINUTE_IN_MILLIS));
     }
 
-    public void updateStatus(Queue object) {
+    public void updateStatus(Queue queue) {
         String sql = "UPDATE queue_metadata "
-                + "SET status = :status, "
+                + "SET status = :statusName, "
                 + "lastAttemptTime = :lastAttemptTime, "
-                + "numberAttempt = :numberAttempt "
+                + "numberAttempt = :numberAttempts "
                 + "WHERE unique_id = :uniqueId";
 
-        template.update(sql, object.getStatus().name(), object.getLastAttemptTime(), object.getNumberAttempts(),
-                object.getUnique());
+        SqlParameterSource params = new BeanPropertySqlParameterSource(queue);
+
+        namedTemplate.update(sql, params);
     }
 
     protected void removeAll() {

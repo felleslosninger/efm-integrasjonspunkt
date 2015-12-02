@@ -41,17 +41,17 @@ public class QueueScheduler {
             Queue next = queueService.getNext();
             if (next != null) {
                 try {
-                    PutMessageRequestType request = (PutMessageRequestType) queueService.getMessage(next.getUnique());
+                    PutMessageRequestType request = (PutMessageRequestType) queueService.getMessage(next.getUniqueId());
                     boolean success = integrasjonspunkt.sendMessage(request);
-                    applyResultToQueue(next.getUnique(), success);
+                    applyResultToQueue(next.getUniqueId(), success);
                     sendMessage();
                 } catch (IOException e) {
                     log.error(e.getMessage(), e);
                 } catch (IndexOutOfBoundsException e) {
-                    applyResultToQueue(next.getUnique(), false);
+                    applyResultToQueue(next.getUniqueId(), false);
                     log.error("Could not send message.", e.getMessage(), e);
                 } catch (MeldingsUtvekslingRuntimeException e) {
-                    applyResultToQueue(next.getUnique(), false);
+                    applyResultToQueue(next.getUniqueId(), false);
                     log.error("Error in message.", e.getMessage(), e);
                 }
             }
