@@ -5,61 +5,121 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
 import no.difi.meldingsutveksling.services.CertificateException;
 import no.difi.virksert.client.VirksertClientException;
+import org.hamcrest.Description;
+import org.hamcrest.TypeSafeMatcher;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@RunWith(MockitoJUnitRunner.class)
 public class MessageSenderTest {
+    public static final String SENDER_PARTY_NUMBER = "910075918";
+    public static final String RECIEVER_PARTY_NUMBER = "910077473";
     private MessageSender messageSender;
 
-    @Mock IntegrasjonspunktConfig configMock;
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
+
+    @Mock
+    private AdresseregisterService adresseregister;
+
+    @Mock
+    private IntegrasjonspunktConfig config;
+
+    @Mock
+    private IntegrasjonspunktNokkel integrasjonspunktNokkel;
 
     @Before
     public void setUp() {
-        initMocks(this);
-
         messageSender = new MessageSender();
-        IntegrasjonspunktConfig config = mock(IntegrasjonspunktConfig.class);
         messageSender.setConfiguration(config);
-        IntegrasjonspunktNokkel integrasjonspunktNokkel = mock(IntegrasjonspunktNokkel.class);
         messageSender.setKeyInfo(integrasjonspunktNokkel);
-
-    }
-
-    @Test(expected = MessageSender.MessageContextException.class)
-    public void shouldThrowMessageContextExceptionWhenMissingRecipientOrganizationNumber() throws MessageSender.MessageContextException {
-        PutMessageRequestAdapter requestAdapter = mock(PutMessageRequestAdapter.class);
-        when(requestAdapter.getRecieverPartyNumber()).thenReturn(null);
-
-        messageSender.createMessageContext(requestAdapter);
-    }
-
-    @Test(expected = MessageSender.MessageContextException.class)
-    public void shouldThrowMessageContextExceptionWhenMissingRecipientCertificate() throws MessageSender.MessageContextException {
-        PutMessageRequestAdapter requestAdapter = mock(PutMessageRequestAdapter.class);
-        when(requestAdapter.hasRecieverPartyNumber()).thenReturn(true);
-        when(requestAdapter.getRecieverPartyNumber()).thenReturn("123");
-        AdresseregisterService adresseregister = mock(AdresseregisterService.class);
-        when(adresseregister.getCertificate("123")).thenThrow(new CertificateException("hello", new VirksertClientException("hello")));
         messageSender.setAdresseregister(adresseregister);
 
+    }
+
+    @Test
+    public void shouldThrowMessageContextExceptionWhenMissingRecipientOrganizationNumber() throws MessageSender.MessageContextException {
+        expectedException.expect(MessageSender.MessageContextException.class);
+        expectedException.expect(new StatusMatches(Status.MISSING_RECIEVER_ORGANIZATION_NUMBER));
+        PutMessageRequestAdapter requestAdapter = new RequestBuilder().withSender().build();
+
         messageSender.createMessageContext(requestAdapter);
     }
 
-    @Test(expected = MessageSender.MessageContextException.class)
+    @Test
+    public void shouldThrowMessageContextExceptionWhenMissingRecipientCertificate() throws MessageSender.MessageContextException {
+        expectedException.expect(MessageSender.MessageContextException.class);
+        expectedException.expect(new StatusMatches(Status.MISSING_RECIEVER_CERTIFICATE));
+        PutMessageRequestAdapter requestAdapter = new RequestBuilder().withSender().withReciever().build();
+
+        when(adresseregister.getCertificate(RECIEVER_PARTY_NUMBER)).thenThrow(new CertificateException("hello", new VirksertClientException("hello")));
+
+        messageSender.createMessageContext(requestAdapter);
+    }
+
+    @Test
     public void shouldThrowMessageContextExceptionWhenMissingSenderCertificate() throws MessageSender.MessageContextException {
-        PutMessageRequestAdapter requestAdapter = mock(PutMessageRequestAdapter.class);
-        when(requestAdapter.hasRecieverPartyNumber()).thenReturn(true);
-        when(requestAdapter.getSenderPartynumber()).thenReturn("321");
-        AdresseregisterService adresseregisterService = mock(AdresseregisterService.class);
-        when(adresseregisterService.getCertificate("321")).thenThrow(new CertificateException("hello", new VirksertClientException("hello")));
-        messageSender.setAdresseregister(adresseregisterService);
+        expectedException.expect(MessageSender.MessageContextException.class);
+        expectedException.expect(new StatusMatches(Status.MISSING_SENDER_CERTIFICATE));
+        PutMessageRequestAdapter requestAdapter = new RequestBuilder().withSender().withReciever().build();
+
+        when(adresseregister.getCertificate(SENDER_PARTY_NUMBER)).thenThrow(new CertificateException("hello", new VirksertClientException("hello")));
 
         messageSender.createMessageContext(requestAdapter);
     }
 
+    private class RequestBuilder {
+        private PutMessageRequestAdapter requestAdapter;
+
+        private RequestBuilder() {
+            this.requestAdapter = mock(PutMessageRequestAdapter.class);
+        }
+
+        public RequestBuilder withSender() {
+            when(requestAdapter.getSenderPartynumber()).thenReturn(SENDER_PARTY_NUMBER);
+            return this;
+        }
+
+        public RequestBuilder withReciever() {
+            when(requestAdapter.getRecieverPartyNumber()).thenReturn(RECIEVER_PARTY_NUMBER);
+            when(requestAdapter.hasRecieverPartyNumber()).thenReturn(true);
+            return this;
+        }
+
+        public PutMessageRequestAdapter build() {
+            return requestAdapter;
+        }
+
+    }
+
+    private class StatusMatches extends TypeSafeMatcher<MessageSender.MessageContextException> {
+        private final Status expectedStatus;
+
+        public StatusMatches(Status expectedStatus) {
+            this.expectedStatus = expectedStatus;
+        }
+
+        @Override
+        protected boolean matchesSafely(MessageSender.MessageContextException e) {
+            return e.getStatus() == expectedStatus;
+        }
+
+        @Override
+        public void describeTo(Description description) {
+            description.appendText("with status ").appendValue(expectedStatus);
+        }
+
+        @Override
+        public void describeMismatchSafely(MessageSender.MessageContextException exception, Description mismatchDescription) {
+            mismatchDescription.appendText("was ").appendValue(exception.getStatus());
+        }
+    }
 }

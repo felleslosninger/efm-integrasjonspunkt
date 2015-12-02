@@ -208,6 +208,10 @@ public class MessageSender {
             super(exception);
             this.status = status;
         }
+
+        public Status getStatus() {
+            return status;
+        }
     }
 
 }
