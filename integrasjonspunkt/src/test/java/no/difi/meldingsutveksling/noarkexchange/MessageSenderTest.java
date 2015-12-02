@@ -42,7 +42,6 @@ public class MessageSenderTest {
         messageSender.setConfiguration(config);
         messageSender.setKeyInfo(integrasjonspunktNokkel);
         messageSender.setAdresseregister(adresseregister);
-
     }
 
     @Test

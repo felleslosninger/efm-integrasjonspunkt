@@ -27,6 +27,7 @@ import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
+import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createErrorResponse;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createOkResponse;
 
@@ -95,7 +96,7 @@ public class MessageSender {
         try {
             messageContext = createMessageContext(message);
         } catch (MessageContextException e) {
-            log.error(e.getMessage());
+            log.error(markerFrom(message), e.getStatus().getTechnicalMessage(), e);
             return createErrorResponse(e.getMessage());
         }
 
