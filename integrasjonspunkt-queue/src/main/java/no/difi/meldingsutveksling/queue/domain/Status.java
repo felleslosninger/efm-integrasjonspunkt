@@ -4,5 +4,5 @@ public enum Status {
     NEW,
     DONE,
     RETRY,
-    ERROR;
+    ERROR
 }

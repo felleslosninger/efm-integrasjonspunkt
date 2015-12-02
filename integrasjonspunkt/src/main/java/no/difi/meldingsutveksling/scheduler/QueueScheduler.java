@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.queue.domain.Queue;
 import no.difi.meldingsutveksling.queue.domain.Status;
+import no.difi.meldingsutveksling.queue.exception.QueueException;
 import no.difi.meldingsutveksling.queue.service.QueueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +54,9 @@ public class QueueScheduler {
                 } catch (MeldingsUtvekslingRuntimeException e) {
                     applyResultToQueue(next.getUniqueId(), false);
                     log.error("Error in message.", e.getMessage(), e);
+                } catch (QueueException e) {
+                    applyResultToQueue(next.getUniqueId(), false);
+                    log.error("Internal error in queue.", e.getMessage(), e);
                 }
             }
         }

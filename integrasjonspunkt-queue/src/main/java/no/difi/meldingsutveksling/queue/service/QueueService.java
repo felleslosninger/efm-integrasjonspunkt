@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.queue.service;
 import no.difi.meldingsutveksling.queue.dao.QueueDao;
 import no.difi.meldingsutveksling.queue.domain.Queue;
 import no.difi.meldingsutveksling.queue.domain.Status;
+import no.difi.meldingsutveksling.queue.exception.QueueException;
 import no.difi.meldingsutveksling.queue.messageutil.QueueMessageFile;
 import no.difi.meldingsutveksling.queue.rule.RuleDefault;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,26 +11,16 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
 
-import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
-
 @Service
 @ManagedResource
 public class QueueService {
-    private static final String BASE64_KEY = "ABEiM0RVZneImaq7zN3u/w==";
-    private static final String BASE64_IV = "AAECAwQFBgcICQoLDA0ODw==";
-
     private final QueueDao queueDao;
 
     @Autowired
@@ -68,10 +59,6 @@ public class QueueService {
         Queue retrieve = queueDao.retrieve(uniqueId);
 
         return QueueMessageFile.loadMessageFromFile(retrieve);
-
-//        byte[] bytes = decryptMessage(String.valueOf(buffer));
-//
-//        return Arrays.toString(bytes);
     }
 
     /**
@@ -80,13 +67,9 @@ public class QueueService {
      * @param request Request to be put on queue
      */
     public void put(Object request) throws IOException {
-
-
-//        byte[] crypted = encryptMessage(request);
         String uniqueFilename = QueueMessageFile.generateUniqueFileName();
         String filenameWithPath = QueueMessageFile.ammendPath(uniqueFilename);
 
-//        saveFileOnDisk(crypted, filenameWithPath);
         QueueMessageFile.saveFileOnDisk(request, filenameWithPath);
 
         Queue newEntry = new Queue.Builder()
@@ -154,27 +137,6 @@ public class QueueService {
         return builtObject.getStatus();
     }
 
-    private byte[] encryptMessage(String request) {
-        try {
-            return AES.encrypt(parseBase64Binary(BASE64_KEY), parseBase64Binary(BASE64_IV), parseBase64Binary(request));
-        } catch (NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException | InvalidAlgorithmParameterException e) {
-            //TODO: Better logging
-            e.printStackTrace();
-        }
-        return new byte[0];
-    }
-
-    private byte[] decryptMessage(String request) {
-        try {
-            return AES.decrypt(parseBase64Binary(BASE64_KEY), parseBase64Binary(BASE64_IV), parseBase64Binary(request));
-
-        } catch (NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException | InvalidAlgorithmParameterException e) {
-            //TODO: Better logging
-            e.printStackTrace();
-        }
-        return new byte[0];
-    }
-
     private String generateChecksum(String filenameWithPath) {
         StringBuilder sb = new StringBuilder("");
         try {
@@ -193,8 +155,7 @@ public class QueueService {
             fileInput.close();
 
         } catch (NoSuchAlgorithmException | IOException e) {
-            //TODO: Better logging
-            e.printStackTrace();
+            throw new QueueException("Error while creating checksum", e);
         }
         return sb.toString();
     }
