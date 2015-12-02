@@ -13,6 +13,13 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <springVersion>4.1.2.RELEASE</springVersion>
+    <spring.version>4.1.7.RELEASE</spring.version>
+    <spring.framework.version>2.2.3.RELEASE</spring.framework.version>
+    <spring.boot.version>1.3.0.RELEASE</spring.boot.version>
+    <hsql.version>2.3.3</hsql.version>
+    <commons.lang.version>20030203.000129</commons.lang.version>
+    <apache.commons.version>10.0-b28</apache.commons.version>
+    <xstream.version>1.4.8</xstream.version>
     <junit.version>4.12</junit.version>
     <mockito.version>1.9.5</mockito.version>
   </properties>
@@ -38,6 +45,48 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
+        <groupId>org.springframework.ws</groupId>
+        <artifactId>spring-ws-core</artifactId>
+        <version>${spring.framework.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter</artifactId>
+        <version>${spring.boot.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-jdbc</artifactId>
+        <version>${spring.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.hsqldb</groupId>
+        <artifactId>hsqldb</artifactId>
+        <version>${hsql.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-lang</groupId>
+        <artifactId>commons-lang</artifactId>
+        <version>${commons.lang.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.glassfish.external</groupId>
+        <artifactId>apache-commons</artifactId>
+        <version>${apache.commons.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.thoughtworks.xstream</groupId>
+        <artifactId>xstream</artifactId>
+        <version>${xstream.version}</version>
+      </dependency>
+
+      <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>${junit.version}</version>
@@ -48,6 +97,20 @@
         <groupId>org.mockito</groupId>
         <artifactId>mockito-all</artifactId>
         <version>${mockito.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-test</artifactId>
+        <version>${spring.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-test</artifactId>
+        <version>${spring.boot.version}</version>
         <scope>test</scope>
       </dependency>
     </dependencies>
