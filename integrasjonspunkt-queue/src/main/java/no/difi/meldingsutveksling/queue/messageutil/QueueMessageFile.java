@@ -12,17 +12,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.nio.file.FileSystems;
 
 public class QueueMessageFile {
     public static final String FILE_PATH = System.getProperty("user.dir") + "/queue/";
-    public static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("windows");
 
     public static boolean removeFile(String filename) {
         File file = new File(filename);
         return file.delete();
     }
 
-    public static Object retrieveFileFromDisk(Queue queueElement) throws IOException {
+    public static Object loadMessageFromFile(Queue queueElement) throws IOException {
         InputStream is = new FileInputStream(queueElement.getFileLocation());
         return new XStream(new DomDriver()).fromXML(is);
     }
@@ -38,12 +38,7 @@ public class QueueMessageFile {
     }
 
     public static String ammendPath(String filename) {
-        String fullFilename = FILE_PATH + filename + ".queue";
-
-        if (IS_WINDOWS) {
-            return fullFilename.replace("/", "\\");
-        }
-        return fullFilename;
+        return FileSystems.getDefault().getPath(FILE_PATH, filename + ".queue").toString();
     }
 
     public static String generateUniqueFileName() {

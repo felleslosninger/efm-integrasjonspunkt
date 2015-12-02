@@ -67,7 +67,7 @@ public class QueueService {
     public Object getMessage(String uniqueId) throws IOException {
         Queue retrieve = queueDao.retrieve(uniqueId);
 
-        return QueueMessageFile.retrieveFileFromDisk(retrieve);
+        return QueueMessageFile.loadMessageFromFile(retrieve);
 
 //        byte[] bytes = decryptMessage(String.valueOf(buffer));
 //

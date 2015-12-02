@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.queue.service;
 import no.difi.meldingsutveksling.queue.dao.QueueDao;
 import no.difi.meldingsutveksling.queue.domain.Queue;
 import no.difi.meldingsutveksling.queue.domain.Status;
-import no.difi.meldingsutveksling.queue.messageutil.QueueMessageFile;
 import no.difi.meldingsutveksling.queue.rule.RuleDefault;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -15,6 +14,7 @@ import org.mockito.Mock;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.util.Date;
 
 import static java.util.Arrays.asList;
@@ -227,10 +227,7 @@ public class QueueServiceTest {
 
     @AfterClass
     public static void cleanUp() {
-        String filePath = FILE_PATH;
-        if (QueueMessageFile.IS_WINDOWS) {
-            filePath = filePath.replace("/", "\\");
-        }
+        String filePath = FileSystems.getDefault().getPath(FILE_PATH).toString();
 
         File downloadFile = new File(filePath);
 
