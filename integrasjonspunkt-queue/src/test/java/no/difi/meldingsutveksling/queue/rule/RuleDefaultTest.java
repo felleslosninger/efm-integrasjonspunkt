@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.queue.rule;
 
+import no.difi.meldingsutveksling.queue.exception.RuleOutOfBoundsException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -8,21 +9,17 @@ import static org.junit.Assert.assertEquals;
 public class RuleDefaultTest {
     private Rule ruleDefault;
 
-    private static int FIRST_ATTEMPT = 1;
-    private static int SECOND_ATTEMPT = 2;
-    private static int THIRD_ATTEMPT = 3;
-
     @Before
     public void setUp() {
         ruleDefault = new RuleDefault();
     }
 
-    @Test(expected = IndexOutOfBoundsException.class)
+    @Test(expected = RuleOutOfBoundsException.class)
     public void shouldFailWithQueueExceptionWhenAttemptLowerThan0() {
         ruleDefault.getMinutesToNextAttempt(-1);
     }
 
-    @Test(expected = IndexOutOfBoundsException.class)
+    @Test(expected = RuleOutOfBoundsException.class)
     public void shouldFailWithQueueExceptionWhenAttemptOverMax() {
         ruleDefault.getMinutesToNextAttempt(4);
     }
@@ -36,6 +33,7 @@ public class RuleDefaultTest {
 
     @Test
     public void shouldReturnFirstAttemptMinutesWhenFirstAttempt() {
+        int FIRST_ATTEMPT = 1;
         int actual = ruleDefault.getMinutesToNextAttempt(FIRST_ATTEMPT);
 
         assertEquals(RuleDefault.Attempt.FIRST.getDelayMinutes(), actual);
@@ -43,6 +41,7 @@ public class RuleDefaultTest {
 
     @Test
     public void shouldReturnSecondAttemptMinutesWhenSecondAttempt() {
+        int SECOND_ATTEMPT = 2;
         int actual = ruleDefault.getMinutesToNextAttempt(SECOND_ATTEMPT);
 
         assertEquals(RuleDefault.Attempt.SECOND.getDelayMinutes(), actual);
@@ -50,6 +49,7 @@ public class RuleDefaultTest {
 
     @Test
     public void shouldReturnThirdAttemptMinutesWhenThirdAttempt() {
+        int THIRD_ATTEMPT = 3;
         int actual = ruleDefault.getMinutesToNextAttempt(THIRD_ATTEMPT);
 
         assertEquals(RuleDefault.Attempt.THIRD.getDelayMinutes(), actual);

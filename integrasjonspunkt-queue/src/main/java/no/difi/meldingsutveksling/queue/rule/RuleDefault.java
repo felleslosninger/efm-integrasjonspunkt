@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.queue.rule;
 
+import no.difi.meldingsutveksling.queue.exception.RuleOutOfBoundsException;
+
 public class RuleDefault implements Rule {
     public static Rule getRule() {
         return new RuleDefault();
@@ -12,7 +14,7 @@ public class RuleDefault implements Rule {
 
     @Override
     public int getMinutesToNextAttempt(int attempt) {
-        return Attempt.getInterval(attempt);
+        return Attempt.getTimeForAttempt(attempt);
     }
 
     protected enum Attempt {
@@ -33,13 +35,13 @@ public class RuleDefault implements Rule {
             return delayMinutes;
         }
 
-        public static int getInterval(int attempt) {
+        private static int getTimeForAttempt(int attempt) {
             for (Attempt trials : Attempt.values()) {
                 if (trials.attempt == attempt) {
                     return trials.delayMinutes;
                 }
             }
-            throw new IndexOutOfBoundsException();
+            throw new RuleOutOfBoundsException();
         }
 
         private static class Constants {
