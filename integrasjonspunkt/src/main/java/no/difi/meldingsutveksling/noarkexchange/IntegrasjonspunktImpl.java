@@ -14,7 +14,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageRespo
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.SOAPport;
-import no.difi.meldingsutveksling.queue.service.QueueService;
+import no.difi.meldingsutveksling.queue.service.Queue;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
 import org.jboss.logging.MDC;
 import org.slf4j.Logger;
@@ -59,7 +59,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
     private NoarkClient mshClient;
 
     @Autowired
-    private QueueService queueService;
+    private Queue queue;
 
     @Autowired
     IntegrasjonspunktConfig configuration;
@@ -102,7 +102,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
         if (configuration.isQueueEnabled()) {
             try {
-                queueService.put(request);
+                queue.put(request);
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
             }

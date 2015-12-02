@@ -5,7 +5,7 @@ import no.difi.meldingsutveksling.queue.rule.RuleDefault;
 
 import java.util.Date;
 
-public class Queue {
+public class QueueElement {
     private String uniqueId;
     private int numberAttempt;
     private Rule rule;
@@ -14,7 +14,7 @@ public class Queue {
     private String checksum;
     private Status status;
 
-    private Queue(String uniqueId, int numberAttempt, Rule rule, Date lastAttemptTime, String location, String checksum, Status status) {
+    private QueueElement(String uniqueId, int numberAttempt, Rule rule, Date lastAttemptTime, String location, String checksum, Status status) {
         this.uniqueId = uniqueId;
         this.numberAttempt = numberAttempt;
         this.rule = rule == null ? RuleDefault.getRule() : rule;
@@ -131,8 +131,8 @@ public class Queue {
             return this;
         }
 
-        public Queue build() {
-            return new Queue(uniqueId, numberAttempt, rule, lastAttemptTime, location, checksum, status);
+        public QueueElement build() {
+            return new QueueElement(uniqueId, numberAttempt, rule, lastAttemptTime, location, checksum, status);
         }
     }
 

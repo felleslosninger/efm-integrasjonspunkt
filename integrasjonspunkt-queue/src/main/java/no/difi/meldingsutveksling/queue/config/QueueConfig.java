@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.queue.config;
 
 import no.difi.meldingsutveksling.queue.dao.QueueDao;
-import no.difi.meldingsutveksling.queue.service.QueueService;
+import no.difi.meldingsutveksling.queue.service.Queue;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -17,8 +17,8 @@ import javax.sql.DataSource;
 @Configuration
 public class QueueConfig {
     @Bean
-    public QueueService queueService() {
-        return new QueueService(queueDao());
+    public Queue queueService() {
+        return new Queue(queueDao());
     }
 
     @Bean

@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.config;
 
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.queue.dao.QueueDao;
-import no.difi.meldingsutveksling.queue.service.QueueService;
+import no.difi.meldingsutveksling.queue.service.Queue;
 import no.difi.meldingsutveksling.scheduler.QueueScheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -19,7 +19,7 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public QueueService queueService() {
-        return new QueueService(new QueueDao());
+    public Queue queueService() {
+        return new Queue(new QueueDao());
     }
 }

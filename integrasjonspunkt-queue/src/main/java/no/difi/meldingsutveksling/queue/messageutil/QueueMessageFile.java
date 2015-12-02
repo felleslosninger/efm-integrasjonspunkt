@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.queue.messageutil;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
-import no.difi.meldingsutveksling.queue.domain.Queue;
+import no.difi.meldingsutveksling.queue.domain.QueueElement;
 import org.apache.commons.lang.RandomStringUtils;
 
 import java.io.BufferedWriter;
@@ -22,7 +22,7 @@ public class QueueMessageFile {
         return file.delete();
     }
 
-    public static Object loadMessageFromFile(Queue queueElement) throws IOException {
+    public static Object loadMessageFromFile(QueueElement queueElement) throws IOException {
         InputStream is = new FileInputStream(queueElement.getFileLocation());
         return new XStream(new DomDriver()).fromXML(is);
     }

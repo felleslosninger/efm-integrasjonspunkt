@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.queue.dao;
 
-import no.difi.meldingsutveksling.queue.domain.Queue;
+import no.difi.meldingsutveksling.queue.domain.QueueElement;
 import no.difi.meldingsutveksling.queue.domain.Status;
 import no.difi.meldingsutveksling.queue.rule.Rule;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,17 +36,17 @@ public class QueueDao {
     @Qualifier("queueJDBCNamedTemplate")
     private NamedParameterJdbcTemplate namedTemplate;
 
-    public void saveEntry(Queue queue) {
+    public void saveEntry(QueueElement queueElement) {
         String sql = "INSERT INTO queue_metadata "
                 + "(unique_id, numberAttempt, rule, status, requestLocation, lastAttemptTime, checksum) "
                 + "VALUES (:uniqueId, :numberAttempts, :ruleName, :statusName, :fileLocation, :lastAttemptTime, :checksum)";
 
-        SqlParameterSource params = new BeanPropertySqlParameterSource(queue);
+        SqlParameterSource params = new BeanPropertySqlParameterSource(queueElement);
 
         namedTemplate.update(sql, params);
     }
 
-    public void updateEntry(Queue queue) {
+    public void updateEntry(QueueElement queueElement) {
         String sql = "UPDATE queue_metadata "
                 + "SET numberAttempt = :numberAttempts, "
                 + "rule = :ruleName, "
@@ -56,22 +56,22 @@ public class QueueDao {
                 + "checksum = :checksum "
                 + "WHERE unique_id = :uniqueId ";
 
-        SqlParameterSource params = new BeanPropertySqlParameterSource(queue);
+        SqlParameterSource params = new BeanPropertySqlParameterSource(queueElement);
 
         namedTemplate.update(sql, params);
     }
 
-    public List<Queue> retrieve(Status status) {
+    public List<QueueElement> retrieve(Status status) {
         String sql = "SELECT unique_id, numberAttempt, rule, status, requestLocation, lastAttemptTime, checksum "
                 + "FROM queue_metadata "
                 + "WHERE status = :statusName ";
 
-        List<Queue> unfilteredQueue = QueueMapper.map(template.queryForList(sql, status.name()));
-        List<Queue> queueList = filterQueue(unfilteredQueue);
+        List<QueueElement> unfilteredQueue = QueueMapper.map(template.queryForList(sql, status.name()));
+        List<QueueElement> queueElements = filterQueue(unfilteredQueue);
 
-        sortQueue(queueList);
+        sortQueue(queueElements);
 
-        return queueList;
+        return queueElements;
     }
 
     public static Date addMinutesToDate(Date beforeTime, int minutes) {
@@ -81,14 +81,14 @@ public class QueueDao {
         return new Date(curTimeInMs + (minutes * ONE_MINUTE_IN_MILLIS));
     }
 
-    public void updateStatus(Queue queue) {
+    public void updateStatus(QueueElement queueElement) {
         String sql = "UPDATE queue_metadata "
                 + "SET status = :statusName, "
                 + "lastAttemptTime = :lastAttemptTime, "
                 + "numberAttempt = :numberAttempts "
                 + "WHERE unique_id = :uniqueId";
 
-        SqlParameterSource params = new BeanPropertySqlParameterSource(queue);
+        SqlParameterSource params = new BeanPropertySqlParameterSource(queueElement);
 
         namedTemplate.update(sql, params);
     }
@@ -99,44 +99,44 @@ public class QueueDao {
         template.execute(sql);
     }
 
-    private void sortQueue(List<Queue> queueList) {
-        Collections.sort(queueList, new Comparator<Queue>() {
-            public int compare(Queue o1, Queue o2) {
+    private void sortQueue(List<QueueElement> queueElements) {
+        Collections.sort(queueElements, new Comparator<QueueElement>() {
+            public int compare(QueueElement o1, QueueElement o2) {
                 return o1.getLastAttemptTime().compareTo(o2.getLastAttemptTime());
             }
         });
     }
 
-    private List<Queue> filterQueue(List<Queue> queueList) {
-        List<Queue> queueToReturn = new ArrayList<>();
+    private List<QueueElement> filterQueue(List<QueueElement> queueElements) {
+        List<QueueElement> queueToReturn = new ArrayList<>();
 
         Date now = new Date();
-        for (Queue queue : queueList) {
-            int minDelay = queue.getRule().getMinutesToNextAttempt(queue.getNumberAttempts());
-            Date lastAttempt = queue.getLastAttemptTime();
+        for (QueueElement queueElement : queueElements) {
+            int minDelay = queueElement.getRule().getMinutesToNextAttempt(queueElement.getNumberAttempts());
+            Date lastAttempt = queueElement.getLastAttemptTime();
             Date newAttemptAfter = addMinutesToDate(lastAttempt, minDelay);
 
             if (now.getTime() > newAttemptAfter.getTime()) {
-                queueToReturn.add(queue);
+                queueToReturn.add(queueElement);
             }
         }
 
         return queueToReturn;
     }
 
-    public Queue retrieve(String uniqueId) {
+    public QueueElement retrieve(String uniqueId) {
         String sql = "SELECT unique_id, numberAttempt, rule, status, requestLocation, lastAttemptTime, checksum "
                 + "FROM queue_metadata "
                 + "WHERE unique_id = :uniqueId ";
 
-        List<Queue> queue = QueueMapper.map(template.queryForList(sql, uniqueId));
-        return queue.get(0);
+        List<QueueElement> queueElement = QueueMapper.map(template.queryForList(sql, uniqueId));
+        return queueElement.get(0);
     }
 
-    private static final class QueueMapper implements RowMapper<Queue> {
+    private static final class QueueMapper implements RowMapper<QueueElement> {
 
-        public Queue mapRow(ResultSet rs, int rowNum) throws SQLException {
-            return new Queue.Builder()
+        public QueueElement mapRow(ResultSet rs, int rowNum) throws SQLException {
+            return new QueueElement.Builder()
                     .uniqueId(rs.getString("unique_id"))
                     .numberAttempt(rs.getInt("numberAttempt"))
                     .rule((Rule) rs.getObject("rule"))
@@ -147,20 +147,13 @@ public class QueueDao {
                     .build();
         }
 
-        public static List<Queue> map(List<Map<String, Object>> maps) {
-            ArrayList<Queue> queues = new ArrayList<>();
+        public static List<QueueElement> map(List<Map<String, Object>> maps) {
+            ArrayList<QueueElement> queueElements = new ArrayList<>();
 
             for (Map map : maps) {
-                queues.add(new Queue.Builder()
-                        .uniqueId(map.get("unique_id").toString())
-                        .numberAttempt(Integer.parseInt(map.get("numberAttempt").toString()))
-                        .rule(map.get("rule").toString())
-                        .status(Status.valueOf(map.get("status").toString()))
-                        .location(map.get("requestLocation").toString()).lastAttemptTime((Date) map.get("lastAttemptTime"))
-                        .checksum(map.get("checksum").toString())
-                        .build());
+                queueElements.add(new QueueElement.Builder().uniqueId(map.get("unique_id").toString()).numberAttempt(Integer.parseInt(map.get("numberAttempt").toString())).rule(map.get("rule").toString()).status(Status.valueOf(map.get("status").toString())).location(map.get("requestLocation").toString()).lastAttemptTime((Date) map.get("lastAttemptTime")).checksum(map.get("checksum").toString()).build());
             }
-            return queues;
+            return queueElements;
         }
     }
 

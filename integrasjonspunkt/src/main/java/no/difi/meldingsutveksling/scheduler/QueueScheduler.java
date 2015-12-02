@@ -4,10 +4,10 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-import no.difi.meldingsutveksling.queue.domain.Queue;
+import no.difi.meldingsutveksling.queue.domain.QueueElement;
 import no.difi.meldingsutveksling.queue.domain.Status;
 import no.difi.meldingsutveksling.queue.exception.QueueException;
-import no.difi.meldingsutveksling.queue.service.QueueService;
+import no.difi.meldingsutveksling.queue.service.Queue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
@@ -22,7 +22,7 @@ import java.io.IOException;
 @EnableScheduling
 public class QueueScheduler {
     public static final String FIRE_EVERY_1_MINUTE = "0 0/1 * * * ?";
-    private final QueueService queueService;
+    private final Queue queue;
     private final IntegrasjonspunktImpl integrasjonspunkt;
 
     private IntegrasjonspunktConfig integrasjonspunktConfig;
@@ -30,8 +30,8 @@ public class QueueScheduler {
     private static final Logger log = LoggerFactory.getLogger(QueueScheduler.class);
 
     @Autowired
-    public QueueScheduler(QueueService queueService, IntegrasjonspunktImpl integrasjonspunkt, IntegrasjonspunktConfig integrasjonspunktConfig) {
-        this.queueService = queueService;
+    public QueueScheduler(Queue queue, IntegrasjonspunktImpl integrasjonspunkt, IntegrasjonspunktConfig integrasjonspunktConfig) {
+        this.queue = queue;
         this.integrasjonspunkt = integrasjonspunkt;
         this.integrasjonspunktConfig = integrasjonspunktConfig;
     }
@@ -39,10 +39,10 @@ public class QueueScheduler {
     @Scheduled(cron = FIRE_EVERY_1_MINUTE)
     public void sendMessage() {
         if (integrasjonspunktConfig.isQueueEnabled()) {
-            Queue next = queueService.getNext();
+            QueueElement next = queue.getNext();
             if (next != null) {
                 try {
-                    PutMessageRequestType request = (PutMessageRequestType) queueService.getMessage(next.getUniqueId());
+                    PutMessageRequestType request = (PutMessageRequestType) queue.getMessage(next.getUniqueId());
                     boolean success = integrasjonspunkt.sendMessage(request);
                     applyResultToQueue(next.getUniqueId(), success);
                     sendMessage();
@@ -64,10 +64,10 @@ public class QueueScheduler {
 
     private void applyResultToQueue(String uniqueId, boolean result) {
         if (result) {
-            queueService.success(uniqueId);
+            queue.success(uniqueId);
             log.info("Successfully sent message.");
         } else {
-            Status status = queueService.fail(uniqueId);
+            Status status = queue.fail(uniqueId);
 
             if (status == Status.RETRY) {
                 log.warn("Message failed send. Will try later.");

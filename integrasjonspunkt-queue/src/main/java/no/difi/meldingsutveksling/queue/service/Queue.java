@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.queue.service;
 
 import no.difi.meldingsutveksling.queue.dao.QueueDao;
-import no.difi.meldingsutveksling.queue.domain.Queue;
+import no.difi.meldingsutveksling.queue.domain.QueueElement;
 import no.difi.meldingsutveksling.queue.domain.Status;
 import no.difi.meldingsutveksling.queue.exception.QueueException;
 import no.difi.meldingsutveksling.queue.messageutil.QueueMessageFile;
@@ -9,7 +9,6 @@ import no.difi.meldingsutveksling.queue.rule.RuleDefault;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
-import org.springframework.stereotype.Service;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -18,13 +17,12 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
 
-@Service
 @ManagedResource
-public class QueueService {
+public class Queue {
     private final QueueDao queueDao;
 
     @Autowired
-    public QueueService(QueueDao queueDao) {
+    public Queue(QueueDao queueDao) {
         this.queueDao = queueDao;
     }
 
@@ -33,13 +31,13 @@ public class QueueService {
      *
      * @return Metadata for the top element to process
      */
-    public Queue getNext() {
-        List<Queue> retrieveRetry = queueDao.retrieve(Status.RETRY);
+    public QueueElement getNext() {
+        List<QueueElement> retrieveRetry = queueDao.retrieve(Status.RETRY);
         if  (retrieveRetry.size() > 0) {
             return retrieveRetry.get(0);
         }
         else {
-            List<Queue> retrieveNew = queueDao.retrieve(Status.NEW);
+            List<QueueElement> retrieveNew = queueDao.retrieve(Status.NEW);
             if (retrieveNew.size() > 0) {
                 return retrieveNew.get(0);
             }
@@ -56,7 +54,7 @@ public class QueueService {
      * @return the original request ready to send
      */
     public Object getMessage(String uniqueId) throws IOException {
-        Queue retrieve = queueDao.retrieve(uniqueId);
+        QueueElement retrieve = queueDao.retrieve(uniqueId);
 
         return QueueMessageFile.loadMessageFromFile(retrieve);
     }
@@ -72,7 +70,7 @@ public class QueueService {
 
         QueueMessageFile.saveFileOnDisk(request, filenameWithPath);
 
-        Queue newEntry = new Queue.Builder()
+        QueueElement newEntry = new QueueElement.Builder()
                 .uniqueId(uniqueFilename)
                 .location(filenameWithPath)
                 .status(Status.NEW)
@@ -92,12 +90,12 @@ public class QueueService {
      * @param uniqueId unique id for the queue element
      */
     public void success(String uniqueId) {
-        Queue queue = queueDao.retrieve(uniqueId);
-        QueueMessageFile.removeFile(queue.getFileLocation());
+        QueueElement queueElement = queueDao.retrieve(uniqueId);
+        QueueMessageFile.removeFile(queueElement.getFileLocation());
 
-        int numberAttempts = queue.getNumberAttempts();
+        int numberAttempts = queueElement.getNumberAttempts();
 
-        Queue updatedQueue = queue.getOpenObjectBuilder()
+        QueueElement updatedQueue = queueElement.getOpenObjectBuilder()
                 .status(Status.DONE)
                 .lastAttemptTime(new Date())
                 .location("")
@@ -116,22 +114,22 @@ public class QueueService {
      * @return Status.RETRY if it should be tried again at a later time, Status.ERROR if it is a permanent error.
      */
     public Status fail(String uniqueId) {
-        Queue queue = queueDao.retrieve(uniqueId);
+        QueueElement queueElement = queueDao.retrieve(uniqueId);
 
-        int numberAttempts = queue.getNumberAttempts();
-        Queue.Builder openObject = queue.getOpenObjectBuilder()
+        int numberAttempts = queueElement.getNumberAttempts();
+        QueueElement.Builder openObject = queueElement.getOpenObjectBuilder()
                 .numberAttempt(++numberAttempts)
                 .lastAttemptTime(new Date());
 
-        if (numberAttempts > queue.getRule().getMaxAttempt()) {
+        if (numberAttempts > queueElement.getRule().getMaxAttempt()) {
             openObject.status(Status.ERROR);
-            QueueMessageFile.removeFile(queue.getFileLocation());
+            QueueMessageFile.removeFile(queueElement.getFileLocation());
         }
         else {
             openObject.status(Status.RETRY);
         }
 
-        Queue builtObject = openObject.build();
+        QueueElement builtObject = openObject.build();
         queueDao.updateEntry(builtObject);
 
         return builtObject.getStatus();
