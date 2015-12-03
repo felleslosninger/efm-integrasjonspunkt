@@ -45,8 +45,8 @@ public class MessageSenderTest {
     }
 
     @Test
-    public void shouldThrowMessageContextExceptionWhenMissingRecipientOrganizationNumber() throws MessageSender.MessageContextException {
-        expectedException.expect(MessageSender.MessageContextException.class);
+    public void shouldThrowMessageContextExceptionWhenMissingRecipientOrganizationNumber() throws MessageContextException {
+        expectedException.expect(MessageContextException.class);
         expectedException.expect(new StatusMatches(Status.MISSING_RECIEVER_ORGANIZATION_NUMBER));
         PutMessageRequestAdapter requestAdapter = new RequestBuilder().withSender().build();
 
@@ -54,8 +54,8 @@ public class MessageSenderTest {
     }
 
     @Test
-    public void shouldThrowMessageContextExceptionWhenMissingRecipientCertificate() throws MessageSender.MessageContextException {
-        expectedException.expect(MessageSender.MessageContextException.class);
+    public void shouldThrowMessageContextExceptionWhenMissingRecipientCertificate() throws MessageContextException {
+        expectedException.expect(MessageContextException.class);
         expectedException.expect(new StatusMatches(Status.MISSING_RECIEVER_CERTIFICATE));
         PutMessageRequestAdapter requestAdapter = new RequestBuilder().withSender().withReciever().build();
 
@@ -65,8 +65,8 @@ public class MessageSenderTest {
     }
 
     @Test
-    public void shouldThrowMessageContextExceptionWhenMissingSenderCertificate() throws MessageSender.MessageContextException {
-        expectedException.expect(MessageSender.MessageContextException.class);
+    public void shouldThrowMessageContextExceptionWhenMissingSenderCertificate() throws MessageContextException {
+        expectedException.expect(MessageContextException.class);
         expectedException.expect(new StatusMatches(Status.MISSING_SENDER_CERTIFICATE));
         PutMessageRequestAdapter requestAdapter = new RequestBuilder().withSender().withReciever().build();
 
@@ -99,7 +99,7 @@ public class MessageSenderTest {
 
     }
 
-    private class StatusMatches extends TypeSafeMatcher<MessageSender.MessageContextException> {
+    private class StatusMatches extends TypeSafeMatcher<MessageContextException> {
         private final Status expectedStatus;
 
         public StatusMatches(Status expectedStatus) {
@@ -107,7 +107,7 @@ public class MessageSenderTest {
         }
 
         @Override
-        protected boolean matchesSafely(MessageSender.MessageContextException e) {
+        protected boolean matchesSafely(MessageContextException e) {
             return e.getStatus() == expectedStatus;
         }
 
@@ -117,7 +117,7 @@ public class MessageSenderTest {
         }
 
         @Override
-        public void describeMismatchSafely(MessageSender.MessageContextException exception, Description mismatchDescription) {
+        public void describeMismatchSafely(MessageContextException exception, Description mismatchDescription) {
             mismatchDescription.appendText("was ").appendValue(exception.getStatus());
         }
     }

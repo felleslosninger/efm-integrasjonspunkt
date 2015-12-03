@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
@@ -105,10 +104,10 @@ public class MessageSender {
         no.difi.meldingsutveksling.domain.sbdh.Document sbd;
         try {
             sbd = standardBusinessDocumentFactory.create(messageRequest, messageContext.getAvsender(), messageContext.getMottaker());
-        } catch (IOException e) {
+        } catch (MessageException e) {
             eventLog.log(new Event().setJpId(messageContext.getJournalPostId()).setArkiveConversationId(message.getConversationId()).setProcessStates(ProcessState.MESSAGE_SEND_FAIL));
-            log.error("IO Error on Asic-e or sbd creation ", e);
-            return createErrorResponse("Unable to create standard business document");
+            log.error(markerFrom(message), e.getStatus().getTechnicalMessage(), e);
+            return createErrorResponse(e);
 
         }
         Scope item = sbd.getStandardBusinessDocumentHeader().getBusinessScope().getScope().get(0);
@@ -196,23 +195,6 @@ public class MessageSender {
 
     public StandardBusinessDocumentFactory getStandardBusinessDocumentFactory() {
         return standardBusinessDocumentFactory;
-    }
-
-    public class MessageContextException extends Exception {
-        private final Status status;
-
-        public MessageContextException(Status status) {
-            this.status = status;
-        }
-
-        public MessageContextException(CertificateException exception, Status status) {
-            super(exception);
-            this.status = status;
-        }
-
-        public Status getStatus() {
-            return status;
-        }
     }
 
 }
