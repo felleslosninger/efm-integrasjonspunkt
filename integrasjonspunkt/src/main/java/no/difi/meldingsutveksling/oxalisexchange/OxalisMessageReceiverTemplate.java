@@ -1,20 +1,13 @@
 package no.difi.meldingsutveksling.oxalisexchange;
 
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
-import no.difi.meldingsutveksling.dokumentpakking.Dokumentpakker;
-import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.Mottaker;
-import no.difi.meldingsutveksling.domain.Noekkelpar;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -27,10 +20,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.security.PrivateKey;
-import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
 import java.util.Map;
 
 
@@ -48,48 +37,6 @@ public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
 
     @Autowired
     private AdresseregisterVirksert adresseRegisterClient;
-
-    @Override
-    void sendLeveringskvittering(Map nodeList) {
-        forberedKvitering(nodeList, LEVERINGSKVITTERING);
-    }
-
-    @Override
-    void sendApningskvittering(Map nodeList) {
-        forberedKvitering(nodeList, AAPNINGSKVITTERING);
-    }
-
-    private void forberedKvitering(Map nodeList, String kvitteringsType) {
-        Node senderNode = (Node) nodeList.get("Sender");
-        Node reciverNode = (Node) nodeList.get("Receiver");
-        Node businessScopeNode = (Node) nodeList.get("BusinessScope");
-        NodeList businessChildNodes = businessScopeNode.getChildNodes();
-        Node instanceIdentifierNoden = businessChildNodes.item(1);
-        NodeList scopeChildNodes = instanceIdentifierNoden.getChildNodes();
-        Node child = scopeChildNodes.item(INSTANCEIDENTIFIER_FIELD);
-        String instanceIdentifier = child.getTextContent();
-        String[] sendToAr = senderNode.getTextContent().split(":");
-        String[] recievedByAr = reciverNode.getTextContent().split(":");
-        String sendTo = sendToAr[1].trim();
-        String recievedBy = recievedByAr[1].trim();
-        Certificate certificate = adresseRegisterClient.getCertificate(recievedBy);
-        Noekkelpar noekkelpar = new Noekkelpar((PrivateKey) nodeList.get("privateKey"), certificate);
-        Avsender.Builder avsenderBuilder = Avsender.builder(new Organisasjonsnummer(recievedBy), noekkelpar);
-        Avsender avsender = avsenderBuilder.build();
-        Mottaker mottaker = new Mottaker(new Organisasjonsnummer(sendTo), (X509Certificate) adresseRegisterClient.getCertificate(sendTo));
-        ByteArrayImpl byteArray = new ByteArrayImpl(genererKvittering(nodeList, kvitteringsType), kvitteringsType.concat(".xml"), MIME_TYPE);
-
-        try {
-            Dokumentpakker dokumentpakker = new Dokumentpakker(integrasjonspunktNokkel.getSignatureHelper());
-            byte[] resultSbd = dokumentpakker.pakkTilByteArray(byteArray, avsender, mottaker, instanceIdentifier, KVITTERING);
-            File file = new File(WRITE_TO);
-            FileUtils.writeByteArrayToFile(file, resultSbd);
-        } catch (IOException e) {
-            eventLog.log(new Event().setExceptionMessage(e.toString()));
-            throw new MeldingsUtvekslingRuntimeException(e);
-        }
-
-    }
 
     private byte[] genererKvittering(Map nodeList, String kvitteringsType) {
         Node docId = (Node) nodeList.get("BusinessScope");
@@ -127,4 +74,13 @@ public class OxalisMessageReceiverTemplate extends MessageReceieverTemplate {
     }
 
 
+    @Override
+    void sendLeveringskvittering(Map list) {
+        //todo
+    }
+
+    @Override
+    void sendApningskvittering(Map list) {
+        //todo
+    }
 }

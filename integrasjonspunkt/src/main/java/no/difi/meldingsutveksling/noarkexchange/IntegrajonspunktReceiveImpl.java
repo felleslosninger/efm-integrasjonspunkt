@@ -20,7 +20,6 @@ import no.difi.meldingsutveksling.services.AdresseregisterService;
 import no.difi.meldingsutveksling.services.CertificateException;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.jws.WebParam;
@@ -58,7 +57,6 @@ public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate i
     private static final String WRITE_TO = System.getProperty("user.home") + File.separator + "testToRemove" + File.separator + "kvitteringSbd.xml";
 
     @Autowired
-    @Qualifier(value = "multiTransport")
     TransportFactory transportFactory;
 
     @Autowired

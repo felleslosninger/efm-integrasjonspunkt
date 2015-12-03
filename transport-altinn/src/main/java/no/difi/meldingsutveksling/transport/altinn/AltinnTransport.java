@@ -1,9 +1,15 @@
-package no.difi.meldingsutveksling;
+package no.difi.meldingsutveksling.transport.altinn;
 
+import no.difi.meldingsutveksling.AltinnWsClient;
+import no.difi.meldingsutveksling.AltinnWsConfiguration;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
+import no.difi.meldingsutveksling.elma.ELMALookup;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.transport.Transport;
+import no.difi.vefa.peppol.common.model.Endpoint;
+import no.difi.vefa.peppol.lookup.api.LookupException;
 import org.apache.commons.configuration.Configuration;
 
 import static no.difi.meldingsutveksling.domain.Organisasjonsnummer.fromIso6523;
@@ -14,14 +20,27 @@ import static no.difi.meldingsutveksling.domain.Organisasjonsnummer.fromIso6523;
  */
 public class AltinnTransport implements Transport {
 
+    private final String organisationNumber;
+    private final ELMALookup elmaLookup;
+
+    public AltinnTransport(String organisationNumber, ELMALookup elmaLookup) {
+        this.organisationNumber = organisationNumber;
+        this.elmaLookup = elmaLookup;
+    }
+
     /**
      * @param configuration a configuration object given by the integrasjonspunkt
      * @param document      An SBD document with a payload consisting of an CMS encrypted ASIC package
      */
     @Override
     public void send(Configuration configuration, final Document document) {
-        AltinnWsClient client = new AltinnWsClient(AltinnWsConfiguration.fromConfiguration(configuration));
-
+        Endpoint ep;
+        try {
+            ep = elmaLookup.lookup(organisationNumber);
+        } catch (LookupException e) {
+            throw new MeldingsUtvekslingRuntimeException(e.getMessage(), e);
+        }
+        AltinnWsClient client = new AltinnWsClient(AltinnWsConfiguration.fromConfiguration(ep.getAddress(), configuration));
         UploadRequest request1 = new UploadRequest() {
 
             @Override
@@ -48,12 +67,5 @@ public class AltinnTransport implements Transport {
         };
 
         client.send(request1);
-    }
-
-
-    private class AltinnTransportException extends RuntimeException {
-        public AltinnTransportException(String message, Exception exception) {
-            super(message, exception);
-        }
     }
 }

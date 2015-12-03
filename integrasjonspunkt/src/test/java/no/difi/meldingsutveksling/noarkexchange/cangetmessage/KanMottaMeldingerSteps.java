@@ -168,6 +168,9 @@ public class KanMottaMeldingerSteps {
         AddressType addressType = new AddressType();
         addressType.setOrgnr("12345678");
         envelope.setReceiver(addressType);
+        addressType = new AddressType();
+        addressType.setOrgnr("87654321");
+        envelope.setSender(addressType);
         req.setEnvelope(envelope);
         req.setPayload(message);
         integrasjonspunkt.putMessage(req);

@@ -24,23 +24,21 @@
     <mockito.version>1.9.5</mockito.version>
   </properties>
 
-  <modules>
-    <module>noarkexchange</module>
-    <module>noarkexchange-p360</module>
-    <module>noarkexchange-ephorte</module>
-    <module>altinnexchange</module>
-    <module>dokumentpakking</module>
-    <module>integrasjonspunkt</module>
-    <module>domain</module>
-    <module>transport</module>
-    <module>transport-file</module>
-    <module>transport-altinn</module>
-    <module>altinn-batch-receive</module>
-    <module>altinnmock</module>
-    <module>altinn-client</module>
-    <module>virksert-demoscope</module>
-    <module>integrasjonspunkt-queue</module>
-  </modules>
+    <modules>
+        <module>noarkexchange</module>
+        <module>noarkexchange-p360</module>
+        <module>noarkexchange-ephorte</module>
+        <module>altinnexchange</module>
+        <module>dokumentpakking</module>
+        <module>integrasjonspunkt</module>
+        <module>domain</module>
+        <module>transport</module>
+        <module>transport-file</module>
+        <module>transport-altinn</module>
+        <module>altinn-client</module>
+        <module>virksert-demoscope</module>
+      <module>integrasjonspunkt-queue</module>
+    </modules>
 
   <dependencyManagement>
     <dependencies>
@@ -127,39 +125,16 @@
           <configuration>
             <junitArtifactName>junit:junit</junitArtifactName>
             <argLine>-Xms256m -Xmx512m -XX:MaxPermSize=128m -ea
-              -Dfile.encoding=UTF-8</argLine>
+              -Dfile.encoding=UTF-8
+            </argLine>
           </configuration>
-        </plugin>
-
-        <plugin>
-          <groupId>com.heroku.sdk</groupId>
-          <artifactId>heroku-maven-plugin</artifactId>
-          <version>0.1.9</version>
-          <configuration>
-            <appName>muv-adresseregister</appName>
-            <processTypes>
-              <web>java $JAVA_OPTS -jar
-                adresseregister-web/target/{project.artifactId}-{project.version}.{project.packaging}
-              </web>
-            </processTypes>
-          </configuration>
-        </plugin>
-
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <configuration>
-                <source>1.7</source>
-                <target>1.7</target>
-                <verbose>true</verbose>
-                <encoding>UTF-8</encoding>
-            </configuration>
         </plugin>
 
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>sonar-maven-plugin</artifactId>
           <version>2.4</version>
+
         </plugin>
 
         <plugin>
@@ -168,6 +143,8 @@
           <configuration>
             <source>1.7</source>
             <target>1.7</target>
+            <verbose>true</verbose>
+            <encoding>UTF-8</encoding>
           </configuration>
         </plugin>
 
@@ -229,5 +206,12 @@
       <version>3.8.1</version>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>no.difi.commons</groupId>
+      <artifactId>commons-asic</artifactId>
+      <version>0.9.2-SNAPSHOT</version>
+    </dependency>
+
   </dependencies>
 </project>
