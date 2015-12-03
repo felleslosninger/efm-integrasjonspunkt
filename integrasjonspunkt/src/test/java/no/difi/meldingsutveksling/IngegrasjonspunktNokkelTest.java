@@ -1,12 +1,14 @@
 package no.difi.meldingsutveksling;
 
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.security.PrivateKey;
 
 import static junit.framework.Assert.assertNotNull;
 
+@Ignore("Temporary ignored. Functionality is to be moved, reason queue handling.")
 public class IngegrasjonspunktNokkelTest {
 
 

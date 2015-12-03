@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.services;
 
-import java.security.PublicKey;
 import java.security.cert.Certificate;
 
 public interface AdresseregisterService {

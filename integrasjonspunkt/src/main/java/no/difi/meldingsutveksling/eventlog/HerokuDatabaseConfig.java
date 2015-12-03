@@ -16,7 +16,7 @@ public class HerokuDatabaseConfig implements DataBaseConfig {
 
     public static final String DATABASE_URL_ENV_PARAM = "DATABASE_URL";
 
-    @Bean
+    @Bean(name = "eventlogdatasource")
     public BasicDataSource getDataSource() {
         URI dbUri = null;
         try {

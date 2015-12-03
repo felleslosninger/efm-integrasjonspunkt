@@ -111,3 +111,5 @@ atlassian-ide-plugin.xml
 com_crashlytics_export_strings.xml
 
 integrasjonspunkt-local.properties
+
+queue/*.queue

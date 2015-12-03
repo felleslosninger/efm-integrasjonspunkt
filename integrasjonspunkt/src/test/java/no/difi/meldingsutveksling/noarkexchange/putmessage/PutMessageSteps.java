@@ -37,13 +37,17 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Makes sure that the integrasjonspunkt can handle receipt messages on
  * the putMessage interface
  * @author Glenn Bech
  */
+
 public class PutMessageSteps {
 
     private String appReceiptPayload = "&lt;AppReceipt type=\"OK\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.arkivverket.no/Noark/Exchange/types\"&gt;\n" +

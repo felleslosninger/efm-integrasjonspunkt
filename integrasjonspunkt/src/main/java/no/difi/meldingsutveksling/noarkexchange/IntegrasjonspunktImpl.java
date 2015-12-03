@@ -14,14 +14,17 @@ import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageRespo
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.SOAPport;
+import no.difi.meldingsutveksling.queue.service.Queue;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
 import org.jboss.logging.MDC;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.xml.ws.BindingType;
+import java.io.IOException;
 
 /**
  * This is the implementation of the wenbservice that case managenent systems supporting
@@ -37,10 +40,11 @@ import javax.xml.ws.BindingType;
  * Time: 15:26
  */
 
-@Component("noarkExchangeService")
+@org.springframework.stereotype.Component("noarkExchangeService")
 @WebService(portName = "NoarkExchangePort", serviceName = "noarkExchange", targetNamespace = "http://www.arkivverket.no/Noark/Exchange", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.SOAPport")
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
 public class IntegrasjonspunktImpl implements SOAPport {
+    private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktImpl.class);
 
     @Autowired
     AdresseregisterService adresseregister;
@@ -53,6 +57,9 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
     @Autowired
     private NoarkClient mshClient;
+
+    @Autowired
+    private Queue queue;
 
     @Autowired
     IntegrasjonspunktConfig configuration;
@@ -87,8 +94,39 @@ public class IntegrasjonspunktImpl implements SOAPport {
     }
 
     @Override
-    public PutMessageResponseType putMessage(PutMessageRequestType req) {
-        PutMessageRequestAdapter message = new PutMessageRequestAdapter(req);
+    public PutMessageResponseType putMessage(PutMessageRequestType request) {
+        PutMessageRequestAdapter message = new PutMessageRequestAdapter(request);
+        if (!message.hasSenderPartyNumber() && !configuration.hasOrganisationNumber()) {
+            throw new MeldingsUtvekslingRuntimeException();
+        }
+
+        if (configuration.isQueueEnabled()) {
+            try {
+                queue.put(request);
+            } catch (IOException e) {
+                log.error(e.getMessage(), e);
+            }
+            return PutMessageResponseFactory.createOkResponse();
+        }
+        else {
+            final String partyNumber = message.hasSenderPartyNumber() ? message.getSenderPartynumber() : configuration.getOrganisationNumber();
+
+            MDC.put(IntegrasjonspunktConfig.PARTY_NUMBER, partyNumber);
+
+            if (hasAdresseregisterCertificate(request.getEnvelope().getReceiver().getOrgnr())) {
+                PutMessageContext context = new PutMessageContext(eventLog, messageSender);
+                PutMessageStrategyFactory putMessageStrategyFactory = PutMessageStrategyFactory.newInstance(context);
+
+                PutMessageStrategy strategy = putMessageStrategyFactory.create(request.getPayload());
+                return strategy.putMessage(request);
+            } else {
+                return mshClient.sendEduMelding(request);
+            }
+        }
+    }
+
+    public boolean sendMessage(PutMessageRequestType request) {
+        PutMessageRequestAdapter message = new PutMessageRequestAdapter(request);
         if (!message.hasSenderPartyNumber() && !configuration.hasOrganisationNumber()) {
             throw new MeldingsUtvekslingRuntimeException();
         }
@@ -96,17 +134,18 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
         MDC.put(IntegrasjonspunktConfig.PARTY_NUMBER, partyNumber);
 
-        if(hasAdresseregisterCertificate(req.getEnvelope().getReceiver().getOrgnr())) {
+        if(hasAdresseregisterCertificate(request.getEnvelope().getReceiver().getOrgnr())) {
             PutMessageContext context = new PutMessageContext(eventLog, messageSender);
             PutMessageStrategyFactory putMessageStrategyFactory = PutMessageStrategyFactory.newInstance(context);
 
-            PutMessageStrategy strategy = putMessageStrategyFactory.create(req.getPayload());
-            return strategy.putMessage(req);
+            PutMessageStrategy strategy = putMessageStrategyFactory.create(request.getPayload());
+            PutMessageResponseType response = strategy.putMessage(request);
+            return validateResult(response);
         } else {
-            return mshClient.sendEduMelding(req);
+            PutMessageResponseType response = mshClient.sendEduMelding(request);
+            return validateResult(response);
         }
-
-    }   
+    }
 
     public AdresseregisterService getAdresseRegister() {
         return adresseregister;
@@ -138,5 +177,9 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
     public NoarkClient getMshClient() {
         return mshClient;
+    }
+
+    private boolean validateResult(PutMessageResponseType response) {
+        return response.getResult().getType().equals("OK");
     }
 }

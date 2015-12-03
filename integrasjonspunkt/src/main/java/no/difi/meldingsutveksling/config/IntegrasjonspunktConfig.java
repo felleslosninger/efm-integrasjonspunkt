@@ -157,6 +157,11 @@ public class IntegrasjonspunktConfig {
         return config.getString(KEY_ORGANISATION_NUMBER);
     }
 
+    public boolean isQueueEnabled() {
+        String queueEnabled = config.getString("toggle.enable.queue");
+        return queueEnabled.equals("on") || queueEnabled.equals("true");
+    }
+
     public boolean hasOrganisationNumber() {
         String orgNumber = config.getString(KEY_ORGANISATION_NUMBER);
         return orgNumber != null && !orgNumber.isEmpty();

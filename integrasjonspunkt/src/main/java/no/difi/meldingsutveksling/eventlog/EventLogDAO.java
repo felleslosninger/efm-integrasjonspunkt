@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.eventlog;
 
 import no.difi.meldingsutveksling.domain.ProcessState;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -32,12 +33,12 @@ public class EventLogDAO {
     public EventLogDAO() {
     }
 
-    public EventLogDAO(DataSource dataSource) {
+    public EventLogDAO(@Qualifier("eventlogdatasource") DataSource dataSource) {
         this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
     }
 
     @Autowired
-    public void setDataSource(DataSource dataSource) {
+    public void setDataSource(@Qualifier("eventlogdatasource") DataSource dataSource) {
         this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
     }
 
