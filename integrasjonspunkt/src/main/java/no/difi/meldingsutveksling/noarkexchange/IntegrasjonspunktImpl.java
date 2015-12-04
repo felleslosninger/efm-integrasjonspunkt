@@ -47,7 +47,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
     private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktImpl.class);
 
     @Autowired
-    AdresseregisterService adresseregister;
+    private AdresseregisterService adresseregister;
 
     @Autowired
     private MessageSender messageSender;
@@ -62,7 +62,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
     private Queue queue;
 
     @Autowired
-    IntegrasjonspunktConfig configuration;
+    private IntegrasjonspunktConfig configuration;
 
     @Override
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
