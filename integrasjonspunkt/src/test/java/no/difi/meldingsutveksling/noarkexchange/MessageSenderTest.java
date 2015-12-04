@@ -54,7 +54,7 @@ public class MessageSenderTest {
     }
 
     @Test
-    public void shouldThrowMessageContextExceptionWhenMissingRecipientCertificate() throws MessageContextException {
+    public void shouldThrowMessageContextExceptionWhenMissingRecipientCertificate() throws MessageContextException, CertificateException {
         expectedException.expect(MessageContextException.class);
         expectedException.expect(new StatusMatches(StatusMessage.MISSING_RECIEVER_CERTIFICATE));
         PutMessageRequestAdapter requestAdapter = new RequestBuilder().withSender().withReciever().build();
@@ -65,7 +65,7 @@ public class MessageSenderTest {
     }
 
     @Test
-    public void shouldThrowMessageContextExceptionWhenMissingSenderCertificate() throws MessageContextException {
+    public void shouldThrowMessageContextExceptionWhenMissingSenderCertificate() throws CertificateException, MessageContextException {
         expectedException.expect(MessageContextException.class);
         expectedException.expect(new StatusMatches(StatusMessage.MISSING_SENDER_CERTIFICATE));
         PutMessageRequestAdapter requestAdapter = new RequestBuilder().withSender().withReciever().build();
@@ -121,4 +121,6 @@ public class MessageSenderTest {
             mismatchDescription.appendText("was ").appendValue(exception.getStatusMessage());
         }
     }
+
+
 }

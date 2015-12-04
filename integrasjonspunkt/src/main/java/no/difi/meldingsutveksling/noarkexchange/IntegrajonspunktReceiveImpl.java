@@ -62,7 +62,7 @@ public class IntegrajonspunktReceiveImpl  implements SOAReceivePort {
     private NoarkClient localNoark;
 
     @Autowired
-    private AdresseregisterService adresseRegisterClient;
+    private AdresseregisterService adresseregisterService;
 
     @Autowired
     private IntegrasjonspunktConfig config;
@@ -81,7 +81,7 @@ public class IntegrajonspunktReceiveImpl  implements SOAReceivePort {
 
     public CorrelationInformation forwardToNoarkSystem(StandardBusinessDocument standardBusinessDocument) {
         StandardBusinessDocumentWrapper inputDocument = new StandardBusinessDocumentWrapper(standardBusinessDocument);
-        if (!verifyCertificatesForSenderAndReceiver(inputDocument.getReceiverOrgNumber(), inputDocument.getSenderOrgNumber())) {
+        if (!validateCertificates(inputDocument)) {
             throw new MeldingsUtvekslingRuntimeException("invalid certificate for sender or recipient (" + inputDocument.getSenderOrgNumber() + "," + inputDocument.getReceiverOrgNumber());
         }
 
@@ -117,11 +117,11 @@ public class IntegrajonspunktReceiveImpl  implements SOAReceivePort {
         return cmsUtil.decryptCMS(cmsEncZip, keyInfo.loadPrivateKey());
     }
 
-    private boolean verifyCertificatesForSenderAndReceiver(String orgNumberReceiver, String orgNumberSender) {
+    private boolean validateCertificates(StandardBusinessDocumentWrapper documentWrapper) {
         boolean validCertificates;
         try {
-            adresseRegisterClient.getCertificate(orgNumberReceiver);
-            adresseRegisterClient.getCertificate(orgNumberSender);
+            adresseregisterService.getCertificate(documentWrapper.getReceiverOrgNumber());
+            adresseregisterService.getCertificate(documentWrapper.getSenderOrgNumber());
             validCertificates = true;
         } catch (CertificateException e) {
             validCertificates = false;

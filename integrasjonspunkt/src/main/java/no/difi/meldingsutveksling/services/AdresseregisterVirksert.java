@@ -1,6 +1,9 @@
 package no.difi.meldingsutveksling.services;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
+import no.difi.meldingsutveksling.noarkexchange.MessageException;
+import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
+import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import no.difi.virksert.client.VirksertClient;
 import no.difi.virksert.client.VirksertClientBuilder;
 import no.difi.virksert.client.VirksertClientException;
@@ -22,6 +25,10 @@ public class AdresseregisterVirksert implements AdresseregisterService {
     public AdresseregisterVirksert() {
     }
 
+    public AdresseregisterVirksert(VirksertClient virksertClient) {
+        this.virksertClient = virksertClient;
+    }
+
     @PostConstruct
     public void init() {
         String adresseRegisterEndPointURL = configuration.getAdresseRegisterEndPointURL();
@@ -38,8 +45,21 @@ public class AdresseregisterVirksert implements AdresseregisterService {
         this.configuration = configuration;
     }
 
+    public void validateCertificates(StandardBusinessDocumentWrapper documentWrapper) throws MessageException {
+        try {
+            getCertificate(documentWrapper.getReceiverOrgNumber());
+        } catch (CertificateException e) {
+            throw new MessageException(e, StatusMessage.MISSING_RECIEVER_CERTIFICATE);
+        }
+        try {
+            getCertificate(documentWrapper.getSenderOrgNumber());
+        } catch (CertificateException e) {
+            throw new MessageException(e, StatusMessage.MISSING_SENDER_CERTIFICATE);
+        }
+    }
+
     @Override
-    public Certificate getCertificate(String orgNumber) {
+    public Certificate getCertificate(String orgNumber) throws CertificateException {
         try {
             return virksertClient.fetch(orgNumber);
         } catch (VirksertClientException e) {

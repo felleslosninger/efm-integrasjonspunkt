@@ -23,6 +23,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
 import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
+import no.difi.meldingsutveksling.services.CertificateException;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.apache.commons.configuration.Configuration;
@@ -66,7 +67,7 @@ public class PutMessageSteps {
 
 
     @Before
-    public void setup() throws MessageException {
+    public void setup() throws MessageException, CertificateException {
         integrasjonspunkt = new IntegrasjonspunktImpl();
         adresseregister = mock(AdresseregisterService.class);
         when(adresseregister.getCertificate(any(String.class))).thenReturn(new X509CertImpl());
