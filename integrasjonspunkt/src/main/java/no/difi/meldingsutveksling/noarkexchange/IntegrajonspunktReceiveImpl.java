@@ -15,7 +15,6 @@ import no.difi.meldingsutveksling.noarkexchange.schema.receive.CorrelationInform
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocumentHeader;
-import no.difi.meldingsutveksling.oxalisexchange.OxalisMessageReceiverTemplate;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
 import no.difi.meldingsutveksling.services.CertificateException;
 import no.difi.meldingsutveksling.transport.TransportFactory;
@@ -45,7 +44,7 @@ import java.util.zip.ZipInputStream;
 @Component("recieveService")
 @WebService(portName = "ReceivePort", serviceName = "receive", targetNamespace = "", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort")
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
-public class IntegrajonspunktReceiveImpl extends OxalisMessageReceiverTemplate implements SOAReceivePort {
+public class IntegrajonspunktReceiveImpl  implements SOAReceivePort {
 
     private static final String KVITTERING = "Kvittering";
     private static final String BEST_EDU = "BEST_EDU";
