@@ -12,22 +12,22 @@ import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.noarkexchange.putmessage.ErrorStatus;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
 import no.difi.meldingsutveksling.services.CertificateException;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
+import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createErrorResponse;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createOkResponse;
 
@@ -37,7 +37,7 @@ public class MessageSender {
     @Autowired
     private EventLog eventLog;
 
-    org.slf4j.Logger log = LoggerFactory.getLogger(MessageSender.class.getName());
+    Logger log = LoggerFactory.getLogger(MessageSender.class);
 
     @Autowired
     private TransportFactory transportFactory;
@@ -54,7 +54,7 @@ public class MessageSender {
     @Autowired
     private StandardBusinessDocumentFactory standardBusinessDocumentFactory;
 
-    Avsender createAvsender(PutMessageRequestAdapter message) throws AvsenderException {
+    private Avsender createAvsender(PutMessageRequestAdapter message) throws MessageContextException {
         if (!message.hasSenderPartyNumber()) {
             message.setSenderPartyNumber(configuration.getOrganisationNumber());
         }
@@ -63,7 +63,7 @@ public class MessageSender {
         try {
             certificate = adresseregister.getCertificate(message.getSenderPartynumber());
         } catch (CertificateException e) {
-            throw new AvsenderException(e);
+            throw new MessageContextException(e, StatusMessage.MISSING_SENDER_CERTIFICATE);
         }
         PrivateKey privatNoekkel = keyInfo.loadPrivateKey();
         Avsender avsender = Avsender.builder(new Organisasjonsnummer(message.getSenderPartynumber()), new Noekkelpar(privatNoekkel, certificate)).build();
@@ -71,24 +71,33 @@ public class MessageSender {
         return avsender;
     }
 
-    private Mottaker createMottaker(String orgnr) throws MottakerException {
+    private Mottaker createMottaker(String orgnr) throws MessageContextException {
         X509Certificate receiverCertificate;
         try {
-            receiverCertificate = (X509Certificate) adresseregister.getCertificate(orgnr);
+            receiverCertificate = lookupCertificate(orgnr);
         } catch(CertificateException e) {
-            throw new MottakerException(e);
+            throw new MessageContextException(e, StatusMessage.MISSING_RECIEVER_CERTIFICATE);
         }
         Mottaker mottaker = Mottaker.builder(new Organisasjonsnummer(orgnr), receiverCertificate).build();
 
         return mottaker;
     }
 
+    private X509Certificate lookupCertificate(String orgnr) throws CertificateException {
+        X509Certificate certificate;
+        certificate = (X509Certificate) adresseregister.getCertificate(orgnr);
+        return certificate;
+    }
+
     public PutMessageResponseType sendMessage(PutMessageRequestType messageRequest) {
         PutMessageRequestAdapter message = new PutMessageRequestAdapter(messageRequest);
 
-        MessageContext messageContext = createMessageContext(message);
-        if(messageContext.hasErrors()) {
-            return createErrorResponse(messageContext.getErrors().iterator().next());
+        MessageContext messageContext;
+        try {
+            messageContext = createMessageContext(message);
+        } catch (MessageContextException e) {
+            log.error(markerFrom(message), e.getStatusMessage().getTechnicalMessage(), e);
+            return createErrorResponse(e);
         }
 
         eventLog.log(new Event(ProcessState.SIGNATURE_VALIDATED));
@@ -96,11 +105,10 @@ public class MessageSender {
         no.difi.meldingsutveksling.domain.sbdh.Document sbd;
         try {
             sbd = standardBusinessDocumentFactory.create(messageRequest, messageContext.getAvsender(), messageContext.getMottaker());
-
-        } catch (IOException e) {
+        } catch (MessageException e) {
             eventLog.log(new Event().setJpId(messageContext.getJournalPostId()).setArkiveConversationId(message.getConversationId()).setProcessStates(ProcessState.MESSAGE_SEND_FAIL));
-            log.error("IO Error on Asic-e or sbd creation " + e.getMessage());
-            return createErrorResponse(ErrorStatus.MISSING_SENDER);
+            log.error(markerFrom(message), e.getStatusMessage().getTechnicalMessage(), e);
+            return createErrorResponse(e);
 
         }
         Scope item = sbd.getStandardBusinessDocumentHeader().getBusinessScope().getScope().get(0);
@@ -124,32 +132,23 @@ public class MessageSender {
      * @param message
      * @return
      */
-    private MessageContext createMessageContext(PutMessageRequestAdapter message) {
+    protected MessageContext createMessageContext(PutMessageRequestAdapter message) throws MessageContextException {
         MessageContext context = new MessageContext();
+
         if(!message.hasRecieverPartyNumber()) {
-            log.error(ErrorStatus.MISSING_RECIPIENT.toString());
-            context.addError(ErrorStatus.MISSING_RECIPIENT);
+            throw new MessageContextException(StatusMessage.MISSING_RECIEVER_ORGANIZATION_NUMBER);
         }
+        Avsender avsender;
+        final Mottaker mottaker;
+        avsender = createAvsender(message);
+        mottaker = createMottaker(message.getRecieverPartyNumber());
 
         JournalpostId p = JournalpostId.fromPutMessage(message);
         String journalPostId = p.value();
 
         context.setJpId(journalPostId);
-
-        try {
-            context.setMottaker(createMottaker(message.getRecieverPartyNumber()));
-        } catch (MottakerException e) {
-            log.error(ErrorStatus.CANNOT_RECIEVE + message.getRecieverPartyNumber() + e.toString());
-            context.addError(ErrorStatus.CANNOT_RECIEVE);
-        }
-
-        try {
-            context.setAvsender(createAvsender(message));
-        } catch (AvsenderException e) {
-            log.error(ErrorStatus.MISSING_SENDER + e.toString());
-            context.addError(ErrorStatus.MISSING_SENDER);
-        }
-
+        context.setMottaker(mottaker);
+        context.setAvsender(avsender);
         return context;
     }
 

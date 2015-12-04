@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class ErrorStatusTest {
+public class ErrorStatusMessageTest {
 
     @Test
     public void shouldGetMotakendeOrganisasjonKanIkkeMottaMeldingerWhenErrorStatusIsCannotRecieve() throws Exception {

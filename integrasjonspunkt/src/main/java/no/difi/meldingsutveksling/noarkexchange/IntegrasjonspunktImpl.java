@@ -46,6 +46,8 @@ import java.io.IOException;
 public class IntegrasjonspunktImpl implements SOAPport {
     private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktImpl.class);
 
+    private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktImpl.class);
+
     @Autowired
     AdresseregisterService adresseregister;
 

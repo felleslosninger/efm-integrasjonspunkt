@@ -10,10 +10,6 @@ import org.springframework.boot.context.embedded.ServletRegistrationBean;
 import org.springframework.boot.context.web.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 
-/**
- * @author Dervis M, 13/08/15.
- */
-
 @SpringBootApplication(exclude = {SolrAutoConfiguration.class})
 public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
     private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktApplication.class);
