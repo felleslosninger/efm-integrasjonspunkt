@@ -16,6 +16,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
+import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
@@ -30,7 +31,6 @@ import sun.security.x509.X509CertImpl;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -66,7 +66,7 @@ public class PutMessageSteps {
 
 
     @Before
-    public void setup() throws IOException {
+    public void setup() throws MessageException {
         integrasjonspunkt = new IntegrasjonspunktImpl();
         adresseregister = mock(AdresseregisterService.class);
         when(adresseregister.getCertificate(any(String.class))).thenReturn(new X509CertImpl());

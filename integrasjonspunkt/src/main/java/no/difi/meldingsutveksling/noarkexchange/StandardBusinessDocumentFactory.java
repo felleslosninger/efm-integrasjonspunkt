@@ -59,15 +59,20 @@ public class StandardBusinessDocumentFactory {
         this.integrasjonspunktNokkel = integrasjonspunktNokkel;
     }
 
-    public Document create(PutMessageRequestType sender, Avsender avsender, Mottaker mottaker) throws IOException {
+    public Document create(PutMessageRequestType sender, Avsender avsender, Mottaker mottaker) throws MessageException {
         return create(sender, UUID.randomUUID().toString(), avsender, mottaker);
     }
 
-    public Document create(PutMessageRequestType shipment, String id, Avsender avsender, Mottaker mottaker) throws IOException {
+    public Document create(PutMessageRequestType shipment, String id, Avsender avsender, Mottaker mottaker) throws MessageException {
         final byte[] marshalledShipment = marshall(shipment);
 
         BestEduMessage bestEduMessage = new BestEduMessage(marshalledShipment);
-        Archive archive = createAsicePackage(avsender, mottaker, bestEduMessage);
+        Archive archive;
+        try {
+            archive = createAsicePackage(avsender, mottaker, bestEduMessage);
+        } catch(IOException e) {
+            throw new MessageException(e, StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT);
+        }
         Payload payload = new Payload(encryptArchive(mottaker, archive));
 
         return new CreateSBD().createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload, id, "melding");
