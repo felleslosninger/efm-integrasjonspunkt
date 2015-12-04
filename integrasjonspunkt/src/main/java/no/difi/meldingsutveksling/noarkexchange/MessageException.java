@@ -1,18 +1,18 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 public class MessageException extends Exception {
-    private final Status status;
+    private final StatusMessage statusMessage;
 
-    public MessageException(Status status) {
-        this.status = status;
+    public MessageException(StatusMessage statusMessage) {
+        this.statusMessage = statusMessage;
     }
 
-    public MessageException(Exception exception, Status status) {
+    public MessageException(Exception exception, StatusMessage statusMessage) {
         super(exception);
-        this.status = status;
+        this.statusMessage = statusMessage;
     }
 
-    public Status getStatus() {
-        return status;
+    public StatusMessage getStatusMessage() {
+        return statusMessage;
     }
 }

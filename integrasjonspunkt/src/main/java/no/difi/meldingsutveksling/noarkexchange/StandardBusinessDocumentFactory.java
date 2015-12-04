@@ -71,7 +71,7 @@ public class StandardBusinessDocumentFactory {
         try {
             archive = createAsicePackage(avsender, mottaker, bestEduMessage);
         } catch(IOException e) {
-            throw new MessageException(e, Status.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT);
+            throw new MessageException(e, StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT);
         }
         Payload payload = new Payload(encryptArchive(mottaker, archive));
 

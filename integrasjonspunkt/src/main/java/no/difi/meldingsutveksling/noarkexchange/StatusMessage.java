@@ -1,9 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-/**
- * Created by mfhoel on 30.11.15.
- */
-public enum Status {
+public enum StatusMessage {
     MISSING_RECIEVER_CERTIFICATE("Mottakers sertifikat mangler i adresseregister", "Missing reciever certificate for orgnumber {} in adresseregister", 1),
     MISSING_SENDER_CERTIFICATE("Avsenders sertifikat mangler i adresseregisteret", "Missing sender certficiate for orgnumber {} in adresseregister", 2),
     MISSING_RECIEVER_ORGANIZATION_NUMBER("Mottakers organisasjonsnummer mangler", "Message is missing a recipient organization number", 3),
@@ -12,7 +9,7 @@ public enum Status {
     private final String technicalMessage;
     private String id;
 
-    Status(String endUserMessage, String technicalMessage, int id) {
+    StatusMessage(String endUserMessage, String technicalMessage, int id) {
         this.endUserMessage = endUserMessage;
         this.technicalMessage = technicalMessage;
         this.id = String.valueOf(id);

@@ -15,8 +15,8 @@ public class PutMessageResponseFactory {
         AppReceiptType receipt = new AppReceiptType();
         receipt.setType("ERROR ");
         StatusMessageType statusMessageType = new StatusMessageType();
-        statusMessageType.setText(exception.getStatus().getEndUserMessage());
-        statusMessageType.setCode(exception.getStatus().getId());
+        statusMessageType.setText(exception.getStatusMessage().getEndUserMessage());
+        statusMessageType.setCode(exception.getStatusMessage().getId());
         receipt.getMessage().add(statusMessageType);
         response.setResult(receipt);
         return response;

@@ -3,11 +3,11 @@ package no.difi.meldingsutveksling.noarkexchange;
 import no.difi.meldingsutveksling.services.CertificateException;
 
 public class MessageContextException extends MessageException {
-    public MessageContextException(Status status) {
-        super(status);
+    public MessageContextException(StatusMessage statusMessage) {
+        super(statusMessage);
     }
 
-    public MessageContextException(CertificateException exception, Status status) {
-        super(exception, status);
+    public MessageContextException(CertificateException exception, StatusMessage statusMessage) {
+        super(exception, statusMessage);
     }
 }
