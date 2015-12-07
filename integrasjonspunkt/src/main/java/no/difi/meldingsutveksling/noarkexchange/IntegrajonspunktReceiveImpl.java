@@ -15,7 +15,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.receive.CorrelationInform
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocumentHeader;
-import no.difi.meldingsutveksling.services.AdresseregisterService;
+import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
 import no.difi.meldingsutveksling.services.CertificateException;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +62,7 @@ public class IntegrajonspunktReceiveImpl  implements SOAReceivePort {
     private NoarkClient localNoark;
 
     @Autowired
-    private AdresseregisterService adresseregisterService;
+    private AdresseregisterVirksert adresseregisterService;
 
     @Autowired
     private IntegrasjonspunktConfig config;
@@ -81,6 +81,7 @@ public class IntegrajonspunktReceiveImpl  implements SOAReceivePort {
 
     public CorrelationInformation forwardToNoarkSystem(StandardBusinessDocument standardBusinessDocument) {
         StandardBusinessDocumentWrapper inputDocument = new StandardBusinessDocumentWrapper(standardBusinessDocument);
+
         if (!validateCertificates(inputDocument)) {
             throw new MeldingsUtvekslingRuntimeException("invalid certificate for sender or recipient (" + inputDocument.getSenderOrgNumber() + "," + inputDocument.getReceiverOrgNumber());
         }

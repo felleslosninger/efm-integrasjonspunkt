@@ -15,7 +15,7 @@ import java.security.cert.Certificate;
 
 
 @Component
-public class AdresseregisterVirksert implements AdresseregisterService {
+public class AdresseregisterVirksert {
 
     @Autowired
     IntegrasjonspunktConfig configuration;
@@ -58,7 +58,6 @@ public class AdresseregisterVirksert implements AdresseregisterService {
         }
     }
 
-    @Override
     public Certificate getCertificate(String orgNumber) throws CertificateException {
         try {
             return virksertClient.fetch(orgNumber);

@@ -14,7 +14,7 @@ import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import no.difi.meldingsutveksling.services.AdresseregisterService;
+import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
 import no.difi.meldingsutveksling.services.CertificateException;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
@@ -43,7 +43,7 @@ public class MessageSender {
     private TransportFactory transportFactory;
 
     @Autowired
-    private AdresseregisterService adresseregister;
+    private AdresseregisterVirksert adresseregister;
 
     @Autowired
     private IntegrasjonspunktConfig configuration;
@@ -152,7 +152,7 @@ public class MessageSender {
         return context;
     }
 
-    public void setAdresseregister(AdresseregisterService adresseregister) {
+    public void setAdresseregister(AdresseregisterVirksert adresseregister) {
         this.adresseregister = adresseregister;
     }
 
