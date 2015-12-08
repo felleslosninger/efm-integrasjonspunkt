@@ -51,33 +51,14 @@ Under piloten vil det kjøre med sertifkatkjede der Difi er Trusted Root. Deltag
 Når du har fått sertifikatet, må det legges inn på maskinen. Noter deg lokasjonen for sertifikatet, samt brukernavn og passord. Dette legges inn som en del av [konfigurasjonen] (#konfigurasjon)
 
 
-### Laste opp public virksomhetssertifikat til virksomhetssertifikatserveren
-Sertifikatet kan lastes opp til [staging-/demo-server her](http://beta-meldingsutveksling.difi.no:9998)
-
-### Laste ned og klargjøre Deploy Manager
-Installering og oppsett av Deploy Manager er beskrevet i [installasjonsguiden](#deploymanager).
-
-
-### Verifisere at alt er oppe og snurrer
-Etter at Deploy Manageren er startet, vil den hente siste versjon av Integrasjonspunktet og starte det. Dette kan ta et par minutter.
-
-Når Integrasjonspunktet er klart, kan du åpne en nettleser og taste 
-
-```http://localhost:9000/api/running```. 
-
-Da vil du få en oversikt over applikasjoner som Deploy Manager kjører. 
-
-```http://localhost:<port-til-integrasjonspunkt>/noarkExchange?wsdl``` 
-
-gir response i form av en wsdl når Integrasjonspunktet har startet.
-
-### Kjøre integrasjonspunktet
-Når DeployMangager er startet vil denne automatisk laste ned og starte siste versjon av integrasjonspunktet. 
+### Laste opp public virksomhetssertifikat
+Sertifikatet kan lastes opp til [virksomhetssertifikatserveren](http://virksert.herokuapp.com/)
 
 ### Konfigurere sak-/arkivsystem til å bruke Integrsjonspunktet
 
+Oppsett for Acos, ePhorte, [P360](../resources/Oppsett360.docx)
 
-## Dersom du ønsker at Integrasjonspunktet skal overvåkes sentralt
+### Sentral kontroll på integrasjonspunkt
 Sentral overvåking innebærer at status samt en del statistikk sendes sentralt. Man vil tidligere få melding om feil, og man kan i enkelte tilfeller rette feilen før den påvirker produksjonen (før en feilet melding blir savnet).
 
 **Parametre for aktivering av sentral overvåking**
@@ -86,10 +67,7 @@ Sentral overvåking innebærer at status samt en del statistikk sendes sentralt.
 3. spring.boot.admin.autoDeregistration
 4. spring.boot.admin.client.serviceUrl
 
-## Feilsøking
-Dersom du får feilmeldingen av typen
-`javax.xml.ws.WebServiceException: Failed to access the WSDL at: https://at06.altinn.basefarm.net/ServiceEngineExternal/BrokerServiceExternalBasic.svc?wsdl. It failed with: 
-    sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target.`
+### Kjøre integrasjonspunktet
+Når DeployMangager er startet vil denne automatisk laste ned og starte siste versjon av integrasjonspunktet.
 
-Må sertifikates installeres i JKS fila _cacerts_ som ligger i _$JAVA_HOME/jre/lib/security_. For dette formålet kan du bruke verktøyet **Portecle** etter guiden [Connecting to ssl services](https://confluence.atlassian.com/jira/connecting-to-ssl-services-117455.html). Da tar man inspect SSL certificate mot URL i feilmeldingen. I eksempelet over er det at06.altinn.basefarm.net
 
