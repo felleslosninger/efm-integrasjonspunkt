@@ -5,7 +5,7 @@ siteUrlText: http://difi.github.io/meldingsutveksling-mellom-offentlige-virksomh
 # current version of the software
 version: Staging
 # url of the download button
-downloadUrl: https://beta-meldingsutveksling.difi.no/#nexus-search;quick~deploy-manager
+downloadUrl: https://beta-meldingsutveksling.difi.no/#nexus-search;quick~deploy-manager
 
 # licence of the software
 license: GPL-3 License
