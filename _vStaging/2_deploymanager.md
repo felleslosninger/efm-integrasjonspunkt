@@ -23,16 +23,26 @@ java -jar deploy-manager[versjon].jar
 
 Når den starter, vil den lete lokalt etter filen `data/monitorApps.json`. monitorApps.json inneholder informasjon om hvilke applikasjoner som skal vedlikeholdes av Deployment Manager. 
 
-For å legge til applikasjoner som skal vedlikeholdes, må de legges manuelt inn i monitorApps.json. [Struktur på monitorApps.json](../resources/monitorApps.json)
+For å legge til applikasjoner som skal vedlikeholdes, må de legges manuelt inn i monitorApps.json. Applikasjoner legges til som vist under. 
 
-**Parameter**                      |**Verdi**  		|**Beskrivelse**
------------------------------------|----------------|---------------------------------------------------------------------
-application.runtime.environment    |enum     		|test, staging, production
-spring.boot.admin.url              |url:port 		|URL til server hvor monitoreringsapplikasjonen er installert
-spring.boot.admin.client.serviceUrl|url:port 		|URL monitor-appen kan kalle inn til DM for metrics m.m.
-spring.application.name            |String   		|Navnet applikasjonen skal registrere seg på monitoreringsappen som
-application.runtime.status         |test, production|Modus applikasjonen skal kjøre i, hvilket nexus repo som skal benyttes
+```json
+{"artifacts": [
+    {
+      "name": "Name of application",
+      "groupId": "my.app.group.id",
+      "artifactId": "my.app.artifact.id",
+      "activeVersion": "activeVersion",
+      "artifactType": "JAR",
+      "filename": "filename.jar",
+      "vmOptions": "-Xms=512m -Xmx=512m",
+      "environmentVariables": "-Dspring.boot.admin.url=http://localhost:9000 ",
+      "mainClass": "my.application.start.Application"
+    }]
+}
+```
 
+Eksemple for integrajsonspunktet finner du [her](../resources/monitorApps.json).
+Filen navngis som monitorApps.json og legges under \data
 
 ### Verifisere at alt er oppe og snurrer
 Etter at Deploy Manageren er startet, vil den hente siste versjon av Integrasjonspunktet og starte det. Dette kan ta et par minutter.

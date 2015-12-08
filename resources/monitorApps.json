@@ -1,13 +1,13 @@
 {"artifacts": [
-    {
-      "name": "Name of application",
-      "groupId": "my.app.group.id",
-      "artifactId": "my.app.artifact.id",
-      "activeVersion": "activeVersion",
-      "artifactType": "JAR",
-      "filename": "filename.jar",
-      "vmOptions": "-Xms=512m -Xmx=512m",
-      "environmentVariables": "-Dspring.boot.admin.url=http://localhost:9000 ",
-      "mainClass": "my.application.start.Application"
-    }]
+  {
+    "name": "Integrasjonspunkt",
+    "groupId": "no.difi.meldingsutveksling",
+    "artifactId": "integrasjonspunkt",
+    "artifactType": "JAR",
+    "activeVersion": "",
+    "filename": "",
+    "vmOptions": "",
+    "environmentVariables": "-Dspring.profiles.active=dev -Dspring.application.name=<orgnr>",
+    "mainClass": "no.difi.meldingsutveksling.IntegrasjonspunktApplication"
+  }]
 }

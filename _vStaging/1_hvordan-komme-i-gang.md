@@ -43,7 +43,9 @@ Dersom det er en ny versjon av Java, så my JCE installeres. Last ned JCE fra [O
 Det er ikke noen enkel måte å sjekke om Java Cryptography Extension er installert. Ofte kan det enkleste være å bare laste ned og installere JCE, men om du ønsker å sjekke, kan du gå til mappen ```$JAVA_HOME/jre/lib/security``` og sjekke om filene ```US_export_policy.jar``` og ```local_policy.jar``` har nyere dato enn øvrige filer. Hvis datoen er lik, må du installere JCE.
 
 ### Opprette en bruker til Altinn formidlingstjeneste
-_Prosessen for oppretting av brukere til Altinn Formidlingstjeneste er under arbeid_
+
+Integrasjonspunktet kjører som et sluttbrukersystem mot AltInns meldingsformidler. Integrsjonspunktet må registeres som et [sluttbrukersystem](https://www.altinn.no/no/Portalhjelp/Datasystemer/Sende-fra-sluttbrukersystem-datasystem/) i AltInns portal
+Informasjon om hvordan du logger på AltInn portal finner du [her](https://www.altinn.no/no/Portalhjelp/Innlogging-og-rapportering/).
 
 ### Sette opp sertifikat i Java Key Store (JKS)
 Under piloten vil det kjøre med sertifkatkjede der Difi er Trusted Root. Deltagere vil derfor få tildelt sertifikater etterhvert som de blir en del av piloten.
@@ -61,11 +63,11 @@ Oppsett for Acos, ePhorte, [P360](../resources/Oppsett360.docx)
 ### Sentral kontroll på integrasjonspunkt
 Sentral overvåking innebærer at status samt en del statistikk sendes sentralt. Man vil tidligere få melding om feil, og man kan i enkelte tilfeller rette feilen før den påvirker produksjonen (før en feilet melding blir savnet).
 
-**Parametre for aktivering av sentral overvåking**
-1. spring.boot.admin.url
-2. spring.boot.admin.client.name
-3. spring.boot.admin.autoDeregistration
-4. spring.boot.admin.client.serviceUrl
+** Parametre for aktivering av sentral overvåking **
+* spring.boot.admin.url
+* spring.boot.admin.client.name
+* spring.boot.admin.autoDeregistration
+* spring.boot.admin.client.serviceUrl
 
 ### Kjøre integrasjonspunktet
 Når DeployMangager er startet vil denne automatisk laste ned og starte siste versjon av integrasjonspunktet.

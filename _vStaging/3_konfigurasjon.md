@@ -6,7 +6,8 @@ description: Hvordan sette verider i .properties filen
 isHome: false
 ---
 
-Følgende verdier settest i integrasjonspunkt-local.properties
+Lokale konfigurasjonsverdier legges i en tekstfil med navnet integrasjonspunkt-local.properties
+Denne filen legges på samme nivå som DeployManager ligger.
 
 **Propertie**              	|**Beskrivelse**														|**Eksempel**
 ----------------------------|-----------------------------------------------------------------------|-----------------
@@ -16,15 +17,12 @@ noarksystem.userName\*   	|brukernavn for autentisering mot sakarkivsystem						
 noarksystem.password\*   	|passord for autentisering mot sakarkivsystem							|
 noarksystem.domain*     	|domene sakarkivsystemet kjører på										|
 							|																		|
-adresseregister.endPointURL	|url til adresseregister												|
 orgnumber               	| Organisasjonsnummer til din organisasjon (9 siffer)					|123456789
 server.port					| Portnummer integrasjonspunktet skal kjøre på (default 9093) 			| 9093		  
 keystorelocation 			| path til '.jks fil 													|
 privatekeypassword      	| Passord til keystore 													|
 privatekeyalias  			| alieas til virksomhetssertifikatet som brukes i  integrasjonspunktet 	| 
 							|																		|
-altinn.external_service_code|																		|
-altinn.external_service_edition_code|																|
 altinn.username         	|brukernavnet du fikk når du opprettet AltInn systembruker				|
 altinn.password         	|passord du satte når du opprettet AltInn systembruker					|
 msh.endpointURL\*\*			|url til msh															|
