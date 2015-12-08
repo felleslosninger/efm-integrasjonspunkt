@@ -9,8 +9,5 @@
       "vmOptions": "-Xms=512m -Xmx=512m",
       "environmentVariables": "-Dspring.boot.admin.url=http://localhost:9000 ",
       "mainClass": "my.application.start.Application"
-    },
-    {
-    .....
     }]
 }

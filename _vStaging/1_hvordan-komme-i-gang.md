@@ -74,7 +74,7 @@ gir response i form av en wsdl når Integrasjonspunktet har startet.
 ### Kjøre integrasjonspunktet
 Når DeployMangager er startet vil denne automatisk laste ned og starte siste versjon av integrasjonspunktet. 
 
-###Konfigurere sak-/arkivsystem til å bruke Integrsjonspunktet
+### Konfigurere sak-/arkivsystem til å bruke Integrsjonspunktet
 
 
 ## Dersom du ønsker at Integrasjonspunktet skal overvåkes sentralt

@@ -7,12 +7,9 @@ noarksystem.userName=svc_sakark
 noarksystem.password=<passord>
 noarksystem.domain=<domene>
 
-adresseregister.endPointURL=http://virksert.herokuapp.com/
 orgnumber=<orgnr>
 
 #Altinn related properties (used by transport-altinn, ignored if other transport is in use
-altinn.external_service_code=<serviceCode>
-altinn.external_service_edition_code=<ServiceEditionCode>
 altinn.username= <username>
 altinn.password= <password>
 
