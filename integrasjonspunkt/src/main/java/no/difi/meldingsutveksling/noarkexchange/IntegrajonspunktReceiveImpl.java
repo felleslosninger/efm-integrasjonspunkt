@@ -104,15 +104,10 @@ public class IntegrajonspunktReceiveImpl  implements SOAReceivePort {
         Payload payload = document.getPayload();
 
         byte[] decryptedPayload = decrypt(payload);
-        logEvent(document, null, ProcessState.DECRYPTION_SUCCESS);
+        logEvent(document, ProcessState.DECRYPTION_SUCCESS);
         File decompressedPayload;
-        try {
-            decompressedPayload = decompressToFile(document, decryptedPayload);
-            logEvent(document, null, ProcessState.BESTEDU_EXTRACTED);
-        } catch (IOException e) {
-            logEvent(document, e, ProcessState.SOME_OTHER_EXCEPTION);
-            throw new MeldingsUtvekslingRuntimeException(e);
-        }
+        decompressedPayload = decompressToFile(document, decryptedPayload);
+        logEvent(document, ProcessState.BESTEDU_EXTRACTED);
         PutMessageRequestType putMessageRequestType = extractBestEdu(inputDocument, decompressedPayload);
         forwardToNoarkSystemAndSendReceipt(document, putMessageRequestType);
 
@@ -125,16 +120,14 @@ public class IntegrajonspunktReceiveImpl  implements SOAReceivePort {
         return cmsUtil.decryptCMS(cmsEncZip, keyInfo.loadPrivateKey());
     }
 
-    private PutMessageRequestType extractBestEdu(StandardBusinessDocument standardBusinessDocument, File bestEdu) {
+    private PutMessageRequestType extractBestEdu(StandardBusinessDocument standardBusinessDocument, File bestEdu) throws MessageException {
         PutMessageRequestType putMessageRequestType;
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
             Unmarshaller unMarshaller = jaxbContext.createUnmarshaller();
             putMessageRequestType = unMarshaller.unmarshal(new StreamSource(bestEdu), PutMessageRequestType.class).getValue();
         } catch (JAXBException e) {
-            StandardBusinessDocumentWrapper inputDocument = new StandardBusinessDocumentWrapper(standardBusinessDocument);
-            logEvent(inputDocument, e, ProcessState.SOME_OTHER_EXCEPTION);
-            throw new IllegalStateException(e.getMessage(), e);
+            throw new MessageException(e, StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
         }
         return putMessageRequestType;
     }
@@ -144,16 +137,16 @@ public class IntegrajonspunktReceiveImpl  implements SOAReceivePort {
         if (response != null) {
             AppReceiptType result = response.getResult();
             if (null == result) {
-                logEvent(inputDocument, null, ProcessState.ARCHIVE_NULL_RESPONSE);
+                logEvent(inputDocument, ProcessState.ARCHIVE_NULL_RESPONSE);
             } else {
-                logEvent(inputDocument, null, ProcessState.BEST_EDU_SENT);
+                logEvent(inputDocument, ProcessState.BEST_EDU_SENT);
             }
         } else {
-            logEvent(inputDocument, null, ProcessState.ARCHIVE_NOT_AVAILABLE);
+            logEvent(inputDocument, ProcessState.ARCHIVE_NOT_AVAILABLE);
         }
     }
 
-    private File decompressToFile(StandardBusinessDocumentWrapper inputDocument, byte[] bytes) throws IOException {
+    private File decompressToFile(StandardBusinessDocumentWrapper inputDocument, byte[] bytes) throws MessageException {
         ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes));
         ZipEntry zipEntry = null;
         String outputFolder = System.getProperty("user.home") + File.separator + "testToRemove" +
@@ -161,52 +154,48 @@ public class IntegrajonspunktReceiveImpl  implements SOAReceivePort {
         File newFile = null;
         try {
             zipEntry = zipInputStream.getNextEntry();
-        } catch (IOException e) {
-            logEvent(inputDocument, e, ProcessState.SOME_OTHER_EXCEPTION);
-        }
-        while (null != zipEntry) {
-            String fileName = zipEntry.getName();
-            if ("edu_test.xml".equals(fileName)) {
+            while (null != zipEntry) {
+                String fileName = zipEntry.getName();
+                if ("edu_test.xml".equals(fileName)) {
 
-                newFile = new File(outputFolder + File.separator + fileName);
-                FileOutputStream fos = null;
-                new File(newFile.getParent()).mkdirs();
-                try {
-                    fos = new FileOutputStream(newFile);
-                } catch (FileNotFoundException e) {
-                    logEvent(inputDocument, e, ProcessState.SOME_OTHER_EXCEPTION);
+                    newFile = new File(outputFolder + File.separator + fileName);
+                    FileOutputStream fos = null;
+                    new File(newFile.getParent()).mkdirs();
+                    try {
+                        fos = new FileOutputStream(newFile);
+                    } catch (FileNotFoundException e) {
+                        throw new MessageException(e, StatusMessage.UNABLE_TO_EXTRACT_ZIP_CONTENTS);
+                    }
+                    byte[] bufbyte = new byte[MAGIC_NR];
+                    int len;
+                    while ((len = zipInputStream.read(bufbyte)) > 0) {
+
+                        fos.write(bufbyte, 0, len);
+                    }
+                    fos.close();
+
                 }
-                byte[] bufbyte = new byte[MAGIC_NR];
-                int len;
-                while ((len = zipInputStream.read(bufbyte)) > 0) {
-
-                    fos.write(bufbyte, 0, len);
-                }
-                fos.close();
-
+                zipEntry = zipInputStream.getNextEntry();
             }
-            zipEntry = zipInputStream.getNextEntry();
         }
-        zipInputStream.closeEntry();
-        zipInputStream.close();
+
+        catch (IOException e) {
+            throw new MessageException(e, StatusMessage.UNABLE_TO_EXTRACT_ZIP_CONTENTS);
+        }
+        try {
+            zipInputStream.closeEntry();
+            zipInputStream.close();
+        } catch (IOException e) {
+            throw new MeldingsUtvekslingRuntimeException(e);
+        }
         return newFile;
     }
 
 
-    private void logEvent(StandardBusinessDocumentWrapper inputDocument, ProcessState sbdRecieved) {
-        logEvent(inputDocument, null, sbdRecieved);
-    }
-
-    private void logEvent(StandardBusinessDocumentWrapper inputDocument, Throwable e, ProcessState processState) {
-        if (null != e) {
-            eventLog.log(new Event().setProcessStates(processState).setExceptionMessage(e.toString())
-                    .setReceiver(inputDocument.getReceiverOrgNumber())
-                    .setSender(inputDocument.getSenderOrgNumber()));
-        } else {
+    private void logEvent(StandardBusinessDocumentWrapper inputDocument, ProcessState processState) {
             eventLog.log(new Event().setProcessStates(processState)
                     .setReceiver(inputDocument.getReceiverOrgNumber())
                     .setSender(inputDocument.getSenderOrgNumber()));
-        }
     }
 
     public TransportFactory getTransportFactory() {
