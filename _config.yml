@@ -3,9 +3,9 @@ name: Om Meldingsutveksling i offentlig sektor
 siteUrlText: http://difi.github.io/meldingsutveksling-mellom-offentlige-virksomheter/
 
 # current version of the software
-version: 1.3
+version: Staging
 # url of the download button
-downloadUrl: https://beta-meldingsutveksling.difi.no/
+downloadUrl: https://beta-meldingsutveksling.difi.no/#nexus-search;quick~deploy-manager
 
 # licence of the software
 license: GPL-3 License

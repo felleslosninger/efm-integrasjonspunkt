@@ -43,7 +43,9 @@ Bruker du ny versjon av Java, så må ny JCE installeres. Last ned JCE fra [Orac
 Det er ikke noen enkel måte å sjekke om Java Cryptography Extension er installert. Ofte kan det enkleste være å bare laste ned og installere JCE, men om du ønsker å sjekke, kan du gå til mappen ```$JAVA_HOME/jre/lib/security``` og sjekke om filene ```US_export_policy.jar``` og ```local_policy.jar``` har nyere dato enn øvrige filer. Hvis datoen er lik, må du installere JCE.
 
 ### Opprette en bruker til Altinn formidlingstjeneste
-_Prosessen for oppretting av brukere til Altinn Formidlingstjeneste er under arbeid_
+
+Integrasjonspunktet kjører som et sluttbrukersystem mot AltInns meldingsformidler. Integrsjonspunktet må registeres som et [sluttbrukersystem](https://www.altinn.no/no/Portalhjelp/Datasystemer/Sende-fra-sluttbrukersystem-datasystem/) i AltInns portal
+Informasjon om hvordan du logger på AltInn portal finner du [her](https://www.altinn.no/no/Portalhjelp/Innlogging-og-rapportering/).
 
 ### Sette opp sertifikat i Java Key Store (JKS)
 Under piloten vil det kjøre med sertifikatkjede der Difi er Trusted Root. Deltagere vil derfor få tildelt sertifikater etterhvert som de blir en del av piloten.
@@ -51,6 +53,7 @@ Under piloten vil det kjøre med sertifikatkjede der Difi er Trusted Root. Delta
 Når du har fått sertifikatet, må det legges inn på maskinen. Noter deg lokasjonen for sertifikatet, samt brukernavn og passord. Dette legges inn som en del av [Konfigurasjonen](#konfigurasjon)
 
 
+<<<<<<< HEAD
 ### Laste opp public virksomhetssertifikat til virksomhetssertifikatserveren
 Sertifikatet kan lastes opp til [staging-/demo-server her](http://beta-meldingsutveksling.difi.no:9998)
 
@@ -74,17 +77,34 @@ _Under arbeid_
 
 ## Dersom du ønsker at Integrasjonspunktet skal overvåkes sentralt
 Sentral overvåking innebærer at status samt en del statistikk sendes sentralt. Man vil tidlig få melding om feil, og man kan i enkelte tilfeller rette feilen før den påvirker produksjonen (før en feilet melding blir savnet).
+=======
+### Laste opp public virksomhetssertifikat
+Sertifikatet kan lastes opp til [virksomhetssertifikatserveren](http://virksert.herokuapp.com/)
 
-**Parametre for aktivering av sentral overvåking**
-1. spring.boot.admin.url
-2. spring.boot.admin.client.name
-3. spring.boot.admin.autoDeregistration
-4. spring.boot.admin.client.serviceUrl
+### Konfigurere sak-/arkivsystem til å bruke Integrsjonspunktet
 
+Oppsett for Acos, ePhorte, [P360](../resources/Oppsett360.docx)
+
+### Sentral kontroll på integrasjonspunkt
+Sentral overvåking innebærer at status samt en del statistikk sendes sentralt. Man vil tidligere få melding om feil, og man kan i enkelte tilfeller rette feilen før den påvirker produksjonen (før en feilet melding blir savnet).
+>>>>>>> origin/gh-pages
+
+** Parametre for aktivering av sentral overvåking **
+* spring.boot.admin.url
+* spring.boot.admin.client.name
+* spring.boot.admin.autoDeregistration
+* spring.boot.admin.client.serviceUrl
+
+<<<<<<< HEAD
 ## Feilsøking
 Dersom du får feilmeldingen av typen : 
 `javax.xml.ws.WebServiceException: Failed to access the WSDL at: https://at06.altinn.basefarm.net/ServiceEngineExternal/BrokerServiceExternalBasic.svc?wsdl. It failed with: 
     sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target.`
 
 Sertifikatet må da installeres i JKS fila _cacerts_ som ligger i _$JAVA_HOME/jre/lib/security_. For dette formålet kan du bruke verktøyet **Portecle** etter guiden [Connecting to ssl services](https://confluence.atlassian.com/jira/connecting-to-ssl-services-117455.html). Da tar man inspect SSL certificate mot URL i feilmeldingen. I eksempelet over er det at06.altinn.basefarm.net
+=======
+### Kjøre integrasjonspunktet
+Når DeployMangager er startet vil denne automatisk laste ned og starte siste versjon av integrasjonspunktet.
+
+>>>>>>> origin/gh-pages
 
