@@ -19,7 +19,7 @@ Deploy Manageren holder underordnede applikasjoner oppdatert ved å sjekke om ny
 Deploy Manager kan startes ved å laste ned jar-filen, og startes fra kommandolinjen og startes med kommandoen 
 
 ```
-java -jar deploy-manager[versjon].jar -Dapplication.runtime.environment=staging
+java -jar -Dapplication.runtime.environment=staging  deploy-manager[versjon].jar
 ```
 
 
