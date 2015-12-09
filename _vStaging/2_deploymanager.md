@@ -16,8 +16,10 @@ Ved å installere Deploy Manageren vil man sikre at siste fungerende versjon av 
 Deploy Manageren holder underordnede applikasjoner oppdatert ved å sjekke om ny versjon er tilgjengelig, laste ned og restarte applikasjoner. 
 
 ### Installasjon/start
-Deploy Manager kan startes ved å laste ned jar-filen, og startes fra kommandolinjen og startes med kommandoen ```
-java -jar deploy-manager[versjon].jar
+Deploy Manager kan startes ved å laste ned jar-filen, og startes fra kommandolinjen og startes med kommandoen 
+
+```
+java -jar deploy-manager[versjon].jar -Dapplication.runtime.environment=staging
 ```
 
 
