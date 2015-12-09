@@ -35,6 +35,7 @@ import java.util.UUID;
 @Component
 public class StandardBusinessDocumentFactory {
 
+    public static final String DOCUMENT_TYPE_MELDING = "melding";
     private static JAXBContext jaxbContextdomain;
 
     @Autowired
@@ -63,7 +64,7 @@ public class StandardBusinessDocumentFactory {
         return create(sender, UUID.randomUUID().toString(), avsender, mottaker);
     }
 
-    public Document create(PutMessageRequestType shipment, String id, Avsender avsender, Mottaker mottaker) throws MessageException {
+    public Document create(PutMessageRequestType shipment, String conversationId, Avsender avsender, Mottaker mottaker) throws MessageException {
         final byte[] marshalledShipment = marshall(shipment);
 
         BestEduMessage bestEduMessage = new BestEduMessage(marshalledShipment);
@@ -75,7 +76,8 @@ public class StandardBusinessDocumentFactory {
         }
         Payload payload = new Payload(encryptArchive(mottaker, archive));
 
-        return new CreateSBD().createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload, id, "melding");
+        final JournalpostId journalpostId = JournalpostId.fromPutMessage(new PutMessageRequestAdapter(shipment));
+        return new CreateSBD().createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload, conversationId, DOCUMENT_TYPE_MELDING, journalpostId.value());
     }
 
     private byte[] encryptArchive(Mottaker mottaker, Archive archive) {
