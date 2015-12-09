@@ -19,6 +19,8 @@ public class StandardBusinessDocumentWrapper {
 
     private final StandardBusinessDocument document;
 
+    private static final String KVITTERING_CONSTANT = "kvittering";
+
     public StandardBusinessDocumentWrapper(StandardBusinessDocument standardBusinessDocument) {
         this.document = standardBusinessDocument;
     }
@@ -51,6 +53,10 @@ public class StandardBusinessDocumentWrapper {
             }
         }
         return new Scope();
+    }
+
+    public boolean isReciept() {
+        return document.getStandardBusinessDocumentHeader().getDocumentIdentification().getType().equalsIgnoreCase(KVITTERING_CONSTANT);
     }
 
     public Payload getPayload() {

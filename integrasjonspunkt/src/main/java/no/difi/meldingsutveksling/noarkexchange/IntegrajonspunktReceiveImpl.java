@@ -14,10 +14,10 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.CorrelationInformation;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
-import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
-import no.difi.meldingsutveksling.services.CertificateException;
 import no.difi.meldingsutveksling.transport.TransportFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,6 +37,8 @@ import java.io.IOException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
+
 /**
  *
  */
@@ -46,9 +48,10 @@ import java.util.zip.ZipInputStream;
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
 public class IntegrajonspunktReceiveImpl  implements SOAReceivePort {
 
+    private Logger logger = LoggerFactory.getLogger(IntegrasjonspunktImpl.class);
+
     private static final String KVITTERING = "Kvittering";
     private static final String BEST_EDU = "BEST_EDU";
-    private static final String KVITTERING_CONSTANT = "kvittering";
     private static final int MAGIC_NR = 1024;
     public static final String SBD_NAMESPACE = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader";
     private EventLog eventLog = EventLog.create();
@@ -76,38 +79,42 @@ public class IntegrajonspunktReceiveImpl  implements SOAReceivePort {
     }
 
     public CorrelationInformation receive(@WebParam(name = "StandardBusinessDocument", targetNamespace = SBD_NAMESPACE, partName = "receiveResponse") StandardBusinessDocument standardBusinessDocument) {
-        return forwardToNoarkSystem(standardBusinessDocument);
+
+        try {
+            return forwardToNoarkSystem(standardBusinessDocument);
+        } catch (MessageException e) {
+            logger.error(markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)),
+                    e.getStatusMessage().getTechnicalMessage(), e);
+            return new CorrelationInformation();
+        }
     }
 
-    public CorrelationInformation forwardToNoarkSystem(StandardBusinessDocument standardBusinessDocument) {
-        StandardBusinessDocumentWrapper inputDocument = new StandardBusinessDocumentWrapper(standardBusinessDocument);
+    public CorrelationInformation forwardToNoarkSystem(StandardBusinessDocument inputDocument) throws MessageException {
+        StandardBusinessDocumentWrapper document = new StandardBusinessDocumentWrapper(inputDocument);
+        adresseregisterService.validateCertificates(document);
 
-        if (!validateCertificates(inputDocument)) {
-            throw new MeldingsUtvekslingRuntimeException("invalid certificate for sender or recipient (" + inputDocument.getSenderOrgNumber() + "," + inputDocument.getReceiverOrgNumber());
-        }
-
-        if (isReciept(standardBusinessDocument.getStandardBusinessDocumentHeader())) {
-            logEvent(inputDocument, ProcessState.KVITTERING_MOTTATT);
+        if (document.isReciept()) {
+            logEvent(document, ProcessState.KVITTERING_MOTTATT);
             return new CorrelationInformation();
         }
 
 
-        logEvent(inputDocument, ProcessState.SBD_RECIEVED);
+        logEvent(document, ProcessState.SBD_RECIEVED);
 
-        Payload payload = inputDocument.getPayload();
+        Payload payload = document.getPayload();
 
         byte[] decryptedPayload = decrypt(payload);
-        logEvent(inputDocument, null, ProcessState.DECRYPTION_SUCCESS);
+        logEvent(document, null, ProcessState.DECRYPTION_SUCCESS);
         File decompressedPayload;
         try {
-            decompressedPayload = decompressToFile(inputDocument, decryptedPayload);
-            logEvent(inputDocument, null, ProcessState.BESTEDU_EXTRACTED);
+            decompressedPayload = decompressToFile(document, decryptedPayload);
+            logEvent(document, null, ProcessState.BESTEDU_EXTRACTED);
         } catch (IOException e) {
-            logEvent(inputDocument, e, ProcessState.SOME_OTHER_EXCEPTION);
+            logEvent(document, e, ProcessState.SOME_OTHER_EXCEPTION);
             throw new MeldingsUtvekslingRuntimeException(e);
         }
-        PutMessageRequestType putMessageRequestType = extractBestEdu(standardBusinessDocument, decompressedPayload);
-        forwardToNoarkSystemAndSendReceipt(inputDocument, putMessageRequestType);
+        PutMessageRequestType putMessageRequestType = extractBestEdu(inputDocument, decompressedPayload);
+        forwardToNoarkSystemAndSendReceipt(document, putMessageRequestType);
 
         return new CorrelationInformation();
     }
@@ -116,18 +123,6 @@ public class IntegrajonspunktReceiveImpl  implements SOAReceivePort {
         byte[] cmsEncZip = DatatypeConverter.parseBase64Binary(payload.getContent());
         CmsUtil cmsUtil = new CmsUtil();
         return cmsUtil.decryptCMS(cmsEncZip, keyInfo.loadPrivateKey());
-    }
-
-    private boolean validateCertificates(StandardBusinessDocumentWrapper documentWrapper) {
-        boolean validCertificates;
-        try {
-            adresseregisterService.getCertificate(documentWrapper.getReceiverOrgNumber());
-            adresseregisterService.getCertificate(documentWrapper.getSenderOrgNumber());
-            validCertificates = true;
-        } catch (CertificateException e) {
-            validCertificates = false;
-        }
-        return validCertificates;
     }
 
     private PutMessageRequestType extractBestEdu(StandardBusinessDocument standardBusinessDocument, File bestEdu) {
@@ -156,10 +151,6 @@ public class IntegrajonspunktReceiveImpl  implements SOAReceivePort {
         } else {
             logEvent(inputDocument, null, ProcessState.ARCHIVE_NOT_AVAILABLE);
         }
-    }
-
-    private boolean isReciept(StandardBusinessDocumentHeader standardBusinessDocumentHeader) {
-        return standardBusinessDocumentHeader.getDocumentIdentification().getType().equalsIgnoreCase(KVITTERING_CONSTANT);
     }
 
     private File decompressToFile(StandardBusinessDocumentWrapper inputDocument, byte[] bytes) throws IOException {
