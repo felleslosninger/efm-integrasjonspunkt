@@ -19,7 +19,6 @@ Driftsalternativer. Kan din driftsorganisasjon forvalte integrasjonspunktet?
 * Java Keystore nøkkelord (brukes for å finne riktig sertifikat i keystore)
 * Hvilken port Integrasjonspunktet kan bruke
 * Hvilken port Deploy Manageren kan bruke
-
 * URL til MSH (Dette gjelder kun dersom du bruker BestEdu fra tidligere og kommuniserer med mottakere som ikke deltar i piloten)
 
 

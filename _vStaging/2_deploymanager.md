@@ -49,12 +49,7 @@ Filen navngis som monitorApps.json og legges under \data
 ### Verifisere at alt er oppe og snurrer
 Etter at Deploy Manageren er startet, vil den hente siste versjon av Integrasjonspunktet og starte det. Dette kan ta et par minutter.
 
-Når Integrasjonspunktet er klart, kan du åpne en nettleser og taste 
-
-```http://localhost:9000/api/running```. 
-
+Når Integrasjonspunktet er klart, kan du åpne en nettleser og taste ```http://localhost:9000/api/running```. 
 Da vil du få en oversikt over applikasjoner som Deploy Manager kjører. 
 
-```http://localhost:<port-til-integrasjonspunkt>/noarkExchange?wsdl``` 
-
-gir response i form av en wsdl når Integrasjonspunktet har startet.
+```http://localhost:<port-til-integrasjonspunkt>/noarkExchange?wsdl``` gir response i form av en wsdl når Integrasjonspunktet har startet.
