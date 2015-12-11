@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.domain;
 
-public class MeldingsUtvekslingRequiredPropertyException extends Throwable {
+public class MeldingsUtvekslingRequiredPropertyException extends Exception {
     public MeldingsUtvekslingRequiredPropertyException(String message) {
         super(message);
     }
