@@ -7,11 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
-@Service
+@Component
 @PropertySources(value = {
         @PropertySource("classpath:properties/application.properties"),
         @PropertySource("classpath:properties/integrasjonspunkt.properties"),
@@ -28,19 +28,41 @@ public class IntegrasjonspunktConfiguration {
     private static final String KEY_ALTINN_SERVICE_CODE = "altinn.external_service_code";
     private static final String KEY_ALTINN_SERVICE_EDITION_CODE = "altinn.external_service_edition_code";
 
+    protected static final String KEY_NOARKSYSTEM_ENDPOINT = "noarksystem.endpointURL";
+    private static final String KEY_NOARKSYSTEM_USERNAME = "noarksystem.userName";
+    private static final String KEY_NOARKSYSTEM_PASSWORD = "noarksystem.password";
+    private static final String KEY_NOARKSYSTEM_DOMAIN = "noarksystem.domain";
+
+    private static final String KEY_MSH_ENDPOINT = "msh.endpointURL";
+    private static final String KEY_MSH_USERNAME = "msh.userName";
+    private static final String KEY_MSH_PASSWORD = "msh.password";
+
+    protected static final String KEY_ADRESSEREGISTER_ENDPOINT = "adresseregister.endPointURL";
+    private static final String KEY_ADRESSEREGISTER_USERNAME = "adresseregister.userName";
+    private static final String KEY_ADRESSEREGISTER_PASSWORD = "adresseregister.password";
+
+    protected static final String KEY_PRIVATEKEYALIAS = "privatekeyalias";
+    protected static final String KEY_KEYSTORE_LOCATION = "keystorelocation";
+    protected static final String KEY_PRIVATEKEYPASSWORD = "privatekeypassword";
+    protected static final String NOARKSYSTEM_TYPE = "noarksystem.type";
+    private static final String PARTY_NUMBER = "party_number";
+
     private Environment environment;
 
     @Autowired
     public IntegrasjonspunktConfiguration(Environment environment) throws MeldingsUtvekslingRequiredPropertyException {
         this.environment = environment;
+
+        validateProperty(KEY_NOARKSYSTEM_ENDPOINT);
+        validateProperty(KEY_ADRESSEREGISTER_ENDPOINT);
+        validateProperty(KEY_PRIVATEKEYALIAS);
+        validateProperty(KEY_KEYSTORE_LOCATION);
+        validateProperty(KEY_PRIVATEKEYPASSWORD);
+        validateProperty(NOARKSYSTEM_TYPE);
     }
 
     public String getProfile() {
         return this.environment.getProperty("spring.profiles.active");
-    }
-
-    public String getOrganisationNumber() {
-        return environment.getProperty(KEY_ORGANISATION_NUMBER);
     }
 
     public boolean isQueueEnabled() {
@@ -52,12 +74,8 @@ public class IntegrasjonspunktConfiguration {
         return orgNumber != null && !orgNumber.isEmpty();
     }
 
-    private void validateProperty(String key) throws MeldingsUtvekslingRequiredPropertyException {
-        if (isBlank(environment.getProperty(key))) {
-            String message = String.format("Required property %s is missing. Check if parameter for key is set, either in integrasjonspunkt-local.properties or set as in-parameter on startup.", key);
-            log.error(message);
-            throw new MeldingsUtvekslingRequiredPropertyException(message);
-        }
+    public String getOrganisationNumber() {
+        return environment.getProperty(KEY_ORGANISATION_NUMBER);
     }
 
     public String getAltinnUsername() {
@@ -74,5 +92,49 @@ public class IntegrasjonspunktConfiguration {
 
     public String getAltinnServiceEditionCode() {
         return environment.getProperty(KEY_ALTINN_SERVICE_EDITION_CODE);
+    }
+
+    public String getAdresseRegisterEndPointURL() {
+        return environment.getProperty(KEY_ADRESSEREGISTER_ENDPOINT);
+    }
+
+    public String getKeyStoreLocation() {
+        return environment.getProperty(KEY_KEYSTORE_LOCATION);
+    }
+
+    public String getPrivateKeyPassword() {
+        return environment.getProperty(KEY_PRIVATEKEYPASSWORD);
+    }
+
+    public String getPrivateKeyAlias() {
+        return environment.getProperty(KEY_PRIVATEKEYALIAS);
+    }
+
+    public String getNoarkType() {
+        return environment.getProperty(NOARKSYSTEM_TYPE);
+    }
+
+    private void validateProperty(String key) throws MeldingsUtvekslingRequiredPropertyException {
+        if (isBlank(environment.getRequiredProperty(key))) {
+            String message = String.format("Required property %s is missing. Check if parameter for key is set, either in integrasjonspunkt-local.properties or set as in-parameter on startup.", key);
+            log.error(message);
+            throw new MeldingsUtvekslingRequiredPropertyException(message);
+        }
+    }
+
+    private String getNOARKSystemEndPointURL() {
+        return environment.getProperty(KEY_NOARKSYSTEM_ENDPOINT);
+    }
+
+    private String getNoarksystemUsername() {
+        return environment.getProperty(KEY_NOARKSYSTEM_USERNAME);
+    }
+
+    private String getKeyNoarksystemPassword() {
+        return environment.getProperty(KEY_NOARKSYSTEM_PASSWORD);
+    }
+
+    private String getNoarksystemDomain() {
+        return environment.getProperty(KEY_NOARKSYSTEM_DOMAIN);
     }
 }
