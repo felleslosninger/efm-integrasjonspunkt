@@ -34,47 +34,47 @@ public class IntegrasjonspunktConfigurationProductionIntegrationTest {
     }
 
     @Test
-    public void shouldHaveEndpointsEnabledWhenStagingEnvironment() {
+    public void shouldHaveEndpointsEnabledWhenProductionEnvironment() {
         assertEquals("false", environment.getProperty("endpoints.enabled"));
     }
 
     @Test
-    public void shouldHaveDisabledSecurityWhenStagingEnvironment() {
+    public void shouldHaveEnabledSecurityWhenProductionEnvironment() {
         assertEquals("true", environment.getProperty("security.basic.enabled"));
     }
 
     @Test
-    public void shouldHaveDisabledHealthSensitiveInformationWhenStagingEnvironment() {
+    public void shouldHaveDisabledHealthSensitiveInformationWhenProductionEnvironment() {
         assertEquals("false", environment.getProperty("endpoints.health.sensitive"));
     }
 
     @Test
-    public void shouldHaveEnabledQueueFeatureToggleWhenStagingEnvironment() {
+    public void shouldHaveEnabledQueueFeatureToggleWhenProductionEnvironment() {
         assertEquals(true, configuration.isQueueEnabled());
     }
 
     @Test
-    public void shouldHaveOrganizationNumberWhenStagingEnvironment() {
+    public void shouldHaveOrganizationNumberWhenProductionEnvironment() {
         assertEquals(false, configuration.hasOrganisationNumber());
     }
 
     @Test
-    public void shouldHaveStagingAltinnUsernameDefaultWhenStagingEnvironment() {
+    public void shouldHaveProductionAltinnUsernameDefaultWhenProductionEnvironment() {
         assertNotNull(configuration.getAltinnUsername());
     }
 
     @Test
-    public void shouldHaveStagingAltinnPasswordDefaultWhenStagingEnvironment() {
+    public void shouldHaveProductionAltinnPasswordDefaultWhenProductionEnvironment() {
         assertNotNull(configuration.getAltinnPassword());
     }
 
     @Test
-    public void shouldHaveAltinnExternalServiceCodeForTestWhenStagingEnvironment() {
+    public void shouldHaveAltinnExternalServiceCodeForTestWhenProductionEnvironment() {
         assertEquals("", configuration.getAltinnServiceCode());
     }
 
     @Test
-    public void shouldHaveAltinnExternalServiceEditionCodeForTestWhenStagingEnvironment() {
+    public void shouldHaveAltinnExternalServiceEditionCodeForTestWhenProductionEnvironment() {
         assertEquals("", configuration.getAltinnServiceEditionCode());
     }
 }

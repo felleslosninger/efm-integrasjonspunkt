@@ -37,7 +37,7 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 public class IntegrasjonspunktConfig {
     private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktConfig.class);
 
-    private static final String PROPERTIES_FILE_NAME = "integrasjonspunkt.properties";
+    private static final String PROPERTIES_FILE_NAME = "properties/integrasjonspunkt.properties";
     private static final String PROPERTIES_FILE_NAME_OVERRIDE = "integrasjonspunkt-local.properties";
 
     static final String KEY_NOARKSYSTEM_ENDPOINT = "noarksystem.endpointURL";

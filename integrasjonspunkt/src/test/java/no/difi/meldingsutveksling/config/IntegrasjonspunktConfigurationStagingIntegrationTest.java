@@ -39,7 +39,7 @@ public class IntegrasjonspunktConfigurationStagingIntegrationTest {
     }
 
     @Test
-    public void shouldHaveDisabledSecurityWhenStagingEnvironment() {
+    public void shouldHaveEnabledSecurityWhenStagingEnvironment() {
         assertEquals("true", environment.getProperty("security.basic.enabled"));
     }
 

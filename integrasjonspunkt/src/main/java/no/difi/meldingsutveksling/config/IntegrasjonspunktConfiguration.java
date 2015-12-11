@@ -13,6 +13,8 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 
 @Service
 @PropertySources(value = {
+        @PropertySource("classpath:properties/application.properties"),
+        @PropertySource("classpath:properties/integrasjonspunkt.properties"),
         @PropertySource("classpath:properties/application-${spring.profiles.active}.properties"),
         @PropertySource("classpath:properties/integrasjonspunkt-${spring.profiles.active}.properties"),
         @PropertySource("classpath:integrasjonspunkt-local.properties")
@@ -27,7 +29,6 @@ public class IntegrasjonspunktConfiguration {
     private static final String KEY_ALTINN_SERVICE_EDITION_CODE = "altinn.external_service_edition_code";
 
     private Environment environment;
-    private String altinnServiceEditionCode;
 
     @Autowired
     public IntegrasjonspunktConfiguration(Environment environment) throws MeldingsUtvekslingRequiredPropertyException {
