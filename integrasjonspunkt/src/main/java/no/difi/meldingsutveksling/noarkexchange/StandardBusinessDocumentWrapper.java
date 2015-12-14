@@ -1,13 +1,16 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import no.difi.meldingsutveksling.dokumentpakking.service.ScopeFactory;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.noarkexchange.schema.receive.Scope;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.w3c.dom.Node;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import java.util.List;
 
 /**
  * Wrapper class for StandardBusinessDocument to simplify the interface and hide implementation details
@@ -15,6 +18,8 @@ import javax.xml.bind.Unmarshaller;
 public class StandardBusinessDocumentWrapper {
 
     private final StandardBusinessDocument document;
+
+    private static final String KVITTERING_CONSTANT = "kvittering";
 
     public StandardBusinessDocumentWrapper(StandardBusinessDocument standardBusinessDocument) {
         this.document = standardBusinessDocument;
@@ -26,6 +31,32 @@ public class StandardBusinessDocumentWrapper {
 
     public String getReceiverOrgNumber() {
         return document.getStandardBusinessDocumentHeader().getReceiver().get(0).getIdentifier().getValue().split(":")[1];
+    }
+
+    public String getDocumentId() {
+        return document.getStandardBusinessDocumentHeader().getDocumentIdentification().getInstanceIdentifier();
+    }
+
+    public String getConversationId() {
+        return findScope(ScopeFactory.TYPE_CONVERSATIONID).getInstanceIdentifier();
+    }
+
+    public final String getJournalPostId() {
+        return findScope(ScopeFactory.TYPE_JOURNALPOST_ID).getInstanceIdentifier();
+    }
+
+    private Scope findScope(String scopeType) {
+        final List<Scope> scopes = document.getStandardBusinessDocumentHeader().getBusinessScope().getScope();
+        for(Scope scope : scopes) {
+            if(scopeType.equals(scope.getType())) {
+                return scope;
+            }
+        }
+        return new Scope();
+    }
+
+    public boolean isReciept() {
+        return document.getStandardBusinessDocumentHeader().getDocumentIdentification().getType().equalsIgnoreCase(KVITTERING_CONSTANT);
     }
 
     public Payload getPayload() {

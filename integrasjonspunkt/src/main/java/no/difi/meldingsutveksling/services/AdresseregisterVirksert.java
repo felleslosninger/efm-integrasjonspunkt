@@ -1,6 +1,9 @@
 package no.difi.meldingsutveksling.services;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
+import no.difi.meldingsutveksling.noarkexchange.MessageException;
+import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
+import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import no.difi.virksert.client.VirksertClient;
 import no.difi.virksert.client.VirksertClientBuilder;
 import no.difi.virksert.client.VirksertClientException;
@@ -12,7 +15,7 @@ import java.security.cert.Certificate;
 
 
 @Component
-public class AdresseregisterVirksert implements AdresseregisterService {
+public class AdresseregisterVirksert {
 
     @Autowired
     IntegrasjonspunktConfig configuration;
@@ -20,6 +23,10 @@ public class AdresseregisterVirksert implements AdresseregisterService {
     private VirksertClient virksertClient;
 
     public AdresseregisterVirksert() {
+    }
+
+    public AdresseregisterVirksert(VirksertClient virksertClient) {
+        this.virksertClient = virksertClient;
     }
 
     @PostConstruct
@@ -38,8 +45,20 @@ public class AdresseregisterVirksert implements AdresseregisterService {
         this.configuration = configuration;
     }
 
-    @Override
-    public Certificate getCertificate(String orgNumber) {
+    public void validateCertificates(StandardBusinessDocumentWrapper documentWrapper) throws MessageException {
+        try {
+            getCertificate(documentWrapper.getReceiverOrgNumber());
+        } catch (CertificateException e) {
+            throw new MessageException(e, StatusMessage.MISSING_RECIEVER_CERTIFICATE);
+        }
+        try {
+            getCertificate(documentWrapper.getSenderOrgNumber());
+        } catch (CertificateException e) {
+            throw new MessageException(e, StatusMessage.MISSING_SENDER_CERTIFICATE);
+        }
+    }
+
+    public Certificate getCertificate(String orgNumber) throws CertificateException {
         try {
             return virksertClient.fetch(orgNumber);
         } catch (VirksertClientException e) {

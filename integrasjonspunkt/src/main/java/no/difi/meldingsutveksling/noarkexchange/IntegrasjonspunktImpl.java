@@ -15,7 +15,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.SOAPport;
 import no.difi.meldingsutveksling.queue.service.Queue;
-import no.difi.meldingsutveksling.services.AdresseregisterService;
+import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
 import org.jboss.logging.MDC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +47,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
     private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktImpl.class);
 
     @Autowired
-    private AdresseregisterService adresseregister;
+    AdresseregisterVirksert adresseregister;
 
     @Autowired
     private MessageSender messageSender;
@@ -147,11 +147,11 @@ public class IntegrasjonspunktImpl implements SOAPport {
         }
     }
 
-    public AdresseregisterService getAdresseRegister() {
+    public AdresseregisterVirksert getAdresseRegister() {
         return adresseregister;
     }
 
-    public void setAdresseRegister(AdresseregisterService adresseRegisterClient) {
+    public void setAdresseRegister(AdresseregisterVirksert adresseRegisterClient) {
         this.adresseregister = adresseRegisterClient;
     }
 

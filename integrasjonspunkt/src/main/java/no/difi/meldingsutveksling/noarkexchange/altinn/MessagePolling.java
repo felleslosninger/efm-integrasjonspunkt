@@ -12,6 +12,8 @@ import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.elma.ELMALookup;
 import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
+import no.difi.meldingsutveksling.noarkexchange.MessageException;
+import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import no.difi.vefa.peppol.common.model.Endpoint;
 import no.difi.vefa.peppol.lookup.api.LookupException;
@@ -27,6 +29,8 @@ import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
+
+import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
 /**
  * MessagePolling periodically checks Altinn Formidlingstjeneste for new messages. If new messages are discovered they
@@ -92,10 +96,14 @@ public class MessagePolling {
                     = (JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument>)
                     jaxbContext.createUnmarshaller().unmarshal(new ByteArrayInputStream(tmp));
 
-            integrajonspunktReceive.forwardToNoarkSystem(toDocument.getValue());
+            final StandardBusinessDocument standardBusinessDocument = toDocument.getValue();
+            try {
+                integrajonspunktReceive.forwardToNoarkSystem(standardBusinessDocument);
+            } catch (MessageException e) {
+                logger.error(markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)), e.getStatusMessage().getTechnicalMessage(), e);
+            }
         } catch (JAXBException e) {
-            e.printStackTrace();
-            logger.error(e.getMessage(), e);
+            throw new MeldingsUtvekslingRuntimeException("Could not forward document to archive system", e);
         }
     }
 }

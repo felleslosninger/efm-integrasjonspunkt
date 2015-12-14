@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
-import no.difi.meldingsutveksling.services.AdresseregisterService;
+import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
 import no.difi.meldingsutveksling.services.CertificateException;
 import no.difi.virksert.client.VirksertClientException;
 import org.hamcrest.Description;
@@ -28,7 +28,7 @@ public class MessageSenderTest {
     public ExpectedException expectedException = ExpectedException.none();
 
     @Mock
-    private AdresseregisterService adresseregister;
+    private AdresseregisterVirksert adresseregister;
 
     @Mock
     private IntegrasjonspunktConfig config;
@@ -54,7 +54,7 @@ public class MessageSenderTest {
     }
 
     @Test
-    public void shouldThrowMessageContextExceptionWhenMissingRecipientCertificate() throws MessageContextException {
+    public void shouldThrowMessageContextExceptionWhenMissingRecipientCertificate() throws MessageContextException, CertificateException {
         expectedException.expect(MessageContextException.class);
         expectedException.expect(new StatusMatches(StatusMessage.MISSING_RECIEVER_CERTIFICATE));
         PutMessageRequestAdapter requestAdapter = new RequestBuilder().withSender().withReciever().build();
@@ -65,7 +65,7 @@ public class MessageSenderTest {
     }
 
     @Test
-    public void shouldThrowMessageContextExceptionWhenMissingSenderCertificate() throws MessageContextException {
+    public void shouldThrowMessageContextExceptionWhenMissingSenderCertificate() throws CertificateException, MessageContextException {
         expectedException.expect(MessageContextException.class);
         expectedException.expect(new StatusMatches(StatusMessage.MISSING_SENDER_CERTIFICATE));
         PutMessageRequestAdapter requestAdapter = new RequestBuilder().withSender().withReciever().build();
@@ -121,4 +121,6 @@ public class MessageSenderTest {
             mismatchDescription.appendText("was ").appendValue(exception.getStatusMessage());
         }
     }
+
+
 }

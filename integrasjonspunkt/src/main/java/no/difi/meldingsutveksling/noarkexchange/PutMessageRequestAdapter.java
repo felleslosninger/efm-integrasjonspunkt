@@ -56,4 +56,8 @@ public class PutMessageRequestAdapter {
     public Object getPayload() {
         return requestType.getPayload();
     }
+
+    public PutMessageRequestType getRequest() {
+        return requestType;
+    }
 }
