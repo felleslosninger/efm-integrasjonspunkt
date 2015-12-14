@@ -50,13 +50,9 @@ public class IntegrajonspunktReceiveImpl  implements SOAReceivePort {
 
     private Logger logger = LoggerFactory.getLogger(IntegrasjonspunktImpl.class);
 
-    private static final String KVITTERING = "Kvittering";
-    private static final String BEST_EDU = "BEST_EDU";
     private static final int MAGIC_NR = 1024;
     public static final String SBD_NAMESPACE = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader";
     private EventLog eventLog = EventLog.create();
-    private static final String MIME_TYPE = "application/xml";
-    private static final String WRITE_TO = System.getProperty("user.home") + File.separator + "testToRemove" + File.separator + "kvitteringSbd.xml";
 
     @Autowired
     TransportFactory transportFactory;
@@ -106,9 +102,9 @@ public class IntegrajonspunktReceiveImpl  implements SOAReceivePort {
         byte[] decryptedPayload = decrypt(payload);
         logEvent(document, ProcessState.DECRYPTION_SUCCESS);
         File decompressedPayload;
-        decompressedPayload = decompressToFile(document, decryptedPayload);
+        decompressedPayload = decompressToFile(decryptedPayload);
         logEvent(document, ProcessState.BESTEDU_EXTRACTED);
-        PutMessageRequestType putMessageRequestType = extractBestEdu(inputDocument, decompressedPayload);
+        PutMessageRequestType putMessageRequestType = extractBestEdu(decompressedPayload);
         forwardToNoarkSystemAndSendReceipt(document, putMessageRequestType);
 
         return new CorrelationInformation();
@@ -120,7 +116,7 @@ public class IntegrajonspunktReceiveImpl  implements SOAReceivePort {
         return cmsUtil.decryptCMS(cmsEncZip, keyInfo.loadPrivateKey());
     }
 
-    private PutMessageRequestType extractBestEdu(StandardBusinessDocument standardBusinessDocument, File bestEdu) throws MessageException {
+    private PutMessageRequestType extractBestEdu(File bestEdu) throws MessageException {
         PutMessageRequestType putMessageRequestType;
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
@@ -146,9 +142,9 @@ public class IntegrajonspunktReceiveImpl  implements SOAReceivePort {
         }
     }
 
-    private File decompressToFile(StandardBusinessDocumentWrapper inputDocument, byte[] bytes) throws MessageException {
+    private File decompressToFile(byte[] bytes) throws MessageException {
         ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes));
-        ZipEntry zipEntry = null;
+        ZipEntry zipEntry;
         String outputFolder = System.getProperty("user.home") + File.separator + "testToRemove" +
                 File.separator + "Zip Output";
         File newFile = null;
@@ -159,7 +155,7 @@ public class IntegrajonspunktReceiveImpl  implements SOAReceivePort {
                 if ("edu_test.xml".equals(fileName)) {
 
                     newFile = new File(outputFolder + File.separator + fileName);
-                    FileOutputStream fos = null;
+                    FileOutputStream fos;
                     new File(newFile.getParent()).mkdirs();
                     try {
                         fos = new FileOutputStream(newFile);

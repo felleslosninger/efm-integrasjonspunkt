@@ -56,7 +56,7 @@ public class StandardBusinessDocumentWrapperTest {
     }
 
     @Test
-    public void testGetDocumentId() throws Exception {
+    public void getDocumentIdReturnsDocumentInstanceIdentifier() throws Exception {
         StandardBusinessDocumentWrapper wrapper = new StandardBusinessDocumentWrapper(standardBusinessDocument);
 
         final String actual = wrapper.getDocumentId();
@@ -65,7 +65,7 @@ public class StandardBusinessDocumentWrapperTest {
     }
 
     @Test
-    public void testGetConversationId() throws Exception {
+    public void getConversationIdReturnsConversationId() throws Exception {
         StandardBusinessDocumentWrapper wrapper = new StandardBusinessDocumentWrapper(standardBusinessDocument);
 
         final String actual = wrapper.getConversationId();
@@ -74,7 +74,7 @@ public class StandardBusinessDocumentWrapperTest {
     }
 
     @Test
-    public void testGetJournalPostId() {
+    public void getJournalPostIdReturnsJournalPostId() {
         StandardBusinessDocumentWrapper wrapper = new StandardBusinessDocumentWrapper(standardBusinessDocument);
 
         final String actual = wrapper.getJournalPostId();
