@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.config;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRequiredPropertyException;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClientSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 public class IntegrasjonspunktConfiguration {
     private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktConfiguration.class);
 
-    private static final String KEY_ORGANISATION_NUMBER = "orgnumber";
+    public static final String KEY_ORGANISATION_NUMBER = "orgnumber";
     private static final String KEY_ALTINN_USERNAME = "altinn.username";
     private static final String KEY_ALTINN_PASSWORD = "altinn.password";
     private static final String KEY_ALTINN_SERVICE_CODE = "altinn.external_service_code";
@@ -72,6 +73,18 @@ public class IntegrasjonspunktConfiguration {
     public boolean hasOrganisationNumber() {
         String orgNumber = environment.getProperty(KEY_ORGANISATION_NUMBER);
         return orgNumber != null && !orgNumber.isEmpty();
+    }
+
+    public static String getPartyNumber() {
+        return PARTY_NUMBER;
+    }
+
+    public NoarkClientSettings getLocalNoarkClientSettings() {
+        return new NoarkClientSettings(getNOARKSystemEndPointURL(), getNoarksystemUsername(), getKeyNoarksystemPassword(), getNoarksystemDomain());
+    }
+
+    public NoarkClientSettings getMshNoarkClientSettings() {
+        return new NoarkClientSettings(getNOARKSystemEndPointURL(), getNoarksystemUsername(), getKeyNoarksystemPassword(), getNoarksystemDomain());
     }
 
     public String getOrganisationNumber() {
@@ -136,5 +149,9 @@ public class IntegrasjonspunktConfiguration {
 
     private String getNoarksystemDomain() {
         return environment.getProperty(KEY_NOARKSYSTEM_DOMAIN);
+    }
+
+    public Environment getConfiguration() {
+        return environment;
     }
 }

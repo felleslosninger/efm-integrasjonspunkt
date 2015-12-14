@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.services;
 
-import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.virksert.client.VirksertClient;
 import no.difi.virksert.client.VirksertClientBuilder;
 import no.difi.virksert.client.VirksertClientException;
@@ -15,7 +15,7 @@ import java.security.cert.Certificate;
 public class AdresseregisterVirksert implements AdresseregisterService {
 
     @Autowired
-    IntegrasjonspunktConfig configuration;
+    IntegrasjonspunktConfiguration configuration;
 
     private VirksertClient virksertClient;
 
@@ -30,11 +30,11 @@ public class AdresseregisterVirksert implements AdresseregisterService {
                 .setUri(adresseRegisterEndPointURL).build();
     }
 
-    public IntegrasjonspunktConfig getConfiguration() {
+    public IntegrasjonspunktConfiguration getConfiguration() {
         return configuration;
     }
 
-    public void setConfiguration(IntegrasjonspunktConfig configuration) {
+    public void setConfiguration(IntegrasjonspunktConfiguration configuration) {
         this.configuration = configuration;
     }
 

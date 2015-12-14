@@ -10,7 +10,7 @@ import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.vefa.peppol.common.model.Endpoint;
 import no.difi.vefa.peppol.lookup.api.LookupException;
-import org.apache.commons.configuration.Configuration;
+import org.springframework.core.env.Environment;
 
 import static no.difi.meldingsutveksling.domain.Organisasjonsnummer.fromIso6523;
 
@@ -29,18 +29,18 @@ public class AltinnTransport implements Transport {
     }
 
     /**
-     * @param configuration a configuration object given by the integrasjonspunkt
+     * @param environment a configuration object given by the integrasjonspunkt
      * @param document      An SBD document with a payload consisting of an CMS encrypted ASIC package
      */
     @Override
-    public void send(Configuration configuration, final Document document) {
+    public void send(Environment environment, final Document document) {
         Endpoint ep;
         try {
             ep = elmaLookup.lookup(organisationNumber);
         } catch (LookupException e) {
             throw new MeldingsUtvekslingRuntimeException(e.getMessage(), e);
         }
-        AltinnWsClient client = new AltinnWsClient(AltinnWsConfiguration.fromConfiguration(ep.getAddress(), configuration));
+        AltinnWsClient client = new AltinnWsClient(AltinnWsConfiguration.fromConfiguration(ep.getAddress(), environment));
         UploadRequest request1 = new UploadRequest() {
 
             @Override

@@ -4,8 +4,8 @@ import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
-import org.apache.commons.configuration.Configuration;
 import org.modelmapper.ModelMapper;
+import org.springframework.core.env.Environment;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -25,7 +25,7 @@ import java.io.FileOutputStream;
 public class FileTransport implements Transport {
 
     @Override
-    public void send(Configuration configuration, Document document) {
+    public void send(Environment environment, Document document) {
         String fileName = createFilename();
         ModelMapper mapper = new ModelMapper();
 
@@ -34,7 +34,7 @@ public class FileTransport implements Transport {
 
         File f = new File(fileName);
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(new Class[]{Document.class, Payload.class});
+            JAXBContext jaxbContext = JAXBContext.newInstance(Document.class, Payload.class);
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
             jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             jaxbMarshaller.marshal(new ObjectFactory().createStandardBusinessDocument(document), new FileOutputStream(f));

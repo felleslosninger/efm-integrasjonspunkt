@@ -36,7 +36,7 @@ public class IntegrasjonspunktCustomPropertyListener implements ApplicationListe
     static final String KEY_DEREGISTRATION = "spring.boot.admin.autoDeregistration";
 
     // NB: autowiring does not work so good at the early stage when this listener is called,
-    // so will not use the existing IntegrasjonspunktConfig class yet.
+    // so will not use the existing IntegrasjonspunktConfiguration class yet.
     private static final String PROPERTIES_FILE_NAME_OVERRIDE = "integrasjonspunkt-local.properties";
     private CompositeConfiguration config;
 
@@ -85,7 +85,5 @@ public class IntegrasjonspunktCustomPropertyListener implements ApplicationListe
                 environment.getPropertySources().addFirst(new PropertiesPropertySource("props", props));
             }
         }
-
     }
-
 }

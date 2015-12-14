@@ -5,7 +5,7 @@ import no.difi.meldingsutveksling.AltinnWsClient;
 import no.difi.meldingsutveksling.AltinnWsConfiguration;
 import no.difi.meldingsutveksling.DownloadRequest;
 import no.difi.meldingsutveksling.FileReference;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
@@ -38,7 +38,7 @@ public class MessagePolling {
     Logger logger = LoggerFactory.getLogger(MessagePolling.class);
 
     @Autowired
-    IntegrasjonspunktConfig config;
+    IntegrasjonspunktConfiguration config;
 
     @Autowired
     IntegrajonspunktReceiveImpl integrajonspunktReceive;

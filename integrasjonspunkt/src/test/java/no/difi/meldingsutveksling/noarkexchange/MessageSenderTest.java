@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.services.AdresseregisterService;
 import no.difi.meldingsutveksling.services.CertificateException;
 import no.difi.virksert.client.VirksertClientException;
@@ -31,7 +31,7 @@ public class MessageSenderTest {
     private AdresseregisterService adresseregister;
 
     @Mock
-    private IntegrasjonspunktConfig config;
+    private IntegrasjonspunktConfiguration config;
 
     @Mock
     private IntegrasjonspunktNokkel integrasjonspunktNokkel;

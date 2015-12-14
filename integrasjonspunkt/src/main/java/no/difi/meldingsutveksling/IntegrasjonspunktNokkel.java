@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling;
 
 import no.difi.asic.SignatureHelper;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -11,7 +11,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.*;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.Enumeration;
 
@@ -26,7 +30,7 @@ public class IntegrasjonspunktNokkel {
     private String pkLocation, pkAlias, pkPassword;
 
     @Autowired
-    IntegrasjonspunktConfig config;
+    IntegrasjonspunktConfiguration config;
 
     public IntegrasjonspunktNokkel() {
     }
@@ -93,11 +97,11 @@ public class IntegrasjonspunktNokkel {
         }
     }
 
-    public IntegrasjonspunktConfig getConfig() {
+    public IntegrasjonspunktConfiguration getConfig() {
         return config;
     }
 
-    public void setConfig(IntegrasjonspunktConfig config) {
+    public void setConfig(IntegrasjonspunktConfiguration config) {
         this.config = config;
     }
 

@@ -16,7 +16,7 @@ public class IntegrasjonspunktBeans {
     private Environment environment;
 
     @Bean
-    public QueueScheduler queueScheduler(IntegrasjonspunktImpl integrasjonspunkt, IntegrasjonspunktConfig config) {
+    public QueueScheduler queueScheduler(IntegrasjonspunktImpl integrasjonspunkt, IntegrasjonspunktConfiguration config) {
         return new QueueScheduler(queueService(), integrasjonspunkt, config);
     }
 
