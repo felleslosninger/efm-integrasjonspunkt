@@ -91,6 +91,7 @@ public class IntegrasjonspunktConfig {
         validateProperty(KEY_KEYSTORE_LOCATION);
         validateProperty(KEY_PRIVATEKEYPASSWORD);
         validateProperty(NOARKSYSTEM_TYPE);
+        validateProperty(KEY_ORGANISATION_NUMBER);
     }
 
     public String getAdresseRegisterEndPointURL() {
@@ -178,7 +179,6 @@ public class IntegrasjonspunktConfig {
     private boolean validateProperty(String key) throws MeldingsUtvekslingRequiredPropertyException {
         if (isBlank(config.getString(key))) {
             String message = String.format("Required property %s is missing. Check if parameter for key is set, either in integrasjonspunkt-local.properties or set as in-parameter on startup.", key);
-            log.error(message);
             throw new MeldingsUtvekslingRequiredPropertyException(message);
         }
         return true;
