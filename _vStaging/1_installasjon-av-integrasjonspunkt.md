@@ -130,10 +130,10 @@ Når du er ferdig skal strukturen på området se slik ut:
 ```
 c:/
 |-- deploymanager/
-    |-- integrasjonspunkt-local.properties
+	|-- integrasjonspunkt-local.properties
 	|-- deploy-manager-x.x.xx--xxx.jar
-    |-- data
-        |-- monitorApps.json
+	|-- data
+		|-- monitorApps.json
 ```
 
 
