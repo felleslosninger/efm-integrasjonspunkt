@@ -128,11 +128,12 @@ Lagre filen på området c:\deploymanager og endre navnet til integrasjonspunkt-
 Når du er ferdig skal strukturen på området se slik ut:
 ```
 c:/
-├── deploymanager/
-│   ├── integrasjonspunkt-local.properties
-│	├── deploy-manager-x.x.xx--xxx.jar
-│   ├── data
-│   │   ├── monitorApps.json
+|-- deploymanager/
+|   |-- integrasjonspunkt-local.properties
+|	|-- deploy-manager-x.x.xx--xxx.jar
+|   |-- data
+|   |   |-- monitorApps.json
+
 ```
 
 
