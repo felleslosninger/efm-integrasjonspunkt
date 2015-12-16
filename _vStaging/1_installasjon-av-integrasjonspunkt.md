@@ -53,7 +53,7 @@ Når du har fått sertifikatet, må det legges inn på maskinen. Noter deg lokas
 Dette legges inn som propertiene, keystorelocation og privatekeypassword
 
 ### Laste opp public virksomhetssertifikat
-Sertifikatet kan lastes opp til [virksomhetssertifikatserveren](http://virksert.herokuapp.com/)
+Sertifikatet kan lastes opp til [virksomhetssertifikatserveren](https://beta-meldingsutveksling.difi.no/virksomhetssertifikat/)
 
 ### Installering og oppsett av Deploy Manager
 
