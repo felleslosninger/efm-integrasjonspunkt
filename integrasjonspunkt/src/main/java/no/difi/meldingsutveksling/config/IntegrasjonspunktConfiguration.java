@@ -48,6 +48,11 @@ public class IntegrasjonspunktConfiguration {
     protected static final String NOARKSYSTEM_TYPE = "noarksystem.type";
     private static final String PARTY_NUMBER = "party_number";
 
+    private static final String KEY_SERVICEURL = "spring.boot.admin.client.serviceUrl";
+    private static final String KEY_SERVERURL = "spring.boot.admin.url";
+    private static final String KEY_CLIENTNAME = "spring.boot.admin.client.name";
+    private static final String KEY_DEREGISTRATION = "spring.boot.admin.autoDeregistration";
+
     private Environment environment;
 
     @Autowired
@@ -60,6 +65,8 @@ public class IntegrasjonspunktConfiguration {
         validateProperty(KEY_KEYSTORE_LOCATION);
         validateProperty(KEY_PRIVATEKEYPASSWORD);
         validateProperty(NOARKSYSTEM_TYPE);
+
+        validateSpringMetrics();
     }
 
     public String getProfile() {
@@ -85,6 +92,10 @@ public class IntegrasjonspunktConfiguration {
 
     public NoarkClientSettings getMshNoarkClientSettings() {
         return new NoarkClientSettings(getNOARKSystemEndPointURL(), getNoarksystemUsername(), getKeyNoarksystemPassword(), getNoarksystemDomain());
+    }
+
+    public Environment getConfiguration() {
+        return environment;
     }
 
     public String getOrganisationNumber() {
@@ -135,6 +146,15 @@ public class IntegrasjonspunktConfiguration {
         }
     }
 
+    private void validateSpringMetrics() {
+        if (isBlank(environment.getProperty(KEY_SERVERURL))
+                || isBlank(environment.getProperty(KEY_SERVICEURL))
+                || isBlank(environment.getProperty(KEY_CLIENTNAME))
+                || isBlank(environment.getProperty(KEY_DEREGISTRATION))) {
+            log.warn("Not all parameters for metrics are set. Metrics might not work properly.");
+        }
+    }
+
     private String getNOARKSystemEndPointURL() {
         return environment.getProperty(KEY_NOARKSYSTEM_ENDPOINT);
     }
@@ -149,9 +169,5 @@ public class IntegrasjonspunktConfiguration {
 
     private String getNoarksystemDomain() {
         return environment.getProperty(KEY_NOARKSYSTEM_DOMAIN);
-    }
-
-    public Environment getConfiguration() {
-        return environment;
     }
 }
