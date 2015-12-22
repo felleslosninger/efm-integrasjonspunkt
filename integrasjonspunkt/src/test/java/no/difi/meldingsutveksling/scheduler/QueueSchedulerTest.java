@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.scheduler;
 
-import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.queue.domain.QueueElement;
@@ -30,7 +30,7 @@ public class QueueSchedulerTest {
 
     @Mock private Queue queueMock;
     @Mock private IntegrasjonspunktImpl integrasjonspunktMock;
-    @Mock private IntegrasjonspunktConfig integrasjonspunktConfigMock;
+    @Mock private IntegrasjonspunktConfiguration integrasjonspunktConfigMock;
 
     @Before
     public void setUp() {

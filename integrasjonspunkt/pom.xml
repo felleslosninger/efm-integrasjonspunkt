@@ -21,7 +21,6 @@
     <jersey-version>1.8</jersey-version>
     <jstlVersion>1.2</jstlVersion>
     <jerseyVersion>1.17</jerseyVersion>
-    <springVersion>4.1.2.RELEASE</springVersion>
   </properties>
 
   <build>
@@ -170,7 +169,7 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-webmvc</artifactId>
-      <version>4.1.2.RELEASE</version>
+      <version>${spring.version}</version>
     </dependency>
 
     <dependency>
@@ -266,13 +265,13 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-jdbc</artifactId>
-      <version>4.1.2.RELEASE</version>
+      <version>${spring.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
-      <version>4.1.2.RELEASE</version>
+      <version>${spring.version}</version>
     </dependency>
 
 

@@ -24,6 +24,12 @@
       <groupId>no.difi.vefa</groupId>
       <artifactId>peppol-lookup</artifactId>
       <version>0.9.3</version>
+      <exclusions>
+        <exclusion>
+          <groupId>no.difi.commons</groupId>
+          <artifactId>commons-certvalidator</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
@@ -42,5 +48,7 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
     </dependency>
+
+
   </dependencies>
 </project>

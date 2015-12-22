@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.scheduler;
 
-import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
@@ -25,12 +25,13 @@ public class QueueScheduler {
     private final Queue queue;
     private final IntegrasjonspunktImpl integrasjonspunkt;
 
-    private IntegrasjonspunktConfig integrasjonspunktConfig;
+    private IntegrasjonspunktConfiguration integrasjonspunktConfig;
 
     private static final Logger log = LoggerFactory.getLogger(QueueScheduler.class);
 
     @Autowired
-    public QueueScheduler(Queue queue, IntegrasjonspunktImpl integrasjonspunkt, IntegrasjonspunktConfig integrasjonspunktConfig) {
+    public QueueScheduler(Queue queue, IntegrasjonspunktImpl integrasjonspunkt,
+                          IntegrasjonspunktConfiguration integrasjonspunktConfig) {
         this.queue = queue;
         this.integrasjonspunkt = integrasjonspunkt;
         this.integrasjonspunktConfig = integrasjonspunktConfig;

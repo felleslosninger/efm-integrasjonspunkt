@@ -1,23 +1,20 @@
-${color.green}
                                      1ttttti        1ttttt;             .1tttttt.    ittttti
                                     1ttttttti      1ttttttt;          .1tttttttt.   ittttttti
                                     1ttttttti     ittttttttt,        1tttttttttt.  :ttttttttt:
                                     1ttttttti     ;ttttttttt.       1ttttttttttt.  ,ttttttttt,
                                     1ttttttti      :ttttttt.       ,tttttttt1       ,ttttttt,
                                     1ttttttti         .,.          ;ttttttt1           .,.
-                         ${color.gray}:1fL1 ${color.green}it1;.1ttttttti      .........    ...;ttttttt1....    .........
-                     ${color.gray}.1LLLLLLLL; ${color.green}1tttttttttti      1ttttttt;    1ttttttttttttttt.   ittttttti
-                   ${color.gray}.fLLLLLLLLLL1 ${color.green}1tttttttttti      1ttttttt;    1ttttttttttttttt.   ittttttti
-                  ${color.gray}:LLLLLLLLLLi ${color.green};tttttttttttti      1ttttttt;    ;ii1ttttttt1iiii.   ittttttti
-                 ${color.gray}:LLLLLLLLt,     ${color.green},1ttttttttti      1ttttttt;       ;ttttttt1        ittttttti
-                 ${color.gray}fLLLLLLL,         ${color.green}:tttttttti      1ttttttt;       ;ttttttt1        ittttttti
-                ${color.gray},LLLLLLL;           ${color.green}ittttttti      1ttttttt;       ;ttttttt1        ittttttti
-                ${color.gray},LLLLLLL;           ${color.green}ittttttti      1ttttttt;       ;ttttttt1        ittttttti
-                 ${color.gray}fLLLLLLL,         ${color.green}:tttttttti      1ttttttt;       ;ttttttt1        ittttttti
-                 ${color.gray}:LLLLLLLLf,     ${color.green}:tttttttttti      1ttttttt;       ;ttttttt1        ittttttti
-                  ${color.gray}:LLLLLLLLLL: ${color.green}itttttttttttti      1ttttttt;       ;ttttttt1        ittttttti
-                    ${color.gray}tLLLLLL1 ${color.green}1tttttttttttttti      1ttttttt;       ;ttttttt1        ittttttti
-                      ${color.gray}1LLLLt ${color.green};tttttttttttttti      1ttttttt;       ;ttttttt1        ittttttti
-                         ${color.gray}:1fLi ${color.green}it1:.;1111111i      11111111;       ;1111111i        i1111111i
-
-${spring-boot.version}${color.reset}
+                         :1fL1 it1;.1ttttttti      .........    ...;ttttttt1....    .........
+                     .1LLLLLLLL; 1tttttttttti      1ttttttt;    1ttttttttttttttt.   ittttttti
+                   .fLLLLLLLLLL1 1tttttttttti      1ttttttt;    1ttttttttttttttt.   ittttttti
+                  :LLLLLLLLLLi ;tttttttttttti      1ttttttt;    ;ii1ttttttt1iiii.   ittttttti
+                 :LLLLLLLLt,     ,1ttttttttti      1ttttttt;       ;ttttttt1        ittttttti
+                 fLLLLLLL,         :tttttttti      1ttttttt;       ;ttttttt1        ittttttti
+                ,LLLLLLL;           ittttttti      1ttttttt;       ;ttttttt1        ittttttti
+                ,LLLLLLL;           ittttttti      1ttttttt;       ;ttttttt1        ittttttti
+                 fLLLLLLL,         :tttttttti      1ttttttt;       ;ttttttt1        ittttttti
+                 :LLLLLLLLf,     :tttttttttti      1ttttttt;       ;ttttttt1        ittttttti
+                  :LLLLLLLLLL: itttttttttttti      1ttttttt;       ;ttttttt1        ittttttti
+                    tLLLLLL1 1tttttttttttttti      1ttttttt;       ;ttttttt1        ittttttti
+                      1LLLLt ;tttttttttttttti      1ttttttt;       ;ttttttt1        ittttttti
+                         :1fLi it1:.;1111111i      11111111;       ;1111111i        i1111111i

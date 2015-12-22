@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import com.thoughtworks.xstream.XStream;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.eventlog.Event;
@@ -62,7 +62,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
     private Queue queue;
 
     @Autowired
-    private IntegrasjonspunktConfig configuration;
+    private IntegrasjonspunktConfiguration configuration;
 
     @Override
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
@@ -111,7 +111,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
         else {
             final String partyNumber = message.hasSenderPartyNumber() ? message.getSenderPartynumber() : configuration.getOrganisationNumber();
 
-            MDC.put(IntegrasjonspunktConfig.PARTY_NUMBER, partyNumber);
+            MDC.put(IntegrasjonspunktConfiguration.getPartyNumber(), partyNumber);
 
             if (hasAdresseregisterCertificate(request.getEnvelope().getReceiver().getOrgnr())) {
                 PutMessageContext context = new PutMessageContext(eventLog, messageSender);
@@ -132,7 +132,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
         }
         final String partyNumber = message.hasSenderPartyNumber() ? message.getSenderPartynumber() : configuration.getOrganisationNumber();
 
-        MDC.put(IntegrasjonspunktConfig.PARTY_NUMBER, partyNumber);
+        MDC.put(IntegrasjonspunktConfiguration.getPartyNumber(), partyNumber);
 
         if(hasAdresseregisterCertificate(request.getEnvelope().getReceiver().getOrgnr())) {
             PutMessageContext context = new PutMessageContext(eventLog, messageSender);

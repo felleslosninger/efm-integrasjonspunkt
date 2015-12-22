@@ -7,7 +7,7 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import no.difi.asic.SignatureHelper;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.sbdh.BusinessScope;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
@@ -26,7 +26,7 @@ import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
 import no.difi.meldingsutveksling.services.CertificateException;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
-import org.apache.commons.configuration.Configuration;
+import org.springframework.core.env.Environment;
 import sun.security.x509.X509CertImpl;
 
 import javax.xml.bind.JAXBContext;
@@ -86,7 +86,7 @@ public class PutMessageSteps {
         when(documentFactory.create(any(PutMessageRequestType.class), any(no.difi.meldingsutveksling.domain.Avsender.class), any(Mottaker.class))).thenReturn(document);
         messageSender.setStandardBusinessDocumentFactory(documentFactory);
         messageSender.setKeyInfo(integrasjonspunktNokkel);
-        messageSender.setConfiguration(mock(IntegrasjonspunktConfig.class));
+        messageSender.setConfiguration(mock(IntegrasjonspunktConfiguration.class));
 
         TransportFactory transportFactory = mock(TransportFactory.class);
         transport = mock(Transport.class);
@@ -139,7 +139,7 @@ public class PutMessageSteps {
 
     @Then("^kvitteringen sendes ikke videre til transport$")
     public void kvitteringen_sendes_ikke_videre()  {
-        verify(transport, never()).send(any(Configuration.class), any(Document.class));
+        verify(transport, never()).send(any(Environment.class), any(Document.class));
     }
 
     @Given("^en velformet melding fra (.+)$")
@@ -159,7 +159,7 @@ public class PutMessageSteps {
 
     @Then("^skal melding bli videresendt$")
     public void skal_melding_bli_videresendt() throws Throwable {
-        verify(transport).send(any(Configuration.class), any(Document.class));
+        verify(transport).send(any(Environment.class), any(Document.class));
     }
 
     @When("^integrasjonspunktet mottar meldingen$")

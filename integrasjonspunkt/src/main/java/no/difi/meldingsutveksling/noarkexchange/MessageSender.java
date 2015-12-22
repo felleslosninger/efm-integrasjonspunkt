@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import com.thoughtworks.xstream.XStream;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.Noekkelpar;
@@ -46,7 +46,7 @@ public class MessageSender {
     private AdresseregisterVirksert adresseregister;
 
     @Autowired
-    private IntegrasjonspunktConfig configuration;
+    private IntegrasjonspunktConfiguration configuration;
 
     @Autowired
     private IntegrasjonspunktNokkel keyInfo;
@@ -66,9 +66,8 @@ public class MessageSender {
             throw new MessageContextException(e, StatusMessage.MISSING_SENDER_CERTIFICATE);
         }
         PrivateKey privatNoekkel = keyInfo.loadPrivateKey();
-        Avsender avsender = Avsender.builder(new Organisasjonsnummer(message.getSenderPartynumber()), new Noekkelpar(privatNoekkel, certificate)).build();
 
-        return avsender;
+        return Avsender.builder(new Organisasjonsnummer(message.getSenderPartynumber()), new Noekkelpar(privatNoekkel, certificate)).build();
     }
 
     private Mottaker createMottaker(String orgnr) throws MessageContextException {
@@ -78,9 +77,8 @@ public class MessageSender {
         } catch(CertificateException e) {
             throw new MessageContextException(e, StatusMessage.MISSING_RECIEVER_CERTIFICATE);
         }
-        Mottaker mottaker = Mottaker.builder(new Organisasjonsnummer(orgnr), receiverCertificate).build();
 
-        return mottaker;
+        return Mottaker.builder(new Organisasjonsnummer(orgnr), receiverCertificate).build();
     }
 
     private X509Certificate lookupCertificate(String orgnr) throws CertificateException {
@@ -160,11 +158,11 @@ public class MessageSender {
         this.eventLog = eventLog;
     }
 
-    public IntegrasjonspunktConfig getConfiguration() {
+    public IntegrasjonspunktConfiguration getConfiguration() {
         return configuration;
     }
 
-    public void setConfiguration(IntegrasjonspunktConfig configuration) {
+    public void setConfiguration(IntegrasjonspunktConfiguration configuration) {
         this.configuration = configuration;
     }
 

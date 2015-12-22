@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling;
 
-import org.apache.commons.configuration.Configuration;
+import org.springframework.core.env.Environment;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -33,17 +33,17 @@ public class AltinnWsConfiguration {
     private AltinnWsConfiguration() {
     }
 
-    public static AltinnWsConfiguration fromConfiguration(String hostName, Configuration config) {
-        URL streamingserviceUrl = createUrl(hostName + config.getString("altinn.streamingservice.url"));
-        URL brokerserviceUrl = createUrl(hostName + config.getString("altinn.brokerservice.url"));
+    public static AltinnWsConfiguration fromConfiguration(String hostName, Environment config) {
+        URL streamingserviceUrl = createUrl(hostName + config.getProperty("altinn.streamingservice.url"));
+        URL brokerserviceUrl = createUrl(hostName + config.getProperty("altinn.brokerservice.url"));
 
         return new Builder()
-                .withUsername(config.getString("altinn.username"))
-                .withPassword(config.getString("altinn.password"))
+                .withUsername(config.getProperty("altinn.username"))
+                .withPassword(config.getProperty("altinn.password"))
                 .withStreamingServiceUrl(streamingserviceUrl)
                 .withBrokerServiceUrl(brokerserviceUrl)
-                .withExternalServiceCode(config.getString("altinn.external_service_code"))
-                .withExternalServiceEditionCode(config.getInt("altinn.external_service_edition_code"))
+                .withExternalServiceCode(config.getProperty("altinn.external_service_code"))
+                .withExternalServiceEditionCode(Integer.parseInt(config.getProperty("altinn.external_service_edition_code")))
                 .build();
     }
 

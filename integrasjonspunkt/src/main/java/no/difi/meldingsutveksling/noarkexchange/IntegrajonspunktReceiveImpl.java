@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
@@ -64,7 +64,7 @@ public class IntegrajonspunktReceiveImpl  implements SOAReceivePort {
     private AdresseregisterVirksert adresseregisterService;
 
     @Autowired
-    private IntegrasjonspunktConfig config;
+    private IntegrasjonspunktConfiguration config;
 
 
     @Autowired
@@ -210,11 +210,11 @@ public class IntegrajonspunktReceiveImpl  implements SOAReceivePort {
         this.localNoark = localNoark;
     }
 
-    public IntegrasjonspunktConfig getConfig() {
+    public IntegrasjonspunktConfiguration getConfig() {
         return config;
     }
 
-    public void setConfig(IntegrasjonspunktConfig config) {
+    public void setConfig(IntegrasjonspunktConfiguration config) {
         this.config = config;
     }
 

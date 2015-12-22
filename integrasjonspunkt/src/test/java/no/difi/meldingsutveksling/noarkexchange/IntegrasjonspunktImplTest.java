@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.PutMessageObjectMother;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktConfig;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.queue.service.Queue;
@@ -20,7 +20,7 @@ public class IntegrasjonspunktImplTest {
     private IntegrasjonspunktImpl integrasjonspunkt = new IntegrasjonspunktImpl();
 
     @Mock private Queue queueMock;
-    @Mock private IntegrasjonspunktConfig configurationMock;
+    @Mock private IntegrasjonspunktConfiguration configurationMock;
 
     @Before
     public void setUp() {
