@@ -18,7 +18,7 @@ import static org.apache.commons.lang.StringUtils.isBlank;
         @PropertySource("classpath:properties/integrasjonspunkt.properties"),
         @PropertySource("classpath:properties/application-${spring.profiles.active}.properties"),
         @PropertySource("classpath:properties/integrasjonspunkt-${spring.profiles.active}.properties"),
-        @PropertySource("classpath:integrasjonspunkt-local.properties")
+        @PropertySource("file:integrasjonspunkt-local.properties")
 })
 public class IntegrasjonspunktConfiguration {
     private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktConfiguration.class);
