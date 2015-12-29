@@ -3,19 +3,17 @@ package no.difi.meldingsutveksling.queue.service;
 import no.difi.meldingsutveksling.queue.dao.QueueDao;
 import no.difi.meldingsutveksling.queue.domain.QueueElement;
 import no.difi.meldingsutveksling.queue.domain.Status;
-import no.difi.meldingsutveksling.queue.exception.QueueException;
 import no.difi.meldingsutveksling.queue.messageutil.QueueMessageFile;
 import no.difi.meldingsutveksling.queue.rule.RuleDefault;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
+
+import static no.difi.meldingsutveksling.queue.service.FileSHA1Digest.*;
 
 @ManagedResource
 public class Queue {
@@ -70,6 +68,7 @@ public class Queue {
 
         QueueMessageFile.saveFileOnDisk(request, filenameWithPath);
 
+        String generateChecksum = getHexEncodedSHA1DigestOf(filenameWithPath);
         QueueElement newEntry = new QueueElement.Builder()
                 .uniqueId(uniqueFilename)
                 .location(filenameWithPath)
@@ -77,7 +76,7 @@ public class Queue {
                 .numberAttempt(0)
                 .rule(RuleDefault.getRule())
                 .lastAttemptTime(new Date())
-                .checksum(generateChecksum(filenameWithPath))
+                .checksum(generateChecksum)
                 .build();
 
         queueDao.saveEntry(newEntry);
@@ -135,28 +134,6 @@ public class Queue {
         return builtObject.getStatus();
     }
 
-    private String generateChecksum(String filenameWithPath) {
-        StringBuilder sb = new StringBuilder("");
-        try {
-            MessageDigest messageDigest = MessageDigest.getInstance("SHA1");
-            FileInputStream fileInput = new FileInputStream(filenameWithPath);
-            byte[] dataBytes = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = fileInput.read(dataBytes)) != -1) {
-                messageDigest.update(dataBytes, 0, bytesRead);
-            }
-            byte[] digestBytes = messageDigest.digest();
-            for (byte digestByte : digestBytes) {
-                sb.append(Integer.toString((digestByte & 0xff) + 0x100, 16).substring(1));
-            }
-
-            fileInput.close();
-
-        } catch (NoSuchAlgorithmException | IOException e) {
-            throw new QueueException("Error while creating checksum", e);
-        }
-        return sb.toString();
-    }
 
     @ManagedAttribute
     public int getQueueSize() {
