@@ -26,7 +26,6 @@ import static java.lang.String.format;
 
 @Repository
 public class QueueDao {
-    public static final int ONE_MINUTE_IN_MILLIS = 60000;
 
     @Autowired
     @Qualifier("queueJDBCTemplate")
