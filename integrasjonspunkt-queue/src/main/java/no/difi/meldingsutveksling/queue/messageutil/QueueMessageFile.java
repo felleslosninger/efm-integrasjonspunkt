@@ -29,9 +29,9 @@ public class QueueMessageFile {
 
     public static void saveFileOnDisk(Object encryptedMessage, String filename) throws IOException {
         ensureLocalDirectoryExists();
-        String stringRepresentaiton = new XStream(new DomDriver()).toXML(encryptedMessage);
+        String stringified = new XStream(new DomDriver()).toXML(encryptedMessage);
         BufferedWriter br = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename)));
-        br.write(stringRepresentaiton);
+        br.write(stringified);
         br.close();
     }
 
