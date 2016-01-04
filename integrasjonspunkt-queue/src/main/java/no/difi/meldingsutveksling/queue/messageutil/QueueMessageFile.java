@@ -27,13 +27,11 @@ public class QueueMessageFile {
         return new XStream(new DomDriver()).fromXML(is);
     }
 
-    public static void saveFileOnDisk(Object crypted, String filename) throws IOException {
-        if (!new File(FILE_PATH).exists()) {
-            new File(FILE_PATH).mkdir();
-        }
-        String stringRepresentaiton = new XStream(new DomDriver()).toXML(crypted);
+    public static void saveFileOnDisk(Object encryptedMessage, String filename) throws IOException {
+        ensureLocalDirectoryExists();
+        String stringified = new XStream(new DomDriver()).toXML(encryptedMessage);
         BufferedWriter br = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename)));
-        br.write(stringRepresentaiton);
+        br.write(stringified);
         br.close();
     }
 
@@ -45,5 +43,15 @@ public class QueueMessageFile {
         long millis = System.currentTimeMillis();
         String rndchars = RandomStringUtils.randomAlphanumeric(10);
         return rndchars + "_" + millis;
+    }
+
+    private static void ensureLocalDirectoryExists() throws IOException {
+        File localDirectory = new File(FILE_PATH);
+        if (!localDirectory.exists()) {
+            boolean success = localDirectory.mkdir();
+            if (!success) {
+                throw new IOException("Can not create directory with name " + FILE_PATH);
+            }
+        }
     }
 }

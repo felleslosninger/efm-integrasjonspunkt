@@ -4,4 +4,8 @@ public class QueueException extends RuntimeException {
     public QueueException(String message, Throwable exception) {
         super(message, exception);
     }
+
+    public QueueException(Exception e) {
+        super(e);
+    }
 }

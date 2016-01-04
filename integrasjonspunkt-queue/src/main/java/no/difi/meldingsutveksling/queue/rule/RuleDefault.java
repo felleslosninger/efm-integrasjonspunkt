@@ -18,10 +18,10 @@ public class RuleDefault implements Rule {
     }
 
     protected enum Attempt {
-        NEW(0, Constants.MINUTE),
-        FIRST(1, 3 * Constants.MINUTE),
-        SECOND(2, 5 * Constants.MINUTE),
-        THIRD(3, 10 * Constants.MINUTE);
+        NEW(0, 1),
+        FIRST(1, 3),
+        SECOND(2, 5),
+        THIRD(3, 10);
 
         private final int attempt;
         private final int delayMinutes;
@@ -42,10 +42,6 @@ public class RuleDefault implements Rule {
                 }
             }
             throw new RuleOutOfBoundsException();
-        }
-
-        private static class Constants {
-            public static final int MINUTE = 1;
         }
     }
 }
