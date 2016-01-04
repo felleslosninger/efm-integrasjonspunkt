@@ -28,7 +28,7 @@ public class QueueMessageFile {
     }
 
     public static void saveFileOnDisk(Object encryptedMessage, String filename) throws IOException {
-        createQueueDirectoryIfNotExisits();
+        ensureLocalDirectoryExists();
         String stringRepresentaiton = new XStream(new DomDriver()).toXML(encryptedMessage);
         BufferedWriter br = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename)));
         br.write(stringRepresentaiton);
@@ -45,7 +45,7 @@ public class QueueMessageFile {
         return rndchars + "_" + millis;
     }
 
-    private static void createQueueDirectoryIfNotExisits() throws IOException {
+    private static void ensureLocalDirectoryExists() throws IOException {
         File localDirectory = new File(FILE_PATH);
         if (!localDirectory.exists()) {
             boolean success = localDirectory.mkdir();

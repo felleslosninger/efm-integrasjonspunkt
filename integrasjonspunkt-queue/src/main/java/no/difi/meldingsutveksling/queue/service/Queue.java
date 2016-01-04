@@ -68,7 +68,7 @@ public class Queue {
 
         QueueMessageFile.saveFileOnDisk(request, filenameWithPath);
 
-        String generateChecksum = getHexEncodedSHA1DigestOf(filenameWithPath);
+        String generateChecksum = getHash(filenameWithPath);
         QueueElement newEntry = new QueueElement.Builder()
                 .uniqueId(uniqueFilename)
                 .location(filenameWithPath)
