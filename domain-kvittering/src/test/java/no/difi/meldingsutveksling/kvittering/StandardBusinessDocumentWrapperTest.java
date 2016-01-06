@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.kvittering;
 
 
-import no.difi.meldingsutveksling.dokumentpakking.kvit.Kvittering;
-import no.difi.meldingsutveksling.dokumentpakking.kvit.ObjectFactory;
+import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
+import no.difi.meldingsutveksling.kvittering.xsd.ObjectFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.Partner;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.PartnerIdentification;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;

@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.kvittering;
 
-import no.difi.meldingsutveksling.dokumentpakking.kvit.Kvittering;
+
+import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;
