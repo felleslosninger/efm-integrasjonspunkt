@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.logging;
 
 import net.logstash.logback.marker.LogstashMarker;
-import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestAdapter;
+import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.slf4j.Logger;
@@ -18,11 +18,11 @@ public class Audit {
         logger.info(marker, text);
     }
 
-    public static void info(String text, PutMessageRequestAdapter putMessageRequestAdapter) {
-        logger.info(MessageMarkerFactory.markerFrom(putMessageRequestAdapter), text);
+    public static void info(String text, PutMessageRequestWrapper putMessageRequestWrapper) {
+        logger.info(MessageMarkerFactory.markerFrom(putMessageRequestWrapper), text);
     }
 
-    public static void error(String text, PutMessageRequestAdapter message) {
+    public static void error(String text, PutMessageRequestWrapper message) {
         logger.error(MessageMarkerFactory.markerFrom(message), text);
     }
 

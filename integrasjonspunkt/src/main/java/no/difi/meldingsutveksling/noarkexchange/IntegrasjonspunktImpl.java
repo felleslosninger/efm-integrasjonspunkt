@@ -96,7 +96,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType request) {
-        PutMessageRequestAdapter message = new PutMessageRequestAdapter(request);
+        PutMessageRequestWrapper message = new PutMessageRequestWrapper(request);
         Audit.info("Recieved message", message);
         if (!message.hasSenderPartyNumber() && !configuration.hasOrganisationNumber()) {
             throw new MeldingsUtvekslingRuntimeException("Missing senders orgnumber. Please configure orgnumber= in the integrasjonspunkt-local.properties");
@@ -128,7 +128,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
     }
 
     public boolean sendMessage(PutMessageRequestType request) {
-        PutMessageRequestAdapter message = new PutMessageRequestAdapter(request);
+        PutMessageRequestWrapper message = new PutMessageRequestWrapper(request);
         if (!message.hasSenderPartyNumber() && !configuration.hasOrganisationNumber()) {
             throw new MeldingsUtvekslingRuntimeException();
         }

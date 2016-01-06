@@ -48,7 +48,7 @@ public class MessageSenderTest {
     public void shouldThrowMessageContextExceptionWhenMissingRecipientOrganizationNumber() throws MessageContextException {
         expectedException.expect(MessageContextException.class);
         expectedException.expect(new StatusMatches(StatusMessage.MISSING_RECIEVER_ORGANIZATION_NUMBER));
-        PutMessageRequestAdapter requestAdapter = new RequestBuilder().withSender().build();
+        PutMessageRequestWrapper requestAdapter = new RequestBuilder().withSender().build();
 
         messageSender.createMessageContext(requestAdapter);
     }
@@ -57,7 +57,7 @@ public class MessageSenderTest {
     public void shouldThrowMessageContextExceptionWhenMissingRecipientCertificate() throws MessageContextException, CertificateException {
         expectedException.expect(MessageContextException.class);
         expectedException.expect(new StatusMatches(StatusMessage.MISSING_RECIEVER_CERTIFICATE));
-        PutMessageRequestAdapter requestAdapter = new RequestBuilder().withSender().withReciever().build();
+        PutMessageRequestWrapper requestAdapter = new RequestBuilder().withSender().withReciever().build();
 
         when(adresseregister.getCertificate(RECIEVER_PARTY_NUMBER)).thenThrow(new CertificateException("hello", new VirksertClientException("hello")));
 
@@ -68,7 +68,7 @@ public class MessageSenderTest {
     public void shouldThrowMessageContextExceptionWhenMissingSenderCertificate() throws CertificateException, MessageContextException {
         expectedException.expect(MessageContextException.class);
         expectedException.expect(new StatusMatches(StatusMessage.MISSING_SENDER_CERTIFICATE));
-        PutMessageRequestAdapter requestAdapter = new RequestBuilder().withSender().withReciever().build();
+        PutMessageRequestWrapper requestAdapter = new RequestBuilder().withSender().withReciever().build();
 
         when(adresseregister.getCertificate(SENDER_PARTY_NUMBER)).thenThrow(new CertificateException("hello", new VirksertClientException("hello")));
 
@@ -76,10 +76,10 @@ public class MessageSenderTest {
     }
 
     private class RequestBuilder {
-        private PutMessageRequestAdapter requestAdapter;
+        private PutMessageRequestWrapper requestAdapter;
 
         private RequestBuilder() {
-            this.requestAdapter = mock(PutMessageRequestAdapter.class);
+            this.requestAdapter = mock(PutMessageRequestWrapper.class);
         }
 
         public RequestBuilder withSender() {
@@ -93,7 +93,7 @@ public class MessageSenderTest {
             return this;
         }
 
-        public PutMessageRequestAdapter build() {
+        public PutMessageRequestWrapper build() {
             return requestAdapter;
         }
 
