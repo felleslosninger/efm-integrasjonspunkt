@@ -1,17 +1,17 @@
 package no.difi.meldingsutveksling.kvittering;
 
 
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import org.apache.jcp.xml.dsig.internal.dom.DOMKeyValue;
-
+import org.jcp.xml.dsig.internal.dom.DOMKeyValue;
 
 import javax.xml.crypto.*;
-import javax.xml.crypto.dsig.XMLValidateContext;
+import javax.xml.crypto.dsig.SignatureMethod;
 import javax.xml.crypto.dsig.keyinfo.KeyInfo;
+import javax.xml.crypto.dsig.keyinfo.X509Data;
 import java.security.Key;
 import java.security.KeyException;
 import java.security.PublicKey;
-import java.util.List;
+import java.security.cert.X509Certificate;
+import java.util.Iterator;
 
 /**
  * KeySelector that looks for the public key within the SigninInfo element
@@ -22,44 +22,37 @@ class DOMX509KeySelector extends KeySelector {
 
     @Override
     public KeySelectorResult select(KeyInfo keyInfo, KeySelector.Purpose purpose, AlgorithmMethod method, XMLCryptoContext context) throws KeySelectorException {
-        if (keyInfo == null) {
-            throw new KeySelectorException("KeyInfo object is null!");
-        }
-        List list = keyInfo.getContent();
-        for (int i = 0; i < list.size(); i++) {
-            XMLStructure xmlStructure = (XMLStructure) list.get(i);
-            if (!(xmlStructure instanceof DOMKeyValue)) {
-                throw new KeySelectorException("No X509 element in kvittering ");
-            }
-            PublicKey pk;
-            DOMKeyValue domKeyValue = (DOMKeyValue) xmlStructure;
-            try {
-                pk = domKeyValue.getPublicKey();
-            } catch (KeyException e) {
-                throw new MeldingsUtvekslingRuntimeException( e);
-            }
-            if (purpose != KeySelector.Purpose.VERIFY) {
-                throw new KeySelectorException("The public key is for validation only in XML signature!");
-            }
 
-            if (!(context instanceof XMLValidateContext)) {
-                throw new KeySelectorException("The context must be for validation!");
+        Iterator ki = keyInfo.getContent().iterator();
+        while (ki.hasNext()) {
+            XMLStructure info = (XMLStructure) ki.next();
+            if (!(info instanceof DOMKeyValue))
+                continue;
+            final PublicKey pk;
+            try {
+                pk = ((DOMKeyValue) info).getPublicKey();
+            } catch (KeyException e) {
+                throw new KeySelectorException(e);
             }
-            return new SimpleKeySelectorResult(pk);
+            if (algEquals(method.getAlgorithm(), pk.getAlgorithm())) {
+                return new KeySelectorResult() {
+                    public Key getKey() {
+                        return pk;
+                    }
+                };
+            }
         }
-        throw new KeySelectorException("No KeyValue element found in KeyInfo!");
+        throw new KeySelectorException("No key found!");
     }
 
-    private class SimpleKeySelectorResult implements KeySelectorResult {
-        private PublicKey pk;
-
-        SimpleKeySelectorResult(PublicKey pk) {
-            this.pk = pk;
-        }
-
-        @Override
-        public Key getKey() {
-            return this.pk;
+    static boolean algEquals(String algURI, String algName) {
+        if ((algName.equalsIgnoreCase("DSA") &&
+                algURI.equalsIgnoreCase(SignatureMethod.DSA_SHA1)) ||
+                (algName.equalsIgnoreCase("RSA") &&
+                        algURI.equalsIgnoreCase(SignatureMethod.RSA_SHA1))) {
+            return true;
+        } else {
+            return false;
         }
     }
 }
