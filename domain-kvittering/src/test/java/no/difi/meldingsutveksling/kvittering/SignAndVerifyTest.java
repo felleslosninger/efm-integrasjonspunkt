@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.kvittering;
 
-import no.difi.meldingsutveksling.dokumentpakking.kvit.Kvittering;
+
+import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocumentHeader;
 import org.junit.Test;
@@ -38,7 +39,7 @@ public class SignAndVerifyTest {
 
         Kvittering k = KvitteringFactory.createAapningskvittering();
         JAXBElement<Kvittering> kvitteringJAXBElement =
-                new no.difi.meldingsutveksling.dokumentpakking.kvit.ObjectFactory().createKvittering(k);
+                new no.difi.meldingsutveksling.kvittering.xsd.ObjectFactory().createKvittering(k);
         doc.setAny(kvitteringJAXBElement);
         return doc;
     }
