@@ -5,9 +5,15 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.ProcessState;
+import no.difi.meldingsutveksling.domain.sbdh.Document;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
+import no.difi.meldingsutveksling.kvittering.DocumentSigner;
+import no.difi.meldingsutveksling.kvittering.KvitteringFactory;
+import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
@@ -20,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 
 import javax.jws.WebParam;
 import javax.jws.WebService;
@@ -46,7 +53,7 @@ import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom
 @Component("recieveService")
 @WebService(portName = "ReceivePort", serviceName = "receive", targetNamespace = "", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort")
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
-public class IntegrajonspunktReceiveImpl  implements SOAReceivePort {
+public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
 
     private Logger logger = LoggerFactory.getLogger(IntegrasjonspunktImpl.class);
 
@@ -59,6 +66,9 @@ public class IntegrajonspunktReceiveImpl  implements SOAReceivePort {
 
     @Autowired
     private NoarkClient localNoark;
+
+    @Autowired
+    private MessageSender messageSender;
 
     @Autowired
     private AdresseregisterVirksert adresseregisterService;
@@ -93,7 +103,6 @@ public class IntegrajonspunktReceiveImpl  implements SOAReceivePort {
             logEvent(document, ProcessState.KVITTERING_MOTTATT);
             return new CorrelationInformation();
         }
-
 
         logEvent(document, ProcessState.SBD_RECIEVED);
 
@@ -131,11 +140,13 @@ public class IntegrajonspunktReceiveImpl  implements SOAReceivePort {
     private void forwardToNoarkSystemAndSendReceipt(StandardBusinessDocumentWrapper inputDocument, PutMessageRequestType putMessageRequestType) {
         PutMessageResponseType response = localNoark.sendEduMelding(putMessageRequestType);
         if (response != null) {
+            sendAapningskvittering();
             AppReceiptType result = response.getResult();
             if (null == result) {
                 logEvent(inputDocument, ProcessState.ARCHIVE_NULL_RESPONSE);
             } else {
                 logEvent(inputDocument, ProcessState.BEST_EDU_SENT);
+
             }
         } else {
             logEvent(inputDocument, ProcessState.ARCHIVE_NOT_AVAILABLE);
@@ -173,9 +184,7 @@ public class IntegrajonspunktReceiveImpl  implements SOAReceivePort {
                 }
                 zipEntry = zipInputStream.getNextEntry();
             }
-        }
-
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new MessageException(e, StatusMessage.UNABLE_TO_EXTRACT_ZIP_CONTENTS);
         }
         try {
@@ -189,9 +198,29 @@ public class IntegrajonspunktReceiveImpl  implements SOAReceivePort {
 
 
     private void logEvent(StandardBusinessDocumentWrapper inputDocument, ProcessState processState) {
-            eventLog.log(new Event().setProcessStates(processState)
-                    .setReceiver(inputDocument.getReceiverOrgNumber())
-                    .setSender(inputDocument.getSenderOrgNumber()));
+        eventLog.log(new Event().setProcessStates(processState)
+                .setReceiver(inputDocument.getReceiverOrgNumber())
+                .setSender(inputDocument.getSenderOrgNumber()));
+    }
+
+    private void sendAapningskvittering(String orgNumberReceiver) {
+        StandardBusinessDocument kvitDocument = new StandardBusinessDocument();
+        Kvittering k = KvitteringFactory.createAapningskvittering();
+
+
+        kvitDocument.setAny(k);
+
+        String self = config.getOrganisationNumber();
+
+        Document doc = new Document();
+        StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader.Builder().
+                from(new Organisasjonsnummer(self)).
+                to(new Organisasjonsnummer(orgNumberReceiver))
+                .build();
+        doc.setStandardBusinessDocumentHeader(header);
+        StandardbusinesDoc
+        DocumentSigner.sign(doc, config.getKeyPair());
+        messageSender.sendMessage(doc);
     }
 
     public TransportFactory getTransportFactory() {

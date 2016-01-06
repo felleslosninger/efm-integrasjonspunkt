@@ -170,4 +170,8 @@ public class IntegrasjonspunktConfiguration {
     private String getNoarksystemDomain() {
         return environment.getProperty(KEY_NOARKSYSTEM_DOMAIN);
     }
+
+    public void getKeyPair() {
+
+    }
 }

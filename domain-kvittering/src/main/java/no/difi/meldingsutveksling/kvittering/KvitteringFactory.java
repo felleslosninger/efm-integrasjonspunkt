@@ -16,7 +16,7 @@ import java.util.GregorianCalendar;
  *
  * @author Glenn bech
  */
-class KvitteringFactory {
+public class KvitteringFactory {
 
     public static Kvittering createAapningskvittering() {
         Kvittering k = new Kvittering();
