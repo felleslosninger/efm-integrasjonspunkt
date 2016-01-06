@@ -32,6 +32,7 @@
         <module>dokumentpakking</module>
         <module>integrasjonspunkt</module>
         <module>domain</module>
+        <module>domain-kvittering</module>
         <module>transport</module>
         <module>transport-file</module>
         <module>transport-altinn</module>
@@ -143,7 +144,6 @@
           <configuration>
             <source>1.7</source>
             <target>1.7</target>
-            <verbose>true</verbose>
             <encoding>UTF-8</encoding>
           </configuration>
         </plugin>
