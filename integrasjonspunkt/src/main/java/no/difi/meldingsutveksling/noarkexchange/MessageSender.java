@@ -55,10 +55,6 @@ public class MessageSender {
     private StandardBusinessDocumentFactory standardBusinessDocumentFactory;
 
     private Avsender createAvsender(PutMessageRequestWrapper message) throws MessageContextException {
-        if (!message.hasSenderPartyNumber()) {
-            message.setSenderPartyNumber(configuration.getOrganisationNumber());
-        }
-
         Certificate certificate;
         try {
             certificate = adresseregister.getCertificate(message.getSenderPartynumber());
@@ -127,7 +123,7 @@ public class MessageSender {
      *
      * The context also contains error statuses if the message request has validation errors.
      *
-     * @param message
+     * @param message that contains sender, receiver and journalpost id
      * @return
      */
     protected MessageContext createMessageContext(PutMessageRequestWrapper message) throws MessageContextException {
@@ -178,7 +174,7 @@ public class MessageSender {
         this.transportFactory = transportFactory;
     }
 
-    private Event createOkStateEvent(PutMessageRequestType anyOject) {
+    private static Event createOkStateEvent(PutMessageRequestType anyOject) {
         XStream xs = new XStream();
         Event event = new Event();
         event.setSender(anyOject.getEnvelope().getSender().getOrgnr());
