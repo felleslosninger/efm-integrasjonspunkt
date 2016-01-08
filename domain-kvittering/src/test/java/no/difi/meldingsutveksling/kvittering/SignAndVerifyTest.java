@@ -27,7 +27,7 @@ public class SignAndVerifyTest {
         kpg.initialize(512);
         KeyPair kp = kpg.generateKeyPair();
 
-        StandardBusinessDocumentWrapper wrapper = new StandardBusinessDocumentWrapper(doc);
+        DocumentToDocumentConverter wrapper = new DocumentToDocumentConverter(doc);
         Document signedDomDocument = DocumentSigner.sign(wrapper.toDocument(), kp);
         assertTrue(DocumentValidator.validate(signedDomDocument));
     }

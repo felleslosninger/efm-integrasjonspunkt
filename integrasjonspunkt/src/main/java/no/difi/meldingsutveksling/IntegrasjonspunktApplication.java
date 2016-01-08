@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Bean;
 public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
     private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktApplication.class);
 
-    @BeanReR
+    @Bean
     public ServletRegistrationBean servletNoArk() {
         WSSpringServlet servlet = new WSSpringServlet();
         ServletRegistrationBean reg = new ServletRegistrationBean(servlet, "/noarkExchange", "/receive");

@@ -10,6 +10,8 @@ import org.springframework.context.annotation.PropertySources;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import java.security.KeyPair;
+
 import static org.apache.commons.lang.StringUtils.isBlank;
 
 @Component
@@ -171,7 +173,7 @@ public class IntegrasjonspunktConfiguration {
         return environment.getProperty(KEY_NOARKSYSTEM_DOMAIN);
     }
 
-    public void getKeyPair() {
-
+    public KeyPair getKeyPair() {
+        return null;
     }
 }

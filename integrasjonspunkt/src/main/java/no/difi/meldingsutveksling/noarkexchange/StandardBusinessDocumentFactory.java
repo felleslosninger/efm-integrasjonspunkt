@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.domain.BestEduMessage;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
+import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
@@ -43,8 +44,8 @@ public class StandardBusinessDocumentFactory {
 
     static {
         try {
-            jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class);
-            jaxbContextdomain = JAXBContext.newInstance(Document.class, Payload.class);
+            jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class, Kvittering.class);
+            jaxbContextdomain = JAXBContext.newInstance(Document.class, Payload.class, Kvittering.class);
 
         } catch (JAXBException e) {
             throw new RuntimeException("Could not initialize " + StandardBusinessDocumentConverter.class, e);
@@ -129,7 +130,7 @@ public class StandardBusinessDocumentFactory {
 
             return toDocument.getValue();
         } catch (JAXBException e) {
-            throw new RuntimeException("Could not marshall domain Document to StandardBusinessDocument", e);
+            throw new RuntimeException(e);
         }
     }
 }
