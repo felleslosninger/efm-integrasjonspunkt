@@ -46,10 +46,10 @@ public class StandardBusinessDocumentWrapperTest {
         JAXBElement<Kvittering> kvittering = new ObjectFactory().createKvittering(k);
         document.setAny(kvittering);
 
-        StandardBusinessDocumentWrapper wrapper = new StandardBusinessDocumentWrapper(document);
+        DocumentToDocumentConverter wrapper = new DocumentToDocumentConverter(document);
         Document documentVersionOfTheObject = wrapper.toDocument();
 
-        StandardBusinessDocumentWrapper anotherWrapper = new StandardBusinessDocumentWrapper(documentVersionOfTheObject);
+        DocumentToDocumentConverter anotherWrapper = new DocumentToDocumentConverter(documentVersionOfTheObject);
         anotherWrapper.getStandardBusinessDocument();
 
         assertEquals(wrapper.getStandardBusinessDocument().getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue(),

@@ -4,7 +4,6 @@ import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
@@ -12,8 +11,10 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.kvittering.DocumentSigner;
+import no.difi.meldingsutveksling.kvittering.DocumentToDocumentConverter;
 import no.difi.meldingsutveksling.kvittering.KvitteringFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
+import no.difi.meldingsutveksling.kvittering.xsd.ObjectFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
@@ -30,18 +31,13 @@ import org.springframework.stereotype.Component;
 
 import javax.jws.WebParam;
 import javax.jws.WebService;
-import javax.xml.bind.DatatypeConverter;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.*;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.BindingType;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.zip.ZipEntry;
+import java.io.*;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 import java.util.zip.ZipInputStream;
 
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
@@ -108,13 +104,11 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
 
         Payload payload = document.getPayload();
 
-        byte[] decryptedPayload = decrypt(payload);
+        byte[] decryptedAsicPackage = decrypt(payload);
         logEvent(document, ProcessState.DECRYPTION_SUCCESS);
-        File decompressedPayload;
-        decompressedPayload = decompressToFile(decryptedPayload);
+        PutMessageRequestType eduDocument = convertAsicEntrytoEduDocument(decryptedAsicPackage);
         logEvent(document, ProcessState.BESTEDU_EXTRACTED);
-        PutMessageRequestType putMessageRequestType = extractBestEdu(decompressedPayload);
-        forwardToNoarkSystemAndSendReceipt(document, putMessageRequestType);
+        forwardToNoarkSystemAndSendReceipt(document, eduDocument);
 
         return new CorrelationInformation();
     }
@@ -140,7 +134,6 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
     private void forwardToNoarkSystemAndSendReceipt(StandardBusinessDocumentWrapper inputDocument, PutMessageRequestType putMessageRequestType) {
         PutMessageResponseType response = localNoark.sendEduMelding(putMessageRequestType);
         if (response != null) {
-            sendAapningskvittering();
             AppReceiptType result = response.getResult();
             if (null == result) {
                 logEvent(inputDocument, ProcessState.ARCHIVE_NULL_RESPONSE);
@@ -153,49 +146,17 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
         }
     }
 
-    private File decompressToFile(byte[] bytes) throws MessageException {
-        ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes));
-        ZipEntry zipEntry;
-        String outputFolder = System.getProperty("user.home") + File.separator + "testToRemove" +
-                File.separator + "Zip Output";
-        File newFile = null;
-        try {
-            zipEntry = zipInputStream.getNextEntry();
-            while (null != zipEntry) {
-                String fileName = zipEntry.getName();
-                if ("edu_test.xml".equals(fileName)) {
-
-                    newFile = new File(outputFolder + File.separator + fileName);
-                    FileOutputStream fos;
-                    new File(newFile.getParent()).mkdirs();
-                    try {
-                        fos = new FileOutputStream(newFile);
-                    } catch (FileNotFoundException e) {
-                        throw new MessageException(e, StatusMessage.UNABLE_TO_EXTRACT_ZIP_CONTENTS);
-                    }
-                    byte[] bufbyte = new byte[MAGIC_NR];
-                    int len;
-                    while ((len = zipInputStream.read(bufbyte)) > 0) {
-
-                        fos.write(bufbyte, 0, len);
-                    }
-                    fos.close();
-
-                }
-                zipEntry = zipInputStream.getNextEntry();
-            }
-        } catch (IOException e) {
-            throw new MessageException(e, StatusMessage.UNABLE_TO_EXTRACT_ZIP_CONTENTS);
+    private PutMessageRequestType convertAsicEntrytoEduDocument(byte[] bytes) throws MessageException {
+        PutMessageRequestType returnValue;
+        try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes))) {
+            JAXBContext jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
+            Unmarshaller unMarshaller = jaxbContext.createUnmarshaller();
+            returnValue = unMarshaller.unmarshal(new StreamSource(zipInputStream), PutMessageRequestType.class).getValue();
+        } catch (JAXBException | IOException e) {
+            throw new MessageException(e, StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
         }
-        try {
-            zipInputStream.closeEntry();
-            zipInputStream.close();
-        } catch (IOException e) {
-            throw new MeldingsUtvekslingRuntimeException(e);
-        }
-        return newFile;
+        return returnValue;
     }
-
 
     private void logEvent(StandardBusinessDocumentWrapper inputDocument, ProcessState processState) {
         eventLog.log(new Event().setProcessStates(processState)
@@ -203,25 +164,32 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
                 .setSender(inputDocument.getSenderOrgNumber()));
     }
 
-    private void sendAapningskvittering(String orgNumberReceiver) {
-        StandardBusinessDocument kvitDocument = new StandardBusinessDocument();
-        Kvittering k = KvitteringFactory.createAapningskvittering();
+    public static Document createAapningskvittering(String orgNumberReceiver, String orgNumberSender, KeyPair keyPair) {
+        return wrapAndSignReceipt(orgNumberReceiver, orgNumberSender, keyPair, KvitteringFactory.createAapningskvittering());
+    }
 
+    public static Document createLeveringsKvittering(String orgNumberReceiver, String orgNumberSender, KeyPair keyPair) {
+        return wrapAndSignReceipt(orgNumberReceiver, orgNumberSender, keyPair, KvitteringFactory.createLeveringsKvittering());
+    }
 
-        kvitDocument.setAny(k);
-
-        String self = config.getOrganisationNumber();
-
-        Document doc = new Document();
+    private static Document wrapAndSignReceipt(String orgNumberReceiver, String orgNumberSender, KeyPair keyPair, Kvittering kvittering) {
+        Document unsignedReceipt = new Document();
         StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader.Builder().
-                from(new Organisasjonsnummer(self)).
+                from(new Organisasjonsnummer(orgNumberSender)).
                 to(new Organisasjonsnummer(orgNumberReceiver))
                 .build();
-        doc.setStandardBusinessDocumentHeader(header);
-        StandardbusinesDoc
-        DocumentSigner.sign(doc, config.getKeyPair());
-        messageSender.sendMessage(doc);
+        unsignedReceipt.setStandardBusinessDocumentHeader(header);
+
+        JAXBElement<Kvittering> jaxBKvittering = new ObjectFactory().createKvittering(kvittering);
+        unsignedReceipt.setAny(jaxBKvittering);
+
+        StandardBusinessDocument externalReceiptdocument = StandardBusinessDocumentFactory.create(unsignedReceipt);
+        org.w3c.dom.Document xmlDoc = new DocumentToDocumentConverter(externalReceiptdocument).toDocument();
+        org.w3c.dom.Document signedXmlDoc = DocumentSigner.sign(xmlDoc, keyPair);
+        StandardBusinessDocument signedExternal = new DocumentToDocumentConverter(signedXmlDoc).getStandardBusinessDocument();
+        return StandardBusinessDocumentFactory.create(signedExternal);
     }
+
 
     public TransportFactory getTransportFactory() {
         return transportFactory;
@@ -253,5 +221,24 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
 
     public void setKeyInfo(IntegrasjonspunktNokkel keyInfo) {
         this.keyInfo = keyInfo;
+    }
+
+    public static void main(String[] args) throws NoSuchAlgorithmException, JAXBException {
+
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("DSA");
+        kpg.initialize(512);
+        KeyPair kp = kpg.generateKeyPair();
+        final Document aapningskvittering = IntegrajonspunktReceiveImpl.createAapningskvittering("0110763434", "0110763434", kp);
+        JAXBElement<Document> d = new no.difi.meldingsutveksling.domain.sbdh.ObjectFactory().createStandardBusinessDocument(aapningskvittering);
+        System.out.println(toXml(d));
+    }
+
+    public static String toXml(JAXBElement<Document> doc) throws JAXBException {
+        ByteArrayOutputStream baos;
+        JAXBContext jc = JAXBContext.newInstance(Document.class, Kvittering.class);
+        Marshaller marshaller = jc.createMarshaller();
+        baos = new ByteArrayOutputStream();
+        marshaller.marshal(doc, baos);
+        return baos.toString();
     }
 }

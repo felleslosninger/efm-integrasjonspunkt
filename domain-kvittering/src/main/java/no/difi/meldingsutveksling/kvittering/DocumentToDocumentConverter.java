@@ -25,7 +25,7 @@ import javax.xml.transform.dom.DOMSource;
  *
  * @author Glenn Bech
  */
-class StandardBusinessDocumentWrapper {
+public class DocumentToDocumentConverter {
 
     private static JAXBContext jaxBContext;
 
@@ -46,7 +46,7 @@ class StandardBusinessDocumentWrapper {
      * @param domDocument the source document
      * @throws JAXBException
      */
-    public StandardBusinessDocumentWrapper(Document domDocument) throws JAXBException {
+    public DocumentToDocumentConverter(Document domDocument) {
         TransformerFactory tf = TransformerFactory.newInstance();
         Transformer t;
         try {
@@ -55,7 +55,7 @@ class StandardBusinessDocumentWrapper {
             JAXBResult result = new JAXBResult(jaxBContext);
             t.transform(source, result);
             this.jaxBdocuemnt = ((JAXBElement<StandardBusinessDocument>) result.getResult()).getValue();
-        } catch (TransformerException e) {
+        } catch (TransformerException | JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
     }
@@ -66,7 +66,7 @@ class StandardBusinessDocumentWrapper {
      *
      * @param jaxBdocuemnt
      */
-    public StandardBusinessDocumentWrapper(StandardBusinessDocument jaxBdocuemnt) {
+    public DocumentToDocumentConverter(StandardBusinessDocument jaxBdocuemnt) {
         this.jaxBdocuemnt = jaxBdocuemnt;
     }
 
@@ -76,20 +76,24 @@ class StandardBusinessDocumentWrapper {
      * @return
      * @throws JAXBException
      */
-    public Document toDocument() throws JAXBException {
-        Marshaller marshaller = jaxBContext.createMarshaller();
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        dbf.setNamespaceAware(true);
-
-        Document domDocument;
+    public Document toDocument() {
         try {
-            domDocument = dbf.newDocumentBuilder().newDocument();
-        } catch (ParserConfigurationException e) {
+            Marshaller marshaller = jaxBContext.createMarshaller();
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setNamespaceAware(true);
+
+            Document domDocument;
+            try {
+                domDocument = dbf.newDocumentBuilder().newDocument();
+            } catch (ParserConfigurationException e) {
+                throw new MeldingsUtvekslingRuntimeException(e);
+            }
+            JAXBElement<StandardBusinessDocument> jbe = new ObjectFactory().createStandardBusinessDocument(jaxBdocuemnt);
+            marshaller.marshal(jbe, domDocument);
+            return domDocument;
+        } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
-        JAXBElement<StandardBusinessDocument> jbe = new ObjectFactory().createStandardBusinessDocument(jaxBdocuemnt);
-        marshaller.marshal(jbe, domDocument);
-        return domDocument;
     }
 
     public StandardBusinessDocument getStandardBusinessDocument() {
