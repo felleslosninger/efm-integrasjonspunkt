@@ -2,7 +2,10 @@ package no.difi.meldingsutveksling.scheduler;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.logging.MessageMarkerFactory;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
+import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.queue.domain.QueueElement;
 import no.difi.meldingsutveksling.queue.domain.Status;
@@ -45,7 +48,8 @@ public class QueueScheduler {
                 try {
                     PutMessageRequestType request = (PutMessageRequestType) queue.getMessage(next.getUniqueId());
                     boolean success = integrasjonspunkt.sendMessage(request);
-                    applyResultToQueue(next.getUniqueId(), success);
+                    final Status status = applyResultToQueue(next.getUniqueId(), success);
+                    logStatus(status, request);
                     sendMessage();
                 } catch (IOException e) {
                     log.error(e.getMessage(), e);
@@ -63,17 +67,36 @@ public class QueueScheduler {
         }
     }
 
-    private void applyResultToQueue(String uniqueId, boolean result) {
-        if (result) {
-            queue.success(uniqueId);
-        } else {
-            Status status = queue.fail(uniqueId);
-
-            if (status == Status.RETRY) {
-                log.warn("Message failed send. Will try later.");
-            } else if (status == Status.ERROR) {
-                log.error(Marker.ANY_MARKER, "Message failed. Can not send message to receipient.");
-            }
+    /**
+     * Method to audit log and technical log message delivery based on queue status
+     * @param status either RETRY or FAILED will log
+     * @param request
+     */
+    private void logStatus(Status status, PutMessageRequestType request) {
+        final PutMessageRequestWrapper message = new PutMessageRequestWrapper(request);
+        if (status == Status.RETRY) {
+            Audit.info("Failed to send message. It is put on retry queue", message);
+            log.warn(MessageMarkerFactory.markerFrom(message), "Message failed send. Will try later.");
+        } else if (status == Status.ERROR) {
+            Audit.error("Message could not be delivered after several attempts", message);
+            log.error(MessageMarkerFactory.markerFrom(message), "Message failed. Can not send message to receipient.");
         }
+
+    }
+
+    /**
+     * Updates the queue element based on the result of sending the message
+     * @param uniqueId the id to the queue element
+     * @param result true if the message was successfully sent, false otherwise
+     * @return the Status of the queue element that was updated
+     */
+    private Status applyResultToQueue(String uniqueId, boolean result) {
+        final Status status;
+        if (result) {
+            status = queue.success(uniqueId);
+        } else {
+            status = queue.fail(uniqueId);
+        }
+        return status;
     }
 }
