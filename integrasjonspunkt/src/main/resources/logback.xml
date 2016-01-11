@@ -3,7 +3,7 @@
     <jmxConfigurator/>
 
     <appender name="stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>http://integrasjonstest-miif.difi.local:8300</destination>
+        <destination>integrasjonstest-miif.difi.local:8300</destination>
 
         <!-- encoder is required -->
         <encoder class="net.logstash.logback.encoder.LogstashEncoder" />

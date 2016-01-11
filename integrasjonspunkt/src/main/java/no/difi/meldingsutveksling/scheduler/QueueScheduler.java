@@ -66,7 +66,6 @@ public class QueueScheduler {
     private void applyResultToQueue(String uniqueId, boolean result) {
         if (result) {
             queue.success(uniqueId);
-            log.info("Successfully sent message.");
         } else {
             Status status = queue.fail(uniqueId);
 
