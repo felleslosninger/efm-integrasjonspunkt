@@ -20,6 +20,7 @@
     <commons.lang.version>20030203.000129</commons.lang.version>
     <apache.commons.version>10.0-b28</apache.commons.version>
     <xstream.version>1.4.8</xstream.version>
+    <commons-codec.version>1.10</commons-codec.version>
     <junit.version>4.12</junit.version>
     <mockito.version>1.9.5</mockito.version>
   </properties>
@@ -82,6 +83,12 @@
         <groupId>com.thoughtworks.xstream</groupId>
         <artifactId>xstream</artifactId>
         <version>${xstream.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>${commons-codec.version}</version>
       </dependency>
 
       <dependency>
