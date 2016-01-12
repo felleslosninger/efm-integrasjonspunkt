@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
+import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageContext;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategy;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategyFactory;
@@ -95,7 +96,8 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType request) {
-        PutMessageRequestAdapter message = new PutMessageRequestAdapter(request);
+        PutMessageRequestWrapper message = new PutMessageRequestWrapper(request);
+        Audit.info("Recieved message", message);
         if (!message.hasSenderPartyNumber() && !configuration.hasOrganisationNumber()) {
             throw new MeldingsUtvekslingRuntimeException("Missing senders orgnumber. Please configure orgnumber= in the integrasjonspunkt-local.properties");
         }
@@ -126,7 +128,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
     }
 
     public boolean sendMessage(PutMessageRequestType request) {
-        PutMessageRequestAdapter message = new PutMessageRequestAdapter(request);
+        PutMessageRequestWrapper message = new PutMessageRequestWrapper(request);
         if (!message.hasSenderPartyNumber() && !configuration.hasOrganisationNumber()) {
             throw new MeldingsUtvekslingRuntimeException();
         }
@@ -134,17 +136,24 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
         MDC.put(IntegrasjonspunktConfiguration.getPartyNumber(), partyNumber);
 
+        boolean result;
         if(hasAdresseregisterCertificate(request.getEnvelope().getReceiver().getOrgnr())) {
             PutMessageContext context = new PutMessageContext(eventLog, messageSender);
             PutMessageStrategyFactory putMessageStrategyFactory = PutMessageStrategyFactory.newInstance(context);
 
             PutMessageStrategy strategy = putMessageStrategyFactory.create(request.getPayload());
             PutMessageResponseType response = strategy.putMessage(request);
-            return validateResult(response);
+            result = validateResult(response);
         } else {
             PutMessageResponseType response = mshClient.sendEduMelding(request);
-            return validateResult(response);
+            result = validateResult(response);
         }
+        if(result) {
+            Audit.info("Message successfully sent", message);
+        } else {
+            Audit.error("Message was not successfully sent", message);
+        }
+        return result;
     }
 
     public AdresseregisterVirksert getAdresseRegister() {
@@ -180,6 +189,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
     }
 
     private boolean validateResult(PutMessageResponseType response) {
-        return response.getResult().getType().equals("OK");
+        final boolean result = response.getResult().getType().equals("OK");
+        return result;
     }
 }

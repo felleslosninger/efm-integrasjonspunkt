@@ -54,7 +54,7 @@ public class MessageSender {
     @Autowired
     private StandardBusinessDocumentFactory standardBusinessDocumentFactory;
 
-    private Avsender createAvsender(PutMessageRequestAdapter message) throws MessageContextException {
+    private Avsender createAvsender(PutMessageRequestWrapper message) throws MessageContextException {
         if (!message.hasSenderPartyNumber()) {
             message.setSenderPartyNumber(configuration.getOrganisationNumber());
         }
@@ -88,7 +88,7 @@ public class MessageSender {
     }
 
     public PutMessageResponseType sendMessage(PutMessageRequestType messageRequest) {
-        PutMessageRequestAdapter message = new PutMessageRequestAdapter(messageRequest);
+        PutMessageRequestWrapper message = new PutMessageRequestWrapper(messageRequest);
 
         MessageContext messageContext;
         try {
@@ -130,7 +130,7 @@ public class MessageSender {
      * @param message
      * @return
      */
-    protected MessageContext createMessageContext(PutMessageRequestAdapter message) throws MessageContextException {
+    protected MessageContext createMessageContext(PutMessageRequestWrapper message) throws MessageContextException {
         MessageContext context = new MessageContext();
 
         if(!message.hasRecieverPartyNumber()) {
