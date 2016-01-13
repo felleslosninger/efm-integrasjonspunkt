@@ -1,15 +1,15 @@
 package no.difi.meldingsutveksling.kvittering;
 
 
-import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
-import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
-import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocumentHeader;
+import no.difi.meldingsutveksling.domain.sbdh.Document;
 import org.junit.Test;
-import org.w3c.dom.Document;
 
-import javax.xml.bind.JAXBElement;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static org.junit.Assert.assertTrue;
 
@@ -21,28 +21,19 @@ public class SignAndVerifyTest {
 
     @Test
     public void should_be_able_to_sign_and_verify_the_same_document() throws Exception {
-        StandardBusinessDocument doc = createStandardBusinessDocument();
 
-        KeyPairGenerator kpg = KeyPairGenerator.getInstance("DSA");
+        Handler consoleHandler = new ConsoleHandler();
+        consoleHandler.setLevel(Level.FINEST);
+        Logger.getAnonymousLogger().addHandler(consoleHandler);
+
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         kpg.initialize(512);
         KeyPair kp = kpg.generateKeyPair();
 
-        DocumentToDocumentConverter wrapper = new DocumentToDocumentConverter(doc);
-        Document signedDomDocument = DocumentSigner.sign(wrapper.toDocument(), kp);
+        Document doc = KvitteringFactory.createAapningskvittering("111111111", "222222222", "123", "456", kp);
+        final org.w3c.dom.Document xmlDocument = DocumentToDocumentConverter.toXMLDocument(doc);
+        org.w3c.dom.Document signedDomDocument = DocumentSigner.sign(xmlDocument, kp);
         assertTrue(DocumentValidator.validate(signedDomDocument));
     }
-
-    private StandardBusinessDocument createStandardBusinessDocument() {
-        StandardBusinessDocument doc = new StandardBusinessDocument();
-        StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader();
-        doc.setStandardBusinessDocumentHeader(header);
-
-        Kvittering k = KvitteringFactory.createAapningskvittering();
-        JAXBElement<Kvittering> kvitteringJAXBElement =
-                new no.difi.meldingsutveksling.kvittering.xsd.ObjectFactory().createKvittering(k);
-        doc.setAny(kvitteringJAXBElement);
-        return doc;
-    }
-
 
 }

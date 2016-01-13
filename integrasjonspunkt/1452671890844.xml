@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<StandardBusinessDocument xmlns="http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader" xmlns:ns2="urn:no:difi:meldingsutveksling:1.0">
+    <StandardBusinessDocumentHeader>
+        <HeaderVersion>1.0</HeaderVersion>
+        <Sender>
+            <Identifier Authority="9908:910075918">9908:910075918</Identifier>
+        </Sender>
+        <Receiver>
+            <Identifier Authority="9908:910077473">9908:910077473</Identifier>
+        </Receiver>
+        <DocumentIdentification>
+            <Standard>urn:no:difi:meldingsutveksling:1.0</Standard>
+            <TypeVersion>1.0</TypeVersion>
+            <InstanceIdentifier>fbe726cc-2b7e-409e-ae91-e4f0cae822fe</InstanceIdentifier>
+            <Type>melding</Type>
+            <CreationDateAndTime>2016-01-13T08:58:10.817+01:00</CreationDateAndTime>
+        </DocumentIdentification>
+        <BusinessScope>
+            <Scope>
+                <Type>ConversationId</Type>
+                <Identifier>urn:no:difi:meldingsutveksling:1.0

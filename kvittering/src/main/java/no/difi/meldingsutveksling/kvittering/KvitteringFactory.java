@@ -25,8 +25,12 @@ import java.io.ByteArrayOutputStream;
 import java.security.KeyPair;
 import java.util.GregorianCalendar;
 
+import static no.difi.meldingsutveksling.kvittering.DocumentToDocumentConverter.*;
+
 /**
- * Factory class for Kvittering documents
+ * Factory class for creating Kvittering documents. This class is the only one visible from outside and uses
+ * the other package local classes to perform its tasks.
+ * //todo move StandardBusinessDocumentFactory to domain, and remove the two "borrowed" private create methods
  *
  * @author Glenn bech
  */
@@ -71,6 +75,7 @@ public class KvitteringFactory {
 
     private static Document signAndWrapDocument(String receiverOrgNumber, String senderOrgNumber, String journalPostId,
                                                 String conversationId, KeyPair keyPair, Kvittering kvittering) {
+
         Document unsignedReceipt = new Document();
         StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader.Builder()
                 .from(new Organisasjonsnummer(receiverOrgNumber))
@@ -80,15 +85,11 @@ public class KvitteringFactory {
                 .build();
 
         unsignedReceipt.setStandardBusinessDocumentHeader(header);
+        unsignedReceipt.setAny(new ObjectFactory().createKvittering(kvittering));
 
-        JAXBElement<Kvittering> jaxBKvittering = new ObjectFactory().createKvittering(kvittering);
-        unsignedReceipt.setAny(jaxBKvittering);
-
-        StandardBusinessDocument externalReceiptdocument = create(unsignedReceipt);
-        org.w3c.dom.Document xmlDoc = new DocumentToDocumentConverter(externalReceiptdocument).toDocument();
+        org.w3c.dom.Document xmlDoc = toXMLDocument(unsignedReceipt);
         org.w3c.dom.Document signedXmlDoc = DocumentSigner.sign(xmlDoc, keyPair);
-        StandardBusinessDocument signedExternal = new DocumentToDocumentConverter(signedXmlDoc).getStandardBusinessDocument();
-        return create(signedExternal);
+        return toDomainDocument(signedXmlDoc);
     }
 
     public static Document createLeveringsKvittering() {
