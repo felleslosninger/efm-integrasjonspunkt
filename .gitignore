@@ -1,3 +1,7 @@
+*.jks
+*.cer
+*.crt
+
 *.class
 *.log
 /**/*.iml
