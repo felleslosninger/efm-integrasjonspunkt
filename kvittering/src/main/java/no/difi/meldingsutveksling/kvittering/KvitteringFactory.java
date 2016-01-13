@@ -78,8 +78,8 @@ public class KvitteringFactory {
 
         Document unsignedReceipt = new Document();
         StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader.Builder()
-                .from(new Organisasjonsnummer(receiverOrgNumber))
-                .to(new Organisasjonsnummer(senderOrgNumber))
+                .from(new Organisasjonsnummer(senderOrgNumber))
+                .to(new Organisasjonsnummer(receiverOrgNumber))
                 .relatedToConversationId(conversationId)
                 .relatedToJournalPostId(journalPostId)
                 .build();
