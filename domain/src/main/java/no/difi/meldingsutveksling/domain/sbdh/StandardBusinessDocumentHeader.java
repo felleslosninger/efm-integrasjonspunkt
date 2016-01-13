@@ -23,9 +23,9 @@ import java.util.*;
 
 /**
  * <p>Java class for StandardBusinessDocumentHeader complex type.
- * <p>
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * <p>
+ * <p/>
  * <pre>
  * &lt;complexType name="StandardBusinessDocumentHeader">
  *   &lt;complexContent>
@@ -71,7 +71,7 @@ public class StandardBusinessDocumentHeader {
      * Gets the value of the headerVersion property.
      *
      * @return possible object is
-     * {@link String }
+     *         {@link String }
      */
     public String getHeaderVersion() {
         return headerVersion;
@@ -89,21 +89,21 @@ public class StandardBusinessDocumentHeader {
 
     /**
      * Gets the value of the sender property.
-     * <p>
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the sender property.
-     * <p>
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getSender().add(newItem);
      * </pre>
-     * <p>
-     * <p>
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link Partner }
      */
@@ -116,21 +116,21 @@ public class StandardBusinessDocumentHeader {
 
     /**
      * Gets the value of the receiver property.
-     * <p>
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the receiver property.
-     * <p>
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getReceiver().add(newItem);
      * </pre>
-     * <p>
-     * <p>
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link Partner }
      */
@@ -159,7 +159,7 @@ public class StandardBusinessDocumentHeader {
      * Gets the value of the documentIdentification property.
      *
      * @return possible object is
-     * {@link DocumentIdentification }
+     *         {@link DocumentIdentification }
      */
     public DocumentIdentification getDocumentIdentification() {
         return documentIdentification;
@@ -179,7 +179,7 @@ public class StandardBusinessDocumentHeader {
      * Gets the value of the manifest property.
      *
      * @return possible object is
-     * {@link Manifest }
+     *         {@link Manifest }
      */
     public Manifest getManifest() {
         return manifest;
@@ -199,7 +199,7 @@ public class StandardBusinessDocumentHeader {
      * Gets the value of the businessScope property.
      *
      * @return possible object is
-     * {@link BusinessScope }
+     *         {@link BusinessScope }
      */
     public BusinessScope getBusinessScope() {
         return businessScope;
@@ -230,7 +230,6 @@ public class StandardBusinessDocumentHeader {
         public static final String STANDARD_IDENTIFIER = "urn:no:difi:meldingsutveksling:1.0";
         public static final String HEADER_VERSION = "1.0";
         public static final String TYPE_VERSION = "1.0";
-
         public static final String TYPE_JOURNALPOST_ID = "JournalpostId";
         public static final String TYPE_CONVERSATIONID = "ConversationId";
 

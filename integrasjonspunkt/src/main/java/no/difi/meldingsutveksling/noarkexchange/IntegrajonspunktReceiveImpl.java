@@ -136,7 +136,9 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
     }
 
     private void sendReceipt(StandardBusinessDocumentWrapper inputDocument) {
-        Document doc = KvitteringFactory.createAapningskvittering(inputDocument.getReceiverOrgNumber(), inputDocument.getSenderOrgNumber(), inputDocument.getJournalPostId(), inputDocument.getConversationId(), keyInfo.getKeyPair());
+        Document doc = KvitteringFactory.createAapningskvittering(inputDocument.getReceiverOrgNumber(),
+                inputDocument.getSenderOrgNumber(), inputDocument.getJournalPostId(),
+                inputDocument.getConversationId(), keyInfo.getKeyPair());
         Transport t = transportFactory.createTransport(doc);
         t.send(config.getConfiguration(), doc);
     }
@@ -145,7 +147,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
         try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes))) {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
-                if (entry.getName().equals("edu_test.xml")) {
+                if (entry.getName().equals("best_edu.xml")) {
                     JAXBContext jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
                     Unmarshaller unMarshaller = jaxbContext.createUnmarshaller();
                     return unMarshaller.unmarshal(new StreamSource(zipInputStream), PutMessageRequestType.class).getValue();

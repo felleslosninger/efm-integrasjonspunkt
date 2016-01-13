@@ -4,7 +4,6 @@ package no.difi.meldingsutveksling.kvittering;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
-import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.w3c.dom.Document;
 
 import javax.xml.bind.JAXBContext;
@@ -20,7 +19,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 
 /**
- * A Wrapper class for StandardBusinessDocument that aids in converting it back-and forth from
+ * A helper class for StandardBusinessDocument that aids in converting it back-and forth from
  * org.w3c.Document
  *
  * @author Glenn Bech

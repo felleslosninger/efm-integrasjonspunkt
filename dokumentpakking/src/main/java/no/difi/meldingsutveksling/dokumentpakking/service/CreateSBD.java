@@ -21,7 +21,6 @@ import java.util.UUID;
 import static no.difi.meldingsutveksling.dokumentpakking.service.ScopeFactory.fromConversationId;
 import static no.difi.meldingsutveksling.dokumentpakking.service.ScopeFactory.fromJournalPostId;
 
-//todo refactor with builder
 public class CreateSBD {
 	public static final String STANDARD = "urn:no:difi:meldingsutveksling:1.0";
 	public static final String HEADER_VERSION = "1.0";

@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 public class MessageException extends Exception {
-
     private final StatusMessage statusMessage;
 
     public MessageException(StatusMessage statusMessage) {

@@ -30,11 +30,11 @@ import java.io.IOException;
  * This is the implementation of the wenbservice that case managenent systems supporting
  * the BEST/EDU stadard communicates with. The responsibility of this component is to
  * create, sign and encrypt a SBD message for delivery to a PEPPOL access point
- * <p>
+ * <p/>
  * The access point for the recipient is looked up through ELMA and SMK, the certificates are
  * retrived through a MOCKED adress register component not yet imolemented in any infrastructure.
- * <p>
- * <p>
+ * <p/>
+ * <p/>
  * User: glennbech
  * Date: 31.10.14
  * Time: 15:26
@@ -107,7 +107,8 @@ public class IntegrasjonspunktImpl implements SOAPport {
                 log.error(e.getMessage(), e);
             }
             return PutMessageResponseFactory.createOkResponse();
-        } else {
+        }
+        else {
             final String partyNumber = message.hasSenderPartyNumber() ? message.getSenderPartynumber() : configuration.getOrganisationNumber();
 
             MDC.put(IntegrasjonspunktConfiguration.getPartyNumber(), partyNumber);
@@ -133,7 +134,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
         MDC.put(IntegrasjonspunktConfiguration.getPartyNumber(), partyNumber);
 
-        if (hasAdresseregisterCertificate(request.getEnvelope().getReceiver().getOrgnr())) {
+        if(hasAdresseregisterCertificate(request.getEnvelope().getReceiver().getOrgnr())) {
             PutMessageContext context = new PutMessageContext(eventLog, messageSender);
             PutMessageStrategyFactory putMessageStrategyFactory = PutMessageStrategyFactory.newInstance(context);
 
