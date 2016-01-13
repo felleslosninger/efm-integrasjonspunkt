@@ -18,7 +18,7 @@ import javax.xml.crypto.dsig.dom.DOMValidateContext;
  *
  * @author Glenn Bech
  */
-public class DocumentValidator {
+class DocumentValidator {
 
     private static final String SIGNATURE_LOCAL_NAME = "Signature";
 

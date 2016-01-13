@@ -22,11 +22,13 @@ import no.difi.meldingsutveksling.noarkexchange.schema.receive.CorrelationInform
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
+import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import sun.plugin2.message.Message;
 
 
 import javax.jws.WebParam;
@@ -38,6 +40,7 @@ import java.io.*;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
@@ -106,7 +109,12 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
 
         byte[] decryptedAsicPackage = decrypt(payload);
         logEvent(document, ProcessState.DECRYPTION_SUCCESS);
-        PutMessageRequestType eduDocument = convertAsicEntrytoEduDocument(decryptedAsicPackage);
+        PutMessageRequestType eduDocument;
+        try {
+            eduDocument = convertAsicEntrytoEduDocument(decryptedAsicPackage);
+        } catch (IOException | JAXBException e) {
+            throw new MessageException(e, StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
+        }
         logEvent(document, ProcessState.BESTEDU_EXTRACTED);
         forwardToNoarkSystemAndSendReceipt(document, eduDocument);
 
@@ -119,18 +127,6 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
         return cmsUtil.decryptCMS(cmsEncZip, keyInfo.loadPrivateKey());
     }
 
-    private PutMessageRequestType extractBestEdu(File bestEdu) throws MessageException {
-        PutMessageRequestType putMessageRequestType;
-        try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
-            Unmarshaller unMarshaller = jaxbContext.createUnmarshaller();
-            putMessageRequestType = unMarshaller.unmarshal(new StreamSource(bestEdu), PutMessageRequestType.class).getValue();
-        } catch (JAXBException e) {
-            throw new MessageException(e, StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
-        }
-        return putMessageRequestType;
-    }
-
     private void forwardToNoarkSystemAndSendReceipt(StandardBusinessDocumentWrapper inputDocument, PutMessageRequestType putMessageRequestType) {
         PutMessageResponseType response = localNoark.sendEduMelding(putMessageRequestType);
         if (response != null) {
@@ -138,24 +134,32 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
             if (null == result) {
                 logEvent(inputDocument, ProcessState.ARCHIVE_NULL_RESPONSE);
             } else {
+                sendReceipt(inputDocument);
                 logEvent(inputDocument, ProcessState.BEST_EDU_SENT);
-
             }
         } else {
             logEvent(inputDocument, ProcessState.ARCHIVE_NOT_AVAILABLE);
         }
     }
 
-    private PutMessageRequestType convertAsicEntrytoEduDocument(byte[] bytes) throws MessageException {
-        PutMessageRequestType returnValue;
+    private void sendReceipt(StandardBusinessDocumentWrapper inputDocument) {
+        Document doc = KvitteringFactory.createAapningskvittering(inputDocument.getReceiverOrgNumber(), inputDocument.getSenderOrgNumber(), inputDocument.getJournalPostId(), inputDocument.getConversationId(), keyInfo.getKeyPair());
+        Transport t = transportFactory.createTransport(doc);
+        t.send(config.getConfiguration(), doc);
+    }
+
+    private PutMessageRequestType convertAsicEntrytoEduDocument(byte[] bytes) throws MessageException, IOException, JAXBException {
         try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes))) {
-            JAXBContext jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
-            Unmarshaller unMarshaller = jaxbContext.createUnmarshaller();
-            returnValue = unMarshaller.unmarshal(new StreamSource(zipInputStream), PutMessageRequestType.class).getValue();
-        } catch (JAXBException | IOException e) {
-            throw new MessageException(e, StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
+            ZipEntry entry;
+            while ((entry = zipInputStream.getNextEntry()) != null) {
+                if (entry.getName().equals("edu_test.xml")) {
+                    JAXBContext jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
+                    Unmarshaller unMarshaller = jaxbContext.createUnmarshaller();
+                    return unMarshaller.unmarshal(new StreamSource(zipInputStream), PutMessageRequestType.class).getValue();
+                }
+            }
         }
-        return returnValue;
+        throw new MessageException(StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
     }
 
     private void logEvent(StandardBusinessDocumentWrapper inputDocument, ProcessState processState) {
@@ -163,33 +167,6 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
                 .setReceiver(inputDocument.getReceiverOrgNumber())
                 .setSender(inputDocument.getSenderOrgNumber()));
     }
-
-    public static Document createAapningskvittering(String orgNumberReceiver, String orgNumberSender, KeyPair keyPair) {
-        return wrapAndSignReceipt(orgNumberReceiver, orgNumberSender, keyPair, KvitteringFactory.createAapningskvittering());
-    }
-
-    public static Document createLeveringsKvittering(String orgNumberReceiver, String orgNumberSender, KeyPair keyPair) {
-        return wrapAndSignReceipt(orgNumberReceiver, orgNumberSender, keyPair, KvitteringFactory.createLeveringsKvittering());
-    }
-
-    private static Document wrapAndSignReceipt(String orgNumberReceiver, String orgNumberSender, KeyPair keyPair, Kvittering kvittering) {
-        Document unsignedReceipt = new Document();
-        StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader.Builder().
-                from(new Organisasjonsnummer(orgNumberSender)).
-                to(new Organisasjonsnummer(orgNumberReceiver))
-                .build();
-        unsignedReceipt.setStandardBusinessDocumentHeader(header);
-
-        JAXBElement<Kvittering> jaxBKvittering = new ObjectFactory().createKvittering(kvittering);
-        unsignedReceipt.setAny(jaxBKvittering);
-
-        StandardBusinessDocument externalReceiptdocument = StandardBusinessDocumentFactory.create(unsignedReceipt);
-        org.w3c.dom.Document xmlDoc = new DocumentToDocumentConverter(externalReceiptdocument).toDocument();
-        org.w3c.dom.Document signedXmlDoc = DocumentSigner.sign(xmlDoc, keyPair);
-        StandardBusinessDocument signedExternal = new DocumentToDocumentConverter(signedXmlDoc).getStandardBusinessDocument();
-        return StandardBusinessDocumentFactory.create(signedExternal);
-    }
-
 
     public TransportFactory getTransportFactory() {
         return transportFactory;
@@ -223,22 +200,4 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
         this.keyInfo = keyInfo;
     }
 
-    public static void main(String[] args) throws NoSuchAlgorithmException, JAXBException {
-
-        KeyPairGenerator kpg = KeyPairGenerator.getInstance("DSA");
-        kpg.initialize(512);
-        KeyPair kp = kpg.generateKeyPair();
-        final Document aapningskvittering = IntegrajonspunktReceiveImpl.createAapningskvittering("0110763434", "0110763434", kp);
-        JAXBElement<Document> d = new no.difi.meldingsutveksling.domain.sbdh.ObjectFactory().createStandardBusinessDocument(aapningskvittering);
-        System.out.println(toXml(d));
-    }
-
-    public static String toXml(JAXBElement<Document> doc) throws JAXBException {
-        ByteArrayOutputStream baos;
-        JAXBContext jc = JAXBContext.newInstance(Document.class, Kvittering.class);
-        Marshaller marshaller = jc.createMarshaller();
-        baos = new ByteArrayOutputStream();
-        marshaller.marshal(doc, baos);
-        return baos.toString();
-    }
 }

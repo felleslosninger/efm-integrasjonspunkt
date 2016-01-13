@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * @author Glenn Bech
  */
-public class DocumentSigner {
+class DocumentSigner {
 
     private static final String SIGN_ENTIRE_DOCUMENT = "";
 
@@ -50,7 +50,7 @@ public class DocumentSigner {
             CanonicalizationMethod canonicalizationMethod = xmlSignatureFactory.newCanonicalizationMethod
                     (CanonicalizationMethod.INCLUSIVE_WITH_COMMENTS,
                             (C14NMethodParameterSpec) null);
-            SignatureMethod signatureMethod = xmlSignatureFactory.newSignatureMethod(SignatureMethod.DSA_SHA1, null);
+            SignatureMethod signatureMethod = xmlSignatureFactory.newSignatureMethod(SignatureMethod.RSA_SHA1, null);
             SignedInfo signedIno = xmlSignatureFactory.newSignedInfo(canonicalizationMethod, signatureMethod,
                     Collections.singletonList(ref));
 

@@ -11,12 +11,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.UnrecoverableKeyException;
+import java.security.*;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 
 /**
@@ -88,6 +85,31 @@ public class IntegrasjonspunktNokkel {
         }
     }
 
+    public KeyPair getKeyPair() {
+
+        PrivateKey key = null;
+        try (InputStream i = openKeyInputStream()) {
+            KeyStore keystore = KeyStore.getInstance("JKS");
+            keystore.load(i, pkPassword.toCharArray());
+            Enumeration aliases = keystore.aliases();
+            for (; aliases.hasMoreElements(); ) {
+                String alias = (String) aliases.nextElement();
+                boolean isKey = keystore.isKeyEntry(alias);
+                if (isKey && alias.equals(pkAlias)) {
+                    key = (PrivateKey) keystore.getKey(alias, pkPassword.toCharArray());
+                    X509Certificate c = (X509Certificate) keystore.getCertificate(alias);
+                    return new KeyPair(c.getPublicKey(), key);
+                }
+            }
+            if (key == null) {
+                throw new MeldingsUtvekslingRuntimeException("no key with alias " + pkAlias + " found in the keystore " + pkLocation);
+            }
+        } catch (CertificateException | KeyStoreException | IOException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
+            throw new MeldingsUtvekslingRuntimeException(e);
+        }
+        return null;
+    }
+
     public SignatureHelper getSignatureHelper() {
         try {
             InputStream keyInputStream = openKeyInputStream();
@@ -110,4 +132,3 @@ public class IntegrasjonspunktNokkel {
     }
 
 }
-
