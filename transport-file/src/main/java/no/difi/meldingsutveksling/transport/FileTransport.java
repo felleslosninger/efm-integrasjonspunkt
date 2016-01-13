@@ -4,6 +4,7 @@ import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
+
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import org.modelmapper.ModelMapper;
 import org.springframework.core.env.Environment;

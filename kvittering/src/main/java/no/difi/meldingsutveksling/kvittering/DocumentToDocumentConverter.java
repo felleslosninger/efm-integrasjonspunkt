@@ -2,8 +2,8 @@ package no.difi.meldingsutveksling.kvittering;
 
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
-import no.difi.meldingsutveksling.noarkexchange.schema.receive.ObjectFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.w3c.dom.Document;
 
@@ -31,13 +31,11 @@ class DocumentToDocumentConverter {
 
     static {
         try {
-            jaxBContext = JAXBContext.newInstance(Kvittering.class, StandardBusinessDocument.class);
+            jaxBContext = JAXBContext.newInstance(no.difi.meldingsutveksling.domain.sbdh.Document.class, Kvittering.class);
         } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException(e.getMessage(), e);
         }
     }
-
-    private StandardBusinessDocument jaxBdocuemnt;
 
     /**
      * Creates a StandardBusinessDocumentWrapper where the contained document is marshalled
@@ -46,7 +44,7 @@ class DocumentToDocumentConverter {
      * @param domDocument the source document
      * @throws JAXBException
      */
-    public DocumentToDocumentConverter(Document domDocument) {
+    public static no.difi.meldingsutveksling.domain.sbdh.Document toDomainDocument(Document domDocument) {
         TransformerFactory tf = TransformerFactory.newInstance();
         Transformer t;
         try {
@@ -54,20 +52,10 @@ class DocumentToDocumentConverter {
             DOMSource source = new DOMSource(domDocument);
             JAXBResult result = new JAXBResult(jaxBContext);
             t.transform(source, result);
-            this.jaxBdocuemnt = ((JAXBElement<StandardBusinessDocument>) result.getResult()).getValue();
+            return ((JAXBElement<no.difi.meldingsutveksling.domain.sbdh.Document>) result.getResult()).getValue();
         } catch (TransformerException | JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
-    }
-
-    /**
-     * Creates a StandardBusinessDocumentWrapper from an org.w3c.document where the contained document
-     * is a JAXB annotated object
-     *
-     * @param jaxBdocuemnt
-     */
-    public DocumentToDocumentConverter(StandardBusinessDocument jaxBdocuemnt) {
-        this.jaxBdocuemnt = jaxBdocuemnt;
     }
 
     /**
@@ -76,7 +64,7 @@ class DocumentToDocumentConverter {
      * @return
      * @throws JAXBException
      */
-    public Document toDocument() {
+    public static Document toXMLDocument(no.difi.meldingsutveksling.domain.sbdh.Document jaxbDocument ) {
         try {
             Marshaller marshaller = jaxBContext.createMarshaller();
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -88,7 +76,7 @@ class DocumentToDocumentConverter {
             } catch (ParserConfigurationException e) {
                 throw new MeldingsUtvekslingRuntimeException(e);
             }
-            JAXBElement<StandardBusinessDocument> jbe = new ObjectFactory().createStandardBusinessDocument(jaxBdocuemnt);
+            JAXBElement<no.difi.meldingsutveksling.domain.sbdh.Document> jbe = new ObjectFactory().createStandardBusinessDocument(jaxbDocument);
             marshaller.marshal(jbe, domDocument);
             return domDocument;
         } catch (JAXBException e) {
@@ -96,7 +84,4 @@ class DocumentToDocumentConverter {
         }
     }
 
-    public StandardBusinessDocument getStandardBusinessDocument() {
-        return jaxBdocuemnt;
-    }
 }

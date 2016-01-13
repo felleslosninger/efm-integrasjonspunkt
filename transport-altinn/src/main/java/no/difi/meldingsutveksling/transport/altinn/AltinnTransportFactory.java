@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.transport.altinn;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.elma.ELMALookup;
-import no.difi.meldingsutveksling.transport.FileTransport;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +24,9 @@ public class AltinnTransportFactory implements TransportFactory {
 
     @Override
     public Transport createTransport(Document message) {
-        return new FileTransport();
+        StandardBusinessDocumentHeader standardBusinessDocumentHeader = message.getStandardBusinessDocumentHeader();
+        final String receiverOrganisationNumber = standardBusinessDocumentHeader.getReceiverOrganisationNumber();
+        return new AltinnTransport(receiverOrganisationNumber, elmaLookup);
     }
 
 }

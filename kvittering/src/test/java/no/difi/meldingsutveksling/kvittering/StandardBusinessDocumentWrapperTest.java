@@ -13,6 +13,10 @@ import org.w3c.dom.Document;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -21,39 +25,22 @@ import static org.junit.Assert.assertEquals;
 public class StandardBusinessDocumentWrapperTest {
 
     private static final String AUTHOROTHY = "";
+    public static final String SENDER = "974720760";
+    public static final String RECEIVER = "974720760";
 
     @Test
-    public void should_convert_to_document_and_back_to_jaxb_representation() throws JAXBException {
+    public void should_convert_to_document_and_back_to_jaxb_representation() throws JAXBException, NoSuchAlgorithmException {
 
-        StandardBusinessDocument document = new StandardBusinessDocument();
-        StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader();
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+        kpg.initialize(512);
+        KeyPair kp = kpg.generateKeyPair();
 
-        Partner sender = new Partner();
-        PartnerIdentification piSender = new PartnerIdentification();
-        piSender.setAuthority(AUTHOROTHY);
-        piSender.setValue("974720760");
-        sender.setIdentifier(piSender);
+        no.difi.meldingsutveksling.domain.sbdh.Document beforeConversion = KvitteringFactory.createAapningskvittering(RECEIVER, SENDER, "", "", kp);
+        Document xmlDocVersion = DocumentToDocumentConverter.toXMLDocument(beforeConversion);
+        no.difi.meldingsutveksling.domain.sbdh.Document afterConversion = 4dDocumentToDocumentConverter.toDomainDocument(xmlDocVersion);
 
-        Partner receiver = new Partner();
-        PartnerIdentification piReceiver = new PartnerIdentification();
-        piReceiver.setAuthority(AUTHOROTHY);
-        piReceiver.setValue("974720760");
-        receiver.setIdentifier(piReceiver);
-        header.getSender().add(0, sender);
-        header.getReceiver().add(0, receiver);
-        document.setStandardBusinessDocumentHeader(header);
-        Kvittering k = KvitteringFactory.createAapningskvittering();
-        JAXBElement<Kvittering> kvittering = new ObjectFactory().createKvittering(k);
-        document.setAny(kvittering);
-
-        DocumentToDocumentConverter wrapper = new DocumentToDocumentConverter(document);
-        Document documentVersionOfTheObject = wrapper.toDocument();
-
-        DocumentToDocumentConverter anotherWrapper = new DocumentToDocumentConverter(documentVersionOfTheObject);
-        anotherWrapper.getStandardBusinessDocument();
-
-        assertEquals(wrapper.getStandardBusinessDocument().getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue(),
-                anotherWrapper.getStandardBusinessDocument().getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue());
+        assertEquals(beforeConversion.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue(),
+                afterConversion.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue());
     }
 
 }
