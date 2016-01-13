@@ -136,8 +136,8 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
     }
 
     private void sendReceipt(StandardBusinessDocumentWrapper inputDocument) {
-        Document doc = KvitteringFactory.createAapningskvittering(inputDocument.getReceiverOrgNumber(),
-                inputDocument.getSenderOrgNumber(), inputDocument.getJournalPostId(),
+        Document doc = KvitteringFactory.createAapningskvittering(inputDocument.getSenderOrgNumber(),
+                inputDocument.getReceiverOrgNumber(), inputDocument.getJournalPostId(),
                 inputDocument.getConversationId(), keyInfo.getKeyPair());
         Transport t = transportFactory.createTransport(doc);
         t.send(config.getConfiguration(), doc);
