@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<StandardBusinessDocument xmlns="http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader">
-    <StandardBusinessDocumentHeader/>
-    <ns2:kvittering xmlns:ns2="http://begrep.difi.no/sdp/schema_v10" xmlns="http://www.w3.org/2000/09/xmldsig#"
-                    xmlns:ns3="http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader">
-        <ns2:tidspunkt>2015-12-03T21:49:28.476+01:00</ns2:tidspunkt>
-        <ns2:aapning/>
-    </ns2:kvittering>
-</StandardBusinessDocument>

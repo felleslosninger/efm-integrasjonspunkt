@@ -37,7 +37,7 @@ public class StandardBusinessDocumentWrapperTest {
 
         no.difi.meldingsutveksling.domain.sbdh.Document beforeConversion = KvitteringFactory.createAapningskvittering(RECEIVER, SENDER, "", "", kp);
         Document xmlDocVersion = DocumentToDocumentConverter.toXMLDocument(beforeConversion);
-        no.difi.meldingsutveksling.domain.sbdh.Document afterConversion = 4dDocumentToDocumentConverter.toDomainDocument(xmlDocVersion);
+        no.difi.meldingsutveksling.domain.sbdh.Document afterConversion = DocumentToDocumentConverter.toDomainDocument(xmlDocVersion);
 
         assertEquals(beforeConversion.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue(),
                 afterConversion.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue());

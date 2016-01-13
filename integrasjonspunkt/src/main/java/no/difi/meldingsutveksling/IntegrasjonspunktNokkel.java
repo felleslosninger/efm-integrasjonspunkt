@@ -87,7 +87,7 @@ public class IntegrasjonspunktNokkel {
 
     public KeyPair getKeyPair() {
 
-        PrivateKey key = null;
+        KeyPair result = null ;
         try (InputStream i = openKeyInputStream()) {
             KeyStore keystore = KeyStore.getInstance("JKS");
             keystore.load(i, pkPassword.toCharArray());
@@ -96,18 +96,19 @@ public class IntegrasjonspunktNokkel {
                 String alias = (String) aliases.nextElement();
                 boolean isKey = keystore.isKeyEntry(alias);
                 if (isKey && alias.equals(pkAlias)) {
-                    key = (PrivateKey) keystore.getKey(alias, pkPassword.toCharArray());
+                   PrivateKey key = (PrivateKey) keystore.getKey(alias, pkPassword.toCharArray());
                     X509Certificate c = (X509Certificate) keystore.getCertificate(alias);
-                    return new KeyPair(c.getPublicKey(), key);
+                    result = new  KeyPair(c.getPublicKey(), key);
+                    break;
                 }
             }
-            if (key == null) {
+            if (result == null) {
                 throw new MeldingsUtvekslingRuntimeException("no key with alias " + pkAlias + " found in the keystore " + pkLocation);
             }
         } catch (CertificateException | KeyStoreException | IOException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
-        return null;
+        return result;
     }
 
     public SignatureHelper getSignatureHelper() {

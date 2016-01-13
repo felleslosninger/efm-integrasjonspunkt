@@ -173,7 +173,4 @@ public class IntegrasjonspunktConfiguration {
         return environment.getProperty(KEY_NOARKSYSTEM_DOMAIN);
     }
 
-    public KeyPair getKeyPair() {
-        return null;
-    }
 }
