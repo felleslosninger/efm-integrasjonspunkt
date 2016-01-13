@@ -92,13 +92,6 @@ public class KvitteringFactory {
         return toDomainDocument(signedXmlDoc);
     }
 
-    public static Document createLeveringsKvittering() {
-        Kvittering k = new Kvittering();
-        k.setLevering(new Levering());
-        k.setTidspunkt(createTimeStamp());
-        return null;
-    }
-
     private static XMLGregorianCalendar createTimeStamp() {
         try {
             GregorianCalendar gcal = (GregorianCalendar) GregorianCalendar.getInstance();
