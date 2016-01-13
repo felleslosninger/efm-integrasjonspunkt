@@ -127,6 +127,4 @@ public class KvitteringFactory {
         ModelMapper mapper = new ModelMapper();
         return mapper.map(fromDocument, Document.class);
     }
-
-
 }
