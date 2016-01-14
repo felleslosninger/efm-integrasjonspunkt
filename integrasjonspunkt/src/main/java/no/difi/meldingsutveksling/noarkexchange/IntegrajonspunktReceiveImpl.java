@@ -68,12 +68,23 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
     @Autowired
     private IntegrasjonspunktConfiguration config;
 
-
     @Autowired
     private IntegrasjonspunktNokkel keyInfo;
 
+    @Autowired
+    public IntegrajonspunktReceiveImpl(TransportFactory transportFactory,
+                                       NoarkClient localNoark,
+                                       MessageSender messageSender,
+                                       AdresseregisterVirksert adresseregisterService,
+                                       IntegrasjonspunktConfiguration config,
+                                       IntegrasjonspunktNokkel keyInfo) {
 
-    public IntegrajonspunktReceiveImpl() {
+        this.transportFactory = transportFactory;
+        this.localNoark = localNoark;
+        this.messageSender = messageSender;
+        this.adresseregisterService = adresseregisterService;
+        this.config = config;
+        this.keyInfo = keyInfo;
     }
 
     public CorrelationInformation receive(@WebParam(name = "StandardBusinessDocument", targetNamespace = SBD_NAMESPACE, partName = "receiveResponse") StandardBusinessDocument standardBusinessDocument) {

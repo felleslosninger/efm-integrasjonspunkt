@@ -51,6 +51,8 @@ class AppReceiptPutMessageStrategy implements PutMessageStrategy {
             AppReceiptType receipt = r.getValue();
             for (StatusMessageType sm : receipt.getMessage())
                 eventLog.log(new Event(ProcessState.APP_RECEIPT).setMessage(sm.getCode() + ", " + sm.getText()));
+            PutMessageResponseType pmrt = new PutMessageResponseType();
+
             return createOkResponse();
         } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException(e);

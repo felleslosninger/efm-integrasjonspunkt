@@ -20,9 +20,8 @@ class DOMX509KeySelector extends KeySelector {
     @Override
     public KeySelectorResult select(KeyInfo keyInfo, KeySelector.Purpose purpose, AlgorithmMethod method, XMLCryptoContext context) throws KeySelectorException {
 
-        Iterator ki = keyInfo.getContent().iterator();
-        while (ki.hasNext()) {
-            XMLStructure info = (XMLStructure) ki.next();
+        for (Object o : keyInfo.getContent()) {
+            XMLStructure info = (XMLStructure) o;
             if (!(info instanceof DOMKeyValue))
                 continue;
             final PublicKey pk;

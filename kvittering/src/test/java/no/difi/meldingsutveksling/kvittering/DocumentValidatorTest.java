@@ -16,7 +16,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Glenn Bech
  */
-public class SignaturValidatorTest {
+public class DocumentValidatorTest {
 
     @Test
     public void should_verify_external_document_that_is_valid() throws XMLSignatureException, ParserConfigurationException, SAXException, IOException {
@@ -24,7 +24,7 @@ public class SignaturValidatorTest {
         dbf.setNamespaceAware(true);
         DocumentBuilder builder;
         builder = dbf.newDocumentBuilder();
-        Document doc = builder.parse(SignaturValidatorTest.class.getClassLoader().getResourceAsStream("signed_sbd_kvittering.xml"));
+        Document doc = builder.parse(DocumentValidatorTest.class.getClassLoader().getResourceAsStream("signed_sbd_kvittering.xml"));
         assertTrue(DocumentValidator.validate(doc));
     }
 }
