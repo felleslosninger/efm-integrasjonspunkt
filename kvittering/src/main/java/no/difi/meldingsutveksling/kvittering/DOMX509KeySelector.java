@@ -8,7 +8,6 @@ import javax.xml.crypto.dsig.keyinfo.KeyInfo;
 import java.security.Key;
 import java.security.KeyException;
 import java.security.PublicKey;
-import java.util.Iterator;
 
 /**
  * KeySelector that looks for the public key within the SigninInfo element
@@ -20,9 +19,8 @@ class DOMX509KeySelector extends KeySelector {
     @Override
     public KeySelectorResult select(KeyInfo keyInfo, KeySelector.Purpose purpose, AlgorithmMethod method, XMLCryptoContext context) throws KeySelectorException {
 
-        Iterator ki = keyInfo.getContent().iterator();
-        while (ki.hasNext()) {
-            XMLStructure info = (XMLStructure) ki.next();
+        for (Object o : keyInfo.getContent()) {
+            XMLStructure info = (XMLStructure) o;
             if (!(info instanceof DOMKeyValue))
                 continue;
             final PublicKey pk;
@@ -42,14 +40,8 @@ class DOMX509KeySelector extends KeySelector {
         throw new KeySelectorException("No key found!");
     }
 
-    static boolean algEquals(String algURI, String algName) {
-        if ((algName.equalsIgnoreCase("DSA") &&
-                algURI.equalsIgnoreCase(SignatureMethod.DSA_SHA1)) ||
-                (algName.equalsIgnoreCase("RSA") &&
-                        algURI.equalsIgnoreCase(SignatureMethod.RSA_SHA1))) {
-            return true;
-        } else {
-            return false;
-        }
+    private static boolean algEquals(String algURI, String algName) {
+        return (algName.equalsIgnoreCase("DSA") && algURI.equalsIgnoreCase(SignatureMethod.DSA_SHA1))
+                || (algName.equalsIgnoreCase("RSA") && algURI.equalsIgnoreCase(SignatureMethod.RSA_SHA1));
     }
 }

@@ -5,6 +5,7 @@ import no.difi.meldingsutveksling.StandardBusinessDocumentConverter;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.XMLTimeStamp;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.kvittering.xsd.Aapning;
@@ -15,11 +16,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessD
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 import java.security.KeyPair;
-import java.util.GregorianCalendar;
 
 import static no.difi.meldingsutveksling.kvittering.DocumentToDocumentConverter.toDomainDocument;
 import static no.difi.meldingsutveksling.kvittering.DocumentToDocumentConverter.toXMLDocument;
@@ -41,7 +38,7 @@ public class KvitteringFactory {
             jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class, Kvittering.class);
             jaxbContextdomain = JAXBContext.newInstance(Document.class, Payload.class, Kvittering.class);
         } catch (JAXBException e) {
-            throw new RuntimeException("Could not initialize " + StandardBusinessDocumentConverter.class, e);
+            throw new MeldingsUtvekslingRuntimeException("Could not initialize " + StandardBusinessDocumentConverter.class, e);
         }
     }
 
@@ -52,13 +49,13 @@ public class KvitteringFactory {
      * @param senderOrgNumber
      * @param journalPostId
      * @param conversationId
-     * @param keyPair           @return
+     * @param keyPair
      */
     public static Document createAapningskvittering(String receiverOrgNumber, String senderOrgNumber,
                                                     String journalPostId, String conversationId, KeyPair keyPair) {
         Kvittering k = new Kvittering();
         k.setAapning(new Aapning());
-        k.setTidspunkt(createTimeStamp());
+        k.setTidspunkt(XMLTimeStamp.createTimeStamp());
         return signAndWrapDocument(receiverOrgNumber, senderOrgNumber, journalPostId, conversationId, keyPair, k);
     }
 
@@ -66,7 +63,7 @@ public class KvitteringFactory {
                                                      String journalPostId, String conversationId, KeyPair keyPair) {
         Kvittering k = new Kvittering();
         k.setLevering(new Levering());
-        k.setTidspunkt(createTimeStamp());
+        k.setTidspunkt(XMLTimeStamp.createTimeStamp());
         return signAndWrapDocument(receiverOrgNumber, senderOrgNumber, journalPostId, conversationId, keyPair, k);
     }
 
@@ -92,12 +89,4 @@ public class KvitteringFactory {
         return toDomainDocument(signedXmlDoc);
     }
 
-    private static XMLGregorianCalendar createTimeStamp() {
-        try {
-            GregorianCalendar gcal = (GregorianCalendar) GregorianCalendar.getInstance();
-            return DatatypeFactory.newInstance().newXMLGregorianCalendar(gcal);
-        } catch (DatatypeConfigurationException e) {
-            throw new MeldingsUtvekslingRuntimeException(e);
-        }
-    }
 }

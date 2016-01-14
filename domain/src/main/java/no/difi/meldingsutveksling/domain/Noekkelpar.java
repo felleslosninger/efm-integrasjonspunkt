@@ -14,10 +14,6 @@ public class Noekkelpar {
 		this.sertifikat = sertifikat;
 	}
 
-	public Sertifikat getSertifikat() {
-		return Sertifikat.fraCertificate((X509Certificate) sertifikat);
-	}
-
 	public Certificate[] getCertificateChain() {
 		Certificate[] certs = new Certificate[1];
 		certs[0] = sertifikat;

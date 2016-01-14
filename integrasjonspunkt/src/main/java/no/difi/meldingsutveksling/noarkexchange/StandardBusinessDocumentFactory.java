@@ -38,6 +38,7 @@ public class StandardBusinessDocumentFactory {
 
     public static final String DOCUMENT_TYPE_MELDING = "melding";
     private static JAXBContext jaxbContextdomain;
+    private static JAXBContext jaxbContext;
 
     @Autowired
     private IntegrasjonspunktNokkel integrasjonspunktNokkel;
@@ -46,13 +47,10 @@ public class StandardBusinessDocumentFactory {
         try {
             jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class, Kvittering.class);
             jaxbContextdomain = JAXBContext.newInstance(Document.class, Payload.class, Kvittering.class);
-
         } catch (JAXBException e) {
-            throw new RuntimeException("Could not initialize " + StandardBusinessDocumentConverter.class, e);
+            throw new MeldingsUtvekslingRuntimeException("Could not initialize " + StandardBusinessDocumentConverter.class, e);
         }
     }
-
-    private static JAXBContext jaxbContext;
 
     public StandardBusinessDocumentFactory() {
     }
@@ -72,7 +70,7 @@ public class StandardBusinessDocumentFactory {
         Archive archive;
         try {
             archive = createAsicePackage(avsender, mottaker, bestEduMessage);
-        } catch(IOException e) {
+        } catch (IOException e) {
             throw new MessageException(e, StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT);
         }
         Payload payload = new Payload(encryptArchive(mottaker, archive));

@@ -69,7 +69,7 @@ public class IntegrasjonspunktNokkel {
             keystore.load(i, pkPassword.toCharArray());
 
             Enumeration aliases = keystore.aliases();
-            for (; aliases.hasMoreElements(); ) {
+            while (aliases.hasMoreElements()) {
                 String alias = (String) aliases.nextElement();
                 boolean isKey = keystore.isKeyEntry(alias);
                 if (isKey && alias.equals(pkAlias)) {
@@ -87,7 +87,7 @@ public class IntegrasjonspunktNokkel {
 
     public KeyPair getKeyPair() {
 
-        KeyPair result = null ;
+        KeyPair result = null;
         try (InputStream i = openKeyInputStream()) {
             KeyStore keystore = KeyStore.getInstance("JKS");
             keystore.load(i, pkPassword.toCharArray());
@@ -96,9 +96,9 @@ public class IntegrasjonspunktNokkel {
                 String alias = (String) aliases.nextElement();
                 boolean isKey = keystore.isKeyEntry(alias);
                 if (isKey && alias.equals(pkAlias)) {
-                   PrivateKey key = (PrivateKey) keystore.getKey(alias, pkPassword.toCharArray());
+                    PrivateKey key = (PrivateKey) keystore.getKey(alias, pkPassword.toCharArray());
                     X509Certificate c = (X509Certificate) keystore.getCertificate(alias);
-                    result = new  KeyPair(c.getPublicKey(), key);
+                    result = new KeyPair(c.getPublicKey(), key);
                     break;
                 }
             }
