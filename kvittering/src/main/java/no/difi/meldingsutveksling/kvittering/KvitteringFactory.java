@@ -49,7 +49,7 @@ public class KvitteringFactory {
      * @param senderOrgNumber
      * @param journalPostId
      * @param conversationId
-     * @param keyPair           @return
+     * @param keyPair
      */
     public static Document createAapningskvittering(String receiverOrgNumber, String senderOrgNumber,
                                                     String journalPostId, String conversationId, KeyPair keyPair) {

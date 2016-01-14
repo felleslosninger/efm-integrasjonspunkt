@@ -47,28 +47,15 @@ import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
 public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
 
-    private Logger logger = LoggerFactory.getLogger(IntegrasjonspunktImpl.class);
-
+    private static Logger logger = LoggerFactory.getLogger(IntegrasjonspunktImpl.class);
     private static final int MAGIC_NR = 1024;
-    public static final String SBD_NAMESPACE = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader";
+    private static final String SBD_NAMESPACE = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader";
     private EventLog eventLog = EventLog.create();
-
-    @Autowired
-    TransportFactory transportFactory;
-
-    @Autowired
+    private TransportFactory transportFactory;
     private NoarkClient localNoark;
-
-    @Autowired
     private MessageSender messageSender;
-
-    @Autowired
     private AdresseregisterVirksert adresseregisterService;
-
-    @Autowired
     private IntegrasjonspunktConfiguration config;
-
-    @Autowired
     private IntegrasjonspunktNokkel keyInfo;
 
     @Autowired
@@ -88,7 +75,6 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
     }
 
     public CorrelationInformation receive(@WebParam(name = "StandardBusinessDocument", targetNamespace = SBD_NAMESPACE, partName = "receiveResponse") StandardBusinessDocument standardBusinessDocument) {
-
         try {
             return forwardToNoarkSystem(standardBusinessDocument);
         } catch (MessageException e) {
@@ -101,16 +87,13 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
     public CorrelationInformation forwardToNoarkSystem(StandardBusinessDocument inputDocument) throws MessageException {
         StandardBusinessDocumentWrapper document = new StandardBusinessDocumentWrapper(inputDocument);
         adresseregisterService.validateCertificates(document);
-
         if (document.isReciept()) {
             logEvent(document, ProcessState.KVITTERING_MOTTATT);
             return new CorrelationInformation();
         }
 
         logEvent(document, ProcessState.SBD_RECIEVED);
-
         Payload payload = document.getPayload();
-
         byte[] decryptedAsicPackage = decrypt(payload);
         logEvent(document, ProcessState.DECRYPTION_SUCCESS);
         PutMessageRequestType eduDocument;
@@ -121,7 +104,6 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
         }
         logEvent(document, ProcessState.BESTEDU_EXTRACTED);
         forwardToNoarkSystemAndSendReceipt(document, eduDocument);
-
         return new CorrelationInformation();
     }
 
@@ -178,10 +160,6 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
         return transportFactory;
     }
 
-    public void setTransportFactory(TransportFactory transportFactory) {
-        this.transportFactory = transportFactory;
-    }
-
     public NoarkClient getLocalNoark() {
         return localNoark;
     }
@@ -194,16 +172,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
         return config;
     }
 
-    public void setConfig(IntegrasjonspunktConfiguration config) {
-        this.config = config;
-    }
-
     public IntegrasjonspunktNokkel getKeyInfo() {
         return keyInfo;
     }
-
-    public void setKeyInfo(IntegrasjonspunktNokkel keyInfo) {
-        this.keyInfo = keyInfo;
-    }
-
 }
