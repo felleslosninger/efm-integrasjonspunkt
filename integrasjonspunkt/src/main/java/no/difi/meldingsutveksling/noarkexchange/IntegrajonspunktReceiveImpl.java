@@ -9,6 +9,7 @@ import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.kvittering.KvitteringFactory;
+import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
@@ -78,6 +79,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
         try {
             return forwardToNoarkSystem(standardBusinessDocument);
         } catch (MessageException e) {
+            Audit.error("Message could not be sent to archive system", standardBusinessDocument);
             logger.error(markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)),
                     e.getStatusMessage().getTechnicalMessage(), e);
             return new CorrelationInformation();

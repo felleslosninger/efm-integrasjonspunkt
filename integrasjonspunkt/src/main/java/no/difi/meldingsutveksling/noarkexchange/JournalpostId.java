@@ -31,7 +31,7 @@ public class JournalpostId {
         this.jpId = jpId;
     }
 
-    public static JournalpostId fromPutMessage(PutMessageRequestAdapter message) {
+    public static JournalpostId fromPutMessage(PutMessageRequestWrapper message) {
         JournalpostId result;
         XPathFactory xPathFactory = XPathFactory.newInstance();
         XPath xPath = xPathFactory.newXPath();

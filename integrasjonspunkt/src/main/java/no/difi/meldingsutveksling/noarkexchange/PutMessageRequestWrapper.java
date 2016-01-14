@@ -6,10 +6,10 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 
-public class PutMessageRequestAdapter {
+public class PutMessageRequestWrapper {
     private PutMessageRequestType requestType;
 
-    public PutMessageRequestAdapter(PutMessageRequestType requestType) {
+    public PutMessageRequestWrapper(PutMessageRequestType requestType) {
         this.requestType = requestType;
     }
 
