@@ -12,20 +12,17 @@ import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.kvittering.xsd.Levering;
 import no.difi.meldingsutveksling.kvittering.xsd.ObjectFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
-import org.modelmapper.ModelMapper;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.security.KeyPair;
 import java.util.GregorianCalendar;
 
-import static no.difi.meldingsutveksling.kvittering.DocumentToDocumentConverter.*;
+import static no.difi.meldingsutveksling.kvittering.DocumentToDocumentConverter.toDomainDocument;
+import static no.difi.meldingsutveksling.kvittering.DocumentToDocumentConverter.toXMLDocument;
 
 /**
  * Factory class for creating Kvittering documents. This class is the only one visible from outside and uses
@@ -89,6 +86,9 @@ public class KvitteringFactory {
 
         org.w3c.dom.Document xmlDoc = toXMLDocument(unsignedReceipt);
         org.w3c.dom.Document signedXmlDoc = DocumentSigner.sign(xmlDoc, keyPair);
+        if (!DocumentValidator.validate(signedXmlDoc)) {
+            throw new MeldingsUtvekslingRuntimeException("created non validating document");
+        }
         return toDomainDocument(signedXmlDoc);
     }
 
@@ -99,32 +99,5 @@ public class KvitteringFactory {
         } catch (DatatypeConfigurationException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
-    }
-
-    /**
-     * @param fromDocument
-     * @return
-     */
-    private static StandardBusinessDocument create(Document fromDocument) {
-        try {
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            JAXBElement<Document> d = new no.difi.meldingsutveksling.domain.sbdh.ObjectFactory().createStandardBusinessDocument(fromDocument);
-
-            jaxbContextdomain.createMarshaller().marshal(d, os);
-            byte[] tmp = os.toByteArray();
-
-            JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument> toDocument
-                    = (JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument>)
-                    jaxbContext.createUnmarshaller().unmarshal(new ByteArrayInputStream(tmp));
-
-            return toDocument.getValue();
-        } catch (JAXBException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static Document create(StandardBusinessDocument fromDocument) {
-        ModelMapper mapper = new ModelMapper();
-        return mapper.map(fromDocument, Document.class);
     }
 }
