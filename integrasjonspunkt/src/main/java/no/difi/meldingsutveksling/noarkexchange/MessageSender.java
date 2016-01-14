@@ -9,11 +9,14 @@ import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.Noekkelpar;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.ProcessState;
+import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
+import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
+import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
 import no.difi.meldingsutveksling.services.CertificateException;
 import no.difi.meldingsutveksling.transport.Transport;
@@ -74,7 +77,7 @@ public class MessageSender {
         X509Certificate receiverCertificate;
         try {
             receiverCertificate = lookupCertificate(orgnr);
-        } catch(CertificateException e) {
+        } catch (CertificateException e) {
             throw new MessageContextException(e, StatusMessage.MISSING_RECIEVER_CERTIFICATE);
         }
 
@@ -121,10 +124,15 @@ public class MessageSender {
         return createOkResponse();
     }
 
+    public void sendMessage(Document doc) {
+        Transport t = transportFactory.createTransport(doc);
+        t.send(configuration.getConfiguration(), doc);
+    }
+
     /**
      * Creates MessageContext to contain data needed to send a message such as
      * sender/recipient party numbers and certificates
-     *
+     * <p>
      * The context also contains error statuses if the message request has validation errors.
      *
      * @param message
@@ -133,7 +141,7 @@ public class MessageSender {
     protected MessageContext createMessageContext(PutMessageRequestAdapter message) throws MessageContextException {
         MessageContext context = new MessageContext();
 
-        if(!message.hasRecieverPartyNumber()) {
+        if (!message.hasRecieverPartyNumber()) {
             throw new MessageContextException(StatusMessage.MISSING_RECIEVER_ORGANIZATION_NUMBER);
         }
         Avsender avsender;
@@ -195,6 +203,7 @@ public class MessageSender {
     public StandardBusinessDocumentFactory getStandardBusinessDocumentFactory() {
         return standardBusinessDocumentFactory;
     }
+
 
 }
 
