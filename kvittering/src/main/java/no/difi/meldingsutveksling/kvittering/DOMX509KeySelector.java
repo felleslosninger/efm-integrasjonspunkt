@@ -40,6 +40,7 @@ class DOMX509KeySelector extends KeySelector {
         throw new KeySelectorException("No key found!");
     }
 
+
     private static boolean algEquals(String algURI, String algName) {
         return (algName.equalsIgnoreCase("DSA") && algURI.equalsIgnoreCase(SignatureMethod.DSA_SHA1))
                 || (algName.equalsIgnoreCase("RSA") && algURI.equalsIgnoreCase(SignatureMethod.RSA_SHA1));
