@@ -25,7 +25,7 @@ import javax.xml.transform.dom.DOMSource;
  *
  * @author Glenn Bech
  */
-public class DocumentToDocumentConverter {
+class DocumentToDocumentConverter {
 
     private static JAXBContext jaxBContext;
 
