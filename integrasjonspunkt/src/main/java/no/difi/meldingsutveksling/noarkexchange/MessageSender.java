@@ -9,11 +9,14 @@ import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.Noekkelpar;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.ProcessState;
+import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
+import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
+import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
 import no.difi.meldingsutveksling.services.CertificateException;
 import no.difi.meldingsutveksling.transport.Transport;
@@ -119,6 +122,11 @@ public class MessageSender {
         eventLog.log(createOkStateEvent(messageRequest));
 
         return createOkResponse();
+    }
+
+    public void sendMessage(Document doc) {
+        Transport t = transportFactory.createTransport(doc);
+        t.send(configuration.getConfiguration(), doc);
     }
 
     /**

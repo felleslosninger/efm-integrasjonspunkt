@@ -26,6 +26,7 @@
   </properties>
 
     <modules>
+        <module>kvittering</module>
         <module>noarkexchange</module>
         <module>noarkexchange-p360</module>
         <module>noarkexchange-ephorte</module>
@@ -34,6 +35,7 @@
         <module>integrasjonspunkt</module>
         <module>domain</module>
         <module>transport</module>
+        <module>kvittering</module>
         <module>transport-file</module>
         <module>transport-altinn</module>
         <module>altinn-client</module>
