@@ -2,7 +2,9 @@ package no.difi.meldingsutveksling.kvittering;
 
 
 
-import org.apache.jcp.xml.dsig.internal.dom.DOMKeyValue;
+
+
+import org.jcp.xml.dsig.internal.dom.DOMKeyValue;
 
 import javax.xml.crypto.*;
 import javax.xml.crypto.dsig.SignatureMethod;
