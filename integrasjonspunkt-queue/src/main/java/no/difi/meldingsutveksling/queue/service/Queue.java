@@ -95,16 +95,15 @@ public class Queue {
 
         int numberAttempts = queueElement.getNumberAttempts();
 
-        final Status done = Status.DONE;
         QueueElement updatedQueue = queueElement.getOpenObjectBuilder()
-                .status(done)
+                .status(Status.DONE)
                 .lastAttemptTime(new Date())
                 .location("")
                 .numberAttempt(++numberAttempts)
                 .build();
 
         queueDao.updateStatus(updatedQueue);
-        return done;
+        return updatedQueue.getStatus();
     }
 
     /***

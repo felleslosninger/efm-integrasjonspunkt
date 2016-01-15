@@ -100,11 +100,11 @@ public class MessageSender {
         try {
             sbd = standardBusinessDocumentFactory.create(messageRequest, messageContext.getAvsender(), messageContext.getMottaker());
         } catch (MessageException e) {
-            Audit.error("Document packing failed. Message is not delievered", message);
+            Audit.error("Unable to create Standard Business Document. Message is not delievered", message);
             log.error(markerFrom(message), e.getStatusMessage().getTechnicalMessage(), e);
             return createErrorResponse(e);
         }
-        Audit.info("Document packing successful. Sending message", message);
+        Audit.info("Successfully created Standard Business Document. Sending message...", message);
 
         Transport t = transportFactory.createTransport(sbd);
         t.send(configuration.getConfiguration(), sbd);
