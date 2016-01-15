@@ -12,6 +12,7 @@ import static no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration.K
 import static no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration.KEY_PRIVATEKEYALIAS;
 import static no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration.KEY_PRIVATEKEYPASSWORD;
 import static no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration.NOARKSYSTEM_TYPE;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -26,52 +27,52 @@ public class IntegrasjonspunktConfigurationTest {
         initMocks(this);
 
         //Default with values set on required properties
-        when(environmentMock.getRequiredProperty(KEY_NOARKSYSTEM_ENDPOINT)).thenReturn("something");
-        when(environmentMock.getRequiredProperty(KEY_ADRESSEREGISTER_ENDPOINT)).thenReturn("something");
-        when(environmentMock.getRequiredProperty(KEY_PRIVATEKEYALIAS)).thenReturn("something");
-        when(environmentMock.getRequiredProperty(KEY_KEYSTORE_LOCATION)).thenReturn("something");
-        when(environmentMock.getRequiredProperty(KEY_PRIVATEKEYPASSWORD)).thenReturn("something");
-        when(environmentMock.getRequiredProperty(NOARKSYSTEM_TYPE)).thenReturn("something");
+        when(environmentMock.getProperty(KEY_NOARKSYSTEM_ENDPOINT)).thenReturn("something");
+        when(environmentMock.getProperty(KEY_ADRESSEREGISTER_ENDPOINT)).thenReturn("something");
+        when(environmentMock.getProperty(KEY_PRIVATEKEYALIAS)).thenReturn("something");
+        when(environmentMock.getProperty(KEY_KEYSTORE_LOCATION)).thenReturn("something");
+        when(environmentMock.getProperty(KEY_PRIVATEKEYPASSWORD)).thenReturn("something");
+        when(environmentMock.getProperty(NOARKSYSTEM_TYPE)).thenReturn("something");
     }
 
     @Test(expected = MeldingsUtvekslingRequiredPropertyException.class)
     public void shouldGetExceptionWhenNoarkSystemIsBlank() throws Exception {
-        when(environmentMock.getRequiredProperty(KEY_NOARKSYSTEM_ENDPOINT)).thenReturn("");
+        when(environmentMock.getProperty(KEY_NOARKSYSTEM_ENDPOINT)).thenReturn("");
 
         configuration = new IntegrasjonspunktConfiguration(environmentMock);
     }
 
     @Test(expected = MeldingsUtvekslingRequiredPropertyException.class)
     public void shouldGetExceptionWhenAdresseregisterEndpointIsBlank() throws Exception {
-        when(environmentMock.getRequiredProperty(KEY_ADRESSEREGISTER_ENDPOINT)).thenReturn("");
+        when(environmentMock.getProperty(KEY_ADRESSEREGISTER_ENDPOINT)).thenReturn("");
 
         configuration = new IntegrasjonspunktConfiguration(environmentMock);
     }
 
     @Test(expected = MeldingsUtvekslingRequiredPropertyException.class)
     public void shouldGetExceptionWhenPrivatekeyaliasIsBlank() throws Exception {
-        when(environmentMock.getRequiredProperty(KEY_PRIVATEKEYALIAS)).thenReturn("");
+        when(environmentMock.getProperty(KEY_PRIVATEKEYALIAS)).thenReturn("");
 
         configuration = new IntegrasjonspunktConfiguration(environmentMock);
     }
 
     @Test(expected = MeldingsUtvekslingRequiredPropertyException.class)
     public void shouldGetExceptionWhenKeystorelocationIsBlank() throws Exception {
-        when(environmentMock.getRequiredProperty(KEY_KEYSTORE_LOCATION)).thenReturn(null);
+        when(environmentMock.getProperty(KEY_KEYSTORE_LOCATION)).thenReturn(null);
 
         configuration = new IntegrasjonspunktConfiguration(environmentMock);
     }
 
     @Test(expected = MeldingsUtvekslingRequiredPropertyException.class)
     public void shouldGetExceptionWhenPrivatekeypasswordIsBlank() throws Exception {
-        when(environmentMock.getRequiredProperty(KEY_PRIVATEKEYPASSWORD)).thenReturn(null);
+        when(environmentMock.getProperty(KEY_PRIVATEKEYPASSWORD)).thenReturn(null);
 
         configuration = new IntegrasjonspunktConfiguration(environmentMock);
     }
 
     @Test(expected = MeldingsUtvekslingRequiredPropertyException.class)
     public void shouldGetExceptionWhenNoarksystemtypeIsBlank() throws Exception {
-        when(environmentMock.getRequiredProperty(NOARKSYSTEM_TYPE)).thenReturn(null);
+        when(environmentMock.getProperty(NOARKSYSTEM_TYPE)).thenReturn(null);
 
         configuration = new IntegrasjonspunktConfiguration(environmentMock);
     }

@@ -139,7 +139,7 @@ public class IntegrasjonspunktConfiguration {
     }
 
     private void validateProperty(String key) throws MeldingsUtvekslingRequiredPropertyException {
-        if (isBlank(environment.getRequiredProperty(key))) {
+        if (isBlank(environment.getProperty(key))) {
             String message = String.format("Required property %s is missing. Check if parameter for key is set, either in integrasjonspunkt-local.properties or set as in-parameter on startup.", key);
             log.error(message);
             throw new MeldingsUtvekslingRequiredPropertyException(message);

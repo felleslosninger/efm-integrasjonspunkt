@@ -76,11 +76,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
         GetCanReceiveMessageResponseType response = new GetCanReceiveMessageResponseType();
         boolean canReceive;
-        if (hasAdresseregisterCertificate(organisasjonsnummer)) {
-            canReceive = true;
-        } else {
-            canReceive = mshClient.canRecieveMessage(organisasjonsnummer);
-        }
+        canReceive = hasAdresseregisterCertificate(organisasjonsnummer) || mshClient.canRecieveMessage(organisasjonsnummer);
         response.setResult(canReceive);
         return response;
     }
@@ -97,6 +93,9 @@ public class IntegrasjonspunktImpl implements SOAPport {
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType request) {
         PutMessageRequestWrapper message = new PutMessageRequestWrapper(request);
+        if (!message.hasSenderPartyNumber()) {
+            message.setSenderPartyNumber(configuration.getOrganisationNumber());
+        }
         Audit.info("Recieved message", message);
         if (!message.hasSenderPartyNumber() && !configuration.hasOrganisationNumber()) {
             throw new MeldingsUtvekslingRuntimeException("Missing senders orgnumber. Please configure orgnumber= in the integrasjonspunkt-local.properties");
@@ -105,12 +104,14 @@ public class IntegrasjonspunktImpl implements SOAPport {
         if (configuration.isQueueEnabled()) {
             try {
                 queue.put(request);
+                Audit.info("Message is put on queue ready to be sent", message);
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
             }
             return PutMessageResponseFactory.createOkResponse();
         }
         else {
+            Audit.info("Queue is disabled. Message will be sent immediatly", message);
             final String partyNumber = message.hasSenderPartyNumber() ? message.getSenderPartynumber() : configuration.getOrganisationNumber();
 
             MDC.put(IntegrasjonspunktConfiguration.getPartyNumber(), partyNumber);
@@ -137,7 +138,8 @@ public class IntegrasjonspunktImpl implements SOAPport {
         MDC.put(IntegrasjonspunktConfiguration.getPartyNumber(), partyNumber);
 
         boolean result;
-        if(hasAdresseregisterCertificate(request.getEnvelope().getReceiver().getOrgnr())) {
+        if(hasAdresseregisterCertificate(message.getRecieverPartyNumber())) {
+            Audit.info("Mottaker validert", message);
             PutMessageContext context = new PutMessageContext(eventLog, messageSender);
             PutMessageStrategyFactory putMessageStrategyFactory = PutMessageStrategyFactory.newInstance(context);
 
@@ -145,6 +147,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
             PutMessageResponseType response = strategy.putMessage(request);
             result = validateResult(response);
         } else {
+            Audit.info("Mottakers sertifikat mangler eller er ugyldig, prøver å sende melding via MSH", message);
             PutMessageResponseType response = mshClient.sendEduMelding(request);
             result = validateResult(response);
         }
@@ -188,8 +191,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
         return mshClient;
     }
 
-    private boolean validateResult(PutMessageResponseType response) {
-        final boolean result = response.getResult().getType().equals("OK");
-        return result;
+    private static boolean validateResult(PutMessageResponseType response) {
+        return "OK".equals(response.getResult().getType());
     }
 }

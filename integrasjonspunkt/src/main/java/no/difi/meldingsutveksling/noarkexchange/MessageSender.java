@@ -1,13 +1,13 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 
-import com.thoughtworks.xstream.XStream;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.Noekkelpar;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
@@ -37,9 +37,6 @@ import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory
 @Component
 public class MessageSender {
 
-    @Autowired
-    private EventLog eventLog;
-
     Logger log = LoggerFactory.getLogger(MessageSender.class);
 
     @Autowired
@@ -58,10 +55,6 @@ public class MessageSender {
     private StandardBusinessDocumentFactory standardBusinessDocumentFactory;
 
     private Avsender createAvsender(PutMessageRequestWrapper message) throws MessageContextException {
-        if (!message.hasSenderPartyNumber()) {
-            message.setSenderPartyNumber(configuration.getOrganisationNumber());
-        }
-
         Certificate certificate;
         try {
             certificate = adresseregister.getCertificate(message.getSenderPartynumber());
@@ -101,25 +94,22 @@ public class MessageSender {
             return createErrorResponse(e);
         }
 
-        eventLog.log(new Event(ProcessState.SIGNATURE_VALIDATED));
+        Audit.info("Sender and receivers signatures are validated", message);
 
         no.difi.meldingsutveksling.domain.sbdh.Document sbd;
         try {
             sbd = standardBusinessDocumentFactory.create(messageRequest, messageContext.getAvsender(), messageContext.getMottaker());
         } catch (MessageException e) {
-            eventLog.log(new Event().setJpId(messageContext.getJournalPostId()).setArkiveConversationId(message.getConversationId()).setProcessStates(ProcessState.MESSAGE_SEND_FAIL));
+            Audit.error("Unable to create Standard Business Document. Message is not delievered", message);
             log.error(markerFrom(message), e.getStatusMessage().getTechnicalMessage(), e);
             return createErrorResponse(e);
-
         }
-        Scope item = sbd.getStandardBusinessDocumentHeader().getBusinessScope().getScope().get(0);
-        String hubCid = item.getInstanceIdentifier();
-        eventLog.log(new Event().setJpId(messageContext.getJournalPostId()).setArkiveConversationId(message.getConversationId()).setHubConversationId(hubCid).setProcessStates(ProcessState.CONVERSATION_ID_LOGGED));
+        Audit.info("Successfully created Standard Business Document. Sending message...", message);
 
         Transport t = transportFactory.createTransport(sbd);
         t.send(configuration.getConfiguration(), sbd);
 
-        eventLog.log(createOkStateEvent(messageRequest));
+        Audit.info("Message delivered", message);
 
         return createOkResponse();
     }
@@ -135,8 +125,8 @@ public class MessageSender {
      *
      * The context also contains error statuses if the message request has validation errors.
      *
-     * @param message
-     * @return
+     * @param message that contains sender, receiver and journalpost id
+     * @return MessageContext containing data about the shipment
      */
     protected MessageContext createMessageContext(PutMessageRequestWrapper message) throws MessageContextException {
         MessageContext context = new MessageContext();
@@ -162,10 +152,6 @@ public class MessageSender {
         this.adresseregister = adresseregister;
     }
 
-    public void setEventLog(EventLog eventLog) {
-        this.eventLog = eventLog;
-    }
-
     public IntegrasjonspunktConfiguration getConfiguration() {
         return configuration;
     }
@@ -184,16 +170,6 @@ public class MessageSender {
 
     public void setTransportFactory(TransportFactory transportFactory) {
         this.transportFactory = transportFactory;
-    }
-
-    private Event createOkStateEvent(PutMessageRequestType anyOject) {
-        XStream xs = new XStream();
-        Event event = new Event();
-        event.setSender(anyOject.getEnvelope().getSender().getOrgnr());
-        event.setReceiver(anyOject.getEnvelope().getReceiver().getOrgnr());
-        event.setMessage(xs.toXML(anyOject));
-        event.setProcessStates(ProcessState.SBD_SENT);
-        return event;
     }
 
     public void setStandardBusinessDocumentFactory(StandardBusinessDocumentFactory standardBusinessDocumentFactory) {

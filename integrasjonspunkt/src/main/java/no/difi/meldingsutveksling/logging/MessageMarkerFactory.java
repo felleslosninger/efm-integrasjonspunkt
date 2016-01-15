@@ -19,18 +19,37 @@ public class MessageMarkerFactory {
     public static final String DOCUMENT_ID = "document_id";
     public static final String JOURNALPOST_ID = "journalpost_id";
     public static final String RECEIVER_ORG_NUMBER = "receiver_org_number";
+    private static final String SENDER_ORG_NUMBER = "sender_org_number";
 
     /**
      * Creates LogstashMarker with conversation id from the putMessageRequest that will appear
      * in the logs when used.
      *
-     * @param requestAdapter
+     * @param requestAdapter request that contains journal post id, receiver party number, sender party number and conversation id
      * @return LogstashMarker
      */
     public static LogstashMarker markerFrom(PutMessageRequestWrapper requestAdapter) {
-        LogstashMarker journalPostIdMarker = Markers.append(JOURNALPOST_ID, JournalpostId.fromPutMessage(requestAdapter).value());
-        final LogstashMarker receiverMarker = Markers.append(RECEIVER_ORG_NUMBER, requestAdapter.hasRecieverPartyNumber());
-        return Markers.append(CONVERSATION_ID, requestAdapter.getConversationId()).and(journalPostIdMarker).and(receiverMarker);
+        LogstashMarker journalPostIdMarker = journalPostIdMarker(JournalpostId.fromPutMessage(requestAdapter).value());
+        final LogstashMarker receiverMarker = receiverMarker(requestAdapter.getRecieverPartyNumber());
+        final LogstashMarker senderMarker = senderMarker(requestAdapter.getSenderPartynumber());
+        final LogstashMarker conversationIdMarker = conversationIdMarker(requestAdapter.getConversationId());
+        return conversationIdMarker.and(journalPostIdMarker).and(receiverMarker).and(senderMarker);
+    }
+
+    private static LogstashMarker conversationIdMarker(String conversationId) {
+        return Markers.append(CONVERSATION_ID, conversationId);
+    }
+
+    private static LogstashMarker journalPostIdMarker(String journalPostId) {
+        return Markers.append(JOURNALPOST_ID, journalPostId);
+    }
+
+    private static LogstashMarker receiverMarker(String recieverPartyNumber) {
+        return Markers.append(RECEIVER_ORG_NUMBER, recieverPartyNumber);
+    }
+
+    private static LogstashMarker senderMarker(String senderPartynumber) {
+        return Markers.append(SENDER_ORG_NUMBER, senderPartynumber);
     }
 
     /**
@@ -41,11 +60,14 @@ public class MessageMarkerFactory {
      * @return LogstashMarker
      */
     public static LogstashMarker markerFrom(StandardBusinessDocumentWrapper documentWrapper) {
-        LogstashMarker journalPostIdMarker = Markers.append(JOURNALPOST_ID, documentWrapper.getJournalPostId());
+        LogstashMarker journalPostIdMarker = journalPostIdMarker(documentWrapper.getJournalPostId());
         LogstashMarker documentIdMarker = Markers.append(DOCUMENT_ID, documentWrapper.getDocumentId());
-        LogstashMarker conversationIdMarker = Markers.append(CONVERSATION_ID, documentWrapper.getConversationId());
-        Markers.append(RECEIVER_ORG_NUMBER, documentWrapper.getReceiverOrgNumber());
-        return documentIdMarker.and(journalPostIdMarker).and(conversationIdMarker);
+        LogstashMarker conversationIdMarker = conversationIdMarker(documentWrapper.getConversationId());
+        final LogstashMarker receiverMarker = receiverMarker(documentWrapper.getReceiverOrgNumber());
+        final LogstashMarker senderMarker = senderMarker(documentWrapper.getSenderOrgNumber());
+        return documentIdMarker.and(journalPostIdMarker).and(conversationIdMarker).and(senderMarker).and(receiverMarker);
     }
+
+
 
 }

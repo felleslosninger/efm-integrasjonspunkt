@@ -87,8 +87,9 @@ public class Queue {
      * It will clean up the message on disk, and update meta-data to reflect successfully sent message.
      *
      * @param uniqueId unique id for the queue element
+     * @return Status.DONE
      */
-    public void success(String uniqueId) {
+    public Status success(String uniqueId) {
         QueueElement queueElement = queueDao.retrieve(uniqueId);
         QueueMessageFile.removeFile(queueElement.getFileLocation());
 
@@ -102,6 +103,7 @@ public class Queue {
                 .build();
 
         queueDao.updateStatus(updatedQueue);
+        return updatedQueue.getStatus();
     }
 
     /***
