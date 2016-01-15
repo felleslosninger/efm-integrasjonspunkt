@@ -28,7 +28,7 @@ public class CreateAsice {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         AsicWriter asicWriter = AsicWriterFactory.newFactory()
                 .newContainer(bos)
-                .add(new ByteArrayInputStream(forsendelse.getBytes()), "edu_test.xml")
+                .add(new ByteArrayInputStream(forsendelse.getBytes()), "best_edu.xml")
                 .add(new ByteArrayInputStream(manifest.getBytes()), "manifest.xml");
         asicWriter.sign(signatureHelper);
         return new Archive(bos.toByteArray());

@@ -13,7 +13,6 @@ import java.util.List;
  * Created by kons-gbe on 27.11.2015.
  */
 
-
 public class StandardBusinessDocumentHeaderTest {
 
     @Test(expected = MeldingsUtvekslingRuntimeException.class)

@@ -20,7 +20,11 @@ import org.apache.commons.codec.binary.Base64;
 import java.io.ByteArrayInputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.cert.*;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 
 public final class Sertifikat {
 
@@ -71,11 +75,11 @@ public final class Sertifikat {
         }
 
         if (certificate == null) {
-            throw new MeldingsUtvekslingRuntimeException("Kunne ikke finne sertifikat i keystore. Er du sikker på at det er brukt keystore med et sertifikat og at du har oppgitt riktig alias?");
+            throw new MeldingsUtvekslingRuntimeException("Kunne ikke finne sertifikat i keystore. Er du sikker pÃ¥ at det er brukt keystore med et sertifikat og at du har oppgitt riktig alias?");
         }
 
         if (!(certificate instanceof X509Certificate)) {
-            throw new MeldingsUtvekslingRuntimeException("Klienten støtter kun X509-sertifikater. Fikk sertifikat av typen " + certificate.getClass().getSimpleName());
+            throw new MeldingsUtvekslingRuntimeException("Klienten stÃ¸tter kun X509-sertifikater. Fikk sertifikat av typen " + certificate.getClass().getSimpleName());
         }
 
         return new Sertifikat((X509Certificate) certificate);

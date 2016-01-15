@@ -30,7 +30,6 @@ public class EphorteClient implements NoarkClient {
 
         JAXBElement<GetCanReceiveMessageResponseType> result = (JAXBElement<GetCanReceiveMessageResponseType>) template.marshalSendAndReceive(settings.getEndpointUrl(), ephorteRequest);
         return result.getValue().isResult();
-
     }
 
     @Override
@@ -46,6 +45,5 @@ public class EphorteClient implements NoarkClient {
         PutMessageResponseType response = new PutMessageResponseType();
         modelMapper.map(ephorteResponse.getValue(), response);
         return response;
-
     }
 }
