@@ -76,7 +76,6 @@ public class PutMessageSteps {
 
         messageSender = new MessageSender();
         messageSender.setAdresseregister(adresseregister);
-        messageSender.setEventLog(eventLog);
         integrasjonspunktNokkel = mock(IntegrasjonspunktNokkel.class);
         when(integrasjonspunktNokkel.getSignatureHelper()).thenReturn(mock(SignatureHelper.class));
         StandardBusinessDocumentFactory documentFactory = mock(StandardBusinessDocumentFactory.class);
