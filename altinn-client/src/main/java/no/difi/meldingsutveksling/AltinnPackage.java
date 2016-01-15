@@ -4,6 +4,7 @@ import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceMan
 import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceRecipientList;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
+import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.shipping.sftp.BrokerServiceManifestBuilder;
 import no.difi.meldingsutveksling.shipping.sftp.ExternalServiceBuilder;
@@ -38,7 +39,7 @@ public class AltinnPackage {
 
     static {
         try {
-            ctx = JAXBContext.newInstance(BrokerServiceManifest.class, BrokerServiceRecipientList.class, Document.class, Payload.class);
+            ctx = JAXBContext.newInstance(BrokerServiceManifest.class, BrokerServiceRecipientList.class, Document.class, Payload.class, Kvittering.class);
         } catch (JAXBException e) {
             throw new RuntimeException("Could not create JAXBContext", e);
         }
