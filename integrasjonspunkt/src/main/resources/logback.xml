@@ -3,7 +3,7 @@
     <jmxConfigurator/>
 
     <appender name="stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>test-meldingsutveksling-app01.dmz.local:8300</destination>
+        <destination>192.81.220.89:5044</destination>
 
         <!-- encoder is required -->
         <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
