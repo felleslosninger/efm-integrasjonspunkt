@@ -25,7 +25,7 @@ public class ElmaDevConfig {
 
     @Bean
     public LookupClient getElmaLookupClient() {
-        return LookupClientBuilder.forTest().build();
+        return LookupClientBuilder.forTest().endpointCertificateValidator(null).providerCertificateValidator(null).build();
     }
 
 }
