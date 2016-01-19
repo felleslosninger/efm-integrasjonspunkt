@@ -2,19 +2,19 @@
 <configuration scan="true">
 
         <appender name="stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-            <if condition='property("spring.profiles.active").equals("dev")'>
+            <if condition='property("spring.profiles.active").contains("dev")'>
                 <then>
                     <destination>integrasjonstest-miif.difi.local:8300</destination>
                 </then>
             </if>
-            <if condition='property("spring.profiles.active").equals("production")'>
-                <then>
-                    <destination>REMEMBER TO CHANGE THIS</destination>
-                </then>
-            </if>
-            <if condition='property("spring.profiles.active").equals("staging")'>
+            <if condition='property("spring.profiles.active").contains("staging")'>
                 <then>
                     <destination>192.81.220.89:5044</destination>
+                </then>
+            </if>
+            <if condition='property("spring.profiles.active").contains("production")'>
+                <then>
+                    <destination>REMEMBER TO CHANGE THIS</destination>
                 </then>
             </if>
             <!-- encoder is required -->
