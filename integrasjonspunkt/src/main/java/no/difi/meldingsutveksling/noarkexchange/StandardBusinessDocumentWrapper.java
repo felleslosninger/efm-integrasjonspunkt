@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.noarkexchange;
 import no.difi.meldingsutveksling.dokumentpakking.service.ScopeFactory;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.Scope;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.w3c.dom.Node;
@@ -18,8 +19,6 @@ import java.util.List;
 public class StandardBusinessDocumentWrapper {
 
     private final StandardBusinessDocument document;
-
-    private static final String KVITTERING_CONSTANT = "kvittering";
 
     public StandardBusinessDocumentWrapper(StandardBusinessDocument standardBusinessDocument) {
         this.document = standardBusinessDocument;
@@ -56,7 +55,7 @@ public class StandardBusinessDocumentWrapper {
     }
 
     public boolean isReciept() {
-        return document.getStandardBusinessDocumentHeader().getDocumentIdentification().getType().equalsIgnoreCase(KVITTERING_CONSTANT);
+        return document.getStandardBusinessDocumentHeader().getDocumentIdentification().getType().equalsIgnoreCase(StandardBusinessDocumentHeader.KVITTERING_TYPE);
     }
 
     public Payload getPayload() {
