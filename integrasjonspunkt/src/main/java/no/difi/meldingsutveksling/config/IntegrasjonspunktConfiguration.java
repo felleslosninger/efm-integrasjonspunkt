@@ -64,6 +64,7 @@ public class IntegrasjonspunktConfiguration {
         validateProperty(KEY_KEYSTORE_LOCATION);
         validateProperty(KEY_PRIVATEKEYPASSWORD);
         validateProperty(NOARKSYSTEM_TYPE);
+        validateProperty(KEY_ORGANISATION_NUMBER);
 
         validateSpringMetrics();
     }
