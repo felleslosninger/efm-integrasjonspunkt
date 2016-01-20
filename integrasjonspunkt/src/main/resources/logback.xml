@@ -3,9 +3,20 @@
 
         <appender name="stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
             <if condition='property("spring.profiles.active").contains("dev")'>
-                <then>
-                    <destination>integrasjonstest-miif.difi.local:8300</destination>
-                </then>
+              <then>
+                <!--Require elk stack locally to test-->
+                <destination>localhost:8300</destination>
+              </then>
+            </if>
+            <if condition='property("spring.profiles.active").contains("itest")'>
+              <then>
+                <destination>integrasjonstest-miif.difi.local:8300</destination>
+              </then>
+            </if>
+            <if condition='property("spring.profiles.active").contains("systest")'>
+              <then>
+                <destination>test-meldingsutveksling-app01.difi.local:8300</destination>
+              </then>
             </if>
             <if condition='property("spring.profiles.active").contains("staging")'>
                 <then>
