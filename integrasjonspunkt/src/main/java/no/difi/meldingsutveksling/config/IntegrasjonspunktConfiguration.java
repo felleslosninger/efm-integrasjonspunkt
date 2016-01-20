@@ -46,7 +46,6 @@ public class IntegrasjonspunktConfiguration {
     protected static final String KEY_KEYSTORE_LOCATION = "keystorelocation";
     protected static final String KEY_PRIVATEKEYPASSWORD = "privatekeypassword";
     protected static final String NOARKSYSTEM_TYPE = "noarksystem.type";
-    private static final String PARTY_NUMBER = "party_number";
 
     private static final String KEY_SERVICEURL = "spring.boot.admin.client.serviceUrl";
     private static final String KEY_SERVERURL = "spring.boot.admin.url";
@@ -65,6 +64,7 @@ public class IntegrasjonspunktConfiguration {
         validateProperty(KEY_KEYSTORE_LOCATION);
         validateProperty(KEY_PRIVATEKEYPASSWORD);
         validateProperty(NOARKSYSTEM_TYPE);
+        validateProperty(KEY_ORGANISATION_NUMBER);
 
         validateSpringMetrics();
     }
@@ -80,10 +80,6 @@ public class IntegrasjonspunktConfiguration {
     public boolean hasOrganisationNumber() {
         String orgNumber = environment.getProperty(KEY_ORGANISATION_NUMBER);
         return orgNumber != null && !orgNumber.isEmpty();
-    }
-
-    public static String getPartyNumber() {
-        return PARTY_NUMBER;
     }
 
     public NoarkClientSettings getLocalNoarkClientSettings() {
