@@ -76,6 +76,7 @@ public class KvitteringFactory {
                 .to(new Organisasjonsnummer(receiverOrgNumber))
                 .relatedToConversationId(conversationId)
                 .relatedToJournalPostId(journalPostId)
+                .type(StandardBusinessDocumentHeader.DocumentType.KVITTERING)
                 .build();
 
         unsignedReceipt.setStandardBusinessDocumentHeader(header);
