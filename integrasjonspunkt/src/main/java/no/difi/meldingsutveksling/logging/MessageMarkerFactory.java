@@ -2,6 +2,10 @@ package no.difi.meldingsutveksling.logging;
 
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
+import no.difi.meldingsutveksling.FileReference;
+import no.difi.meldingsutveksling.domain.sbdh.Document;
+import no.difi.meldingsutveksling.domain.sbdh.Partner;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.noarkexchange.JournalpostId;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
@@ -20,6 +24,7 @@ public class MessageMarkerFactory {
     public static final String JOURNALPOST_ID = "journalpost_id";
     public static final String RECEIVER_ORG_NUMBER = "receiver_org_number";
     private static final String SENDER_ORG_NUMBER = "sender_org_number";
+    public static final String ALTINN_RECEIPT_ID = "altinn-receipt-id";
 
     /**
      * Creates LogstashMarker with conversation id from the putMessageRequest that will appear
@@ -68,6 +73,12 @@ public class MessageMarkerFactory {
         return documentIdMarker.and(journalPostIdMarker).and(conversationIdMarker).and(senderMarker).and(receiverMarker);
     }
 
+
+    public static LogstashMarker markerFrom(FileReference reference) {
+        LogstashMarker receiptIdMarker = Markers.append(ALTINN_RECEIPT_ID, reference.getReceiptID());
+        LogstashMarker referenceValueMarker = Markers.append("altinn-reference-value", reference.getValue());
+        return receiptIdMarker.and(referenceValueMarker);
+    }
 
 
 }
