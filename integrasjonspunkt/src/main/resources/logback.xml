@@ -4,8 +4,7 @@
         <appender name="stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
             <if condition='property("spring.profiles.active").contains("dev")'>
               <then>
-                <!--Require elk stack locally to test-->
-                <destination>localhost:8300</destination>
+                <destination>integrasjonstest-miif.difi.local:8300</destination>
               </then>
             </if>
             <if condition='property("spring.profiles.active").contains("itest")'>
