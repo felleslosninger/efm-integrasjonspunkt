@@ -16,9 +16,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 import java.util.*;
 
 
@@ -54,6 +51,14 @@ import java.util.*;
         "businessScope"
 })
 public class StandardBusinessDocumentHeader {
+
+    public enum DocumentType {KVITTERING, MELDING}
+
+    public static final String STANDARD_IDENTIFIER = "urn:no:difi:meldingsutveksling:1.0";
+    public static final String KVITTERING_TYPE = "kvittering";
+    public static final String KVITTERING_VERSION = "urn:no:difi:meldingsutveksling:1.0";
+    public static final String MELDING_TYPE = "melding";
+    public static final String MELDING_VERSION = "urn:no:difi:meldingsutveksling:1.0";
 
     @XmlElement(name = "HeaderVersion", required = true)
     protected String headerVersion;
@@ -227,10 +232,8 @@ public class StandardBusinessDocumentHeader {
 
     public static class Builder {
 
-        private static final String DOCUMENT_TYPE_MELDING = "melding";
-        private static final String STANDARD_IDENTIFIER = "urn:no:difi:meldingsutveksling:1.0";
         private static final String HEADER_VERSION = "1.0";
-        private static final String TYPE_VERSION = "1.0";
+
         private static final String TYPE_JOURNALPOST_ID = "JournalpostId";
         private static final String TYPE_CONVERSATIONID = "ConversationId";
 
@@ -238,6 +241,7 @@ public class StandardBusinessDocumentHeader {
         private Organisasjonsnummer mottaker;
         private String journalPostId;
         private String conversationId;
+        private DocumentType documentType;
 
         public Builder from(Organisasjonsnummer avsender) {
             this.avsender = avsender;
@@ -254,18 +258,30 @@ public class StandardBusinessDocumentHeader {
             return this;
         }
 
+        public Builder type(DocumentType documentType) {
+            this.documentType = documentType;
+            return this;
+        }
+
         public Builder relatedToConversationId(String conversationId) {
             this.conversationId = conversationId;
             return this;
         }
 
         public StandardBusinessDocumentHeader build() {
+            if (documentType == null) {
+                throw new MeldingsUtvekslingRuntimeException("DocumentType must be set");
+            }
             StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader();
             header.setHeaderVersion(HEADER_VERSION);
             header.getSender().add(createPartner(avsender));
             header.getReceiver().add(createPartner(mottaker));
-            header.setDocumentIdentification(createDocumentIdentification(DOCUMENT_TYPE_MELDING));
             header.setBusinessScope(createBusinessScope(fromConversationId(conversationId), fromJournalPostId(journalPostId)));
+            if (documentType == DocumentType.KVITTERING) {
+                header.setDocumentIdentification(createDocumentIdentification(KVITTERING_TYPE, KVITTERING_VERSION));
+            } else if (documentType == DocumentType.MELDING) {
+                header.setDocumentIdentification(createDocumentIdentification(MELDING_TYPE, MELDING_VERSION));
+            }
             return header;
         }
 
@@ -278,17 +294,17 @@ public class StandardBusinessDocumentHeader {
             return partner;
         }
 
-        private DocumentIdentification createDocumentIdentification(String type) {
-            DocumentIdentification doc = new DocumentIdentification();
+        private DocumentIdentification createDocumentIdentification(String type, String version) {
+            DocumentIdentification documentIdentification = new DocumentIdentification();
 
             GregorianCalendar gCal = new GregorianCalendar();
             gCal.setTime(new Date());
-            doc.setCreationDateAndTime(XMLTimeStamp.createTimeStamp());
-            doc.setStandard(STANDARD_IDENTIFIER);
-            doc.setType(type);
-            doc.setTypeVersion(TYPE_VERSION);
-            doc.setInstanceIdentifier(UUID.randomUUID().toString());
-            return doc;
+            documentIdentification.setCreationDateAndTime(XMLTimeStamp.createTimeStamp());
+            documentIdentification.setStandard(STANDARD_IDENTIFIER);
+            documentIdentification.setType(type);
+            documentIdentification.setTypeVersion(version);
+            documentIdentification.setInstanceIdentifier(UUID.randomUUID().toString());
+            return documentIdentification;
         }
 
         private BusinessScope createBusinessScope(Scope... scopes) {

@@ -63,6 +63,7 @@ public class IntegrasjonspunktConfiguration {
         validateProperty(KEY_PRIVATEKEYALIAS);
         validateProperty(KEY_KEYSTORE_LOCATION);
         validateProperty(KEY_PRIVATEKEYPASSWORD);
+        validateProperty(KEY_ORGANISATION_NUMBER);
         validateProperty(KEY_NOARKSYSTEM_TYPE);
 
         validateSpringMetrics();
@@ -79,10 +80,6 @@ public class IntegrasjonspunktConfiguration {
     public boolean hasOrganisationNumber() {
         String orgNumber = environment.getProperty(KEY_ORGANISATION_NUMBER);
         return orgNumber != null && !orgNumber.isEmpty();
-    }
-
-    public static String getPartyNumber() {
-        return PARTY_NUMBER;
     }
 
     public NoarkClientSettings getLocalNoarkClientSettings() {
