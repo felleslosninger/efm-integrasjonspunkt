@@ -10,6 +10,10 @@ import org.springframework.context.annotation.PropertySources;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import static org.apache.commons.lang.StringUtils.isBlank;
 
 @Component
@@ -143,7 +147,7 @@ public class IntegrasjonspunktConfiguration {
                 .newElement(KEY_ALTINN_SERVICE_CODE, getAltinnServiceCode())
                 .newElement(KEY_ALTINN_SERVICE_EDITION_CODE, getAltinnServiceEditionCode())
                 .newGroup("Keystore")
-                .newElement(KEY_KEYSTORE_LOCATION, getKeyStoreLocation())
+                .newElement(KEY_KEYSTORE_LOCATION, getCurrentPath() + File.separator + getKeyStoreLocation())
                 .newElement(KEY_PRIVATEKEYALIAS, getPrivateKeyAlias())
                 .newGroup("Adresseregister")
                 .newElement(KEY_ADRESSEREGISTER_ENDPOINT, getAdresseRegisterEndPointURL())
@@ -157,6 +161,11 @@ public class IntegrasjonspunktConfiguration {
                 .newElement(KEY_MSH_ENDPOINT, getMshNoarkClientSettings().getEndpointUrl())
                 .newElement(KEY_MSH_USERNAME, getMshNoarkClientSettings().getUserName())
                 .newElement(KEY_MSH_PASSWORD).build();
+    }
+
+    private String getCurrentPath() {
+        Path r = Paths.get("");
+        return r.toAbsolutePath().toString();
     }
 
     private void validateProperty(String key) throws MeldingsUtvekslingRequiredPropertyException {
