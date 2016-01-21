@@ -39,13 +39,12 @@ public class IntegrasjonspunktConfiguration {
     private static final String KEY_MSH_PASSWORD = "msh.password";
 
     protected static final String KEY_ADRESSEREGISTER_ENDPOINT = "adresseregister.endPointURL";
-    private static final String KEY_ADRESSEREGISTER_USERNAME = "adresseregister.userName";
-    private static final String KEY_ADRESSEREGISTER_PASSWORD = "adresseregister.password";
+
 
     protected static final String KEY_PRIVATEKEYALIAS = "privatekeyalias";
     protected static final String KEY_KEYSTORE_LOCATION = "keystorelocation";
     protected static final String KEY_PRIVATEKEYPASSWORD = "privatekeypassword";
-    protected static final String NOARKSYSTEM_TYPE = "noarksystem.type";
+    protected static final String KEY_NOARKSYSTEM_TYPE = "noarksystem.type";
     private static final String PARTY_NUMBER = "party_number";
 
     private static final String KEY_SERVICEURL = "spring.boot.admin.client.serviceUrl";
@@ -64,7 +63,7 @@ public class IntegrasjonspunktConfiguration {
         validateProperty(KEY_PRIVATEKEYALIAS);
         validateProperty(KEY_KEYSTORE_LOCATION);
         validateProperty(KEY_PRIVATEKEYPASSWORD);
-        validateProperty(NOARKSYSTEM_TYPE);
+        validateProperty(KEY_NOARKSYSTEM_TYPE);
 
         validateSpringMetrics();
     }
@@ -135,7 +134,32 @@ public class IntegrasjonspunktConfiguration {
     }
 
     public String getNoarkType() {
-        return environment.getProperty(NOARKSYSTEM_TYPE);
+        return environment.getProperty(KEY_NOARKSYSTEM_TYPE);
+    }
+
+    public ConfigMeta getMetadata() {
+
+        ConfigMeta.Builder b = new ConfigMeta.Builder();
+        return b.newElement(KEY_ORGANISATION_NUMBER, getOrganisationNumber())
+                .newGroup("Altinn")
+                .newElement(KEY_ALTINN_USERNAME, getAltinnUsername())
+                .newElement(KEY_ALTINN_SERVICE_CODE, getAltinnServiceCode())
+                .newElement(KEY_ALTINN_SERVICE_EDITION_CODE, getAltinnServiceEditionCode())
+                .newGroup("Keystore")
+                .newElement(KEY_KEYSTORE_LOCATION, getKeyStoreLocation())
+                .newElement(KEY_PRIVATEKEYALIAS, getPrivateKeyAlias())
+                .newGroup("Adresseregister")
+                .newElement(KEY_ADRESSEREGISTER_ENDPOINT, getAdresseRegisterEndPointURL())
+                .newGroup("Noark")
+                .newElement(KEY_NOARKSYSTEM_TYPE, getNoarkType())
+                .newElement(KEY_NOARKSYSTEM_ENDPOINT, getNOARKSystemEndPointURL())
+                .newElement(KEY_NOARKSYSTEM_DOMAIN, getNoarksystemDomain())
+                .newElement(KEY_NOARKSYSTEM_USERNAME, getNoarksystemUsername())
+                .newElement(KEY_NOARKSYSTEM_PASSWORD)
+                .newGroup("Msh")
+                .newElement(KEY_MSH_ENDPOINT, getMshNoarkClientSettings().getEndpointUrl())
+                .newElement(KEY_MSH_USERNAME, getMshNoarkClientSettings().getUserName())
+                .newElement(KEY_MSH_PASSWORD).build();
     }
 
     private void validateProperty(String key) throws MeldingsUtvekslingRequiredPropertyException {
