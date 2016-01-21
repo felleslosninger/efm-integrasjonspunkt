@@ -11,7 +11,7 @@ public class Audit {
     public static Logger logger = LoggerFactory.getLogger("AUDIT");
 
     public static void info(String text, LogstashMarker marker) {
-        logger.info(text, marker);
+        logger.info(marker, text);
     }
 
     public static void error(String text, LogstashMarker marker) {
