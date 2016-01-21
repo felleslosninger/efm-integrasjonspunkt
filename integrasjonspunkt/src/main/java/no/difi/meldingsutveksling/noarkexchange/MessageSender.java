@@ -8,15 +8,9 @@ import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.Noekkelpar;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
-import no.difi.meldingsutveksling.domain.sbdh.Scope;
-import no.difi.meldingsutveksling.eventlog.Event;
-import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
 import no.difi.meldingsutveksling.services.CertificateException;
 import no.difi.meldingsutveksling.transport.Transport;
@@ -94,22 +88,22 @@ public class MessageSender {
             return createErrorResponse(e);
         }
 
-        Audit.info("Sender and receivers signatures are validated", message);
+        Audit.info("Sender and receivers signatures are validated", markerFrom(message));
 
         no.difi.meldingsutveksling.domain.sbdh.Document sbd;
         try {
             sbd = standardBusinessDocumentFactory.create(messageRequest, messageContext.getAvsender(), messageContext.getMottaker());
         } catch (MessageException e) {
-            Audit.error("Unable to create Standard Business Document. Message is not delievered", message);
+            Audit.error("Unable to create Standard Business Document. Message is not delievered", markerFrom(message));
             log.error(markerFrom(message), e.getStatusMessage().getTechnicalMessage(), e);
             return createErrorResponse(e);
         }
-        Audit.info("Successfully created Standard Business Document. Sending message...", message);
+        Audit.info("Successfully created Standard Business Document. Sending message...", markerFrom(message));
 
         Transport t = transportFactory.createTransport(sbd);
         t.send(configuration.getConfiguration(), sbd);
 
-        Audit.info("Message delivered", message);
+        Audit.info("Message delivered", markerFrom(message));
 
         return createOkResponse();
     }

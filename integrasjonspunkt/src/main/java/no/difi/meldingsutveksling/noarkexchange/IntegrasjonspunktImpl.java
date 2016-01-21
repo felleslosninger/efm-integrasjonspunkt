@@ -27,6 +27,8 @@ import javax.jws.WebService;
 import javax.xml.ws.BindingType;
 import java.io.IOException;
 
+import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
+
 /**
  * This is the implementation of the wenbservice that case managenent systems supporting
  * the BEST/EDU stadard communicates with. The responsibility of this component is to
@@ -96,7 +98,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
         if (!message.hasSenderPartyNumber()) {
             message.setSenderPartyNumber(configuration.getOrganisationNumber());
         }
-        Audit.info("Recieved message", message);
+        Audit.info("Recieved message", markerFrom(message));
         if (!message.hasSenderPartyNumber() && !configuration.hasOrganisationNumber()) {
             throw new MeldingsUtvekslingRuntimeException("Missing senders orgnumber. Please configure orgnumber= in the integrasjonspunkt-local.properties");
         }
@@ -104,14 +106,14 @@ public class IntegrasjonspunktImpl implements SOAPport {
         if (configuration.isQueueEnabled()) {
             try {
                 queue.put(request);
-                Audit.info("Message is put on queue ready to be sent", message);
+                Audit.info("Message is put on queue ready to be sent", markerFrom(message));
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
             }
             return PutMessageResponseFactory.createOkResponse();
         }
         else {
-            Audit.info("Queue is disabled. Message will be sent immediatly", message);
+            Audit.info("Queue is disabled. Message will be sent immediatly", markerFrom(message));
 
             MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, configuration.getOrganisationNumber());
 
@@ -136,7 +138,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
         boolean result;
         if(hasAdresseregisterCertificate(message.getRecieverPartyNumber())) {
-            Audit.info("Mottaker validert", message);
+            Audit.info("Mottaker validert", markerFrom(message));
             PutMessageContext context = new PutMessageContext(eventLog, messageSender);
             PutMessageStrategyFactory putMessageStrategyFactory = PutMessageStrategyFactory.newInstance(context);
 
@@ -144,14 +146,14 @@ public class IntegrasjonspunktImpl implements SOAPport {
             PutMessageResponseType response = strategy.putMessage(request);
             result = validateResult(response);
         } else {
-            Audit.info("Mottakers sertifikat mangler eller er ugyldig, prøver å sende melding via MSH", message);
+            Audit.info("Mottakers sertifikat mangler eller er ugyldig, prøver å sende melding via MSH", markerFrom(message));
             PutMessageResponseType response = mshClient.sendEduMelding(request);
             result = validateResult(response);
         }
         if(result) {
-            Audit.info("Message successfully sent", message);
+            Audit.info("Message successfully sent", markerFrom(message));
         } else {
-            Audit.error("Message was not successfully sent", message);
+            Audit.error("Message was not successfully sent", markerFrom(message));
         }
         return result;
     }

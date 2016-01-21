@@ -39,7 +39,8 @@
         <module>transport-altinn</module>
         <module>altinn-client</module>
         <module>virksert-demoscope</module>
-      <module>integrasjonspunkt-queue</module>
+        <module>integrasjonspunkt-queue</module>
+        <module>audit</module>
     </modules>
 
   <dependencyManagement>

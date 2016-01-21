@@ -66,7 +66,7 @@ public class MessagePolling {
 
     private static JAXBContext jaxbContext;
 
-    @Scheduled(fixedRate = 1000)
+    @Scheduled(fixedRate = 15000)
     public void checkForNewMessages() {
         logger.debug("Checking for new messages");
         MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, config.getOrganisationNumber());
@@ -86,9 +86,8 @@ public class MessagePolling {
         }
 
         for (FileReference reference : fileReferences) {
-            Audit.info(reference, "Downloading message");
+            Audit.info("Downloading message", markerFrom(reference));
             Document document = client.download(new DownloadRequest(reference.getValue(), config.getOrganisationNumber()));
-
             forwardToNoark(document);
         }
     }
@@ -106,11 +105,11 @@ public class MessagePolling {
                     jaxbContext.createUnmarshaller().unmarshal(new ByteArrayInputStream(tmp));
 
             final StandardBusinessDocument standardBusinessDocument = toDocument.getValue();
-            Audit.info("Successfully extracted standard business document. Forwarding document to NOARK system...", standardBusinessDocument);
+            Audit.info("Successfully extracted standard business document. Forwarding document to NOARK system...", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));
             try {
                 integrajonspunktReceive.forwardToNoarkSystem(standardBusinessDocument);
             } catch (MessageException e) {
-                Audit.error("Could not forward document to NOARK system...", standardBusinessDocument);
+                Audit.error("Could not forward document to NOARK system...", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));
                 logger.error(markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)), e.getStatusMessage().getTechnicalMessage(), e);
             }
         } catch (JAXBException e) {
