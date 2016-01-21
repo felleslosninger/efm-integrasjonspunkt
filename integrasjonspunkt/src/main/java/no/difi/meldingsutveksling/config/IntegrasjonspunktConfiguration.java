@@ -49,7 +49,6 @@ public class IntegrasjonspunktConfiguration {
     protected static final String KEY_KEYSTORE_LOCATION = "keystorelocation";
     protected static final String KEY_PRIVATEKEYPASSWORD = "privatekeypassword";
     protected static final String KEY_NOARKSYSTEM_TYPE = "noarksystem.type";
-    private static final String PARTY_NUMBER = "party_number";
 
     private static final String KEY_SERVICEURL = "spring.boot.admin.client.serviceUrl";
     private static final String KEY_SERVERURL = "spring.boot.admin.url";
