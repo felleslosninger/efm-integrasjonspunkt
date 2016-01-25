@@ -1,8 +1,11 @@
 package no.difi.meldingsutveksling;
 
+import net.logstash.logback.marker.LogstashMarker;
+import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.*;
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.*;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
+import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.shipping.ws.AltinnReasonFactory;
 import no.difi.meldingsutveksling.shipping.ws.AltinnWsException;
@@ -55,12 +58,26 @@ public class AltinnWsClient {
             altinnPackage.write(outputStream);
             parameters.setDataStream(outputStream.toByteArray());
 
-            streamingService.uploadFileStreamedBasic(parameters, FILE_NAME, senderReference, request.getSender(), configuration.getPassword(), configuration.getUsername());
+            ReceiptExternalStreamedBE receiptAltinn = streamingService.uploadFileStreamedBasic(parameters, FILE_NAME, senderReference, request.getSender(), configuration.getPassword(), configuration.getUsername());
+            Audit.info("Got response on file upload from Altinn", markerFrom(receiptAltinn));
         } catch (IBrokerServiceExternalBasicStreamedUploadFileStreamedBasicAltinnFaultFaultFaultMessage e) {
             throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, AltinnReasonFactory.from(e), e);
         } catch (IOException e) {
             throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, e);
         }
+    }
+
+    /**
+     * Creates Logstash Markers to be used with logging. Makes it easier to troubleshoot problems with Altinn
+     *
+     * @param receiptAltinn the receipt returned from Altinn formidlingstjeneste
+     * @return log markers providing information needed to troubleshoot the logs
+     */
+    private LogstashMarker markerFrom(ReceiptExternalStreamedBE receiptAltinn) {
+        LogstashMarker idMarker = Markers.append("altinn-receipt-id", receiptAltinn.getReceiptId());
+        LogstashMarker statusCodeMarker = Markers.append("altinn-status-code", receiptAltinn.getReceiptStatusCode().getValue());
+        LogstashMarker textMarker = Markers.append("altinn-text", receiptAltinn.getReceiptText().getValue());
+        return idMarker.and(statusCodeMarker).and(textMarker);
     }
 
 

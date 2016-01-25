@@ -115,7 +115,7 @@ public class StandardBusinessDocumentHeader {
      */
     public List<Partner> getSender() {
         if (sender == null) {
-            sender = new ArrayList<Partner>();
+            sender = new ArrayList<>();
         }
         return this.sender;
     }
@@ -142,7 +142,7 @@ public class StandardBusinessDocumentHeader {
      */
     public List<Partner> getReceiver() {
         if (receiver == null) {
-            receiver = new ArrayList<Partner>();
+            receiver = new ArrayList<>();
         }
         return this.receiver;
     }
