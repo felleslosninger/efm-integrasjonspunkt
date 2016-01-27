@@ -6,13 +6,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.springframework.core.env.Environment;
 
-import static no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration.KEY_ADRESSEREGISTER_ENDPOINT;
-import static no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration.KEY_KEYSTORE_LOCATION;
-import static no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration.KEY_NOARKSYSTEM_ENDPOINT;
-import static no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration.KEY_PRIVATEKEYALIAS;
-import static no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration.KEY_PRIVATEKEYPASSWORD;
-import static no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration.NOARKSYSTEM_TYPE;
-import static org.mockito.Mockito.mock;
+import static no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration.*;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -32,7 +26,8 @@ public class IntegrasjonspunktConfigurationTest {
         when(environmentMock.getProperty(KEY_PRIVATEKEYALIAS)).thenReturn("something");
         when(environmentMock.getProperty(KEY_KEYSTORE_LOCATION)).thenReturn("something");
         when(environmentMock.getProperty(KEY_PRIVATEKEYPASSWORD)).thenReturn("something");
-        when(environmentMock.getProperty(NOARKSYSTEM_TYPE)).thenReturn("something");
+        when(environmentMock.getProperty(KEY_ORGANISATION_NUMBER)).thenReturn("something");
+        when(environmentMock.getProperty(KEY_NOARKSYSTEM_TYPE)).thenReturn("something");
     }
 
     @Test(expected = MeldingsUtvekslingRequiredPropertyException.class)
@@ -72,7 +67,7 @@ public class IntegrasjonspunktConfigurationTest {
 
     @Test(expected = MeldingsUtvekslingRequiredPropertyException.class)
     public void shouldGetExceptionWhenNoarksystemtypeIsBlank() throws Exception {
-        when(environmentMock.getProperty(NOARKSYSTEM_TYPE)).thenReturn(null);
+        when(environmentMock.getProperty(KEY_NOARKSYSTEM_TYPE)).thenReturn(null);
 
         configuration = new IntegrasjonspunktConfiguration(environmentMock);
     }

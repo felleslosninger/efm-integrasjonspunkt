@@ -77,10 +77,11 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
 
     public CorrelationInformation receive(@WebParam(name = "StandardBusinessDocument", targetNamespace = SBD_NAMESPACE, partName = "receiveResponse") StandardBusinessDocument standardBusinessDocument) {
         try {
-            return forwardToNoarkSystem(standardBusinessDocument);
+            return  forwardToNoarkSystem(standardBusinessDocument);
         } catch (MessageException e) {
-            Audit.error("Message could not be sent to archive system", standardBusinessDocument);
-            logger.error(markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)),
+            StandardBusinessDocumentWrapper documentWrapper = new StandardBusinessDocumentWrapper(standardBusinessDocument);
+            Audit.error("Message could not be sent to archive system", markerFrom(documentWrapper));
+            logger.error(markerFrom(documentWrapper),
                     e.getStatusMessage().getTechnicalMessage(), e);
             return new CorrelationInformation();
         }
@@ -89,7 +90,9 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
     public CorrelationInformation forwardToNoarkSystem(StandardBusinessDocument inputDocument) throws MessageException {
         StandardBusinessDocumentWrapper document = new StandardBusinessDocumentWrapper(inputDocument);
         adresseregisterService.validateCertificates(document);
+        Audit.info("Sender and recievers certificates are validated. Processing contents...", markerFrom(new StandardBusinessDocumentWrapper(inputDocument)));
         if (document.isReciept()) {
+            Audit.info("Received message is a receipt. Finished", markerFrom(document));
             logEvent(document, ProcessState.KVITTERING_MOTTATT);
             return new CorrelationInformation();
         }
@@ -104,7 +107,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
         } catch (IOException | JAXBException e) {
             throw new MessageException(e, StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
         }
-        logEvent(document, ProcessState.BESTEDU_EXTRACTED);
+        Audit.info("Successfully extracted BEST/EDU document from message payload", markerFrom(document));
         forwardToNoarkSystemAndSendReceipt(document, eduDocument);
         return new CorrelationInformation();
     }
@@ -122,6 +125,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
             if (null == result) {
                 logEvent(inputDocument, ProcessState.ARCHIVE_NULL_RESPONSE);
             } else {
+                Audit.info("Document successfully sent to NOARK system. Sending receipt...", markerFrom(inputDocument));
                 sendReceipt(inputDocument);
                 logEvent(inputDocument, ProcessState.BEST_EDU_SENT);
             }

@@ -129,8 +129,8 @@ if [ $# -ge 2 ]; then
       case $TRANSPORT in
         mock*)
             echo "Configuring Transport channel: $TRANSPORT"
-            echo "altinn.streamingservice.url=http://10.243.200.51:9999/" >> integrasjonspunkt-local.properties
-            echo "altinn.brokerservice.url=http://10.243.200.51:9999/" >> integrasjonspunkt-local.properties
+            echo "altinn.streamingservice.url=http://Integrasjonstest-miif.difi.local:9999/" >> integrasjonspunkt-local.properties
+            echo "altinn.brokerservice.url=http://Integrasjonstest-miif.difi.local:9999/" >> integrasjonspunkt-local.properties
         ;;
       esac
   fi

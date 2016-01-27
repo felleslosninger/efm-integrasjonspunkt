@@ -23,7 +23,6 @@ public class ELMALookup {
 
     private static final ProcessIdentifier PROCESS_IDENTIFIER = new ProcessIdentifier("urn:www.difi.no:profile:meldingsutveksling:ver1.0");
     private static final DocumentIdentifier DOCUMENT_IDENTIFIER = new DocumentIdentifier("urn:no:difi:meldingsuveksling:xsd::Melding##urn:www.difi.no:meldingsutveksling:melding:1.0:extended:urn:www.difi.no:encoded:aes-zip:1.0::1.0");
-    public static final String NORWAY_PREFIX = "9908:";
 
     private LookupClient lookupClient;
     private TransportProfile transportProfile;

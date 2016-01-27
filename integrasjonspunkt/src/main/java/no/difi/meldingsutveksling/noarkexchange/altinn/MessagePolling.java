@@ -11,6 +11,8 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.elma.ELMALookup;
+import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
+import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
@@ -19,6 +21,7 @@ import no.difi.vefa.peppol.common.model.Endpoint;
 import no.difi.vefa.peppol.lookup.api.LookupException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -54,8 +57,8 @@ public class MessagePolling {
 
     static {
         try {
-            jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class);
-            jaxbContextdomain = JAXBContext.newInstance(Document.class, Payload.class);
+            jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class, Kvittering.class);
+            jaxbContextdomain = JAXBContext.newInstance(Document.class, Payload.class, Kvittering.class);
         } catch (JAXBException e) {
             e.printStackTrace();
         }
@@ -66,6 +69,7 @@ public class MessagePolling {
     @Scheduled(fixedRate = 15000)
     public void checkForNewMessages() {
         logger.debug("Checking for new messages");
+        MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, config.getOrganisationNumber());
         Endpoint endpoint;
         try {
             endpoint = elmaLookup.lookup(PREFIX_NORWAY + config.getOrganisationNumber());
@@ -77,10 +81,14 @@ public class MessagePolling {
 
         List<FileReference> fileReferences = client.availableFiles(config.getOrganisationNumber());
 
+        if(!fileReferences.isEmpty()) {
+            Audit.info("Found new messages! Proceeding with download...");
+        }
+
         for (FileReference reference : fileReferences) {
+            Audit.info("Downloading message", markerFrom(reference));
             Document document = client.download(new DownloadRequest(reference.getValue(), config.getOrganisationNumber()));
             forwardToNoark(document);
-
         }
     }
 
@@ -97,12 +105,15 @@ public class MessagePolling {
                     jaxbContext.createUnmarshaller().unmarshal(new ByteArrayInputStream(tmp));
 
             final StandardBusinessDocument standardBusinessDocument = toDocument.getValue();
+            Audit.info("Successfully extracted standard business document. Forwarding document to NOARK system...", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));
             try {
                 integrajonspunktReceive.forwardToNoarkSystem(standardBusinessDocument);
             } catch (MessageException e) {
+                Audit.error("Could not forward document to NOARK system...", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));
                 logger.error(markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)), e.getStatusMessage().getTechnicalMessage(), e);
             }
         } catch (JAXBException e) {
+            Audit.error("Could not forward document to NOARK system... due to a technical error");
             throw new MeldingsUtvekslingRuntimeException("Could not forward document to archive system", e);
         }
     }

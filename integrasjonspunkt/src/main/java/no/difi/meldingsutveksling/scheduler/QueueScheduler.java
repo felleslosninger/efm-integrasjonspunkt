@@ -13,13 +13,14 @@ import no.difi.meldingsutveksling.queue.exception.QueueException;
 import no.difi.meldingsutveksling.queue.service.Queue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+
+import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
 @Component
 @EnableScheduling
@@ -70,16 +71,16 @@ public class QueueScheduler {
     /**
      * Method to audit log and technical log message delivery based on queue status
      * @param status either RETRY or FAILED will log
-     * @param request
+     * @param request the message to be delivered
      */
     private void logStatus(Status status, PutMessageRequestType request) {
         final PutMessageRequestWrapper message = new PutMessageRequestWrapper(request);
         if (status == Status.RETRY) {
-            Audit.info("Failed to send message. It is put on retry queue", message);
-            log.warn(MessageMarkerFactory.markerFrom(message), "Message failed send. Will try later.");
+            Audit.info("Failed to send message. It is put on retry queue", markerFrom(message));
+            log.warn(markerFrom(message), "Message failed send. Will try later.");
         } else if (status == Status.ERROR) {
-            Audit.error("Message could not be delivered after several attempts", message);
-            log.error(MessageMarkerFactory.markerFrom(message), "Message failed. Can not send message to receipient.");
+            Audit.error("Message could not be delivered after several attempts", markerFrom(message));
+            log.error(markerFrom(message), "Message failed. Can not send message to receipient.");
         }
 
     }

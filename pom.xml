@@ -23,6 +23,7 @@
     <commons-codec.version>1.10</commons-codec.version>
     <junit.version>4.12</junit.version>
     <mockito.version>1.9.5</mockito.version>
+    <logbackVersion>4.5.1</logbackVersion>
   </properties>
 
     <modules>
@@ -39,7 +40,8 @@
         <module>transport-altinn</module>
         <module>altinn-client</module>
         <module>virksert-demoscope</module>
-      <module>integrasjonspunkt-queue</module>
+        <module>integrasjonspunkt-queue</module>
+        <module>audit</module>
     </modules>
 
   <dependencyManagement>
@@ -118,6 +120,11 @@
         <artifactId>spring-boot-starter-test</artifactId>
         <version>${spring.boot.version}</version>
         <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>net.logstash.logback</groupId>
+        <artifactId>logstash-logback-encoder</artifactId>
+        <version>${logbackVersion}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
