@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
@@ -11,6 +12,10 @@ public class PutMessageRequestWrapper {
 
     public PutMessageRequestWrapper(PutMessageRequestType requestType) {
         this.requestType = requestType;
+    }
+
+    public boolean isAppReceipt() {
+        return ((String) requestType.getPayload()).contains(PutMessageStrategyFactory.APP_RECEIPT_INDICATOR);
     }
 
     public String getSenderPartynumber() {

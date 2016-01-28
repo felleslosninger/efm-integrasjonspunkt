@@ -34,11 +34,16 @@ public class MessageMarkerFactory {
      * @return LogstashMarker
      */
     public static LogstashMarker markerFrom(PutMessageRequestWrapper requestAdapter) {
-        LogstashMarker journalPostIdMarker = journalPostIdMarker(JournalpostId.fromPutMessage(requestAdapter).value());
         final LogstashMarker receiverMarker = receiverMarker(requestAdapter.getRecieverPartyNumber());
         final LogstashMarker senderMarker = senderMarker(requestAdapter.getSenderPartynumber());
         final LogstashMarker conversationIdMarker = conversationIdMarker(requestAdapter.getConversationId());
-        return conversationIdMarker.and(journalPostIdMarker).and(receiverMarker).and(senderMarker);
+        LogstashMarker logMarker = conversationIdMarker.and(receiverMarker).and(senderMarker);
+        if(requestAdapter.isAppReceipt()) {
+            LogstashMarker journalPostIdMarker = journalPostIdMarker(JournalpostId.fromPutMessage(requestAdapter).value());
+            logMarker = logMarker.and(journalPostIdMarker);
+        }
+
+        return logMarker;
     }
 
     private static LogstashMarker conversationIdMarker(String conversationId) {
