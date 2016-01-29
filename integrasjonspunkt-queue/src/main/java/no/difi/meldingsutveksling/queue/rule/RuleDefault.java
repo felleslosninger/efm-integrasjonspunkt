@@ -9,7 +9,7 @@ public class RuleDefault implements Rule {
 
     @Override
     public int getMaxAttempt() {
-        return Attempt.values().length;
+        return Attempt.values().length - 1;
     }
 
     @Override
