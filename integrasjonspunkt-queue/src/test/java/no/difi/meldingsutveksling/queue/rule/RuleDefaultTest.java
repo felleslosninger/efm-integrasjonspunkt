@@ -28,7 +28,8 @@ public class RuleDefaultTest {
     public void shouldReturnMaxAttemptWhenRequested() {
         int actual = ruleDefault.getMaxAttempt();
 
-        assertEquals(RuleDefault.Attempt.values().length, actual);
+        //Have to test on -1, first value on enums is 0, length start on 1.
+        assertEquals(RuleDefault.Attempt.values().length - 1, actual);
     }
 
     @Test
