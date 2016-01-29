@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.scheduler;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.logging.MessageMarkerFactory;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
@@ -17,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.ws.client.WebServiceIOException;
 
 import java.io.IOException;
 
@@ -52,7 +52,12 @@ public class QueueScheduler {
                     final Status status = applyResultToQueue(next.getUniqueId(), success);
                     logStatus(status, request);
                     sendMessage();
+                }
+                catch(WebServiceIOException we) {
+                    log.error("Could not send message", we);
+                    applyResultToQueue(next.getUniqueId(), false);
                 } catch (IOException e) {
+                    applyResultToQueue(next.getUniqueId(), false);
                     log.error(e.getMessage(), e);
                 } catch (IndexOutOfBoundsException e) {
                     applyResultToQueue(next.getUniqueId(), false);
@@ -63,6 +68,9 @@ public class QueueScheduler {
                 } catch (QueueException e) {
                     applyResultToQueue(next.getUniqueId(), false);
                     log.error("Internal error in queue.", e.getMessage(), e);
+                } catch (Exception e) {
+                    applyResultToQueue(next.getUniqueId(), false);
+                    log.error("Could not send message: unexpected exception occured", e);
                 }
             }
         }
