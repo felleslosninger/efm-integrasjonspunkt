@@ -3,10 +3,6 @@ package no.difi.meldingsutveksling.logging;
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.FileReference;
-import no.difi.meldingsutveksling.domain.sbdh.Document;
-import no.difi.meldingsutveksling.domain.sbdh.Partner;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
-import no.difi.meldingsutveksling.noarkexchange.JournalpostId;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
 
@@ -38,10 +34,10 @@ public class MessageMarkerFactory {
         final LogstashMarker senderMarker = senderMarker(requestAdapter.getSenderPartynumber());
         final LogstashMarker conversationIdMarker = conversationIdMarker(requestAdapter.getConversationId());
         LogstashMarker logMarker = conversationIdMarker.and(receiverMarker).and(senderMarker);
-        if(!requestAdapter.isAppReceipt()) {
+       /* if(!requestAdapter.isAppReceipt()) {
             LogstashMarker journalPostIdMarker = journalPostIdMarker(JournalpostId.fromPutMessage(requestAdapter).value());
             logMarker = logMarker.and(journalPostIdMarker);
-        }
+        }*/
 
         return logMarker;
     }
