@@ -10,11 +10,7 @@ import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageContext;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategy;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategyFactory;
-import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageRequestType;
-import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageResponseType;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import no.difi.meldingsutveksling.noarkexchange.schema.SOAPport;
+import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.queue.service.Queue;
 import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
 import no.difi.meldingsutveksling.services.CertificateException;
@@ -99,7 +95,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
         if (!message.hasSenderPartyNumber()) {
             message.setSenderPartyNumber(configuration.getOrganisationNumber());
         }
-        Audit.info("Recieved message", markerFrom(message));
+//        Audit.info("Recieved message", markerFrom(message));
         if (!message.hasSenderPartyNumber() && !configuration.hasOrganisationNumber()) {
             throw new MeldingsUtvekslingRuntimeException("Missing senders orgnumber. Please configure orgnumber= in the integrasjonspunkt-local.properties");
         }
