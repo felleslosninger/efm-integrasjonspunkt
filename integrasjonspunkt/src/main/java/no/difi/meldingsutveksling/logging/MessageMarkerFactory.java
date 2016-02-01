@@ -35,11 +35,10 @@ public class MessageMarkerFactory {
         final LogstashMarker senderMarker = senderMarker(requestAdapter.getSenderPartynumber());
         final LogstashMarker conversationIdMarker = conversationIdMarker(requestAdapter.getConversationId());
         LogstashMarker logMarker = conversationIdMarker.and(receiverMarker).and(senderMarker);
-        if(!requestAdapter.isAppReceipt()) {
+        if(!requestAdapter.hasNOARKPayload()) {
             LogstashMarker journalPostIdMarker = journalPostIdMarker(JournalpostId.fromPutMessage(requestAdapter).value());
             logMarker = logMarker.and(journalPostIdMarker);
         }
-
         return logMarker;
     }
 

@@ -1,8 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import com.thoughtworks.xstream.XStream;
-import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
@@ -16,19 +13,12 @@ public class PutMessageRequestWrapper {
         this.requestType = requestType;
     }
 
-    public boolean isAppReceipt() {
-        if (requestType == null) {
-            throw new IllegalStateException("requestType is null");
-        }
-        Audit.info(new XStream().toXML(requestType));
-        if (requestType.getPayload() == null) {
-            throw new IllegalStateException("get Payload returns null");
-        }
-        return ((String) requestType.getPayload()).contains(PutMessageStrategyFactory.APP_RECEIPT_INDICATOR);
+    public boolean hasNOARKPayload() {
+        return requestType.getPayload() != null;
     }
 
     public String getSenderPartynumber() {
-        if(hasSenderPartyNumber()) {
+        if (hasSenderPartyNumber()) {
             return requestType.getEnvelope().getSender().getOrgnr();
         } else {
             return "";

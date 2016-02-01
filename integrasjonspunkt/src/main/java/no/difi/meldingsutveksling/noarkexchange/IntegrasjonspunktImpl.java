@@ -95,7 +95,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
         if (!message.hasSenderPartyNumber()) {
             message.setSenderPartyNumber(configuration.getOrganisationNumber());
         }
-//        Audit.info("Recieved message", markerFrom(message));
+        Audit.info("Recieved message", markerFrom(message));
         if (!message.hasSenderPartyNumber() && !configuration.hasOrganisationNumber()) {
             throw new MeldingsUtvekslingRuntimeException("Missing senders orgnumber. Please configure orgnumber= in the integrasjonspunkt-local.properties");
         }
@@ -111,7 +111,6 @@ public class IntegrasjonspunktImpl implements SOAPport {
         }
         else {
             Audit.info("Queue is disabled. Message will be sent immediatly", markerFrom(message));
-
             MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, configuration.getOrganisationNumber());
 
             if (hasAdresseregisterCertificate(request.getEnvelope().getReceiver().getOrgnr())) {
