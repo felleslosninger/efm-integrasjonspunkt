@@ -1,13 +1,11 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.ProcessState;
-import no.difi.meldingsutveksling.eventlog.Event;
-import no.difi.meldingsutveksling.eventlog.EventLog;
+import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.springframework.xml.transform.StringSource;
 
@@ -16,6 +14,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createOkResponse;
 
 /**
@@ -25,34 +24,36 @@ import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory
  */
 class AppReceiptPutMessageStrategy implements PutMessageStrategy {
 
-    private final EventLog eventLog;
+    private final PutMessageContext context;
 
     private static final JAXBContext jaxbContext;
 
     static {
         try {
-              jaxbContext = JAXBContext.newInstance("no.difi.meldingsutveksling.noarkexchange.schema");
+            jaxbContext = JAXBContext.newInstance("no.difi.meldingsutveksling.noarkexchange.schema");
         } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
     }
-    public AppReceiptPutMessageStrategy(EventLog eventLog) {
-        this.eventLog = eventLog;
+
+    public AppReceiptPutMessageStrategy(PutMessageContext context) {
+        this.context = context;
     }
 
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType request) {
-
+        final PutMessageRequestWrapper wrapper = new PutMessageRequestWrapper(request);
+        Audit.info("Received Appreceipt", markerFrom(wrapper));
         final String payload = StringEscapeUtils.unescapeHtml((String) request.getPayload());
         try {
             StringSource source = new StringSource(payload);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             JAXBElement<AppReceiptType> r = unmarshaller.unmarshal(source, AppReceiptType.class);
             AppReceiptType receipt = r.getValue();
-            for (StatusMessageType sm : receipt.getMessage())
-                eventLog.log(new Event(ProcessState.APP_RECEIPT).setMessage(sm.getCode() + ", " + sm.getText()));
-            PutMessageResponseType pmrt = new PutMessageResponseType();
-
+            if (receipt.getType().equals("OK")) {
+                Audit.info("Received Appreceipt OK returning document to sender." + wrapper.getRecieverPartyNumber(), markerFrom(wrapper));
+                context.getMessageSender().sendMessage(request);
+            }
             return createOkResponse();
         } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException(e);

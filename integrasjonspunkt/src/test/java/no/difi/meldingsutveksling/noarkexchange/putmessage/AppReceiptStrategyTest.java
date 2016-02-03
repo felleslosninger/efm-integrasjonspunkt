@@ -1,18 +1,14 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
-import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -28,11 +24,11 @@ public class AppReceiptStrategyTest {
             "  &lt;/message&gt;\n" +
             "&lt;/AppReceipt&gt;";
 
-        private PutMessageContext ctx;
+    private PutMessageContext ctx;
 
     @Before
     public void init() {
-         ctx = new PutMessageContext(Mockito.mock(EventLog.class), Mockito.mock(MessageSender.class));
+        ctx = new PutMessageContext(Mockito.mock(EventLog.class), Mockito.mock(MessageSender.class));
     }
 
     /**
@@ -40,15 +36,13 @@ public class AppReceiptStrategyTest {
      * and return an OK response type
      */
     @Test
-    public void shouldOnlyLogApplicationReceipts() {
-        AppReceiptPutMessageStrategy strategy = new AppReceiptPutMessageStrategy(ctx.getEventlog());
+    public void appReceiptsShouldBeReturnedToSender() {
+        AppReceiptPutMessageStrategy strategy = new AppReceiptPutMessageStrategy(ctx);
         PutMessageRequestType request = new PutMessageRequestType();
         request.setPayload(receiptPayload);
 
         strategy.putMessage(request);
-        verify(ctx.getEventlog()).log(any(Event.class));
-
         // message sender should not be called for receipts, only log
-        verify(ctx.getMessageSender(), never()).sendMessage(any(PutMessageRequestType.class));
+        verify(ctx.getMessageSender(), atLeastOnce()).sendMessage(any(PutMessageRequestType.class));
     }
 }

@@ -14,7 +14,7 @@ public class PutMessageRequestWrapper {
     }
 
     public String getSenderPartynumber() {
-        if(hasSenderPartyNumber()) {
+        if (hasSenderPartyNumber()) {
             return requestType.getEnvelope().getSender().getOrgnr();
         } else {
             return "";
@@ -59,5 +59,13 @@ public class PutMessageRequestWrapper {
 
     public PutMessageRequestType getRequest() {
         return requestType;
+    }
+
+    public void setReceiverPartyNumber(String receiverPartyNumber) {
+        this.requestType.getEnvelope().getReceiver().setOrgnr(receiverPartyNumber);
+    }
+
+    public String getJournalPostId() {
+        return JournalpostId.fromPutMessage(this).value();
     }
 }
