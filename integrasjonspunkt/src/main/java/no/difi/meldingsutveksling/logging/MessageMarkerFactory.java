@@ -26,14 +26,14 @@ public class MessageMarkerFactory {
      * Creates LogstashMarker with conversation id from the putMessageRequest that will appear
      * in the logs when used.
      *
-     * @param requestAdapter request that contains journal post id, receiver party number, sender party number and conversation id
+     * @param requestWrapper request that contains journal post id, receiver party number, sender party number and conversation id
      * @return LogstashMarker
      */
-    public static LogstashMarker markerFrom(PutMessageRequestWrapper requestAdapter) {
-        final LogstashMarker journalPostIdMarker = journalPostIdMarker(requestAdapter.getJournalPostId());
-        final LogstashMarker receiverMarker = receiverMarker(requestAdapter.getRecieverPartyNumber());
-        final LogstashMarker senderMarker = senderMarker(requestAdapter.getSenderPartynumber());
-        final LogstashMarker conversationIdMarker = conversationIdMarker(requestAdapter.getConversationId());
+    public static LogstashMarker markerFrom(PutMessageRequestWrapper requestWrapper) {
+        final LogstashMarker journalPostIdMarker = journalPostIdMarker(requestWrapper.getJournalPostId());
+        final LogstashMarker receiverMarker = receiverMarker(requestWrapper.getRecieverPartyNumber());
+        final LogstashMarker senderMarker = senderMarker(requestWrapper.getSenderPartynumber());
+        final LogstashMarker conversationIdMarker = conversationIdMarker(requestWrapper.getConversationId());
         return conversationIdMarker.and(journalPostIdMarker).and(receiverMarker).and(senderMarker);
     }
 
