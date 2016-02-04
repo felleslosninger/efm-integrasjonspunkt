@@ -48,6 +48,7 @@ import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
 public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
 
+    public static final String OKEY_TYPE = "OK";
     private static Logger logger = LoggerFactory.getLogger(IntegrasjonspunktImpl.class);
     private static final int MAGIC_NR = 1024;
     private static final String SBD_NAMESPACE = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader";
@@ -77,7 +78,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
 
     public CorrelationInformation receive(@WebParam(name = "StandardBusinessDocument", targetNamespace = SBD_NAMESPACE, partName = "receiveResponse") StandardBusinessDocument standardBusinessDocument) {
         try {
-            return  forwardToNoarkSystem(standardBusinessDocument);
+            return forwardToNoarkSystem(standardBusinessDocument);
         } catch (MessageException e) {
             StandardBusinessDocumentWrapper documentWrapper = new StandardBusinessDocumentWrapper(standardBusinessDocument);
             Audit.error("Message could not be sent to archive system", markerFrom(documentWrapper));
@@ -120,19 +121,15 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
     }
 
     private void forwardToNoarkSystemAndSendReceipts(StandardBusinessDocumentWrapper inputDocument, PutMessageRequestType putMessageRequestType) {
-
         PutMessageResponseType response = localNoark.sendEduMelding(putMessageRequestType);
-        if (response != null) {
-            AppReceiptType result = response.getResult();
-            if (null == result) {
-                logEvent(inputDocument, ProcessState.ARCHIVE_NULL_RESPONSE);
-            } else {
-                Audit.info("Document successfully sent to NOARK system. Sending receipt...", markerFrom(inputDocument));
-                sendReceiptOpen(inputDocument);
-                logEvent(inputDocument, ProcessState.BEST_EDU_SENT);
-            }
+        AppReceiptType result = response.getResult();
+        if (result.getType().equals(OKEY_TYPE)) {
+            Audit.info("Document successfully sent to NOARK system. Sending receipt...", markerFrom(response));
+            sendReceiptOpen(inputDocument);
+            logEvent(inputDocument, ProcessState.BEST_EDU_SENT);
         } else {
-            logEvent(inputDocument, ProcessState.ARCHIVE_NOT_AVAILABLE);
+            Audit.info("NOARK replied with non-OK. Response", markerFrom(response));
+
         }
     }
 

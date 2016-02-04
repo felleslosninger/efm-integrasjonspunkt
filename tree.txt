@@ -1,0 +1,353 @@
+[INFO] Scanning for projects...
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for no.difi.meldingsutveksling:noarkexchange-p360:jar:1.0-SNAPSHOT
+[WARNING] The expression ${parent.version} is deprecated. Please use ${project.parent.version} instead.
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for no.difi.meldingsutveksling:noarkexchange-ephorte:jar:1.0-SNAPSHOT
+[WARNING] The expression ${parent.version} is deprecated. Please use ${project.parent.version} instead.
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for no.difi.meldingsutveksling:altinnexchange:jar:1.0-SNAPSHOT
+[WARNING] 'build.plugins.plugin.version' for org.jvnet.jaxb2.maven2:maven-jaxb2-plugin is missing. @ line 89, column 21
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for no.difi.meldingsutveksling:integrasjonspunkt:jar:1.0-SNAPSHOT
+[WARNING] 'build.plugins.plugin.version' for org.mortbay.jetty:jetty-maven-plugin is missing. @ line 56, column 21
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for no.difi.meldingsutveksling:transport-altinn:jar:1.0-SNAPSHOT
+[WARNING] 'dependencies.dependency.(groupId:artifactId:type:classifier)' must be unique: no.difi.meldingsutveksling:transport-file:jar -> duplicate declaration of version 1.0-SNAPSHOT @ line 58, column 17
+[WARNING] The expression ${parent.version} is deprecated. Please use ${project.parent.version} instead.
+[WARNING] 
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+[WARNING] 
+[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
+[WARNING] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] Multiproject for meldingsutveksling
+[INFO] noarkexchange
+[INFO] noarkexchange-p360
+[INFO] noarkexchange-ephorte
+[INFO] altinnexchange
+[INFO] domain
+[INFO] dokumentpakking
+[INFO] virksert-demoscope
+[INFO] transport
+[INFO] kvittering
+[INFO] audit
+[INFO] altinn-client
+[INFO] transport-file
+[INFO] transport-altinn
+[INFO] integrasjonspunkt-queue
+[INFO] Meldingsutveksling Integrasjonspunkt
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building Multiproject for meldingsutveksling 1.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-dependency-plugin:2.8:tree (default-cli) @ parent-pom ---
+[INFO] no.difi.meldingsutveksling:parent-pom:pom:1.0-SNAPSHOT
+[INFO] +- junit:junit:jar:3.8.1:test
+[INFO] \- no.difi.commons:commons-asic:jar:0.9.2-SNAPSHOT:compile
+[INFO]    +- org.slf4j:slf4j-api:jar:1.7.12:compile
+[INFO]    +- commons-codec:commons-codec:jar:1.10:compile
+[INFO]    +- commons-io:commons-io:jar:2.4:compile
+[INFO]    \- org.bouncycastle:bcpkix-jdk15on:jar:1.52:compile
+[INFO]       \- org.bouncycastle:bcprov-jdk15on:jar:1.52:compile
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building noarkexchange 1.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-dependency-plugin:2.8:tree (default-cli) @ noarkexchange ---
+[INFO] no.difi.meldingsutveksling:noarkexchange:jar:1.0-SNAPSHOT
+[INFO] +- org.springframework.ws:spring-ws-core:jar:2.1.4.RELEASE:compile
+[INFO] |  +- org.springframework.ws:spring-xml:jar:2.1.4.RELEASE:compile
+[INFO] |  +- org.springframework:spring-context:jar:3.2.4.RELEASE:compile
+[INFO] |  |  \- org.springframework:spring-expression:jar:3.2.4.RELEASE:compile
+[INFO] |  +- org.springframework:spring-aop:jar:3.2.4.RELEASE:compile
+[INFO] |  |  \- aopalliance:aopalliance:jar:1.0:compile
+[INFO] |  +- org.springframework:spring-oxm:jar:3.2.4.RELEASE:compile
+[INFO] |  +- org.springframework:spring-web:jar:3.2.4.RELEASE:compile
+[INFO] |  +- org.springframework:spring-webmvc:jar:3.2.4.RELEASE:compile
+[INFO] |  +- wsdl4j:wsdl4j:jar:1.6.1:compile
+[INFO] |  +- javax.xml.stream:stax-api:jar:1.0-2:compile
+[INFO] |  +- commons-logging:commons-logging:jar:1.1.1:compile
+[INFO] |  +- org.springframework:spring-core:jar:3.2.4.RELEASE:compile
+[INFO] |  \- org.springframework:spring-beans:jar:3.2.4.RELEASE:compile
+[INFO] +- org.apache.httpcomponents:httpclient:jar:4.5.1:compile
+[INFO] |  +- org.apache.httpcomponents:httpcore:jar:4.4.3:compile
+[INFO] |  \- commons-codec:commons-codec:jar:1.10:compile
+[INFO] +- junit:junit:jar:4.12:test
+[INFO] |  \- org.hamcrest:hamcrest-core:jar:1.3:test
+[INFO] \- no.difi.commons:commons-asic:jar:0.9.2-SNAPSHOT:compile
+[INFO]    +- org.slf4j:slf4j-api:jar:1.7.12:compile
+[INFO]    +- commons-io:commons-io:jar:2.4:compile
+[INFO]    \- org.bouncycastle:bcpkix-jdk15on:jar:1.52:compile
+[INFO]       \- org.bouncycastle:bcprov-jdk15on:jar:1.52:compile
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building noarkexchange-p360 1.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-dependency-plugin:2.8:tree (default-cli) @ noarkexchange-p360 ---
+[INFO] no.difi.meldingsutveksling:noarkexchange-p360:jar:1.0-SNAPSHOT
+[INFO] +- no.difi.meldingsutveksling:noarkexchange:jar:1.0-SNAPSHOT:compile
+[INFO] +- org.springframework.ws:spring-ws-core:jar:2.1.4.RELEASE:compile
+[INFO] |  +- org.springframework.ws:spring-xml:jar:2.1.4.RELEASE:compile
+[INFO] |  +- org.springframework:spring-context:jar:3.2.4.RELEASE:compile
+[INFO] |  |  \- org.springframework:spring-expression:jar:3.2.4.RELEASE:compile
+[INFO] |  +- org.springframework:spring-aop:jar:3.2.4.RELEASE:compile
+[INFO] |  |  \- aopalliance:aopalliance:jar:1.0:compile
+[INFO] |  +- org.springframework:spring-oxm:jar:3.2.4.RELEASE:compile
+[INFO] |  +- org.springframework:spring-web:jar:3.2.4.RELEASE:compile
+[INFO] |  +- org.springframework:spring-webmvc:jar:3.2.4.RELEASE:compile
+[INFO] |  +- wsdl4j:wsdl4j:jar:1.6.1:compile
+[INFO] |  +- javax.xml.stream:stax-api:jar:1.0-2:compile
+[INFO] |  +- commons-logging:commons-logging:jar:1.1.1:compile
+[INFO] |  +- org.springframework:spring-core:jar:3.2.4.RELEASE:compile
+[INFO] |  \- org.springframework:spring-beans:jar:3.2.4.RELEASE:compile
+[INFO] +- org.apache.httpcomponents:httpclient:jar:4.5.1:compile
+[INFO] |  +- org.apache.httpcomponents:httpcore:jar:4.4.3:compile
+[INFO] |  \- commons-codec:commons-codec:jar:1.10:compile
+[INFO] +- org.modelmapper:modelmapper:jar:0.7.3:compile
+[INFO] +- junit:junit:jar:3.8.1:test
+[INFO] \- no.difi.commons:commons-asic:jar:0.9.2-SNAPSHOT:compile
+[INFO]    +- org.slf4j:slf4j-api:jar:1.7.12:compile
+[INFO]    +- commons-io:commons-io:jar:2.4:compile
+[INFO]    \- org.bouncycastle:bcpkix-jdk15on:jar:1.52:compile
+[INFO]       \- org.bouncycastle:bcprov-jdk15on:jar:1.52:compile
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building noarkexchange-ephorte 1.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-dependency-plugin:2.8:tree (default-cli) @ noarkexchange-ephorte ---
+[INFO] no.difi.meldingsutveksling:noarkexchange-ephorte:jar:1.0-SNAPSHOT
+[INFO] +- no.difi.meldingsutveksling:noarkexchange:jar:1.0-SNAPSHOT:compile
+[INFO] |  +- org.springframework.ws:spring-ws-core:jar:2.2.3.RELEASE:compile
+[INFO] |  |  +- commons-logging:commons-logging:jar:1.1.3:compile
+[INFO] |  |  +- org.springframework.ws:spring-xml:jar:2.2.3.RELEASE:compile
+[INFO] |  |  |  \- org.springframework:spring-context:jar:4.0.9.RELEASE:compile
+[INFO] |  |  +- org.springframework:spring-aop:jar:4.0.9.RELEASE:compile
+[INFO] |  |  |  \- aopalliance:aopalliance:jar:1.0:compile
+[INFO] |  |  +- org.springframework:spring-beans:jar:4.0.9.RELEASE:compile
+[INFO] |  |  +- org.springframework:spring-core:jar:4.0.9.RELEASE:compile
+[INFO] |  |  +- org.springframework:spring-oxm:jar:4.0.9.RELEASE:compile
+[INFO] |  |  +- org.springframework:spring-web:jar:4.0.9.RELEASE:compile
+[INFO] |  |  \- org.springframework:spring-webmvc:jar:4.0.9.RELEASE:compile
+[INFO] |  |     \- org.springframework:spring-expression:jar:4.0.9.RELEASE:compile
+[INFO] |  \- org.apache.httpcomponents:httpclient:jar:4.5.1:compile
+[INFO] |     \- org.apache.httpcomponents:httpcore:jar:4.4.3:compile
+[INFO] +- org.modelmapper:modelmapper:jar:0.7.3:compile
+[INFO] +- junit:junit:jar:3.8.1:test
+[INFO] \- no.difi.commons:commons-asic:jar:0.9.2-SNAPSHOT:compile
+[INFO]    +- org.slf4j:slf4j-api:jar:1.7.12:compile
+[INFO]    +- commons-codec:commons-codec:jar:1.10:compile
+[INFO]    +- commons-io:commons-io:jar:2.4:compile
+[INFO]    \- org.bouncycastle:bcpkix-jdk15on:jar:1.52:compile
+[INFO]       \- org.bouncycastle:bcprov-jdk15on:jar:1.52:compile
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building altinnexchange 1.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-dependency-plugin:2.8:tree (default-cli) @ altinnexchange ---
+[INFO] no.difi.meldingsutveksling:altinnexchange:jar:1.0-SNAPSHOT
+[INFO] +- junit:junit:jar:3.8.1:test
+[INFO] \- no.difi.commons:commons-asic:jar:0.9.2-SNAPSHOT:compile
+[INFO]    +- org.slf4j:slf4j-api:jar:1.7.12:compile
+[INFO]    +- commons-codec:commons-codec:jar:1.10:compile
+[INFO]    +- commons-io:commons-io:jar:2.4:compile
+[INFO]    \- org.bouncycastle:bcpkix-jdk15on:jar:1.52:compile
+[INFO]       \- org.bouncycastle:bcprov-jdk15on:jar:1.52:compile
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building domain 1.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-dependency-plugin:2.8:tree (default-cli) @ domain ---
+[INFO] no.difi.meldingsutveksling:domain:jar:1.0-SNAPSHOT
+[INFO] +- commons-codec:commons-codec:jar:1.10:compile
+[INFO] +- junit:junit:jar:4.12:test
+[INFO] |  \- org.hamcrest:hamcrest-core:jar:1.3:test
+[INFO] \- no.difi.commons:commons-asic:jar:0.9.2-SNAPSHOT:compile
+[INFO]    +- org.slf4j:slf4j-api:jar:1.7.12:compile
+[INFO]    +- commons-io:commons-io:jar:2.4:compile
+[INFO]    \- org.bouncycastle:bcpkix-jdk15on:jar:1.52:compile
+[INFO]       \- org.bouncycastle:bcprov-jdk15on:jar:1.52:compile
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building dokumentpakking 0.1-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[WARNING] The artifact xstream:xstream:jar:1.2.2 has been relocated to com.thoughtworks.xstream:xstream:jar:1.2.2
+[INFO] 
+[INFO] --- maven-dependency-plugin:2.8:tree (default-cli) @ dokumentpakking ---
+[WARNING] The artifact xstream:xstream:jar:1.2.2 has been relocated to com.thoughtworks.xstream:xstream:jar:1.2.2
+[INFO] no.difi.meldingsutveksling:dokumentpakking:jar:0.1-SNAPSHOT
+[INFO] +- org.apache.commons:commons-compress:jar:1.9:compile
+[INFO] +- commons-io:commons-io:jar:2.4:compile
+[INFO] +- commons-codec:commons-codec:jar:1.10:compile
+[INFO] +- org.springframework.ws:spring-xml:jar:2.2.0.RELEASE:compile
+[INFO] |  +- commons-logging:commons-logging:jar:1.1.3:compile
+[INFO] |  +- org.springframework:spring-beans:jar:4.0.5.RELEASE:compile
+[INFO] |  +- org.springframework:spring-context:jar:4.0.5.RELEASE:compile
+[INFO] |  |  +- org.springframework:spring-aop:jar:4.0.5.RELEASE:compile
+[INFO] |  |  |  \- aopalliance:aopalliance:jar:1.0:compile
+[INFO] |  |  \- org.springframework:spring-expression:jar:4.0.5.RELEASE:compile
+[INFO] |  \- org.springframework:spring-core:jar:4.0.5.RELEASE:compile
+[INFO] +- org.springframework:spring-oxm:jar:4.0.5.RELEASE:compile
+[INFO] +- com.thoughtworks.xstream:xstream:jar:1.2.2:compile
+[INFO] |  \- xpp3:xpp3_min:jar:1.1.3.4.O:compile
+[INFO] +- joda-time:joda-time:jar:2.5:compile
+[INFO] +- no.difi.meldingsutveksling:domain:jar:1.0-SNAPSHOT:compile
+[INFO] +- junit:junit:jar:4.12:test
+[INFO] |  \- org.hamcrest:hamcrest-core:jar:1.3:test
+[INFO] +- org.hamcrest:hamcrest-all:jar:1.3:test
+[INFO] +- org.mockito:mockito-all:jar:1.9.5:test
+[INFO] +- org.bouncycastle:bcpkix-jdk15on:jar:1.50:compile
+[INFO] +- org.bouncycastle:bcprov-jdk15on:jar:1.50:compile
+[INFO] \- no.difi.commons:commons-asic:jar:0.9.2-SNAPSHOT:compile
+[INFO]    \- org.slf4j:slf4j-api:jar:1.7.12:compile
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building virksert-demoscope 1.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-dependency-plugin:2.8:tree (default-cli) @ virksert-demoscope ---
+[INFO] no.difi.meldingsutveksling:virksert-demoscope:jar:1.0-SNAPSHOT
+[INFO] +- no.difi.virksert:virksert-common:jar:1.0-SNAPSHOT:compile
+[INFO] |  +- no.difi.commons:commons-certvalidator:jar:2.0.2-SNAPSHOT:compile
+[INFO] |  \- org.slf4j:slf4j-api:jar:1.7.12:compile
+[INFO] +- junit:junit:jar:3.8.1:test
+[INFO] \- no.difi.commons:commons-asic:jar:0.9.2-SNAPSHOT:compile
+[INFO]    +- commons-codec:commons-codec:jar:1.10:compile
+[INFO]    +- commons-io:commons-io:jar:2.4:compile
+[INFO]    \- org.bouncycastle:bcpkix-jdk15on:jar:1.52:compile
+[INFO]       \- org.bouncycastle:bcprov-jdk15on:jar:1.52:compile
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building transport 1.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-dependency-plugin:2.8:tree (default-cli) @ transport ---
+[INFO] no.difi.meldingsutveksling:transport:jar:1.0-SNAPSHOT
+[INFO] +- no.difi.meldingsutveksling:domain:jar:1.0-SNAPSHOT:compile
+[INFO] |  \- commons-codec:commons-codec:jar:1.10:compile
+[INFO] +- org.springframework:spring-context:jar:4.1.7.RELEASE:compile
+[INFO] |  +- org.springframework:spring-aop:jar:4.1.7.RELEASE:compile
+[INFO] |  |  \- aopalliance:aopalliance:jar:1.0:compile
+[INFO] |  +- org.springframework:spring-beans:jar:4.1.7.RELEASE:compile
+[INFO] |  +- org.springframework:spring-core:jar:4.1.7.RELEASE:compile
+[INFO] |  \- org.springframework:spring-expression:jar:4.1.7.RELEASE:compile
+[INFO] +- commons-configuration:commons-configuration:jar:1.10:compile
+[INFO] |  +- commons-lang:commons-lang:jar:20030203.000129:compile
+[INFO] |  \- commons-logging:commons-logging:jar:1.1.1:compile
+[INFO] +- junit:junit:jar:3.8.1:test
+[INFO] \- no.difi.commons:commons-asic:jar:0.9.2-SNAPSHOT:compile
+[INFO]    +- org.slf4j:slf4j-api:jar:1.7.12:compile
+[INFO]    +- commons-io:commons-io:jar:2.4:compile
+[INFO]    \- org.bouncycastle:bcpkix-jdk15on:jar:1.52:compile
+[INFO]       \- org.bouncycastle:bcprov-jdk15on:jar:1.52:compile
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building kvittering 1.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-dependency-plugin:2.8:tree (default-cli) @ kvittering ---
+[INFO] no.difi.meldingsutveksling:kvittering:jar:1.0-SNAPSHOT
+[INFO] +- no.difi.meldingsutveksling:domain:jar:1.0-SNAPSHOT:compile
+[INFO] |  \- commons-codec:commons-codec:jar:1.10:compile
+[INFO] +- no.difi.meldingsutveksling:dokumentpakking:jar:0.1-SNAPSHOT:compile
+[INFO] |  +- org.apache.commons:commons-compress:jar:1.9:compile
+[INFO] |  +- commons-io:commons-io:jar:2.4:compile
+[INFO] |  +- org.springframework.ws:spring-xml:jar:2.2.0.RELEASE:compile
+[INFO] |  |  +- org.springframework:spring-beans:jar:4.0.5.RELEASE:compile
+[INFO] |  |  +- org.springframework:spring-context:jar:4.0.5.RELEASE:compile
+[INFO] |  |  |  \- org.springframework:spring-expression:jar:4.0.5.RELEASE:compile
+[INFO] |  |  \- org.springframework:spring-core:jar:4.0.5.RELEASE:compile
+[INFO] |  +- org.springframework:spring-oxm:jar:4.0.5.RELEASE:compile
+[INFO] |  +- com.thoughtworks.xstream:xstream:jar:1.4.8:compile
+[INFO] |  |  +- xmlpull:xmlpull:jar:1.1.3.1:compile
+[INFO] |  |  \- xpp3:xpp3_min:jar:1.1.4c:compile
+[INFO] |  +- joda-time:joda-time:jar:2.5:compile
+[INFO] |  +- org.bouncycastle:bcpkix-jdk15on:jar:1.50:compile
+[INFO] |  \- org.bouncycastle:bcprov-jdk15on:jar:1.50:compile
+[INFO] +- no.difi.meldingsutveksling:noarkexchange:jar:1.0-SNAPSHOT:compile
+[INFO] |  +- org.springframework.ws:spring-ws-core:jar:2.2.3.RELEASE:compile
+[INFO] |  |  +- org.springframework:spring-aop:jar:4.0.9.RELEASE:compile
+[INFO] |  |  |  \- aopalliance:aopalliance:jar:1.0:compile
+[INFO] |  |  +- org.springframework:spring-web:jar:4.0.9.RELEASE:compile
+[INFO] |  |  \- org.springframework:spring-webmvc:jar:4.0.9.RELEASE:compile
+[INFO] |  \- org.apache.httpcomponents:httpclient:jar:4.5.1:compile
+[INFO] |     \- org.apache.httpcomponents:httpcore:jar:4.4.3:compile
+[INFO] +- junit:junit:jar:4.12:test
+[INFO] |  \- org.hamcrest:hamcrest-core:jar:1.3:test
+[INFO] +- no.difi.vefa:sbdh:jar:0.9.3:compile
+[INFO] |  +- no.difi.commons:commons-sbdh:jar:0.9.0:compile
+[INFO] |  \- org.slf4j:slf4j-api:jar:1.7.12:compile
+[INFO] +- org.apache.santuario:xmlsec:jar:1.4.3:compile
+[INFO] |  \- commons-logging:commons-logging:jar:1.1:compile
+[INFO] |     +- log4j:log4j:jar:1.2.12:compile
+[INFO] |     +- logkit:logkit:jar:1.0.1:compile
+[INFO] |     +- avalon-framework:avalon-framework:jar:4.1.3:compile
+[INFO] |     \- javax.servlet:servlet-api:jar:2.3:compile
+[INFO] \- no.difi.commons:commons-asic:jar:0.9.2-SNAPSHOT:compile
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building audit 1.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-dependency-plugin:2.8:tree (default-cli) @ audit ---
+[INFO] no.difi.meldingsutveksling:audit:jar:1.0-SNAPSHOT
+[INFO] +- net.logstash.logback:logstash-logback-encoder:jar:4.5.1:compile
+[INFO] |  +- ch.qos.logback:logback-core:jar:1.1.3:compile
+[INFO] |  \- com.fasterxml.jackson.core:jackson-databind:jar:2.5.4:compile
+[INFO] |     +- com.fasterxml.jackson.core:jackson-annotations:jar:2.5.0:compile
+[INFO] |     \- com.fasterxml.jackson.core:jackson-core:jar:2.5.4:compile
+[INFO] +- junit:junit:jar:3.8.1:test
+[INFO] \- no.difi.commons:commons-asic:jar:0.9.2-SNAPSHOT:compile
+[INFO]    +- org.slf4j:slf4j-api:jar:1.7.12:compile
+[INFO]    +- commons-codec:commons-codec:jar:1.10:compile
+[INFO]    +- commons-io:commons-io:jar:2.4:compile
+[INFO]    \- org.bouncycastle:bcpkix-jdk15on:jar:1.52:compile
+[INFO]       \- org.bouncycastle:bcprov-jdk15on:jar:1.52:compile
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building altinn-client 1.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary:
+[INFO] 
+[INFO] Multiproject for meldingsutveksling ................ SUCCESS [  1.068 s]
+[INFO] noarkexchange ...................................... SUCCESS [  0.137 s]
+[INFO] noarkexchange-p360 ................................. SUCCESS [  0.063 s]
+[INFO] noarkexchange-ephorte .............................. SUCCESS [  0.018 s]
+[INFO] altinnexchange ..................................... SUCCESS [  0.018 s]
+[INFO] domain ............................................. SUCCESS [  0.009 s]
+[INFO] dokumentpakking .................................... SUCCESS [  0.085 s]
+[INFO] virksert-demoscope ................................. SUCCESS [  0.028 s]
+[INFO] transport .......................................... SUCCESS [  0.034 s]
+[INFO] kvittering ......................................... SUCCESS [  0.059 s]
+[INFO] audit .............................................. SUCCESS [  0.032 s]
+[INFO] altinn-client ...................................... FAILURE [  0.072 s]
+[INFO] transport-file ..................................... SKIPPED
+[INFO] transport-altinn ................................... SKIPPED
+[INFO] integrasjonspunkt-queue ............................ SKIPPED
+[INFO] Meldingsutveksling Integrasjonspunkt ............... SKIPPED
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 2.194 s
+[INFO] Finished at: 2016-02-01T12:46:38+01:00
+[INFO] Final Memory: 20M/218M
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal on project altinn-client: Could not resolve dependencies for project no.difi.meldingsutveksling:altinn-client:jar:1.0-SNAPSHOT: Failure to find no.difi.meldingsutveksling:audit:jar:1.0-SNAPSHOT in http://jsch.sf.net/maven2/ was cached in the local repository, resolution will not be reattempted until the update interval of Jsch has elapsed or updates are forced -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/DependencyResolutionException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <goals> -rf :altinn-client

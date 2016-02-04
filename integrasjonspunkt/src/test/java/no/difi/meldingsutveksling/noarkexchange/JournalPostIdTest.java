@@ -130,9 +130,7 @@ public class JournalPostIdTest {
     @Test
     public void shouldExtractJpIdFromCdataTaggedXml() throws JAXBException {
         PutMessageRequestType request = createPutMessageRequestWith(cdataTaggedXml);
-
         JournalpostId id = JournalpostId.fromPutMessage(new PutMessageRequestWrapper(request));
-
         assertEquals("219816", id.value());
 
     }
