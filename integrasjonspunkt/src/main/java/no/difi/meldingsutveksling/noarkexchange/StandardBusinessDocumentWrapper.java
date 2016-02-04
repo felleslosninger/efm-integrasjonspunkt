@@ -24,6 +24,10 @@ public class StandardBusinessDocumentWrapper {
         this.document = standardBusinessDocument;
     }
 
+    public StandardBusinessDocument getDocument() {
+        return document;
+    }
+
     public String getSenderOrgNumber() {
         return document.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue().split(":")[1];
     }
@@ -46,8 +50,8 @@ public class StandardBusinessDocumentWrapper {
 
     private Scope findScope(String scopeType) {
         final List<Scope> scopes = document.getStandardBusinessDocumentHeader().getBusinessScope().getScope();
-        for(Scope scope : scopes) {
-            if(scopeType.equals(scope.getType())) {
+        for (Scope scope : scopes) {
+            if (scopeType.equals(scope.getType())) {
                 return scope;
             }
         }
@@ -59,11 +63,11 @@ public class StandardBusinessDocumentWrapper {
     }
 
     public Payload getPayload() {
-        if(document.getAny() instanceof Payload) {
+        if (document.getAny() instanceof Payload) {
             return (Payload) document.getAny();
-        } else if(document.getAny() instanceof Node) {
+        } else if (document.getAny() instanceof Node) {
             return unmarshallAnyElement(document.getAny());
-        }  else {
+        } else {
             throw new MeldingsUtvekslingRuntimeException("Could not cast any element " + document.getAny() + " from " + StandardBusinessDocument.class + " to " + Payload.class);
         }
     }

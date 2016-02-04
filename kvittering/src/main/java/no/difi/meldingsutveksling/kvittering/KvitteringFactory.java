@@ -12,8 +12,6 @@ import no.difi.meldingsutveksling.kvittering.xsd.Aapning;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.kvittering.xsd.Levering;
 import no.difi.meldingsutveksling.kvittering.xsd.ObjectFactory;
-import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 
 import javax.xml.bind.JAXBContext;
@@ -44,14 +42,6 @@ public class KvitteringFactory {
         }
     }
 
-    /**
-     * Creates an Åpningskvittering
-     */
-    public static Document createAapningskvittering(PutMessageRequestType message, KeyPair keyPair) {
-        PutMessageRequestWrapper w = new PutMessageRequestWrapper(message);
-        return createAapningskvittering(w.getRecieverPartyNumber(), w.getSenderPartynumber(), w.getJournalPostId(),
-                w.getConversationId(), keyPair);
-    }
 
     public static Document createAapningskvittering(String receiverOrgNumber, String senderOrgNumber,
                                                     String journalPostId, String conversationId, KeyPair keyPair) {
@@ -59,11 +49,6 @@ public class KvitteringFactory {
         k.setAapning(new Aapning());
         k.setTidspunkt(XMLTimeStamp.createTimeStamp());
         return signAndWrapDocument(receiverOrgNumber, senderOrgNumber, journalPostId, conversationId, keyPair, k);
-    }
-
-    public static Document createLeveringsKvittering(PutMessageRequestType message, KeyPair keyPair) {
-        PutMessageRequestWrapper w = new PutMessageRequestWrapper(message);
-        return createLeveringsKvittering(w.getRecieverPartyNumber(), w.getSenderPartynumber(), w.getJournalPostId(), w.getConversationId(), keyPair);
     }
 
     public static Document createLeveringsKvittering(String receiverOrgNumber, String senderOrgNumber,
