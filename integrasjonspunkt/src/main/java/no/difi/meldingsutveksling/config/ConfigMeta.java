@@ -1,10 +1,17 @@
 package no.difi.meldingsutveksling.config;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import net.logstash.logback.encoder.org.apache.commons.lang.StringUtils;
+import net.logstash.logback.marker.LogstashMarker;
+import net.logstash.logback.marker.Markers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Logger;
+import java.util.Map;
 
 /**
  * Class that contains denormalised metadata about the current configuration. Used for logging and
@@ -14,7 +21,7 @@ import java.util.logging.Logger;
  */
 public class ConfigMeta {
 
-    private static final Logger logger = Logger.getLogger(ConfigMeta.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(ConfigMeta.class.getName());
 
     private List<ConfigGroup> configGroups;
 
@@ -34,11 +41,18 @@ public class ConfigMeta {
     }
 
     public void logInfo() {
-        for (ConfigGroup g : configGroups) {
-            for (ConfigElement e : g.elements) {
-                logger.info("configGroup " + g.name + ", key `" + e.key + "`,value `" + e.value + "`");
+        logger.info(createLogMarkers(), "Startup configuration");
+    }
+
+    private LogstashMarker createLogMarkers() {
+        Map<String, String> fields = new HashMap<>();
+
+        for(ConfigGroup g: configGroups) {
+            for(ConfigElement e: g.getElements()) {
+                fields.put(e.key, e.value);
             }
         }
+        return Markers.appendEntries(fields);
     }
 
     public static class Builder {

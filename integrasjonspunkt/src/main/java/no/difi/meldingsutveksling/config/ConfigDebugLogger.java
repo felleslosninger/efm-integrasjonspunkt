@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 /**
  * the onApplicationEvent is executed during startup of the application
  *
- * @Author Glenn Bech
  */
 @Component
 public class ConfigDebugLogger implements ApplicationListener<ContextRefreshedEvent> {
@@ -24,7 +23,6 @@ public class ConfigDebugLogger implements ApplicationListener<ContextRefreshedEv
     public void onApplicationEvent(final ContextRefreshedEvent event) {
         final ConfigMeta metadata = config.getMetadata();
         metadata.logInfo();
-        System.out.println(metadata.toString());
     }
 
 }
