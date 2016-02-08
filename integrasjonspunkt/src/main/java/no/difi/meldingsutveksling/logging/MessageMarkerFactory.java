@@ -37,11 +37,11 @@ public class MessageMarkerFactory {
      * @param requestWrapper request that contains journal post id, receiver party number, sender party number and conversation id
      * @return LogstashMarker
      */
-    public static LogstashMarker markerFrom(PutMessageRequestWrapper requestWrapper) {
-        final LogstashMarker journalPostIdMarker = journalPostIdMarker(requestWrapper.getJournalPostId());
-        final LogstashMarker receiverMarker = receiverMarker(requestWrapper.getRecieverPartyNumber());
-        final LogstashMarker senderMarker = senderMarker(requestWrapper.getSenderPartynumber());
-        final LogstashMarker conversationIdMarker = conversationIdMarker(requestWrapper.getConversationId());
+    public static LogstashMarker markerFrom(PutMessageRequestWrapper requestAdapter) {
+        LogstashMarker journalPostIdMarker = journalPostIdMarker(JournalpostId.fromPutMessage(requestAdapter).value());
+        final LogstashMarker receiverMarker = receiverMarker(requestAdapter.getRecieverPartyNumber());
+        final LogstashMarker senderMarker = senderMarker(requestAdapter.getSenderPartynumber());
+        final LogstashMarker conversationIdMarker = conversationIdMarker(requestAdapter.getConversationId());
         return conversationIdMarker.and(journalPostIdMarker).and(receiverMarker).and(senderMarker);
     }
 
