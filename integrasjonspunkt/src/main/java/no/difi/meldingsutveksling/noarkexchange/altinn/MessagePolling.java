@@ -23,9 +23,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.core.MessageCreator;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.Session;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -53,6 +58,9 @@ public class MessagePolling {
     @Autowired
     ELMALookup elmaLookup;
 
+    @Autowired
+    private JmsTemplate jmsTemplate;
+
     private static JAXBContext jaxbContextdomain;
 
     static {
@@ -63,7 +71,6 @@ public class MessagePolling {
             e.printStackTrace();
         }
     }
-
     private static JAXBContext jaxbContext;
 
     @Scheduled(fixedRate = 15000)
@@ -88,6 +95,17 @@ public class MessagePolling {
         for (FileReference reference : fileReferences) {
             Audit.info("Downloading message", markerFrom(reference));
             Document document = client.download(new DownloadRequest(reference.getValue(), config.getOrganisationNumber()));
+
+            MessageCreator messageCreator = new MessageCreator() {
+                @Override
+                public Message createMessage(Session session) throws JMSException {
+                    return session.createTextMessage("Hello world from JMS!");
+                }
+            };
+
+            System.out.println("Sending a new Message.... -> ");
+            jmsTemplate.send("mailbox-destination", messageCreator);
+
             forwardToNoark(document);
         }
     }

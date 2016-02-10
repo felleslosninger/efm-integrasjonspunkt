@@ -5,18 +5,23 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
-/**
- * Created by kons-mho on 05.02.2016.
- */
+import javax.jms.Session;
+
 @Component
 public class Receiver {
     @Autowired
     ConfigurableApplicationContext context;
 
+    private static int attempts = 0;
+
     @JmsListener(destination = "mailbox-destination", containerFactory = "myJmsContainerFactory")
-    public void receiveMessage(String message) {
+    public void receiveMessage(String message, Session session) {
+//        if(attempts < 5) {
+//            attempts++;
+//            throw new RuntimeException("trying out transactions in JMS");
+//        }
         System.out.println("<<< Received message <" + message + ">");
-        context.close();
+  //      context.close();
         
     }
 }
