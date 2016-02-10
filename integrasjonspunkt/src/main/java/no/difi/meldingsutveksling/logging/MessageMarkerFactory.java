@@ -34,7 +34,7 @@ public class MessageMarkerFactory {
      * Creates LogstashMarker with conversation id from the putMessageRequest that will appear
      * in the logs when used.
      *
-     * @param requestWrapper request that contains journal post id, receiver party number, sender party number and conversation id
+     * @param requestAdapter request that contains journal post id, receiver party number, sender party number and conversation id
      * @return LogstashMarker
      */
     public static LogstashMarker markerFrom(PutMessageRequestWrapper requestAdapter) {
@@ -71,8 +71,8 @@ public class MessageMarkerFactory {
         return Markers.append(SENDER_ORG_NUMBER, senderPartynumber);
     }
 
-    private static LogstashMarker responseTypeMarker(String senderPartynumber) {
-        return Markers.append(RESPONSE_TYPE, senderPartynumber);
+    private static LogstashMarker responseTypeMarker(String responseType) {
+        return Markers.append(RESPONSE_TYPE, responseType);
     }
 
     private static LogstashMarker responseMessageCodeMarker(String senderPartynumber) {
