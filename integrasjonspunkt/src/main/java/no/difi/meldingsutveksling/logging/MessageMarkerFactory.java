@@ -75,12 +75,12 @@ public class MessageMarkerFactory {
         return Markers.append(RESPONSE_TYPE, responseType);
     }
 
-    private static LogstashMarker responseMessageCodeMarker(String senderPartynumber) {
-        return Markers.append(RESPONSE_STATUS_MESSAGE_CODE, senderPartynumber);
+    private static LogstashMarker responseMessageCodeMarker(String statusMessageCode) {
+        return Markers.append(RESPONSE_STATUS_MESSAGE_CODE, statusMessageCode);
     }
 
-    private static LogstashMarker responseMessageTextMarker(String senderPartynumber) {
-        return Markers.append(RESPONSE_STATUS_MESSAGE_TEXT, senderPartynumber);
+    private static LogstashMarker responseMessageTextMarker(String statusMessageText) {
+        return Markers.append(RESPONSE_STATUS_MESSAGE_TEXT, statusMessageText);
     }
 
 
