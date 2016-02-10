@@ -149,7 +149,7 @@ public class QueueTest {
         verify(queueDaoMock, times(1)).updateEntry(args.capture());
 
         QueueElement actual = args.getValue();
-        assertEquals(actual.getNumberAttempts(), actual.getRule().getMaxAttempt()-1); //-1 because first attempt is 0 {0,1,2,3}
+        assertEquals(actual.getNumberAttempts(), actual.getRule().getMaxAttempt());
         assertEquals(actual.getStatus(), Status.RETRY);
     }
 

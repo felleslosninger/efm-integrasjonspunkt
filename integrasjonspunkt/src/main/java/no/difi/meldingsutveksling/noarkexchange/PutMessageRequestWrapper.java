@@ -13,8 +13,12 @@ public class PutMessageRequestWrapper {
         this.requestType = requestType;
     }
 
+    public boolean hasNOARKPayload() {
+        return requestType.getPayload() != null;
+    }
+
     public String getSenderPartynumber() {
-        if(hasSenderPartyNumber()) {
+        if (hasSenderPartyNumber()) {
             return requestType.getEnvelope().getSender().getOrgnr();
         } else {
             return "";

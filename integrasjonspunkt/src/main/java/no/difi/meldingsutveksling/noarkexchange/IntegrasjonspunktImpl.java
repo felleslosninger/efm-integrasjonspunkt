@@ -10,13 +10,10 @@ import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageContext;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategy;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategyFactory;
-import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageRequestType;
-import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageResponseType;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import no.difi.meldingsutveksling.noarkexchange.schema.SOAPport;
+import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.queue.service.Queue;
 import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
+import no.difi.meldingsutveksling.services.CertificateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -87,7 +84,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
         try {
             adresseregister.getCertificate(organisasjonsnummer);
             return true;
-        } catch (Exception e) {
+        } catch (CertificateException e) {
             return false;
         }
     }
@@ -114,7 +111,6 @@ public class IntegrasjonspunktImpl implements SOAPport {
         }
         else {
             Audit.info("Queue is disabled. Message will be sent immediatly", markerFrom(message));
-
             MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, configuration.getOrganisationNumber());
 
             if (hasAdresseregisterCertificate(request.getEnvelope().getReceiver().getOrgnr())) {

@@ -3,9 +3,6 @@ package no.difi.meldingsutveksling.logging;
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.FileReference;
-import no.difi.meldingsutveksling.domain.sbdh.Document;
-import no.difi.meldingsutveksling.domain.sbdh.Partner;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.noarkexchange.JournalpostId;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
@@ -34,11 +31,15 @@ public class MessageMarkerFactory {
      * @return LogstashMarker
      */
     public static LogstashMarker markerFrom(PutMessageRequestWrapper requestAdapter) {
-        LogstashMarker journalPostIdMarker = journalPostIdMarker(JournalpostId.fromPutMessage(requestAdapter).value());
         final LogstashMarker receiverMarker = receiverMarker(requestAdapter.getRecieverPartyNumber());
         final LogstashMarker senderMarker = senderMarker(requestAdapter.getSenderPartynumber());
         final LogstashMarker conversationIdMarker = conversationIdMarker(requestAdapter.getConversationId());
-        return conversationIdMarker.and(journalPostIdMarker).and(receiverMarker).and(senderMarker);
+        LogstashMarker logMarker = conversationIdMarker.and(receiverMarker).and(senderMarker);
+        if(requestAdapter.hasNOARKPayload()) {
+            LogstashMarker journalPostIdMarker = journalPostIdMarker(JournalpostId.fromPutMessage(requestAdapter).value());
+            logMarker = logMarker.and(journalPostIdMarker);
+        }
+        return logMarker;
     }
 
     private static LogstashMarker conversationIdMarker(String conversationId) {
