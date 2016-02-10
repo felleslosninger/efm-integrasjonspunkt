@@ -14,7 +14,6 @@ import org.springframework.context.annotation.Profile;
 @Profile("dev")
 public class ElmaDevConfig {
 
-    no.difi.vefa.peppol.lookup.
     public static final String ELMA_ENDPOINT_KEY = "bdxr-transport-altinn-dev";
     private static final TransportProfile TRANSPORT_PROFILE_ALTINN_DEV = new TransportProfile(ELMA_ENDPOINT_KEY);
 
