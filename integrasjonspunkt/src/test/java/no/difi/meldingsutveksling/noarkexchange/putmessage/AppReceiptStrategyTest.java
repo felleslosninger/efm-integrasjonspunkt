@@ -33,7 +33,6 @@ public class AppReceiptStrategyTest {
 
     /**
      * The AppReceiptStrategy should send the receipt back to the sender
-     * and return an OK response type
      */
     @Test
     public void appReceiptsShouldBeReturnedToSender() {
