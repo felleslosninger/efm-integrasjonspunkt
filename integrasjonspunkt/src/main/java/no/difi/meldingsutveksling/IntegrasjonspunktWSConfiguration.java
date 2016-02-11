@@ -18,37 +18,10 @@ import org.springframework.transaction.jta.JtaTransactionManager;
 import javax.jms.ConnectionFactory;
 import javax.jms.Session;
 
-
-/**
- * @author Dervis M, 13/08/15.
- */
-
 @Configuration
 @ComponentScan("no.difi")
 @ImportResource({"classpath*:rest-servlet.xml"})
-@EnableJms
-@EnableConfigurationProperties(ActiveMQProperties.class)
 public class IntegrasjonspunktWSConfiguration{
 
-    @Bean
-    ConnectionFactory jmsConnectionFactory(ActiveMQProperties properties) {
-        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("vm://localhost");
-
-        RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
-     //   redeliveryPolicy.setMaximumRedeliveries(2);
-        redeliveryPolicy.setMaximumRedeliveryDelay(5000L);
-        redeliveryPolicy.setUseExponentialBackOff(true);
-        connectionFactory.setRedeliveryPolicy(redeliveryPolicy);
-
-        return connectionFactory;
-    }
-
-    @Bean
-    DefaultJmsListenerContainerFactory myJmsContainerFactory(ActiveMQConnectionFactory connectionFactory) {
-        DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-        factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
-        factory.setConnectionFactory(connectionFactory);
-        return factory;
-    }
 
 }

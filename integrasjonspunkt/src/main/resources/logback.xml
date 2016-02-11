@@ -27,6 +27,11 @@
                     <destination>REMEMBER TO CHANGE THIS</destination>
                 </then>
             </if>
+            <if condition='property("spring.profiles.active").isEmpty()'>
+                <then>
+                    <destination>integrasjonstest-miif.difi.local:8300</destination>
+                </then>
+            </if>
             <!-- encoder is required -->
             <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
         </appender>

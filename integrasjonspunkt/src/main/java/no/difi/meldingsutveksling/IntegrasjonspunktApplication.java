@@ -45,13 +45,10 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
             System.out.println("Sending a new Message.... -> ");
             JmsTemplate jmsTemplate = (JmsTemplate) context.getBean("jmsTemplate");
             jmsTemplate.setDeliveryPersistent(true);
-            //jmsTemplate.setTimeToLive();
             jmsTemplate.setSessionTransacted(true);
-            //jmsTemplate.setDeliveryMode(DeliveryMode.PERSISTENT);
-            //jmsTemplate.setExplicitQosEnabled(true);
 
 
-//            jmsTemplate.send("mailbox-destination", messageCreator);
+            jmsTemplate.send("mailbox-destination", messageCreator);
 
 //            MessageCreator messageCreator = new MessageCreator() {
 //                @Override
