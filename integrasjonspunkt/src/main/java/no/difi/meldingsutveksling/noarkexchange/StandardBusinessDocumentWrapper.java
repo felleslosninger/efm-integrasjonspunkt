@@ -55,6 +55,7 @@ public class StandardBusinessDocumentWrapper {
                 return scope;
             }
         }
+
         return new Scope();
     }
 
