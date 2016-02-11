@@ -52,7 +52,8 @@ class AppReceiptPutMessageStrategy implements PutMessageStrategy {
             AppReceiptType receipt = r.getValue();
             if (receipt.getType().equals("OK")) {
                 Audit.info("Received Appreceipt OK returning document to sender." + wrapper.getRecieverPartyNumber(), markerFrom(wrapper));
-                context.getMessageSender().sendMessage(request);
+                wrapper.swapSenderAndReceiver();
+                context.getMessageSender().sendMessage(wrapper.getRequest());
             }
             return createOkResponse();
         } catch (JAXBException e) {

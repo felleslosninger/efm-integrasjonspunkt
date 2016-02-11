@@ -38,14 +38,14 @@ public class MessageMarkerFactory {
      * @return LogstashMarker
      */
     public static LogstashMarker markerFrom(PutMessageRequestWrapper requestAdapter) {
-        LogstashMarker journalPostIdMarker = journalPostIdMarker(JournalpostId.fromPutMessage(requestAdapter).value());
+        LogstashMarker journalPostIdMarker = journalPostIdMarker(requestAdapter.getJournalPostId());
         final LogstashMarker receiverMarker = receiverMarker(requestAdapter.getRecieverPartyNumber());
         final LogstashMarker senderMarker = senderMarker(requestAdapter.getSenderPartynumber());
         final LogstashMarker conversationIdMarker = conversationIdMarker(requestAdapter.getConversationId());
         return conversationIdMarker.and(journalPostIdMarker).and(receiverMarker).and(senderMarker);
     }
 
-    public static LogstashMarker markerFrom(PutMessageResponseType response) {
+     public static LogstashMarker markerFrom(PutMessageResponseType response) {
         final LogstashMarker marker = responseTypeMarker(response.getResult().getType());
         for (StatusMessageType s : response.getResult().getMessage()) {
             marker.and(responseMessageTextMarker(s.getText()));

@@ -72,4 +72,10 @@ public class PutMessageRequestWrapper {
     public String getJournalPostId() {
         return JournalpostId.fromPutMessage(this).value();
     }
+
+    public void swapSenderAndReceiver() {
+        final String sender = getSenderPartynumber() ;
+        setSenderPartyNumber(getRecieverPartyNumber());
+        setReceiverPartyNumber(sender);
+    }
 }
