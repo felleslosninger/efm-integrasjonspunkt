@@ -59,7 +59,7 @@ public class IntegrasjonspunktConfiguration {
 
     @Autowired
     public IntegrasjonspunktConfiguration(Environment environment) throws MeldingsUtvekslingRequiredPropertyException {
-        this.environment = environment;
+        this.environment = new WhiteSpaceTrimmingEnvironmentDecorator(environment);
 
         validateProperty(KEY_NOARKSYSTEM_ENDPOINT);
         validateProperty(KEY_ADRESSEREGISTER_ENDPOINT);
@@ -199,4 +199,6 @@ public class IntegrasjonspunktConfiguration {
     private String getNoarksystemDomain() {
         return environment.getProperty(KEY_NOARKSYSTEM_DOMAIN);
     }
+
+
 }
