@@ -16,6 +16,8 @@ public class WhiteSpaceTrimmingEnvironmentDecoratorTest {
     public static final String LEADING = "leading";
     public static final String TRAILING = "trailing";
     public static final String NULL = "null";
+    public static final String DEFAULT = "default";
+    public static final String DOES_NOT_EXIST = "does not exist";
     private Map<String, String> sampleValues = new HashMap<>();
     private Environment environment;
 
@@ -30,6 +32,7 @@ public class WhiteSpaceTrimmingEnvironmentDecoratorTest {
         WhiteSpaceTrimmingEnvironmentDecorator wst = new WhiteSpaceTrimmingEnvironmentDecorator(environment);
         assertEquals(LEADING, wst.getProperty(LEADING));
         assertEquals(TRAILING, wst.getProperty(TRAILING));
+        assertEquals(DEFAULT, wst.getProperty(DOES_NOT_EXIST, DEFAULT));
         assertNull(wst.getProperty(NULL));
     }
 
