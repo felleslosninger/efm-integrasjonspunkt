@@ -32,7 +32,7 @@ public class AppReceiptStrategyTest {
     }
 
     /**
-     * The AppReceiptStrategy should only log the message to the eventlog,
+     * The AppReceiptStrategy should send the receipt back to the sender
      * and return an OK response type
      */
     @Test
@@ -42,7 +42,7 @@ public class AppReceiptStrategyTest {
         request.setPayload(receiptPayload);
 
         strategy.putMessage(request);
-        // message sender should not be called for receipts, only log
+
         verify(ctx.getMessageSender(), atLeastOnce()).sendMessage(any(PutMessageRequestType.class));
     }
 }
