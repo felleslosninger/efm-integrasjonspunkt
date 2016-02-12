@@ -1,11 +1,7 @@
 package no.difi.meldingsutveksling.noark;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
-import no.difi.meldingsutveksling.noarkexchange.EphorteClient;
-import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
-import no.difi.meldingsutveksling.noarkexchange.NoarkClientSettings;
-import no.difi.meldingsutveksling.noarkexchange.P360Client;
-import no.difi.meldingsutveksling.noarkexchange.WebServiceTemplateFactory;
+import no.difi.meldingsutveksling.noarkexchange.*;
 
 /**
  * Factory to create NoarkClient for communicating correctly with specific Noark systems: ie: P360, ePhorte, Akoz
@@ -31,9 +27,9 @@ public class NoarkClientFactory {
 
         WebServiceTemplateFactory templateFactory = settings.createTemplateFactory();
 
-        if(E_PHORTE.equals(noarkType)) {
+        if (E_PHORTE.equalsIgnoreCase(noarkType)) {
             return new EphorteClient(settings, templateFactory);
-        } else if(P360.equals(noarkType)) {
+        } else if (P360.equalsIgnoreCase(noarkType)) {
             return new P360Client(settings, templateFactory);
         } else {
             throw new UnknownArchiveSystemException(noarkType);
