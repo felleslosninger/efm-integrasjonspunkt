@@ -1,11 +1,8 @@
 package no.difi.meldingsutveksling;
 
 import com.sun.xml.ws.transport.http.servlet.WSSpringServlet;
-import org.apache.activemq.broker.Broker;
-import org.apache.activemq.broker.BrokerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.solr.SolrAutoConfiguration;
@@ -13,11 +10,6 @@ import org.springframework.boot.context.embedded.ServletRegistrationBean;
 import org.springframework.boot.context.web.SpringBootServletInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.core.MessageCreator;
-import org.springframework.jms.listener.DefaultMessageListenerContainer;
-
-import javax.jms.*;
 
 @SpringBootApplication(exclude = {SolrAutoConfiguration.class})
 public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
@@ -34,35 +26,7 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
     public static void main(String[] args) {
         try {
             ConfigurableApplicationContext context = SpringApplication.run(IntegrasjonspunktApplication.class, args);
-
-            MessageCreator messageCreator = new MessageCreator() {
-                @Override
-                public Message createMessage(Session session) throws JMSException {
-                    return session.createTextMessage("Hello world from JMS!");
-                }
-            };
-
-            System.out.println("Sending a new Message.... -> ");
-            JmsTemplate jmsTemplate = (JmsTemplate) context.getBean("jmsTemplate");
-            jmsTemplate.setDeliveryPersistent(true);
-            jmsTemplate.setSessionTransacted(true);
-
-
-            jmsTemplate.send("mailbox-destination", messageCreator);
-
-//            MessageCreator messageCreator = new MessageCreator() {
-//                @Override
-//                public Message createMessage(Session session) throws JMSException {
-//                    return session.createTextMessage("Hello world from JMS!");
-//                }
-//            };
-//
-//            JmsTemplate jmsTemplate = context.getBean(JmsTemplate.class);
-//            System.out.println("Sending a new Message.... -> ");
-//            jmsTemplate.send("mailbox-destination", messageCreator);
-
-        }
-        catch (SecurityException se) {
+        } catch (SecurityException se) {
             String message =
                     "Failed startup. Possibly unlimited security policy files that is not updated." +
                             "/r/nTo fix this, download and replace policy files for the apropriate java version (found in ${java.home}/jre/lib/security/)" +

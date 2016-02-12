@@ -16,6 +16,7 @@ import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
+import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import no.difi.vefa.peppol.common.model.Endpoint;
 import no.difi.vefa.peppol.lookup.api.LookupException;
@@ -53,25 +54,13 @@ public class MessagePolling {
     IntegrasjonspunktConfiguration config;
 
     @Autowired
-    IntegrajonspunktReceiveImpl integrajonspunktReceive;
+    InternalQueue internalQueue;
 
     @Autowired
     ELMALookup elmaLookup;
 
     @Autowired
     private JmsTemplate jmsTemplate;
-
-    private static JAXBContext jaxbContextdomain;
-
-    static {
-        try {
-            jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class, Kvittering.class);
-            jaxbContextdomain = JAXBContext.newInstance(Document.class, Payload.class, Kvittering.class);
-        } catch (JAXBException e) {
-            e.printStackTrace();
-        }
-    }
-    private static JAXBContext jaxbContext;
 
     @Scheduled(fixedRate = 15000)
     public void checkForNewMessages() {
@@ -96,43 +85,7 @@ public class MessagePolling {
             Audit.info("Downloading message", markerFrom(reference));
             Document document = client.download(new DownloadRequest(reference.getValue(), config.getOrganisationNumber()));
 
-            MessageCreator messageCreator = new MessageCreator() {
-                @Override
-                public Message createMessage(Session session) throws JMSException {
-                    return session.createTextMessage("Hello world from JMS!");
-                }
-            };
-
-            System.out.println("Sending a new Message.... -> ");
-            jmsTemplate.send("mailbox-destination", messageCreator);
-
-            forwardToNoark(document);
-        }
-    }
-
-    private void forwardToNoark(Document document) {
-        try {
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            JAXBElement<Document> d = new ObjectFactory().createStandardBusinessDocument(document);
-
-            jaxbContextdomain.createMarshaller().marshal(d, os);
-            byte[] tmp = os.toByteArray();
-
-            JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument> toDocument
-                    = (JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument>)
-                    jaxbContext.createUnmarshaller().unmarshal(new ByteArrayInputStream(tmp));
-
-            final StandardBusinessDocument standardBusinessDocument = toDocument.getValue();
-            Audit.info("Successfully extracted standard business document. Forwarding document to NOARK system...", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));
-            try {
-                integrajonspunktReceive.forwardToNoarkSystem(standardBusinessDocument);
-            } catch (MessageException e) {
-                Audit.error("Could not forward document to NOARK system...", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));
-                logger.error(markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)), e.getStatusMessage().getTechnicalMessage(), e);
-            }
-        } catch (JAXBException e) {
-            Audit.error("Could not forward document to NOARK system... due to a technical error");
-            throw new MeldingsUtvekslingRuntimeException("Could not forward document to archive system", e);
+            internalQueue.put(document);
         }
     }
 }
