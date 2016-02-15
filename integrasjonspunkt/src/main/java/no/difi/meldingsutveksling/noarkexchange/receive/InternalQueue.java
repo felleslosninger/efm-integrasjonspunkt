@@ -8,9 +8,11 @@ import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
+import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +45,7 @@ import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom
  */
 @Component
 public class InternalQueue {
+    private static final String ALTINN = "altinn";
     private static int attempts = 0;
     Logger logger = LoggerFactory.getLogger(InternalQueue.class);
 
@@ -53,24 +56,37 @@ public class InternalQueue {
     @Autowired
     private IntegrajonspunktReceiveImpl integrajonspunktReceive;
 
+    @Autowired
+    private IntegrasjonspunktImpl integrasjonspunktSend;
 
-    private static JAXBContext jaxbContextdomain;
+    private final DocumentConverter documentConverter = new DocumentConverter();
+
     private static JAXBContext jaxbContext;
+
+    private PutMessageRequestConverter putMessageRequestConverter = new PutMessageRequestConverter();
 
     static {
         try {
-            jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class, Kvittering.class);
-            jaxbContextdomain = JAXBContext.newInstance(Document.class, Payload.class, Kvittering.class);
+            jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Document.class, Payload.class, Kvittering.class);
         } catch (JAXBException e) {
             e.printStackTrace();
         }
     }
 
+
     @JmsListener(destination = DESTINATION, containerFactory = "myJmsContainerFactory")
     public void receiveMessage(byte[] message, Session session) {
-        Document document = new DocumentConverter().unmarshallFrom(message);
-        System.out.println("<<< Received message <" + document + ">");
+        Document document = documentConverter.unmarshallFrom(message);
         forwardToNoark(document);
+    }
+
+    @JmsListener(destination = ALTINN, containerFactory = "myJmsContainerFactory")
+    public void putMessage(byte[] message, Session session) {
+        Document document = documentConverter.unmarshallFrom(message);
+    }
+
+    public void putMessage(PutMessageRequestType request) {
+        jmsTemplate.convertAndSend(ALTINN, putMessageRequestConverter.marshallToBytes(request));
     }
 
     public void put(String document) {
@@ -80,7 +96,7 @@ public class InternalQueue {
     public void put(Document document) {
 //        jmsTemplate.setDeliveryPersistent(true);
 //        jmsTemplate.setSessionTransacted(true);
-        jmsTemplate.convertAndSend(DESTINATION, new DocumentConverter().marshallToBytes(document));
+        jmsTemplate.convertAndSend(DESTINATION,  documentConverter.marshallToBytes(document));
     }
 
     private void forwardToNoark(Document document) {
@@ -88,7 +104,7 @@ public class InternalQueue {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             JAXBElement<Document> d = new ObjectFactory().createStandardBusinessDocument(document);
 
-            jaxbContextdomain.createMarshaller().marshal(d, os);
+            jaxbContext.createMarshaller().marshal(d, os);
             byte[] tmp = os.toByteArray();
 
             JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument> toDocument
