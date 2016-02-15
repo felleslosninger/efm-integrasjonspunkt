@@ -14,9 +14,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
 /**
- * Test for hte AppReceiptStrategy
- *
- * @author Glenn Bech
+ * Test for the AppReceiptStrategy
  */
 public class AppReceiptStrategyTest {
 
@@ -41,6 +39,12 @@ public class AppReceiptStrategyTest {
     @Test
     public void appReceiptsShouldBeReturnedToSender() {
         AppReceiptPutMessageStrategy strategy = new AppReceiptPutMessageStrategy(ctx);
+        PutMessageRequestType request = createPutMessageRequestType();
+        strategy.putMessage(request);
+        verify(ctx.getMessageSender(), atLeastOnce()).sendMessage(any(PutMessageRequestType.class));
+    }
+
+    private PutMessageRequestType createPutMessageRequestType() {
         PutMessageRequestType request = new PutMessageRequestType();
         final EnvelopeType envelope = new EnvelopeType();
         AddressType receiver = new AddressType();
@@ -53,9 +57,6 @@ public class AppReceiptStrategyTest {
 
         request.setEnvelope(envelope);
         request.setPayload(receiptPayload);
-
-        strategy.putMessage(request);
-
-        verify(ctx.getMessageSender(), atLeastOnce()).sendMessage(any(PutMessageRequestType.class));
+        return request;
     }
 }

@@ -49,6 +49,7 @@ import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom
 public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
 
     public static final String OKEY_TYPE = "OK";
+    public static final String OK_TYPE = OKEY_TYPE;
     private static Logger logger = LoggerFactory.getLogger(IntegrasjonspunktImpl.class);
     private static final int MAGIC_NR = 1024;
     private static final String SBD_NAMESPACE = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader";
@@ -123,7 +124,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
     private void forwardToNoarkSystemAndSendReceipts(StandardBusinessDocumentWrapper inputDocument, PutMessageRequestType putMessageRequestType) {
         PutMessageResponseType response = localNoark.sendEduMelding(putMessageRequestType);
         AppReceiptType result = response.getResult();
-        if (result.getType().equals(OKEY_TYPE)) {
+        if (result.getType().equals(OK_TYPE)) {
             Audit.info("Document successfully sent to NOARK system. Sending receipt...", markerFrom(response));
             sendReceiptOpen(inputDocument);
             logEvent(inputDocument, ProcessState.BEST_EDU_SENT);

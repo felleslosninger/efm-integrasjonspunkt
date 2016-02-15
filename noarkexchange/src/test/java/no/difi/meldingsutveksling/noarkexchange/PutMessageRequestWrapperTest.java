@@ -14,6 +14,14 @@ public class PutMessageRequestWrapperTest {
 
     @Test
     public void testSwapSenderAndReceiver() {
+        PutMessageRequestType pmrt = createPutMessageRequestType();
+        PutMessageRequestWrapper w = new PutMessageRequestWrapper(pmrt);
+        w.swapSenderAndReceiver();
+        assertEquals(RECEIVER, w.getRequest().getEnvelope().getSender().getOrgnr());
+        assertEquals(SENDER, w.getRequest().getEnvelope().getReceiver().getOrgnr());
+    }
+
+    private PutMessageRequestType createPutMessageRequestType() {
         PutMessageRequestType pmrt = new PutMessageRequestType();
         AddressType sender = new AddressType();
         sender.setOrgnr(SENDER);
@@ -23,9 +31,6 @@ public class PutMessageRequestWrapperTest {
         pmrt.setEnvelope(env);
         pmrt.getEnvelope().setSender(sender);
         pmrt.getEnvelope().setReceiver(receiver);
-        PutMessageRequestWrapper w = new PutMessageRequestWrapper(pmrt);
-        w.swapSenderAndReceiver();
-        assertEquals(RECEIVER, w.getRequest().getEnvelope().getSender().getOrgnr());
-        assertEquals(SENDER, w.getRequest().getEnvelope().getReceiver().getOrgnr());
+        return pmrt;
     }
 }
