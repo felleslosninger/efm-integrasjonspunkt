@@ -19,14 +19,10 @@ import java.util.Date;
 import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.queue.messageutil.QueueMessageFile.FILE_PATH;
 import static no.difi.meldingsutveksling.queue.objectmother.QueueObjectMother.createQueue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class QueueTest {

@@ -42,15 +42,7 @@ public class KvitteringFactory {
         }
     }
 
-    /**
-     * Creates an Åpningskvittering
-     *
-     * @param receiverOrgNumber
-     * @param senderOrgNumber
-     * @param journalPostId
-     * @param conversationId
-     * @param keyPair
-     */
+
     public static Document createAapningskvittering(String receiverOrgNumber, String senderOrgNumber,
                                                     String journalPostId, String conversationId, KeyPair keyPair) {
         Kvittering k = new Kvittering();
@@ -89,5 +81,4 @@ public class KvitteringFactory {
         }
         return toDomainDocument(signedXmlDoc);
     }
-
 }
