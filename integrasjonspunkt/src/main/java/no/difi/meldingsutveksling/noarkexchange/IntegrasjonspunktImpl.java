@@ -12,7 +12,6 @@ import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategy;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
-import no.difi.meldingsutveksling.queue.service.Queue;
 import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
 import no.difi.meldingsutveksling.services.CertificateException;
 import org.slf4j.Logger;
@@ -23,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.xml.ws.BindingType;
-import java.io.IOException;
 
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
@@ -61,9 +59,6 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
     @Autowired
     private InternalQueue internalQueue;
-
-    @Autowired
-    private Queue queue;
 
     @Autowired
     private IntegrasjonspunktConfiguration configuration;
