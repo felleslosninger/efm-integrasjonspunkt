@@ -19,12 +19,17 @@
             </if>
             <if condition='property("spring.profiles.active").contains("staging")'>
                 <then>
-                    <destination>192.81.220.89:5044</destination>
+                    <destination>test-meldingsutveksling-app01.difi.local:5044</destination>
                 </then>
             </if>
             <if condition='property("spring.profiles.active").contains("production")'>
                 <then>
                     <destination>REMEMBER TO CHANGE THIS</destination>
+                </then>
+            </if>
+            <if condition='property("spring.profiles.active").isEmpty()'>
+                <then>
+                    <destination>integrasjonstest-miif.difi.local:8300</destination>
                 </then>
             </if>
             <!-- encoder is required -->
