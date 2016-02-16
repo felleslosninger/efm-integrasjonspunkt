@@ -2,11 +2,7 @@ package no.difi.meldingsutveksling.elma;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.vefa.peppol.common.api.EndpointNotFoundException;
-import no.difi.vefa.peppol.common.model.DocumentIdentifier;
-import no.difi.vefa.peppol.common.model.Endpoint;
-import no.difi.vefa.peppol.common.model.ParticipantIdentifier;
-import no.difi.vefa.peppol.common.model.ProcessIdentifier;
-import no.difi.vefa.peppol.common.model.TransportProfile;
+import no.difi.vefa.peppol.common.model.*;
 import no.difi.vefa.peppol.lookup.LookupClient;
 import no.difi.vefa.peppol.lookup.api.LookupException;
 import no.difi.vefa.peppol.security.api.PeppolSecurityException;

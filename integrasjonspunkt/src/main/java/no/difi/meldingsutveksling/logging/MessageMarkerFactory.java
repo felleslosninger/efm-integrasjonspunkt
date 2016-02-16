@@ -3,16 +3,18 @@ package no.difi.meldingsutveksling.logging;
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.FileReference;
-import no.difi.meldingsutveksling.noarkexchange.JournalpostId;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
+import no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType;
+
 
 /**
  * Example usage:
  * import static no.difi.meldingsutveksling.logging.ConversationIdMarkerFactory.markerFrom;
- *
+ * <p/>
  * ...
- *
+ * <p/>
  * log.error(markerFrom(message), "putting message");
  */
 public class MessageMarkerFactory {
@@ -23,6 +25,11 @@ public class MessageMarkerFactory {
     private static final String SENDER_ORG_NUMBER = "sender_org_number";
     public static final String ALTINN_RECEIPT_ID = "altinn-receipt-id";
 
+    public static final String RESPONSE_TYPE = "response-type";
+    public static final String RESPONSE_STATUS_MESSAGE_TEXT = "response-message-text";
+    public static final String RESPONSE_STATUS_MESSAGE_CODE = "response-message-code";
+
+
     /**
      * Creates LogstashMarker with conversation id from the putMessageRequest that will appear
      * in the logs when used.
@@ -31,16 +38,22 @@ public class MessageMarkerFactory {
      * @return LogstashMarker
      */
     public static LogstashMarker markerFrom(PutMessageRequestWrapper requestAdapter) {
+        LogstashMarker journalPostIdMarker = journalPostIdMarker(requestAdapter.getJournalPostId());
         final LogstashMarker receiverMarker = receiverMarker(requestAdapter.getRecieverPartyNumber());
         final LogstashMarker senderMarker = senderMarker(requestAdapter.getSenderPartynumber());
         final LogstashMarker conversationIdMarker = conversationIdMarker(requestAdapter.getConversationId());
-        LogstashMarker logMarker = conversationIdMarker.and(receiverMarker).and(senderMarker);
-        if(requestAdapter.hasNOARKPayload()) {
-            LogstashMarker journalPostIdMarker = journalPostIdMarker(JournalpostId.fromPutMessage(requestAdapter).value());
-            logMarker = logMarker.and(journalPostIdMarker);
-        }
-        return logMarker;
+        return conversationIdMarker.and(journalPostIdMarker).and(receiverMarker).and(senderMarker);
     }
+
+     public static LogstashMarker markerFrom(PutMessageResponseType response) {
+        final LogstashMarker marker = responseTypeMarker(response.getResult().getType());
+        for (StatusMessageType s : response.getResult().getMessage()) {
+            marker.and(responseMessageTextMarker(s.getText()));
+            marker.and(responseMessageCodeMarker(s.getCode()));
+        }
+        return marker;
+    }
+
 
     private static LogstashMarker conversationIdMarker(String conversationId) {
         return Markers.append(CONVERSATION_ID, conversationId);
@@ -57,6 +70,19 @@ public class MessageMarkerFactory {
     private static LogstashMarker senderMarker(String senderPartynumber) {
         return Markers.append(SENDER_ORG_NUMBER, senderPartynumber);
     }
+
+    private static LogstashMarker responseTypeMarker(String responseType) {
+        return Markers.append(RESPONSE_TYPE, responseType);
+    }
+
+    private static LogstashMarker responseMessageCodeMarker(String statusMessageCode) {
+        return Markers.append(RESPONSE_STATUS_MESSAGE_CODE, statusMessageCode);
+    }
+
+    private static LogstashMarker responseMessageTextMarker(String statusMessageText) {
+        return Markers.append(RESPONSE_STATUS_MESSAGE_TEXT, statusMessageText);
+    }
+
 
     /**
      * Creates LogstashMarker with conversation id from the StandardBusinessDocument that will appear

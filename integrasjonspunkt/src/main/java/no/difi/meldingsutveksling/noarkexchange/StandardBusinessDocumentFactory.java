@@ -88,13 +88,12 @@ public class StandardBusinessDocumentFactory {
         return new CreateAsice().createAsice(bestEduMessage, integrasjonspunktNokkel.getSignatureHelper(), avsender, mottaker);
     }
 
-    private byte[] marshall(PutMessageRequestType sender) {
+    private byte[] marshall(PutMessageRequestType message) {
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-            jaxbMarshaller.marshal(new ObjectFactory().createPutMessageRequest(sender), os);
+            jaxbMarshaller.marshal(new ObjectFactory().createPutMessageRequest(message), os);
         } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }

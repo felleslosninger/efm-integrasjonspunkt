@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
-import no.difi.meldingsutveksling.StandardBusinessDocumentConverter;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
@@ -17,14 +16,10 @@ import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessD
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.core.MessageCreator;
 import org.springframework.stereotype.Component;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
 import javax.jms.Session;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -51,7 +46,7 @@ public class InternalQueue {
 
     @Autowired
     JmsTemplate jmsTemplate;
-    private static final String DESTINATION = "mailbox-destination";
+    private static final String DESTINATION = "noark-destination";
 
     @Autowired
     private IntegrajonspunktReceiveImpl integrajonspunktReceive;
@@ -94,8 +89,6 @@ public class InternalQueue {
     }
 
     public void put(Document document) {
-//        jmsTemplate.setDeliveryPersistent(true);
-//        jmsTemplate.setSessionTransacted(true);
         jmsTemplate.convertAndSend(DESTINATION,  documentConverter.marshallToBytes(document));
     }
 
