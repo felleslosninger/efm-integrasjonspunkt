@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
-import no.difi.meldingsutveksling.StandardBusinessDocumentConverter;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
@@ -10,19 +9,14 @@ import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
-import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.core.MessageCreator;
 import org.springframework.stereotype.Component;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
 import javax.jms.Session;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -48,19 +42,17 @@ public class InternalQueue {
 
     @Autowired
     JmsTemplate jmsTemplate;
-    private static final String DESTINATION = "mailbox-destination";
+    private static final String DESTINATION = "noark-destination";
 
     @Autowired
     private IntegrajonspunktReceiveImpl integrajonspunktReceive;
 
 
-    private static JAXBContext jaxbContextdomain;
     private static JAXBContext jaxbContext;
 
     static {
         try {
-            jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class, Kvittering.class);
-            jaxbContextdomain = JAXBContext.newInstance(Document.class, Payload.class, Kvittering.class);
+            jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Document.class, Payload.class, Kvittering.class);
         } catch (JAXBException e) {
             e.printStackTrace();
         }
@@ -69,7 +61,6 @@ public class InternalQueue {
     @JmsListener(destination = DESTINATION, containerFactory = "myJmsContainerFactory")
     public void receiveMessage(byte[] message, Session session) {
         Document document = new DocumentConverter().unmarshallFrom(message);
-        System.out.println("<<< Received message <" + document + ">");
         forwardToNoark(document);
     }
 
@@ -78,8 +69,6 @@ public class InternalQueue {
     }
 
     public void put(Document document) {
-//        jmsTemplate.setDeliveryPersistent(true);
-//        jmsTemplate.setSessionTransacted(true);
         jmsTemplate.convertAndSend(DESTINATION, new DocumentConverter().marshallToBytes(document));
     }
 
@@ -88,7 +77,7 @@ public class InternalQueue {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             JAXBElement<Document> d = new ObjectFactory().createStandardBusinessDocument(document);
 
-            jaxbContextdomain.createMarshaller().marshal(d, os);
+            jaxbContext.createMarshaller().marshal(d, os);
             byte[] tmp = os.toByteArray();
 
             JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument> toDocument

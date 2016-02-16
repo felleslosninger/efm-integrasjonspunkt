@@ -24,7 +24,6 @@ public class JmsConfiguration {
     ConnectionFactory jmsConnectionFactory(ActiveMQProperties properties) {
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("vm://localhost");
         RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
-        //   redeliveryPolicy.setMaximumRedeliveries(2);
         redeliveryPolicy.setMaximumRedeliveryDelay(5000L);
         redeliveryPolicy.setUseExponentialBackOff(true);
         connectionFactory.setRedeliveryPolicy(redeliveryPolicy);
