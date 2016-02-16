@@ -24,6 +24,10 @@ public class PutMessageRequestConverterTest {
         converter.marshallToBytes(putMessageRequestType);
     }
 
-
+    @Test
+    public void testUnmarshallKvittering() throws Exception {
+        PutMessageRequestConverter converter = new PutMessageRequestConverter();
+        converter.unmarshallFrom(converter.marshallToBytes(putMessageRequestType));
+    }
 
 }

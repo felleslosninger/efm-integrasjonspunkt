@@ -10,6 +10,7 @@ import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageContext;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategy;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategyFactory;
+import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.queue.service.Queue;
 import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
@@ -59,6 +60,9 @@ public class IntegrasjonspunktImpl implements SOAPport {
     private NoarkClient mshClient;
 
     @Autowired
+    private InternalQueue internalQueue;
+
+    @Autowired
     private Queue queue;
 
     @Autowired
@@ -101,12 +105,9 @@ public class IntegrasjonspunktImpl implements SOAPport {
         }
 
         if (configuration.isQueueEnabled()) {
-            try {
-                queue.put(request);
-                Audit.info("Message is put on queue ready to be sent", markerFrom(message));
-            } catch (IOException e) {
-                log.error(e.getMessage(), e);
-            }
+            internalQueue.enqueueExternal(request);
+            Audit.info("Message is put on queue ready to be sent", markerFrom(message));
+
             return PutMessageResponseFactory.createOkResponse();
         }
         else {

@@ -6,18 +6,11 @@ import no.difi.meldingsutveksling.AltinnWsConfiguration;
 import no.difi.meldingsutveksling.DownloadRequest;
 import no.difi.meldingsutveksling.FileReference;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
-import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
-import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.elma.ELMALookup;
-import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
-import no.difi.meldingsutveksling.noarkexchange.MessageException;
-import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
-import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import no.difi.vefa.peppol.common.model.Endpoint;
 import no.difi.vefa.peppol.lookup.api.LookupException;
 import org.slf4j.Logger;
@@ -25,18 +18,9 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.core.MessageCreator;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.util.List;
 
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
@@ -85,7 +69,7 @@ public class MessagePolling {
             Audit.info("Downloading message", markerFrom(reference));
             Document document = client.download(new DownloadRequest(reference.getValue(), config.getOrganisationNumber()));
 
-            internalQueue.put(document);
+            internalQueue.enqueueNoark(document);
         }
     }
 }

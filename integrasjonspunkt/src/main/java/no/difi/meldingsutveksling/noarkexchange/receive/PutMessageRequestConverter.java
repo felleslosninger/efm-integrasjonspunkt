@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
+import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory;
@@ -38,4 +39,15 @@ public class PutMessageRequestConverter {
     }
 
 
+    public PutMessageRequestType unmarshallFrom(byte[] message) {
+        final ByteArrayInputStream is = new ByteArrayInputStream(message);
+        Unmarshaller unmarshaller;
+        try {
+            unmarshaller = jaxbContext.createUnmarshaller();
+            StreamSource source = new StreamSource(is);
+            return unmarshaller.unmarshal(source, PutMessageRequestType.class).getValue();
+        } catch (JAXBException e) {
+            throw new RuntimeException("Unable to create unmarshaller for " + PutMessageRequestType.class, e);
+        }
+    }
 }

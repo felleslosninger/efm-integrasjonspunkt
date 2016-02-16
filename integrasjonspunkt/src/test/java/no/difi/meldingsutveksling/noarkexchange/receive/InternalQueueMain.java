@@ -5,17 +5,11 @@ import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.autoconfigure.solr.SolrAutoConfiguration;
 import org.springframework.boot.context.web.SpringBootServletInitializer;
-import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.jms.core.JmsTemplate;
 
 /**
  * This class can be used to explore the JMS queue.
@@ -31,7 +25,7 @@ public class InternalQueueMain extends SpringBootServletInitializer {
         StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader();
         header.setHeaderVersion("some header version");
         document.setStandardBusinessDocumentHeader(header);
-        queue.put(document);
+        queue.enqueueNoark(document);
     }
 
     public static void main(String... args) {
