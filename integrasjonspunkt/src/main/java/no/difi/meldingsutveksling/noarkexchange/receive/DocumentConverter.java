@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.noarkexchange.receive;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
+import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -17,7 +18,7 @@ public class DocumentConverter {
 
     static {
         try {
-            ctx = JAXBContext.newInstance(Document.class, Payload.class);
+            ctx = JAXBContext.newInstance(Document.class, Payload.class, Kvittering.class);
         } catch (JAXBException e) {
             throw new RuntimeException("Could not initialize " + DocumentConverter.class, e);
         }

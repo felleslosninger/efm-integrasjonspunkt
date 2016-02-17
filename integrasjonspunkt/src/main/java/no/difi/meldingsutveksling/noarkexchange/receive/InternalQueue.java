@@ -7,8 +7,10 @@ import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
+import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,39 +39,65 @@ import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom
  */
 @Component
 public class InternalQueue {
+    private static final String EXTERNAL = "external";
     private static int attempts = 0;
     Logger logger = LoggerFactory.getLogger(InternalQueue.class);
 
     @Autowired
     JmsTemplate jmsTemplate;
-    private static final String DESTINATION = "noark-destination";
+    private static final String NOARK = "noark";
 
     @Autowired
     private IntegrajonspunktReceiveImpl integrajonspunktReceive;
 
+    @Autowired
+    private IntegrasjonspunktImpl integrasjonspunktSend;
 
+    private final DocumentConverter documentConverter = new DocumentConverter();
+
+    private static JAXBContext jaxbContextdomain;
     private static JAXBContext jaxbContext;
+
+    private PutMessageRequestConverter putMessageRequestConverter = new PutMessageRequestConverter();
 
     static {
         try {
-            jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Document.class, Payload.class, Kvittering.class);
+            jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class, Kvittering.class);
+            jaxbContextdomain = JAXBContext.newInstance(Document.class, Payload.class, Kvittering.class);
         } catch (JAXBException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Could not start internal queue: Failed to create JAXBContext", e);
         }
     }
 
-    @JmsListener(destination = DESTINATION, containerFactory = "myJmsContainerFactory")
-    public void receiveMessage(byte[] message, Session session) {
-        Document document = new DocumentConverter().unmarshallFrom(message);
+
+    @JmsListener(destination = NOARK, containerFactory = "myJmsContainerFactory")
+    public void noarkListener(byte[] message, Session session) {
+        Document document = documentConverter.unmarshallFrom(message);
         forwardToNoark(document);
     }
 
-    public void put(String document) {
-        jmsTemplate.convertAndSend(DESTINATION, document);
+    @JmsListener(destination = EXTERNAL, containerFactory = "myJmsContainerFactory")
+    public void externalListener(byte[] message, Session session) {
+        PutMessageRequestType requestType = putMessageRequestConverter.unmarshallFrom(message);
+        integrasjonspunktSend.sendMessage(requestType);
     }
 
-    public void put(Document document) {
-        jmsTemplate.convertAndSend(DESTINATION, new DocumentConverter().marshallToBytes(document));
+    /**
+     * Place the input parameter on external queue. The external queue sends messages to an external recipient
+     * using transport mechnism.
+     * @param request the input parameter from IntegrasjonspunktImpl
+     */
+    public void enqueueExternal(PutMessageRequestType request) {
+        jmsTemplate.convertAndSend(EXTERNAL, putMessageRequestConverter.marshallToBytes(request));
+    }
+
+    /**
+     * Places the input parameter on the NOARK queue. The NOARK queue sends messages from external sender to
+     * NOARK server.
+     * @param document the document as received by IntegrasjonspunktReceiveImpl from an external source
+     */
+    public void enqueueNoark(Document document) {
+        jmsTemplate.convertAndSend(NOARK,  documentConverter.marshallToBytes(document));
     }
 
     private void forwardToNoark(Document document) {
@@ -77,7 +105,7 @@ public class InternalQueue {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             JAXBElement<Document> d = new ObjectFactory().createStandardBusinessDocument(document);
 
-            jaxbContext.createMarshaller().marshal(d, os);
+            jaxbContextdomain.createMarshaller().marshal(d, os);
             byte[] tmp = os.toByteArray();
 
             JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument> toDocument
