@@ -18,9 +18,6 @@ public class PutMessageRequestConverter {
     static {
         try {
             jaxbContext = JAXBContext.newInstance("no.difi.meldingsutveksling.kvittering.xsd:no.difi.meldingsutveksling.noarkexchange.schema");
-
-
-            //PutMessageRequestType result = context.createUnmarshaller().unmarshal(new StreamSource(new ByteArrayInputStream(temp)), PutMessageRequestType.class).getValue();
         } catch (JAXBException e) {
             throw new RuntimeException("Could not create JAXBContext for " + PutMessageRequestType.class);
         }
@@ -31,7 +28,6 @@ public class PutMessageRequestConverter {
         try {
             Marshaller marshaller = jaxbContext.createMarshaller();
             marshaller.marshal(new JAXBElement<>(new QName("uri", "local"), PutMessageRequestType.class, request), os);
-           // marshaller.marshal(new ObjectFactory().createPutMessageRequest(request), os);
             return os.toByteArray();
         } catch (JAXBException e) {
             throw new RuntimeException("Unable to create unmarshaller for " + PutMessageRequestType.class, e);

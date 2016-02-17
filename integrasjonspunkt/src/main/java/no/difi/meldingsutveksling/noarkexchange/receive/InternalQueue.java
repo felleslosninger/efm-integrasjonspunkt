@@ -65,7 +65,7 @@ public class InternalQueue {
             jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class, Kvittering.class);
             jaxbContextdomain = JAXBContext.newInstance(Document.class, Payload.class, Kvittering.class);
         } catch (JAXBException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Could not start internal queue: Failed to create JAXBContext", e);
         }
     }
 
