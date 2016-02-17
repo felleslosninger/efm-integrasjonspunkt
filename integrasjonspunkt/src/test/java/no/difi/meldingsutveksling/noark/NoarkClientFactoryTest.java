@@ -14,13 +14,13 @@ import static org.mockito.Mockito.when;
 public class NoarkClientFactoryTest {
 
     @Test
-    public void config_is_case_insensitive() {
+    public void config_noarkType_is_case_insensitive() {
         NoarkClientSettings settings = new NoarkClientSettings("http://localhost", "username", "password");
         NoarkClientFactory f = new NoarkClientFactory(settings);
         IntegrasjonspunktConfiguration config = mock(IntegrasjonspunktConfiguration.class);
-        when(config.getNoarkType()).thenReturn("P360").thenReturn("p360");
+        when(config.getNoarkType()).thenReturn("P360").thenReturn("ePhOrTe");
         assertEquals(P360Client.class, f.from(config).getClass());
-        assertEquals(P360Client.class, f.from(config).getClass());
+        assertEquals(EphorteClient.class, f.from(config).getClass());
     }
 
     @Test
