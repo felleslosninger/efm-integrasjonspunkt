@@ -3,8 +3,8 @@ package no.difi.meldingsutveksling.noarkexchange;
 import no.difi.meldingsutveksling.PutMessageObjectMother;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-import no.difi.meldingsutveksling.queue.service.Queue;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -19,7 +19,7 @@ public class IntegrasjonspunktImplTest {
     @InjectMocks
     private IntegrasjonspunktImpl integrasjonspunkt = new IntegrasjonspunktImpl();
 
-    @Mock private Queue queueMock;
+    @Mock private InternalQueue queueMock;
     @Mock private IntegrasjonspunktConfiguration configurationMock;
 
     @Before
@@ -44,7 +44,7 @@ public class IntegrasjonspunktImplTest {
 
         integrasjonspunkt.putMessage(request);
 
-        verify(queueMock, times(1)).put(request);
+        verify(queueMock, times(1)).enqueueExternal(request);
     }
 
     @Test
@@ -54,7 +54,7 @@ public class IntegrasjonspunktImplTest {
 
         integrasjonspunkt.putMessage(request);
 
-        verify(queueMock, times(1)).put(request);
+        verify(queueMock, times(1)).enqueueExternal(request);
     }
 
     @Test
@@ -64,6 +64,6 @@ public class IntegrasjonspunktImplTest {
 
         integrasjonspunkt.putMessage(request);
 
-        verify(queueMock, times(1)).put(request);
+        verify(queueMock, times(1)).enqueueExternal(request);
     }
 }

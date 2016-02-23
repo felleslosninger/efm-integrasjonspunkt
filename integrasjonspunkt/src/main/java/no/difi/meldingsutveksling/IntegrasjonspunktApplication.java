@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.solr.SolrAutoConfiguration;
 import org.springframework.boot.context.embedded.ServletRegistrationBean;
 import org.springframework.boot.context.web.SpringBootServletInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication(exclude = {SolrAutoConfiguration.class})
@@ -24,9 +25,8 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
         try {
-            SpringApplication.run(IntegrasjonspunktApplication.class, args);
-        }
-        catch (SecurityException se) {
+            ConfigurableApplicationContext context = SpringApplication.run(IntegrasjonspunktApplication.class, args);
+        } catch (SecurityException se) {
             String message =
                     "Failed startup. Possibly unlimited security policy files that is not updated." +
                             "/r/nTo fix this, download and replace policy files for the apropriate java version (found in ${java.home}/jre/lib/security/)" +

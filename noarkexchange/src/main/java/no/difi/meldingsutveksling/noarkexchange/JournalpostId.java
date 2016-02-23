@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
@@ -23,7 +22,7 @@ import static org.apache.commons.lang.StringEscapeUtils.unescapeHtml;
  *
  * @author Glenn Bech
  */
-public class JournalpostId {
+class JournalpostId {
 
     private String jpId;
 
@@ -38,7 +37,7 @@ public class JournalpostId {
         try {
             XPathExpression expression = xPath.compile("/Melding/journpost/jpId");
             String doc;
-            if(message.getPayload() instanceof String){
+            if (message.getPayload() instanceof String) {
                 doc = (String) message.getPayload();
                 doc = unescapeHtml(doc);
             } else {
@@ -50,7 +49,7 @@ public class JournalpostId {
             Document document = builder.parse(new ByteArrayInputStream(doc.getBytes(java.nio.charset.Charset.forName("utf-8"))));
             result = new JournalpostId(expression.evaluate(document));
         } catch (XPathExpressionException | ParserConfigurationException | SAXException | IOException e) {
-            throw new MeldingsUtvekslingRuntimeException("Could not extract jpId from the payload", e);
+            throw new IllegalArgumentException("Could not extract jpId from the payload", e);
         }
         return result;
     }

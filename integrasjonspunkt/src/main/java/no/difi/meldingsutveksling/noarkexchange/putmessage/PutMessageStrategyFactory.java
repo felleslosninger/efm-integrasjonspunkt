@@ -33,7 +33,7 @@ public final class PutMessageStrategyFactory {
             throw new MeldingsUtvekslingRuntimeException("unknown payload class " + payload);
         }
         if (isAppReceipt(payload)) {
-            return new AppReceiptPutMessageStrategy(context.getEventlog());
+            return new AppReceiptPutMessageStrategy(context);
         } else if (isBestEDUMessage(payload)) {
             return new BestEDUPutMessageStrategy(context.getMessageSender());
         } else

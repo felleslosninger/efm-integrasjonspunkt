@@ -10,8 +10,8 @@ import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageContext;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategy;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategyFactory;
+import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
-import no.difi.meldingsutveksling.queue.service.Queue;
 import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
 import no.difi.meldingsutveksling.services.CertificateException;
 import org.slf4j.Logger;
@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.xml.ws.BindingType;
-import java.io.IOException;
 
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
@@ -59,7 +58,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
     private NoarkClient mshClient;
 
     @Autowired
-    private Queue queue;
+    private InternalQueue internalQueue;
 
     @Autowired
     private IntegrasjonspunktConfiguration configuration;
@@ -101,12 +100,9 @@ public class IntegrasjonspunktImpl implements SOAPport {
         }
 
         if (configuration.isQueueEnabled()) {
-            try {
-                queue.put(request);
-                Audit.info("Message is put on queue ready to be sent", markerFrom(message));
-            } catch (IOException e) {
-                log.error(e.getMessage(), e);
-            }
+            internalQueue.enqueueExternal(request);
+            Audit.info("Message is put on queue ready to be sent", markerFrom(message));
+
             return PutMessageResponseFactory.createOkResponse();
         }
         else {

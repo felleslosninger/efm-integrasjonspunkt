@@ -14,10 +14,10 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <spring.version>4.1.7.RELEASE</spring.version>
-    <spring.framework.version>2.2.3.RELEASE</spring.framework.version>
+    <spring.ws.version>2.2.4.RELEASE</spring.ws.version>
     <spring.boot.version>1.3.0.RELEASE</spring.boot.version>
     <hsql.version>2.3.3</hsql.version>
-    <commons.lang.version>20030203.000129</commons.lang.version>
+    <commons.lang.version>2.3</commons.lang.version>
     <apache.commons.version>10.0-b28</apache.commons.version>
     <xstream.version>1.4.8</xstream.version>
     <commons-codec.version>1.10</commons-codec.version>
@@ -40,7 +40,6 @@
         <module>transport-altinn</module>
         <module>altinn-client</module>
         <module>virksert-demoscope</module>
-        <module>integrasjonspunkt-queue</module>
         <module>audit</module>
     </modules>
 
@@ -49,7 +48,7 @@
       <dependency>
         <groupId>org.springframework.ws</groupId>
         <artifactId>spring-ws-core</artifactId>
-        <version>${spring.framework.version}</version>
+        <version>${spring.ws.version}</version>
       </dependency>
 
       <dependency>

@@ -64,4 +64,18 @@ public class PutMessageRequestWrapper {
     public PutMessageRequestType getRequest() {
         return requestType;
     }
+
+    public void setReceiverPartyNumber(String receiverPartyNumber) {
+        this.requestType.getEnvelope().getReceiver().setOrgnr(receiverPartyNumber);
+    }
+
+    public String getJournalPostId() {
+        return JournalpostId.fromPutMessage(this).value();
+    }
+
+    public void swapSenderAndReceiver() {
+        final String sender = getSenderPartynumber() ;
+        setSenderPartyNumber(getRecieverPartyNumber());
+        setReceiverPartyNumber(sender);
+    }
 }

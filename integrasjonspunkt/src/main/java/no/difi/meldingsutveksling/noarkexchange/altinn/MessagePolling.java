@@ -6,31 +6,21 @@ import no.difi.meldingsutveksling.AltinnWsConfiguration;
 import no.difi.meldingsutveksling.DownloadRequest;
 import no.difi.meldingsutveksling.FileReference;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
-import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
-import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.elma.ELMALookup;
-import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
-import no.difi.meldingsutveksling.noarkexchange.MessageException;
-import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
-import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
+import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.vefa.peppol.common.model.Endpoint;
 import no.difi.vefa.peppol.lookup.api.LookupException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.util.List;
 
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
@@ -48,23 +38,13 @@ public class MessagePolling {
     IntegrasjonspunktConfiguration config;
 
     @Autowired
-    IntegrajonspunktReceiveImpl integrajonspunktReceive;
+    InternalQueue internalQueue;
 
     @Autowired
     ELMALookup elmaLookup;
 
-    private static JAXBContext jaxbContextdomain;
-
-    static {
-        try {
-            jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class, Kvittering.class);
-            jaxbContextdomain = JAXBContext.newInstance(Document.class, Payload.class, Kvittering.class);
-        } catch (JAXBException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static JAXBContext jaxbContext;
+    @Autowired
+    private JmsTemplate jmsTemplate;
 
     @Scheduled(fixedRate = 15000)
     public void checkForNewMessages() {
@@ -88,33 +68,8 @@ public class MessagePolling {
         for (FileReference reference : fileReferences) {
             Audit.info("Downloading message", markerFrom(reference));
             Document document = client.download(new DownloadRequest(reference.getValue(), config.getOrganisationNumber()));
-            forwardToNoark(document);
-        }
-    }
 
-    private void forwardToNoark(Document document) {
-        try {
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            JAXBElement<Document> d = new ObjectFactory().createStandardBusinessDocument(document);
-
-            jaxbContextdomain.createMarshaller().marshal(d, os);
-            byte[] tmp = os.toByteArray();
-
-            JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument> toDocument
-                    = (JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument>)
-                    jaxbContext.createUnmarshaller().unmarshal(new ByteArrayInputStream(tmp));
-
-            final StandardBusinessDocument standardBusinessDocument = toDocument.getValue();
-            Audit.info("Successfully extracted standard business document. Forwarding document to NOARK system...", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));
-            try {
-                integrajonspunktReceive.forwardToNoarkSystem(standardBusinessDocument);
-            } catch (MessageException e) {
-                Audit.error("Could not forward document to NOARK system...", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));
-                logger.error(markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)), e.getStatusMessage().getTechnicalMessage(), e);
-            }
-        } catch (JAXBException e) {
-            Audit.error("Could not forward document to NOARK system... due to a technical error");
-            throw new MeldingsUtvekslingRuntimeException("Could not forward document to archive system", e);
+            internalQueue.enqueueNoark(document);
         }
     }
 }

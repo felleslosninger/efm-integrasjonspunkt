@@ -49,7 +49,7 @@ public class ConfigMeta {
 
         for(ConfigGroup g: configGroups) {
             for(ConfigElement e: g.getElements()) {
-                fields.put(e.key, e.value);
+                fields.put(e.key.replace(".", "_"), e.value);
             }
         }
         return Markers.appendEntries(fields);
