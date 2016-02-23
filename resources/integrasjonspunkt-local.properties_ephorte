@@ -5,6 +5,11 @@ noarksystem.endpointURL=http://<sakArkivSystemURL>:<port>/ePhorteWeb/shared/webs
 noarksystem.type=ePhorte
 
 orgnumber=<orgnr>
+server.port=
+
+keystorelocation=
+privatekeypassword=	 
+privatekeyalias=
 
 #Altinn related properties (used by transport-altinn, ignored if other transport is in use
 altinn.username= <username>

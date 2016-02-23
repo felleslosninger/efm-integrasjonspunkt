@@ -7,7 +7,7 @@
     "activeVersion": "",
     "filename": "",
     "vmOptions": "",
-    "environmentVariables": "-Dspring.profiles.active=dev -Dspring.application.name=<orgnr>",
+    "environmentVariables": "-Dspring.profiles.active=staging -Dspring.application.name=<orgnr>",
     "mainClass": "no.difi.meldingsutveksling.IntegrasjonspunktApplication"
   }]
 }

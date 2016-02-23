@@ -84,7 +84,7 @@ For å legge til applikasjoner som skal vedlikeholdes, må de legges manuelt inn
       "artifactType": "JAR",
       "filename": "filename.jar",
       "vmOptions": "-Xms=512m -Xmx=512m",
-      "environmentVariables": "-Dspring.profiles.active=dev",
+      "environmentVariables": "-Dspring.profiles.active=staging",
       "mainClass": "my.application.start.Application"
     }]
 }
@@ -112,8 +112,6 @@ keystorelocation 			| path til .jks fil 													|
 privatekeypassword      	| Passord til keystore 													|
 privatekeyalias  			| alieas til virksomhetssertifikatet som brukes i  integrasjonspunktet 	| 
 							|																		|
-altinn.external_service_code|																		|
-altinn.external_service_edition_code|																|
 altinn.username         	|brukernavnet du fikk når du opprettet AltInn systembruker				|
 altinn.password         	|passord du satte når du opprettet AltInn systembruker					|
 msh.endpointURL\*\*			|url til msh															|
@@ -143,6 +141,9 @@ Deploy Manager startes fra kommandolinjen med kommandoen
 
 ```
 java -jar -Dapplication.runtime.environment=staging  deploy-manager[versjon].jar
+
+Fra versjon 1.0.1
+java -jar -Dspring.profiles.active=staging  deploy-manager[versjon].jar
 ```
 
 Etter at Deploy Manageren er startet, vil den hente siste versjon av Integrasjonspunktet og starte det. Dette kan ta et par minutter.

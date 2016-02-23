@@ -8,6 +8,11 @@ noarksystem.password=<passord>
 noarksystem.domain=<domene>
 
 orgnumber=<orgnr>
+server.port=
+
+keystorelocation=
+privatekeypassword=	 
+privatekeyalias=
 
 #Altinn related properties (used by transport-altinn, ignored if other transport is in use
 altinn.username= <username>
