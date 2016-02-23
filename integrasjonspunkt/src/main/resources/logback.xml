@@ -19,7 +19,7 @@
             </if>
             <if condition='property("spring.profiles.active").contains("staging")'>
                 <then>
-                    <destination>test-meldingsutveksling-app01.difi.local:5044</destination>
+                    <destination>93.94.10.18:8300</destination>
                 </then>
             </if>
             <if condition='property("spring.profiles.active").contains("production")'>
