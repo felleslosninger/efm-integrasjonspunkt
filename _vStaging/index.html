@@ -6,9 +6,8 @@ isHome: true
 redirect_from: /
 ---
 
-
 {% for dok in site.vStaging %}
-	{% if dok.id %}
+	{% if dok.pageid %}
 		<h2 id="{{dok.id}}">{{dok.title}}</h2>
 		<div class="body">
 			<p>{{dok.content}}</p>

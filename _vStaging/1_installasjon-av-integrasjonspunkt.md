@@ -1,6 +1,6 @@
 ---
 title: Installasjon av integrasjonspunkt
-id: installasjonavintegrasjonspunkt
+pageid: installasjonavintegrasjonspunkt
 layout: default
 description: En liten oppstart for å komme i gang.
 isHome: false
