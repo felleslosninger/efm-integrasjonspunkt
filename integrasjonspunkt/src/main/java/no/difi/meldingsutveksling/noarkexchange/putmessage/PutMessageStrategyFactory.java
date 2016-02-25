@@ -2,6 +2,9 @@ package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import com.sun.org.apache.xerces.internal.dom.ElementNSImpl;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.logging.Audit;
+
+import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
 /**
  * Factory clsss for putmessage strategies. Responsible for inspecting a payload and returning an appropriate
@@ -27,17 +30,19 @@ public final class PutMessageStrategyFactory {
 
     public PutMessageStrategy create(Object payload) {
         if (isEPhorte(payload)) {
+            Audit.info("Message type is EDU (ePhorte type)");
             return new BestEDUPutMessageStrategy(context.getMessageSender());
-        }
-        if (isUnknown(payload)) {
-            throw new MeldingsUtvekslingRuntimeException("unknown payload class " + payload);
         }
         if (isAppReceipt(payload)) {
+            Audit.info("Message type is Appreceipt");
             return new AppReceiptPutMessageStrategy(context);
         } else if (isBestEDUMessage(payload)) {
+            Audit.info("Message type is EDU (String payload. 360 etc)");
             return new BestEDUPutMessageStrategy(context.getMessageSender());
-        } else
+        } else {
+            Audit.info("Can not determine paylod type");
             throw new MeldingsUtvekslingRuntimeException("Unknown String based payload " + payload);
+        }
     }
 
     private boolean isUnknown(Object payload) {

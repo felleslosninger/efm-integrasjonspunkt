@@ -112,10 +112,10 @@ public class IntegrasjonspunktImpl implements SOAPport {
             if (hasAdresseregisterCertificate(request.getEnvelope().getReceiver().getOrgnr())) {
                 PutMessageContext context = new PutMessageContext(eventLog, messageSender);
                 PutMessageStrategyFactory putMessageStrategyFactory = PutMessageStrategyFactory.newInstance(context);
-
                 PutMessageStrategy strategy = putMessageStrategyFactory.create(request.getPayload());
                 return strategy.putMessage(request);
             } else {
+                Audit.info("Receiver certificate not found, reverting to MSH.", markerFrom(message));
                 return mshClient.sendEduMelding(request);
             }
         }
