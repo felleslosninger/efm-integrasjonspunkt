@@ -4,8 +4,6 @@ import com.sun.org.apache.xerces.internal.dom.ElementNSImpl;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
 
-import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
-
 /**
  * Factory clsss for putmessage strategies. Responsible for inspecting a payload and returning an appropriate
  * Strategy implementation
@@ -32,6 +30,10 @@ public final class PutMessageStrategyFactory {
         if (isEPhorte(payload)) {
             Audit.info("Message type is EDU (ePhorte type)");
             return new BestEDUPutMessageStrategy(context.getMessageSender());
+        }
+        if (isUnknown(payload)) {
+            Audit.info("Message has unknown payload class");
+            throw new MeldingsUtvekslingRuntimeException("unknown payload class " + payload);
         }
         if (isAppReceipt(payload)) {
             Audit.info("Message type is Appreceipt");
