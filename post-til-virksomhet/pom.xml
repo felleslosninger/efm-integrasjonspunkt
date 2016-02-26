@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>parent-pom</artifactId>
+        <groupId>no.difi.meldingsutveksling</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>post-til-virksomhet</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jvnet.jax-ws-commons</groupId>
+                <artifactId>jaxws-maven-plugin</artifactId>
+                <version>2.3</version>
+
+                <executions>
+                    <execution>
+                        <id>normal-messages</id>
+                        <goals>
+                            <goal>
+                                wsimport
+                            </goal>
+                        </goals>
+                        <configuration>
+                            <bindingDirectory>./</bindingDirectory>
+                            <bindingFiles>
+                                <bindingFile>./jaxb-bindings-post-til-virksomheter.xsd</bindingFile>
+                            </bindingFiles>
+                            <packageName>no.difi.meldingsutveksling.altinn.postvirksomhet</packageName>
+                            <wsdlFiles>
+                                <wsdlFile>${basedir}/wsdl/CorrespondenceAgencyExternal.wsdl</wsdlFile>
+                            </wsdlFiles>
+                            <vmArgs>
+                                <vmArg>-Djavax.xml.accessExternalDTD=all</vmArg>
+                                <vmArg>-Djavax.xml.accessExternalSchema=all</vmArg>
+                            </vmArgs>
+                            <verbose>true</verbose>
+                            <xnocompile>true</xnocompile>
+                            <xadditionalHeaders>true</xadditionalHeaders>
+                            <keep>true</keep>
+                            <extension>true</extension>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

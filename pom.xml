@@ -41,6 +41,7 @@
         <module>altinn-client</module>
         <module>virksert-demoscope</module>
         <module>audit</module>
+        <module>post-til-virksomhet</module>
     </modules>
 
   <dependencyManagement>
