@@ -61,9 +61,11 @@ public class AdresseregisterVirksert {
 
     public Certificate getCertificate(String orgNumber) throws CertificateException {
         try {
-            return virksertClient.fetch(orgNumber);
+            String nOrgNumber = FiksFix.replaceOrgNummberWithKs(orgNumber);
+            return virksertClient.fetch(nOrgNumber);
         } catch (VirksertClientException e) {
             throw new CertificateException("Virkcert cannot find valid certificate for " + orgNumber, e);
         }
     }
+
 }
