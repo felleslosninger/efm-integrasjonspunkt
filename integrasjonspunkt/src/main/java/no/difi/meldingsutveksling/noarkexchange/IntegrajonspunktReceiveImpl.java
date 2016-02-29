@@ -91,7 +91,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
 
     public CorrelationInformation forwardToNoarkSystem(StandardBusinessDocument inputDocument) throws MessageException {
         StandardBusinessDocumentWrapper document = new StandardBusinessDocumentWrapper(inputDocument);
-        sendReceiptDelivered(document);
+
         adresseregisterService.validateCertificates(document);
         Audit.info("Sender and recievers certificates are validated. Processing contents...", markerFrom(new StandardBusinessDocumentWrapper(inputDocument)));
         if (document.isReciept()) {
@@ -101,6 +101,9 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
         }
 
         logEvent(document, ProcessState.SBD_RECIEVED);
+        sendReceiptDelivered(document);
+        Audit.info("Delivery receipt sent", markerFrom(document));
+
         Payload payload = document.getPayload();
         byte[] decryptedAsicPackage = decrypt(payload);
         logEvent(document, ProcessState.DECRYPTION_SUCCESS);
