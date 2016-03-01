@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.services;
 
+import no.difi.meldingsutveksling.noarkexchange.FiksFix;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

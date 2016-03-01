@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.services;
+package no.difi.meldingsutveksling.noarkexchange;
 
 import java.util.ArrayList;
 import java.util.List;
