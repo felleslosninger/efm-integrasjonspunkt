@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
  */
 
 @Component
-public class AltinnTransportFactory implements TransportFactory {
+public class MultiTransportFactory implements TransportFactory {
 
     @Autowired
     ELMALookup elmaLookup;
