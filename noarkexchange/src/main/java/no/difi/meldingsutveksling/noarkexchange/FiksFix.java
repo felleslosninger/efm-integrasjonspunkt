@@ -12,7 +12,7 @@ public class FiksFix {
     private static List<String> orgNumberstoreplaceWithKS = new ArrayList<>();
 
     static {
-        orgNumberstoreplaceWithKS.add("910951688");
+        orgNumberstoreplaceWithKS.add("910076787");
     }
 
     public static String replaceOrgNummberWithKs(String orgNumber) {
