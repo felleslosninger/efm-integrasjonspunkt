@@ -81,7 +81,8 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
     private boolean hasAdresseregisterCertificate(String organisasjonsnummer) {
         try {
-            adresseregister.getCertificate(organisasjonsnummer);
+            String nOrgnr = FiksFix.replaceOrgNummberWithKs(organisasjonsnummer);
+            adresseregister.getCertificate(nOrgnr);
             return true;
         } catch (CertificateException e) {
             return false;
