@@ -13,11 +13,12 @@ public class FiksFix {
 
     static {
         orgNumberstoreplaceWithKS.add("910076787");
+        orgNumberstoreplaceWithKS.add("910951688");
     }
 
     public static String replaceOrgNummberWithKs(String orgNumber) {
         if (orgNumberstoreplaceWithKS.contains(orgNumber)) {
-            return "910639870";
+            return "910076787";
         } else {
             return orgNumber;
         }
