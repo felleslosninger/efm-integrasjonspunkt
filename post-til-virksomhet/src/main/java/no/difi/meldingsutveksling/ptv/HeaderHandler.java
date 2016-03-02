@@ -26,7 +26,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
             SOAPMessage soapMessage = context.getMessage();
 
             try {
-                SOAPHeader soapHeader = soapMessage.getSOAPHeader();
+                SOAPHeader soapHeader = soapMessage.getSOAPPart().getEnvelope().addHeader();
                 SOAPElement security = soapHeader.addChildElement("Security", "wsse", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd");
                 security.addAttribute(new QName("xmlns:wsu"), "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd");
                 SOAPElement userNameToken = security.addChildElement("UsernameToken", "wsse");
