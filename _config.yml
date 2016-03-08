@@ -1,6 +1,6 @@
 # name of the software
 name: Om Meldingsutveksling i offentlig sektor
-siteUrlText: http://difi.github.io/meldingsutveksling-mellom-offentlige-virksomheter/
+siteUrlText: http://difi.github.io/move-integrasjonspunkt/
 
 # current version of the software
 version: Staging
@@ -12,7 +12,7 @@ license: GPL-3 License
 licenseUrl: http://opensource.org/licenses/GPL-3.0
 
 #baseurl: "/meldingsutveksling-mellom-offentlige-virksomheter" # the subpath of your site, e.g. /blog/
-baseurl: "/meldingsutveksling-mellom-offentlige-virksomheter"
+baseurl: "/move-integrasjonspunkt"
 
 ##Version handling
 currentCollecion: "vStaging"
@@ -33,9 +33,9 @@ headerLinks:
   - title: Om Meldingsutveksling mellom offentlige virksomheter
     url: /meldingsutveksling-mellom-offentlige-virksomheter/about.html
   - title: GitHub
-    url: https://github.com/difi/meldingsutveksling-mellom-offentlige-virksomheter
+    url: https://github.com/difi/move-integrasjonspunkt
   - title: Issues
-    url: https://github.com/difi/meldingsutveksling-mellom-offentlige-virksomheter/issues
+    url: https://github.com/difi/move-integrasjonspunkt/issues
 
 # github buttons
 githubButton:
