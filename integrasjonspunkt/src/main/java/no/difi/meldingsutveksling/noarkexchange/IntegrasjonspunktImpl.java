@@ -91,6 +91,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType request) {
+        MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, configuration.getOrganisationNumber());
         PutMessageRequestWrapper message = new PutMessageRequestWrapper(request);
         if (!message.hasSenderPartyNumber()) {
             message.setSenderPartyNumber(configuration.getOrganisationNumber());
@@ -108,7 +109,6 @@ public class IntegrasjonspunktImpl implements SOAPport {
         }
         else {
             Audit.info("Queue is disabled. Message will be sent immediatly", markerFrom(message));
-            MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, configuration.getOrganisationNumber());
 
             if (hasAdresseregisterCertificate(request.getEnvelope().getReceiver().getOrgnr())) {
                 PutMessageContext context = new PutMessageContext(eventLog, messageSender);
@@ -123,11 +123,11 @@ public class IntegrasjonspunktImpl implements SOAPport {
     }
 
     public boolean sendMessage(PutMessageRequestType request) {
+        MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, configuration.getOrganisationNumber());
         PutMessageRequestWrapper message = new PutMessageRequestWrapper(request);
         if (!message.hasSenderPartyNumber() && !configuration.hasOrganisationNumber()) {
             throw new MeldingsUtvekslingRuntimeException();
         }
-        MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, configuration.getOrganisationNumber());
 
         boolean result;
         if(hasAdresseregisterCertificate(message.getRecieverPartyNumber())) {
