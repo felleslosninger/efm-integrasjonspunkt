@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
+import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
@@ -14,6 +15,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
@@ -53,6 +55,9 @@ public class InternalQueue {
     @Autowired
     private IntegrasjonspunktImpl integrasjonspunktSend;
 
+    @Autowired
+    private IntegrasjonspunktConfiguration configuration;
+
     private final DocumentConverter documentConverter = new DocumentConverter();
 
     private static JAXBContext jaxbContextdomain;
@@ -72,12 +77,14 @@ public class InternalQueue {
 
     @JmsListener(destination = NOARK, containerFactory = "myJmsContainerFactory")
     public void noarkListener(byte[] message, Session session) {
+        MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, configuration.getOrganisationNumber());
         Document document = documentConverter.unmarshallFrom(message);
         forwardToNoark(document);
     }
 
     @JmsListener(destination = EXTERNAL, containerFactory = "myJmsContainerFactory")
     public void externalListener(byte[] message, Session session) {
+        MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, configuration.getOrganisationNumber());
         PutMessageRequestType requestType = putMessageRequestConverter.unmarshallFrom(message);
         integrasjonspunktSend.sendMessage(requestType);
     }

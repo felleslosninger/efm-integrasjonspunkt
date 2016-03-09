@@ -48,8 +48,8 @@ public class MessagePolling {
 
     @Scheduled(fixedRate = 15000)
     public void checkForNewMessages() {
-        logger.debug("Checking for new messages");
         MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, config.getOrganisationNumber());
+        logger.debug("Checking for new messages");
         Endpoint endpoint;
         try {
             endpoint = elmaLookup.lookup(PREFIX_NORWAY + config.getOrganisationNumber());

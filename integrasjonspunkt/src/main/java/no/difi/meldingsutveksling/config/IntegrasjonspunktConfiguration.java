@@ -4,6 +4,7 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRequiredPropertyExcep
 import no.difi.meldingsutveksling.noarkexchange.NoarkClientSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
@@ -68,7 +69,7 @@ public class IntegrasjonspunktConfiguration {
         validateProperty(KEY_PRIVATEKEYPASSWORD);
         validateProperty(KEY_ORGANISATION_NUMBER);
         validateProperty(KEY_NOARKSYSTEM_TYPE);
-
+        MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, getOrganisationNumber());
         validateSpringMetrics();
     }
 

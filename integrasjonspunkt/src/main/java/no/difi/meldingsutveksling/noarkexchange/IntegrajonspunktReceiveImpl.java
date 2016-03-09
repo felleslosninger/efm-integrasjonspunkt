@@ -21,6 +21,7 @@ import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -78,6 +79,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
     }
 
     public CorrelationInformation receive(@WebParam(name = "StandardBusinessDocument", targetNamespace = SBD_NAMESPACE, partName = "receiveResponse") StandardBusinessDocument standardBusinessDocument) {
+        MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, config.getOrganisationNumber());
         try {
             return forwardToNoarkSystem(standardBusinessDocument);
         } catch (MessageException e) {
@@ -128,7 +130,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
         PutMessageResponseType response = localNoark.sendEduMelding(putMessageRequestType);
         AppReceiptType result = response.getResult();
         if (result.getType().equals(OK_TYPE)) {
-            Audit.info("Document successfully sent to NOARK system. Sending receipt...", markerFrom(response));
+            Audit.info("Document successfully delivered to NOARK system. Sending receipt back to sender...", markerFrom(response));
             sendReceiptOpen(inputDocument);
             logEvent(inputDocument, ProcessState.BEST_EDU_SENT);
         } else {
