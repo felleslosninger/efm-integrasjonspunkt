@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import net.logstash.logback.marker.LogstashMarker;
+import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.StandardBusinessDocumentConverter;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Archive;
@@ -13,6 +15,7 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
+import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
@@ -29,6 +32,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.UUID;
 
+import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
+import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.payloadSizeMarker;
 
 /**
  * Factory class for StandardBusinessDocument instances
@@ -67,6 +72,8 @@ public class StandardBusinessDocumentFactory {
         final byte[] marshalledShipment = marshall(shipment);
 
         BestEduMessage bestEduMessage = new BestEduMessage(marshalledShipment);
+        LogstashMarker marker = markerFrom(new PutMessageRequestWrapper(shipment));
+        Audit.info("Payload size of message", marker.and(payloadSizeMarker(marshalledShipment)));
         Archive archive;
         try {
             archive = createAsicePackage(avsender, mottaker, bestEduMessage);
@@ -100,19 +107,11 @@ public class StandardBusinessDocumentFactory {
         return os.toByteArray();
     }
 
-    /**
-     * @param fromDocument
-     * @return
-     */
     public static Document create(StandardBusinessDocument fromDocument) {
         ModelMapper mapper = new ModelMapper();
         return mapper.map(fromDocument, Document.class);
     }
 
-    /**
-     * @param fromDocument
-     * @return
-     */
     public static StandardBusinessDocument create(Document fromDocument) {
         try {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
