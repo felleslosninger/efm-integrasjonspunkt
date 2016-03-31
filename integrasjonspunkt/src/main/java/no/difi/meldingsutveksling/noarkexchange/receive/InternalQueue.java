@@ -7,10 +7,8 @@ import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
-import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
-import no.difi.meldingsutveksling.noarkexchange.MessageException;
-import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
+import no.difi.meldingsutveksling.logging.MessageMarkerFactory;
+import no.difi.meldingsutveksling.noarkexchange.*;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.slf4j.Logger;
@@ -86,7 +84,12 @@ public class InternalQueue {
     public void externalListener(byte[] message, Session session) {
         MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, configuration.getOrganisationNumber());
         PutMessageRequestType requestType = putMessageRequestConverter.unmarshallFrom(message);
-        integrasjonspunktSend.sendMessage(requestType);
+        try {
+            integrasjonspunktSend.sendMessage(requestType);
+        } catch (Exception e) {
+            Audit.error("Failed to send message... queue will retry", MessageMarkerFactory.markerFrom(new PutMessageRequestWrapper(requestType)));
+            throw e;
+        }
     }
 
     /**
@@ -95,7 +98,12 @@ public class InternalQueue {
      * @param request the input parameter from IntegrasjonspunktImpl
      */
     public void enqueueExternal(PutMessageRequestType request) {
-        jmsTemplate.convertAndSend(EXTERNAL, putMessageRequestConverter.marshallToBytes(request));
+        try {
+            jmsTemplate.convertAndSend(EXTERNAL, putMessageRequestConverter.marshallToBytes(request));
+        } catch (Exception e) {
+            Audit.error("Unable to send message", MessageMarkerFactory.markerFrom(new PutMessageRequestWrapper(request)));
+            throw e;
+        }
     }
 
     /**
@@ -126,6 +134,9 @@ public class InternalQueue {
             } catch (MessageException e) {
                 Audit.error("Could not forward document to NOARK system...", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));
                 logger.error(markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)), e.getStatusMessage().getTechnicalMessage(), e);
+            } catch (Exception e) {
+                Audit.error("Unable to send document to NOARK system", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));
+                throw e;
             }
         } catch (JAXBException e) {
             Audit.error("Could not forward document to NOARK system... due to a technical error");
