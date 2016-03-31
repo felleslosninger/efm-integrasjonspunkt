@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import com.thoughtworks.xstream.XStream;
-import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.ProcessState;
@@ -13,7 +12,11 @@ import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageContext;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategy;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
-import no.difi.meldingsutveksling.noarkexchange.schema.*;
+import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageRequestType;
+import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageResponseType;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
+import no.difi.meldingsutveksling.noarkexchange.schema.SOAPport;
 import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
 import no.difi.meldingsutveksling.services.CertificateException;
 import org.slf4j.Logger;
@@ -80,8 +83,11 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
         canReceive = hasAdresseregisterCertificate(organisasjonsnummer) || mshClient.canRecieveMessage(organisasjonsnummer);
 
-        if(!canReceive) {
+        if(canReceive) {
+            Audit.error("Mottaker kan motta meldinger", MessageMarkerFactory.receiverMarker(organisasjonsnummer));
+        } else {
             Audit.error("Mottaker kan ikke motta meldinger", MessageMarkerFactory.receiverMarker(organisasjonsnummer));
+
         }
         response.setResult(canReceive);
         return response;
