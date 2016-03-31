@@ -1,12 +1,14 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import com.thoughtworks.xstream.XStream;
+import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.logging.MessageMarkerFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageContext;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategy;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategyFactory;
@@ -66,6 +68,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
     @Override
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
 
+
         String organisasjonsnummer = getCanReceiveMessageRequest.getReceiver().getOrgnr();
         eventLog.log(new Event()
                 .setMessage(new XStream().toXML(getCanReceiveMessageRequest))
@@ -74,7 +77,12 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
         GetCanReceiveMessageResponseType response = new GetCanReceiveMessageResponseType();
         boolean canReceive;
+
         canReceive = hasAdresseregisterCertificate(organisasjonsnummer) || mshClient.canRecieveMessage(organisasjonsnummer);
+
+        if(!canReceive) {
+            Audit.error("Mottaker kan ikke motta meldinger", MessageMarkerFactory.receiverMarker(organisasjonsnummer));
+        }
         response.setResult(canReceive);
         return response;
     }

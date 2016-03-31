@@ -77,7 +77,7 @@ public class MessageMarkerFactory {
         return Markers.append(JOURNALPOST_ID, journalPostId);
     }
 
-    private static LogstashMarker receiverMarker(String recieverPartyNumber) {
+    public static LogstashMarker receiverMarker(String recieverPartyNumber) {
         return Markers.append(RECEIVER_ORG_NUMBER, recieverPartyNumber);
     }
 
