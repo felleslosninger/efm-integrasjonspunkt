@@ -7,11 +7,16 @@ import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.logging.MessageMarkerFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageContext;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategy;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
-import no.difi.meldingsutveksling.noarkexchange.schema.*;
+import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageRequestType;
+import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageResponseType;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
+import no.difi.meldingsutveksling.noarkexchange.schema.SOAPport;
 import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
 import no.difi.meldingsutveksling.services.CertificateException;
 import org.slf4j.Logger;
@@ -66,6 +71,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
     @Override
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
 
+
         String organisasjonsnummer = getCanReceiveMessageRequest.getReceiver().getOrgnr();
         eventLog.log(new Event()
                 .setMessage(new XStream().toXML(getCanReceiveMessageRequest))
@@ -74,7 +80,15 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
         GetCanReceiveMessageResponseType response = new GetCanReceiveMessageResponseType();
         boolean canReceive;
+
         canReceive = hasAdresseregisterCertificate(organisasjonsnummer) || mshClient.canRecieveMessage(organisasjonsnummer);
+
+        if(canReceive) {
+            Audit.error("Mottaker kan motta meldinger", MessageMarkerFactory.receiverMarker(organisasjonsnummer));
+        } else {
+            Audit.error("Mottaker kan ikke motta meldinger", MessageMarkerFactory.receiverMarker(organisasjonsnummer));
+
+        }
         response.setResult(canReceive);
         return response;
     }
