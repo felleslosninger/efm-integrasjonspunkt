@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import com.thoughtworks.xstream.XStream;
+import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.ProcessState;
@@ -81,13 +82,17 @@ public class IntegrasjonspunktImpl implements SOAPport {
         GetCanReceiveMessageResponseType response = new GetCanReceiveMessageResponseType();
         boolean canReceive;
 
-        canReceive = hasAdresseregisterCertificate(organisasjonsnummer) || mshClient.canRecieveMessage(organisasjonsnummer);
+        canReceive = hasAdresseregisterCertificate(organisasjonsnummer);
 
+        final LogstashMarker marker = MessageMarkerFactory.receiverMarker(organisasjonsnummer);
         if(canReceive) {
-            Audit.error("Mottaker kan motta meldinger", MessageMarkerFactory.receiverMarker(organisasjonsnummer));
+            Audit.info("Mottaker kan motta meldinger", marker);
         } else {
-            Audit.error("Mottaker kan ikke motta meldinger", MessageMarkerFactory.receiverMarker(organisasjonsnummer));
-
+            Audit.info("Mangler mottakers sertifikat, sjekker om MSH kan motta meldinger", marker);
+            canReceive = mshClient.canRecieveMessage(organisasjonsnummer);
+        }
+        if(!canReceive) {
+            Audit.error("Mottaker kan ikke motta meldinger", marker);
         }
         response.setResult(canReceive);
         return response;
