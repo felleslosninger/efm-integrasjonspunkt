@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.kvittering;
 
 
+import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.kvittering.xsd.ObjectFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.Partner;
@@ -35,7 +36,7 @@ public class StandardBusinessDocumentWrapperTest {
         kpg.initialize(512);
         KeyPair kp = kpg.generateKeyPair();
 
-        no.difi.meldingsutveksling.domain.sbdh.Document beforeConversion = KvitteringFactory.createAapningskvittering(RECEIVER, SENDER, "", "", kp);
+        no.difi.meldingsutveksling.domain.sbdh.Document beforeConversion = KvitteringFactory.createAapningskvittering(new MessageInfo(RECEIVER, SENDER, "", ""), kp);
         Document xmlDocVersion = DocumentToDocumentConverter.toXMLDocument(beforeConversion);
         no.difi.meldingsutveksling.domain.sbdh.Document afterConversion = DocumentToDocumentConverter.toDomainDocument(xmlDocVersion);
 

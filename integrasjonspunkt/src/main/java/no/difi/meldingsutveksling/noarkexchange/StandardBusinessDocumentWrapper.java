@@ -3,6 +3,8 @@ package no.difi.meldingsutveksling.noarkexchange;
 import no.difi.meldingsutveksling.dokumentpakking.service.ScopeFactory;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.MessageInfo;
+import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.Scope;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
@@ -41,11 +43,15 @@ public class StandardBusinessDocumentWrapper {
     }
 
     public String getConversationId() {
-        return findScope(ScopeFactory.TYPE_CONVERSATIONID).getInstanceIdentifier();
+        return findScope(ScopeType.ConversationId.name()).getInstanceIdentifier();
     }
 
     public final String getJournalPostId() {
-        return findScope(ScopeFactory.TYPE_JOURNALPOST_ID).getInstanceIdentifier();
+        return findScope(ScopeType.JournalpostId.name()).getInstanceIdentifier();
+    }
+
+    public MessageInfo getMessageInfo() {
+        return new MessageInfo(getReceiverOrgNumber(), getSenderOrgNumber(), getJournalPostId(), getConversationId());
     }
 
     private Scope findScope(String scopeType) {

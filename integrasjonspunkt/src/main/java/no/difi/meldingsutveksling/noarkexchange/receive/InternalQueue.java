@@ -1,20 +1,27 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
+import net.logstash.logback.marker.LogstashMarker;
+import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
+import no.difi.meldingsutveksling.kvittering.KvitteringFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.logging.MessageMarkerFactory;
 import no.difi.meldingsutveksling.noarkexchange.*;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
+import no.difi.meldingsutveksling.transport.Transport;
+import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
@@ -56,6 +63,15 @@ public class InternalQueue {
     @Autowired
     private IntegrasjonspunktConfiguration configuration;
 
+    @Autowired
+    IntegrasjonspunktNokkel keyInfo;
+
+    @Autowired
+    TransportFactory transportFactory;
+
+    @Autowired
+    IntegrasjonspunktConfiguration config;
+
     private final DocumentConverter documentConverter = new DocumentConverter();
 
     private static JAXBContext jaxbContextdomain;
@@ -87,7 +103,7 @@ public class InternalQueue {
         try {
             integrasjonspunktSend.sendMessage(requestType);
         } catch (Exception e) {
-            Audit.error("Failed to send message... queue will retry", MessageMarkerFactory.markerFrom(new PutMessageRequestWrapper(requestType)));
+            Audit.error("Failed to send message... queue will retry", markerFrom(new PutMessageRequestWrapper(requestType)));
             throw e;
         }
     }
@@ -101,7 +117,7 @@ public class InternalQueue {
         try {
             jmsTemplate.convertAndSend(EXTERNAL, putMessageRequestConverter.marshallToBytes(request));
         } catch (Exception e) {
-            Audit.error("Unable to send message", MessageMarkerFactory.markerFrom(new PutMessageRequestWrapper(request)));
+            Audit.error("Unable to send message", markerFrom(new PutMessageRequestWrapper(request)));
             throw e;
         }
     }
@@ -112,6 +128,8 @@ public class InternalQueue {
      * @param document the document as received by IntegrasjonspunktReceiveImpl from an external source
      */
     public void enqueueNoark(Document document) {
+        sendReceipt(document.getMessageInfo());
+        Audit.info("Delivery receipt sent", markerFrom(document.getMessageInfo()));
         jmsTemplate.convertAndSend(NOARK,  documentConverter.marshallToBytes(document));
     }
 
@@ -142,5 +160,11 @@ public class InternalQueue {
             Audit.error("Could not forward document to NOARK system... due to a technical error");
             throw new MeldingsUtvekslingRuntimeException("Could not forward document to archive system", e);
         }
+    }
+
+    private void sendReceipt(MessageInfo messageInfo) {
+        Document doc = KvitteringFactory.createLeveringsKvittering(messageInfo, keyInfo.getKeyPair());
+        Transport t = transportFactory.createTransport(doc);
+        t.send(config.getConfiguration(), doc);
     }
 }

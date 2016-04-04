@@ -4,6 +4,7 @@ package no.difi.meldingsutveksling.kvittering;
 import no.difi.meldingsutveksling.StandardBusinessDocumentConverter;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.XMLTimeStamp;
 import no.difi.meldingsutveksling.domain.sbdh.Document;
@@ -43,31 +44,30 @@ public class KvitteringFactory {
     }
 
 
-    public static Document createAapningskvittering(String receiverOrgNumber, String senderOrgNumber,
-                                                    String journalPostId, String conversationId, KeyPair keyPair) {
+    public static Document createAapningskvittering(MessageInfo messageInfo, KeyPair keyPair) {
         Kvittering k = new Kvittering();
         k.setAapning(new Aapning());
         k.setTidspunkt(XMLTimeStamp.createTimeStamp());
-        return signAndWrapDocument(receiverOrgNumber, senderOrgNumber, journalPostId, conversationId, keyPair, k);
+        return signAndWrapDocument(messageInfo, keyPair, k);
     }
 
-    public static Document createLeveringsKvittering(String receiverOrgNumber, String senderOrgNumber,
-                                                     String journalPostId, String conversationId, KeyPair keyPair) {
+    public static Document createLeveringsKvittering(MessageInfo messageInfo, KeyPair keyPair) {
         Kvittering k = new Kvittering();
         k.setLevering(new Levering());
         k.setTidspunkt(XMLTimeStamp.createTimeStamp());
-        return signAndWrapDocument(receiverOrgNumber, senderOrgNumber, journalPostId, conversationId, keyPair, k);
+        return signAndWrapDocument(messageInfo,
+                keyPair,
+                k);
     }
 
-    private static Document signAndWrapDocument(String receiverOrgNumber, String senderOrgNumber, String journalPostId,
-                                                String conversationId, KeyPair keyPair, Kvittering kvittering) {
+    private static Document signAndWrapDocument(MessageInfo messageInfo, KeyPair keyPair, Kvittering kvittering) {
 
         Document unsignedReceipt = new Document();
         StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader.Builder()
-                .from(new Organisasjonsnummer(senderOrgNumber))
-                .to(new Organisasjonsnummer(receiverOrgNumber))
-                .relatedToConversationId(conversationId)
-                .relatedToJournalPostId(journalPostId)
+                .from(new Organisasjonsnummer(messageInfo.getSenderOrgNumber()))
+                .to(new Organisasjonsnummer(messageInfo.getReceiverOrgNumber()))
+                .relatedToConversationId(messageInfo.getConversationId())
+                .relatedToJournalPostId(messageInfo.getJournalPostId())
                 .type(StandardBusinessDocumentHeader.DocumentType.KVITTERING)
                 .build();
 

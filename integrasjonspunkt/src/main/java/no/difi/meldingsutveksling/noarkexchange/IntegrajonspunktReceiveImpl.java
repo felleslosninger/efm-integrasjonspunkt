@@ -102,9 +102,8 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
             return new CorrelationInformation();
         }
 
+        // TODO: remove? or move to send leveringskvittering i internal queue?
         logEvent(document, ProcessState.SBD_RECIEVED);
-        sendReceiptDelivered(document);
-        Audit.info("Delivery receipt sent", markerFrom(document));
 
         Payload payload = document.getPayload();
         byte[] decryptedAsicPackage = decrypt(payload);
@@ -140,20 +139,16 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
     }
 
     private void sendReceiptDelivered(StandardBusinessDocumentWrapper inputDocument) {
-        Document doc = KvitteringFactory.createLeveringsKvittering(inputDocument.getSenderOrgNumber(),
-                inputDocument.getReceiverOrgNumber(), inputDocument.getJournalPostId(),
-                inputDocument.getConversationId(), keyInfo.getKeyPair());
-        sendReceipt(inputDocument, doc);
+        Document doc = KvitteringFactory.createLeveringsKvittering(inputDocument.getMessageInfo(), keyInfo.getKeyPair());
+        sendReceipt(doc);
     }
 
     private void sendReceiptOpen(StandardBusinessDocumentWrapper inputDocument) {
-        Document doc = KvitteringFactory.createAapningskvittering(inputDocument.getSenderOrgNumber(),
-                inputDocument.getReceiverOrgNumber(), inputDocument.getJournalPostId(),
-                inputDocument.getConversationId(), keyInfo.getKeyPair());
-        sendReceipt(inputDocument, doc);
+        Document doc = KvitteringFactory.createAapningskvittering(inputDocument.getMessageInfo(), keyInfo.getKeyPair());
+        sendReceipt(doc);
     }
 
-    private void sendReceipt(StandardBusinessDocumentWrapper input, Document receipt) {
+    private void sendReceipt(Document receipt) {
         Transport t = transportFactory.createTransport(receipt);
         t.send(config.getConfiguration(), receipt);
     }
