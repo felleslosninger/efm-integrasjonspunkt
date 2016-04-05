@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.transport;
 
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.sbdh.Document;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
@@ -27,19 +27,19 @@ import java.io.FileOutputStream;
 public class FileTransport implements Transport {
 
     @Override
-    public void send(Environment environment, Document document) {
+    public void send(Environment environment, EduDocument eduDocument) {
         String fileName = createFilename();
         ModelMapper mapper = new ModelMapper();
 
         no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument toWrite =
-                mapper.map(document, no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument.class);
+                mapper.map(eduDocument, no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument.class);
 
         File f = new File(fileName);
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(Document.class, Payload.class, Kvittering.class);
+            JAXBContext jaxbContext = JAXBContext.newInstance(EduDocument.class, Payload.class, Kvittering.class);
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
             jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-            jaxbMarshaller.marshal(new ObjectFactory().createStandardBusinessDocument(document), new FileOutputStream(f));
+            jaxbMarshaller.marshal(new ObjectFactory().createStandardBusinessDocument(eduDocument), new FileOutputStream(f));
             JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument> element =
                     new JAXBElement<>(new QName("ns"),
                             no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument.class, toWrite);

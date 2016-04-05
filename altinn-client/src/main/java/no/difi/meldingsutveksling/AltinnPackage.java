@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling;
 import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceManifest;
 import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceRecipientList;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
-import no.difi.meldingsutveksling.domain.sbdh.Document;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.shipping.sftp.BrokerServiceManifestBuilder;
@@ -35,20 +35,20 @@ public class AltinnPackage {
     private static JAXBContext ctx;
     private final BrokerServiceManifest manifest;
     private final BrokerServiceRecipientList recipient;
-    private final Document document;
+    private final EduDocument eduDocument;
 
     static {
         try {
-            ctx = JAXBContext.newInstance(BrokerServiceManifest.class, BrokerServiceRecipientList.class, Document.class, Payload.class, Kvittering.class);
+            ctx = JAXBContext.newInstance(BrokerServiceManifest.class, BrokerServiceRecipientList.class, EduDocument.class, Payload.class, Kvittering.class);
         } catch (JAXBException e) {
             throw new RuntimeException("Could not create JAXBContext", e);
         }
     }
 
-    private AltinnPackage(BrokerServiceManifest manifest, BrokerServiceRecipientList recipient, Document document) {
+    private AltinnPackage(BrokerServiceManifest manifest, BrokerServiceRecipientList recipient, EduDocument eduDocument) {
         this.manifest = manifest;
         this.recipient = recipient;
-        this.document = document;
+        this.eduDocument = eduDocument;
     }
 
     public static AltinnPackage from(UploadRequest document) {
@@ -84,7 +84,7 @@ public class AltinnPackage {
 
         zipOutputStream.putNextEntry(new ZipEntry("content.xml"));
         no.difi.meldingsutveksling.domain.sbdh.ObjectFactory objectFactory = new no.difi.meldingsutveksling.domain.sbdh.ObjectFactory();
-        marshallObject(objectFactory.createStandardBusinessDocument(document), zipOutputStream);
+        marshallObject(objectFactory.createStandardBusinessDocument(eduDocument), zipOutputStream);
         zipOutputStream.closeEntry();
 
         zipOutputStream.finish();
@@ -106,7 +106,7 @@ public class AltinnPackage {
         ArchiveEntry zipEntry;
         BrokerServiceManifest manifest = null;
         BrokerServiceRecipientList recipientList = null;
-        Document document = null;
+        EduDocument eduDocument = null;
 
         while ((zipEntry = zipInputStream.getNextEntry()) != null) {
             if (zipEntry.getName().equals("manifest.xml")) {
@@ -115,10 +115,10 @@ public class AltinnPackage {
                 recipientList = (BrokerServiceRecipientList) unmarshaller.unmarshal(inputStreamProxy);
             } else if (zipEntry.getName().equals("content.xml")) {
                 Source source = new StreamSource(inputStreamProxy);
-                document = unmarshaller.unmarshal(source, Document.class).getValue();
+                eduDocument = unmarshaller.unmarshal(source, EduDocument.class).getValue();
             }
         }
-        return new AltinnPackage(manifest, recipientList, document);
+        return new AltinnPackage(manifest, recipientList, eduDocument);
     }
 
     private void marshallObject(Object object, OutputStream outputStream) {
@@ -132,7 +132,7 @@ public class AltinnPackage {
 
     }
 
-    public Document getDocument() {
-        return document;
+    public EduDocument getEduDocument() {
+        return eduDocument;
     }
 }

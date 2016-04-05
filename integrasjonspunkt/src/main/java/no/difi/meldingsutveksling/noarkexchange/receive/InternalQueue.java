@@ -1,17 +1,15 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
-import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
-import no.difi.meldingsutveksling.domain.sbdh.Document;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.kvittering.KvitteringFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.logging.MessageMarkerFactory;
 import no.difi.meldingsutveksling.noarkexchange.*;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
@@ -21,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
@@ -82,7 +79,7 @@ public class InternalQueue {
     static {
         try {
             jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class, Kvittering.class);
-            jaxbContextdomain = JAXBContext.newInstance(Document.class, Payload.class, Kvittering.class);
+            jaxbContextdomain = JAXBContext.newInstance(EduDocument.class, Payload.class, Kvittering.class);
         } catch (JAXBException e) {
             throw new RuntimeException("Could not start internal queue: Failed to create JAXBContext", e);
         }
@@ -92,8 +89,8 @@ public class InternalQueue {
     @JmsListener(destination = NOARK, containerFactory = "myJmsContainerFactory")
     public void noarkListener(byte[] message, Session session) {
         MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, configuration.getOrganisationNumber());
-        Document document = documentConverter.unmarshallFrom(message);
-        forwardToNoark(document);
+        EduDocument eduDocument = documentConverter.unmarshallFrom(message);
+        forwardToNoark(eduDocument);
     }
 
     @JmsListener(destination = EXTERNAL, containerFactory = "myJmsContainerFactory")
@@ -125,18 +122,18 @@ public class InternalQueue {
     /**
      * Places the input parameter on the NOARK queue. The NOARK queue sends messages from external sender to
      * NOARK server.
-     * @param document the document as received by IntegrasjonspunktReceiveImpl from an external source
+     * @param eduDocument the eduDocument as received by IntegrasjonspunktReceiveImpl from an external source
      */
-    public void enqueueNoark(Document document) {
-        sendReceipt(document.getMessageInfo());
-        Audit.info("Delivery receipt sent", markerFrom(document.getMessageInfo()));
-        jmsTemplate.convertAndSend(NOARK,  documentConverter.marshallToBytes(document));
+    public void enqueueNoark(EduDocument eduDocument) {
+        sendReceipt(eduDocument.getMessageInfo());
+        Audit.info("Delivery receipt sent", markerFrom(eduDocument.getMessageInfo()));
+        jmsTemplate.convertAndSend(NOARK,  documentConverter.marshallToBytes(eduDocument));
     }
 
-    private void forwardToNoark(Document document) {
+    private void forwardToNoark(EduDocument eduDocument) {
         try {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
-            JAXBElement<Document> d = new ObjectFactory().createStandardBusinessDocument(document);
+            JAXBElement<EduDocument> d = new ObjectFactory().createStandardBusinessDocument(eduDocument);
 
             jaxbContextdomain.createMarshaller().marshal(d, os);
             byte[] tmp = os.toByteArray();
@@ -163,7 +160,7 @@ public class InternalQueue {
     }
 
     private void sendReceipt(MessageInfo messageInfo) {
-        Document doc = KvitteringFactory.createLeveringsKvittering(messageInfo, keyInfo.getKeyPair());
+        EduDocument doc = KvitteringFactory.createLeveringsKvittering(messageInfo, keyInfo.getKeyPair());
         Transport t = transportFactory.createTransport(doc);
         t.send(config.getConfiguration(), doc);
     }

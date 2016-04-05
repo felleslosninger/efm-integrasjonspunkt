@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import net.logstash.logback.marker.LogstashMarker;
-import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.StandardBusinessDocumentConverter;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Archive;
@@ -13,7 +12,7 @@ import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.BestEduMessage;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Mottaker;
-import no.difi.meldingsutveksling.domain.sbdh.Document;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory;
@@ -51,7 +50,7 @@ public class StandardBusinessDocumentFactory {
     static {
         try {
             jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class, Kvittering.class);
-            jaxbContextdomain = JAXBContext.newInstance(Document.class, Payload.class, Kvittering.class);
+            jaxbContextdomain = JAXBContext.newInstance(EduDocument.class, Payload.class, Kvittering.class);
         } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException("Could not initialize " + StandardBusinessDocumentConverter.class, e);
         }
@@ -64,11 +63,11 @@ public class StandardBusinessDocumentFactory {
         this.integrasjonspunktNokkel = integrasjonspunktNokkel;
     }
 
-    public Document create(PutMessageRequestType sender, Avsender avsender, Mottaker mottaker) throws MessageException {
+    public EduDocument create(PutMessageRequestType sender, Avsender avsender, Mottaker mottaker) throws MessageException {
         return create(sender, UUID.randomUUID().toString(), avsender, mottaker);
     }
 
-    public Document create(PutMessageRequestType shipment, String conversationId, Avsender avsender, Mottaker mottaker) throws MessageException {
+    public EduDocument create(PutMessageRequestType shipment, String conversationId, Avsender avsender, Mottaker mottaker) throws MessageException {
         final byte[] marshalledShipment = marshall(shipment);
 
         BestEduMessage bestEduMessage = new BestEduMessage(marshalledShipment);
@@ -107,15 +106,15 @@ public class StandardBusinessDocumentFactory {
         return os.toByteArray();
     }
 
-    public static Document create(StandardBusinessDocument fromDocument) {
+    public static EduDocument create(StandardBusinessDocument fromDocument) {
         ModelMapper mapper = new ModelMapper();
-        return mapper.map(fromDocument, Document.class);
+        return mapper.map(fromDocument, EduDocument.class);
     }
 
-    public static StandardBusinessDocument create(Document fromDocument) {
+    public static StandardBusinessDocument create(EduDocument fromDocument) {
         try {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
-            JAXBElement<Document> d = new no.difi.meldingsutveksling.domain.sbdh.ObjectFactory().createStandardBusinessDocument(fromDocument);
+            JAXBElement<EduDocument> d = new no.difi.meldingsutveksling.domain.sbdh.ObjectFactory().createStandardBusinessDocument(fromDocument);
 
             jaxbContextdomain.createMarshaller().marshal(d, os);
             byte[] tmp = os.toByteArray();

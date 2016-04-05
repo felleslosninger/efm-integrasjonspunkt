@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.transport.altinn;
 
-import no.difi.meldingsutveksling.domain.sbdh.Document;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.elma.ELMALookup;
 import no.difi.meldingsutveksling.transport.Transport;
@@ -23,7 +23,7 @@ public class AltinnTransportFactory implements TransportFactory {
     ELMALookup elmaLookup;
 
     @Override
-    public Transport createTransport(Document message) {
+    public Transport createTransport(EduDocument message) {
         StandardBusinessDocumentHeader standardBusinessDocumentHeader = message.getStandardBusinessDocumentHeader();
         final String receiverOrganisationNumber = standardBusinessDocumentHeader.getReceiverOrganisationNumber();
         return new AltinnTransport(receiverOrganisationNumber, elmaLookup);

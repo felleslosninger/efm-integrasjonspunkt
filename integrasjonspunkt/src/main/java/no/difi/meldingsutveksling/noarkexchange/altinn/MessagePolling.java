@@ -7,7 +7,7 @@ import no.difi.meldingsutveksling.DownloadRequest;
 import no.difi.meldingsutveksling.FileReference;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.sbdh.Document;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.elma.ELMALookup;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
@@ -67,9 +67,9 @@ public class MessagePolling {
 
         for (FileReference reference : fileReferences) {
             Audit.info("Downloading message", markerFrom(reference));
-            Document document = client.download(new DownloadRequest(reference.getValue(), config.getOrganisationNumber()));
+            EduDocument eduDocument = client.download(new DownloadRequest(reference.getValue(), config.getOrganisationNumber()));
 
-            internalQueue.enqueueNoark(document);
+            internalQueue.enqueueNoark(eduDocument);
         }
     }
 }

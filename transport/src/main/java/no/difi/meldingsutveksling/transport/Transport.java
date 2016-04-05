@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.transport;
 
-import no.difi.meldingsutveksling.domain.sbdh.Document;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import org.springframework.core.env.Environment;
 
 /**
@@ -15,8 +15,8 @@ import org.springframework.core.env.Environment;
 public interface Transport {
 
     /**
-     * @param document An SBD document with a payload consisting of an CMS encrypted ASIC package
+     * @param eduDocument An eduDocument with a payload consisting of an CMS encrypted ASIC package
      */
-    public void send(Environment environment, Document document);
+    void send(Environment environment, EduDocument eduDocument);
 
 }

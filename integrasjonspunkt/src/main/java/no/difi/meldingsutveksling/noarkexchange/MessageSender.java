@@ -7,8 +7,8 @@ import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.Noekkelpar;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
@@ -90,25 +90,25 @@ public class MessageSender {
 
         Audit.info("Sender and receivers signatures are validated", markerFrom(message));
 
-        no.difi.meldingsutveksling.domain.sbdh.Document sbd;
+        EduDocument edu;
         try {
-            sbd = standardBusinessDocumentFactory.create(messageRequest, messageContext.getAvsender(), messageContext.getMottaker());
+            edu = standardBusinessDocumentFactory.create(messageRequest, messageContext.getAvsender(), messageContext.getMottaker());
         } catch (MessageException e) {
-            Audit.error("Unable to create Standard Business Document. Message is not delievered", markerFrom(message));
+            Audit.error("Unable to create Edu Document. Message is not delievered", markerFrom(message));
             log.error(markerFrom(message), e.getStatusMessage().getTechnicalMessage(), e);
             return createErrorResponse(e);
         }
-        Audit.info("Successfully created Standard Business Document. Sending message...", markerFrom(message));
+        Audit.info("Successfully created Edu Document. Sending message...", markerFrom(message));
 
-        Transport t = transportFactory.createTransport(sbd);
-        t.send(configuration.getConfiguration(), sbd);
+        Transport t = transportFactory.createTransport(edu);
+        t.send(configuration.getConfiguration(), edu);
 
         Audit.info("Message delivered", markerFrom(message));
 
         return createOkResponse();
     }
 
-    public void sendMessage(Document doc) {
+    public void sendMessage(EduDocument doc) {
         Transport t = transportFactory.createTransport(doc);
         t.send(configuration.getConfiguration(), doc);
     }

@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.dokumentpakking.service;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.BusinessScope;
-import no.difi.meldingsutveksling.domain.sbdh.Document;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.DocumentIdentification;
 import no.difi.meldingsutveksling.domain.sbdh.Partner;
 import no.difi.meldingsutveksling.domain.sbdh.PartnerIdentification;
@@ -26,8 +26,8 @@ public class CreateSBD {
 	public static final String HEADER_VERSION = "1.0";
 	public static final String TYPE_VERSION = "1.0";
 
-    public Document createSBD(Organisasjonsnummer avsender, Organisasjonsnummer mottaker, Object payload, String conversationId, String type, String journalPostId) {
-		Document doc = new Document();
+    public EduDocument createSBD(Organisasjonsnummer avsender, Organisasjonsnummer mottaker, Object payload, String conversationId, String type, String journalPostId) {
+		EduDocument doc = new EduDocument();
 		doc.setStandardBusinessDocumentHeader(createHeader(avsender, mottaker, conversationId, type, journalPostId));
 		doc.setAny(payload);
 		return doc;

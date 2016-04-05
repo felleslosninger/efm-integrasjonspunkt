@@ -44,7 +44,7 @@ import java.util.List;
     "standardBusinessDocumentHeader",
     "any"
 })
-public class Document {
+public class EduDocument {
 
     @XmlElement(name = "StandardBusinessDocumentHeader")
     protected StandardBusinessDocumentHeader standardBusinessDocumentHeader;

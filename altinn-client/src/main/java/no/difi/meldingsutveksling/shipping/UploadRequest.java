@@ -1,11 +1,11 @@
 package no.difi.meldingsutveksling.shipping;
 
-import no.difi.meldingsutveksling.domain.sbdh.Document;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 
 public interface UploadRequest {
-    public String getSender();
-    public String getReceiver();
-    public String getSenderReference();
+    String getSender();
+    String getReceiver();
+    String getSenderReference();
 
-    Document getPayload();
+    EduDocument getPayload();
 }
