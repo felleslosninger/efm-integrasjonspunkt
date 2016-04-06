@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.kvittering.KvitteringFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -125,9 +126,18 @@ public class InternalQueue {
      * @param eduDocument the eduDocument as received by IntegrasjonspunktReceiveImpl from an external source
      */
     public void enqueueNoark(EduDocument eduDocument) {
-        sendReceipt(eduDocument.getMessageInfo());
-        Audit.info("Delivery receipt sent", markerFrom(eduDocument.getMessageInfo()));
-        jmsTemplate.convertAndSend(NOARK,  documentConverter.marshallToBytes(eduDocument));
+
+        if(!isKvittering(eduDocument)) {
+            sendReceipt(eduDocument.getMessageInfo());
+            Audit.info("Delivery receipt sent", markerFrom(eduDocument.getMessageInfo()));
+            jmsTemplate.convertAndSend(NOARK,  documentConverter.marshallToBytes(eduDocument));
+        } else {
+            Audit.info("Message is a receipt", markerFrom(eduDocument.getMessageInfo()));
+        }
+    }
+
+    private boolean isKvittering(EduDocument eduDocument) {
+        return eduDocument.getStandardBusinessDocumentHeader().getDocumentIdentification().getType().equalsIgnoreCase(StandardBusinessDocumentHeader.KVITTERING_TYPE);
     }
 
     private void forwardToNoark(EduDocument eduDocument) {

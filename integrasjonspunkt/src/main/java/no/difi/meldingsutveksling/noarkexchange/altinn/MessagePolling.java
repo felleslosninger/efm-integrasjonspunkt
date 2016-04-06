@@ -62,12 +62,12 @@ public class MessagePolling {
         List<FileReference> fileReferences = client.availableFiles(config.getOrganisationNumber());
 
         if(!fileReferences.isEmpty()) {
-            Audit.info("Found new messages! Proceeding with download...");
+            Audit.info("New messages");
         }
 
         for (FileReference reference : fileReferences) {
-            Audit.info("Downloading message", markerFrom(reference));
             EduDocument eduDocument = client.download(new DownloadRequest(reference.getValue(), config.getOrganisationNumber()));
+            Audit.info("Message downloaded", markerFrom(reference));
 
             internalQueue.enqueueNoark(eduDocument);
         }

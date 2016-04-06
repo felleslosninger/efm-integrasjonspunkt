@@ -64,8 +64,9 @@ public class KvitteringFactory {
 
         EduDocument unsignedReceipt = new EduDocument();
         StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader.Builder()
-                .from(new Organisasjonsnummer(messageInfo.getSenderOrgNumber()))
-                .to(new Organisasjonsnummer(messageInfo.getReceiverOrgNumber()))
+                // sender of the receipt is the receiver of the message
+                .from(new Organisasjonsnummer(messageInfo.getReceiverOrgNumber()))
+                .to(new Organisasjonsnummer(messageInfo.getSenderOrgNumber()))
                 .relatedToConversationId(messageInfo.getConversationId())
                 .relatedToJournalPostId(messageInfo.getJournalPostId())
                 .type(StandardBusinessDocumentHeader.DocumentType.KVITTERING)
