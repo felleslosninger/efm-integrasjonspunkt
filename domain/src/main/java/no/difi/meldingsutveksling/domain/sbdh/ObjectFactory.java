@@ -61,11 +61,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link Document }
+     * Create an instance of {@link EduDocument }
      * 
      */
-    public Document createStandardBusinessDocument() {
-        return new Document();
+    public EduDocument createStandardBusinessDocument() {
+        return new EduDocument();
     }
 
     /**
@@ -154,7 +154,7 @@ public class ObjectFactory {
      */
     @XmlElementDecl(namespace = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader", name = "CorrelationInformation", substitutionHeadNamespace = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader", substitutionHeadName = "ScopeInformation")
     public JAXBElement<CorrelationInformation> createCorrelationInformation(CorrelationInformation value) {
-        return new JAXBElement<CorrelationInformation>(_CorrelationInformation_QNAME, CorrelationInformation.class, null, value);
+        return new JAXBElement<>(_CorrelationInformation_QNAME, CorrelationInformation.class, null, value);
     }
 
     /**
@@ -163,7 +163,7 @@ public class ObjectFactory {
      */
     @XmlElementDecl(namespace = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader", name = "BusinessService", substitutionHeadNamespace = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader", substitutionHeadName = "ScopeInformation")
     public JAXBElement<BusinessService> createBusinessService(BusinessService value) {
-        return new JAXBElement<BusinessService>(_BusinessService_QNAME, BusinessService.class, null, value);
+        return new JAXBElement<>(_BusinessService_QNAME, BusinessService.class, null, value);
     }
 
     /**
@@ -172,7 +172,7 @@ public class ObjectFactory {
      */
     @XmlElementDecl(namespace = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader", name = "ScopeInformation")
     public JAXBElement<Object> createScopeInformation(Object value) {
-        return new JAXBElement<Object>(_ScopeInformation_QNAME, Object.class, null, value);
+        return new JAXBElement<>(_ScopeInformation_QNAME, Object.class, null, value);
     }
 
     /**
@@ -181,16 +181,16 @@ public class ObjectFactory {
      */
     @XmlElementDecl(namespace = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader", name = "StandardBusinessDocumentHeader")
     public JAXBElement<StandardBusinessDocumentHeader> createStandardBusinessDocumentHeader(StandardBusinessDocumentHeader value) {
-        return new JAXBElement<StandardBusinessDocumentHeader>(_StandardBusinessDocumentHeader_QNAME, StandardBusinessDocumentHeader.class, null, value);
+        return new JAXBElement<>(_StandardBusinessDocumentHeader_QNAME, StandardBusinessDocumentHeader.class, null, value);
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link Document }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link EduDocument }{@code >}}
      * 
      */
     @XmlElementDecl(namespace = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader", name = "StandardBusinessDocument")
-    public JAXBElement<Document> createStandardBusinessDocument(Document value) {
-        return new JAXBElement<Document>(_StandardBusinessDocument_QNAME, Document.class, null, value);
+    public JAXBElement<EduDocument> createStandardBusinessDocument(EduDocument value) {
+        return new JAXBElement<>(_StandardBusinessDocument_QNAME, EduDocument.class, null, value);
     }
 
 }

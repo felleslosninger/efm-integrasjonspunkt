@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.kvittering;
 
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import org.w3c.dom.Document;
@@ -30,7 +31,7 @@ class DocumentToDocumentConverter {
 
     static {
         try {
-            jaxBContext = JAXBContext.newInstance(no.difi.meldingsutveksling.domain.sbdh.Document.class, Kvittering.class);
+            jaxBContext = JAXBContext.newInstance(EduDocument.class, Kvittering.class);
         } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException(e.getMessage(), e);
         }
@@ -41,9 +42,8 @@ class DocumentToDocumentConverter {
      * from a  from an org.w3c.document
      *
      * @param domDocument the source document
-     * @throws JAXBException
      */
-    public static no.difi.meldingsutveksling.domain.sbdh.Document toDomainDocument(Document domDocument) {
+    public static EduDocument toDomainDocument(Document domDocument) {
         TransformerFactory tf = TransformerFactory.newInstance();
         Transformer t;
         try {
@@ -51,19 +51,18 @@ class DocumentToDocumentConverter {
             DOMSource source = new DOMSource(domDocument);
             JAXBResult result = new JAXBResult(jaxBContext);
             t.transform(source, result);
-            return ((JAXBElement<no.difi.meldingsutveksling.domain.sbdh.Document>) result.getResult()).getValue();
+            return ((JAXBElement<EduDocument>) result.getResult()).getValue();
         } catch (TransformerException | JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
     }
 
     /**
-     * Marshell the contained document to an org.w3c.Document representation
+     * Marshall the contained document to an org.w3c.Document representation
      *
-     * @return
-     * @throws JAXBException
+     * @return org.w3c.Document
      */
-    public static Document toXMLDocument(no.difi.meldingsutveksling.domain.sbdh.Document jaxbDocument ) {
+    public static Document toXMLDocument(EduDocument jaxbDocument ) {
         try {
             Marshaller marshaller = jaxBContext.createMarshaller();
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -75,7 +74,7 @@ class DocumentToDocumentConverter {
             } catch (ParserConfigurationException e) {
                 throw new MeldingsUtvekslingRuntimeException(e);
             }
-            JAXBElement<no.difi.meldingsutveksling.domain.sbdh.Document> jbe = new ObjectFactory().createStandardBusinessDocument(jaxbDocument);
+            JAXBElement<EduDocument> jbe = new ObjectFactory().createStandardBusinessDocument(jaxbDocument);
             marshaller.marshal(jbe, domDocument);
             return domDocument;
         } catch (JAXBException e) {

@@ -1,16 +1,21 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
+import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.sbdh.Document;
+import no.difi.meldingsutveksling.domain.MessageInfo;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
+import no.difi.meldingsutveksling.kvittering.KvitteringFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.logging.MessageMarkerFactory;
 import no.difi.meldingsutveksling.noarkexchange.*;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
+import no.difi.meldingsutveksling.transport.Transport;
+import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -56,6 +61,15 @@ public class InternalQueue {
     @Autowired
     private IntegrasjonspunktConfiguration configuration;
 
+    @Autowired
+    IntegrasjonspunktNokkel keyInfo;
+
+    @Autowired
+    TransportFactory transportFactory;
+
+    @Autowired
+    IntegrasjonspunktConfiguration config;
+
     private final DocumentConverter documentConverter = new DocumentConverter();
 
     private static JAXBContext jaxbContextdomain;
@@ -66,7 +80,7 @@ public class InternalQueue {
     static {
         try {
             jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class, Kvittering.class);
-            jaxbContextdomain = JAXBContext.newInstance(Document.class, Payload.class, Kvittering.class);
+            jaxbContextdomain = JAXBContext.newInstance(EduDocument.class, Payload.class, Kvittering.class);
         } catch (JAXBException e) {
             throw new RuntimeException("Could not start internal queue: Failed to create JAXBContext", e);
         }
@@ -76,8 +90,8 @@ public class InternalQueue {
     @JmsListener(destination = NOARK, containerFactory = "myJmsContainerFactory")
     public void noarkListener(byte[] message, Session session) {
         MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, configuration.getOrganisationNumber());
-        Document document = documentConverter.unmarshallFrom(message);
-        forwardToNoark(document);
+        EduDocument eduDocument = documentConverter.unmarshallFrom(message);
+        forwardToNoark(eduDocument);
     }
 
     @JmsListener(destination = EXTERNAL, containerFactory = "myJmsContainerFactory")
@@ -87,7 +101,7 @@ public class InternalQueue {
         try {
             integrasjonspunktSend.sendMessage(requestType);
         } catch (Exception e) {
-            Audit.error("Failed to send message... queue will retry", MessageMarkerFactory.markerFrom(new PutMessageRequestWrapper(requestType)));
+            Audit.error("Failed to send message... queue will retry", markerFrom(new PutMessageRequestWrapper(requestType)));
             throw e;
         }
     }
@@ -101,7 +115,7 @@ public class InternalQueue {
         try {
             jmsTemplate.convertAndSend(EXTERNAL, putMessageRequestConverter.marshallToBytes(request));
         } catch (Exception e) {
-            Audit.error("Unable to send message", MessageMarkerFactory.markerFrom(new PutMessageRequestWrapper(request)));
+            Audit.error("Unable to send message", markerFrom(new PutMessageRequestWrapper(request)));
             throw e;
         }
     }
@@ -109,16 +123,27 @@ public class InternalQueue {
     /**
      * Places the input parameter on the NOARK queue. The NOARK queue sends messages from external sender to
      * NOARK server.
-     * @param document the document as received by IntegrasjonspunktReceiveImpl from an external source
+     * @param eduDocument the eduDocument as received by IntegrasjonspunktReceiveImpl from an external source
      */
-    public void enqueueNoark(Document document) {
-        jmsTemplate.convertAndSend(NOARK,  documentConverter.marshallToBytes(document));
+    public void enqueueNoark(EduDocument eduDocument) {
+
+        if(!isKvittering(eduDocument)) {
+            sendReceipt(eduDocument.getMessageInfo());
+            Audit.info("Delivery receipt sent", markerFrom(eduDocument.getMessageInfo()));
+            jmsTemplate.convertAndSend(NOARK,  documentConverter.marshallToBytes(eduDocument));
+        } else {
+            Audit.info("Message is a receipt", markerFrom(eduDocument.getMessageInfo()));
+        }
     }
 
-    private void forwardToNoark(Document document) {
+    private boolean isKvittering(EduDocument eduDocument) {
+        return eduDocument.getStandardBusinessDocumentHeader().getDocumentIdentification().getType().equalsIgnoreCase(StandardBusinessDocumentHeader.KVITTERING_TYPE);
+    }
+
+    private void forwardToNoark(EduDocument eduDocument) {
         try {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
-            JAXBElement<Document> d = new ObjectFactory().createStandardBusinessDocument(document);
+            JAXBElement<EduDocument> d = new ObjectFactory().createStandardBusinessDocument(eduDocument);
 
             jaxbContextdomain.createMarshaller().marshal(d, os);
             byte[] tmp = os.toByteArray();
@@ -142,5 +167,11 @@ public class InternalQueue {
             Audit.error("Could not forward document to NOARK system... due to a technical error");
             throw new MeldingsUtvekslingRuntimeException("Could not forward document to archive system", e);
         }
+    }
+
+    private void sendReceipt(MessageInfo messageInfo) {
+        EduDocument doc = KvitteringFactory.createLeveringsKvittering(messageInfo, keyInfo.getKeyPair());
+        Transport t = transportFactory.createTransport(doc);
+        t.send(config.getConfiguration(), doc);
     }
 }

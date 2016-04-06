@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.transport;
 
-import no.difi.meldingsutveksling.domain.sbdh.Document;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 
 /**
  * Factory class to configure transport based on a SBD document. Implementations of this can use content in the StandardBusinessDocument
@@ -11,7 +11,7 @@ import no.difi.meldingsutveksling.domain.sbdh.Document;
 
 public interface TransportFactory {
 
-    Transport createTransport(Document message);
+    Transport createTransport(EduDocument message);
 
 }
 

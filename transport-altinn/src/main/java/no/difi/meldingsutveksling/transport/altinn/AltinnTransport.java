@@ -4,7 +4,7 @@ import no.difi.meldingsutveksling.AltinnWsClient;
 import no.difi.meldingsutveksling.AltinnWsConfiguration;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
-import no.difi.meldingsutveksling.domain.sbdh.Document;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.elma.ELMALookup;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.transport.Transport;
@@ -30,10 +30,10 @@ public class AltinnTransport implements Transport {
 
     /**
      * @param environment a configuration object given by the integrasjonspunkt
-     * @param document      An SBD document with a payload consisting of an CMS encrypted ASIC package
+     * @param eduDocument      An eduDocument with a payload consisting of an CMS encrypted ASIC package
      */
     @Override
-    public void send(Environment environment, final Document document) {
+    public void send(Environment environment, final EduDocument eduDocument) {
         Endpoint ep;
         try {
             ep = elmaLookup.lookup(organisationNumber);
@@ -45,13 +45,13 @@ public class AltinnTransport implements Transport {
 
             @Override
             public String getSender() {
-                Organisasjonsnummer orgNumberSender = fromIso6523(document.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue());
+                Organisasjonsnummer orgNumberSender = fromIso6523(eduDocument.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue());
                 return orgNumberSender.toString();
             }
 
             @Override
             public String getReceiver() {
-                Organisasjonsnummer orgNumberReceiver = fromIso6523(document.getStandardBusinessDocumentHeader().getReceiver().get(0).getIdentifier().getValue());
+                Organisasjonsnummer orgNumberReceiver = fromIso6523(eduDocument.getStandardBusinessDocumentHeader().getReceiver().get(0).getIdentifier().getValue());
                 return orgNumberReceiver.toString();
             }
 
@@ -61,8 +61,8 @@ public class AltinnTransport implements Transport {
             }
 
             @Override
-            public Document getPayload() {
-                return document;
+            public EduDocument getPayload() {
+                return eduDocument;
             }
         };
 

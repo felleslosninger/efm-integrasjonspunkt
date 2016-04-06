@@ -8,6 +8,7 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
+import no.difi.meldingsutveksling.domain.MessageInfo;
 import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -15,6 +16,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.List;
 
 
 /**
@@ -42,7 +44,7 @@ import javax.xml.bind.annotation.XmlType;
     "standardBusinessDocumentHeader",
     "any"
 })
-public class Document {
+public class EduDocument {
 
     @XmlElement(name = "StandardBusinessDocumentHeader")
     protected StandardBusinessDocumentHeader standardBusinessDocumentHeader;
@@ -97,6 +99,36 @@ public class Document {
      */
     public void setAny(Object value) {
         this.any = value;
+    }
+
+    public MessageInfo getMessageInfo() {
+        return new MessageInfo(getReceiverOrgNumber(), getSenderOrgNumber(), getJournalPostId(), getConversationId());
+    }
+
+    public String getSenderOrgNumber() {
+        return getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue().split(":")[1];
+    }
+
+    public String getReceiverOrgNumber() {
+        return getStandardBusinessDocumentHeader().getReceiver().get(0).getIdentifier().getValue().split(":")[1];
+    }
+
+    public final String getJournalPostId() {
+        return findScope(ScopeType.JournalpostId).getInstanceIdentifier();
+    }
+
+    public String getConversationId() {
+        return findScope(ScopeType.ConversationId).getInstanceIdentifier();
+    }
+
+    private Scope findScope(ScopeType scopeType) {
+        final List<Scope> scopes = getStandardBusinessDocumentHeader().getBusinessScope().getScope();
+        for (Scope scope : scopes) {
+            if (scopeType.name().equals(scope.getType())) {
+                return scope;
+            }
+        }
+        return new Scope();
     }
 
 }

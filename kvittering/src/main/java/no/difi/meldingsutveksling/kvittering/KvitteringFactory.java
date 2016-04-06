@@ -4,9 +4,10 @@ package no.difi.meldingsutveksling.kvittering;
 import no.difi.meldingsutveksling.StandardBusinessDocumentConverter;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.XMLTimeStamp;
-import no.difi.meldingsutveksling.domain.sbdh.Document;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.kvittering.xsd.Aapning;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
@@ -36,38 +37,38 @@ public class KvitteringFactory {
     static {
         try {
             jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class, Kvittering.class);
-            jaxbContextdomain = JAXBContext.newInstance(Document.class, Payload.class, Kvittering.class);
+            jaxbContextdomain = JAXBContext.newInstance(EduDocument.class, Payload.class, Kvittering.class);
         } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException("Could not initialize " + StandardBusinessDocumentConverter.class, e);
         }
     }
 
 
-    public static Document createAapningskvittering(String receiverOrgNumber, String senderOrgNumber,
-                                                    String journalPostId, String conversationId, KeyPair keyPair) {
+    public static EduDocument createAapningskvittering(MessageInfo messageInfo, KeyPair keyPair) {
         Kvittering k = new Kvittering();
         k.setAapning(new Aapning());
         k.setTidspunkt(XMLTimeStamp.createTimeStamp());
-        return signAndWrapDocument(receiverOrgNumber, senderOrgNumber, journalPostId, conversationId, keyPair, k);
+        return signAndWrapDocument(messageInfo, keyPair, k);
     }
 
-    public static Document createLeveringsKvittering(String receiverOrgNumber, String senderOrgNumber,
-                                                     String journalPostId, String conversationId, KeyPair keyPair) {
+    public static EduDocument createLeveringsKvittering(MessageInfo messageInfo, KeyPair keyPair) {
         Kvittering k = new Kvittering();
         k.setLevering(new Levering());
         k.setTidspunkt(XMLTimeStamp.createTimeStamp());
-        return signAndWrapDocument(receiverOrgNumber, senderOrgNumber, journalPostId, conversationId, keyPair, k);
+        return signAndWrapDocument(messageInfo,
+                keyPair,
+                k);
     }
 
-    private static Document signAndWrapDocument(String receiverOrgNumber, String senderOrgNumber, String journalPostId,
-                                                String conversationId, KeyPair keyPair, Kvittering kvittering) {
+    private static EduDocument signAndWrapDocument(MessageInfo messageInfo, KeyPair keyPair, Kvittering kvittering) {
 
-        Document unsignedReceipt = new Document();
+        EduDocument unsignedReceipt = new EduDocument();
         StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader.Builder()
-                .from(new Organisasjonsnummer(senderOrgNumber))
-                .to(new Organisasjonsnummer(receiverOrgNumber))
-                .relatedToConversationId(conversationId)
-                .relatedToJournalPostId(journalPostId)
+                // sender of the receipt is the receiver of the message
+                .from(new Organisasjonsnummer(messageInfo.getReceiverOrgNumber()))
+                .to(new Organisasjonsnummer(messageInfo.getSenderOrgNumber()))
+                .relatedToConversationId(messageInfo.getConversationId())
+                .relatedToJournalPostId(messageInfo.getJournalPostId())
                 .type(StandardBusinessDocumentHeader.DocumentType.KVITTERING)
                 .build();
 

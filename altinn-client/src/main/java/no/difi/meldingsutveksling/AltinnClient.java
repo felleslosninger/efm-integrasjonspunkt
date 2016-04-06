@@ -4,7 +4,7 @@ import no.altinn.schemas.services.intermediary.receipt._2009._10.*;
 import no.altinn.schemas.services.intermediary.shipment._2009._10.ReferenceType;
 import no.altinn.services.intermediary.receipt._2009._10.IReceiptExternalBasicGetReceiptBasicAltinnFaultFaultFaultMessage;
 import no.altinn.services.intermediary.receipt._2009._10.ReceiptExternalBasicSF;
-import no.difi.meldingsutveksling.domain.sbdh.Document;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 
 import javax.xml.bind.JAXBContext;
@@ -42,10 +42,10 @@ public class AltinnClient {
 
     private void printIt(AltinnPackage altinnPackage) {
         try {
-            JAXBContext ctx = JAXBContext.newInstance(Document.class);
+            JAXBContext ctx = JAXBContext.newInstance(EduDocument.class);
             Marshaller marshaller = ctx.createMarshaller();
             no.difi.meldingsutveksling.domain.sbdh.ObjectFactory objectFactory = new no.difi.meldingsutveksling.domain.sbdh.ObjectFactory();
-            marshaller.marshal(objectFactory.createStandardBusinessDocument(altinnPackage.getDocument()), System.out);
+            marshaller.marshal(objectFactory.createStandardBusinessDocument(altinnPackage.getEduDocument()), System.out);
         } catch (JAXBException e) {
             e.printStackTrace();
         }

@@ -4,6 +4,7 @@ import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.FileReference;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
+import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
@@ -112,6 +113,13 @@ public class MessageMarkerFactory {
         final LogstashMarker receiverMarker = receiverMarker(documentWrapper.getReceiverOrgNumber());
         final LogstashMarker senderMarker = senderMarker(documentWrapper.getSenderOrgNumber());
         return documentIdMarker.and(journalPostIdMarker).and(conversationIdMarker).and(senderMarker).and(receiverMarker);
+    }
+
+    public static LogstashMarker markerFrom(MessageInfo messageInfo) {
+        final LogstashMarker jpMarker = journalPostIdMarker(messageInfo.getJournalPostId());
+        final LogstashMarker sMarker = senderMarker(messageInfo.getSenderOrgNumber());
+        final LogstashMarker rMarker = receiverMarker(messageInfo.getReceiverOrgNumber());
+        return jpMarker.and(sMarker).and(rMarker);
     }
 
 

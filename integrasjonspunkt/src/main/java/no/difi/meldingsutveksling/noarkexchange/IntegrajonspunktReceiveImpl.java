@@ -5,7 +5,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.ProcessState;
-import no.difi.meldingsutveksling.domain.sbdh.Document;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.kvittering.KvitteringFactory;
@@ -102,9 +102,8 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
             return new CorrelationInformation();
         }
 
+        // TODO: remove? or move to send leveringskvittering i internal queue?
         logEvent(document, ProcessState.SBD_RECIEVED);
-        sendReceiptDelivered(document);
-        Audit.info("Delivery receipt sent", markerFrom(document));
 
         Payload payload = document.getPayload();
         byte[] decryptedAsicPackage = decrypt(payload);
@@ -130,7 +129,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
         PutMessageResponseType response = localNoark.sendEduMelding(putMessageRequestType);
         AppReceiptType result = response.getResult();
         if (result.getType().equals(OK_TYPE)) {
-            Audit.info("Document successfully delivered to NOARK system. Sending receipt back to sender...", markerFrom(response));
+            Audit.info("EduDocument successfully delivered to NOARK system. Sending receipt back to sender...", markerFrom(response));
             sendReceiptOpen(inputDocument);
             logEvent(inputDocument, ProcessState.BEST_EDU_SENT);
         } else {
@@ -140,20 +139,16 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
     }
 
     private void sendReceiptDelivered(StandardBusinessDocumentWrapper inputDocument) {
-        Document doc = KvitteringFactory.createLeveringsKvittering(inputDocument.getSenderOrgNumber(),
-                inputDocument.getReceiverOrgNumber(), inputDocument.getJournalPostId(),
-                inputDocument.getConversationId(), keyInfo.getKeyPair());
-        sendReceipt(inputDocument, doc);
+        EduDocument doc = KvitteringFactory.createLeveringsKvittering(inputDocument.getMessageInfo(), keyInfo.getKeyPair());
+        sendReceipt(doc);
     }
 
     private void sendReceiptOpen(StandardBusinessDocumentWrapper inputDocument) {
-        Document doc = KvitteringFactory.createAapningskvittering(inputDocument.getSenderOrgNumber(),
-                inputDocument.getReceiverOrgNumber(), inputDocument.getJournalPostId(),
-                inputDocument.getConversationId(), keyInfo.getKeyPair());
-        sendReceipt(inputDocument, doc);
+        EduDocument doc = KvitteringFactory.createAapningskvittering(inputDocument.getMessageInfo(), keyInfo.getKeyPair());
+        sendReceipt(doc);
     }
 
-    private void sendReceipt(StandardBusinessDocumentWrapper input, Document receipt) {
+    private void sendReceipt(EduDocument receipt) {
         Transport t = transportFactory.createTransport(receipt);
         t.send(config.getConfiguration(), receipt);
     }

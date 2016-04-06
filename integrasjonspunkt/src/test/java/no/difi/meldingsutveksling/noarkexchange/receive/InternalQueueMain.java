@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
 import no.difi.meldingsutveksling.config.JmsConfiguration;
-import no.difi.meldingsutveksling.domain.sbdh.Document;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -21,11 +21,11 @@ public class InternalQueueMain extends SpringBootServletInitializer {
     InternalQueue queue;
 
     public void testPut() {
-        Document document = new Document();
+        EduDocument eduDocument = new EduDocument();
         StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader();
         header.setHeaderVersion("some header version");
-        document.setStandardBusinessDocumentHeader(header);
-        queue.enqueueNoark(document);
+        eduDocument.setStandardBusinessDocumentHeader(header);
+        queue.enqueueNoark(eduDocument);
     }
 
     public static void main(String... args) {
