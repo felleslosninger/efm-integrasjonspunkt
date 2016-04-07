@@ -4,7 +4,7 @@
         <appender name="stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
             <if condition='property("spring.profiles.active").contains("dev")'>
               <then>
-                <destination>integrasjonstest-miif.difi.local:8300</destination>
+                <destination>test-meldingsutveksling-app01.difi.local:8300</destination>
               </then>
             </if>
             <if condition='property("spring.profiles.active").contains("itest")'>
@@ -14,7 +14,7 @@
             </if>
             <if condition='property("spring.profiles.active").contains("systest")'>
               <then>
-                <destination>test-meldingsutveksling-app01.difi.local:8300</destination>
+                <destination>integrasjonstest-miif.difi.local:8300</destination>
               </then>
             </if>
             <if condition='property("spring.profiles.active").contains("staging")'>
