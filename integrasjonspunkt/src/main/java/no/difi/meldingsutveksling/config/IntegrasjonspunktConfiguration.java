@@ -35,7 +35,7 @@ public class IntegrasjonspunktConfiguration {
     private static final String KEY_ALTINN_SERVICE_EDITION_CODE = "altinn.external_service_edition_code";
 
     protected static final String KEY_NOARKSYSTEM_ENDPOINT = "noarksystem.endpointURL";
-    private static final String KEY_NOARKSYSTEM_USERNAME = "noarksystem.userName";
+    private static final String KEY_NOARKSYSTEM_USERNAME = "noarksystem.username";
     private static final String KEY_NOARKSYSTEM_PASSWORD = "noarksystem.password";
     private static final String KEY_NOARKSYSTEM_DOMAIN = "noarksystem.domain";
 
