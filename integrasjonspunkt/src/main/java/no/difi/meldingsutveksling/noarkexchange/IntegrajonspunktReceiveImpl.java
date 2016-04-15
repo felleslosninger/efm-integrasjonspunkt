@@ -84,7 +84,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
             return forwardToNoarkSystem(standardBusinessDocument);
         } catch (MessageException e) {
             StandardBusinessDocumentWrapper documentWrapper = new StandardBusinessDocumentWrapper(standardBusinessDocument);
-            Audit.error("Message could not be sent to archive system", markerFrom(documentWrapper));
+            Audit.error("Failed to deliver archive", markerFrom(documentWrapper));
             logger.error(markerFrom(documentWrapper),
                     e.getStatusMessage().getTechnicalMessage(), e);
             return new CorrelationInformation();
@@ -94,10 +94,17 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
     public CorrelationInformation forwardToNoarkSystem(StandardBusinessDocument inputDocument) throws MessageException {
         StandardBusinessDocumentWrapper document = new StandardBusinessDocumentWrapper(inputDocument);
 
-        adresseregisterService.validateCertificates(document);
-        Audit.info("Sender and recievers certificates are validated. Processing contents...", markerFrom(new StandardBusinessDocumentWrapper(inputDocument)));
+        try {
+            adresseregisterService.validateCertificates(document);
+            Audit.info("Certificates validated", markerFrom(new StandardBusinessDocumentWrapper(inputDocument)));
+        }
+        catch (MessageException e){
+            Audit.error(e.getMessage(), markerFrom(document));
+            throw e;
+        }
+
         if (document.isReciept()) {
-            Audit.info("Received message is a receipt. Finished", markerFrom(document));
+            Audit.info("Messagetype Receipt", markerFrom(document));
             logEvent(document, ProcessState.KVITTERING_MOTTATT);
             return new CorrelationInformation();
         }
@@ -111,10 +118,12 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
         PutMessageRequestType eduDocument;
         try {
             eduDocument = convertAsicEntrytoEduDocument(decryptedAsicPackage);
+            Audit.info("EDUdocument extracted", markerFrom(document));
         } catch (IOException | JAXBException e) {
+            Audit.error("Failed to extract EDUdocument", markerFrom(document));
             throw new MessageException(e, StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
         }
-        Audit.info("Successfully extracted BEST/EDU document from message payload", markerFrom(document));
+
         forwardToNoarkSystemAndSendReceipts(document, eduDocument);
         return new CorrelationInformation();
     }
@@ -129,11 +138,11 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
         PutMessageResponseType response = localNoark.sendEduMelding(putMessageRequestType);
         AppReceiptType result = response.getResult();
         if (result.getType().equals(OK_TYPE)) {
-            Audit.info("EduDocument successfully delivered to NOARK system. Sending receipt back to sender...", markerFrom(response));
+            Audit.info("Deliverded archive", markerFrom(response));
             sendReceiptOpen(inputDocument);
             logEvent(inputDocument, ProcessState.BEST_EDU_SENT);
         } else {
-            Audit.info("NOARK replied with non-OK. Response", markerFrom(response));
+            Audit.error("Unexcpected response from archive", markerFrom(response));
 
         }
     }
