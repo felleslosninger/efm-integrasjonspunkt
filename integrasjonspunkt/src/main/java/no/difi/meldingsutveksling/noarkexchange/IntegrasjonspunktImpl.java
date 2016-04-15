@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import com.thoughtworks.xstream.XStream;
+import net.logstash.logback.encoder.org.apache.commons.lang.StringUtils;
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
@@ -88,8 +89,10 @@ public class IntegrasjonspunktImpl implements SOAPport {
         if(canReceive) {
             Audit.info("Mottaker kan motta meldinger", marker);
         } else {
-            Audit.info("Mangler mottakers sertifikat, sjekker om MSH kan motta meldinger", marker);
-            canReceive = mshClient.canRecieveMessage(organisasjonsnummer);
+            if(hasMshEndpoint()) {
+                Audit.info("Mangler mottakers sertifikat, sjekker om MSH kan motta meldinger", marker);
+                canReceive = mshClient.canRecieveMessage(organisasjonsnummer);
+            }
         }
         if(!canReceive) {
             Audit.error("Mottaker kan ikke motta meldinger", marker);
@@ -100,12 +103,17 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
     private boolean hasAdresseregisterCertificate(String organisasjonsnummer) {
         try {
+            log.info("hasAdresseregisterCertificate orgnr:" +organisasjonsnummer+"orgnr");
             String nOrgnr = FiksFix.replaceOrgNummberWithKs(organisasjonsnummer);
             adresseregister.getCertificate(nOrgnr);
             return true;
         } catch (CertificateException e) {
             return false;
         }
+    }
+
+    private boolean hasMshEndpoint(){
+        return !StringUtils.isBlank(configuration.getKeyMshEndpoint());
     }
 
     @Override
@@ -135,8 +143,12 @@ public class IntegrasjonspunktImpl implements SOAPport {
                 PutMessageStrategy strategy = putMessageStrategyFactory.create(request.getPayload());
                 return strategy.putMessage(request);
             } else {
-                Audit.info("Receiver certificate not found, reverting to MSH.", markerFrom(message));
-                return mshClient.sendEduMelding(request);
+                if(hasMshEndpoint()) {
+                    Audit.info("Receiver not found, reverting to MSH.", markerFrom(message));
+                    return mshClient.sendEduMelding(request);
+                }
+                Audit.error("Receiver not found", markerFrom(message));
+                return PutMessageResponseFactory.createErrorResponse(new MessageException(StatusMessage.UNABLE_TO_FIND_RECEIVER));
             }
         }
     }
@@ -158,9 +170,16 @@ public class IntegrasjonspunktImpl implements SOAPport {
             PutMessageResponseType response = strategy.putMessage(request);
             result = validateResult(response);
         } else {
-            Audit.info("Mottakers sertifikat mangler eller er ugyldig, prøver å sende melding via MSH", markerFrom(message));
-            PutMessageResponseType response = mshClient.sendEduMelding(request);
-            result = validateResult(response);
+            if (hasMshEndpoint()){
+                Audit.info("Mottakers sertifikat mangler eller er ugyldig, prøver å sende melding via MSH", markerFrom(message));
+                PutMessageResponseType response = mshClient.sendEduMelding(request);
+                result = validateResult(response);
+            }
+            else
+            {
+                Audit.error("Receiver not found", markerFrom(message));
+                result = false;
+            }
         }
         if(result) {
             Audit.info("Message successfully sent", markerFrom(message));

@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.config;
 
+import com.sun.jersey.core.util.StringIgnoreCaseKeyComparator;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRequiredPropertyException;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClientSettings;
 import org.slf4j.Logger;
@@ -137,6 +138,8 @@ public class IntegrasjonspunktConfiguration {
     public String getNoarkType() {
         return environment.getProperty(KEY_NOARKSYSTEM_TYPE);
     }
+
+    public String getKeyMshEndpoint() {return environment.getProperty(KEY_MSH_ENDPOINT); }
 
     public ConfigMeta getMetadata() {
 
