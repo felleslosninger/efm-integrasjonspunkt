@@ -142,7 +142,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
             sendReceiptOpen(inputDocument);
             logEvent(inputDocument, ProcessState.BEST_EDU_SENT);
         } else {
-            Audit.error("Unexcpected response from archive", markerFrom(response));
+            Audit.error("Unexpected response from archive", markerFrom(response));
 
         }
     }
