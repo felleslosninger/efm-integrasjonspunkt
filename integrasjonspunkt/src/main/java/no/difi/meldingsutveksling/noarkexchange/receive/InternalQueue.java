@@ -153,18 +153,18 @@ public class InternalQueue {
                     jaxbContext.createUnmarshaller().unmarshal(new ByteArrayInputStream(tmp));
 
             final StandardBusinessDocument standardBusinessDocument = toDocument.getValue();
-            Audit.info("Successfully extracted standard business document. Forwarding document to NOARK system...", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));
+            Audit.info("SBD extracted", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));
             try {
                 integrajonspunktReceive.forwardToNoarkSystem(standardBusinessDocument);
             } catch (MessageException e) {
-                Audit.error("Could not forward document to NOARK system...", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));
+                Audit.error("Failed delivering to archive (1)", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));
                 logger.error(markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)), e.getStatusMessage().getTechnicalMessage(), e);
             } catch (Exception e) {
-                Audit.error("Unable to send document to NOARK system", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));
+                Audit.error("Failed delivering to archive (2)", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));
                 throw e;
             }
         } catch (JAXBException e) {
-            Audit.error("Could not forward document to NOARK system... due to a technical error");
+            Audit.error("Failed to unserialize SBD");
             throw new MeldingsUtvekslingRuntimeException("Could not forward document to archive system", e);
         }
     }

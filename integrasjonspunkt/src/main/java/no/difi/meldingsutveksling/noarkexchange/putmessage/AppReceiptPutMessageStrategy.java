@@ -43,7 +43,7 @@ class AppReceiptPutMessageStrategy implements PutMessageStrategy {
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType request) {
         final PutMessageRequestWrapper wrapper = new PutMessageRequestWrapper(request);
-        Audit.info("Received Appreceipt", markerFrom(wrapper));
+        Audit.info("Received AppReceipt", markerFrom(wrapper));
         final String payload = StringEscapeUtils.unescapeHtml((String) request.getPayload());
         try {
             StringSource source = new StringSource(payload);
@@ -51,9 +51,9 @@ class AppReceiptPutMessageStrategy implements PutMessageStrategy {
             JAXBElement<AppReceiptType> r = unmarshaller.unmarshal(source, AppReceiptType.class);
             AppReceiptType receipt = r.getValue();
             if (receipt.getType().equals("OK")) {
-                Audit.info("Received Appreceipt OK returning document to sender." + wrapper.getRecieverPartyNumber(), markerFrom(wrapper));
                 wrapper.swapSenderAndReceiver();
                 context.getMessageSender().sendMessage(wrapper.getRequest());
+                Audit.info("AppReceipt sent to "+ wrapper.getRecieverPartyNumber(), markerFrom(wrapper));
             }
             return createOkResponse();
         } catch (JAXBException e) {
