@@ -138,7 +138,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
         PutMessageResponseType response = localNoark.sendEduMelding(putMessageRequestType);
         AppReceiptType result = response.getResult();
         if (result.getType().equals(OK_TYPE)) {
-            Audit.info("Deliverded archive", markerFrom(response));
+            Audit.info("Delivered archive", markerFrom(response));
             sendReceiptOpen(inputDocument);
             logEvent(inputDocument, ProcessState.BEST_EDU_SENT);
         } else {
