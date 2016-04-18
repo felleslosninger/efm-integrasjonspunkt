@@ -62,7 +62,7 @@ public class MessagePolling {
         List<FileReference> fileReferences = client.availableFiles(config.getOrganisationNumber());
 
         if(!fileReferences.isEmpty()) {
-            Audit.info("New messages");
+            Audit.info("New message(s) detected");
         }
 
         for (FileReference reference : fileReferences) {

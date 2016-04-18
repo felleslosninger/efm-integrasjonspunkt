@@ -28,21 +28,21 @@ public final class PutMessageStrategyFactory {
 
     public PutMessageStrategy create(Object payload) {
         if (isEPhorte(payload)) {
-            Audit.info("Message type is EDU (ePhorte type)");
+            Audit.info("Messagetype EDU - CData");
             return new BestEDUPutMessageStrategy(context.getMessageSender());
         }
         if (isUnknown(payload)) {
-            Audit.info("Message has unknown payload class");
+            Audit.error("Unknown payload class");
             throw new MeldingsUtvekslingRuntimeException("unknown payload class " + payload);
         }
         if (isAppReceipt(payload)) {
-            Audit.info("Message type is Appreceipt");
+            Audit.info("Messagetype AppReceipt");
             return new AppReceiptPutMessageStrategy(context);
         } else if (isBestEDUMessage(payload)) {
-            Audit.info("Message type is EDU (String payload. 360 etc)");
+            Audit.info("Messagetype EDU HtmlEndoced");
             return new BestEDUPutMessageStrategy(context.getMessageSender());
         } else {
-            Audit.info("Can not determine paylod type");
+            Audit.error("Unknown payload string");
             throw new MeldingsUtvekslingRuntimeException("Unknown String based payload " + payload);
         }
     }

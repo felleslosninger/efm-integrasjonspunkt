@@ -136,7 +136,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
                 PutMessageStrategy strategy = putMessageStrategyFactory.create(request.getPayload());
                 return strategy.putMessage(request);
             } else {
-                Audit.info("Receiver certificate missing, reverting to MSH.", markerFrom(message));
+                Audit.info("Send message to MSH", markerFrom(message));
                 return mshClient.sendEduMelding(request);
             }
         }
@@ -159,7 +159,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
             PutMessageResponseType response = strategy.putMessage(request);
             result = validateResult(response);
         } else {
-            Audit.info("Mottakers sertifikat mangler eller er ugyldig, prøver å sende melding via MSH", markerFrom(message));
+            Audit.info("Send message to MSH", markerFrom(message));
             PutMessageResponseType response = mshClient.sendEduMelding(request);
             result = validateResult(response);
         }

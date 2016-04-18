@@ -72,7 +72,7 @@ public class StandardBusinessDocumentFactory {
 
         BestEduMessage bestEduMessage = new BestEduMessage(marshalledShipment);
         LogstashMarker marker = markerFrom(new PutMessageRequestWrapper(shipment));
-        Audit.info("Payload size of message", marker.and(payloadSizeMarker(marshalledShipment)));
+        Audit.info("Payload size", marker.and(payloadSizeMarker(marshalledShipment)));
         Archive archive;
         try {
             archive = createAsicePackage(avsender, mottaker, bestEduMessage);
