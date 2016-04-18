@@ -95,7 +95,7 @@ public class MessageSender {
             edu = standardBusinessDocumentFactory.create(messageRequest, messageContext.getAvsender(), messageContext.getMottaker());
             Audit.info("EDUdocument created", markerFrom(message));
         } catch (MessageException e) {
-            Audit.error("Failed to crate EDUdocument", markerFrom(message));
+            Audit.error("Failed to create EDUdocument", markerFrom(message));
             log.error(markerFrom(message), e.getStatusMessage().getTechnicalMessage(), e);
             return createErrorResponse(e);
         }
