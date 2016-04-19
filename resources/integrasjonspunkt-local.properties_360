@@ -3,7 +3,7 @@
 
 noarksystem.endpointURL=http://<sakArkivSystemURL>:<port>/SI.WS.Core/Integration/EDUImport.svc/EDUImportService
 noarksystem.type=P360
-noarksystem.userName=svc_sakark
+noarksystem.username=svc_sakark
 noarksystem.password=<passord>
 noarksystem.domain=<domene>
 

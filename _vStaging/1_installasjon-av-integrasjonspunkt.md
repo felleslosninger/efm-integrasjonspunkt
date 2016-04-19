@@ -101,9 +101,9 @@ Følgende verdier settest i integrasjonspunkt-local.properties
 ----------------------------|-----------------------------------------------------------------------|-----------------
 noarksystem.endpointURL 	| URL integrasjonspunktet finner sak-/arkivsystemets BestEdu tjenester 	| 
 noarksystem.type        	| Sak/-arkivsystem type 												|P360/Acos/ePhorte																	
-noarksystem.userName\*   	|brukernavn for autentisering mot sakarkivsystem						|svc_sakark
+noarksystem.username\*   	|brukernavn for autentisering mot sakarkivsystem						|svc_sakark
 noarksystem.password\*   	|passord for autentisering mot sakarkivsystem							|
-noarksystem.domain*     	|domene sakarkivsystemet kjører på										|
+noarksystem.domain\*     	|domene sakarkivsystemet kjører på										|
 							|																		|
 adresseregister.endPointURL	|url til adresseregister												|
 orgnumber               	| Organisasjonsnummer til din organisasjon (9 siffer)					|123456789
