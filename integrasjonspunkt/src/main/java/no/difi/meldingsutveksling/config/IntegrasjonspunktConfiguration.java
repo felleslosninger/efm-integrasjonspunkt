@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.config;
 
-import com.sun.jersey.core.util.StringIgnoreCaseKeyComparator;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRequiredPropertyException;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClientSettings;
 import org.slf4j.Logger;

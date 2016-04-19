@@ -4,6 +4,8 @@ import com.sun.org.apache.xerces.internal.dom.ElementNSImpl;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
 
+import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.isAppReceipt;
+
 /**
  * Factory clsss for putmessage strategies. Responsible for inspecting a payload and returning an appropriate
  * Strategy implementation
@@ -13,7 +15,7 @@ import no.difi.meldingsutveksling.logging.Audit;
 
 public final class PutMessageStrategyFactory {
 
-    public static final String APP_RECEIPT_INDICATOR = "AppReceipt";
+
     public static final String MESSAGE_INDICATOR = "Melding";
 
     private PutMessageContext context;
@@ -57,9 +59,5 @@ public final class PutMessageStrategyFactory {
 
     private boolean isBestEDUMessage(Object payload) {
         return ((String) payload).contains(MESSAGE_INDICATOR);
-    }
-
-    private boolean isAppReceipt(Object payload) {
-        return ((String) payload).contains(APP_RECEIPT_INDICATOR);
     }
 }
