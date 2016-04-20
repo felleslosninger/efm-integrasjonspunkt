@@ -7,6 +7,7 @@ import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.soap.client.core.SoapActionCallback;
 
 import javax.xml.bind.JAXBElement;
+import java.util.List;
 
 public class P360Client implements NoarkClient {
 
@@ -35,12 +36,23 @@ public class P360Client implements NoarkClient {
         JAXBElement<no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType> p360request
                 = new no.difi.meldingsutveksling.noarkexchange.p360.schema.ObjectFactory().createPutMessageRequest(r);
 
+
         JAXBElement<no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageResponseType> response
                 = (JAXBElement) template.marshalSendAndReceive(settings.getEndpointUrl(), p360request,
                 new SoapActionCallback(SOAP_ACTION));
 
         PutMessageResponseType theResponse = new PutMessageResponseType();
         mapper.map(response.getValue(), theResponse);
+
+        List<no.difi.meldingsutveksling.noarkexchange.p360.schema.StatusMessageType> statusMessages = response.getValue().getResult().getMessage();
+
+        if(!statusMessages.isEmpty()) {
+            no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType statusMesage = new no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType();
+            statusMesage.setCode(statusMessages.get(0).getCode());
+            statusMesage.setText(statusMessages.get(0).getText());
+            theResponse.getResult().getMessage().add(statusMesage);
+        }
+
         return theResponse;
     }
 }
