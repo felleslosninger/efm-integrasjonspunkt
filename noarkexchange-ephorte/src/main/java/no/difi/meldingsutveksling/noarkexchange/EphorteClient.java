@@ -10,6 +10,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.ws.client.core.WebServiceTemplate;
 
 import javax.xml.bind.JAXBElement;
+import java.util.List;
 
 public class EphorteClient implements NoarkClient {
     private final WebServiceTemplate template;
@@ -44,6 +45,16 @@ public class EphorteClient implements NoarkClient {
 
         PutMessageResponseType response = new PutMessageResponseType();
         modelMapper.map(ephorteResponse.getValue(), response);
+
+        List<no.difi.meldingsutveksling.noarkexchange.ephorte.schema.StatusMessageType> statusMessages = ephorteResponse.getValue().getResult().getMessage();
+
+        if(!statusMessages.isEmpty()) {
+            no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType statusMesage = new no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType();
+            statusMesage.setCode(statusMessages.get(0).getCode());
+            statusMesage.setText(statusMessages.get(0).getText());
+            response.getResult().getMessage().add(statusMesage);
+        }
+
         return response;
     }
 }
