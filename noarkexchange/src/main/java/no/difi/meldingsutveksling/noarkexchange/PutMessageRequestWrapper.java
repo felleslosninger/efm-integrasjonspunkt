@@ -80,4 +80,8 @@ public class PutMessageRequestWrapper {
         setSenderPartyNumber(getRecieverPartyNumber());
         setReceiverPartyNumber(sender);
     }
+
+    public boolean hasPayload() {
+        return getPayload() != null;
+    }
 }

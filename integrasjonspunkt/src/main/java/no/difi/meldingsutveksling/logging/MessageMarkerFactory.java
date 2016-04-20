@@ -48,12 +48,11 @@ public class MessageMarkerFactory {
         final LogstashMarker conversationIdMarker = conversationIdMarker(requestAdapter.getConversationId());
         final LogstashMarker markers = conversationIdMarker.and(receiverMarker).and(senderMarker);
 
-        if(!isAppReceipt(requestAdapter.getPayload())) {
+        if(requestAdapter.hasPayload() && !isAppReceipt(requestAdapter.getPayload())) {
             return journalPostIdMarker(requestAdapter.getJournalPostId()).and(markers);
         } else {
             return markers;
         }
-
     }
 
 
