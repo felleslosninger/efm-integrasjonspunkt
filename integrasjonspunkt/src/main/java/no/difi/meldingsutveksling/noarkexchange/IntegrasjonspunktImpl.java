@@ -123,7 +123,13 @@ public class IntegrasjonspunktImpl implements SOAPport {
         if (!message.hasSenderPartyNumber()) {
             message.setSenderPartyNumber(configuration.getOrganisationNumber());
         }
+
         Audit.info("Recieved message", markerFrom(message));
+
+        if(StringUtils.isBlank((String) message.getPayload())){
+            Audit.error("Payload is missing", markerFrom(message));
+        }
+
         if (!message.hasSenderPartyNumber() && !configuration.hasOrganisationNumber()) {
             Audit.error("Sernders orgnr missing", markerFrom(message));
             throw new MeldingsUtvekslingRuntimeException("Missing senders orgnumber. Please configure orgnumber= in the integrasjonspunkt-local.properties");
