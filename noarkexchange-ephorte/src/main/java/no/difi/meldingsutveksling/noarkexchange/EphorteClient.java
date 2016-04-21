@@ -44,7 +44,7 @@ public class EphorteClient implements NoarkClient {
         PutMessageResponseType response = new PutMessageResponseType();
         modelMapper.map(ephorteResponse.getValue(), response);
 
-        List<no.difi.meldingsutveksling.noarkexchange.ephorte.schema.StatusMessageType> statusMessages = GetStatusMessages(ephorteResponse);
+        List<no.difi.meldingsutveksling.noarkexchange.ephorte.schema.StatusMessageType> statusMessages = getStatusMessages(ephorteResponse);
 
         if(!statusMessages.isEmpty()) {
             no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType statusMesage = new no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType();
@@ -56,7 +56,7 @@ public class EphorteClient implements NoarkClient {
         return response;
     }
 
-    private List<StatusMessageType> GetStatusMessages(JAXBElement<no.difi.meldingsutveksling.noarkexchange.ephorte.schema.PutMessageResponseType> response){
+    private List<StatusMessageType> getStatusMessages(JAXBElement<no.difi.meldingsutveksling.noarkexchange.ephorte.schema.PutMessageResponseType> response){
         List<StatusMessageType> statusMessageTypes = new ArrayList<>() ;
 
         if(response.isNil()){
