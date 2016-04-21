@@ -1,5 +1,10 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+
+import no.difi.meldingsutveksling.noarkexchange.p360.schema.AddressType;
+import no.difi.meldingsutveksling.noarkexchange.p360.schema.GetCanReceiveMessageRequestType;
+import no.difi.meldingsutveksling.noarkexchange.p360.schema.GetCanReceiveMessageResponseType;
+import no.difi.meldingsutveksling.noarkexchange.p360.schema.ObjectFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import org.modelmapper.ModelMapper;
@@ -22,7 +27,15 @@ public class P360Client implements NoarkClient {
 
     @Override
     public boolean canRecieveMessage(String orgnr) {
-        return false;
+        GetCanReceiveMessageRequestType r = new GetCanReceiveMessageRequestType();
+        AddressType addressType = new AddressType();
+        addressType.setOrgnr(orgnr);
+        r.setReceiver(addressType);
+
+        JAXBElement<GetCanReceiveMessageRequestType> request = new ObjectFactory().createGetCanReceiveMessageRequest(r);
+
+        JAXBElement<GetCanReceiveMessageResponseType> result = (JAXBElement<GetCanReceiveMessageResponseType>) template.marshalSendAndReceive(settings.getEndpointUrl(), request);
+        return result.getValue().isResult();
     }
 
     @Override

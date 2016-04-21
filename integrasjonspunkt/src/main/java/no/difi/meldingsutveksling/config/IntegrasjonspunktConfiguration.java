@@ -56,6 +56,8 @@ public class IntegrasjonspunktConfiguration {
     private static final String KEY_CLIENTNAME = "spring.boot.admin.client.name";
     private static final String KEY_DEREGISTRATION = "spring.boot.admin.autoDeregistration";
 
+    private static final String KEY_RETURN_OK_ONMISSINGPAYLOAD = "Return.Ok.OnEmptyPayload";
+
     private Environment environment;
 
     @Autowired
@@ -140,6 +142,10 @@ public class IntegrasjonspunktConfiguration {
 
     public String getKeyMshEndpoint() {return environment.getProperty(KEY_MSH_ENDPOINT); }
 
+    public boolean getReturnOkOnMissingPayload() {
+        return Boolean.valueOf(environment.getProperty(KEY_RETURN_OK_ONMISSINGPAYLOAD));
+    }
+
     public ConfigMeta getMetadata() {
 
         ConfigMeta.Builder b = new ConfigMeta.Builder();
@@ -162,7 +168,10 @@ public class IntegrasjonspunktConfiguration {
                 .newGroup("Msh")
                 .newElement(KEY_MSH_ENDPOINT, getMshNoarkClientSettings().getEndpointUrl())
                 .newElement(KEY_MSH_USERNAME, getMshNoarkClientSettings().getUserName())
-                .newElement(KEY_MSH_PASSWORD).build();
+                .newElement(KEY_MSH_PASSWORD)
+                .newGroup("Misc")
+                .newElement(KEY_RETURN_OK_ONMISSINGPAYLOAD, environment.getProperty(KEY_RETURN_OK_ONMISSINGPAYLOAD))
+                .build();
     }
 
     private String getCurrentPath() {
