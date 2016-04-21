@@ -11,6 +11,7 @@ public class PutMessageRequestWrapper {
 
     public PutMessageRequestWrapper(PutMessageRequestType requestType) {
         this.requestType = requestType;
+
     }
 
     public boolean hasNOARKPayload() {
@@ -30,7 +31,8 @@ public class PutMessageRequestWrapper {
     }
 
     public String getRecieverPartyNumber() {
-        return requestType.getEnvelope().getReceiver().getOrgnr();
+        final String originalOrgNr = requestType.getEnvelope().getReceiver().getOrgnr();
+        return FiksFix.replaceOrgNummberWithKs(originalOrgNr);
     }
 
     public boolean hasSenderPartyNumber() {
@@ -77,5 +79,9 @@ public class PutMessageRequestWrapper {
         final String sender = getSenderPartynumber() ;
         setSenderPartyNumber(getRecieverPartyNumber());
         setReceiverPartyNumber(sender);
+    }
+
+    public boolean hasPayload() {
+        return getPayload() != null;
     }
 }

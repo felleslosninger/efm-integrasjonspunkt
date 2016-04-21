@@ -1,17 +1,24 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import com.thoughtworks.xstream.XStream;
+import net.logstash.logback.encoder.org.apache.commons.lang.StringUtils;
+import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.logging.MessageMarkerFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageContext;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategy;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
-import no.difi.meldingsutveksling.noarkexchange.schema.*;
+import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageRequestType;
+import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageResponseType;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
+import no.difi.meldingsutveksling.noarkexchange.schema.SOAPport;
 import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
 import no.difi.meldingsutveksling.services.CertificateException;
 import org.slf4j.Logger;
@@ -66,6 +73,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
     @Override
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
 
+
         String organisasjonsnummer = getCanReceiveMessageRequest.getReceiver().getOrgnr();
         eventLog.log(new Event()
                 .setMessage(new XStream().toXML(getCanReceiveMessageRequest))
@@ -74,63 +82,100 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
         GetCanReceiveMessageResponseType response = new GetCanReceiveMessageResponseType();
         boolean canReceive;
-        canReceive = hasAdresseregisterCertificate(organisasjonsnummer) || mshClient.canRecieveMessage(organisasjonsnummer);
+
+        canReceive = hasAdresseregisterCertificate(organisasjonsnummer);
+
+        final LogstashMarker marker = MessageMarkerFactory.receiverMarker(organisasjonsnummer);
+        if(canReceive) {
+            Audit.info("CanReceive = true", marker);
+        } else {
+            if(hasMshEndpoint()) {
+                canReceive = mshClient.canRecieveMessage(organisasjonsnummer);
+                Audit.info(String.format( "MSH canReceive = %s", canReceive), marker);
+            }
+        }
+        if(!canReceive) {
+            Audit.error("CanReceive = false", marker);
+        }
         response.setResult(canReceive);
         return response;
     }
 
     private boolean hasAdresseregisterCertificate(String organisasjonsnummer) {
         try {
-            adresseregister.getCertificate(organisasjonsnummer);
+            log.info("hasAdresseregisterCertificate orgnr:" +organisasjonsnummer+"orgnr");
+            String nOrgnr = FiksFix.replaceOrgNummberWithKs(organisasjonsnummer);
+            adresseregister.getCertificate(nOrgnr);
             return true;
         } catch (CertificateException e) {
             return false;
         }
     }
 
+    private boolean hasMshEndpoint(){
+        return !StringUtils.isBlank(configuration.getKeyMshEndpoint());
+    }
+
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType request) {
+        MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, configuration.getOrganisationNumber());
         PutMessageRequestWrapper message = new PutMessageRequestWrapper(request);
         if (!message.hasSenderPartyNumber()) {
             message.setSenderPartyNumber(configuration.getOrganisationNumber());
         }
+
         Audit.info("Recieved message", markerFrom(message));
+
+        if(StringUtils.isBlank((String) message.getPayload())){
+            Audit.error("Payload is missing", markerFrom(message));
+            if(configuration.getReturnOkOnMissingPayload()){
+                return PutMessageResponseFactory.createOkResponse();
+            }
+            else {
+                return PutMessageResponseFactory.createErrorResponse( new MessageException(StatusMessage.MISSING_PAYLOAD));
+            }
+        }
+
         if (!message.hasSenderPartyNumber() && !configuration.hasOrganisationNumber()) {
+            Audit.error("Sernders orgnr missing", markerFrom(message));
             throw new MeldingsUtvekslingRuntimeException("Missing senders orgnumber. Please configure orgnumber= in the integrasjonspunkt-local.properties");
         }
 
         if (configuration.isQueueEnabled()) {
             internalQueue.enqueueExternal(request);
-            Audit.info("Message is put on queue ready to be sent", markerFrom(message));
+            Audit.info("Message enqueued", markerFrom(message));
 
             return PutMessageResponseFactory.createOkResponse();
         }
         else {
-            Audit.info("Queue is disabled. Message will be sent immediatly", markerFrom(message));
-            MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, configuration.getOrganisationNumber());
+            Audit.info("Queue is disabled", markerFrom(message));
 
             if (hasAdresseregisterCertificate(request.getEnvelope().getReceiver().getOrgnr())) {
                 PutMessageContext context = new PutMessageContext(eventLog, messageSender);
                 PutMessageStrategyFactory putMessageStrategyFactory = PutMessageStrategyFactory.newInstance(context);
-
                 PutMessageStrategy strategy = putMessageStrategyFactory.create(request.getPayload());
                 return strategy.putMessage(request);
             } else {
-                return mshClient.sendEduMelding(request);
+                if(hasMshEndpoint()) {
+                    Audit.info("Send message to MSH", markerFrom(message));
+                    return mshClient.sendEduMelding(request);
+                }
+                Audit.error("Receiver not found", markerFrom(message));
+                return PutMessageResponseFactory.createErrorResponse(new MessageException(StatusMessage.UNABLE_TO_FIND_RECEIVER));
             }
         }
     }
 
     public boolean sendMessage(PutMessageRequestType request) {
+        MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, configuration.getOrganisationNumber());
         PutMessageRequestWrapper message = new PutMessageRequestWrapper(request);
         if (!message.hasSenderPartyNumber() && !configuration.hasOrganisationNumber()) {
             throw new MeldingsUtvekslingRuntimeException();
         }
-        MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, configuration.getOrganisationNumber());
 
         boolean result;
         if(hasAdresseregisterCertificate(message.getRecieverPartyNumber())) {
-            Audit.info("Mottaker validert", markerFrom(message));
+            Audit.info("Receiver validated", markerFrom(message));
             PutMessageContext context = new PutMessageContext(eventLog, messageSender);
             PutMessageStrategyFactory putMessageStrategyFactory = PutMessageStrategyFactory.newInstance(context);
 
@@ -138,14 +183,21 @@ public class IntegrasjonspunktImpl implements SOAPport {
             PutMessageResponseType response = strategy.putMessage(request);
             result = validateResult(response);
         } else {
-            Audit.info("Mottakers sertifikat mangler eller er ugyldig, prøver å sende melding via MSH", markerFrom(message));
-            PutMessageResponseType response = mshClient.sendEduMelding(request);
-            result = validateResult(response);
+            if (hasMshEndpoint()){
+                Audit.info("Send message to MSH", markerFrom(message));
+                PutMessageResponseType response = mshClient.sendEduMelding(request);
+                result = validateResult(response);
+            }
+            else
+            {
+                Audit.error("Receiver not found", markerFrom(message));
+                result = false;
+            }
         }
         if(result) {
-            Audit.info("Message successfully sent", markerFrom(message));
+            Audit.info("Message sent", markerFrom(message));
         } else {
-            Audit.error("Message was not successfully sent", markerFrom(message));
+            Audit.error("Message sending failed", markerFrom(message));
         }
         return result;
     }

@@ -4,6 +4,7 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRequiredPropertyExcep
 import no.difi.meldingsutveksling.noarkexchange.NoarkClientSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
@@ -34,7 +35,7 @@ public class IntegrasjonspunktConfiguration {
     private static final String KEY_ALTINN_SERVICE_EDITION_CODE = "altinn.external_service_edition_code";
 
     protected static final String KEY_NOARKSYSTEM_ENDPOINT = "noarksystem.endpointURL";
-    private static final String KEY_NOARKSYSTEM_USERNAME = "noarksystem.userName";
+    private static final String KEY_NOARKSYSTEM_USERNAME = "noarksystem.username";
     private static final String KEY_NOARKSYSTEM_PASSWORD = "noarksystem.password";
     private static final String KEY_NOARKSYSTEM_DOMAIN = "noarksystem.domain";
 
@@ -55,11 +56,13 @@ public class IntegrasjonspunktConfiguration {
     private static final String KEY_CLIENTNAME = "spring.boot.admin.client.name";
     private static final String KEY_DEREGISTRATION = "spring.boot.admin.autoDeregistration";
 
+    private static final String KEY_RETURN_OK_ONMISSINGPAYLOAD = "Return.Ok.OnEmptyPayload";
+
     private Environment environment;
 
     @Autowired
     public IntegrasjonspunktConfiguration(Environment environment) throws MeldingsUtvekslingRequiredPropertyException {
-        this.environment = environment;
+        this.environment = new WhiteSpaceTrimmingEnvironmentDecorator(environment);
 
         validateProperty(KEY_NOARKSYSTEM_ENDPOINT);
         validateProperty(KEY_ADRESSEREGISTER_ENDPOINT);
@@ -68,7 +71,7 @@ public class IntegrasjonspunktConfiguration {
         validateProperty(KEY_PRIVATEKEYPASSWORD);
         validateProperty(KEY_ORGANISATION_NUMBER);
         validateProperty(KEY_NOARKSYSTEM_TYPE);
-
+        MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, getOrganisationNumber());
         validateSpringMetrics();
     }
 
@@ -137,6 +140,12 @@ public class IntegrasjonspunktConfiguration {
         return environment.getProperty(KEY_NOARKSYSTEM_TYPE);
     }
 
+    public String getKeyMshEndpoint() {return environment.getProperty(KEY_MSH_ENDPOINT); }
+
+    public boolean getReturnOkOnMissingPayload() {
+        return Boolean.valueOf(environment.getProperty(KEY_RETURN_OK_ONMISSINGPAYLOAD));
+    }
+
     public ConfigMeta getMetadata() {
 
         ConfigMeta.Builder b = new ConfigMeta.Builder();
@@ -159,7 +168,10 @@ public class IntegrasjonspunktConfiguration {
                 .newGroup("Msh")
                 .newElement(KEY_MSH_ENDPOINT, getMshNoarkClientSettings().getEndpointUrl())
                 .newElement(KEY_MSH_USERNAME, getMshNoarkClientSettings().getUserName())
-                .newElement(KEY_MSH_PASSWORD).build();
+                .newElement(KEY_MSH_PASSWORD)
+                .newGroup("Misc")
+                .newElement(KEY_RETURN_OK_ONMISSINGPAYLOAD, environment.getProperty(KEY_RETURN_OK_ONMISSINGPAYLOAD))
+                .build();
     }
 
     private String getCurrentPath() {
@@ -199,4 +211,6 @@ public class IntegrasjonspunktConfiguration {
     private String getNoarksystemDomain() {
         return environment.getProperty(KEY_NOARKSYSTEM_DOMAIN);
     }
+
+
 }

@@ -5,7 +5,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.ProcessState;
-import no.difi.meldingsutveksling.domain.sbdh.Document;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.kvittering.KvitteringFactory;
@@ -21,6 +21,7 @@ import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -78,11 +79,12 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
     }
 
     public CorrelationInformation receive(@WebParam(name = "StandardBusinessDocument", targetNamespace = SBD_NAMESPACE, partName = "receiveResponse") StandardBusinessDocument standardBusinessDocument) {
+        MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, config.getOrganisationNumber());
         try {
             return forwardToNoarkSystem(standardBusinessDocument);
         } catch (MessageException e) {
             StandardBusinessDocumentWrapper documentWrapper = new StandardBusinessDocumentWrapper(standardBusinessDocument);
-            Audit.error("Message could not be sent to archive system", markerFrom(documentWrapper));
+            Audit.error("Failed to deliver archive", markerFrom(documentWrapper));
             logger.error(markerFrom(documentWrapper),
                     e.getStatusMessage().getTechnicalMessage(), e);
             return new CorrelationInformation();
@@ -91,26 +93,37 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
 
     public CorrelationInformation forwardToNoarkSystem(StandardBusinessDocument inputDocument) throws MessageException {
         StandardBusinessDocumentWrapper document = new StandardBusinessDocumentWrapper(inputDocument);
-        sendReceiptDelivered(document);
-        adresseregisterService.validateCertificates(document);
-        Audit.info("Sender and recievers certificates are validated. Processing contents...", markerFrom(new StandardBusinessDocumentWrapper(inputDocument)));
+
+        try {
+            adresseregisterService.validateCertificates(document);
+            Audit.info("Certificates validated", markerFrom(new StandardBusinessDocumentWrapper(inputDocument)));
+        }
+        catch (MessageException e){
+            Audit.error(e.getMessage(), markerFrom(document));
+            throw e;
+        }
+
         if (document.isReciept()) {
-            Audit.info("Received message is a receipt. Finished", markerFrom(document));
+            Audit.info("Messagetype Receipt", markerFrom(document));
             logEvent(document, ProcessState.KVITTERING_MOTTATT);
             return new CorrelationInformation();
         }
 
+        // TODO: remove? or move to send leveringskvittering i internal queue?
         logEvent(document, ProcessState.SBD_RECIEVED);
+
         Payload payload = document.getPayload();
         byte[] decryptedAsicPackage = decrypt(payload);
         logEvent(document, ProcessState.DECRYPTION_SUCCESS);
         PutMessageRequestType eduDocument;
         try {
             eduDocument = convertAsicEntrytoEduDocument(decryptedAsicPackage);
+            Audit.info("EDUdocument extracted", markerFrom(document));
         } catch (IOException | JAXBException e) {
+            Audit.error("Failed to extract EDUdocument", markerFrom(document));
             throw new MessageException(e, StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
         }
-        Audit.info("Successfully extracted BEST/EDU document from message payload", markerFrom(document));
+
         forwardToNoarkSystemAndSendReceipts(document, eduDocument);
         return new CorrelationInformation();
     }
@@ -125,30 +138,26 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
         PutMessageResponseType response = localNoark.sendEduMelding(putMessageRequestType);
         AppReceiptType result = response.getResult();
         if (result.getType().equals(OK_TYPE)) {
-            Audit.info("Document successfully sent to NOARK system. Sending receipt...", markerFrom(response));
+            Audit.info("Delivered archive", markerFrom(response));
             sendReceiptOpen(inputDocument);
             logEvent(inputDocument, ProcessState.BEST_EDU_SENT);
         } else {
-            Audit.info("NOARK replied with non-OK. Response", markerFrom(response));
+            Audit.error("Unexpected response from archive", markerFrom(response));
 
         }
     }
 
     private void sendReceiptDelivered(StandardBusinessDocumentWrapper inputDocument) {
-        Document doc = KvitteringFactory.createLeveringsKvittering(inputDocument.getSenderOrgNumber(),
-                inputDocument.getReceiverOrgNumber(), inputDocument.getJournalPostId(),
-                inputDocument.getConversationId(), keyInfo.getKeyPair());
-        sendReceipt(inputDocument, doc);
+        EduDocument doc = KvitteringFactory.createLeveringsKvittering(inputDocument.getMessageInfo(), keyInfo.getKeyPair());
+        sendReceipt(doc);
     }
 
     private void sendReceiptOpen(StandardBusinessDocumentWrapper inputDocument) {
-        Document doc = KvitteringFactory.createAapningskvittering(inputDocument.getSenderOrgNumber(),
-                inputDocument.getReceiverOrgNumber(), inputDocument.getJournalPostId(),
-                inputDocument.getConversationId(), keyInfo.getKeyPair());
-        sendReceipt(inputDocument, doc);
+        EduDocument doc = KvitteringFactory.createAapningskvittering(inputDocument.getMessageInfo(), keyInfo.getKeyPair());
+        sendReceipt(doc);
     }
 
-    private void sendReceipt(StandardBusinessDocumentWrapper input, Document receipt) {
+    private void sendReceipt(EduDocument receipt) {
         Transport t = transportFactory.createTransport(receipt);
         t.send(config.getConfiguration(), receipt);
     }

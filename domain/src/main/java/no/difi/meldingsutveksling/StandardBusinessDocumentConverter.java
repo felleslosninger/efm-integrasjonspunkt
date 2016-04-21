@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling;
 
-import no.difi.meldingsutveksling.domain.sbdh.Document;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 
 import javax.xml.bind.JAXBContext;
@@ -16,46 +16,46 @@ public class StandardBusinessDocumentConverter {
 
     static {
         try {
-            ctx = JAXBContext.newInstance(Document.class);
+            ctx = JAXBContext.newInstance(EduDocument.class);
         } catch (JAXBException e) {
             throw new RuntimeException("Could not initialize " + StandardBusinessDocumentConverter.class, e);
         }
     }
-    public byte[] marshallToBytes(Document document) {
+    public byte[] marshallToBytes(EduDocument eduDocument) {
         Marshaller marshaller;
         try {
             marshaller = ctx.createMarshaller();
         } catch (JAXBException e) {
-            throw new RuntimeException("Could not create marshaller for " + Document.class, e);
+            throw new RuntimeException("Could not create marshaller for " + EduDocument.class, e);
         }
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         ObjectFactory objectFactory = new ObjectFactory();
 
         try {
-            marshaller.marshal(objectFactory.createStandardBusinessDocument(document), output);
+            marshaller.marshal(objectFactory.createStandardBusinessDocument(eduDocument), output);
         } catch (JAXBException e) {
-            throw new RuntimeException("Could not marshall " + document, e);
+            throw new RuntimeException("Could not marshall " + eduDocument, e);
         }
         return output.toByteArray();
     }
 
-    public Document unmarshallFrom(byte[] bytes) {
+    public EduDocument unmarshallFrom(byte[] bytes) {
         Unmarshaller unmarshaller;
 
         try {
             unmarshaller = ctx.createUnmarshaller();
         } catch (JAXBException e) {
-            throw new RuntimeException("Could not create Unmarshaller for " + Document.class, e);
+            throw new RuntimeException("Could not create Unmarshaller for " + EduDocument.class, e);
         }
 
         ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
         StreamSource streamSource = new StreamSource(inputStream);
 
-        Document sbd;
+        EduDocument sbd;
         try {
-            sbd = unmarshaller.unmarshal(streamSource, Document.class).getValue();
+            sbd = unmarshaller.unmarshal(streamSource, EduDocument.class).getValue();
         } catch (JAXBException e) {
-            throw new RuntimeException("Could not unmarshall to " + Document.class, e);
+            throw new RuntimeException("Could not unmarshall to " + EduDocument.class, e);
         }
 
         return sbd;
