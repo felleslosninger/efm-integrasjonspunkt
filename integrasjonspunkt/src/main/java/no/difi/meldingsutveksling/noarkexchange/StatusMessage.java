@@ -8,7 +8,7 @@ public enum StatusMessage {
     UNABLE_TO_EXTRACT_ZIP_CONTENTS("Kan ikke behandle melding", "Unable to extract zip contents", 5),
     UNABLE_TO_EXTRACT_BEST_EDU("Teknisk feil: kan ikke behandle melding", "Unable to extract BEST EDU", 6),
     UNABLE_TO_FIND_RECEIVER("Mottaker ikke funnet", "Motaker ikke funnet i Adresseregister eller på MSH",7),
-    MISSING_PAYLOAD("Requst has missing or empty payload", "MissingPayload", 8);
+    MISSING_PAYLOAD("Request has missing or empty payload", "MissingPayload", 8);
 
 
     private final String endUserMessage;
