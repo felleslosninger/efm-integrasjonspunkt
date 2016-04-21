@@ -56,20 +56,28 @@ public class P360Client implements NoarkClient {
         mapper.map(response.getValue(), theResponse);
 
 
-
-        List<no.difi.meldingsutveksling.noarkexchange.p360.schema.StatusMessageType> statusMessages = GetStatusMessages(response);
-
-        if(!statusMessages.isEmpty()) {
-            no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType statusMesage = new no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType();
-            statusMesage.setCode(statusMessages.get(0).getCode());
-            statusMesage.setText(statusMessages.get(0).getText());
-            theResponse.getResult().getMessage().add(statusMesage);
-        }
+        setUnmappedValues(response, theResponse);
 
         return theResponse;
     }
 
-    private List<StatusMessageType> GetStatusMessages(JAXBElement<no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageResponseType> response){
+    /**
+     * Use this method to set values not "mapped" by modelmapper. For instance statusMessage
+     * @param p360Response from the archive system
+     * @param response p360Response from this client
+     */
+    private void setUnmappedValues(JAXBElement<no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageResponseType> p360Response, PutMessageResponseType response) {
+        List<StatusMessageType> statusMessages = getStatusMessages(p360Response);
+
+        if(!statusMessages.isEmpty()) {
+            no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType statusMessage = new no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType();
+            statusMessage.setCode(statusMessages.get(0).getCode());
+            statusMessage.setText(statusMessages.get(0).getText());
+            response.getResult().getMessage().add(statusMessage);
+        }
+    }
+
+    private List<StatusMessageType> getStatusMessages(JAXBElement<no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageResponseType> response){
         List<StatusMessageType> statusMessageTypes = new ArrayList<>() ;
 
         if(response.isNil()){
