@@ -1,10 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 
-import no.difi.meldingsutveksling.noarkexchange.p360.schema.AddressType;
-import no.difi.meldingsutveksling.noarkexchange.p360.schema.GetCanReceiveMessageRequestType;
-import no.difi.meldingsutveksling.noarkexchange.p360.schema.GetCanReceiveMessageResponseType;
-import no.difi.meldingsutveksling.noarkexchange.p360.schema.ObjectFactory;
+import no.difi.meldingsutveksling.noarkexchange.p360.schema.*;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import org.modelmapper.ModelMapper;
@@ -12,6 +9,7 @@ import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.soap.client.core.SoapActionCallback;
 
 import javax.xml.bind.JAXBElement;
+import java.util.ArrayList;
 import java.util.List;
 
 public class P360Client implements NoarkClient {
@@ -57,7 +55,9 @@ public class P360Client implements NoarkClient {
         PutMessageResponseType theResponse = new PutMessageResponseType();
         mapper.map(response.getValue(), theResponse);
 
-        List<no.difi.meldingsutveksling.noarkexchange.p360.schema.StatusMessageType> statusMessages = response.getValue().getResult().getMessage();
+
+
+        List<no.difi.meldingsutveksling.noarkexchange.p360.schema.StatusMessageType> statusMessages = GetStatusMessages(response);
 
         if(!statusMessages.isEmpty()) {
             no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType statusMesage = new no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType();
@@ -67,5 +67,20 @@ public class P360Client implements NoarkClient {
         }
 
         return theResponse;
+    }
+
+    private List<StatusMessageType> GetStatusMessages(JAXBElement<no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageResponseType> response){
+        List<StatusMessageType> statusMessageTypes = new ArrayList<>() ;
+
+        if(response.isNil()){
+            return statusMessageTypes;
+        }
+
+        AppReceiptType appReceipt = response.getValue().getResult();
+        if(appReceipt != null){
+            statusMessageTypes = appReceipt.getMessage();
+        }
+
+        return statusMessageTypes;
     }
 }

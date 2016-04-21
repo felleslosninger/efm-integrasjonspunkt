@@ -1,15 +1,13 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import no.difi.meldingsutveksling.noarkexchange.ephorte.schema.AddressType;
-import no.difi.meldingsutveksling.noarkexchange.ephorte.schema.GetCanReceiveMessageRequestType;
-import no.difi.meldingsutveksling.noarkexchange.ephorte.schema.GetCanReceiveMessageResponseType;
-import no.difi.meldingsutveksling.noarkexchange.ephorte.schema.ObjectFactory;
+import no.difi.meldingsutveksling.noarkexchange.ephorte.schema.*;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import org.modelmapper.ModelMapper;
 import org.springframework.ws.client.core.WebServiceTemplate;
 
 import javax.xml.bind.JAXBElement;
+import java.util.ArrayList;
 import java.util.List;
 
 public class EphorteClient implements NoarkClient {
@@ -46,7 +44,7 @@ public class EphorteClient implements NoarkClient {
         PutMessageResponseType response = new PutMessageResponseType();
         modelMapper.map(ephorteResponse.getValue(), response);
 
-        List<no.difi.meldingsutveksling.noarkexchange.ephorte.schema.StatusMessageType> statusMessages = ephorteResponse.getValue().getResult().getMessage();
+        List<no.difi.meldingsutveksling.noarkexchange.ephorte.schema.StatusMessageType> statusMessages = GetStatusMessages(ephorteResponse);
 
         if(!statusMessages.isEmpty()) {
             no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType statusMesage = new no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType();
@@ -56,5 +54,20 @@ public class EphorteClient implements NoarkClient {
         }
 
         return response;
+    }
+
+    private List<StatusMessageType> GetStatusMessages(JAXBElement<no.difi.meldingsutveksling.noarkexchange.ephorte.schema.PutMessageResponseType> response){
+        List<StatusMessageType> statusMessageTypes = new ArrayList<>() ;
+
+        if(response.isNil()){
+            return statusMessageTypes;
+        }
+
+        AppReceiptType appReceipt = response.getValue().getResult();
+        if(appReceipt != null){
+            statusMessageTypes = appReceipt.getMessage();
+        }
+
+        return statusMessageTypes;
     }
 }
