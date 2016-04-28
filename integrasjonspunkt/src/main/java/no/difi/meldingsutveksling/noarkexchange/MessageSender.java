@@ -83,27 +83,27 @@ public class MessageSender {
         MessageContext messageContext;
         try {
             messageContext = createMessageContext(message);
+            Audit.info("Required metadata validated", markerFrom(message));
         } catch (MessageContextException e) {
             log.error(markerFrom(message), e.getStatusMessage().getTechnicalMessage(), e);
             return createErrorResponse(e);
         }
 
-        Audit.info("Sender and receivers signatures are validated", markerFrom(message));
 
         EduDocument edu;
         try {
             edu = standardBusinessDocumentFactory.create(messageRequest, messageContext.getAvsender(), messageContext.getMottaker());
+            Audit.info("EDUdocument created", markerFrom(message));
         } catch (MessageException e) {
-            Audit.error("Unable to create Edu Document. Message is not delievered", markerFrom(message));
+            Audit.error("Failed to create EDUdocument", markerFrom(message));
             log.error(markerFrom(message), e.getStatusMessage().getTechnicalMessage(), e);
             return createErrorResponse(e);
         }
-        Audit.info("Successfully created Edu Document. Sending message...", markerFrom(message));
 
         Transport t = transportFactory.createTransport(edu);
         t.send(configuration.getConfiguration(), edu);
 
-        Audit.info("Message delivered", markerFrom(message));
+        Audit.info("Message sent", markerFrom(message));
 
         return createOkResponse();
     }

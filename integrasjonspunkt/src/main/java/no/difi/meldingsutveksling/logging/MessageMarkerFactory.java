@@ -3,14 +3,14 @@ package no.difi.meldingsutveksling.logging;
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.FileReference;
-import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.net.util.Base64;
+
+import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.isAppReceipt;
 
 
 /**
@@ -43,11 +43,16 @@ public class MessageMarkerFactory {
      * @return LogstashMarker
      */
     public static LogstashMarker markerFrom(PutMessageRequestWrapper requestAdapter) {
-        LogstashMarker journalPostIdMarker = journalPostIdMarker(requestAdapter.getJournalPostId());
         final LogstashMarker receiverMarker = receiverMarker(requestAdapter.getRecieverPartyNumber());
         final LogstashMarker senderMarker = senderMarker(requestAdapter.getSenderPartynumber());
         final LogstashMarker conversationIdMarker = conversationIdMarker(requestAdapter.getConversationId());
-        return conversationIdMarker.and(journalPostIdMarker).and(receiverMarker).and(senderMarker);
+        final LogstashMarker markers = conversationIdMarker.and(receiverMarker).and(senderMarker);
+
+        if(requestAdapter.hasPayload() && !isAppReceipt(requestAdapter.getPayload())) {
+            return journalPostIdMarker(requestAdapter.getJournalPostId()).and(markers);
+        } else {
+            return markers;
+        }
     }
 
 
