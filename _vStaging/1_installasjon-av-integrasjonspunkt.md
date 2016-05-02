@@ -7,22 +7,6 @@ isHome: false
 ---
 
 
-### Dette trenger du å finne ut av
-Driftsalternativer. Kan din driftsorganisasjon forvalte integrasjonspunktet?
-
-* Url til arkivsystemet
-* Arkivsystem type
-* Organisasjonsnummeret til virksomheten
-* Brukernavn og passord til Altinn formidlingstjeneste
-* Java Keystore lokasjon (filen hvor sertifikatene ligger. _F. eks. crt/mykeystore.jks_)
-* Java Keystore passord (passordet for å lese sertifikatene)
-* Java Keystore nøkkelord (brukes for å finne riktig sertifikat i keystore)
-* Hvilken port Integrasjonspunktet kan bruke
-* Hvilken port Deploy Manageren kan bruke
-* URL til MSH (Dette gjelder kun dersom du bruker BestEdu fra tidligere og kommuniserer med mottakere som ikke deltar i piloten)
-
-
-
 ### Installere Java runtime environment (JRE)
 
 Integrasjonspunktet og DeployMangager er Java applikasjoner og krever derfor at man har Java kjøremiljø installert på maskinen dette skal kjøre. 
@@ -49,22 +33,19 @@ Informasjon om hvordan du logger på AltInn portal finner du [her](https://www.a
 ### Sette opp sertifikat i Java Key Store (JKS)
 Under piloten vil det kjøre med sertifikatkjede der Difi er Trusted Root. Deltagere vil derfor få tildelt sertifikater etterhvert som de blir en del av piloten.
 
-Når du har fått sertifikatet, må det legges inn på maskinen. Noter deg lokasjonen for sertifikatet, samt brukernavn og passord. 
-Dette legges inn som propertiene, keystorelocation og privatekeypassword
+Når du har fått sertifikatet, må det legges inn på serveren du kjører integrasjonspunket. Noter deg lokasjonen for sertifikatet, samt brukernavn og passord. 
+Dette legges senere inn som propertiene, keystorelocation, privatekeypassword, privatekeyalias
 
 ### Laste opp public virksomhetssertifikat
 Sertifikatet kan lastes opp til [virksomhetssertifikatserveren](https://beta-meldingsutveksling.difi.no/virksomhetssertifikat/)
 
-### Installering og oppsett av Deploy Manager
+### Deploy Manager
 
-Deploy Manager er en applikasjon som kan installeres lokalt for å holde integrasjonspunktet
-og andre applikasjoner den skal overvåke oppdatert. 
-
-Ved å installere Deploy Manageren vil man sikre at siste fungerende versjon av Integrasjonspunktet alltid kjører.
+Deploy Manager er en applikasjon som installeres lokalt for å holde integrasjonspunktet oppdatert. 
 
 Deploy Manageren holder underordnede applikasjoner oppdatert ved å sjekke om ny versjon er tilgjengelig, laste ned og restarte applikasjoner. 
 
-#### Installasjon/start
+**Installasjon/start
 
 Start med å opprette en mappe med navn deploymanager på c:\ 
 
@@ -93,7 +74,7 @@ For å legge til applikasjoner som skal vedlikeholdes, må de legges manuelt inn
 Eksempel, med en del preutfylte verdier, for integrajsonspunktet finner du [her](../resources/monitorApps.json).
 Filen navngis som monitorApps.json og legges under \data
 
-#### integrasjonspunkt-local.properties
+### integrasjonspunkt-local.properties
 
 Følgende verdier settest i integrasjonspunkt-local.properties
 
@@ -136,7 +117,7 @@ c:/
 
 
 
-#### Start DeployManager
+### Start DeployManager
 Deploy Manager startes fra kommandolinjen med kommandoen 
 
 ```
@@ -160,7 +141,7 @@ Oppsett for Acos, ePhorte, [P360](../resources/Oppsett360.docx)
 ### Sentral kontroll på integrasjonspunkt
 Sentral overvåking innebærer at status samt en del statistikk sendes sentralt. Man vil tidligere få melding om feil, og man kan i enkelte tilfeller rette feilen før den påvirker produksjonen (før en feilet melding blir savnet).
 
-** Parametre for aktivering av sentral overvåking **
+**Parametre for aktivering av sentral overvåking**
 * spring.boot.admin.url
 * spring.boot.admin.client.name
 * spring.boot.admin.autoDeregistration
