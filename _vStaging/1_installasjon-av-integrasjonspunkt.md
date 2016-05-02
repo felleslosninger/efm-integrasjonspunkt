@@ -53,7 +53,7 @@ Deploy Manager er en applikasjon som installeres lokalt for å holde integrasjon
 
 Deploy Manageren holder underordnede applikasjoner oppdatert ved å sjekke om ny versjon er tilgjengelig, laste ned og restarte applikasjoner. 
 
-** Oppsett **
+**Oppsett**
 
 Start med å opprette en mappe med navn deploymanager på c:\ 
 
@@ -149,7 +149,7 @@ Oppsett for Acos, ePhorte, [P360](../resources/Oppsett360.docx)
 ### Sentral kontroll på integrasjonspunkt
 Sentral overvåking innebærer at status samt en del statistikk sendes sentralt. Man vil tidligere få melding om feil, og man kan i enkelte tilfeller rette feilen før den påvirker produksjonen (før en feilet melding blir savnet).
 
-** Parametre for aktivering av sentral overvåking **
+**Parametre for aktivering av sentral overvåking**
 
 + spring.boot.admin.url
 + spring.boot.admin.client.name
