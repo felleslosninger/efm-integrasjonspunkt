@@ -41,13 +41,19 @@ Dette legges senere inn som propertiene, keystorelocation, privatekeypassword, p
 ### Laste opp public virksomhetssertifikat
 Sertifikatet kan lastes opp til [virksomhetssertifikatserveren](https://beta-meldingsutveksling.difi.no/virksomhetssertifikat/)
 
+### Brannmursåpninger
+
+*beta-meldingsutveksling.difi.no
+*test.smp.difi.no
+*
+
 ### Deploy Manager
 
 Deploy Manager er en applikasjon som installeres lokalt for å holde integrasjonspunktet oppdatert. 
 
 Deploy Manageren holder underordnede applikasjoner oppdatert ved å sjekke om ny versjon er tilgjengelig, laste ned og restarte applikasjoner. 
 
-** Installasjon/start **
+** Oppsett **
 
 Start med å opprette en mappe med navn deploymanager på c:\ 
 
