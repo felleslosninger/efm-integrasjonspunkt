@@ -43,9 +43,9 @@ Sertifikatet kan lastes opp til [virksomhetssertifikatserveren](https://beta-mel
 
 ### Brannmursåpninger
 
-*beta-meldingsutveksling.difi.no
-*test.smp.difi.no
-*
++ beta-meldingsutveksling.difi.no
++ test.smp.difi.no
++
 
 ### Deploy Manager
 
@@ -151,10 +151,10 @@ Sentral overvåking innebærer at status samt en del statistikk sendes sentralt.
 
 ** Parametre for aktivering av sentral overvåking **
 
-* spring.boot.admin.url
-* spring.boot.admin.client.name
-* spring.boot.admin.autoDeregistration
-* spring.boot.admin.client.serviceUrl
++ spring.boot.admin.url
++ spring.boot.admin.client.name
++ spring.boot.admin.autoDeregistration
++ spring.boot.admin.client.serviceUrl
 
 ### Kjøre integrasjonspunktet
 Når DeployMangager er startet vil denne automatisk laste ned og starte siste versjon av integrasjonspunktet.
