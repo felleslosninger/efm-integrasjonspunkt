@@ -30,6 +30,8 @@ Det er ikke noen enkel måte å sjekke om Java Cryptography Extension er install
 Integrasjonspunktet kjører som et sluttbrukersystem mot AltInn's meldingsformidler. Integrsjonspunktet må registeres som et [sluttbrukersystem](https://www.altinn.no/no/Portalhjelp/Datasystemer/Sende-fra-sluttbrukersystem-datasystem/) i AltInn's portal.
 Informasjon om hvordan du logger på AltInn portal finner du [her](https://www.altinn.no/no/Portalhjelp/Innlogging-og-rapportering/).
 
+Under opprettelse av sluttbrukersystemet vil du sette passord og få tildelt brukerid, disse skal senere brukes i properties filen som beskrives lenger ned
+
 ### Sette opp sertifikat i Java Key Store (JKS)
 Under piloten vil det kjøre med sertifikatkjede der Difi er Trusted Root. Deltagere vil derfor få tildelt sertifikater etterhvert som de blir en del av piloten.
 
@@ -45,7 +47,7 @@ Deploy Manager er en applikasjon som installeres lokalt for å holde integrasjon
 
 Deploy Manageren holder underordnede applikasjoner oppdatert ved å sjekke om ny versjon er tilgjengelig, laste ned og restarte applikasjoner. 
 
-**Installasjon/start
+** Installasjon/start **
 
 Start med å opprette en mappe med navn deploymanager på c:\ 
 
@@ -141,7 +143,8 @@ Oppsett for Acos, ePhorte, [P360](../resources/Oppsett360.docx)
 ### Sentral kontroll på integrasjonspunkt
 Sentral overvåking innebærer at status samt en del statistikk sendes sentralt. Man vil tidligere få melding om feil, og man kan i enkelte tilfeller rette feilen før den påvirker produksjonen (før en feilet melding blir savnet).
 
-**Parametre for aktivering av sentral overvåking**
+** Parametre for aktivering av sentral overvåking **
+
 * spring.boot.admin.url
 * spring.boot.admin.client.name
 * spring.boot.admin.autoDeregistration
