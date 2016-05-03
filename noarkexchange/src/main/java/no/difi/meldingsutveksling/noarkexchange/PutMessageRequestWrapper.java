@@ -82,6 +82,6 @@ public class PutMessageRequestWrapper {
     }
 
     public boolean hasPayload() {
-        return getPayload() != null;
+        return PayloadUtil.isEmpty(getPayload());
     }
 }

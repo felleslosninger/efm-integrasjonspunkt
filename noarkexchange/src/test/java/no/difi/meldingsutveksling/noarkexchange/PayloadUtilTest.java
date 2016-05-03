@@ -1,11 +1,17 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import java.io.InputStream;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -38,5 +44,12 @@ public class PayloadUtilTest {
         final PutMessageRequestType putMessageRequestType = testData.loadFromClasspath("ephorte/PutMessageAppReceipt.xml");
 
         assertTrue(PayloadUtil.isAppReceipt(putMessageRequestType.getPayload()));
+    }
+    
+    @Test
+    public void isEmptyPayloadFromEphorte() throws JAXBException, XMLStreamException {
+        final PutMessageRequestType putMessageRequestType = testData.loadFromClasspath("ephorte/PutMessageEmptyPayload.xml");
+
+        assertTrue(PayloadUtil.isEmpty(putMessageRequestType.getPayload()));
     }
 }
