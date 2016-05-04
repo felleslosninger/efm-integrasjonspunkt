@@ -122,7 +122,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
         Audit.info("Recieved message", markerFrom(message));
 
-        if(StringUtils.isBlank((String) message.getPayload())){
+        if(PayloadUtil.isEmpty(message.getPayload())){
             Audit.error("Payload is missing", markerFrom(message));
             if(configuration.getReturnOkOnMissingPayload()){
                 return PutMessageResponseFactory.createOkResponse();

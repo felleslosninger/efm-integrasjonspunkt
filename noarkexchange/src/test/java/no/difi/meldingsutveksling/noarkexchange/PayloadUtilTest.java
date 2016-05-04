@@ -48,7 +48,14 @@ public class PayloadUtilTest {
         assertTrue(PayloadUtil.isAppReceipt(putMessageRequestType.getPayload()));
     }
 
-    private PutMessageRequestType loadTestdataFromClasspath(String fileName) throws JAXBException, XMLStreamException {
+    @Test
+    public void isEmptyPayloadFromEphorte() throws JAXBException, XMLStreamException {
+        final PutMessageRequestType putMessageRequestType = loadTestdataFromClasspath("ephorte/PutMessageEmptyPayload.xml");
+
+        assertTrue(PayloadUtil.isEmpty(putMessageRequestType.getPayload()));
+    }
+
+    public PutMessageRequestType loadTestdataFromClasspath(String fileName) throws JAXBException, XMLStreamException {
         InputStream file = this.getClass().getClassLoader().getResourceAsStream(fileName);
 
         XMLInputFactory xif = XMLInputFactory.newFactory();
