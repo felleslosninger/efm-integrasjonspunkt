@@ -1,11 +1,14 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType;
+import no.difi.meldingsutveksling.noarkexchange.p360.PutMessageRequestMapper;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
+
+import static junit.framework.Assert.assertTrue;
 
 public class PutMessageRequestMapperTest {
 
@@ -18,8 +21,12 @@ public class PutMessageRequestMapperTest {
 
     @Test
     public void mapFromEphortePutMessageToP360PutMessage() throws JAXBException, XMLStreamException {
-        testData.loadFromClasspath("ephorte/PutMessageMessage.xml");
+        PutMessageRequestType putMessageRequestType = testData.loadFromClasspath("ephorte/PutMessageMessage.xml");
 
+        PutMessageRequestMapper mapper = new PutMessageRequestMapper();
+        no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType p360Request = mapper.mapFrom(putMessageRequestType).getValue();
 
+        assertTrue(!PayloadUtil.isEmpty(p360Request.getPayload()));
+        assertTrue(p360Request.getPayload().contains("Melding"));
     }
 }

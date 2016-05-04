@@ -19,9 +19,19 @@ public class PayloadUtil {
         }
     }
 
+    public static String payloadAsString(Object payload) {
+        if(payload instanceof String) {
+            return ((String) payload);
+        } else if (payload instanceof Node) {
+            return ((Node) payload).getFirstChild().getTextContent();
+        } else {
+            throw new RuntimeException("Could not get payload as String");
+        }
+    }
+
     public static boolean isEmpty(Object payload) {
-        if (StringUtils.isEmpty(payload)) {
-            return true;
+        if (payload instanceof String) {
+            return StringUtils.isEmpty(payload);
         } else if (payload instanceof Node) {
            return  !((Node) payload).hasChildNodes();
         } else {
