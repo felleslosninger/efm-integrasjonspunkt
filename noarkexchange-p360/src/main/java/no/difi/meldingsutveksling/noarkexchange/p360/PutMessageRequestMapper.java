@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange.p360;
 
-import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import org.modelmapper.ModelMapper;
 
@@ -14,7 +13,6 @@ public class PutMessageRequestMapper {
 
         ModelMapper mapper = new ModelMapper();
         mapper.map(domain, r);
-        r.setPayload(PayloadUtil.payloadAsString(domain.getPayload()));
 
         JAXBElement<no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType> p360request
                 = new no.difi.meldingsutveksling.noarkexchange.p360.schema.ObjectFactory().createPutMessageRequest(r);
