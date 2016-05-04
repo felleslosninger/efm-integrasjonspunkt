@@ -18,44 +18,38 @@ import static org.junit.Assert.assertTrue;
 
 public class PayloadUtilTest {
 
-    private JAXBContext ctx;
-    private Unmarshaller unmarshaller;
+    private TestData<PutMessageRequestType> testData;
 
     @Before
     public void setup() throws JAXBException {
-        ctx = JAXBContext.newInstance(PutMessageRequestType.class, EnvelopeType.class);
-        unmarshaller = ctx.createUnmarshaller();
+        testData = new TestData<>(PutMessageRequestType.class);
     }
 
     @Test
     public void isAppReceiptPutMessageFromEphorte() throws Exception {
-        PutMessageRequestType value = loadTestdataFromClasspath("ephorte/PutMessageMessage.xml");
+        PutMessageRequestType value = testData.loadFromClasspath("ephorte/PutMessageMessage.xml");
 
         assertFalse(PayloadUtil.isAppReceipt(value.getPayload()));
     }
 
     @Test
     public void isAppReceiptAppreceiptFrom360() throws JAXBException, XMLStreamException {
-        final PutMessageRequestType putMessageRequestType = loadTestdataFromClasspath("p360/PutMessageAppReceipt.xml");
+        final PutMessageRequestType putMessageRequestType = testData.loadFromClasspath("p360/PutMessageAppReceipt.xml");
 
         assertTrue(PayloadUtil.isAppReceipt(putMessageRequestType.getPayload()));
     }
 
     @Test
     public void isAppReceiptAppreceiptFromEphorte() throws JAXBException, XMLStreamException {
-        final PutMessageRequestType putMessageRequestType = loadTestdataFromClasspath("ephorte/PutMessageAppReceipt.xml");
+        final PutMessageRequestType putMessageRequestType = testData.loadFromClasspath("ephorte/PutMessageAppReceipt.xml");
 
         assertTrue(PayloadUtil.isAppReceipt(putMessageRequestType.getPayload()));
     }
+    
+    @Test
+    public void isEmptyPayloadFromEphorte() throws JAXBException, XMLStreamException {
+        final PutMessageRequestType putMessageRequestType = testData.loadFromClasspath("ephorte/PutMessageEmptyPayload.xml");
 
-    private PutMessageRequestType loadTestdataFromClasspath(String fileName) throws JAXBException, XMLStreamException {
-        InputStream file = this.getClass().getClassLoader().getResourceAsStream(fileName);
-
-        XMLInputFactory xif = XMLInputFactory.newFactory();
-        XMLStreamReader xsr = xif.createXMLStreamReader(file);
-        xsr.nextTag(); // Advance to Envelope tag
-        xsr.nextTag(); // Advance to Body tag
-        xsr.nextTag(); // Advance to getNumberResponse tag
-        return unmarshaller.unmarshal(xsr, PutMessageRequestType.class).getValue();
+        assertTrue(PayloadUtil.isEmpty(putMessageRequestType.getPayload()));
     }
 }

@@ -1,7 +1,13 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 
-import no.difi.meldingsutveksling.noarkexchange.p360.schema.*;
+import no.difi.meldingsutveksling.noarkexchange.p360.PutMessageRequestMapper;
+import no.difi.meldingsutveksling.noarkexchange.p360.schema.AddressType;
+import no.difi.meldingsutveksling.noarkexchange.p360.schema.AppReceiptType;
+import no.difi.meldingsutveksling.noarkexchange.p360.schema.GetCanReceiveMessageRequestType;
+import no.difi.meldingsutveksling.noarkexchange.p360.schema.GetCanReceiveMessageResponseType;
+import no.difi.meldingsutveksling.noarkexchange.p360.schema.ObjectFactory;
+import no.difi.meldingsutveksling.noarkexchange.p360.schema.StatusMessageType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import org.modelmapper.ModelMapper;
@@ -9,6 +15,7 @@ import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.soap.client.core.SoapActionCallback;
 
 import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,11 +48,14 @@ public class P360Client implements NoarkClient {
         no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType r =
                 new no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType();
 
-        ModelMapper mapper = new ModelMapper();
-        mapper.map(request, r);
+        PutMessageRequestMapper requestMapper = new PutMessageRequestMapper();
 
-        JAXBElement<no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType> p360request
-                = new no.difi.meldingsutveksling.noarkexchange.p360.schema.ObjectFactory().createPutMessageRequest(r);
+        JAXBElement<no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType> p360request = null;
+        try {
+            p360request = requestMapper.mapFrom(request);
+        } catch (JAXBException e) {
+            throw new RuntimeException("Could not create PutMessageRequest for P360");
+        }
 
 
         JAXBElement<no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageResponseType> response
@@ -53,7 +63,9 @@ public class P360Client implements NoarkClient {
                 new SoapActionCallback(SOAP_ACTION));
 
         PutMessageResponseType theResponse = new PutMessageResponseType();
-        mapper.map(response.getValue(), theResponse);
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.map(response.getValue(), theResponse);
+
 
 
         setUnmappedValues(response, theResponse);
