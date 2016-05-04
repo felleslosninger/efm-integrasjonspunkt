@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import junit.framework.Assert;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
@@ -15,6 +16,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -22,6 +24,8 @@ import static org.mockito.Mockito.when;
 public class MessageSenderTest {
     public static final String SENDER_PARTY_NUMBER = "910075918";
     public static final String RECIEVER_PARTY_NUMBER = "910077473";
+    public static final String CONVERSATION_ID = "conversationId";
+    public static final String JOURNALPOST_ID = "journalpostid";
     private MessageSender messageSender;
 
     @Rule
@@ -71,8 +75,22 @@ public class MessageSenderTest {
         PutMessageRequestWrapper requestAdapter = new RequestBuilder().withSender().withReciever().build();
 
         when(adresseregister.getCertificate(SENDER_PARTY_NUMBER)).thenThrow(new CertificateException("hello", new VirksertClientException("hello")));
+    }
 
-        messageSender.createMessageContext(requestAdapter);
+    @Test
+    public void ShouldSetConversationId() throws MessageContextException {
+        PutMessageRequestWrapper requestAdapter = new RequestBuilder().withSender().withReciever().withConversationId().withJournalpostId().build();
+
+        MessageContext context = messageSender.createMessageContext(requestAdapter);
+        Assert.assertEquals(CONVERSATION_ID, context.getConversationId());
+    }
+
+    @Test
+    public void ShouldSetJournalpostId() throws MessageContextException {
+        PutMessageRequestWrapper requestAdapter = new RequestBuilder().withSender().withReciever().withConversationId().withJournalpostId().build();
+
+        MessageContext context = messageSender.createMessageContext(requestAdapter);
+        Assert.assertEquals(JOURNALPOST_ID, context.getJournalPostId());
     }
 
     private class RequestBuilder {
@@ -93,9 +111,23 @@ public class MessageSenderTest {
             return this;
         }
 
+        public  RequestBuilder withConversationId(){
+            when(requestAdapter.getConversationId()).thenReturn(CONVERSATION_ID);
+            return this;
+        }
+
+        public RequestBuilder withJournalpostId(){
+            String returnvalue = "<Melding><journpost><jpId>"+JOURNALPOST_ID+"</jpId></journpost></Melding>";
+            Object message = returnvalue;
+            when(requestAdapter.getPayload()).thenReturn(message);
+            when(requestAdapter.getJournalPostId()).thenReturn(JOURNALPOST_ID);
+            return this;
+        }
+
         public PutMessageRequestWrapper build() {
             return requestAdapter;
         }
+
 
     }
 
