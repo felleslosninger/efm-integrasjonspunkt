@@ -11,6 +11,7 @@ public class MessageContext {
 	private Avsender avsender;
 	private Mottaker mottaker;
     private String jpId;
+    private String conversationId;
     private AbstractCollection<ErrorStatus> errors;
 
     public MessageContext(){
@@ -35,9 +36,16 @@ public class MessageContext {
         return this;
     }
 
+    public MessageContext setConversationId(String conversationId){
+        this.conversationId = conversationId;
+        return this;
+    }
+
     public String getJournalPostId() {
         return jpId;
     }
+
+    public String getConversationId() { return conversationId; }
 
     /**
      * Appends errorStatus to IntegrasjonspunktContext error statuses
