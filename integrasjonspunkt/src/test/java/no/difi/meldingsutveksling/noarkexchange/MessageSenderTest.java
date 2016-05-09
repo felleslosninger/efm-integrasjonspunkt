@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import junit.framework.Assert;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
@@ -8,6 +7,7 @@ import no.difi.meldingsutveksling.services.CertificateException;
 import no.difi.virksert.client.VirksertClientException;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -16,7 +16,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -75,6 +74,8 @@ public class MessageSenderTest {
         PutMessageRequestWrapper requestAdapter = new RequestBuilder().withSender().withReciever().build();
 
         when(adresseregister.getCertificate(SENDER_PARTY_NUMBER)).thenThrow(new CertificateException("hello", new VirksertClientException("hello")));
+
+        messageSender.createMessageContext(requestAdapter);
     }
 
     @Test
@@ -117,8 +118,7 @@ public class MessageSenderTest {
         }
 
         public RequestBuilder withJournalpostId(){
-            String returnvalue = "<Melding><journpost><jpId>"+JOURNALPOST_ID+"</jpId></journpost></Melding>";
-            Object message = returnvalue;
+            Object message = "<Melding><journpost><jpId>"+JOURNALPOST_ID+"</jpId></journpost></Melding>";
             when(requestAdapter.getPayload()).thenReturn(message);
             when(requestAdapter.getJournalPostId()).thenReturn(JOURNALPOST_ID);
             return this;
