@@ -84,6 +84,11 @@
             <appender-ref ref="FILE"/>
             <appender-ref ref="stash"/>
         </root>
-
+    <logger name="org.springframework.ws.client.MessageTracing">
+        <level value="TRACE"/>
+    </logger>
+    <logger name="org.springframework.ws.server.MessageTracing">
+        <level value="TRACE"/>
+    </logger>
 
 </configuration>

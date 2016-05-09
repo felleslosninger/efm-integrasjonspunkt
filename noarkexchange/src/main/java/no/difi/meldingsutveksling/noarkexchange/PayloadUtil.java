@@ -1,7 +1,14 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import org.springframework.util.StringUtils;
+import org.springframework.xml.transform.StringSource;
 import org.w3c.dom.Node;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 
 public class PayloadUtil {
     public static final String APP_RECEIPT_INDICATOR = "AppReceipt";
@@ -38,4 +45,13 @@ public class PayloadUtil {
             throw new RuntimeException(PAYLOAD_UNKNOWN_TYPE);
         }
     }
+
+    public static AppReceiptType getAppReceiptType(String payload) throws JAXBException {
+        StringSource source = new StringSource(payload);
+        JAXBContext jaxbContext = JAXBContext.newInstance(AppReceiptType.class);
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        JAXBElement<AppReceiptType> r = unmarshaller.unmarshal(source, AppReceiptType.class);
+        return r.getValue();
+    }
+
 }
