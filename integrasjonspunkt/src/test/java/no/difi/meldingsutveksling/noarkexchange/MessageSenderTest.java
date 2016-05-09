@@ -79,7 +79,7 @@ public class MessageSenderTest {
     }
 
     @Test
-    public void ShouldSetConversationId() throws MessageContextException {
+    public void messageContextShouldHaveConversationId() throws MessageContextException {
         PutMessageRequestWrapper requestAdapter = new RequestBuilder().withSender().withReciever().withConversationId().withJournalpostId().build();
 
         MessageContext context = messageSender.createMessageContext(requestAdapter);
@@ -87,7 +87,7 @@ public class MessageSenderTest {
     }
 
     @Test
-    public void ShouldSetJournalpostId() throws MessageContextException {
+    public void messageContextShouldHaveJournalPostId() throws MessageContextException {
         PutMessageRequestWrapper requestAdapter = new RequestBuilder().withSender().withReciever().withConversationId().withJournalpostId().build();
 
         MessageContext context = messageSender.createMessageContext(requestAdapter);
