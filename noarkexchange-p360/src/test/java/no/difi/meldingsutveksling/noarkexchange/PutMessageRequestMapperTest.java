@@ -29,7 +29,7 @@ public class PutMessageRequestMapperTest {
         testData = new TestData<>(PutMessageRequestType.class);
     }
 
-    @Ignore
+    @Ignore("Work in progress")
     @Test
     public void mapFromEphortePutMessageToP360PutMessage() throws JAXBException, XMLStreamException {
         PutMessageRequestType putMessageRequestType = testData.loadFromClasspath("ephorte/PutMessageMessage.xml");
