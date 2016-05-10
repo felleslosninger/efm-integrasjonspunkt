@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import no.difi.meldingsutveksling.noarkexchange.ephorte.PutMessageRequestMapper;
 import no.difi.meldingsutveksling.noarkexchange.ephorte.schema.*;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
@@ -7,6 +8,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.ws.client.core.WebServiceTemplate;
 
 import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +38,17 @@ public class EphorteClient implements NoarkClient {
         ModelMapper modelMapper = new ModelMapper();
         no.difi.meldingsutveksling.noarkexchange.ephorte.schema.PutMessageRequestType r = new no.difi.meldingsutveksling.noarkexchange.ephorte.schema.PutMessageRequestType();
         modelMapper.map(request, r);
-        JAXBElement<no.difi.meldingsutveksling.noarkexchange.ephorte.schema.PutMessageRequestType> ephorteRequest = new ObjectFactory().createPutMessageRequest(r);
+
+
+        JAXBElement<no.difi.meldingsutveksling.noarkexchange.ephorte.schema.PutMessageRequestType> ephorteRequest;
+
+        try {
+            ephorteRequest = new PutMessageRequestMapper().mapFrom(request);
+
+        } catch (JAXBException e) {
+            throw new RuntimeException("Failed to map request from internal PutMessageRequest to ephorte", e);
+        }
+
         JAXBElement<no.difi.meldingsutveksling.noarkexchange.ephorte.schema.PutMessageResponseType>
                 ephorteResponse = (JAXBElement<no.difi.meldingsutveksling.noarkexchange.ephorte.schema.PutMessageResponseType>)
                 template.marshalSendAndReceive(settings.getEndpointUrl(), ephorteRequest);

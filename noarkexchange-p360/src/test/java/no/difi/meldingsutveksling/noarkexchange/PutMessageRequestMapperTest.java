@@ -8,10 +8,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.xml.transform.StringSource;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.*;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
@@ -27,6 +24,17 @@ public class PutMessageRequestMapperTest {
     @Before
     public void setup() throws JAXBException {
         testData = new TestData<>(PutMessageRequestType.class);
+    }
+
+    @Test
+    public void emptyPayloadEphorteBug() throws JAXBException, XMLStreamException {
+        PutMessageRequestType putMessageRequestType = testData.loadFromClasspath("ephorte/EmptyPayload.xml");
+
+        PutMessageRequestMapper mapper = new PutMessageRequestMapper();
+
+        final JAXBElement<no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType> p360PutMessage = mapper.mapFrom(putMessageRequestType);
+
+        assertTrue(p360PutMessage.getValue().getPayload() != null);
     }
 
     @Ignore("Work in progress")
