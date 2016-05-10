@@ -2,12 +2,7 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 
 import no.difi.meldingsutveksling.noarkexchange.p360.PutMessageRequestMapper;
-import no.difi.meldingsutveksling.noarkexchange.p360.schema.AddressType;
-import no.difi.meldingsutveksling.noarkexchange.p360.schema.AppReceiptType;
-import no.difi.meldingsutveksling.noarkexchange.p360.schema.GetCanReceiveMessageRequestType;
-import no.difi.meldingsutveksling.noarkexchange.p360.schema.GetCanReceiveMessageResponseType;
-import no.difi.meldingsutveksling.noarkexchange.p360.schema.ObjectFactory;
-import no.difi.meldingsutveksling.noarkexchange.p360.schema.StatusMessageType;
+import no.difi.meldingsutveksling.noarkexchange.p360.schema.*;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import org.modelmapper.ModelMapper;
@@ -48,11 +43,9 @@ public class P360Client implements NoarkClient {
         no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType r =
                 new no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType();
 
-        PutMessageRequestMapper requestMapper = new PutMessageRequestMapper();
-
-        JAXBElement<no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType> p360request = null;
+        JAXBElement<no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType> p360request;
         try {
-            p360request = requestMapper.mapFrom(request);
+            p360request = new PutMessageRequestMapper().mapFrom(request);
         } catch (JAXBException e) {
             throw new RuntimeException("Could not create PutMessageRequest for P360");
         }

@@ -1,20 +1,14 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import java.io.InputStream;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class PayloadUtilTest {
 
@@ -23,6 +17,15 @@ public class PayloadUtilTest {
     @Before
     public void setup() throws JAXBException {
         testData = new TestData<>(PutMessageRequestType.class);
+    }
+
+    @Test
+    public void getAppreceiptFromP360() throws JAXBException, XMLStreamException {
+        PutMessageRequestType value = testData.loadFromClasspath("p360/PutMessageAppReceiptProblem.xml");
+
+        String payload = StringEscapeUtils.unescapeHtml((String) value.getPayload());
+
+        assertNotNull(PayloadUtil.getAppReceiptType(payload));
     }
 
     @Test

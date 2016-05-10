@@ -2,17 +2,17 @@ package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.springframework.xml.transform.StringSource;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.Marshaller;
+import java.io.StringWriter;
 
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createOkResponse;
@@ -46,10 +46,7 @@ class AppReceiptPutMessageStrategy implements PutMessageStrategy {
         Audit.info("Received AppReceipt", markerFrom(wrapper));
         final String payload = StringEscapeUtils.unescapeHtml((String) request.getPayload());
         try {
-            StringSource source = new StringSource(payload);
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            JAXBElement<AppReceiptType> r = unmarshaller.unmarshal(source, AppReceiptType.class);
-            AppReceiptType receipt = r.getValue();
+            AppReceiptType receipt = PayloadUtil.getAppReceiptType(payload);
             if (receipt.getType().equals("OK")) {
                 wrapper.swapSenderAndReceiver();
                 context.getMessageSender().sendMessage(wrapper.getRequest());
@@ -57,6 +54,15 @@ class AppReceiptPutMessageStrategy implements PutMessageStrategy {
             }
             return createOkResponse();
         } catch (JAXBException e) {
+            try {
+                JAXBContext jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
+                final Marshaller marshaller = jaxbContext.createMarshaller();
+                StringWriter requestAsXml = new StringWriter(4096);
+                marshaller.marshal(request, requestAsXml);
+                Audit.error("This request resultet in error: {}", markerFrom(new PutMessageRequestWrapper(request)), requestAsXml.toString());
+            } catch (JAXBException e1) {
+                throw new MeldingsUtvekslingRuntimeException(e);
+            }
             throw new MeldingsUtvekslingRuntimeException(e);
         }
     }
