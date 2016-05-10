@@ -1,69 +1,83 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true">
 
-        <appender name="stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-            <if condition='property("spring.profiles.active").contains("dev")'>
-              <then>
+    <!-- Logstash destination -->
+    <appender name="stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <if condition='property("spring.profiles.active").contains("dev")'>
+            <then>
                 <destination>test-meldingsutveksling-app01.difi.local:8300</destination>
-              </then>
-            </if>
-            <if condition='property("spring.profiles.active").contains("itest")'>
-              <then>
+            </then>
+        </if>
+        <if condition='property("spring.profiles.active").contains("itest")'>
+            <then>
                 <destination>integrasjonstest-miif.difi.local:8300</destination>
-              </then>
-            </if>
-            <if condition='property("spring.profiles.active").contains("systest")'>
-              <then>
+            </then>
+        </if>
+        <if condition='property("spring.profiles.active").contains("systest")'>
+            <then>
                 <destination>integrasjonstest-miif.difi.local:8300</destination>
-              </then>
-            </if>
-            <if condition='property("spring.profiles.active").contains("staging")'>
-                <then>
-                    <destination>93.94.10.18:8300</destination>
-                </then>
-            </if>
-            <if condition='property("spring.profiles.active").contains("production")'>
-                <then>
-                    <destination>REMEMBER TO CHANGE THIS</destination>
-                </then>
-            </if>
-            <if condition='property("spring.profiles.active").isEmpty()'>
-                <then>
-                    <destination>integrasjonstest-miif.difi.local:8300</destination>
-                </then>
-            </if>
-            <!-- encoder is required -->
-            <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
-        </appender>
+            </then>
+        </if>
+        <if condition='property("spring.profiles.active").contains("staging")'>
+            <then>
+                <destination>93.94.10.18:8300</destination>
+            </then>
+        </if>
+        <if condition='property("spring.profiles.active").contains("production")'>
+            <then>
+                <destination>REMEMBER TO CHANGE THIS</destination>
+            </then>
+        </if>
+        <if condition='property("spring.profiles.active").isEmpty()'>
+            <then>
+                <destination>integrasjonstest-miif.difi.local:8300</destination>
+            </then>
+        </if>
+        <!-- encoder is required -->
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+    </appender>
 
-        <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+    <!-- some extra debug
+    <if condition='Arrays.asList("dev", "systest", "itest").contains(property("spring.profiles.active")'>
+        <then>
+            <logger name="org.springframework.ws.client.MessageTracing">
+                <level value="TRACE"/>
+            </logger>
+            <logger name="org.springframework.ws.server.MessageTracing">
+                <level value="TRACE"/>
+            </logger>
+        </then>
+    </if>
+    -->
 
-            <encoder>
-                <charset>UTF-8</charset>
-                <Pattern>%d %-4relative [%thread] %-5level %logger{35} \(%marker\) - %msg%n</Pattern>
-            </encoder>
-        </appender>
+    <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
 
-        <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder>
+            <charset>UTF-8</charset>
+            <Pattern>%d %-4relative [%thread] %-5level %logger{35} \(%marker\) - %msg%n</Pattern>
+        </encoder>
+    </appender>
 
-            <file>${user.dir}/integrasjonspunkt-logs/application.log</file>
-            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-                <!-- daily rollover. Make sure the path matches the one in the file element or else
-                 the rollover logs are placed in the working directory. -->
-                <fileNamePattern>${user.dir}/integrasjonspunkt-logs/application_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
 
-                <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                    <maxFileSize>15MB</maxFileSize>
-                </timeBasedFileNamingAndTriggeringPolicy>
-                <!-- keep 30 days' worth of history -->
-                <maxHistory>30</maxHistory>
-            </rollingPolicy>
+        <file>${user.dir}/integrasjonspunkt-logs/application.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- daily rollover. Make sure the path matches the one in the file element or else
+             the rollover logs are placed in the working directory. -->
+            <fileNamePattern>${user.dir}/integrasjonspunkt-logs/application_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
 
-            <encoder>
-                <charset>UTF-8</charset>
-                <pattern>%d %-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
-            </encoder>
-        </appender>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>15MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <!-- keep 30 days' worth of history -->
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d %-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+        </encoder>
+    </appender>
 
     <appender name="configMetaConsole" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -79,16 +93,10 @@
     </logger>
 
 
-        <root level="INFO">
-            <appender-ref ref="consoleAppender" />
-            <appender-ref ref="FILE"/>
-            <appender-ref ref="stash"/>
-        </root>
-    <logger name="org.springframework.ws.client.MessageTracing">
-        <level value="TRACE"/>
-    </logger>
-    <logger name="org.springframework.ws.server.MessageTracing">
-        <level value="TRACE"/>
-    </logger>
+    <root level="INFO">
+        <appender-ref ref="consoleAppender"/>
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="stash"/>
+    </root>
 
 </configuration>
