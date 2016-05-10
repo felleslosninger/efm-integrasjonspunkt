@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.ptv;
 
 import no.altinn.schemas.serviceengine.formsengine._2009._10.TransportType;
-import no.altinn.schemas.services.serviceengine.correspondence._2009._10.Attachments;
 import no.altinn.schemas.services.serviceengine.correspondence._2010._10.AttachmentsV2;
 import no.altinn.schemas.services.serviceengine.correspondence._2010._10.ExternalContentV2;
 import no.altinn.schemas.services.serviceengine.correspondence._2010._10.MyInsertCorrespondenceV2;
@@ -22,7 +21,8 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.BindingProvider;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -70,7 +70,7 @@ public class Client {
 
         AttachmentsV2 attachmentsV2 = new AttachmentsV2();
         BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
-        ;
+
         BinaryAttachmentV2 binaryAttachmentV2 = new BinaryAttachmentV2();
         binaryAttachmentV2.setFunctionType(AttachmentFunctionType.fromValue("Unspecified"));
         no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory reporteeFactory = new no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory();
@@ -80,7 +80,7 @@ public class Client {
         binaryAttachmentV2.setSendersReference(reporteeFactory.createBinaryAttachmentV2SendersReference("AttachmentReference_as123452"));
 
         try {
-            byte[] data = FileUtils.readFileToByteArray(new File("data"));
+            byte[] data = FileUtils.readFileToByteArray(new File("src/test/resources/data"));
             binaryAttachmentV2.setData(reporteeFactory.createBinaryAttachmentV2Data(data));
         } catch (IOException e) {
             e.printStackTrace();
