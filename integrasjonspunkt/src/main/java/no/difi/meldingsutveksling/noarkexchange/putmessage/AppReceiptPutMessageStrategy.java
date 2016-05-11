@@ -5,9 +5,9 @@ import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
+import no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import org.apache.commons.lang.StringEscapeUtils;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -44,9 +44,8 @@ class AppReceiptPutMessageStrategy implements PutMessageStrategy {
     public PutMessageResponseType putMessage(PutMessageRequestType request) {
         final PutMessageRequestWrapper wrapper = new PutMessageRequestWrapper(request);
         Audit.info("Received AppReceipt", markerFrom(wrapper));
-        final String payload = StringEscapeUtils.unescapeHtml((String) request.getPayload());
         try {
-            AppReceiptType receipt = PayloadUtil.getAppReceiptType(payload);
+             AppReceiptType receipt = PayloadUtil.getAppReceiptType(request.getPayload());
             if (receipt.getType().equals("OK")) {
                 wrapper.swapSenderAndReceiver();
                 context.getMessageSender().sendMessage(wrapper.getRequest());
@@ -58,10 +57,11 @@ class AppReceiptPutMessageStrategy implements PutMessageStrategy {
                 JAXBContext jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
                 final Marshaller marshaller = jaxbContext.createMarshaller();
                 StringWriter requestAsXml = new StringWriter(4096);
-                marshaller.marshal(request, requestAsXml);
+                marshaller.marshal(new ObjectFactory().createPutMessageRequest(request), requestAsXml);
+                System.out.println(">>> Failing request: " + requestAsXml.toString());
                 Audit.error("This request resultet in error: {}", markerFrom(new PutMessageRequestWrapper(request)), requestAsXml.toString());
             } catch (JAXBException e1) {
-                throw new MeldingsUtvekslingRuntimeException(e);
+                throw new MeldingsUtvekslingRuntimeException(e1);
             }
             throw new MeldingsUtvekslingRuntimeException(e);
         }

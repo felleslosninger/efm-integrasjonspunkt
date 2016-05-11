@@ -20,11 +20,11 @@ public class AppReceiptStrategyTest {
 
     public static final String RECEIVER_ORG_NR = "11111111";
     public static final String SENDER_ORG_NR = "22222222";
-    private String receiptPayload = "&lt;AppReceipt type=\"OK\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.arkivverket.no/Noark/Exchange/types\"&gt;\n" +
-            "  &lt;message code=\"ID\" xmlns=\"\"&gt;\n" +
-            "    &lt;text&gt;210725&lt;/text&gt;\n" +
-            "  &lt;/message&gt;\n" +
-            "&lt;/AppReceipt&gt;";
+    private String receiptPayload = "<AppReceipt type=\"OK\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.arkivverket.no/Noark/Exchange/types\">\n" +
+            "  <message code=\"ID\" xmlns=\"\">\n" +
+            "    <text>210725</text>\n" +
+            "  </message>\n" +
+            "</AppReceipt>";
 
     private PutMessageContext ctx;
 

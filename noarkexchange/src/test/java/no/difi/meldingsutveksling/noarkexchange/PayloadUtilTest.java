@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.junit.Before;
@@ -20,6 +21,14 @@ public class PayloadUtilTest {
     }
 
     @Test
+    public void appReceiptMedFeilmeldingIsNotOkType() throws JAXBException, XMLStreamException {
+        PutMessageRequestType value = testData.loadFromClasspath("p360/PutMessageAppReceiptFeilmelding.xml");
+
+        final AppReceiptType appReceiptType = PayloadUtil.getAppReceiptType(value.getPayload());
+        assertFalse(appReceiptType.getType().equals("OK"));
+    }
+
+    @Test
     public void getAppreceiptFromP360() throws JAXBException, XMLStreamException {
         PutMessageRequestType value = testData.loadFromClasspath("p360/PutMessageAppReceiptProblem.xml");
 
@@ -37,9 +46,18 @@ public class PayloadUtilTest {
 
     @Test
     public void isAppReceiptAppreceiptFrom360() throws JAXBException, XMLStreamException {
-        final PutMessageRequestType putMessageRequestType = testData.loadFromClasspath("p360/PutMessageAppReceipt.xml");
+        final PutMessageRequestType putMessageRequestType = testData.loadFromClasspath("p360/OKPutMessageAppReceipt.xml");
 
         assertTrue(PayloadUtil.isAppReceipt(putMessageRequestType.getPayload()));
+    }
+
+    @Test
+    public void getOKAppReceiptTypeFromP360() throws JAXBException, XMLStreamException {
+        final PutMessageRequestType putMessageRequestType = testData.loadFromClasspath("p360/OKPutMessageAppReceipt.xml");
+
+        final AppReceiptType appReceiptType = PayloadUtil.getAppReceiptType(putMessageRequestType.getPayload());
+        assertNotNull(appReceiptType);
+        assertTrue(appReceiptType.getType().equals("OK"));
     }
 
     @Test
