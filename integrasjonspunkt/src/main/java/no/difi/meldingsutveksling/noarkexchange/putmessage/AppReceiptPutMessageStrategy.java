@@ -43,9 +43,8 @@ class AppReceiptPutMessageStrategy implements PutMessageStrategy {
     public PutMessageResponseType putMessage(PutMessageRequestType request) {
         final PutMessageRequestWrapper wrapper = new PutMessageRequestWrapper(request);
         Audit.info("Received AppReceipt", markerFrom(wrapper));
-        final String payload = (String) request.getPayload();
         try {
-             AppReceiptType receipt = PayloadUtil.getAppReceiptType(payload);
+             AppReceiptType receipt = PayloadUtil.getAppReceiptType(request.getPayload());
             if (receipt.getType().equals("OK")) {
                 wrapper.swapSenderAndReceiver();
                 context.getMessageSender().sendMessage(wrapper.getRequest());
