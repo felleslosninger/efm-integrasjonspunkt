@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.junit.Before;
@@ -17,6 +18,17 @@ public class PayloadUtilTest {
     @Before
     public void setup() throws JAXBException {
         testData = new TestData<>(PutMessageRequestType.class);
+    }
+
+    @Test
+    public void appReceiptMedFeilmelding() throws JAXBException, XMLStreamException {
+        PutMessageRequestType value = testData.loadFromClasspath("p360/PutMessageAppReceiptFeilmelding.xml");
+
+        final String payload = (String) value.getPayload();
+
+        final AppReceiptType appReceiptType = PayloadUtil.getAppReceiptType(payload);
+        assertNotNull(appReceiptType);
+        assertFalse(appReceiptType.getType().equals("OK"));
     }
 
     @Test

@@ -48,7 +48,7 @@ public class PayloadUtil {
 
     public static AppReceiptType getAppReceiptType(String payload) throws JAXBException {
         StringSource source = new StringSource(payload);
-        JAXBContext jaxbContext = JAXBContext.newInstance(AppReceiptType.class);
+        JAXBContext jaxbContext = JAXBContext.newInstance("no.difi.meldingsutveksling.noarkexchange.schema");
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         JAXBElement<AppReceiptType> r = unmarshaller.unmarshal(source, AppReceiptType.class);
         return r.getValue();
