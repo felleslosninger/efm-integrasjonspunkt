@@ -47,8 +47,7 @@ public class PayloadUtil {
     }
 
     public static AppReceiptType getAppReceiptType(Object payload) throws JAXBException {
-        /* Potential bug: if payload is something other than String. */
-        final String payloadAsString = (String) payload;
+        final String payloadAsString = payloadAsString(payload);
 
         StringSource source = new StringSource(payloadAsString);
         JAXBContext jaxbContext = JAXBContext.newInstance("no.difi.meldingsutveksling.noarkexchange.schema");

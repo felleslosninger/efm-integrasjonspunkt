@@ -46,9 +46,18 @@ public class PayloadUtilTest {
 
     @Test
     public void isAppReceiptAppreceiptFrom360() throws JAXBException, XMLStreamException {
-        final PutMessageRequestType putMessageRequestType = testData.loadFromClasspath("p360/PutMessageAppReceipt.xml");
+        final PutMessageRequestType putMessageRequestType = testData.loadFromClasspath("p360/OKPutMessageAppReceipt.xml");
 
         assertTrue(PayloadUtil.isAppReceipt(putMessageRequestType.getPayload()));
+    }
+
+    @Test
+    public void getOKAppReceiptTypeFromP360() throws JAXBException, XMLStreamException {
+        final PutMessageRequestType putMessageRequestType = testData.loadFromClasspath("p360/OKPutMessageAppReceipt.xml");
+
+        final AppReceiptType appReceiptType = PayloadUtil.getAppReceiptType(putMessageRequestType.getPayload());
+        assertNotNull(appReceiptType);
+        assertTrue(appReceiptType.getType().equals("OK"));
     }
 
     @Test

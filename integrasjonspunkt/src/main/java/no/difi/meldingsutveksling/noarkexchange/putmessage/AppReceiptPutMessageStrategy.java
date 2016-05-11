@@ -5,6 +5,7 @@ import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
+import no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 
@@ -56,7 +57,8 @@ class AppReceiptPutMessageStrategy implements PutMessageStrategy {
                 JAXBContext jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
                 final Marshaller marshaller = jaxbContext.createMarshaller();
                 StringWriter requestAsXml = new StringWriter(4096);
-                marshaller.marshal(request, requestAsXml);
+                marshaller.marshal(new ObjectFactory().createPutMessageRequest(request), requestAsXml);
+                System.out.println(">>> Failing request: " + requestAsXml.toString());
                 Audit.error("This request resultet in error: {}", markerFrom(new PutMessageRequestWrapper(request)), requestAsXml.toString());
             } catch (JAXBException e1) {
                 throw new MeldingsUtvekslingRuntimeException(e1);
