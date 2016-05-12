@@ -62,7 +62,7 @@ public class MessagePolling {
         try {
             endpoint = elmaLookup.lookup(PREFIX_NORWAY + config.getOrganisationNumber());
         } catch (LookupException e) {
-            throw new MeldingsUtvekslingRuntimeException(e.getMessage(), e);
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
         AltinnWsConfiguration configuration = AltinnWsConfiguration.fromConfiguration(endpoint.getAddress(), config.getConfiguration());
         AltinnWsClient client = new AltinnWsClient(configuration);
@@ -76,12 +76,12 @@ public class MessagePolling {
         for (FileReference reference : fileReferences) {
             final DownloadRequest request = new DownloadRequest(reference.getValue(), config.getOrganisationNumber());
             EduDocument eduDocument = client.download(request);
-            Audit.info("Message downloaded", markerFrom(reference));
 
             if (!isKvittering(eduDocument)) {
                 internalQueue.enqueueNoark(eduDocument);
             }
             client.confirmDownload(request);
+            Audit.info("Message downloaded", markerFrom(reference));
             if (!isKvittering(eduDocument)) {
                 sendReceipt(eduDocument.getMessageInfo());
                 Audit.info("Delivery receipt sent", markerFrom(eduDocument.getMessageInfo()));
