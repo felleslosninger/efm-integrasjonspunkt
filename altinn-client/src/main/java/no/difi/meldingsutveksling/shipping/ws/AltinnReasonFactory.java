@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.shipping.ws;
 
+import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasicConfirmDownloadedBasicAltinnFaultFaultFaultMessage;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasicGetAvailableFilesBasicAltinnFaultFaultFaultMessage;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasicInitiateBrokerServiceBasicAltinnFaultFaultFaultMessage;
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExternalBasicStreamedDownloadFileStreamedBasicAltinnFaultFaultFaultMessage;
@@ -34,6 +35,14 @@ public class AltinnReasonFactory {
         String message = downloadFault.getFaultInfo().getAltinnErrorMessage().getValue();
         Integer id = downloadFault.getFaultInfo().getErrorID();
         String userId = downloadFault.getFaultInfo().getUserId().getValue();
+        return new AltinnReason(id, message, userId);
+    }
+
+    public static AltinnReason from(IBrokerServiceExternalBasicConfirmDownloadedBasicAltinnFaultFaultFaultMessage confirmFault) {
+
+        final String message = confirmFault.getFaultInfo().getAltinnErrorMessage().getValue();
+        final Integer id = confirmFault.getFaultInfo().getErrorID();
+        final String userId = confirmFault.getFaultInfo().getUserId().getValue();
         return new AltinnReason(id, message, userId);
     }
 }
