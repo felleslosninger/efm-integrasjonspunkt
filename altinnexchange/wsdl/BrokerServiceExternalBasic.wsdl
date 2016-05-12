@@ -1,20 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <wsdl:definitions name="BrokerServiceExternalBasicSF"
                   targetNamespace="http://www.altinn.no/services/ServiceEngine/Broker/2015/06"
-                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex"
-                  xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
-                  xmlns:wsa10="http://www.w3.org/2005/08/addressing"
-                  xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
-                  xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy"
-                  xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract"
-                  xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/"
-                  xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing"
-                  xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
                   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
                   xmlns:tns="http://www.altinn.no/services/ServiceEngine/Broker/2015/06"
                   xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
                   xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
-                  xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/">
+>
     <wsdl:types>
         <xsd:schema elementFormDefault="qualified" targetNamespace="http://www.altinn.no/services/2009/10">
             <xsd:element name="Test">
@@ -237,6 +229,21 @@
                                      type="q3:BrokerServiceAvailableFileList"
                                      xmlns:q3="http://schemas.altinn.no/services/ServiceEngine/Broker/2015/06"/>
                     </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="ConfirmDownloadedBasic">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element minOccurs="1" name="systemUserName" type="xsd:string"/>
+                        <xsd:element minOccurs="1" name="systemPassword" type="xsd:string"/>
+                        <xsd:element minOccurs="1" name="fileReference" type="xsd:string"/>
+                        <xsd:element minOccurs="1" name="reportee" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="ConfirmDownloadedBasicResponse">
+                <xsd:complexType>
+                    <xsd:sequence/>
                 </xsd:complexType>
             </xsd:element>
         </xsd:schema>
@@ -948,6 +955,16 @@
         <wsdl:part name="detail" element="q10:AltinnFault"
                    xmlns:q10="http://www.altinn.no/services/common/fault/2009/10"/>
     </wsdl:message>
+    <wsdl:message name="IBrokerServiceExternalBasic_ConfirmDownloadedBasic_InputMessage">
+        <wsdl:part name="parameters" element="tns:ConfirmDownloadedBasic"/>
+    </wsdl:message>
+    <wsdl:message name="IBrokerServiceExternalBasic_ConfirmDownloadedBasic_OutputMessage">
+        <wsdl:part name="parameters" element="tns:ConfirmDownloadedBasicResponse"/>
+    </wsdl:message>
+    <wsdl:message name="IBrokerServiceExternalBasic_ConfirmDownloadedBasic_AltinnFaultFault_FaultMessage">
+        <wsdl:part name="detail" element="q11:AltinnFault"
+                   xmlns:q11="http://www.altinn.no/services/common/fault/2009/10"/>
+    </wsdl:message>
     <wsdl:portType name="IBrokerServiceExternalBasic">
         <wsdl:documentation>&lt;summary&gt;&#xD;
             External interface for exposing service operations for Broker Service on basic binding.&#xD;
@@ -1019,6 +1036,18 @@
                     name="AltinnFaultFault"
                     message="tns:IBrokerServiceExternalBasic_GetAvailableFilesBasic_AltinnFaultFault_FaultMessage"/>
         </wsdl:operation>
+        <wsdl:operation name="ConfirmDownloadedBasic">
+            <wsdl:input
+                    wsaw:Action="http://www.altinn.no/services/ServiceEngine/Broker/2015/06/IBrokerServiceExternalBasic/ConfirmDownloadedBasic"
+                    message="tns:IBrokerServiceExternalBasic_ConfirmDownloadedBasic_InputMessage"/>
+            <wsdl:output
+                    wsaw:Action="http://www.altinn.no/services/ServiceEngine/Broker/2015/06/IBrokerServiceExternalBasic/ConfirmDownloadedBasicResponse"
+                    message="tns:IBrokerServiceExternalBasic_ConfirmDownloadedBasic_OutputMessage"/>
+            <wsdl:fault
+                    wsaw:Action="http://www.altinn.no/services/ServiceEngine/Broker/2015/06/IBrokerServiceExternalBasic/ConfirmDownloadedBasicAltinnFaultFault"
+                    name="AltinnFaultFault"
+                    message="tns:IBrokerServiceExternalBasic_ConfirmDownloadedBasic_AltinnFaultFault_FaultMessage"/>
+        </wsdl:operation>
     </wsdl:portType>
     <wsdl:binding name="BasicHttpBinding_IBrokerServiceExternalBasic" type="tns:IBrokerServiceExternalBasic">
         <soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
@@ -1063,12 +1092,26 @@
                 <soap:fault name="AltinnFaultFault" use="literal"/>
             </wsdl:fault>
         </wsdl:operation>
+        <wsdl:operation name="ConfirmDownloadedBasic">
+            <soap:operation
+                    soapAction="http://www.altinn.no/services/ServiceEngine/Broker/2015/06/IBrokerServiceExternalBasic/ConfirmDownloadedBasic"
+                    style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="AltinnFaultFault">
+                <soap:fault name="AltinnFaultFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
     </wsdl:binding>
     <wsdl:service name="BrokerServiceExternalBasicSF">
         <wsdl:port name="BasicHttpBinding_IBrokerServiceExternalBasic"
                    binding="tns:BasicHttpBinding_IBrokerServiceExternalBasic">
             <soap:address
-                    location="http://at06.altinn.basefarm.net/ServiceEngineExternal/BrokerServiceExternalBasic.svc"/>
+                    location="http://tt02.altinn.basefarm.net/ServiceEngineExternal/BrokerServiceExternalBasic.svc"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>
