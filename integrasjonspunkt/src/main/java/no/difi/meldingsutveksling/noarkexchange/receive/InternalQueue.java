@@ -1,21 +1,15 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
-import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
-import no.difi.meldingsutveksling.kvittering.KvitteringFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.*;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
-import no.difi.meldingsutveksling.transport.Transport;
-import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -60,12 +54,6 @@ public class InternalQueue {
 
     @Autowired
     private IntegrasjonspunktConfiguration configuration;
-
-    @Autowired
-    IntegrasjonspunktNokkel keyInfo;
-
-    @Autowired
-    TransportFactory transportFactory;
 
     @Autowired
     IntegrasjonspunktConfiguration config;
@@ -126,19 +114,10 @@ public class InternalQueue {
      * @param eduDocument the eduDocument as received by IntegrasjonspunktReceiveImpl from an external source
      */
     public void enqueueNoark(EduDocument eduDocument) {
-
-        if(!isKvittering(eduDocument)) {
-            sendReceipt(eduDocument.getMessageInfo());
-            Audit.info("Delivery receipt sent", markerFrom(eduDocument.getMessageInfo()));
             jmsTemplate.convertAndSend(NOARK,  documentConverter.marshallToBytes(eduDocument));
-        } else {
-            Audit.info("Message is a receipt", markerFrom(eduDocument.getMessageInfo()));
-        }
     }
 
-    private boolean isKvittering(EduDocument eduDocument) {
-        return eduDocument.getStandardBusinessDocumentHeader().getDocumentIdentification().getType().equalsIgnoreCase(StandardBusinessDocumentHeader.KVITTERING_TYPE);
-    }
+
 
     private void forwardToNoark(EduDocument eduDocument) {
         try {
@@ -167,11 +146,5 @@ public class InternalQueue {
             Audit.error("Failed to unserialize SBD");
             throw new MeldingsUtvekslingRuntimeException("Could not forward document to archive system", e);
         }
-    }
-
-    private void sendReceipt(MessageInfo messageInfo) {
-        EduDocument doc = KvitteringFactory.createLeveringsKvittering(messageInfo, keyInfo.getKeyPair());
-        Transport t = transportFactory.createTransport(doc);
-        t.send(config.getConfiguration(), doc);
     }
 }

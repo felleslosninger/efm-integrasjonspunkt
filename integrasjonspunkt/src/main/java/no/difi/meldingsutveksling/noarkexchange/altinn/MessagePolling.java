@@ -1,16 +1,18 @@
 package no.difi.meldingsutveksling.noarkexchange.altinn;
 
 
-import no.difi.meldingsutveksling.AltinnWsClient;
-import no.difi.meldingsutveksling.AltinnWsConfiguration;
-import no.difi.meldingsutveksling.DownloadRequest;
-import no.difi.meldingsutveksling.FileReference;
+import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.elma.ELMALookup;
+import no.difi.meldingsutveksling.kvittering.KvitteringFactory;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
+import no.difi.meldingsutveksling.transport.Transport;
+import no.difi.meldingsutveksling.transport.TransportFactory;
 import no.difi.vefa.peppol.common.model.Endpoint;
 import no.difi.vefa.peppol.lookup.api.LookupException;
 import org.slf4j.Logger;
@@ -44,6 +46,12 @@ public class MessagePolling {
     ELMALookup elmaLookup;
 
     @Autowired
+    IntegrasjonspunktNokkel keyInfo;
+
+    @Autowired
+    TransportFactory transportFactory;
+
+    @Autowired
     private JmsTemplate jmsTemplate;
 
     @Scheduled(fixedRate = 15000)
@@ -66,11 +74,31 @@ public class MessagePolling {
         }
 
         for (FileReference reference : fileReferences) {
-            EduDocument eduDocument = client.download(new DownloadRequest(reference.getValue(), config.getOrganisationNumber()));
+            final DownloadRequest request = new DownloadRequest(reference.getValue(), config.getOrganisationNumber());
+            EduDocument eduDocument = client.download(request);
             Audit.info("Message downloaded", markerFrom(reference));
 
-            internalQueue.enqueueNoark(eduDocument);
+            if (!isKvittering(eduDocument)) {
+                internalQueue.enqueueNoark(eduDocument);
+            }
+            client.confirmDownload(request);
+            if (!isKvittering(eduDocument)) {
+                sendReceipt(eduDocument.getMessageInfo());
+                Audit.info("Delivery receipt sent", markerFrom(eduDocument.getMessageInfo()));
+            } else {
+                Audit.info("Message is a receipt", markerFrom(eduDocument.getMessageInfo()));
+            }
         }
+    }
+
+    private boolean isKvittering(EduDocument eduDocument) {
+        return eduDocument.getStandardBusinessDocumentHeader().getDocumentIdentification().getType().equalsIgnoreCase(StandardBusinessDocumentHeader.KVITTERING_TYPE);
+    }
+
+    private void sendReceipt(MessageInfo messageInfo) {
+        EduDocument doc = KvitteringFactory.createLeveringsKvittering(messageInfo, keyInfo.getKeyPair());
+        Transport t = transportFactory.createTransport(doc);
+        t.send(config.getConfiguration(), doc);
     }
 }
 
