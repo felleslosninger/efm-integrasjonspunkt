@@ -39,7 +39,7 @@ public final class PutMessageStrategyFactory {
         }
         if (isAppReceipt(payload)) {
             Audit.info("Messagetype AppReceipt");
-            return new AppReceiptPutMessageStrategy(context);
+            return new AppReceiptPutMessageStrategy(context.getMessageSender());
         } else if (isBestEDUMessage(payload)) {
             Audit.info("Messagetype EDU HtmlEndoced");
             return new BestEDUPutMessageStrategy(context.getMessageSender());

@@ -2,8 +2,7 @@ package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
-import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
+import no.difi.meldingsutveksling.noarkexchange.*;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
@@ -14,6 +13,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import java.io.StringWriter;
 
+import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createOkResponse;
 
@@ -24,7 +24,7 @@ import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory
  */
 class AppReceiptPutMessageStrategy implements PutMessageStrategy {
 
-    private final PutMessageContext context;
+    private final MessageSender messageSender;
 
     private static final JAXBContext jaxbContext;
 
@@ -36,8 +36,8 @@ class AppReceiptPutMessageStrategy implements PutMessageStrategy {
         }
     }
 
-    public AppReceiptPutMessageStrategy(PutMessageContext context) {
-        this.context = context;
+    public AppReceiptPutMessageStrategy(MessageSender messageSender) {
+        this.messageSender = messageSender;
     }
 
     @Override
@@ -46,10 +46,15 @@ class AppReceiptPutMessageStrategy implements PutMessageStrategy {
         Audit.info("Received AppReceipt", markerFrom(wrapper));
         try {
              AppReceiptType receipt = PayloadUtil.getAppReceiptType(request.getPayload());
-            if (receipt.getType().equals("OK")) {
+            if (asList("OK", "WARNING", "ERROR").contains(receipt.getType())) {
                 wrapper.swapSenderAndReceiver();
-                context.getMessageSender().sendMessage(wrapper.getRequest());
+                messageSender.sendMessage(wrapper.getRequest());
+            }
+            if (receipt.getType().equals("OK")) {
                 Audit.info("AppReceipt sent to "+ wrapper.getRecieverPartyNumber(), markerFrom(wrapper));
+            } else if (asList("ERROR", "WARNING").contains(receipt.getType())) {
+                final MessageException me = new MessageException(StatusMessage.APP_RECEIPT_CONTAINS_ERROR);
+                Audit.warn(me.getStatusMessage().getTechnicalMessage(), markerFrom(wrapper));
             }
             return createOkResponse();
         } catch (JAXBException e) {
