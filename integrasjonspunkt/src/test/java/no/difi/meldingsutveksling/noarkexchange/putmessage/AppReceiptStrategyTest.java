@@ -38,7 +38,7 @@ public class AppReceiptStrategyTest {
      */
     @Test
     public void appReceiptsShouldBeReturnedToSender() {
-        AppReceiptPutMessageStrategy strategy = new AppReceiptPutMessageStrategy(ctx);
+        AppReceiptPutMessageStrategy strategy = new AppReceiptPutMessageStrategy(ctx.getMessageSender());
         PutMessageRequestType request = createPutMessageRequestType();
         strategy.putMessage(request);
         verify(ctx.getMessageSender(), atLeastOnce()).sendMessage(any(PutMessageRequestType.class));

@@ -29,4 +29,9 @@ public class Audit {
     public static void error(String text) {
         logger.error(text);
     }
+
+    public static void warn(String text, LogstashMarker marker) {
+        logger.warn(marker, text);
+    }
+
 }

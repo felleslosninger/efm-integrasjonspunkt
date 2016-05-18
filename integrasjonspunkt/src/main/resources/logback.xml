@@ -37,8 +37,8 @@
         <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
     </appender>
 
-    <!-- some extra debug
-    <if condition='Arrays.asList("dev", "systest", "itest").contains(property("spring.profiles.active")'>
+
+    <if condition='"dev".contains(property("spring.profiles.active"))'>
         <then>
             <logger name="org.springframework.ws.client.MessageTracing">
                 <level value="TRACE"/>
@@ -48,7 +48,6 @@
             </logger>
         </then>
     </if>
-    -->
 
     <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
 

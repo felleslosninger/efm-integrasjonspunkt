@@ -13,7 +13,7 @@ public class PutMessageResponseFactory {
     public static PutMessageResponseType createErrorResponse(MessageException exception) {
         PutMessageResponseType response = new PutMessageResponseType();
         AppReceiptType receipt = new AppReceiptType();
-        receipt.setType("ERROR ");
+        receipt.setType("ERROR");
         StatusMessageType statusMessageType = new StatusMessageType();
         statusMessageType.setText(exception.getStatusMessage().getEndUserMessage());
         statusMessageType.setCode(exception.getStatusMessage().getId());
