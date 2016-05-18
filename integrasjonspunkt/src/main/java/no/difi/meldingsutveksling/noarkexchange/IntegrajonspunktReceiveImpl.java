@@ -137,7 +137,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
     private void forwardToNoarkSystemAndSendReceipts(StandardBusinessDocumentWrapper inputDocument, PutMessageRequestType putMessageRequestType) {
         PutMessageResponseType response = localNoark.sendEduMelding(putMessageRequestType);
         if (response == null || response.getResult() == null) {
-            Audit.info("Got empty response from Archive system", markerFrom(inputDocument));
+            Audit.info("Empty response from archive", markerFrom(inputDocument));
         } else {
             AppReceiptType result = response.getResult();
             if (result.getType().equals(OK_TYPE)) {
