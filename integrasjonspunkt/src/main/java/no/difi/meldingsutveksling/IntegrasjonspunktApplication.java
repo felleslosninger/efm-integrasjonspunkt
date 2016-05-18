@@ -16,7 +16,12 @@ import java.security.NoSuchAlgorithmException;
 
 @SpringBootApplication(exclude = {SolrAutoConfiguration.class})
 public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
+
     private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktApplication.class);
+    private static final String MISSING_JCE_MESSAGE = "Failed startup. Possibly unlimited security policy files that is not updated." +
+            "/r/nTo fix this, download and replace policy files for the apropriate java version (found in ${java.home}/jre/lib/security/)" +
+            "/r/n- Java7: http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html" +
+            "/r/n- Java8: http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html";
 
     @Bean
     public ServletRegistrationBean servletNoArk() {
@@ -29,7 +34,7 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
     public static void main(String[] args) {
         try {
             if(!validateJCE()){
-                logMissingJCE(null);
+                logMissingJCE();
                 return;
             }
             ConfigurableApplicationContext context = SpringApplication.run(IntegrasjonspunktApplication.class, args);
@@ -40,17 +45,15 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
 
     private static void logMissingJCE(Exception e)
     {
-        String message =
-                "Failed startup. Possibly unlimited security policy files that is not updated." +
-                        "/r/nTo fix this, download and replace policy files for the apropriate java version (found in ${java.home}/jre/lib/security/)" +
-                        "/r/n- Java7: http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html" +
-                        "/r/n- Java8: http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html";
+        System.out.println(MISSING_JCE_MESSAGE);
+        log.error(MISSING_JCE_MESSAGE);
+        log.error(e.getMessage());
+    }
 
-        System.out.println(message);
-        log.error(message);
-        if(e != null){
-            log.error(e.getMessage());
-        }
+    private static void logMissingJCE()
+    {
+        System.out.println(MISSING_JCE_MESSAGE);
+        log.error(MISSING_JCE_MESSAGE);
     }
 
     private static boolean validateJCE()
