@@ -81,15 +81,9 @@ public class StandardBusinessDocumentFactory {
         }
         Payload payload = new Payload(encryptArchive(mottaker, archive));
 
-        String jpId = "";
+        final JournalpostId journalpostId = JournalpostId.fromPutMessage(new PutMessageRequestWrapper(shipment));
 
-        try {
-            final JournalpostId journalpostId = JournalpostId.fromPutMessage(new PutMessageRequestWrapper(shipment));
-            jpId = journalpostId.value();
-        }
-        catch (Exception ex){}
-
-        return new CreateSBD().createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload, conversationId, DOCUMENT_TYPE_MELDING, jpId);
+        return new CreateSBD().createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload, conversationId, DOCUMENT_TYPE_MELDING, journalpostId.value());
     }
 
     private byte[] encryptArchive(Mottaker mottaker, Archive archive) {
