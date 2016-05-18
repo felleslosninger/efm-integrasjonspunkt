@@ -88,18 +88,16 @@ public class PutMessageRequestWrapper {
     }
 
     public boolean hasPayload() {
-        return PayloadUtil.isEmpty(getPayload());
+        return !PayloadUtil.isEmpty(getPayload());
     }
 
     public MessageType getMessageType(){
-        if (PayloadUtil.isAppReceipt(requestType)){
-            return MessageType.APPRECEIPT;
+        if(hasPayload()) {
+            if (PayloadUtil.isAppReceipt(getPayload())) {
+                return MessageType.APPRECEIPT;
+            }
+            return MessageType.EDUMESSAGE;
         }
-        if(PayloadUtil.isEmpty(requestType)){
-            return MessageType.UNKNOWN;
-        }
-
-        return MessageType.EDUMESSAGE;
+        return MessageType.UNKNOWN;
     }
-
 }
