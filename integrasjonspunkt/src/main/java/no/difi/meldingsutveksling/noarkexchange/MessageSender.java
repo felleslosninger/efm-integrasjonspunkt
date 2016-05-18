@@ -133,11 +133,14 @@ public class MessageSender {
         avsender = createAvsender(message);
         mottaker = createMottaker(message.getRecieverPartyNumber());
 
-        JournalpostId id = JournalpostId.fromPutMessage(message);
-        String journalPostId = id.value();
+        if(message.getMessageType() == PutMessageRequestWrapper.MessageType.EDUMESSAGE){
+            JournalpostId id = JournalpostId.fromPutMessage(message);
+            String journalPostId = id.value();
+            context.setJpId(journalPostId);
+        }
+
         String converationId = message.getConversationId();
 
-        context.setJpId(journalPostId);
         context.setMottaker(mottaker);
         context.setAvsender(avsender);
         context.setConversationId(converationId);

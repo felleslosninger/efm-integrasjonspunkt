@@ -6,8 +6,14 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 
+
+
 public class PutMessageRequestWrapper {
     private PutMessageRequestType requestType;
+
+    public enum MessageType{
+        EDUMESSAGE, APPRECEIPT, UNKNOWN
+    }
 
     public PutMessageRequestWrapper(PutMessageRequestType requestType) {
         this.requestType = requestType;
@@ -84,4 +90,16 @@ public class PutMessageRequestWrapper {
     public boolean hasPayload() {
         return PayloadUtil.isEmpty(getPayload());
     }
+
+    public MessageType getMessageType(){
+        if (PayloadUtil.isAppReceipt(requestType)){
+            return MessageType.APPRECEIPT;
+        }
+        if(PayloadUtil.isEmpty(requestType)){
+            return MessageType.UNKNOWN;
+        }
+
+        return MessageType.EDUMESSAGE;
+    }
+
 }
