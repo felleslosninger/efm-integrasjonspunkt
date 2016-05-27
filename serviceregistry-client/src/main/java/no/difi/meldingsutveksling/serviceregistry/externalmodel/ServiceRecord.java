@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.serviceregistry.common;
+package no.difi.meldingsutveksling.serviceregistry.externalmodel;
 
 import java.io.Serializable;
 

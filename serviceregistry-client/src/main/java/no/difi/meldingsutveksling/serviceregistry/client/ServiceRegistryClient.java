@@ -1,7 +1,8 @@
 package no.difi.meldingsutveksling.serviceregistry.client;
 
-import no.difi.meldingsutveksling.serviceregistry.common.InfoRecord;
-import no.difi.meldingsutveksling.serviceregistry.common.ServiceRecord;
+
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import retrofit2.Call;
 
 import java.io.IOException;

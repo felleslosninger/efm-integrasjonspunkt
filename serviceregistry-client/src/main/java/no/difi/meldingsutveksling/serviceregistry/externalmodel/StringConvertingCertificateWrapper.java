@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.serviceregistry.common;
+package no.difi.meldingsutveksling.serviceregistry.externalmodel;
 
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
