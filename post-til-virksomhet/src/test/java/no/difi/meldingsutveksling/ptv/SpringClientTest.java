@@ -70,7 +70,7 @@ public class SpringClientTest {
 
 
         try {
-            byte[] data = FileUtils.readFileToByteArray(new File("src/test/resources/data"));
+            byte[] data = FileUtils.readFileToByteArray(new File("src/test/resources/test_data"));
             binaryAttachmentV2.setData(reporteeFactory.createBinaryAttachmentV2Data(data));
         } catch (IOException e) {
             throw new RuntimeException(e);
