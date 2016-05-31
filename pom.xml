@@ -42,6 +42,7 @@
         <module>virksert-demoscope</module>
         <module>audit</module>
         <module>test-tools</module>
+        <module>post-til-virksomhet</module>
     </modules>
 
   <dependencyManagement>
