@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true">
+
+
+    <logger name="org.springframework.ws.client.MessageTracing">
+        <level value="TRACE"/>
+    </logger>
+    <logger name="org.springframework.ws.server.MessageTracing">
+        <level value="TRACE"/>
+    </logger>
+
+    <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+
+        <encoder>
+            <charset>UTF-8</charset>
+            <Pattern>%d %-4relative [%thread] %-5level %logger{35} \(%marker\) - %msg%n</Pattern>
+        </encoder>
+    </appender>
+
+
+    <root level="INFO">
+        <appender-ref ref="consoleAppender"/>
+    </root>
+
+</configuration>
