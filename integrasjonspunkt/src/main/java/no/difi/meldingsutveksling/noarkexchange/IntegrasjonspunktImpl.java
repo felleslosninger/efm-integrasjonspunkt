@@ -14,11 +14,7 @@ import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageContext;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategy;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
-import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageRequestType;
-import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageResponseType;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import no.difi.meldingsutveksling.noarkexchange.schema.SOAPport;
+import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
 import no.difi.meldingsutveksling.services.CertificateException;
 import org.slf4j.Logger;
@@ -126,7 +122,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
         Audit.info("Recieved message", markerFrom(message));
 
-        if(StringUtils.isBlank((String) message.getPayload())){
+        if(PayloadUtil.isEmpty(message.getPayload())){
             Audit.error("Payload is missing", markerFrom(message));
             if(configuration.getReturnOkOnMissingPayload()){
                 return PutMessageResponseFactory.createOkResponse();
@@ -137,7 +133,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
         }
 
         if (!message.hasSenderPartyNumber() && !configuration.hasOrganisationNumber()) {
-            Audit.error("Sernders orgnr missing", markerFrom(message));
+            Audit.error("Senders orgnr missing", markerFrom(message));
             throw new MeldingsUtvekslingRuntimeException("Missing senders orgnumber. Please configure orgnumber= in the integrasjonspunkt-local.properties");
         }
 

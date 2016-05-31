@@ -1,15 +1,15 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import no.difi.meldingsutveksling.noarkexchange.ephorte.schema.AddressType;
-import no.difi.meldingsutveksling.noarkexchange.ephorte.schema.GetCanReceiveMessageRequestType;
-import no.difi.meldingsutveksling.noarkexchange.ephorte.schema.GetCanReceiveMessageResponseType;
-import no.difi.meldingsutveksling.noarkexchange.ephorte.schema.ObjectFactory;
+import no.difi.meldingsutveksling.noarkexchange.ephorte.PutMessageRequestMapper;
+import no.difi.meldingsutveksling.noarkexchange.ephorte.schema.*;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import org.modelmapper.ModelMapper;
 import org.springframework.ws.client.core.WebServiceTemplate;
 
 import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class EphorteClient implements NoarkClient {
@@ -38,7 +38,17 @@ public class EphorteClient implements NoarkClient {
         ModelMapper modelMapper = new ModelMapper();
         no.difi.meldingsutveksling.noarkexchange.ephorte.schema.PutMessageRequestType r = new no.difi.meldingsutveksling.noarkexchange.ephorte.schema.PutMessageRequestType();
         modelMapper.map(request, r);
-        JAXBElement<no.difi.meldingsutveksling.noarkexchange.ephorte.schema.PutMessageRequestType> ephorteRequest = new ObjectFactory().createPutMessageRequest(r);
+
+
+        JAXBElement<no.difi.meldingsutveksling.noarkexchange.ephorte.schema.PutMessageRequestType> ephorteRequest;
+
+        try {
+            ephorteRequest = new PutMessageRequestMapper().mapFrom(request);
+
+        } catch (JAXBException e) {
+            throw new RuntimeException("Failed to map request from internal PutMessageRequest to ephorte", e);
+        }
+
         JAXBElement<no.difi.meldingsutveksling.noarkexchange.ephorte.schema.PutMessageResponseType>
                 ephorteResponse = (JAXBElement<no.difi.meldingsutveksling.noarkexchange.ephorte.schema.PutMessageResponseType>)
                 template.marshalSendAndReceive(settings.getEndpointUrl(), ephorteRequest);
@@ -46,15 +56,39 @@ public class EphorteClient implements NoarkClient {
         PutMessageResponseType response = new PutMessageResponseType();
         modelMapper.map(ephorteResponse.getValue(), response);
 
-        List<no.difi.meldingsutveksling.noarkexchange.ephorte.schema.StatusMessageType> statusMessages = ephorteResponse.getValue().getResult().getMessage();
-
-        if(!statusMessages.isEmpty()) {
-            no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType statusMesage = new no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType();
-            statusMesage.setCode(statusMessages.get(0).getCode());
-            statusMesage.setText(statusMessages.get(0).getText());
-            response.getResult().getMessage().add(statusMesage);
-        }
+        setUnmappedValues(ephorteResponse, response);
 
         return response;
+    }
+
+    /**
+     * Use this method to set values not "mapped" by modelmapper. For instance statusMessage
+     * @param ephorteResponse response from the archive system
+     * @param response response from this client
+     */
+    private void setUnmappedValues(JAXBElement<no.difi.meldingsutveksling.noarkexchange.ephorte.schema.PutMessageResponseType> ephorteResponse, PutMessageResponseType response) {
+        List<StatusMessageType> statusMessages = getStatusMessages(ephorteResponse);
+
+        if(!statusMessages.isEmpty()) {
+            no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType statusMessage = new no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType();
+            statusMessage.setCode(statusMessages.get(0).getCode());
+            statusMessage.setText(statusMessages.get(0).getText());
+            response.getResult().getMessage().add(statusMessage);
+        }
+    }
+
+    private List<StatusMessageType> getStatusMessages(JAXBElement<no.difi.meldingsutveksling.noarkexchange.ephorte.schema.PutMessageResponseType> response){
+        List<StatusMessageType> statusMessageTypes = new ArrayList<>() ;
+
+        if(response.isNil()){
+            return statusMessageTypes;
+        }
+
+        AppReceiptType appReceipt = response.getValue().getResult();
+        if(appReceipt != null){
+            statusMessageTypes = appReceipt.getMessage();
+        }
+
+        return statusMessageTypes;
     }
 }

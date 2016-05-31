@@ -66,7 +66,7 @@ public class MessageMarkerFactory {
 
 
     public static LogstashMarker markerFrom(PutMessageResponseType response) {
-        final LogstashMarker marker = responseTypeMarker(response.getResult().getType());
+        LogstashMarker marker = responseTypeMarker(response.getResult().getType());
         for (StatusMessageType s : response.getResult().getMessage()) {
             marker.and(responseMessageTextMarker(s.getText()));
             marker.and(responseMessageCodeMarker(s.getCode()));

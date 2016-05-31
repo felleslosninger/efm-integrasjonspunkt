@@ -31,6 +31,11 @@ class JournalpostId {
     }
 
     public static JournalpostId fromPutMessage(PutMessageRequestWrapper message) {
+
+        if(message.getMessageType() != PutMessageRequestWrapper.MessageType.EDUMESSAGE){
+            return new JournalpostId("");
+        }
+
         JournalpostId result;
         XPathFactory xPathFactory = XPathFactory.newInstance();
         XPath xPath = xPathFactory.newXPath();

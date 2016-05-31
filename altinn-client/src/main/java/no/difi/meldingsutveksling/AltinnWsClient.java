@@ -29,6 +29,7 @@ public class AltinnWsClient {
     private static final String FILE_NAME = "sbd.zip";
     private static final String AVAILABLE_FILES_ERROR_MESSAGE = "Could not get list of available files from Altinn formidlingstjeneste";
     private static final String CANNOT_DOWNLOAD_FILE = "Cannot download file";
+    private static final String CANNOT_CONFIRM_DOWNLOAD = "Cannot confirm download";
     private final AltinnWsConfiguration configuration;
 
     public AltinnWsClient(AltinnWsConfiguration altinnWsConfiguration) {
@@ -131,6 +132,21 @@ public class AltinnWsClient {
         } catch (IOException | JAXBException e) {
             throw new AltinnWsException(CANNOT_DOWNLOAD_FILE, e);
         }
+    }
+
+    public void confirmDownload(DownloadRequest request) {
+        final BrokerServiceExternalBasicSF brokerServiceExternalBasicSF = new BrokerServiceExternalBasicSF(configuration.getBrokerServiceUrl());
+        final IBrokerServiceExternalBasic service = brokerServiceExternalBasicSF.getBasicHttpBindingIBrokerServiceExternalBasic();
+        final BindingProvider bp = (BindingProvider) service;
+
+        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, configuration.getBrokerServiceUrl().toString());
+
+        try {
+            service.confirmDownloadedBasic(configuration.getUsername(), configuration.getPassword(), request.fileReference, request.getReciever());
+        } catch (IBrokerServiceExternalBasicConfirmDownloadedBasicAltinnFaultFaultFaultMessage e) {
+            throw new AltinnWsException(CANNOT_CONFIRM_DOWNLOAD, AltinnReasonFactory.from(e), e);
+        }
+
     }
 
     private String initiateBrokerService(UploadRequest request) {

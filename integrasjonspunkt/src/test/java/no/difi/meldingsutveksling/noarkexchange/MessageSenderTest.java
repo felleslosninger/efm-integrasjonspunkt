@@ -7,9 +7,7 @@ import no.difi.meldingsutveksling.services.CertificateException;
 import no.difi.virksert.client.VirksertClientException;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -22,6 +20,8 @@ import static org.mockito.Mockito.when;
 public class MessageSenderTest {
     public static final String SENDER_PARTY_NUMBER = "910075918";
     public static final String RECIEVER_PARTY_NUMBER = "910077473";
+    public static final String CONVERSATION_ID = "conversationId";
+    public static final String JOURNALPOST_ID = "journalpostid";
     private MessageSender messageSender;
 
     @Rule
@@ -75,6 +75,32 @@ public class MessageSenderTest {
         messageSender.createMessageContext(requestAdapter);
     }
 
+    @Test
+    public void messageContextShouldHaveConversationId() throws MessageContextException {
+        PutMessageRequestWrapper requestAdapter = new RequestBuilder().withSender().withReciever().withConversationId().withJournalpostId().build();
+
+        MessageContext context = messageSender.createMessageContext(requestAdapter);
+        Assert.assertEquals(CONVERSATION_ID, context.getConversationId());
+    }
+
+    @Test
+    public void messageContextShouldHaveJournalPostId() throws MessageContextException {
+        PutMessageRequestWrapper requestAdapter = new RequestBuilder().withSender().withReciever().withConversationId().withJournalpostId().build();
+
+        when(requestAdapter.getMessageType()).thenReturn(PutMessageRequestWrapper.MessageType.EDUMESSAGE);
+        MessageContext context = messageSender.createMessageContext(requestAdapter);
+        Assert.assertEquals(JOURNALPOST_ID, context.getJournalPostId());
+    }
+
+    @Test
+    public void messageContextShouldHaveEmptyJounalpostIdOnAppReceipt() throws MessageContextException{
+        PutMessageRequestWrapper requestAdapter = new RequestBuilder().withSender().withReciever().withConversationId().build();
+
+        when(requestAdapter.getMessageType()).thenReturn(PutMessageRequestWrapper.MessageType.APPRECEIPT);
+        MessageContext context = messageSender.createMessageContext(requestAdapter);
+        Assert.assertEquals("", context.getJournalPostId());
+    }
+
     private class RequestBuilder {
         private PutMessageRequestWrapper requestAdapter;
 
@@ -93,10 +119,21 @@ public class MessageSenderTest {
             return this;
         }
 
+        public  RequestBuilder withConversationId(){
+            when(requestAdapter.getConversationId()).thenReturn(CONVERSATION_ID);
+            return this;
+        }
+
+        public RequestBuilder withJournalpostId(){
+            Object message = "<Melding><journpost><jpId>"+JOURNALPOST_ID+"</jpId></journpost></Melding>";
+            when(requestAdapter.getPayload()).thenReturn(message);
+            when(requestAdapter.getJournalPostId()).thenReturn(JOURNALPOST_ID);
+            return this;
+        }
+
         public PutMessageRequestWrapper build() {
             return requestAdapter;
         }
-
     }
 
     private class StatusMatches extends TypeSafeMatcher<MessageContextException> {

@@ -82,6 +82,7 @@ public class StandardBusinessDocumentFactory {
         Payload payload = new Payload(encryptArchive(mottaker, archive));
 
         final JournalpostId journalpostId = JournalpostId.fromPutMessage(new PutMessageRequestWrapper(shipment));
+
         return new CreateSBD().createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload, conversationId, DOCUMENT_TYPE_MELDING, journalpostId.value());
     }
 

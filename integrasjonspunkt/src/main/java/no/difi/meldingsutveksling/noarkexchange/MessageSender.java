@@ -92,7 +92,7 @@ public class MessageSender {
 
         EduDocument edu;
         try {
-            edu = standardBusinessDocumentFactory.create(messageRequest, messageContext.getAvsender(), messageContext.getMottaker());
+            edu = standardBusinessDocumentFactory.create(messageRequest, messageContext.getConversationId(),  messageContext.getAvsender(), messageContext.getMottaker());
             Audit.info("EDUdocument created", markerFrom(message));
         } catch (MessageException e) {
             Audit.error("Failed to create EDUdocument", markerFrom(message));
@@ -133,12 +133,18 @@ public class MessageSender {
         avsender = createAvsender(message);
         mottaker = createMottaker(message.getRecieverPartyNumber());
 
-        JournalpostId p = JournalpostId.fromPutMessage(message);
-        String journalPostId = p.value();
+        PutMessageRequestWrapper.MessageType type = message.getMessageType();
 
-        context.setJpId(journalPostId);
+
+
+        JournalpostId id = JournalpostId.fromPutMessage(message);
+        context.setJpId(id.value());
+
+        String converationId = message.getConversationId();
+
         context.setMottaker(mottaker);
         context.setAvsender(avsender);
+        context.setConversationId(converationId);
         return context;
     }
 
