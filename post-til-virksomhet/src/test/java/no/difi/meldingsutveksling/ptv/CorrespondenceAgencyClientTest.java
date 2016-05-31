@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.ptv;
 
-import com.sun.deploy.Environment;
 import no.altinn.schemas.serviceengine.formsengine._2009._10.TransportType;
 import no.altinn.schemas.services.serviceengine.correspondence._2010._10.AttachmentsV2;
 import no.altinn.schemas.services.serviceengine.correspondence._2010._10.ExternalContentV2;
@@ -38,7 +37,7 @@ public class CorrespondenceAgencyClientTest {
     }
 
     private static void usage(String[] args) {
-        System.out.format("Usage: %s %s [username] [password]", Environment.getJavawCommand(), CorrespondenceAgencyClientTest.class.getName());
+        System.out.format("Usage: %s %s [username] [password]", "java", CorrespondenceAgencyClientTest.class.getName());
     }
 
     private static InsertCorrespondenceV2 createInsertCorrespondenceV2() {
