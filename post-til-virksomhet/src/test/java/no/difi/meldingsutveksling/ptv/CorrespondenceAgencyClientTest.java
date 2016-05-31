@@ -23,21 +23,22 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.File;
 import java.io.IOException;
 
-public class SpringClientTest {
-    static Logger log = LoggerFactory.getLogger(SpringClientTest.class);
+public class CorrespondenceAgencyClientTest {
+    static Logger log = LoggerFactory.getLogger(CorrespondenceAgencyClientTest.class);
+
     public static void main(String[] args) {
         if (args.length != 2) {
             usage(args);
             System.exit(1);
         }
-        final CorrespondenceAgencyClient correspondenceAgencyClient = new CorrespondenceAgencyClient();
         final InsertCorrespondenceV2 insertCorrespondenceV2 = createInsertCorrespondenceV2();
+        final CorrespondenceAgencyClient correspondenceAgencyClient = new CorrespondenceAgencyClient();
         final CorrespondenceRequest request = new CorrespondenceRequest.Builder().withUsername(args[0]).withPassword(args[1]).withPayload(insertCorrespondenceV2).build();
         correspondenceAgencyClient.send(request);
     }
 
     private static void usage(String[] args) {
-        System.out.format("Usage: %s %s [username] [password]", Environment.getJavawCommand(), SpringClientTest.class.getName());
+        System.out.format("Usage: %s %s [username] [password]", Environment.getJavawCommand(), CorrespondenceAgencyClientTest.class.getName());
     }
 
     private static InsertCorrespondenceV2 createInsertCorrespondenceV2() {
