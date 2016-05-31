@@ -30,10 +30,10 @@ public class SpringClientTest {
             usage(args);
             System.exit(1);
         }
-        final SpringClient springClient = new SpringClient();
+        final CorrespondenceAgencyClient correspondenceAgencyClient = new CorrespondenceAgencyClient();
         final InsertCorrespondenceV2 insertCorrespondenceV2 = createInsertCorrespondenceV2();
         final CorrespondenceRequest request = new CorrespondenceRequest.Builder().withUsername(args[0]).withPassword(args[1]).withPayload(insertCorrespondenceV2).build();
-        springClient.send(request);
+        correspondenceAgencyClient.send(request);
     }
 
     private static void usage(String[] args) {

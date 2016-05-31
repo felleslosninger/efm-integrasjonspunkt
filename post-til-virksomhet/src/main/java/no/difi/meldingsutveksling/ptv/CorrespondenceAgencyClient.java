@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-public class SpringClient {
+public class CorrespondenceAgencyClient {
 
     public Object send(CorrespondenceRequest request) {
         AxiomSoapMessageFactory newSoapMessageFactory = new AxiomSoapMessageFactory();
