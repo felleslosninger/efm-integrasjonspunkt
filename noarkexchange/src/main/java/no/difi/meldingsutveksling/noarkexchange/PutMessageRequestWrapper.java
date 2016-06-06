@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
@@ -67,6 +68,10 @@ public class PutMessageRequestWrapper {
 
     public Object getPayload() {
         return requestType.getPayload();
+    }
+
+    public EnvelopeType getEnvelope() {
+        return requestType.getEnvelope();
     }
 
     public PutMessageRequestType getRequest() {
