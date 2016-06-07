@@ -6,39 +6,27 @@ import java.io.Serializable;
  *
  */
 public class InfoRecord implements Serializable {
+    private final String primaryServiceIdentifier;
+    private final String organizationNumber;
 
-    private boolean smpRecordAvailable;
-    private boolean certificateAvailable;
-
-    public InfoRecord(boolean hasSmpRecord, boolean hasCertificateRecord) {
-        this.smpRecordAvailable = hasSmpRecord;
-        this.certificateAvailable = hasCertificateRecord;
+    public InfoRecord(String primaryServiceIdentifier, String organizationNumber) {
+        this.primaryServiceIdentifier = primaryServiceIdentifier;
+        this.organizationNumber = organizationNumber;
     }
 
-    public InfoRecord() {
+    public String getPrimaryServiceIdentifier() {
+        return primaryServiceIdentifier;
     }
 
-    public boolean isSmpRecordAvailable() {
-        return smpRecordAvailable;
-    }
-
-    public void setSmpRecordAvailable(boolean smpRecordAvailable) {
-        this.smpRecordAvailable = smpRecordAvailable;
-    }
-
-    public boolean isCertificateAvailable() {
-        return certificateAvailable;
-    }
-
-    public void setCertificateAvailable(boolean certificateAvailable) {
-        this.certificateAvailable = certificateAvailable;
+    public String getOrganizationNumber() {
+        return organizationNumber;
     }
 
     @Override
     public String toString() {
         return "InfoRecord{" +
-                "smpRecordAvailable=" + smpRecordAvailable +
-                ", certificateAvailable=" + certificateAvailable +
+                "primaryServiceIdentifier='" + primaryServiceIdentifier + '\'' +
+                ", organizationNumber='" + organizationNumber + '\'' +
                 '}';
     }
 }
