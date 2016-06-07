@@ -10,13 +10,10 @@ import org.springframework.stereotype.Component;
 
 
 @Component
-public class MultiTransportFactory implements TransportFactory {
+public class AltinnTransportFactory implements TransportFactory {
 
     @Autowired
-
-
-    @Autowired
-    ELMALookup elmaLookup;
+    private ELMALookup elmaLookup;
 
     @Override
     public Transport createTransport(EduDocument message) {
