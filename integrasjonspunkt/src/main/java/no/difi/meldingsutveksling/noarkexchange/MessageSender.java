@@ -7,8 +7,8 @@ import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.Noekkelpar;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.domain.sbdh.Document;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
@@ -83,32 +83,32 @@ public class MessageSender {
         MessageContext messageContext;
         try {
             messageContext = createMessageContext(message);
+            Audit.info("Required metadata validated", markerFrom(message));
         } catch (MessageContextException e) {
             log.error(markerFrom(message), e.getStatusMessage().getTechnicalMessage(), e);
             return createErrorResponse(e);
         }
 
-        Audit.info("Sender and receivers signatures are validated", markerFrom(message));
 
-        no.difi.meldingsutveksling.domain.sbdh.Document sbd;
+        EduDocument edu;
         try {
-            sbd = standardBusinessDocumentFactory.create(messageRequest, messageContext.getAvsender(), messageContext.getMottaker());
+            edu = standardBusinessDocumentFactory.create(messageRequest, messageContext.getConversationId(),  messageContext.getAvsender(), messageContext.getMottaker());
+            Audit.info("EDUdocument created", markerFrom(message));
         } catch (MessageException e) {
-            Audit.error("Unable to create Standard Business Document. Message is not delievered", markerFrom(message));
+            Audit.error("Failed to create EDUdocument", markerFrom(message));
             log.error(markerFrom(message), e.getStatusMessage().getTechnicalMessage(), e);
             return createErrorResponse(e);
         }
-        Audit.info("Successfully created Standard Business Document. Sending message...", markerFrom(message));
 
-        Transport t = transportFactory.createTransport(sbd);
-        t.send(configuration.getConfiguration(), sbd);
+        Transport t = transportFactory.createTransport(edu);
+        t.send(configuration.getConfiguration(), edu);
 
-        Audit.info("Message delivered", markerFrom(message));
+        Audit.info("Message sent", markerFrom(message));
 
         return createOkResponse();
     }
 
-    public void sendMessage(Document doc) {
+    public void sendMessage(EduDocument doc) {
         Transport t = transportFactory.createTransport(doc);
         t.send(configuration.getConfiguration(), doc);
     }
@@ -133,12 +133,18 @@ public class MessageSender {
         avsender = createAvsender(message);
         mottaker = createMottaker(message.getRecieverPartyNumber());
 
-        JournalpostId p = JournalpostId.fromPutMessage(message);
-        String journalPostId = p.value();
+        PutMessageRequestWrapper.MessageType type = message.getMessageType();
 
-        context.setJpId(journalPostId);
+
+
+        JournalpostId id = JournalpostId.fromPutMessage(message);
+        context.setJpId(id.value());
+
+        String converationId = message.getConversationId();
+
         context.setMottaker(mottaker);
         context.setAvsender(avsender);
+        context.setConversationId(converationId);
         return context;
     }
 

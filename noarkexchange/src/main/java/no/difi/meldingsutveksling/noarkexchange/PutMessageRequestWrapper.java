@@ -6,11 +6,18 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 
+
+
 public class PutMessageRequestWrapper {
     private PutMessageRequestType requestType;
 
+    public enum MessageType{
+        EDUMESSAGE, APPRECEIPT, UNKNOWN
+    }
+
     public PutMessageRequestWrapper(PutMessageRequestType requestType) {
         this.requestType = requestType;
+
     }
 
     public boolean hasNOARKPayload() {
@@ -30,7 +37,8 @@ public class PutMessageRequestWrapper {
     }
 
     public String getRecieverPartyNumber() {
-        return requestType.getEnvelope().getReceiver().getOrgnr();
+        final String originalOrgNr = requestType.getEnvelope().getReceiver().getOrgnr();
+        return FiksFix.replaceOrgNummberWithKs(originalOrgNr);
     }
 
     public boolean hasSenderPartyNumber() {
@@ -77,5 +85,19 @@ public class PutMessageRequestWrapper {
         final String sender = getSenderPartynumber() ;
         setSenderPartyNumber(getRecieverPartyNumber());
         setReceiverPartyNumber(sender);
+    }
+
+    public boolean hasPayload() {
+        return !PayloadUtil.isEmpty(getPayload());
+    }
+
+    public MessageType getMessageType(){
+        if(hasPayload()) {
+            if (PayloadUtil.isAppReceipt(getPayload())) {
+                return MessageType.APPRECEIPT;
+            }
+            return MessageType.EDUMESSAGE;
+        }
+        return MessageType.UNKNOWN;
     }
 }

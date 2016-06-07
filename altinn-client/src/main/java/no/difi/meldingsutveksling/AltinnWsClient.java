@@ -4,7 +4,7 @@ import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.*;
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.*;
-import no.difi.meldingsutveksling.domain.sbdh.Document;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.shipping.ws.AltinnReasonFactory;
@@ -29,6 +29,7 @@ public class AltinnWsClient {
     private static final String FILE_NAME = "sbd.zip";
     private static final String AVAILABLE_FILES_ERROR_MESSAGE = "Could not get list of available files from Altinn formidlingstjeneste";
     private static final String CANNOT_DOWNLOAD_FILE = "Cannot download file";
+    private static final String CANNOT_CONFIRM_DOWNLOAD = "Cannot confirm download";
     private final AltinnWsConfiguration configuration;
 
     public AltinnWsClient(AltinnWsConfiguration altinnWsConfiguration) {
@@ -59,10 +60,12 @@ public class AltinnWsClient {
             parameters.setDataStream(outputStream.toByteArray());
 
             ReceiptExternalStreamedBE receiptAltinn = streamingService.uploadFileStreamedBasic(parameters, FILE_NAME, senderReference, request.getSender(), configuration.getPassword(), configuration.getUsername());
-            Audit.info("Got response on file upload from Altinn", markerFrom(receiptAltinn));
+            Audit.info("Message uploaded", markerFrom(receiptAltinn));
         } catch (IBrokerServiceExternalBasicStreamedUploadFileStreamedBasicAltinnFaultFaultFaultMessage e) {
+            Audit.error("Message failed to upload");
             throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, AltinnReasonFactory.from(e), e);
         } catch (IOException e) {
+            Audit.error("Message failed to upload");
             throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, e);
         }
     }
@@ -109,7 +112,7 @@ public class AltinnWsClient {
     }
 
 
-    public Document download(DownloadRequest request) {
+    public EduDocument download(DownloadRequest request) {
         BrokerServiceExternalBasicStreamedSF brokerServiceExternalBasicStreamedSF;
         brokerServiceExternalBasicStreamedSF = new BrokerServiceExternalBasicStreamedSF(configuration.getStreamingServiceUrl());
         IBrokerServiceExternalBasicStreamed streamingService = brokerServiceExternalBasicStreamedSF.getBasicHttpBindingIBrokerServiceExternalBasicStreamed(new MTOMFeature(true));
@@ -122,13 +125,28 @@ public class AltinnWsClient {
         try {
             message = streamingService.downloadFileStreamedBasic(configuration.getUsername(), configuration.getPassword(), request.getFileReference(), request.getReciever());
             AltinnPackage altinnPackage = AltinnPackage.from(new ByteArrayInputStream(message));
-            return altinnPackage.getDocument();
+            return altinnPackage.getEduDocument();
 
         } catch (IBrokerServiceExternalBasicStreamedDownloadFileStreamedBasicAltinnFaultFaultFaultMessage e) {
             throw new AltinnWsException(CANNOT_DOWNLOAD_FILE, AltinnReasonFactory.from(e), e);
         } catch (IOException | JAXBException e) {
             throw new AltinnWsException(CANNOT_DOWNLOAD_FILE, e);
         }
+    }
+
+    public void confirmDownload(DownloadRequest request) {
+        final BrokerServiceExternalBasicSF brokerServiceExternalBasicSF = new BrokerServiceExternalBasicSF(configuration.getBrokerServiceUrl());
+        final IBrokerServiceExternalBasic service = brokerServiceExternalBasicSF.getBasicHttpBindingIBrokerServiceExternalBasic();
+        final BindingProvider bp = (BindingProvider) service;
+
+        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, configuration.getBrokerServiceUrl().toString());
+
+        try {
+            service.confirmDownloadedBasic(configuration.getUsername(), configuration.getPassword(), request.fileReference, request.getReciever());
+        } catch (IBrokerServiceExternalBasicConfirmDownloadedBasicAltinnFaultFaultFaultMessage e) {
+            throw new AltinnWsException(CANNOT_CONFIRM_DOWNLOAD, AltinnReasonFactory.from(e), e);
+        }
+
     }
 
     private String initiateBrokerService(UploadRequest request) {

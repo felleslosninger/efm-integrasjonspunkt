@@ -11,9 +11,17 @@ import org.springframework.boot.context.web.SpringBootServletInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 
+import javax.crypto.Cipher;
+import java.security.NoSuchAlgorithmException;
+
 @SpringBootApplication(exclude = {SolrAutoConfiguration.class})
 public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
+
     private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktApplication.class);
+    private static final String MISSING_JCE_MESSAGE = "Failed startup. Possibly unlimited security policy files that is not updated." +
+            "/r/nTo fix this, download and replace policy files for the apropriate java version (found in ${java.home}/jre/lib/security/)" +
+            "/r/n- Java7: http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html" +
+            "/r/n- Java8: http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html";
 
     @Bean
     public ServletRegistrationBean servletNoArk() {
@@ -25,17 +33,41 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
         try {
+            if(!validateJCE()){
+                logMissingJCE();
+                return;
+            }
             ConfigurableApplicationContext context = SpringApplication.run(IntegrasjonspunktApplication.class, args);
         } catch (SecurityException se) {
-            String message =
-                    "Failed startup. Possibly unlimited security policy files that is not updated." +
-                            "/r/nTo fix this, download and replace policy files for the apropriate java version (found in ${java.home}/jre/lib/security/)" +
-                            "/r/n- Java7: http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html" +
-                            "/r/n- Java8: http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html";
-
-            System.out.println(message);
-            log.error(message);
-            log.error(se.getMessage());
+            logMissingJCE(se);
         }
+    }
+
+    private static void logMissingJCE(Exception e)
+    {
+        System.out.println(MISSING_JCE_MESSAGE);
+        log.error(MISSING_JCE_MESSAGE);
+        log.error(e.getMessage());
+    }
+
+    private static void logMissingJCE()
+    {
+        System.out.println(MISSING_JCE_MESSAGE);
+        log.error(MISSING_JCE_MESSAGE);
+    }
+
+    private static boolean validateJCE()
+    {
+        try {
+            int maxKeyLen = Cipher.getMaxAllowedKeyLength("AES");
+            if(maxKeyLen > 128)
+            {
+                return true;
+            }
+        }
+        catch(NoSuchAlgorithmException ex) {
+        }
+        return false;
+
     }
 }

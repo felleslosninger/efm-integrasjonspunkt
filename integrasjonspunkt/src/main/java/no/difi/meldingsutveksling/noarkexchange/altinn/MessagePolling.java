@@ -1,16 +1,18 @@
 package no.difi.meldingsutveksling.noarkexchange.altinn;
 
 
-import no.difi.meldingsutveksling.AltinnWsClient;
-import no.difi.meldingsutveksling.AltinnWsConfiguration;
-import no.difi.meldingsutveksling.DownloadRequest;
-import no.difi.meldingsutveksling.FileReference;
+import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.sbdh.Document;
+import no.difi.meldingsutveksling.domain.MessageInfo;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.elma.ELMALookup;
+import no.difi.meldingsutveksling.kvittering.KvitteringFactory;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
+import no.difi.meldingsutveksling.transport.Transport;
+import no.difi.meldingsutveksling.transport.TransportFactory;
 import no.difi.vefa.peppol.common.model.Endpoint;
 import no.difi.vefa.peppol.lookup.api.LookupException;
 import org.slf4j.Logger;
@@ -44,17 +46,23 @@ public class MessagePolling {
     ELMALookup elmaLookup;
 
     @Autowired
+    IntegrasjonspunktNokkel keyInfo;
+
+    @Autowired
+    TransportFactory transportFactory;
+
+    @Autowired
     private JmsTemplate jmsTemplate;
 
     @Scheduled(fixedRate = 15000)
     public void checkForNewMessages() {
-        logger.debug("Checking for new messages");
         MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, config.getOrganisationNumber());
+        logger.debug("Checking for new messages");
         Endpoint endpoint;
         try {
             endpoint = elmaLookup.lookup(PREFIX_NORWAY + config.getOrganisationNumber());
         } catch (LookupException e) {
-            throw new MeldingsUtvekslingRuntimeException(e.getMessage(), e);
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
         AltinnWsConfiguration configuration = AltinnWsConfiguration.fromConfiguration(endpoint.getAddress(), config.getConfiguration());
         AltinnWsClient client = new AltinnWsClient(configuration);
@@ -62,15 +70,35 @@ public class MessagePolling {
         List<FileReference> fileReferences = client.availableFiles(config.getOrganisationNumber());
 
         if(!fileReferences.isEmpty()) {
-            Audit.info("Found new messages! Proceeding with download...");
+            Audit.info("New message(s) detected");
         }
 
         for (FileReference reference : fileReferences) {
-            Audit.info("Downloading message", markerFrom(reference));
-            Document document = client.download(new DownloadRequest(reference.getValue(), config.getOrganisationNumber()));
+            final DownloadRequest request = new DownloadRequest(reference.getValue(), config.getOrganisationNumber());
+            EduDocument eduDocument = client.download(request);
 
-            internalQueue.enqueueNoark(document);
+            if (!isKvittering(eduDocument)) {
+                internalQueue.enqueueNoark(eduDocument);
+            }
+            client.confirmDownload(request);
+            Audit.info("Message downloaded", markerFrom(reference));
+            if (!isKvittering(eduDocument)) {
+                sendReceipt(eduDocument.getMessageInfo());
+                Audit.info("Delivery receipt sent", markerFrom(eduDocument.getMessageInfo()));
+            } else {
+                Audit.info("Message is a receipt", markerFrom(eduDocument.getMessageInfo()));
+            }
         }
+    }
+
+    private boolean isKvittering(EduDocument eduDocument) {
+        return eduDocument.getStandardBusinessDocumentHeader().getDocumentIdentification().getType().equalsIgnoreCase(StandardBusinessDocumentHeader.KVITTERING_TYPE);
+    }
+
+    private void sendReceipt(MessageInfo messageInfo) {
+        EduDocument doc = KvitteringFactory.createLeveringsKvittering(messageInfo, keyInfo.getKeyPair());
+        Transport t = transportFactory.createTransport(doc);
+        t.send(config.getConfiguration(), doc);
     }
 }
 

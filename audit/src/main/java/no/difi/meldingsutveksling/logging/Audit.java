@@ -18,6 +18,10 @@ public class Audit {
         logger.error(marker, text);
     }
 
+    public static void error(String text, LogstashMarker marker, Object... args) {
+        logger.error(marker, text);
+    }
+
     public static void info(String text) {
         logger.info(text);
     }
@@ -25,4 +29,9 @@ public class Audit {
     public static void error(String text) {
         logger.error(text);
     }
+
+    public static void warn(String text, LogstashMarker marker) {
+        logger.warn(marker, text);
+    }
+
 }

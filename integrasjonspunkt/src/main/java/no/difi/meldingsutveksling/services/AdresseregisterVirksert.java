@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.services;
 
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
+import no.difi.meldingsutveksling.noarkexchange.FiksFix;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
@@ -61,9 +62,11 @@ public class AdresseregisterVirksert {
 
     public Certificate getCertificate(String orgNumber) throws CertificateException {
         try {
-            return virksertClient.fetch(orgNumber);
+            String nOrgNumber = FiksFix.replaceOrgNummberWithKs(orgNumber);
+            return virksertClient.fetch(nOrgNumber);
         } catch (VirksertClientException e) {
             throw new CertificateException("Virkcert cannot find valid certificate for " + orgNumber, e);
         }
     }
+
 }

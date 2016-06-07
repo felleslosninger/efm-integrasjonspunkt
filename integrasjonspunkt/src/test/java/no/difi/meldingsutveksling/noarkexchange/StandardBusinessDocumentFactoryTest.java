@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import no.difi.meldingsutveksling.domain.sbdh.Document;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import org.junit.Test;
 
 import javax.xml.bind.JAXBContext;
@@ -21,7 +21,7 @@ public class StandardBusinessDocumentFactoryTest {
         JAXBContext ctx = JAXBContext.newInstance(no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument.class);
         Unmarshaller unmarshaller = ctx.createUnmarshaller();
         fromDocument = unmarshaller.unmarshal(new StreamSource(getClass().getClassLoader().getResourceAsStream("sample_dbd_document.xml")), no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument.class);
-        Document result = StandardBusinessDocumentFactory.create(fromDocument.getValue());
+        EduDocument result = StandardBusinessDocumentFactory.create(fromDocument.getValue());
         assertNotNull(result);
     }
 
