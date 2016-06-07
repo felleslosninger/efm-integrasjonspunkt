@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.ptv;
 
-import no.altinn.schemas.services.serviceengine.notification._2009._10.Notification2009;
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
+import no.difi.meldingsutveksling.noarkexchange.PayloadException;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
 import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
@@ -10,7 +10,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.core.env.Environment;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.xml.transform.StringSource;
 
 import javax.xml.bind.JAXBContext;
@@ -119,27 +118,29 @@ public class CorrespondenceAgencyMessageFactoryTest {
             "    <payload xmlns=\"\"><![CDATA[<?xml version=\"1.0\" encoding=\"utf-8\"?><Melding xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.arkivverket.no/Noark4-1-WS-WD/types\"><journpost xmlns=\"\"><jpId>219816</jpId><jpJaar>2015</jpJaar><jpSeknr>11734</jpSeknr><jpJpostnr>2</jpJpostnr><jpJdato>2015-10-08</jpJdato><jpNdoktype>U</jpNdoktype><jpDokdato>2015-10-08</jpDokdato><jpStatus>F</jpStatus><jpInnhold>Test1</jpInnhold><jpU1>0</jpU1><jpForfdato /><jpTgkode /><jpUoff /><jpAgdato /><jpAgkode /><jpSaksdel /><jpU2>0</jpU2><jpArkdel /><jpTlkode /><jpAntved>0</jpAntved><jpSaar>2014</jpSaar><jpSaseknr>2703</jpSaseknr><jpOffinnhold>Test2</jpOffinnhold><jpTggruppnavn /><avsmot><amId>501153</amId><amOrgnr>974763907</amOrgnr><amIhtype>1</amIhtype><amKopimot>0</amKopimot><amBehansv>0</amBehansv><amNavn>Fylkesmannen i Sogn og Fjordane</amNavn><amU1>0</amU1><amKortnavn>FMSF</amKortnavn><amAdresse>Njøsavegen 2</amAdresse><amPostnr>6863</amPostnr><amPoststed>Leikanger</amPoststed><amUtland /><amEpostadr>fmsfpost@fylkesmannen.no</amEpostadr><amRef /><amJenhet /><amAvskm /><amAvskdato /><amFrist /><amForsend>D</amForsend><amAdmkort>[Ufordelt]</amAdmkort><amAdmbet>Ufordelt/sendt tilbake til arkiv</amAdmbet><amSbhinit>[Ufordelt]</amSbhinit><amSbhnavn>Ikke fordelt til saksbehandler</amSbhnavn><amAvsavdok /><amBesvardok /></avsmot><dokument><dlRnr>1</dlRnr><dlType>H</dlType><dbKategori>ND</dbKategori><dbTittel>Test1</dbTittel><dbStatus>F</dbStatus><veVariant>A</veVariant><veDokformat>RA-PDF</veDokformat><fil><base64>aGVsbG8gd29ybGQ=</base64></fil><veFilnavn>Edu testdokument.DOCX</veFilnavn><veMimeType /></dokument></journpost><noarksak xmlns=\"\"><saId>68286</saId><saSaar>2014</saSaar><saSeknr>2703</saSeknr><saPapir>0</saPapir><saDato>2014-11-27</saDato><saTittel>Test Knutepunkt herokuapp</saTittel><saU1>0</saU1><saStatus>B</saStatus><saArkdel>EARKIV1</saArkdel><saType /><saJenhet>SENTRAL</saJenhet><saTgkode /><saUoff /><saBevtid /><saKasskode /><saKassdato /><saProsjekt /><saOfftittel>Test Knutepunkt herokuapp</saOfftittel><saAdmkort>FM-ADMA</saAdmkort><saAdmbet>Administrasjon</saAdmbet><saAnsvinit>JPS</saAnsvinit><saAnsvnavn>John Petter Svedal</saAnsvnavn><saTggruppnavn /></noarksak></Melding>]]></payload></PutMessageRequest>";
 
     private JAXBContext jaxbContext;
+    private Environment envMock;
 
     @Before
     public void initializeJaxb() throws JAXBException {
         jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
+        envMock = mock(Environment.class);
+        Mockito.when(envMock.getProperty(Mockito.anyString())).thenReturn(""); // default
+        Mockito.when(envMock.getProperty("altinn.user_code")).thenReturn("AAS_TEST");
     }
 
     @Test
-    public void testBuilder() throws JAXBException {
-        Environment envMock = mock(Environment.class);
-        Mockito.when(envMock.getProperty(Mockito.anyString())).thenReturn(""); // default
-        Mockito.when(envMock.getProperty("altinn.user_code")).thenReturn("AAS_TEST");
-
+    public void testFactoryForEscapedXML() throws PayloadException, JAXBException {
         PutMessageRequestWrapper msgFromEscaped = new PutMessageRequestWrapper(createPutMessageEscapedXml(escapedXml));
-        testFields(CorrespondenceAgencyMessageFactory.create(envMock, msgFromEscaped));
-
-        PutMessageRequestWrapper msgFromCdata = new PutMessageRequestWrapper(createPutMessageCdataXml(cdataTaggedXml));
-        testFields(CorrespondenceAgencyMessageFactory.create(envMock, msgFromCdata));
-
+        assertFields(CorrespondenceAgencyMessageFactory.create(envMock, msgFromEscaped));
     }
 
-    private void testFields(InsertCorrespondenceV2 c) {
+    @Test
+    public void testFactoryForCDataXML() throws PayloadException, JAXBException {
+        PutMessageRequestWrapper msgFromCdata = new PutMessageRequestWrapper(createPutMessageCdataXml(cdataTaggedXml));
+        assertFields(CorrespondenceAgencyMessageFactory.create(envMock, msgFromCdata));
+    }
+
+    private void assertFields(InsertCorrespondenceV2 c) {
         assertEquals("AAS_TEST", c.getSystemUserCode());
         assertEquals("4255", c.getCorrespondence().getServiceCode().getValue());
         assertEquals("10", c.getCorrespondence().getServiceEdition().getValue());

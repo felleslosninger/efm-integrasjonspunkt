@@ -127,7 +127,10 @@ public class MessageSenderTest {
         public RequestBuilder withJournalpostId(){
             Object message = "<Melding><journpost><jpId>"+JOURNALPOST_ID+"</jpId></journpost></Melding>";
             when(requestAdapter.getPayload()).thenReturn(message);
-            when(requestAdapter.getJournalPostId()).thenReturn(JOURNALPOST_ID);
+            try {
+                when(requestAdapter.getJournalPostId()).thenReturn(JOURNALPOST_ID);
+            } catch (PayloadException e) {
+            }
             return this;
         }
 

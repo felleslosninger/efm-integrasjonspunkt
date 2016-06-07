@@ -82,7 +82,7 @@ public class PutMessageRequestWrapper {
         this.requestType.getEnvelope().getReceiver().setOrgnr(receiverPartyNumber);
     }
 
-    public String getJournalPostId() {
+    public String getJournalPostId() throws PayloadException {
         return JournalpostId.fromPutMessage(this).value();
     }
 

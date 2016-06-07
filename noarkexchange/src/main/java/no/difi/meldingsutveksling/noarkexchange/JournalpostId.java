@@ -14,6 +14,7 @@ import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
+import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.queryPayload;
 import static org.apache.commons.lang.StringEscapeUtils.unescapeHtml;
 
 /**
@@ -25,38 +26,14 @@ import static org.apache.commons.lang.StringEscapeUtils.unescapeHtml;
 class JournalpostId {
 
     private String jpId;
+    private static String jpIdXpath= "/Melding/journpost/jpId";
 
     private JournalpostId(String jpId) {
         this.jpId = jpId;
     }
 
-    public static JournalpostId fromPutMessage(PutMessageRequestWrapper message) {
-
-        if(message.getMessageType() != PutMessageRequestWrapper.MessageType.EDUMESSAGE){
-            return new JournalpostId("");
-        }
-
-        JournalpostId result;
-        XPathFactory xPathFactory = XPathFactory.newInstance();
-        XPath xPath = xPathFactory.newXPath();
-        try {
-            XPathExpression expression = xPath.compile("/Melding/journpost/jpId");
-            String doc;
-            if (message.getPayload() instanceof String) {
-                doc = (String) message.getPayload();
-                doc = unescapeHtml(doc);
-            } else {
-                doc = ((Node) message.getPayload()).getFirstChild().getTextContent().trim();
-            }
-
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document document = builder.parse(new ByteArrayInputStream(doc.getBytes(java.nio.charset.Charset.forName("utf-8"))));
-            result = new JournalpostId(expression.evaluate(document));
-        } catch (XPathExpressionException | ParserConfigurationException | SAXException | IOException e) {
-            throw new IllegalArgumentException("Could not extract jpId from the payload", e);
-        }
-        return result;
+    public static JournalpostId fromPutMessage(PutMessageRequestWrapper message) throws PayloadException {
+        return new JournalpostId(queryPayload(message, jpIdXpath));
     }
 
     public String value() {

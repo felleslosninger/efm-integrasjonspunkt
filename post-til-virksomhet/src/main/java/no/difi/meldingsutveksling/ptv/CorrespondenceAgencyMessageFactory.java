@@ -11,29 +11,19 @@ import no.altinn.schemas.services.serviceengine.subscription._2009._10.Attachmen
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentExternalBEV2List;
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentV2;
+import no.difi.meldingsutveksling.noarkexchange.PayloadException;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import org.joda.time.DateTime;
 import org.springframework.core.env.Environment;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.queryPayload;
 import static org.apache.commons.lang.StringEscapeUtils.unescapeHtml;
 
 /**
@@ -43,7 +33,7 @@ import static org.apache.commons.lang.StringEscapeUtils.unescapeHtml;
  */
 public class CorrespondenceAgencyMessageFactory {
 
-    private static Map<Integer, String> serviceEditionMapping= new HashMap<>();
+    private static final Map<Integer, String> serviceEditionMapping= new HashMap<>();
 
     static {
         serviceEditionMapping.put(1, "Plan, bygg og geodata");
@@ -58,7 +48,7 @@ public class CorrespondenceAgencyMessageFactory {
         serviceEditionMapping.put(10, "Administrasjon");
     }
 
-    public static InsertCorrespondenceV2 create(Environment env, PutMessageRequestWrapper msg) {
+    public static InsertCorrespondenceV2 create(Environment env, PutMessageRequestWrapper msg) throws PayloadException {
         String xpathJpInnhold= "Melding/journpost/jpInnhold";
         String xpathJpOffinnhold= "Melding/journpost/jpOffinnhold";
         String xpathJpFilnavn= "Melding/journpost/dokument/veFilnavn";
@@ -160,34 +150,6 @@ public class CorrespondenceAgencyMessageFactory {
         return myInsertCorrespondenceV2;
     }
 
-    private static String queryPayload(PutMessageRequestWrapper message, String xpath) {
-        String result;
-
-        if(message.getMessageType() != PutMessageRequestWrapper.MessageType.EDUMESSAGE){
-            return "";
-        }
-
-        XPathFactory xPathFactory = XPathFactory.newInstance();
-        XPath xPath = xPathFactory.newXPath();
-        try {
-            XPathExpression expression = xPath.compile(xpath);
-            String doc;
-            if (message.getPayload() instanceof String) {
-                doc = (String) message.getPayload();
-                doc = unescapeHtml(doc);
-            } else {
-                doc = ((Node) message.getPayload()).getFirstChild().getTextContent().trim();
-            }
-
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document document = builder.parse(new ByteArrayInputStream(doc.getBytes(java.nio.charset.Charset.forName("utf-8"))));
-            result = expression.evaluate(document);
-        } catch (XPathExpressionException | ParserConfigurationException | SAXException | IOException e) {
-            throw new IllegalArgumentException("Could not execute query \'"+xpath+"\'  on the payload", e);
-        }
-        return result;
-    }
 
     private static TextToken createTextToken(int num, String value) {
         no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory objectFactory = new no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory();

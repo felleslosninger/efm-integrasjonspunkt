@@ -15,6 +15,7 @@ import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.logging.MessageMarkerFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
@@ -81,7 +82,13 @@ public class StandardBusinessDocumentFactory {
         }
         Payload payload = new Payload(encryptArchive(mottaker, archive));
 
-        final JournalpostId journalpostId = JournalpostId.fromPutMessage(new PutMessageRequestWrapper(shipment));
+        final JournalpostId journalpostId;
+        try {
+            journalpostId = JournalpostId.fromPutMessage(new PutMessageRequestWrapper(shipment));
+        } catch (PayloadException e) {
+            Audit.error(e.getMessage(), MessageMarkerFactory.markerFrom(new PutMessageRequestWrapper(shipment)));
+            throw new IllegalArgumentException(e.getMessage());
+        }
 
         return new CreateSBD().createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload, conversationId, DOCUMENT_TYPE_MELDING, journalpostId.value());
     }

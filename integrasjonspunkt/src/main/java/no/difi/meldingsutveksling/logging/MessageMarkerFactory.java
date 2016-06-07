@@ -4,6 +4,7 @@ import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.FileReference;
 import no.difi.meldingsutveksling.domain.MessageInfo;
+import no.difi.meldingsutveksling.noarkexchange.PayloadException;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
@@ -49,10 +50,14 @@ public class MessageMarkerFactory {
         final LogstashMarker markers = conversationIdMarker.and(receiverMarker).and(senderMarker);
 
         if(requestAdapter.hasPayload() && !isAppReceipt(requestAdapter.getPayload())) {
-            return journalPostIdMarker(requestAdapter.getJournalPostId()).and(markers);
-        } else {
-            return markers;
+            try {
+                return journalPostIdMarker(requestAdapter.getJournalPostId()).and(markers);
+            } catch (PayloadException e) {
+                // Should in practice never end up here, but we do not want to throw a RuntimeException due to just
+                // an error in logging.
+            }
         }
+        return markers;
     }
 
 
