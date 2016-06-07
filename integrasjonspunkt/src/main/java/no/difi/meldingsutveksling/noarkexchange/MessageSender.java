@@ -136,11 +136,12 @@ public class MessageSender {
 
         PutMessageRequestWrapper.MessageType type = message.getMessageType();
 
-        JournalpostId id = null;
+        JournalpostId id;
         try {
             id = JournalpostId.fromPutMessage(message);
         } catch (PayloadException e) {
-            Audit.error(e.getMessage(), markerFrom(message));
+            Audit.error("Unknown payload string", markerFrom(message));
+            log.error(markerFrom(message), e.getMessage(), e);
             throw new IllegalArgumentException(e.getMessage());
         }
         context.setJpId(id.value());

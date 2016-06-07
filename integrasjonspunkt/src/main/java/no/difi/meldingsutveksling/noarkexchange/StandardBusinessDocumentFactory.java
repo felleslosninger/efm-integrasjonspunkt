@@ -20,6 +20,8 @@ import no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -40,6 +42,8 @@ import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.payloadSiz
  */
 @Component
 public class StandardBusinessDocumentFactory {
+
+    Logger log = LoggerFactory.getLogger(StandardBusinessDocumentFactory.class);
 
     public static final String DOCUMENT_TYPE_MELDING = "melding";
     private static JAXBContext jaxbContextdomain;
@@ -86,7 +90,8 @@ public class StandardBusinessDocumentFactory {
         try {
             journalpostId = JournalpostId.fromPutMessage(new PutMessageRequestWrapper(shipment));
         } catch (PayloadException e) {
-            Audit.error(e.getMessage(), MessageMarkerFactory.markerFrom(new PutMessageRequestWrapper(shipment)));
+            Audit.error("Unknown payload string", MessageMarkerFactory.markerFrom(new PutMessageRequestWrapper(shipment)));
+            log.error(markerFrom(new PutMessageRequestWrapper(shipment)), e.getMessage(), e);
             throw new IllegalArgumentException(e.getMessage());
         }
 
