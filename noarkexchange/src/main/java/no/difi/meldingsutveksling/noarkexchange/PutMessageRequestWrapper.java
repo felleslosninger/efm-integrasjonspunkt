@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
@@ -69,6 +70,10 @@ public class PutMessageRequestWrapper {
         return requestType.getPayload();
     }
 
+    public EnvelopeType getEnvelope() {
+        return requestType.getEnvelope();
+    }
+
     public PutMessageRequestType getRequest() {
         return requestType;
     }
@@ -77,7 +82,7 @@ public class PutMessageRequestWrapper {
         this.requestType.getEnvelope().getReceiver().setOrgnr(receiverPartyNumber);
     }
 
-    public String getJournalPostId() {
+    public String getJournalPostId() throws PayloadException {
         return JournalpostId.fromPutMessage(this).value();
     }
 
