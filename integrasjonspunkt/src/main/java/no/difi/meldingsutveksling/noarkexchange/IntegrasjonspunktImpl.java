@@ -120,7 +120,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
             message.setSenderPartyNumber(configuration.getOrganisationNumber());
         }
 
-        Audit.info("Recieved message", markerFrom(message));
+        Audit.info("Received EDU message", markerFrom(message));
 
         if(PayloadUtil.isEmpty(message.getPayload())){
             Audit.error("Payload is missing", markerFrom(message));
