@@ -4,23 +4,22 @@ import java.io.Serializable;
 
 public class ServiceRecord implements Serializable {
 
-    public static final ServiceRecord EMPTY = new ServiceRecord("", "", "", "", "");
+    public static final ServiceRecord EMPTY = new ServiceRecord("", "", "", "");
     private String serviceIdentifier;
     private String organisationNumber;
     private String x509Certificate;
-    private String payloadIdentifier;
     private String endPointURL;
 
     public ServiceRecord(String serviceIdentifier, String organisationNumber, String x509Certificate
-            , String payloadIdentifier, String endPointURL) {
+            , String endPointURL) {
 
         this.organisationNumber = organisationNumber;
         this.x509Certificate = x509Certificate;
-        this.payloadIdentifier = payloadIdentifier;
         this.endPointURL = endPointURL;
         this.serviceIdentifier = serviceIdentifier;
     }
 
+    /** Needed by gson **/
     public ServiceRecord() {
     }
 
@@ -38,14 +37,6 @@ public class ServiceRecord implements Serializable {
 
     public void setX509Certificate(String x509Certificate) {
         this.x509Certificate = x509Certificate;
-    }
-
-    public String getPayloadIdentifier() {
-        return payloadIdentifier;
-    }
-
-    public void setPayloadIdentifier(String payloadIdentifier) {
-        this.payloadIdentifier = payloadIdentifier;
     }
 
     public String getEndPointURL() {
@@ -70,7 +61,6 @@ public class ServiceRecord implements Serializable {
                 "serviceIdentifier='" + serviceIdentifier + '\'' +
                 ", organisationNumber='" + organisationNumber + '\'' +
                 ", x509Certificate='" + x509Certificate + '\'' +
-                ", payloadIdentifier='" + payloadIdentifier + '\'' +
                 ", endPointURL='" + endPointURL + '\'' +
                 '}';
     }
@@ -88,8 +78,6 @@ public class ServiceRecord implements Serializable {
             return false;
         if (x509Certificate != null ? !x509Certificate.equals(that.x509Certificate) : that.x509Certificate != null)
             return false;
-        if (payloadIdentifier != null ? !payloadIdentifier.equals(that.payloadIdentifier) : that.payloadIdentifier != null)
-            return false;
         return endPointURL != null ? endPointURL.equals(that.endPointURL) : that.endPointURL == null;
 
     }
@@ -99,7 +87,6 @@ public class ServiceRecord implements Serializable {
         int result = serviceIdentifier != null ? serviceIdentifier.hashCode() : 0;
         result = 31 * result + (organisationNumber != null ? organisationNumber.hashCode() : 0);
         result = 31 * result + (x509Certificate != null ? x509Certificate.hashCode() : 0);
-        result = 31 * result + (payloadIdentifier != null ? payloadIdentifier.hashCode() : 0);
         result = 31 * result + (endPointURL != null ? endPointURL.hashCode() : 0);
         return result;
     }
