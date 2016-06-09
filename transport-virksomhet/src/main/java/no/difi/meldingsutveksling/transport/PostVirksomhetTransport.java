@@ -2,14 +2,15 @@ package no.difi.meldingsutveksling.transport;
 
 
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 
 
 public class PostVirksomhetTransport implements Transport {
 
-    private static final Log log = LogFactory.getLog(PostVirksomhetTransport.class);
+
+    private Logger log = LoggerFactory.getLogger(PostVirksomhetTransport.class);
 
     @Override
     public void send(Environment environment, EduDocument document) {
