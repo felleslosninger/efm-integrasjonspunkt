@@ -12,6 +12,7 @@ public class NoarkClientFactory {
 
     private static final String E_PHORTE = "ePhorte";
     private static final String P360 = "P360";
+    private static final String WEBSAK = "WebSak";
     private final NoarkClientSettings settings;
 
     public NoarkClientFactory(NoarkClientSettings settings) {
@@ -31,6 +32,8 @@ public class NoarkClientFactory {
             return new EphorteClient(settings, templateFactory);
         } else if (P360.equalsIgnoreCase(noarkType)) {
             return new P360Client(settings, templateFactory);
+        } else if (WEBSAK.equalsIgnoreCase(noarkType)) {
+            return new WebsakClient(settings, templateFactory);
         } else {
             throw new UnknownArchiveSystemException(noarkType);
         }

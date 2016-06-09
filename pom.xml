@@ -30,6 +30,7 @@
         <module>noarkexchange</module>
         <module>noarkexchange-p360</module>
         <module>noarkexchange-ephorte</module>
+        <module>noarkexchange-websak</module>
         <module>altinnexchange</module>
         <module>dokumentpakking</module>
         <module>integrasjonspunkt</module>
