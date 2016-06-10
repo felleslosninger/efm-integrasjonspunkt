@@ -1,10 +1,7 @@
 package no.difi.meldingsutveksling.noark;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
-import no.difi.meldingsutveksling.noarkexchange.EphorteClient;
-import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
-import no.difi.meldingsutveksling.noarkexchange.NoarkClientSettings;
-import no.difi.meldingsutveksling.noarkexchange.P360Client;
+import no.difi.meldingsutveksling.noarkexchange.*;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -18,9 +15,10 @@ public class NoarkClientFactoryTest {
         NoarkClientSettings settings = new NoarkClientSettings("http://localhost", "username", "password");
         NoarkClientFactory f = new NoarkClientFactory(settings);
         IntegrasjonspunktConfiguration config = mock(IntegrasjonspunktConfiguration.class);
-        when(config.getNoarkType()).thenReturn("P360").thenReturn("ePhOrTe");
+        when(config.getNoarkType()).thenReturn("P360").thenReturn("ePhOrTe").thenReturn("wEbSaK");
         assertEquals(P360Client.class, f.from(config).getClass());
         assertEquals(EphorteClient.class, f.from(config).getClass());
+        assertEquals(WebsakClient.class, f.from(config).getClass());
     }
 
     @Test
@@ -43,6 +41,17 @@ public class NoarkClientFactoryTest {
         NoarkClient client = new NoarkClientFactory(settings).from(config);
 
         assertEquals(EphorteClient.class, client.getClass());
+    }
+
+    @Test
+    public void config_specifies_websak_create_websak_client() {
+        IntegrasjonspunktConfiguration config = mock(IntegrasjonspunktConfiguration.class);
+        when(config.getNoarkType()).thenReturn("WebSak");
+        NoarkClientSettings settings = new NoarkClientSettings("http://localhost", "username", "password");
+
+        NoarkClient client = new NoarkClientFactory(settings).from(config);
+
+        assertEquals(WebsakClient.class, client.getClass());
     }
 
     @Test(expected = UnknownArchiveSystemException.class)
