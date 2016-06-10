@@ -29,6 +29,10 @@ public final class PutMessageStrategyFactory {
     }
 
     public PutMessageStrategy create(Object payload) {
+        if (isAppReceipt(payload)) {
+            Audit.info("Messagetype AppReceipt");
+            return new AppReceiptPutMessageStrategy(context.getMessageSender());
+        }
         if (isEPhorte(payload)) {
             Audit.info("Messagetype EDU - CData");
             return new BestEDUPutMessageStrategy(context.getMessageSender());
@@ -37,16 +41,12 @@ public final class PutMessageStrategyFactory {
             Audit.error("Unknown payload class");
             throw new MeldingsUtvekslingRuntimeException("unknown payload class " + payload);
         }
-        if (isAppReceipt(payload)) {
-            Audit.info("Messagetype AppReceipt");
-            return new AppReceiptPutMessageStrategy(context.getMessageSender());
-        } else if (isBestEDUMessage(payload)) {
+        if (isBestEDUMessage(payload)) {
             Audit.info("Messagetype EDU HtmlEndoced");
             return new BestEDUPutMessageStrategy(context.getMessageSender());
-        } else {
-            Audit.error("Unknown payload string");
-            throw new MeldingsUtvekslingRuntimeException("Unknown String based payload " + payload);
         }
+        Audit.error("Unknown payload string");
+        throw new MeldingsUtvekslingRuntimeException("Unknown String based payload " + payload);
     }
 
     private boolean isUnknown(Object payload) {
