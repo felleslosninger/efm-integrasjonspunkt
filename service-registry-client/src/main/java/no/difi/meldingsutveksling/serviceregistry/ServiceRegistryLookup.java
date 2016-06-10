@@ -1,8 +1,6 @@
 package no.difi.meldingsutveksling.serviceregistry;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
+import com.google.gson.*;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
@@ -24,8 +22,8 @@ public class ServiceRegistryLookup {
             return documentContext.read("$.serviceRecords[0].serviceRecord", ServiceRecord.class);
         }
 
-        final String primaryServiceIdentifier = JsonPath.read(serviceRecords, "$.infoRecord.primaryServiceIdentifier");
-        if (primaryServiceIdentifier == null) {
+        final JsonElement primaryServiceIdentifier = documentContext.read("$.infoRecord.primaryServiceIdentifier");
+        if (primaryServiceIdentifier instanceof JsonNull) {
             return ServiceRecord.EMPTY;
         } else {
             final JsonArray res = documentContext.read("$.serviceRecords[?(@.serviceRecord.serviceIdentifier == $.infoRecord.primaryServiceIdentifier)].serviceRecord");
