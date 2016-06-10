@@ -44,7 +44,6 @@ public class PutMessageRequestMapperTest {
         no.difi.meldingsutveksling.noarkexchange.websak.schema.PutMessageRequestType websakRequest = mapper.mapFrom(putMessageRequestType).getValue();
 
         assertTrue(!PayloadUtil.isEmpty(websakRequest.getPayload()));
-        //assertTrue(websakRequest.getPayload().contains("Melding"));
         JAXBContext ctx2 = JAXBContext.newInstance(PutMessageRequestType.class);
         Marshaller marshaller = ctx2.createMarshaller();
         StringWriter writer = new StringWriter();
@@ -52,7 +51,6 @@ public class PutMessageRequestMapperTest {
         String xml = writer.toString();
         JAXBContext ctx = JAXBContext.newInstance(no.difi.meldingsutveksling.noarkexchange.websak.schema.PutMessageRequestType.class);
         Unmarshaller unmarshaller = ctx.createUnmarshaller();
-        //System.out.println(xml);
 
         no.difi.meldingsutveksling.noarkexchange.websak.schema.PutMessageRequestType websakResult = unmarshaller.unmarshal(new StringSource(xml), no.difi.meldingsutveksling.noarkexchange.websak.schema.PutMessageRequestType.class).getValue();
 
