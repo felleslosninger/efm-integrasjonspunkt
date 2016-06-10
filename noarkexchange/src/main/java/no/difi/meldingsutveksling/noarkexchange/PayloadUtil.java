@@ -31,12 +31,14 @@ public class PayloadUtil {
         if(payload instanceof String) {
             return ((String) payload).contains(APP_RECEIPT_INDICATOR);
         }
-        else if(payload instanceof Node) {
-            final String nodeName = ((Node) payload).getFirstChild().getTextContent();
-            return nodeName.contains(APP_RECEIPT_INDICATOR);
-        } else {
-            throw new RuntimeException(PAYLOAD_UNKNOWN_TYPE);
+        if(payload instanceof Node) {
+            Node firstChild = ((Node) payload).getFirstChild();
+            if (firstChild != null) {
+                final String nodeName = firstChild.getTextContent();
+                return nodeName.contains(APP_RECEIPT_INDICATOR);
+            }
         }
+        return false;
     }
 
     public static String payloadAsString(Object payload) {
