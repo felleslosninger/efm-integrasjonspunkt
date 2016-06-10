@@ -15,6 +15,12 @@ public class ServiceRegistryLookup {
         this.client = client;
     }
 
+    /**
+     * Method to find out which transport channel to use to send messages to given organization
+     * @param orgnumber organization number of the receiver
+     * @return a ServiceRecord if a primary service record could be determined. Otherwise an empty ServiceRecord is
+     * returned.
+     */
     public ServiceRecord getPrimaryServiceRecord(String orgnumber) {
         final String serviceRecords = client.getResource(orgnumber);
         final DocumentContext documentContext = JsonPath.parse(serviceRecords, jsonPathConfiguration());

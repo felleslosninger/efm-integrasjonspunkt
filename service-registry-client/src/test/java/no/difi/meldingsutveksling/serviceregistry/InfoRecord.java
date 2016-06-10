@@ -1,11 +1,11 @@
-package no.difi.meldingsutveksling.serviceregistry.externalmodel;
+package no.difi.meldingsutveksling.serviceregistry;
 
-import java.io.Serializable;
+import com.google.common.base.MoreObjects;
 
 /**
  *
  */
-public class InfoRecord implements Serializable {
+public class InfoRecord {
     private final String primaryServiceIdentifier;
     private final String organizationNumber;
 
@@ -24,9 +24,8 @@ public class InfoRecord implements Serializable {
 
     @Override
     public String toString() {
-        return "InfoRecord{" +
-                "primaryServiceIdentifier='" + primaryServiceIdentifier + '\'' +
-                ", organizationNumber='" + organizationNumber + '\'' +
-                '}';
+        return MoreObjects.toStringHelper(this)
+                .add("primaryServiceIdentifier", primaryServiceIdentifier)
+                .add("organizationNumber", organizationNumber).toString();
     }
 }
