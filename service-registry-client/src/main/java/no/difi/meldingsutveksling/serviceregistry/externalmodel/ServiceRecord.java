@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.serviceregistry.externalmodel;
 
+import com.google.common.base.MoreObjects;
+
 import java.io.Serializable;
 
 import static com.google.common.base.Objects.equal;
@@ -60,12 +62,12 @@ public class ServiceRecord implements Serializable {
 
     @Override
     public String toString() {
-        return "ServiceRecord{" +
-                "serviceIdentifier='" + serviceIdentifier + '\'' +
-                ", organisationNumber='" + organisationNumber + '\'' +
-                ", x509Certificate='" + x509Certificate + '\'' +
-                ", endPointURL='" + endPointURL + '\'' +
-                '}';
+        return MoreObjects.toStringHelper(this)
+                .add("organizationNumber", organisationNumber)
+                .add("X509Certificate", x509Certificate)
+                .add("endpointUrl", endPointURL)
+                .add("serviceIdentifier", serviceIdentifier)
+                .toString();
     }
 
     @Override
