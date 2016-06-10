@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.spi.json.GsonJsonProvider;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
@@ -18,22 +19,23 @@ public class ServiceRegistryLookup {
 
     public ServiceRecord getPrimaryServiceRecord(String orgnumber) {
         final String serviceRecords = client.getResource(orgnumber);
-        if (getNumberOfServiceRecords(serviceRecords) == 1) {
-            return JsonPath.parse(serviceRecords, jsonPathConfiguration()).read("$.serviceRecords[0].serviceRecord", ServiceRecord.class);
+        final DocumentContext documentContext = JsonPath.parse(serviceRecords, jsonPathConfiguration());
+        if (getNumberOfServiceRecords(documentContext) == 1) {
+            return documentContext.read("$.serviceRecords[0].serviceRecord", ServiceRecord.class);
         }
 
         final String primaryServiceIdentifier = JsonPath.read(serviceRecords, "$.infoRecord.primaryServiceIdentifier");
         if (primaryServiceIdentifier == null) {
             return ServiceRecord.EMPTY;
         } else {
-            final JsonArray res = JsonPath.parse(serviceRecords, jsonPathConfiguration()).read("$.serviceRecords[?(@.serviceRecord.serviceIdentifier == $.infoRecord.primaryServiceIdentifier)].serviceRecord");
+            final JsonArray res = documentContext.read("$.serviceRecords[?(@.serviceRecord.serviceIdentifier == $.infoRecord.primaryServiceIdentifier)].serviceRecord");
             return new Gson().fromJson(res.get(0), ServiceRecord.class);
         }
 
     }
 
-    private int getNumberOfServiceRecords(String serviceRecords) {
-        return JsonPath.read(serviceRecords, "$.serviceRecords.length()");
+    private int getNumberOfServiceRecords(DocumentContext documentContext) {
+        return documentContext.read("$.serviceRecords.length()");
     }
 
     private Configuration jsonPathConfiguration() {

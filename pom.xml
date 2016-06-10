@@ -44,7 +44,7 @@
         <module>audit</module>
         <module>test-tools</module>
         <module>post-til-virksomhet</module>
-        <module>serviceregistry-client</module>
+        <module>service-registry-client</module>
     </modules>
 
     <dependencyManagement>
