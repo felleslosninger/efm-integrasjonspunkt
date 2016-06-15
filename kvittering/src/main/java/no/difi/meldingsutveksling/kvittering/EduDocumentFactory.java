@@ -1,8 +1,6 @@
 package no.difi.meldingsutveksling.kvittering;
 
 
-import no.difi.meldingsutveksling.StandardBusinessDocumentConverter;
-import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
@@ -13,10 +11,7 @@ import no.difi.meldingsutveksling.kvittering.xsd.Aapning;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.kvittering.xsd.Levering;
 import no.difi.meldingsutveksling.kvittering.xsd.ObjectFactory;
-import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
 import java.security.KeyPair;
 
 import static no.difi.meldingsutveksling.kvittering.DocumentToDocumentConverter.toDomainDocument;
@@ -29,20 +24,10 @@ import static no.difi.meldingsutveksling.kvittering.DocumentToDocumentConverter.
  *
  * @author Glenn bech
  */
-public class KvitteringFactory {
+public class EduDocumentFactory {
 
-    private static final JAXBContext jaxbContextdomain;
-    private static final JAXBContext jaxbContext;
-
-    static {
-        try {
-            jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class, Kvittering.class);
-            jaxbContextdomain = JAXBContext.newInstance(EduDocument.class, Payload.class, Kvittering.class);
-        } catch (JAXBException e) {
-            throw new MeldingsUtvekslingRuntimeException("Could not initialize " + StandardBusinessDocumentConverter.class, e);
-        }
+    private EduDocumentFactory() {
     }
-
 
     public static EduDocument createAapningskvittering(MessageInfo messageInfo, KeyPair keyPair) {
         Kvittering k = new Kvittering();

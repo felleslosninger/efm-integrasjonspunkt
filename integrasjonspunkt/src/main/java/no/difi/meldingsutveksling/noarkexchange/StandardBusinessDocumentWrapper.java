@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import no.difi.meldingsutveksling.dokumentpakking.service.ScopeFactory;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
@@ -51,7 +50,7 @@ public class StandardBusinessDocumentWrapper {
     }
 
     public MessageInfo getMessageInfo() {
-        return new MessageInfo(getReceiverOrgNumber(), getSenderOrgNumber(), getJournalPostId(), getConversationId());
+        return new MessageInfo(getReceiverOrgNumber(), getSenderOrgNumber(), getJournalPostId(), getConversationId(), getMessageType());
     }
 
     private Scope findScope(String scopeType) {
@@ -90,6 +89,10 @@ public class StandardBusinessDocumentWrapper {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
         return payload;
+    }
+
+    public String getMessageType() {
+        return document.getStandardBusinessDocumentHeader().getDocumentIdentification().getType();
     }
 
 }

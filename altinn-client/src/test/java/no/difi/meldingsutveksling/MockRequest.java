@@ -2,12 +2,13 @@ package no.difi.meldingsutveksling;
 
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
+import org.slf4j.Marker;
 
-public class MockRequest implements UploadRequest {
+class MockRequest implements UploadRequest {
 
     private final String reference;
 
-    public MockRequest() {
+    MockRequest() {
         reference = String.valueOf((int) (Math.random() * 100000));
     }
 
@@ -29,5 +30,10 @@ public class MockRequest implements UploadRequest {
         @Override
         public EduDocument getPayload() {
         return new EduDocument();
+    }
+
+    @Override
+    public Marker getMarkers() {
+        return null;
     }
 }

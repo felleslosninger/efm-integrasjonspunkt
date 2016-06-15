@@ -17,6 +17,7 @@ import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.*;
@@ -35,6 +36,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
+@Ignore
 public class CmsUtilTest {
 
     public static final String FILENAME_CERT = "difi-cert.pem";
@@ -104,9 +106,8 @@ public class CmsUtilTest {
         X509CertificateHolder holder = certBuilder.build(signer);
 
         CertificateFactory factory = CertificateFactory.getInstance("X.509");
-        X509Certificate cert = (X509Certificate) factory.generateCertificate(new ByteArrayInputStream(holder.getEncoded()));
 
-        return cert;
+        return (X509Certificate) factory.generateCertificate(new ByteArrayInputStream(holder.getEncoded()));
     }
 
 
