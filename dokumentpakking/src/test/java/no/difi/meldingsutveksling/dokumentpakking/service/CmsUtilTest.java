@@ -36,7 +36,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
-@Ignore
+//@Ignore("JCE support is missing on our build server")
 public class CmsUtilTest {
 
     public static final String FILENAME_CERT = "difi-cert.pem";
