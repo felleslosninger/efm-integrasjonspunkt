@@ -2,8 +2,8 @@ package no.difi.meldingsutveksling.transport.altinn;
 
 import no.difi.meldingsutveksling.AltinnWsClient;
 import no.difi.meldingsutveksling.AltinnWsConfiguration;
+import no.difi.meldingsutveksling.AltinnWsRequest;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.elma.ELMALookup;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
@@ -11,8 +11,6 @@ import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.vefa.peppol.common.model.Endpoint;
 import no.difi.vefa.peppol.lookup.api.LookupException;
 import org.springframework.core.env.Environment;
-
-import static no.difi.meldingsutveksling.domain.Organisasjonsnummer.fromIso6523;
 
 
 /**
@@ -41,30 +39,7 @@ public class AltinnTransport implements Transport {
             throw new MeldingsUtvekslingRuntimeException(e.getMessage(), e);
         }
         AltinnWsClient client = new AltinnWsClient(AltinnWsConfiguration.fromConfiguration(ep.getAddress(), environment));
-        UploadRequest request1 = new UploadRequest() {
-
-            @Override
-            public String getSender() {
-                Organisasjonsnummer orgNumberSender = fromIso6523(eduDocument.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue());
-                return orgNumberSender.toString();
-            }
-
-            @Override
-            public String getReceiver() {
-                Organisasjonsnummer orgNumberReceiver = fromIso6523(eduDocument.getStandardBusinessDocumentHeader().getReceiver().get(0).getIdentifier().getValue());
-                return orgNumberReceiver.toString();
-            }
-
-            @Override
-            public String getSenderReference() {
-                return String.valueOf(Math.random() * 3000);
-            }
-
-            @Override
-            public EduDocument getPayload() {
-                return eduDocument;
-            }
-        };
+        UploadRequest request1 = new AltinnWsRequest(eduDocument);
 
         client.send(request1);
     }

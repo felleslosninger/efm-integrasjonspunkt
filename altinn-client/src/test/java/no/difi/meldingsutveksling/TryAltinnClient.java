@@ -2,10 +2,11 @@ package no.difi.meldingsutveksling;
 
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
+import org.slf4j.Marker;
 
 public class TryAltinnClient {
 
-    static class MockRequest implements UploadRequest {
+    private static class MockRequest implements UploadRequest {
 
         @Override
         public String getSender() {
@@ -25,6 +26,11 @@ public class TryAltinnClient {
         @Override
         public EduDocument getPayload() {
             return new EduDocument();
+        }
+
+        @Override
+        public Marker getMarkers() {
+            return null;
         }
 
     }

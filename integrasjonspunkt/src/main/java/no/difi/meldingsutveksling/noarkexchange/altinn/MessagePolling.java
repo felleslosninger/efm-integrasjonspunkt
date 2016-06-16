@@ -8,7 +8,7 @@ import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.elma.ELMALookup;
-import no.difi.meldingsutveksling.kvittering.KvitteringFactory;
+import no.difi.meldingsutveksling.kvittering.EduDocumentFactory;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.transport.Transport;
@@ -33,8 +33,8 @@ import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom
  */
 @Component
 public class MessagePolling {
-    public static final String PREFIX_NORWAY = "9908:";
-    Logger logger = LoggerFactory.getLogger(MessagePolling.class);
+    private static final String PREFIX_NORWAY = "9908:";
+    private Logger logger = LoggerFactory.getLogger(MessagePolling.class);
 
     @Autowired
     IntegrasjonspunktConfiguration config;
@@ -81,12 +81,12 @@ public class MessagePolling {
                 internalQueue.enqueueNoark(eduDocument);
             }
             client.confirmDownload(request);
-            Audit.info("Message downloaded", markerFrom(reference));
+            Audit.info("Message downloaded", markerFrom(reference).and(eduDocument.createLogstashMarkers()));
             if (!isKvittering(eduDocument)) {
                 sendReceipt(eduDocument.getMessageInfo());
-                Audit.info("Delivery receipt sent", markerFrom(eduDocument.getMessageInfo()));
+                Audit.info("Delivery receipt sent", eduDocument.createLogstashMarkers());
             } else {
-                Audit.info("Message is a receipt", markerFrom(eduDocument.getMessageInfo()));
+                Audit.info("Message is a receipt", eduDocument.createLogstashMarkers());
             }
         }
     }
@@ -96,7 +96,7 @@ public class MessagePolling {
     }
 
     private void sendReceipt(MessageInfo messageInfo) {
-        EduDocument doc = KvitteringFactory.createLeveringsKvittering(messageInfo, keyInfo.getKeyPair());
+        EduDocument doc = EduDocumentFactory.createLeveringsKvittering(messageInfo, keyInfo.getKeyPair());
         Transport t = transportFactory.createTransport(doc);
         t.send(config.getConfiguration(), doc);
     }

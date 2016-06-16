@@ -8,14 +8,11 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
+import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.domain.MessageInfo;
 import org.w3c.dom.Element;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 import java.util.List;
 
 
@@ -47,7 +44,7 @@ import java.util.List;
 public class EduDocument {
 
     @XmlElement(name = "StandardBusinessDocumentHeader")
-    protected StandardBusinessDocumentHeader standardBusinessDocumentHeader;
+    private StandardBusinessDocumentHeader standardBusinessDocumentHeader;
     @XmlAnyElement(lax = true)
     protected Object any;
 
@@ -102,7 +99,7 @@ public class EduDocument {
     }
 
     public MessageInfo getMessageInfo() {
-        return new MessageInfo(getReceiverOrgNumber(), getSenderOrgNumber(), getJournalPostId(), getConversationId());
+        return new MessageInfo(getReceiverOrgNumber(), getSenderOrgNumber(), getJournalPostId(), getConversationId(), getMessageType());
     }
 
     public String getSenderOrgNumber() {
@@ -131,4 +128,11 @@ public class EduDocument {
         return new Scope();
     }
 
+    private String getMessageType() {
+        return getStandardBusinessDocumentHeader().getDocumentIdentification().getType();
+    }
+
+    public LogstashMarker createLogstashMarkers() {
+        return getMessageInfo().createLogstashMarkers();
+    }
 }

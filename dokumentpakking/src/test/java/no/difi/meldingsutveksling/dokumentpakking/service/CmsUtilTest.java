@@ -106,9 +106,8 @@ public class CmsUtilTest {
         X509CertificateHolder holder = certBuilder.build(signer);
 
         CertificateFactory factory = CertificateFactory.getInstance("X.509");
-        X509Certificate cert = (X509Certificate) factory.generateCertificate(new ByteArrayInputStream(holder.getEncoded()));
 
-        return cert;
+        return (X509Certificate) factory.generateCertificate(new ByteArrayInputStream(holder.getEncoded()));
     }
 
 
