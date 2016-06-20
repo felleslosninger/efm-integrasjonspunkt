@@ -6,6 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.core.env.Environment;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
@@ -22,10 +25,16 @@ import static org.apache.commons.lang.StringUtils.isBlank;
         @PropertySource("classpath:properties/application.properties"),
         @PropertySource("classpath:properties/integrasjonspunkt.properties"),
         @PropertySource("classpath:properties/application-${spring.profiles.active}.properties"),
-        @PropertySource("classpath:properties/integrasjonspunkt-${spring.profiles.active}.properties"),
-        @PropertySource("file:integrasjonspunkt-local.properties")
+        @PropertySource("classpath:properties/integrasjonspunkt-${spring.profiles.active}.properties")
 })
 public class IntegrasjonspunktConfiguration {
+
+    @Configuration
+    @Profile({"dev", "itest", "systest", "staging", "production"})
+    @PropertySource("file:integrasjonspunkt-local.properties")
+    static class Overrides {
+    }
+
     private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktConfiguration.class);
 
     public static final String KEY_ORGANISATION_NUMBER = "orgnumber";

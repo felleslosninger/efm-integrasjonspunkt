@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Profile;
  * Created by steinbjarne
  */
 @Configuration
-@Profile({"itest", "systest"})
+@Profile({"itest", "systest", "test"})
 public class ElmaSystestConfig {
     public static final String ELMA_ENDPOINT_KEY = "bdxr-transport-altinn-systemtest";
     private static final TransportProfile TRANSPORT_PROFILE_ALTINN_SYSTEST = new TransportProfile(ELMA_ENDPOINT_KEY);
