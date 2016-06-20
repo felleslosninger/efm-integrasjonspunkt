@@ -119,7 +119,7 @@ public class JournalPostIdTest {
     }
 
     @Test
-    public void shouldExtractJpIdFromEscapedXmlPayload() throws JAXBException {
+    public void shouldExtractJpIdFromEscapedXmlPayload() throws JAXBException, PayloadException {
         PutMessageRequestType request = createPutMessageEscapedXml(escapedXml);
 
         JournalpostId id = JournalpostId.fromPutMessage(new PutMessageRequestWrapper(request));
@@ -128,7 +128,7 @@ public class JournalPostIdTest {
     }
 
     @Test
-    public void shouldExtractJpIdFromCdataTaggedXml() throws JAXBException {
+    public void shouldExtractJpIdFromCdataTaggedXml() throws JAXBException, PayloadException {
         PutMessageRequestType request = createPutMessageRequestWith(cdataTaggedXml);
         JournalpostId id = JournalpostId.fromPutMessage(new PutMessageRequestWrapper(request));
         assertEquals("219816", id.value());

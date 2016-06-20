@@ -8,7 +8,7 @@ import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
-import no.difi.meldingsutveksling.kvittering.KvitteringFactory;
+import no.difi.meldingsutveksling.kvittering.EduDocumentFactory;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
@@ -49,10 +49,9 @@ import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
 public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
 
-    public static final String OKEY_TYPE = "OK";
-    public static final String OK_TYPE = OKEY_TYPE;
+    private static final String OKEY_TYPE = "OK";
+    private static final String OK_TYPE = OKEY_TYPE;
     private static Logger logger = LoggerFactory.getLogger(IntegrasjonspunktImpl.class);
-    private static final int MAGIC_NR = 1024;
     private static final String SBD_NAMESPACE = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader";
     private EventLog eventLog = EventLog.create();
     private TransportFactory transportFactory;
@@ -78,6 +77,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
         this.keyInfo = keyInfo;
     }
 
+    @Override
     public CorrelationInformation receive(@WebParam(name = "StandardBusinessDocument", targetNamespace = SBD_NAMESPACE, partName = "receiveResponse") StandardBusinessDocument standardBusinessDocument) {
         MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, config.getOrganisationNumber());
         try {
@@ -96,7 +96,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
 
         try {
             adresseregisterService.validateCertificates(document);
-            Audit.info("Certificates validated", markerFrom(new StandardBusinessDocumentWrapper(inputDocument)));
+            Audit.info("Certificates validated", markerFrom(document));
         }
         catch (MessageException e){
             Audit.error(e.getMessage(), markerFrom(document));
@@ -118,7 +118,12 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
         PutMessageRequestType eduDocument;
         try {
             eduDocument = convertAsicEntrytoEduDocument(decryptedAsicPackage);
-            Audit.info("EDUdocument extracted", markerFrom(document));
+            if (PayloadUtil.isAppReceipt(eduDocument.getPayload())) {
+                Audit.info("AppReceipt extracted", markerFrom(document));
+            } else {
+                Audit.info("EDU Document extracted", markerFrom(document));
+            }
+
         } catch (IOException | JAXBException e) {
             Audit.error("Failed to extract EDUdocument", markerFrom(document));
             throw new MessageException(e, StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
@@ -152,13 +157,8 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
 
     }
 
-    private void sendReceiptDelivered(StandardBusinessDocumentWrapper inputDocument) {
-        EduDocument doc = KvitteringFactory.createLeveringsKvittering(inputDocument.getMessageInfo(), keyInfo.getKeyPair());
-        sendReceipt(doc);
-    }
-
     private void sendReceiptOpen(StandardBusinessDocumentWrapper inputDocument) {
-        EduDocument doc = KvitteringFactory.createAapningskvittering(inputDocument.getMessageInfo(), keyInfo.getKeyPair());
+        EduDocument doc = EduDocumentFactory.createAapningskvittering(inputDocument.getMessageInfo(), keyInfo.getKeyPair());
         sendReceipt(doc);
     }
 
@@ -171,7 +171,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
         try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes))) {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
-                if (entry.getName().equals("best_edu.xml")) {
+                if ("best_edu.xml".equals(entry.getName())) {
                     JAXBContext jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
                     Unmarshaller unMarshaller = jaxbContext.createUnmarshaller();
                     return unMarshaller.unmarshal(new StreamSource(zipInputStream), PutMessageRequestType.class).getValue();

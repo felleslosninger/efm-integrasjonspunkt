@@ -15,10 +15,13 @@ import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.logging.MessageMarkerFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -39,6 +42,8 @@ import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.payloadSiz
  */
 @Component
 public class StandardBusinessDocumentFactory {
+
+    Logger log = LoggerFactory.getLogger(StandardBusinessDocumentFactory.class);
 
     public static final String DOCUMENT_TYPE_MELDING = "melding";
     private static JAXBContext jaxbContextdomain;
@@ -81,7 +86,14 @@ public class StandardBusinessDocumentFactory {
         }
         Payload payload = new Payload(encryptArchive(mottaker, archive));
 
-        final JournalpostId journalpostId = JournalpostId.fromPutMessage(new PutMessageRequestWrapper(shipment));
+        final JournalpostId journalpostId;
+        try {
+            journalpostId = JournalpostId.fromPutMessage(new PutMessageRequestWrapper(shipment));
+        } catch (PayloadException e) {
+            Audit.error("Unknown payload string", MessageMarkerFactory.markerFrom(new PutMessageRequestWrapper(shipment)));
+            log.error(markerFrom(new PutMessageRequestWrapper(shipment)), e.getMessage(), e);
+            throw new IllegalArgumentException(e.getMessage());
+        }
 
         return new CreateSBD().createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload, conversationId, DOCUMENT_TYPE_MELDING, journalpostId.value());
     }

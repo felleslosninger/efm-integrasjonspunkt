@@ -9,6 +9,7 @@ import no.difi.meldingsutveksling.domain.Noekkelpar;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.logging.MessageMarkerFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
@@ -135,9 +136,14 @@ public class MessageSender {
 
         PutMessageRequestWrapper.MessageType type = message.getMessageType();
 
-
-
-        JournalpostId id = JournalpostId.fromPutMessage(message);
+        JournalpostId id;
+        try {
+            id = JournalpostId.fromPutMessage(message);
+        } catch (PayloadException e) {
+            Audit.error("Unknown payload string", markerFrom(message));
+            log.error(markerFrom(message), e.getMessage(), e);
+            throw new IllegalArgumentException(e.getMessage());
+        }
         context.setJpId(id.value());
 
         String converationId = message.getConversationId();

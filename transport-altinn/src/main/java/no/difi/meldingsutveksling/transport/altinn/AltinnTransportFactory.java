@@ -9,18 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 
-/**
- * TransportFactory that uses the Peppol ELMA adressing mechanism to look up Endpoints for
- * the Altinn document storage service. The endPoint can vary between
- *
- * @author Glenn Bech
- */
-
 @Component
 public class AltinnTransportFactory implements TransportFactory {
 
     @Autowired
-    ELMALookup elmaLookup;
+    private ELMALookup elmaLookup;
 
     @Override
     public Transport createTransport(EduDocument message) {

@@ -9,7 +9,7 @@ import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.eventlog.Event;
 import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.logging.MessageMarkerFactory;
+import no.difi.meldingsutveksling.logging.MarkerFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageContext;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategy;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategyFactory;
@@ -49,7 +49,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
     private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktImpl.class);
 
     @Autowired
-    AdresseregisterVirksert adresseregister;
+    private AdresseregisterVirksert adresseregister;
 
     @Autowired
     private MessageSender messageSender;
@@ -81,7 +81,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
         canReceive = hasAdresseregisterCertificate(organisasjonsnummer);
 
-        final LogstashMarker marker = MessageMarkerFactory.receiverMarker(organisasjonsnummer);
+        final LogstashMarker marker = MarkerFactory.receiverMarker(organisasjonsnummer);
         if(canReceive) {
             Audit.info("CanReceive = true", marker);
         } else {
@@ -120,7 +120,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
             message.setSenderPartyNumber(configuration.getOrganisationNumber());
         }
 
-        Audit.info("Recieved message", markerFrom(message));
+        Audit.info("Received EDU message", markerFrom(message));
 
         if(PayloadUtil.isEmpty(message.getPayload())){
             Audit.error("Payload is missing", markerFrom(message));
