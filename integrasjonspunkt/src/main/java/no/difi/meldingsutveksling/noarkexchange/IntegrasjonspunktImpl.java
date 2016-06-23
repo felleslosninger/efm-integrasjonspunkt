@@ -15,8 +15,8 @@ import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategy;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
-import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
-import no.difi.meldingsutveksling.services.CertificateException;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import no.difi.meldingsutveksling.services.Adresseregister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -25,6 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.xml.ws.BindingType;
+
+import java.security.cert.CertificateException;
 
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
@@ -49,9 +51,6 @@ public class IntegrasjonspunktImpl implements SOAPport {
     private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktImpl.class);
 
     @Autowired
-    private AdresseregisterVirksert adresseregister;
-
-    @Autowired
     private MessageSender messageSender;
 
     @Autowired
@@ -65,6 +64,9 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
     @Autowired
     private IntegrasjonspunktConfiguration configuration;
+
+    @Autowired
+    private Adresseregister adresseRegister;
 
     @Override
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
@@ -98,14 +100,15 @@ public class IntegrasjonspunktImpl implements SOAPport {
     }
 
     private boolean hasAdresseregisterCertificate(String organisasjonsnummer) {
-        try {
             log.info("hasAdresseregisterCertificate orgnr:" +organisasjonsnummer+"orgnr");
             String nOrgnr = FiksFix.replaceOrgNummberWithKs(organisasjonsnummer);
-            adresseregister.getCertificate(nOrgnr);
-            return true;
+        final ServiceRecord primaryServiceRecord;
+        try {
+            adresseRegister.getCertificate(nOrgnr);
         } catch (CertificateException e) {
             return false;
         }
+        return true;
     }
 
     private boolean hasMshEndpoint(){
@@ -198,14 +201,6 @@ public class IntegrasjonspunktImpl implements SOAPport {
         return result;
     }
 
-    public AdresseregisterVirksert getAdresseRegister() {
-        return adresseregister;
-    }
-
-    public void setAdresseRegister(AdresseregisterVirksert adresseRegisterClient) {
-        this.adresseregister = adresseRegisterClient;
-    }
-
     public MessageSender getMessageSender() {
         return messageSender;
     }
@@ -232,5 +227,9 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
     private static boolean validateResult(PutMessageResponseType response) {
         return "OK".equals(response.getResult().getType());
+    }
+
+    public void setAdresseRegister(Adresseregister adresseRegister) {
+        this.adresseRegister = adresseRegister;
     }
 }

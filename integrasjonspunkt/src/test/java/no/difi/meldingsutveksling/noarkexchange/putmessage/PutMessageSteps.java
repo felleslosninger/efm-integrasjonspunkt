@@ -22,8 +22,7 @@ import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
 import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
-import no.difi.meldingsutveksling.services.CertificateException;
+import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.springframework.core.env.Environment;
@@ -35,6 +34,7 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 
 import static org.mockito.Matchers.any;
@@ -58,7 +58,7 @@ public class PutMessageSteps {
             "    &lt;/AppReceipt&gt;";
 
     private IntegrasjonspunktImpl integrasjonspunkt;
-    private AdresseregisterVirksert adresseregister ;
+    private Adresseregister adresseregister ;
     private EventLog eventLog ;
     private PutMessageRequestType message;
     private MessageSender messageSender;
@@ -69,7 +69,7 @@ public class PutMessageSteps {
     @Before
     public void setup() throws MessageException, CertificateException {
         integrasjonspunkt = new IntegrasjonspunktImpl();
-        adresseregister = mock(AdresseregisterVirksert.class);
+        adresseregister = mock(Adresseregister.class);
         when(adresseregister.getCertificate(any(String.class))).thenReturn(new X509CertImpl());
         eventLog = mock(EventLog.class);
         integrasjonspunkt.setEventLog(eventLog);

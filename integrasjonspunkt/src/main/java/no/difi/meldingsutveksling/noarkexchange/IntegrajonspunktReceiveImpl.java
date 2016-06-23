@@ -16,7 +16,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.CorrelationInformation;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
-import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
+import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.slf4j.Logger;
@@ -57,7 +57,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
     private TransportFactory transportFactory;
     private NoarkClient localNoark;
     private MessageSender messageSender;
-    private AdresseregisterVirksert adresseregisterService;
+    private Adresseregister adresseregisterService;
     private IntegrasjonspunktConfiguration config;
     private IntegrasjonspunktNokkel keyInfo;
 
@@ -65,7 +65,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
     public IntegrajonspunktReceiveImpl(TransportFactory transportFactory,
                                        NoarkClient localNoark,
                                        MessageSender messageSender,
-                                       AdresseregisterVirksert adresseregisterService,
+                                       Adresseregister adresseregisterService,
                                        IntegrasjonspunktConfiguration config,
                                        IntegrasjonspunktNokkel keyInfo) {
 
