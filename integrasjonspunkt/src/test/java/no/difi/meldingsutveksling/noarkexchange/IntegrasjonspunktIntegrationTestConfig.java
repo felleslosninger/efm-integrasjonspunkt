@@ -1,27 +1,22 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
-import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
-import no.difi.meldingsutveksling.elma.ELMALookup;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
+import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
-import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.core.JmsTemplate;
 
-import javax.jms.ConnectionFactory;
 import javax.sql.DataSource;
 
 import static org.mockito.Matchers.any;
@@ -68,8 +63,8 @@ public class IntegrasjonspunktIntegrationTestConfig {
 
     @Bean
     @Primary
-    public AdresseregisterVirksert adresseregisterVirksert() {
-        return mock(AdresseregisterVirksert.class);
+    public Adresseregister adresseregister() {
+        return mock(Adresseregister.class);
     }
 
     @Bean
