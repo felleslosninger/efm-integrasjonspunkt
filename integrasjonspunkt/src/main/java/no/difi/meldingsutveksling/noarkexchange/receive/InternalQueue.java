@@ -119,7 +119,7 @@ public class InternalQueue {
 
 
 
-    private void forwardToNoark(EduDocument eduDocument) {
+    public void forwardToNoark(EduDocument eduDocument) {
         try {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             JAXBElement<EduDocument> d = new ObjectFactory().createStandardBusinessDocument(eduDocument);
@@ -146,5 +146,9 @@ public class InternalQueue {
             Audit.error("Failed to unserialize SBD");
             throw new MeldingsUtvekslingRuntimeException("Could not forward document to archive system", e);
         }
+    }
+
+    public void setIntegrajonspunktReceiveImpl(IntegrajonspunktReceiveImpl integrajonspunktReceiveImpl) {
+        this.integrajonspunktReceive= integrajonspunktReceiveImpl;
     }
 }
