@@ -18,12 +18,10 @@ import org.springframework.core.env.Environment;
  */
 public class AltinnTransport implements Transport {
 
-    private final String organisationNumber;
-    private final ELMALookup elmaLookup;
+    private final String endpoint;
 
-    public AltinnTransport(String organisationNumber, ELMALookup elmaLookup) {
-        this.organisationNumber = organisationNumber;
-        this.elmaLookup = elmaLookup;
+    public AltinnTransport(String endpoint) {
+        this.endpoint = endpoint;
     }
 
     /**
@@ -32,13 +30,7 @@ public class AltinnTransport implements Transport {
      */
     @Override
     public void send(Environment environment, final EduDocument eduDocument) {
-        Endpoint ep;
-        try {
-            ep = elmaLookup.lookup(organisationNumber);
-        } catch (LookupException e) {
-            throw new MeldingsUtvekslingRuntimeException(e.getMessage(), e);
-        }
-        AltinnWsClient client = new AltinnWsClient(AltinnWsConfiguration.fromConfiguration(ep.getAddress(), environment));
+        AltinnWsClient client = new AltinnWsClient(AltinnWsConfiguration.fromConfiguration(endpoint, environment));
         UploadRequest request1 = new AltinnWsRequest(eduDocument);
 
         client.send(request1);

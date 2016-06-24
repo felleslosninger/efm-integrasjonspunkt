@@ -38,16 +38,16 @@
     </appender>
 
 
-    <!--<if condition='"dev".contains(property("spring.profiles.active"))'>-->
-        <!--<then>-->
-            <!--<logger name="org.springframework.ws.client.MessageTracing">-->
-                <!--<level value="TRACE"/>-->
-            <!--</logger>-->
-            <!--<logger name="org.springframework.ws.server.MessageTracing">-->
-                <!--<level value="TRACE"/>-->
-            <!--</logger>-->
-        <!--</then>-->
-    <!--</if>-->
+<!--    <if condition='"dev".contains(property("spring.profiles.active"))'>
+        <then>
+            <logger name="org.springframework.ws.client.MessageTracing">
+                <level value="TRACE"/>
+            </logger>
+            <logger name="org.springframework.ws.server.MessageTracing">
+                <level value="TRACE"/>
+            </logger>
+        </then>
+    </if>-->
 
     <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
 

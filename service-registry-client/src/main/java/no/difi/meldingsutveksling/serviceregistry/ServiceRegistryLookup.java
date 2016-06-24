@@ -22,7 +22,7 @@ public class ServiceRegistryLookup {
      * returned.
      */
     public ServiceRecord getPrimaryServiceRecord(String orgnumber) {
-        final String serviceRecords = client.getResource(orgnumber);
+        final String serviceRecords = client.getResource("organization/" + orgnumber);
         final DocumentContext documentContext = JsonPath.parse(serviceRecords, jsonPathConfiguration());
         if (getNumberOfServiceRecords(documentContext) == 1) {
             return documentContext.read("$.serviceRecords[0].serviceRecord", ServiceRecord.class);
