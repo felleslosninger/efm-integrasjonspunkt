@@ -8,8 +8,7 @@ import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
-import no.difi.vefa.peppol.lookup.api.LookupException;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,11 +17,7 @@ import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 
 import static org.mockito.Mockito.*;
@@ -44,8 +39,10 @@ public class IntegrasjonspunktReceiveImplIntegrationTest {
     @Autowired
     IntegrajonspunktReceiveImpl integrajonspunktReceive;
 
-    @Test
-    public void receiveMessageTest() throws LookupException, JAXBException, IOException, MessageException {
+    IntegrajonspunktReceiveImpl integrajonspunktReceiveSpy;
+
+    @Before
+    public void setUp() throws JAXBException, IOException, MessageException {
         AppReceiptType appReceiptTypeMock = mock(AppReceiptType.class);
         when(appReceiptTypeMock.getType()).thenReturn("OK");
         PutMessageResponseType putMessageResponseTypeMock = mock(PutMessageResponseType.class);
@@ -54,18 +51,17 @@ public class IntegrasjonspunktReceiveImplIntegrationTest {
         when(noarkClientMock.sendEduMelding(any(PutMessageRequestType.class))).thenReturn(putMessageResponseTypeMock);
         integrajonspunktReceive.setLocalNoark(noarkClientMock);
 
-        IntegrajonspunktReceiveImpl integrajonspunktReceiveSpy = spy(integrajonspunktReceive);
+        integrajonspunktReceiveSpy = spy(integrajonspunktReceive);
         doReturn("42".getBytes()).when(integrajonspunktReceiveSpy).decrypt(any(Payload.class));
         PutMessageRequestType putMessageRequestTypeMock = mock(PutMessageRequestType.class);
         doReturn(putMessageRequestTypeMock).when(integrajonspunktReceiveSpy).convertAsicEntrytoEduDocument(any(byte[].class));
         doNothing().when(integrajonspunktReceiveSpy).sendReceiptOpen(any(StandardBusinessDocumentWrapper.class));
         internalQueue.setIntegrajonspunktReceiveImpl(integrajonspunktReceiveSpy);
+    }
 
-        JAXBElement<StandardBusinessDocument> fromDocument;
-        JAXBContext ctx = JAXBContext.newInstance(no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument.class);
-        Unmarshaller unmarshaller = ctx.createUnmarshaller();
-        fromDocument = unmarshaller.unmarshal(new StreamSource(getClass().getClassLoader().getResourceAsStream("1466595652965.xml")), no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument.class);
-        EduDocument eduDocument = StandardBusinessDocumentFactory.create(fromDocument.getValue());
+    @Test
+    public void receiveMessageTest() throws JAXBException {
+        EduDocument eduDocument = SBDFileReader.readSBD("1466595652965.xml");
 
         internalQueue.forwardToNoark(eduDocument);
 
