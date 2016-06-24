@@ -28,7 +28,7 @@ public class ServiceRegistryTransportFactory implements TransportFactory {
         Optional<ServiceRecord> serviceRecord = Optional.of(primaryServiceRecord);
 
         Optional<Transport> transport = serviceRecord.filter(isServiceIdentifier("edu")).map(s -> new AltinnTransport(s.getEndPointURL()));
-        if(transport.isPresent()) {
+        if(!transport.isPresent()) {
             transport = serviceRecord.filter(isServiceIdentifier("post")).map(s -> new PostVirksomhetTransport(s.getEndPointURL()));
         }
         return transport.orElseThrow(() -> new RuntimeException("Failed to create transport"));
