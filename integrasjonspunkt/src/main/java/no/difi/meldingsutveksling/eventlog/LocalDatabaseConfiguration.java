@@ -7,7 +7,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
 @Configuration
-@Profile({"dev", "itest", "systest", "staging", "production"})
+@Profile({"dev", "test", "itest", "systest", "staging", "production"})
 public class LocalDatabaseConfiguration implements DataBaseConfig {
 
     @Bean(name = "eventlogdatasource")

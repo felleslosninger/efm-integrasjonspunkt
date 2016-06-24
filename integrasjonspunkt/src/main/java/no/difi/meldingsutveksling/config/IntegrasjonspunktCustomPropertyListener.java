@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.config;
 
+import com.google.common.io.Files;
 import org.apache.commons.configuration.CompositeConfiguration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
@@ -10,6 +11,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -42,6 +44,10 @@ public class IntegrasjonspunktCustomPropertyListener implements ApplicationListe
 
     @Override
     public void onApplicationEvent(ApplicationEnvironmentPreparedEvent event) {
+        // File may not exist in test context
+        if (!new File(PROPERTIES_FILE_NAME_OVERRIDE).exists()) {
+            return;
+        }
         // Add the these custom properties (only the ones you specify here) into the application context
         List<String> list = Arrays.asList(
                 KEY_SERVICEURL,

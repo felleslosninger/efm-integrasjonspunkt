@@ -133,13 +133,13 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
         return new CorrelationInformation();
     }
 
-    private byte[] decrypt(Payload payload) {
+    public byte[] decrypt(Payload payload) {
         byte[] cmsEncZip = DatatypeConverter.parseBase64Binary(payload.getContent());
         CmsUtil cmsUtil = new CmsUtil();
         return cmsUtil.decryptCMS(cmsEncZip, keyInfo.loadPrivateKey());
     }
 
-    private void forwardToNoarkSystemAndSendReceipts(StandardBusinessDocumentWrapper inputDocument, PutMessageRequestType putMessageRequestType) {
+    public void forwardToNoarkSystemAndSendReceipts(StandardBusinessDocumentWrapper inputDocument, PutMessageRequestType putMessageRequestType) {
         PutMessageResponseType response = localNoark.sendEduMelding(putMessageRequestType);
         if (response == null || response.getResult() == null) {
             Audit.info("Empty response from archive", markerFrom(inputDocument));
@@ -157,7 +157,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
 
     }
 
-    private void sendReceiptOpen(StandardBusinessDocumentWrapper inputDocument) {
+    public void sendReceiptOpen(StandardBusinessDocumentWrapper inputDocument) {
         EduDocument doc = EduDocumentFactory.createAapningskvittering(inputDocument.getMessageInfo(), keyInfo.getKeyPair());
         sendReceipt(doc);
     }
@@ -167,7 +167,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
         t.send(config.getConfiguration(), receipt);
     }
 
-    private PutMessageRequestType convertAsicEntrytoEduDocument(byte[] bytes) throws MessageException, IOException, JAXBException {
+    public PutMessageRequestType convertAsicEntrytoEduDocument(byte[] bytes) throws MessageException, IOException, JAXBException {
         try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes))) {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {

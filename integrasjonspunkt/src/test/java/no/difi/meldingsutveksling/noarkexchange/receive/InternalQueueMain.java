@@ -6,7 +6,6 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.autoconfigure.solr.SolrAutoConfiguration;
 import org.springframework.boot.context.web.SpringBootServletInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -14,7 +13,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 /**
  * This class can be used to explore the JMS queue.
  */
-@SpringBootApplication(exclude = {SolrAutoConfiguration.class, FlywayAutoConfiguration.class})
+@SpringBootApplication(exclude = {SolrAutoConfiguration.class})
 public class InternalQueueMain extends SpringBootServletInitializer {
 
     @Autowired
