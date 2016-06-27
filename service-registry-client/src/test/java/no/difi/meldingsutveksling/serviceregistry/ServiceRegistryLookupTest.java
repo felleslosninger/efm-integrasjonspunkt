@@ -39,7 +39,7 @@ public class ServiceRegistryLookupTest {
     @Test
     public void organizationWithoutServiceRecord() {
         final String json = new SRContentBuilder().withoutPrimaryServiceIdentifier().withServiceRecord(post).withServiceRecord(edu).build();
-        when(client.getResource(ORGNR)).thenReturn(json);
+        when(client.getResource("organization/" + ORGNR)).thenReturn(json);
 
         final ServiceRecord primaryServiceRecord = this.service.getPrimaryServiceRecord(ORGNR);
 
@@ -49,7 +49,7 @@ public class ServiceRegistryLookupTest {
     @Test
     public void organizationWithSingleServiceRecordHasPrimaryServiceRecord() {
         final String json = new SRContentBuilder().withoutPrimaryServiceIdentifier().withServiceRecord(edu).build();
-        when(client.getResource(ORGNR)).thenReturn(json);
+        when(client.getResource("organization/" + ORGNR)).thenReturn(json);
 
         final ServiceRecord primaryServiceRecord = service.getPrimaryServiceRecord(ORGNR);
 
@@ -59,7 +59,7 @@ public class ServiceRegistryLookupTest {
     @Test
     public void organizationWithTwoServiceRecordsHasNoPrimaryServiceRecord() {
         final String json = new SRContentBuilder().withoutPrimaryServiceIdentifier().withServiceRecord(post).withServiceRecord(edu).build();
-        when(client.getResource(ORGNR)).thenReturn(json);
+        when(client.getResource("organization/" + ORGNR)).thenReturn(json);
 
         final ServiceRecord primaryServiceRecord = service.getPrimaryServiceRecord(ORGNR);
 
@@ -69,7 +69,7 @@ public class ServiceRegistryLookupTest {
     @Test
     public void organisationWithTwoServiceRecordsAndPrimaryOverride() {
         final String json = new SRContentBuilder().withPrimaryServiceIdentifier(edu.getServiceIdentifier()).withServiceRecord(post).withServiceRecord(edu).build();
-        when(client.getResource(ORGNR)).thenReturn(json);
+        when(client.getResource("organization/" + ORGNR)).thenReturn(json);
 
         final ServiceRecord serviceRecord = service.getPrimaryServiceRecord(ORGNR);
 

@@ -3,18 +3,16 @@ package no.difi.meldingsutveksling.noarkexchange.altinn;
 
 import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
-import no.difi.meldingsutveksling.elma.ELMALookup;
 import no.difi.meldingsutveksling.kvittering.EduDocumentFactory;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
-import no.difi.vefa.peppol.common.model.Endpoint;
-import no.difi.vefa.peppol.lookup.api.LookupException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -43,9 +41,6 @@ public class MessagePolling {
     InternalQueue internalQueue;
 
     @Autowired
-    ELMALookup elmaLookup;
-
-    @Autowired
     IntegrasjonspunktNokkel keyInfo;
 
     @Autowired
@@ -54,17 +49,20 @@ public class MessagePolling {
     @Autowired
     private JmsTemplate jmsTemplate;
 
+    @Autowired
+    ServiceRegistryLookup serviceRegistryLookup;
+
     @Scheduled(fixedRate = 15000)
     public void checkForNewMessages() {
         MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, config.getOrganisationNumber());
         logger.debug("Checking for new messages");
-        Endpoint endpoint;
-        try {
-            endpoint = elmaLookup.lookup(PREFIX_NORWAY + config.getOrganisationNumber());
-        } catch (LookupException e) {
-            throw new MeldingsUtvekslingRuntimeException(e);
-        }
-        AltinnWsConfiguration configuration = AltinnWsConfiguration.fromConfiguration(endpoint.getAddress(), config.getConfiguration());
+
+        /*
+            TODO: if ServiceRegistry returns a ServiceRecord to something other than Altinn formidlingstjeneste this will fail
+         */
+        final ServiceRecord primaryServiceRecord = serviceRegistryLookup.getPrimaryServiceRecord(config.getOrganisationNumber());
+
+        AltinnWsConfiguration configuration = AltinnWsConfiguration.fromConfiguration(primaryServiceRecord.getEndPointURL(), config.getConfiguration());
         AltinnWsClient client = new AltinnWsClient(configuration);
 
         List<FileReference> fileReferences = client.availableFiles(config.getOrganisationNumber());

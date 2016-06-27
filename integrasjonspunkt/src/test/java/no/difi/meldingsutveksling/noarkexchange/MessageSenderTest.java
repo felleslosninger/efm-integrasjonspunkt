@@ -2,9 +2,7 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
-import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
-import no.difi.meldingsutveksling.services.CertificateException;
-import no.difi.virksert.client.VirksertClientException;
+import no.difi.meldingsutveksling.services.Adresseregister;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.*;
@@ -12,6 +10,8 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import java.security.cert.CertificateException;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -28,7 +28,7 @@ public class MessageSenderTest {
     public ExpectedException expectedException = ExpectedException.none();
 
     @Mock
-    private AdresseregisterVirksert adresseregister;
+    private Adresseregister adresseregister;
 
     @Mock
     private IntegrasjonspunktConfiguration config;
@@ -59,7 +59,7 @@ public class MessageSenderTest {
         expectedException.expect(new StatusMatches(StatusMessage.MISSING_RECIEVER_CERTIFICATE));
         PutMessageRequestWrapper requestAdapter = new RequestBuilder().withSender().withReciever().build();
 
-        when(adresseregister.getCertificate(RECIEVER_PARTY_NUMBER)).thenThrow(new CertificateException("hello", new VirksertClientException("hello")));
+        when(adresseregister.getCertificate(RECIEVER_PARTY_NUMBER)).thenThrow(new CertificateException("hello"));
 
         messageSender.createMessageContext(requestAdapter);
     }
@@ -70,7 +70,7 @@ public class MessageSenderTest {
         expectedException.expect(new StatusMatches(StatusMessage.MISSING_SENDER_CERTIFICATE));
         PutMessageRequestWrapper requestAdapter = new RequestBuilder().withSender().withReciever().build();
 
-        when(adresseregister.getCertificate(SENDER_PARTY_NUMBER)).thenThrow(new CertificateException("hello", new VirksertClientException("hello")));
+        when(adresseregister.getCertificate(SENDER_PARTY_NUMBER)).thenThrow(new CertificateException("hello"));
 
         messageSender.createMessageContext(requestAdapter);
     }

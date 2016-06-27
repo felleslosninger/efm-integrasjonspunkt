@@ -9,11 +9,9 @@ import no.difi.meldingsutveksling.domain.Noekkelpar;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.logging.MessageMarkerFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import no.difi.meldingsutveksling.services.AdresseregisterVirksert;
-import no.difi.meldingsutveksling.services.CertificateException;
+import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.slf4j.Logger;
@@ -23,7 +21,7 @@ import org.springframework.stereotype.Component;
 
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
+import java.security.cert.CertificateException;
 
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createErrorResponse;
@@ -38,7 +36,7 @@ public class MessageSender {
     private TransportFactory transportFactory;
 
     @Autowired
-    private AdresseregisterVirksert adresseregister;
+    private Adresseregister adresseregister;
 
     @Autowired
     private IntegrasjonspunktConfiguration configuration;
@@ -62,19 +60,19 @@ public class MessageSender {
     }
 
     private Mottaker createMottaker(String orgnr) throws MessageContextException {
-        X509Certificate receiverCertificate;
+        Certificate receiverCertificate;
         try {
             receiverCertificate = lookupCertificate(orgnr);
-        } catch(CertificateException e) {
+        } catch (CertificateException e) {
             throw new MessageContextException(e, StatusMessage.MISSING_RECIEVER_CERTIFICATE);
         }
 
         return Mottaker.builder(new Organisasjonsnummer(orgnr), receiverCertificate).build();
     }
 
-    private X509Certificate lookupCertificate(String orgnr) throws CertificateException {
-        X509Certificate certificate;
-        certificate = (X509Certificate) adresseregister.getCertificate(orgnr);
+    private Certificate lookupCertificate(String orgnr) throws CertificateException {
+        Certificate certificate;
+        certificate = adresseregister.getCertificate(orgnr);
         return certificate;
     }
 
@@ -154,7 +152,7 @@ public class MessageSender {
         return context;
     }
 
-    public void setAdresseregister(AdresseregisterVirksert adresseregister) {
+    public void setAdresseregister(Adresseregister adresseregister) {
         this.adresseregister = adresseregister;
     }
 

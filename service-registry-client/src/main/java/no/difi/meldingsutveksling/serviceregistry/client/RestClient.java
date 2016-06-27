@@ -36,7 +36,7 @@ public class RestClient {
      * @return response body
      */
     public String getResource(String resourcePath) {
-        URI uri =  baseUrl.resolve(resourcePath);
+        URI uri =  baseUrl.resolve("/" + resourcePath);
         final ResponseEntity<String> entity = template.getForEntity(uri, String.class);
         return entity.getBody();
     }

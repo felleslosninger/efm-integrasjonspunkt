@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.serviceregistry.externalmodel;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
 
 import java.io.Serializable;
 
@@ -12,14 +13,14 @@ public class ServiceRecord implements Serializable {
     public static final ServiceRecord EMPTY = new ServiceRecord("", "", "", "");
     private String serviceIdentifier;
     private String organisationNumber;
-    private String x509Certificate;
+    private String pemCertificate;
     private String endPointURL;
 
-    public ServiceRecord(String serviceIdentifier, String organisationNumber, String x509Certificate
+    public ServiceRecord(String serviceIdentifier, String organisationNumber, String pemCertificate
             , String endPointURL) {
 
         this.organisationNumber = organisationNumber;
-        this.x509Certificate = x509Certificate;
+        this.pemCertificate = pemCertificate;
         this.endPointURL = endPointURL;
         this.serviceIdentifier = serviceIdentifier;
     }
@@ -36,12 +37,12 @@ public class ServiceRecord implements Serializable {
         this.organisationNumber = organisationNumber;
     }
 
-    public String getX509Certificate() {
-        return x509Certificate;
+    public String getPemCertificate() {
+        return pemCertificate;
     }
 
-    public void setX509Certificate(String x509Certificate) {
-        this.x509Certificate = x509Certificate;
+    public void setPemCertificate(String pemCertificate) {
+        this.pemCertificate = pemCertificate;
     }
 
     public String getEndPointURL() {
@@ -63,29 +64,26 @@ public class ServiceRecord implements Serializable {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("organizationNumber", organisationNumber)
-                .add("X509Certificate", x509Certificate)
-                .add("endpointUrl", endPointURL)
                 .add("serviceIdentifier", serviceIdentifier)
+                .add("organisationNumber", organisationNumber)
+                .add("pemCertificate", pemCertificate)
+                .add("endPointURL", endPointURL)
                 .toString();
     }
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof ServiceRecord) {
-            ServiceRecord other = (ServiceRecord) o;
-
-            return equal(serviceIdentifier, other.getServiceIdentifier())
-                    && equal(organisationNumber, other.getOrganisationNumber())
-                    && equal(x509Certificate, other.getX509Certificate())
-                    && equal(getEndPointURL(), other.getEndPointURL());
-        } else {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ServiceRecord that = (ServiceRecord) o;
+        return Objects.equal(serviceIdentifier, that.serviceIdentifier) &&
+                Objects.equal(organisationNumber, that.organisationNumber) &&
+                Objects.equal(pemCertificate, that.pemCertificate) &&
+                Objects.equal(endPointURL, that.endPointURL);
     }
 
     @Override
     public int hashCode() {
-        return hash(serviceIdentifier, organisationNumber, x509Certificate, endPointURL);
+        return Objects.hashCode(serviceIdentifier, organisationNumber, pemCertificate, endPointURL);
     }
 }

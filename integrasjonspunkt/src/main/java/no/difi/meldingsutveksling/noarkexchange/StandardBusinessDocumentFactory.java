@@ -32,6 +32,7 @@ import javax.xml.bind.Marshaller;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.security.cert.X509Certificate;
 import java.util.UUID;
 
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
@@ -100,7 +101,7 @@ public class StandardBusinessDocumentFactory {
 
     private byte[] encryptArchive(Mottaker mottaker, Archive archive) {
         return new CmsUtil().createCMS(archive.getBytes()
-                , mottaker.getSertifikat());
+                , (X509Certificate) mottaker.getSertifikat());
     }
 
     private Archive createAsicePackage(Avsender avsender, Mottaker mottaker, BestEduMessage bestEduMessage) throws IOException {

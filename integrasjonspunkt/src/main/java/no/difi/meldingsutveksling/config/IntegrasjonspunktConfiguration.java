@@ -14,6 +14,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -66,6 +67,7 @@ public class IntegrasjonspunktConfiguration {
     private static final String KEY_DEREGISTRATION = "spring.boot.admin.autoDeregistration";
 
     private static final String KEY_RETURN_OK_ONMISSINGPAYLOAD = "Return.Ok.OnEmptyPayload";
+    private static final java.lang.String SERVICE_REGISTRY_URL = "difi.service.registry.url";
 
     private Environment environment;
 
@@ -222,4 +224,7 @@ public class IntegrasjonspunktConfiguration {
     }
 
 
+    public String getServiceRegistryUrl() {
+        return environment.getProperty(SERVICE_REGISTRY_URL);
+    }
 }

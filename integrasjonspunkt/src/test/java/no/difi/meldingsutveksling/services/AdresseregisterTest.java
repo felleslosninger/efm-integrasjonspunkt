@@ -3,8 +3,9 @@ package no.difi.meldingsutveksling.services;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
-import no.difi.virksert.client.VirksertClient;
-import no.difi.virksert.client.VirksertClientException;
+import no.difi.meldingsutveksling.noarkexchange.TestConstants;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.Before;
@@ -18,9 +19,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AdresseregisterVirksertTest {
+public class AdresseregisterTest {
 
-    AdresseregisterVirksert adresseregisterVirksert;
+    Adresseregister adresseregister;
     public static final String SENDER_PARTY_NUMBER = "910075918";
     public static final String RECIEVER_PARTY_NUMBER = "910077473";
 
@@ -28,41 +29,45 @@ public class AdresseregisterVirksertTest {
     public ExpectedException expectedException = ExpectedException.none();
 
     @Mock
-    private VirksertClient virksertClient;
+    private ServiceRegistryLookup serviceRegistryLookup;
 
     @Mock
     private StandardBusinessDocumentWrapper documentWrapper;
+    private String emptyCertificate = "";
 
     @Before
     public void setup() {
-        adresseregisterVirksert = new AdresseregisterVirksert(virksertClient);
+        adresseregister = new Adresseregister(serviceRegistryLookup);
         when(documentWrapper.getSenderOrgNumber()).thenReturn(SENDER_PARTY_NUMBER);
         when(documentWrapper.getReceiverOrgNumber()).thenReturn(RECIEVER_PARTY_NUMBER);
+        when(serviceRegistryLookup.getPrimaryServiceRecord(RECIEVER_PARTY_NUMBER)).thenReturn(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"));
+        when(serviceRegistryLookup.getPrimaryServiceRecord(SENDER_PARTY_NUMBER)).thenReturn(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"));
     }
 
     @Test
-    public void senderCertificateIsInvalid() throws Exception {
+    public void senderCertificateIsMissing() throws Exception {
         expectedException.expect(MessageException.class);
         expectedException.expect(new StatusMatches(StatusMessage.MISSING_SENDER_CERTIFICATE));
-        when(virksertClient.fetch(SENDER_PARTY_NUMBER)).thenThrow(new VirksertClientException(""));
+        when(serviceRegistryLookup.getPrimaryServiceRecord(SENDER_PARTY_NUMBER)).thenReturn(new ServiceRecord(null, SENDER_PARTY_NUMBER, emptyCertificate, "http://localhost:123"));
 
 
-        adresseregisterVirksert.validateCertificates(documentWrapper);
+        adresseregister.validateCertificates(documentWrapper);
 
     }
 
     @Test
-    public void recieverCertificateIsValid() throws Exception {
+    public void recieverCertificateIsInValid() throws Exception {
         expectedException.expect(MessageException.class);
         expectedException.expect(new StatusMatches(StatusMessage.MISSING_RECIEVER_CERTIFICATE));
-        when(virksertClient.fetch(RECIEVER_PARTY_NUMBER)).thenThrow(new VirksertClientException(""));
+        when(serviceRegistryLookup.getPrimaryServiceRecord(RECIEVER_PARTY_NUMBER)).thenReturn(new ServiceRecord(null, RECIEVER_PARTY_NUMBER, emptyCertificate, "http://localhost:123"));
 
-        adresseregisterVirksert.validateCertificates(documentWrapper);
+        adresseregister.validateCertificates(documentWrapper);
     }
 
     @Test
     public void certificatesAreValid() throws MessageException {
-        adresseregisterVirksert.validateCertificates(documentWrapper);
+        adresseregister.validateCertificates(documentWrapper);
+        when(serviceRegistryLookup.getPrimaryServiceRecord(RECIEVER_PARTY_NUMBER)).thenReturn(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"));
     }
 
     private class StatusMatches extends TypeSafeMatcher<MessageException> {
