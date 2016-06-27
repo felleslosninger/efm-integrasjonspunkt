@@ -5,15 +5,10 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
-import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
-import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
-import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageRequestType;
-import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageResponseType;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
+import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import sun.security.x509.X509CertImpl;
 
@@ -22,9 +17,7 @@ import java.security.cert.CertificateException;
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class KanMottaMeldingerSteps {
 
@@ -117,7 +110,6 @@ public class KanMottaMeldingerSteps {
         mshClient = mock(NoarkClient.class);
         messageSender = mock(MessageSender.class);
         integrasjonspunkt.setMessageSender(messageSender);
-        integrasjonspunkt.setEventLog(mock(EventLog.class));
         integrasjonspunkt.setAdresseRegister(adresseRegister);
         integrasjonspunkt.setMshClient(mshClient);
     }

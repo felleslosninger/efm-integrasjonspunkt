@@ -1,10 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
-import no.difi.meldingsutveksling.noarkexchange.putmessage.BestEDUPutMessageStrategy;
-import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageContext;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import org.junit.Test;
@@ -12,16 +9,15 @@ import org.mockito.Mockito;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 /**
  * Test for hte AppReceiptStrategy
@@ -215,8 +211,8 @@ public class BestEDUStrategyTest {
     @Test
     public void shouldHandleP360StylePayload() {
 
-        PutMessageContext ctx = new PutMessageContext(Mockito.mock(EventLog.class), Mockito.mock(MessageSender.class));
-        BestEDUPutMessageStrategy strategy = new BestEDUPutMessageStrategy(ctx.getMessageSender());
+        MessageSender messageSender = Mockito.mock(MessageSender.class);
+        BestEDUPutMessageStrategy strategy = new BestEDUPutMessageStrategy(messageSender);
         PutMessageResponseType t = new PutMessageResponseType();
         when(strategy.putMessage(any(PutMessageRequestType.class))).thenReturn(t);
 
@@ -224,14 +220,13 @@ public class BestEDUStrategyTest {
         request.setPayload(p360Style);
 
         strategy.putMessage(request);
-        verify(ctx.getMessageSender(), times(1)).sendMessage(any(PutMessageRequestType.class));
+        verify(messageSender, times(1)).sendMessage(any(PutMessageRequestType.class));
     }
 
     @Test
     public void testShouldHandleEPhortePaload() throws ParserConfigurationException {
         MessageSender messageSenderMock = Mockito.mock(MessageSender.class);
-        PutMessageContext ctx = new PutMessageContext(Mockito.mock(EventLog.class), messageSenderMock);
-        BestEDUPutMessageStrategy strategy = new BestEDUPutMessageStrategy(ctx.getMessageSender());
+        BestEDUPutMessageStrategy strategy = new BestEDUPutMessageStrategy(messageSenderMock);
         Document document;
         try {
             DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -242,6 +237,6 @@ public class BestEDUStrategyTest {
         PutMessageRequestType req = new PutMessageRequestType();
         req.setPayload(document);
         strategy.putMessage(req);
-        verify(ctx.getMessageSender(), times(1)).sendMessage(any(PutMessageRequestType.class));
+        verify(messageSenderMock, times(1)).sendMessage(any(PutMessageRequestType.class));
     }
 }

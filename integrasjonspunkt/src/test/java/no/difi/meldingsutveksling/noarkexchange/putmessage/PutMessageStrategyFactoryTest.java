@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import org.junit.Before;
 import org.junit.Test;
@@ -103,12 +102,12 @@ public class PutMessageStrategyFactoryTest {
             "    &lt;/message&gt;\n" +
             "    &lt;/AppReceipt&gt;";
 
-    private PutMessageContext context;
+    private MessageSender messageSender;
 
     @Before
     public void createContxt() {
-        context = new PutMessageContext(Mockito.mock(EventLog.class), Mockito.mock(MessageSender.class));
-        putMessageStrategyFactory = putMessageStrategyFactory.newInstance(context);
+        messageSender = Mockito.mock(MessageSender.class);
+        putMessageStrategyFactory = putMessageStrategyFactory.newInstance(messageSender);
     }
 
     @Test
@@ -126,7 +125,7 @@ public class PutMessageStrategyFactoryTest {
 
     @Test
     public void testShouldCreateAppReceiptStrategy() {
-        assertTrue(putMessageStrategyFactory.newInstance(context).create(appReceiptPayload) instanceof AppReceiptPutMessageStrategy);
+        assertTrue(putMessageStrategyFactory.newInstance(messageSender).create(appReceiptPayload) instanceof AppReceiptPutMessageStrategy);
         assertEquals(AppReceiptPutMessageStrategy.class, putMessageStrategyFactory.create(appReceiptPayload).getClass());
     }
 
