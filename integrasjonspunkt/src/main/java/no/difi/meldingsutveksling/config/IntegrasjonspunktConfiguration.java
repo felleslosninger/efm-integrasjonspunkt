@@ -14,10 +14,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
@@ -53,9 +51,6 @@ public class IntegrasjonspunktConfiguration {
     private static final String KEY_MSH_USERNAME = "msh.userName";
     private static final String KEY_MSH_PASSWORD = "msh.password";
 
-    protected static final String KEY_ADRESSEREGISTER_ENDPOINT = "adresseregister.endPointURL";
-
-
     protected static final String KEY_PRIVATEKEYALIAS = "privatekeyalias";
     protected static final String KEY_KEYSTORE_LOCATION = "keystorelocation";
     protected static final String KEY_PRIVATEKEYPASSWORD = "privatekeypassword";
@@ -67,7 +62,7 @@ public class IntegrasjonspunktConfiguration {
     private static final String KEY_DEREGISTRATION = "spring.boot.admin.autoDeregistration";
 
     private static final String KEY_RETURN_OK_ONMISSINGPAYLOAD = "Return.Ok.OnEmptyPayload";
-    private static final java.lang.String SERVICE_REGISTRY_URL = "difi.service.registry.url";
+    protected static final String KEY_SERVICE_REGISTRY_URL = "difi.service.registry.url";
 
     private Environment environment;
 
@@ -76,7 +71,7 @@ public class IntegrasjonspunktConfiguration {
         this.environment = new WhiteSpaceTrimmingEnvironmentDecorator(environment);
 
         validateProperty(KEY_NOARKSYSTEM_ENDPOINT);
-        validateProperty(KEY_ADRESSEREGISTER_ENDPOINT);
+        validateProperty(KEY_SERVICE_REGISTRY_URL);
         validateProperty(KEY_PRIVATEKEYALIAS);
         validateProperty(KEY_KEYSTORE_LOCATION);
         validateProperty(KEY_PRIVATEKEYPASSWORD);
@@ -131,10 +126,6 @@ public class IntegrasjonspunktConfiguration {
         return environment.getProperty(KEY_ALTINN_SERVICE_EDITION_CODE);
     }
 
-    public String getAdresseRegisterEndPointURL() {
-        return environment.getProperty(KEY_ADRESSEREGISTER_ENDPOINT);
-    }
-
     public String getKeyStoreLocation() {
         return environment.getProperty(KEY_KEYSTORE_LOCATION);
     }
@@ -168,8 +159,8 @@ public class IntegrasjonspunktConfiguration {
                 .newGroup("Keystore")
                 .newElement(KEY_KEYSTORE_LOCATION, getCurrentPath() + File.separator + getKeyStoreLocation())
                 .newElement(KEY_PRIVATEKEYALIAS, getPrivateKeyAlias())
-                .newGroup("Adresseregister")
-                .newElement(KEY_ADRESSEREGISTER_ENDPOINT, getAdresseRegisterEndPointURL())
+                .newGroup("ServiceRegistry")
+                .newElement(KEY_SERVICE_REGISTRY_URL, getServiceRegistryUrl())
                 .newGroup("Noark")
                 .newElement(KEY_NOARKSYSTEM_TYPE, getNoarkType())
                 .newElement(KEY_NOARKSYSTEM_ENDPOINT, getNOARKSystemEndPointURL())
@@ -225,6 +216,6 @@ public class IntegrasjonspunktConfiguration {
 
 
     public String getServiceRegistryUrl() {
-        return environment.getProperty(SERVICE_REGISTRY_URL);
+        return environment.getProperty(KEY_SERVICE_REGISTRY_URL);
     }
 }
