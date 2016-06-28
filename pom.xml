@@ -216,9 +216,9 @@
                     <destFile>${project.basedir}/../jacoco.exec</destFile>
                     <dataFile>${project.basedir}/../jacoco.exec</dataFile>
                     <append>true</append>
+                    <rules>
                     <!-- Do not enforce covered ratio.. (yet!) -->
                     <!--
-                    <rules>
                         <rule implementation="org.jacoco.maven.RuleConfiguration">
                             <element>BUNDLE</element>
                             <limits>
@@ -229,8 +229,8 @@
                                 </limit>
                             </limits>
                         </rule>
-                    </rules>
                     -->
+                    </rules>
                 </configuration>
                 <executions>
                     <execution>
