@@ -152,7 +152,27 @@
                         <argLine>${argLine} -Xms256m -Xmx512m -XX:MaxPermSize=128m -ea
                             -Dfile.encoding=UTF-8
                         </argLine>
+                        <excludes>
+                            <exclude>**/*IntegrationTest.java</exclude>
+                        </excludes>
                     </configuration>
+                    <executions>
+                        <execution>
+                            <id>integration-test</id>
+                            <goals>
+                                <goal>test</goal>
+                            </goals>
+                            <phase>integration-test</phase>
+                            <configuration>
+                                <excludes>
+                                    <exclude>none</exclude>
+                                </excludes>
+                                <includes>
+                                    <include>**/*IntegrationTest.java</include>
+                                </includes>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
 
                 <plugin>
@@ -194,6 +214,7 @@
                 <version>${jacoco.version}</version>
                 <configuration>
                     <destFile>${project.basedir}/../jacoco.exec</destFile>
+                    <dataFile>${project.basedir}/../jacoco.exec</dataFile>
                     <append>true</append>
                     <rules>
                         <!-- implementation is needed only for Maven 2 -->
@@ -229,34 +250,6 @@
                         <goals>
                             <goal>check</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${surefire.version}</version>
-                <configuration>
-                    <excludes>
-                        <exclude>**/*IntegrationTest.java</exclude>
-                    </excludes>
-                    <argLine>${argLine} -Dfile.encoding=UTF-8</argLine>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>integration-test</id>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                        <phase>integration-test</phase>
-                        <configuration>
-                            <excludes>
-                                <exclude>none</exclude>
-                            </excludes>
-                            <includes>
-                                <include>**/*IntegrationTest.java</include>
-                            </includes>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
