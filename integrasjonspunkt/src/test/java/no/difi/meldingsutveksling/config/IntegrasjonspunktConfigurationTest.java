@@ -22,7 +22,7 @@ public class IntegrasjonspunktConfigurationTest {
 
         //Default with values set on required properties
         when(environmentMock.getProperty(KEY_NOARKSYSTEM_ENDPOINT)).thenReturn("something");
-        when(environmentMock.getProperty(KEY_ADRESSEREGISTER_ENDPOINT)).thenReturn("something");
+        when(environmentMock.getProperty(KEY_SERVICE_REGISTRY_URL)).thenReturn("something");
         when(environmentMock.getProperty(KEY_PRIVATEKEYALIAS)).thenReturn("something");
         when(environmentMock.getProperty(KEY_KEYSTORE_LOCATION)).thenReturn("something");
         when(environmentMock.getProperty(KEY_PRIVATEKEYPASSWORD)).thenReturn("something");
@@ -38,8 +38,8 @@ public class IntegrasjonspunktConfigurationTest {
     }
 
     @Test(expected = MeldingsUtvekslingRequiredPropertyException.class)
-    public void shouldGetExceptionWhenAdresseregisterEndpointIsBlank() throws Exception {
-        when(environmentMock.getProperty(KEY_ADRESSEREGISTER_ENDPOINT)).thenReturn("");
+    public void shouldGetExceptionWhenServiceRegistryIsBlank() throws Exception {
+        when(environmentMock.getProperty(KEY_SERVICE_REGISTRY_URL)).thenReturn("");
 
         configuration = new IntegrasjonspunktConfiguration(environmentMock);
     }
