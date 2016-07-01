@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.noarkexchange.putmessage;
 import com.sun.org.apache.xerces.internal.dom.ElementNSImpl;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 
 import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.isAppReceipt;
 
@@ -18,24 +19,24 @@ public final class PutMessageStrategyFactory {
 
     public static final String MESSAGE_INDICATOR = "Melding";
 
-    private PutMessageContext context;
+    private MessageSender messageSender;
 
-    private PutMessageStrategyFactory(PutMessageContext context) {
-        this.context = context;
+    private PutMessageStrategyFactory(MessageSender messageSender) {
+        this.messageSender = messageSender;
     }
 
-    public static PutMessageStrategyFactory newInstance(PutMessageContext context) {
-        return new PutMessageStrategyFactory(context);
+    public static PutMessageStrategyFactory newInstance(MessageSender messageSender) {
+        return new PutMessageStrategyFactory(messageSender);
     }
 
     public PutMessageStrategy create(Object payload) {
         if (isAppReceipt(payload)) {
             Audit.info("Messagetype AppReceipt");
-            return new AppReceiptPutMessageStrategy(context.getMessageSender());
+            return new AppReceiptPutMessageStrategy(messageSender);
         }
         if (isEPhorte(payload)) {
             Audit.info("Messagetype EDU - CData");
-            return new BestEDUPutMessageStrategy(context.getMessageSender());
+            return new BestEDUPutMessageStrategy(messageSender);
         }
         if (isUnknown(payload)) {
             Audit.error("Unknown payload class");
@@ -43,7 +44,7 @@ public final class PutMessageStrategyFactory {
         }
         if (isBestEDUMessage(payload)) {
             Audit.info("Messagetype EDU HtmlEndoced");
-            return new BestEDUPutMessageStrategy(context.getMessageSender());
+            return new BestEDUPutMessageStrategy(messageSender);
         }
         Audit.error("Unknown payload string");
         throw new MeldingsUtvekslingRuntimeException("Unknown String based payload " + payload);

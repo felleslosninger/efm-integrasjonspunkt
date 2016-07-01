@@ -1,16 +1,11 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import com.thoughtworks.xstream.XStream;
 import net.logstash.logback.encoder.org.apache.commons.lang.StringUtils;
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.ProcessState;
-import no.difi.meldingsutveksling.eventlog.Event;
-import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.logging.MarkerFactory;
-import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageContext;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategy;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
@@ -25,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.xml.ws.BindingType;
-
 import java.security.cert.CertificateException;
 
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
@@ -54,9 +48,6 @@ public class IntegrasjonspunktImpl implements SOAPport {
     private MessageSender messageSender;
 
     @Autowired
-    private EventLog eventLog;
-
-    @Autowired
     private NoarkClient mshClient;
 
     @Autowired
@@ -73,10 +64,6 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
 
         String organisasjonsnummer = getCanReceiveMessageRequest.getReceiver().getOrgnr();
-        eventLog.log(new Event()
-                .setMessage(new XStream().toXML(getCanReceiveMessageRequest))
-                .setProcessStates(ProcessState.CAN_RECEIVE_INVOKED)
-                .setReceiver(getCanReceiveMessageRequest.getReceiver().getOrgnr()).setSender("NA"));
 
         GetCanReceiveMessageResponseType response = new GetCanReceiveMessageResponseType();
         boolean canReceive;
@@ -150,8 +137,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
             Audit.info("Queue is disabled", markerFrom(message));
 
             if (hasAdresseregisterCertificate(request.getEnvelope().getReceiver().getOrgnr())) {
-                PutMessageContext context = new PutMessageContext(eventLog, messageSender);
-                PutMessageStrategyFactory putMessageStrategyFactory = PutMessageStrategyFactory.newInstance(context);
+                PutMessageStrategyFactory putMessageStrategyFactory = PutMessageStrategyFactory.newInstance(messageSender);
                 PutMessageStrategy strategy = putMessageStrategyFactory.create(request.getPayload());
                 return strategy.putMessage(request);
             } else {
@@ -175,8 +161,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
         boolean result;
         if(hasAdresseregisterCertificate(message.getRecieverPartyNumber())) {
             Audit.info("Receiver validated", markerFrom(message));
-            PutMessageContext context = new PutMessageContext(eventLog, messageSender);
-            PutMessageStrategyFactory putMessageStrategyFactory = PutMessageStrategyFactory.newInstance(context);
+            PutMessageStrategyFactory putMessageStrategyFactory = PutMessageStrategyFactory.newInstance(messageSender);
 
             PutMessageStrategy strategy = putMessageStrategyFactory.create(request.getPayload());
             PutMessageResponseType response = strategy.putMessage(request);
@@ -207,14 +192,6 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
     public void setMessageSender(MessageSender messageSender) {
         this.messageSender = messageSender;
-    }
-
-    public EventLog getEventLog() {
-        return eventLog;
-    }
-
-    public void setEventLog(EventLog eventLog) {
-        this.eventLog = eventLog;
     }
 
     public void setMshClient(NoarkClient mshClient) {

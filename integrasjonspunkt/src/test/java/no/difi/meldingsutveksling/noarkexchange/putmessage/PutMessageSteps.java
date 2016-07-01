@@ -13,8 +13,6 @@ import no.difi.meldingsutveksling.domain.sbdh.BusinessScope;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
-import no.difi.meldingsutveksling.eventlog.Event;
-import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
@@ -38,10 +36,7 @@ import java.security.cert.CertificateException;
 import java.util.ArrayList;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * Makes sure that the integrasjonspunkt can handle receipt messages on
@@ -59,7 +54,6 @@ public class PutMessageSteps {
 
     private IntegrasjonspunktImpl integrasjonspunkt;
     private Adresseregister adresseregister ;
-    private EventLog eventLog ;
     private PutMessageRequestType message;
     private MessageSender messageSender;
     private Transport transport;
@@ -71,8 +65,6 @@ public class PutMessageSteps {
         integrasjonspunkt = new IntegrasjonspunktImpl();
         adresseregister = mock(Adresseregister.class);
         when(adresseregister.getCertificate(any(String.class))).thenReturn(new X509CertImpl());
-        eventLog = mock(EventLog.class);
-        integrasjonspunkt.setEventLog(eventLog);
 
         messageSender = new MessageSender();
         messageSender.setAdresseregister(adresseregister);
@@ -129,11 +121,6 @@ public class PutMessageSteps {
     @When("^integrasjonspunktet mottar en kvittering på putMessage grensesnittet$")
     public void integrasjonspunkt_mottar_kvittering(){
         integrasjonspunkt.putMessage(message);
-    }
-
-    @Then("^kvitteringen logges i integrasjonspunktet sin hendelseslogg$")
-    public void kvitteringen_logges_i_eventlog()  {
-        verify(eventLog).log(any(Event.class));
     }
 
     @Then("^kvitteringen sendes ikke videre til transport$")

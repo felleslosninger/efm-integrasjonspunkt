@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
-import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
 import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
@@ -26,11 +25,11 @@ public class AppReceiptStrategyTest {
             "  </message>\n" +
             "</AppReceipt>";
 
-    private PutMessageContext ctx;
+    private MessageSender messageSender;
 
     @Before
     public void init() {
-        ctx = new PutMessageContext(Mockito.mock(EventLog.class), Mockito.mock(MessageSender.class));
+        messageSender = Mockito.mock(MessageSender.class);
     }
 
     /**
@@ -38,10 +37,10 @@ public class AppReceiptStrategyTest {
      */
     @Test
     public void appReceiptsShouldBeReturnedToSender() {
-        AppReceiptPutMessageStrategy strategy = new AppReceiptPutMessageStrategy(ctx.getMessageSender());
+        AppReceiptPutMessageStrategy strategy = new AppReceiptPutMessageStrategy(messageSender);
         PutMessageRequestType request = createPutMessageRequestType();
         strategy.putMessage(request);
-        verify(ctx.getMessageSender(), atLeastOnce()).sendMessage(any(PutMessageRequestType.class));
+        verify(messageSender, atLeastOnce()).sendMessage(any(PutMessageRequestType.class));
     }
 
     private PutMessageRequestType createPutMessageRequestType() {

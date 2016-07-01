@@ -4,10 +4,7 @@ import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
-import no.difi.meldingsutveksling.domain.ProcessState;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
-import no.difi.meldingsutveksling.eventlog.Event;
-import no.difi.meldingsutveksling.eventlog.EventLog;
 import no.difi.meldingsutveksling.kvittering.EduDocumentFactory;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
@@ -53,7 +50,6 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
     private static final String OK_TYPE = OKEY_TYPE;
     private static Logger logger = LoggerFactory.getLogger(IntegrasjonspunktImpl.class);
     private static final String SBD_NAMESPACE = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader";
-    private EventLog eventLog = EventLog.create();
     private TransportFactory transportFactory;
     private NoarkClient localNoark;
     private MessageSender messageSender;
@@ -105,16 +101,13 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
 
         if (document.isReciept()) {
             Audit.info("Messagetype Receipt", markerFrom(document));
-            logEvent(document, ProcessState.KVITTERING_MOTTATT);
             return new CorrelationInformation();
         }
 
         // TODO: remove? or move to send leveringskvittering i internal queue?
-        logEvent(document, ProcessState.SBD_RECIEVED);
 
         Payload payload = document.getPayload();
         byte[] decryptedAsicPackage = decrypt(payload);
-        logEvent(document, ProcessState.DECRYPTION_SUCCESS);
         PutMessageRequestType eduDocument;
         try {
             eduDocument = convertAsicEntrytoEduDocument(decryptedAsicPackage);
@@ -148,7 +141,6 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
             if (result.getType().equals(OK_TYPE)) {
                 Audit.info("Delivered archive", markerFrom(response));
                 sendReceiptOpen(inputDocument);
-                logEvent(inputDocument, ProcessState.BEST_EDU_SENT);
             } else {
                 Audit.error("Unexpected response from archive", markerFrom(response));
                 System.out.println(">>> archivesystem: " + response.getResult().getMessage().get(0).getText());
@@ -179,12 +171,6 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
             }
         }
         throw new MessageException(StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
-    }
-
-    private void logEvent(StandardBusinessDocumentWrapper inputDocument, ProcessState processState) {
-        eventLog.log(new Event().setProcessStates(processState)
-                .setReceiver(inputDocument.getReceiverOrgNumber())
-                .setSender(inputDocument.getSenderOrgNumber()));
     }
 
     public TransportFactory getTransportFactory() {
