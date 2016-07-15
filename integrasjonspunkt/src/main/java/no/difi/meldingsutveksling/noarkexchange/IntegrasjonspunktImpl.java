@@ -6,8 +6,10 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.logging.MarkerFactory;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.EduMessageStrategyFactory;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactory;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategy;
-import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -58,6 +60,9 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
     @Autowired
     private Adresseregister adresseRegister;
+
+    @Autowired
+    private StrategyFactory strategyFactory;
 
     @Override
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
@@ -137,8 +142,8 @@ public class IntegrasjonspunktImpl implements SOAPport {
             Audit.info("Queue is disabled", markerFrom(message));
 
             if (hasAdresseregisterCertificate(request.getEnvelope().getReceiver().getOrgnr())) {
-                PutMessageStrategyFactory putMessageStrategyFactory = PutMessageStrategyFactory.newInstance(messageSender);
-                PutMessageStrategy strategy = putMessageStrategyFactory.create(request.getPayload());
+                MessageStrategyFactory messageStrategyFactory = EduMessageStrategyFactory.newInstance(messageSender);
+                PutMessageStrategy strategy = messageStrategyFactory.create(request.getPayload());
                 return strategy.putMessage(request);
             } else {
                 if(hasMshEndpoint()) {
@@ -161,9 +166,9 @@ public class IntegrasjonspunktImpl implements SOAPport {
         boolean result;
         if(hasAdresseregisterCertificate(message.getRecieverPartyNumber())) {
             Audit.info("Receiver validated", markerFrom(message));
-            PutMessageStrategyFactory putMessageStrategyFactory = PutMessageStrategyFactory.newInstance(messageSender);
+            EduMessageStrategyFactory eduMessageStrategyFactory = EduMessageStrategyFactory.newInstance(messageSender);
 
-            PutMessageStrategy strategy = putMessageStrategyFactory.create(request.getPayload());
+            PutMessageStrategy strategy = eduMessageStrategyFactory.create(request.getPayload());
             PutMessageResponseType response = strategy.putMessage(request);
             result = validateResult(response);
         } else {

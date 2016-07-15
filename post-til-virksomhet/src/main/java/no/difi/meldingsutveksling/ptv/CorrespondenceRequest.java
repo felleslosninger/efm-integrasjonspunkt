@@ -5,7 +5,7 @@ public class CorrespondenceRequest {
     private String password;
     private Object payload;
 
-    public CorrespondenceRequest() {
+    private CorrespondenceRequest() {
     }
 
     public String getUsername() {

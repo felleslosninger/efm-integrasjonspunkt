@@ -37,10 +37,22 @@ public class IntegrasjonspunktConfiguration {
     private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktConfiguration.class);
 
     public static final String KEY_ORGANISATION_NUMBER = "orgnumber";
+
+    /*
+        Properties for Altinn formidlingstjeneste
+     */
     private static final String KEY_ALTINN_USERNAME = "altinn.username";
     private static final String KEY_ALTINN_PASSWORD = "altinn.password";
     private static final String KEY_ALTINN_SERVICE_CODE = "altinn.external_service_code";
     private static final String KEY_ALTINN_SERVICE_EDITION_CODE = "altinn.external_service_edition_code";
+
+    /*
+        Properties for Altinn Post til virksomheter
+     */
+    public static final String POST_VIRKSOMHETER_USERNAME = "post.virksomheter.username";
+    public static final String POST_VIRKSOMHETER_PASSWORD = "post.virksomheter.password";
+    public static final String POST_VIRKSOMHETER_EXTERNAL_SERVICE_CODE = "post.virksomheter.external_service_code";
+    public static final String POST_VIRKSOMHETER_EXTERNAL_SERVICE_EDITION_CODE = "post.virksomheter.external_service_edition_code";
 
     protected static final String KEY_NOARKSYSTEM_ENDPOINT = "noarksystem.endpointURL";
     private static final String KEY_NOARKSYSTEM_USERNAME = "noarksystem.username";
@@ -126,6 +138,22 @@ public class IntegrasjonspunktConfiguration {
         return environment.getProperty(KEY_ALTINN_SERVICE_EDITION_CODE);
     }
 
+    public String getPostVirksomheterUsername() {
+        return environment.getProperty(POST_VIRKSOMHETER_USERNAME);
+    }
+
+    public String getPostVirksomheterPassword() {
+        return environment.getProperty(POST_VIRKSOMHETER_PASSWORD);
+    }
+
+    public String getPostVirksomheterExternalServiceCode() {
+        return environment.getProperty(POST_VIRKSOMHETER_EXTERNAL_SERVICE_CODE);
+    }
+
+    public String getPostVirksomheterExternalServiceEditionCode() {
+        return environment.getProperty(POST_VIRKSOMHETER_EXTERNAL_SERVICE_EDITION_CODE);
+    }
+
     public String getKeyStoreLocation() {
         return environment.getProperty(KEY_KEYSTORE_LOCATION);
     }
@@ -142,7 +170,9 @@ public class IntegrasjonspunktConfiguration {
         return environment.getProperty(KEY_NOARKSYSTEM_TYPE);
     }
 
-    public String getKeyMshEndpoint() {return environment.getProperty(KEY_MSH_ENDPOINT); }
+    public String getKeyMshEndpoint() {
+        return environment.getProperty(KEY_MSH_ENDPOINT);
+    }
 
     public boolean getReturnOkOnMissingPayload() {
         return Boolean.valueOf(environment.getProperty(KEY_RETURN_OK_ONMISSINGPAYLOAD));

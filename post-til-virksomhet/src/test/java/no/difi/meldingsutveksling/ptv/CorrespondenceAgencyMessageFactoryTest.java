@@ -18,6 +18,7 @@ import javax.xml.bind.Unmarshaller;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Testclass for {@link CorrespondenceAgencyMessageFactory}
@@ -119,25 +120,30 @@ public class CorrespondenceAgencyMessageFactoryTest {
 
     private JAXBContext jaxbContext;
     private Environment envMock;
+    private CorrespondenceAgencyConfiguration postConfig;
 
     @Before
     public void initializeJaxb() throws JAXBException {
         jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
         envMock = mock(Environment.class);
-        Mockito.when(envMock.getProperty(Mockito.anyString())).thenReturn(""); // default
-        Mockito.when(envMock.getProperty("altinn.user_code")).thenReturn("AAS_TEST");
+        when(envMock.getProperty(Mockito.anyString())).thenReturn(""); // default
+        when(envMock.getProperty("altinn.user_code")).thenReturn("AAS_TEST");
+
+        postConfig = mock(CorrespondenceAgencyConfiguration.class);
+        when(postConfig.getSystemUserCode()).thenReturn("AAS_TEST");
     }
 
     @Test
     public void testFactoryForEscapedXML() throws PayloadException, JAXBException {
         PutMessageRequestWrapper msgFromEscaped = new PutMessageRequestWrapper(createPutMessageEscapedXml(escapedXml));
-        assertFields(CorrespondenceAgencyMessageFactory.create(envMock, msgFromEscaped));
+
+        assertFields(CorrespondenceAgencyMessageFactory.create(postConfig, msgFromEscaped));
     }
 
     @Test
     public void testFactoryForCDataXML() throws PayloadException, JAXBException {
         PutMessageRequestWrapper msgFromCdata = new PutMessageRequestWrapper(createPutMessageCdataXml(cdataTaggedXml));
-        assertFields(CorrespondenceAgencyMessageFactory.create(envMock, msgFromCdata));
+        assertFields(CorrespondenceAgencyMessageFactory.create(postConfig, msgFromCdata));
     }
 
     private void assertFields(InsertCorrespondenceV2 c) {

@@ -11,6 +11,8 @@ import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
+import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
+import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
@@ -27,7 +29,6 @@ import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createErrorResponse;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createOkResponse;
 
-@Component
 public class MessageSender {
 
     Logger log = LoggerFactory.getLogger(MessageSender.class);
@@ -46,6 +47,17 @@ public class MessageSender {
 
     @Autowired
     private StandardBusinessDocumentFactory standardBusinessDocumentFactory;
+
+    public MessageSender() {
+    }
+
+    public MessageSender(TransportFactory transportFactory, Adresseregister adresseregister, IntegrasjonspunktConfiguration configuration, IntegrasjonspunktNokkel keyInfo, StandardBusinessDocumentFactory standardBusinessDocumentFactory) {
+        this.transportFactory = transportFactory;
+        this.adresseregister = adresseregister;
+        this.configuration = configuration;
+        this.keyInfo = keyInfo;
+        this.standardBusinessDocumentFactory = standardBusinessDocumentFactory;
+    }
 
     private Avsender createAvsender(PutMessageRequestWrapper message) throws MessageContextException {
         Certificate certificate;
@@ -74,6 +86,25 @@ public class MessageSender {
         Certificate certificate;
         certificate = adresseregister.getCertificate(orgnr);
         return certificate;
+    }
+
+    // TODO: refactor this: move it into PostMessageStrategy
+    public PutMessageResponseType sendMessagePost(PutMessageRequestType messageRequest) {
+        CorrespondenceAgencyMessageFactory messageFactory;
+        CorrespondenceAgencyConfiguration postConfig = new CorrespondenceAgencyConfiguration.Builder()
+                .withExternalServiceCode(configuration.getPostVirksomheterExternalServiceCode())
+                .withExternalServiceEditionCode(configuration.getPostVirksomheterExternalServiceEditionCode())
+                .withLanguageCode("1044")
+                .withSystemUserCode(configuration.getPostVirksomheterUsername())
+                .build();
+        final PutMessageRequestWrapper msg = new PutMessageRequestWrapper(messageRequest);
+        try {
+            CorrespondenceAgencyMessageFactory.create(postConfig, msg);
+        } catch (PayloadException e) {
+            Audit.error("Could not send \"Post til virksomhet\"", markerFrom(msg));
+            return createErrorResponse(new MessageException(e, StatusMessage.POST_VIRKSOMHET_REQUEST_MISSING_VALUES));
+        }
+        return createOkResponse();
     }
 
     public PutMessageResponseType sendMessage(PutMessageRequestType messageRequest) {
@@ -105,11 +136,6 @@ public class MessageSender {
         Audit.info("Message sent", markerFrom(message));
 
         return createOkResponse();
-    }
-
-    public void sendMessage(EduDocument doc) {
-        Transport t = transportFactory.createTransport(doc);
-        t.send(configuration.getConfiguration(), doc);
     }
 
     /**

@@ -2,6 +2,8 @@ package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
+import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -14,13 +16,15 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
- * tests for the PutMessageStrategyFactory
+ * tests for the EduMessageStrategyFactory
  *
  * @author Glenn Bech
  */
-public class PutMessageStrategyFactoryTest {
+public class EduMessageStrategyFactoryTest {
 
     private String p360Message = "<s:Envelope encoding=\"utf-8\" xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"><s:Body xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"><PutMessageRequest xmlns=\"http://www.arkivverket.no/Noark/Exchange/types\"><envelope contentNamespace=\"http://www.arkivverket.no/Noark4-1-WS-WD/types\" conversationId=\"1ca54c1c-74ab-44b4-b3af-6f92a59b2f67\" xmlns=\"\"><sender><orgnr/></sender><receiver><orgnr>974720760</orgnr></receiver></envelope><payload xsi:type=\"xsd:string\" xmlns=\"\">&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;\n" +
             "&lt;Melding xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.arkivverket.no/Noark4-1-WS-WD/types\"&gt;\n" +
@@ -94,7 +98,7 @@ public class PutMessageStrategyFactoryTest {
             "&lt;/Melding&gt;</payload></PutMessageRequest></s:Body></s:Envelope>";
 
 
-    private PutMessageStrategyFactory putMessageStrategyFactory;
+    private EduMessageStrategyFactory eduMessageStrategyFactory;
 
     private String appReceiptPayload = "lt;AppReceipt type=\"OK\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.arkivverket.no/Noark/Exchange/types\"&gt;\n" +
             "    &lt;message code=\"ID\" xmlns=\"\"&gt;\n" +
@@ -106,13 +110,16 @@ public class PutMessageStrategyFactoryTest {
 
     @Before
     public void createContxt() {
-        messageSender = Mockito.mock(MessageSender.class);
-        putMessageStrategyFactory = putMessageStrategyFactory.newInstance(messageSender);
+        messageSender = mock(MessageSender.class);
+        eduMessageStrategyFactory = EduMessageStrategyFactory.newInstance(messageSender);
     }
 
     @Test
     public void testShouldCreateBestEDUStrategy() {
-        assertEquals(BestEDUPutMessageStrategy.class, putMessageStrategyFactory.create(p360Message).getClass());
+        final PutMessageRequestWrapper requestWrapper = mock(PutMessageRequestWrapper.class);
+        when(requestWrapper.getPayload()).thenReturn(p360Message);
+
+        assertEquals(BestEDUPutMessageStrategy.class, eduMessageStrategyFactory.create(p360Message).getClass());
     }
 
     @Test
@@ -120,22 +127,22 @@ public class PutMessageStrategyFactoryTest {
         DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         Document doc = builder.newDocument();
         Element element = doc.createElementNS("http://www.arkivverket.no/Noark4-1-WS-WD/types", "Melding");
-        assertEquals(BestEDUPutMessageStrategy.class, putMessageStrategyFactory.create(element).getClass());
+        assertEquals(BestEDUPutMessageStrategy.class, eduMessageStrategyFactory.create(element).getClass());
     }
 
     @Test
     public void testShouldCreateAppReceiptStrategy() {
-        assertTrue(putMessageStrategyFactory.newInstance(messageSender).create(appReceiptPayload) instanceof AppReceiptPutMessageStrategy);
-        assertEquals(AppReceiptPutMessageStrategy.class, putMessageStrategyFactory.create(appReceiptPayload).getClass());
+        assertTrue(eduMessageStrategyFactory.newInstance(messageSender).create(appReceiptPayload) instanceof AppReceiptPutMessageStrategy);
+        assertEquals(AppReceiptPutMessageStrategy.class, eduMessageStrategyFactory.create(appReceiptPayload).getClass());
     }
 
     @Test(expected = MeldingsUtvekslingRuntimeException.class)
     public void testShoudThrowExceptionOnUnknownStringPayload() {
-        putMessageStrategyFactory.create("dette burde ikke fungere");
+        eduMessageStrategyFactory.create("dette burde ikke fungere");
     }
 
     @Test(expected = MeldingsUtvekslingRuntimeException.class)
     public void testShouldFailOnUnknownPayloadClass() {
-        putMessageStrategyFactory.create(1337);
+        eduMessageStrategyFactory.create(1337);
     }
 }

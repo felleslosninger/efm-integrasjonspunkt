@@ -24,7 +24,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**
- * Configuration class used for integration tests.
+ * CorrespondenceAgencyConfiguration class used for integration tests.
  *
  * Contains mock overrides for all integration tests running with the profile "test". The test profile
  * also has property files located in src/test/resources/properties.

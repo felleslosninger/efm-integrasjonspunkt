@@ -14,7 +14,6 @@ import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAtta
 import no.difi.meldingsutveksling.noarkexchange.PayloadException;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import org.joda.time.DateTime;
-import org.springframework.core.env.Environment;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -24,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.queryPayload;
-import static org.apache.commons.lang.StringEscapeUtils.unescapeHtml;
 
 /**
  * Class used to create an InsertCorrespondenceV2 object based on a PutMessageRequest(Wrapper).
@@ -48,7 +46,7 @@ public class CorrespondenceAgencyMessageFactory {
         serviceEditionMapping.put(10, "Administrasjon");
     }
 
-    public static InsertCorrespondenceV2 create(Environment env, PutMessageRequestWrapper msg) throws PayloadException {
+    public static InsertCorrespondenceV2 create(CorrespondenceAgencyConfiguration postConfig, PutMessageRequestWrapper msg) throws PayloadException {
         String xpathJpInnhold= "Melding/journpost/jpInnhold";
         String xpathJpOffinnhold= "Melding/journpost/jpOffinnhold";
         String xpathJpFilnavn= "Melding/journpost/dokument/veFilnavn";
@@ -56,16 +54,16 @@ public class CorrespondenceAgencyMessageFactory {
 
         ObjectFactory objectFactory = new ObjectFactory();
 
-        String systemUserCode = env.getProperty("altinn.user_code"); // "AAS_TEST" TODO: Avklares
+        String systemUserCode = postConfig.getSystemUserCode(); // "AAS_TEST" TODO: Avklares
         MyInsertCorrespondenceV2 correspondence = new MyInsertCorrespondenceV2();
 
         // Service code, default 4255
-        String serviceCodeProp= env.getProperty("altinn.external_service_code");
+        String serviceCodeProp= postConfig.getExternalServiceCode();
         String serviceCode= !Strings.isNullOrEmpty(serviceCodeProp) ? serviceCodeProp : "4255";
         correspondence.setServiceCode(objectFactory.createMyInsertCorrespondenceV2ServiceCode(serviceCode));
 
         // Service edition, default 10
-        String serviceEditionProp = env.getProperty("altinn.external_service_edition_code");
+        String serviceEditionProp = postConfig.getExternalServiceEditionCode();
         String serviceEdition = !Strings.isNullOrEmpty(serviceEditionProp) ? serviceEditionProp : "10";
         correspondence.setServiceEdition(objectFactory.createMyInsertCorrespondenceV2ServiceEdition(serviceEdition));
 
@@ -176,5 +174,6 @@ public class CorrespondenceAgencyMessageFactory {
             throw new RuntimeException("Could not convert DateTime to " + XMLGregorianCalendar.class, e);
         }
     }
+
 
 }

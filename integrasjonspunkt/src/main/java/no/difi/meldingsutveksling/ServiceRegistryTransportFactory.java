@@ -4,7 +4,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import no.difi.meldingsutveksling.transport.PostVirksomhetTransport;
+import no.difi.meldingsutveksling.transport.PostVirksomhet;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import no.difi.meldingsutveksling.transport.altinn.AltinnTransport;
@@ -29,7 +29,8 @@ public class ServiceRegistryTransportFactory implements TransportFactory {
 
         Optional<Transport> transport = serviceRecord.filter(isServiceIdentifier("edu")).map(s -> new AltinnTransport(s.getEndPointURL()));
         if(!transport.isPresent()) {
-            transport = serviceRecord.filter(isServiceIdentifier("post")).map(s -> new PostVirksomhetTransport(s.getEndPointURL()));
+            // TODO: refactor this: using Post til virksomhet should happen at a higher level
+            //transport = serviceRecord.filter(isServiceIdentifier("post")).map(s -> new PostVirksomhet(s.getEndPointURL()));
         }
         return transport.orElseThrow(() -> new RuntimeException("Failed to create transport"));
     }
