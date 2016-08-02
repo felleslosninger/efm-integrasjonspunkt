@@ -12,12 +12,14 @@ import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategy;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.Message;
 
 import javax.jws.WebParam;
 import javax.jws.WebService;
@@ -63,6 +65,9 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
     @Autowired
     private StrategyFactory strategyFactory;
+
+    @Autowired
+    ServiceRegistryLookup serviceRegistryLookup;
 
     @Override
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
@@ -163,12 +168,15 @@ public class IntegrasjonspunktImpl implements SOAPport {
             throw new MeldingsUtvekslingRuntimeException();
         }
 
+        final ServiceRecord primaryServiceRecord = serviceRegistryLookup.getPrimaryServiceRecord(message.getRecieverPartyNumber());
+
+        final MessageStrategyFactory strategyFactory = this.strategyFactory.getFactory(primaryServiceRecord);
+
         boolean result;
         if(hasAdresseregisterCertificate(message.getRecieverPartyNumber())) {
             Audit.info("Receiver validated", markerFrom(message));
-            EduMessageStrategyFactory eduMessageStrategyFactory = EduMessageStrategyFactory.newInstance(messageSender);
 
-            PutMessageStrategy strategy = eduMessageStrategyFactory.create(request.getPayload());
+            PutMessageStrategy strategy = strategyFactory.create(request.getPayload());
             PutMessageResponseType response = strategy.putMessage(request);
             result = validateResult(response);
         } else {

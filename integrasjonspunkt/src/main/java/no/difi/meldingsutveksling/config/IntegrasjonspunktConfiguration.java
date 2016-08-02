@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.config;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRequiredPropertyException;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClientSettings;
+import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -27,6 +28,15 @@ import static org.apache.commons.lang.StringUtils.isBlank;
         @PropertySource("classpath:properties/integrasjonspunkt-${spring.profiles.active}.properties")
 })
 public class IntegrasjonspunktConfiguration {
+
+    public CorrespondenceAgencyConfiguration getPostTilVirksomhetConfig() {
+        return new CorrespondenceAgencyConfiguration.Builder()
+                .withExternalServiceCode(getPostVirksomheterExternalServiceCode())
+                .withExternalServiceEditionCode(getPostVirksomheterExternalServiceEditionCode())
+                .withPassword(getPostVirksomheterPassword())
+                .withSystemUserCode(getPostVirksomheterUsername())
+                .withLanguageCode("1044").build();
+    }
 
     @Configuration
     @Profile({"dev", "itest", "systest", "staging", "production"})
@@ -134,23 +144,23 @@ public class IntegrasjonspunktConfiguration {
         return environment.getProperty(KEY_ALTINN_SERVICE_CODE);
     }
 
-    public String getAltinnServiceEditionCode() {
+    private String getAltinnServiceEditionCode() {
         return environment.getProperty(KEY_ALTINN_SERVICE_EDITION_CODE);
     }
 
-    public String getPostVirksomheterUsername() {
+    private String getPostVirksomheterUsername() {
         return environment.getProperty(POST_VIRKSOMHETER_USERNAME);
     }
 
-    public String getPostVirksomheterPassword() {
+    private String getPostVirksomheterPassword() {
         return environment.getProperty(POST_VIRKSOMHETER_PASSWORD);
     }
 
-    public String getPostVirksomheterExternalServiceCode() {
+    private String getPostVirksomheterExternalServiceCode() {
         return environment.getProperty(POST_VIRKSOMHETER_EXTERNAL_SERVICE_CODE);
     }
 
-    public String getPostVirksomheterExternalServiceEditionCode() {
+    private String getPostVirksomheterExternalServiceEditionCode() {
         return environment.getProperty(POST_VIRKSOMHETER_EXTERNAL_SERVICE_EDITION_CODE);
     }
 

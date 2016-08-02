@@ -88,25 +88,6 @@ public class MessageSender {
         return certificate;
     }
 
-    // TODO: refactor this: move it into PostMessageStrategy
-    public PutMessageResponseType sendMessagePost(PutMessageRequestType messageRequest) {
-        CorrespondenceAgencyMessageFactory messageFactory;
-        CorrespondenceAgencyConfiguration postConfig = new CorrespondenceAgencyConfiguration.Builder()
-                .withExternalServiceCode(configuration.getPostVirksomheterExternalServiceCode())
-                .withExternalServiceEditionCode(configuration.getPostVirksomheterExternalServiceEditionCode())
-                .withLanguageCode("1044")
-                .withSystemUserCode(configuration.getPostVirksomheterUsername())
-                .build();
-        final PutMessageRequestWrapper msg = new PutMessageRequestWrapper(messageRequest);
-        try {
-            CorrespondenceAgencyMessageFactory.create(postConfig, msg);
-        } catch (PayloadException e) {
-            Audit.error("Could not send \"Post til virksomhet\"", markerFrom(msg));
-            return createErrorResponse(new MessageException(e, StatusMessage.POST_VIRKSOMHET_REQUEST_MISSING_VALUES));
-        }
-        return createOkResponse();
-    }
-
     public PutMessageResponseType sendMessage(PutMessageRequestType messageRequest) {
         PutMessageRequestWrapper message = new PutMessageRequestWrapper(messageRequest);
 

@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.ptv;
 public class CorrespondenceAgencyConfiguration {
     private String externalServiceEditionCode;
     private String externalServiceCode;
+    private String password;
     private String systemUserCode;
     private String languageCode;
 
@@ -19,6 +20,10 @@ public class CorrespondenceAgencyConfiguration {
 
     public String getSystemUserCode() {
         return systemUserCode;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public String getLanguageCode() {
@@ -43,6 +48,11 @@ public class CorrespondenceAgencyConfiguration {
 
         public Builder withSystemUserCode(String systemUserCode) {
             correspondenceAgencyConfiguration.systemUserCode = systemUserCode;
+            return this;
+        }
+
+        public Builder withPassword(String password) {
+            correspondenceAgencyConfiguration.password = password;
             return this;
         }
 

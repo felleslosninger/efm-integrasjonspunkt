@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import org.apache.commons.lang.NotImplementedException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -46,5 +47,10 @@ public class StrategyFactoryTest {
     @Test(expected = IllegalArgumentException.class)
     public void serviceRecordWithoutServiceIdentifierThrowsError() {
         strategyFactory.getFactory(new ServiceRecord(null, "1235465", "certificate", "http://localhost"));
+    }
+
+    @Test(expected = NotImplementedException.class)
+    public void unknownServiceRecordThrowsException() {
+        strategyFactory.getFactory(new ServiceRecord("unknown", "123456", "certificate", "http://localhost"));
     }
 }
