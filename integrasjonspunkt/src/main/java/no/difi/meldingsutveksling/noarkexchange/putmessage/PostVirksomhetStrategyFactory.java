@@ -1,25 +1,22 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
-import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
-import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
+import org.springframework.core.env.Environment;
 
 public class PostVirksomhetStrategyFactory implements MessageStrategyFactory {
 
-    private final IntegrasjonspunktConfiguration configuration;
+    private final CorrespondenceAgencyConfiguration configuration;
 
-    public PostVirksomhetStrategyFactory(IntegrasjonspunktConfiguration configuration) {
+    public PostVirksomhetStrategyFactory(CorrespondenceAgencyConfiguration configuration) {
         this.configuration = configuration;
     }
 
-    public static PostVirksomhetStrategyFactory newInstance(MessageSender messageSender) {
-        return new PostVirksomhetStrategyFactory(messageSender.getConfiguration());
+    public static PostVirksomhetStrategyFactory newInstance(Environment environment) {
+        return new PostVirksomhetStrategyFactory(CorrespondenceAgencyConfiguration.configurationFrom(environment));
     }
 
     @Override
     public PutMessageStrategy create(Object payload) {
-        CorrespondenceAgencyConfiguration correspondenceAgencyConfig = configuration.getPostTilVirksomhetConfig();
-
-        return new PostVirksomhetPutMessageStrategy(correspondenceAgencyConfig);
+        return new PostVirksomhetPutMessageStrategy(configuration);
     }
 }

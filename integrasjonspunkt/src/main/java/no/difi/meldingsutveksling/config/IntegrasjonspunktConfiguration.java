@@ -29,15 +29,6 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 })
 public class IntegrasjonspunktConfiguration {
 
-    public CorrespondenceAgencyConfiguration getPostTilVirksomhetConfig() {
-        return new CorrespondenceAgencyConfiguration.Builder()
-                .withExternalServiceCode(getPostVirksomheterExternalServiceCode())
-                .withExternalServiceEditionCode(getPostVirksomheterExternalServiceEditionCode())
-                .withPassword(getPostVirksomheterPassword())
-                .withSystemUserCode(getPostVirksomheterUsername())
-                .withLanguageCode("1044").build();
-    }
-
     @Configuration
     @Profile({"dev", "itest", "systest", "staging", "production"})
     @PropertySource("file:integrasjonspunkt-local.properties")
@@ -61,8 +52,8 @@ public class IntegrasjonspunktConfiguration {
      */
     public static final String POST_VIRKSOMHETER_USERNAME = "post.virksomheter.username";
     public static final String POST_VIRKSOMHETER_PASSWORD = "post.virksomheter.password";
-    public static final String POST_VIRKSOMHETER_EXTERNAL_SERVICE_CODE = "post.virksomheter.external_service_code";
-    public static final String POST_VIRKSOMHETER_EXTERNAL_SERVICE_EDITION_CODE = "post.virksomheter.external_service_edition_code";
+    public static final String POST_VIRKSOMHETER_EXTERNAL_SERVICE_CODE = "altinn.ptv.external_service_code";
+    public static final String POST_VIRKSOMHETER_EXTERNAL_SERVICE_EDITION_CODE = "altinn.ptv.external_service_edition_code";
 
     protected static final String KEY_NOARKSYSTEM_ENDPOINT = "noarksystem.endpointURL";
     private static final String KEY_NOARKSYSTEM_USERNAME = "noarksystem.username";

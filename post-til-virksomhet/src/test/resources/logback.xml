@@ -9,8 +9,7 @@
         </encoder>
     </appender>
 
-    <if condition='property("spring.profiles.active").contains("dev")'>
-        <then>
+
             <logger name="org.springframework.ws.client.MessageTracing">
                 <level value="TRACE"/>
             </logger>
@@ -20,8 +19,6 @@
             <root level="TRACE">
                 <appender-ref ref="consoleAppender"/>
             </root>
-        </then>
-    </if>
 
 
 </configuration>

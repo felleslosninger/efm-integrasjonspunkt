@@ -54,7 +54,7 @@ public class CorrespondenceAgencyMessageFactory {
 
         ObjectFactory objectFactory = new ObjectFactory();
 
-        String systemUserCode = postConfig.getSystemUserCode(); // "AAS_TEST" TODO: Avklares
+
         MyInsertCorrespondenceV2 correspondence = new MyInsertCorrespondenceV2();
 
         // Service code, default 4255
@@ -141,7 +141,7 @@ public class CorrespondenceAgencyMessageFactory {
         no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory correspondenceObjectFactory = new no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory();
         final InsertCorrespondenceV2 myInsertCorrespondenceV2 = correspondenceObjectFactory.createInsertCorrespondenceV2();
         myInsertCorrespondenceV2.setCorrespondence(correspondence);
-        myInsertCorrespondenceV2.setSystemUserCode(systemUserCode);
+        myInsertCorrespondenceV2.setSystemUserCode(postConfig.getSystemUserCode()); // "AAS_TEST" TODO: Avklares
         // Reference set by the message sender
         myInsertCorrespondenceV2.setExternalShipmentReference(msg.getEnvelope().getConversationId());
 
