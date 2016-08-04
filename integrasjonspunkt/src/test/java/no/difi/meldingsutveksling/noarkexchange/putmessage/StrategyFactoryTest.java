@@ -5,9 +5,12 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.lang.NotImplementedException;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.core.env.Environment;
 
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class StrategyFactoryTest {
 
@@ -15,7 +18,12 @@ public class StrategyFactoryTest {
 
     @Before
     public void setup() {
-        strategyFactory = new StrategyFactory(new MessageSender());
+        final MessageSender messageSender = mock(MessageSender.class);
+        final Environment environment = mock(Environment.class);
+        when(messageSender.getEnvironment()).thenReturn(environment);
+
+
+        strategyFactory = new StrategyFactory(messageSender);
     }
 
     @Test
@@ -53,4 +61,5 @@ public class StrategyFactoryTest {
     public void unknownServiceRecordThrowsException() {
         strategyFactory.getFactory(new ServiceRecord("unknown", "123456", "certificate", "http://localhost"));
     }
+
 }
