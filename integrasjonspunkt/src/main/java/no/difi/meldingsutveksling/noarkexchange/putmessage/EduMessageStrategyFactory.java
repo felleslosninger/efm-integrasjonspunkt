@@ -4,6 +4,7 @@ import com.sun.org.apache.xerces.internal.dom.ElementNSImpl;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
+import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 
 import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.isAppReceipt;
 
@@ -14,19 +15,19 @@ import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.isAppReceipt;
  * @author Glenn Bech
  */
 
-public final class PutMessageStrategyFactory {
+public final class EduMessageStrategyFactory implements MessageStrategyFactory {
 
 
     public static final String MESSAGE_INDICATOR = "Melding";
+    private final MessageSender messageSender;
 
-    private MessageSender messageSender;
 
-    private PutMessageStrategyFactory(MessageSender messageSender) {
+    public EduMessageStrategyFactory(MessageSender messageSender) {
         this.messageSender = messageSender;
     }
 
-    public static PutMessageStrategyFactory newInstance(MessageSender messageSender) {
-        return new PutMessageStrategyFactory(messageSender);
+    public static EduMessageStrategyFactory newInstance(MessageSender messageSender) {
+        return new EduMessageStrategyFactory(messageSender);
     }
 
     public PutMessageStrategy create(Object payload) {

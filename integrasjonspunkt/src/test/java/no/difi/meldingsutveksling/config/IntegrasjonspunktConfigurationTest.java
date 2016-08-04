@@ -72,6 +72,8 @@ public class IntegrasjonspunktConfigurationTest {
         configuration = new IntegrasjonspunktConfiguration(environmentMock);
     }
 
+
+
     @Test
     public void shouldNotFailInitializationWhenAllRequiredParametersIsSet() throws Exception{
         //Default values on properties is set in @Before
