@@ -1,4 +1,4 @@
-FROM 7-jre-alpine
+FROM java:7-jre-alpine
 MAINTAINER DIFI <espen.korra@difi.no>
 
 LABEL package="no.difi"
