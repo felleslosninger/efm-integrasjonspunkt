@@ -31,25 +31,29 @@ public class SoapFaultInterceptor implements ClientInterceptor {
      * @param logMarkers the log markers to be used when logging
      * @return new instance
      */
-    public static SoapFaultInterceptor withLogMarkers(LogstashMarker logMarkers) {
+    static SoapFaultInterceptor withLogMarkers(LogstashMarker logMarkers) {
         return new SoapFaultInterceptor(logMarkers);
     }
 
+    @SuppressWarnings("squid:RedundantThrowsDeclarationCheck")
     @Override
     public boolean handleRequest(MessageContext messageContext) throws WebServiceClientException {
         return true;
     }
 
+    @SuppressWarnings("squid:RedundantThrowsDeclarationCheck")
     @Override
     public boolean handleResponse(MessageContext messageContext) throws WebServiceClientException {
         return true;
     }
 
+    @SuppressWarnings("squid:RedundantThrowsDeclarationCheck")
     @Override
     public boolean handleFault(MessageContext messageContext) throws WebServiceClientException {
         throw new SoapFaultException("Failed to send message to correspondence agency");
     }
 
+    @SuppressWarnings("squid:MaximumInheritanceDepth")
     class SoapFaultException extends WebServiceClientException {
         public SoapFaultException(String msg) {
             super(msg);
@@ -71,6 +75,7 @@ public class SoapFaultInterceptor implements ClientInterceptor {
         return "";
     }
 
+    @SuppressWarnings("squid:RedundantThrowsDeclarationCheck")
     @Override
     public void afterCompletion(MessageContext messageContext, Exception ex) throws WebServiceClientException {
         if (Optional.ofNullable(ex).filter(e -> e instanceof SoapFaultException).isPresent()) {
