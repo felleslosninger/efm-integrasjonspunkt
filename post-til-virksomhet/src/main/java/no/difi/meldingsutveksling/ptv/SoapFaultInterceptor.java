@@ -13,6 +13,7 @@ import org.springframework.ws.context.MessageContext;
 import javax.xml.transform.*;
 import javax.xml.transform.stream.StreamResult;
 import java.io.StringWriter;
+import java.util.Optional;
 
 /**
  * Used to log soap faults from Spring web service template
@@ -72,7 +73,9 @@ public class SoapFaultInterceptor implements ClientInterceptor {
 
     @Override
     public void afterCompletion(MessageContext messageContext, Exception ex) throws WebServiceClientException {
-        final WebServiceMessage response = messageContext.getResponse();
-        Audit.error("Failed to send message to correspondence agency", logMarkers.and(Markers.append("soap_fault", asString(response.getPayloadSource()))), ex);
+        if (Optional.ofNullable(ex).filter(e -> e instanceof SoapFaultException).isPresent()) {
+            final WebServiceMessage response = messageContext.getResponse();
+            Audit.error("Failed to send message to correspondence agency", logMarkers.and(Markers.append("soap_fault", asString(response.getPayloadSource()))), ex);
+        }
     }
 }
