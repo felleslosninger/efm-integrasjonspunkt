@@ -9,10 +9,10 @@ import org.slf4j.Marker;
  * Class used to log audit messages
  */
 public class Audit {
+    public static final Logger logger = LoggerFactory.getLogger("AUDIT");
+
     private Audit() {
     }
-
-    public static final Logger logger = LoggerFactory.getLogger("AUDIT");
 
     public static void info(String text, LogstashMarker marker) {
         logger.info(marker, text);
@@ -22,8 +22,12 @@ public class Audit {
         logger.error(marker, text);
     }
 
+    public static void error(String text, Marker marker, Throwable throwable) {
+        logger.error(marker, text, throwable);
+    }
+
     public static void error(String text, LogstashMarker marker, Object... args) {
-        logger.error(marker, text);
+        logger.error(marker, text, args);
     }
 
     public static void info(String text) {

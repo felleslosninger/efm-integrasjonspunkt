@@ -1,10 +1,8 @@
 package no.difi.meldingsutveksling;
 
-import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import no.difi.meldingsutveksling.transport.PostVirksomhet;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import no.difi.meldingsutveksling.transport.altinn.AltinnTransport;
@@ -12,11 +10,17 @@ import no.difi.meldingsutveksling.transport.altinn.AltinnTransport;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+/**
+ * Used to create transport based on service registry lookup.
+ */
 public class ServiceRegistryTransportFactory implements TransportFactory {
+    private ServiceRegistryLookup serviceRegistryLookup;
 
-    ServiceRegistryLookup serviceRegistryLookup;
-
-    public ServiceRegistryTransportFactory(ServiceRegistryLookup serviceRegistryLookup, IntegrasjonspunktConfiguration configuration) {
+    /**
+     * Creates instance of factory with needed dependency to determine the transport to create
+     * @param serviceRegistryLookup
+     */
+    public ServiceRegistryTransportFactory(ServiceRegistryLookup serviceRegistryLookup) {
         this.serviceRegistryLookup = serviceRegistryLookup;
     }
 
@@ -29,8 +33,8 @@ public class ServiceRegistryTransportFactory implements TransportFactory {
 
         Optional<Transport> transport = serviceRecord.filter(isServiceIdentifier("edu")).map(s -> new AltinnTransport(s.getEndPointURL()));
         if(!transport.isPresent()) {
-            // TODO: refactor this: using Post til virksomhet should happen at a higher level
-            //transport = serviceRecord.filter(isServiceIdentifier("post")).map(s -> new PostVirksomhet(s.getEndPointURL()));
+            // example
+            //transport = serviceRecord.filter(isServiceIdentifier("some_identifier")).map(s -> new SomeOtherTransport(s.getEndPointURL()));
         }
         return transport.orElseThrow(() -> new RuntimeException("Failed to create transport"));
     }

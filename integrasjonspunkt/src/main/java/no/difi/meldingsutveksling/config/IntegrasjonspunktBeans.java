@@ -34,7 +34,7 @@ public class IntegrasjonspunktBeans {
 
     @Bean
     public TransportFactory serviceRegistryTransportFactory(ServiceRegistryLookup serviceRegistryLookup, IntegrasjonspunktConfiguration integrasjonspunktConfiguration) {
-        return new ServiceRegistryTransportFactory(serviceRegistryLookup, integrasjonspunktConfiguration);
+        return new ServiceRegistryTransportFactory(serviceRegistryLookup);
     }
 
     @Bean

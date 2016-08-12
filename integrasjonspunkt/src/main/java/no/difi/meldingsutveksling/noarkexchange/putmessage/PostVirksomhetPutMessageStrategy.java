@@ -9,13 +9,14 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.ptv.CorrespondenceRequest;
-import org.apache.commons.lang.NotImplementedException;
+import org.slf4j.Logger;
 
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
 public class PostVirksomhetPutMessageStrategy implements PutMessageStrategy {
 
     private final CorrespondenceAgencyConfiguration config;
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(PostVirksomhetPutMessageStrategy.class);
 
     public PostVirksomhetPutMessageStrategy(CorrespondenceAgencyConfiguration config) {
         this.config = config;
@@ -26,13 +27,13 @@ public class PostVirksomhetPutMessageStrategy implements PutMessageStrategy {
         final PutMessageRequestWrapper putMessageWrapper = new PutMessageRequestWrapper(requestType);
         try {
             final InsertCorrespondenceV2 message = CorrespondenceAgencyMessageFactory.create(config, putMessageWrapper);
-            CorrespondenceAgencyClient client = new CorrespondenceAgencyClient();
+            CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(markerFrom(putMessageWrapper));
             final CorrespondenceRequest request = new CorrespondenceRequest.Builder().withUsername(config.getSystemUserCode()).withPassword(config.getPassword()).withPayload(message).build();
 
             client.send(request);
             return PutMessageResponseFactory.createOkResponse();
         } catch (PayloadException e) {
-            Audit.error("Unable to create message for Post til virksomhet", markerFrom(putMessageWrapper));
+            Audit.error("Unable to create message for Post til virksomhet", markerFrom(putMessageWrapper), e);
             return PutMessageResponseFactory.createErrorResponse(new MessageException(StatusMessage.POST_VIRKSOMHET_REQUEST_MISSING_VALUES));
         }
     }

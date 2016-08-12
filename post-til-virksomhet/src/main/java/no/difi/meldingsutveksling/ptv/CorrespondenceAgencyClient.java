@@ -1,14 +1,12 @@
 package no.difi.meldingsutveksling.ptv;
 
-import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
+import net.logstash.logback.marker.LogstashMarker;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.HTTP;
-import org.apache.http.protocol.HttpContext;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
@@ -19,12 +17,29 @@ import org.springframework.ws.soap.axiom.AxiomSoapMessageFactory;
 import org.springframework.ws.soap.security.wss4j.Wss4jSecurityInterceptor;
 import org.springframework.ws.transport.http.HttpComponentsMessageSender;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+/**
+ * Used to send messages to Altinn InsertCorrespondence. InsertCorrespondence is used to send information to private companies.
+ */
 public class CorrespondenceAgencyClient {
 
+    private final LogstashMarker logstashMarker;
+
+    /**
+     * Creates client to use Altinn Correspondence Agency
+     * @param logstashMarker used when logging to keep track of message flow
+     */
+    public CorrespondenceAgencyClient(LogstashMarker logstashMarker) {
+        this.logstashMarker = logstashMarker;
+    }
+
+    /**
+     * Sends correspondence to Altinn Insert Correspondence
+     * @param request containing the message along with sender/receiver
+     * @return response if successful
+     */
     public Object send(CorrespondenceRequest request) {
         AxiomSoapMessageFactory newSoapMessageFactory = new AxiomSoapMessageFactory();
         newSoapMessageFactory.setSoapVersion(SoapVersion.SOAP_12);
@@ -34,7 +49,9 @@ public class CorrespondenceAgencyClient {
         marshaller.setContextPath(contextPath);
         template.setMarshaller(marshaller);
         template.setUnmarshaller(marshaller);
-        final ClientInterceptor[] interceptors = createSecurityInterceptors(request.getUsername(), request.getPassword());
+        ClientInterceptor[] interceptors = new ClientInterceptor[2];
+        interceptors[0] = createSecurityInterceptors(request.getUsername(), request.getPassword());
+        interceptors[1] = SoapFaultInterceptor.withLogMarkers(logstashMarker);
         template.setInterceptors(interceptors);
 
         final String uri = "https://tt02.altinn.basefarm.net/ServiceEngineExternal/CorrespondenceAgencyExternal.svc";
@@ -50,12 +67,10 @@ public class CorrespondenceAgencyClient {
     }
 
     private HttpComponentsMessageSender createMessageSender() {
-        System.out.println("Created message sender");
         final HttpComponentsMessageSender messageSender = new HttpComponentsMessageSender();
         PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
         cm.setMaxTotal(18);
         cm.setDefaultMaxPerRoute(6);
-
         RequestConfig requestConfig = RequestConfig.custom()
                 .setSocketTimeout(30000)
                 .setConnectTimeout(30000)
@@ -66,12 +81,9 @@ public class CorrespondenceAgencyClient {
                 .build();
 
         HttpClient client = HttpClients.custom()
-                .addInterceptorFirst(new HttpRequestInterceptor() {
-                    @Override
-                    public void process(HttpRequest httpRequest, HttpContext httpContext) throws HttpException, IOException {
-                        if(httpRequest.containsHeader(HTTP.CONTENT_LEN)) {
-                            httpRequest.removeHeaders(HTTP.CONTENT_LEN);
-                        }
+                .addInterceptorFirst((HttpRequestInterceptor) (httpRequest, httpContext) -> {
+                    if(httpRequest.containsHeader(HTTP.CONTENT_LEN)) {
+                        httpRequest.removeHeaders(HTTP.CONTENT_LEN);
                     }
                 })
                 .setConnectionManager(cm)
@@ -82,9 +94,8 @@ public class CorrespondenceAgencyClient {
         return messageSender;
     }
 
-    private ClientInterceptor[] createSecurityInterceptors(String username, String password) {
+    private ClientInterceptor createSecurityInterceptors(String username, String password) {
 
-        final ClientInterceptor[] clientInterceptors = new ClientInterceptor[1];
         final Wss4jSecurityInterceptor securityInterceptor = new Wss4jSecurityInterceptor();
         securityInterceptor.setSecurementActions("UsernameToken");
         securityInterceptor.setSecurementUsername(username);
@@ -92,8 +103,7 @@ public class CorrespondenceAgencyClient {
         securityInterceptor.setSecurementPasswordType("PasswordText");
         securityInterceptor.setSecurementUsernameTokenElements("Nonce Created");
 
-        clientInterceptors[0] = securityInterceptor;
-        return clientInterceptors;
+        return securityInterceptor;
     }
 
 

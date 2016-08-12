@@ -41,7 +41,6 @@
         <module>kvittering</module>
         <module>transport-file</module>
         <module>transport-altinn</module>
-        <module>transport-virksomhet</module>
         <module>altinn-client</module>
         <module>audit</module>
         <module>test-tools</module>

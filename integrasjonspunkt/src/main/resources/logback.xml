@@ -92,6 +92,11 @@
     </logger>
 
 
+    <!-- Changed log level to avoid log spam until we have fixed Spring boot actuator setup -->
+    <logger name="de.codecentric.boot.admin.services.ApplicationRegistrator">
+        <level value="ERROR"/>
+    </logger>
+
     <root level="INFO">
         <appender-ref ref="consoleAppender"/>
         <appender-ref ref="FILE"/>
