@@ -31,7 +31,7 @@ public class CorrespondenceAgencyClientTest {
             System.exit(1);
         }
         final InsertCorrespondenceV2 insertCorrespondenceV2 = createInsertCorrespondenceV2();
-        final CorrespondenceAgencyClient correspondenceAgencyClient = new CorrespondenceAgencyClient();
+        final CorrespondenceAgencyClient correspondenceAgencyClient = new CorrespondenceAgencyClient(null);
         final CorrespondenceRequest request = new CorrespondenceRequest.Builder().withUsername(args[0]).withPassword(args[1]).withPayload(insertCorrespondenceV2).build();
         correspondenceAgencyClient.send(request);
     }

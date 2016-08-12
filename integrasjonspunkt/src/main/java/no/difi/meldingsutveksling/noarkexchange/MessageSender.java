@@ -11,8 +11,6 @@ import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
-import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
@@ -20,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
 
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -32,7 +29,7 @@ import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory
 
 public class MessageSender {
 
-    Logger log = LoggerFactory.getLogger(MessageSender.class);
+    private static final Logger log = LoggerFactory.getLogger(MessageSender.class);
 
     @Autowired
     private TransportFactory transportFactory;
@@ -142,8 +139,6 @@ public class MessageSender {
         final Mottaker mottaker;
         avsender = createAvsender(message);
         mottaker = createMottaker(message.getRecieverPartyNumber());
-
-        PutMessageRequestWrapper.MessageType type = message.getMessageType();
 
         JournalpostId id;
         try {
