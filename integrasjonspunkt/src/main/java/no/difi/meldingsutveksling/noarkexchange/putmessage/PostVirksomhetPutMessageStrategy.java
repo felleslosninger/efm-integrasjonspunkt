@@ -9,14 +9,12 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.ptv.CorrespondenceRequest;
-import org.slf4j.Logger;
 
-import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
+import static no.difi.meldingsutveksling.noarkexchange.PutMessageMarker.markerFrom;
 
 public class PostVirksomhetPutMessageStrategy implements PutMessageStrategy {
 
     private final CorrespondenceAgencyConfiguration config;
-    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(PostVirksomhetPutMessageStrategy.class);
 
     public PostVirksomhetPutMessageStrategy(CorrespondenceAgencyConfiguration config) {
         this.config = config;

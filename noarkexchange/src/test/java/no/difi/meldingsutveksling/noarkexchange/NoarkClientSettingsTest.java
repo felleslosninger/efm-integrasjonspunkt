@@ -1,10 +1,13 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import net.logstash.logback.marker.LogstashMarker;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
 public class NoarkClientSettingsTest {
+
+    public static final LogstashMarker NO_MARKER = null;
 
     @Test
     public void userNamePasswordAndDomainCreatesNtlmAuthenticationFactory() throws Exception {

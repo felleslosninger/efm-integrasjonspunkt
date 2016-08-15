@@ -15,7 +15,6 @@ import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.logging.MessageMarkerFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
@@ -35,8 +34,8 @@ import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.UUID;
 
-import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.payloadSizeMarker;
+import static no.difi.meldingsutveksling.noarkexchange.PutMessageMarker.markerFrom;
 
 /**
  * Factory class for StandardBusinessDocument instances
@@ -91,7 +90,7 @@ public class StandardBusinessDocumentFactory {
         try {
             journalpostId = JournalpostId.fromPutMessage(new PutMessageRequestWrapper(shipment));
         } catch (PayloadException e) {
-            Audit.error("Unknown payload string", MessageMarkerFactory.markerFrom(new PutMessageRequestWrapper(shipment)));
+            Audit.error("Unknown payload string", markerFrom(new PutMessageRequestWrapper(shipment)));
             log.error(markerFrom(new PutMessageRequestWrapper(shipment)), e.getMessage(), e);
             throw new IllegalArgumentException(e.getMessage());
         }

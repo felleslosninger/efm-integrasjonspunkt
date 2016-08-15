@@ -29,11 +29,11 @@ public class NoarkClientFactory {
         WebServiceTemplateFactory templateFactory = settings.createTemplateFactory();
 
         if (E_PHORTE.equalsIgnoreCase(noarkType)) {
-            return new EphorteClient(settings, templateFactory);
+            return new EphorteClient(settings);
         } else if (P360.equalsIgnoreCase(noarkType)) {
-            return new P360Client(settings, templateFactory);
+            return new P360Client(settings);
         } else if (WEBSAK.equalsIgnoreCase(noarkType)) {
-            return new WebsakClient(settings, templateFactory);
+            return new WebsakClient(settings);
         } else {
             throw new UnknownArchiveSystemException(noarkType);
         }

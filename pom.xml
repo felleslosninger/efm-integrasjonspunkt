@@ -46,6 +46,7 @@
         <module>test-tools</module>
         <module>post-til-virksomhet</module>
         <module>service-registry-client</module>
+        <module>webservice-tools</module>
     </modules>
 
     <dependencyManagement>

@@ -14,7 +14,7 @@ import javax.xml.bind.Marshaller;
 import java.io.StringWriter;
 
 import static java.util.Arrays.asList;
-import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
+import static no.difi.meldingsutveksling.noarkexchange.PutMessageMarker.markerFrom;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createOkResponse;
 
 /**
@@ -50,7 +50,7 @@ class AppReceiptPutMessageStrategy implements PutMessageStrategy {
                 wrapper.swapSenderAndReceiver();
                 messageSender.sendMessage(wrapper.getRequest());
             }
-            if (receipt.getType().equals("OK")) {
+            if ("OK".equals(receipt.getType())) {
                 Audit.info("AppReceipt sent to "+ wrapper.getRecieverPartyNumber(), markerFrom(wrapper));
             } else if (asList("ERROR", "WARNING").contains(receipt.getType())) {
                 final MessageException me = new MessageException(StatusMessage.APP_RECEIPT_CONTAINS_ERROR);
@@ -59,7 +59,6 @@ class AppReceiptPutMessageStrategy implements PutMessageStrategy {
             return createOkResponse();
         } catch (JAXBException e) {
             try {
-                JAXBContext jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
                 final Marshaller marshaller = jaxbContext.createMarshaller();
                 StringWriter requestAsXml = new StringWriter(4096);
                 marshaller.marshal(new ObjectFactory().createPutMessageRequest(request), requestAsXml);
@@ -71,4 +70,6 @@ class AppReceiptPutMessageStrategy implements PutMessageStrategy {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
     }
+
+
 }

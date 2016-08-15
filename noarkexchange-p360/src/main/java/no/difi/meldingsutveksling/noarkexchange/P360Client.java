@@ -14,15 +14,17 @@ import javax.xml.bind.JAXBException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static no.difi.meldingsutveksling.logging.MarkerFactory.receiverMarker;
+
 public class P360Client implements NoarkClient {
 
-    public static final String SOAP_ACTION = "http://www.arkivverket.no/Noark/Exchange/IEDUImport/PutMessage";
-    private final WebServiceTemplate template;
+    private static final String SOAP_ACTION = "http://www.arkivverket.no/Noark/Exchange/IEDUImport/PutMessage";
+    private final WebServiceTemplateFactory templateFactory;
     private NoarkClientSettings settings;
 
-    public P360Client(NoarkClientSettings settings, WebServiceTemplateFactory templateFactory) {
+    public P360Client(NoarkClientSettings settings) {
         this.settings = settings;
-        this.template = templateFactory.createTemplate("no.difi.meldingsutveksling.noarkexchange.p360.schema");
+        templateFactory = settings.createTemplateFactory();
     }
 
     @Override
@@ -34,23 +36,22 @@ public class P360Client implements NoarkClient {
 
         JAXBElement<GetCanReceiveMessageRequestType> request = new ObjectFactory().createGetCanReceiveMessageRequest(r);
 
+        final WebServiceTemplate template = templateFactory.createTemplate("no.difi.meldingsutveksling.noarkexchange.p360.schema", receiverMarker(orgnr));
         JAXBElement<GetCanReceiveMessageResponseType> result = (JAXBElement<GetCanReceiveMessageResponseType>) template.marshalSendAndReceive(settings.getEndpointUrl(), request);
         return result.getValue().isResult();
     }
 
     @Override
     public PutMessageResponseType sendEduMelding(PutMessageRequestType request) {
-        no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType r =
-                new no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType();
 
         JAXBElement<no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType> p360request;
         try {
             p360request = new PutMessageRequestMapper().mapFrom(request);
         } catch (JAXBException e) {
-            throw new RuntimeException("Could not create PutMessageRequest for P360");
+            throw new RuntimeException("Could not create PutMessageRequest for P360", e);
         }
 
-
+        final WebServiceTemplate template = templateFactory.createTemplate("no.difi.meldingsutveksling.noarkexchange.p360.schema", PutMessageMarker.markerFrom(new PutMessageRequestWrapper(request)));
         JAXBElement<no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageResponseType> response
                 = (JAXBElement) template.marshalSendAndReceive(settings.getEndpointUrl(), p360request,
                 new SoapActionCallback(SOAP_ACTION));
