@@ -407,11 +407,6 @@
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>transport-virksomhet</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>post-til-virksomhet</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
