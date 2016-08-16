@@ -12,13 +12,19 @@ import javax.xml.bind.JAXBException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EphorteClient implements NoarkClient {
-    private final WebServiceTemplate template;
-    private final NoarkClientSettings settings;
+import static no.difi.meldingsutveksling.logging.MarkerFactory.receiverMarker;
+import static no.difi.meldingsutveksling.noarkexchange.PutMessageMarker.markerFrom;
 
-    public EphorteClient(NoarkClientSettings settings, WebServiceTemplateFactory templateFactory) {
-        this.template = templateFactory.createTemplate("no.difi.meldingsutveksling.noarkexchange.ephorte.schema");
+/**
+ * Client to send messages to Ephorte based archive system
+ */
+public class EphorteClient implements NoarkClient {
+    private final NoarkClientSettings settings;
+    private final WebServiceTemplateFactory templateFactory;
+
+    public EphorteClient(NoarkClientSettings settings) {
         this.settings = settings;
+        templateFactory = settings.createTemplateFactory();
     }
 
     @Override
@@ -28,7 +34,7 @@ public class EphorteClient implements NoarkClient {
         addressType.setOrgnr(orgnr);
         r.setReceiver(addressType);
         JAXBElement<GetCanReceiveMessageRequestType> ephorteRequest = new ObjectFactory().createGetCanReceiveMessageRequest(r);
-
+        final WebServiceTemplate template = templateFactory.createTemplate("no.difi.meldingsutveksling.noarkexchange.ephorte.schema", receiverMarker(orgnr));
         JAXBElement<GetCanReceiveMessageResponseType> result = (JAXBElement<GetCanReceiveMessageResponseType>) template.marshalSendAndReceive(settings.getEndpointUrl(), ephorteRequest);
         return result.getValue().isResult();
     }
@@ -49,6 +55,8 @@ public class EphorteClient implements NoarkClient {
             throw new RuntimeException("Failed to map request from internal PutMessageRequest to ephorte", e);
         }
 
+
+        final WebServiceTemplate template = templateFactory.createTemplate("no.difi.meldingsutveksling.noarkexchange.ephorte.schema", markerFrom(new PutMessageRequestWrapper(request)));
         JAXBElement<no.difi.meldingsutveksling.noarkexchange.ephorte.schema.PutMessageResponseType>
                 ephorteResponse = (JAXBElement<no.difi.meldingsutveksling.noarkexchange.ephorte.schema.PutMessageResponseType>)
                 template.marshalSendAndReceive(settings.getEndpointUrl(), ephorteRequest);

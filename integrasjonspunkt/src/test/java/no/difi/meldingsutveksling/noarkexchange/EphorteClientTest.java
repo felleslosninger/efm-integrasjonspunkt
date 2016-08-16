@@ -14,8 +14,7 @@ public class EphorteClientTest {
     @Test
     public void testSendEduMelding() throws Exception {
         NoarkClientSettings settings = new NoarkClientSettings("http://localhost:7778/ephorte", "", "");
-        WebServiceTemplateFactory templateFactory = settings.createTemplateFactory();
-        EphorteClient client = new EphorteClient(settings, templateFactory);
+        EphorteClient client = new EphorteClient(settings);
 
         PutMessageResponseType result = client.sendEduMelding(new PutMessageRequestType());
         assertEquals(result.getResult().getType(), "Hello world");
@@ -24,8 +23,7 @@ public class EphorteClientTest {
     @Test
     public void testCanGetRecieveMessage() {
         NoarkClientSettings settings = new NoarkClientSettings("http://localhost:7778/ephorte", "", "");
-        WebServiceTemplateFactory templateFactory = settings.createTemplateFactory();
-        EphorteClient client = new EphorteClient(settings, templateFactory);
+        EphorteClient client = new EphorteClient(settings);
         boolean result = client.canRecieveMessage("123");
         assertTrue(result);
     }

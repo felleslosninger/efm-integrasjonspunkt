@@ -1,10 +1,10 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 
-import no.difi.meldingsutveksling.noarkexchange.websak.PutMessageRequestMapper;
-import no.difi.meldingsutveksling.noarkexchange.websak.schema.*;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
+import no.difi.meldingsutveksling.noarkexchange.websak.PutMessageRequestMapper;
+import no.difi.meldingsutveksling.noarkexchange.websak.schema.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.soap.client.core.SoapActionCallback;
@@ -14,15 +14,18 @@ import javax.xml.bind.JAXBException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static no.difi.meldingsutveksling.logging.MarkerFactory.receiverMarker;
+import static no.difi.meldingsutveksling.noarkexchange.PutMessageMarker.markerFrom;
+
 public class WebsakClient implements NoarkClient {
 
-    public static final String SOAP_ACTION = "http://www.arkivverket.no/Noark/Exchange/IEDUImport/PutMessage";
-    private final WebServiceTemplate template;
+    private static final String SOAP_ACTION = "http://www.arkivverket.no/Noark/Exchange/IEDUImport/PutMessage";
+    private final WebServiceTemplateFactory templateFactory;
     private NoarkClientSettings settings;
 
-    public WebsakClient(NoarkClientSettings settings, WebServiceTemplateFactory templateFactory) {
+    public WebsakClient(NoarkClientSettings settings) {
         this.settings = settings;
-        this.template = templateFactory.createTemplate("no.difi.meldingsutveksling.noarkexchange.websak.schema");
+        this.templateFactory = settings.createTemplateFactory();
     }
 
     @Override
@@ -34,6 +37,7 @@ public class WebsakClient implements NoarkClient {
 
         JAXBElement<GetCanReceiveMessageRequestType> request = new ObjectFactory().createGetCanReceiveMessageRequest(r);
 
+        final WebServiceTemplate template = templateFactory.createTemplate("no.difi.meldingsutveksling.noarkexchange.websak.schema", receiverMarker(orgnr));
         JAXBElement<GetCanReceiveMessageResponseType> result = (JAXBElement<GetCanReceiveMessageResponseType>) template.marshalSendAndReceive(settings.getEndpointUrl(), request);
         return result.getValue().isResult();
     }
@@ -47,10 +51,11 @@ public class WebsakClient implements NoarkClient {
         try {
             websakRequest = new PutMessageRequestMapper().mapFrom(request);
         } catch (JAXBException e) {
-            throw new RuntimeException("Could not create PutMessageRequest for WebSak");
+            throw new RuntimeException("Could not create PutMessageRequest for WebSak", e);
         }
 
 
+        final WebServiceTemplate template = templateFactory.createTemplate("no.difi.meldingsutveksling.noarkexchange.websak.schema", markerFrom(new PutMessageRequestWrapper(request)));
         JAXBElement<no.difi.meldingsutveksling.noarkexchange.websak.schema.PutMessageResponseType> response
                 = (JAXBElement) template.marshalSendAndReceive(settings.getEndpointUrl(), websakRequest,
                 new SoapActionCallback(SOAP_ACTION));

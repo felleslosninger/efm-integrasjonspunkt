@@ -27,6 +27,7 @@ import java.io.ByteArrayOutputStream;
 
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
+
 /**
  * The idea behind this queue is to avoid loosing messages before they are saved in Noark System.
  *
@@ -39,7 +40,6 @@ import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom
 @Component
 public class InternalQueue {
     private static final String EXTERNAL = "external";
-    private static int attempts = 0;
     Logger logger = LoggerFactory.getLogger(InternalQueue.class);
 
     @Autowired
@@ -79,6 +79,7 @@ public class InternalQueue {
     public void noarkListener(byte[] message, Session session) {
         MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, configuration.getOrganisationNumber());
         EduDocument eduDocument = documentConverter.unmarshallFrom(message);
+
         forwardToNoark(eduDocument);
     }
 
@@ -89,7 +90,7 @@ public class InternalQueue {
         try {
             integrasjonspunktSend.sendMessage(requestType);
         } catch (Exception e) {
-            Audit.error("Failed to send message... queue will retry", markerFrom(new PutMessageRequestWrapper(requestType)));
+            Audit.error("Failed to send message... queue will retry", PutMessageMarker.markerFrom(new PutMessageRequestWrapper(requestType)));
             throw e;
         }
     }
@@ -103,7 +104,7 @@ public class InternalQueue {
         try {
             jmsTemplate.convertAndSend(EXTERNAL, putMessageRequestConverter.marshallToBytes(request));
         } catch (Exception e) {
-            Audit.error("Unable to send message", markerFrom(new PutMessageRequestWrapper(request)));
+            Audit.error("Unable to send message", PutMessageMarker.markerFrom(new PutMessageRequestWrapper(request)));
             throw e;
         }
     }
@@ -133,18 +134,22 @@ public class InternalQueue {
 
             final StandardBusinessDocument standardBusinessDocument = toDocument.getValue();
             Audit.info("SBD extracted", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));
-            try {
-                integrajonspunktReceive.forwardToNoarkSystem(standardBusinessDocument);
-            } catch (MessageException e) {
-                Audit.error("Failed delivering to archive (1)", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));
-                logger.error(markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)), e.getStatusMessage().getTechnicalMessage(), e);
-            } catch (Exception e) {
-                Audit.error("Failed delivering to archive (2)", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));
-                throw e;
-            }
+            sendToNoarkSystem(standardBusinessDocument);
         } catch (JAXBException e) {
             Audit.error("Failed to unserialize SBD");
             throw new MeldingsUtvekslingRuntimeException("Could not forward document to archive system", e);
+        }
+    }
+
+    private void sendToNoarkSystem(StandardBusinessDocument standardBusinessDocument) {
+        try {
+            integrajonspunktReceive.forwardToNoarkSystem(standardBusinessDocument);
+        } catch (MessageException e) {
+            Audit.error("Failed delivering to archive (1)", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));
+            logger.error(markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)), e.getStatusMessage().getTechnicalMessage(), e);
+        } catch (Exception e) {
+            Audit.error("Failed delivering to archive (2)", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));
+            throw e;
         }
     }
 

@@ -1,5 +1,9 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+/**
+ * Contains settings needed to send messages to Noark.
+ * Can also be used to create Spring WS template factory
+ */
 public class NoarkClientSettings {
 
     private final String endpointUrl;

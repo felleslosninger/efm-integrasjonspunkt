@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.ptv;
 
 import net.logstash.logback.marker.LogstashMarker;
+import no.difi.webservice.support.SoapFaultInterceptorLogger;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -51,7 +52,7 @@ public class CorrespondenceAgencyClient {
         template.setUnmarshaller(marshaller);
         ClientInterceptor[] interceptors = new ClientInterceptor[2];
         interceptors[0] = createSecurityInterceptors(request.getUsername(), request.getPassword());
-        interceptors[1] = SoapFaultInterceptor.withLogMarkers(logstashMarker);
+        interceptors[1] = SoapFaultInterceptorLogger.withLogMarkers(logstashMarker);
         template.setInterceptors(interceptors);
 
         final String uri = "https://tt02.altinn.basefarm.net/ServiceEngineExternal/CorrespondenceAgencyExternal.svc";

@@ -8,8 +8,8 @@ import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.logging.MarkerFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.EduMessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactory;
-import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PutMessageStrategy;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -19,14 +19,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.Message;
 
 import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.xml.ws.BindingType;
 import java.security.cert.CertificateException;
 
-import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
+import static no.difi.meldingsutveksling.noarkexchange.PutMessageMarker.markerFrom;
 
 /**
  * This is the implementation of the wenbservice that case managenent systems supporting
@@ -170,13 +169,13 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
         final ServiceRecord primaryServiceRecord = serviceRegistryLookup.getPrimaryServiceRecord(message.getRecieverPartyNumber());
 
-        final MessageStrategyFactory strategyFactory = this.strategyFactory.getFactory(primaryServiceRecord);
+        final MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(primaryServiceRecord);
 
         boolean result;
         if(hasAdresseregisterCertificate(message.getRecieverPartyNumber())) {
             Audit.info("Receiver validated", markerFrom(message));
 
-            PutMessageStrategy strategy = strategyFactory.create(request.getPayload());
+            PutMessageStrategy strategy = messageStrategyFactory.create(request.getPayload());
             PutMessageResponseType response = strategy.putMessage(request);
             result = validateResult(response);
         } else {

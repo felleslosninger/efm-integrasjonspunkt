@@ -23,7 +23,7 @@ import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 
-import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
+import static no.difi.meldingsutveksling.noarkexchange.PutMessageMarker.markerFrom;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createErrorResponse;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createOkResponse;
 
