@@ -1,5 +1,5 @@
 node {
-   properties([pipelineTriggers([]), [$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/nuth/move-integrasjonspunkt/']])
+   properties([pipelineTriggers([]), [$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/difi/move-integrasjonspunkt/']])
 
    // Mark the code checkout 'stage'....
    stage 'Checkout'
@@ -25,6 +25,9 @@ node {
       
       
     }
+
+    step([$class: 'GitHubCommitStatusSetter', contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'build'], statusResultSource: [$class: 'ConditionalStatusResultSource', results: [[$class: 'AnyBuildResult', message: 'Start testing', state: 'PENDING']]]])
+    input id: 'Testing', message: 'Start'
     
     stage name: "itest", concurrency: 1
     dir('integrasjonspunkt') {
@@ -48,14 +51,15 @@ node {
     }
 
     stage name: "production", concurrency: 1
-    //sh "${mvnHome}/bin/mvn -B release:clean release:prepare release:perform -DautoVersionSubmodules=true -Darguments=\"-Dmaven.deploy.skip=true -Dmaven.javadoc.skip=true\""
+    sh "${mvnHome}/bin/mvn -B release:clean release:prepare -DautoVersionSubmodules=true -Darguments=\"-Dmaven.deploy.skip=true -Dmaven.javadoc.skip=true\""
     dir('integrasjonspunkt') {
       sh "${mvnHome}/bin/mvn docker:build -DpushImage -DdockerImageTag=latest"
     }
+    sh "${mvnHome}/bin/mvn -B release:perform -DautoVersionSubmodules=true -Darguments=\"-Dmaven.deploy.skip=true -Dmaven.javadoc.skip=true\""
 
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'github', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD']]) {
 
-        sh "git push https://${env.GIT_USERNAME}:${env.GIT_PASSWORD}@github.com/nuth/move-integrasjonspunkt.git HEAD:master --follow-tags"
+        sh "git push https://${env.GIT_USERNAME}:${env.GIT_PASSWORD}@github.com/difi/move-integrasjonspunkt.git HEAD:master --follow-tags"
     }
 
     step([$class: 'GitHubCommitStatusSetter', contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'build'], statusResultSource: [$class: 'ConditionalStatusResultSource', results: [[$class: 'AnyBuildResult', message: 'Pushed to production', state: 'SUCCESS']]]])

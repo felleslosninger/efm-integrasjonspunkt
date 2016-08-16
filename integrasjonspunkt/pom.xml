@@ -19,7 +19,8 @@
         <jersey-version>1.8</jersey-version>
         <jstlVersion>1.2</jstlVersion>
         <jerseyVersion>1.17</jerseyVersion>
-        <docker.registry>registry:5000/</docker.registry>
+        <docker.registry>docker-registry.dmz.local/</docker.registry>
+<!--        <docker.registry>registry:5000/</docker.registry>-->
     </properties>
 
     <build>
@@ -98,7 +99,7 @@
                 <artifactId>docker-maven-plugin</artifactId>
                 <version>0.4.11</version>
                 <configuration>
-                    <imageName>${docker.registry}difi/${project.artifactId}</imageName>
+                    <imageName>${docker.registry}move/${project.artifactId}</imageName>
                     <dockerDirectory>src/main/docker</dockerDirectory>
                     <imageTags>
                         <imageTag>${project.version}</imageTag>
