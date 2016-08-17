@@ -9,10 +9,10 @@
     <name>Multiproject for meldingsutveksling</name>
     
     <scm>
-        <connection>scm:git:https://github.com/difi/move-integrasjonspunkt</connection>
-        <developerConnection>scm:git:git@github.com:difi/move-integrasjonspunkt</developerConnection>
-        <url>https://github.com/difi/move-integrasjonspunkt</url>
-  </scm>
+        <connection>scm:git:https://github.com/nuth/move-integrasjonspunkt</connection>
+        <developerConnection>scm:git:https://github.com/nuth/move-integrasjonspunkt</developerConnection>
+        <url>https://github.com/nuth/move-integrasjonspunkt</url>
+    </scm>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -267,6 +267,7 @@
                 <version>2.5.3</version>
                 <configuration>
                     <tagNameFormat>v@{project.version}</tagNameFormat>
+                    <releaseProfiles>release</releaseProfiles>
                 </configuration>
                 <dependencies>
                     <dependency>
