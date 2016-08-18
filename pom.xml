@@ -9,9 +9,9 @@
     <name>Multiproject for meldingsutveksling</name>
     
     <scm>
-        <connection>scm:git:https://github.com/nuth/move-integrasjonspunkt</connection>
-        <developerConnection>scm:git:https://github.com/nuth/move-integrasjonspunkt</developerConnection>
-        <url>https://github.com/nuth/move-integrasjonspunkt</url>
+        <connection>scm:git:https://github.com/difi/move-integrasjonspunkt</connection>
+        <developerConnection>scm:git:https://github.com/difi/move-integrasjonspunkt</developerConnection>
+        <url>https://github.com/difi/move-integrasjonspunkt</url>
     </scm>
 
     <properties>
