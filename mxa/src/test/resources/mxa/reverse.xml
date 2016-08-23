@@ -1,0 +1,21 @@
+
+<?xml version="1.0" encoding="utf-8"?>
+<Message xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" sendingSystem="360" batchSending="false" domain="[DM]" caseDescription="new case 4" caseOfficer="CH1 - Dept 1 case handler">
+  <ParticipantId>910258346</ParticipantId>
+  <MessageReference>DM20131022114944-1</MessageReference>
+  <Idproc>20131022114944</Idproc>
+  <Content>
+    <MessageHeader><![CDATA[DM 13/00001-25-test & document & 1]]></MessageHeader>
+    <MessageSummery><![CDATA[Saksnummer:DM-13/00001<br/>Sakstittel:new case]]></MessageSummery>
+    <Attachments>
+      <Attachment mimeType="application/pdf" filename="13_00001-25test &amp; document &amp; 1.pdf" name="13_00001-25test &amp; document &amp; 1.pdf">" + Encode() + @"</Attachment>
+    </Attachments>
+  </Content>
+  <NotificationMessages>
+    <NotificationMessage>
+      <EmailAddresses>
+        <EmailAddress>test@test.com</EmailAddress>
+      </EmailAddresses>
+    </NotificationMessage>
+  </NotificationMessages>
+</Message>
