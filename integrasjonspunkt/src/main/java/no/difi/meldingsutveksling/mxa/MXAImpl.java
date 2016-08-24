@@ -6,12 +6,16 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.logging.MarkerFactory;
 import no.difi.meldingsutveksling.mxa.schema.MXADelegate;
 import no.difi.meldingsutveksling.mxa.schema.domain.Message;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactory;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.ptv.CorrespondenceRequest;
+import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyValues;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -51,6 +55,9 @@ public class MXAImpl implements MXADelegate {
 
     @Autowired
     IntegrasjonspunktConfiguration config;
+
+    @Autowired
+    private StrategyFactory strategyFactory;
 
     private static final Logger log = LoggerFactory.getLogger(MXAImpl.class);
     private static final int SUCCESS= 0;
@@ -92,10 +99,13 @@ public class MXAImpl implements MXADelegate {
     }
 
     public void sendMessage(Message msg) {
-        final ServiceRecord primaryServiceRecord = serviceRegistryLookup.getPrimaryServiceRecord(msg.getParticipantId());
+        final InfoRecord senderInfo = serviceRegistryLookup.getInfoRecord(configuration.getOrganisationNumber());
+        final InfoRecord receiverInfo = serviceRegistryLookup.getInfoRecord(msg.getParticipantId());
+
         CorrespondenceAgencyConfiguration config = CorrespondenceAgencyConfiguration.configurationFrom(environment);
 
-        final InsertCorrespondenceV2 message = CorrespondenceAgencyMessageFactory.create(config, msg);
+        CorrespondenceAgencyValues values = CorrespondenceAgencyValues.from(msg, senderInfo, receiverInfo);
+        final InsertCorrespondenceV2 message = CorrespondenceAgencyMessageFactory.create(config, values);
         CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(MarkerFactory.mxaMarker(msg.getParticipantId()));
         final CorrespondenceRequest request = new CorrespondenceRequest.Builder().withUsername(config.getSystemUserCode()).withPassword(config.getPassword()).withPayload(message).build();
         client.send(request);

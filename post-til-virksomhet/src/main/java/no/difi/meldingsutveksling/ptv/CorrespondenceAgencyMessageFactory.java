@@ -14,6 +14,7 @@ import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAtta
 import no.difi.meldingsutveksling.mxa.schema.domain.Message;
 import no.difi.meldingsutveksling.noarkexchange.PayloadException;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
+import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyValues;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.joda.time.DateTime;
 
@@ -49,121 +50,15 @@ public class CorrespondenceAgencyMessageFactory {
         serviceEditionMapping.put(10, "Administrasjon");
     }
 
-    public static InsertCorrespondenceV2 create(CorrespondenceAgencyConfiguration postConfig, Message msg) {
-        ObjectFactory objectFactory = new ObjectFactory();
-
-        MyInsertCorrespondenceV2 correspondence = createMyInsertCorrespondenceV2(postConfig, null);
-
-        correspondence.setReportee(objectFactory.createMyInsertCorrespondenceV2Reportee(msg.getParticipantId()));
-
-        ExternalContentV2 externalContentV2 = objectFactory.createExternalContentV2();
-        externalContentV2.setLanguageCode(objectFactory.createExternalContentV2LanguageCode("1044"));
-        externalContentV2.setMessageTitle(objectFactory.createExternalContentV2MessageTitle(StringEscapeUtils.unescapeHtml(msg.getContent().getMessageHeader())));
-        externalContentV2.setMessageSummary(objectFactory.createExternalContentV2MessageTitle(StringEscapeUtils.unescapeHtml(msg.getContent().getMessageHeader())));
-        externalContentV2.setMessageBody(objectFactory.createExternalContentV2MessageBody(StringEscapeUtils.unescapeHtml(msg.getContent().getMessageSummery())));
-
-        correspondence.setAllowSystemDeleteDateTime(
-                objectFactory.createMyInsertCorrespondenceV2AllowSystemDeleteDateTime(
-                        toXmlGregorianCalendar(DateTime.now().plusYears(5))));
-
-        correspondence.setArchiveReference(objectFactory.createMyInsertCorrespondenceV2ArchiveReference(msg.getAltinnArchive()));
-
-        BinaryAttachmentExternalBEV2List binaryAttachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
-        no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory reporteeFactory = new no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory();
-        if (msg.getContent().getAttachments() != null && msg.getContent().getAttachments().getAttachment().size() > 0) {
-            msg.getContent().getAttachments().getAttachment().forEach(a -> {
-                BinaryAttachmentV2 binaryAttachmentV2 = new BinaryAttachmentV2();
-                binaryAttachmentV2.setFileName(reporteeFactory.createBinaryAttachmentV2FileName(a.getFilename()));
-                binaryAttachmentV2.setName(reporteeFactory.createBinaryAttachmentV2Name(a.getName()));
-                binaryAttachmentV2.setData(reporteeFactory.createBinaryAttachmentV2Data(Base64.getDecoder().decode(a.getValue().getBytes())));
-                binaryAttachmentV2.setEncrypted(false);
-                binaryAttachmentExternalBEV2List.getBinaryAttachmentV2().add(binaryAttachmentV2);
-            });
-        }
-
-        AttachmentsV2 attachmentsV2 = objectFactory.createAttachmentsV2();
-        attachmentsV2.setBinaryAttachments(objectFactory.createAttachmentsV2BinaryAttachments(binaryAttachmentExternalBEV2List));
-        externalContentV2.setAttachments(objectFactory.createExternalContentV2Attachments(attachmentsV2));
-        correspondence.setContent(objectFactory.createMyInsertCorrespondenceV2Content(externalContentV2));
-
-        no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory correspondenceObjectFactory = new no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory();
-        final InsertCorrespondenceV2 myInsertCorrespondenceV2 = correspondenceObjectFactory.createInsertCorrespondenceV2();
-        myInsertCorrespondenceV2.setCorrespondence(correspondence);
-        myInsertCorrespondenceV2.setSystemUserCode(postConfig.getSystemUserCode()); // "AAS_TEST" TODO: Avklares
-        // Reference set by the message sender
-        myInsertCorrespondenceV2.setExternalShipmentReference(msg.getMessageReference());
-
-        return myInsertCorrespondenceV2;
+    private CorrespondenceAgencyMessageFactory() {
     }
 
-    public static InsertCorrespondenceV2 create(CorrespondenceAgencyConfiguration postConfig, PutMessageRequestWrapper msg) throws PayloadException {
-        String xpathJpInnhold= "Melding/journpost/jpInnhold";
-        String xpathJpOffinnhold= "Melding/journpost/jpOffinnhold";
-        String xpathJpFilnavn= "Melding/journpost/dokument/veFilnavn";
-        String xpathJpData= "Melding/journpost/dokument/fil/base64";
+    public static InsertCorrespondenceV2 create(CorrespondenceAgencyConfiguration postConfig, CorrespondenceAgencyValues values) {
 
-        TextTokenSubstitutionBEList tokens = new TextTokenSubstitutionBEList();
-        // $envelope/sender/orgnr - trenger en navnmapping TODO: Skal hentes fra SR basert paa orgnr
-        tokens.getTextToken().add(createTextToken(0, msg.getEnvelope().getSender().getName()));
-        // Message area, based on ServiceEdition
-        tokens.getTextToken().add(createTextToken(1, serviceEditionMapping.get(Integer.valueOf(getServiceEditionCode(postConfig).getValue()))));
-        // Name of the message recipient TODO: Skal hentes fra SR basert paa orgnr
-        tokens.getTextToken().add(createTextToken(2, msg.getEnvelope().getReceiver().getName()));
-
-        MyInsertCorrespondenceV2 correspondence = createMyInsertCorrespondenceV2(postConfig, tokens);
-
-        ObjectFactory objectFactory = new ObjectFactory();
-        // Orgnr. of message recipient.
-        correspondence.setReportee(objectFactory.createMyInsertCorrespondenceV2Reportee(msg.getEnvelope().getReceiver().getOrgnr()));
-
-        ExternalContentV2 externalContentV2 = new ExternalContentV2();
-        externalContentV2.setLanguageCode(objectFactory.createExternalContentV2LanguageCode("1044"));
-        externalContentV2.setMessageTitle(objectFactory.createExternalContentV2MessageTitle(queryPayload(msg, xpathJpInnhold)));
-        externalContentV2.setMessageSummary(objectFactory.createExternalContentV2MessageSummary(queryPayload(msg, xpathJpInnhold)));
-        externalContentV2.setMessageBody(objectFactory.createExternalContentV2MessageBody(queryPayload(msg, xpathJpOffinnhold)));
-
-        // The date and time the message can be deleted by the user
-        correspondence.setAllowSystemDeleteDateTime(
-                objectFactory.createMyInsertCorrespondenceV2AllowSystemDeleteDateTime(
-                        toXmlGregorianCalendar(DateTime.now().plusMinutes(5))));
-
-        BinaryAttachmentV2 binaryAttachmentV2 = new BinaryAttachmentV2();
-        // FunctionType
-        binaryAttachmentV2.setFunctionType(AttachmentFunctionType.fromValue("Unspecified"));
-        no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory reporteeFactory = new no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory();
-        // Actual file name of the attachment
-        binaryAttachmentV2.setFileName(reporteeFactory.createBinaryAttachmentV2FileName(queryPayload(msg, xpathJpFilnavn)));
-        // Name of the attachment
-        binaryAttachmentV2.setName(reporteeFactory.createBinaryAttachmentV2Name("Brev"));
-        // Has the attachment been encrypted
-        binaryAttachmentV2.setEncrypted(false);
-        // A unique senders reference
-        binaryAttachmentV2.setSendersReference(reporteeFactory.createBinaryAttachmentV2SendersReference("AttachmentReference_as123452"));
-        // Attachement data, base64 encoded
-        binaryAttachmentV2.setData(reporteeFactory.createBinaryAttachmentV2Data(queryPayload(msg, xpathJpData).getBytes()));
-
-        BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
-        attachmentExternalBEV2List.getBinaryAttachmentV2().add(binaryAttachmentV2);
-
-        AttachmentsV2 attachmentsV2 = new AttachmentsV2();
-        attachmentsV2.setBinaryAttachments(objectFactory.createAttachmentsV2BinaryAttachments(attachmentExternalBEV2List));
-        externalContentV2.setAttachments(objectFactory.createExternalContentV2Attachments(attachmentsV2));
-        correspondence.setContent(objectFactory.createMyInsertCorrespondenceV2Content(externalContentV2));
-
-        no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory correspondenceObjectFactory = new no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory();
-        final InsertCorrespondenceV2 myInsertCorrespondenceV2 = correspondenceObjectFactory.createInsertCorrespondenceV2();
-        myInsertCorrespondenceV2.setCorrespondence(correspondence);
-        myInsertCorrespondenceV2.setSystemUserCode(postConfig.getSystemUserCode()); // "AAS_TEST" TODO: Avklares
-        // Reference set by the message sender
-        myInsertCorrespondenceV2.setExternalShipmentReference(msg.getEnvelope().getConversationId());
-
-        return myInsertCorrespondenceV2;
-    }
-
-    private static MyInsertCorrespondenceV2 createMyInsertCorrespondenceV2(CorrespondenceAgencyConfiguration postConfig, TextTokenSubstitutionBEList tokens) {
         MyInsertCorrespondenceV2 correspondence = new MyInsertCorrespondenceV2();
         ObjectFactory objectFactory = new ObjectFactory();
 
+        correspondence.setReportee(objectFactory.createMyInsertCorrespondenceV2Reportee(values.getReportee()));
         // Service code, default 4255
         correspondence.setServiceCode(getServiceCode(postConfig));
         // Service edition, default 10
@@ -187,6 +82,13 @@ public class CorrespondenceAgencyMessageFactory {
         // Notification type
         notification.setNotificationType(notificationFactory.createNotification2009NotificationType("offentlig_etat"));
 
+        TextTokenSubstitutionBEList tokens = new TextTokenSubstitutionBEList();
+        // Name of the message sender
+        tokens.getTextToken().add(createTextToken(0, values.getSenderOrgName()));
+        // Message area, based on ServiceEdition
+        tokens.getTextToken().add(createTextToken(1, serviceEditionMapping.get(Integer.valueOf(getServiceEditionCode(postConfig).getValue()))));
+        // Name of the message recipient
+        tokens.getTextToken().add(createTextToken(2, values.getReceiverOrgName()));
         notification.setTextTokens(notificationFactory.createNotification2009TextTokens(tokens));
 
         JAXBElement<ReceiverEndPointBEList> receiverEndpoints = createReceiverEndPoint();
@@ -196,7 +98,44 @@ public class CorrespondenceAgencyMessageFactory {
         notifications.getNotification().add(notification);
         correspondence.setNotifications(objectFactory.createMyInsertCorrespondenceV2Notifications(notifications));
 
-        return correspondence;
+        ExternalContentV2 externalContentV2 = new ExternalContentV2();
+        externalContentV2.setLanguageCode(objectFactory.createExternalContentV2LanguageCode("1044"));
+        externalContentV2.setMessageTitle(objectFactory.createExternalContentV2MessageTitle(values.getMessageTitle()));
+        externalContentV2.setMessageSummary(objectFactory.createExternalContentV2MessageSummary(values.getMessageSummary()));
+        externalContentV2.setMessageBody(objectFactory.createExternalContentV2MessageBody(values.getMessageBody()));
+
+        // The date and time the message can be deleted by the user
+        correspondence.setAllowSystemDeleteDateTime(
+                objectFactory.createMyInsertCorrespondenceV2AllowSystemDeleteDateTime(
+                        toXmlGregorianCalendar(values.getAllowSystemDeleteDateTime())));
+
+        // FunctionType
+        no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory reporteeFactory = new no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory();
+        BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
+        values.getAttachments().forEach(a -> {
+            BinaryAttachmentV2 binaryAttachmentV2 = new BinaryAttachmentV2();
+            binaryAttachmentV2.setFunctionType(AttachmentFunctionType.fromValue("Unspecified"));
+            binaryAttachmentV2.setFileName(reporteeFactory.createBinaryAttachmentV2FileName(a.getFilename()));
+            binaryAttachmentV2.setName(reporteeFactory.createBinaryAttachmentV2Name(a.getName()));
+            binaryAttachmentV2.setEncrypted(false);
+            binaryAttachmentV2.setSendersReference(reporteeFactory.createBinaryAttachmentV2SendersReference("AttachmentReference_as123452"));
+            binaryAttachmentV2.setData(reporteeFactory.createBinaryAttachmentV2Data(a.getData()));
+            attachmentExternalBEV2List.getBinaryAttachmentV2().add(binaryAttachmentV2);
+        });
+
+        AttachmentsV2 attachmentsV2 = new AttachmentsV2();
+        attachmentsV2.setBinaryAttachments(objectFactory.createAttachmentsV2BinaryAttachments(attachmentExternalBEV2List));
+        externalContentV2.setAttachments(objectFactory.createExternalContentV2Attachments(attachmentsV2));
+        correspondence.setContent(objectFactory.createMyInsertCorrespondenceV2Content(externalContentV2));
+
+        no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory correspondenceObjectFactory = new no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory();
+        final InsertCorrespondenceV2 myInsertCorrespondenceV2 = correspondenceObjectFactory.createInsertCorrespondenceV2();
+        myInsertCorrespondenceV2.setCorrespondence(correspondence);
+        myInsertCorrespondenceV2.setSystemUserCode(postConfig.getSystemUserCode()); // "AAS_TEST" TODO: Avklares
+        // Reference set by the message sender
+        myInsertCorrespondenceV2.setExternalShipmentReference(values.getExternalShipmentReference());
+
+        return myInsertCorrespondenceV2;
     }
 
     private static JAXBElement<String> getServiceCode(CorrespondenceAgencyConfiguration postConfig) {

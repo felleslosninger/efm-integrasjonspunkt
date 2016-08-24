@@ -7,7 +7,6 @@ public class CorrespondenceAgencyConfiguration {
     private String externalServiceCode;
     private String password;
     private String systemUserCode;
-    private String languageCode;
 
     private CorrespondenceAgencyConfiguration() {
     }
@@ -18,7 +17,6 @@ public class CorrespondenceAgencyConfiguration {
                 .withExternalServiceEditionCode("altinn.ptv.external_service_edition_code")
                 .withSystemUserCode("altinn.ptv.user_code")
                 .withPassword("altinn.ptv.password")
-                .withLanguageCode("1044")
                 .build();
         return configuration;
     }
@@ -37,10 +35,6 @@ public class CorrespondenceAgencyConfiguration {
 
     public String getPassword() {
         return password;
-    }
-
-    public String getLanguageCode() {
-        return languageCode;
     }
 
     public static class Builder {
@@ -68,11 +62,6 @@ public class CorrespondenceAgencyConfiguration {
 
         public Builder withPassword(String password) {
             correspondenceAgencyConfiguration.password = environment.getProperty(password);
-            return this;
-        }
-
-        public Builder withLanguageCode(String languageCode) {
-            correspondenceAgencyConfiguration.languageCode = environment.getProperty(languageCode, languageCode);
             return this;
         }
 

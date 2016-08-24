@@ -6,6 +6,7 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.spi.json.GsonJsonProvider;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 
 public class ServiceRegistryLookup {
@@ -36,6 +37,12 @@ public class ServiceRegistryLookup {
             return new Gson().fromJson(res.get(0), ServiceRecord.class);
         }
 
+    }
+
+    public InfoRecord getInfoRecord(String orgnr) {
+        final String infoRecordString = client.getResource("organization/" + orgnr);
+        final DocumentContext documentContext = JsonPath.parse(infoRecordString, jsonPathConfiguration());
+        return documentContext.read("$.infoRecord", InfoRecord.class);
     }
 
     private int getNumberOfServiceRecords(DocumentContext documentContext) {
