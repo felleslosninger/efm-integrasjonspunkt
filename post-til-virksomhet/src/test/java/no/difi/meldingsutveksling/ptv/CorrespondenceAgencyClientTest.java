@@ -11,7 +11,6 @@ import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespon
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentExternalBEV2List;
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentV2;
 import org.apache.commons.io.FileUtils;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +20,8 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.File;
 import java.io.IOException;
+import java.time.ZonedDateTime;
+import java.util.GregorianCalendar;
 
 public class CorrespondenceAgencyClientTest {
     static Logger log = LoggerFactory.getLogger(CorrespondenceAgencyClientTest.class);
@@ -139,12 +140,12 @@ public class CorrespondenceAgencyClientTest {
     }
 
     private static XMLGregorianCalendar fiveMinutesFromNow() {
-        return toXmlGregorianCalendar(new DateTime().plusMinutes(5));
+        return toXmlGregorianCalendar(ZonedDateTime.now().plusMinutes(5));
     }
 
-    private static XMLGregorianCalendar toXmlGregorianCalendar(DateTime date) {
+    private static XMLGregorianCalendar toXmlGregorianCalendar(ZonedDateTime date) {
         try {
-            return DatatypeFactory.newInstance().newXMLGregorianCalendar(date.toGregorianCalendar());
+            return DatatypeFactory.newInstance().newXMLGregorianCalendar(GregorianCalendar.from(date));
         } catch (DatatypeConfigurationException e) {
             throw new RuntimeException("Could not convert DateTime to " + XMLGregorianCalendar.class, e);
         }

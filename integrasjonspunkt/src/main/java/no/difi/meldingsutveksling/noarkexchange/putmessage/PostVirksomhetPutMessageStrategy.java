@@ -13,18 +13,18 @@ import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyValues;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageMarker.markerFrom;
 
 public class PostVirksomhetPutMessageStrategy implements PutMessageStrategy {
 
-    @Autowired
-    private ServiceRegistryLookup serviceRegistryLookup;
-
     private final CorrespondenceAgencyConfiguration config;
+    private final ServiceRegistryLookup serviceRegistryLookup;
 
-    public PostVirksomhetPutMessageStrategy(CorrespondenceAgencyConfiguration config) {
+    public PostVirksomhetPutMessageStrategy(CorrespondenceAgencyConfiguration config, ServiceRegistryLookup serviceRegistryLookup) {
         this.config = config;
+        this.serviceRegistryLookup = serviceRegistryLookup;
     }
 
     @Override

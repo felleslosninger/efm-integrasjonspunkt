@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.lang.NotImplementedException;
 import org.junit.Before;
@@ -20,10 +21,11 @@ public class StrategyFactoryTest {
     public void setup() {
         final MessageSender messageSender = mock(MessageSender.class);
         final Environment environment = mock(Environment.class);
+        final ServiceRegistryLookup serviceRegistryLookup = mock(ServiceRegistryLookup.class);
         when(messageSender.getEnvironment()).thenReturn(environment);
 
 
-        strategyFactory = new StrategyFactory(messageSender);
+        strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup);
     }
 
     @Test

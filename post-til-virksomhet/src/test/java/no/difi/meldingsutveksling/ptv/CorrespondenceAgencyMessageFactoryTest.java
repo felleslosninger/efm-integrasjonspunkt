@@ -6,6 +6,8 @@ import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
 import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
+import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyValues;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -136,14 +138,22 @@ public class CorrespondenceAgencyMessageFactoryTest {
     @Test
     public void testFactoryForEscapedXML() throws PayloadException, JAXBException {
         PutMessageRequestWrapper msgFromEscaped = new PutMessageRequestWrapper(createPutMessageEscapedXml(escapedXml));
+        InfoRecord infoMock = mock(InfoRecord.class);
+        when(infoMock.getOrganisationNumber()).thenReturn("910075918");
+        when(infoMock.getOrganizationName()).thenReturn("Fylkesmannen i Sogn og Fjordane");
+        CorrespondenceAgencyValues values = CorrespondenceAgencyValues.from(msgFromEscaped, infoMock, infoMock);
 
-        assertFields(CorrespondenceAgencyMessageFactory.create(postConfig, msgFromEscaped));
+        assertFields(CorrespondenceAgencyMessageFactory.create(postConfig, values));
     }
 
     @Test
     public void testFactoryForCDataXML() throws PayloadException, JAXBException {
         PutMessageRequestWrapper msgFromCdata = new PutMessageRequestWrapper(createPutMessageCdataXml(cdataTaggedXml));
-        assertFields(CorrespondenceAgencyMessageFactory.create(postConfig, msgFromCdata));
+        InfoRecord infoMock = mock(InfoRecord.class);
+        when(infoMock.getOrganisationNumber()).thenReturn("910075918");
+        when(infoMock.getOrganizationName()).thenReturn("Fylkesmannen i Sogn og Fjordane");
+        CorrespondenceAgencyValues values = CorrespondenceAgencyValues.from(msgFromCdata, infoMock, infoMock);
+        assertFields(CorrespondenceAgencyMessageFactory.create(postConfig, values));
     }
 
     private void assertFields(InsertCorrespondenceV2 c) {
@@ -185,4 +195,5 @@ public class CorrespondenceAgencyMessageFactoryTest {
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         return unmarshaller.unmarshal(new StringSource((payload)), PutMessageRequestType.class).getValue();
     }
+
 }

@@ -43,7 +43,7 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public StrategyFactory messageStrategyFactory(MessageSender messageSender) {
-        return new StrategyFactory(messageSender);
+    public StrategyFactory messageStrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup) {
+        return new StrategyFactory(messageSender, serviceRegistryLookup);
     }
 }

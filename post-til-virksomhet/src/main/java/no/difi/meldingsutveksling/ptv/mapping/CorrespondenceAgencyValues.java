@@ -5,8 +5,8 @@ import no.difi.meldingsutveksling.mxa.schema.domain.Message;
 import no.difi.meldingsutveksling.noarkexchange.PayloadException;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
-import org.joda.time.DateTime;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -28,7 +28,7 @@ public class CorrespondenceAgencyValues {
     private String messageSummary;
     private String messageBody;
     private String externalShipmentReference;
-    private DateTime allowSystemDeleteDateTime;
+    private ZonedDateTime allowSystemDeleteDateTime;
 
     private List<Attachment> attachments;
 
@@ -51,7 +51,7 @@ public class CorrespondenceAgencyValues {
         values.setMessageTitle(queryPayload(putMessage, xpathJpInnhold));
         values.setMessageSummary(queryPayload(putMessage, xpathJpInnhold));
         values.setMessageBody(queryPayload(putMessage, xpathJpOffinnhold));
-        values.setAllowSystemDeleteDateTime(DateTime.now().plusMinutes(5));
+        values.setAllowSystemDeleteDateTime(ZonedDateTime.now().plusMinutes(5));
         values.setExternalShipmentReference(putMessage.getEnvelope().getConversationId());
 
         Attachment attachment = new Attachment(queryPayload(putMessage, xpathJpFilnavn),
@@ -73,7 +73,7 @@ public class CorrespondenceAgencyValues {
         values.setMessageTitle(msg.getContent().getMessageHeader());
         values.setMessageSummary(msg.getContent().getMessageHeader());
         values.setMessageBody(msg.getContent().getMessageSummery());
-        values.setAllowSystemDeleteDateTime(DateTime.now().plusYears(5));
+        values.setAllowSystemDeleteDateTime(ZonedDateTime.now().plusYears(5));
         values.setExternalShipmentReference(msg.getMessageReference());
 
         final ArrayList<Attachment> attachments = new ArrayList<>();
@@ -81,6 +81,7 @@ public class CorrespondenceAgencyValues {
             msg.getContent().getAttachments().getAttachment().forEach(a -> {
                 attachments.add(new Attachment(a.getFilename(), a.getName(), Base64.getDecoder().decode(a.getValue())));
             });
+            values.setAttachments(attachments);
         }
 
         return values;
@@ -142,11 +143,11 @@ public class CorrespondenceAgencyValues {
         this.messageBody = messageBody;
     }
 
-    public DateTime getAllowSystemDeleteDateTime() {
+    public ZonedDateTime getAllowSystemDeleteDateTime() {
         return allowSystemDeleteDateTime;
     }
 
-    public void setAllowSystemDeleteDateTime(DateTime allowSystemDeleteDateTime) {
+    public void setAllowSystemDeleteDateTime(ZonedDateTime allowSystemDeleteDateTime) {
         this.allowSystemDeleteDateTime = allowSystemDeleteDateTime;
     }
 

@@ -11,22 +11,16 @@ import no.altinn.schemas.services.serviceengine.subscription._2009._10.Attachmen
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentExternalBEV2List;
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentV2;
-import no.difi.meldingsutveksling.mxa.schema.domain.Message;
-import no.difi.meldingsutveksling.noarkexchange.PayloadException;
-import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyValues;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.joda.time.DateTime;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-import java.util.Base64;
+import java.time.ZonedDateTime;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
-
-import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.queryPayload;
 
 /**
  * Class used to create an InsertCorrespondenceV2 object based on a PutMessageRequest(Wrapper).
@@ -68,15 +62,15 @@ public class CorrespondenceAgencyMessageFactory {
         // Name of the message sender, always "Avsender"
         correspondence.setMessageSender(objectFactory.createMyInsertCorrespondenceV2MessageSender("Avsender"));
         // The date and time the message should be visible in the Portal
-        correspondence.setVisibleDateTime(toXmlGregorianCalendar(DateTime.now()));
+        correspondence.setVisibleDateTime(toXmlGregorianCalendar(ZonedDateTime.now()));
         // TODO: Avklares
-        correspondence.setDueDateTime(toXmlGregorianCalendar(DateTime.now().plusDays(7)));
+        correspondence.setDueDateTime(toXmlGregorianCalendar(ZonedDateTime.now().plusDays(7)));
 
         Notification2009 notification = new Notification2009();
         no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory notificationFactory = new no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory();
         notification.setFromAddress(notificationFactory.createNotification2009FromAddress("no-reply@altinn.no"));
         // The date and time the notification should be sent
-        notification.setShipmentDateTime(toXmlGregorianCalendar(DateTime.now().plusMinutes(5)));
+        notification.setShipmentDateTime(toXmlGregorianCalendar(ZonedDateTime.now().plusMinutes(5)));
         // Language code of the notification
         notification.setLanguageCode(notificationFactory.createNotification2009LanguageCode("1044"));
         // Notification type
@@ -170,13 +164,12 @@ public class CorrespondenceAgencyMessageFactory {
         return objectFactory.createNotification2009ReceiverEndPoints(receiverEndpoints);
     }
 
-    private static XMLGregorianCalendar toXmlGregorianCalendar(DateTime date) {
+    public static XMLGregorianCalendar toXmlGregorianCalendar(ZonedDateTime date) {
         try {
-            return DatatypeFactory.newInstance().newXMLGregorianCalendar(date.toGregorianCalendar());
+            return DatatypeFactory.newInstance().newXMLGregorianCalendar(GregorianCalendar.from(date));
         } catch (DatatypeConfigurationException e) {
             throw new RuntimeException("Could not convert DateTime to " + XMLGregorianCalendar.class, e);
         }
     }
-
 
 }

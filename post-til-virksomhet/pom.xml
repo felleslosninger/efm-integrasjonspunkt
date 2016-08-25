@@ -19,11 +19,6 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>2.8.2</version>
-        </dependency>
-        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
@@ -108,14 +103,15 @@
             <artifactId>audit</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>service-registry-client</artifactId>
+            <artifactId>mxa</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>mxa</artifactId>
+            <artifactId>service-registry-client</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
 

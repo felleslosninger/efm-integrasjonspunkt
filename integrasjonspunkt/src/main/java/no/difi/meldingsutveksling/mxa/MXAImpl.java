@@ -66,15 +66,6 @@ public class MXAImpl implements MXADelegate {
 
     @Override
     public int submitMessage(@WebParam(name = "submitMessage") String arg0) {
-        String fileName = "MXA-" + Instant.now().toEpochMilli() + ".xml";
-        File mxaMsgFile = new File(fileName);
-        try {
-            FileUtils.writeStringToFile(mxaMsgFile, arg0);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return INTERNAL_ERROR;
-        }
-
         JAXBContext jaxbContext = null;
         Message msg = null;
         try {
