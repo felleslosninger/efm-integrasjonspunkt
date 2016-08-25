@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.ptp;
 
 import net.logstash.logback.marker.Markers;
 import no.difi.ptp.oppslagstjenesten.HentPersonerForespoersel;
+import no.difi.ptp.oppslagstjenesten.HentPersonerRespons;
 import no.difi.ptp.oppslagstjenesten.Informasjonsbehov;
 import no.difi.webservice.support.SoapFaultInterceptorLogger;
 import org.apache.ws.security.WSPasswordCallback;
@@ -24,18 +25,31 @@ import java.io.IOException;
 import java.util.Arrays;
 
 public class OppslagstjenesteClient {
-    public void hentKontaktInformasjon(String pid) {
+    private Configuration conf;
+
+    public OppslagstjenesteClient(Configuration configuration) {
+        this.conf = configuration;
+    }
+
+    public HentPersonerRespons hentKontaktInformasjon(String pid) {
         final HentPersonerForespoersel hentPersonerForespoersel = HentPersonerForespoersel.builder().
                 addInformasjonsbehov(Informasjonsbehov.KONTAKTINFO)
                 .addPersonidentifikator(pid)
                 .build();
 
+        WebServiceTemplate template = createWebServiceTemplate("no.difi.ptp.oppslagstjenesten");
+
+        return (HentPersonerRespons) template.marshalSendAndReceive(conf.url, hentPersonerForespoersel);
+
+    }
+
+    private WebServiceTemplate createWebServiceTemplate(String contextPath) {
         AxiomSoapMessageFactory messageFactory = new AxiomSoapMessageFactory();
         messageFactory.setSoapVersion(SoapVersion.SOAP_12);
         WebServiceTemplate template = new WebServiceTemplate(messageFactory);
 
         Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
-        marshaller.setContextPath("no.difi.ptp.oppslagstjenesten");
+        marshaller.setContextPath(contextPath);
         template.setMarshaller(marshaller);
         template.setUnmarshaller(marshaller);
         final ClientInterceptor[] interceptors = new ClientInterceptor[2];
@@ -43,31 +57,29 @@ public class OppslagstjenesteClient {
         interceptors[1] = SoapFaultInterceptorLogger.withLogMarkers(Markers.append("some marker", ""));
 
         template.setInterceptors(interceptors);
-
-        final Object result = template.marshalSendAndReceive("https://kontaktinfo-ws-ver2.difi.no/kontaktinfo-external/ws-v5", hentPersonerForespoersel);
+        return template;
     }
-
 
     private ClientInterceptor createSecurityInterceptor() {
         Wss4jSecurityInterceptor securityInterceptor = new Wss4jSecurityInterceptor();
         securityInterceptor.setSecurementActions("Signature Timestamp");
         securityInterceptor.setFutureTimeToLive(120);
         securityInterceptor.setSecurementSignatureKeyIdentifier("DirectReference");
-        securityInterceptor.setSecurementUsername("client_alias");
-        securityInterceptor.setSecurementPassword("changeit");
+        securityInterceptor.setSecurementUsername(conf.clientAlias);
+        securityInterceptor.setSecurementPassword(conf.password);
         securityInterceptor.setValidationActions("Signature Timestamp Encrypt");
 
         securityInterceptor.setValidationCallbackHandler(new CallbackHandler() {
             @Override
             public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                Arrays.stream(callbacks).filter(c -> c instanceof WSPasswordCallback).forEach(c -> ((WSPasswordCallback)c).setPassword("changeit"));
+                Arrays.stream(callbacks).filter(c -> c instanceof WSPasswordCallback).forEach(c -> ((WSPasswordCallback)c).setPassword(conf.password));
             }
         });
 
         securityInterceptor.setSecurementSignatureAlgorithm("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
         securityInterceptor.setSecurementSignatureParts("{}{http://www.w3.org/2003/05/soap-envelope}Body;{}{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd}Timestamp}");
-        final Crypto clientCrypto = getCryptoFactoryBean(new FileSystemResource("kontaktinfo-client-test.jks"), "changeit", "client_alias");
-        final Crypto serverCrypto = getCryptoFactoryBean(new FileSystemResource("kontaktinfo-server-test.jks"), "changeit", "ver2");
+        final Crypto clientCrypto = getCryptoFactoryBean(new FileSystemResource("kontaktinfo-client-test.jks"), conf.password, conf.password);
+        final Crypto serverCrypto = getCryptoFactoryBean(new FileSystemResource("kontaktinfo-server-test.jks"), conf.password, conf.serverAlias);
         securityInterceptor.setSecurementSignatureCrypto(clientCrypto);
         securityInterceptor.setValidationSignatureCrypto(serverCrypto);
         securityInterceptor.setValidationDecryptionCrypto(clientCrypto);
@@ -97,5 +109,31 @@ public class OppslagstjenesteClient {
         } catch (Exception e) {
             throw new RuntimeException("Could not create CryptoFactoryBean", e);
         }
+
     }
+
+    /**
+     * Parameter object to contain configuration needed to invoke the service oppslagstjeneste
+     */
+    public static class Configuration {
+        private final String url;
+        private final String password;
+        private final String clientAlias;
+        private final String serverAlias;
+
+        /**
+         * Needed to construct OppslagstjenesteClient
+         * @param url Url to the Oppslagstjeneste endpoint
+         * @param password password for the JKS file
+         * @param clientAlias for the JKS entry
+         */
+        public Configuration(String url, String password, String clientAlias, String serverAlias) {
+            this.url = url;
+            this.password = password;
+            this.clientAlias = clientAlias;
+            this.serverAlias = serverAlias;
+        }
+    }
+
+
 }

@@ -1,8 +1,11 @@
 package no.difi.meldingsutveksling.ptp;
 
+import static no.difi.meldingsutveksling.ptp.OppslagstjenesteClient.Configuration;
+
 public class OppslagstjenesteClientMain {
     public static void main(String[] args) {
-        OppslagstjenesteClient client = new OppslagstjenesteClient();
+        final Configuration configuration = new Configuration("https://kontaktinfo-ws-ver2.difi.no/kontaktinfo-external/ws-v5", "changeit", "client_alias", "ver2");
+        OppslagstjenesteClient client = new OppslagstjenesteClient(configuration);
         client.hentKontaktInformasjon("23079421936");
     }
 }
