@@ -30,8 +30,8 @@ public class PostVirksomhetPutMessageStrategy implements PutMessageStrategy {
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType requestType) {
         final PutMessageRequestWrapper putMessageWrapper = new PutMessageRequestWrapper(requestType);
-        InfoRecord senderInfo = serviceRegistryLookup.getInfoRecord(putMessageWrapper.getEnvelope().getSender().getOrgnr());
-        InfoRecord receiverInfo = serviceRegistryLookup.getInfoRecord(putMessageWrapper.getEnvelope().getReceiver().getOrgnr());
+        InfoRecord senderInfo = serviceRegistryLookup.getInfoRecord(putMessageWrapper.getSenderPartynumber());
+        InfoRecord receiverInfo = serviceRegistryLookup.getInfoRecord(putMessageWrapper.getRecieverPartyNumber());
         try {
             CorrespondenceAgencyValues values = CorrespondenceAgencyValues.from(putMessageWrapper, senderInfo, receiverInfo);
             final InsertCorrespondenceV2 message = CorrespondenceAgencyMessageFactory.create(config, values);

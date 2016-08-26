@@ -2,6 +2,9 @@ package no.difi.meldingsutveksling.ptv.mapping;
 
 import com.google.common.base.MoreObjects;
 
+/**
+ * Used for mapping values in {@link CorrespondenceAgencyValues}.
+ */
 public class Attachment {
 
     private String filename;

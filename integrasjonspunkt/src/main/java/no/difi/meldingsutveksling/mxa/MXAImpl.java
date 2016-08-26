@@ -69,6 +69,7 @@ public class MXAImpl implements MXADelegate {
             msg = (Message) unmarshaller.unmarshal(new StringReader(arg0));
         } catch (JAXBException e) {
             e.printStackTrace();
+            Audit.error("XML parse error", markerFrom(msg));
             return XML_PARSE_ERROR;
         }
 
@@ -84,6 +85,7 @@ public class MXAImpl implements MXADelegate {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            Audit.error("Internal error", markerFrom(msg));
             return INTERNAL_ERROR;
         }
 
