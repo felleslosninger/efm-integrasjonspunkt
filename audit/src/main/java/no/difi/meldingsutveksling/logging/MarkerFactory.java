@@ -14,8 +14,6 @@ public class MarkerFactory {
     private static final String RESPONSE_STATUS_MESSAGE_CODE = "response-message-code";
     private static final String MESSAGE_TYPE = "message-type";
 
-    private static final String MXA_ID = "mxa_id";
-
     /**
      * Simple factory pattern
      */
@@ -52,9 +50,5 @@ public class MarkerFactory {
 
     public static LogstashMarker responseMessageTextMarker(String statusMessageText) {
         return Markers.append(RESPONSE_STATUS_MESSAGE_TEXT, statusMessageText);
-    }
-
-    public static LogstashMarker mxaMarker(String participantId) {
-        return Markers.append(MXA_ID, participantId);
     }
 }

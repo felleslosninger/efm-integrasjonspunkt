@@ -63,7 +63,6 @@ public class CorrespondenceAgencyMessageFactory {
         correspondence.setMessageSender(objectFactory.createMyInsertCorrespondenceV2MessageSender("Avsender"));
         // The date and time the message should be visible in the Portal
         correspondence.setVisibleDateTime(toXmlGregorianCalendar(ZonedDateTime.now()));
-        // TODO: Avklares
         correspondence.setDueDateTime(toXmlGregorianCalendar(ZonedDateTime.now().plusDays(7)));
 
         Notification2009 notification = new Notification2009();
@@ -125,7 +124,7 @@ public class CorrespondenceAgencyMessageFactory {
         no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory correspondenceObjectFactory = new no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory();
         final InsertCorrespondenceV2 myInsertCorrespondenceV2 = correspondenceObjectFactory.createInsertCorrespondenceV2();
         myInsertCorrespondenceV2.setCorrespondence(correspondence);
-        myInsertCorrespondenceV2.setSystemUserCode(postConfig.getSystemUserCode()); // "AAS_TEST" TODO: Avklares
+        myInsertCorrespondenceV2.setSystemUserCode(postConfig.getSystemUserCode());
         // Reference set by the message sender
         myInsertCorrespondenceV2.setExternalShipmentReference(values.getExternalShipmentReference());
 
@@ -168,7 +167,7 @@ public class CorrespondenceAgencyMessageFactory {
         try {
             return DatatypeFactory.newInstance().newXMLGregorianCalendar(GregorianCalendar.from(date));
         } catch (DatatypeConfigurationException e) {
-            throw new RuntimeException("Could not convert DateTime to " + XMLGregorianCalendar.class, e);
+            throw new RuntimeException("Could not convert ZonedDateTime(value="+date+") to " + XMLGregorianCalendar.class, e);
         }
     }
 

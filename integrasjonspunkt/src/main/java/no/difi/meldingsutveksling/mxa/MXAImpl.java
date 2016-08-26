@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.mxa;
 import net.logstash.logback.marker.LogstashMarker;
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
+import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.logging.MarkerFactory;
 import no.difi.meldingsutveksling.mxa.schema.MXADelegate;
 import no.difi.meldingsutveksling.mxa.schema.domain.Message;
@@ -34,6 +35,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.time.Instant;
+
+import static no.difi.meldingsutveksling.mxa.MessageMarker.markerFrom;
 
 
 @Component("mxaService")
@@ -77,13 +80,19 @@ public class MXAImpl implements MXADelegate {
             return XML_PARSE_ERROR;
         }
 
-        LogstashMarker marker = MarkerFactory.mxaMarker(msg.getParticipantId());
-        log.info(marker, "MXA message received");
+        Audit.info("MXA message received", markerFrom(msg));
 
-        if (configuration.isQueueEnabled()) {
-            internalQueue.enqueueMXA(msg);
-        } else {
-            sendMessage(msg);
+        try {
+            if (configuration.isQueueEnabled()) {
+                internalQueue.enqueueMXA(msg);
+                Audit.info("MXA message enqueued", markerFrom(msg));
+            } else {
+                Audit.info("Queue is disabled", markerFrom(msg));
+                sendMessage(msg);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return INTERNAL_ERROR;
         }
 
         return SUCCESS;
@@ -97,8 +106,9 @@ public class MXAImpl implements MXADelegate {
 
         CorrespondenceAgencyValues values = CorrespondenceAgencyValues.from(msg, senderInfo, receiverInfo);
         final InsertCorrespondenceV2 message = CorrespondenceAgencyMessageFactory.create(config, values);
-        CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(MarkerFactory.mxaMarker(msg.getParticipantId()));
+        CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(markerFrom(msg));
         final CorrespondenceRequest request = new CorrespondenceRequest.Builder().withUsername(config.getSystemUserCode()).withPassword(config.getPassword()).withPayload(message).build();
         client.send(request);
+        Audit.info("MXA message sent", markerFrom(msg));
     }
 }
