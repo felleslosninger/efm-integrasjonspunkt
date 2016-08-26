@@ -1,4 +1,4 @@
-FROM dervism/dockerjava:jre7
+FROM jeanblanchard/java:jre-8
 MAINTAINER DIFI <espen.korra@difi.no>
 
 LABEL package="no.difi"
