@@ -80,7 +80,12 @@ public class SoapFaultInterceptorLogger implements ClientInterceptor {
     public void afterCompletion(MessageContext messageContext, Exception ex) throws WebServiceClientException {
         if (Optional.ofNullable(ex).filter(e -> e instanceof SoapFaultException).isPresent()) {
             final WebServiceMessage response = messageContext.getResponse();
+            System.out.println("Fault from server: " + asString(response.getPayloadSource()));
             Audit.error("Failed to send message to correspondence agency", logMarkers.and(Markers.append("soap_fault", asString(response.getPayloadSource()))), ex);
+        } else if (ex != null)
+        {
+            System.out.println("Fault from server: " + asString(messageContext.getResponse().getPayloadSource()));
+            Audit.error("Failed to send message", logMarkers.and(Markers.append("soap_fault", asString(messageContext.getResponse().getPayloadSource()))), ex);
         }
     }
 }
