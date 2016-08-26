@@ -1,13 +1,10 @@
 package no.difi.meldingsutveksling.mxa;
 
-import net.logstash.logback.marker.LogstashMarker;
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.logging.MarkerFactory;
 import no.difi.meldingsutveksling.mxa.schema.MXADelegate;
 import no.difi.meldingsutveksling.mxa.schema.domain.Message;
-import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
@@ -17,8 +14,6 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceRequest;
 import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyValues;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +26,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.ws.BindingType;
-import java.io.File;
-import java.io.IOException;
 import java.io.StringReader;
-import java.time.Instant;
 
 import static no.difi.meldingsutveksling.mxa.MessageMarker.markerFrom;
 

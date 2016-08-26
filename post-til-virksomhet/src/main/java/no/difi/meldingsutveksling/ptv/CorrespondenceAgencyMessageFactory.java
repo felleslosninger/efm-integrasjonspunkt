@@ -23,9 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Class used to create an InsertCorrespondenceV2 object based on a PutMessageRequest(Wrapper).
- *
- * Created by kons-mwa on 01.06.2016.
+ * Class used to create an InsertCorrespondenceV2 object based on an internal message format.
  */
 public class CorrespondenceAgencyMessageFactory {
 
