@@ -35,7 +35,7 @@ public class PostVirksomhetPutMessageStrategy implements PutMessageStrategy {
         try {
             CorrespondenceAgencyValues values = CorrespondenceAgencyValues.from(putMessageWrapper, senderInfo, receiverInfo);
             final InsertCorrespondenceV2 message = CorrespondenceAgencyMessageFactory.create(config, values);
-            CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(markerFrom(putMessageWrapper));
+            CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(markerFrom(putMessageWrapper), config);
             final CorrespondenceRequest request = new CorrespondenceRequest.Builder().withUsername(config.getSystemUserCode()).withPassword(config.getPassword()).withPayload(message).build();
 
             client.send(request);

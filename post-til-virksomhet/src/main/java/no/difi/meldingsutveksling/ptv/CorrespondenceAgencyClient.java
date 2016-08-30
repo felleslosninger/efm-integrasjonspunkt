@@ -27,13 +27,15 @@ import java.net.URISyntaxException;
 public class CorrespondenceAgencyClient {
 
     private final LogstashMarker logstashMarker;
+    private final CorrespondenceAgencyConfiguration config;
 
     /**
      * Creates client to use Altinn Correspondence Agency
      * @param logstashMarker used when logging to keep track of message flow
      */
-    public CorrespondenceAgencyClient(LogstashMarker logstashMarker) {
+    public CorrespondenceAgencyClient(LogstashMarker logstashMarker, CorrespondenceAgencyConfiguration config) {
         this.logstashMarker = logstashMarker;
+        this.config = config;
     }
 
     /**
@@ -55,7 +57,7 @@ public class CorrespondenceAgencyClient {
         interceptors[1] = SoapFaultInterceptorLogger.withLogMarkers(logstashMarker);
         template.setInterceptors(interceptors);
 
-        final String uri = "https://tt02.altinn.basefarm.net/ServiceEngineExternal/CorrespondenceAgencyExternal.svc";
+        final String uri = config.getEndpointUrl();
         final String soapAction = "http://www.altinn.no/services/ServiceEngine/Correspondence/2009/10/ICorrespondenceAgencyExternal/InsertCorrespondenceV2";
         template.setMessageSender(createMessageSender());
         final URI actionURI;
