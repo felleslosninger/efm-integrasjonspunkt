@@ -14,6 +14,7 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceRequest;
 import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyValues;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,10 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.ws.BindingType;
+import java.io.File;
+import java.io.IOException;
 import java.io.StringReader;
+import java.time.Instant;
 
 import static no.difi.meldingsutveksling.mxa.MessageMarker.markerFrom;
 
@@ -75,6 +79,19 @@ public class MXAImpl implements MXADelegate {
 
         Audit.info("MXA message received", markerFrom(msg));
 
+        // TODO: get service record from SR
+        if (msg.getParticipantId().length() > 9) {
+            String fileName = "MXA-" + Instant.now().toEpochMilli() + ".xml";
+            File mxaMsgFile = new File(fileName);
+            try {
+                FileUtils.writeStringToFile(mxaMsgFile, arg0);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return INTERNAL_ERROR;
+            }
+            return SUCCESS;
+        }
+
         try {
             if (configuration.isQueueEnabled()) {
                 internalQueue.enqueueMXA(msg);
@@ -93,6 +110,7 @@ public class MXAImpl implements MXADelegate {
     }
 
     public void sendMessage(Message msg) {
+
         final InfoRecord senderInfo = serviceRegistryLookup.getInfoRecord(configuration.getOrganisationNumber());
         final InfoRecord receiverInfo = serviceRegistryLookup.getInfoRecord(msg.getParticipantId());
 
