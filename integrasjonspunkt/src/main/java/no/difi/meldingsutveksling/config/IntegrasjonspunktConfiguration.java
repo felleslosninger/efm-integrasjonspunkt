@@ -77,7 +77,7 @@ public class IntegrasjonspunktConfiguration {
     private static final String KEY_RETURN_OK_ONMISSINGPAYLOAD = "Return.Ok.OnEmptyPayload";
     protected static final String KEY_SERVICE_REGISTRY_URL = "difi.service.registry.url";
 
-    private static final String PTV_ENDPOINT_URL = "altinn.ptv.endpoint_url";
+    protected static final String PTV_ENDPOINT_URL = "altinn.ptv.endpoint_url";
 
     private Environment environment;
 
