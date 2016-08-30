@@ -7,6 +7,7 @@ public class CorrespondenceAgencyConfiguration {
     private String externalServiceCode;
     private String password;
     private String systemUserCode;
+    private String endpointUrl;
 
     private CorrespondenceAgencyConfiguration() {
     }
@@ -17,6 +18,7 @@ public class CorrespondenceAgencyConfiguration {
                 .withExternalServiceEditionCode("altinn.ptv.external_service_edition_code")
                 .withSystemUserCode("altinn.ptv.user_code")
                 .withPassword("altinn.ptv.password")
+                .withEndpointURL("altinn.ptv.endpoint_url")
                 .build();
         return configuration;
     }
@@ -35,6 +37,10 @@ public class CorrespondenceAgencyConfiguration {
 
     public String getPassword() {
         return password;
+    }
+
+    public String getEndpointUrl() {
+        return endpointUrl;
     }
 
     public static class Builder {
@@ -62,6 +68,11 @@ public class CorrespondenceAgencyConfiguration {
 
         public Builder withPassword(String password) {
             correspondenceAgencyConfiguration.password = environment.getProperty(password);
+            return this;
+        }
+
+        public Builder withEndpointURL(String url) {
+            correspondenceAgencyConfiguration.endpointUrl = environment.getProperty(url);
             return this;
         }
 

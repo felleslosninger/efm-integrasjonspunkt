@@ -118,7 +118,7 @@ public class MXAImpl implements MXADelegate {
 
         CorrespondenceAgencyValues values = CorrespondenceAgencyValues.from(msg, senderInfo, receiverInfo);
         final InsertCorrespondenceV2 message = CorrespondenceAgencyMessageFactory.create(config, values);
-        CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(markerFrom(msg));
+        CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(markerFrom(msg), config);
         final CorrespondenceRequest request = new CorrespondenceRequest.Builder().withUsername(config.getSystemUserCode()).withPassword(config.getPassword()).withPayload(message).build();
         client.send(request);
         Audit.info("MXA message sent", markerFrom(msg));
