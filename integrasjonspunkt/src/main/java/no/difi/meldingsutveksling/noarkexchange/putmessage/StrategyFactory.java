@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.lang.NotImplementedException;
 
@@ -15,9 +16,9 @@ public class StrategyFactory {
     private final EduMessageStrategyFactory eduMessageStrategyFactory;
     private final PostVirksomhetStrategyFactory postVirksomhetStrategyFactory;
 
-    public StrategyFactory(MessageSender messageSender) {
+    public StrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup) {
         eduMessageStrategyFactory = EduMessageStrategyFactory.newInstance(messageSender);
-        postVirksomhetStrategyFactory = PostVirksomhetStrategyFactory.newInstance(messageSender.getEnvironment());
+        postVirksomhetStrategyFactory = PostVirksomhetStrategyFactory.newInstance(messageSender.getEnvironment(), serviceRegistryLookup);
 
     }
 

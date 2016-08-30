@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+	<xs:element name="Message">
+		<xs:annotation>
+			<xs:documentation>This is the actual Message. One message will in the Altinn portal become one AltUt message which the participant can view.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ParticipantId">
+					<xs:annotation>
+						<xs:documentation>The ID of the participant. It must be either a 9 digit organization number or an 11 digit social security number.</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:pattern value="\d\d\d\d\d\d\d\d\d"/>
+							<xs:pattern value="\d\d\d\d\d\d\d\d\d\d\d"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="MessageReference">
+					<xs:annotation>
+						<xs:documentation>Unique message reference within a short name</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:maxLength value="40"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="Idproc">
+					<xs:annotation>
+						<xs:documentation>Key to authenticate the user when status link is opened</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:maxLength value="40"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="DueDate" type="xs:date" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Deadline to confirm a message</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="AltinnArchive" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>If this message refers to an element in the Altinn archive (i.e. a submitted form), specify the archive ID here.</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:pattern value="[A][M]\d+"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="Content">
+					<xs:annotation>
+						<xs:documentation>This is the actual content of the message which will be displayed to the user.</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="MessageHeader">
+								<xs:annotation>
+									<xs:documentation>This is the message header that will be visible on the users "Mottatt"-list in the Altinn portal.</xs:documentation>
+								</xs:annotation>
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:maxLength value="512"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+							<xs:element name="MessageSummery">
+								<xs:annotation>
+									<xs:documentation>This is a short summary of the message.</xs:documentation>
+								</xs:annotation>
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:maxLength value="2000"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+							<xs:element name="Attachments">
+								<xs:annotation>
+									<xs:documentation>This element will contain all and any attachments to the message. These can be any file type.</xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="Attachment" maxOccurs="unbounded">
+											<xs:annotation>
+												<xs:documentation>This element will contain information about 1 attachment. The content of this element must be the BASE64 encoded version of the attachment.</xs:documentation>
+											</xs:annotation>
+											<xs:complexType>
+												<xs:simpleContent>
+													<xs:extension base="xs:string">
+														<xs:attribute name="mimeType" use="required">
+															<xs:annotation>
+																<xs:documentation>The type of attachment using MIME-specification, such as application/pdf, text/plain etc.</xs:documentation>
+															</xs:annotation>
+															<xs:simpleType>
+																<xs:restriction base="xs:string">
+																	<xs:maxLength value="255"/>
+																</xs:restriction>
+															</xs:simpleType>
+														</xs:attribute>
+														<xs:attribute name="filename" use="required">
+															<xs:annotation>
+																<xs:documentation>This is the name of the file that the user will see when viewing the message and the name the web browser will save the file as.</xs:documentation>
+															</xs:annotation>
+															<xs:simpleType>
+																<xs:restriction base="xs:string">
+																	<xs:maxLength value="255"/>
+																</xs:restriction>
+															</xs:simpleType>
+														</xs:attribute>
+														<xs:attribute name="name" use="required">
+															<xs:annotation>
+																<xs:documentation>The name of the attachment.</xs:documentation>
+															</xs:annotation>
+															<xs:simpleType>
+																<xs:restriction base="xs:string">
+																	<xs:maxLength value="255"/>
+																</xs:restriction>
+															</xs:simpleType>
+														</xs:attribute>
+													</xs:extension>
+												</xs:simpleContent>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="NotificationMessages" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>This will contain the notification messages sent to the user when the AltUt message is read into Altinn.</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="NotificationMessage" maxOccurs="unbounded">
+								<xs:annotation>
+									<xs:documentation>A notification message sent to the user when the AltUt message is read into Altinn.</xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="SMSPhoneNumbers" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>This element contains the phone numbers to send an SMS to.</xs:documentation>
+											</xs:annotation>
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="SMSPhoneNumber" maxOccurs="unbounded">
+														<xs:annotation>
+															<xs:documentation>An SMS number to send the notification message to.</xs:documentation>
+														</xs:annotation>
+														<xs:simpleType>
+															<xs:restriction base="xs:string">
+																<xs:maxLength value="200"/>
+																<xs:pattern value="\+\d+"/>
+															</xs:restriction>
+														</xs:simpleType>
+													</xs:element>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+										<xs:element name="EmailAddresses" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>E-mail addresses that the notification message will be sent to.</xs:documentation>
+											</xs:annotation>
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="EmailAddress" maxOccurs="unbounded">
+														<xs:annotation>
+															<xs:documentation>An E-mail address that will receive a notification message when the AltUt message is read into Altinn.</xs:documentation>
+														</xs:annotation>
+														<xs:simpleType>
+															<xs:restriction base="xs:string">
+																<xs:maxLength value="200"/>
+																<xs:pattern value="((&quot;[^&quot;]+&quot;)|(([a-zA-Z0-9!#$%&amp;&apos;*+\-=?\^_`{|}~])+(\.([a-zA-Z0-9!#$%&amp;&apos;*+\-=?\^_`{|}~])+)*))@(((([a-zA-Z0-9]\.)|([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61})[a-zA-Z0-9]\.))*([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61})[a-zA-Z0-9]\.)([a-zA-Z]{2,6}))|((\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})))"/>
+															</xs:restriction>
+														</xs:simpleType>
+													</xs:element>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="sendingSystem" use="required">
+				<xs:annotation>
+					<xs:documentation>The unique idetifier for the system that sends messages to MXA</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="15"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="batchSending" type="xs:boolean" use="required">
+				<xs:annotation>
+					<xs:documentation>Flag to decide if the message should be delivered to Altinn as batch or via online webservice call. 0 = ws, 1 = batch</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="domain" use="required">
+				<xs:annotation>
+					<xs:documentation>A two to ten letter code showing what type of ase the documents relates to</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="2"/>
+						<xs:maxLength value="10"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="caseDescription">
+				<xs:annotation>
+					<xs:documentation>Mark denominatiom, product type, patent title etc.</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="2000"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="caseOfficer">
+				<xs:annotation>
+					<xs:documentation>Officer in charge, case officer or sending officer</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="50"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

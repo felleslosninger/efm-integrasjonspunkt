@@ -51,5 +51,4 @@ public class MarkerFactory {
     public static LogstashMarker responseMessageTextMarker(String statusMessageText) {
         return Markers.append(RESPONSE_STATUS_MESSAGE_TEXT, statusMessageText);
     }
-
 }

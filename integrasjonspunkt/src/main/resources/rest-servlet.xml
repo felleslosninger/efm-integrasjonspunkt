@@ -30,5 +30,10 @@
             <ws:service bean="#recieveService"/>
         </wss:service>
     </wss:binding>
+    <wss:binding url="/mxa">
+        <wss:service>
+            <ws:service bean="#mxaService"/>
+        </wss:service>
+    </wss:binding>
 
 </beans>
