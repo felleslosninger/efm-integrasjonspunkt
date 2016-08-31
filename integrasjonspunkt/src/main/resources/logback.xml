@@ -3,6 +3,11 @@
 
     <!-- Logstash destination -->
     <appender name="stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <if condition='property("spring.profiles.active").contains("docker")'>
+            <then>
+                <destination>logstash:8300</destination>
+            </then>
+        </if>
         <if condition='property("spring.profiles.active").contains("dev")'>
             <then>
                 <destination>integrasjonstest-miif.difi.local:8300</destination>
