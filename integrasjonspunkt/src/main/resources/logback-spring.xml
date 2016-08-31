@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true">
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener" />
+    <!-- Logstash destination -->
+    <springProperty name="destination" source="app.logger.destination"/>
+    <appender name="stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <droppedWarnFrequency>5</droppedWarnFrequency>
+        <destination>${destination}</destination>
+        <!-- encoder is required -->
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"appname":"${project.artifactId}","buildinfo.version":"${project.version}","buildinfo.lastcommit":"${buildNumber}"}</customFields>
+        </encoder>
+        <ssl>
+            <trustStore>
+                <location>classpath:logstash.jks</location>
+                <password>logstash</password>
+            </trustStore>
+        </ssl>
+    </appender>
+
+    <appender name="configMetaConsole" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%msg: %marker%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="no.difi.meldingsutveksling.config.ConfigMeta" additivity="false">
+        <appender-ref ref="stash"/>
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="configMetaConsole"/>
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="stash"/>
+    </root>
+
+</configuration>

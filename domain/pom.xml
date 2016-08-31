@@ -29,7 +29,6 @@
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
-            <version>4.5.1</version>
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>

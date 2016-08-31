@@ -7,12 +7,12 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static org.junit.Assert.assertEquals;
+import org.springframework.boot.test.context.SpringBootTest;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 /**
  * Integration test class for {@link IntegrasjonspunktImpl}.
@@ -20,8 +20,7 @@ import static org.junit.Assert.assertEquals;
  * Mock overrides are configured in {@link IntegrasjonspunktIntegrationTestConfig}.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(IntegrasjonspunktApplication.class)
-@WebIntegrationTest
+@SpringBootTest(classes = IntegrasjonspunktApplication.class, webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test")
 public class IntegrasjonspunktImplIntegrationTest {
 
