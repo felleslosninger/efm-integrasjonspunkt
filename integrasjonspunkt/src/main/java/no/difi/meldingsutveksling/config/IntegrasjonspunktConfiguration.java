@@ -25,12 +25,6 @@ public class IntegrasjonspunktConfiguration {
 
     @Configuration
     @Profile({"dev", "itest", "systest", "staging", "production", "test"})
-    @PropertySources(value = {
-            @PropertySource("classpath:properties/application.properties"),
-            @PropertySource("classpath:properties/integrasjonspunkt.properties"),
-            @PropertySource("classpath:properties/application-${spring.profiles.active}.properties"),
-            @PropertySource("classpath:properties/integrasjonspunkt-${spring.profiles.active}.properties")
-    })
     static class Default {
     }
 
