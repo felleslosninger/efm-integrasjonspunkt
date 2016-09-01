@@ -22,7 +22,7 @@ ENV KEYSTOREPASS changeit
 
 ADD ${APP_PREFIX}*.jar ${APP_DIR}/app.jar
 #ADD ./integrasjonspunkt-docker.properties ${APP_DIR}/integrasjonspunkt-local.properties
-RUN echo -e '#!/bin/sh\njava -jar ${APP_JAVA_PARAMS} ${APP_DIR}/app.jar ${APP_MAIN_CLASS} --spring.profiles.active=${APP_PROFILE} "$@"' > ${APP_DIR}/run.sh && \
+RUN touch ${APP_DIR}/integrasjonspunkt-local.properties; echo -e '#!/bin/sh\njava -jar ${APP_JAVA_PARAMS} ${APP_DIR}/app.jar ${APP_MAIN_CLASS} --spring.profiles.active=${APP_PROFILE} "$@"' > ${APP_DIR}/run.sh && \
 	chmod a+x ${APP_DIR}/run.sh
 #
 # Open ports for incoming connections

@@ -33,7 +33,7 @@
                         <artifactId>docker-maven-plugin</artifactId>
                         <version>0.4.11</version>
                         <configuration>
-                            <imageName>${docker.registry}move/${project.artifactId}</imageName>
+                            <imageName>${docker.registry}difi/${project.artifactId}</imageName>
                             <dockerDirectory>${project.basedir}/src/main/docker</dockerDirectory>
                             <imageTags>
                                 <imageTag>${project.version}</imageTag>
@@ -139,7 +139,7 @@
                 <artifactId>docker-maven-plugin</artifactId>
                 <version>0.4.11</version>
                 <configuration>
-                    <imageName>${docker.registry}move/${project.artifactId}</imageName>
+                    <imageName>${docker.registry}/${project.artifactId}</imageName>
                     <dockerDirectory>${project.basedir}/src/main/docker</dockerDirectory>
                     <imageTags>
                         <imageTag>${project.version}</imageTag>
@@ -151,6 +151,7 @@
                             <include>${project.build.finalName}.jar</include>
                         </resource>
                     </resources>
+                    <useConfigFile>true</useConfigFile>
                 </configuration>
             </plugin>
 
