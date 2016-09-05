@@ -303,11 +303,5 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>no.difi.commons</groupId>
-            <artifactId>commons-asic</artifactId>
-            <version>0.9.2</version>
-        </dependency>
-
     </dependencies>
 </project>
