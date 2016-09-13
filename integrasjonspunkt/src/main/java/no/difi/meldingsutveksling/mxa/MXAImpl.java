@@ -2,6 +2,9 @@ package no.difi.meldingsutveksling.mxa;
 
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
+import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.core.EDUCoreFactory;
+import no.difi.meldingsutveksling.core.EDUMessage;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.mxa.schema.MXADelegate;
 import no.difi.meldingsutveksling.mxa.schema.domain.Message;
@@ -110,14 +113,12 @@ public class MXAImpl implements MXADelegate {
     }
 
     public void sendMessage(Message msg) {
-
-        final InfoRecord senderInfo = serviceRegistryLookup.getInfoRecord(configuration.getOrganisationNumber());
-        final InfoRecord receiverInfo = serviceRegistryLookup.getInfoRecord(msg.getParticipantId());
+        EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
+        EDUMessage eduMessage = eduCoreFactory.createEduMessage(msg, configuration.getOrganisationNumber());
 
         CorrespondenceAgencyConfiguration config = CorrespondenceAgencyConfiguration.configurationFrom(environment);
 
-        CorrespondenceAgencyValues values = CorrespondenceAgencyValues.from(msg, senderInfo, receiverInfo);
-        final InsertCorrespondenceV2 message = CorrespondenceAgencyMessageFactory.create(config, values);
+        final InsertCorrespondenceV2 message = CorrespondenceAgencyMessageFactory.create(config, eduMessage);
         CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(markerFrom(msg), config);
         final CorrespondenceRequest request = new CorrespondenceRequest.Builder().withUsername(config.getSystemUserCode()).withPassword(config.getPassword()).withPayload(message).build();
         client.send(request);

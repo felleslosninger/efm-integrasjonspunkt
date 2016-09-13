@@ -11,6 +11,8 @@ import no.altinn.schemas.services.serviceengine.subscription._2009._10.Attachmen
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentExternalBEV2List;
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentV2;
+import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.core.EDUMessage;
 import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyValues;
 
 import javax.xml.bind.JAXBElement;
@@ -18,6 +20,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.time.ZonedDateTime;
+import java.util.Base64;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,6 +46,101 @@ public class CorrespondenceAgencyMessageFactory {
     }
 
     private CorrespondenceAgencyMessageFactory() {
+    }
+
+    public static InsertCorrespondenceV2 create(CorrespondenceAgencyConfiguration postConfig, EDUMessage edu) {
+
+        MyInsertCorrespondenceV2 correspondence = new MyInsertCorrespondenceV2();
+        ObjectFactory objectFactory = new ObjectFactory();
+
+        correspondence.setReportee(objectFactory.createMyInsertCorrespondenceV2Reportee(edu.getReceiver().getOrgNr()));
+        // Service code, default 4255
+        correspondence.setServiceCode(getServiceCode(postConfig));
+        // Service edition, default 10
+        correspondence.setServiceEdition(getServiceEditionCode(postConfig));
+        // Should the user be allowed to forward the message from portal
+        correspondence.setAllowForwarding(objectFactory.createMyInsertCorrespondenceV2AllowForwarding(false));
+        // Name of the message sender, always "Avsender"
+        correspondence.setMessageSender(objectFactory.createMyInsertCorrespondenceV2MessageSender("Avsender"));
+        // The date and time the message should be visible in the Portal
+        correspondence.setVisibleDateTime(toXmlGregorianCalendar(ZonedDateTime.now()));
+        correspondence.setDueDateTime(toXmlGregorianCalendar(ZonedDateTime.now().plusDays(7)));
+
+        Notification2009 notification = new Notification2009();
+        no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory notificationFactory = new no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory();
+        notification.setFromAddress(notificationFactory.createNotification2009FromAddress("no-reply@altinn.no"));
+        // The date and time the notification should be sent
+        notification.setShipmentDateTime(toXmlGregorianCalendar(ZonedDateTime.now().plusMinutes(5)));
+        // Language code of the notification
+        notification.setLanguageCode(notificationFactory.createNotification2009LanguageCode("1044"));
+        // Notification type
+        notification.setNotificationType(notificationFactory.createNotification2009NotificationType("offentlig_etat"));
+
+        TextTokenSubstitutionBEList tokens = new TextTokenSubstitutionBEList();
+        // Name of the message sender
+        tokens.getTextToken().add(createTextToken(0, edu.getSender().getOrgName()));
+        // Message area, based on ServiceEdition
+        tokens.getTextToken().add(createTextToken(1, serviceEditionMapping.get(Integer.valueOf(getServiceEditionCode(postConfig).getValue()))));
+        // Name of the message recipient
+        tokens.getTextToken().add(createTextToken(2, edu.getReceiver().getOrgName()));
+        notification.setTextTokens(notificationFactory.createNotification2009TextTokens(tokens));
+
+        JAXBElement<ReceiverEndPointBEList> receiverEndpoints = createReceiverEndPoint();
+        notification.setReceiverEndPoints(receiverEndpoints);
+
+        NotificationBEList notifications = new NotificationBEList();
+        notifications.getNotification().add(notification);
+        correspondence.setNotifications(objectFactory.createMyInsertCorrespondenceV2Notifications(notifications));
+
+        ExternalContentV2 externalContentV2 = new ExternalContentV2();
+        externalContentV2.setLanguageCode(objectFactory.createExternalContentV2LanguageCode("1044"));
+        externalContentV2.setMessageTitle(objectFactory.createExternalContentV2MessageTitle(edu.getPayload().getJournpost().getJpInnhold()));
+        externalContentV2.setMessageSummary(objectFactory.createExternalContentV2MessageSummary(edu.getPayload().getJournpost().getJpInnhold()));
+        externalContentV2.setMessageBody(objectFactory.createExternalContentV2MessageBody(edu.getPayload().getJournpost().getJpOffinnhold()));
+
+        // The date and time the message can be deleted by the user
+        correspondence.setAllowSystemDeleteDateTime(
+                objectFactory.createMyInsertCorrespondenceV2AllowSystemDeleteDateTime(
+                        toXmlGregorianCalendar(getAllowSystemDeleteDateTime(edu))));
+
+        // FunctionType
+        no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory reporteeFactory = new no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory();
+        BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
+        edu.getPayload().getJournpost().getDokument().forEach(d -> {
+            BinaryAttachmentV2 binaryAttachmentV2 = new BinaryAttachmentV2();
+            binaryAttachmentV2.setFunctionType(AttachmentFunctionType.fromValue("Unspecified"));
+            binaryAttachmentV2.setFileName(reporteeFactory.createBinaryAttachmentV2FileName(d.getVeFilnavn()));
+            binaryAttachmentV2.setName(reporteeFactory.createBinaryAttachmentV2Name(d.getVeFilnavn()));
+            binaryAttachmentV2.setEncrypted(false);
+            binaryAttachmentV2.setSendersReference(reporteeFactory.createBinaryAttachmentV2SendersReference("AttachmentReference_as123452"));
+            binaryAttachmentV2.setData(reporteeFactory.createBinaryAttachmentV2Data(Base64.getDecoder().decode(d.getFil().getBase64())));
+            attachmentExternalBEV2List.getBinaryAttachmentV2().add(binaryAttachmentV2);
+        });
+
+        AttachmentsV2 attachmentsV2 = new AttachmentsV2();
+        attachmentsV2.setBinaryAttachments(objectFactory.createAttachmentsV2BinaryAttachments(attachmentExternalBEV2List));
+        externalContentV2.setAttachments(objectFactory.createExternalContentV2Attachments(attachmentsV2));
+        correspondence.setContent(objectFactory.createMyInsertCorrespondenceV2Content(externalContentV2));
+
+        no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory correspondenceObjectFactory = new no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory();
+        final InsertCorrespondenceV2 myInsertCorrespondenceV2 = correspondenceObjectFactory.createInsertCorrespondenceV2();
+        myInsertCorrespondenceV2.setCorrespondence(correspondence);
+        myInsertCorrespondenceV2.setSystemUserCode(postConfig.getSystemUserCode());
+        // Reference set by the message sender
+        myInsertCorrespondenceV2.setExternalShipmentReference(edu.getId());
+
+        return myInsertCorrespondenceV2;
+    }
+
+    private static ZonedDateTime getAllowSystemDeleteDateTime(EDUCore edu) {
+        switch (edu.getMessageType()) {
+            case EDU:
+                return ZonedDateTime.now().plusMinutes(5);
+            case MXA:
+                return ZonedDateTime.now().plusYears(5);
+            default:
+                return ZonedDateTime.now().plusMinutes(5);
+        }
     }
 
     public static InsertCorrespondenceV2 create(CorrespondenceAgencyConfiguration postConfig, CorrespondenceAgencyValues values) {
@@ -161,7 +259,7 @@ public class CorrespondenceAgencyMessageFactory {
         return objectFactory.createNotification2009ReceiverEndPoints(receiverEndpoints);
     }
 
-    public static XMLGregorianCalendar toXmlGregorianCalendar(ZonedDateTime date) {
+    private static XMLGregorianCalendar toXmlGregorianCalendar(ZonedDateTime date) {
         try {
             return DatatypeFactory.newInstance().newXMLGregorianCalendar(GregorianCalendar.from(date));
         } catch (DatatypeConfigurationException e) {

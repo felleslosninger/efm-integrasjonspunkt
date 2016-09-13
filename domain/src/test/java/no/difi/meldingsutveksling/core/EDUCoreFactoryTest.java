@@ -141,7 +141,7 @@ public class EDUCoreFactoryTest {
     public void testUnmarshallPayload() {
         ServiceRegistryLookup srLookupMock = Mockito.mock(ServiceRegistryLookup.class);
         EDUCoreFactory eduCoreFactory = new EDUCoreFactory(srLookupMock);
-        MeldingType meldingType = eduCoreFactory.unmarshallPayload(StringEscapeUtils.unescapeXml(escapedXml));
+        MeldingType meldingType = (MeldingType) eduCoreFactory.unmarshallPayload(StringEscapeUtils.unescapeXml(escapedXml));
         Assert.assertEquals("210570", meldingType.getJournpost().getJpId());
     }
 }

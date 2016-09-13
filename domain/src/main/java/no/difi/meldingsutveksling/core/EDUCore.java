@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.core;
 
 import com.google.common.base.MoreObjects;
+import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 
 /**
@@ -11,7 +12,26 @@ public class EDUCore {
     private String id;
     private Sender sender;
     private Receiver receiver;
-    private MeldingType meldingType;
+    private Object payload;
+    private MessageType messageType;
+
+    EDUCore() {}
+
+    public enum MessageType {
+        EDU,
+        MXA,
+        APPRECEIPT,
+        UNKNOWN
+    }
+
+    public MessageType getMessageType() {
+        return messageType;
+    }
+
+    public void setMessageType(MessageType messageType) {
+        this.messageType = messageType;
+    }
+
 
     public String getId() {
         return id;
@@ -37,12 +57,12 @@ public class EDUCore {
         this.receiver = receiver;
     }
 
-    public MeldingType getMeldingType() {
-        return meldingType;
+    public Object getPayload() {
+        return payload;
     }
 
-    public void setMeldingType(MeldingType meldingType) {
-        this.meldingType = meldingType;
+    public void setPayload(Object payload) {
+        this.payload = payload;
     }
 
     @Override
@@ -51,7 +71,6 @@ public class EDUCore {
                 .add("id", id)
                 .add("sender", sender)
                 .add("receiver", receiver)
-                .add("meldingType", meldingType)
                 .toString();
     }
 }
