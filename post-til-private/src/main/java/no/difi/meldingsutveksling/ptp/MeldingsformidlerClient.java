@@ -28,7 +28,7 @@ public class MeldingsformidlerClient {
         KontaktInfo kontaktInfo = new KontaktInfo(); // this should come from SR once we're done
         Mottaker mottaker = Mottaker.builder(request.getMottakerPid(), kontaktInfo.getPostkasseAdresse(), Sertifikat.fraByteArray(kontaktInfo.getCertificate()), kontaktInfo.getOrgnrPostkasse()).build();
         DigitalPost digitalPost = DigitalPost.builder(mottaker, request.getSubject()).virkningsdato(new Date()).build();
-        Dokument dokument = Dokument.builder(request.getDocumentTitle(), request.getDocumentName(), request.getDocument()).build();
+        Dokument dokument = Dokument.builder(request.getDocumentTitle(), request.getDocumentName(), request.getDocument()).mimeType("application/vnd.openxmlformats-officedocument.wordprocessingml.document").build();
         Dokumentpakke dokumentpakke = Dokumentpakke.builder(dokument).build(); // skal dokumentpakke ha vedlegg?
         Behandlingsansvarlig behandlingsansvarlig = Behandlingsansvarlig.builder(request.getSenderOrgnumber()).build();
 
