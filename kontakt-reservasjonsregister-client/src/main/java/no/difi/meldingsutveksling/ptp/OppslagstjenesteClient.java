@@ -1,13 +1,13 @@
 package no.difi.meldingsutveksling.ptp;
 
 import net.logstash.logback.marker.Markers;
-import no.difi.ptp.oppslagstjenesten.HentPersonerForespoersel;
-import no.difi.ptp.oppslagstjenesten.HentPersonerRespons;
-import no.difi.ptp.oppslagstjenesten.Informasjonsbehov;
+import no.difi.ptp.sikkerdigitalpost.HentPersonerForespoersel;
+import no.difi.ptp.sikkerdigitalpost.HentPersonerRespons;
+import no.difi.ptp.sikkerdigitalpost.Informasjonsbehov;
 import no.difi.webservice.support.SoapFaultInterceptorLogger;
-import org.apache.ws.security.WSPasswordCallback;
-import org.apache.ws.security.components.crypto.Crypto;
-import org.apache.ws.security.components.crypto.Merlin;
+import org.apache.wss4j.common.crypto.Crypto;
+import org.apache.wss4j.common.crypto.Merlin;
+import org.apache.wss4j.common.ext.WSPasswordCallback;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
@@ -15,8 +15,8 @@ import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 import org.springframework.ws.soap.SoapVersion;
 import org.springframework.ws.soap.axiom.AxiomSoapMessageFactory;
-import org.springframework.ws.soap.security.wss4j.Wss4jSecurityInterceptor;
-import org.springframework.ws.soap.security.wss4j.support.CryptoFactoryBean;
+import org.springframework.ws.soap.security.wss4j2.Wss4jSecurityInterceptor;
+import org.springframework.ws.soap.security.wss4j2.support.CryptoFactoryBean;
 
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -31,15 +31,16 @@ public class OppslagstjenesteClient {
         this.conf = configuration;
     }
 
-    public HentPersonerRespons hentKontaktInformasjon(String pid) {
-        final HentPersonerForespoersel hentPersonerForespoersel = HentPersonerForespoersel.builder().
-                addInformasjonsbehov(Informasjonsbehov.KONTAKTINFO)
+    public KontaktInfo hentKontaktInformasjon(String pid) {
+        final HentPersonerForespoersel hentPersonerForespoersel = HentPersonerForespoersel.builder()
+                .addInformasjonsbehov(Informasjonsbehov.KONTAKTINFO, Informasjonsbehov.SIKKER_DIGITAL_POST, Informasjonsbehov.SERTIFIKAT)
                 .addPersonidentifikator(pid)
                 .build();
 
-        WebServiceTemplate template = createWebServiceTemplate("no.difi.ptp.oppslagstjenesten");
+        WebServiceTemplate template = createWebServiceTemplate(HentPersonerRespons.class.getPackage().getName());
 
-        return (HentPersonerRespons) template.marshalSendAndReceive(conf.url, hentPersonerForespoersel);
+        final HentPersonerRespons hentPersonerRespons = (HentPersonerRespons) template.marshalSendAndReceive(conf.url, hentPersonerForespoersel);
+        return KontaktInfo.from(hentPersonerRespons);
 
     }
 

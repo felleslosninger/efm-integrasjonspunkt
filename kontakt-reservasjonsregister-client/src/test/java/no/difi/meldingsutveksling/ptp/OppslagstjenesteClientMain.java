@@ -6,6 +6,8 @@ public class OppslagstjenesteClientMain {
     public static void main(String[] args) {
         final Configuration configuration = new Configuration("https://kontaktinfo-ws-ver2.difi.no/kontaktinfo-external/ws-v5", "changeit", "client_alias", "ver2");
         OppslagstjenesteClient client = new OppslagstjenesteClient(configuration);
-        client.hentKontaktInformasjon("23079421936");
+//        client.hentKontaktInformasjon("23079421936");
+        final KontaktInfo kontaktInfo = client.hentKontaktInformasjon("06045000883");
+        System.out.println(kontaktInfo);
     }
 }
