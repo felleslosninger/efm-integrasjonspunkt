@@ -14,7 +14,7 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>noarkexchange</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
@@ -43,7 +43,7 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>test-tools</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
             <scope>test</scope>
         </dependency>
 

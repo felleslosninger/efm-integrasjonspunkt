@@ -19,7 +19,7 @@
         <jersey-version>1.8</jersey-version>
         <jstlVersion>1.2</jstlVersion>
         <jerseyVersion>1.17</jerseyVersion>
-        <docker.registry>docker-registry.dmz.local/</docker.registry>
+        <docker.registry>docker-registry.dmz.local/difi</docker.registry>
     </properties>
 
     <profiles>
@@ -32,10 +32,10 @@
                         <artifactId>docker-maven-plugin</artifactId>
                         <version>0.4.11</version>
                         <configuration>
-                            <imageName>${docker.registry}difi/${project.artifactId}</imageName>
+                            <imageName>${docker.registry}/${project.artifactId}</imageName>
                             <dockerDirectory>${project.basedir}/src/main/docker</dockerDirectory>
                             <imageTags>
-                                <imageTag>${project.version}</imageTag>
+                                <imageTag>${project.parent.version}</imageTag>
                                 <imageTag>latest</imageTag>
                             </imageTags>
                             <resources>
@@ -159,7 +159,7 @@
                     <imageName>${docker.registry}/${project.artifactId}</imageName>
                     <dockerDirectory>${project.basedir}/src/main/docker</dockerDirectory>
                     <imageTags>
-                        <imageTag>${project.version}</imageTag>
+                        <imageTag>${project.parent.version}</imageTag>
                     </imageTags>
                     <resources>
                         <resource>
@@ -206,7 +206,7 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>service-registry-client</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -329,43 +329,43 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>noarkexchange-ephorte</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>noarkexchange-p360</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>noarkexchange-websak</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>mxa</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>transport</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>transport-altinn</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>domain</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
@@ -377,7 +377,7 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>kvittering</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
 
@@ -443,7 +443,7 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>noarkexchange</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
@@ -500,17 +500,17 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>audit</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>transport-file</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>post-til-virksomhet</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
 </project>

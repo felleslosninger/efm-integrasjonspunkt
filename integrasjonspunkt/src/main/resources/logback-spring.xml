@@ -4,6 +4,7 @@
     <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener" />
     <!-- Logstash destination -->
     <springProperty name="destination" source="app.logger.destination"/>
+    <springProperty name="profiles" source="app.logger.destination"/>
     <appender name="stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <droppedWarnFrequency>5</droppedWarnFrequency>
         <destination>${destination}</destination>
@@ -11,26 +12,17 @@
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <customFields>{"appname":"${project.artifactId}","buildinfo.version":"${project.version}","buildinfo.lastcommit":"${buildNumber}"}</customFields>
         </encoder>
-        <ssl>
-            <trustStore>
-                <location>classpath:logstash.jks</location>
-                <password>logstash</password>
-            </trustStore>
-        </ssl>
+        <if condition="property('spring.profiles.active').contains('docker')">
+            <then>
+                <ssl>
+                    <trustStore>
+                        <location>classpath:logstash.jks</location>
+                        <password>logstash</password>
+                    </trustStore>
+                </ssl>
+            </then>
+        </if>
     </appender>
-
-    <appender name="configMetaConsole" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <charset>UTF-8</charset>
-            <pattern>%msg: %marker%n</pattern>
-        </encoder>
-    </appender>
-
-    <logger name="no.difi.meldingsutveksling.config.ConfigMeta" additivity="false">
-        <appender-ref ref="stash"/>
-        <appender-ref ref="FILE"/>
-        <appender-ref ref="configMetaConsole"/>
-    </logger>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>

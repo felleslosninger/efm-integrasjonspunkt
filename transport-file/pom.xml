@@ -15,13 +15,13 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>transport</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>domain</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
@@ -33,13 +33,13 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>kvittering</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>noarkexchange</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>

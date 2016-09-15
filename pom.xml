@@ -7,7 +7,7 @@
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <name>Multiproject for meldingsutveksling</name>
-    
+
     <scm>
         <connection>scm:git:https://github.com/difi/move-integrasjonspunkt</connection>
         <developerConnection>scm:git:https://github.com/difi/move-integrasjonspunkt</developerConnection>
@@ -21,7 +21,7 @@
         <apache.commons.version>10.0-b28</apache.commons.version>
         <jacoco.version>0.7.5.201505241946</jacoco.version>
         <!-- bug with logstash-logback-encoder in 1.1.7, wait for 1.1.8 http://jira.qos.ch/browse/LOGBACK-1158 -->
-        <logback.version>1.1.6</logback.version> 
+        <logback.version>1.1.6</logback.version>
         <mockito.version>1.10.19</mockito.version>
     </properties>
 
@@ -70,13 +70,6 @@
                 <artifactId>apache-commons</artifactId>
                 <version>${apache.commons.version}</version>
             </dependency>
-<!--
-            <dependency>
-                <groupId>com.thoughtworks.xstream</groupId>
-                <artifactId>xstream</artifactId>
-                <version>${xstream.version}</version>
-            </dependency>
--->
 
             <dependency>
                 <groupId>org.mockito</groupId>

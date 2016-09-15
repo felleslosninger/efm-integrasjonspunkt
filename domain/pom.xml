@@ -33,7 +33,7 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>audit</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
 
