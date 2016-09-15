@@ -17,36 +17,24 @@
     <dependency>
       <groupId>no.difi.meldingsutveksling</groupId>
       <artifactId>transport</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>${project.parent.version}</version>
     </dependency>
-
-    <dependency>
-      <groupId>no.difi.vefa</groupId>
-      <artifactId>peppol-lookup</artifactId>
-      <version>0.9.3</version>
-      <exclusions>
-        <exclusion>
-          <groupId>no.difi.commons</groupId>
-          <artifactId>commons-certvalidator</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-
     <dependency>
       <groupId>no.difi.meldingsutveksling</groupId>
       <artifactId>domain</artifactId>
-      <version>${parent.version}</version>
+      <version>${project.parent.version}</version>
     </dependency>
 
     <dependency>
       <groupId>no.difi.meldingsutveksling</groupId>
       <artifactId>altinn-client</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>${project.parent.version}</version>
     </dependency>
 
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>
