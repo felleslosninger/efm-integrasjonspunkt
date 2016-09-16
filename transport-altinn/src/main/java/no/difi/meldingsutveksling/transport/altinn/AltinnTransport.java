@@ -3,13 +3,9 @@ package no.difi.meldingsutveksling.transport.altinn;
 import no.difi.meldingsutveksling.AltinnWsClient;
 import no.difi.meldingsutveksling.AltinnWsConfiguration;
 import no.difi.meldingsutveksling.AltinnWsRequest;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
-import no.difi.meldingsutveksling.elma.ELMALookup;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.transport.Transport;
-import no.difi.vefa.peppol.common.model.Endpoint;
-import no.difi.vefa.peppol.lookup.api.LookupException;
 import org.springframework.core.env.Environment;
 
 
