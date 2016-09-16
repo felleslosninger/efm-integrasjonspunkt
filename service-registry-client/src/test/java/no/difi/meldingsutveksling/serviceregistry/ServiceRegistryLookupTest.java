@@ -3,6 +3,8 @@ package no.difi.meldingsutveksling.serviceregistry;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.OrganizationType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,6 +24,7 @@ import static org.mockito.Mockito.when;
 public class ServiceRegistryLookupTest {
 
     private static final String ORGNR = "12345678";
+    private static final String ORGNAME = "test";
 
     @Mock
     private RestClient client;
@@ -100,7 +103,8 @@ public class ServiceRegistryLookupTest {
         }
 
         String build() {
-            InfoRecord infoRecord = new InfoRecord(primaryServiceIdentifier, ORGNR);
+            OrganizationType organizationType = new OrganizationType("Organisasjonsledd", "ORGL");
+            InfoRecord infoRecord = new InfoRecord(primaryServiceIdentifier, ORGNR, ORGNAME, organizationType);
 
             final HashMap<String, Object> content = new HashMap<>();
 

@@ -9,23 +9,33 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.ptv.CorrespondenceRequest;
+import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyValues;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageMarker.markerFrom;
 
 public class PostVirksomhetPutMessageStrategy implements PutMessageStrategy {
 
     private final CorrespondenceAgencyConfiguration config;
+    private final ServiceRegistryLookup serviceRegistryLookup;
 
-    public PostVirksomhetPutMessageStrategy(CorrespondenceAgencyConfiguration config) {
+    public PostVirksomhetPutMessageStrategy(CorrespondenceAgencyConfiguration config, ServiceRegistryLookup serviceRegistryLookup) {
         this.config = config;
+        this.serviceRegistryLookup = serviceRegistryLookup;
     }
 
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType requestType) {
         final PutMessageRequestWrapper putMessageWrapper = new PutMessageRequestWrapper(requestType);
+        InfoRecord senderInfo = serviceRegistryLookup.getInfoRecord(putMessageWrapper.getSenderPartynumber());
+        InfoRecord receiverInfo = serviceRegistryLookup.getInfoRecord(putMessageWrapper.getRecieverPartyNumber());
         try {
-            final InsertCorrespondenceV2 message = CorrespondenceAgencyMessageFactory.create(config, putMessageWrapper);
-            CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(markerFrom(putMessageWrapper));
+            CorrespondenceAgencyValues values = CorrespondenceAgencyValues.from(putMessageWrapper, senderInfo, receiverInfo);
+            final InsertCorrespondenceV2 message = CorrespondenceAgencyMessageFactory.create(config, values);
+            CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(markerFrom(putMessageWrapper), config);
             final CorrespondenceRequest request = new CorrespondenceRequest.Builder().withUsername(config.getSystemUserCode()).withPassword(config.getPassword()).withPayload(message).build();
 
             client.send(request);

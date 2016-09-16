@@ -21,13 +21,18 @@ import java.nio.file.Paths;
 import static org.apache.commons.lang.StringUtils.isBlank;
 
 @Component
-@PropertySources(value = {
-        @PropertySource("classpath:properties/application.properties"),
-        @PropertySource("classpath:properties/integrasjonspunkt.properties"),
-        @PropertySource("classpath:properties/application-${spring.profiles.active}.properties"),
-        @PropertySource("classpath:properties/integrasjonspunkt-${spring.profiles.active}.properties")
-})
 public class IntegrasjonspunktConfiguration {
+
+    @Configuration
+    @Profile({"dev", "itest", "systest", "staging", "production", "test"})
+    @PropertySources(value = {
+            @PropertySource("classpath:properties/application.properties"),
+            @PropertySource("classpath:properties/integrasjonspunkt.properties"),
+            @PropertySource("classpath:properties/application-${spring.profiles.active}.properties"),
+            @PropertySource("classpath:properties/integrasjonspunkt-${spring.profiles.active}.properties")
+    })
+    static class Default {
+    }
 
     @Configuration
     @Profile({"dev", "itest", "systest", "staging", "production"})
@@ -77,6 +82,8 @@ public class IntegrasjonspunktConfiguration {
     private static final String KEY_RETURN_OK_ONMISSINGPAYLOAD = "Return.Ok.OnEmptyPayload";
     protected static final String KEY_SERVICE_REGISTRY_URL = "difi.service.registry.url";
 
+    protected static final String PTV_ENDPOINT_URL = "altinn.ptv.endpoint_url";
+
     private Environment environment;
 
     @Autowired
@@ -90,6 +97,7 @@ public class IntegrasjonspunktConfiguration {
         validateProperty(KEY_PRIVATEKEYPASSWORD);
         validateProperty(KEY_ORGANISATION_NUMBER);
         validateProperty(KEY_NOARKSYSTEM_TYPE);
+        validateProperty(PTV_ENDPOINT_URL);
         MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, getOrganisationNumber());
         validateSpringMetrics();
     }

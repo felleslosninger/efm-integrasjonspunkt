@@ -1,11 +1,14 @@
 package no.difi.meldingsutveksling.ptv;
 
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
+import no.difi.meldingsutveksling.mxa.schema.domain.Message;
 import no.difi.meldingsutveksling.noarkexchange.PayloadException;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
 import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
+import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyValues;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -22,7 +25,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * Testclass for {@link CorrespondenceAgencyMessageFactory}
- *
+ * <p>
  * Created by kons-mwa on 01.06.2016.
  */
 public class CorrespondenceAgencyMessageFactoryTest {
@@ -118,13 +121,48 @@ public class CorrespondenceAgencyMessageFactoryTest {
             "    </envelope>\n" +
             "    <payload xmlns=\"\"><![CDATA[<?xml version=\"1.0\" encoding=\"utf-8\"?><Melding xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.arkivverket.no/Noark4-1-WS-WD/types\"><journpost xmlns=\"\"><jpId>219816</jpId><jpJaar>2015</jpJaar><jpSeknr>11734</jpSeknr><jpJpostnr>2</jpJpostnr><jpJdato>2015-10-08</jpJdato><jpNdoktype>U</jpNdoktype><jpDokdato>2015-10-08</jpDokdato><jpStatus>F</jpStatus><jpInnhold>Test1</jpInnhold><jpU1>0</jpU1><jpForfdato /><jpTgkode /><jpUoff /><jpAgdato /><jpAgkode /><jpSaksdel /><jpU2>0</jpU2><jpArkdel /><jpTlkode /><jpAntved>0</jpAntved><jpSaar>2014</jpSaar><jpSaseknr>2703</jpSaseknr><jpOffinnhold>Test2</jpOffinnhold><jpTggruppnavn /><avsmot><amId>501153</amId><amOrgnr>974763907</amOrgnr><amIhtype>1</amIhtype><amKopimot>0</amKopimot><amBehansv>0</amBehansv><amNavn>Fylkesmannen i Sogn og Fjordane</amNavn><amU1>0</amU1><amKortnavn>FMSF</amKortnavn><amAdresse>Njøsavegen 2</amAdresse><amPostnr>6863</amPostnr><amPoststed>Leikanger</amPoststed><amUtland /><amEpostadr>fmsfpost@fylkesmannen.no</amEpostadr><amRef /><amJenhet /><amAvskm /><amAvskdato /><amFrist /><amForsend>D</amForsend><amAdmkort>[Ufordelt]</amAdmkort><amAdmbet>Ufordelt/sendt tilbake til arkiv</amAdmbet><amSbhinit>[Ufordelt]</amSbhinit><amSbhnavn>Ikke fordelt til saksbehandler</amSbhnavn><amAvsavdok /><amBesvardok /></avsmot><dokument><dlRnr>1</dlRnr><dlType>H</dlType><dbKategori>ND</dbKategori><dbTittel>Test1</dbTittel><dbStatus>F</dbStatus><veVariant>A</veVariant><veDokformat>RA-PDF</veDokformat><fil><base64>aGVsbG8gd29ybGQ=</base64></fil><veFilnavn>Edu testdokument.DOCX</veFilnavn><veMimeType /></dokument></journpost><noarksak xmlns=\"\"><saId>68286</saId><saSaar>2014</saSaar><saSeknr>2703</saSeknr><saPapir>0</saPapir><saDato>2014-11-27</saDato><saTittel>Test Knutepunkt herokuapp</saTittel><saU1>0</saU1><saStatus>B</saStatus><saArkdel>EARKIV1</saArkdel><saType /><saJenhet>SENTRAL</saJenhet><saTgkode /><saUoff /><saBevtid /><saKasskode /><saKassdato /><saProsjekt /><saOfftittel>Test Knutepunkt herokuapp</saOfftittel><saAdmkort>FM-ADMA</saAdmkort><saAdmbet>Administrasjon</saAdmbet><saAnsvinit>JPS</saAnsvinit><saAnsvnavn>John Petter Svedal</saAnsvnavn><saTggruppnavn /></noarksak></Melding>]]></payload></PutMessageRequest>";
 
-    private JAXBContext jaxbContext;
+    private static String cdataTaggedMxaXml = "<Message batchSending=\"1\" domain=\"PT\" sendingSystem=\"AGENCY\"\n" +
+            "xsi:noNamespaceSchemaLocation=\"sant_mxa.xsd\"\n" +
+            "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+            "caseDescription=\"test message example\" caseOfficer=\"ttt,Mr. Test\">\n" +
+            "<ParticipantId>910075918</ParticipantId>\n" +
+            "<MessageReference>P1234-5-test</MessageReference>\n" +
+            "<Idproc>66A50D806D9444E5E044000E7F7E0BD2</Idproc>\n" +
+            "<DueDate>2009-04-07</DueDate>\n" +
+            "<AltinnArchive>AM12345</AltinnArchive>\n" +
+            "<Content>\n" +
+            "    <MessageHeader><![CDATA[Test1]]></MessageHeader>\n" +
+            "    <MessageSummery><![CDATA[Test2]]></MessageSummery>    \n" +
+            "    <Attachments>\n" +
+            "      <Attachment filename=\"Edu testdokument.DOCX\" name=\"Vedlegg 1\"\n" +
+            "        mimeType=\"text/plain\">RGV0dGUgZXIgZmlsIG51bW1lciAxLgoK</Attachment>\n" +
+            "      <Attachment filename=\"filename.txt\" name=\"Vedlegg 1\"\n" +
+            "        mimeType=\"text/plain\">SGVyIGVyIGZpbCBudW1tZXIgMi4KCg==</Attachment>\n" +
+            "      <Attachment filename=\"filename.txt\" name=\"Vedlegg 1\"\n" +
+            "        mimeType=\"text/plain\">VHJlZGplIGZpbGVuIGVyIGRlbm5lLgo=</Attachment>\n" +
+            "    </Attachments>\n" +
+            "  </Content>\n" +
+            "  <NotificationMessages>\n" +
+            "    <NotificationMessage>\n" +
+            "      <SMSPhoneNumbers>\n" +
+            "        <SMSPhoneNumber>+4700000000</SMSPhoneNumber>\n" +
+            "      </SMSPhoneNumbers>\n" +
+            "      <EmailAddresses>\n" +
+            "                <EmailAddress>oslo@foo.bar</EmailAddress>\n" +
+            "            </EmailAddresses>\n" +
+            "    </NotificationMessage>\n" +
+            "  </NotificationMessages>\n" +
+            "</Message>";
+
+    private JAXBContext putMessageJaxbContext;
+    private JAXBContext mxaMessageJaxbContext;
     private Environment envMock;
     private CorrespondenceAgencyConfiguration postConfig;
 
     @Before
     public void initializeJaxb() throws JAXBException {
-        jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
+        putMessageJaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
+        mxaMessageJaxbContext = JAXBContext.newInstance(Message.class);
         envMock = mock(Environment.class);
         when(envMock.getProperty(Mockito.anyString())).thenReturn(""); // default
         when(envMock.getProperty("altinn.user_code")).thenReturn("AAS_TEST");
@@ -134,16 +172,35 @@ public class CorrespondenceAgencyMessageFactoryTest {
     }
 
     @Test
-    public void testFactoryForEscapedXML() throws PayloadException, JAXBException {
+    public void testFactoryForEscapedXMLPutMessage() throws PayloadException, JAXBException {
         PutMessageRequestWrapper msgFromEscaped = new PutMessageRequestWrapper(createPutMessageEscapedXml(escapedXml));
+        InfoRecord infoMock = mock(InfoRecord.class);
+        when(infoMock.getOrganisationNumber()).thenReturn("910075918");
+        when(infoMock.getOrganizationName()).thenReturn("Fylkesmannen i Sogn og Fjordane");
+        CorrespondenceAgencyValues values = CorrespondenceAgencyValues.from(msgFromEscaped, infoMock, infoMock);
 
-        assertFields(CorrespondenceAgencyMessageFactory.create(postConfig, msgFromEscaped));
+        assertFields(CorrespondenceAgencyMessageFactory.create(postConfig, values));
+    }
+
+    @Test
+    public void testFactoryForEscapedXMLMXAMessage() throws PayloadException, JAXBException {
+        Message mxaMessage = createMxaMessageEscapedXml(cdataTaggedMxaXml);
+        InfoRecord infoMock = mock(InfoRecord.class);
+        when(infoMock.getOrganisationNumber()).thenReturn("910075918");
+        when(infoMock.getOrganizationName()).thenReturn("Fylkesmannen i Sogn og Fjordane");
+        CorrespondenceAgencyValues values = CorrespondenceAgencyValues.from(mxaMessage, infoMock, infoMock);
+
+        assertFields(CorrespondenceAgencyMessageFactory.create(postConfig, values));
     }
 
     @Test
     public void testFactoryForCDataXML() throws PayloadException, JAXBException {
         PutMessageRequestWrapper msgFromCdata = new PutMessageRequestWrapper(createPutMessageCdataXml(cdataTaggedXml));
-        assertFields(CorrespondenceAgencyMessageFactory.create(postConfig, msgFromCdata));
+        InfoRecord infoMock = mock(InfoRecord.class);
+        when(infoMock.getOrganisationNumber()).thenReturn("910075918");
+        when(infoMock.getOrganizationName()).thenReturn("Fylkesmannen i Sogn og Fjordane");
+        CorrespondenceAgencyValues values = CorrespondenceAgencyValues.from(msgFromCdata, infoMock, infoMock);
+        assertFields(CorrespondenceAgencyMessageFactory.create(postConfig, values));
     }
 
     private void assertFields(InsertCorrespondenceV2 c) {
@@ -169,7 +226,7 @@ public class CorrespondenceAgencyMessageFactoryTest {
         AddressType receiver = new AddressType();
         receiver.setOrgnr("910075918");
 
-        AddressType sender= new AddressType();
+        AddressType sender = new AddressType();
         sender.setName("Fylkesmannen i Sogn og Fjordane");
 
         EnvelopeType envelopeType = new EnvelopeType();
@@ -182,7 +239,13 @@ public class CorrespondenceAgencyMessageFactoryTest {
     }
 
     private PutMessageRequestType createPutMessageCdataXml(String payload) throws JAXBException {
-        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        Unmarshaller unmarshaller = putMessageJaxbContext.createUnmarshaller();
         return unmarshaller.unmarshal(new StringSource((payload)), PutMessageRequestType.class).getValue();
     }
+
+    private Message createMxaMessageEscapedXml(String payload) throws JAXBException {
+        Unmarshaller unmarshaller = mxaMessageJaxbContext.createUnmarshaller();
+        return unmarshaller.unmarshal(new StringSource((payload)), Message.class).getValue();
+    }
+
 }

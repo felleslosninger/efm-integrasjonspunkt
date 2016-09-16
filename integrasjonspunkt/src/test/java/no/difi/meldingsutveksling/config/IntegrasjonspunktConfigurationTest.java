@@ -28,6 +28,7 @@ public class IntegrasjonspunktConfigurationTest {
         when(environmentMock.getProperty(KEY_PRIVATEKEYPASSWORD)).thenReturn("something");
         when(environmentMock.getProperty(KEY_ORGANISATION_NUMBER)).thenReturn("something");
         when(environmentMock.getProperty(KEY_NOARKSYSTEM_TYPE)).thenReturn("something");
+        when(environmentMock.getProperty(PTV_ENDPOINT_URL)).thenReturn("something");
     }
 
     @Test(expected = MeldingsUtvekslingRequiredPropertyException.class)

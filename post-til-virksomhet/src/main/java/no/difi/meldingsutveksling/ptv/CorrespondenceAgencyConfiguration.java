@@ -7,7 +7,7 @@ public class CorrespondenceAgencyConfiguration {
     private String externalServiceCode;
     private String password;
     private String systemUserCode;
-    private String languageCode;
+    private String endpointUrl;
 
     private CorrespondenceAgencyConfiguration() {
     }
@@ -18,7 +18,7 @@ public class CorrespondenceAgencyConfiguration {
                 .withExternalServiceEditionCode("altinn.ptv.external_service_edition_code")
                 .withSystemUserCode("altinn.ptv.user_code")
                 .withPassword("altinn.ptv.password")
-                .withLanguageCode("1044")
+                .withEndpointURL("altinn.ptv.endpoint_url")
                 .build();
         return configuration;
     }
@@ -39,8 +39,8 @@ public class CorrespondenceAgencyConfiguration {
         return password;
     }
 
-    public String getLanguageCode() {
-        return languageCode;
+    public String getEndpointUrl() {
+        return endpointUrl;
     }
 
     public static class Builder {
@@ -71,8 +71,8 @@ public class CorrespondenceAgencyConfiguration {
             return this;
         }
 
-        public Builder withLanguageCode(String languageCode) {
-            correspondenceAgencyConfiguration.languageCode = environment.getProperty(languageCode, languageCode);
+        public Builder withEndpointURL(String url) {
+            correspondenceAgencyConfiguration.endpointUrl = environment.getProperty(url);
             return this;
         }
 
