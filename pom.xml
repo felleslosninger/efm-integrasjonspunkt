@@ -47,6 +47,7 @@
         <module>post-til-private</module>
         <module>service-registry-client</module>
         <module>webservice-tools</module>
+        <module>kontakt-reservasjonsregister-client</module>
     </modules>
 
     <dependencyManagement>
@@ -275,12 +276,6 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>no.difi.commons</groupId>
-            <artifactId>commons-asic</artifactId>
-            <version>0.9.2</version>
         </dependency>
 
     </dependencies>

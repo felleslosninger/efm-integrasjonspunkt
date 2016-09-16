@@ -7,17 +7,23 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+
     <artifactId>post-til-private</artifactId>
+    <packaging>pom</packaging>
     <dependencies>
+        <dependency>
+            <groupId>org.jhades</groupId>
+            <artifactId>jhades</artifactId>
+            <version>1.0.4</version>
+        </dependency>
         <dependency>
             <groupId>no.difi.sdp</groupId>
             <artifactId>sikker-digital-post-klient-java</artifactId>
             <version>2.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ws.security</groupId>
-            <artifactId>wss4j</artifactId>
-            <version>1.6.19</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -43,54 +49,10 @@
             <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.ws.commons.axiom</groupId>
-            <artifactId>axiom-api</artifactId>
-            <version>1.2.19</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ws.commons.axiom</groupId>
-            <artifactId>axiom-impl</artifactId>
-            <version>1.2.19</version>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.jvnet.jaxb2.maven2</groupId>
-                <artifactId>maven-jaxb2-plugin</artifactId>
-                <version>0.13.0</version>
-                <executions>
-                    <execution>
-                        <id>xsd-generate</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <schemaLanguage>WSDL</schemaLanguage>
-                    <schemaDirectory>${basedir}/src/wsdl</schemaDirectory>
-                    <schemaIncludes>
-                        <include>*.wsdl</include>
-                    </schemaIncludes>
-                    <generatePackage>no.difi.ptp.oppslagstjenesten</generatePackage>
-                    <strict>true</strict>
-                    <verbose>true</verbose>
-                    <extension>true</extension>
-                    <removeOldOutput>true</removeOldOutput>
-                    <args>
-                        <arg>-Xfluent-builder</arg>
-                    </args>
-                    <plugins>
-                        <plugin>
-                            <groupId>net.codesup.util</groupId>
-                            <artifactId>jaxb2-rich-contract-plugin</artifactId>
-                            <version>1.17.0</version>
-                        </plugin>
-                    </plugins>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+
 </project>

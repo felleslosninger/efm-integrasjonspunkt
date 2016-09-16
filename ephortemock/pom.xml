@@ -4,7 +4,7 @@
 
     <properties>
         <jetty.port>7778</jetty.port>
-        <java.version>1.7</java.version>
+        <java.version>1.8</java.version>
     </properties>
 
     <modelVersion>4.0.0</modelVersion>
