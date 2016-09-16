@@ -15,7 +15,6 @@ import java.util.concurrent.TimeUnit;
 
 public class MeldingsformidlerClient {
     static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-    public static final String URL_MELDINGS_FORMIDLER = "https://qaoffentlig.meldingsformidler.digipost.no/api/ebms";
     private final Config config;
 
 
@@ -26,7 +25,7 @@ public class MeldingsformidlerClient {
     public void sendMelding(MeldingsformidlerRequest request) throws MeldingsformidlerException {
         Mottaker mottaker = Mottaker.builder(request.getMottakerPid(), request.getPostkasseAdresse(), Sertifikat.fraByteArray(request.getCertificate()), request.getOrgnrPostkasse()).build();
         DigitalPost digitalPost = DigitalPost.builder(mottaker, request.getSubject()).virkningsdato(new Date()).build();
-        Dokument dokument = Dokument.builder(request.getDocumentTitle(), request.getDocumentName(), request.getDocument()).mimeType("application/vnd.openxmlformats-officedocument.wordprocessingml.document").build();
+        Dokument dokument = Dokument.builder(request.getDocumentTitle(), request.getDocumentName(), request.getDocument()).mimeType(request.getMimeType()).build();
         Dokumentpakke dokumentpakke = Dokumentpakke.builder(dokument).build(); // skal dokumentpakke ha vedlegg?
         Behandlingsansvarlig behandlingsansvarlig = Behandlingsansvarlig.builder(request.getSenderOrgnumber()).build();
 

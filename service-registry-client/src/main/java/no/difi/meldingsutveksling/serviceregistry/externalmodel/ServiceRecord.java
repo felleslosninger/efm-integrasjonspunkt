@@ -5,9 +5,6 @@ import com.google.common.base.Objects;
 
 import java.io.Serializable;
 
-import static com.google.common.base.Objects.equal;
-import static java.util.Objects.hash;
-
 public class ServiceRecord implements Serializable {
 
     public static final ServiceRecord EMPTY = new ServiceRecord("", "", "", "");

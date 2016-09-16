@@ -80,4 +80,9 @@ public interface MeldingsformidlerRequest {
      */
     String getQueueId();
 
+    /**
+     *
+     * @return MIME type of the document
+     */
+    String getMimeType();
 }

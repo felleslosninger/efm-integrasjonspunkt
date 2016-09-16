@@ -81,6 +81,11 @@ public class MeldingsformidlerClientMain {
             public String getQueueId() {
                 return "køid";
             }
+
+            @Override
+            public String getMimeType() {
+                return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+            }
         };
         try {
             meldingsformidlerClient.sendMelding(request);
