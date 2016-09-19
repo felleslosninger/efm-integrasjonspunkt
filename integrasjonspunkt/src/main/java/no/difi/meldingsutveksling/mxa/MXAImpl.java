@@ -4,7 +4,7 @@ import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespon
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreFactory;
-import no.difi.meldingsutveksling.core.EDUMessage;
+import no.difi.meldingsutveksling.core.EDUCoreMarker;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.mxa.schema.MXADelegate;
 import no.difi.meldingsutveksling.mxa.schema.domain.Message;
@@ -14,9 +14,7 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.ptv.CorrespondenceRequest;
-import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyValues;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,13 +112,13 @@ public class MXAImpl implements MXADelegate {
 
     public void sendMessage(Message msg) {
         EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
-        EDUMessage eduMessage = eduCoreFactory.createEduMessage(msg, configuration.getOrganisationNumber());
+        EDUCore message = eduCoreFactory.create(msg, configuration.getOrganisationNumber());
 
         CorrespondenceAgencyConfiguration config = CorrespondenceAgencyConfiguration.configurationFrom(environment);
 
-        final InsertCorrespondenceV2 message = CorrespondenceAgencyMessageFactory.create(config, eduMessage);
-        CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(markerFrom(msg), config);
-        final CorrespondenceRequest request = new CorrespondenceRequest.Builder().withUsername(config.getSystemUserCode()).withPassword(config.getPassword()).withPayload(message).build();
+        final InsertCorrespondenceV2 insertCorrespondenceV2 = CorrespondenceAgencyMessageFactory.create(config, message);
+        CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(EDUCoreMarker.markerFrom(message), config);
+        final CorrespondenceRequest request = new CorrespondenceRequest.Builder().withUsername(config.getSystemUserCode()).withPassword(config.getPassword()).withPayload(insertCorrespondenceV2).build();
         client.send(request);
         Audit.info("MXA message sent", markerFrom(msg));
     }

@@ -28,7 +28,7 @@ class JournalpostId {
     private String jpId;
     private static String jpIdXpath= "/Melding/journpost/jpId";
 
-    private JournalpostId(String jpId) {
+    public JournalpostId(String jpId) {
         this.jpId = jpId;
     }
 

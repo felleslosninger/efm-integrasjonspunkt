@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
+import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 
 /**
@@ -9,16 +9,16 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
  *
  * @author Glenn Bech
  */
-class BestEDUPutMessageStrategy implements PutMessageStrategy {
+class BestEDUMessageStrategy implements MessageStrategy {
 
     private MessageSender messageSender;
 
-    public BestEDUPutMessageStrategy(MessageSender messageSender) {
+    public BestEDUMessageStrategy(MessageSender messageSender) {
         this.messageSender = messageSender;
     }
 
     @Override
-    public PutMessageResponseType putMessage(PutMessageRequestType requestType) {
-        return messageSender.sendMessage(requestType);
+    public PutMessageResponseType putMessage(EDUCore request) {
+        return messageSender.sendMessage(request);
     }
 }

@@ -4,7 +4,9 @@ import com.sun.org.apache.xerces.internal.dom.ElementNSImpl;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
-import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
+import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
+import org.w3c.dom.Document;
 
 import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.isAppReceipt;
 
@@ -30,14 +32,18 @@ public final class EduMessageStrategyFactory implements MessageStrategyFactory {
         return new EduMessageStrategyFactory(messageSender);
     }
 
-    public PutMessageStrategy create(Object payload) {
+    public MessageStrategy create(Object payload) {
         if (isAppReceipt(payload)) {
             Audit.info("Messagetype AppReceipt");
-            return new AppReceiptPutMessageStrategy(messageSender);
+            return new AppReceiptMessageStrategy(messageSender);
+        }
+        if (isMeldingTypePayload(payload)) {
+            Audit.info("Messagetype EDU");
+            return new BestEDUMessageStrategy(messageSender);
         }
         if (isEPhorte(payload)) {
             Audit.info("Messagetype EDU - CData");
-            return new BestEDUPutMessageStrategy(messageSender);
+            return new BestEDUMessageStrategy(messageSender);
         }
         if (isUnknown(payload)) {
             Audit.error("Unknown payload class");
@@ -45,10 +51,14 @@ public final class EduMessageStrategyFactory implements MessageStrategyFactory {
         }
         if (isBestEDUMessage(payload)) {
             Audit.info("Messagetype EDU HtmlEndoced");
-            return new BestEDUPutMessageStrategy(messageSender);
+            return new BestEDUMessageStrategy(messageSender);
         }
         Audit.error("Unknown payload string");
         throw new MeldingsUtvekslingRuntimeException("Unknown String based payload " + payload);
+    }
+
+    private boolean isMeldingTypePayload(Object payload) {
+        return payload instanceof MeldingType;
     }
 
     private boolean isUnknown(Object payload) {
@@ -56,7 +66,7 @@ public final class EduMessageStrategyFactory implements MessageStrategyFactory {
     }
 
     private boolean isEPhorte(Object payload) {
-        return payload instanceof ElementNSImpl;
+        return payload instanceof ElementNSImpl || payload instanceof Document;
     }
 
     private boolean isBestEDUMessage(Object payload) {

@@ -1,15 +1,16 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 
+import com.google.common.base.Strings;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
+import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.Noekkelpar;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
@@ -23,7 +24,7 @@ import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 
-import static no.difi.meldingsutveksling.noarkexchange.PutMessageMarker.markerFrom;
+import static no.difi.meldingsutveksling.core.EDUCoreMarker.markerFrom;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createErrorResponse;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createOkResponse;
 
@@ -60,16 +61,16 @@ public class MessageSender {
         this.standardBusinessDocumentFactory = standardBusinessDocumentFactory;
     }
 
-    private Avsender createAvsender(PutMessageRequestWrapper message) throws MessageContextException {
+    private Avsender createAvsender(EDUCore message) throws MessageContextException {
         Certificate certificate;
         try {
-            certificate = adresseregister.getCertificate(message.getSenderPartynumber());
+            certificate = adresseregister.getCertificate(message.getSender().getOrgNr());
         } catch (CertificateException e) {
             throw new MessageContextException(e, StatusMessage.MISSING_SENDER_CERTIFICATE);
         }
         PrivateKey privatNoekkel = keyInfo.loadPrivateKey();
 
-        return Avsender.builder(new Organisasjonsnummer(message.getSenderPartynumber()), new Noekkelpar(privatNoekkel, certificate)).build();
+        return Avsender.builder(new Organisasjonsnummer(message.getSender().getOrgNr()), new Noekkelpar(privatNoekkel, certificate)).build();
     }
 
     private Mottaker createMottaker(String orgnr) throws MessageContextException {
@@ -89,9 +90,7 @@ public class MessageSender {
         return certificate;
     }
 
-    public PutMessageResponseType sendMessage(PutMessageRequestType messageRequest) {
-        PutMessageRequestWrapper message = new PutMessageRequestWrapper(messageRequest);
-
+    public PutMessageResponseType sendMessage(EDUCore message) {
         MessageContext messageContext;
         try {
             messageContext = createMessageContext(message);
@@ -104,7 +103,7 @@ public class MessageSender {
 
         EduDocument edu;
         try {
-            edu = standardBusinessDocumentFactory.create(messageRequest, messageContext.getConversationId(),  messageContext.getAvsender(), messageContext.getMottaker());
+            edu = standardBusinessDocumentFactory.create(message, messageContext.getConversationId(),  messageContext.getAvsender(), messageContext.getMottaker());
             Audit.info("EDUdocument created", markerFrom(message));
         } catch (MessageException e) {
             Audit.error("Failed to create EDUdocument", markerFrom(message));
@@ -129,28 +128,26 @@ public class MessageSender {
      * @param message that contains sender, receiver and journalpost id
      * @return MessageContext containing data about the shipment
      */
-    protected MessageContext createMessageContext(PutMessageRequestWrapper message) throws MessageContextException {
-        MessageContext context = new MessageContext();
-
-        if(!message.hasRecieverPartyNumber()) {
+    protected MessageContext createMessageContext(EDUCore message) throws MessageContextException {
+        if(Strings.isNullOrEmpty(message.getReceiver().getOrgNr())) {
             throw new MessageContextException(StatusMessage.MISSING_RECIEVER_ORGANIZATION_NUMBER);
         }
+
+        MessageContext context = new MessageContext();
+
         Avsender avsender;
         final Mottaker mottaker;
         avsender = createAvsender(message);
-        mottaker = createMottaker(message.getRecieverPartyNumber());
+        mottaker = createMottaker(message.getReceiver().getOrgNr());
 
-        JournalpostId id;
-        try {
-            id = JournalpostId.fromPutMessage(message);
-        } catch (PayloadException e) {
-            Audit.error("Unknown payload string", markerFrom(message));
-            log.error(markerFrom(message), e.getMessage(), e);
-            throw new IllegalArgumentException(e.getMessage());
+        if (message.getMessageType() == EDUCore.MessageType.EDU) {
+            context.setJpId(message.getPayloadAsMeldingType().getJournpost().getJpId());
+        } else {
+            context.setJpId("");
         }
-        context.setJpId(id.value());
 
-        String converationId = message.getConversationId();
+
+        String converationId = message.getId();
 
         context.setMottaker(mottaker);
         context.setAvsender(avsender);

@@ -2,11 +2,8 @@ package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
-import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -17,7 +14,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * tests for the EduMessageStrategyFactory
@@ -116,10 +112,7 @@ public class EduMessageStrategyFactoryTest {
 
     @Test
     public void testShouldCreateBestEDUStrategy() {
-        final PutMessageRequestWrapper requestWrapper = mock(PutMessageRequestWrapper.class);
-        when(requestWrapper.getPayload()).thenReturn(p360Message);
-
-        assertEquals(BestEDUPutMessageStrategy.class, eduMessageStrategyFactory.create(p360Message).getClass());
+        assertEquals(BestEDUMessageStrategy.class, eduMessageStrategyFactory.create(p360Message).getClass());
     }
 
     @Test
@@ -127,13 +120,13 @@ public class EduMessageStrategyFactoryTest {
         DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         Document doc = builder.newDocument();
         Element element = doc.createElementNS("http://www.arkivverket.no/Noark4-1-WS-WD/types", "Melding");
-        assertEquals(BestEDUPutMessageStrategy.class, eduMessageStrategyFactory.create(element).getClass());
+        assertEquals(BestEDUMessageStrategy.class, eduMessageStrategyFactory.create(element).getClass());
     }
 
     @Test
     public void testShouldCreateAppReceiptStrategy() {
-        assertTrue(eduMessageStrategyFactory.newInstance(messageSender).create(appReceiptPayload) instanceof AppReceiptPutMessageStrategy);
-        assertEquals(AppReceiptPutMessageStrategy.class, eduMessageStrategyFactory.create(appReceiptPayload).getClass());
+        assertTrue(eduMessageStrategyFactory.newInstance(messageSender).create(appReceiptPayload) instanceof AppReceiptMessageStrategy);
+        assertEquals(AppReceiptMessageStrategy.class, eduMessageStrategyFactory.create(appReceiptPayload).getClass());
     }
 
     @Test(expected = MeldingsUtvekslingRuntimeException.class)

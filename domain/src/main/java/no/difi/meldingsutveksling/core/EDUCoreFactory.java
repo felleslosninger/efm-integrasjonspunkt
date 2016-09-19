@@ -2,7 +2,9 @@ package no.difi.meldingsutveksling.core;
 
 import no.difi.meldingsutveksling.mxa.schema.domain.Message;
 import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
+import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
+import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -23,14 +25,6 @@ public class EDUCoreFactory {
         this.serviceRegistryLookup = serviceRegistryLookup;
     }
 
-    public EDUMessage createEduMessage(PutMessageRequestType putMessageRequestType, String senderOrgNr) {
-        return (EDUMessage) create(putMessageRequestType, senderOrgNr);
-    }
-
-    public EDUAppReceipt createEduAppReceipt(PutMessageRequestType putMessageRequestType, String senderOrgNr) {
-        return (EDUAppReceipt) create(putMessageRequestType, senderOrgNr);
-    }
-
     public EDUCore create(PutMessageRequestType putMessageRequestType, String senderOrgNr) {
         EDUCore eduCore = createCommon(senderOrgNr, putMessageRequestType.getEnvelope().getReceiver().getOrgnr());
 
@@ -45,8 +39,29 @@ public class EDUCoreFactory {
         return eduCore;
     }
 
-    public EDUMessage createEduMessage(Message message, String senderOrgNr) {
-        return (EDUMessage) create(message, senderOrgNr);
+    public PutMessageRequestType createPutMessageFromCore(EDUCore message) {
+        no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory of = new no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory();
+
+        AddressType receiverAddressType = of.createAddressType();
+        receiverAddressType.setOrgnr(message.getReceiver().getOrgNr());
+        receiverAddressType.setName(message.getReceiver().getOrgName());
+
+        AddressType senderAddressType = of.createAddressType();
+        senderAddressType.setOrgnr(message.getSender().getOrgNr());
+        senderAddressType.setName(message.getSender().getOrgName());
+
+        EnvelopeType envelopeType = of.createEnvelopeType();
+        envelopeType.setConversationId(message.getId());
+        envelopeType.setReceiver(receiverAddressType);
+        envelopeType.setSender(senderAddressType);
+
+        PutMessageRequestType putMessageRequestType = of.createPutMessageRequestType();
+        putMessageRequestType.setEnvelope(envelopeType);
+        putMessageRequestType.setPayload(message.getPayload());
+
+        // TODO: add potential missing fields: ref, email?
+
+        return putMessageRequestType;
     }
 
     public EDUCore create(Message message, String senderOrgNr) {
@@ -83,8 +98,12 @@ public class EDUCoreFactory {
 
     private EDUCore createCommon(String senderOrgNr, String receiverOrgNr) {
 
+        // TODO: add sender/receiver orgnr validation
+
         InfoRecord senderInfo = serviceRegistryLookup.getInfoRecord(senderOrgNr);
         InfoRecord receiverInfo = serviceRegistryLookup.getInfoRecord(receiverOrgNr);
+
+        // TODO: verify info objects
 
         EDUCore eduCore = new EDUCore();
 
@@ -113,7 +132,7 @@ public class EDUCoreFactory {
             p = ((Node) payload).getFirstChild().getTextContent().trim();
         }
 
-        try {
+        try { // TODO: see AppReceiptPutMessageStrategy, error handling
             if (PayloadUtil.isAppReceipt(payload)) {
                 JAXBContext jaxbContext = JAXBContext.newInstance("no.difi.meldingsutveksling.noarkexchange.schema");
                 Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
@@ -142,4 +161,5 @@ public class EDUCoreFactory {
         receiver.setOrgName(receiverInfo.getOrganizationName());
         return receiver;
     }
+
 }

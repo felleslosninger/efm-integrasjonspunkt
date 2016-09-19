@@ -2,12 +2,24 @@ package no.difi.meldingsutveksling.core;
 
 import com.google.common.base.MoreObjects;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlType;
+
 /**
  * Used by {@link EDUCore}.
  */
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "Receiver", propOrder = {
+        "orgNr",
+        "orgName"
+})
 public class Receiver {
 
+    @XmlAttribute(name = "orgNr", required = true)
     private String orgNr;
+    @XmlAttribute(name = "orgName", required = true)
     private String orgName;
 
     public String getOrgNr() {

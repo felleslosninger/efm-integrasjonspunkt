@@ -12,7 +12,6 @@ import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespon
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentExternalBEV2List;
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentV2;
 import no.difi.meldingsutveksling.core.EDUCore;
-import no.difi.meldingsutveksling.core.EDUMessage;
 import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyValues;
 
 import javax.xml.bind.JAXBElement;
@@ -48,7 +47,7 @@ public class CorrespondenceAgencyMessageFactory {
     private CorrespondenceAgencyMessageFactory() {
     }
 
-    public static InsertCorrespondenceV2 create(CorrespondenceAgencyConfiguration postConfig, EDUMessage edu) {
+    public static InsertCorrespondenceV2 create(CorrespondenceAgencyConfiguration postConfig, EDUCore edu) {
 
         MyInsertCorrespondenceV2 correspondence = new MyInsertCorrespondenceV2();
         ObjectFactory objectFactory = new ObjectFactory();
@@ -94,9 +93,9 @@ public class CorrespondenceAgencyMessageFactory {
 
         ExternalContentV2 externalContentV2 = new ExternalContentV2();
         externalContentV2.setLanguageCode(objectFactory.createExternalContentV2LanguageCode("1044"));
-        externalContentV2.setMessageTitle(objectFactory.createExternalContentV2MessageTitle(edu.getPayload().getJournpost().getJpInnhold()));
-        externalContentV2.setMessageSummary(objectFactory.createExternalContentV2MessageSummary(edu.getPayload().getJournpost().getJpInnhold()));
-        externalContentV2.setMessageBody(objectFactory.createExternalContentV2MessageBody(edu.getPayload().getJournpost().getJpOffinnhold()));
+        externalContentV2.setMessageTitle(objectFactory.createExternalContentV2MessageTitle(edu.getPayloadAsMeldingType().getJournpost().getJpInnhold()));
+        externalContentV2.setMessageSummary(objectFactory.createExternalContentV2MessageSummary(edu.getPayloadAsMeldingType().getJournpost().getJpInnhold()));
+        externalContentV2.setMessageBody(objectFactory.createExternalContentV2MessageBody(edu.getPayloadAsMeldingType().getJournpost().getJpOffinnhold()));
 
         // The date and time the message can be deleted by the user
         correspondence.setAllowSystemDeleteDateTime(
@@ -106,7 +105,7 @@ public class CorrespondenceAgencyMessageFactory {
         // FunctionType
         no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory reporteeFactory = new no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory();
         BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
-        edu.getPayload().getJournpost().getDokument().forEach(d -> {
+        edu.getPayloadAsMeldingType().getJournpost().getDokument().forEach(d -> {
             BinaryAttachmentV2 binaryAttachmentV2 = new BinaryAttachmentV2();
             binaryAttachmentV2.setFunctionType(AttachmentFunctionType.fromValue("Unspecified"));
             binaryAttachmentV2.setFileName(reporteeFactory.createBinaryAttachmentV2FileName(d.getVeFilnavn()));

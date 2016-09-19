@@ -1,6 +1,8 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
+import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.core.EDUCoreMarker;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
@@ -72,6 +74,7 @@ public class InternalQueue {
     private final DocumentConverter documentConverter = new DocumentConverter();
     private final PutMessageRequestConverter putMessageRequestConverter = new PutMessageRequestConverter();
     private final MessageConverter messageConverter = new MessageConverter();
+    private final EDUCoreConverter eduCoreConverter = new EDUCoreConverter();
 
     static {
         try {
@@ -94,11 +97,11 @@ public class InternalQueue {
     @JmsListener(destination = EXTERNAL, containerFactory = "myJmsContainerFactory")
     public void externalListener(byte[] message, Session session) {
         MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, configuration.getOrganisationNumber());
-        PutMessageRequestType requestType = putMessageRequestConverter.unmarshallFrom(message);
+        EDUCore request = eduCoreConverter.unmarshallFrom(message);
         try {
-            integrasjonspunktSend.sendMessage(requestType);
+            integrasjonspunktSend.sendMessage(request);
         } catch (Exception e) {
-            Audit.error("Failed to send message... queue will retry", PutMessageMarker.markerFrom(new PutMessageRequestWrapper(requestType)));
+            Audit.error("Failed to send message... queue will retry", EDUCoreMarker.markerFrom(request));
             throw e;
         }
     }
@@ -120,11 +123,11 @@ public class InternalQueue {
      * using transport mechnism.
      * @param request the input parameter from IntegrasjonspunktImpl
      */
-    public void enqueueExternal(PutMessageRequestType request) {
+    public void enqueueExternal(EDUCore request) {
         try {
-            jmsTemplate.convertAndSend(EXTERNAL, putMessageRequestConverter.marshallToBytes(request));
+            jmsTemplate.convertAndSend(EXTERNAL, eduCoreConverter.marshallToBytes(request));
         } catch (Exception e) {
-            Audit.error("Unable to send message", PutMessageMarker.markerFrom(new PutMessageRequestWrapper(request)));
+            Audit.error("Unable to send message", EDUCoreMarker.markerFrom(request));
             throw e;
         }
     }

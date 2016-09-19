@@ -1,27 +1,49 @@
 package no.difi.meldingsutveksling.core;
 
 import com.google.common.base.MoreObjects;
-import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
+import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
+
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.annotation.*;
+import javax.xml.namespace.QName;
+
+import static no.difi.meldingsutveksling.core.EDUCore.MessageType.EDU;
 
 /**
  * Internal mapping object for generic handling of e.g. BEST EDU and MXA formats.
  */
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "EDUCore", propOrder = {
+        "id",
+        "sender",
+        "receiver",
+        "messageType",
+        "payload"
+})
 public class EDUCore {
 
+    // ConversationId
+    @XmlAttribute(name = "id", required = true)
     private String id;
+    @XmlElement(required = true)
     private Sender sender;
+    @XmlElement(required = true)
     private Receiver receiver;
-    private Object payload;
+    @XmlElement(required = true)
     private MessageType messageType;
+    @XmlElement(required = true)
+    private Object payload;
 
-    EDUCore() {}
+    public EDUCore() {}
 
+    @XmlType
+    @XmlEnum(Integer.class)
     public enum MessageType {
-        EDU,
-        MXA,
-        APPRECEIPT,
-        UNKNOWN
+        @XmlEnumValue("1") EDU,
+        @XmlEnumValue("2") MXA,
+        @XmlEnumValue("3") APPRECEIPT,
+        @XmlEnumValue("4") UNKNOWN
     }
 
     public MessageType getMessageType() {
@@ -63,6 +85,41 @@ public class EDUCore {
 
     public void setPayload(Object payload) {
         this.payload = payload;
+    }
+
+
+    public boolean hasPayload() {
+        return this.payload != null;
+    }
+
+    public String getJournalpostId() {
+        if (getMessageType() == EDU) {
+            return ((MeldingType) getPayload()).getJournpost().getJpId();
+        }
+        return "";
+    }
+
+    public MeldingType getPayloadAsMeldingType() {
+        return (MeldingType) getPayload();
+    }
+
+    public AppReceiptType getPayloadAsAppreceiptType() {
+        return (AppReceiptType) getPayload();
+    }
+
+    public void swapSenderAndReceiver() {
+        Sender sender = new Sender();
+        sender.setOrgNr(getReceiver().getOrgNr());
+        sender.setOrgName(getReceiver().getOrgName());
+        Receiver receiver = new Receiver();
+        receiver.setOrgNr(getSender().getOrgNr());
+        receiver.setOrgName(getSender().getOrgName());
+        setSender(sender);
+        setReceiver(receiver);
+    }
+
+    public JAXBElement<EDUCore> getAsJaxBElement() {
+        return new JAXBElement<>(new QName("uri", "local"), EDUCore.class, this);
     }
 
     @Override

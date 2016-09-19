@@ -8,6 +8,7 @@ import cucumber.api.java.en.When;
 import no.difi.asic.SignatureHelper;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
+import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.sbdh.BusinessScope;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
@@ -74,7 +75,7 @@ public class PutMessageSteps {
 
         EduDocument eduDocument = createStandardBusinessDocument();
 
-        when(documentFactory.create(any(PutMessageRequestType.class), any(no.difi.meldingsutveksling.domain.Avsender.class), any(Mottaker.class))).thenReturn(eduDocument);
+        when(documentFactory.create(any(EDUCore.class), any(no.difi.meldingsutveksling.domain.Avsender.class), any(Mottaker.class))).thenReturn(eduDocument);
         messageSender.setStandardBusinessDocumentFactory(documentFactory);
         messageSender.setKeyInfo(integrasjonspunktNokkel);
         messageSender.setConfiguration(mock(IntegrasjonspunktConfiguration.class));
