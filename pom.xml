@@ -5,14 +5,14 @@
     <groupId>no.difi.meldingsutveksling</groupId>
     <artifactId>parent-pom</artifactId>
     <packaging>pom</packaging>
-    <version>1.2-SNAPSHOT</version>
+    <version>1.2</version>
     <name>Multiproject for meldingsutveksling</name>
 
     <scm>
         <connection>scm:git:https://github.com/difi/move-integrasjonspunkt</connection>
         <developerConnection>scm:git:https://github.com/difi/move-integrasjonspunkt</developerConnection>
         <url>https://github.com/difi/move-integrasjonspunkt</url>
-      <tag>HEAD</tag>
+      <tag>v1.2</tag>
   </scm>
 
     <properties>
