@@ -2,15 +2,10 @@ package no.difi.meldingsutveksling.config;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRequiredPropertyException;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClientSettings;
-import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.PropertySources;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -22,12 +17,6 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 
 @Component
 public class IntegrasjonspunktConfiguration {
-
-    @Configuration
-    @Profile({"dev", "itest", "systest", "staging", "production"})
-    @PropertySource("file:integrasjonspunkt-local.properties")
-    static class Overrides {
-    }
 
     private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktConfiguration.class);
 
