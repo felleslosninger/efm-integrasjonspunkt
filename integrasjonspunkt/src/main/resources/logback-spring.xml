@@ -4,7 +4,7 @@
     <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener" />
     <!-- Logstash destination -->
     <springProperty name="destination" source="app.logger.destination"/>
-    <springProperty name="profiles" source="app.logger.destination"/>
+    <springProperty name="profiles" source="spring.profiles.active"/>
     <appender name="stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <droppedWarnFrequency>5</droppedWarnFrequency>
         <destination>${destination}</destination>
@@ -12,7 +12,7 @@
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <customFields>{"appname":"${project.artifactId}","buildinfo.version":"${project.version}","buildinfo.lastcommit":"${buildNumber}"}</customFields>
         </encoder>
-        <if condition="property('spring.profiles.active').contains('docker')">
+        <if condition='property("profiles").contains("docker")'>
             <then>
                 <ssl>
                     <trustStore>

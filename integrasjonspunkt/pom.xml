@@ -2,14 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>integrasjonspunkt</artifactId>
-    <version>1.2-SNAPSHOT</version>
+    <version>1.4-SNAPSHOT</version>
 
     <name>Meldingsutveksling Integrasjonspunkt</name>
 
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>1.2-SNAPSHOT</version>
+        <version>1.4-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -153,13 +153,11 @@
             <plugin>
                 <groupId>com.spotify</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
-                <version>0.4.11</version>
+                <version>0.4.13</version>
                 <configuration>
+                    <serverId>docker-hub</serverId>
                     <imageName>${docker.registry}/${project.artifactId}</imageName>
                     <dockerDirectory>${project.basedir}/src/main/docker</dockerDirectory>
-                    <imageTags>
-                        <imageTag>${project.parent.version}</imageTag>
-                    </imageTags>
                     <resources>
                         <resource>
                             <targetPath>/</targetPath>
@@ -167,6 +165,7 @@
                             <include>${project.build.finalName}.jar</include>
                         </resource>
                     </resources>
+                    <forceTags>true</forceTags>
                 </configuration>
             </plugin>
             <plugin>
@@ -370,7 +369,7 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>dokumentpakking</artifactId>
-            <version>1.2-SNAPSHOT</version>
+            <version>1.4-SNAPSHOT</version>
         </dependency>
 
         <dependency>
