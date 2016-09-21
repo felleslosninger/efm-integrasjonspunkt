@@ -17,8 +17,9 @@ import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.receive.EDUCoreConverter;
-import no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
+import no.difi.meldingsutveksling.noarkexchange.receive.PayloadConverter;
+import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
+import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -29,7 +30,6 @@ import org.springframework.stereotype.Component;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -75,7 +75,21 @@ public class StandardBusinessDocumentFactory {
     }
 
     public EduDocument create(EDUCore shipment, String conversationId, Avsender avsender, Mottaker mottaker) throws MessageException {
-        final byte[] marshalledShipment = new EDUCoreConverter().marshallToBytes(shipment);
+        // Need to marshall payload before marshalling the message, since the payload can have different types
+        String payloadAsString;
+        PayloadConverter payloadConverter;
+        if (shipment.getMessageType() == EDUCore.MessageType.EDU) {
+            payloadConverter = new PayloadConverter<>(MeldingType.class);
+            payloadAsString = payloadConverter.marshallToString(shipment.getPayloadAsMeldingType());
+        } else {
+            payloadConverter = new PayloadConverter<>(AppReceiptType.class);
+            payloadAsString = payloadConverter.marshallToString(shipment.getPayloadAsAppreceiptType());
+        }
+        shipment.setPayload(payloadAsString);
+
+        EDUCoreConverter eduCoreConverter = new EDUCoreConverter();
+        byte[] marshalledShipment = eduCoreConverter.marshallToBytes(shipment);
+        shipment.setPayload(payloadConverter.unmarshallFrom(payloadAsString.getBytes()));
 
         BestEduMessage bestEduMessage = new BestEduMessage(marshalledShipment);
         LogstashMarker marker = markerFrom(shipment);

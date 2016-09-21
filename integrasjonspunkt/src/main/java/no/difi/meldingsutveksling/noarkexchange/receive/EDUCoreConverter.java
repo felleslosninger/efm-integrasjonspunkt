@@ -26,10 +26,9 @@ public class EDUCoreConverter {
             marshaller.marshal(new JAXBElement<>(new QName("uri", "local"), EDUCore.class, message), os);
             return os.toByteArray();
         } catch (JAXBException e) {
-            throw new RuntimeException("Unable to create unmarshaller for " + EDUCore.class, e);
+            throw new RuntimeException("Unable to create marshaller for " + EDUCore.class, e);
         }
     }
-
 
     public EDUCore unmarshallFrom(byte[] message) {
         final ByteArrayInputStream is = new ByteArrayInputStream(message);

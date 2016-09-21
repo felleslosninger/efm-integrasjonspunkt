@@ -2,6 +2,8 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
+import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.core.EDUCoreFactory;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
@@ -13,6 +15,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.CorrelationInformation;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
@@ -54,6 +57,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
     private NoarkClient localNoark;
     private MessageSender messageSender;
     private Adresseregister adresseregisterService;
+    private ServiceRegistryLookup serviceRegistryLookup;
     private IntegrasjonspunktConfiguration config;
     private IntegrasjonspunktNokkel keyInfo;
 
@@ -63,7 +67,8 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
                                        MessageSender messageSender,
                                        Adresseregister adresseregisterService,
                                        IntegrasjonspunktConfiguration config,
-                                       IntegrasjonspunktNokkel keyInfo) {
+                                       IntegrasjonspunktNokkel keyInfo,
+                                       ServiceRegistryLookup serviceRegistryLookup) {
 
         this.transportFactory = transportFactory;
         this.localNoark = localNoark;
@@ -71,6 +76,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
         this.adresseregisterService = adresseregisterService;
         this.config = config;
         this.keyInfo = keyInfo;
+        this.serviceRegistryLookup = serviceRegistryLookup;
     }
 
     @Override
@@ -108,7 +114,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
 
         Payload payload = document.getPayload();
         byte[] decryptedAsicPackage = decrypt(payload);
-        PutMessageRequestType eduDocument;
+        EDUCore eduDocument;
         try {
             eduDocument = convertAsicEntrytoEduDocument(decryptedAsicPackage);
             if (PayloadUtil.isAppReceipt(eduDocument.getPayload())) {
@@ -132,8 +138,9 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
         return cmsUtil.decryptCMS(cmsEncZip, keyInfo.loadPrivateKey());
     }
 
-    public void forwardToNoarkSystemAndSendReceipts(StandardBusinessDocumentWrapper inputDocument, PutMessageRequestType putMessageRequestType) {
-        PutMessageResponseType response = localNoark.sendEduMelding(putMessageRequestType);
+    public void forwardToNoarkSystemAndSendReceipts(StandardBusinessDocumentWrapper inputDocument, EDUCore eduCore) {
+        PutMessageRequestType putMessage = new EDUCoreFactory(serviceRegistryLookup).createPutMessageFromCore(eduCore);
+        PutMessageResponseType response = localNoark.sendEduMelding(putMessage);
         if (response == null || response.getResult() == null) {
             Audit.info("Empty response from archive", markerFrom(inputDocument));
         } else {
@@ -159,14 +166,14 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
         t.send(config.getConfiguration(), receipt);
     }
 
-    public PutMessageRequestType convertAsicEntrytoEduDocument(byte[] bytes) throws MessageException, IOException, JAXBException {
+    public EDUCore convertAsicEntrytoEduDocument(byte[] bytes) throws MessageException, IOException, JAXBException {
         try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes))) {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
                 if ("best_edu.xml".equals(entry.getName())) {
-                    JAXBContext jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
+                    JAXBContext jaxbContext = JAXBContext.newInstance(EDUCore.class);
                     Unmarshaller unMarshaller = jaxbContext.createUnmarshaller();
-                    return unMarshaller.unmarshal(new StreamSource(zipInputStream), PutMessageRequestType.class).getValue();
+                    return unMarshaller.unmarshal(new StreamSource(zipInputStream), EDUCore.class).getValue();
                 }
             }
         }

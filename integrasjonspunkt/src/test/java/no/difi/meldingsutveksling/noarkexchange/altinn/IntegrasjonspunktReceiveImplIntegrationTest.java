@@ -1,6 +1,9 @@
 package no.difi.meldingsutveksling.noarkexchange.altinn;
 
 import no.difi.meldingsutveksling.IntegrasjonspunktApplication;
+import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.core.Receiver;
+import no.difi.meldingsutveksling.core.Sender;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.noarkexchange.*;
@@ -53,8 +56,18 @@ public class IntegrasjonspunktReceiveImplIntegrationTest {
 
         integrajonspunktReceiveSpy = spy(integrajonspunktReceive);
         doReturn("42".getBytes()).when(integrajonspunktReceiveSpy).decrypt(any(Payload.class));
-        PutMessageRequestType putMessageRequestTypeMock = mock(PutMessageRequestType.class);
-        doReturn(putMessageRequestTypeMock).when(integrajonspunktReceiveSpy).convertAsicEntrytoEduDocument(any(byte[].class));
+
+        Sender senderMock = mock(Sender.class);
+        when(senderMock.getOrgNr()).thenReturn("42");
+        when(senderMock.getOrgName()).thenReturn("foo");
+        Receiver receiverMock = mock(Receiver.class);
+        when(receiverMock.getOrgNr()).thenReturn("42");
+        when(receiverMock.getOrgName()).thenReturn("foo");
+        EDUCore requestMock = mock(EDUCore.class);
+        when(requestMock.getSender()).thenReturn(senderMock);
+        when(requestMock.getReceiver()).thenReturn(receiverMock);
+
+        doReturn(requestMock).when(integrajonspunktReceiveSpy).convertAsicEntrytoEduDocument(any(byte[].class));
         doNothing().when(integrajonspunktReceiveSpy).sendReceiptOpen(any(StandardBusinessDocumentWrapper.class));
         internalQueue.setIntegrajonspunktReceiveImpl(integrajonspunktReceiveSpy);
     }
@@ -65,7 +78,7 @@ public class IntegrasjonspunktReceiveImplIntegrationTest {
 
         internalQueue.forwardToNoark(eduDocument);
 
-        verify(integrajonspunktReceiveSpy).forwardToNoarkSystemAndSendReceipts(any(StandardBusinessDocumentWrapper.class), any(PutMessageRequestType.class));
+        verify(integrajonspunktReceiveSpy).forwardToNoarkSystemAndSendReceipts(any(StandardBusinessDocumentWrapper.class), any(EDUCore.class));
     }
 
 }
