@@ -51,7 +51,6 @@
                                 <phase>package</phase>
                                 <goals>
                                     <goal>build</goal>
-                                    <goal>tag</goal>
                                     <goal>push</goal>
                                 </goals>
                             </execution>
