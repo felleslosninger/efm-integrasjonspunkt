@@ -30,9 +30,10 @@ public class EDUCoreFactory {
     }
 
     public EDUCore create(PutMessageRequestType putMessageRequestType, String senderOrgNr) {
-        EDUCore eduCore = createCommon(senderOrgNr, putMessageRequestType.getEnvelope().getReceiver().getOrgnr());
+        PutMessageRequestWrapper requestWrapper = new PutMessageRequestWrapper(putMessageRequestType);
+        EDUCore eduCore = createCommon(senderOrgNr, requestWrapper.getRecieverPartyNumber());
 
-        eduCore.setId(putMessageRequestType.getEnvelope().getConversationId());
+        eduCore.setId(requestWrapper.getConversationId());
         if (PayloadUtil.isAppReceipt(putMessageRequestType.getPayload())) {
             eduCore.setMessageType(EDUCore.MessageType.APPRECEIPT);
         } else {
