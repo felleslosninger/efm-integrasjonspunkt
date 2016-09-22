@@ -16,7 +16,7 @@
             <then>
                 <ssl>
                     <trustStore>
-                        <location>classpath:logstash.jks</location>
+                        <location>classpath:logstash.jks-test</location>
                         <password>logstash</password>
                     </trustStore>
                 </ssl>
