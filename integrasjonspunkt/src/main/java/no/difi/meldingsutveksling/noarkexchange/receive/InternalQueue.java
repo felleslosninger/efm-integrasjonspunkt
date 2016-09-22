@@ -10,9 +10,10 @@ import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.mxa.MXAImpl;
-import no.difi.meldingsutveksling.mxa.schema.domain.Message;
-import no.difi.meldingsutveksling.noarkexchange.*;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
+import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
+import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
+import no.difi.meldingsutveksling.noarkexchange.MessageException;
+import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +47,6 @@ public class InternalQueue {
 
     private static final String EXTERNAL = "external";
     private static final String NOARK = "noark";
-    private static final String MXA = "mxa";
 
     Logger logger = LoggerFactory.getLogger(InternalQueue.class);
 
@@ -72,7 +72,6 @@ public class InternalQueue {
     private static JAXBContext jaxbContext;
 
     private final DocumentConverter documentConverter = new DocumentConverter();
-    private final PutMessageRequestConverter putMessageRequestConverter = new PutMessageRequestConverter();
     private final MessageConverter messageConverter = new MessageConverter();
     private final EDUCoreConverter eduCoreConverter = new EDUCoreConverter();
 
@@ -106,18 +105,6 @@ public class InternalQueue {
         }
     }
 
-    @JmsListener(destination = MXA, containerFactory = "myJmsContainerFactory")
-    public void mxaListener(byte[] message, Session session) {
-        MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, configuration.getOrganisationNumber());
-        Message msg = messageConverter.unmarshallFrom(message);
-        logger.info("MXA message {} fetched from queue", msg.getParticipantId());
-        try {
-            mxa.sendMessage(msg);
-        } catch (Exception e) {
-            throw e;
-        }
-    }
-
     /**
      * Place the input parameter on external queue. The external queue sends messages to an external recipient
      * using transport mechnism.
@@ -139,10 +126,6 @@ public class InternalQueue {
      */
     public void enqueueNoark(EduDocument eduDocument) {
             jmsTemplate.convertAndSend(NOARK,  documentConverter.marshallToBytes(eduDocument));
-    }
-
-    public void enqueueMXA(Message msg) {
-        jmsTemplate.convertAndSend(MXA, messageConverter.marshallToBytes(msg));
     }
 
     public void forwardToNoark(EduDocument eduDocument) {

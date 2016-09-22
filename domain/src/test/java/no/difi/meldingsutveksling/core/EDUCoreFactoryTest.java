@@ -7,10 +7,8 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.OrganizationType;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.xml.transform.StringSource;
 
@@ -218,7 +216,7 @@ public class EDUCoreFactoryTest {
     }
 
     @Test
-    public void testUnmarshallPayload() {
+    public void testUnmarshallPayload() throws JAXBException {
         EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
         MeldingType meldingType = (MeldingType) eduCoreFactory.unmarshallPayload(StringEscapeUtils.unescapeXml(escapedXml));
         assertEquals("210570", meldingType.getJournpost().getJpId());

@@ -136,9 +136,15 @@ public class IntegrasjonspunktImpl implements SOAPport {
             }
         }
 
-        if (!message.hasSenderPartyNumber() && !configuration.hasOrganisationNumber()) {
+        // Validate sender identifier
+        if (!message.hasSenderPartyNumber()) {
             Audit.error("Senders orgnr missing", markerFrom(message));
             throw new MeldingsUtvekslingRuntimeException("Missing senders orgnumber. Please configure orgnumber= in the integrasjonspunkt-local.properties");
+        }
+        // Validate receiver identifier
+        if (!message.hasRecieverPartyNumber()) {
+            Audit.error("Receiver orgnr missing", markerFrom(message));
+            throw new MeldingsUtvekslingRuntimeException("Missing receivers orgnumber.");
         }
 
         EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);

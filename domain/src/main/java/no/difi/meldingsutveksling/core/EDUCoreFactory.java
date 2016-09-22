@@ -1,7 +1,11 @@
 package no.difi.meldingsutveksling.core;
 
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.mxa.schema.domain.Message;
 import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
+import no.difi.meldingsutveksling.noarkexchange.PutMessageMarker;
+import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
@@ -34,7 +38,14 @@ public class EDUCoreFactory {
         } else {
             eduCore.setMessageType(EDUCore.MessageType.EDU);
         }
-        eduCore.setPayload(unmarshallPayload(putMessageRequestType.getPayload()));
+
+        try {
+            eduCore.setPayload(unmarshallPayload(putMessageRequestType.getPayload()));
+        } catch (JAXBException e) {
+            Audit.error("Payload unmarshalling failed. Request causing error: {}",
+                    PutMessageMarker.markerFrom(new PutMessageRequestWrapper(putMessageRequestType)));
+            throw new MeldingsUtvekslingRuntimeException(e);
+        }
 
         return eduCore;
     }
@@ -58,8 +69,6 @@ public class EDUCoreFactory {
         PutMessageRequestType putMessageRequestType = of.createPutMessageRequestType();
         putMessageRequestType.setEnvelope(envelopeType);
         putMessageRequestType.setPayload(message.getPayload());
-
-        // TODO: add potential missing fields: ref, email?
 
         return putMessageRequestType;
     }
@@ -98,12 +107,8 @@ public class EDUCoreFactory {
 
     private EDUCore createCommon(String senderOrgNr, String receiverOrgNr) {
 
-        // TODO: add sender/receiver orgnr validation
-
         InfoRecord senderInfo = serviceRegistryLookup.getInfoRecord(senderOrgNr);
         InfoRecord receiverInfo = serviceRegistryLookup.getInfoRecord(receiverOrgNr);
-
-        // TODO: verify info objects
 
         EDUCore eduCore = new EDUCore();
 
@@ -113,15 +118,7 @@ public class EDUCoreFactory {
         return eduCore;
     }
 
-    private void fillCommon(EDUCore core, String senderOrgNr, String receiverOrgNr) {
-        InfoRecord senderInfo = serviceRegistryLookup.getInfoRecord(senderOrgNr);
-        InfoRecord receiverInfo = serviceRegistryLookup.getInfoRecord(receiverOrgNr);
-
-        core.setSender(createSender(senderInfo));
-        core.setReceiver(createReceiver(receiverInfo));
-    }
-
-    public Object unmarshallPayload(Object payload) {
+    public Object unmarshallPayload(Object payload) throws JAXBException {
         String p;
         Object msg = null;
 
@@ -132,18 +129,14 @@ public class EDUCoreFactory {
             p = ((Node) payload).getFirstChild().getTextContent().trim();
         }
 
-        try { // TODO: see AppReceiptPutMessageStrategy, error handling
-            if (PayloadUtil.isAppReceipt(payload)) {
-                JAXBContext jaxbContext = JAXBContext.newInstance("no.difi.meldingsutveksling.noarkexchange.schema");
-                Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-                msg = unmarshaller.unmarshal(new StringSource((p)), AppReceiptType.class).getValue();
-            } else {
-                JAXBContext jaxbContext = JAXBContext.newInstance(MeldingType.class);
-                Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-                msg = unmarshaller.unmarshal(new StringSource((p)), MeldingType.class).getValue();
-            }
-        } catch (JAXBException e) {
-            e.printStackTrace();
+        if (PayloadUtil.isAppReceipt(payload)) {
+            JAXBContext jaxbContext = JAXBContext.newInstance("no.difi.meldingsutveksling.noarkexchange.schema");
+            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+            msg = unmarshaller.unmarshal(new StringSource((p)), AppReceiptType.class).getValue();
+        } else {
+            JAXBContext jaxbContext = JAXBContext.newInstance(MeldingType.class);
+            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+            msg = unmarshaller.unmarshal(new StringSource((p)), MeldingType.class).getValue();
         }
         return msg;
     }
