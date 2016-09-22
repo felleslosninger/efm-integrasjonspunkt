@@ -95,6 +95,25 @@
                 </executions>
 
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jaxb2-maven-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>xjc-educore</id>
+                        <goals>
+                            <goal>xjc</goal>
+                        </goals>
+                        <configuration>
+                            <packageName>no.difi.meldingsutveksling.noarkexchange.schema.core</packageName>
+                            <schemaDirectory>src/wsdl</schemaDirectory>
+                            <schemaFiles>noark4-1-ws-wd-types.xsd</schemaFiles>
+                            <clearOutputDir>true</clearOutputDir>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 

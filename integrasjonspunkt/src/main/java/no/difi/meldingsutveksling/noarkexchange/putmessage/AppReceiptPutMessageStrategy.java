@@ -1,11 +1,13 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
+import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.noarkexchange.*;
+import no.difi.meldingsutveksling.noarkexchange.MessageException;
+import no.difi.meldingsutveksling.noarkexchange.MessageSender;
+import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
+import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
-import no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 
 import javax.xml.bind.JAXBContext;
@@ -14,7 +16,7 @@ import javax.xml.bind.Marshaller;
 import java.io.StringWriter;
 
 import static java.util.Arrays.asList;
-import static no.difi.meldingsutveksling.noarkexchange.PutMessageMarker.markerFrom;
+import static no.difi.meldingsutveksling.core.EDUCoreMarker.markerFrom;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createOkResponse;
 
 /**
@@ -22,7 +24,7 @@ import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory
  *
  * @author Glenn Bech
  */
-class AppReceiptPutMessageStrategy implements PutMessageStrategy {
+class AppReceiptMessageStrategy implements MessageStrategy {
 
     private final MessageSender messageSender;
 
@@ -36,39 +38,25 @@ class AppReceiptPutMessageStrategy implements PutMessageStrategy {
         }
     }
 
-    public AppReceiptPutMessageStrategy(MessageSender messageSender) {
+    public AppReceiptMessageStrategy(MessageSender messageSender) {
         this.messageSender = messageSender;
     }
 
     @Override
-    public PutMessageResponseType putMessage(PutMessageRequestType request) {
-        final PutMessageRequestWrapper wrapper = new PutMessageRequestWrapper(request);
-        Audit.info("Received AppReceipt", markerFrom(wrapper));
-        try {
-             AppReceiptType receipt = PayloadUtil.getAppReceiptType(request.getPayload());
-            if (asList("OK", "WARNING", "ERROR").contains(receipt.getType())) {
-                wrapper.swapSenderAndReceiver();
-                messageSender.sendMessage(wrapper.getRequest());
-            }
-            if ("OK".equals(receipt.getType())) {
-                Audit.info("AppReceipt sent to "+ wrapper.getRecieverPartyNumber(), markerFrom(wrapper));
-            } else if (asList("ERROR", "WARNING").contains(receipt.getType())) {
-                final MessageException me = new MessageException(StatusMessage.APP_RECEIPT_CONTAINS_ERROR);
-                Audit.warn(me.getStatusMessage().getTechnicalMessage(), markerFrom(wrapper));
-            }
-            return createOkResponse();
-        } catch (JAXBException e) {
-            try {
-                final Marshaller marshaller = jaxbContext.createMarshaller();
-                StringWriter requestAsXml = new StringWriter(4096);
-                marshaller.marshal(new ObjectFactory().createPutMessageRequest(request), requestAsXml);
-                System.out.println(">>> Failing request: " + requestAsXml.toString());
-                Audit.error("This request resultet in error: {}", markerFrom(new PutMessageRequestWrapper(request)), requestAsXml.toString());
-            } catch (JAXBException e1) {
-                throw new MeldingsUtvekslingRuntimeException(e1);
-            }
-            throw new MeldingsUtvekslingRuntimeException(e);
+    public PutMessageResponseType putMessage(EDUCore request) {
+        Audit.info("Received AppReceipt", markerFrom(request));
+        AppReceiptType receipt = request.getPayloadAsAppreceiptType();
+        if (asList("OK", "WARNING", "ERROR").contains(receipt.getType())) {
+            request.swapSenderAndReceiver();
+            messageSender.sendMessage(request);
         }
+        if ("OK".equals(receipt.getType())) {
+            Audit.info("AppReceipt sent to "+ request.getReceiver().getOrgNr(), markerFrom(request));
+        } else if (asList("ERROR", "WARNING").contains(receipt.getType())) {
+            final MessageException me = new MessageException(StatusMessage.APP_RECEIPT_CONTAINS_ERROR);
+            Audit.warn(me.getStatusMessage().getTechnicalMessage(), markerFrom(request));
+        }
+        return createOkResponse();
     }
 
 

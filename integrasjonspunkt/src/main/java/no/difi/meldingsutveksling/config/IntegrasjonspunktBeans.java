@@ -13,10 +13,12 @@ import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 
 import java.net.URISyntaxException;
 
+@Profile({"dev", "itest", "systest", "staging", "production"})
 @Configuration
 public class IntegrasjonspunktBeans {
     @Autowired
@@ -44,6 +46,6 @@ public class IntegrasjonspunktBeans {
 
     @Bean
     public StrategyFactory messageStrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup) {
-        return new StrategyFactory(messageSender, serviceRegistryLookup);
+        return new StrategyFactory(messageSender);
     }
 }

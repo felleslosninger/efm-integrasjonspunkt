@@ -2,10 +2,18 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
+import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.core.Receiver;
+import no.difi.meldingsutveksling.core.Sender;
+import no.difi.meldingsutveksling.noarkexchange.schema.core.JournpostType;
+import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -48,94 +56,94 @@ public class MessageSenderTest {
     public void shouldThrowMessageContextExceptionWhenMissingRecipientOrganizationNumber() throws MessageContextException {
         expectedException.expect(MessageContextException.class);
         expectedException.expect(new StatusMatches(StatusMessage.MISSING_RECIEVER_ORGANIZATION_NUMBER));
-        PutMessageRequestWrapper requestAdapter = new RequestBuilder().withSender().build();
+        EDUCore request = new RequestBuilder().withSender().build();
+        when(request.getReceiver().getOrgNr()).thenReturn("");
 
-        messageSender.createMessageContext(requestAdapter);
+        messageSender.createMessageContext(request);
     }
 
     @Test
     public void shouldThrowMessageContextExceptionWhenMissingRecipientCertificate() throws MessageContextException, CertificateException {
         expectedException.expect(MessageContextException.class);
         expectedException.expect(new StatusMatches(StatusMessage.MISSING_RECIEVER_CERTIFICATE));
-        PutMessageRequestWrapper requestAdapter = new RequestBuilder().withSender().withReciever().build();
+        EDUCore request = new RequestBuilder().withSender().withReciever().build();
 
         when(adresseregister.getCertificate(RECIEVER_PARTY_NUMBER)).thenThrow(new CertificateException("hello"));
 
-        messageSender.createMessageContext(requestAdapter);
+        messageSender.createMessageContext(request);
     }
 
     @Test
     public void shouldThrowMessageContextExceptionWhenMissingSenderCertificate() throws CertificateException, MessageContextException {
         expectedException.expect(MessageContextException.class);
         expectedException.expect(new StatusMatches(StatusMessage.MISSING_SENDER_CERTIFICATE));
-        PutMessageRequestWrapper requestAdapter = new RequestBuilder().withSender().withReciever().build();
+        EDUCore request = new RequestBuilder().withSender().withReciever().build();
 
         when(adresseregister.getCertificate(SENDER_PARTY_NUMBER)).thenThrow(new CertificateException("hello"));
 
-        messageSender.createMessageContext(requestAdapter);
+        messageSender.createMessageContext(request);
     }
 
     @Test
     public void messageContextShouldHaveConversationId() throws MessageContextException {
-        PutMessageRequestWrapper requestAdapter = new RequestBuilder().withSender().withReciever().withConversationId().withJournalpostId().build();
+        EDUCore request = new RequestBuilder().withSender().withReciever().withConversationId().withJournalpostId().build();
 
-        MessageContext context = messageSender.createMessageContext(requestAdapter);
+        MessageContext context = messageSender.createMessageContext(request);
         Assert.assertEquals(CONVERSATION_ID, context.getConversationId());
     }
 
     @Test
     public void messageContextShouldHaveJournalPostId() throws MessageContextException {
-        PutMessageRequestWrapper requestAdapter = new RequestBuilder().withSender().withReciever().withConversationId().withJournalpostId().build();
+        EDUCore request = new RequestBuilder().withSender().withReciever().withConversationId().withJournalpostId().build();
 
-        when(requestAdapter.getMessageType()).thenReturn(PutMessageRequestWrapper.MessageType.EDUMESSAGE);
-        MessageContext context = messageSender.createMessageContext(requestAdapter);
+        when(request.getMessageType()).thenReturn(EDUCore.MessageType.EDU);
+        MessageContext context = messageSender.createMessageContext(request);
         Assert.assertEquals(JOURNALPOST_ID, context.getJournalPostId());
     }
 
     @Test
     public void messageContextShouldHaveEmptyJounalpostIdOnAppReceipt() throws MessageContextException{
-        PutMessageRequestWrapper requestAdapter = new RequestBuilder().withSender().withReciever().withConversationId().build();
+        EDUCore request = new RequestBuilder().withSender().withReciever().withConversationId().build();
 
-        when(requestAdapter.getMessageType()).thenReturn(PutMessageRequestWrapper.MessageType.APPRECEIPT);
-        MessageContext context = messageSender.createMessageContext(requestAdapter);
+        when(request.getMessageType()).thenReturn(EDUCore.MessageType.APPRECEIPT);
+        MessageContext context = messageSender.createMessageContext(request);
         Assert.assertEquals("", context.getJournalPostId());
     }
 
     private class RequestBuilder {
-        private PutMessageRequestWrapper requestAdapter;
+        private EDUCore request;
 
         private RequestBuilder() {
-            this.requestAdapter = mock(PutMessageRequestWrapper.class);
+            this.request = mock(EDUCore.class);
+            when(request.getSender()).thenReturn(mock(Sender.class));
+            when(request.getReceiver()).thenReturn(mock(Receiver.class));
         }
 
         public RequestBuilder withSender() {
-            when(requestAdapter.getSenderPartynumber()).thenReturn(SENDER_PARTY_NUMBER);
+            when(request.getSender().getOrgNr()).thenReturn(SENDER_PARTY_NUMBER);
             return this;
         }
 
         public RequestBuilder withReciever() {
-            when(requestAdapter.getRecieverPartyNumber()).thenReturn(RECIEVER_PARTY_NUMBER);
-            when(requestAdapter.hasRecieverPartyNumber()).thenReturn(true);
+            when(request.getReceiver().getOrgNr()).thenReturn(RECIEVER_PARTY_NUMBER);
             return this;
         }
 
         public  RequestBuilder withConversationId(){
-            when(requestAdapter.getConversationId()).thenReturn(CONVERSATION_ID);
+            when(request.getId()).thenReturn(CONVERSATION_ID);
             return this;
         }
 
         public RequestBuilder withJournalpostId(){
-            Object message = "<Melding><journpost><jpId>"+JOURNALPOST_ID+"</jpId></journpost></Melding>";
-            when(requestAdapter.getPayload()).thenReturn(message);
-            try {
-                when(requestAdapter.getJournalPostId()).thenReturn(JOURNALPOST_ID);
-            } catch (PayloadException e) {
-            }
+            when(request.getPayloadAsMeldingType()).thenReturn(mock(MeldingType.class));
+            when(request.getPayloadAsMeldingType().getJournpost()).thenReturn(mock(JournpostType.class));
+            when(request.getPayloadAsMeldingType().getJournpost().getJpId()).thenReturn(JOURNALPOST_ID);
+            when(request.getJournalpostId()).thenReturn(JOURNALPOST_ID);
             return this;
         }
 
-        public PutMessageRequestWrapper build() {
-            return requestAdapter;
+        public EDUCore build() {
+            return request;
         }
     }
 

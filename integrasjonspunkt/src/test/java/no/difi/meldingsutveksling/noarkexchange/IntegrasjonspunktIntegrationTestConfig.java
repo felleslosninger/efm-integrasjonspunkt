@@ -1,15 +1,25 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
+import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.core.Receiver;
+import no.difi.meldingsutveksling.core.Sender;
 import no.difi.meldingsutveksling.domain.Avsender;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRequiredPropertyException;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.OrganizationType;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -18,6 +28,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.jms.core.JmsTemplate;
 
 import javax.sql.DataSource;
+
+import java.net.URISyntaxException;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -32,6 +44,26 @@ import static org.mockito.Mockito.*;
 @Profile("test")
 @Configuration
 public class IntegrasjonspunktIntegrationTestConfig {
+
+    @Autowired
+    private Environment environment;
+
+    @Bean
+    public IntegrasjonspunktConfiguration integrasjonspunktConfiguration() throws MeldingsUtvekslingRequiredPropertyException {
+        return new IntegrasjonspunktConfiguration(environment);
+    }
+
+    @Bean
+    public MessageSender messageSender(TransportFactory transportFactory, Adresseregister adresseregister, IntegrasjonspunktConfiguration integrasjonspunktConfiguration, IntegrasjonspunktNokkel integrasjonspunktNokkel, StandardBusinessDocumentFactory standardBusinessDocumentFactory) {
+        return new MessageSender(transportFactory, adresseregister, integrasjonspunktConfiguration, integrasjonspunktNokkel, standardBusinessDocumentFactory);
+    }
+
+    @Bean
+    public StrategyFactory messageStrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup) {
+        return new StrategyFactory(messageSender);
+    }
+
+    // Mocks
 
     @Bean
     @Primary
@@ -77,7 +109,7 @@ public class IntegrasjonspunktIntegrationTestConfig {
     @Primary
     public StandardBusinessDocumentFactory standardBusinessDocumentFactory() throws MessageException {
         StandardBusinessDocumentFactory sbdfMock = mock(StandardBusinessDocumentFactory.class);
-        when(sbdfMock.create(any(PutMessageRequestType.class), anyString(), any(Avsender.class), any(Mottaker.class))).thenReturn(mock(EduDocument.class));
+        when(sbdfMock.create(any(EDUCore.class), anyString(), any(Avsender.class), any(Mottaker.class))).thenReturn(mock(EduDocument.class));
         return sbdfMock;
     }
 
@@ -88,4 +120,15 @@ public class IntegrasjonspunktIntegrationTestConfig {
         return dataSourceMock;
     }
 
+    @Bean
+    @Primary
+    public ServiceRegistryLookup serviceRegistryLookup(IntegrasjonspunktConfiguration integrasjonspunktConfiguration) throws URISyntaxException {
+        ServiceRegistryLookup srMock = mock(ServiceRegistryLookup.class);
+        InfoRecord ir = mock(InfoRecord.class);
+        when(ir.getOrganisationNumber()).thenReturn("1337");
+        when(ir.getOrganizationName()).thenReturn("foo");
+        when(ir.getOrganizationType()).thenReturn(new OrganizationType("EDU", "EDU"));
+        when(srMock.getInfoRecord(anyString())).thenReturn(ir);
+        return srMock;
+    }
 }

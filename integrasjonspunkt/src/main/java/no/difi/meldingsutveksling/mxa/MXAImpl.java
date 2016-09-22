@@ -2,18 +2,21 @@ package no.difi.meldingsutveksling.mxa;
 
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
+import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.core.EDUCoreFactory;
+import no.difi.meldingsutveksling.core.EDUCoreMarker;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.mxa.schema.MXADelegate;
 import no.difi.meldingsutveksling.mxa.schema.domain.Message;
+import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.ptv.CorrespondenceRequest;
-import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyValues;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +35,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.time.Instant;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.mxa.MessageMarker.markerFrom;
 
 
@@ -50,13 +54,16 @@ public class MXAImpl implements MXADelegate {
     private InternalQueue internalQueue;
 
     @Autowired
-    ServiceRegistryLookup serviceRegistryLookup;
+    private ServiceRegistryLookup serviceRegistryLookup;
 
     @Autowired
-    IntegrasjonspunktConfiguration config;
+    private IntegrasjonspunktConfiguration config;
 
     @Autowired
     private StrategyFactory strategyFactory;
+
+    @Autowired
+    private IntegrasjonspunktImpl integrasjonspunktImpl;
 
     private static final Logger log = LoggerFactory.getLogger(MXAImpl.class);
     private static final int SUCCESS= 0;
@@ -76,10 +83,19 @@ public class MXAImpl implements MXADelegate {
             Audit.error("XML parse error", markerFrom(msg));
             return XML_PARSE_ERROR;
         }
-
         Audit.info("MXA message received", markerFrom(msg));
 
-        // TODO: get service record from SR
+        if (isNullOrEmpty(configuration.getOrganisationNumber())) {
+            Audit.error("Senders orgnr missing", markerFrom(msg));
+            throw new MeldingsUtvekslingRuntimeException("Missing senders orgnumber. Please configure orgnumber= in the integrasjonspunkt-local.properties");
+        }
+        if (isNullOrEmpty(msg.getParticipantId())) {
+            Audit.error("Receiver identifier missing", markerFrom(msg));
+            throw new MeldingsUtvekslingRuntimeException("Missing receiver identifier.");
+        }
+
+
+        // TODO: temp. fix for personal id number
         if (msg.getParticipantId().length() > 9) {
             String fileName = "MXA-" + Instant.now().toEpochMilli() + ".xml";
             File mxaMsgFile = new File(fileName);
@@ -92,35 +108,24 @@ public class MXAImpl implements MXADelegate {
             return SUCCESS;
         }
 
+        EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
+        EDUCore message = eduCoreFactory.create(msg, configuration.getOrganisationNumber());
+
         try {
             if (configuration.isQueueEnabled()) {
-                internalQueue.enqueueMXA(msg);
-                Audit.info("MXA message enqueued", markerFrom(msg));
+                internalQueue.enqueueExternal(message);
+                Audit.info("MXA message enqueued", EDUCoreMarker.markerFrom(message));
             } else {
-                Audit.info("Queue is disabled", markerFrom(msg));
-                sendMessage(msg);
+                Audit.info("Queue is disabled", EDUCoreMarker.markerFrom(message));
+                integrasjonspunktImpl.sendMessage(message);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Audit.error("Internal error", markerFrom(msg));
+            Audit.error("Internal error", EDUCoreMarker.markerFrom(message));
             return INTERNAL_ERROR;
         }
 
         return SUCCESS;
     }
 
-    public void sendMessage(Message msg) {
-
-        final InfoRecord senderInfo = serviceRegistryLookup.getInfoRecord(configuration.getOrganisationNumber());
-        final InfoRecord receiverInfo = serviceRegistryLookup.getInfoRecord(msg.getParticipantId());
-
-        CorrespondenceAgencyConfiguration config = CorrespondenceAgencyConfiguration.configurationFrom(environment);
-
-        CorrespondenceAgencyValues values = CorrespondenceAgencyValues.from(msg, senderInfo, receiverInfo);
-        final InsertCorrespondenceV2 message = CorrespondenceAgencyMessageFactory.create(config, values);
-        CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(markerFrom(msg), config);
-        final CorrespondenceRequest request = new CorrespondenceRequest.Builder().withUsername(config.getSystemUserCode()).withPassword(config.getPassword()).withPayload(message).build();
-        client.send(request);
-        Audit.info("MXA message sent", markerFrom(msg));
-    }
 }

@@ -28,6 +28,9 @@ public class PayloadUtil {
     public static final String PAYLOAD_UNKNOWN_TYPE = "Payload is of unknown type cannot determine what type of message it is";
 
     public static boolean isAppReceipt(Object payload) {
+        if (payload instanceof AppReceiptType) {
+            return true;
+        }
         if(payload instanceof String) {
             return ((String) payload).contains(APP_RECEIPT_INDICATOR);
         }

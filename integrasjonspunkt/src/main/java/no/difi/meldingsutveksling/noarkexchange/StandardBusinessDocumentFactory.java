@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.noarkexchange;
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.StandardBusinessDocumentConverter;
+import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Archive;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateAsice;
@@ -15,8 +16,10 @@ import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
+import no.difi.meldingsutveksling.noarkexchange.receive.EDUCoreConverter;
+import no.difi.meldingsutveksling.noarkexchange.receive.PayloadConverter;
+import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
+import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -27,15 +30,14 @@ import org.springframework.stereotype.Component;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.UUID;
 
+import static no.difi.meldingsutveksling.core.EDUCoreMarker.markerFrom;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.payloadSizeMarker;
-import static no.difi.meldingsutveksling.noarkexchange.PutMessageMarker.markerFrom;
 
 /**
  * Factory class for StandardBusinessDocument instances
@@ -68,15 +70,29 @@ public class StandardBusinessDocumentFactory {
         this.integrasjonspunktNokkel = integrasjonspunktNokkel;
     }
 
-    public EduDocument create(PutMessageRequestType sender, Avsender avsender, Mottaker mottaker) throws MessageException {
+    public EduDocument create(EDUCore sender, Avsender avsender, Mottaker mottaker) throws MessageException {
         return create(sender, UUID.randomUUID().toString(), avsender, mottaker);
     }
 
-    public EduDocument create(PutMessageRequestType shipment, String conversationId, Avsender avsender, Mottaker mottaker) throws MessageException {
-        final byte[] marshalledShipment = marshall(shipment);
+    public EduDocument create(EDUCore shipment, String conversationId, Avsender avsender, Mottaker mottaker) throws MessageException {
+        // Need to marshall payload before marshalling the message, since the payload can have different types
+        String payloadAsString;
+        PayloadConverter payloadConverter;
+        if (shipment.getMessageType() == EDUCore.MessageType.EDU) {
+            payloadConverter = new PayloadConverter<>(MeldingType.class);
+            payloadAsString = payloadConverter.marshallToString(shipment.getPayloadAsMeldingType());
+        } else {
+            payloadConverter = new PayloadConverter<>(AppReceiptType.class);
+            payloadAsString = payloadConverter.marshallToString(shipment.getPayloadAsAppreceiptType());
+        }
+        shipment.setPayload(payloadAsString);
+
+        EDUCoreConverter eduCoreConverter = new EDUCoreConverter();
+        byte[] marshalledShipment = eduCoreConverter.marshallToBytes(shipment);
+        shipment.setPayload(payloadConverter.unmarshallFrom(payloadAsString.getBytes()));
 
         BestEduMessage bestEduMessage = new BestEduMessage(marshalledShipment);
-        LogstashMarker marker = markerFrom(new PutMessageRequestWrapper(shipment));
+        LogstashMarker marker = markerFrom(shipment);
         Audit.info("Payload size", marker.and(payloadSizeMarker(marshalledShipment)));
         Archive archive;
         try {
@@ -86,16 +102,7 @@ public class StandardBusinessDocumentFactory {
         }
         Payload payload = new Payload(encryptArchive(mottaker, archive));
 
-        final JournalpostId journalpostId;
-        try {
-            journalpostId = JournalpostId.fromPutMessage(new PutMessageRequestWrapper(shipment));
-        } catch (PayloadException e) {
-            Audit.error("Unknown payload string", markerFrom(new PutMessageRequestWrapper(shipment)));
-            log.error(markerFrom(new PutMessageRequestWrapper(shipment)), e.getMessage(), e);
-            throw new IllegalArgumentException(e.getMessage());
-        }
-
-        return new CreateSBD().createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload, conversationId, DOCUMENT_TYPE_MELDING, journalpostId.value());
+        return new CreateSBD().createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload, conversationId, DOCUMENT_TYPE_MELDING, shipment.getJournalpostId());
     }
 
     private byte[] encryptArchive(Mottaker mottaker, Archive archive) {
@@ -105,18 +112,6 @@ public class StandardBusinessDocumentFactory {
 
     private Archive createAsicePackage(Avsender avsender, Mottaker mottaker, BestEduMessage bestEduMessage) throws IOException {
         return new CreateAsice().createAsice(bestEduMessage, integrasjonspunktNokkel.getSignatureHelper(), avsender, mottaker);
-    }
-
-    private byte[] marshall(PutMessageRequestType message) {
-        final ByteArrayOutputStream os = new ByteArrayOutputStream();
-        try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
-            Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-            jaxbMarshaller.marshal(new ObjectFactory().createPutMessageRequest(message), os);
-        } catch (JAXBException e) {
-            throw new MeldingsUtvekslingRuntimeException(e);
-        }
-        return os.toByteArray();
     }
 
     public static EduDocument create(StandardBusinessDocument fromDocument) {

@@ -1,9 +1,10 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
+import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
+import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.w3c.dom.Document;
@@ -212,21 +213,24 @@ public class BestEDUStrategyTest {
     public void shouldHandleP360StylePayload() {
 
         MessageSender messageSender = Mockito.mock(MessageSender.class);
-        BestEDUPutMessageStrategy strategy = new BestEDUPutMessageStrategy(messageSender);
-        PutMessageResponseType t = new PutMessageResponseType();
-        when(strategy.putMessage(any(PutMessageRequestType.class))).thenReturn(t);
-
-        PutMessageRequestType request = new PutMessageRequestType();
+        EduMessageStrategyFactory strategyFactory = new EduMessageStrategyFactory(messageSender);
+        EDUCore request = new EDUCore();
         request.setPayload(p360Style);
+        MessageStrategy messageStrategy = strategyFactory.create(request.getPayload());
+        Assert.assertTrue(messageStrategy instanceof BestEDUMessageStrategy);
 
-        strategy.putMessage(request);
-        verify(messageSender, times(1)).sendMessage(any(PutMessageRequestType.class));
+        PutMessageResponseType t = new PutMessageResponseType();
+        when(messageStrategy.putMessage(any(EDUCore.class))).thenReturn(t);
+
+
+        messageStrategy.putMessage(request);
+        verify(messageSender, times(1)).sendMessage(any(EDUCore.class));
     }
 
     @Test
     public void testShouldHandleEPhortePaload() throws ParserConfigurationException {
         MessageSender messageSenderMock = Mockito.mock(MessageSender.class);
-        BestEDUPutMessageStrategy strategy = new BestEDUPutMessageStrategy(messageSenderMock);
+        EduMessageStrategyFactory strategyFactory = new EduMessageStrategyFactory(messageSenderMock);
         Document document;
         try {
             DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -234,9 +238,10 @@ public class BestEDUStrategyTest {
         } catch (SAXException | IOException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
-        PutMessageRequestType req = new PutMessageRequestType();
-        req.setPayload(document);
-        strategy.putMessage(req);
-        verify(messageSenderMock, times(1)).sendMessage(any(PutMessageRequestType.class));
+        EDUCore request = new EDUCore();
+        request.setPayload(document);
+        MessageStrategy messageStrategy = strategyFactory.create(document);
+        messageStrategy.putMessage(request);
+        verify(messageSenderMock, times(1)).sendMessage(any(EDUCore.class));
     }
 }

@@ -16,9 +16,9 @@ public class StrategyFactory {
     private final EduMessageStrategyFactory eduMessageStrategyFactory;
     private final PostVirksomhetStrategyFactory postVirksomhetStrategyFactory;
 
-    public StrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup) {
+    public StrategyFactory(MessageSender messageSender) {
         eduMessageStrategyFactory = EduMessageStrategyFactory.newInstance(messageSender);
-        postVirksomhetStrategyFactory = PostVirksomhetStrategyFactory.newInstance(messageSender.getEnvironment(), serviceRegistryLookup);
+        postVirksomhetStrategyFactory = PostVirksomhetStrategyFactory.newInstance(messageSender.getEnvironment());
 
     }
 
