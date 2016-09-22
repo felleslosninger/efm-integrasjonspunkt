@@ -11,10 +11,12 @@ public class PutMessageObjectMother {
     public static PutMessageRequestType createMessageRequestType(String orgNumber) {
         PutMessageRequestType request = new PutMessageRequestType();
         EnvelopeType envelope = new EnvelopeType();
-        AddressType address = new AddressType();
-        address.setOrgnr(orgNumber);
-        envelope.setSender(address);
-        envelope.setReceiver(new AddressType());
+        AddressType senderAddress = new AddressType();
+        senderAddress.setOrgnr(orgNumber);
+        envelope.setSender(senderAddress);
+        AddressType receiverAddress = new AddressType();
+        receiverAddress.setOrgnr("42");
+        envelope.setReceiver(receiverAddress);
         request.setEnvelope(envelope);
         request.setPayload("<Melding><journpost><jpId>5</jpId></journpost></Melding>");
         return request;

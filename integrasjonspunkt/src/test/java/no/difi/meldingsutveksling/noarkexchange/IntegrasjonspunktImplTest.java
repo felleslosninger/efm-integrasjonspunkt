@@ -46,8 +46,9 @@ public class IntegrasjonspunktImplTest {
 
     @Test
     public void shouldPutMessageOnQueueWhenOrganisationNumberIsConfigured() throws Exception {
-        when(configurationMock.hasOrganisationNumber()).thenReturn(false);
-        PutMessageRequestType request = PutMessageObjectMother.createMessageRequestType("12345");
+        when(configurationMock.hasOrganisationNumber()).thenReturn(true);
+        when(configurationMock.getOrganisationNumber()).thenReturn("1234");
+        PutMessageRequestType request = PutMessageObjectMother.createMessageRequestType(null);
 
         integrasjonspunkt.putMessage(request);
 
@@ -56,8 +57,8 @@ public class IntegrasjonspunktImplTest {
 
     @Test
     public void shouldPutMessageOnQueueWhenPartyNumberIsInRequest() throws Exception {
-        when(configurationMock.hasOrganisationNumber()).thenReturn(true);
-        PutMessageRequestType request = PutMessageObjectMother.createMessageRequestType(null);
+        when(configurationMock.hasOrganisationNumber()).thenReturn(false);
+        PutMessageRequestType request = PutMessageObjectMother.createMessageRequestType("12345");
 
         integrasjonspunkt.putMessage(request);
 
