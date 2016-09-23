@@ -13,7 +13,6 @@
     </properties>
 
     <artifactId>post-til-private</artifactId>
-    <packaging>pom</packaging>
     <dependencies>
         <dependency>
             <groupId>org.jhades</groupId>

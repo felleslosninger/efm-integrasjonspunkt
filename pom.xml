@@ -47,7 +47,6 @@
         <module>post-til-private</module>
         <module>service-registry-client</module>
         <module>webservice-tools</module>
-        <module>kontakt-reservasjonsregister-client</module>
     </modules>
 
     <dependencyManagement>

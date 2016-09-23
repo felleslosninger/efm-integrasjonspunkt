@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true">
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
-    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener" />
+    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener"/>
     <!-- Logstash destination -->
     <springProperty name="destination" source="app.logger.destination"/>
     <springProperty name="profiles" source="spring.profiles.active"/>
@@ -10,9 +10,21 @@
         <destination>${destination}</destination>
         <!-- encoder is required -->
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <customFields>{"appname":"${project.artifactId}","buildinfo.version":"${project.version}","buildinfo.lastcommit":"${buildNumber}"}</customFields>
+            <customFields>
+                {"appname":"${project.artifactId}","buildinfo.version":"${project.version}","buildinfo.lastcommit":"${buildNumber}"}
+            </customFields>
         </encoder>
         <if condition='property("profiles").contains("docker")'>
+            <then>
+                <ssl>
+                    <trustStore>
+                        <location>classpath:logstash.jks-test</location>
+                        <password>logstash</password>
+                    </trustStore>
+                </ssl>
+            </then>
+        </if>
+        <if condition='property("profiles").contains("dev")'>
             <then>
                 <ssl>
                     <trustStore>

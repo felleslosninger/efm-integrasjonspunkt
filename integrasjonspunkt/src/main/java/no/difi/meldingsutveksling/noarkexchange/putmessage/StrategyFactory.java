@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.lang.NotImplementedException;
 
@@ -15,11 +14,13 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
 public class StrategyFactory {
     private final EduMessageStrategyFactory eduMessageStrategyFactory;
     private final PostVirksomhetStrategyFactory postVirksomhetStrategyFactory;
+    private final MessageStrategyFactory postInnbyggerStrategyFactory;
 
     public StrategyFactory(MessageSender messageSender) {
         eduMessageStrategyFactory = EduMessageStrategyFactory.newInstance(messageSender);
         postVirksomhetStrategyFactory = PostVirksomhetStrategyFactory.newInstance(messageSender.getEnvironment());
 
+        postInnbyggerStrategyFactory = PostInnbyggerStrategyFactory.newInstance();
     }
 
     /**
@@ -38,6 +39,8 @@ public class StrategyFactory {
             return eduMessageStrategyFactory;
         } else if ("POST_VIRKSOMHET".equalsIgnoreCase(serviceRecord.getServiceIdentifier())) {
             return postVirksomhetStrategyFactory;
+        } else if ("DPI".equalsIgnoreCase(serviceRecord.getServiceIdentifier())){
+            return postInnbyggerStrategyFactory;
         } else {
             throw new NotImplementedException(String.format("Integrasjonspunkt has no message strategy matching service identifier matching %s", serviceRecord.getServiceIdentifier()));
         }

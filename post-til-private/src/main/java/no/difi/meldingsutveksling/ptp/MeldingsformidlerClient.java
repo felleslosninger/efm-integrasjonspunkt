@@ -25,8 +25,8 @@ public class MeldingsformidlerClient {
     public void sendMelding(MeldingsformidlerRequest request) throws MeldingsformidlerException {
         Mottaker mottaker = Mottaker.builder(request.getMottakerPid(), request.getPostkasseAdresse(), Sertifikat.fraByteArray(request.getCertificate()), request.getOrgnrPostkasse()).build();
         DigitalPost digitalPost = DigitalPost.builder(mottaker, request.getSubject()).virkningsdato(new Date()).build();
-        Dokument dokument = Dokument.builder(request.getDocumentTitle(), request.getDocumentName(), request.getDocument()).mimeType(request.getMimeType()).build();
-        Dokumentpakke dokumentpakke = Dokumentpakke.builder(dokument).build(); // skal dokumentpakke ha vedlegg?
+        Dokument dokument = Dokument.builder(request.getDocumentTitle(), request.getDocumentName(), request.getDocument().getInputStream()).mimeType(request.getMimeType()).build();
+        Dokumentpakke dokumentpakke = Dokumentpakke.builder(dokument)/*TODO.vedlegg(Dokument.builder())*/.build(); // skal dokumentpakke ha vedlegg?
         Behandlingsansvarlig behandlingsansvarlig = Behandlingsansvarlig.builder(request.getSenderOrgnumber()).build();
 
         Forsendelse forsendelse = Forsendelse.digital(behandlingsansvarlig, digitalPost, dokumentpakke)
@@ -50,22 +50,16 @@ public class MeldingsformidlerClient {
     }
 
     public static class Config {
-        private final String orgnumber;
         private final String url;
         private KeyStore keyStore;
         private String keystoreAlias;
         private String keystorePassword;
 
-        public Config(String orgnumber, String url, KeyStore keyStore, String keystoreAlias, String keystorePassword) {
-            this.orgnumber = orgnumber;
+        public Config(String url, KeyStore keyStore, String keystoreAlias, String keystorePassword) {
             this.url = url;
             this.keyStore = keyStore;
             this.keystoreAlias = keystoreAlias;
             this.keystorePassword = keystorePassword;
-        }
-
-        public String getOrgnumber() {
-            return orgnumber;
         }
 
         public String getUrl() {
