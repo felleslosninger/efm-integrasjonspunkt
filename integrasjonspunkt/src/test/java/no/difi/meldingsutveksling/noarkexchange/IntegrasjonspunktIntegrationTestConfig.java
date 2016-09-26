@@ -3,18 +3,15 @@ package no.difi.meldingsutveksling.noarkexchange;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.core.EDUCore;
-import no.difi.meldingsutveksling.core.Receiver;
-import no.difi.meldingsutveksling.core.Sender;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRequiredPropertyException;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.OrganizationType;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
@@ -125,9 +122,9 @@ public class IntegrasjonspunktIntegrationTestConfig {
     public ServiceRegistryLookup serviceRegistryLookup(IntegrasjonspunktConfiguration integrasjonspunktConfiguration) throws URISyntaxException {
         ServiceRegistryLookup srMock = mock(ServiceRegistryLookup.class);
         InfoRecord ir = mock(InfoRecord.class);
-        when(ir.getOrganisationNumber()).thenReturn("1337");
+        when(ir.getIdentifier()).thenReturn("1337");
         when(ir.getOrganizationName()).thenReturn("foo");
-        when(ir.getOrganizationType()).thenReturn(new OrganizationType("EDU", "EDU"));
+        when(ir.getEntityType()).thenReturn(new EntityType("EDU", "EDU"));
         when(srMock.getInfoRecord(anyString())).thenReturn(ir);
         return srMock;
     }

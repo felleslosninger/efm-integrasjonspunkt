@@ -144,14 +144,14 @@ public class EDUCoreFactory {
 
     private Sender createSender(InfoRecord senderInfo) {
         Sender sender = new Sender();
-        sender.setOrgNr(senderInfo.getOrganisationNumber());
+        sender.setOrgNr(senderInfo.getIdentifier());
         sender.setOrgName(senderInfo.getOrganizationName());
         return sender;
     }
 
     private Receiver createReceiver(InfoRecord receiverInfo) {
         Receiver receiver = new Receiver();
-        receiver.setOrgNr(receiverInfo.getOrganisationNumber());
+        receiver.setOrgNr(receiverInfo.getIdentifier());
         receiver.setOrgName(receiverInfo.getOrganizationName());
         return receiver;
     }
