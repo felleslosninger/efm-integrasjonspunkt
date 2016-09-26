@@ -175,7 +175,7 @@ public class CorrespondenceAgencyMessageFactoryTest {
     public void testFactoryForEscapedXMLPutMessage() throws PayloadException, JAXBException {
         PutMessageRequestWrapper msgFromEscaped = new PutMessageRequestWrapper(createPutMessageEscapedXml(escapedXml));
         InfoRecord infoMock = mock(InfoRecord.class);
-        when(infoMock.getOrganisationNumber()).thenReturn("910075918");
+        when(infoMock.getIdentifier()).thenReturn("910075918");
         when(infoMock.getOrganizationName()).thenReturn("Fylkesmannen i Sogn og Fjordane");
         CorrespondenceAgencyValues values = CorrespondenceAgencyValues.from(msgFromEscaped, infoMock, infoMock);
 
@@ -186,7 +186,7 @@ public class CorrespondenceAgencyMessageFactoryTest {
     public void testFactoryForEscapedXMLMXAMessage() throws PayloadException, JAXBException {
         Message mxaMessage = createMxaMessageEscapedXml(cdataTaggedMxaXml);
         InfoRecord infoMock = mock(InfoRecord.class);
-        when(infoMock.getOrganisationNumber()).thenReturn("910075918");
+        when(infoMock.getIdentifier()).thenReturn("910075918");
         when(infoMock.getOrganizationName()).thenReturn("Fylkesmannen i Sogn og Fjordane");
         CorrespondenceAgencyValues values = CorrespondenceAgencyValues.from(mxaMessage, infoMock, infoMock);
 
@@ -197,7 +197,7 @@ public class CorrespondenceAgencyMessageFactoryTest {
     public void testFactoryForCDataXML() throws PayloadException, JAXBException {
         PutMessageRequestWrapper msgFromCdata = new PutMessageRequestWrapper(createPutMessageCdataXml(cdataTaggedXml));
         InfoRecord infoMock = mock(InfoRecord.class);
-        when(infoMock.getOrganisationNumber()).thenReturn("910075918");
+        when(infoMock.getIdentifier()).thenReturn("910075918");
         when(infoMock.getOrganizationName()).thenReturn("Fylkesmannen i Sogn og Fjordane");
         CorrespondenceAgencyValues values = CorrespondenceAgencyValues.from(msgFromCdata, infoMock, infoMock);
         assertFields(CorrespondenceAgencyMessageFactory.create(postConfig, values));

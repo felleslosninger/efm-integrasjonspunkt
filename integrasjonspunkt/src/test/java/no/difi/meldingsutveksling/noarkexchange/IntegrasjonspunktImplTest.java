@@ -29,7 +29,7 @@ public class IntegrasjonspunktImplTest {
         initMocks(this);
 
         InfoRecord infoRecord = new InfoRecord();
-        infoRecord.setOrganisationNumber("1234");
+        infoRecord.setIdentifier("1234");
         infoRecord.setOrganizationName("foo");
         when(serviceRegistryLookup.getInfoRecord(anyString())).thenReturn(infoRecord);
 
