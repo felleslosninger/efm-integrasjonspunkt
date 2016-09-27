@@ -237,7 +237,7 @@ public class EDUCoreFactoryTest {
         EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
 
         EDUCore eduCore = eduCoreFactory.create(message, "1234");
-        assertEquals("66A50D806D9444E5E044000E7F7E0BD2", eduCore.getPayloadAsMeldingType().getJournpost().getJpId());
+        assertEquals("P1234-5-test", eduCore.getPayloadAsMeldingType().getJournpost().getJpId());
     }
 
     @Test
