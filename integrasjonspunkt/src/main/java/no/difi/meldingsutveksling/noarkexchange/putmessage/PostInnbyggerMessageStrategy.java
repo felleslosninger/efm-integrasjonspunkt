@@ -48,16 +48,6 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
                 }
 
                 @Override
-                public String getDocumentName() {
-                    return null;
-                }
-
-                @Override
-                public String getDocumentTitle() {
-                    return null;
-                }
-
-                @Override
                 public String getSenderOrgnumber() {
                     return null;
                 }
@@ -92,10 +82,6 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
                     return null;
                 }
 
-                @Override
-                public String getMimeType() {
-                    return null;
-                }
             });
         } catch (MeldingsformidlerException e) {
             //TODO
