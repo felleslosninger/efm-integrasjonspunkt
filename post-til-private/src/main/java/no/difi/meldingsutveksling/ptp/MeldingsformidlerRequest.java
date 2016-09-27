@@ -33,18 +33,6 @@ public interface MeldingsformidlerRequest {
 
     /**
      *
-     * @return typically the prefix in the filename
-     */
-    String getDocumentName();
-
-    /**
-     *
-     * @return this title will be used to display the post in the target portal
-     */
-    String getDocumentTitle();
-
-    /**
-     *
      * @return virksomhetens organization number
      */
     String getSenderOrgnumber();
@@ -85,12 +73,5 @@ public interface MeldingsformidlerRequest {
      * @return
      */
     String getQueueId();
-
-    /**
-     *
-     * @return MIME type of the document
-     */
-    String getMimeType();
-
 
 }

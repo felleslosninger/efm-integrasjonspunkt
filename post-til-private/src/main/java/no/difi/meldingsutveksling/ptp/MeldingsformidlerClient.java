@@ -5,6 +5,7 @@ import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.sdp.client2.domain.*;
 import no.difi.sdp.client2.domain.digital_post.DigitalPost;
 import no.difi.sdp.client2.domain.exceptions.SendException;
+import no.digipost.api.representations.Organisasjonsnummer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,11 +24,12 @@ public class MeldingsformidlerClient {
     }
 
     public void sendMelding(MeldingsformidlerRequest request) throws MeldingsformidlerException {
-        Mottaker mottaker = Mottaker.builder(request.getMottakerPid(), request.getPostkasseAdresse(), Sertifikat.fraByteArray(request.getCertificate()), request.getOrgnrPostkasse()).build();
+        Mottaker mottaker = Mottaker.builder(request.getMottakerPid(), request.getPostkasseAdresse(), Sertifikat.fraByteArray(request.getCertificate()), Organisasjonsnummer.of(request.getOrgnrPostkasse())).build();
         DigitalPost digitalPost = DigitalPost.builder(mottaker, request.getSubject()).virkningsdato(new Date()).build();
-        Dokument dokument = Dokument.builder(request.getDocumentTitle(), request.getDocumentName(), request.getDocument().getInputStream()).mimeType(request.getMimeType()).build();
+        Dokument dokument = Dokument.builder(request.getDocument().getTitle(), request.getDocument().getFileName(), request.getDocument().getContents()).mimeType(request.getDocument().getMimeType()).build();
         Dokumentpakke dokumentpakke = Dokumentpakke.builder(dokument)/*TODO.vedlegg(Dokument.builder())*/.build(); // skal dokumentpakke ha vedlegg?
-        Behandlingsansvarlig behandlingsansvarlig = Behandlingsansvarlig.builder(request.getSenderOrgnumber()).build();
+        final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(request.getSenderOrgnumber());
+        Avsender behandlingsansvarlig = Avsender.builder(aktoerOrganisasjonsnummer.forfremTilAvsender()).build();
 
         Forsendelse forsendelse = Forsendelse.digital(behandlingsansvarlig, digitalPost, dokumentpakke)
                 .konversasjonsId(request.getConversationId()) // fra integrasjonspunkt?
@@ -36,10 +38,10 @@ public class MeldingsformidlerClient {
 //                .spraakkode(request.getSpraakKode())
                 .build();
 
-        KlientKonfigurasjon klientKonfigurasjon = KlientKonfigurasjon.builder().meldingsformidlerRoot(config.getUrl()).connectionTimeout(20, TimeUnit.SECONDS).build();
+        KlientKonfigurasjon klientKonfigurasjon = KlientKonfigurasjon.builder(config.getUrl()).connectionTimeout(20, TimeUnit.SECONDS).build();
 
 
-        TekniskAvsender tekniskAvsender = TekniskAvsender.builder(request.getSenderOrgnumber(), Noekkelpar.fraKeyStoreUtenTrustStore(config.getKeyStore(), config.getKeystoreAlias(), config.getKeystorePassword())).build();
+        Databehandler tekniskAvsender = Databehandler.builder(aktoerOrganisasjonsnummer.forfremTilDatabehandler(), Noekkelpar.fraKeyStoreUtenTrustStore(config.getKeyStore(), config.getKeystoreAlias(), config.getKeystorePassword())).build();
 
         SikkerDigitalPostKlient klient = new SikkerDigitalPostKlient(tekniskAvsender, klientKonfigurasjon);
         try {

@@ -1,10 +1,13 @@
 package no.difi.meldingsutveksling.ptp;
 
+import com.google.common.io.ByteStreams;
+
 import java.io.*;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.List;
 import java.util.UUID;
 
 public class MeldingsformidlerClientMain {
@@ -16,11 +19,22 @@ public class MeldingsformidlerClientMain {
 
     public static void main(String[] args) throws MeldingsformidlerException {
         KeyStore keystore = setupKeyStore("kontaktinfo-client-test.jks", "changeit".toCharArray());
-        MeldingsformidlerClient meldingsformidlerClient = new MeldingsformidlerClient(new MeldingsformidlerClient.Config(DIFI_ORGNR, URL_TESTMILJO, keystore, "client_alias", "changeit"));
+        MeldingsformidlerClient meldingsformidlerClient = new MeldingsformidlerClient(new MeldingsformidlerClient.Config(URL_TESTMILJO, keystore, "client_alias", "changeit"));
         final MeldingsformidlerRequest request = new MeldingsformidlerRequest() {
             @Override
-            public InputStream getDocument() {
-                return this.getClass().getClassLoader().getResourceAsStream("Testdokument.DOCX");
+            public Document getDocument() {
+                final String filname = "Testdokument.DOCX";
+                try(final InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(filname)) {
+                    final byte[] bytes = ByteStreams.toByteArray(resourceAsStream);
+                    return new Document(bytes, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", filname, "Testdokument");
+                } catch (IOException e) {
+                    throw new RuntimeException("Unable to read Testdokument", e);
+                }
+            }
+
+            @Override
+            public List<Document> getAttachements() {
+                return null;
             }
 
             @Override
@@ -31,16 +45,6 @@ public class MeldingsformidlerClientMain {
             @Override
             public String getSubject() {
                 return "Dette er en test";
-            }
-
-            @Override
-            public String getDocumentName() {
-                return "Testdokument.DOCX";
-            }
-
-            @Override
-            public String getDocumentTitle() {
-                return "Testdokument";
             }
 
             @Override
@@ -82,10 +86,6 @@ public class MeldingsformidlerClientMain {
                 return "køid";
             }
 
-            @Override
-            public String getMimeType() {
-                return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-            }
         };
         try {
             meldingsformidlerClient.sendMelding(request);
