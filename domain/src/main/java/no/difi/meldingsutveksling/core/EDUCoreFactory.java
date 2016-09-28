@@ -77,7 +77,7 @@ public class EDUCoreFactory {
     public EDUCore create(Message message, String senderOrgNr) {
         EDUCore eduCore = createCommon(senderOrgNr, message.getParticipantId());
 
-        eduCore.setId(message.getMessageReference());
+        eduCore.setId(message.getIdproc());
         eduCore.setMessageType(EDUCore.MessageType.MXA);
 
         ObjectFactory of = new ObjectFactory();
@@ -85,7 +85,7 @@ public class EDUCoreFactory {
         JournpostType journpostType = of.createJournpostType();
         journpostType.setJpInnhold(message.getContent().getMessageHeader());
         journpostType.setJpOffinnhold(message.getContent().getMessageSummery());
-        journpostType.setJpId(message.getIdproc());
+        journpostType.setJpId(message.getMessageReference());
 
         message.getContent().getAttachments().getAttachment().forEach(a -> {
             DokumentType dokumentType = of.createDokumentType();
@@ -144,14 +144,14 @@ public class EDUCoreFactory {
 
     private Sender createSender(InfoRecord senderInfo) {
         Sender sender = new Sender();
-        sender.setOrgNr(senderInfo.getOrganisationNumber());
+        sender.setOrgNr(senderInfo.getIdentifier());
         sender.setOrgName(senderInfo.getOrganizationName());
         return sender;
     }
 
     private Receiver createReceiver(InfoRecord receiverInfo) {
         Receiver receiver = new Receiver();
-        receiver.setOrgNr(receiverInfo.getOrganisationNumber());
+        receiver.setOrgNr(receiverInfo.getIdentifier());
         receiver.setOrgName(receiverInfo.getOrganizationName());
         return receiver;
     }

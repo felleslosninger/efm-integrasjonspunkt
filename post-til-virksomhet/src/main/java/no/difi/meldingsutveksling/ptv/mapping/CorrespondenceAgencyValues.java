@@ -42,9 +42,9 @@ public class CorrespondenceAgencyValues {
         String xpathJpData= "Melding/journpost/dokument/fil/base64";
 
         CorrespondenceAgencyValues values = new CorrespondenceAgencyValues();
-        values.setSenderOrgNr(senderInfo.getOrganisationNumber());
+        values.setSenderOrgNr(senderInfo.getIdentifier());
         values.setSenderOrgName(senderInfo.getOrganizationName());
-        values.setReceiverOrgNr(receiverInfo.getOrganisationNumber());
+        values.setReceiverOrgNr(receiverInfo.getIdentifier());
         values.setReceiverOrgName(receiverInfo.getOrganizationName());
 
         values.setReportee(putMessage.getEnvelope().getReceiver().getOrgnr());
@@ -64,9 +64,9 @@ public class CorrespondenceAgencyValues {
 
     public static CorrespondenceAgencyValues from(Message msg, InfoRecord senderInfo, InfoRecord receiverInfo) {
         CorrespondenceAgencyValues values = new CorrespondenceAgencyValues();
-        values.setSenderOrgNr(senderInfo.getOrganisationNumber());
+        values.setSenderOrgNr(senderInfo.getIdentifier());
         values.setSenderOrgName(senderInfo.getOrganizationName());
-        values.setReceiverOrgNr(receiverInfo.getOrganisationNumber());
+        values.setReceiverOrgNr(receiverInfo.getIdentifier());
         values.setReceiverOrgName(receiverInfo.getOrganizationName());
 
         values.setReportee(msg.getParticipantId());

@@ -5,7 +5,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.OrganizationType;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -211,7 +211,7 @@ public class EDUCoreFactoryTest {
         mxaMessageJaxbContext = JAXBContext.newInstance(Message.class);
         serviceRegistryLookup = Mockito.mock(ServiceRegistryLookup.class);
 
-        InfoRecord infoRecord = new InfoRecord("EDU", "1234", "Foo", new OrganizationType("EDU", "EDU"));
+        InfoRecord infoRecord = new InfoRecord("EDU", "1234", "Foo", new EntityType("EDU", "EDU"));
         when(serviceRegistryLookup.getInfoRecord(anyString())).thenReturn(infoRecord);
     }
 
@@ -237,7 +237,7 @@ public class EDUCoreFactoryTest {
         EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
 
         EDUCore eduCore = eduCoreFactory.create(message, "1234");
-        assertEquals("66A50D806D9444E5E044000E7F7E0BD2", eduCore.getPayloadAsMeldingType().getJournpost().getJpId());
+        assertEquals("P1234-5-test", eduCore.getPayloadAsMeldingType().getJournpost().getJpId());
     }
 
     @Test

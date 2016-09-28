@@ -3,8 +3,8 @@ package no.difi.meldingsutveksling.serviceregistry;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.OrganizationType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.junit.Before;
 import org.junit.Test;
@@ -103,8 +103,8 @@ public class ServiceRegistryLookupTest {
         }
 
         String build() {
-            OrganizationType organizationType = new OrganizationType("Organisasjonsledd", "ORGL");
-            InfoRecord infoRecord = new InfoRecord(primaryServiceIdentifier, ORGNR, ORGNAME, organizationType);
+            EntityType entityType = new EntityType("Organisasjonsledd", "ORGL");
+            InfoRecord infoRecord = new InfoRecord(primaryServiceIdentifier, ORGNR, ORGNAME, entityType);
 
             final HashMap<String, Object> content = new HashMap<>();
 

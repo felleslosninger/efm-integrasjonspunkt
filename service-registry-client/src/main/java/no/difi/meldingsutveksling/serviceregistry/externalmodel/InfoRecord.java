@@ -7,15 +7,16 @@ import com.google.common.base.MoreObjects;
  */
 public class InfoRecord {
     private String primaryServiceIdentifier;
-    private String organisationNumber;
+    private String identifier;
     private String organizationName;
-    private OrganizationType organizationType;
+    private EntityType entityType;
 
-    public InfoRecord(String primaryServiceIdentifier, String organisationNumber, String organizationName, OrganizationType organizationType) {
+    public InfoRecord(String primaryServiceIdentifier, String identifier, String organizationName, EntityType
+            entityType) {
         this.primaryServiceIdentifier = primaryServiceIdentifier;
-        this.organisationNumber = organisationNumber;
+        this.identifier = identifier;
         this.organizationName = organizationName;
-        this.organizationType = organizationType;
+        this.entityType = entityType;
     }
 
     /** Needed by gson **/
@@ -30,12 +31,12 @@ public class InfoRecord {
         this.primaryServiceIdentifier = primaryServiceIdentifier;
     }
 
-    public String getOrganisationNumber() {
-        return organisationNumber;
+    public String getIdentifier() {
+        return identifier;
     }
 
-    public void setOrganisationNumber(String organisationNumber) {
-        this.organisationNumber = organisationNumber;
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 
     public String getOrganizationName() {
@@ -46,21 +47,21 @@ public class InfoRecord {
         this.organizationName = organizationName;
     }
 
-    public OrganizationType getOrganizationType() {
-        return organizationType;
+    public EntityType getEntityType() {
+        return entityType;
     }
 
-    public void setOrganizationType(OrganizationType organizationType) {
-        this.organizationType = organizationType;
+    public void setEntityType(EntityType entityType) {
+        this.entityType = entityType;
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("primaryServiceIdentifier", primaryServiceIdentifier)
-                .add("organisationNumber", organisationNumber)
+                .add("identifier", identifier)
                 .add("organizationName", organizationName)
-                .add("organizationType", organizationType)
+                .add("entityType", entityType)
                 .toString();
     }
 }

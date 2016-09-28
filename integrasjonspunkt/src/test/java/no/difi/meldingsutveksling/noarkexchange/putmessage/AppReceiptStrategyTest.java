@@ -46,10 +46,10 @@ public class AppReceiptStrategyTest {
         ServiceRegistryLookup srMock = mock(ServiceRegistryLookup.class);
         InfoRecord senderInfoRecord = new InfoRecord();
         InfoRecord receiverInfoRecord = new InfoRecord();
-        senderInfoRecord.setOrganisationNumber(SENDER_ORG_NR);
+        senderInfoRecord.setIdentifier(SENDER_ORG_NR);
         senderInfoRecord.setOrganizationName("foo");
-        receiverInfoRecord.setOrganisationNumber(RECEIVER_ORG_NR);
-        receiverInfoRecord.setOrganisationNumber("bar");
+        receiverInfoRecord.setIdentifier(RECEIVER_ORG_NR);
+        receiverInfoRecord.setIdentifier("bar");
         when(srMock.getInfoRecord(SENDER_ORG_NR)).thenReturn(senderInfoRecord);
         when(srMock.getInfoRecord(RECEIVER_ORG_NR)).thenReturn(receiverInfoRecord);
 
