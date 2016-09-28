@@ -8,22 +8,24 @@ import no.difi.meldingsutveksling.ptp.Document;
 import no.difi.meldingsutveksling.ptp.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.ptp.MeldingsformidlerException;
 import no.difi.meldingsutveksling.ptp.MeldingsformidlerRequest;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 
 import java.util.List;
 import java.util.UUID;
 
 public class PostInnbyggerMessageStrategy implements MessageStrategy {
 
+    private final ServiceRegistryLookup serviceRegistry;
     private MeldingsformidlerClient.Config config;
 
-    public PostInnbyggerMessageStrategy(MeldingsformidlerClient.Config config) {
+    public PostInnbyggerMessageStrategy(MeldingsformidlerClient.Config config, ServiceRegistryLookup serviceRegistryLookup) {
         this.config = config;
+        this.serviceRegistry = serviceRegistryLookup;
     }
 
     @Override
     public PutMessageResponseType putMessage(final EDUCore request) {
         final MeldingsformidlerClient.Config config = this.config;
-
         MeldingsformidlerClient client = new MeldingsformidlerClient(config);
         try {
             client.sendMelding(new MeldingsformidlerRequest() {

@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.ptp.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.ptp.MeldingsformidlerException;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.springframework.core.env.Environment;
 
 import java.io.FileInputStream;
@@ -14,22 +15,24 @@ import java.security.cert.CertificateException;
 public class PostInnbyggerStrategyFactory implements MessageStrategyFactory {
 
     private final MeldingsformidlerClient.Config clientConfig;
+    private final ServiceRegistryLookup serviceRegistryLookup;
 
-    public PostInnbyggerStrategyFactory(MeldingsformidlerClient.Config clientConfig) {
+    public PostInnbyggerStrategyFactory(MeldingsformidlerClient.Config clientConfig, ServiceRegistryLookup serviceRegistryLookup) {
         this.clientConfig = clientConfig;
+        this.serviceRegistryLookup = serviceRegistryLookup;
     }
 
     @Override
     public MessageStrategy create(Object payload) {
-        return new PostInnbyggerMessageStrategy(clientConfig);
+        return new PostInnbyggerMessageStrategy(clientConfig, serviceRegistryLookup);
     }
 
-    public static MessageStrategyFactory newInstance(Environment environment) throws MeldingsformidlerException {
+    public static MessageStrategyFactory newInstance(Environment environment, ServiceRegistryLookup serviceRegistryLookup) throws MeldingsformidlerException {
         final String keystoreLocation = environment.getProperty("meldingsformidler.keystore.location");
         final String keystorePassword = environment.getProperty("meldingsformidler.keystore.password");
         final KeyStore keyStore = setupKeyStore(keystoreLocation, keystorePassword.toCharArray());
         final MeldingsformidlerClient.Config clientConfig = MeldingsformidlerClient.Config.from(environment, keyStore);
-        return new PostInnbyggerStrategyFactory(clientConfig);
+        return new PostInnbyggerStrategyFactory(clientConfig, serviceRegistryLookup);
     }
 
     private static KeyStore setupKeyStore(String filename, char[] password) throws MeldingsformidlerException {

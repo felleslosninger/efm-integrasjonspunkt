@@ -22,9 +22,9 @@ public class StrategyFactoryTest {
         final MessageSender messageSender = mock(MessageSender.class);
         final Environment environment = mock(Environment.class);
         when(messageSender.getEnvironment()).thenReturn(environment);
+        final ServiceRegistryLookup serviceRegistryLookup = mock(ServiceRegistryLookup.class);
 
-
-        strategyFactory = new StrategyFactory(messageSender);
+        strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup);
     }
 
     @Test
