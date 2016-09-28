@@ -2,12 +2,15 @@ package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
+import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
+import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.ptp.Document;
 import no.difi.meldingsutveksling.ptp.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.ptp.MeldingsformidlerException;
 import no.difi.meldingsutveksling.ptp.MeldingsformidlerRequest;
 
 import java.util.List;
+import java.util.UUID;
 
 public class PostInnbyggerMessageStrategy implements MessageStrategy {
 
@@ -18,7 +21,7 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
     }
 
     @Override
-    public PutMessageResponseType putMessage(EDUCore request) {
+    public PutMessageResponseType putMessage(final EDUCore request) {
         final MeldingsformidlerClient.Config config = this.config;
 
         MeldingsformidlerClient client = new MeldingsformidlerClient(config);
@@ -26,10 +29,9 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
             client.sendMelding(new MeldingsformidlerRequest() {
                 @Override
                 public Document getDocument() {
-    //                final MeldingType payloadAsMeldingType = request.getPayloadAsMeldingType().getJournpost().getDokument();
-
-                    return null;
-
+                    final MeldingType meldingType = request.getPayloadAsMeldingType();
+                    final DokumentType dokumentType = meldingType.getJournpost().getDokument().get(0);
+                    return new Document(dokumentType.getFil().getBase64(), dokumentType.getVeMimeType(), dokumentType.getVeFilnavn(), dokumentType.getDbTittel());
                 }
 
                 @Override
@@ -39,54 +41,53 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
 
                 @Override
                 public String getMottakerPid() {
-                    return null;
+                    return request.getReceiver().getOrgNr();
                 }
 
                 @Override
                 public String getSubject() {
-                    return null;
+                    return request.getPayloadAsMeldingType().getNoarksak().getSaOfftittel(); /* TODO: er dette riktig sted og finne subject */
                 }
 
                 @Override
                 public String getSenderOrgnumber() {
-                    return null;
+                    return request.getSender().getOrgNr();
                 }
 
                 @Override
                 public String getConversationId() {
-                    return null;
+                    return String.valueOf(UUID.randomUUID()); /* TODO: finnes denne i EduCore? */
                 }
 
                 @Override
                 public String getPostkasseAdresse() {
-                    return null;
+                    return null; /* fra KRR via SR */
                 }
 
                 @Override
                 public byte[] getCertificate() {
-                    return new byte[0];
+                    return new byte[0]; /* fra KRR via SR */
                 }
 
                 @Override
                 public String getOrgnrPostkasse() {
-                    return null;
+                    return null; /* fra KRR via SR */
                 }
 
                 @Override
                 public String getSpraakKode() {
-                    return null;
+                    return null; /* TODO: hvor hentes denne fra? EduCore? */
                 }
 
                 @Override
                 public String getQueueId() {
-                    return null;
+                    return "queueId"; /* TODO: hva skal denne egentlig settes til? */
                 }
 
             });
         } catch (MeldingsformidlerException e) {
             //TODO
         }
-//        client.sendMelding();
         return null;
     }
 }

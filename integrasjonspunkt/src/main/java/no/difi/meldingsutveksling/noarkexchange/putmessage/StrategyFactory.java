@@ -1,6 +1,8 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
+import no.difi.meldingsutveksling.ptp.MeldingsformidlerException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.lang.NotImplementedException;
 
@@ -20,7 +22,11 @@ public class StrategyFactory {
         eduMessageStrategyFactory = EduMessageStrategyFactory.newInstance(messageSender);
         postVirksomhetStrategyFactory = PostVirksomhetStrategyFactory.newInstance(messageSender.getEnvironment());
 
-        postInnbyggerStrategyFactory = PostInnbyggerStrategyFactory.newInstance();
+        try {
+            postInnbyggerStrategyFactory = PostInnbyggerStrategyFactory.newInstance(messageSender.getEnvironment());
+        } catch (MeldingsformidlerException e) {
+            throw new MeldingsUtvekslingRuntimeException("Unable to create client for sikker digital post", e);
+        }
     }
 
     /**
@@ -46,5 +52,8 @@ public class StrategyFactory {
         }
 
     }
+
+
+
 
 }

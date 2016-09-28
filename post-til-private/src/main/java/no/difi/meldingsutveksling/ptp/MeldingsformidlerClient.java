@@ -8,6 +8,7 @@ import no.difi.sdp.client2.domain.exceptions.SendException;
 import no.digipost.api.representations.Organisasjonsnummer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
 
 import java.lang.invoke.MethodHandles;
 import java.security.KeyStore;
@@ -79,6 +80,15 @@ public class MeldingsformidlerClient {
         public String getKeystorePassword() {
             return keystorePassword;
         }
+
+        public static Config from(Environment environment, KeyStore keyStore) {
+            final String url = environment.getProperty("meldingsformidler.url");
+            final String keystorePassword = environment.getProperty("meldingsformidler.keystore.password");
+            final String keystoreAlias = environment.getProperty("meldingsformidler.keystore.alias");
+            return new Config(url, keyStore, keystoreAlias, keystorePassword);
+        }
+
+
     }
 
 }
