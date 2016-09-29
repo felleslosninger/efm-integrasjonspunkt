@@ -75,21 +75,8 @@ public class StandardBusinessDocumentFactory {
     }
 
     public EduDocument create(EDUCore shipment, String conversationId, Avsender avsender, Mottaker mottaker) throws MessageException {
-        // Need to marshall payload before marshalling the message, since the payload can have different types
-        String payloadAsString;
-        PayloadConverter payloadConverter;
-        if (shipment.getMessageType() == EDUCore.MessageType.EDU) {
-            payloadConverter = new PayloadConverter<>(MeldingType.class);
-            payloadAsString = payloadConverter.marshallToString(shipment.getPayloadAsMeldingType());
-        } else {
-            payloadConverter = new PayloadConverter<>(AppReceiptType.class);
-            payloadAsString = payloadConverter.marshallToString(shipment.getPayloadAsAppreceiptType());
-        }
-        shipment.setPayload(payloadAsString);
-
         EDUCoreConverter eduCoreConverter = new EDUCoreConverter();
         byte[] marshalledShipment = eduCoreConverter.marshallToBytes(shipment);
-        shipment.setPayload(payloadConverter.unmarshallFrom(payloadAsString.getBytes()));
 
         BestEduMessage bestEduMessage = new BestEduMessage(marshalledShipment);
         LogstashMarker marker = markerFrom(shipment);

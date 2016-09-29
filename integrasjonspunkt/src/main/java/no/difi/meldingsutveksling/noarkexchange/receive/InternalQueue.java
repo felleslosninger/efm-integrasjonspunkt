@@ -14,6 +14,8 @@ import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
+import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
+import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
