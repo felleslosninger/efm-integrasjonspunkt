@@ -20,6 +20,7 @@ import org.w3c.dom.Node;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import java.util.Base64;
 
 public class EDUCoreFactory {
 
@@ -78,7 +79,7 @@ public class EDUCoreFactory {
         EDUCore eduCore = createCommon(senderOrgNr, message.getParticipantId());
 
         eduCore.setId(message.getIdproc());
-        eduCore.setMessageType(EDUCore.MessageType.MXA);
+        eduCore.setMessageType(EDUCore.MessageType.EDU);
 
         ObjectFactory of = new ObjectFactory();
 
@@ -92,7 +93,7 @@ public class EDUCoreFactory {
             dokumentType.setVeFilnavn(a.getFilename());
             dokumentType.setVeMimeType(a.getMimeType());
             FilType filType = of.createFilType();
-            filType.setBase64(a.getValue().getBytes());
+            filType.setBase64(Base64.getDecoder().decode(a.getValue()));
             dokumentType.setFil(filType);
 
             journpostType.getDokument().add(dokumentType);

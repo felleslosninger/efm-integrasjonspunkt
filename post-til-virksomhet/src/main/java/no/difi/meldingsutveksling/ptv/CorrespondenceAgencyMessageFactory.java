@@ -112,7 +112,7 @@ public class CorrespondenceAgencyMessageFactory {
             binaryAttachmentV2.setName(reporteeFactory.createBinaryAttachmentV2Name(d.getVeFilnavn()));
             binaryAttachmentV2.setEncrypted(false);
             binaryAttachmentV2.setSendersReference(reporteeFactory.createBinaryAttachmentV2SendersReference("AttachmentReference_as123452"));
-            binaryAttachmentV2.setData(reporteeFactory.createBinaryAttachmentV2Data(Base64.getDecoder().decode(d.getFil().getBase64())));
+            binaryAttachmentV2.setData(reporteeFactory.createBinaryAttachmentV2Data(d.getFil().getBase64()));
             attachmentExternalBEV2List.getBinaryAttachmentV2().add(binaryAttachmentV2);
         });
 

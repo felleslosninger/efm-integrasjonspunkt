@@ -72,7 +72,6 @@ public class InternalQueue {
     private static JAXBContext jaxbContext;
 
     private final DocumentConverter documentConverter = new DocumentConverter();
-    private final MessageConverter messageConverter = new MessageConverter();
     private final EDUCoreConverter eduCoreConverter = new EDUCoreConverter();
 
     static {
