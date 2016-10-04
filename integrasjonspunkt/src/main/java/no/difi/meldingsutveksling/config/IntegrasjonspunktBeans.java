@@ -5,7 +5,9 @@ import no.difi.meldingsutveksling.ServiceRegistryTransportFactory;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRequiredPropertyException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.KeystoreProvider;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
+import no.difi.meldingsutveksling.ptp.MeldingsformidlerException;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.services.Adresseregister;
@@ -45,7 +47,12 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public StrategyFactory messageStrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup) {
-        return new StrategyFactory(messageSender, serviceRegistryLookup);
+    public KeystoreProvider meldingsformidlerKeystoreProvider(Environment environment) throws MeldingsformidlerException {
+        return KeystoreProvider.from(environment);
+    }
+
+    @Bean
+    public StrategyFactory messageStrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup, KeystoreProvider meldingsformidlerKeystoreProvider) {
+        return new StrategyFactory(messageSender, serviceRegistryLookup, meldingsformidlerKeystoreProvider);
     }
 }

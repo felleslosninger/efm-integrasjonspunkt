@@ -19,12 +19,12 @@ public class StrategyFactory {
     private final PostVirksomhetStrategyFactory postVirksomhetStrategyFactory;
     private final MessageStrategyFactory postInnbyggerStrategyFactory;
 
-    public StrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup) {
+    public StrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup, KeystoreProvider keystoreProvider) {
         eduMessageStrategyFactory = EduMessageStrategyFactory.newInstance(messageSender);
         postVirksomhetStrategyFactory = PostVirksomhetStrategyFactory.newInstance(messageSender.getEnvironment());
 
         try {
-            postInnbyggerStrategyFactory = PostInnbyggerStrategyFactory.newInstance(messageSender.getEnvironment(), serviceRegistryLookup);
+            postInnbyggerStrategyFactory = PostInnbyggerStrategyFactory.newInstance(messageSender.getEnvironment(), serviceRegistryLookup, keystoreProvider);
         } catch (MeldingsformidlerException e) {
             throw new MeldingsUtvekslingRuntimeException("Unable to create client for sikker digital post", e);
         }

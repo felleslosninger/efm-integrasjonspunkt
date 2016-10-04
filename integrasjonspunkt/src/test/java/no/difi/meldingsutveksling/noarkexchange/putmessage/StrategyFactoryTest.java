@@ -24,7 +24,8 @@ public class StrategyFactoryTest {
         when(messageSender.getEnvironment()).thenReturn(environment);
         final ServiceRegistryLookup serviceRegistryLookup = mock(ServiceRegistryLookup.class);
 
-        strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup);
+        final KeystoreProvider keystoreProvider = mock(KeystoreProvider.class);
+        strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider);
     }
 
     @Test

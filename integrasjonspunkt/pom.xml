@@ -515,15 +515,5 @@
             <artifactId>post-til-virksomhet</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>post-til-private</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>post-til-private</artifactId>
-            <version>1.6.2-SNAPSHOT</version>
-        </dependency>
     </dependencies>
 </project>

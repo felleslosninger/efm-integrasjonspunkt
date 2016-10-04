@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
 import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 
 import javax.xml.bind.*;
 import javax.xml.namespace.QName;
@@ -13,7 +14,7 @@ public class EDUCoreConverter {
     private static final JAXBContext jaxbContext;
     static {
         try {
-            jaxbContext = JAXBContext.newInstance(EDUCore.class);
+            jaxbContext = JAXBContext.newInstance(EDUCore.class, MeldingType.class);
         } catch (JAXBException e) {
             throw new RuntimeException("Could not create JAXBContext for " + EDUCore.class);
         }
