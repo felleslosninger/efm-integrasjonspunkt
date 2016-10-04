@@ -12,16 +12,12 @@
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <customFields>{"appname":"${project.artifactId}","buildinfo.version":"${project.version}","buildinfo.lastcommit":"${buildNumber}"}</customFields>
         </encoder>
-        <if condition='property("profiles").contains("docker")'>
-            <then>
-                <ssl>
-                    <trustStore>
-                        <location>classpath:logstash.jks-test</location>
-                        <password>logstash</password>
-                    </trustStore>
-                </ssl>
-            </then>
-        </if>
+        <ssl>
+            <trustStore>
+                <location>classpath:logstash.jks-test</location>
+                <password>logstash</password>
+            </trustStore>
+        </ssl>
     </appender>
 
     <root level="INFO">

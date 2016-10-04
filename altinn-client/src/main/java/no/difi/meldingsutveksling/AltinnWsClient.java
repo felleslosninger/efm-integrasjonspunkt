@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling;
 
+import com.google.common.collect.Lists;
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.*;
@@ -11,6 +12,8 @@ import no.difi.meldingsutveksling.shipping.ws.AltinnReasonFactory;
 import no.difi.meldingsutveksling.shipping.ws.AltinnWsException;
 import no.difi.meldingsutveksling.shipping.ws.ManifestBuilder;
 import no.difi.meldingsutveksling.shipping.ws.RecipientBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.ws.BindingProvider;
@@ -19,18 +22,21 @@ import javax.xml.ws.soap.SOAPBinding;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class AltinnWsClient {
 
     private static final String FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE = "Failed to upload a message to Altinn broker service";
     private static final String FAILED_TO_INITATE_ALTINN_BROKER_SERVICE = "Failed to initate Altinn broker service";
     private static final String FILE_NAME = "sbd.zip";
-    private static final String AVAILABLE_FILES_ERROR_MESSAGE = "Could not get list of available files from Altinn formidlingstjeneste";
+    private static final String AVAILABLE_FILES_ERROR_MESSAGE = "Could not get list of available files from Altinn " +
+            "formidlingstjeneste. Reason: {}";
     private static final String CANNOT_DOWNLOAD_FILE = "Cannot download file";
     private static final String CANNOT_CONFIRM_DOWNLOAD = "Cannot confirm download";
     private final AltinnWsConfiguration configuration;
+
+    private static final Logger log = LoggerFactory.getLogger(AltinnWsClient.class);
 
     public AltinnWsClient(AltinnWsConfiguration altinnWsConfiguration) {
         this.configuration = altinnWsConfiguration;
@@ -100,15 +106,13 @@ public class AltinnWsClient {
         try {
             filesBasic = service.getAvailableFilesBasic(configuration.getUsername(), configuration.getPassword(), searchParameters);
         } catch (IBrokerServiceExternalBasicGetAvailableFilesBasicAltinnFaultFaultFaultMessage e) {
-            throw new AltinnWsException(AVAILABLE_FILES_ERROR_MESSAGE, AltinnReasonFactory.from(e), e);
+            log.error(AVAILABLE_FILES_ERROR_MESSAGE, AltinnReasonFactory.from(e));
+            return Lists.newArrayList();
         }
 
-        List<FileReference> fileReferences = new ArrayList<>();
-        for (BrokerServiceAvailableFile f : filesBasic.getBrokerServiceAvailableFile()) {
-            fileReferences.add(new FileReference(f.getFileReference(), f.getReceiptID()));
-        }
-
-        return fileReferences;
+        return filesBasic.getBrokerServiceAvailableFile()
+            .stream().map(f -> new FileReference(f.getFileReference(), f.getReceiptID()))
+            .collect(Collectors.toList());
     }
 
 
