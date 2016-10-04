@@ -13,6 +13,7 @@ import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
@@ -131,6 +132,12 @@ public class IntegrasjonspunktIntegrationTestConfig {
         when(ir.getOrganizationName()).thenReturn("foo");
         when(ir.getEntityType()).thenReturn(new EntityType("EDU", "EDU"));
         when(srMock.getInfoRecord(anyString())).thenReturn(ir);
+
+        ServiceRecord sr = mock(ServiceRecord.class);
+        when(sr.getServiceIdentifier()).thenReturn("EDU");
+        when(sr.getOrganisationNumber()).thenReturn("1337");
+        when(srMock.getPrimaryServiceRecord(anyString())).thenReturn(sr);
+
         return srMock;
     }
 }

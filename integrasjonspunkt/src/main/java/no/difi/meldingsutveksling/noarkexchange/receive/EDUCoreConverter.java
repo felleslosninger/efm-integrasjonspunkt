@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
 import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 
 import javax.xml.bind.*;
@@ -14,17 +15,30 @@ public class EDUCoreConverter {
     private static final JAXBContext jaxbContext;
     static {
         try {
-            jaxbContext = JAXBContext.newInstance(EDUCore.class, MeldingType.class);
+            jaxbContext = JAXBContext.newInstance(EDUCore.class);
         } catch (JAXBException e) {
             throw new RuntimeException("Could not create JAXBContext for " + EDUCore.class);
         }
     }
 
     public byte[] marshallToBytes(EDUCore message) {
+        // Need to marshall payload before marshalling the message, since the payload can have different types
+        String payloadAsString;
+        PayloadConverter payloadConverter;
+        if (message.getMessageType() == EDUCore.MessageType.EDU) {
+            payloadConverter = new PayloadConverter<>(MeldingType.class);
+            payloadAsString = payloadConverter.marshallToString(message.getPayloadAsMeldingType());
+        } else {
+            payloadConverter = new PayloadConverter<>(AppReceiptType.class);
+            payloadAsString = payloadConverter.marshallToString(message.getPayloadAsAppreceiptType());
+        }
+        message.setPayload(payloadAsString);
+
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
         try {
             Marshaller marshaller = jaxbContext.createMarshaller();
             marshaller.marshal(new JAXBElement<>(new QName("uri", "local"), EDUCore.class, message), os);
+            message.setPayload(payloadConverter.unmarshallFrom(payloadAsString.getBytes()));
             return os.toByteArray();
         } catch (JAXBException e) {
             throw new RuntimeException("Unable to create marshaller for " + EDUCore.class, e);
@@ -37,7 +51,16 @@ public class EDUCoreConverter {
         try {
             unmarshaller = jaxbContext.createUnmarshaller();
             StreamSource source = new StreamSource(is);
-            return unmarshaller.unmarshal(source, EDUCore.class).getValue();
+            EDUCore eduCore = unmarshaller.unmarshal(source, EDUCore.class).getValue();
+            PayloadConverter payloadConverter;
+            if (eduCore.getMessageType() == EDUCore.MessageType.EDU) {
+                payloadConverter = new PayloadConverter<>(MeldingType.class);
+                eduCore.setPayload(payloadConverter.unmarshallFrom(((String)eduCore.getPayload()).getBytes()));
+            } else {
+                payloadConverter = new PayloadConverter<>(AppReceiptType.class);
+                eduCore.setPayload(payloadConverter.unmarshallFrom(((String)eduCore.getPayload()).getBytes()));
+            }
+            return eduCore;
         } catch (JAXBException e) {
             throw new RuntimeException("Unable to create unmarshaller for " + EDUCore.class, e);
         }
