@@ -15,6 +15,14 @@
       <tag>HEAD</tag>
   </scm>
 
+    <repositories>
+        <repository>
+            <id>DIFI MOVE</id>
+            <name>DIFI MOVE Nexus 3rd party</name>
+            <url>http://staging-move-app01.dmz.local:8081/content/repositories/thirdparty/</url>
+        </repository>
+    </repositories>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.boot.version>1.4.0.RELEASE</spring.boot.version>
