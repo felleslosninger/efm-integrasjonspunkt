@@ -52,15 +52,18 @@ public class MessagePolling {
     @Autowired
     ServiceRegistryLookup serviceRegistryLookup;
 
+    private ServiceRecord primaryServiceRecord;
+
     @Scheduled(fixedRate = 15000)
     public void checkForNewMessages() {
         MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, config.getOrganisationNumber());
         logger.debug("Checking for new messages");
 
-        /*
-            TODO: if ServiceRegistry returns a ServiceRecord to something other than Altinn formidlingstjeneste this will fail
-         */
-        final ServiceRecord primaryServiceRecord = serviceRegistryLookup.getPrimaryServiceRecord(config.getOrganisationNumber());
+        // TODO: if ServiceRegistry returns a ServiceRecord to something other than Altinn formidlingstjeneste this
+        // will fail
+        if (primaryServiceRecord == null) {
+            primaryServiceRecord = serviceRegistryLookup.getPrimaryServiceRecord(config.getOrganisationNumber());
+        }
 
         AltinnWsConfiguration configuration = AltinnWsConfiguration.fromConfiguration(primaryServiceRecord.getEndPointURL(), config.getConfiguration());
         AltinnWsClient client = new AltinnWsClient(configuration);

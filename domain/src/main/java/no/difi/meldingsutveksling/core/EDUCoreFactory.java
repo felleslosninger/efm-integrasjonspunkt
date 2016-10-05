@@ -20,6 +20,7 @@ import org.w3c.dom.Node;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import java.util.Base64;
 
 public class EDUCoreFactory {
 
@@ -77,22 +78,22 @@ public class EDUCoreFactory {
     public EDUCore create(Message message, String senderOrgNr) {
         EDUCore eduCore = createCommon(senderOrgNr, message.getParticipantId());
 
-        eduCore.setId(message.getMessageReference());
-        eduCore.setMessageType(EDUCore.MessageType.MXA);
+        eduCore.setId(message.getIdproc());
+        eduCore.setMessageType(EDUCore.MessageType.EDU);
 
         ObjectFactory of = new ObjectFactory();
 
         JournpostType journpostType = of.createJournpostType();
         journpostType.setJpInnhold(message.getContent().getMessageHeader());
         journpostType.setJpOffinnhold(message.getContent().getMessageSummery());
-        journpostType.setJpId(message.getIdproc());
+        journpostType.setJpId(message.getMessageReference());
 
         message.getContent().getAttachments().getAttachment().forEach(a -> {
             DokumentType dokumentType = of.createDokumentType();
             dokumentType.setVeFilnavn(a.getFilename());
             dokumentType.setVeMimeType(a.getMimeType());
             FilType filType = of.createFilType();
-            filType.setBase64(a.getValue().getBytes());
+            filType.setBase64(Base64.getDecoder().decode(a.getValue()));
             dokumentType.setFil(filType);
 
             journpostType.getDokument().add(dokumentType);

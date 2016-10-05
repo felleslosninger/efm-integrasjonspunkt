@@ -1,10 +1,10 @@
 package no.difi.meldingsutveksling.mxa;
 
-import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreFactory;
 import no.difi.meldingsutveksling.core.EDUCoreMarker;
+import no.difi.meldingsutveksling.core.EDUCoreSender;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.mxa.schema.MXADelegate;
@@ -12,10 +12,6 @@ import no.difi.meldingsutveksling.mxa.schema.domain.Message;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
-import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
-import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
-import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
-import no.difi.meldingsutveksling.ptv.CorrespondenceRequest;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -64,6 +60,9 @@ public class MXAImpl implements MXADelegate {
 
     @Autowired
     private IntegrasjonspunktImpl integrasjonspunktImpl;
+
+    @Autowired
+    private EDUCoreSender eduCoreSender;
 
     private static final Logger log = LoggerFactory.getLogger(MXAImpl.class);
     private static final int SUCCESS= 0;
@@ -117,7 +116,7 @@ public class MXAImpl implements MXADelegate {
                 Audit.info("MXA message enqueued", EDUCoreMarker.markerFrom(message));
             } else {
                 Audit.info("Queue is disabled", EDUCoreMarker.markerFrom(message));
-                integrasjonspunktImpl.sendMessage(message);
+                eduCoreSender.sendMessage(message);
             }
         } catch (Exception e) {
             e.printStackTrace();
