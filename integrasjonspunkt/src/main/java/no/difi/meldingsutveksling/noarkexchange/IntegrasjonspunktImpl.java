@@ -1,16 +1,13 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import com.google.common.base.Strings;
 import net.logstash.logback.encoder.org.apache.commons.lang.StringUtils;
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreFactory;
-import no.difi.meldingsutveksling.core.EDUCoreMarker;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.logging.MarkerFactory;
-import no.difi.meldingsutveksling.noarkexchange.putmessage.EduMessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategy;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
@@ -27,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.xml.ws.BindingType;
-import java.security.cert.CertificateException;
 
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageMarker.markerFrom;
 
@@ -82,7 +78,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
         GetCanReceiveMessageResponseType response = new GetCanReceiveMessageResponseType();
         boolean canReceive;
 
-        canReceive = hasAdresseregisterCertificate(organisasjonsnummer);
+        canReceive = adresseRegister.hasAdresseregisterCertificate(organisasjonsnummer);
 
         final LogstashMarker marker = MarkerFactory.receiverMarker(organisasjonsnummer);
         if(canReceive) {
@@ -98,18 +94,6 @@ public class IntegrasjonspunktImpl implements SOAPport {
         }
         response.setResult(canReceive);
         return response;
-    }
-
-    private boolean hasAdresseregisterCertificate(String organisasjonsnummer) {
-            log.info("hasAdresseregisterCertificate orgnr:" +organisasjonsnummer+"orgnr");
-            String nOrgnr = FiksFix.replaceOrgNummberWithKs(organisasjonsnummer);
-        final ServiceRecord primaryServiceRecord;
-        try {
-            adresseRegister.getCertificate(nOrgnr);
-        } catch (CertificateException e) {
-            return false;
-        }
-        return true;
     }
 
     private boolean hasMshEndpoint(){
@@ -159,7 +143,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
         else {
             Audit.info("Queue is disabled", markerFrom(message));
 
-            if (hasAdresseregisterCertificate(coreMessage.getReceiver().getOrgNr())) {
+            if (adresseRegister.hasAdresseregisterCertificate(coreMessage.getReceiver().getOrgNr())) {
                 final ServiceRecord serviceRecord = serviceRegistryLookup.getPrimaryServiceRecord(coreMessage
                         .getReceiver().getOrgNr());
                 MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(serviceRecord);
@@ -174,44 +158,6 @@ public class IntegrasjonspunktImpl implements SOAPport {
                 return PutMessageResponseFactory.createErrorResponse(new MessageException(StatusMessage.UNABLE_TO_FIND_RECEIVER));
             }
         }
-    }
-
-    public boolean sendMessage(EDUCore message) {
-        MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, configuration.getOrganisationNumber());
-        if (!Strings.isNullOrEmpty(message.getSender().getOrgNr()) && !configuration.hasOrganisationNumber()) {
-            throw new MeldingsUtvekslingRuntimeException();
-        }
-
-        final ServiceRecord primaryServiceRecord = serviceRegistryLookup.getPrimaryServiceRecord(message.getReceiver().getOrgNr());
-
-        final MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(primaryServiceRecord);
-
-        boolean result;
-        if(hasAdresseregisterCertificate(message.getReceiver().getOrgNr())) {
-            Audit.info("Receiver validated", EDUCoreMarker.markerFrom(message));
-
-            MessageStrategy strategy = messageStrategyFactory.create(message.getPayload());
-            PutMessageResponseType response = strategy.putMessage(message);
-            result = validateResult(response);
-        } else {
-            if (hasMshEndpoint()){
-                Audit.info("Send message to MSH", EDUCoreMarker.markerFrom(message));
-                EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
-                PutMessageResponseType response = mshClient.sendEduMelding(eduCoreFactory.createPutMessageFromCore(message));
-                result = validateResult(response);
-            }
-            else
-            {
-                Audit.error("Receiver not found", EDUCoreMarker.markerFrom(message));
-                result = false;
-            }
-        }
-        if(result) {
-            Audit.info("Message sent", EDUCoreMarker.markerFrom(message));
-        } else {
-            Audit.error("Message sending failed", EDUCoreMarker.markerFrom(message));
-        }
-        return result;
     }
 
     public MessageSender getMessageSender() {

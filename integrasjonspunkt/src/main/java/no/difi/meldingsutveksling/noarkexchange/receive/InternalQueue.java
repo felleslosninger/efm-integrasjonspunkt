@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.noarkexchange.receive;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreMarker;
+import no.difi.meldingsutveksling.core.EDUCoreSender;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
@@ -48,7 +49,7 @@ public class InternalQueue {
     private static final String EXTERNAL = "external";
     private static final String NOARK = "noark";
 
-    Logger logger = LoggerFactory.getLogger(InternalQueue.class);
+    private Logger logger = LoggerFactory.getLogger(InternalQueue.class);
 
     @Autowired
     JmsTemplate jmsTemplate;
@@ -67,6 +68,9 @@ public class InternalQueue {
 
     @Autowired
     IntegrasjonspunktConfiguration config;
+
+    @Autowired
+    EDUCoreSender eduCoreSender;
 
     private static JAXBContext jaxbContextdomain;
     private static JAXBContext jaxbContext;
@@ -97,7 +101,7 @@ public class InternalQueue {
         MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, configuration.getOrganisationNumber());
         EDUCore request = eduCoreConverter.unmarshallFrom(message);
         try {
-            integrasjonspunktSend.sendMessage(request);
+            eduCoreSender.sendMessage(request);
         } catch (Exception e) {
             Audit.error("Failed to send message... queue will retry", EDUCoreMarker.markerFrom(request));
             throw e;

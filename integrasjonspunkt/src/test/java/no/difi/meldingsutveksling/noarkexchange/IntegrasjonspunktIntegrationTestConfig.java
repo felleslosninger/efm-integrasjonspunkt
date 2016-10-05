@@ -94,7 +94,9 @@ public class IntegrasjonspunktIntegrationTestConfig {
     @Bean
     @Primary
     public Adresseregister adresseregister() {
-        return mock(Adresseregister.class);
+        Adresseregister adresseregisterMock = mock(Adresseregister.class);
+        when(adresseregisterMock.hasAdresseregisterCertificate(anyString())).thenReturn(true);
+        return adresseregisterMock;
     }
 
     @Bean
