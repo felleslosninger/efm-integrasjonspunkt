@@ -1,42 +1,77 @@
+/**
+ *
+ * Modified version of samples/org/apache/xml/security/samples/signature/VerifySignature.java
+ * of how to validate XML signatures from the Santuario project http://santuario.apache.org/
+ *
+ * What is modified:
+ * removed some unnecessary assignments of null.
+ * Removed try/catch with System.out
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package no.difi.meldingsutveksling.kvittering;
 
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import org.apache.xml.security.exceptions.XMLSecurityException;
+import org.apache.xml.security.keys.KeyInfo;
+import org.apache.xml.security.samples.DSNamespaceContext;
+import org.apache.xml.security.samples.utils.resolver.OfflineResolver;
 import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.Element;
 
-import javax.xml.crypto.MarshalException;
-import javax.xml.crypto.dsig.XMLSignature;
-import javax.xml.crypto.dsig.XMLSignatureException;
-import javax.xml.crypto.dsig.XMLSignatureFactory;
-import javax.xml.crypto.dsig.dom.DOMValidateContext;
-
-/**
- * Utility class used to validate an XML signatuere in Java
- * Based on documentation at
- * https://docs.oracle.com/javase/7/docs/technotes/guides/security/xmldsig/XMLDigitalSignature.html#wp512158
- * <p>
- *
- * @author Glenn Bech
- */
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+import java.security.PublicKey;
+import java.security.cert.X509Certificate;
 class DocumentValidator {
 
-    private static final String SIGNATURE_LOCAL_NAME = "Signature";
+    public static boolean validate(Document doc) throws XMLSecurityException, XPathExpressionException {
+        org.apache.xml.security.Init.init();
+        XPathFactory xpf = XPathFactory.newInstance();
+        XPath xpath = xpf.newXPath();
+        xpath.setNamespaceContext(new DSNamespaceContext());
 
-    public static boolean validate(Document doc) {
+        String expression = "//ds:Signature[1]";
+        Element sigElement = (Element) xpath.evaluate(expression, doc, XPathConstants.NODE);
+        org.apache.xml.security.signature.XMLSignature signature = new org.apache.xml.security.signature.XMLSignature(sigElement, "");
 
-        NodeList nl = doc.getElementsByTagNameNS
-                (XMLSignature.XMLNS, SIGNATURE_LOCAL_NAME);
-        if (nl.getLength() == 0) {
-            throw new MeldingsUtvekslingRuntimeException("Cannot find Signature element");
+        signature.addResourceResolver(new OfflineResolver());
+
+        KeyInfo ki = signature.getKeyInfo();
+
+        boolean isValid = false;
+        if (ki != null) {
+            X509Certificate cert = signature.getKeyInfo().getX509Certificate();
+
+            if (cert != null) {
+                isValid = signature.checkSignatureValue(cert);
+            } else {
+                PublicKey pk;
+                pk = signature.getKeyInfo().getPublicKey();
+
+                if (pk != null) {
+                    isValid = signature.checkSignatureValue(pk);
+                }
+            }
         }
-        DOMValidateContext valContext = new DOMValidateContext(new DOMX509KeySelector(), nl.item(0));
-        XMLSignatureFactory factory = XMLSignatureFactory.getInstance("DOM");
-        XMLSignature signature;
-        try {
-            signature = factory.unmarshalXMLSignature(valContext);
-            return signature.validate(valContext);
-        } catch (XMLSignatureException | MarshalException e) {
-            throw new MeldingsUtvekslingRuntimeException(e);
-        }
+
+        return isValid;
     }
 }
