@@ -5,6 +5,8 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
 import no.difi.meldingsutveksling.noarkexchange.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -16,6 +18,8 @@ import java.security.cert.CertificateException;
 
 @Component
 public class Adresseregister {
+
+    private static final Logger log = LoggerFactory.getLogger(Adresseregister.class);
 
     @Autowired
     IntegrasjonspunktConfiguration configuration;
@@ -68,6 +72,17 @@ public class Adresseregister {
         } catch (CertificateException | IOException e) {
             throw new CertificateException(String.format("Failed to parse pem certificate: invalid certificate for organization %s? ", orgNumber), e);
         }
+    }
+
+    public boolean hasAdresseregisterCertificate(String organisasjonsnummer) {
+        log.info("hasAdresseregisterCertificate orgnr:" +organisasjonsnummer+"orgnr");
+        String nOrgnr = FiksFix.replaceOrgNummberWithKs(organisasjonsnummer);
+        try {
+            getCertificate(nOrgnr);
+        } catch (CertificateException e) {
+            return false;
+        }
+        return true;
     }
 
 }
