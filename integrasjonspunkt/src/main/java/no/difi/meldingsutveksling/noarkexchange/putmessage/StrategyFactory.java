@@ -1,6 +1,8 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
+import no.difi.meldingsutveksling.ptp.MeldingsformidlerException;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.lang.NotImplementedException;
@@ -15,11 +17,17 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
 public class StrategyFactory {
     private final EduMessageStrategyFactory eduMessageStrategyFactory;
     private final PostVirksomhetStrategyFactory postVirksomhetStrategyFactory;
+    private final MessageStrategyFactory postInnbyggerStrategyFactory;
 
-    public StrategyFactory(MessageSender messageSender) {
+    public StrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup, KeystoreProvider keystoreProvider) {
         eduMessageStrategyFactory = EduMessageStrategyFactory.newInstance(messageSender);
         postVirksomhetStrategyFactory = PostVirksomhetStrategyFactory.newInstance(messageSender.getEnvironment());
 
+        try {
+            postInnbyggerStrategyFactory = PostInnbyggerStrategyFactory.newInstance(messageSender.getEnvironment(), serviceRegistryLookup, keystoreProvider);
+        } catch (MeldingsformidlerException e) {
+            throw new MeldingsUtvekslingRuntimeException("Unable to create client for sikker digital post", e);
+        }
     }
 
     /**
@@ -38,10 +46,15 @@ public class StrategyFactory {
             return eduMessageStrategyFactory;
         } else if ("POST_VIRKSOMHET".equalsIgnoreCase(serviceRecord.getServiceIdentifier())) {
             return postVirksomhetStrategyFactory;
+        } else if ("DPI".equalsIgnoreCase(serviceRecord.getServiceIdentifier())){
+            return postInnbyggerStrategyFactory;
         } else {
             throw new NotImplementedException(String.format("Integrasjonspunkt has no message strategy matching service identifier matching %s", serviceRecord.getServiceIdentifier()));
         }
 
     }
+
+
+
 
 }

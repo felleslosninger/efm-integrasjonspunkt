@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.ptp;
 
-import java.io.InputStream;
+import java.util.List;
 
 /**
  * Object to hold parameters used to send messages to sikker digital post
@@ -9,9 +9,15 @@ public interface MeldingsformidlerRequest {
 
     /**
      *
-     * @return the actual content of the post (mail)
+     * @return the main document post (mail)
      */
-    InputStream getDocument();
+    Document getDocument();
+
+
+    /**
+     * @return the attachements for the post (mail). This is the other documents in the JournalPost
+     */
+    List<Document> getAttachements();
 
     /**
      *
@@ -24,18 +30,6 @@ public interface MeldingsformidlerRequest {
      * @return subject in the post (mail)
      */
     String getSubject();
-
-    /**
-     *
-     * @return typically the prefix in the filename
-     */
-    String getDocumentName();
-
-    /**
-     *
-     * @return this title will be used to display the post in the target portal
-     */
-    String getDocumentTitle();
 
     /**
      *
@@ -80,9 +74,4 @@ public interface MeldingsformidlerRequest {
      */
     String getQueueId();
 
-    /**
-     *
-     * @return MIME type of the document
-     */
-    String getMimeType();
 }

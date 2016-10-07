@@ -13,7 +13,6 @@
     </properties>
 
     <artifactId>post-til-private</artifactId>
-    <packaging>pom</packaging>
     <dependencies>
         <dependency>
             <groupId>org.jhades</groupId>
@@ -23,7 +22,7 @@
         <dependency>
             <groupId>no.difi.sdp</groupId>
             <artifactId>sikker-digital-post-klient-java</artifactId>
-            <version>2.1.0</version>
+            <version>3.1-MOVE</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>

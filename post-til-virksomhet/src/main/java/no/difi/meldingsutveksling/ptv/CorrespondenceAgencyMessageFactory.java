@@ -19,7 +19,6 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.time.ZonedDateTime;
-import java.util.Base64;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;

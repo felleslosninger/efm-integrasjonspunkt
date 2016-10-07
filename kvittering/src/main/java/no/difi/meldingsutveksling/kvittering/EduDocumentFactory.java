@@ -11,7 +11,9 @@ import no.difi.meldingsutveksling.kvittering.xsd.Aapning;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.kvittering.xsd.Levering;
 import no.difi.meldingsutveksling.kvittering.xsd.ObjectFactory;
+import org.apache.xml.security.exceptions.XMLSecurityException;
 
+import javax.xml.xpath.XPathExpressionException;
 import java.security.KeyPair;
 
 import static no.difi.meldingsutveksling.kvittering.DocumentToDocumentConverter.toDomainDocument;
@@ -62,8 +64,12 @@ public class EduDocumentFactory {
 
         org.w3c.dom.Document xmlDoc = toXMLDocument(unsignedReceipt);
         org.w3c.dom.Document signedXmlDoc = DocumentSigner.sign(xmlDoc, keyPair);
-        if (!DocumentValidator.validate(signedXmlDoc)) {
-            throw new MeldingsUtvekslingRuntimeException("created non validating document");
+        try {
+            if (!DocumentValidator.validate(signedXmlDoc)) {
+                throw new MeldingsUtvekslingRuntimeException("created non validating document");
+            }
+        } catch (XPathExpressionException | XMLSecurityException e) {
+            throw new RuntimeException("Could not validate signature that we used to sign the document", e);
         }
         return toDomainDocument(signedXmlDoc);
     }
