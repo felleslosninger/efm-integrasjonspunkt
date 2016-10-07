@@ -87,7 +87,7 @@ public class InternalQueue {
 
     @JmsListener(destination = NOARK, containerFactory = "myJmsContainerFactory")
     public void noarkListener(byte[] message, Session session) {
-        MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrgnumber());
+        MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrg().getNumber());
         EduDocument eduDocument = documentConverter.unmarshallFrom(message);
 
         forwardToNoark(eduDocument);
@@ -95,7 +95,7 @@ public class InternalQueue {
 
     @JmsListener(destination = EXTERNAL, containerFactory = "myJmsContainerFactory")
     public void externalListener(byte[] message, Session session) {
-        MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrgnumber());
+        MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrg().getNumber());
         EDUCore request = eduCoreConverter.unmarshallFrom(message);
         try {
             eduCoreSender.sendMessage(request);

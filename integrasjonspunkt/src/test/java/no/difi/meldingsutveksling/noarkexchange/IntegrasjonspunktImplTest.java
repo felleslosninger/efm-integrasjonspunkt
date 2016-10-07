@@ -25,6 +25,8 @@ public class IntegrasjonspunktImplTest {
     @Mock
     private IntegrasjonspunktProperties propertiesMock;
     @Mock
+    private IntegrasjonspunktProperties.Organization organizationMock;
+    @Mock
     private IntegrasjonspunktProperties.FeatureToggle featureMock;
     @Mock
     private ServiceRegistryLookup serviceRegistryLookup;
@@ -39,12 +41,13 @@ public class IntegrasjonspunktImplTest {
         when(serviceRegistryLookup.getInfoRecord(anyString())).thenReturn(infoRecord);
 
         when(propertiesMock.getFeature()).thenReturn(featureMock);
+        when(propertiesMock.getOrg()).thenReturn(organizationMock);
         when(featureMock.isEnableQueue()).thenReturn(true);
     }
 
     @Test(expected = MeldingsUtvekslingRuntimeException.class)
     public void shouldFailWhenPartyAndOrganisationNumberIsMissing() {
-        when(propertiesMock.getOrgnumber()).thenReturn(null);
+        when(organizationMock.getNumber()).thenReturn(null);
         PutMessageRequestType request = PutMessageObjectMother.createMessageRequestType(null);
 
         integrasjonspunkt.putMessage(request);
@@ -52,7 +55,7 @@ public class IntegrasjonspunktImplTest {
 
     @Test
     public void shouldPutMessageOnQueueWhenOrganisationNumberIsConfigured() throws Exception {
-        when(propertiesMock.getOrgnumber()).thenReturn("1234");
+        when(organizationMock.getNumber()).thenReturn("1234");
         PutMessageRequestType request = PutMessageObjectMother.createMessageRequestType(null);
 
         integrasjonspunkt.putMessage(request);
@@ -62,7 +65,7 @@ public class IntegrasjonspunktImplTest {
 
     @Test
     public void shouldPutMessageOnQueueWhenPartyNumberIsInRequest() throws Exception {
-        when(propertiesMock.getOrgnumber()).thenReturn(null);
+        when(organizationMock.getNumber()).thenReturn(null);
         PutMessageRequestType request = PutMessageObjectMother.createMessageRequestType("12345");
 
         integrasjonspunkt.putMessage(request);
@@ -72,7 +75,7 @@ public class IntegrasjonspunktImplTest {
 
     @Test
     public void shouldPutMessageOnQueueWhenOrganisationNumberIsProvided() throws Exception {
-        when(propertiesMock.getOrgnumber()).thenReturn(null);
+        when(organizationMock.getNumber()).thenReturn(null);
         PutMessageRequestType request = PutMessageObjectMother.createMessageRequestType("12345");
 
         integrasjonspunkt.putMessage(request);

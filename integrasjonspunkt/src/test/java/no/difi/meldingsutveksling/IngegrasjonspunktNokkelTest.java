@@ -16,10 +16,12 @@ public class IngegrasjonspunktNokkelTest {
     public void init() {
         IntegrasjonspunktProperties properties = new IntegrasjonspunktProperties();
 
-        properties.setCert(new IntegrasjonspunktProperties.Certificate());
-        properties.getCert().setAlias("974720760");
-        properties.getCert().setPassword("changeit");
-        properties.getCert().setPath("src/main/resources/test-certificates.jks");
+        properties.setOrg(new IntegrasjonspunktProperties.Organization());
+        properties.getOrg().setKeystore(new IntegrasjonspunktProperties.Keystore());
+
+        properties.getOrg().getKeystore().setAlias("974720760");
+        properties.getOrg().getKeystore().setPassword("changeit");
+        properties.getOrg().getKeystore().setPath("src/main/resources/test-certificates.jks");
 
         nokkel = new IntegrasjonspunktNokkel(properties);
 

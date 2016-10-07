@@ -44,8 +44,8 @@ public class EDUCoreSender {
     }
 
     public boolean sendMessage(EDUCore message) {
-        MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrgnumber());
-        if (!Strings.isNullOrEmpty(message.getSender().getOrgNr()) && !Strings.isNullOrEmpty(properties.getOrgnumber())) {
+        MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrg().getNumber());
+        if (!Strings.isNullOrEmpty(message.getSender().getOrgNr()) && !Strings.isNullOrEmpty(properties.getOrg().getNumber())) {
             throw new MeldingsUtvekslingRuntimeException();
         }
 

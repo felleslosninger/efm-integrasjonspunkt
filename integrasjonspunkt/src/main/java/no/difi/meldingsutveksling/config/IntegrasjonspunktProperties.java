@@ -13,47 +13,55 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @author kons-nlu
  */
 @Data
-@ConfigurationProperties(prefix = "difi.miif")
+@ConfigurationProperties(prefix = "difi.move")
 public class IntegrasjonspunktProperties {
 
-    /**
-     * Organization number to run as.
-     */
-    @NotNull(message = "difi.miif.orgnumber is not set. This property is required.")
-    @Size(min = 9, max = 9, message = "difi.miif.orgnumber must be exactly 9 digits")
-    private String orgnumber;
+    @Valid
+    private Organization org;
 
     /**
      * Service registry endpoint.
      */
+    @NotNull
     private String serviceregistryEndpoint;
-
-    /**
-     * Feature toggles.
-     */
-    private FeatureToggle feature;
-
-    /**
-     * Business certificate for this instance.
-     */
-    @Valid
-    @NotNull(message = "Certificate properties not set.")
-    private Certificate cert;
 
     @Valid
     private Altinn altinn;
 
     @Valid
-    private DigitalPostInnbyggerConfig dpi;
-
-    @Valid
-    private PostVirksomheter altinnptv;
+    private PostVirksomheter altinnPTV;
 
     @Valid
     private NorskArkivstandardSystem noarkSystem;
 
     @Valid
     private MessageServiceHandler msh;
+
+    @Valid
+    private DigitalPostInnbyggerConfig dpi;
+
+    /**
+     * Feature toggles.
+     */
+    private FeatureToggle feature;
+
+    @Data
+    public static class Organization {
+
+        /**
+         * Organization number to run as.
+         */
+        @NotNull(message = "difi.move.org.number is not set. This property is required.")
+        @Size(min = 9, max = 9, message = "difi.move.org.number must be exactly 9 digits")
+        private String number;
+
+        /**
+         * Business certificate for this instance.
+         */
+        @Valid
+        @NotNull(message = "Certificate properties not set.")
+        private Keystore keystore;
+    }
 
     @Data
     public static class Altinn {
@@ -112,7 +120,16 @@ public class IntegrasjonspunktProperties {
     }
 
     @Data
-    public static class Certificate {
+    public static class MessageServiceHandler {
+
+        private String username;
+        private String password;
+        private String endpointURL;
+
+    }
+
+    @Data
+    public static class Keystore {
 
         /**
          * Keystore alias for key.
@@ -130,15 +147,6 @@ public class IntegrasjonspunktProperties {
          */
         @NotNull
         private String password;
-
-    }
-
-    @Data
-    public static class MessageServiceHandler {
-
-        private String username;
-        private String password;
-        private String endpointURL;
 
     }
 

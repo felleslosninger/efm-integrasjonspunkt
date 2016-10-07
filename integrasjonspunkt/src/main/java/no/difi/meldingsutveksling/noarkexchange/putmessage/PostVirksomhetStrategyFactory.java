@@ -14,11 +14,11 @@ public class PostVirksomhetStrategyFactory implements MessageStrategyFactory {
     public static PostVirksomhetStrategyFactory newInstance(IntegrasjonspunktProperties properties) {
         return new PostVirksomhetStrategyFactory(
                 new CorrespondenceAgencyConfiguration.Builder()
-                .withEndpointURL(properties.getAltinnptv().getEndpointUrl())
-                .withExternalServiceCode(properties.getAltinnptv().getExternalServiceCode())
-                .withExternalServiceEditionCode(properties.getAltinnptv().getExternalServiceEditionCode())
-                .withPassword(properties.getAltinnptv().getPassword())
-                .withSystemUserCode(properties.getAltinnptv().getUsername())
+                .withEndpointURL(properties.getAltinnPTV().getEndpointUrl())
+                .withExternalServiceCode(properties.getAltinnPTV().getExternalServiceCode())
+                .withExternalServiceEditionCode(properties.getAltinnPTV().getExternalServiceEditionCode())
+                .withPassword(properties.getAltinnPTV().getPassword())
+                .withSystemUserCode(properties.getAltinnPTV().getUsername())
                 .build()
         );
     }

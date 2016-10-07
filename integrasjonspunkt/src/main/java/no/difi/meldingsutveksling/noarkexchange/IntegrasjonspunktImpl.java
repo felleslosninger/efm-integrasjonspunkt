@@ -73,7 +73,6 @@ public class IntegrasjonspunktImpl implements SOAPport {
     @Override
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
 
-
         String organisasjonsnummer = getCanReceiveMessageRequest.getReceiver().getOrgnr();
 
         GetCanReceiveMessageResponseType response = new GetCanReceiveMessageResponseType();
@@ -101,10 +100,10 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType request) {
-        MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrgnumber());
+        MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrg().getNumber());
         PutMessageRequestWrapper message = new PutMessageRequestWrapper(request);
         if (!message.hasSenderPartyNumber()) {
-            message.setSenderPartyNumber(properties.getOrgnumber());
+            message.setSenderPartyNumber(properties.getOrg().getNumber());
         }
 
         Audit.info("Received EDU message", markerFrom(message));

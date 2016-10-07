@@ -78,7 +78,7 @@ public class MXAImpl implements MXADelegate {
         }
         Audit.info("MXA message received", markerFrom(msg));
 
-        if (isNullOrEmpty(properties.getOrgnumber())) {
+        if (isNullOrEmpty(properties.getOrg().getNumber())) {
             Audit.error("Senders orgnr missing", markerFrom(msg));
             throw new MeldingsUtvekslingRuntimeException("Missing senders orgnumber. Please configure orgnumber= in the integrasjonspunkt-local.properties");
         }
@@ -102,7 +102,7 @@ public class MXAImpl implements MXADelegate {
         }
 
         EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
-        EDUCore message = eduCoreFactory.create(msg, properties.getOrgnumber());
+        EDUCore message = eduCoreFactory.create(msg, properties.getOrg().getNumber());
 
         try {
             if (properties.getFeature().isEnableQueue()) {

@@ -60,26 +60,26 @@ public class MessagePolling {
 
     @Scheduled(fixedRate = 15000)
     public void checkForNewMessages() {
-        MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrgnumber());
+        MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrg().getNumber());
         logger.debug("Checking for new messages");
 
         // TODO: if ServiceRegistry returns a ServiceRecord to something other than Altinn formidlingstjeneste this
         // will fail
         if (primaryServiceRecord == null) {
-            primaryServiceRecord = serviceRegistryLookup.getPrimaryServiceRecord(properties.getOrgnumber());
+            primaryServiceRecord = serviceRegistryLookup.getPrimaryServiceRecord(properties.getOrg().getNumber());
         }
 
         AltinnWsConfiguration configuration = AltinnWsConfiguration.fromConfiguration(primaryServiceRecord.getEndPointURL(), environment);
         AltinnWsClient client = new AltinnWsClient(configuration);
 
-        List<FileReference> fileReferences = client.availableFiles(properties.getOrgnumber());
+        List<FileReference> fileReferences = client.availableFiles(properties.getOrg().getNumber());
 
         if (!fileReferences.isEmpty()) {
             Audit.info("New message(s) detected");
         }
 
         for (FileReference reference : fileReferences) {
-            final DownloadRequest request = new DownloadRequest(reference.getValue(), properties.getOrgnumber());
+            final DownloadRequest request = new DownloadRequest(reference.getValue(), properties.getOrg().getNumber());
             EduDocument eduDocument = client.download(request);
 
             if (!isKvittering(eduDocument)) {

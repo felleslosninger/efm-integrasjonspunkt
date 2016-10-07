@@ -83,7 +83,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
 
     @Override
     public CorrelationInformation receive(@WebParam(name = "StandardBusinessDocument", targetNamespace = SBD_NAMESPACE, partName = "receiveResponse") StandardBusinessDocument standardBusinessDocument) {
-        MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrgnumber());
+        MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrg().getNumber());
         try {
             return forwardToNoarkSystem(standardBusinessDocument);
         } catch (MessageException e) {

@@ -26,7 +26,7 @@ public class StrategyFactoryTest {
         final DigitalPostInnbyggerConfig.Keystore keystore = mock(DigitalPostInnbyggerConfig.Keystore.class);
         when(dpic.getKeystore()).thenReturn(keystore);
         when(messageSender.getProperties()).thenReturn(properties);
-        when(properties.getAltinnptv()).thenReturn(ptvMock);
+        when(properties.getAltinnPTV()).thenReturn(ptvMock);
         when(properties.getDpi()).thenReturn(dpic);
         final ServiceRegistryLookup serviceRegistryLookup = mock(ServiceRegistryLookup.class);
 
