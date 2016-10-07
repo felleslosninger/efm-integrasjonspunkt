@@ -1,5 +1,9 @@
 package no.difi.meldingsutveksling.ptp;
 
+import java.lang.invoke.MethodHandles;
+import java.security.KeyStore;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import no.difi.sdp.client2.KlientKonfigurasjon;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.sdp.client2.domain.*;
@@ -8,17 +12,11 @@ import no.difi.sdp.client2.domain.exceptions.SendException;
 import no.digipost.api.representations.Organisasjonsnummer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.env.Environment;
-
-import java.lang.invoke.MethodHandles;
-import java.security.KeyStore;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 public class MeldingsformidlerClient {
+
     static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private final Config config;
-
 
     public MeldingsformidlerClient(Config config) {
         this.config = config;
@@ -34,13 +32,12 @@ public class MeldingsformidlerClient {
 
         Forsendelse forsendelse = Forsendelse.digital(behandlingsansvarlig, digitalPost, dokumentpakke)
                 .konversasjonsId(request.getConversationId()) // fra integrasjonspunkt?
-//                .mpcId(request.getQueueId()) // køid? unik for å unngå kollisjon med andre avsendere
-//                .prioritet(Prioritet.NORMAL) // eller Prioritet.Prioritert?
-//                .spraakkode(request.getSpraakKode())
+                //                .mpcId(request.getQueueId()) // køid? unik for å unngå kollisjon med andre avsendere
+                //                .prioritet(Prioritet.NORMAL) // eller Prioritet.Prioritert?
+                //                .spraakkode(request.getSpraakKode())
                 .build();
 
         KlientKonfigurasjon klientKonfigurasjon = KlientKonfigurasjon.builder(config.getUrl()).connectionTimeout(20, TimeUnit.SECONDS).build();
-
 
         Databehandler tekniskAvsender = Databehandler.builder(aktoerOrganisasjonsnummer.forfremTilDatabehandler(), Noekkelpar.fraKeyStoreUtenTrustStore(config.getKeyStore(), config.getKeystoreAlias(), config.getKeystorePassword())).build();
 
@@ -53,6 +50,7 @@ public class MeldingsformidlerClient {
     }
 
     public static class Config {
+
         private final String url;
         private KeyStore keyStore;
         private String keystoreAlias;
@@ -81,13 +79,12 @@ public class MeldingsformidlerClient {
             return keystorePassword;
         }
 
-        public static Config from(Environment environment, KeyStore keyStore) {
-            final String url = environment.getProperty("meldingsformidler.url");
-            final String keystorePassword = environment.getProperty("meldingsformidler.keystore.password");
-            final String keystoreAlias = environment.getProperty("meldingsformidler.keystore.alias");
+        public static Config from(DigitalPostInnbyggerConfig config, KeyStore keyStore) {
+            final String url = config.getEndpoint();
+            final String keystorePassword = config.getKeystore().getPassword();
+            final String keystoreAlias = config.getKeystore().getPassword();
             return new Config(url, keyStore, keystoreAlias, keystorePassword);
         }
-
 
     }
 

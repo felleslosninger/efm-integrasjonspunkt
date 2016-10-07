@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.config;
 
+import java.net.URISyntaxException;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.ServiceRegistryTransportFactory;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRequiredPropertyException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.KeystoreProvider;
@@ -13,42 +13,37 @@ import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.env.Environment;
-
-import java.net.URISyntaxException;
 
 @Profile({"dev", "itest", "systest", "staging", "production"})
 @Configuration
+@EnableConfigurationProperties({IntegrasjonspunktProperties.class})
 public class IntegrasjonspunktBeans {
+
     @Autowired
-    private Environment environment;
+    private IntegrasjonspunktProperties properties;
 
     @Bean
-    public IntegrasjonspunktConfiguration integrasjonspunktConfiguration() throws MeldingsUtvekslingRequiredPropertyException {
-        return new IntegrasjonspunktConfiguration(environment);
+    public ServiceRegistryLookup serviceRegistryLookup() throws URISyntaxException {
+        return new ServiceRegistryLookup(new RestClient(properties.getServiceregistryEndpoint()));
     }
 
     @Bean
-    public ServiceRegistryLookup serviceRegistryLookup(IntegrasjonspunktConfiguration integrasjonspunktConfiguration) throws URISyntaxException {
-        return new ServiceRegistryLookup(new RestClient(integrasjonspunktConfiguration.getServiceRegistryUrl()));
-    }
-
-    @Bean
-    public TransportFactory serviceRegistryTransportFactory(ServiceRegistryLookup serviceRegistryLookup, IntegrasjonspunktConfiguration integrasjonspunktConfiguration) {
+    public TransportFactory serviceRegistryTransportFactory(ServiceRegistryLookup serviceRegistryLookup) {
         return new ServiceRegistryTransportFactory(serviceRegistryLookup);
     }
 
     @Bean
-    public MessageSender messageSender(TransportFactory transportFactory, Adresseregister adresseregister, IntegrasjonspunktConfiguration integrasjonspunktConfiguration, IntegrasjonspunktNokkel integrasjonspunktNokkel, StandardBusinessDocumentFactory standardBusinessDocumentFactory) {
-        return new MessageSender(transportFactory, adresseregister, integrasjonspunktConfiguration, integrasjonspunktNokkel, standardBusinessDocumentFactory);
+    public MessageSender messageSender(TransportFactory transportFactory, Adresseregister adresseregister, IntegrasjonspunktNokkel integrasjonspunktNokkel, StandardBusinessDocumentFactory standardBusinessDocumentFactory) {
+        return new MessageSender(transportFactory, adresseregister, properties, integrasjonspunktNokkel, standardBusinessDocumentFactory);
     }
 
     @Bean
-    public KeystoreProvider meldingsformidlerKeystoreProvider(Environment environment) throws MeldingsformidlerException {
-        return KeystoreProvider.from(environment);
+    public KeystoreProvider meldingsformidlerKeystoreProvider() throws MeldingsformidlerException {
+        return KeystoreProvider.from(properties);
     }
 
     @Bean

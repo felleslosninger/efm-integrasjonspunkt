@@ -1,15 +1,13 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
-import no.difi.meldingsutveksling.ptp.MeldingsformidlerException;
-import org.springframework.core.env.Environment;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.ptp.MeldingsformidlerException;
 
 public class KeystoreProvider {
 
@@ -21,10 +19,10 @@ public class KeystoreProvider {
         this.keystore = keyStore;
     }
 
-    public static KeystoreProvider from(Environment environment) throws MeldingsformidlerException {
-        location = environment.getProperty("meldingsformidler.keystore.location");
-        password = environment.getProperty("meldingsformidler.keystore.password");
-        final KeyStore keyStore = loadKeyStore(location,  password.toCharArray());
+    public static KeystoreProvider from(IntegrasjonspunktProperties properties) throws MeldingsformidlerException {
+        location = properties.getDpi().getKeystore().getPath();
+        password = properties.getDpi().getKeystore().getPassword();
+        final KeyStore keyStore = loadKeyStore(location, password.toCharArray());
         return new KeystoreProvider(keyStore);
     }
 
@@ -35,7 +33,7 @@ public class KeystoreProvider {
         } catch (KeyStoreException e) {
             throw new MeldingsformidlerException("Could not initialize keystore", e);
         }
-        try (FileInputStream file = new FileInputStream(filename)){
+        try (FileInputStream file = new FileInputStream(filename)) {
             keystore.load(file, password);
         } catch (IOException e) {
             throw new MeldingsformidlerException("Could not open keystore file", e);

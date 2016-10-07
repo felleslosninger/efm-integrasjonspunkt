@@ -1,6 +1,12 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
-import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import javax.jms.Session;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreMarker;
 import no.difi.meldingsutveksling.core.EDUCoreSender;
@@ -10,6 +16,8 @@ import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
+import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
+import no.difi.meldingsutveksling.logging.MoveLogMarkers;
 import no.difi.meldingsutveksling.mxa.MXAImpl;
 import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
@@ -24,23 +32,16 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.jms.Session;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-
-import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
-
-
 /**
- * The idea behind this queue is to avoid loosing messages before they are saved in Noark System.
+ * The idea behind this queue is to avoid loosing messages before they are saved
+ * in Noark System.
  *
- * The way it works is that any exceptions that happens in after a message is put on the queue is re-sent to the JMS
- * listener. If the application is restarted the message is also resent.
+ * The way it works is that any exceptions that happens in after a message is
+ * put on the queue is re-sent to the JMS listener. If the application is
+ * restarted the message is also resent.
  *
- * The JMS listener has the responsibility is to forward the message to the archive system.
+ * The JMS listener has the responsibility is to forward the message to the
+ * archive system.
  *
  */
 @Component
@@ -64,10 +65,7 @@ public class InternalQueue {
     private MXAImpl mxa;
 
     @Autowired
-    private IntegrasjonspunktConfiguration configuration;
-
-    @Autowired
-    IntegrasjonspunktConfiguration config;
+    private IntegrasjonspunktProperties properties;
 
     @Autowired
     EDUCoreSender eduCoreSender;
@@ -87,10 +85,9 @@ public class InternalQueue {
         }
     }
 
-
     @JmsListener(destination = NOARK, containerFactory = "myJmsContainerFactory")
     public void noarkListener(byte[] message, Session session) {
-        MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, configuration.getOrganisationNumber());
+        MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrgnumber());
         EduDocument eduDocument = documentConverter.unmarshallFrom(message);
 
         forwardToNoark(eduDocument);
@@ -98,7 +95,7 @@ public class InternalQueue {
 
     @JmsListener(destination = EXTERNAL, containerFactory = "myJmsContainerFactory")
     public void externalListener(byte[] message, Session session) {
-        MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, configuration.getOrganisationNumber());
+        MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrgnumber());
         EDUCore request = eduCoreConverter.unmarshallFrom(message);
         try {
             eduCoreSender.sendMessage(request);
@@ -109,8 +106,9 @@ public class InternalQueue {
     }
 
     /**
-     * Place the input parameter on external queue. The external queue sends messages to an external recipient
-     * using transport mechnism.
+     * Place the input parameter on external queue. The external queue sends
+     * messages to an external recipient using transport mechnism.
+     *
      * @param request the input parameter from IntegrasjonspunktImpl
      */
     public void enqueueExternal(EDUCore request) {
@@ -123,12 +121,14 @@ public class InternalQueue {
     }
 
     /**
-     * Places the input parameter on the NOARK queue. The NOARK queue sends messages from external sender to
-     * NOARK server.
-     * @param eduDocument the eduDocument as received by IntegrasjonspunktReceiveImpl from an external source
+     * Places the input parameter on the NOARK queue. The NOARK queue sends
+     * messages from external sender to NOARK server.
+     *
+     * @param eduDocument the eduDocument as received by
+     * IntegrasjonspunktReceiveImpl from an external source
      */
     public void enqueueNoark(EduDocument eduDocument) {
-            jmsTemplate.convertAndSend(NOARK,  documentConverter.marshallToBytes(eduDocument));
+        jmsTemplate.convertAndSend(NOARK, documentConverter.marshallToBytes(eduDocument));
     }
 
     public void forwardToNoark(EduDocument eduDocument) {
@@ -140,8 +140,7 @@ public class InternalQueue {
             byte[] tmp = os.toByteArray();
 
             JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument> toDocument
-                    = (JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument>)
-                    jaxbContext.createUnmarshaller().unmarshal(new ByteArrayInputStream(tmp));
+                    = (JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument>) jaxbContext.createUnmarshaller().unmarshal(new ByteArrayInputStream(tmp));
 
             final StandardBusinessDocument standardBusinessDocument = toDocument.getValue();
             Audit.info("SBD extracted", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));
@@ -165,6 +164,6 @@ public class InternalQueue {
     }
 
     public void setIntegrajonspunktReceiveImpl(IntegrajonspunktReceiveImpl integrajonspunktReceiveImpl) {
-        this.integrajonspunktReceive= integrajonspunktReceiveImpl;
+        this.integrajonspunktReceive = integrajonspunktReceiveImpl;
     }
 }

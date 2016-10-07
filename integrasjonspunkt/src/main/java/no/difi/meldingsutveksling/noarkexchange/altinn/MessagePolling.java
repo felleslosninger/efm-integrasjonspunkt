@@ -1,13 +1,15 @@
 package no.difi.meldingsutveksling.noarkexchange.altinn;
 
-
+import java.util.List;
 import no.difi.meldingsutveksling.*;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.kvittering.EduDocumentFactory;
 import no.difi.meldingsutveksling.logging.Audit;
+import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
+import no.difi.meldingsutveksling.logging.MoveLogMarkers;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -17,25 +19,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
-import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
-
 /**
- * MessagePolling periodically checks Altinn Formidlingstjeneste for new messages. If new messages are discovered they
- * are downloaded forwarded to the Archive system.
+ * MessagePolling periodically checks Altinn Formidlingstjeneste for new
+ * messages. If new messages are discovered they are downloaded forwarded to the
+ * Archive system.
  */
 @Component
 public class MessagePolling {
+
     private static final String PREFIX_NORWAY = "9908:";
     private Logger logger = LoggerFactory.getLogger(MessagePolling.class);
 
     @Autowired
-    IntegrasjonspunktConfiguration config;
+    Environment environment;
+
+    @Autowired
+    IntegrasjonspunktProperties properties;
 
     @Autowired
     InternalQueue internalQueue;
@@ -56,26 +60,26 @@ public class MessagePolling {
 
     @Scheduled(fixedRate = 15000)
     public void checkForNewMessages() {
-        MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, config.getOrganisationNumber());
+        MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrgnumber());
         logger.debug("Checking for new messages");
 
         // TODO: if ServiceRegistry returns a ServiceRecord to something other than Altinn formidlingstjeneste this
         // will fail
         if (primaryServiceRecord == null) {
-            primaryServiceRecord = serviceRegistryLookup.getPrimaryServiceRecord(config.getOrganisationNumber());
+            primaryServiceRecord = serviceRegistryLookup.getPrimaryServiceRecord(properties.getOrgnumber());
         }
 
-        AltinnWsConfiguration configuration = AltinnWsConfiguration.fromConfiguration(primaryServiceRecord.getEndPointURL(), config.getConfiguration());
+        AltinnWsConfiguration configuration = AltinnWsConfiguration.fromConfiguration(primaryServiceRecord.getEndPointURL(), environment);
         AltinnWsClient client = new AltinnWsClient(configuration);
 
-        List<FileReference> fileReferences = client.availableFiles(config.getOrganisationNumber());
+        List<FileReference> fileReferences = client.availableFiles(properties.getOrgnumber());
 
-        if(!fileReferences.isEmpty()) {
+        if (!fileReferences.isEmpty()) {
             Audit.info("New message(s) detected");
         }
 
         for (FileReference reference : fileReferences) {
-            final DownloadRequest request = new DownloadRequest(reference.getValue(), config.getOrganisationNumber());
+            final DownloadRequest request = new DownloadRequest(reference.getValue(), properties.getOrgnumber());
             EduDocument eduDocument = client.download(request);
 
             if (!isKvittering(eduDocument)) {
@@ -99,7 +103,6 @@ public class MessagePolling {
     private void sendReceipt(MessageInfo messageInfo) {
         EduDocument doc = EduDocumentFactory.createLeveringsKvittering(messageInfo, keyInfo.getKeyPair());
         Transport t = transportFactory.createTransport(doc);
-        t.send(config.getConfiguration(), doc);
+        t.send(environment, doc);
     }
 }
-

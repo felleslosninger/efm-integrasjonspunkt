@@ -2,6 +2,10 @@
 *.cer
 *.crt
 
+pom.xml.versionsBackup
+
+jacoco.exec
+*.orig
 *.class
 *.log
 /**/*.iml

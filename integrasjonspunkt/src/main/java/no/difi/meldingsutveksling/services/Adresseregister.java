@@ -1,7 +1,8 @@
 package no.difi.meldingsutveksling.services;
 
-
-import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
+import java.io.IOException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import no.difi.meldingsutveksling.noarkexchange.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -11,35 +12,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.io.IOException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-
-
 @Component
 public class Adresseregister {
 
     private static final Logger log = LoggerFactory.getLogger(Adresseregister.class);
 
-    @Autowired
-    IntegrasjonspunktConfiguration configuration;
-
-    @Autowired
     ServiceRegistryLookup serviceRegistryLookup;
 
-    public Adresseregister() {
-    }
-
+    @Autowired
     public Adresseregister(ServiceRegistryLookup serviceRegistryLookup) {
         this.serviceRegistryLookup = serviceRegistryLookup;
-    }
-
-    public IntegrasjonspunktConfiguration getConfiguration() {
-        return configuration;
-    }
-
-    public void setConfiguration(IntegrasjonspunktConfiguration configuration) {
-        this.configuration = configuration;
     }
 
     public void validateCertificates(StandardBusinessDocumentWrapper documentWrapper) throws MessageException {

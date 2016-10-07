@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.PutMessageObjectMother;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
@@ -12,17 +12,22 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class IntegrasjonspunktImplTest {
+
     @InjectMocks
     private IntegrasjonspunktImpl integrasjonspunkt = new IntegrasjonspunktImpl();
 
-    @Mock private InternalQueue queueMock;
-    @Mock private IntegrasjonspunktConfiguration configurationMock;
-    @Mock private ServiceRegistryLookup serviceRegistryLookup;
+    @Mock
+    private InternalQueue queueMock;
+    @Mock
+    private IntegrasjonspunktProperties propertiesMock;
+    @Mock
+    private IntegrasjonspunktProperties.FeatureToggle featureMock;
+    @Mock
+    private ServiceRegistryLookup serviceRegistryLookup;
 
     @Before
     public void setUp() {
@@ -33,12 +38,13 @@ public class IntegrasjonspunktImplTest {
         infoRecord.setOrganizationName("foo");
         when(serviceRegistryLookup.getInfoRecord(anyString())).thenReturn(infoRecord);
 
-        when(configurationMock.isQueueEnabled()).thenReturn(true);
+        when(propertiesMock.getFeature()).thenReturn(featureMock);
+        when(featureMock.isEnableQueue()).thenReturn(true);
     }
 
     @Test(expected = MeldingsUtvekslingRuntimeException.class)
     public void shouldFailWhenPartyAndOrganisationNumberIsMissing() {
-        when(configurationMock.hasOrganisationNumber()).thenReturn(false);
+        when(propertiesMock.getOrgnumber()).thenReturn(null);
         PutMessageRequestType request = PutMessageObjectMother.createMessageRequestType(null);
 
         integrasjonspunkt.putMessage(request);
@@ -46,8 +52,7 @@ public class IntegrasjonspunktImplTest {
 
     @Test
     public void shouldPutMessageOnQueueWhenOrganisationNumberIsConfigured() throws Exception {
-        when(configurationMock.hasOrganisationNumber()).thenReturn(true);
-        when(configurationMock.getOrganisationNumber()).thenReturn("1234");
+        when(propertiesMock.getOrgnumber()).thenReturn("1234");
         PutMessageRequestType request = PutMessageObjectMother.createMessageRequestType(null);
 
         integrasjonspunkt.putMessage(request);
@@ -57,7 +62,7 @@ public class IntegrasjonspunktImplTest {
 
     @Test
     public void shouldPutMessageOnQueueWhenPartyNumberIsInRequest() throws Exception {
-        when(configurationMock.hasOrganisationNumber()).thenReturn(false);
+        when(propertiesMock.getOrgnumber()).thenReturn(null);
         PutMessageRequestType request = PutMessageObjectMother.createMessageRequestType("12345");
 
         integrasjonspunkt.putMessage(request);
@@ -67,7 +72,7 @@ public class IntegrasjonspunktImplTest {
 
     @Test
     public void shouldPutMessageOnQueueWhenOrganisationNumberIsProvided() throws Exception {
-        when(configurationMock.hasOrganisationNumber()).thenReturn(true);
+        when(propertiesMock.getOrgnumber()).thenReturn(null);
         PutMessageRequestType request = PutMessageObjectMother.createMessageRequestType("12345");
 
         integrasjonspunkt.putMessage(request);
