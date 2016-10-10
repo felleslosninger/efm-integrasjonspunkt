@@ -1,6 +1,7 @@
 *.jks
 *.cer
 *.crt
+*.orig
 
 pom.xml.versionsBackup
 
