@@ -19,15 +19,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
+import org.springframework.context.ApplicationContext;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
- * MessagePolling periodically checks Altinn Formidlingstjeneste for new
- * messages. If new messages are discovered they are downloaded forwarded to the
- * Archive system.
+ * MessagePolling periodically checks Altinn Formidlingstjeneste for new messages. If new messages are discovered they are
+ * downloaded forwarded to the Archive system.
  */
 @Component
 public class MessagePolling {
@@ -36,7 +35,7 @@ public class MessagePolling {
     private Logger logger = LoggerFactory.getLogger(MessagePolling.class);
 
     @Autowired
-    Environment environment;
+    ApplicationContext context;
 
     @Autowired
     IntegrasjonspunktProperties properties;
@@ -69,7 +68,7 @@ public class MessagePolling {
             primaryServiceRecord = serviceRegistryLookup.getPrimaryServiceRecord(properties.getOrg().getNumber());
         }
 
-        AltinnWsConfiguration configuration = AltinnWsConfiguration.fromConfiguration(primaryServiceRecord.getEndPointURL(), environment);
+        AltinnWsConfiguration configuration = AltinnWsConfiguration.fromConfiguration(primaryServiceRecord.getEndPointURL(), context);
         AltinnWsClient client = new AltinnWsClient(configuration);
 
         List<FileReference> fileReferences = client.availableFiles(properties.getOrg().getNumber());
@@ -103,6 +102,6 @@ public class MessagePolling {
     private void sendReceipt(MessageInfo messageInfo) {
         EduDocument doc = EduDocumentFactory.createLeveringsKvittering(messageInfo, keyInfo.getKeyPair());
         Transport t = transportFactory.createTransport(doc);
-        t.send(environment, doc);
+        t.send(context, doc);
     }
 }

@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.config;
 
+import no.difi.meldingsutveksling.AltinnConfig;
+import java.net.URL;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -27,7 +29,7 @@ public class IntegrasjonspunktProperties {
     private String serviceregistryEndpoint;
 
     @Valid
-    private Altinn altinn;
+    private AltinnConfig altinn;
 
     @Valid
     private PostVirksomheter altinnPTV;
@@ -64,27 +66,6 @@ public class IntegrasjonspunktProperties {
         private Keystore keystore;
     }
 
-    @Data
-    public static class Altinn {
-
-        /**
-         * System user username for altinn.
-         */
-        private String username;
-        /**
-         * System user password for altinn;
-         */
-        private String password;
-        /**
-         * TODO: descrive
-         */
-        private String externalServiceCode;
-        /**
-         * TODO: descrive
-         */
-        private String externalServiceEditionCode;
-
-    }
 
     @Data
     public static class PostVirksomheter {

@@ -22,7 +22,7 @@ import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.env.Environment;
+import org.springframework.context.ApplicationContext;
 
 public class MessageSender {
 
@@ -34,7 +34,7 @@ public class MessageSender {
 
     private IntegrasjonspunktProperties properties;
 
-    private Environment environment;
+    private ApplicationContext context;
 
     private IntegrasjonspunktNokkel keyInfo;
 
@@ -101,7 +101,7 @@ public class MessageSender {
         }
 
         Transport t = transportFactory.createTransport(edu);
-        t.send(environment, edu);
+        t.send(context, edu);
 
         Audit.info("Message sent", markerFrom(message));
 
@@ -109,11 +109,9 @@ public class MessageSender {
     }
 
     /**
-     * Creates MessageContext to contain data needed to send a message such as
-     * sender/recipient party numbers and certificates
+     * Creates MessageContext to contain data needed to send a message such as sender/recipient party numbers and certificates
      *
-     * The context also contains error statuses if the message request has
-     * validation errors.
+     * The context also contains error statuses if the message request has validation errors.
      *
      * @param message that contains sender, receiver and journalpost id
      * @return MessageContext containing data about the shipment
@@ -174,9 +172,5 @@ public class MessageSender {
 
     public StandardBusinessDocumentFactory getStandardBusinessDocumentFactory() {
         return standardBusinessDocumentFactory;
-    }
-
-    public Environment getEnvironment() {
-        return environment;
     }
 }

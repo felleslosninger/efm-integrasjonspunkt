@@ -22,11 +22,11 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 import static org.mockito.Mockito.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.env.Environment;
 import org.springframework.jms.core.JmsTemplate;
 
 /**
@@ -64,7 +64,7 @@ public class IntegrasjonspunktIntegrationTestConfig {
     public TransportFactory transportFactory() {
         TransportFactory transportFactoryMock = mock(TransportFactory.class);
         Transport transportMock = mock(Transport.class);
-        doNothing().when(transportMock).send(any(Environment.class), any(EduDocument.class));
+        doNothing().when(transportMock).send(any(ApplicationContext.class), any(EduDocument.class));
         when(transportFactoryMock.createTransport(any(EduDocument.class))).thenReturn(transportMock);
         return transportFactoryMock;
     }

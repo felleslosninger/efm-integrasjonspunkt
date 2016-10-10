@@ -6,8 +6,7 @@ import no.difi.meldingsutveksling.AltinnWsRequest;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.transport.Transport;
-import org.springframework.core.env.Environment;
-
+import org.springframework.context.ApplicationContext;
 
 /**
  * Transport implementation for Altinn message service.
@@ -21,12 +20,12 @@ public class AltinnTransport implements Transport {
     }
 
     /**
-     * @param environment a configuration object given by the integrasjonspunkt
-     * @param eduDocument      An eduDocument with a payload consisting of an CMS encrypted ASIC package
+     * @param context a configuration object given by the integrasjonspunkt
+     * @param eduDocument An eduDocument with a payload consisting of an CMS encrypted ASIC package
      */
     @Override
-    public void send(Environment environment, final EduDocument eduDocument) {
-        AltinnWsClient client = new AltinnWsClient(AltinnWsConfiguration.fromConfiguration(endpoint, environment));
+    public void send(ApplicationContext context, final EduDocument eduDocument) {
+        AltinnWsClient client = new AltinnWsClient(AltinnWsConfiguration.fromConfiguration(endpoint, context));
         UploadRequest request1 = new AltinnWsRequest(eduDocument);
 
         client.send(request1);

@@ -37,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 /**
@@ -54,31 +54,28 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
     private static final String SBD_NAMESPACE = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader";
     private final TransportFactory transportFactory;
     private NoarkClient localNoark;
-    private final MessageSender messageSender;
     private final Adresseregister adresseregisterService;
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final IntegrasjonspunktProperties properties;
     private final IntegrasjonspunktNokkel keyInfo;
-    private final Environment environment;
+    private final ApplicationContext context;
 
     @Autowired
     public IntegrajonspunktReceiveImpl(TransportFactory transportFactory,
             NoarkClient localNoark,
-            MessageSender messageSender,
             Adresseregister adresseregisterService,
             IntegrasjonspunktProperties properties,
             IntegrasjonspunktNokkel keyInfo,
             ServiceRegistryLookup serviceRegistryLookup,
-            Environment environment) {
+            ApplicationContext context) {
 
         this.transportFactory = transportFactory;
         this.localNoark = localNoark;
-        this.messageSender = messageSender;
         this.adresseregisterService = adresseregisterService;
         this.properties = properties;
         this.keyInfo = keyInfo;
         this.serviceRegistryLookup = serviceRegistryLookup;
-        this.environment = environment;
+        this.context = context;
     }
 
     @Override
@@ -163,7 +160,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
 
     private void sendReceipt(EduDocument receipt) {
         Transport t = transportFactory.createTransport(receipt);
-        t.send(environment, receipt);
+        t.send(context, receipt);
     }
 
     public EDUCore convertAsicEntrytoEduDocument(byte[] bytes) throws MessageException, IOException, JAXBException {

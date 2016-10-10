@@ -33,12 +33,11 @@ import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import static org.mockito.Mockito.*;
-import org.springframework.core.env.Environment;
+import org.springframework.context.ApplicationContext;
 import sun.security.x509.X509CertImpl;
 
 /**
- * Makes sure that the integrasjonspunkt can handle receipt messages on the
- * putMessage interface
+ * Makes sure that the integrasjonspunkt can handle receipt messages on the putMessage interface
  *
  * @author Glenn Bech
  */
@@ -121,7 +120,7 @@ public class PutMessageSteps {
 
     @Then("^kvitteringen sendes ikke videre til transport$")
     public void kvitteringen_sendes_ikke_videre() {
-        verify(transport, never()).send(any(Environment.class), any(EduDocument.class));
+        verify(transport, never()).send(any(ApplicationContext.class), any(EduDocument.class));
     }
 
     @Given("^en velformet melding fra (.+)$")
@@ -141,7 +140,7 @@ public class PutMessageSteps {
 
     @Then("^skal melding bli videresendt$")
     public void skal_melding_bli_videresendt() throws Throwable {
-        verify(transport).send(any(Environment.class), any(EduDocument.class));
+        verify(transport).send(any(ApplicationContext.class), any(EduDocument.class));
     }
 
     @When("^integrasjonspunktet mottar meldingen$")
