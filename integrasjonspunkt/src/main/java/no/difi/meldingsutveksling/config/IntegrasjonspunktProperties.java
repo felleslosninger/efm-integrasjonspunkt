@@ -6,6 +6,7 @@ import javax.validation.constraints.Size;
 import lombok.Data;
 import no.difi.meldingsutveksling.ptp.DigitalPostInnbyggerConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.core.io.Resource;
 
 /**
  * Configurable properties for Integrasjonspunkt.
@@ -22,7 +23,7 @@ public class IntegrasjonspunktProperties {
     /**
      * Service registry endpoint.
      */
-    @NotNull
+    @NotNull(message = "Service registry must be configured")
     private String serviceregistryEndpoint;
 
     @Valid
@@ -98,6 +99,7 @@ public class IntegrasjonspunktProperties {
          * TODO: descrive
          */
         private String externalServiceEditionCode;
+        @NotNull
         private String endpointUrl;
 
     }
@@ -105,6 +107,7 @@ public class IntegrasjonspunktProperties {
     @Data
     public static class NorskArkivstandardSystem {
 
+        @NotNull
         private String endpointURL;
         private String username;
         private String password;
@@ -115,6 +118,7 @@ public class IntegrasjonspunktProperties {
         /**
          * TODO: descrive
          */
+        @NotNull
         private String type;
 
     }
@@ -141,7 +145,7 @@ public class IntegrasjonspunktProperties {
          */
 
         @NotNull
-        private String path;
+        private Resource path;
         /**
          * Password of keystore and entry.
          */

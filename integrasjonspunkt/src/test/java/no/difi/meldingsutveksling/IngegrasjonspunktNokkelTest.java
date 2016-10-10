@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.core.io.FileSystemResource;
 
 @Ignore("Temporary ignored. Functionality is to be moved, reason queue handling.")
 public class IngegrasjonspunktNokkelTest {
@@ -21,7 +22,7 @@ public class IngegrasjonspunktNokkelTest {
 
         properties.getOrg().getKeystore().setAlias("974720760");
         properties.getOrg().getKeystore().setPassword("changeit");
-        properties.getOrg().getKeystore().setPath("src/main/resources/test-certificates.jks");
+        properties.getOrg().getKeystore().setPath(new FileSystemResource("src/main/resources/test-certificates.jks"));
 
         nokkel = new IntegrasjonspunktNokkel(properties);
 

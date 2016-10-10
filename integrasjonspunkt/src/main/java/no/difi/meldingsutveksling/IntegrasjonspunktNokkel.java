@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.*;
@@ -88,13 +87,13 @@ public class IntegrasjonspunktNokkel {
         try {
             InputStream keyInputStream = openKeyInputStream();
             return new SignatureHelper(keyInputStream, properties.getOrg().getKeystore().getPassword(), properties.getOrg().getKeystore().getAlias(), properties.getOrg().getKeystore().getPassword());
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             throw new MeldingsUtvekslingRuntimeException("keystore " + properties.getOrg().getKeystore().getPath() + " not found on file system.");
         }
     }
 
-    private InputStream openKeyInputStream() throws FileNotFoundException {
-        return new FileInputStream(properties.getOrg().getKeystore().getPath());
+    private InputStream openKeyInputStream() throws IOException {
+        return new FileInputStream(properties.getOrg().getKeystore().getPath().getFile());
     }
 
 }
