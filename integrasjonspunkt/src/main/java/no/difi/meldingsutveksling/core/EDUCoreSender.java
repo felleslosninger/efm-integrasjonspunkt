@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.core;
 
 import com.google.common.base.Strings;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.logging.MoveLogMarkers;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
@@ -45,9 +44,6 @@ public class EDUCoreSender {
 
     public boolean sendMessage(EDUCore message) {
         MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrg().getNumber());
-        if (!Strings.isNullOrEmpty(message.getSender().getOrgNr()) && !Strings.isNullOrEmpty(properties.getOrg().getNumber())) {
-            throw new MeldingsUtvekslingRuntimeException();
-        }
 
         final ServiceRecord primaryServiceRecord = serviceRegistryLookup.getPrimaryServiceRecord(message.getReceiver().getOrgNr());
         final MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(primaryServiceRecord);
