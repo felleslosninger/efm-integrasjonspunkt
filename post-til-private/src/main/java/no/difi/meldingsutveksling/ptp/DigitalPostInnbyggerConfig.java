@@ -5,6 +5,7 @@
  */
 package no.difi.meldingsutveksling.ptp;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -13,8 +14,10 @@ import javax.validation.constraints.NotNull;
  */
 public class DigitalPostInnbyggerConfig {
 
+    @NotNull
     private String endpoint;
 
+    @Valid
     private Keystore keystore;
 
     public String getEndpoint() {

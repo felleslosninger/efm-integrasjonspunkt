@@ -12,7 +12,6 @@ public class TrimPropertyPlaceholderConfigurer extends PropertyPlaceholderConfig
     @Override
     protected String resolvePlaceholder(String placeholder, Properties props) {
         String value = super.resolvePlaceholder(placeholder, props);
-
         return (value != null ? value.trim() : null);
     }
 }
