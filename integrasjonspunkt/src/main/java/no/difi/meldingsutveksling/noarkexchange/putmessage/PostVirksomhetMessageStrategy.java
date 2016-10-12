@@ -25,7 +25,7 @@ public class PostVirksomhetMessageStrategy implements MessageStrategy {
         CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(markerFrom(message), config);
         final CorrespondenceRequest request = new CorrespondenceRequest.Builder().withUsername(config.getSystemUserCode()).withPassword(config.getPassword()).withPayload(correspondence).build();
 
-        client.send(request);
+        client.sendCorrespondence(request);
         return PutMessageResponseFactory.createOkResponse();
     }
 }
