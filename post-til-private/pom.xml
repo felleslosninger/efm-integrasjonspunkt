@@ -3,7 +3,7 @@
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>1.6.9-SNAPSHOT</version>
+        <version>1.6.10-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -13,7 +13,6 @@
     </properties>
 
     <artifactId>post-til-private</artifactId>
-    <packaging>pom</packaging>
     <dependencies>
         <dependency>
             <groupId>org.jhades</groupId>
@@ -23,7 +22,7 @@
         <dependency>
             <groupId>no.difi.sdp</groupId>
             <artifactId>sikker-digital-post-klient-java</artifactId>
-            <version>2.1.0</version>
+            <version>3.1-MOVE</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -46,7 +45,7 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>webservice-tools</artifactId>
-            <version>1.6.9-SNAPSHOT</version>
+            <version>1.6.10-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

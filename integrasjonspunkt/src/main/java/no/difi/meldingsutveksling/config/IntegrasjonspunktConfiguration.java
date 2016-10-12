@@ -75,7 +75,6 @@ public class IntegrasjonspunktConfiguration {
         validateProperty(KEY_PRIVATEKEYPASSWORD);
         validateProperty(KEY_ORGANISATION_NUMBER);
         validateProperty(KEY_NOARKSYSTEM_TYPE);
-        validateProperty(PTV_ENDPOINT_URL);
         MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, getOrganisationNumber());
         validateSpringMetrics();
     }

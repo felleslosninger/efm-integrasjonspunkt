@@ -4,11 +4,11 @@
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>1.6.9-SNAPSHOT</version>
+        <version>1.6.10-SNAPSHOT</version>
     </parent>
 
     <artifactId>post-til-virksomhet</artifactId>
-    <version>1.6.9-SNAPSHOT</version>
+    <version>1.6.10-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
@@ -53,13 +53,6 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ws.security</groupId>
-            <artifactId>wss4j</artifactId>
-            <version>1.6.19</version>
-            <type>jar</type>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.ws.commons.axiom</groupId>

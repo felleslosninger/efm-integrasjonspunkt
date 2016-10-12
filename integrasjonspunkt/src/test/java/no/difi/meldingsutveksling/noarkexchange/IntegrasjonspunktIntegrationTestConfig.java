@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRequiredPropertyExcep
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.KeystoreProvider;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
@@ -26,7 +27,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.jms.core.JmsTemplate;
 
 import javax.sql.DataSource;
-
 import java.net.URISyntaxException;
 
 import static org.mockito.Matchers.any;
@@ -57,8 +57,13 @@ public class IntegrasjonspunktIntegrationTestConfig {
     }
 
     @Bean
-    public StrategyFactory messageStrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup) {
-        return new StrategyFactory(messageSender);
+    public KeystoreProvider keystoreProvider() {
+        return mock(KeystoreProvider.class);
+    }
+
+    @Bean
+    public StrategyFactory messageStrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup, KeystoreProvider keystoreProvider) {
+        return new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider);
     }
 
     // Mocks

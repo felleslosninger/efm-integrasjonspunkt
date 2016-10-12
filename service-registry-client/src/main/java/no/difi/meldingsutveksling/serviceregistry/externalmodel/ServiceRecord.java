@@ -12,6 +12,8 @@ public class ServiceRecord implements Serializable {
     private String organisationNumber;
     private String pemCertificate;
     private String endPointURL;
+    private String orgnrPostkasse;
+    private String postkasseAdresse;
 
     public ServiceRecord(String serviceIdentifier, String organisationNumber, String pemCertificate
             , String endPointURL) {
@@ -58,6 +60,22 @@ public class ServiceRecord implements Serializable {
         this.endPointURL = endPointURL;
     }
 
+    public String getOrgnrPostkasse() {
+        return orgnrPostkasse;
+    }
+
+    public void setOrgnrPostkasse(String orgnrPostkasse) {
+        this.orgnrPostkasse = orgnrPostkasse;
+    }
+
+    public String getPostkasseAdresse() {
+        return postkasseAdresse;
+    }
+
+    public void setPostkasseAdresse(String postkasseAdresse) {
+        this.postkasseAdresse = postkasseAdresse;
+    }
+
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
@@ -65,6 +83,8 @@ public class ServiceRecord implements Serializable {
                 .add("organisationNumber", organisationNumber)
                 .add("pemCertificate", pemCertificate)
                 .add("endPointURL", endPointURL)
+                .add("orgnrPostkasse", orgnrPostkasse)
+                .add("postkasseAdresse", postkasseAdresse)
                 .toString();
     }
 
@@ -76,11 +96,13 @@ public class ServiceRecord implements Serializable {
         return Objects.equal(serviceIdentifier, that.serviceIdentifier) &&
                 Objects.equal(organisationNumber, that.organisationNumber) &&
                 Objects.equal(pemCertificate, that.pemCertificate) &&
-                Objects.equal(endPointURL, that.endPointURL);
+                Objects.equal(endPointURL, that.endPointURL) &&
+                Objects.equal(orgnrPostkasse, that.orgnrPostkasse) &&
+                Objects.equal(postkasseAdresse, that.postkasseAdresse);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(serviceIdentifier, organisationNumber, pemCertificate, endPointURL);
+        return Objects.hashCode(serviceIdentifier, organisationNumber, pemCertificate, endPointURL, orgnrPostkasse, postkasseAdresse);
     }
 }

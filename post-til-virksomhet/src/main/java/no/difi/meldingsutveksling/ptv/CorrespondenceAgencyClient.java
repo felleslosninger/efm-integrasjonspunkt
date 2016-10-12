@@ -15,7 +15,7 @@ import org.springframework.ws.soap.SoapVersion;
 import org.springframework.ws.soap.addressing.client.ActionCallback;
 import org.springframework.ws.soap.addressing.version.Addressing10;
 import org.springframework.ws.soap.axiom.AxiomSoapMessageFactory;
-import org.springframework.ws.soap.security.wss4j.Wss4jSecurityInterceptor;
+import org.springframework.ws.soap.security.wss4j2.Wss4jSecurityInterceptor;
 import org.springframework.ws.transport.http.HttpComponentsMessageSender;
 
 import java.net.URI;
@@ -126,11 +126,14 @@ public class CorrespondenceAgencyClient {
     private ClientInterceptor createSecurityInterceptors(String username, String password) {
 
         final Wss4jSecurityInterceptor securityInterceptor = new Wss4jSecurityInterceptor();
+
         securityInterceptor.setSecurementActions("UsernameToken");
         securityInterceptor.setSecurementUsername(username);
         securityInterceptor.setSecurementPassword(password);
         securityInterceptor.setSecurementPasswordType("PasswordText");
-        securityInterceptor.setSecurementUsernameTokenElements("Nonce Created");
+        securityInterceptor.setSecurementUsernameTokenNonce(true);
+        securityInterceptor.setSecurementUsernameTokenCreated(true);
+//        securityInterceptor.setSecurementUsernameTokenElements("Nonce Created"); // from the old decpreated WSS4JSecurityInterceptor. Not sure if the above is wor
 
         return securityInterceptor;
     }
