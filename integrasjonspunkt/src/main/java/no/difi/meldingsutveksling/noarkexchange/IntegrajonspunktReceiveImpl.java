@@ -36,8 +36,10 @@ import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
 /**
@@ -46,7 +48,7 @@ import org.springframework.stereotype.Component;
 @Component("recieveService")
 @WebService(portName = "ReceivePort", serviceName = "receive", targetNamespace = "", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort")
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
-public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
+public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationContextAware {
 
     private static final String OKEY_TYPE = "OK";
     private static final String OK_TYPE = OKEY_TYPE;
@@ -58,7 +60,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final IntegrasjonspunktProperties properties;
     private final IntegrasjonspunktNokkel keyInfo;
-    private final ApplicationContext context;
+    private ApplicationContext context;
 
     @Autowired
     public IntegrajonspunktReceiveImpl(TransportFactory transportFactory,
@@ -66,8 +68,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
             Adresseregister adresseregisterService,
             IntegrasjonspunktProperties properties,
             IntegrasjonspunktNokkel keyInfo,
-            ServiceRegistryLookup serviceRegistryLookup,
-            ApplicationContext context) {
+            ServiceRegistryLookup serviceRegistryLookup) {
 
         this.transportFactory = transportFactory;
         this.localNoark = localNoark;
@@ -75,7 +76,6 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
         this.properties = properties;
         this.keyInfo = keyInfo;
         this.serviceRegistryLookup = serviceRegistryLookup;
-        this.context = context;
     }
 
     @Override
@@ -195,5 +195,10 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort {
 
     public IntegrasjonspunktNokkel getKeyInfo() {
         return keyInfo;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext ac) throws BeansException {
+        this.context = ac;
     }
 }

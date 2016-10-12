@@ -22,9 +22,11 @@ import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
-public class MessageSender {
+public class MessageSender implements ApplicationContextAware {
 
     private static final Logger log = LoggerFactory.getLogger(MessageSender.class);
 
@@ -173,4 +175,10 @@ public class MessageSender {
     public StandardBusinessDocumentFactory getStandardBusinessDocumentFactory() {
         return standardBusinessDocumentFactory;
     }
+
+    @Override
+    public void setApplicationContext(ApplicationContext ac) throws BeansException {
+        this.context = ac;
+    }
+
 }

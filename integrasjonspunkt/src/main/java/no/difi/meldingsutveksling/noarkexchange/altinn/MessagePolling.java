@@ -18,8 +18,10 @@ import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -29,12 +31,11 @@ import org.springframework.stereotype.Component;
  * downloaded forwarded to the Archive system.
  */
 @Component
-public class MessagePolling {
+public class MessagePolling implements ApplicationContextAware {
 
     private static final String PREFIX_NORWAY = "9908:";
     private Logger logger = LoggerFactory.getLogger(MessagePolling.class);
 
-    @Autowired
     ApplicationContext context;
 
     @Autowired
@@ -103,5 +104,10 @@ public class MessagePolling {
         EduDocument doc = EduDocumentFactory.createLeveringsKvittering(messageInfo, keyInfo.getKeyPair());
         Transport t = transportFactory.createTransport(doc);
         t.send(context, doc);
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext ac) throws BeansException {
+        this.context = ac;
     }
 }
