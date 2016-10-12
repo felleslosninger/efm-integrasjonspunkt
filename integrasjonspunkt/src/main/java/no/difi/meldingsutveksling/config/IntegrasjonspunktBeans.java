@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.config;
 
 import java.net.URISyntaxException;
-import no.difi.meldingsutveksling.AltinnConfig;
+import no.difi.meldingsutveksling.AltinnFormidlingsTjenestenConfig;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.ServiceRegistryTransportFactory;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
@@ -28,7 +28,7 @@ public class IntegrasjonspunktBeans {
     private IntegrasjonspunktProperties properties;
 
     @Bean
-    public AltinnConfig altinnConfig() {
+    public AltinnFormidlingsTjenestenConfig altinnConfig() {
         return properties.getAltinn();
     }
 

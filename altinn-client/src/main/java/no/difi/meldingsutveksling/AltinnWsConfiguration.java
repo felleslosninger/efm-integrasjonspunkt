@@ -33,7 +33,7 @@ public class AltinnWsConfiguration {
     }
 
     public static AltinnWsConfiguration fromConfiguration(String hostName, ApplicationContext context) {
-        AltinnConfig config = context.getBean(AltinnConfig.class);
+        AltinnFormidlingsTjenestenConfig config = context.getBean(AltinnFormidlingsTjenestenConfig.class);
         URL streamingserviceUrl = createUrl(hostName + config.getStreamingserviceUrl());
         URL brokerserviceUrl = createUrl(hostName + config.getBrokerserviceUrl());
 

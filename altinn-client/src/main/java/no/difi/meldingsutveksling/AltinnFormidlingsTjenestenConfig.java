@@ -4,7 +4,7 @@ package no.difi.meldingsutveksling;
  *
  * @author Nikolai Luthman <nikolai dot luthman at inmeta dot no>
  */
-public class AltinnConfig {
+public class AltinnFormidlingsTjenestenConfig {
 
     /**
      * System user username for altinn.

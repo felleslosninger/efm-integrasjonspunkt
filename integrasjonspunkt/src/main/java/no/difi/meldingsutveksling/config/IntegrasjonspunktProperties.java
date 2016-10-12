@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.config;
 
-import no.difi.meldingsutveksling.AltinnConfig;
+import no.difi.meldingsutveksling.AltinnFormidlingsTjenestenConfig;
 import java.net.URL;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -29,7 +29,7 @@ public class IntegrasjonspunktProperties {
     private String serviceregistryEndpoint;
 
     @Valid
-    private AltinnConfig altinn;
+    private AltinnFormidlingsTjenestenConfig altinn;
 
     @Valid
     private PostVirksomheter altinnPTV;
