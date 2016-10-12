@@ -1,20 +1,17 @@
 package no.difi.meldingsutveksling;
 
-import no.difi.asic.SignatureHelper;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
+import no.difi.asic.SignatureHelper;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Class responsible for accessing the keystore for the Integrasjonspunkt.
@@ -24,36 +21,11 @@ import java.util.Enumeration;
 @Component
 public class IntegrasjonspunktNokkel {
 
-    private String pkLocation, pkAlias, pkPassword;
+    private final IntegrasjonspunktProperties properties;
 
     @Autowired
-    IntegrasjonspunktConfiguration config;
-
-    public IntegrasjonspunktNokkel() {
-    }
-
-    @PostConstruct
-    public void init() {
-
-        pkAlias = config.getPrivateKeyAlias();
-        pkLocation = config.getKeyStoreLocation();
-        pkPassword = config.getPrivateKeyPassword();
-
-        if (pkAlias == null) {
-            throw new MeldingsUtvekslingRuntimeException("Missing private key alias system property");
-        }
-        if (pkLocation == null) {
-            throw new MeldingsUtvekslingRuntimeException("Missing private key location system property");
-        }
-        if (pkPassword == null) {
-            throw new MeldingsUtvekslingRuntimeException("Missing private key password system property");
-        }
-    }
-
-    public IntegrasjonspunktNokkel(String pkLocation, String pkAlias, String pkPassword) {
-        this.pkLocation = pkLocation;
-        this.pkAlias = pkAlias;
-        this.pkPassword = pkPassword;
+    public IntegrasjonspunktNokkel(IntegrasjonspunktProperties properties) {
+        this.properties = properties;
     }
 
     /**
@@ -66,18 +38,18 @@ public class IntegrasjonspunktNokkel {
         PrivateKey key = null;
         try (InputStream i = openKeyInputStream()) {
             KeyStore keystore = KeyStore.getInstance("JKS");
-            keystore.load(i, pkPassword.toCharArray());
+            keystore.load(i, properties.getOrg().getKeystore().getPassword().toCharArray());
 
             Enumeration aliases = keystore.aliases();
             while (aliases.hasMoreElements()) {
                 String alias = (String) aliases.nextElement();
                 boolean isKey = keystore.isKeyEntry(alias);
-                if (isKey && alias.equals(pkAlias)) {
-                    key = (PrivateKey) keystore.getKey(alias, pkPassword.toCharArray());
+                if (isKey && alias.equals(properties.getOrg().getKeystore().getAlias())) {
+                    key = (PrivateKey) keystore.getKey(alias, properties.getOrg().getKeystore().getPassword().toCharArray());
                 }
             }
             if (key == null) {
-                throw new MeldingsUtvekslingRuntimeException("no key with alias " + pkAlias + " found in the keystore " + pkLocation);
+                throw new MeldingsUtvekslingRuntimeException("no key with alias " + properties.getOrg().getKeystore().getAlias() + " found in the keystore " + properties.getOrg().getKeystore().getPath());
             }
             return key;
         } catch (CertificateException | KeyStoreException | IOException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
@@ -90,20 +62,20 @@ public class IntegrasjonspunktNokkel {
         KeyPair result = null;
         try (InputStream i = openKeyInputStream()) {
             KeyStore keystore = KeyStore.getInstance("JKS");
-            keystore.load(i, pkPassword.toCharArray());
+            keystore.load(i, properties.getOrg().getKeystore().getPassword().toCharArray());
             Enumeration aliases = keystore.aliases();
-            for (; aliases.hasMoreElements(); ) {
+            for (; aliases.hasMoreElements();) {
                 String alias = (String) aliases.nextElement();
                 boolean isKey = keystore.isKeyEntry(alias);
-                if (isKey && alias.equals(pkAlias)) {
-                    PrivateKey key = (PrivateKey) keystore.getKey(alias, pkPassword.toCharArray());
+                if (isKey && alias.equals(properties.getOrg().getKeystore().getAlias())) {
+                    PrivateKey key = (PrivateKey) keystore.getKey(alias, properties.getOrg().getKeystore().getPassword().toCharArray());
                     X509Certificate c = (X509Certificate) keystore.getCertificate(alias);
                     result = new KeyPair(c.getPublicKey(), key);
                     break;
                 }
             }
             if (result == null) {
-                throw new MeldingsUtvekslingRuntimeException("no key with alias " + pkAlias + " found in the keystore " + pkLocation);
+                throw new MeldingsUtvekslingRuntimeException("no key with alias " + properties.getOrg().getKeystore().getAlias() + " found in the keystore " + properties.getOrg().getKeystore().getPath());
             }
         } catch (CertificateException | KeyStoreException | IOException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
@@ -114,22 +86,14 @@ public class IntegrasjonspunktNokkel {
     public SignatureHelper getSignatureHelper() {
         try {
             InputStream keyInputStream = openKeyInputStream();
-            return new SignatureHelper(keyInputStream, pkPassword, pkAlias, pkPassword);
-        } catch (FileNotFoundException e) {
-            throw new MeldingsUtvekslingRuntimeException("keystore " + pkLocation + " not found on file system.");
+            return new SignatureHelper(keyInputStream, properties.getOrg().getKeystore().getPassword(), properties.getOrg().getKeystore().getAlias(), properties.getOrg().getKeystore().getPassword());
+        } catch (IOException e) {
+            throw new MeldingsUtvekslingRuntimeException("keystore " + properties.getOrg().getKeystore().getPath() + " not found on file system.");
         }
     }
 
-    public IntegrasjonspunktConfiguration getConfig() {
-        return config;
-    }
-
-    public void setConfig(IntegrasjonspunktConfiguration config) {
-        this.config = config;
-    }
-
-    private InputStream openKeyInputStream() throws FileNotFoundException {
-        return new FileInputStream(pkLocation);
+    private InputStream openKeyInputStream() throws IOException {
+        return new FileInputStream(properties.getOrg().getKeystore().getPath().getFile());
     }
 
 }

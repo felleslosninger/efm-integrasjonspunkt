@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.config;
+package no.difi.meldingsutveksling.spring;
 
 
 import java.io.IOException;

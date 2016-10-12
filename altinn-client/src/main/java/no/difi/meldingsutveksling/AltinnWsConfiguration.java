@@ -1,12 +1,11 @@
 package no.difi.meldingsutveksling;
 
-import org.springframework.core.env.Environment;
-
 import java.net.MalformedURLException;
 import java.net.URL;
+import org.springframework.context.ApplicationContext;
 
 public class AltinnWsConfiguration {
-    private static String hostName;
+
     private URL streamingServiceUrl;
     private URL brokerServiceUrl;
     private String username;
@@ -33,17 +32,18 @@ public class AltinnWsConfiguration {
     private AltinnWsConfiguration() {
     }
 
-    public static AltinnWsConfiguration fromConfiguration(String hostName, Environment config) {
-        URL streamingserviceUrl = createUrl(hostName + config.getProperty("altinn.streamingservice.url"));
-        URL brokerserviceUrl = createUrl(hostName + config.getProperty("altinn.brokerservice.url"));
+    public static AltinnWsConfiguration fromConfiguration(String hostName, ApplicationContext context) {
+        AltinnFormidlingsTjenestenConfig config = context.getBean(AltinnFormidlingsTjenestenConfig.class);
+        URL streamingserviceUrl = createUrl(hostName + config.getStreamingserviceUrl());
+        URL brokerserviceUrl = createUrl(hostName + config.getBrokerserviceUrl());
 
         return new Builder()
-                .withUsername(config.getProperty("altinn.username"))
-                .withPassword(config.getProperty("altinn.password"))
+                .withUsername(config.getUsername())
+                .withPassword(config.getPassword())
                 .withStreamingServiceUrl(streamingserviceUrl)
                 .withBrokerServiceUrl(brokerserviceUrl)
-                .withExternalServiceCode(config.getProperty("altinn.external_service_code"))
-                .withExternalServiceEditionCode(Integer.parseInt(config.getProperty("altinn.external_service_edition_code")))
+                .withExternalServiceCode(config.getExternalServiceCode())
+                .withExternalServiceEditionCode(config.getExternalServiceEditionCode())
                 .build();
     }
 
@@ -65,8 +65,8 @@ public class AltinnWsConfiguration {
         return externalServiceEditionCode;
     }
 
-
     public static class Builder {
+
         AltinnWsConfiguration configuration;
 
         public Builder() {
@@ -109,6 +109,7 @@ public class AltinnWsConfiguration {
     }
 
     private static class AltinnWsConfigurationException extends RuntimeException {
+
         public AltinnWsConfigurationException(String message, Exception e) {
             super(message, e);
         }

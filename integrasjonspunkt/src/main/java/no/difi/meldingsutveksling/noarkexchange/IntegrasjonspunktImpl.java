@@ -1,13 +1,21 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import com.google.common.base.Strings;
+import java.security.cert.CertificateException;
+import javax.jws.WebParam;
+import javax.jws.WebService;
+import javax.xml.ws.BindingType;
 import net.logstash.logback.encoder.org.apache.commons.lang.StringUtils;
 import net.logstash.logback.marker.LogstashMarker;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreFactory;
+import no.difi.meldingsutveksling.core.EDUCoreMarker;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.logging.MarkerFactory;
+import no.difi.meldingsutveksling.logging.MoveLogMarkers;
+import static no.difi.meldingsutveksling.noarkexchange.PutMessageMarker.markerFrom;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategy;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
@@ -21,31 +29,24 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.jws.WebParam;
-import javax.jws.WebService;
-import javax.xml.ws.BindingType;
-
-import static no.difi.meldingsutveksling.noarkexchange.PutMessageMarker.markerFrom;
-
-
 /**
- * This is the implementation of the wenbservice that case managenent systems supporting
- * the BEST/EDU stadard communicates with. The responsibility of this component is to
- * create, sign and encrypt a SBD message for delivery to a PEPPOL access point
+ * This is the implementation of the wenbservice that case managenent systems
+ * supporting the BEST/EDU stadard communicates with. The responsibility of this
+ * component is to create, sign and encrypt a SBD message for delivery to a
+ * PEPPOL access point
  * <p/>
- * The access point for the recipient is looked up through ELMA and SMK, the certificates are
- * retrived through a MOCKED adress register component not yet imolemented in any infrastructure.
+ * The access point for the recipient is looked up through ELMA and SMK, the
+ * certificates are retrived through a MOCKED adress register component not yet
+ * imolemented in any infrastructure.
  * <p/>
  * <p/>
- * User: glennbech
- * Date: 31.10.14
- * Time: 15:26
+ * User: glennbech Date: 31.10.14 Time: 15:26
  */
-
 @org.springframework.stereotype.Component("noarkExchangeService")
 @WebService(portName = "NoarkExchangePort", serviceName = "noarkExchange", targetNamespace = "http://www.arkivverket.no/Noark/Exchange", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.SOAPport")
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
 public class IntegrasjonspunktImpl implements SOAPport {
+
     private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktImpl.class);
 
     @Autowired
@@ -58,7 +59,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
     private InternalQueue internalQueue;
 
     @Autowired
-    private IntegrasjonspunktConfiguration configuration;
+    private IntegrasjonspunktProperties properties;
 
     @Autowired
     private Adresseregister adresseRegister;
@@ -72,7 +73,6 @@ public class IntegrasjonspunktImpl implements SOAPport {
     @Override
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
 
-
         String organisasjonsnummer = getCanReceiveMessageRequest.getReceiver().getOrgnr();
 
         GetCanReceiveMessageResponseType response = new GetCanReceiveMessageResponseType();
@@ -81,42 +81,39 @@ public class IntegrasjonspunktImpl implements SOAPport {
         canReceive = adresseRegister.hasAdresseregisterCertificate(organisasjonsnummer);
 
         final LogstashMarker marker = MarkerFactory.receiverMarker(organisasjonsnummer);
-        if(canReceive) {
+        if (canReceive) {
             Audit.info("CanReceive = true", marker);
-        } else {
-            if(hasMshEndpoint()) {
-                canReceive = mshClient.canRecieveMessage(organisasjonsnummer);
-                Audit.info(String.format( "MSH canReceive = %s", canReceive), marker);
-            }
+        } else if (hasMshEndpoint()) {
+            canReceive = mshClient.canRecieveMessage(organisasjonsnummer);
+            Audit.info(String.format("MSH canReceive = %s", canReceive), marker);
         }
-        if(!canReceive) {
+        if (!canReceive) {
             Audit.error("CanReceive = false", marker);
         }
         response.setResult(canReceive);
         return response;
     }
 
-    private boolean hasMshEndpoint(){
-        return !StringUtils.isBlank(configuration.getKeyMshEndpoint());
+    private boolean hasMshEndpoint() {
+        return !StringUtils.isBlank(properties.getMsh().getEndpointURL());
     }
 
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType request) {
-        MDC.put(IntegrasjonspunktConfiguration.KEY_ORGANISATION_NUMBER, configuration.getOrganisationNumber());
+        MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrg().getNumber());
         PutMessageRequestWrapper message = new PutMessageRequestWrapper(request);
         if (!message.hasSenderPartyNumber()) {
-            message.setSenderPartyNumber(configuration.getOrganisationNumber());
+            message.setSenderPartyNumber(properties.getOrg().getNumber());
         }
 
         Audit.info("Received EDU message", markerFrom(message));
 
-        if(PayloadUtil.isEmpty(message.getPayload())){
+        if (PayloadUtil.isEmpty(message.getPayload())) {
             Audit.error("Payload is missing", markerFrom(message));
-            if(configuration.getReturnOkOnMissingPayload()){
+            if (properties.getFeature().isReturnOkOnEmptyPayload()) {
                 return PutMessageResponseFactory.createOkResponse();
-            }
-            else {
-                return PutMessageResponseFactory.createErrorResponse( new MessageException(StatusMessage.MISSING_PAYLOAD));
+            } else {
+                return PutMessageResponseFactory.createErrorResponse(new MessageException(StatusMessage.MISSING_PAYLOAD));
             }
         }
 
@@ -134,13 +131,12 @@ public class IntegrasjonspunktImpl implements SOAPport {
         EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
         EDUCore coreMessage = eduCoreFactory.create(message.getRequest(), message.getSenderPartynumber());
 
-        if (configuration.isQueueEnabled()) {
+        if (properties.getFeature().isEnableQueue()) {
             internalQueue.enqueueExternal(coreMessage);
             Audit.info("Message enqueued", markerFrom(message));
 
             return PutMessageResponseFactory.createOkResponse();
-        }
-        else {
+        } else {
             Audit.info("Queue is disabled", markerFrom(message));
 
             if (adresseRegister.hasAdresseregisterCertificate(coreMessage.getReceiver().getOrgNr())) {
@@ -150,7 +146,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
                 MessageStrategy strategy = messageStrategyFactory.create(request.getPayload());
                 return strategy.putMessage(coreMessage);
             } else {
-                if(hasMshEndpoint()) {
+                if (hasMshEndpoint()) {
                     Audit.info("Send message to MSH", markerFrom(message));
                     return mshClient.sendEduMelding(request);
                 }

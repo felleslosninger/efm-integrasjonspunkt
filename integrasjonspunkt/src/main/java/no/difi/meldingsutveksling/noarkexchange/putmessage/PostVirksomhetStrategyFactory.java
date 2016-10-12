@@ -1,8 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import org.springframework.core.env.Environment;
 
 public class PostVirksomhetStrategyFactory implements MessageStrategyFactory {
 
@@ -12,8 +11,16 @@ public class PostVirksomhetStrategyFactory implements MessageStrategyFactory {
         this.configuration = configuration;
     }
 
-    public static PostVirksomhetStrategyFactory newInstance(Environment environment) {
-        return new PostVirksomhetStrategyFactory(CorrespondenceAgencyConfiguration.configurationFrom(environment));
+    public static PostVirksomhetStrategyFactory newInstance(IntegrasjonspunktProperties properties) {
+        return new PostVirksomhetStrategyFactory(
+                new CorrespondenceAgencyConfiguration.Builder()
+                .withEndpointURL(properties.getAltinnPTV().getEndpointUrl())
+                .withExternalServiceCode(properties.getAltinnPTV().getExternalServiceCode())
+                .withExternalServiceEditionCode(properties.getAltinnPTV().getExternalServiceEditionCode())
+                .withPassword(properties.getAltinnPTV().getPassword())
+                .withSystemUserCode(properties.getAltinnPTV().getUsername())
+                .build()
+        );
     }
 
     @Override

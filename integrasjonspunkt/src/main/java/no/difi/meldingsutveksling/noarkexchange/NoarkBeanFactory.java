@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noark.NoarkClientFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -12,19 +12,27 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class NoarkBeanFactory {
 
     @Autowired
-    IntegrasjonspunktConfiguration integrasjonspunktConfig;
+    IntegrasjonspunktProperties properties;
 
-    @Bean(name="localNoark")
+    @Bean(name = "localNoark")
     public NoarkClient localNoark() {
-        NoarkClientSettings clientSettings = integrasjonspunktConfig.getLocalNoarkClientSettings();
-        NoarkClient client = new NoarkClientFactory(clientSettings).from(integrasjonspunktConfig);
+        NoarkClientSettings clientSettings = new NoarkClientSettings(
+                properties.getNoarkSystem().getEndpointURL(),
+                properties.getNoarkSystem().getUsername(),
+                properties.getNoarkSystem().getPassword(),
+                properties.getNoarkSystem().getDomain());
+        NoarkClient client = new NoarkClientFactory(clientSettings).from(properties.getNoarkSystem());
         return client;
     }
 
-    @Bean(name="mshClient")
+    @Bean(name = "mshClient")
     public NoarkClient mshClient() {
-        NoarkClientSettings clientSettings = integrasjonspunktConfig.getMshNoarkClientSettings();
-        NoarkClient client = new NoarkClientFactory(clientSettings).from(integrasjonspunktConfig);
+        NoarkClientSettings clientSettings = new NoarkClientSettings(
+                properties.getNoarkSystem().getEndpointURL(),
+                properties.getNoarkSystem().getUsername(),
+                properties.getNoarkSystem().getPassword(),
+                properties.getNoarkSystem().getDomain());
+        NoarkClient client = new NoarkClientFactory(clientSettings).from(properties.getNoarkSystem());
         return client;
     }
 }

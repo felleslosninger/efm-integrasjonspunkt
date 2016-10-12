@@ -1,62 +1,54 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-
 import com.google.common.base.Strings;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
+import static no.difi.meldingsutveksling.core.EDUCoreMarker.markerFrom;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.Noekkelpar;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.logging.Audit;
+import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createErrorResponse;
+import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createOkResponse;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
-import java.security.PrivateKey;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-
-import static no.difi.meldingsutveksling.core.EDUCoreMarker.markerFrom;
-import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createErrorResponse;
-import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createOkResponse;
-
-public class MessageSender {
+public class MessageSender implements ApplicationContextAware {
 
     private static final Logger log = LoggerFactory.getLogger(MessageSender.class);
 
-    @Autowired
     private TransportFactory transportFactory;
 
-    @Autowired
     private Adresseregister adresseregister;
 
-    @Autowired
-    private IntegrasjonspunktConfiguration configuration;
+    private IntegrasjonspunktProperties properties;
 
-    @Autowired
-    private Environment environment;
+    private ApplicationContext context;
 
-    @Autowired
     private IntegrasjonspunktNokkel keyInfo;
 
-    @Autowired
     private StandardBusinessDocumentFactory standardBusinessDocumentFactory;
 
     public MessageSender() {
     }
 
-    public MessageSender(TransportFactory transportFactory, Adresseregister adresseregister, IntegrasjonspunktConfiguration configuration, IntegrasjonspunktNokkel keyInfo, StandardBusinessDocumentFactory standardBusinessDocumentFactory) {
+    public MessageSender(TransportFactory transportFactory, Adresseregister adresseregister, IntegrasjonspunktProperties properties, IntegrasjonspunktNokkel keyInfo, StandardBusinessDocumentFactory standardBusinessDocumentFactory) {
         this.transportFactory = transportFactory;
         this.adresseregister = adresseregister;
-        this.configuration = configuration;
+        this.properties = properties;
         this.keyInfo = keyInfo;
         this.standardBusinessDocumentFactory = standardBusinessDocumentFactory;
     }
@@ -100,10 +92,9 @@ public class MessageSender {
             return createErrorResponse(e);
         }
 
-
         EduDocument edu;
         try {
-            edu = standardBusinessDocumentFactory.create(message, messageContext.getConversationId(),  messageContext.getAvsender(), messageContext.getMottaker());
+            edu = standardBusinessDocumentFactory.create(message, messageContext.getConversationId(), messageContext.getAvsender(), messageContext.getMottaker());
             Audit.info("EDUdocument created", markerFrom(message));
         } catch (MessageException e) {
             Audit.error("Failed to create EDUdocument", markerFrom(message));
@@ -112,7 +103,7 @@ public class MessageSender {
         }
 
         Transport t = transportFactory.createTransport(edu);
-        t.send(configuration.getConfiguration(), edu);
+        t.send(context, edu);
 
         Audit.info("Message sent", markerFrom(message));
 
@@ -120,8 +111,7 @@ public class MessageSender {
     }
 
     /**
-     * Creates MessageContext to contain data needed to send a message such as
-     * sender/recipient party numbers and certificates
+     * Creates MessageContext to contain data needed to send a message such as sender/recipient party numbers and certificates
      *
      * The context also contains error statuses if the message request has validation errors.
      *
@@ -129,7 +119,7 @@ public class MessageSender {
      * @return MessageContext containing data about the shipment
      */
     protected MessageContext createMessageContext(EDUCore message) throws MessageContextException {
-        if(Strings.isNullOrEmpty(message.getReceiver().getOrgNr())) {
+        if (Strings.isNullOrEmpty(message.getReceiver().getOrgNr())) {
             throw new MessageContextException(StatusMessage.MISSING_RECIEVER_ORGANIZATION_NUMBER);
         }
 
@@ -146,7 +136,6 @@ public class MessageSender {
             context.setJpId("");
         }
 
-
         String converationId = message.getId();
 
         context.setMottaker(mottaker);
@@ -159,12 +148,12 @@ public class MessageSender {
         this.adresseregister = adresseregister;
     }
 
-    public IntegrasjonspunktConfiguration getConfiguration() {
-        return configuration;
+    public IntegrasjonspunktProperties getProperties() {
+        return properties;
     }
 
-    public void setConfiguration(IntegrasjonspunktConfiguration configuration) {
-        this.configuration = configuration;
+    public void setProperties(IntegrasjonspunktProperties properties) {
+        this.properties = properties;
     }
 
     public IntegrasjonspunktNokkel getKeyInfo() {
@@ -187,8 +176,9 @@ public class MessageSender {
         return standardBusinessDocumentFactory;
     }
 
-    public Environment getEnvironment() {
-        return environment;
+    @Override
+    public void setApplicationContext(ApplicationContext ac) throws BeansException {
+        this.context = ac;
     }
-}
 
+}
