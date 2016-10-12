@@ -43,7 +43,7 @@ public class CorrespondenceAgencyClient {
      * @param request containing the message along with sender/receiver
      * @return response if successful
      */
-    public Object send(CorrespondenceRequest request) {
+    public Object sendCorrespondence(CorrespondenceRequest request) {
         AxiomSoapMessageFactory newSoapMessageFactory = new AxiomSoapMessageFactory();
         newSoapMessageFactory.setSoapVersion(SoapVersion.SOAP_12);
         WebServiceTemplate template = new WebServiceTemplate(newSoapMessageFactory);
@@ -59,6 +59,32 @@ public class CorrespondenceAgencyClient {
 
         final String uri = config.getEndpointUrl();
         final String soapAction = "http://www.altinn.no/services/ServiceEngine/Correspondence/2009/10/ICorrespondenceAgencyExternal/InsertCorrespondenceV2";
+        template.setMessageSender(createMessageSender());
+        final URI actionURI;
+        try {
+            actionURI = new URI(soapAction);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+        return template.marshalSendAndReceive(uri, request.getCorrespondence(), new ActionCallback(actionURI, new Addressing10()));
+    }
+
+    public Object sendStatusRequest(CorrespondenceRequest request) {
+        AxiomSoapMessageFactory newSoapMessageFactory = new AxiomSoapMessageFactory();
+        newSoapMessageFactory.setSoapVersion(SoapVersion.SOAP_12);
+        WebServiceTemplate template = new WebServiceTemplate(newSoapMessageFactory);
+        Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
+        String contextPath = "no.altinn.services.serviceengine.correspondence._2009._10";
+        marshaller.setContextPath(contextPath);
+        template.setMarshaller(marshaller);
+        template.setUnmarshaller(marshaller);
+        ClientInterceptor[] interceptors = new ClientInterceptor[2];
+        interceptors[0] = createSecurityInterceptors(request.getUsername(), request.getPassword());
+        interceptors[1] = SoapFaultInterceptorLogger.withLogMarkers(logstashMarker);
+        template.setInterceptors(interceptors);
+
+        final String uri = config.getEndpointUrl();
+        final String soapAction = "http://www.altinn.no/services/ServiceEngine/Correspondence/2009/10/ICorrespondenceAgencyExternal/GetCorrespondenceStatusDetailsV2";
         template.setMessageSender(createMessageSender());
         final URI actionURI;
         try {
