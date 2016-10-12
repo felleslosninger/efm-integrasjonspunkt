@@ -1,9 +1,9 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.ptp.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.ptp.MeldingsformidlerException;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import org.springframework.core.env.Environment;
 
 public class PostInnbyggerStrategyFactory implements MessageStrategyFactory {
 
@@ -20,10 +20,9 @@ public class PostInnbyggerStrategyFactory implements MessageStrategyFactory {
         return new PostInnbyggerMessageStrategy(clientConfig, serviceRegistryLookup);
     }
 
-    public static MessageStrategyFactory newInstance(Environment environment, ServiceRegistryLookup serviceRegistryLookup, KeystoreProvider keystoreProvider) throws MeldingsformidlerException {
-        final MeldingsformidlerClient.Config clientConfig = MeldingsformidlerClient.Config.from(environment, keystoreProvider.getKeyStore());
+    public static MessageStrategyFactory newInstance(IntegrasjonspunktProperties properties, ServiceRegistryLookup serviceRegistryLookup, KeystoreProvider keystoreProvider) throws MeldingsformidlerException {
+        final MeldingsformidlerClient.Config clientConfig = MeldingsformidlerClient.Config.from(properties.getDpi(), keystoreProvider.getKeyStore());
         return new PostInnbyggerStrategyFactory(clientConfig, serviceRegistryLookup, keystoreProvider);
     }
-
 
 }

@@ -5,21 +5,21 @@
     <groupId>no.difi.meldingsutveksling</groupId>
     <artifactId>parent-pom</artifactId>
     <packaging>pom</packaging>
-    <version>1.6.10-SNAPSHOT</version>
+    <version>1.7.0-SNAPSHOT</version>
     <name>Multiproject for meldingsutveksling</name>
 
     <scm>
         <connection>scm:git:https://github.com/difi/move-integrasjonspunkt</connection>
         <developerConnection>scm:git:https://github.com/difi/move-integrasjonspunkt</developerConnection>
         <url>https://github.com/difi/move-integrasjonspunkt</url>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
 
     <repositories>
         <repository>
             <id>DIFI MOVE</id>
             <name>DIFI MOVE Nexus 3rd party</name>
-            <url>http://staging-move-app01.dmz.local:8081/content/repositories/thirdparty/</url>
+            <url>https://beta-meldingsutveksling.difi.no/content/repositories/thirdparty/</url>
         </repository>
     </repositories>
 
@@ -55,6 +55,7 @@
         <module>post-til-private</module>
         <module>service-registry-client</module>
         <module>webservice-tools</module>
+        <module>kontakt-reservasjonsregister-client</module>
     </modules>
 
     <dependencyManagement>

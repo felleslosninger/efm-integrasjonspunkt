@@ -1,7 +1,8 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import java.security.cert.CertificateException;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktConfiguration;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.Receiver;
 import no.difi.meldingsutveksling.core.Sender;
@@ -17,15 +18,13 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import java.security.cert.CertificateException;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MessageSenderTest {
+
     public static final String SENDER_PARTY_NUMBER = "910075918";
     public static final String RECIEVER_PARTY_NUMBER = "910077473";
     public static final String CONVERSATION_ID = "conversationId";
@@ -39,7 +38,7 @@ public class MessageSenderTest {
     private Adresseregister adresseregister;
 
     @Mock
-    private IntegrasjonspunktConfiguration config;
+    private IntegrasjonspunktProperties propertiesMock;
 
     @Mock
     private IntegrasjonspunktNokkel integrasjonspunktNokkel;
@@ -47,7 +46,7 @@ public class MessageSenderTest {
     @Before
     public void setUp() {
         messageSender = new MessageSender();
-        messageSender.setConfiguration(config);
+        messageSender.setProperties(propertiesMock);
         messageSender.setKeyInfo(integrasjonspunktNokkel);
         messageSender.setAdresseregister(adresseregister);
     }
@@ -102,7 +101,7 @@ public class MessageSenderTest {
     }
 
     @Test
-    public void messageContextShouldHaveEmptyJounalpostIdOnAppReceipt() throws MessageContextException{
+    public void messageContextShouldHaveEmptyJounalpostIdOnAppReceipt() throws MessageContextException {
         EDUCore request = new RequestBuilder().withSender().withReciever().withConversationId().build();
 
         when(request.getMessageType()).thenReturn(EDUCore.MessageType.APPRECEIPT);
@@ -111,6 +110,7 @@ public class MessageSenderTest {
     }
 
     private class RequestBuilder {
+
         private EDUCore request;
 
         private RequestBuilder() {
@@ -129,12 +129,12 @@ public class MessageSenderTest {
             return this;
         }
 
-        public  RequestBuilder withConversationId(){
+        public RequestBuilder withConversationId() {
             when(request.getId()).thenReturn(CONVERSATION_ID);
             return this;
         }
 
-        public RequestBuilder withJournalpostId(){
+        public RequestBuilder withJournalpostId() {
             when(request.getPayloadAsMeldingType()).thenReturn(mock(MeldingType.class));
             when(request.getPayloadAsMeldingType().getJournpost()).thenReturn(mock(JournpostType.class));
             when(request.getPayloadAsMeldingType().getJournpost().getJpId()).thenReturn(JOURNALPOST_ID);
@@ -148,6 +148,7 @@ public class MessageSenderTest {
     }
 
     private class StatusMatches extends TypeSafeMatcher<MessageContextException> {
+
         private final StatusMessage expectedStatusMessage;
 
         public StatusMatches(StatusMessage expectedStatusMessage) {
@@ -169,6 +170,5 @@ public class MessageSenderTest {
             mismatchDescription.appendText("was ").appendValue(exception.getStatusMessage());
         }
     }
-
 
 }

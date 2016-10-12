@@ -1,38 +1,38 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
+import java.util.Optional;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.ptp.MeldingsformidlerException;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.lang.NotImplementedException;
-
-import java.util.Optional;
-
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
 /**
  * PutMessages are delivered based on their ServiceRecord as returned from ServiceRegistry
  */
 public class StrategyFactory {
+
     private final EduMessageStrategyFactory eduMessageStrategyFactory;
     private final PostVirksomhetStrategyFactory postVirksomhetStrategyFactory;
     private final MessageStrategyFactory postInnbyggerStrategyFactory;
 
     public StrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup, KeystoreProvider keystoreProvider) {
         eduMessageStrategyFactory = EduMessageStrategyFactory.newInstance(messageSender);
-        postVirksomhetStrategyFactory = PostVirksomhetStrategyFactory.newInstance(messageSender.getEnvironment());
+        postVirksomhetStrategyFactory = PostVirksomhetStrategyFactory.newInstance(messageSender.getProperties());
 
         try {
-            postInnbyggerStrategyFactory = PostInnbyggerStrategyFactory.newInstance(messageSender.getEnvironment(), serviceRegistryLookup, keystoreProvider);
+            postInnbyggerStrategyFactory = PostInnbyggerStrategyFactory.newInstance(messageSender.getProperties(), serviceRegistryLookup, keystoreProvider);
         } catch (MeldingsformidlerException e) {
             throw new MeldingsUtvekslingRuntimeException("Unable to create client for sikker digital post", e);
         }
     }
 
     /**
-     * Use to get appropriate Message Strategy Factory: if the service record specifies Edu then a factory for that
-     * medium will be returned
+     * Use to get appropriate Message Strategy Factory: if the service record specifies Edu then a factory for that medium will be
+     * returned
+     *
      * @param serviceRecord
      * @return factory to send messages corresponding to provided service record
      */
@@ -46,15 +46,12 @@ public class StrategyFactory {
             return eduMessageStrategyFactory;
         } else if ("POST_VIRKSOMHET".equalsIgnoreCase(serviceRecord.getServiceIdentifier())) {
             return postVirksomhetStrategyFactory;
-        } else if ("DPI".equalsIgnoreCase(serviceRecord.getServiceIdentifier())){
+        } else if ("DPI".equalsIgnoreCase(serviceRecord.getServiceIdentifier())) {
             return postInnbyggerStrategyFactory;
         } else {
             throw new NotImplementedException(String.format("Integrasjonspunkt has no message strategy matching service identifier matching %s", serviceRecord.getServiceIdentifier()));
         }
 
     }
-
-
-
 
 }

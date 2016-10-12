@@ -1,8 +1,7 @@
 package no.difi.meldingsutveksling.ptv;
 
-import org.springframework.core.env.Environment;
-
 public class CorrespondenceAgencyConfiguration {
+
     private String externalServiceEditionCode;
     private String externalServiceCode;
     private String password;
@@ -10,17 +9,6 @@ public class CorrespondenceAgencyConfiguration {
     private String endpointUrl;
 
     private CorrespondenceAgencyConfiguration() {
-    }
-
-    public static CorrespondenceAgencyConfiguration configurationFrom(Environment environment) {
-        final CorrespondenceAgencyConfiguration configuration = new Builder(environment)
-                .withExternalServiceCode("altinn.ptv.external_service_code")
-                .withExternalServiceEditionCode("altinn.ptv.external_service_edition_code")
-                .withSystemUserCode("altinn.ptv.user_code")
-                .withPassword("altinn.ptv.password")
-                .withEndpointURL("altinn.ptv.endpoint_url")
-                .build();
-        return configuration;
     }
 
     public String getExternalServiceEditionCode() {
@@ -44,35 +32,35 @@ public class CorrespondenceAgencyConfiguration {
     }
 
     public static class Builder {
-        private final Environment environment;
+
         CorrespondenceAgencyConfiguration correspondenceAgencyConfiguration;
-        public Builder(Environment environment) {
-            this.environment = environment;
+
+        public Builder() {
             correspondenceAgencyConfiguration = new CorrespondenceAgencyConfiguration();
         }
 
         public Builder withExternalServiceCode(String externalServiceCode) {
-            correspondenceAgencyConfiguration.externalServiceCode = environment.getProperty(externalServiceCode);
+            correspondenceAgencyConfiguration.externalServiceCode = externalServiceCode;
             return this;
         }
 
         public Builder withExternalServiceEditionCode(String externalServiceEditionCode) {
-            correspondenceAgencyConfiguration.externalServiceEditionCode = environment.getProperty(externalServiceEditionCode);
+            correspondenceAgencyConfiguration.externalServiceEditionCode = externalServiceEditionCode;
             return this;
         }
 
         public Builder withSystemUserCode(String systemUserCode) {
-            correspondenceAgencyConfiguration.systemUserCode = environment.getProperty(systemUserCode);
+            correspondenceAgencyConfiguration.systemUserCode = systemUserCode;
             return this;
         }
 
         public Builder withPassword(String password) {
-            correspondenceAgencyConfiguration.password = environment.getProperty(password);
+            correspondenceAgencyConfiguration.password = password;
             return this;
         }
 
         public Builder withEndpointURL(String url) {
-            correspondenceAgencyConfiguration.endpointUrl = environment.getProperty(url);
+            correspondenceAgencyConfiguration.endpointUrl = url;
             return this;
         }
 

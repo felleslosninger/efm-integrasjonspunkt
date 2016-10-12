@@ -1,1 +1,1 @@
-org.springframework.boot.env.EnvironmentPostProcessor=no.difi.meldingsutveksling.config.IntegrasjonspunktLocalPropertyEnvironmentPostProcessor
+org.springframework.boot.env.EnvironmentPostProcessor=no.difi.meldingsutveksling.spring.IntegrasjonspunktLocalPropertyEnvironmentPostProcessor
