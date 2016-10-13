@@ -32,7 +32,7 @@ public class ReceiptPolling {
         messageReceiptRepository.save(MessageReceipt.of("bb8323b9-1023-4046-b620-63c4f9120b62", ServiceIdentifier.DPV));
     }
 
-    @Scheduled(fixedRate = 30000)
+//    @Scheduled(fixedRate = 30000)
     public void checkReceiptStatus() {
         List<MessageReceipt> receipts = messageReceiptRepository.findByCompleted(false);
 

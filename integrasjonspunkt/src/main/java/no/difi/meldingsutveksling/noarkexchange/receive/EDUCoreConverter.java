@@ -17,7 +17,8 @@ public class EDUCoreConverter {
         try {
             jaxbContext = JAXBContext.newInstance(EDUCore.class);
         } catch (JAXBException e) {
-            throw new RuntimeException("Could not create JAXBContext for " + EDUCore.class);
+//            throw new RuntimeException("Could not create JAXBContext for " + EDUCore.class, e);
+            throw new RuntimeException(e);
         }
     }
 

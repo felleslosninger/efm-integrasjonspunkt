@@ -10,9 +10,11 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceRequest;
 import no.difi.meldingsutveksling.receipt.MessageReceipt;
 import no.difi.meldingsutveksling.receipt.ReceiptStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import static no.difi.meldingsutveksling.receipt.MessageReceiptMarker.markerFrom;
 
+@Component
 public class DpvReceiptStrategy implements ReceiptStrategy {
 
     @Autowired
@@ -35,8 +37,7 @@ public class DpvReceiptStrategy implements ReceiptStrategy {
 
         GetCorrespondenceStatusDetailsV2Response result = (GetCorrespondenceStatusDetailsV2Response) client
                 .sendStatusRequest(request);
-        // check result status, return
-        System.out.println(result);
+        // check return status
 
         return false;
     }

@@ -17,8 +17,10 @@ import static no.difi.meldingsutveksling.core.EDUCore.MessageType.EDU;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "EDUCore", propOrder = {
         "id",
+        "messageReference",
         "sender",
         "receiver",
+        "serviceIdentifier",
         "messageType",
         "payload"
 })
@@ -32,6 +34,7 @@ public class EDUCore {
     private Sender sender;
     @XmlElement(required = true)
     private Receiver receiver;
+    @XmlElement
     private ServiceIdentifier serviceIdentifier;
     @XmlElement(required = true)
     private MessageType messageType;

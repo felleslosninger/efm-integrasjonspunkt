@@ -18,6 +18,8 @@ public class MessageReceipt {
     private ServiceIdentifier targetType;
     private boolean completed;
 
+    MessageReceipt(){}
+
     private MessageReceipt(String id, ServiceIdentifier type) {
         this.messageId = id;
         this.targetType = type;
