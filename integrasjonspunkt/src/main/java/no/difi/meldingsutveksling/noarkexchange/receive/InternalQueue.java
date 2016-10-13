@@ -24,6 +24,8 @@ import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
+import no.difi.meldingsutveksling.receipt.MessageReceipt;
+import no.difi.meldingsutveksling.receipt.MessageReceiptRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -53,7 +55,7 @@ public class InternalQueue {
     private Logger logger = LoggerFactory.getLogger(InternalQueue.class);
 
     @Autowired
-    JmsTemplate jmsTemplate;
+    private JmsTemplate jmsTemplate;
 
     @Autowired
     private IntegrajonspunktReceiveImpl integrajonspunktReceive;
@@ -68,7 +70,10 @@ public class InternalQueue {
     private IntegrasjonspunktProperties properties;
 
     @Autowired
-    EDUCoreSender eduCoreSender;
+    private EDUCoreSender eduCoreSender;
+
+    @Autowired
+    private MessageReceiptRepository messageReceiptRepository;
 
     private static JAXBContext jaxbContextdomain;
     private static JAXBContext jaxbContext;
@@ -99,6 +104,7 @@ public class InternalQueue {
         EDUCore request = eduCoreConverter.unmarshallFrom(message);
         try {
             eduCoreSender.sendMessage(request);
+            messageReceiptRepository.save(MessageReceipt.of(request));
         } catch (Exception e) {
             Audit.error("Failed to send message... queue will retry", EDUCoreMarker.markerFrom(request));
             throw e;

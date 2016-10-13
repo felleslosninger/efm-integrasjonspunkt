@@ -15,7 +15,7 @@ import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAtta
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentV2;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyValues;
-import no.difi.meldingsutveksling.ptv.receipt.CorrespondenceReceiptMeta;
+import no.difi.meldingsutveksling.receipt.MessageReceipt;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -228,7 +228,7 @@ public class CorrespondenceAgencyMessageFactory {
         return myInsertCorrespondenceV2;
     }
 
-    public static GetCorrespondenceStatusDetailsV2 createReceiptRequest(CorrespondenceReceiptMeta receipt) {
+    public static GetCorrespondenceStatusDetailsV2 createReceiptRequest(MessageReceipt receipt) {
 
         no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory of = new no.altinn.services
                 .serviceengine.correspondence._2009._10.ObjectFactory();
@@ -238,10 +238,10 @@ public class CorrespondenceAgencyMessageFactory {
         no.altinn.schemas.services.serviceengine.correspondence._2014._10.ObjectFactory filterOF = new no.altinn
                 .schemas.services.serviceengine.correspondence._2014._10.ObjectFactory();
         JAXBElement<String> sendersReference = filterOF.createCorrespondenceStatusFilterV2SendersReference
-                (receipt.getSendersReference());
+                (receipt.getMessageId());
         filter.setSendersReference(sendersReference);
-        filter.setServiceCode(receipt.getServiceCode());
-        filter.setServiceEditionCode(Integer.valueOf(receipt.getServiceEditionCode()));
+        filter.setServiceCode("4255");
+        filter.setServiceEditionCode(10);
         statusRequest.setFilterCriteria(filter);
 
         return statusRequest;

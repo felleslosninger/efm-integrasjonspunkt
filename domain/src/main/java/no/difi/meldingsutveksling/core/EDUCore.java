@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.core;
 
 import com.google.common.base.MoreObjects;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 
@@ -23,13 +24,15 @@ import static no.difi.meldingsutveksling.core.EDUCore.MessageType.EDU;
 })
 public class EDUCore {
 
-    // ConversationId
     @XmlAttribute(name = "id", required = true)
     private String id;
+    @XmlElement
+    private String messageReference;
     @XmlElement(required = true)
     private Sender sender;
     @XmlElement(required = true)
     private Receiver receiver;
+    private ServiceIdentifier serviceIdentifier;
     @XmlElement(required = true)
     private MessageType messageType;
     @XmlElement(required = true)
@@ -63,6 +66,14 @@ public class EDUCore {
         this.id = id;
     }
 
+    public String getMessageReference() {
+        return messageReference;
+    }
+
+    public void setMessageReference(String messageReference) {
+        this.messageReference = messageReference;
+    }
+
     public Sender getSender() {
         return sender;
     }
@@ -77,6 +88,14 @@ public class EDUCore {
 
     public void setReceiver(Receiver receiver) {
         this.receiver = receiver;
+    }
+
+    public ServiceIdentifier getServiceIdentifier() {
+        return serviceIdentifier;
+    }
+
+    public void setServiceIdentifier(ServiceIdentifier serviceIdentifier) {
+        this.serviceIdentifier = serviceIdentifier;
     }
 
     public Object getPayload() {
@@ -126,6 +145,7 @@ public class EDUCore {
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("id", id)
+                .add("messageReference", messageReference)
                 .add("sender", sender)
                 .add("receiver", receiver)
                 .toString();

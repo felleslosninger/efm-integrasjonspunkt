@@ -34,13 +34,6 @@ public class EDUCoreFactory {
         PutMessageRequestWrapper requestWrapper = new PutMessageRequestWrapper(putMessageRequestType);
         EDUCore eduCore = createCommon(senderOrgNr, requestWrapper.getRecieverPartyNumber());
 
-        eduCore.setId(requestWrapper.getConversationId());
-        if (PayloadUtil.isAppReceipt(putMessageRequestType.getPayload())) {
-            eduCore.setMessageType(EDUCore.MessageType.APPRECEIPT);
-        } else {
-            eduCore.setMessageType(EDUCore.MessageType.EDU);
-        }
-
         try {
             eduCore.setPayload(unmarshallPayload(putMessageRequestType.getPayload()));
         } catch (JAXBException e) {
@@ -48,6 +41,17 @@ public class EDUCoreFactory {
                     PutMessageMarker.markerFrom(new PutMessageRequestWrapper(putMessageRequestType)));
             throw new MeldingsUtvekslingRuntimeException(e);
         }
+
+        eduCore.setId(requestWrapper.getConversationId());
+        if (PayloadUtil.isAppReceipt(putMessageRequestType.getPayload())) {
+            eduCore.setMessageType(EDUCore.MessageType.APPRECEIPT);
+        } else {
+            eduCore.setMessageType(EDUCore.MessageType.EDU);
+            eduCore.setMessageReference(String.format("%s-%s",
+                    eduCore.getPayloadAsMeldingType().getNoarksak().getSaId(),
+                    eduCore.getPayloadAsMeldingType().getJournpost().getJpJpostnr()));
+        }
+
 
         return eduCore;
     }
@@ -79,6 +83,7 @@ public class EDUCoreFactory {
         EDUCore eduCore = createCommon(senderOrgNr, message.getParticipantId());
 
         eduCore.setId(message.getIdproc());
+        eduCore.setMessageReference(message.getMessageReference());
         eduCore.setMessageType(EDUCore.MessageType.EDU);
 
         ObjectFactory of = new ObjectFactory();

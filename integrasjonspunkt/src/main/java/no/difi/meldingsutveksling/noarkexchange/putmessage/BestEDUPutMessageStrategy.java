@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
@@ -19,6 +20,7 @@ class BestEDUMessageStrategy implements MessageStrategy {
 
     @Override
     public PutMessageResponseType putMessage(EDUCore request) {
+        request.setServiceIdentifier(ServiceIdentifier.EDU);
         return messageSender.sendMessage(request);
     }
 }
