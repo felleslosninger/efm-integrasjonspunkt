@@ -4,56 +4,34 @@ MAINTAINER DIFI <espen.korra@difi.no>
 LABEL package="no.difi" artifact="meldingsutveksling" version="1.0" description="Direktoratet for forvaltning og IKT (Difi)"
 
 ENV APP_DIR=/var/lib/difi \
-    APP_PREFIX=integrasjonspunkt \
-    APP_MAIN_CLASS=no.difi.meldingsutveksling.IntegrasjonspunktApplication \
-    APP_JAVA_PARAMS="-Dprivatekeyalias=974720760 -Dkeystorelocation=crt/test-certificates.jks -Dprivatekeypassword=changeit" \
     APP_PROFILE=dev \
     HOST=tt02.altinn.basefarm.net \
     PORT=443 \
     KEYSTOREFILE=${JAVA_HOME}/lib/security/cacerts \
-    KEYSTOREPASS=changeit
-
+    KEYSTOREPASS=changeit \
+    DOCKERIZE_VERSION=v0.2.0
 
 RUN apk add --update \
-	    ca-certificates \
-        curl \
-	    openssl  && \
-	    update-ca-certificates && \
-	    rm -rf /var/cache/apk/*
-
-#
-# Install Java unlimited security policy
-#
-
-WORKDIR ${JAVA_HOME}/lib/security
-
-ADD security.tar.gz ${JAVA_HOME}/lib/security
-
-RUN cd /tmp/ && \
-    curl -LO "http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip" -H 'Cookie: oraclelicense=accept-securebackup-cookie' && \
-    unzip jce_policy-8.zip && \
-    rm jce_policy-8.zip && \
-    yes |cp -v /tmp/UnlimitedJCEPolicyJDK8/*.jar ${JAVA_HOME}/lib/security/ && \
+    ca-certificates \
+    tini \
+    curl \
+    openssl  && \
+    update-ca-certificates && \
+    rm -rf /var/cache/apk/* && \
     openssl s_client -connect ${HOST}:${PORT} </dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ${HOST}.cert && \
-    keytool -import -noprompt -trustcacerts -alias ${HOST} -file ${HOST}.cert -keystore ${KEYSTOREFILE} -storepass ${KEYSTOREPASS}
-
-#
-# Start the application
-#
+    keytool -import -noprompt -trustcacerts -alias ${HOST} -file ${HOST}.cert -keystore ${KEYSTOREFILE} -storepass ${KEYSTOREPASS} && \
+    mkdir ${APP_DIR} && \
+    touch ${APP_DIR}/integrasjonspunkt-local.properties && \
+    wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && \
+    tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
 WORKDIR ${APP_DIR}
 
 EXPOSE 8080
 
-ENTRYPOINT ["./run.sh"]
+# Use tini to reap processes and signal handling
+ENTRYPOINT ["/sbin/tini", "-g", "--", "sh", "-c", "./run.sh"]
 
-#
-# Install application
-#
-
-RUN touch ${APP_DIR}/integrasjonspunkt-local.properties; echo -e '#!/bin/sh\njava -jar ${APP_JAVA_PARAMS} ${APP_DIR}/app.jar ${APP_MAIN_CLASS} --spring.profiles.active=${APP_PROFILE} "$@"' > ${APP_DIR}/run.sh && \
-	chmod a+x ${APP_DIR}/run.sh
-ADD ${APP_PREFIX}*.jar ${APP_DIR}/app.jar
-#
-# Open ports for incoming connections
-#
+# Add jar last, since this changes the most
+ADD *.jar ${APP_DIR}/app.jar
+ADD run.sh ${APP_DIR}/
