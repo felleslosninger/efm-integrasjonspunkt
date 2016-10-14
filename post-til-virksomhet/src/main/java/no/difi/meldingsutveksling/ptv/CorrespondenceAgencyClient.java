@@ -133,6 +133,7 @@ public class CorrespondenceAgencyClient {
         securityInterceptor.setSecurementPasswordType("PasswordText");
         securityInterceptor.setSecurementUsernameTokenNonce(true);
         securityInterceptor.setSecurementUsernameTokenCreated(true);
+        securityInterceptor.setValidateResponse(false);
 //        securityInterceptor.setSecurementUsernameTokenElements("Nonce Created"); // from the old decpreated WSS4JSecurityInterceptor. Not sure if the above is wor
 
         return securityInterceptor;

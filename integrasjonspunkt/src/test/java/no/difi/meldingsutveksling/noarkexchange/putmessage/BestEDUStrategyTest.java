@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.noarkexchange.putmessage;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -18,7 +17,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * Test for hte AppReceiptStrategy
@@ -218,10 +218,6 @@ public class BestEDUStrategyTest {
         request.setPayload(p360Style);
         MessageStrategy messageStrategy = strategyFactory.create(request.getPayload());
         Assert.assertTrue(messageStrategy instanceof BestEDUMessageStrategy);
-
-        PutMessageResponseType t = new PutMessageResponseType();
-        when(messageStrategy.putMessage(any(EDUCore.class))).thenReturn(t);
-
 
         messageStrategy.putMessage(request);
         verify(messageSender, times(1)).sendMessage(any(EDUCore.class));
