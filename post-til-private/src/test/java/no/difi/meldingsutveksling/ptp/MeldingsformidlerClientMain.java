@@ -14,12 +14,14 @@ public class MeldingsformidlerClientMain {
 
     public static final String URL_TESTMILJO = "https://qaoffentlig.meldingsformidler.digipost.no/api/ebms";
     public static final String DIFI_ORGNR = "991825827";
-
+    public static final String CLIENT_ALIAS = "client_alias";
+    public static final String PASSWORD = "changeit";
 
 
     public static void main(String[] args) throws MeldingsformidlerException {
-        KeyStore keystore = setupKeyStore("kontaktinfo-client-test.jks", "changeit".toCharArray());
-        MeldingsformidlerClient meldingsformidlerClient = new MeldingsformidlerClient(new MeldingsformidlerClient.Config(URL_TESTMILJO, keystore, "client_alias", "changeit"));
+        KeyStore keystore = createKeyStore();
+        String mpcId = "1";
+        MeldingsformidlerClient meldingsformidlerClient = new MeldingsformidlerClient(new MeldingsformidlerClient.Config(URL_TESTMILJO, keystore, CLIENT_ALIAS, PASSWORD, mpcId));
         final MeldingsformidlerRequest request = new MeldingsformidlerRequest() {
             @Override
             public Document getDocument() {
@@ -59,7 +61,9 @@ public class MeldingsformidlerClientMain {
 
             @Override
             public String getConversationId() {
-                return String.valueOf(UUID.randomUUID());
+                final String uuid = String.valueOf(UUID.randomUUID());
+                System.out.println("Melding sent med conversation id " + uuid);
+                return uuid;
             }
 
             @Override
@@ -81,17 +85,16 @@ public class MeldingsformidlerClientMain {
                 return "984661185";
             }
 
-            @Override
-            public String getQueueId() {
-                return "køid";
-            }
-
         };
         try {
             meldingsformidlerClient.sendMelding(request);
         } catch (MeldingsformidlerException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    static KeyStore createKeyStore() throws MeldingsformidlerException {
+        return setupKeyStore("kontaktinfo-client-test.jks", "changeit".toCharArray());
     }
 
     private static KeyStore setupKeyStore(String filename, char[] password) throws MeldingsformidlerException {
