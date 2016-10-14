@@ -21,6 +21,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.util.Base64;
+import java.util.Optional;
 
 public class EDUCoreFactory {
 
@@ -47,9 +48,17 @@ public class EDUCoreFactory {
             eduCore.setMessageType(EDUCore.MessageType.APPRECEIPT);
         } else {
             eduCore.setMessageType(EDUCore.MessageType.EDU);
-            eduCore.setMessageReference(String.format("%s-%s",
-                    eduCore.getPayloadAsMeldingType().getNoarksak().getSaId(),
-                    eduCore.getPayloadAsMeldingType().getJournpost().getJpJpostnr()));
+            Optional<String> saId = Optional.of(eduCore)
+                    .map(EDUCore::getPayloadAsMeldingType)
+                    .map(MeldingType::getNoarksak)
+                    .map(NoarksakType::getSaId);
+            Optional<String> jpostnr = Optional.of(eduCore)
+                    .map(EDUCore::getPayloadAsMeldingType)
+                    .map(MeldingType::getJournpost)
+                    .map(JournpostType::getJpJpostnr);
+            if (saId.isPresent() && jpostnr.isPresent()) {
+                eduCore.setMessageReference(String.format("%s-%s", saId.get(), jpostnr.get()));
+            }
         }
 
 
