@@ -8,7 +8,8 @@ ENV APP_DIR=/var/lib/difi \
     HOST=tt02.altinn.basefarm.net \
     PORT=443 \
     KEYSTOREFILE=${JAVA_HOME}/lib/security/cacerts \
-    KEYSTOREPASS=changeit
+    KEYSTOREPASS=changeit \
+    DOCKERIZE_VERSION=v0.2.0
 
 RUN apk add --update \
     ca-certificates \
@@ -21,15 +22,16 @@ RUN apk add --update \
     keytool -import -noprompt -trustcacerts -alias ${HOST} -file ${HOST}.cert -keystore ${KEYSTOREFILE} -storepass ${KEYSTOREPASS} && \
     mkdir ${APP_DIR} && \
     touch ${APP_DIR}/integrasjonspunkt-local.properties && \
-    echo -e '#!/bin/sh\njava -jar ${APP_JAVA_PARAMS} ${APP_DIR}/app.jar ${APP_MAIN_CLASS} --spring.profiles.active=${APP_PROFILE} "$@"' > ${APP_DIR}/run.sh && \
-    chmod a+x ${APP_DIR}/run.sh
+    wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && \
+    tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
 WORKDIR ${APP_DIR}
 
 EXPOSE 8080
 
 # Use tini to reap processes and signal handling
-ENTRYPOINT ["/sbin/tini", "-g", "--", "./run.sh"]
+ENTRYPOINT ["/sbin/tini", "-g", "--", "sh", "-c", "./run.sh"]
 
 # Add jar last, since this changes the most
 ADD *.jar ${APP_DIR}/app.jar
+ADD run.sh ${APP_DIR}/
