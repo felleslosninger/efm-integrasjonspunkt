@@ -1,12 +1,11 @@
 package no.difi.meldingsutveksling.receipt;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.logging.Audit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -25,24 +24,31 @@ public class ReceiptPolling {
     private static final Logger log = LoggerFactory.getLogger(ReceiptPolling.class);
 
     @Autowired
-    MessageReceiptRepository messageReceiptRepository;
+    private IntegrasjonspunktProperties props;
+
+    @Autowired
+    private MessageReceiptRepository messageReceiptRepository;
 
     @PostConstruct
     private void addTestData() {
+        // TODO: fjernes etter test!
         messageReceiptRepository.save(MessageReceipt.of("bb8323b9-1023-4046-b620-63c4f9120b62", ServiceIdentifier.DPV));
     }
 
-//    @Scheduled(fixedRate = 30000)
+    @Scheduled(fixedRate = 30000)
     public void checkReceiptStatus() {
-        List<MessageReceipt> receipts = messageReceiptRepository.findByCompleted(false);
+        if (!props.getFeature().isEnableReceipts()) {
+            return;
+        }
+
+        List<MessageReceipt> receipts = messageReceiptRepository.findByReceived(false);
 
         receipts.forEach(r -> {
             log.info(markerFrom(r), "Checking status");
             ReceiptStrategy strategy = ReceiptStrategyFactory.getFactory(r);
-            boolean completed = strategy.checkCompleted(r);
-            if (completed) {
-                Audit.info("Changed status to \"completed\"", markerFrom(r));
-                r.setCompleted(true);
+            if (strategy.checkReceived(r)) {
+                Audit.info("Changed status to \"received\"", markerFrom(r));
+                r.setReceived(true);
                 messageReceiptRepository.save(r);
             }
         });

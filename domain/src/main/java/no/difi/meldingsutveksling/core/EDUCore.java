@@ -35,7 +35,7 @@ public class EDUCore {
     @XmlElement(required = true)
     private Receiver receiver;
     @XmlElement
-    private ServiceIdentifier serviceIdentifier;
+    private ServiceIdentifier serviceIdentifier; // TODO: remove when MessageStrategy is Springified (due to ReceiptRepo..)
     @XmlElement(required = true)
     private MessageType messageType;
     @XmlElement(required = true)

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 public class EduReceiptStrategy implements ReceiptStrategy {
 
     @Override
-    public boolean checkCompleted(MessageReceipt receipt) {
+    public boolean checkReceived(MessageReceipt receipt) {
         return false;
     }
 }

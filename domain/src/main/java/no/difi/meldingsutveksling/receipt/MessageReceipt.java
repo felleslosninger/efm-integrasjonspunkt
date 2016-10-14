@@ -16,14 +16,14 @@ public class MessageReceipt {
     @Id
     private String messageId;
     private ServiceIdentifier targetType;
-    private boolean completed;
+    private boolean received;
 
     MessageReceipt(){}
 
     private MessageReceipt(String id, ServiceIdentifier type) {
         this.messageId = id;
         this.targetType = type;
-        this.completed = false;
+        this.received = false;
     }
 
     public static MessageReceipt of(String id, ServiceIdentifier type) {
@@ -53,12 +53,12 @@ public class MessageReceipt {
         this.targetType = targetType;
     }
 
-    public boolean isCompleted() {
-        return completed;
+    public boolean isReceived() {
+        return received;
     }
 
-    public void setCompleted(boolean completed) {
-        this.completed = completed;
+    public void setReceived(boolean received) {
+        this.received = received;
     }
 
     @Override

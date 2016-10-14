@@ -12,7 +12,7 @@ public class MessageReceiptMarker {
 
     public static LogstashMarker markerFrom(MessageReceipt receipt) {
         final LogstashMarker messageIdMarker = Markers.append(MESSAGE_ID, receipt.getMessageId());
-        final LogstashMarker completedMarker = Markers.append(COMPLETED, receipt.isCompleted());
+        final LogstashMarker completedMarker = Markers.append(COMPLETED, receipt.isReceived());
         return messageIdMarker.and(completedMarker);
     }
 
