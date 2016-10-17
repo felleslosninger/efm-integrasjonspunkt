@@ -35,7 +35,7 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
     }
 
     @Override
-    public PutMessageResponseType putMessage(final EDUCore request) {
+    public PutMessageResponseType send(final EDUCore request) {
         request.setServiceIdentifier(ServiceIdentifier.DPI);
         final ServiceRecord serviceRecord = serviceRegistry.getPrimaryServiceRecord(request.getReceiver().getOrgNr());
 

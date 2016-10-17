@@ -19,7 +19,7 @@ class BestEDUMessageStrategy implements MessageStrategy {
     }
 
     @Override
-    public PutMessageResponseType putMessage(EDUCore request) {
+    public PutMessageResponseType send(EDUCore request) {
         request.setServiceIdentifier(ServiceIdentifier.EDU);
         return messageSender.sendMessage(request);
     }

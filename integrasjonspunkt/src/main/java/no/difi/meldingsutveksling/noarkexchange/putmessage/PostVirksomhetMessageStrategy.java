@@ -21,7 +21,7 @@ public class PostVirksomhetMessageStrategy implements MessageStrategy {
     }
 
     @Override
-    public PutMessageResponseType putMessage(EDUCore message) {
+    public PutMessageResponseType send(EDUCore message) {
         message.setServiceIdentifier(ServiceIdentifier.DPV);
         final InsertCorrespondenceV2 correspondence = CorrespondenceAgencyMessageFactory.create(config, message);
         CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(markerFrom(message), config);

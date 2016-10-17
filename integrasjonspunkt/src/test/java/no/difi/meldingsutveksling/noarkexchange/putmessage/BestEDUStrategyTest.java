@@ -219,7 +219,7 @@ public class BestEDUStrategyTest {
         MessageStrategy messageStrategy = strategyFactory.create(request.getPayload());
         Assert.assertTrue(messageStrategy instanceof BestEDUMessageStrategy);
 
-        messageStrategy.putMessage(request);
+        messageStrategy.send(request);
         verify(messageSender, times(1)).sendMessage(any(EDUCore.class));
     }
 
@@ -237,7 +237,7 @@ public class BestEDUStrategyTest {
         EDUCore request = new EDUCore();
         request.setPayload(document);
         MessageStrategy messageStrategy = strategyFactory.create(document);
-        messageStrategy.putMessage(request);
+        messageStrategy.send(request);
         verify(messageSenderMock, times(1)).sendMessage(any(EDUCore.class));
     }
 }
