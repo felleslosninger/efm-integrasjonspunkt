@@ -55,7 +55,7 @@ public class AppReceiptStrategyTest {
 
         EDUCoreFactory eduCoreFactory = new EDUCoreFactory(srMock);
         EDUCore message = eduCoreFactory.create(request, SENDER_ORG_NR);
-        strategy.putMessage(message);
+        strategy.send(message);
         verify(messageSender, atLeastOnce()).sendMessage(any(EDUCore.class));
     }
 
