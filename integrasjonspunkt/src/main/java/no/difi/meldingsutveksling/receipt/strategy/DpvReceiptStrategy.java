@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 import static no.difi.meldingsutveksling.receipt.MessageReceiptMarker.markerFrom;
 
@@ -44,9 +45,12 @@ public class DpvReceiptStrategy implements ReceiptStrategy {
 
         // TODO: need to find a way to search for CorrespondenceIDs (in response( as ConversationID is not unqiue
         List<StatusV2> statusList = result.getGetCorrespondenceStatusDetailsV2Result().getValue().getStatusList().getValue().getStatusV2();
-        StatusV2 firstStatus = statusList.stream().findFirst().get();
-        List<StatusChangeV2> statusChanges = firstStatus.getStatusChanges().getValue().getStatusChangeV2();
+        Optional<StatusV2> op = statusList.stream().findFirst();
+        if (op.isPresent()) {
+            List<StatusChangeV2> statusChanges = op.get().getStatusChanges().getValue().getStatusChangeV2();
+            return statusChanges.stream().map(s -> s.getStatusType().value()).anyMatch(s -> "Read".equals(s));
+        }
 
-        return statusChanges.stream().map(s -> s.getStatusType().value()).anyMatch(s -> "Created".equals(s));
+        return false;
     }
 }
