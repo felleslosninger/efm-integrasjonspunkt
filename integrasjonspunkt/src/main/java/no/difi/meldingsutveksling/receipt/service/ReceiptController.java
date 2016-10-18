@@ -25,4 +25,9 @@ public class ReceiptController {
     public MessageReceipt receipt(@PathVariable("id") String id) {
         return repo.findOne(id);
     }
+
+    @RequestMapping("/receipts/queue")
+    public List<MessageReceipt> queuedReceipts() {
+        return Lists.newArrayList(repo.findByReceived(false));
+    }
 }
