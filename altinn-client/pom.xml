@@ -67,9 +67,8 @@
         <scope>test</scope>
     </dependency>
     <dependency>
-        <groupId>no.difi.meldingsutveksling</groupId>
+        <groupId>no.difi.move-common</groupId>
         <artifactId>audit</artifactId>
-        <version>${project.parent.version}</version>
     </dependency>
 </dependencies>
 </project>
