@@ -33,6 +33,7 @@ public class ReceiptPolling {
     private void addTestData() {
         // TODO: fjernes etter test!
         messageReceiptRepository.save(MessageReceipt.of("bb8323b9-1023-4046-b620-63c4f9120b62", ServiceIdentifier.DPV));
+        messageReceiptRepository.save(MessageReceipt.of("bb8323b9-1023-4046-b620-63c4f9120b63", ServiceIdentifier.DPV));
     }
 
     @Scheduled(fixedRate = 30000)
@@ -44,10 +45,10 @@ public class ReceiptPolling {
         List<MessageReceipt> receipts = messageReceiptRepository.findByReceived(false);
 
         receipts.forEach(r -> {
-            log.info(markerFrom(r), "Checking status");
+            log.info(markerFrom(r), "Checking status, messageId={}", r.getMessageId());
             ReceiptStrategy strategy = ReceiptStrategyFactory.getFactory(r);
             if (strategy.checkReceived(r)) {
-                Audit.info("Changed status to \"received\"", markerFrom(r));
+                Audit.info("Changed status to \"received\" for messageId="+r.getMessageId(), markerFrom(r));
                 r.setReceived(true);
                 messageReceiptRepository.save(r);
             }
