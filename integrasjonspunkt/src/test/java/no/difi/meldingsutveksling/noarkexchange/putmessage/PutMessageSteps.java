@@ -37,7 +37,7 @@ import org.springframework.context.ApplicationContext;
 import sun.security.x509.X509CertImpl;
 
 /**
- * Makes sure that the integrasjonspunkt can handle receipt messages on the putMessage interface
+ * Makes sure that the integrasjonspunkt can handle receipt messages on the send interface
  *
  * @author Glenn Bech
  */
@@ -113,7 +113,7 @@ public class PutMessageSteps {
         message.setPayload(appReceiptPayload);
     }
 
-    @When("^integrasjonspunktet mottar en kvittering på putMessage grensesnittet$")
+    @When("^integrasjonspunktet mottar en kvittering på send grensesnittet$")
     public void integrasjonspunkt_mottar_kvittering() {
         integrasjonspunkt.putMessage(message);
     }

@@ -143,6 +143,8 @@ public class IntegrasjonspunktProperties {
          */
         private boolean enableQueue;
 
+        private boolean enableReceipts;
+
         private boolean returnOkOnEmptyPayload;
     }
 

@@ -1,8 +1,5 @@
 package no.difi.meldingsutveksling.services;
 
-import java.io.IOException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import no.difi.meldingsutveksling.noarkexchange.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -11,6 +8,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+
+import java.io.IOException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 
 @Component
 public class Adresseregister {
@@ -41,7 +44,7 @@ public class Adresseregister {
         String nOrgNumber = FiksFix.replaceOrgNummberWithKs(orgNumber);
         ServiceRecord serviceRecord = serviceRegistryLookup.getPrimaryServiceRecord(nOrgNumber);
 
-        if ("POST_VIRKSOMHET".equals(serviceRecord.getServiceIdentifier())) {
+        if (DPV.fullname().equals(serviceRecord.getServiceIdentifier())) {
             return null;
         }
 

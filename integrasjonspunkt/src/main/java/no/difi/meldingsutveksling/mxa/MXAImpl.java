@@ -1,16 +1,5 @@
 package no.difi.meldingsutveksling.mxa;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.time.Instant;
-import javax.jws.WebParam;
-import javax.jws.WebService;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.ws.BindingType;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreFactory;
@@ -18,22 +7,27 @@ import no.difi.meldingsutveksling.core.EDUCoreMarker;
 import no.difi.meldingsutveksling.core.EDUCoreSender;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
-import static no.difi.meldingsutveksling.mxa.MessageMarker.markerFrom;
 import no.difi.meldingsutveksling.mxa.schema.MXADelegate;
 import no.difi.meldingsutveksling.mxa.schema.domain.Message;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
-import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
-import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
-import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
-import no.difi.meldingsutveksling.ptv.CorrespondenceRequest;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.jws.WebParam;
+import javax.jws.WebService;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.ws.BindingType;
+import java.io.StringReader;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static no.difi.meldingsutveksling.mxa.MessageMarker.markerFrom;
 
 @Component("mxaService")
 @WebService(portName = "MXAPort", serviceName = "MXA", targetNamespace = "http://webservice.ws.altut.patent.siriusit.com/", endpointInterface = "no.difi.meldingsutveksling.mxa.schema.MXADelegate")
@@ -85,20 +79,6 @@ public class MXAImpl implements MXADelegate {
         if (isNullOrEmpty(msg.getParticipantId())) {
             Audit.error("Receiver identifier missing", markerFrom(msg));
             throw new MeldingsUtvekslingRuntimeException("Missing receiver identifier.");
-        }
-
-
-        // TODO: temp. fix for personal id number
-        if (msg.getParticipantId().length() > 9) {
-            String fileName = "MXA-" + Instant.now().toEpochMilli() + ".xml";
-            File mxaMsgFile = new File(fileName);
-            try {
-                FileUtils.writeStringToFile(mxaMsgFile, arg0);
-            } catch (IOException e) {
-                e.printStackTrace();
-                return INTERNAL_ERROR;
-            }
-            return SUCCESS;
         }
 
         EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);

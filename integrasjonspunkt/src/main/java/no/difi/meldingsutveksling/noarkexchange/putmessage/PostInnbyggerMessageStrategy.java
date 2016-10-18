@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -35,7 +36,8 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
     }
 
     @Override
-    public PutMessageResponseType putMessage(final EDUCore request) {
+    public PutMessageResponseType send(final EDUCore request) {
+        request.setServiceIdentifier(ServiceIdentifier.DPI);
         final ServiceRecord serviceRecord = serviceRegistry.getPrimaryServiceRecord(request.getReceiver().getOrgNr());
 
         MeldingsformidlerClient client = new MeldingsformidlerClient(config);

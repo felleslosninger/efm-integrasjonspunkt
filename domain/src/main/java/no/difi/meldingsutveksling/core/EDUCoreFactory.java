@@ -21,6 +21,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.util.Base64;
+import java.util.Optional;
 
 public class EDUCoreFactory {
 
@@ -34,13 +35,6 @@ public class EDUCoreFactory {
         PutMessageRequestWrapper requestWrapper = new PutMessageRequestWrapper(putMessageRequestType);
         EDUCore eduCore = createCommon(senderOrgNr, requestWrapper.getRecieverPartyNumber());
 
-        eduCore.setId(requestWrapper.getConversationId());
-        if (PayloadUtil.isAppReceipt(putMessageRequestType.getPayload())) {
-            eduCore.setMessageType(EDUCore.MessageType.APPRECEIPT);
-        } else {
-            eduCore.setMessageType(EDUCore.MessageType.EDU);
-        }
-
         try {
             eduCore.setPayload(unmarshallPayload(putMessageRequestType.getPayload()));
         } catch (JAXBException e) {
@@ -48,6 +42,25 @@ public class EDUCoreFactory {
                     PutMessageMarker.markerFrom(new PutMessageRequestWrapper(putMessageRequestType)));
             throw new MeldingsUtvekslingRuntimeException(e);
         }
+
+        eduCore.setId(requestWrapper.getConversationId());
+        if (PayloadUtil.isAppReceipt(putMessageRequestType.getPayload())) {
+            eduCore.setMessageType(EDUCore.MessageType.APPRECEIPT);
+        } else {
+            eduCore.setMessageType(EDUCore.MessageType.EDU);
+            Optional<String> saId = Optional.of(eduCore)
+                    .map(EDUCore::getPayloadAsMeldingType)
+                    .map(MeldingType::getNoarksak)
+                    .map(NoarksakType::getSaId);
+            Optional<String> jpostnr = Optional.of(eduCore)
+                    .map(EDUCore::getPayloadAsMeldingType)
+                    .map(MeldingType::getJournpost)
+                    .map(JournpostType::getJpJpostnr);
+            if (saId.isPresent() && jpostnr.isPresent()) {
+                eduCore.setMessageReference(String.format("%s-%s", saId.get(), jpostnr.get()));
+            }
+        }
+
 
         return eduCore;
     }
@@ -79,6 +92,7 @@ public class EDUCoreFactory {
         EDUCore eduCore = createCommon(senderOrgNr, message.getParticipantId());
 
         eduCore.setId(message.getIdproc());
+        eduCore.setMessageReference(message.getMessageReference());
         eduCore.setMessageType(EDUCore.MessageType.EDU);
 
         ObjectFactory of = new ObjectFactory();
