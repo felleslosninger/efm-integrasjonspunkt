@@ -43,7 +43,7 @@ class AppReceiptMessageStrategy implements MessageStrategy {
     }
 
     @Override
-    public PutMessageResponseType putMessage(EDUCore request) {
+    public PutMessageResponseType send(EDUCore request) {
         Audit.info("Received AppReceipt", markerFrom(request));
         AppReceiptType receipt = request.getPayloadAsAppreceiptType();
         if (asList("OK", "WARNING", "ERROR").contains(receipt.getType())) {

@@ -1,7 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import com.google.common.base.Strings;
-import java.security.cert.CertificateException;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.xml.ws.BindingType;
@@ -10,7 +8,6 @@ import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreFactory;
-import no.difi.meldingsutveksling.core.EDUCoreMarker;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.logging.MarkerFactory;
@@ -144,7 +141,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
                         .getReceiver().getOrgNr());
                 MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(serviceRecord);
                 MessageStrategy strategy = messageStrategyFactory.create(request.getPayload());
-                return strategy.putMessage(coreMessage);
+                return strategy.send(coreMessage);
             } else {
                 if (hasMshEndpoint()) {
                     Audit.info("Send message to MSH", markerFrom(message));

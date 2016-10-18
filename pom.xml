@@ -5,7 +5,7 @@
     <groupId>no.difi.meldingsutveksling</groupId>
     <artifactId>parent-pom</artifactId>
     <packaging>pom</packaging>
-    <version>1.7.7-SNAPSHOT</version>
+    <version>1.7.9-SNAPSHOT</version>
     <name>Multiproject for meldingsutveksling</name>
 
     <scm>
@@ -21,6 +21,11 @@
             <name>DIFI MOVE Nexus 3rd party</name>
             <url>https://beta-meldingsutveksling.difi.no/content/repositories/thirdparty/</url>
         </repository>
+        <repository>
+            <id>DIFI Move releases</id>
+            <name>DIFI MOVE releases on Nexus</name>
+            <url>https://beta-meldingsutveksling.difi.no/content/repositories/releases/</url>
+        </repository>
     </repositories>
 
     <properties>
@@ -32,6 +37,7 @@
         <!-- bug with logstash-logback-encoder in 1.1.7, wait for 1.1.8 http://jira.qos.ch/browse/LOGBACK-1158 -->
         <logback.version>1.1.6</logback.version>
         <mockito.version>1.10.19</mockito.version>
+        <move-common.version>1.0.0</move-common.version>
     </properties>
 
     <modules>
@@ -49,17 +55,24 @@
         <module>transport-file</module>
         <module>transport-altinn</module>
         <module>altinn-client</module>
-        <module>audit</module>
         <module>test-tools</module>
         <module>post-til-virksomhet</module>
         <module>post-til-private</module>
         <module>service-registry-client</module>
-        <module>webservice-tools</module>
-        <module>kontakt-reservasjonsregister-client</module>
     </modules>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>no.difi.move-common</groupId>
+                <artifactId>audit</artifactId>
+                <version>${move-common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.difi.move-common</groupId>
+                <artifactId>webservice-tools</artifactId>
+                <version>${move-common.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.santuario</groupId>
                 <artifactId>xmlsec</artifactId>
