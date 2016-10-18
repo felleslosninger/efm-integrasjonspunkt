@@ -43,9 +43,8 @@
             <version>1.7.12</version>
         </dependency>
         <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
+            <groupId>no.difi.move-common</groupId>
             <artifactId>webservice-tools</artifactId>
-            <version>1.7.5-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
