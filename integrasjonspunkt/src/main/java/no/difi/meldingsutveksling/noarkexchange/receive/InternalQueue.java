@@ -1,11 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import javax.jms.Session;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreMarker;
@@ -16,7 +10,6 @@ import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
-import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 import no.difi.meldingsutveksling.logging.MoveLogMarkers;
 import no.difi.meldingsutveksling.mxa.MXAImpl;
 import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
@@ -24,6 +17,8 @@ import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
+import no.difi.meldingsutveksling.receipt.MessageReceipt;
+import no.difi.meldingsutveksling.receipt.MessageReceiptRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -31,6 +26,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
+
+import javax.jms.Session;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+
+import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
 /**
  * The idea behind this queue is to avoid loosing messages before they are saved
@@ -53,7 +57,7 @@ public class InternalQueue {
     private Logger logger = LoggerFactory.getLogger(InternalQueue.class);
 
     @Autowired
-    JmsTemplate jmsTemplate;
+    private JmsTemplate jmsTemplate;
 
     @Autowired
     private IntegrajonspunktReceiveImpl integrajonspunktReceive;
@@ -68,7 +72,10 @@ public class InternalQueue {
     private IntegrasjonspunktProperties properties;
 
     @Autowired
-    EDUCoreSender eduCoreSender;
+    private EDUCoreSender eduCoreSender;
+
+    @Autowired
+    private MessageReceiptRepository messageReceiptRepository;
 
     private static JAXBContext jaxbContextdomain;
     private static JAXBContext jaxbContext;
@@ -99,6 +106,9 @@ public class InternalQueue {
         EDUCore request = eduCoreConverter.unmarshallFrom(message);
         try {
             eduCoreSender.sendMessage(request);
+            if (properties.getFeature().isEnableReceipts()) {
+                messageReceiptRepository.save(MessageReceipt.of(request));
+            }
         } catch (Exception e) {
             Audit.error("Failed to send message... queue will retry", EDUCoreMarker.markerFrom(request));
             throw e;

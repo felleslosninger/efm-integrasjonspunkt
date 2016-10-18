@@ -8,5 +8,5 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
  * @author Glenn Bech
  */
 public interface MessageStrategy {
-    PutMessageResponseType putMessage(EDUCore request);
+    PutMessageResponseType send(EDUCore request);
 }

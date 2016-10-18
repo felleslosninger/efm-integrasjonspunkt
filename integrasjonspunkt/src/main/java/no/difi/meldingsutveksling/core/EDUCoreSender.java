@@ -52,7 +52,7 @@ public class EDUCoreSender {
             Audit.info("Receiver validated", EDUCoreMarker.markerFrom(message));
 
             MessageStrategy strategy = messageStrategyFactory.create(message.getPayload());
-            PutMessageResponseType response = strategy.putMessage(message);
+            PutMessageResponseType response = strategy.send(message);
             result = "OK".equals(response.getResult().getType());
         } else if (!Strings.isNullOrEmpty(properties.getMsh().getEndpointURL())) {
             Audit.info("Send message to MSH", EDUCoreMarker.markerFrom(message));

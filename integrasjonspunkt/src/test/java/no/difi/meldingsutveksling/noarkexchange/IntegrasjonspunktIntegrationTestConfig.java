@@ -1,7 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import java.net.URISyntaxException;
-import javax.sql.DataSource;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
@@ -19,7 +17,6 @@ import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.apache.activemq.ActiveMQConnectionFactory;
-import static org.mockito.Mockito.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
@@ -28,6 +25,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jms.core.JmsTemplate;
+
+import java.net.URISyntaxException;
+
+import static org.mockito.Mockito.*;
 
 /**
  * CorrespondenceAgencyConfiguration class used for integration tests.
@@ -107,13 +108,6 @@ public class IntegrasjonspunktIntegrationTestConfig {
         StandardBusinessDocumentFactory sbdfMock = mock(StandardBusinessDocumentFactory.class);
         when(sbdfMock.create(any(EDUCore.class), anyString(), any(Avsender.class), any(Mottaker.class))).thenReturn(mock(EduDocument.class));
         return sbdfMock;
-    }
-
-    @Bean
-    @Primary
-    public DataSource dataSource() {
-        DataSource dataSourceMock = mock(DataSource.class);
-        return dataSourceMock;
     }
 
     @Bean
