@@ -14,7 +14,6 @@ import javax.validation.constraints.NotNull;
  */
 public class DigitalPostInnbyggerConfig {
 
-    @NotNull
     private String endpoint;
 
     @Valid
