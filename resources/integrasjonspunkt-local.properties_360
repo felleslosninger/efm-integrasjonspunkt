@@ -1,24 +1,34 @@
-#Replace <....> with your systems values
-#remove _360 from filename and save. Name should be: integrasjonspunkt-local.properties
+#Fyll inn lokale vedier der de mangler
+#fjern _360 fra filnavn og lagre filen. navnet skal være: integrasjonspunkt-local.properties
 
-noarksystem.endpointURL=http://<sakArkivSystemURL>:<port>/SI.WS.Core/Integration/EDUImport.svc/EDUImportService
-noarksystem.type=P360
-noarksystem.username=svc_sakark
-noarksystem.password=<passord>
-noarksystem.domain=<domene>
+server.port=9093
 
-orgnumber=<orgnr>
-server.port=
+## Organisasjon
+difi.move.org.number=
 
-keystorelocation=
-privatekeypassword=	 
-privatekeyalias=
+### Keystore
+difi.move.org.keystore.alias=
+difi.move.org.keystore.password=
+difi.move.org.keystore.path=
 
-#Altinn related properties (used by transport-altinn, ignored if other transport is in use
-altinn.username= <username>
-altinn.password= <password>
+## NOARK settings. Bytt <servernavn> med navnet på serveren din P360 installsjon kjører
+difi.move.noarkSystem.type=P360
+difi.move.noarkSystem.endpointURL=http://<servernavn>:8088/SI.WS.Core/Integration/EDUImport.svc/EDUImportService
+difi.move.noarkSystem.username=svc_sakark
+difi.move.noarkSystem.password=
+difi.move.noarkSystem.domain=
 
-# configuration settings for accessing MSH. You only need to set this if you are already a BestEdu user
-# Url can be found here at your  360snapin
-#msh.endpointURL=
+##MSH (settes kun dersom du har MSH, Integrasjonspunktet blir proxy mot gammel installasjon. Fjern utkommentering (#) )
+#difi.move.msh.endpointURL=
+
+## ALTINN : Correspondance agency
+difi.move.altinn.username=
+difi.move.altinn.password=
+
+## Digital post innbygger (Settes kun dersom man bruker DPI via integrasjonspunktet. Fjern utkommentering (#))
+#difi.move.dpi.keystore.alias= 
+#difi.move.dpi.keystore.path= 
+#difi.move.dpi.keystore.password= 
+
+
 
