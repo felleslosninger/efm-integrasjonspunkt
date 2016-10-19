@@ -22,8 +22,8 @@ Format: ![iisreset](../iisreset.png)
 # INNKOMMENDE INNSTILLINGER
 
 For innkommende meldingen skal følgende service brukes.
-http://test-sakark01:8088/SI.WS.Core/Integration/EDUImport.svc/EDUImportService
-Importen bør utføres med bruker Difi\svc_sakark
+http://<maksinnavn>:8088/SI.WS.Core/Integration/EDUImport.svc/EDUImportService
+Importen bør utføres med bruker <domene>\svc_sakark
 
 
 
