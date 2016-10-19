@@ -30,15 +30,14 @@ public class MeldingsformidlerClient {
         Mottaker mottaker = Mottaker.builder(request.getMottakerPid(), request.getPostkasseAdresse(), Sertifikat.fraByteArray(request.getCertificate()), Organisasjonsnummer.of(request.getOrgnrPostkasse())).build();
         DigitalPost digitalPost = DigitalPost.builder(mottaker, request.getSubject()).virkningsdato(new Date()).build();
         Dokument dokument = Dokument.builder(request.getDocument().getTitle(), request.getDocument().getFileName(), request.getDocument().getContents()).mimeType(request.getDocument().getMimeType()).build();
-        Dokumentpakke dokumentpakke = Dokumentpakke.builder(dokument)/*TODO.vedlegg(Dokument.builder())*/.build(); // skal dokumentpakke ha vedlegg?
+        Dokumentpakke dokumentpakke = Dokumentpakke.builder(dokument).build();
         final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(request.getSenderOrgnumber());
         Avsender behandlingsansvarlig = Avsender.builder(aktoerOrganisasjonsnummer.forfremTilAvsender()).build();
 
         Forsendelse forsendelse = Forsendelse.digital(behandlingsansvarlig, digitalPost, dokumentpakke)
-                .konversasjonsId(request.getConversationId()) // fra integrasjonspunkt?
+                .konversasjonsId(request.getConversationId())
                 .mpcId(config.getMpcId())
-//                .prioritet(Prioritet.NORMAL) // eller Prioritet.Prioritert?
-//                .spraakkode(request.getSpraakKode())
+                .spraakkode(request.getSpraakKode())
                 .build();
 
         SikkerDigitalPostKlient klient = createSikkerDigitalPostKlient(aktoerOrganisasjonsnummer);
