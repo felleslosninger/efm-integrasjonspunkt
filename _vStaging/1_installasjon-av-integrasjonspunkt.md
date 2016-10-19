@@ -72,7 +72,7 @@ difi.move.org.number               	|Organisasjonsnummer til din organisasjon (9
 server.port							|Portnummer integrasjonspunktet skal kjøre på (default 9093) 			| 9093		  
 									|																		|
 difi.move.noarkSystem.endpointURL 	|URL integrasjonspunktet finner sak-/arkivsystemets BestEdu tjenester 	| 
-difi.move.noarkSystem.type        	|Sak/-arkivsystem type 													|P360/Acos/ePhorte																	
+difi.move.noarkSystem.type        	|Sak/-arkivsystem type 													|ephorte/P360/WebSak																	
 difi.move.noarkSystem.username\*   	|Brukernavn for autentisering mot sakarkivsystem						|svc_sakark
 difi.move.noarkSystem.password\*   	|Passord for autentisering mot sakarkivsystem							|
 difi.move.noarkSystem.domain\*     	|Domene sakarkivsystemet kjører på										|
@@ -92,7 +92,7 @@ difi.move.altinn.password         	|Passord du satte når du opprettet AltInn sy
 
 \*\* Denne brukes bare dersom du allerede har BestEdu og ønsker å sende filer via gammel MSH til deltakere som ikke er en del av piloten. Integrasjonspunktet vil da opptre som en proxy.
 
-Last ned eksempel for [P360](../resources/integrasjonspunkt-local.properties_360), Acos, [ephorte](../resources/integrasjonspunkt-local.properties_ephorte)
+Last ned eksempel for [ephorte](../resources/integrasjonspunkt-local.properties_ephorte), [P360](../resources/integrasjonspunkt-local.properties_360), WebSak
 Lagre filen på området c:\integrajsonspunkt og endre navnet til integrasjonspunkt-local.properties
 
 
@@ -107,7 +107,7 @@ c:/
 
 ### Konfigurere sak-/arkivsystem til å bruke Integrsjonspunktet
 
-Oppsett for Acos, ePhorte, [P360](../resources/Oppsett360.docx)
+Oppsett for ephorte, [P360](../resources/Oppsett360.docx), WebSak
 
 
 ### Start Integrasjonspunktet
@@ -119,6 +119,7 @@ java -jar -Dspring.profiles.active=staging  integrasjonspunktet[versjon].jar
 
 
 kommandoen
+
 ```
 http://localhost:<port-til-integrasjonspunkt>/noarkExchange?wsdl
 ``` 
