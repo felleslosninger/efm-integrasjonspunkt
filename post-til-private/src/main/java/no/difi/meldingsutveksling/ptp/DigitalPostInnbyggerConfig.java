@@ -20,6 +20,21 @@ public class DigitalPostInnbyggerConfig {
     @Valid
     private Keystore keystore;
 
+    /**
+     * ID for queue messages are sent to and their corresponding receipts can be retrieved from.
+     * This is to avoid reading receipts from other applications that use the same service
+     */
+    @NotNull
+    private String mpcId;
+
+    public String getMpcId() {
+        return mpcId;
+    }
+
+    public void setMpcId(String mpcId) {
+        this.mpcId = mpcId;
+    }
+
     public String getEndpoint() {
         return endpoint;
     }
