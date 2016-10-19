@@ -181,4 +181,88 @@
    <sha1>c68b600634d4d4bae3fc54575ae850e734dc1af5</sha1>
    <cve>CVE-2013-2566</cve>
 </suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: spring-boot-starter-data-jpa-1.4.1.RELEASE.jar
+   ]]></notes>
+   <sha1>cae0497ceff725efd0438f070c8c0ca0ef3a7128</sha1>
+   <cpe>cpe:/a:pivotal_software:spring_data_jpa:1.4.1</cpe>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: spring-boot-starter-data-jpa-1.4.1.RELEASE.jar
+   ]]></notes>
+   <sha1>cae0497ceff725efd0438f070c8c0ca0ef3a7128</sha1>
+   <cve>CVE-2016-6652</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: apache-el-8.0.33.jar
+   ]]></notes>
+   <sha1>1b8fa2179b3937cada939317bb135815e79c0ac2</sha1>
+   <cve>CVE-2016-6325</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: apache-el-8.0.33.jar
+   ]]></notes>
+   <sha1>1b8fa2179b3937cada939317bb135815e79c0ac2</sha1>
+   <cve>CVE-2016-5388</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: apache-el-8.0.33.jar
+   ]]></notes>
+   <sha1>1b8fa2179b3937cada939317bb135815e79c0ac2</sha1>
+   <cve>CVE-2016-3092</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: apache-el-8.0.33.jar
+   ]]></notes>
+   <sha1>1b8fa2179b3937cada939317bb135815e79c0ac2</sha1>
+   <cve>CVE-2013-2185</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: apache-el-8.0.33.jar
+   ]]></notes>
+   <sha1>1b8fa2179b3937cada939317bb135815e79c0ac2</sha1>
+   <cve>CVE-2009-2696</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: apache-el-8.0.33.jar
+   ]]></notes>
+   <sha1>1b8fa2179b3937cada939317bb135815e79c0ac2</sha1>
+   <cve>CVE-2007-5461</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: apache-el-8.0.33.jar
+   ]]></notes>
+   <sha1>1b8fa2179b3937cada939317bb135815e79c0ac2</sha1>
+   <cve>CVE-2002-0493</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: apache-el-8.0.33.jar
+   ]]></notes>
+   <sha1>1b8fa2179b3937cada939317bb135815e79c0ac2</sha1>
+   <cpe>cpe:/a:apache:tomcat:8.0.33</cpe>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: apache-el-8.0.33.jar
+   ]]></notes>
+   <sha1>1b8fa2179b3937cada939317bb135815e79c0ac2</sha1>
+   <cpe>cpe:/a:apache_tomcat:apache_tomcat:8.0.33</cpe>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: apache-el-8.0.33.jar
+   ]]></notes>
+   <sha1>1b8fa2179b3937cada939317bb135815e79c0ac2</sha1>
+   <cpe>cpe:/a:jasper_project:jasper:8.0.33</cpe>
+</suppress>
 </suppressions>
