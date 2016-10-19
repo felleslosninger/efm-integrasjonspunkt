@@ -2,14 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>integrasjonspunkt</artifactId>
-    <version>1.7.10-SNAPSHOT</version>
+    <version>1.7.13-SNAPSHOT</version>
 
     <name>Meldingsutveksling Integrasjonspunkt</name>
 
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>1.7.10-SNAPSHOT</version>
+        <version>1.7.13-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -392,7 +392,7 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>dokumentpakking</artifactId>
-            <version>1.7.10-SNAPSHOT</version>
+            <version>1.7.13-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -470,7 +470,6 @@
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
-            <version>2.3</version>
         </dependency>
 
         <dependency>
@@ -509,13 +508,11 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpkix-jdk15on</artifactId>
-            <version>1.50</version>
         </dependency>
 
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.50</version>
         </dependency>
 
         <dependency>
