@@ -5,7 +5,7 @@ siteUrlText: http://difi.github.io/move-integrasjonspunkt/
 # current version of the software
 version: Staging
 # url of the download button
-downloadUrl: https://beta-meldingsutveksling.difi.no/service/local/artifact/maven/redirect?r=systest&g=no.difi.meldingsutveksling&a=integrasjonspunkt&v=LATEST
+downloadUrl: https://beta-meldingsutveksling.difi.no/service/local/artifact/maven/redirect?r=staging&g=no.difi.meldingsutveksling&a=integrasjonspunkt&v=LATEST
 
 # licence of the software
 license: GPL-3 License
