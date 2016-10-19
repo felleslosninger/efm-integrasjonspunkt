@@ -36,7 +36,7 @@ public class ReceiptPolling {
         messageReceiptRepository.save(MessageReceipt.of("bb8323b9-1023-4046-b620-63c4f9120b63", ServiceIdentifier.DPV));
     }
 
-    @Scheduled(fixedRate = 30000)
+    @Scheduled(fixedRate = 60000)
     public void checkReceiptStatus() {
         if (!props.getFeature().isEnableReceipts()) {
             return;
@@ -50,8 +50,9 @@ public class ReceiptPolling {
             if (strategy.checkReceived(r)) {
                 Audit.info("Changed status to \"received\" for messageId="+r.getMessageId(), markerFrom(r));
                 r.setReceived(true);
-                messageReceiptRepository.save(r);
             }
+            // Save regardless due to possible change to lastUpdate
+            messageReceiptRepository.save(r);
         });
 
     }
