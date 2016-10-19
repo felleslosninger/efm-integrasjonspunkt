@@ -6,6 +6,13 @@ description: En liten oppstart for å komme i gang.
 isHome: false
 ---
 
+### Krav til kjøremiljø 
+
++ Java 8 med JCE installert
++ 3x tilgjengelig minne i forhold til størte meldinger ønsket sendt
++ Nødvendige brannmursåpninger
++ BestEdu ekspederingskanal skrudd på i sak-/arkivsystem
+
 
 ### Installere Java runtime environment (JRE)
 
@@ -16,7 +23,7 @@ For å verifisere om java er installert og hvilken versjon kan du i et komandoli
 java -version
 ```
 
-Meldingsformidlingsapplikasjonen krever minimum versjon 1.7.0
+Meldingsformidlingsapplikasjonen krever minimum versjon 1.8.0
 
 Dersom Java ikke er installert eller versjonen er for gammel, kan ny versjon lastes ned [her](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) og installeres.
 
@@ -24,6 +31,7 @@ Dersom Java ikke er installert eller versjonen er for gammel, kan ny versjon las
 Bruker du ny versjon av Java, må ny JCE installeres. Last ned JCE fra [Oracles sider](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html).
 
 Det er ikke noen enkel måte å sjekke om Java Cryptography Extension er installert. Ofte kan det enkleste være å bare laste ned og installere JCE, men om du ønsker å sjekke, kan du gå til mappen ```$JAVA_HOME/jre/lib/security``` og sjekke om filene ```US_export_policy.jar``` og ```local_policy.jar``` har nyere dato enn øvrige filer. Hvis datoen er lik, må du installere JCE.
+Dersom JCE mangler vil integrasjonspunket stoppe under oppstart og skrive logmelding om manglende JCE.
 
 ### Opprette en bruker til Altinn formidlingstjeneste
 
@@ -43,121 +51,80 @@ Sertifikatet kan lastes opp til [virksomhetssertifikatserveren](https://beta-mel
 
 ### Brannmursåpninger
 
-+ beta-meldingsutveksling.difi.no
-+ test.smp.difi.no
-+
++ 93.94.10.249:443
++ 93.94.10.18:8300
 
-### Deploy Manager
 
-Deploy Manager er en applikasjon som installeres lokalt for å holde integrasjonspunktet oppdatert. 
+### Oppsett
 
-Deploy Manageren holder underordnede applikasjoner oppdatert ved å sjekke om ny versjon er tilgjengelig, laste ned og restarte applikasjoner. 
+Start med å opprette en mappe med navn integrajsonspunkt på c:\ 
 
-**Oppsett**
-
-Start med å opprette en mappe med navn deploymanager på c:\ 
-
-Last deretter ned Deploymanager fra artifactory (se link i top av dokument) og legg den i overnevnte mappe
-
-Når DeployManager starter, vil den lete lokalt etter filen `data/monitorApps.json`. monitorApps.json inneholder informasjon om hvilke applikasjoner som skal vedlikeholdes av Deployment Manager. 
-
-For å legge til applikasjoner som skal vedlikeholdes, må de legges manuelt inn i monitorApps.json. Applikasjoner legges til som vist under. 
-
-```json
-{"artifacts": [
-    {
-      "name": "Name of application",
-      "groupId": "my.app.group.id",
-      "artifactId": "my.app.artifact.id",
-      "activeVersion": "activeVersion",
-      "artifactType": "JAR",
-      "filename": "filename.jar",
-      "vmOptions": "-Xms=512m -Xmx=512m",
-      "environmentVariables": "-Dspring.profiles.active=staging",
-      "mainClass": "my.application.start.Application"
-    }]
-}
-```
-
-Eksempel, med en del preutfylte verdier, for integrajsonspunktet finner du [her](../resources/monitorApps.json).
-Filen navngis som monitorApps.json og legges under \data
+Last deretter ned integrasjonspunktet fra artifactory (se link i top av dokument) og legg den i overnevnte mappe
+Opprett filen integrasjonspunkt-local.properties på området
 
 ### integrasjonspunkt-local.properties
 
 Følgende verdier settest i integrasjonspunkt-local.properties
 
-**Propertie**              	|**Beskrivelse**														|**Eksempel**
-----------------------------|-----------------------------------------------------------------------|-----------------
-noarksystem.endpointURL 	| URL integrasjonspunktet finner sak-/arkivsystemets BestEdu tjenester 	| 
-noarksystem.type        	| Sak/-arkivsystem type 												|P360/Acos/ePhorte																	
-noarksystem.username\*   	|brukernavn for autentisering mot sakarkivsystem						|svc_sakark
-noarksystem.password\*   	|passord for autentisering mot sakarkivsystem							|
-noarksystem.domain\*     	|domene sakarkivsystemet kjører på										|
-							|																		|
-adresseregister.endPointURL	|url til adresseregister												|
-orgnumber               	| Organisasjonsnummer til din organisasjon (9 siffer)					|123456789
-server.port					| Portnummer integrasjonspunktet skal kjøre på (default 9093) 			| 9093		  
-keystorelocation 			| path til .jks fil 													|
-privatekeypassword      	| Passord til keystore 													|
-privatekeyalias  			| alieas til virksomhetssertifikatet som brukes i  integrasjonspunktet 	| 
-							|																		|
-altinn.username         	|brukernavnet du fikk når du opprettet AltInn systembruker				|
-altinn.password         	|passord du satte når du opprettet AltInn systembruker					|
-msh.endpointURL\*\*			|url til msh															|
+**Propertie**              			|**Beskrivelse**														|**Eksempel**
+------------------------------------|-----------------------------------------------------------------------|-----------------
+difi.move.org.number               	|Organisasjonsnummer til din organisasjon (9 siffer)					|123456789
+server.port							|Portnummer integrasjonspunktet skal kjøre på (default 9093) 			| 9093		  
+									|																		|
+difi.move.noarkSystem.endpointURL 	|URL integrasjonspunktet finner sak-/arkivsystemets BestEdu tjenester 	| 
+difi.move.noarkSystem.type        	|Sak/-arkivsystem type 													|P360/Acos/ePhorte																	
+difi.move.noarkSystem.username\*   	|Brukernavn for autentisering mot sakarkivsystem						|svc_sakark
+difi.move.noarkSystem.password\*   	|Passord for autentisering mot sakarkivsystem							|
+difi.move.noarkSystem.domain\*     	|Domene sakarkivsystemet kjører på										|
+									|																		|
+difi.move.msh.endpointURL\*\*		|Path til MSH 															|
+									|																		|
+difi.move.org.keystore.path			|Path til .jks fil	 													|
+difi.move.org.keystore.password    	|Passord til keystore 													|
+difi.move.org.keystore.alias		|Alieas til virksomhetssertifikatet som brukes i integrasjonspunktet 	| 
+									|																		|
+difi.move.altinn.username         	|Brukernavnet du fikk når du opprettet AltInn systembruker				|
+difi.move.altinn.password         	|Passord du satte når du opprettet AltInn systembruker					|
+
+
 
 \* Autentisering mot sakarkivsystem benyttes av P360
+
 \*\* Denne brukes bare dersom du allerede har BestEdu og ønsker å sende filer via gammel MSH til deltakere som ikke er en del av piloten. Integrasjonspunktet vil da opptre som en proxy.
 
 Last ned eksempel for [P360](../resources/integrasjonspunkt-local.properties_360), Acos, [ephorte](../resources/integrasjonspunkt-local.properties_ephorte)
-Lagre filen på området c:\deploymanager og endre navnet til integrasjonspunkt-local.properties
+Lagre filen på området c:\integrajsonspunkt og endre navnet til integrasjonspunkt-local.properties
 
 
 Når du er ferdig skal strukturen på området se slik ut:
 
 ```
 c:/
-|-- deploymanager/
+|-- integrasjonspunkt/
 	|-- integrasjonspunkt-local.properties
-	|-- deploy-manager-x.x.xx--xxx.jar
-	|-- data
-		|-- monitorApps.json
 ```
 
-
-
-### Start DeployManager
-Deploy Manager startes fra kommandolinjen med kommandoen 
-
-```
-java -jar -Dapplication.runtime.environment=staging  deploy-manager[versjon].jar
-
-Fra versjon 1.0.1
-java -jar -Dspring.profiles.active=staging  deploy-manager[versjon].jar
-```
-
-Etter at Deploy Manageren er startet, vil den hente siste versjon av Integrasjonspunktet og starte det. Dette kan ta et par minutter.
-
-Når Integrasjonspunktet er klart, kan du åpne en nettleser og taste ```http://localhost:9000/api/running```. 
-Da vil du få en oversikt over applikasjoner som Deploy Manager kjører. 
-
-```http://localhost:<port-til-integrasjonspunkt>/noarkExchange?wsdl``` gir response i form av en wsdl når Integrasjonspunktet har startet.
 
 ### Konfigurere sak-/arkivsystem til å bruke Integrsjonspunktet
 
 Oppsett for Acos, ePhorte, [P360](../resources/Oppsett360.docx)
 
-### Sentral kontroll på integrasjonspunkt
-Sentral overvåking innebærer at status samt en del statistikk sendes sentralt. Man vil tidligere få melding om feil, og man kan i enkelte tilfeller rette feilen før den påvirker produksjonen (før en feilet melding blir savnet).
 
-**Parametre for aktivering av sentral overvåking**
+### Start Integrasjonspunktet
+Integrasjonspunktet startes fra kommandolinjen med kommandoen (Kjør som admindistrator)
 
-+ spring.boot.admin.url
-+ spring.boot.admin.client.name
-+ spring.boot.admin.autoDeregistration
-+ spring.boot.admin.client.serviceUrl
+```
+java -jar -Dspring.profiles.active=staging  integrasjonspunktet[versjon].jar
+```
 
-### Kjøre integrasjonspunktet
-Når DeployMangager er startet vil denne automatisk laste ned og starte siste versjon av integrasjonspunktet.
+
+kommandoen
+```
+http://localhost:<port-til-integrasjonspunkt>/noarkExchange?wsdl
+``` 
+
+gir response i form av en wsdl når Integrasjonspunktet har startet.
+
 
 
 
