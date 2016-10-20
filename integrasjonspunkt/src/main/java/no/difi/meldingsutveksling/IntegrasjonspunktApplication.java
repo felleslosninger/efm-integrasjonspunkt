@@ -36,7 +36,7 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
                 return;
             }
 
-            SpringApplication.run(IntegrasjonspunktApplication.class, args).close();
+            SpringApplication.run(IntegrasjonspunktApplication.class, args);
         } catch (SecurityException se) {
             logMissingJCE(se);
         }
