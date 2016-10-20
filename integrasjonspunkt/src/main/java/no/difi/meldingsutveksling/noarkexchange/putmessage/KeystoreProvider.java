@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.KeyStore;
@@ -11,7 +12,7 @@ import no.difi.meldingsutveksling.ptp.MeldingsformidlerException;
 
 public class KeystoreProvider {
 
-    private static String location;
+    private static File location;
     private static String password;
     private final KeyStore keystore;
 
@@ -19,14 +20,14 @@ public class KeystoreProvider {
         this.keystore = keyStore;
     }
 
-    public static KeystoreProvider from(IntegrasjonspunktProperties properties) throws MeldingsformidlerException {
-        location = properties.getDpi().getKeystore().getPath();
+    public static KeystoreProvider from(IntegrasjonspunktProperties properties) throws MeldingsformidlerException, IOException {
+        location = properties.getDpi().getKeystore().getPath().getFile();
         password = properties.getDpi().getKeystore().getPassword();
         final KeyStore keyStore = loadKeyStore(location, password.toCharArray());
         return new KeystoreProvider(keyStore);
     }
 
-    private static KeyStore loadKeyStore(String filename, char[] password) throws MeldingsformidlerException {
+    private static KeyStore loadKeyStore(File filename, char[] password) throws MeldingsformidlerException {
         KeyStore keystore = null;
         try {
             keystore = KeyStore.getInstance(KeyStore.getDefaultType());
