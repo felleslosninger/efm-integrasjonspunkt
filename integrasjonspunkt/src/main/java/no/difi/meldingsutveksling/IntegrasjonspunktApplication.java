@@ -10,7 +10,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.solr.SolrAutoConfiguration;
 import org.springframework.boot.context.embedded.ServletRegistrationBean;
 import org.springframework.boot.context.web.SpringBootServletInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication(exclude = {SolrAutoConfiguration.class})
@@ -36,11 +35,11 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
                 logMissingJCE();
                 return;
             }
+
+            SpringApplication.run(IntegrasjonspunktApplication.class, args).close();
         } catch (SecurityException se) {
             logMissingJCE(se);
         }
-        try (ConfigurableApplicationContext context = SpringApplication.run(IntegrasjonspunktApplication.class, args)) {
-        };
     }
 
     private static void logMissingJCE(Exception e) {
