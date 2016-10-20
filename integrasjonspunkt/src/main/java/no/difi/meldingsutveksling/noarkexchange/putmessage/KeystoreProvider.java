@@ -20,8 +20,12 @@ public class KeystoreProvider {
         this.keystore = keyStore;
     }
 
-    public static KeystoreProvider from(IntegrasjonspunktProperties properties) throws MeldingsformidlerException, IOException {
-        location = properties.getDpi().getKeystore().getPath().getFile();
+    public static KeystoreProvider from(IntegrasjonspunktProperties properties) throws MeldingsformidlerException {
+        try {
+            location = properties.getDpi().getKeystore().getPath().getFile();
+        } catch (IOException e) {
+            throw new MeldingsformidlerException("Could not open keystore file", e);
+        }
         password = properties.getDpi().getKeystore().getPassword();
         final KeyStore keyStore = loadKeyStore(location, password.toCharArray());
         return new KeystoreProvider(keyStore);
