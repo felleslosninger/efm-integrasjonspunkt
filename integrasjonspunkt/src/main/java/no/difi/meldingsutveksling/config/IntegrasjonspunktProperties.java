@@ -1,11 +1,10 @@
 package no.difi.meldingsutveksling.config;
 
-import no.difi.meldingsutveksling.AltinnFormidlingsTjenestenConfig;
-import java.net.URL;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import lombok.Data;
+import no.difi.meldingsutveksling.AltinnFormidlingsTjenestenConfig;
 import no.difi.meldingsutveksling.ptp.DigitalPostInnbyggerConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
@@ -46,7 +45,15 @@ public class IntegrasjonspunktProperties {
     /**
      * Feature toggles.
      */
+    @Valid
     private FeatureToggle feature;
+
+    public FeatureToggle getFeature() {
+        if (this.feature == null) {
+            this.feature = new FeatureToggle();
+        }
+        return this.feature;
+    }
 
     @Data
     public static class Organization {
@@ -65,7 +72,6 @@ public class IntegrasjonspunktProperties {
         @NotNull(message = "Certificate properties not set.")
         private Keystore keystore;
     }
-
 
     @Data
     public static class PostVirksomheter {
