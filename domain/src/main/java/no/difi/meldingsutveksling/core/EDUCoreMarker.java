@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.core;
 
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.logging.MarkerFactory;
+import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 
 public class EDUCoreMarker {
 
@@ -18,7 +19,7 @@ public class EDUCoreMarker {
         final LogstashMarker idMarker = MarkerFactory.conversationIdMarker(message.getId());
         final LogstashMarker markers = idMarker.and(receiverMarker).and(senderMarker).and(messageTypeMarker);
 
-        if(message.hasPayload() && (message.getMessageType() != EDUCore.MessageType.APPRECEIPT)) {
+        if((message.getPayload() instanceof MeldingType) && message.hasPayload() && (message.getMessageType() != EDUCore.MessageType.APPRECEIPT)) {
             return MarkerFactory.journalPostIdMarker(message.getPayloadAsMeldingType().getJournpost().getJpId()).and(markers);
         }
         return markers;
