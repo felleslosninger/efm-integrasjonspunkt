@@ -7,6 +7,7 @@ package no.difi.meldingsutveksling.ptp;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import org.springframework.core.io.Resource;
 
 /**
  *
@@ -14,11 +15,25 @@ import javax.validation.constraints.NotNull;
  */
 public class DigitalPostInnbyggerConfig {
 
-    @NotNull
     private String endpoint;
 
     @Valid
     private Keystore keystore;
+
+    /**
+     * ID for queue messages are sent to and their corresponding receipts can be retrieved from.
+     * This is to avoid reading receipts from other applications that use the same service
+     */
+    @NotNull
+    private String mpcId;
+
+    public String getMpcId() {
+        return mpcId;
+    }
+
+    public void setMpcId(String mpcId) {
+        this.mpcId = mpcId;
+    }
 
     public String getEndpoint() {
         return endpoint;
@@ -48,7 +63,7 @@ public class DigitalPostInnbyggerConfig {
          */
 
         @NotNull
-        private String path;
+        private Resource path;
         /**
          * Password of keystore and entry.
          */
@@ -63,11 +78,11 @@ public class DigitalPostInnbyggerConfig {
             this.alias = alias;
         }
 
-        public String getPath() {
+        public Resource getPath() {
             return path;
         }
 
-        public void setPath(String path) {
+        public void setPath(Resource path) {
             this.path = path;
         }
 

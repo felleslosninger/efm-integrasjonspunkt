@@ -68,10 +68,4 @@ public interface MeldingsformidlerRequest {
      */
     String getSpraakKode();
 
-    /**
-     * Optional?
-     * @return
-     */
-    String getQueueId();
-
 }

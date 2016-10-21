@@ -14,6 +14,7 @@ import no.difi.meldingsutveksling.receipt.ReceiptStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +25,9 @@ public class DpvReceiptStrategy implements ReceiptStrategy {
 
     @Autowired
     private IntegrasjonspunktProperties properties;
+
+    private static final String STATUS_CREATED = "Created";
+    private static final String STATUS_READ = "Read";
 
     @Override
     public boolean checkReceived(MessageReceipt receipt) {
@@ -48,7 +52,25 @@ public class DpvReceiptStrategy implements ReceiptStrategy {
         Optional<StatusV2> op = statusList.stream().findFirst();
         if (op.isPresent()) {
             List<StatusChangeV2> statusChanges = op.get().getStatusChanges().getValue().getStatusChangeV2();
-            return statusChanges.stream().map(s -> s.getStatusType().value()).anyMatch(s -> "Read".equals(s));
+
+            Optional<StatusChangeV2> readStatus = statusChanges.stream()
+                    .filter(s -> STATUS_READ.equals(s.getStatusType().value()))
+                    .findFirst();
+            if (readStatus.isPresent()) {
+                ZonedDateTime readZoned = readStatus.get().getStatusDate().toGregorianCalendar().toZonedDateTime();
+                receipt.setLastUpdate(readZoned.toLocalDateTime());
+                return true;
+            }
+
+            // If no "Read"-status yet, update with "Created" status date
+            Optional<StatusChangeV2> createdStatus = statusChanges.stream()
+                    .filter(s -> STATUS_CREATED.equals(s.getStatusType().value()))
+                    .findFirst();
+            if (createdStatus.isPresent()) {
+                ZonedDateTime createdZoned = createdStatus.get().getStatusDate().toGregorianCalendar().toZonedDateTime();
+                receipt.setLastUpdate(createdZoned.toLocalDateTime());
+                return false;
+            }
         }
 
         return false;

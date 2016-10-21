@@ -26,6 +26,7 @@ import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory
 
 public class PostInnbyggerMessageStrategy implements MessageStrategy {
 
+    public static final String MPC_ID = "no.difi.move-integrasjonspunkt";
     private final ServiceRegistryLookup serviceRegistry;
     private MeldingsformidlerClient.Config config;
 
@@ -46,6 +47,9 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
             Audit.error("Failed to send message to DPI", markerFrom(request), e);
             return createErrorResponse(StatusMessage.UNABLE_TO_SEND_DPI);
         }
+
+        final MeldingsformidlerClient.Kvittering kvittering = client.sjekkEtterKvittering(request.getSender().getOrgNr());
+        kvittering.executeCallback(); // TODO: få denne inn i kjernekvitteringhåndtering
         return createOkResponse();
     }
 
@@ -113,11 +117,6 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
         @Override
         public String getSpraakKode() {
             return NORSK_BOKMAAL; /* TODO: hvor hentes denne fra? EduCore? */
-        }
-
-        @Override
-        public String getQueueId() {
-            return "queueId"; /* TODO: hva skal denne egentlig settes til? */
         }
 
     }

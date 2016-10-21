@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.core.EDUCore;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.time.LocalDateTime;
 
 /**
  * Used for storing and tracking receipt information.
@@ -15,6 +16,7 @@ public class MessageReceipt {
 
     @Id
     private String messageId;
+    private LocalDateTime lastUpdate;
     private ServiceIdentifier targetType;
     private boolean received;
 
@@ -22,6 +24,7 @@ public class MessageReceipt {
 
     private MessageReceipt(String id, ServiceIdentifier type) {
         this.messageId = id;
+        this.lastUpdate = LocalDateTime.now();
         this.targetType = type;
         this.received = false;
     }
@@ -43,6 +46,14 @@ public class MessageReceipt {
 
     public void setMessageId(String messageId) {
         this.messageId = messageId;
+    }
+
+    public LocalDateTime getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(LocalDateTime lastUpdate) {
+        this.lastUpdate = lastUpdate;
     }
 
     public ServiceIdentifier getTargetType() {

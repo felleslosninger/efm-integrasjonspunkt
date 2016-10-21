@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
+   <suppress>
+      <notes><![CDATA[
+      file name: javax.mail-1.5.6.jar
+      ]]></notes>
+      <sha1>ab5daef2f881c42c8e280cbe918ec4d7fdfd7efe</sha1>
+      <cve>CVE-2007-6059</cve>
+   </suppress>
+   <suppress>
+   <notes><![CDATA[
+   file name: mailapi-1.5.4.jar
+   ]]></notes>
+   <sha1>8d293f132fd127ac176801f49f2c0ff3166d3c4d</sha1>
+   <cve>CVE-2007-6059</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: ehcache-2.10.2.2.21.jar\rest-management-private-classpath/META-INF/maven/com.fasterxml.jackson.core/jackson-annotations/pom.xml
+   ]]></notes>
+   <sha1>bf2a064aec0f86ef110ded6b11147350cfef0bb7</sha1>
+   <cve>CVE-2016-3720</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: ehcache-2.10.2.2.21.jar\rest-management-private-classpath/META-INF/maven/com.fasterxml.jackson.core/jackson-core/pom.xml
+   ]]></notes>
+   <sha1>fc05676963f49f5c338cdc115b4ff74dfe041c4f</sha1>
+   <cve>CVE-2016-3720</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: activemq-protobuf-1.1.jar
+   ]]></notes>
+   <sha1>26682eb801f70563511f7c424dc10e8b3e66340e</sha1>
+   <cpe>cpe:/a:apache:activemq:1.1</cpe>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: activemq-protobuf-1.1.jar
+   ]]></notes>
+   <sha1>26682eb801f70563511f7c424dc10e8b3e66340e</sha1>
+   <cve>CVE-2016-3088</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: activemq-protobuf-1.1.jar
+   ]]></notes>
+   <sha1>26682eb801f70563511f7c424dc10e8b3e66340e</sha1>
+   <cve>CVE-2014-3576</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: activemq-protobuf-1.1.jar
+   ]]></notes>
+   <sha1>26682eb801f70563511f7c424dc10e8b3e66340e</sha1>
+   <cve>CVE-2013-3060</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: activemq-protobuf-1.1.jar
+   ]]></notes>
+   <sha1>26682eb801f70563511f7c424dc10e8b3e66340e</sha1>
+   <cve>CVE-2013-1880</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: activemq-protobuf-1.1.jar
+   ]]></notes>
+   <sha1>26682eb801f70563511f7c424dc10e8b3e66340e</sha1>
+   <cve>CVE-2013-1879</cve>
+</suppress><suppress>
+   <notes><![CDATA[
+   file name: activemq-protobuf-1.1.jar
+   ]]></notes>
+   <sha1>26682eb801f70563511f7c424dc10e8b3e66340e</sha1>
+   <cve>CVE-2012-6551</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: activemq-protobuf-1.1.jar
+   ]]></notes>
+   <sha1>26682eb801f70563511f7c424dc10e8b3e66340e</sha1>
+   <cve>CVE-2012-6092</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: activemq-protobuf-1.1.jar
+   ]]></notes>
+   <sha1>26682eb801f70563511f7c424dc10e8b3e66340e</sha1>
+   <cve>CVE-2012-5784</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: activemq-protobuf-1.1.jar
+   ]]></notes>
+   <sha1>26682eb801f70563511f7c424dc10e8b3e66340e</sha1>
+   <cve>CVE-2011-4905</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: activemq-protobuf-1.1.jar
+   ]]></notes>
+   <sha1>26682eb801f70563511f7c424dc10e8b3e66340e</sha1>
+   <cve>CVE-2010-1244</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: activemq-protobuf-1.1.jar
+   ]]></notes>
+   <sha1>26682eb801f70563511f7c424dc10e8b3e66340e</sha1>
+   <cve>CVE-2010-0684</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: apache-mime4j-core-0.7.2.jar
+   ]]></notes>
+   <sha1>a81264fe0265ebe8fd1d8128aad06dc320de6eef</sha1>
+   <cpe>cpe:/a:apache:james:0.7.2</cpe>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: apache-mime4j-core-0.7.2.jar
+   ]]></notes>
+   <sha1>a81264fe0265ebe8fd1d8128aad06dc320de6eef</sha1>
+   <cpe>cpe:/a:jcore:jcore:0.7.2</cpe>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: apache-mime4j-core-0.7.2.jar
+   ]]></notes>
+   <sha1>a81264fe0265ebe8fd1d8128aad06dc320de6eef</sha1>
+   <cve>CVE-2012-4232</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: apache-mime4j-core-0.7.2.jar
+   ]]></notes>
+   <sha1>a81264fe0265ebe8fd1d8128aad06dc320de6eef</sha1>
+   <cve>CVE-2012-4231</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: xbean-spring-3.14.jar
+   ]]></notes>
+   <sha1>862b3b74fad10eaa3742a565bb82f6658ffaadf0</sha1>
+   <cpe>cpe:/a:apache:geronimo:3.14</cpe>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: xbean-spring-3.14.jar
+   ]]></notes>
+   <sha1>862b3b74fad10eaa3742a565bb82f6658ffaadf0</sha1>
+   <cve>CVE-2008-0732</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: jackson-core-asl-1.9.2.jar
+   ]]></notes>
+   <sha1>8493982bba1727106d767034bd0d8e77bc1931a9</sha1>
+   <cve>CVE-2016-3720</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: ha-api-3.1.9.jar
+   ]]></notes>
+   <sha1>c68b600634d4d4bae3fc54575ae850e734dc1af5</sha1>
+   <cpe>cpe:/a:oracle:glassfish:3.1.9</cpe>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: ha-api-3.1.9.jar
+   ]]></notes>
+   <sha1>c68b600634d4d4bae3fc54575ae850e734dc1af5</sha1>
+   <cve>CVE-2015-2808</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: ha-api-3.1.9.jar
+   ]]></notes>
+   <sha1>c68b600634d4d4bae3fc54575ae850e734dc1af5</sha1>
+   <cve>CVE-2013-2566</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: spring-boot-starter-data-jpa-1.4.1.RELEASE.jar
+   ]]></notes>
+   <sha1>cae0497ceff725efd0438f070c8c0ca0ef3a7128</sha1>
+   <cpe>cpe:/a:pivotal_software:spring_data_jpa:1.4.1</cpe>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: spring-boot-starter-data-jpa-1.4.1.RELEASE.jar
+   ]]></notes>
+   <sha1>cae0497ceff725efd0438f070c8c0ca0ef3a7128</sha1>
+   <cve>CVE-2016-6652</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: apache-el-8.0.33.jar
+   ]]></notes>
+   <sha1>1b8fa2179b3937cada939317bb135815e79c0ac2</sha1>
+   <cve>CVE-2016-6325</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: apache-el-8.0.33.jar
+   ]]></notes>
+   <sha1>1b8fa2179b3937cada939317bb135815e79c0ac2</sha1>
+   <cve>CVE-2016-5388</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: apache-el-8.0.33.jar
+   ]]></notes>
+   <sha1>1b8fa2179b3937cada939317bb135815e79c0ac2</sha1>
+   <cve>CVE-2016-3092</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: apache-el-8.0.33.jar
+   ]]></notes>
+   <sha1>1b8fa2179b3937cada939317bb135815e79c0ac2</sha1>
+   <cve>CVE-2013-2185</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: apache-el-8.0.33.jar
+   ]]></notes>
+   <sha1>1b8fa2179b3937cada939317bb135815e79c0ac2</sha1>
+   <cve>CVE-2009-2696</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: apache-el-8.0.33.jar
+   ]]></notes>
+   <sha1>1b8fa2179b3937cada939317bb135815e79c0ac2</sha1>
+   <cve>CVE-2007-5461</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: apache-el-8.0.33.jar
+   ]]></notes>
+   <sha1>1b8fa2179b3937cada939317bb135815e79c0ac2</sha1>
+   <cve>CVE-2002-0493</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: apache-el-8.0.33.jar
+   ]]></notes>
+   <sha1>1b8fa2179b3937cada939317bb135815e79c0ac2</sha1>
+   <cpe>cpe:/a:apache:tomcat:8.0.33</cpe>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: apache-el-8.0.33.jar
+   ]]></notes>
+   <sha1>1b8fa2179b3937cada939317bb135815e79c0ac2</sha1>
+   <cpe>cpe:/a:apache_tomcat:apache_tomcat:8.0.33</cpe>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: apache-el-8.0.33.jar
+   ]]></notes>
+   <sha1>1b8fa2179b3937cada939317bb135815e79c0ac2</sha1>
+   <cpe>cpe:/a:jasper_project:jasper:8.0.33</cpe>
+</suppress>
+</suppressions>
