@@ -7,6 +7,7 @@ package no.difi.meldingsutveksling.ptp;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import org.springframework.core.io.Resource;
 
 /**
  *
@@ -14,7 +15,6 @@ import javax.validation.constraints.NotNull;
  */
 public class DigitalPostInnbyggerConfig {
 
-    @NotNull
     private String endpoint;
 
     @Valid
@@ -63,7 +63,7 @@ public class DigitalPostInnbyggerConfig {
          */
 
         @NotNull
-        private String path;
+        private Resource path;
         /**
          * Password of keystore and entry.
          */
@@ -78,11 +78,11 @@ public class DigitalPostInnbyggerConfig {
             this.alias = alias;
         }
 
-        public String getPath() {
+        public Resource getPath() {
             return path;
         }
 
-        public void setPath(String path) {
+        public void setPath(Resource path) {
             this.path = path;
         }
 
