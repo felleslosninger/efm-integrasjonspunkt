@@ -9,7 +9,7 @@ difi.move.org.number=
 ### Keystore
 difi.move.org.keystore.alias=
 difi.move.org.keystore.password=
-difi.move.org.keystore.path=
+difi.move.org.keystore.path=file:
 
 ## NOARK settings. Bytt <servernavn> med navnet på serveren din ePhorte installsjon kjører
 difi.move.noarkSystem.type=ePhorte
@@ -24,5 +24,8 @@ difi.move.altinn.password=
 
 ## Digital post innbygger (Settes kun dersom man bruker DPI via integrasjonspunktet. Fjern utkommentering (#))
 #difi.move.dpi.keystore.alias= 
-#difi.move.dpi.keystore.path= 
+#difi.move.dpi.keystore.path=file:
+#difi.move.dpi.keystore.password=  
 
+##Dersom du vil endre område log skrives til
+#logging.file=
