@@ -13,12 +13,13 @@ import java.io.UnsupportedEncodingException;
 
 public class EDUCoreConverter {
 
+    private static final String CHARSET_UTF8 = "UTF-8";
+
     private static final JAXBContext jaxbContext;
     static {
         try {
             jaxbContext = JAXBContext.newInstance(EDUCore.class);
         } catch (JAXBException e) {
-//            throw new RuntimeException("Could not create JAXBContext for " + EDUCore.class, e);
             throw new RuntimeException(e);
         }
     }
@@ -40,11 +41,9 @@ public class EDUCoreConverter {
         try {
             Marshaller marshaller = jaxbContext.createMarshaller();
             marshaller.marshal(new JAXBElement<>(new QName("uri", "local"), EDUCore.class, message), os);
-            message.setPayload(payloadConverter.unmarshallFrom(payloadAsString.getBytes("UTF-8")));
+            message.setPayload(payloadConverter.unmarshallFrom(payloadAsString.getBytes(CHARSET_UTF8)));
             return os.toByteArray();
-        } catch (JAXBException e) {
-            throw new RuntimeException("Unable to create marshaller for " + EDUCore.class, e);
-        } catch (UnsupportedEncodingException e) {
+        } catch (JAXBException | UnsupportedEncodingException e) {
             throw new RuntimeException("Unable to create marshaller for " + EDUCore.class, e);
         }
     }
@@ -59,15 +58,13 @@ public class EDUCoreConverter {
             PayloadConverter payloadConverter;
             if (eduCore.getMessageType() == EDUCore.MessageType.EDU) {
                 payloadConverter = new PayloadConverter<>(MeldingType.class);
-                eduCore.setPayload(payloadConverter.unmarshallFrom(((String)eduCore.getPayload()).getBytes("UTF-8")));
+                eduCore.setPayload(payloadConverter.unmarshallFrom(((String)eduCore.getPayload()).getBytes(CHARSET_UTF8)));
             } else {
                 payloadConverter = new PayloadConverter<>(AppReceiptType.class);
-                eduCore.setPayload(payloadConverter.unmarshallFrom(((String)eduCore.getPayload()).getBytes("UTF-8")));
+                eduCore.setPayload(payloadConverter.unmarshallFrom(((String)eduCore.getPayload()).getBytes(CHARSET_UTF8)));
             }
             return eduCore;
-        } catch (JAXBException e) {
-            throw new RuntimeException("Unable to create unmarshaller for " + EDUCore.class, e);
-        } catch (UnsupportedEncodingException e) {
+        } catch (JAXBException | UnsupportedEncodingException  e) {
             throw new RuntimeException("Unable to create unmarshaller for " + EDUCore.class, e);
         }
     }
