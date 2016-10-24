@@ -1,7 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Route, Link, hashHistory, IndexRoute  } from 'react-router';
-import { Accordion, 
+import { Col, 
+            PanelGroup,
+            Accordion, 
             Panel, 
             Label, 
             FormGroup, 
@@ -10,6 +12,7 @@ import { Accordion,
             ControlLabel,
             ButtonGroup,
             Button,
+            Checkbox,
             Input } from 'react-bootstrap';
 import $ from 'jquery';
 
@@ -96,18 +99,46 @@ class AllReceipts extends React.Component {
 
 
 class ReceiptList extends React.Component {
+
     constructor(props) {
         super(props);
         this.displayName = 'ReceiptList';
     }
+
+    padZero(val) {
+        if (val < 10) {
+            return `0${val}`
+        }
+        return val;
+    }
+
     render() {
         if (!this.props.receipts) return (<div></div>);
-        var receiptNodes = this.props.receipts.map((r, k) => {
-            if (!r.messageId.includes(this.props.filter)) return null;
+        var k= 0;
+        var receiptNodes = this.props.receipts.map((r) => {
+            if (!r.messageId.includes(this.props.filter) &&
+                !r.messageReference.includes(this.props.filter) &&
+                !r.messageTitle.includes(this.props.filter)) return null;
+            k++;
+            var monthVal = this.padZero(r.lastUpdate.monthValue);
+            var dayVal = this.padZero(r.lastUpdate.dayOfMonth);
+            var hourVal = this.padZero(r.lastUpdate.hour);
+            var minuteVal = this.padZero(r.lastUpdate.minute);
+            var secondVal = this.padZero(r.lastUpdate.second);
+            var lastUpdate = `${r.lastUpdate.year}.${monthVal}.${dayVal} ${hourVal}.${minuteVal}.${secondVal}`;
             return (
-                <Panel header={r.messageId} eventKey={k} key={k}>
+                <Panel header={r.messageId} eventKey={k} key={k} >
                     <Label>messageId</Label>
                     <p>{r.messageId}</p>
+                    <hr style={{margin: "5px"}}/>
+                    <Label>messageReference</Label>
+                    <p>{r.messageReference}</p>
+                    <hr style={{margin: "5px"}}/>
+                    <Label>messageTitle</Label>
+                    <p>{r.messageTitle}</p>
+                    <hr style={{margin: "5px"}}/>
+                    <Label>lastUpdate</Label>
+                    <p>{lastUpdate}</p>
                     <hr style={{margin: "5px"}}/>
                     <Label>serviceIdentifier</Label>
                     <p>{r.targetType}</p>
@@ -119,9 +150,9 @@ class ReceiptList extends React.Component {
         });
 
         return (
-            <Accordion>
+            <PanelGroup accordion defaultActiveKey={1}>
                 {receiptNodes}
-            </Accordion>
+            </PanelGroup>
         );
     }
 }
@@ -139,38 +170,40 @@ class SearchReceipts extends React.Component {
             <div>
                 <form>
                     <FormGroup>
-                        <InputGroup>
-                            <InputGroup.Addon>MessageId</InputGroup.Addon>
+                        <InputGroup bsSize="sm">
+                            <ControlLabel>MessageId</ControlLabel>
                             <FormControl type="text"></FormControl>
                         </InputGroup>
-                        <InputGroup>
-                            <InputGroup.Addon>Timestamp from</InputGroup.Addon>
+                        <InputGroup bsSize="sm">
+                            <ControlLabel>Timestamp from</ControlLabel>
                             <FormControl type="text"></FormControl>
                         </InputGroup>
-                        <InputGroup>
-                            <InputGroup.Addon>Timestamp to</InputGroup.Addon>
+                        <InputGroup bsSize="sm">
+                            <ControlLabel>Timestamp to</ControlLabel>
                             <FormControl type="text"></FormControl>
                         </InputGroup>
-                        <FormGroup controlId="formControlsSelect">
+                        <InputGroup bsSize="sm">
                             <ControlLabel>ServiceIdentifier</ControlLabel>
                             <FormControl componentClass="select" placeholder="DPO">
                                 <option value="DPO">DPO</option>
                                 <option value="DPV">DPV</option>
                                 <option value="DPI">DPI</option>
                             </FormControl>
-                        </FormGroup>
-                        <ButtonGroup title="foo">
+                        </InputGroup>
+                        <FormGroup>
                             <ControlLabel>Received</ControlLabel>
-                            <Button active>
-                                <Input ref="input1" type="radio" name="receivedRadio" value="input1" standalone defaultChecked />
-                            </Button>
-                            <Button active>
-                                <Input ref="input2" type="radio" name="receivedRadio" value="input2"/>
-                            </Button>
-                        </ButtonGroup>
+                            <br/>
+                            <Checkbox inline>
+                                true
+                            </Checkbox>
+                            <Checkbox inline>
+                                false
+                            </Checkbox>
+                        </FormGroup>
+                        <Button type="button">Search</Button>&nbsp;
+                        <Button type="reset">Reset</Button>
                     </FormGroup>
                 </form>
-                <SearchResultList/>
             </div>
         );
     }
@@ -185,16 +218,18 @@ class SearchResultList extends React.Component {
     render() {
         return (
             <div>
+            foo
             </div>
         );
     }
 }
 
 ReactDOM.render(
-    (<Router history = {hashHistory}>
-        <Route path="/" component={App}/>
-        <Route path="/all" component={AllReceipts}/>
-        <Route path="/search" component={SearchReceipts}/>
-    </Router>),
+    // (<Router history = {hashHistory}>
+    //     <Route path="/" component={App}/>
+    //     <Route path="/all" component={AllReceipts}/>
+    //     <Route path="/search" component={SearchReceipts}/>
+    // </Router>),
+    <AllReceipts/>,
     document.getElementById('react')
 );

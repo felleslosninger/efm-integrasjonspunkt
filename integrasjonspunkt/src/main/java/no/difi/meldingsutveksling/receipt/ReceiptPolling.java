@@ -31,8 +31,12 @@ public class ReceiptPolling {
     // TODO: fjernes etter test!
     @PostConstruct
     private void addTestData() {
-//        messageReceiptRepository.save(MessageReceipt.of("bb8323b9-1023-4046-b620-63c4f9120b62", ServiceIdentifier.EDU));
-//        messageReceiptRepository.save(MessageReceipt.of("bb8323b9-1023-4046-b620-63c4f9120b63", ServiceIdentifier.EDU));
+//        messageReceiptRepository.save(MessageReceipt.of("bb8323b9-1023-4046-b620-63c4f9120b62",
+//                "123", "foo", ServiceIdentifier.EDU));
+//        messageReceiptRepository.save(MessageReceipt.of("bb8323b9-1023-4046-b620-63c4f9120b63",
+//                "456", "bar", ServiceIdentifier.EDU));
+//        messageReceiptRepository.save(MessageReceipt.of("bb8323b9-1023-4046-b620-63c4f9120b64",
+//                "123456", "foobar", ServiceIdentifier.EDU));
     }
 
     @Scheduled(fixedRate = 60000)
