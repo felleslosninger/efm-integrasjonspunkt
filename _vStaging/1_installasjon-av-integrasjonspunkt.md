@@ -127,5 +127,7 @@ http://localhost:<port-til-integrasjonspunkt>/noarkExchange?wsdl
 gir response i form av en wsdl når Integrasjonspunktet har startet.
 
 
+Spørsmål rundt integrasjonspunktet installasjon eller forslag til forbedringer av installasjonsbeskrivelsen kan sendes til vår [supportmail](mailto:move@difi.no)
+
 
 
