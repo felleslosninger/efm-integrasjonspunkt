@@ -57,7 +57,8 @@ class AllReceipts extends React.Component {
         this.state = {
             receipts: '',
             filter: '',
-            filteredReceipts: ''
+            received: false,
+            all: true
         };
         this.handleFilter = this.handleFilter.bind(this);
     }
@@ -80,6 +81,14 @@ class AllReceipts extends React.Component {
         this.setState({filter: e.target.value});
     }
 
+    handleAll() {
+        this.setState({all: !this.state.all});
+    }
+
+    handleReceived() {
+        this.setState({received: !this.state.received});
+    }
+
     render() {
         return (
             <div>
@@ -89,9 +98,15 @@ class AllReceipts extends React.Component {
                             <InputGroup.Addon>Filter</InputGroup.Addon>
                             <FormControl type="text" value={this.state.filter} onChange={this.handleFilter}></FormControl>
                         </InputGroup>
+                        <Checkbox inline checked={this.state.all} value={this.state.all} onChange={() => this.handleAll()}>
+                            All
+                        </Checkbox>
+                        <Checkbox inline disabled={this.state.all} value={this.state.received} onChange={() => this.handleReceived()}>
+                            Received
+                        </Checkbox>
                     </FormGroup>
                 </form>
-                <ReceiptList receipts={this.state.receipts} filter={this.state.filter}/>
+                <ReceiptList receipts={this.state.receipts} filter={this.state.filter} received={this.state.received} all={this.state.all} />
             </div>
         );
     }
@@ -118,7 +133,12 @@ class ReceiptList extends React.Component {
         var receiptNodes = this.props.receipts.map((r) => {
             if (!r.messageId.includes(this.props.filter) &&
                 !r.messageReference.includes(this.props.filter) &&
-                !r.messageTitle.includes(this.props.filter)) return null;
+                !r.messageTitle.includes(this.props.filter)) {
+                return null;
+            } 
+            if (!this.props.all && r.received !== this.props.received) {
+                return null;
+            }
             k++;
             var monthVal = this.padZero(r.lastUpdate.monthValue);
             var dayVal = this.padZero(r.lastUpdate.dayOfMonth);
