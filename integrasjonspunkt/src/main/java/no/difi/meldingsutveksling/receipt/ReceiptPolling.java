@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.receipt;
 
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.logging.Audit;
 import org.slf4j.Logger;
@@ -29,11 +28,15 @@ public class ReceiptPolling {
     @Autowired
     private MessageReceiptRepository messageReceiptRepository;
 
+    // TODO: fjernes etter test!
     @PostConstruct
     private void addTestData() {
-        // TODO: fjernes etter test!
-        messageReceiptRepository.save(MessageReceipt.of("bb8323b9-1023-4046-b620-63c4f9120b62", ServiceIdentifier.DPV));
-        messageReceiptRepository.save(MessageReceipt.of("bb8323b9-1023-4046-b620-63c4f9120b63", ServiceIdentifier.DPV));
+//        messageReceiptRepository.save(MessageReceipt.of("bb8323b9-1023-4046-b620-63c4f9120b62",
+//                "123", "foo", ServiceIdentifier.EDU));
+//        messageReceiptRepository.save(MessageReceipt.of("bb8323b9-1023-4046-b620-63c4f9120b63",
+//                "456", "bar", ServiceIdentifier.EDU));
+//        messageReceiptRepository.save(MessageReceipt.of("bb8323b9-1023-4046-b620-63c4f9120b64",
+//                "123456", "foobar", ServiceIdentifier.EDU));
     }
 
     @Scheduled(fixedRate = 60000)

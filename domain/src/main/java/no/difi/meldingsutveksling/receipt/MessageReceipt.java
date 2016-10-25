@@ -16,28 +16,41 @@ public class MessageReceipt {
 
     @Id
     private String messageId;
+    private String messageReference;
+    private String messageTitle;
     private LocalDateTime lastUpdate;
     private ServiceIdentifier targetType;
     private boolean received;
 
     MessageReceipt(){}
 
-    private MessageReceipt(String id, ServiceIdentifier type) {
+    private MessageReceipt(String id, String msgRef, String msgTitle, ServiceIdentifier type) {
         this.messageId = id;
+        this.messageReference = msgRef;
+        this.messageTitle = msgTitle;
         this.lastUpdate = LocalDateTime.now();
         this.targetType = type;
         this.received = false;
     }
 
-    public static MessageReceipt of(String id, ServiceIdentifier type) {
-        return new MessageReceipt(id, type);
+    public static MessageReceipt of(String id, String msgRef, String msgTitle, ServiceIdentifier type) {
+        return new MessageReceipt(id, msgRef, msgTitle, type);
     }
 
     public static MessageReceipt of(EDUCore eduCore) {
         if (eduCore.getServiceIdentifier() == null) {
             throw new IllegalArgumentException("ServiceIdentifier not set on EDUCore.");
         }
-        return new MessageReceipt(eduCore.getId(), eduCore.getServiceIdentifier());
+
+        String msgTitle = "";
+        if (eduCore.getMessageType() == EDUCore.MessageType.EDU) {
+            msgTitle = eduCore.getPayloadAsMeldingType().getJournpost().getJpInnhold();
+        }
+
+        return new MessageReceipt(eduCore.getId(),
+                eduCore.getMessageReference(),
+                msgTitle,
+                eduCore.getServiceIdentifier());
     }
 
     public String getMessageId() {
@@ -46,6 +59,22 @@ public class MessageReceipt {
 
     public void setMessageId(String messageId) {
         this.messageId = messageId;
+    }
+
+    public String getMessageReference() {
+        return messageReference;
+    }
+
+    public void setMessageReference(String messageReference) {
+        this.messageReference = messageReference;
+    }
+
+    public String getMessageTitle() {
+        return messageTitle;
+    }
+
+    public void setMessageTitle(String messageTitle) {
+        this.messageTitle = messageTitle;
     }
 
     public LocalDateTime getLastUpdate() {
@@ -76,8 +105,11 @@ public class MessageReceipt {
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("messageId", messageId)
+                .add("messageReference", messageReference)
+                .add("messageTitle", messageTitle)
+                .add("lastUpdate", lastUpdate)
                 .add("targetType", targetType)
+                .add("received", received)
                 .toString();
     }
-
 }

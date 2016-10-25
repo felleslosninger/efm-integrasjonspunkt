@@ -47,9 +47,8 @@ public class EDUCore {
     @XmlEnum(Integer.class)
     public enum MessageType {
         @XmlEnumValue("1") EDU,
-        @XmlEnumValue("2") MXA,
-        @XmlEnumValue("3") APPRECEIPT,
-        @XmlEnumValue("4") UNKNOWN
+        @XmlEnumValue("2") APPRECEIPT,
+        @XmlEnumValue("3") UNKNOWN
     }
 
     public MessageType getMessageType() {
