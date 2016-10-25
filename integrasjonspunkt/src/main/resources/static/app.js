@@ -229,27 +229,7 @@ class SearchReceipts extends React.Component {
     }
 }
 
-class SearchResultList extends React.Component {
-
-    constructor(props) {
-        super(props);
-    }
-
-    render() {
-        return (
-            <div>
-            foo
-            </div>
-        );
-    }
-}
-
 ReactDOM.render(
-    // (<Router history = {hashHistory}>
-    //     <Route path="/" component={App}/>
-    //     <Route path="/all" component={AllReceipts}/>
-    //     <Route path="/search" component={SearchReceipts}/>
-    // </Router>),
     <AllReceipts/>,
     document.getElementById('react')
 );
