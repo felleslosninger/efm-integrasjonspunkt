@@ -3,12 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>dokumentpakking</artifactId>
-    <version>1.7.21-SNAPSHOT</version>
+    <version>1.7.22-SNAPSHOT</version>
 
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>1.7.21-SNAPSHOT</version>
+        <version>1.7.22-SNAPSHOT</version>
     </parent>
 
     <build>
