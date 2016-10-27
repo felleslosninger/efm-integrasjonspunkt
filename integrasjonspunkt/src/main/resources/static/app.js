@@ -133,7 +133,8 @@ class ReceiptList extends React.Component {
         var receiptNodes = this.props.receipts.map((r) => {
             if (!r.messageId.includes(this.props.filter) &&
                 !r.messageReference.includes(this.props.filter) &&
-                !r.messageTitle.includes(this.props.filter)) {
+                !r.messageTitle.includes(this.props.filter) &&
+                !r.receiverIdentifier.includes(this.props.filter)) {
                 return null;
             } 
             if (!this.props.all && r.received !== this.props.received) {
@@ -156,6 +157,9 @@ class ReceiptList extends React.Component {
                     <hr style={{margin: "5px"}}/>
                     <Label>messageTitle</Label>
                     <p>{r.messageTitle}</p>
+                    <hr style={{margin: "5px"}}/>
+                    <Label>receiverIdentifier</Label>
+                    <p>{r.receiverIdentifier}</p>
                     <hr style={{margin: "5px"}}/>
                     <Label>lastUpdate</Label>
                     <p>{lastUpdate}</p>
