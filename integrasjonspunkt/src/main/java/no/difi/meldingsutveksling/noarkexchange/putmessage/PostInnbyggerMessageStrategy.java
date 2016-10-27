@@ -48,13 +48,11 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
             return createErrorResponse(StatusMessage.UNABLE_TO_SEND_DPI);
         }
 
-        final MeldingsformidlerClient.Kvittering kvittering = client.sjekkEtterKvittering(request.getSender().getOrgNr());
-        kvittering.executeCallback(); // TODO: få denne inn i kjernekvitteringhåndtering
         return createOkResponse();
     }
 
     private static class EDUCoreMeldingsformidlerRequest implements MeldingsformidlerRequest {
-        public static final String NORSK_BOKMAAL = "1044";
+        public static final String NORSK_BOKMAAL = "NO";
         private final EDUCore request;
         private final ServiceRecord serviceRecord;
 
@@ -72,7 +70,7 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
 
         @Override
         public List<Document> getAttachements() {
-            return new ArrayList();
+            return new ArrayList<>();
         }
 
         @Override

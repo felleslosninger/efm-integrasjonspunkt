@@ -1,35 +1,33 @@
 package no.difi.meldingsutveksling.receipt;
 
+import net.logstash.logback.marker.LogstashMarker;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.KeystoreProvider;
 import no.difi.meldingsutveksling.receipt.strategy.DpiReceiptStrategy;
 import no.difi.meldingsutveksling.receipt.strategy.DpvReceiptStrategy;
 import no.difi.meldingsutveksling.receipt.strategy.EduReceiptStrategy;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
+import static no.difi.meldingsutveksling.receipt.MessageReceiptMarker.markerFrom;
+
 public class ReceiptStrategyFactory {
 
-    private static DpiReceiptStrategy dpiReceiptStrategy;
-    private static DpvReceiptStrategy dpvReceiptStrategy;
-    private static EduReceiptStrategy eduReceiptStrategy;
+    private IntegrasjonspunktProperties integrasjonspunktProperties;
+    private KeystoreProvider keystoreProvider;
 
-    @Autowired
-    ReceiptStrategyFactory(DpiReceiptStrategy dpiReceiptStrategy,
-                           DpvReceiptStrategy dpvReceiptStrategy,
-                           EduReceiptStrategy eduReceiptStrategy) {
-        this.dpiReceiptStrategy = dpiReceiptStrategy;
-        this.dpvReceiptStrategy = dpvReceiptStrategy;
-        this.eduReceiptStrategy = eduReceiptStrategy;
+    public ReceiptStrategyFactory(IntegrasjonspunktProperties integrasjonspunktProperties, KeystoreProvider keystoreProvider) {
+        this.integrasjonspunktProperties = integrasjonspunktProperties;
+        this.keystoreProvider = keystoreProvider;
     }
 
-    public static ReceiptStrategy getFactory(MessageReceipt receipt) {
+    public ReceiptStrategy getFactory(MessageReceipt receipt) {
         switch (receipt.getTargetType()) {
             case DPI:
-                return dpiReceiptStrategy;
+                return new DpiReceiptStrategy(integrasjonspunktProperties, keystoreProvider);
             case DPV:
-                return dpvReceiptStrategy;
+                final LogstashMarker markers = markerFrom(receipt);
+                return new DpvReceiptStrategy(integrasjonspunktProperties, receipt.getMessageId(), markers);
             case EDU:
-                return eduReceiptStrategy;
+                return new EduReceiptStrategy();
             default:
                 return null;
         }

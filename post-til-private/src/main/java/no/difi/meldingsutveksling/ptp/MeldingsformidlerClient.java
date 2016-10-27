@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.ptp;
 
+import no.difi.meldingsutveksling.receipt.ExternalReceipt;
+import no.difi.meldingsutveksling.receipt.MessageReceipt;
 import no.difi.sdp.client2.KlientKonfigurasjon;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.sdp.client2.domain.*;
@@ -11,8 +13,11 @@ import no.digipost.api.representations.Organisasjonsnummer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.persistence.Transient;
 import java.lang.invoke.MethodHandles;
 import java.security.KeyStore;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -101,15 +106,16 @@ public class MeldingsformidlerClient {
         public static Config from(DigitalPostInnbyggerConfig config, KeyStore keyStore) {
             final String url = config.getEndpoint();
             final String keystorePassword = config.getKeystore().getPassword();
-            final String keystoreAlias = config.getKeystore().getPassword();
+            final String keystoreAlias = config.getKeystore().getAlias();
             final String mpcId = config.getMpcId();
             return new Config(url, keyStore, keystoreAlias, keystorePassword, mpcId);
         }
 
     }
 
-    public class Kvittering {
-        private transient final ForretningsKvittering eksternKvittering;
+    public class Kvittering implements ExternalReceipt {
+        @Transient
+        private ForretningsKvittering eksternKvittering;
         private Consumer<ForretningsKvittering> callback;
 
         public Kvittering(ForretningsKvittering forretningsKvittering) {
@@ -123,6 +129,17 @@ public class MeldingsformidlerClient {
 
         public void executeCallback() {
             callback.accept(eksternKvittering);
+        }
+
+        @Override
+        public void update(MessageReceipt messageReceipt) {
+            messageReceipt.setLastUpdate(LocalDateTime.ofInstant(eksternKvittering.getTidspunkt(), ZoneId.systemDefault()));
+            messageReceipt.setReceived(true);
+        }
+
+        @Override
+        public void confirmReceipt() {
+            executeCallback();
         }
     }
 
