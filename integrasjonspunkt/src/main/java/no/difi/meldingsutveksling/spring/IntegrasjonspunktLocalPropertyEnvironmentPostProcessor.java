@@ -1,6 +1,8 @@
 package no.difi.meldingsutveksling.spring;
 
-
+import java.io.IOException;
+import java.util.Optional;
+import java.util.Properties;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
@@ -13,9 +15,6 @@ import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 
-import java.io.IOException;
-import java.util.Properties;
-
 /**
  *
  * @author kons-nlu
@@ -24,9 +23,13 @@ import java.util.Properties;
 public class IntegrasjonspunktLocalPropertyEnvironmentPostProcessor implements EnvironmentPostProcessor, ApplicationListener<ApplicationEnvironmentPreparedEvent> {
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(IntegrasjonspunktLocalPropertyEnvironmentPostProcessor.class);
-    
+
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
+        if (Optional.ofNullable(environment.getProperty("app.local.properties.enable", Boolean.class)).orElse(true).booleanValue() == false) {
+            log.info("Disable local properties file for test");
+            return;
+        }
         try {
             final FileSystemResource resource = new FileSystemResource("integrasjonspunkt-local.properties");
             Properties loadAllProperties = PropertiesLoaderUtils.loadProperties(resource);
@@ -41,5 +44,5 @@ public class IntegrasjonspunktLocalPropertyEnvironmentPostProcessor implements E
     public void onApplicationEvent(ApplicationEnvironmentPreparedEvent e) {
         this.postProcessEnvironment(e.getEnvironment(), e.getSpringApplication());
     }
-    
+
 }

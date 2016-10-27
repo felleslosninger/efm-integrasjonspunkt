@@ -136,8 +136,6 @@ public class CorrespondenceAgencyMessageFactory {
         switch (edu.getMessageType()) {
             case EDU:
                 return ZonedDateTime.now().plusMinutes(5);
-            case MXA:
-                return ZonedDateTime.now().plusYears(5);
             default:
                 return ZonedDateTime.now().plusMinutes(5);
         }

@@ -31,6 +31,7 @@ public class ReceiptPolling {
     ReceiptStrategyFactory receiptStrategyFactory;
 
     // TODO: fjernes etter test!
+    // TODO: fjernes etter test!
     @PostConstruct
     private void addTestData() {
 //        messageReceiptRepository.save(MessageReceipt.of("bb8323b9-1023-4046-b620-63c4f9120b62",
