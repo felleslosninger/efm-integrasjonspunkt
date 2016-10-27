@@ -6,7 +6,6 @@ public class CorrespondenceAgencyConfiguration {
     private String externalServiceCode;
     private String password;
     private String systemUserCode;
-    private String endpointUrl;
 
     private CorrespondenceAgencyConfiguration() {
     }
@@ -25,10 +24,6 @@ public class CorrespondenceAgencyConfiguration {
 
     public String getPassword() {
         return password;
-    }
-
-    public String getEndpointUrl() {
-        return endpointUrl;
     }
 
     public static class Builder {
@@ -56,11 +51,6 @@ public class CorrespondenceAgencyConfiguration {
 
         public Builder withPassword(String password) {
             correspondenceAgencyConfiguration.password = password;
-            return this;
-        }
-
-        public Builder withEndpointURL(String url) {
-            correspondenceAgencyConfiguration.endpointUrl = url;
             return this;
         }
 
