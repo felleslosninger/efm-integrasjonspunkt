@@ -60,10 +60,6 @@ public class MessageReceipt {
         return targetType;
     }
 
-    public void setTargetType(ServiceIdentifier targetType) {
-        this.targetType = targetType;
-    }
-
     public boolean isReceived() {
         return received;
     }

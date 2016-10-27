@@ -1,8 +1,6 @@
 package no.difi.meldingsutveksling.receipt;
 
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.logging.Audit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,11 +27,18 @@ public class ReceiptPolling {
     @Autowired
     private MessageReceiptRepository messageReceiptRepository;
 
+    @Autowired
+    ReceiptStrategyFactory receiptStrategyFactory;
+
+    // TODO: fjernes etter test!
     @PostConstruct
     private void addTestData() {
-        // TODO: fjernes etter test!
-        messageReceiptRepository.save(MessageReceipt.of("bb8323b9-1023-4046-b620-63c4f9120b62", ServiceIdentifier.DPV));
-        messageReceiptRepository.save(MessageReceipt.of("bb8323b9-1023-4046-b620-63c4f9120b63", ServiceIdentifier.DPV));
+//        messageReceiptRepository.save(MessageReceipt.of("bb8323b9-1023-4046-b620-63c4f9120b62",
+//                "123", "foo", ServiceIdentifier.EDU));
+//        messageReceiptRepository.save(MessageReceipt.of("bb8323b9-1023-4046-b620-63c4f9120b63",
+//                "456", "bar", ServiceIdentifier.EDU));
+//        messageReceiptRepository.save(MessageReceipt.of("bb8323b9-1023-4046-b620-63c4f9120b64",
+//                "123456", "foobar", ServiceIdentifier.EDU));
     }
 
     @Scheduled(fixedRate = 60000)
@@ -44,15 +49,14 @@ public class ReceiptPolling {
 
         List<MessageReceipt> receipts = messageReceiptRepository.findByReceived(false);
 
-        receipts.forEach(r -> {
-            log.info(markerFrom(r), "Checking status, messageId={}", r.getMessageId());
-            ReceiptStrategy strategy = ReceiptStrategyFactory.getFactory(r);
-            if (strategy.checkReceived(r)) {
-                Audit.info("Changed status to \"received\" for messageId="+r.getMessageId(), markerFrom(r));
-                r.setReceived(true);
-            }
+        receipts.forEach(receipt -> {
+            log.debug(markerFrom(receipt), "Checking status, messageId={}", receipt.getMessageId());
+            ReceiptStrategy strategy = receiptStrategyFactory.getFactory(receipt);
+            final ExternalReceipt externalReceipt = strategy.getReceipt();
+            externalReceipt.update(receipt);
             // Save regardless due to possible change to lastUpdate
-            messageReceiptRepository.save(r);
+            messageReceiptRepository.save(receipt);
+            externalReceipt.confirmReceipt();
         });
 
     }

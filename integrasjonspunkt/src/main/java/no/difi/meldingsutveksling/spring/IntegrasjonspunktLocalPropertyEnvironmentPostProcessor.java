@@ -28,7 +28,6 @@ public class IntegrasjonspunktLocalPropertyEnvironmentPostProcessor implements E
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
         try {
-
             final FileSystemResource resource = new FileSystemResource("integrasjonspunkt-local.properties");
             Properties loadAllProperties = PropertiesLoaderUtils.loadProperties(resource);
             environment.getPropertySources().addFirst(new PropertiesPropertySource("file:integrasjonspunkt-local.properties", loadAllProperties));
