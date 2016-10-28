@@ -56,7 +56,7 @@ public class MessageSenderTest {
         expectedException.expect(MessageContextException.class);
         expectedException.expect(new StatusMatches(StatusMessage.MISSING_RECIEVER_ORGANIZATION_NUMBER));
         EDUCore request = new RequestBuilder().withSender().build();
-        when(request.getReceiver().getOrgNr()).thenReturn("");
+        when(request.getReceiver().getIdentifier()).thenReturn("");
 
         messageSender.createMessageContext(request);
     }
@@ -120,12 +120,12 @@ public class MessageSenderTest {
         }
 
         public RequestBuilder withSender() {
-            when(request.getSender().getOrgNr()).thenReturn(SENDER_PARTY_NUMBER);
+            when(request.getSender().getIdentifier()).thenReturn(SENDER_PARTY_NUMBER);
             return this;
         }
 
         public RequestBuilder withReciever() {
-            when(request.getReceiver().getOrgNr()).thenReturn(RECIEVER_PARTY_NUMBER);
+            when(request.getReceiver().getIdentifier()).thenReturn(RECIEVER_PARTY_NUMBER);
             return this;
         }
 

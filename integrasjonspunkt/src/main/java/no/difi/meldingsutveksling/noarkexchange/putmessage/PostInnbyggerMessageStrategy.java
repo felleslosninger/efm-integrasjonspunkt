@@ -38,7 +38,7 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
     @Override
     public PutMessageResponseType send(final EDUCore request) {
         request.setServiceIdentifier(ServiceIdentifier.DPI);
-        final ServiceRecord serviceRecord = serviceRegistry.getPrimaryServiceRecord(request.getReceiver().getOrgNr());
+        final ServiceRecord serviceRecord = serviceRegistry.getPrimaryServiceRecord(request.getReceiver().getIdentifier());
 
         MeldingsformidlerClient client = new MeldingsformidlerClient(config);
         try {
@@ -48,7 +48,7 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
             return createErrorResponse(StatusMessage.UNABLE_TO_SEND_DPI);
         }
 
-        final MeldingsformidlerClient.Kvittering kvittering = client.sjekkEtterKvittering(request.getSender().getOrgNr());
+        final MeldingsformidlerClient.Kvittering kvittering = client.sjekkEtterKvittering(request.getSender().getIdentifier());
         kvittering.executeCallback(); // TODO: få denne inn i kjernekvitteringhåndtering
         return createOkResponse();
     }
@@ -77,7 +77,7 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
 
         @Override
         public String getMottakerPid() {
-            return request.getReceiver().getOrgNr();
+            return request.getReceiver().getIdentifier();
         }
 
         @Override
@@ -87,7 +87,7 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
 
         @Override
         public String getSenderOrgnumber() {
-            return request.getSender().getOrgNr();
+            return request.getSender().getIdentifier();
         }
 
         @Override
