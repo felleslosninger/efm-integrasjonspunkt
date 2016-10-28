@@ -54,7 +54,7 @@ public class MessageReceipt {
         return new MessageReceipt(eduCore.getId(),
                 eduCore.getMessageReference(),
                 msgTitle,
-                eduCore.getReceiver().getOrgNr(),
+                eduCore.getReceiver().getIdentifier(),
                 eduCore.getServiceIdentifier());
     }
 

@@ -56,13 +56,13 @@ public class MessageSender implements ApplicationContextAware {
     private Avsender createAvsender(EDUCore message) throws MessageContextException {
         Certificate certificate;
         try {
-            certificate = adresseregister.getCertificate(message.getSender().getOrgNr());
+            certificate = adresseregister.getCertificate(message.getSender().getIdentifier());
         } catch (CertificateException e) {
             throw new MessageContextException(e, StatusMessage.MISSING_SENDER_CERTIFICATE);
         }
         PrivateKey privatNoekkel = keyInfo.loadPrivateKey();
 
-        return Avsender.builder(new Organisasjonsnummer(message.getSender().getOrgNr()), new Noekkelpar(privatNoekkel, certificate)).build();
+        return Avsender.builder(new Organisasjonsnummer(message.getSender().getIdentifier()), new Noekkelpar(privatNoekkel, certificate)).build();
     }
 
     private Mottaker createMottaker(String orgnr) throws MessageContextException {
@@ -119,7 +119,7 @@ public class MessageSender implements ApplicationContextAware {
      * @return MessageContext containing data about the shipment
      */
     protected MessageContext createMessageContext(EDUCore message) throws MessageContextException {
-        if (Strings.isNullOrEmpty(message.getReceiver().getOrgNr())) {
+        if (Strings.isNullOrEmpty(message.getReceiver().getIdentifier())) {
             throw new MessageContextException(StatusMessage.MISSING_RECIEVER_ORGANIZATION_NUMBER);
         }
 
@@ -128,7 +128,7 @@ public class MessageSender implements ApplicationContextAware {
         Avsender avsender;
         final Mottaker mottaker;
         avsender = createAvsender(message);
-        mottaker = createMottaker(message.getReceiver().getOrgNr());
+        mottaker = createMottaker(message.getReceiver().getIdentifier());
 
         if (message.getMessageType() == EDUCore.MessageType.EDU) {
             context.setJpId(message.getPayloadAsMeldingType().getJournpost().getJpId());

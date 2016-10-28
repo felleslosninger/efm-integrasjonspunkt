@@ -27,7 +27,7 @@ public class PostVirksomhetMessageStrategy implements MessageStrategy {
     @Override
     public PutMessageResponseType send(EDUCore message) {
         message.setServiceIdentifier(ServiceIdentifier.DPV);
-        ServiceRecord serviceRecord = this.serviceRegistryLookup.getPrimaryServiceRecord(message.getReceiver().getOrgNr());
+        ServiceRecord serviceRecord = this.serviceRegistryLookup.getPrimaryServiceRecord(message.getReceiver().getIdentifier());
         final InsertCorrespondenceV2 correspondence = CorrespondenceAgencyMessageFactory.create(config, message);
         CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(markerFrom(message), config,
                 serviceRecord.getEndPointURL());

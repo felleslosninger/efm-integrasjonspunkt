@@ -136,9 +136,9 @@ public class IntegrasjonspunktImpl implements SOAPport {
         } else {
             Audit.info("Queue is disabled", markerFrom(message));
 
-            if (adresseRegister.hasAdresseregisterCertificate(coreMessage.getReceiver().getOrgNr())) {
+            if (adresseRegister.hasAdresseregisterCertificate(coreMessage.getReceiver().getIdentifier())) {
                 final ServiceRecord serviceRecord = serviceRegistryLookup.getPrimaryServiceRecord(coreMessage
-                        .getReceiver().getOrgNr());
+                        .getReceiver().getIdentifier());
                 MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(serviceRecord);
                 MessageStrategy strategy = messageStrategyFactory.create(request.getPayload());
                 return strategy.send(coreMessage);

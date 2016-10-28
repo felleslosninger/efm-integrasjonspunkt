@@ -130,11 +130,11 @@ public class EDUCore {
 
     public void swapSenderAndReceiver() {
         Sender sender = new Sender();
-        sender.setOrgNr(getReceiver().getOrgNr());
-        sender.setOrgName(getReceiver().getOrgName());
+        sender.setIdentifier(getReceiver().getIdentifier());
+        sender.setName(getReceiver().getName());
         Receiver receiver = new Receiver();
-        receiver.setOrgNr(getSender().getOrgNr());
-        receiver.setOrgName(getSender().getOrgName());
+        receiver.setIdentifier(getSender().getIdentifier());
+        receiver.setName(getSender().getName());
         setSender(sender);
         setReceiver(receiver);
     }
