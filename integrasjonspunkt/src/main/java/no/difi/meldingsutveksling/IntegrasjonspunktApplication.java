@@ -3,13 +3,14 @@ package no.difi.meldingsutveksling;
 import com.sun.xml.ws.transport.http.servlet.WSSpringServlet;
 import java.security.NoSuchAlgorithmException;
 import javax.crypto.Cipher;
+import no.difi.meldingsutveksling.serviceregistry.spring.cloud.SpringCloudProtocolResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.solr.SolrAutoConfiguration;
-import org.springframework.boot.context.embedded.ServletRegistrationBean;
-import org.springframework.boot.context.web.SpringBootServletInitializer;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
+import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication(exclude = {SolrAutoConfiguration.class})
@@ -36,7 +37,10 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
                 return;
             }
 
-            SpringApplication.run(IntegrasjonspunktApplication.class, args);
+            new SpringApplicationBuilder(IntegrasjonspunktApplication.class)
+                    .initializers(new SpringCloudProtocolResolver())
+                    .run(args);
+
         } catch (SecurityException se) {
             logMissingJCE(se);
         }

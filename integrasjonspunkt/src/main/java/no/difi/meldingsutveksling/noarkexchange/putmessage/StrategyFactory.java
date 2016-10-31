@@ -23,7 +23,7 @@ public class StrategyFactory {
 
     public StrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup, KeystoreProvider keystoreProvider) {
         eduMessageStrategyFactory = EduMessageStrategyFactory.newInstance(messageSender);
-        postVirksomhetStrategyFactory = PostVirksomhetStrategyFactory.newInstance(messageSender.getProperties());
+        postVirksomhetStrategyFactory = PostVirksomhetStrategyFactory.newInstance(messageSender.getProperties(), serviceRegistryLookup);
 
         try {
             postInnbyggerStrategyFactory = PostInnbyggerStrategyFactory.newInstance(messageSender.getProperties(), serviceRegistryLookup, keystoreProvider);

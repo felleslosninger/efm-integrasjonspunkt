@@ -18,23 +18,27 @@ public class MessageReceipt {
     private String messageId;
     private String messageReference;
     private String messageTitle;
+    private String receiverIdentifier;
     private LocalDateTime lastUpdate;
     private ServiceIdentifier targetType;
     private boolean received;
 
     MessageReceipt(){}
 
-    private MessageReceipt(String id, String msgRef, String msgTitle, ServiceIdentifier type) {
+    private MessageReceipt(String id, String msgRef, String msgTitle, String receiverIdentifier,
+                           ServiceIdentifier type) {
         this.messageId = id;
         this.messageReference = msgRef;
         this.messageTitle = msgTitle;
+        this.receiverIdentifier = receiverIdentifier;
         this.lastUpdate = LocalDateTime.now();
         this.targetType = type;
         this.received = false;
     }
 
-    public static MessageReceipt of(String id, String msgRef, String msgTitle, ServiceIdentifier type) {
-        return new MessageReceipt(id, msgRef, msgTitle, type);
+    public static MessageReceipt of(String id, String msgRef, String msgTitle, String receiverIdentifier,
+                                    ServiceIdentifier type) {
+        return new MessageReceipt(id, msgRef, msgTitle, receiverIdentifier, type);
     }
 
     public static MessageReceipt of(EDUCore eduCore) {
@@ -50,6 +54,7 @@ public class MessageReceipt {
         return new MessageReceipt(eduCore.getId(),
                 eduCore.getMessageReference(),
                 msgTitle,
+                eduCore.getReceiver().getIdentifier(),
                 eduCore.getServiceIdentifier());
     }
 
@@ -75,6 +80,14 @@ public class MessageReceipt {
 
     public void setMessageTitle(String messageTitle) {
         this.messageTitle = messageTitle;
+    }
+
+    public String getReceiverIdentifier() {
+        return receiverIdentifier;
+    }
+
+    public void setReceiverIdentifier(String receiverIdentifier) {
+        this.receiverIdentifier = receiverIdentifier;
     }
 
     public LocalDateTime getLastUpdate() {

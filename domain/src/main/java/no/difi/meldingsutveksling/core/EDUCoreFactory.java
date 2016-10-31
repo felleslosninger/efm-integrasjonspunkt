@@ -69,12 +69,12 @@ public class EDUCoreFactory {
         no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory of = new no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory();
 
         AddressType receiverAddressType = of.createAddressType();
-        receiverAddressType.setOrgnr(message.getReceiver().getOrgNr());
-        receiverAddressType.setName(message.getReceiver().getOrgName());
+        receiverAddressType.setOrgnr(message.getReceiver().getIdentifier());
+        receiverAddressType.setName(message.getReceiver().getName());
 
         AddressType senderAddressType = of.createAddressType();
-        senderAddressType.setOrgnr(message.getSender().getOrgNr());
-        senderAddressType.setName(message.getSender().getOrgName());
+        senderAddressType.setOrgnr(message.getSender().getIdentifier());
+        senderAddressType.setName(message.getSender().getName());
 
         EnvelopeType envelopeType = of.createEnvelopeType();
         envelopeType.setConversationId(message.getId());
@@ -159,15 +159,15 @@ public class EDUCoreFactory {
 
     private Sender createSender(InfoRecord senderInfo) {
         Sender sender = new Sender();
-        sender.setOrgNr(senderInfo.getIdentifier());
-        sender.setOrgName(senderInfo.getOrganizationName());
+        sender.setIdentifier(senderInfo.getIdentifier());
+        sender.setName(senderInfo.getOrganizationName());
         return sender;
     }
 
     private Receiver createReceiver(InfoRecord receiverInfo) {
         Receiver receiver = new Receiver();
-        receiver.setOrgNr(receiverInfo.getIdentifier());
-        receiver.setOrgName(receiverInfo.getOrganizationName());
+        receiver.setIdentifier(receiverInfo.getIdentifier());
+        receiver.setName(receiverInfo.getOrganizationName());
         return receiver;
     }
 

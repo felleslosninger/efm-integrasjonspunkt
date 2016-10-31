@@ -28,14 +28,16 @@ public class CorrespondenceAgencyClient {
 
     private final LogstashMarker logstashMarker;
     private final CorrespondenceAgencyConfiguration config;
+    private final String endpointUrl;
 
     /**
      * Creates client to use Altinn Correspondence Agency
      * @param logstashMarker used when logging to keep track of message flow
      */
-    public CorrespondenceAgencyClient(LogstashMarker logstashMarker, CorrespondenceAgencyConfiguration config) {
+    public CorrespondenceAgencyClient(LogstashMarker logstashMarker, CorrespondenceAgencyConfiguration config, String endpointUrl) {
         this.logstashMarker = logstashMarker;
         this.config = config;
+        this.endpointUrl = endpointUrl;
     }
 
     /**
@@ -57,7 +59,6 @@ public class CorrespondenceAgencyClient {
         interceptors[1] = SoapFaultInterceptorLogger.withLogMarkers(logstashMarker);
         template.setInterceptors(interceptors);
 
-        final String uri = config.getEndpointUrl();
         final String soapAction = "http://www.altinn.no/services/ServiceEngine/Correspondence/2009/10/ICorrespondenceAgencyExternal/InsertCorrespondenceV2";
         template.setMessageSender(createMessageSender());
         final URI actionURI;
@@ -66,7 +67,8 @@ public class CorrespondenceAgencyClient {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
-        return template.marshalSendAndReceive(uri, request.getCorrespondence(), new ActionCallback(actionURI, new Addressing10()));
+        return template.marshalSendAndReceive(this.endpointUrl, request.getCorrespondence(), new ActionCallback(actionURI, new
+                Addressing10()));
     }
 
     public Object sendStatusRequest(CorrespondenceRequest request) {
@@ -83,7 +85,6 @@ public class CorrespondenceAgencyClient {
         interceptors[1] = SoapFaultInterceptorLogger.withLogMarkers(logstashMarker);
         template.setInterceptors(interceptors);
 
-        final String uri = config.getEndpointUrl();
         final String soapAction = "http://www.altinn.no/services/ServiceEngine/Correspondence/2009/10/ICorrespondenceAgencyExternal/GetCorrespondenceStatusDetailsV2";
         template.setMessageSender(createMessageSender());
         final URI actionURI;
@@ -92,7 +93,8 @@ public class CorrespondenceAgencyClient {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
-        return template.marshalSendAndReceive(uri, request.getCorrespondence(), new ActionCallback(actionURI, new Addressing10()));
+        return template.marshalSendAndReceive(this.endpointUrl, request.getCorrespondence(), new ActionCallback(actionURI, new
+                Addressing10()));
     }
 
     private HttpComponentsMessageSender createMessageSender() {

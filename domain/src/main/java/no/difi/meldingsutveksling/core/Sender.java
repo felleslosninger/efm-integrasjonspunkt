@@ -12,37 +12,37 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Sender", propOrder = {
-        "orgNr",
-        "orgName"
+        "identifier",
+        "name"
 })
 public class Sender {
 
-    @XmlAttribute(name = "orgNr", required = true)
-    private String orgNr;
-    @XmlAttribute(name = "orgName", required = true)
-    private String orgName;
+    @XmlAttribute(name = "identifier", required = true)
+    private String identifier;
+    @XmlAttribute(name = "name", required = true)
+    private String name;
 
-    public String getOrgNr() {
-        return orgNr;
+    public String getIdentifier() {
+        return identifier;
     }
 
-    public void setOrgNr(String orgNr) {
-        this.orgNr = orgNr;
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 
-    public String getOrgName() {
-        return orgName;
+    public String getName() {
+        return name;
     }
 
-    public void setOrgName(String orgName) {
-        this.orgName = orgName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("orgNr", orgNr)
-                .add("orgName", orgName)
+                .add("identifier", identifier)
+                .add("name", name)
                 .toString();
     }
 }

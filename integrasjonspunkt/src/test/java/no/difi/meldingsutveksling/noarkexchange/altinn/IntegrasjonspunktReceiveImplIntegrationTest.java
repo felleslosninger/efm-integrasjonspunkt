@@ -58,11 +58,11 @@ public class IntegrasjonspunktReceiveImplIntegrationTest {
         doReturn("42".getBytes()).when(integrajonspunktReceiveSpy).decrypt(any(Payload.class));
 
         Sender senderMock = mock(Sender.class);
-        when(senderMock.getOrgNr()).thenReturn("42");
-        when(senderMock.getOrgName()).thenReturn("foo");
+        when(senderMock.getIdentifier()).thenReturn("42");
+        when(senderMock.getName()).thenReturn("foo");
         Receiver receiverMock = mock(Receiver.class);
-        when(receiverMock.getOrgNr()).thenReturn("42");
-        when(receiverMock.getOrgName()).thenReturn("foo");
+        when(receiverMock.getIdentifier()).thenReturn("42");
+        when(receiverMock.getName()).thenReturn("foo");
         EDUCore requestMock = mock(EDUCore.class);
         when(requestMock.getSender()).thenReturn(senderMock);
         when(requestMock.getReceiver()).thenReturn(receiverMock);

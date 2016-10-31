@@ -54,7 +54,7 @@ public class CorrespondenceAgencyMessageFactory {
         MyInsertCorrespondenceV2 correspondence = new MyInsertCorrespondenceV2();
         ObjectFactory objectFactory = new ObjectFactory();
 
-        correspondence.setReportee(objectFactory.createMyInsertCorrespondenceV2Reportee(edu.getReceiver().getOrgNr()));
+        correspondence.setReportee(objectFactory.createMyInsertCorrespondenceV2Reportee(edu.getReceiver().getIdentifier()));
         // Service code, default 4255
         correspondence.setServiceCode(getServiceCode(postConfig));
         // Service edition, default 10
@@ -79,11 +79,11 @@ public class CorrespondenceAgencyMessageFactory {
 
         TextTokenSubstitutionBEList tokens = new TextTokenSubstitutionBEList();
         // Name of the message sender
-        tokens.getTextToken().add(createTextToken(0, edu.getSender().getOrgName()));
+        tokens.getTextToken().add(createTextToken(0, edu.getSender().getName()));
         // Message area, based on ServiceEdition
         tokens.getTextToken().add(createTextToken(1, serviceEditionMapping.get(Integer.valueOf(getServiceEditionCode(postConfig).getValue()))));
         // Name of the message recipient
-        tokens.getTextToken().add(createTextToken(2, edu.getReceiver().getOrgName()));
+        tokens.getTextToken().add(createTextToken(2, edu.getReceiver().getName()));
         notification.setTextTokens(notificationFactory.createNotification2009TextTokens(tokens));
 
         JAXBElement<ReceiverEndPointBEList> receiverEndpoints = createReceiverEndPoint();

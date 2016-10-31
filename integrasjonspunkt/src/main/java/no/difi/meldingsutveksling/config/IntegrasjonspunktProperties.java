@@ -1,13 +1,14 @@
 package no.difi.meldingsutveksling.config;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import lombok.Data;
 import no.difi.meldingsutveksling.AltinnFormidlingsTjenestenConfig;
 import no.difi.meldingsutveksling.ptp.DigitalPostInnbyggerConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 /**
  * Configurable properties for Integrasjonspunkt.
@@ -86,8 +87,6 @@ public class IntegrasjonspunktProperties {
          * TODO: descrive
          */
         private String externalServiceEditionCode;
-        @NotNull
-        private String endpointUrl;
 
     }
 

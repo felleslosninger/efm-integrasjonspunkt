@@ -134,14 +134,14 @@ public class EDUCore {
     }
 
     public void swapSenderAndReceiver() {
-        Sender s = new Sender();
-        s.setOrgNr(getReceiver().getOrgNr());
-        s.setOrgName(getReceiver().getOrgName());
-        Receiver r = new Receiver();
-        r.setOrgNr(getSender().getOrgNr());
-        r.setOrgName(getSender().getOrgName());
-        setSender(s);
-        setReceiver(r);
+        Sender sender = new Sender();
+        sender.setIdentifier(getReceiver().getIdentifier());
+        sender.setName(getReceiver().getName());
+        Receiver receiver = new Receiver();
+        receiver.setIdentifier(getSender().getIdentifier());
+        receiver.setName(getSender().getName());
+        setSender(sender);
+        setReceiver(receiver);
     }
 
     public JAXBElement<EDUCore> getAsJaxBElement() {

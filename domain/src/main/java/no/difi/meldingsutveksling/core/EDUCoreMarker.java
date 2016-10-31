@@ -14,8 +14,8 @@ public class EDUCoreMarker {
      */
     public static LogstashMarker markerFrom(EDUCore message) {
         final LogstashMarker messageTypeMarker = MarkerFactory.messageTypeMarker(message.getMessageType().name().toLowerCase());
-        final LogstashMarker receiverMarker = MarkerFactory.receiverMarker(message.getReceiver().getOrgNr());
-        final LogstashMarker senderMarker = MarkerFactory.senderMarker(message.getSender().getOrgNr());
+        final LogstashMarker receiverMarker = MarkerFactory.receiverMarker(message.getReceiver().getIdentifier());
+        final LogstashMarker senderMarker = MarkerFactory.senderMarker(message.getSender().getIdentifier());
         final LogstashMarker idMarker = MarkerFactory.conversationIdMarker(message.getId());
         final LogstashMarker markers = idMarker.and(receiverMarker).and(senderMarker).and(messageTypeMarker);
 
