@@ -18,7 +18,6 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import static no.difi.meldingsutveksling.core.EDUCoreMarker.markerFrom;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createErrorResponse;
@@ -42,6 +41,7 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
 
         MeldingsformidlerClient client = new MeldingsformidlerClient(config);
         try {
+            Audit.info(String.format("Sending message to DPI with conversation id %s", request.getId()), markerFrom(request));
             client.sendMelding(new EDUCoreMeldingsformidlerRequest(request, serviceRecord));
         } catch (MeldingsformidlerException e) {
             Audit.error("Failed to send message to DPI", markerFrom(request), e);
@@ -90,7 +90,7 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
 
         @Override
         public String getConversationId() {
-            return String.valueOf(UUID.randomUUID()); /* TODO: finnes denne i EduCore? */
+            return request.getId();
         }
 
         @Override

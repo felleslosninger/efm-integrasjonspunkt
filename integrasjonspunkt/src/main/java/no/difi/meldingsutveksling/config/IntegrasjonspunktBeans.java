@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.KeystoreProvider;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.ptp.MeldingsformidlerException;
+import no.difi.meldingsutveksling.receipt.DpiReceiptService;
 import no.difi.meldingsutveksling.receipt.ReceiptStrategyFactory;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
@@ -60,7 +61,12 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public ReceiptStrategyFactory receiptStrategyFactory(IntegrasjonspunktProperties integrasjonspunktProperties, KeystoreProvider keystoreProvider) {
-        return new ReceiptStrategyFactory(integrasjonspunktProperties, keystoreProvider);
+    public DpiReceiptService dpiReceiptService(IntegrasjonspunktProperties integrasjonspunktProperties, KeystoreProvider keystoreProvider) {
+        return new DpiReceiptService(integrasjonspunktProperties, keystoreProvider);
+    }
+
+    @Bean
+    public ReceiptStrategyFactory receiptStrategyFactory(IntegrasjonspunktProperties integrasjonspunktProperties) {
+        return new ReceiptStrategyFactory(integrasjonspunktProperties);
     }
 }

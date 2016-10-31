@@ -61,8 +61,8 @@ public class IntegrasjonspunktIntegrationTestConfig {
     }
 
     @Bean
-    public ReceiptStrategyFactory receiptStrategyFactory(IntegrasjonspunktProperties integrasjonspunktProperties, KeystoreProvider keystoreProvider) {
-        return new ReceiptStrategyFactory(integrasjonspunktProperties, keystoreProvider);
+    public ReceiptStrategyFactory receiptStrategyFactory(IntegrasjonspunktProperties integrasjonspunktProperties) {
+        return new ReceiptStrategyFactory(integrasjonspunktProperties);
     }
 
 

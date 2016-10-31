@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.receipt.strategy;
 
-import no.difi.meldingsutveksling.receipt.ExternalReceipt;
+import no.difi.meldingsutveksling.receipt.MessageReceipt;
 import no.difi.meldingsutveksling.receipt.ReceiptStrategy;
 import org.springframework.stereotype.Component;
 
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 public class EduReceiptStrategy implements ReceiptStrategy {
 
     @Override
-    public ExternalReceipt getReceipt() {
-        return null;
+    public boolean checkReceived(MessageReceipt receipt) {
+        return false;
     }
 }

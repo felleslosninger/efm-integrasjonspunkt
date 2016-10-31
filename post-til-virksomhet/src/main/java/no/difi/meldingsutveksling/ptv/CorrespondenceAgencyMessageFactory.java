@@ -15,6 +15,7 @@ import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAtta
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentV2;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyValues;
+import no.difi.meldingsutveksling.receipt.MessageReceipt;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -133,11 +134,10 @@ public class CorrespondenceAgencyMessageFactory {
     }
 
     private static ZonedDateTime getAllowSystemDeleteDateTime(EDUCore edu) {
-        switch (edu.getMessageType()) {
-            case EDU:
-                return ZonedDateTime.now().plusMinutes(5);
-            default:
-                return ZonedDateTime.now().plusMinutes(5);
+        if (edu.getMessageType() == EDUCore.MessageType.EDU) {
+            return ZonedDateTime.now().plusMinutes(5);
+        } else {
+            return ZonedDateTime.now().plusMinutes(5);
         }
     }
 
@@ -225,7 +225,7 @@ public class CorrespondenceAgencyMessageFactory {
         return myInsertCorrespondenceV2;
     }
 
-    public static GetCorrespondenceStatusDetailsV2 createReceiptRequest(final String messageId) {
+    public static GetCorrespondenceStatusDetailsV2 createReceiptRequest(MessageReceipt receipt) {
 
         no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory of = new no.altinn.services
                 .serviceengine.correspondence._2009._10.ObjectFactory();
@@ -235,7 +235,7 @@ public class CorrespondenceAgencyMessageFactory {
         no.altinn.schemas.services.serviceengine.correspondence._2014._10.ObjectFactory filterOF = new no.altinn
                 .schemas.services.serviceengine.correspondence._2014._10.ObjectFactory();
         JAXBElement<String> sendersReference = filterOF.createCorrespondenceStatusFilterV2SendersReference
-                (messageId);
+                (receipt.getMessageId());
         filter.setSendersReference(sendersReference);
         filter.setServiceCode("4255");
         filter.setServiceEditionCode(10);

@@ -64,6 +64,11 @@ public class EDUCore {
         return id;
     }
 
+    /**
+     * From PutMessage (BEST/EDU) this is the conversation id
+     *
+     * @param id of the message ie. the conversation id
+     */
     public void setId(String id) {
         this.id = id;
     }
@@ -129,14 +134,14 @@ public class EDUCore {
     }
 
     public void swapSenderAndReceiver() {
-        Sender sender = new Sender();
-        sender.setOrgNr(getReceiver().getOrgNr());
-        sender.setOrgName(getReceiver().getOrgName());
-        Receiver receiver = new Receiver();
-        receiver.setOrgNr(getSender().getOrgNr());
-        receiver.setOrgName(getSender().getOrgName());
-        setSender(sender);
-        setReceiver(receiver);
+        Sender s = new Sender();
+        s.setOrgNr(getReceiver().getOrgNr());
+        s.setOrgName(getReceiver().getOrgName());
+        Receiver r = new Receiver();
+        r.setOrgNr(getSender().getOrgNr());
+        r.setOrgName(getSender().getOrgName());
+        setSender(s);
+        setReceiver(r);
     }
 
     public JAXBElement<EDUCore> getAsJaxBElement() {

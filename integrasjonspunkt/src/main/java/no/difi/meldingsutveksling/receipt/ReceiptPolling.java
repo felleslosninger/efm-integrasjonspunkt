@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.receipt;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.logging.Audit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.List;
 
+import static no.difi.meldingsutveksling.ptp.MeldingsformidlerClient.EMPTY_KVITTERING;
 import static no.difi.meldingsutveksling.receipt.MessageReceiptMarker.markerFrom;
 
 /**
@@ -29,6 +31,9 @@ public class ReceiptPolling {
 
     @Autowired
     ReceiptStrategyFactory receiptStrategyFactory;
+
+    @Autowired
+    DpiReceiptService dpiReceiptService;
 
     // TODO: fjernes etter test!
     // TODO: fjernes etter test!
@@ -50,15 +55,31 @@ public class ReceiptPolling {
 
         List<MessageReceipt> receipts = messageReceiptRepository.findByReceived(false);
 
-        receipts.forEach(receipt -> {
-            log.debug(markerFrom(receipt), "Checking status, messageId={}", receipt.getMessageId());
-            ReceiptStrategy strategy = receiptStrategyFactory.getFactory(receipt);
-            final ExternalReceipt externalReceipt = strategy.getReceipt();
-            externalReceipt.update(receipt);
+        receipts.forEach(r -> {
+            log.info(markerFrom(r), "Checking status, messageId={}", r.getMessageId());
+            ReceiptStrategy strategy = receiptStrategyFactory.getFactory(r);
+            if (strategy.checkReceived(r)) {
+                Audit.info("Changed status to \"received\" for messageId=" + r.getMessageId(), markerFrom(r));
+                r.setReceived(true);
+            }
             // Save regardless due to possible change to lastUpdate
-            messageReceiptRepository.save(receipt);
-            externalReceipt.confirmReceipt();
+            messageReceiptRepository.save(r);
         });
 
+    }
+
+    @Scheduled(fixedRate = 10000)
+    public void dpiReceiptsScheduledTask() {
+        final ExternalReceipt externalReceipt = dpiReceiptService.checkForReceipts();
+        if(externalReceipt != EMPTY_KVITTERING) {
+            Audit.info("Got receipt (DPI)", externalReceipt.logMarkers());
+            final String id = externalReceipt.getId();
+            MessageReceipt receipt = messageReceiptRepository.findOne(id);
+            receipt = externalReceipt.update(receipt);
+            messageReceiptRepository.save(receipt);
+            Audit.info("Updated receipt (DPI)", externalReceipt.logMarkers());
+            externalReceipt.confirmReceipt();
+            Audit.info("Confirmed receipt (DPI)", externalReceipt.logMarkers());
+        }
     }
 }

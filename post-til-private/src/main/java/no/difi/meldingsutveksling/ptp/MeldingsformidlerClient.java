@@ -1,5 +1,8 @@
 package no.difi.meldingsutveksling.ptp;
 
+import net.logstash.logback.marker.LogstashMarker;
+import net.logstash.logback.marker.Markers;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.receipt.ExternalReceipt;
 import no.difi.meldingsutveksling.receipt.MessageReceipt;
 import no.difi.sdp.client2.KlientKonfigurasjon;
@@ -22,9 +25,12 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import static no.difi.meldingsutveksling.logging.MarkerFactory.conversationIdMarker;
+
 public class MeldingsformidlerClient {
 
     static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    public static final EmptyKvittering EMPTY_KVITTERING = new EmptyKvittering();
     private final Config config;
 
     public MeldingsformidlerClient(Config config) {
@@ -32,9 +38,21 @@ public class MeldingsformidlerClient {
     }
 
     public void sendMelding(MeldingsformidlerRequest request) throws MeldingsformidlerException {
-        Mottaker mottaker = Mottaker.builder(request.getMottakerPid(), request.getPostkasseAdresse(), Sertifikat.fraByteArray(request.getCertificate()), Organisasjonsnummer.of(request.getOrgnrPostkasse())).build();
-        DigitalPost digitalPost = DigitalPost.builder(mottaker, request.getSubject()).virkningsdato(new Date()).build();
-        Dokument dokument = Dokument.builder(request.getDocument().getTitle(), request.getDocument().getFileName(), request.getDocument().getContents()).mimeType(request.getDocument().getMimeType()).build();
+        Mottaker mottaker = Mottaker.builder(
+                request.getMottakerPid(),
+                request.getPostkasseAdresse(),
+                Sertifikat.fraByteArray(request.getCertificate()),
+                Organisasjonsnummer.of(request.getOrgnrPostkasse())
+        ).build();
+        DigitalPost digitalPost = DigitalPost.builder(mottaker, request.getSubject())
+                .virkningsdato(new Date())
+                .build();
+        Dokument dokument = Dokument.builder(
+                request.getDocument().getTitle(),
+                request.getDocument().getFileName(),
+                request.getDocument().getContents()
+        ).mimeType(request.getDocument().getMimeType())
+                .build();
         Dokumentpakke dokumentpakke = Dokumentpakke.builder(dokument).build();
         final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(request.getSenderOrgnumber());
         Avsender behandlingsansvarlig = Avsender.builder(aktoerOrganisasjonsnummer.forfremTilAvsender()).build();
@@ -62,10 +80,13 @@ public class MeldingsformidlerClient {
         return new SikkerDigitalPostKlient(tekniskAvsender, klientKonfigurasjon);
     }
 
-    public Kvittering sjekkEtterKvittering(String orgnr) {
+    public ExternalReceipt sjekkEtterKvittering(String orgnr) {
         SikkerDigitalPostKlient klient = createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer.of(orgnr));
         final ForretningsKvittering forretningsKvittering = klient.hentKvittering(KvitteringForespoersel.builder(Prioritet.NORMAL).mpcId(config.getMpcId()).build());
-        return new Kvittering(forretningsKvittering).withCallback(klient::bekreft);
+        if (forretningsKvittering == null) {
+            return EMPTY_KVITTERING;
+        }
+        return Kvittering.from(forretningsKvittering).withCallback(klient::bekreft);
     }
 
     public static class Config {
@@ -113,10 +134,11 @@ public class MeldingsformidlerClient {
 
     }
 
-    public class Kvittering implements ExternalReceipt {
+    public static class Kvittering implements ExternalReceipt {
         @Transient
         private ForretningsKvittering eksternKvittering;
         private Consumer<ForretningsKvittering> callback;
+        private final ServiceIdentifier serviceIdentifier = ServiceIdentifier.DPI;
 
         public Kvittering(ForretningsKvittering forretningsKvittering) {
             this.eksternKvittering = forretningsKvittering;
@@ -132,14 +154,33 @@ public class MeldingsformidlerClient {
         }
 
         @Override
-        public void update(MessageReceipt messageReceipt) {
-            messageReceipt.setLastUpdate(LocalDateTime.ofInstant(eksternKvittering.getTidspunkt(), ZoneId.systemDefault()));
-            messageReceipt.setReceived(true);
+        public MessageReceipt update(final MessageReceipt messageReceipt) {
+            MessageReceipt receipt = messageReceipt;
+            if (messageReceipt == null) {
+                receipt = MessageReceipt.of(eksternKvittering.getKonversasjonsId(), eksternKvittering.getReferanseTilMeldingId(), " kvittering fra DPI uten tilhørende melding?", ServiceIdentifier.DPI);
+            }
+            receipt.setLastUpdate(LocalDateTime.ofInstant(eksternKvittering.getTidspunkt(), ZoneId.systemDefault()));
+            receipt.setReceived(true);
+            return messageReceipt;
         }
 
         @Override
         public void confirmReceipt() {
             executeCallback();
+        }
+
+        @Override
+        public String getId() {
+            return eksternKvittering.getKonversasjonsId();
+        }
+
+        @Override
+        public LogstashMarker logMarkers() {
+            return conversationIdMarker(getId()).and(Markers.append("receiptType", serviceIdentifier));
+        }
+
+        public static Kvittering from(ForretningsKvittering forretningsKvittering) {
+            return new Kvittering(forretningsKvittering);
         }
     }
 
