@@ -1,24 +1,30 @@
 package no.difi.meldingsutveksling.receipt;
 
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.receipt.strategy.DpvReceiptStrategy;
 import no.difi.meldingsutveksling.receipt.strategy.EduReceiptStrategy;
 import no.difi.meldingsutveksling.receipt.strategy.NoOperationStrategy;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ReceiptStrategyFactory {
 
-    private IntegrasjonspunktProperties integrasjonspunktProperties;
+    private static DpvReceiptStrategy dpvReceiptStrategy;
+    private static EduReceiptStrategy eduReceiptStrategy;
 
-    public ReceiptStrategyFactory(IntegrasjonspunktProperties integrasjonspunktProperties) {
-        this.integrasjonspunktProperties = integrasjonspunktProperties;
+    @Autowired
+    ReceiptStrategyFactory(DpvReceiptStrategy dpvReceiptStrategy,
+                           EduReceiptStrategy eduReceiptStrategy) {
+        ReceiptStrategyFactory.dpvReceiptStrategy = dpvReceiptStrategy;
+        ReceiptStrategyFactory.eduReceiptStrategy = eduReceiptStrategy;
     }
 
-    public ReceiptStrategy getFactory(MessageReceipt receipt) {
+    public static ReceiptStrategy getFactory(MessageReceipt receipt) {
         switch (receipt.getTargetType()) {
             case DPV:
-                return new DpvReceiptStrategy();
+                return dpvReceiptStrategy;
             case EDU:
-                return new EduReceiptStrategy();
+                return eduReceiptStrategy;
             default:
                 return new NoOperationStrategy();
         }
