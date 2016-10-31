@@ -12,6 +12,7 @@ import no.difi.sdp.client2.domain.digital_post.DigitalPost;
 import no.difi.sdp.client2.domain.exceptions.SendException;
 import no.difi.sdp.client2.domain.kvittering.ForretningsKvittering;
 import no.difi.sdp.client2.domain.kvittering.KvitteringForespoersel;
+import no.digipost.api.representations.EbmsApplikasjonsKvittering;
 import no.digipost.api.representations.Organisasjonsnummer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,11 +158,11 @@ public class MeldingsformidlerClient {
         public MessageReceipt update(final MessageReceipt messageReceipt) {
             MessageReceipt receipt = messageReceipt;
             if (messageReceipt == null) {
-                receipt = MessageReceipt.of(eksternKvittering.getKonversasjonsId(), eksternKvittering.getReferanseTilMeldingId(), " kvittering fra DPI uten tilhørende melding?", ServiceIdentifier.DPI);
+                receipt = MessageReceipt.of(eksternKvittering.getKonversasjonsId(), eksternKvittering.getReferanseTilMeldingId(), " kvittering fra DPI uten tilhørende melding?", "Ukjent mottaker" /* no easy way of getting recipient from ForretningsKvittering */, ServiceIdentifier.DPI);
             }
             receipt.setLastUpdate(LocalDateTime.ofInstant(eksternKvittering.getTidspunkt(), ZoneId.systemDefault()));
             receipt.setReceived(true);
-            return messageReceipt;
+            return receipt;
         }
 
         @Override

@@ -9,7 +9,7 @@ import no.difi.meldingsutveksling.receipt.MessageReceipt;
 public class EmptyKvittering implements ExternalReceipt {
 
     public static final String EMPTY = "empty";
-    public static final MessageReceipt EMPTY_RECEIPT = MessageReceipt.of(EMPTY, EMPTY, EMPTY, ServiceIdentifier.DPI);
+    public static final MessageReceipt EMPTY_RECEIPT = MessageReceipt.of(EMPTY, EMPTY, EMPTY, EMPTY, ServiceIdentifier.DPI);
 
     @Override
     public MessageReceipt update(MessageReceipt messageReceipt) {
