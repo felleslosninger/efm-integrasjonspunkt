@@ -6,14 +6,12 @@ import com.google.common.base.MoreObjects;
  *
  */
 public class InfoRecord {
-    private String primaryServiceIdentifier;
     private String identifier;
     private String organizationName;
     private EntityType entityType;
 
-    public InfoRecord(String primaryServiceIdentifier, String identifier, String organizationName, EntityType
+    public InfoRecord(String identifier, String organizationName, EntityType
             entityType) {
-        this.primaryServiceIdentifier = primaryServiceIdentifier;
         this.identifier = identifier;
         this.organizationName = organizationName;
         this.entityType = entityType;
@@ -21,14 +19,6 @@ public class InfoRecord {
 
     /** Needed by gson **/
     public InfoRecord() {
-    }
-
-    public String getPrimaryServiceIdentifier() {
-        return primaryServiceIdentifier;
-    }
-
-    public void setPrimaryServiceIdentifier(String primaryServiceIdentifier) {
-        this.primaryServiceIdentifier = primaryServiceIdentifier;
     }
 
     public String getIdentifier() {
@@ -58,7 +48,6 @@ public class InfoRecord {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("primaryServiceIdentifier", primaryServiceIdentifier)
                 .add("identifier", identifier)
                 .add("organizationName", organizationName)
                 .add("entityType", entityType)

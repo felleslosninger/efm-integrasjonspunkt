@@ -44,7 +44,7 @@ public class DpvReceiptStrategy implements ReceiptStrategy {
                 .withSystemUserCode(properties.getAltinnPTV().getUsername())
                 .build();
 
-        ServiceRecord serviceRecord = serviceRegistryLookup.getPrimaryServiceRecord(receipt.getReceiverIdentifier());
+        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(receipt.getReceiverIdentifier());
         final CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(markerFrom(receipt), config,
                 serviceRecord.getEndPointURL());
         GetCorrespondenceStatusDetailsV2 receiptRequest = CorrespondenceAgencyMessageFactory.createReceiptRequest(receipt);
