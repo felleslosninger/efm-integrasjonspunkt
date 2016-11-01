@@ -9,6 +9,7 @@ import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.KeystoreProvider;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
+import no.difi.meldingsutveksling.receipt.DpiReceiptService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
@@ -68,6 +69,11 @@ public class IntegrasjonspunktIntegrationTestConfig {
         doNothing().when(transportMock).send(any(ApplicationContext.class), any(EduDocument.class));
         when(transportFactoryMock.createTransport(any(EduDocument.class))).thenReturn(transportMock);
         return transportFactoryMock;
+    }
+
+    @Bean
+    public DpiReceiptService dpiReceiptService(IntegrasjonspunktProperties properties, KeystoreProvider keystoreProvider) {
+        return new DpiReceiptService(properties, keystoreProvider);
     }
 
     @Bean
