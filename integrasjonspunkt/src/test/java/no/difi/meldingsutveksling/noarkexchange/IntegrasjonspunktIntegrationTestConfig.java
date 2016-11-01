@@ -9,7 +9,6 @@ import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.KeystoreProvider;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
-import no.difi.meldingsutveksling.receipt.ReceiptStrategyFactory;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
@@ -59,12 +58,6 @@ public class IntegrasjonspunktIntegrationTestConfig {
     public StrategyFactory messageStrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup, KeystoreProvider keystoreProvider) {
         return new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider);
     }
-
-    @Bean
-    public ReceiptStrategyFactory receiptStrategyFactory(IntegrasjonspunktProperties integrasjonspunktProperties) {
-        return new ReceiptStrategyFactory(integrasjonspunktProperties);
-    }
-
 
     // Mocks
     @Bean
