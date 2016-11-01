@@ -12,9 +12,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -41,74 +39,44 @@ public class ServiceRegistryLookupTest {
 
     @Test
     public void organizationWithoutServiceRecord() {
-        final String json = new SRContentBuilder().withoutPrimaryServiceIdentifier().withServiceRecord(post).withServiceRecord(edu).build();
+        final String json = new SRContentBuilder().build();
         when(client.getResource("identifier/" + ORGNR)).thenReturn(json);
 
-        final ServiceRecord primaryServiceRecord = this.service.getPrimaryServiceRecord(ORGNR);
+        final ServiceRecord serviceRecord = this.service.getServiceRecord(ORGNR);
 
-        assertThat(primaryServiceRecord, is(ServiceRecord.EMPTY));
+        assertThat(serviceRecord, is(ServiceRecord.EMPTY));
     }
 
     @Test
-    public void organizationWithSingleServiceRecordHasPrimaryServiceRecord() {
-        final String json = new SRContentBuilder().withoutPrimaryServiceIdentifier().withServiceRecord(edu).build();
+    public void organizationWithSingleServiceRecordHasServiceRecord() {
+        final String json = new SRContentBuilder().withServiceRecord(edu).build();
         when(client.getResource("identifier/" + ORGNR)).thenReturn(json);
 
-        final ServiceRecord primaryServiceRecord = service.getPrimaryServiceRecord(ORGNR);
-
-        assertThat(primaryServiceRecord, is(edu));
-    }
-
-    @Test
-    public void organizationWithTwoServiceRecordsHasNoPrimaryServiceRecord() {
-        final String json = new SRContentBuilder().withoutPrimaryServiceIdentifier().withServiceRecord(post).withServiceRecord(edu).build();
-        when(client.getResource("identifier/" + ORGNR)).thenReturn(json);
-
-        final ServiceRecord primaryServiceRecord = service.getPrimaryServiceRecord(ORGNR);
-
-        assertThat(primaryServiceRecord, is(ServiceRecord.EMPTY));
-    }
-
-    @Test
-    public void organisationWithTwoServiceRecordsAndPrimaryOverride() {
-        final String json = new SRContentBuilder().withPrimaryServiceIdentifier(edu.getServiceIdentifier()).withServiceRecord(post).withServiceRecord(edu).build();
-        when(client.getResource("identifier/" + ORGNR)).thenReturn(json);
-
-        final ServiceRecord serviceRecord = service.getPrimaryServiceRecord(ORGNR);
+        final ServiceRecord serviceRecord = service.getServiceRecord(ORGNR);
 
         assertThat(serviceRecord, is(edu));
     }
 
     public static class SRContentBuilder {
         private Gson gson = new GsonBuilder().serializeNulls().create();
-        private String primaryServiceIdentifier;
-        private List<HashMap<String, Object>> serviceRecords = new ArrayList<>();
+        private ServiceRecord serviceRecord;
 
         SRContentBuilder withServiceRecord(ServiceRecord serviceRecord) {
-            HashMap<String, Object> record = new HashMap<>();
-            record.put("serviceRecord", serviceRecord);
-            record.put("_links", "http://localhost/../" + serviceRecord.getServiceIdentifier());
-            this.serviceRecords.add(record);
-            return this;
-        }
-
-        SRContentBuilder withoutPrimaryServiceIdentifier() {
-            this.primaryServiceIdentifier = null;
-            return this;
-        }
-
-        SRContentBuilder withPrimaryServiceIdentifier(String identifier) {
-            this.primaryServiceIdentifier = identifier;
+            this.serviceRecord = serviceRecord;
             return this;
         }
 
         String build() {
             EntityType entityType = new EntityType("Organisasjonsledd", "ORGL");
-            InfoRecord infoRecord = new InfoRecord(primaryServiceIdentifier, ORGNR, ORGNAME, entityType);
+            InfoRecord infoRecord = new InfoRecord(ORGNR, ORGNAME, entityType);
 
             final HashMap<String, Object> content = new HashMap<>();
 
-            content.put("serviceRecords", this.serviceRecords);
+            if (this.serviceRecord == null) {
+                content.put("serviceRecord", ServiceRecord.EMPTY);
+            } else {
+                content.put("serviceRecord", this.serviceRecord);
+            }
             content.put("infoRecord", infoRecord);
             return gson.toJson(content);
         }

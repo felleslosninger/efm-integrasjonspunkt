@@ -42,7 +42,7 @@ public class Adresseregister {
 
     public Certificate getCertificate(String orgNumber) throws CertificateException {
         String nOrgNumber = FiksFix.replaceOrgNummberWithKs(orgNumber);
-        ServiceRecord serviceRecord = serviceRegistryLookup.getPrimaryServiceRecord(nOrgNumber);
+        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(nOrgNumber);
 
         if (DPV.fullname().equals(serviceRecord.getServiceIdentifier())) {
             return null;

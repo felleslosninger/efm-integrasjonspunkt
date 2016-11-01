@@ -211,7 +211,7 @@ public class EDUCoreFactoryTest {
         mxaMessageJaxbContext = JAXBContext.newInstance(Message.class);
         serviceRegistryLookup = Mockito.mock(ServiceRegistryLookup.class);
 
-        InfoRecord infoRecord = new InfoRecord("EDU", "1234", "Foo", new EntityType("EDU", "EDU"));
+        InfoRecord infoRecord = new InfoRecord("1234", "Foo", new EntityType("EDU", "EDU"));
         when(serviceRegistryLookup.getInfoRecord(anyString())).thenReturn(infoRecord);
     }
 

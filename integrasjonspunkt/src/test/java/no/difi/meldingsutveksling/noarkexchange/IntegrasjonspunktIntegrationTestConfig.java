@@ -123,7 +123,7 @@ public class IntegrasjonspunktIntegrationTestConfig {
         ServiceRecord sr = mock(ServiceRecord.class);
         when(sr.getServiceIdentifier()).thenReturn("EDU");
         when(sr.getOrganisationNumber()).thenReturn("1337");
-        when(srMock.getPrimaryServiceRecord(anyString())).thenReturn(sr);
+        when(srMock.getServiceRecord(anyString())).thenReturn(sr);
 
         return srMock;
     }

@@ -28,7 +28,7 @@ public class ServiceRegistryLookup {
                 .build(new CacheLoader<String, ServiceRecord>() {
                     @Override
                     public ServiceRecord load(String key) throws Exception {
-                        return loadPrimaryServiceRecord(key);
+                        return loadServiceRecord(key);
                     }
                 });
 
@@ -46,27 +46,20 @@ public class ServiceRegistryLookup {
     /**
      * Method to find out which transport channel to use to send messages to given organization
      * @param identifier of the receiver
-     * @return a ServiceRecord if a primary service record could be determined. Otherwise an empty ServiceRecord is
-     * returned.
+     * @return a ServiceRecord if found. Otherwise an empty ServiceRecord is returned.
      */
-    public ServiceRecord getPrimaryServiceRecord(String identifier) {
+    public ServiceRecord getServiceRecord(String identifier) {
         return srCache.getUnchecked(identifier);
     }
 
-    private ServiceRecord loadPrimaryServiceRecord(String identifier) {
+    private ServiceRecord loadServiceRecord(String identifier) {
         final String serviceRecords = client.getResource("identifier/" + identifier);
         final DocumentContext documentContext = JsonPath.parse(serviceRecords, jsonPathConfiguration());
-        if (getNumberOfServiceRecords(documentContext) == 1) {
-            return documentContext.read("$.serviceRecords[0].serviceRecord", ServiceRecord.class);
+        ServiceRecord serviceRecord = documentContext.read("$.serviceRecord", ServiceRecord.class);
+        if (serviceRecord != null) {
+            return serviceRecord;
         }
-
-        final JsonElement primaryServiceIdentifier = documentContext.read("$.infoRecord.primaryServiceIdentifier");
-        if (primaryServiceIdentifier instanceof JsonNull) {
-            return ServiceRecord.EMPTY;
-        } else {
-            final JsonArray res = documentContext.read("$.serviceRecords[?(@.serviceRecord.serviceIdentifier == $.infoRecord.primaryServiceIdentifier)].serviceRecord");
-            return new Gson().fromJson(res.get(0), ServiceRecord.class);
-        }
+        return ServiceRecord.EMPTY;
     }
 
     /**

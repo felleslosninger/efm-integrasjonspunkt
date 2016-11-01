@@ -38,7 +38,7 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
     @Override
     public PutMessageResponseType send(final EDUCore request) {
         request.setServiceIdentifier(ServiceIdentifier.DPI);
-        final ServiceRecord serviceRecord = serviceRegistry.getPrimaryServiceRecord(request.getReceiver().getIdentifier());
+        final ServiceRecord serviceRecord = serviceRegistry.getServiceRecord(request.getReceiver().getIdentifier());
 
         MeldingsformidlerClient client = new MeldingsformidlerClient(config);
         try {
