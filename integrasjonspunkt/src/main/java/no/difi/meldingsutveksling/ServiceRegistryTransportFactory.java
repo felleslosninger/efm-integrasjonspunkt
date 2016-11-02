@@ -26,10 +26,8 @@ public class ServiceRegistryTransportFactory implements TransportFactory {
 
     @Override
     public Transport createTransport(EduDocument message) {
-        final ServiceRecord primaryServiceRecord = serviceRegistryLookup.getPrimaryServiceRecord(message.getReceiverOrgNumber());
-        primaryServiceRecord.getServiceIdentifier();
 
-        Optional<ServiceRecord> serviceRecord = Optional.of(primaryServiceRecord);
+        Optional<ServiceRecord> serviceRecord = Optional.of(serviceRegistryLookup.getServiceRecord(message.getReceiverOrgNumber()));
 
         Optional<Transport> transport = serviceRecord.filter(isServiceIdentifier("edu")).map(s -> new AltinnTransport(s.getEndPointURL()));
         if(!transport.isPresent()) {

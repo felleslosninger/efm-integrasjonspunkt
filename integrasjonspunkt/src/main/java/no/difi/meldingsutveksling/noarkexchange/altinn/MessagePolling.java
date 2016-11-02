@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange.altinn;
 
-import java.util.List;
 import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MessageInfo;
@@ -8,7 +7,6 @@ import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.kvittering.EduDocumentFactory;
 import no.difi.meldingsutveksling.logging.Audit;
-import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 import no.difi.meldingsutveksling.logging.MoveLogMarkers;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -25,6 +23,10 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+
+import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
 /**
  * MessagePolling periodically checks Altinn Formidlingstjeneste for new messages. If new messages are discovered they are
@@ -56,7 +58,7 @@ public class MessagePolling implements ApplicationContextAware {
     @Autowired
     ServiceRegistryLookup serviceRegistryLookup;
 
-    private ServiceRecord primaryServiceRecord;
+    private ServiceRecord serviceRecord;
 
     @Scheduled(fixedRate = 15000)
     public void checkForNewMessages() {
@@ -65,11 +67,11 @@ public class MessagePolling implements ApplicationContextAware {
 
         // TODO: if ServiceRegistry returns a ServiceRecord to something other than Altinn formidlingstjeneste this
         // will fail
-        if (primaryServiceRecord == null) {
-            primaryServiceRecord = serviceRegistryLookup.getPrimaryServiceRecord(properties.getOrg().getNumber());
+        if (serviceRecord == null) {
+            serviceRecord = serviceRegistryLookup.getServiceRecord(properties.getOrg().getNumber());
         }
 
-        AltinnWsConfiguration configuration = AltinnWsConfiguration.fromConfiguration(primaryServiceRecord.getEndPointURL(), context);
+        AltinnWsConfiguration configuration = AltinnWsConfiguration.fromConfiguration(serviceRecord.getEndPointURL(), context);
         AltinnWsClient client = new AltinnWsClient(configuration);
 
         List<FileReference> fileReferences = client.availableFiles(properties.getOrg().getNumber());

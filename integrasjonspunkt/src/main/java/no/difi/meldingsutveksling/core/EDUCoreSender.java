@@ -45,8 +45,8 @@ public class EDUCoreSender {
     public boolean sendMessage(EDUCore message) {
         MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrg().getNumber());
 
-        final ServiceRecord primaryServiceRecord = serviceRegistryLookup.getPrimaryServiceRecord(message.getReceiver().getIdentifier());
-        final MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(primaryServiceRecord);
+        final ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(message.getReceiver().getIdentifier());
+        final MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(serviceRecord);
         boolean result;
         if (adresseRegister.hasAdresseregisterCertificate(message.getReceiver().getIdentifier())) {
             Audit.info("Receiver validated", EDUCoreMarker.markerFrom(message));
