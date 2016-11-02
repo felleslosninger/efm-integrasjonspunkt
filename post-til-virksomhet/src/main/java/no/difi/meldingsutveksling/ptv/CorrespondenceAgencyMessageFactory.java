@@ -134,11 +134,10 @@ public class CorrespondenceAgencyMessageFactory {
     }
 
     private static ZonedDateTime getAllowSystemDeleteDateTime(EDUCore edu) {
-        switch (edu.getMessageType()) {
-            case EDU:
-                return ZonedDateTime.now().plusMinutes(5);
-            default:
-                return ZonedDateTime.now().plusMinutes(5);
+        if (edu.getMessageType() == EDUCore.MessageType.EDU) {
+            return ZonedDateTime.now().plusMinutes(5);
+        } else {
+            return ZonedDateTime.now().plusMinutes(5);
         }
     }
 

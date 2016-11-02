@@ -18,7 +18,6 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import static no.difi.meldingsutveksling.core.EDUCoreMarker.markerFrom;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createErrorResponse;
@@ -42,19 +41,18 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
 
         MeldingsformidlerClient client = new MeldingsformidlerClient(config);
         try {
+            Audit.info(String.format("Sending message to DPI with conversation id %s", request.getId()), markerFrom(request));
             client.sendMelding(new EDUCoreMeldingsformidlerRequest(request, serviceRecord));
         } catch (MeldingsformidlerException e) {
             Audit.error("Failed to send message to DPI", markerFrom(request), e);
             return createErrorResponse(StatusMessage.UNABLE_TO_SEND_DPI);
         }
 
-        final MeldingsformidlerClient.Kvittering kvittering = client.sjekkEtterKvittering(request.getSender().getIdentifier());
-        kvittering.executeCallback(); // TODO: få denne inn i kjernekvitteringhåndtering
         return createOkResponse();
     }
 
     private static class EDUCoreMeldingsformidlerRequest implements MeldingsformidlerRequest {
-        public static final String NORSK_BOKMAAL = "1044";
+        public static final String NORSK_BOKMAAL = "NO";
         private final EDUCore request;
         private final ServiceRecord serviceRecord;
 
@@ -72,7 +70,7 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
 
         @Override
         public List<Document> getAttachements() {
-            return new ArrayList();
+            return new ArrayList<>();
         }
 
         @Override
@@ -92,7 +90,7 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
 
         @Override
         public String getConversationId() {
-            return String.valueOf(UUID.randomUUID()); /* TODO: finnes denne i EduCore? */
+            return request.getId();
         }
 
         @Override

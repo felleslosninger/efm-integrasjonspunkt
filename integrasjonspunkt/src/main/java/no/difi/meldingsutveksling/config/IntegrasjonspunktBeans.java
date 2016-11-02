@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.config;
 
-import java.net.URISyntaxException;
 import no.difi.meldingsutveksling.AltinnFormidlingsTjenestenConfig;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.ServiceRegistryTransportFactory;
@@ -9,6 +8,7 @@ import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.KeystoreProvider;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.ptp.MeldingsformidlerException;
+import no.difi.meldingsutveksling.receipt.DpiReceiptService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.services.Adresseregister;
@@ -18,6 +18,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+
+import java.net.URISyntaxException;
 
 @Profile({"dev", "itest", "systest", "staging", "production"})
 @Configuration
@@ -56,4 +58,10 @@ public class IntegrasjonspunktBeans {
     public StrategyFactory messageStrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup, KeystoreProvider meldingsformidlerKeystoreProvider) {
         return new StrategyFactory(messageSender, serviceRegistryLookup, meldingsformidlerKeystoreProvider);
     }
+
+    @Bean
+    public DpiReceiptService dpiReceiptService(IntegrasjonspunktProperties integrasjonspunktProperties, KeystoreProvider keystoreProvider) {
+        return new DpiReceiptService(integrasjonspunktProperties, keystoreProvider);
+    }
+
 }

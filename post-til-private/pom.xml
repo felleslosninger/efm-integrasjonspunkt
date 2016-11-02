@@ -15,6 +15,11 @@
     <artifactId>post-til-private</artifactId>
     <dependencies>
         <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>domain</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.jhades</groupId>
             <artifactId>jhades</artifactId>
             <version>1.0.4</version>
@@ -53,6 +58,11 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.10.19</version>
         </dependency>
         <dependency>
             <groupId>javax.validation</groupId>

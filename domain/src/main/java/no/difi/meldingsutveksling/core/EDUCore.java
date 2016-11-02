@@ -64,6 +64,11 @@ public class EDUCore {
         return id;
     }
 
+    /**
+     * From PutMessage (BEST/EDU) this is the conversation id
+     *
+     * @param id of the message ie. the conversation id
+     */
     public void setId(String id) {
         this.id = id;
     }
