@@ -9,17 +9,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class ReceiptStrategyFactory {
 
-    private static DpvReceiptStrategy dpvReceiptStrategy;
-    private static EduReceiptStrategy eduReceiptStrategy;
+    private DpvReceiptStrategy dpvReceiptStrategy;
+    private EduReceiptStrategy eduReceiptStrategy;
 
     @Autowired
     ReceiptStrategyFactory(DpvReceiptStrategy dpvReceiptStrategy,
                            EduReceiptStrategy eduReceiptStrategy) {
-        ReceiptStrategyFactory.dpvReceiptStrategy = dpvReceiptStrategy;
-        ReceiptStrategyFactory.eduReceiptStrategy = eduReceiptStrategy;
+        this.dpvReceiptStrategy = dpvReceiptStrategy;
+        this.eduReceiptStrategy = eduReceiptStrategy;
     }
 
-    public static ReceiptStrategy getFactory(MessageReceipt receipt) {
+    public ReceiptStrategy getFactory(MessageReceipt receipt) {
         switch (receipt.getTargetType()) {
             case DPV:
                 return dpvReceiptStrategy;

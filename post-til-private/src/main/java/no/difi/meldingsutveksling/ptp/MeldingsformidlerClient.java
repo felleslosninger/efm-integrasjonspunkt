@@ -12,12 +12,10 @@ import no.difi.sdp.client2.domain.digital_post.DigitalPost;
 import no.difi.sdp.client2.domain.exceptions.SendException;
 import no.difi.sdp.client2.domain.kvittering.ForretningsKvittering;
 import no.difi.sdp.client2.domain.kvittering.KvitteringForespoersel;
-import no.digipost.api.representations.EbmsApplikasjonsKvittering;
 import no.digipost.api.representations.Organisasjonsnummer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.Transient;
 import java.lang.invoke.MethodHandles;
 import java.security.KeyStore;
 import java.time.LocalDateTime;
@@ -136,7 +134,6 @@ public class MeldingsformidlerClient {
     }
 
     public static class Kvittering implements ExternalReceipt {
-        @Transient
         private ForretningsKvittering eksternKvittering;
         private Consumer<ForretningsKvittering> callback;
         private final ServiceIdentifier serviceIdentifier = ServiceIdentifier.DPI;
