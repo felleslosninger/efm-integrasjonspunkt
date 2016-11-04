@@ -31,9 +31,13 @@ public class MeldingsformidlerClient {
     static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     public static final EmptyKvittering EMPTY_KVITTERING = new EmptyKvittering();
     private final Config config;
+    private SmsNotificationDigitalPostBuilderHandler smsNotificationHandler;
+    private EmailNotificationDigitalPostBuilderHandler emailNotificationHandler;
 
     public MeldingsformidlerClient(Config config) {
         this.config = config;
+        smsNotificationHandler = new SmsNotificationDigitalPostBuilderHandler(config);
+        emailNotificationHandler = new EmailNotificationDigitalPostBuilderHandler(config);
     }
 
     public void sendMelding(MeldingsformidlerRequest request) throws MeldingsformidlerException {
@@ -43,9 +47,10 @@ public class MeldingsformidlerClient {
                 Sertifikat.fraByteArray(request.getCertificate()),
                 Organisasjonsnummer.of(request.getOrgnrPostkasse())
         ).build();
-        DigitalPost digitalPost = DigitalPost.builder(mottaker, request.getSubject())
-                .virkningsdato(new Date())
-                .build();
+        DigitalPost.Builder digitalPost = DigitalPost.builder(mottaker, request.getSubject())
+                .virkningsdato(new Date());
+        digitalPost = smsNotificationHandler.handle(request, digitalPost);
+        digitalPost = emailNotificationHandler.handle(request, digitalPost);
         Dokument dokument = Dokument.builder(
                 request.getDocument().getTitle(),
                 request.getDocument().getFileName(),
@@ -55,8 +60,7 @@ public class MeldingsformidlerClient {
         Dokumentpakke dokumentpakke = Dokumentpakke.builder(dokument).build();
         final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(request.getSenderOrgnumber());
         Avsender behandlingsansvarlig = Avsender.builder(aktoerOrganisasjonsnummer.forfremTilAvsender()).build();
-
-        Forsendelse forsendelse = Forsendelse.digital(behandlingsansvarlig, digitalPost, dokumentpakke)
+        Forsendelse forsendelse = Forsendelse.digital(behandlingsansvarlig, digitalPost.build(), dokumentpakke)
                 .konversasjonsId(request.getConversationId())
                 .mpcId(config.getMpcId())
                 .spraakkode(request.getSpraakKode())
@@ -89,18 +93,22 @@ public class MeldingsformidlerClient {
     }
 
     public static class Config {
+        private final boolean enableEmail;
+        private final boolean enableSms;
         private final String url;
         private KeyStore keyStore;
         private String keystoreAlias;
         private String keystorePassword;
         private final String mpcId;
 
-        public Config(String url, KeyStore keyStore, String keystoreAlias, String keystorePassword, String mpcId) {
+        public Config(String url, KeyStore keyStore, String keystoreAlias, String keystorePassword, String mpcId, boolean enableEmail, boolean enableSms) {
             this.url = url;
             this.keyStore = keyStore;
             this.keystoreAlias = keystoreAlias;
             this.keystorePassword = keystorePassword;
             this.mpcId = mpcId;
+            this.enableEmail = enableEmail;
+            this.enableSms = enableSms;
         }
 
         public String getUrl() {
@@ -128,9 +136,18 @@ public class MeldingsformidlerClient {
             final String keystorePassword = config.getKeystore().getPassword();
             final String keystoreAlias = config.getKeystore().getAlias();
             final String mpcId = config.getMpcId();
-            return new Config(url, keyStore, keystoreAlias, keystorePassword, mpcId);
+            final boolean enableEmail = config.getFeature().isEnableEmailNotification();
+            final boolean enableSms = config.getFeature().isEnableSmsNotification();
+            return new Config(url, keyStore, keystoreAlias, keystorePassword, mpcId, enableEmail, enableSms);
         }
 
+        public boolean isEnableEmail() {
+            return enableEmail;
+        }
+
+        public boolean isEnableSms() {
+            return enableSms;
+        }
     }
 
     public static class Kvittering implements ExternalReceipt {

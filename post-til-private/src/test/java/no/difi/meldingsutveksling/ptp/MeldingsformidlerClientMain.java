@@ -12,16 +12,18 @@ import java.util.UUID;
 
 public class MeldingsformidlerClientMain {
 
-    public static final String URL_TESTMILJO = "https://qaoffentlig.meldingsformidler.digipost.no/api/ebms";
-    public static final String DIFI_ORGNR = "991825827";
-    public static final String CLIENT_ALIAS = "client_alias";
-    public static final String PASSWORD = "changeit";
+    static final String URL_TESTMILJO = "https://qaoffentlig.meldingsformidler.digipost.no/api/ebms";
+    static final String DIFI_ORGNR = "991825827";
+    static final String CLIENT_ALIAS = "client_alias";
+    static final String PASSWORD = "changeit";
+    public static final boolean ENABLE_EMAIL = false;
+    public static final boolean ENABLE_SMS = false;
 
 
     public static void main(String[] args) throws MeldingsformidlerException {
         KeyStore keystore = createKeyStore();
         String mpcId = "1";
-        MeldingsformidlerClient meldingsformidlerClient = new MeldingsformidlerClient(new MeldingsformidlerClient.Config(URL_TESTMILJO, keystore, CLIENT_ALIAS, PASSWORD, mpcId));
+        MeldingsformidlerClient meldingsformidlerClient = new MeldingsformidlerClient(new MeldingsformidlerClient.Config(URL_TESTMILJO, keystore, CLIENT_ALIAS, PASSWORD, mpcId, ENABLE_EMAIL, ENABLE_SMS));
         final MeldingsformidlerRequest request = new MeldingsformidlerRequest() {
             @Override
             public Document getDocument() {
@@ -57,6 +59,26 @@ public class MeldingsformidlerClientMain {
             @Override
             public String getSpraakKode() {
                 return "NO";
+            }
+
+            @Override
+            public String getEmail() {
+                return null;
+            }
+
+            @Override
+            public String getVarslingstekst() {
+                return null;
+            }
+
+            @Override
+            public String getMobileNumber() {
+                return null;
+            }
+
+            @Override
+            public boolean isNotifiable() {
+                return false;
             }
 
             @Override
@@ -98,7 +120,7 @@ public class MeldingsformidlerClientMain {
     }
 
     private static KeyStore setupKeyStore(String filename, char[] password) throws MeldingsformidlerException {
-        KeyStore keystore = null;
+        KeyStore keystore;
         try {
             keystore = KeyStore.getInstance(KeyStore.getDefaultType());
         } catch (KeyStoreException e) {
