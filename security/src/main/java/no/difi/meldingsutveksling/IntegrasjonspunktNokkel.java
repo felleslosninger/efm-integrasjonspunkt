@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling;
 
 import no.difi.asic.SignatureHelper;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -50,11 +49,11 @@ public class IntegrasjonspunktNokkel {
                 }
             }
             if (key == null) {
-                throw new MeldingsUtvekslingRuntimeException("no key with alias " + properties.getOrg().getKeystore().getAlias() + " found in the keystore " + properties.getOrg().getKeystore().getPath());
+                throw new RuntimeException("no key with alias " + properties.getOrg().getKeystore().getAlias() + " found in the keystore " + properties.getOrg().getKeystore().getPath());
             }
             return key;
         } catch (CertificateException | KeyStoreException | IOException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
-            throw new MeldingsUtvekslingRuntimeException(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -76,10 +75,10 @@ public class IntegrasjonspunktNokkel {
                 }
             }
             if (result == null) {
-                throw new MeldingsUtvekslingRuntimeException("no key with alias " + properties.getOrg().getKeystore().getAlias() + " found in the keystore " + properties.getOrg().getKeystore().getPath());
+                throw new RuntimeException("no key with alias " + properties.getOrg().getKeystore().getAlias() + " found in the keystore " + properties.getOrg().getKeystore().getPath());
             }
         } catch (CertificateException | KeyStoreException | IOException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
-            throw new MeldingsUtvekslingRuntimeException(e);
+            throw new RuntimeException(e);
         }
         return result;
     }
@@ -100,10 +99,10 @@ public class IntegrasjonspunktNokkel {
                 }
             }
             if (result == null) {
-                throw new MeldingsUtvekslingRuntimeException("no key with alias " + properties.getOrg().getKeystore().getAlias() + " found in the keystore " + properties.getOrg().getKeystore().getPath());
+                throw new RuntimeException("no key with alias " + properties.getOrg().getKeystore().getAlias() + " found in the keystore " + properties.getOrg().getKeystore().getPath());
             }
         } catch (CertificateException | KeyStoreException | IOException | NoSuchAlgorithmException e) {
-            throw new MeldingsUtvekslingRuntimeException(e);
+            throw new RuntimeException(e);
         }
         return result;
     }
@@ -113,7 +112,7 @@ public class IntegrasjonspunktNokkel {
             InputStream keyInputStream = openKeyInputStream();
             return new SignatureHelper(keyInputStream, properties.getOrg().getKeystore().getPassword(), properties.getOrg().getKeystore().getAlias(), properties.getOrg().getKeystore().getPassword());
         } catch (IOException e) {
-            throw new MeldingsUtvekslingRuntimeException("keystore " + properties.getOrg().getKeystore().getPath() + " not found on file system.");
+            throw new RuntimeException("keystore " + properties.getOrg().getKeystore().getPath() + " not found on file system.");
         }
     }
 
