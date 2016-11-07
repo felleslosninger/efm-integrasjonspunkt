@@ -217,6 +217,25 @@
                 </dependencies>
             </plugin>
             <plugin>
+                <groupId>external.atlassian.jgitflow</groupId>
+                <artifactId>jgitflow-maven-plugin</artifactId>
+                <version>1.0-m5.1</version>
+                <configuration>
+                    <flowInitContext>
+                        <masterBranchName>master</masterBranchName>
+                        <developBranchName>development</developBranchName>
+                        <featureBranchPrefix>feature-</featureBranchPrefix>
+                        <releaseBranchPrefix>release-</releaseBranchPrefix>
+                        <hotfixBranchPrefix>hotfix-</hotfixBranchPrefix>
+                        <versionTagPrefix>v@</versionTagPrefix>
+                    </flowInitContext>
+                    <allowSnapshots>true</allowSnapshots>
+                    <noDeploy>true</noDeploy>
+                    <squash>true</squash>
+                    <scmCommentPrefix>[RELEASE] </scmCommentPrefix>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
                 <version>1.4.3</version>
@@ -245,7 +264,6 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
             <scope>test</scope>
         </dependency>
 
