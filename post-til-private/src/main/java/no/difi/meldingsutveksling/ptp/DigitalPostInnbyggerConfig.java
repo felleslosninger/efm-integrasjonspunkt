@@ -59,7 +59,7 @@ public class DigitalPostInnbyggerConfig {
     }
 
     public FeatureToggle getFeature() {
-        return feature;
+        return feature != null ? feature : new FeatureToggle();
     }
 
     public static class FeatureToggle {
