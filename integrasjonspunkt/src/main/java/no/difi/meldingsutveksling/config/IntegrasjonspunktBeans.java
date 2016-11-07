@@ -1,7 +1,5 @@
 package no.difi.meldingsutveksling.config;
 
-import java.net.URISyntaxException;
-import no.difi.meldingsutveksling.AltinnFormidlingsTjenestenConfig;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.ServiceRegistryTransportFactory;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
@@ -18,6 +16,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+
+import java.net.URISyntaxException;
 
 @Profile({"dev", "itest", "systest", "staging", "production"})
 @Configuration

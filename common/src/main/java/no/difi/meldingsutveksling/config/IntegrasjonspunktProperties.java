@@ -1,8 +1,6 @@
 package no.difi.meldingsutveksling.config;
 
 import lombok.Data;
-import no.difi.meldingsutveksling.AltinnFormidlingsTjenestenConfig;
-import no.difi.meldingsutveksling.ptp.DigitalPostInnbyggerConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
 

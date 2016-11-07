@@ -17,6 +17,12 @@
     </repositories>
 
 <dependencies>
+
+    <dependency>
+        <groupId>no.difi.meldingsutveksling</groupId>
+        <artifactId>common</artifactId>
+        <version>${project.parent.version}</version>
+    </dependency>
     <dependency>
         <groupId>no.difi.meldingsutveksling</groupId>
         <artifactId>altinnexchange</artifactId>

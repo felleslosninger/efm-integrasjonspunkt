@@ -41,6 +41,7 @@
     </properties>
 
     <modules>
+        <module>common</module>
         <module>noarkexchange</module>
         <module>noarkexchange-p360</module>
         <module>noarkexchange-ephorte</module>
@@ -59,6 +60,7 @@
         <module>post-til-virksomhet</module>
         <module>post-til-private</module>
         <module>service-registry-client</module>
+        <module>security</module>
     </modules>
 
     <dependencyManagement>

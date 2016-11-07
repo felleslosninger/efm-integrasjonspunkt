@@ -3,11 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package no.difi.meldingsutveksling.ptp;
+package no.difi.meldingsutveksling.config;
+
+import org.springframework.core.io.Resource;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import org.springframework.core.io.Resource;
 
 /**
  *
