@@ -1,5 +1,11 @@
 package no.difi.meldingsutveksling;
 
+import no.difi.asic.SignatureHelper;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,11 +13,6 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
-import no.difi.asic.SignatureHelper;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * Class responsible for accessing the keystore for the Integrasjonspunkt.
@@ -78,6 +79,30 @@ public class IntegrasjonspunktNokkel {
                 throw new MeldingsUtvekslingRuntimeException("no key with alias " + properties.getOrg().getKeystore().getAlias() + " found in the keystore " + properties.getOrg().getKeystore().getPath());
             }
         } catch (CertificateException | KeyStoreException | IOException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
+            throw new MeldingsUtvekslingRuntimeException(e);
+        }
+        return result;
+    }
+
+    public X509Certificate getX509Certificate() {
+
+        X509Certificate result = null;
+        try (InputStream i = openKeyInputStream()) {
+            KeyStore keystore = KeyStore.getInstance("JKS");
+            keystore.load(i, properties.getOrg().getKeystore().getPassword().toCharArray());
+            Enumeration aliases = keystore.aliases();
+            while (aliases.hasMoreElements()) {
+                String alias = (String) aliases.nextElement();
+                boolean isKey = keystore.isKeyEntry(alias);
+                if (isKey && alias.equals(properties.getOrg().getKeystore().getAlias())) {
+                    result = (X509Certificate) keystore.getCertificate(alias);
+                    break;
+                }
+            }
+            if (result == null) {
+                throw new MeldingsUtvekslingRuntimeException("no key with alias " + properties.getOrg().getKeystore().getAlias() + " found in the keystore " + properties.getOrg().getKeystore().getPath());
+            }
+        } catch (CertificateException | KeyStoreException | IOException | NoSuchAlgorithmException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
         return result;

@@ -9,6 +9,7 @@ import org.springframework.core.io.Resource;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.net.URL;
 
 /**
  * Configurable properties for Integrasjonspunkt.
@@ -42,6 +43,9 @@ public class IntegrasjonspunktProperties {
 
     @Valid
     private DigitalPostInnbyggerConfig dpi;
+
+    @Valid
+    private IdportenOidc idportenOidc;
 
     /**
      * Feature toggles.
@@ -88,6 +92,16 @@ public class IntegrasjonspunktProperties {
          */
         private String externalServiceEditionCode;
 
+    }
+
+    @Data
+    public static class IdportenOidc {
+
+        @NotNull(message = "ID-porten OIDC endpoint base url must be configured.")
+        private URL baseUrl;
+
+        @NotNull(message = "ID-porten OIDC issuer must be configured.")
+        private String issuer;
     }
 
     @Data
