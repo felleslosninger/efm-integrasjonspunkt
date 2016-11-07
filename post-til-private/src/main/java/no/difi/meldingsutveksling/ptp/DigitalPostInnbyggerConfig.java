@@ -5,9 +5,10 @@
  */
 package no.difi.meldingsutveksling.ptp;
 
+import org.springframework.core.io.Resource;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import org.springframework.core.io.Resource;
 
 /**
  *
@@ -19,6 +20,8 @@ public class DigitalPostInnbyggerConfig {
 
     @Valid
     private Keystore keystore;
+
+    private FeatureToggle feature;
 
     /**
      * ID for queue messages are sent to and their corresponding receipts can be retrieved from.
@@ -49,6 +52,35 @@ public class DigitalPostInnbyggerConfig {
 
     public void setKeystore(Keystore keystore) {
         this.keystore = keystore;
+    }
+
+    public void setFeature(FeatureToggle feature) {
+        this.feature = feature;
+    }
+
+    public FeatureToggle getFeature() {
+        return feature != null ? feature : new FeatureToggle();
+    }
+
+    public static class FeatureToggle {
+        private boolean enableEmailNotification = false;
+        private boolean enableSmsNotification = false;
+
+        public boolean isEnableEmailNotification() {
+            return enableEmailNotification;
+        }
+
+        public boolean isEnableSmsNotification() {
+            return enableSmsNotification;
+        }
+
+        public void setEnableEmailNotification(boolean enableEmailNotification) {
+            this.enableEmailNotification = enableEmailNotification;
+        }
+
+        public void setEnableSmsNotification(boolean enableSmsNotification) {
+            this.enableSmsNotification = enableSmsNotification;
+        }
     }
 
     public static class Keystore {

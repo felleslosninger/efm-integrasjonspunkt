@@ -6,10 +6,11 @@ import no.difi.meldingsutveksling.ptp.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.lang.NotImplementedException;
-import static org.hamcrest.core.IsInstanceOf.instanceOf;
-import static org.junit.Assert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -25,6 +26,7 @@ public class StrategyFactoryTest {
         final DigitalPostInnbyggerConfig dpic = mock(DigitalPostInnbyggerConfig.class);
         final DigitalPostInnbyggerConfig.Keystore keystore = mock(DigitalPostInnbyggerConfig.Keystore.class);
         when(dpic.getKeystore()).thenReturn(keystore);
+        when(dpic.getFeature()).thenReturn(new DigitalPostInnbyggerConfig.FeatureToggle());
         when(messageSender.getProperties()).thenReturn(properties);
         when(properties.getAltinnPTV()).thenReturn(ptvMock);
         when(properties.getDpi()).thenReturn(dpic);
