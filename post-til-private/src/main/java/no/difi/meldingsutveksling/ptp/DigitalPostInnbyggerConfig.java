@@ -5,9 +5,12 @@
  */
 package no.difi.meldingsutveksling.ptp;
 
+import no.difi.sdp.client2.domain.Prioritet;
+import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
+import org.springframework.core.io.Resource;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import org.springframework.core.io.Resource;
 
 /**
  *
@@ -26,6 +29,15 @@ public class DigitalPostInnbyggerConfig {
      */
     @NotNull
     private String mpcId;
+
+    @NotNull
+    private String spraakKode;
+
+    @NotNull
+    private Prioritet prioritet;
+
+    @NotNull
+    private Sikkerhetsnivaa sikkerhetsnivaa;
 
     public String getMpcId() {
         return mpcId;
@@ -49,6 +61,30 @@ public class DigitalPostInnbyggerConfig {
 
     public void setKeystore(Keystore keystore) {
         this.keystore = keystore;
+    }
+
+    public String getSpraakKode() {
+        return spraakKode;
+    }
+
+    public void setSpraakKode(String spraakKode) {
+        this.spraakKode = spraakKode;
+    }
+
+    public Prioritet getPrioritet() {
+        return prioritet;
+    }
+
+    public void setPrioritet(Prioritet prioritet) {
+        this.prioritet = prioritet;
+    }
+
+    public Sikkerhetsnivaa getSikkerhetsnivaa() {
+        return sikkerhetsnivaa;
+    }
+
+    public void setSikkerhetsnivaa(Sikkerhetsnivaa sikkerhetsnivaa) {
+        this.sikkerhetsnivaa = sikkerhetsnivaa;
     }
 
     public static class Keystore {

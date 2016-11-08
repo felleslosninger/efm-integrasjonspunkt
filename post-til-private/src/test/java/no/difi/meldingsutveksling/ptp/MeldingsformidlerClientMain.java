@@ -1,6 +1,8 @@
 package no.difi.meldingsutveksling.ptp;
 
 import com.google.common.io.ByteStreams;
+import no.difi.sdp.client2.domain.Prioritet;
+import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
 
 import java.io.*;
 import java.security.KeyStore;
@@ -16,12 +18,15 @@ public class MeldingsformidlerClientMain {
     public static final String DIFI_ORGNR = "991825827";
     public static final String CLIENT_ALIAS = "client_alias";
     public static final String PASSWORD = "changeit";
+    private static final String SPRAAK_KODE = "NO";
+    private static final Prioritet PRIORITET = Prioritet.NORMAL;
+    public static final Sikkerhetsnivaa SIKKERHETSNIVAA = Sikkerhetsnivaa.NIVAA_4;
 
 
     public static void main(String[] args) throws MeldingsformidlerException {
         KeyStore keystore = createKeyStore();
         String mpcId = "1";
-        MeldingsformidlerClient meldingsformidlerClient = new MeldingsformidlerClient(new MeldingsformidlerClient.Config(URL_TESTMILJO, keystore, CLIENT_ALIAS, PASSWORD, mpcId));
+        MeldingsformidlerClient meldingsformidlerClient = new MeldingsformidlerClient(new MeldingsformidlerClient.Config(URL_TESTMILJO, keystore, CLIENT_ALIAS, PASSWORD, mpcId, SPRAAK_KODE, PRIORITET, SIKKERHETSNIVAA));
         final MeldingsformidlerRequest request = new MeldingsformidlerRequest() {
             @Override
             public Document getDocument() {
@@ -52,11 +57,6 @@ public class MeldingsformidlerClientMain {
             @Override
             public String getSenderOrgnumber() {
                 return DIFI_ORGNR;
-            }
-
-            @Override
-            public String getSpraakKode() {
-                return "NO";
             }
 
             @Override
@@ -98,7 +98,7 @@ public class MeldingsformidlerClientMain {
     }
 
     private static KeyStore setupKeyStore(String filename, char[] password) throws MeldingsformidlerException {
-        KeyStore keystore = null;
+        KeyStore keystore;
         try {
             keystore = KeyStore.getInstance(KeyStore.getDefaultType());
         } catch (KeyStoreException e) {

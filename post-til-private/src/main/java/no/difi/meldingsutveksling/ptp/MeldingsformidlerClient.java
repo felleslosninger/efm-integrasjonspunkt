@@ -9,6 +9,7 @@ import no.difi.sdp.client2.KlientKonfigurasjon;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.sdp.client2.domain.*;
 import no.difi.sdp.client2.domain.digital_post.DigitalPost;
+import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
 import no.difi.sdp.client2.domain.exceptions.SendException;
 import no.difi.sdp.client2.domain.kvittering.ForretningsKvittering;
 import no.difi.sdp.client2.domain.kvittering.KvitteringForespoersel;
@@ -45,6 +46,7 @@ public class MeldingsformidlerClient {
         ).build();
         DigitalPost digitalPost = DigitalPost.builder(mottaker, request.getSubject())
                 .virkningsdato(new Date())
+                .sikkerhetsnivaa(config.getSikkerhetsNivaa())
                 .build();
         Dokument dokument = Dokument.builder(
                 request.getDocument().getTitle(),
@@ -59,7 +61,8 @@ public class MeldingsformidlerClient {
         Forsendelse forsendelse = Forsendelse.digital(behandlingsansvarlig, digitalPost, dokumentpakke)
                 .konversasjonsId(request.getConversationId())
                 .mpcId(config.getMpcId())
-                .spraakkode(request.getSpraakKode())
+                .spraakkode(config.getSpraakKode())
+                .prioritet(config.getPrioritet())
                 .build();
 
         SikkerDigitalPostKlient klient = createSikkerDigitalPostKlient(aktoerOrganisasjonsnummer);
@@ -81,7 +84,7 @@ public class MeldingsformidlerClient {
 
     public ExternalReceipt sjekkEtterKvittering(String orgnr) {
         SikkerDigitalPostKlient klient = createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer.of(orgnr));
-        final ForretningsKvittering forretningsKvittering = klient.hentKvittering(KvitteringForespoersel.builder(Prioritet.NORMAL).mpcId(config.getMpcId()).build());
+        final ForretningsKvittering forretningsKvittering = klient.hentKvittering(KvitteringForespoersel.builder(config.getPrioritet()).mpcId(config.getMpcId()).build());
         if (forretningsKvittering == null) {
             return EMPTY_KVITTERING;
         }
@@ -94,13 +97,19 @@ public class MeldingsformidlerClient {
         private String keystoreAlias;
         private String keystorePassword;
         private final String mpcId;
+        private String spraakKode;
+        private Prioritet prioritet;
+        private Sikkerhetsnivaa sikkerhetsnivaa;
 
-        public Config(String url, KeyStore keyStore, String keystoreAlias, String keystorePassword, String mpcId) {
+        public Config(String url, KeyStore keyStore, String keystoreAlias, String keystorePassword, String mpcId, String spraakKode, Prioritet prioritet, Sikkerhetsnivaa sikkerhetsnivaa) {
             this.url = url;
             this.keyStore = keyStore;
             this.keystoreAlias = keystoreAlias;
             this.keystorePassword = keystorePassword;
             this.mpcId = mpcId;
+            this.spraakKode = spraakKode;
+            this.prioritet = prioritet;
+            this.sikkerhetsnivaa = sikkerhetsnivaa;
         }
 
         public String getUrl() {
@@ -128,7 +137,22 @@ public class MeldingsformidlerClient {
             final String keystorePassword = config.getKeystore().getPassword();
             final String keystoreAlias = config.getKeystore().getAlias();
             final String mpcId = config.getMpcId();
-            return new Config(url, keyStore, keystoreAlias, keystorePassword, mpcId);
+            final String spraakKode = config.getSpraakKode();
+            final Prioritet prioritet = config.getPrioritet();
+            final Sikkerhetsnivaa sikkerhetsnivaa = config.getSikkerhetsnivaa();
+            return new Config(url, keyStore, keystoreAlias, keystorePassword, mpcId, spraakKode, prioritet, sikkerhetsnivaa);
+        }
+
+        public String getSpraakKode() {
+            return spraakKode;
+        }
+
+        public Prioritet getPrioritet() {
+            return prioritet;
+        }
+
+        public Sikkerhetsnivaa getSikkerhetsNivaa() {
+            return sikkerhetsnivaa;
         }
 
     }

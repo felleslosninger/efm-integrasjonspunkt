@@ -60,12 +60,4 @@ public interface MeldingsformidlerRequest {
      * @return the organization number of the postkasse provider as defined in KRR
      */
     String getOrgnrPostkasse();
-
-    // === Optional fields ===
-    /**
-     * Optional - defaults to Norwegian
-     * @return
-     */
-    String getSpraakKode();
-
 }

@@ -52,7 +52,6 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
     }
 
     private static class EDUCoreMeldingsformidlerRequest implements MeldingsformidlerRequest {
-        public static final String NORSK_BOKMAAL = "NO";
         private final EDUCore request;
         private final ServiceRecord serviceRecord;
 
@@ -110,11 +109,6 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
         @Override
         public String getOrgnrPostkasse() {
             return serviceRecord.getOrgnrPostkasse(); /* fra KRR via SR */
-        }
-
-        @Override
-        public String getSpraakKode() {
-            return NORSK_BOKMAAL; /* TODO: hvor hentes denne fra? EduCore? */
         }
 
     }
