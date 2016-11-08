@@ -230,7 +230,6 @@
                         <versionTagPrefix>v@</versionTagPrefix>
                     </flowInitContext>
                     <allowSnapshots>true</allowSnapshots>
-                    <noDeploy>true</noDeploy>
                     <squash>true</squash>
                     <scmCommentPrefix>[RELEASE] </scmCommentPrefix>
                 </configuration>
