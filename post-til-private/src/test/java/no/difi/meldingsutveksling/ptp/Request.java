@@ -15,7 +15,7 @@ public class Request implements MeldingsformidlerRequest {
     }
 
     @Override
-    public List<Document> getAttachements() {
+    public List<Document> getAttachments() {
         return null;
     }
 
