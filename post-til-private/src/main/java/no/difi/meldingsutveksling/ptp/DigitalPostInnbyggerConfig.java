@@ -23,6 +23,8 @@ public class DigitalPostInnbyggerConfig {
     @Valid
     private Keystore keystore;
 
+    private FeatureToggle feature;
+
     /**
      * ID for queue messages are sent to and their corresponding receipts can be retrieved from.
      * This is to avoid reading receipts from other applications that use the same service
@@ -85,6 +87,35 @@ public class DigitalPostInnbyggerConfig {
 
     public void setSikkerhetsnivaa(Sikkerhetsnivaa sikkerhetsnivaa) {
         this.sikkerhetsnivaa = sikkerhetsnivaa;
+    }
+
+    public void setFeature(FeatureToggle feature) {
+        this.feature = feature;
+    }
+
+    public FeatureToggle getFeature() {
+        return feature != null ? feature : new FeatureToggle();
+    }
+
+    public static class FeatureToggle {
+        private boolean enableEmailNotification = false;
+        private boolean enableSmsNotification = false;
+
+        public boolean isEnableEmailNotification() {
+            return enableEmailNotification;
+        }
+
+        public boolean isEnableSmsNotification() {
+            return enableSmsNotification;
+        }
+
+        public void setEnableEmailNotification(boolean enableEmailNotification) {
+            this.enableEmailNotification = enableEmailNotification;
+        }
+
+        public void setEnableSmsNotification(boolean enableSmsNotification) {
+            this.enableSmsNotification = enableSmsNotification;
+        }
     }
 
     public static class Keystore {

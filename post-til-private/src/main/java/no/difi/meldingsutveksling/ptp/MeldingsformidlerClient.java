@@ -32,9 +32,13 @@ public class MeldingsformidlerClient {
     static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     public static final EmptyKvittering EMPTY_KVITTERING = new EmptyKvittering();
     private final Config config;
+    private SmsNotificationDigitalPostBuilderHandler smsNotificationHandler;
+    private EmailNotificationDigitalPostBuilderHandler emailNotificationHandler;
 
     public MeldingsformidlerClient(Config config) {
         this.config = config;
+        smsNotificationHandler = new SmsNotificationDigitalPostBuilderHandler(config);
+        emailNotificationHandler = new EmailNotificationDigitalPostBuilderHandler(config);
     }
 
     public void sendMelding(MeldingsformidlerRequest request) throws MeldingsformidlerException {
@@ -44,10 +48,12 @@ public class MeldingsformidlerClient {
                 Sertifikat.fraByteArray(request.getCertificate()),
                 Organisasjonsnummer.of(request.getOrgnrPostkasse())
         ).build();
-        DigitalPost digitalPost = DigitalPost.builder(mottaker, request.getSubject())
+        DigitalPost.Builder digitalPost = DigitalPost.builder(mottaker, request.getSubject())
                 .virkningsdato(new Date())
-                .sikkerhetsnivaa(config.getSikkerhetsNivaa())
-                .build();
+                .sikkerhetsnivaa(config.getSikkerhetsNivaa());
+        digitalPost = smsNotificationHandler.handle(request, digitalPost);
+        digitalPost = emailNotificationHandler.handle(request, digitalPost);
+
         Dokument dokument = Dokument.builder(
                 request.getDocument().getTitle(),
                 request.getDocument().getFileName(),
@@ -57,8 +63,7 @@ public class MeldingsformidlerClient {
         Dokumentpakke dokumentpakke = Dokumentpakke.builder(dokument).build();
         final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(request.getSenderOrgnumber());
         Avsender behandlingsansvarlig = Avsender.builder(aktoerOrganisasjonsnummer.forfremTilAvsender()).build();
-
-        Forsendelse forsendelse = Forsendelse.digital(behandlingsansvarlig, digitalPost, dokumentpakke)
+        Forsendelse forsendelse = Forsendelse.digital(behandlingsansvarlig, digitalPost.build(), dokumentpakke)
                 .konversasjonsId(request.getConversationId())
                 .mpcId(config.getMpcId())
                 .spraakkode(config.getSpraakKode())
@@ -92,6 +97,8 @@ public class MeldingsformidlerClient {
     }
 
     public static class Config {
+        private final boolean enableEmail;
+        private final boolean enableSms;
         private final String url;
         private KeyStore keyStore;
         private String keystoreAlias;
@@ -101,12 +108,14 @@ public class MeldingsformidlerClient {
         private Prioritet prioritet;
         private Sikkerhetsnivaa sikkerhetsnivaa;
 
-        public Config(String url, KeyStore keyStore, String keystoreAlias, String keystorePassword, String mpcId, String spraakKode, Prioritet prioritet, Sikkerhetsnivaa sikkerhetsnivaa) {
+        public Config(String url, KeyStore keyStore, String keystoreAlias, String keystorePassword, String mpcId, boolean enableEmail, boolean enableSmsString spraakKode, Prioritet prioritet, Sikkerhetsnivaa sikkerhetsnivaa) {
             this.url = url;
             this.keyStore = keyStore;
             this.keystoreAlias = keystoreAlias;
             this.keystorePassword = keystorePassword;
             this.mpcId = mpcId;
+            this.enableEmail = enableEmail;
+            this.enableSms = enableSms;
             this.spraakKode = spraakKode;
             this.prioritet = prioritet;
             this.sikkerhetsnivaa = sikkerhetsnivaa;
@@ -140,7 +149,9 @@ public class MeldingsformidlerClient {
             final String spraakKode = config.getSpraakKode();
             final Prioritet prioritet = config.getPrioritet();
             final Sikkerhetsnivaa sikkerhetsnivaa = config.getSikkerhetsnivaa();
-            return new Config(url, keyStore, keystoreAlias, keystorePassword, mpcId, spraakKode, prioritet, sikkerhetsnivaa);
+            final boolean enableEmail = config.getFeature().isEnableEmailNotification();
+            final boolean enableSms = config.getFeature().isEnableSmsNotification();
+            return new Config(url, keyStore, keystoreAlias, keystorePassword, mpcId, enableEmail, enableSms, spraakKode, prioritet, sikkerhetsnivaa);
         }
 
         public String getSpraakKode() {
@@ -155,6 +166,13 @@ public class MeldingsformidlerClient {
             return sikkerhetsnivaa;
         }
 
+        public boolean isEnableEmail() {
+            return enableEmail;
+        }
+
+        public boolean isEnableSms() {
+            return enableSms;
+        }
     }
 
     public static class Kvittering implements ExternalReceipt {

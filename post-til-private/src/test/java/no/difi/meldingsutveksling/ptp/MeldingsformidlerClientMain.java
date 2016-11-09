@@ -21,12 +21,14 @@ public class MeldingsformidlerClientMain {
     private static final String SPRAAK_KODE = "NO";
     private static final Prioritet PRIORITET = Prioritet.NORMAL;
     public static final Sikkerhetsnivaa SIKKERHETSNIVAA = Sikkerhetsnivaa.NIVAA_4;
+    public static final boolean ENABLE_EMAIL = false;
+    public static final boolean ENABLE_SMS = false;
 
 
     public static void main(String[] args) throws MeldingsformidlerException {
         KeyStore keystore = createKeyStore();
         String mpcId = "1";
-        MeldingsformidlerClient meldingsformidlerClient = new MeldingsformidlerClient(new MeldingsformidlerClient.Config(URL_TESTMILJO, keystore, CLIENT_ALIAS, PASSWORD, mpcId, SPRAAK_KODE, PRIORITET, SIKKERHETSNIVAA));
+        MeldingsformidlerClient meldingsformidlerClient = new MeldingsformidlerClient(new MeldingsformidlerClient.Config(URL_TESTMILJO, keystore, CLIENT_ALIAS, PASSWORD, mpcId, ENABLE_EMAIL, ENABLE_SMS, SPRAAK_KODE, PRIORITET, SIKKERHETSNIVAA));
         final MeldingsformidlerRequest request = new MeldingsformidlerRequest() {
             @Override
             public Document getDocument() {
@@ -57,6 +59,31 @@ public class MeldingsformidlerClientMain {
             @Override
             public String getSenderOrgnumber() {
                 return DIFI_ORGNR;
+            }
+
+            @Override
+            public String getSpraakKode() {
+                return "NO";
+            }
+
+            @Override
+            public String getEmail() {
+                return null;
+            }
+
+            @Override
+            public String getVarslingstekst() {
+                return null;
+            }
+
+            @Override
+            public String getMobileNumber() {
+                return null;
+            }
+
+            @Override
+            public boolean isNotifiable() {
+                return false;
             }
 
             @Override

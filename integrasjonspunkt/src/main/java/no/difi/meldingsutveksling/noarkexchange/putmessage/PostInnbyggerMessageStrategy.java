@@ -52,6 +52,7 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
     }
 
     private static class EDUCoreMeldingsformidlerRequest implements MeldingsformidlerRequest {
+        public static final String KAN_VARSLES = "KAN_VARSLES";
         private final EDUCore request;
         private final ServiceRecord serviceRecord;
 
@@ -109,6 +110,26 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
         @Override
         public String getOrgnrPostkasse() {
             return serviceRecord.getOrgnrPostkasse(); /* fra KRR via SR */
+        }
+
+        @Override
+        public String getEmail() {
+            return serviceRecord.getEpostAdresse();
+        }
+
+        @Override
+        public String getVarslingstekst() {
+            return serviceRecord.getVarslingsStatus();
+        }
+
+        @Override
+        public String getMobileNumber() {
+            return serviceRecord.getMobilnummer();
+        }
+
+        @Override
+        public boolean isNotifiable() {
+            return serviceRecord.getVarslingsStatus().equalsIgnoreCase(KAN_VARSLES);
         }
 
     }
