@@ -14,8 +14,7 @@ public class DpiReceiptService {
     }
 
     public ExternalReceipt checkForReceipts() {
-        MeldingsformidlerClient.Config config = MeldingsformidlerClient.Config.from(properties.getDpi(), keystoreProvider.getKeyStore());
-        MeldingsformidlerClient client = new MeldingsformidlerClient(config);
+        MeldingsformidlerClient client = new MeldingsformidlerClient(properties.getDpi(), keystoreProvider.getKeyStore());
         return client.sjekkEtterKvittering(properties.getOrg().getNumber());
     }
 }

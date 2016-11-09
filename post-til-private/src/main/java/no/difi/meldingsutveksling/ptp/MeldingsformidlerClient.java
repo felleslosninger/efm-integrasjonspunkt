@@ -30,12 +30,14 @@ public class MeldingsformidlerClient {
 
     static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     public static final EmptyKvittering EMPTY_KVITTERING = new EmptyKvittering();
-    private final Config config;
     private SmsNotificationDigitalPostBuilderHandler smsNotificationHandler;
     private EmailNotificationDigitalPostBuilderHandler emailNotificationHandler;
+    private final DigitalPostInnbyggerConfig config;
+    private KeyStore keyStore;
 
-    public MeldingsformidlerClient(Config config) {
+    public MeldingsformidlerClient(DigitalPostInnbyggerConfig config, KeyStore keyStore) {
         this.config = config;
+        this.keyStore = keyStore;
         smsNotificationHandler = new SmsNotificationDigitalPostBuilderHandler(config);
         emailNotificationHandler = new EmailNotificationDigitalPostBuilderHandler(config);
     }
@@ -48,9 +50,11 @@ public class MeldingsformidlerClient {
                 Organisasjonsnummer.of(request.getOrgnrPostkasse())
         ).build();
         DigitalPost.Builder digitalPost = DigitalPost.builder(mottaker, request.getSubject())
-                .virkningsdato(new Date());
+                .virkningsdato(new Date())
+                .sikkerhetsnivaa(config.getSecurityLevel());
         digitalPost = smsNotificationHandler.handle(request, digitalPost);
         digitalPost = emailNotificationHandler.handle(request, digitalPost);
+
         Dokument dokument = Dokument.builder(
                 request.getDocument().getTitle(),
                 request.getDocument().getFileName(),
@@ -63,7 +67,8 @@ public class MeldingsformidlerClient {
         Forsendelse forsendelse = Forsendelse.digital(behandlingsansvarlig, digitalPost.build(), dokumentpakke)
                 .konversasjonsId(request.getConversationId())
                 .mpcId(config.getMpcId())
-                .spraakkode(request.getSpraakKode())
+                .spraakkode(config.getLanguage())
+                .prioritet(config.getPriority())
                 .build();
 
         SikkerDigitalPostKlient klient = createSikkerDigitalPostKlient(aktoerOrganisasjonsnummer);
@@ -75,80 +80,23 @@ public class MeldingsformidlerClient {
     }
 
     private SikkerDigitalPostKlient createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer) {
-        KlientKonfigurasjon klientKonfigurasjon = KlientKonfigurasjon.builder(config.getUrl()).connectionTimeout(20, TimeUnit.SECONDS).build();
+        KlientKonfigurasjon klientKonfigurasjon = KlientKonfigurasjon.builder(config.getEndpoint()).connectionTimeout(20, TimeUnit.SECONDS).build();
 
 
-        Databehandler tekniskAvsender = Databehandler.builder(aktoerOrganisasjonsnummer.forfremTilDatabehandler(), Noekkelpar.fraKeyStoreUtenTrustStore(config.getKeyStore(), config.getKeystoreAlias(), config.getKeystorePassword())).build();
+        Databehandler tekniskAvsender = Databehandler.builder(aktoerOrganisasjonsnummer.forfremTilDatabehandler(), Noekkelpar.fraKeyStoreUtenTrustStore(keyStore, config.getKeystore().getAlias(), config.getKeystore().getPassword())).build();
 
         return new SikkerDigitalPostKlient(tekniskAvsender, klientKonfigurasjon);
     }
 
     public ExternalReceipt sjekkEtterKvittering(String orgnr) {
         SikkerDigitalPostKlient klient = createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer.of(orgnr));
-        final ForretningsKvittering forretningsKvittering = klient.hentKvittering(KvitteringForespoersel.builder(Prioritet.NORMAL).mpcId(config.getMpcId()).build());
+        final ForretningsKvittering forretningsKvittering = klient.hentKvittering(KvitteringForespoersel.builder(config.getPriority()).mpcId(config.getMpcId()).build());
         if (forretningsKvittering == null) {
             return EMPTY_KVITTERING;
         }
         return Kvittering.from(forretningsKvittering).withCallback(klient::bekreft);
     }
 
-    public static class Config {
-        private final boolean enableEmail;
-        private final boolean enableSms;
-        private final String url;
-        private KeyStore keyStore;
-        private String keystoreAlias;
-        private String keystorePassword;
-        private final String mpcId;
-
-        public Config(String url, KeyStore keyStore, String keystoreAlias, String keystorePassword, String mpcId, boolean enableEmail, boolean enableSms) {
-            this.url = url;
-            this.keyStore = keyStore;
-            this.keystoreAlias = keystoreAlias;
-            this.keystorePassword = keystorePassword;
-            this.mpcId = mpcId;
-            this.enableEmail = enableEmail;
-            this.enableSms = enableSms;
-        }
-
-        public String getUrl() {
-            return url;
-        }
-
-        public KeyStore getKeyStore() {
-            return keyStore;
-        }
-
-        public String getKeystoreAlias() {
-            return keystoreAlias;
-        }
-
-        public String getKeystorePassword() {
-            return keystorePassword;
-        }
-
-        public String getMpcId() {
-            return mpcId;
-        }
-
-        public static Config from(DigitalPostInnbyggerConfig config, KeyStore keyStore) {
-            final String url = config.getEndpoint();
-            final String keystorePassword = config.getKeystore().getPassword();
-            final String keystoreAlias = config.getKeystore().getAlias();
-            final String mpcId = config.getMpcId();
-            final boolean enableEmail = config.getFeature().isEnableEmailNotification();
-            final boolean enableSms = config.getFeature().isEnableSmsNotification();
-            return new Config(url, keyStore, keystoreAlias, keystorePassword, mpcId, enableEmail, enableSms);
-        }
-
-        public boolean isEnableEmail() {
-            return enableEmail;
-        }
-
-        public boolean isEnableSms() {
-            return enableSms;
-        }
-    }
 
     public static class Kvittering implements ExternalReceipt {
         private ForretningsKvittering eksternKvittering;

@@ -8,14 +8,12 @@ import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
-import no.difi.meldingsutveksling.ptp.Document;
-import no.difi.meldingsutveksling.ptp.MeldingsformidlerClient;
-import no.difi.meldingsutveksling.ptp.MeldingsformidlerException;
-import no.difi.meldingsutveksling.ptp.MeldingsformidlerRequest;
+import no.difi.meldingsutveksling.ptp.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 
 import java.io.UnsupportedEncodingException;
+import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,11 +25,13 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
 
     public static final String MPC_ID = "no.difi.move-integrasjonspunkt";
     private final ServiceRegistryLookup serviceRegistry;
-    private MeldingsformidlerClient.Config config;
+    private KeyStore keyStore;
+    private DigitalPostInnbyggerConfig config;
 
-    public PostInnbyggerMessageStrategy(MeldingsformidlerClient.Config config, ServiceRegistryLookup serviceRegistryLookup) {
+    public PostInnbyggerMessageStrategy(DigitalPostInnbyggerConfig config, ServiceRegistryLookup serviceRegistryLookup, KeyStore keyStore) {
         this.config = config;
         this.serviceRegistry = serviceRegistryLookup;
+        this.keyStore = keyStore;
     }
 
     @Override
@@ -39,7 +39,7 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
         request.setServiceIdentifier(ServiceIdentifier.DPI);
         final ServiceRecord serviceRecord = serviceRegistry.getServiceRecord(request.getReceiver().getIdentifier());
 
-        MeldingsformidlerClient client = new MeldingsformidlerClient(config);
+        MeldingsformidlerClient client = new MeldingsformidlerClient(config, keyStore);
         try {
             Audit.info(String.format("Sending message to DPI with conversation id %s", request.getId()), markerFrom(request));
             client.sendMelding(new EDUCoreMeldingsformidlerRequest(request, serviceRecord));
@@ -52,7 +52,6 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
     }
 
     private static class EDUCoreMeldingsformidlerRequest implements MeldingsformidlerRequest {
-        public static final String NORSK_BOKMAAL = "NO";
         public static final String KAN_VARSLES = "KAN_VARSLES";
         private final EDUCore request;
         private final ServiceRecord serviceRecord;
@@ -111,11 +110,6 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
         @Override
         public String getOrgnrPostkasse() {
             return serviceRecord.getOrgnrPostkasse(); /* fra KRR via SR */
-        }
-
-        @Override
-        public String getSpraakKode() {
-            return NORSK_BOKMAAL;
         }
 
         @Override

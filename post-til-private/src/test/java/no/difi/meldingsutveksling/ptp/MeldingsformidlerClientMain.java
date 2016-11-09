@@ -1,6 +1,8 @@
 package no.difi.meldingsutveksling.ptp;
 
 import com.google.common.io.ByteStreams;
+import no.difi.sdp.client2.domain.Prioritet;
+import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
 
 import java.io.*;
 import java.security.KeyStore;
@@ -12,10 +14,13 @@ import java.util.UUID;
 
 public class MeldingsformidlerClientMain {
 
-    static final String URL_TESTMILJO = "https://qaoffentlig.meldingsformidler.digipost.no/api/ebms";
+    private static final String URL_TESTMILJO = "https://qaoffentlig.meldingsformidler.digipost.no/api/ebms";
     static final String DIFI_ORGNR = "991825827";
-    static final String CLIENT_ALIAS = "client_alias";
-    static final String PASSWORD = "changeit";
+    private static final String CLIENT_ALIAS = "client_alias";
+    private static final String PASSWORD = "changeit";
+    private static final String SPRAAK_KODE = "NO";
+    private static final Prioritet PRIORITET = Prioritet.NORMAL;
+    private static final Sikkerhetsnivaa SIKKERHETSNIVAA = Sikkerhetsnivaa.NIVAA_4;
     public static final boolean ENABLE_EMAIL = false;
     public static final boolean ENABLE_SMS = false;
 
@@ -23,7 +28,8 @@ public class MeldingsformidlerClientMain {
     public static void main(String[] args) throws MeldingsformidlerException {
         KeyStore keystore = createKeyStore();
         String mpcId = "1";
-        MeldingsformidlerClient meldingsformidlerClient = new MeldingsformidlerClient(new MeldingsformidlerClient.Config(URL_TESTMILJO, keystore, CLIENT_ALIAS, PASSWORD, mpcId, ENABLE_EMAIL, ENABLE_SMS));
+        DigitalPostInnbyggerConfig config = getDigitalPostInnbyggerConfig(mpcId);
+        MeldingsformidlerClient meldingsformidlerClient = new MeldingsformidlerClient(config, keystore);
         final MeldingsformidlerRequest request = new MeldingsformidlerRequest() {
             @Override
             public Document getDocument() {
@@ -54,11 +60,6 @@ public class MeldingsformidlerClientMain {
             @Override
             public String getSenderOrgnumber() {
                 return DIFI_ORGNR;
-            }
-
-            @Override
-            public String getSpraakKode() {
-                return "NO";
             }
 
             @Override
@@ -113,6 +114,20 @@ public class MeldingsformidlerClientMain {
         } catch (MeldingsformidlerException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    static DigitalPostInnbyggerConfig getDigitalPostInnbyggerConfig(String mpcId) {
+        DigitalPostInnbyggerConfig config = new DigitalPostInnbyggerConfig();
+        DigitalPostInnbyggerConfig.Keystore keystoreValues = new DigitalPostInnbyggerConfig.Keystore();
+        keystoreValues.setPassword(PASSWORD);
+        keystoreValues.setAlias(CLIENT_ALIAS);
+        config.setKeystore(keystoreValues);
+        config.setEndpoint(URL_TESTMILJO);
+        config.setMpcId(mpcId);
+        config.setPriority(PRIORITET);
+        config.setSecurityLevel(SIKKERHETSNIVAA);
+        config.setLanguage(SPRAAK_KODE);
+        return config;
     }
 
     static KeyStore createKeyStore() throws MeldingsformidlerException {

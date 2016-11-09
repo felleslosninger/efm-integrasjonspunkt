@@ -61,13 +61,6 @@ public interface MeldingsformidlerRequest {
      */
     String getOrgnrPostkasse();
 
-    // === Optional fields ===
-    /**
-     * Optional - defaults to Norwegian
-     * @return
-     */
-    String getSpraakKode();
-
     /**
      * Needed if email notification is enabled
      * @return the email adress of the person(s) to be notified
