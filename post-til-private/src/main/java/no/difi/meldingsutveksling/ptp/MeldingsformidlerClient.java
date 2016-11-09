@@ -9,7 +9,6 @@ import no.difi.sdp.client2.KlientKonfigurasjon;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.sdp.client2.domain.*;
 import no.difi.sdp.client2.domain.digital_post.DigitalPost;
-import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
 import no.difi.sdp.client2.domain.exceptions.SendException;
 import no.difi.sdp.client2.domain.kvittering.ForretningsKvittering;
 import no.difi.sdp.client2.domain.kvittering.KvitteringForespoersel;
@@ -31,12 +30,14 @@ public class MeldingsformidlerClient {
 
     static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     public static final EmptyKvittering EMPTY_KVITTERING = new EmptyKvittering();
-    private final Config config;
     private SmsNotificationDigitalPostBuilderHandler smsNotificationHandler;
     private EmailNotificationDigitalPostBuilderHandler emailNotificationHandler;
+    private final DigitalPostInnbyggerConfig config;
+    private KeyStore keyStore;
 
-    public MeldingsformidlerClient(Config config) {
+    public MeldingsformidlerClient(DigitalPostInnbyggerConfig config, KeyStore keyStore) {
         this.config = config;
+        this.keyStore = keyStore;
         smsNotificationHandler = new SmsNotificationDigitalPostBuilderHandler(config);
         emailNotificationHandler = new EmailNotificationDigitalPostBuilderHandler(config);
     }
@@ -50,7 +51,7 @@ public class MeldingsformidlerClient {
         ).build();
         DigitalPost.Builder digitalPost = DigitalPost.builder(mottaker, request.getSubject())
                 .virkningsdato(new Date())
-                .sikkerhetsnivaa(config.getSikkerhetsNivaa());
+                .sikkerhetsnivaa(config.getSikkerhetsnivaa());
         digitalPost = smsNotificationHandler.handle(request, digitalPost);
         digitalPost = emailNotificationHandler.handle(request, digitalPost);
 
@@ -79,10 +80,10 @@ public class MeldingsformidlerClient {
     }
 
     private SikkerDigitalPostKlient createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer) {
-        KlientKonfigurasjon klientKonfigurasjon = KlientKonfigurasjon.builder(config.getUrl()).connectionTimeout(20, TimeUnit.SECONDS).build();
+        KlientKonfigurasjon klientKonfigurasjon = KlientKonfigurasjon.builder(config.getEndpoint()).connectionTimeout(20, TimeUnit.SECONDS).build();
 
 
-        Databehandler tekniskAvsender = Databehandler.builder(aktoerOrganisasjonsnummer.forfremTilDatabehandler(), Noekkelpar.fraKeyStoreUtenTrustStore(config.getKeyStore(), config.getKeystoreAlias(), config.getKeystorePassword())).build();
+        Databehandler tekniskAvsender = Databehandler.builder(aktoerOrganisasjonsnummer.forfremTilDatabehandler(), Noekkelpar.fraKeyStoreUtenTrustStore(keyStore, config.getKeystore().getAlias(), config.getKeystore().getPassword())).build();
 
         return new SikkerDigitalPostKlient(tekniskAvsender, klientKonfigurasjon);
     }
@@ -96,84 +97,6 @@ public class MeldingsformidlerClient {
         return Kvittering.from(forretningsKvittering).withCallback(klient::bekreft);
     }
 
-    public static class Config {
-        private final boolean enableEmail;
-        private final boolean enableSms;
-        private final String url;
-        private KeyStore keyStore;
-        private String keystoreAlias;
-        private String keystorePassword;
-        private final String mpcId;
-        private String spraakKode;
-        private Prioritet prioritet;
-        private Sikkerhetsnivaa sikkerhetsnivaa;
-
-        public Config(String url, KeyStore keyStore, String keystoreAlias, String keystorePassword, String mpcId, boolean enableEmail, boolean enableSmsString spraakKode, Prioritet prioritet, Sikkerhetsnivaa sikkerhetsnivaa) {
-            this.url = url;
-            this.keyStore = keyStore;
-            this.keystoreAlias = keystoreAlias;
-            this.keystorePassword = keystorePassword;
-            this.mpcId = mpcId;
-            this.enableEmail = enableEmail;
-            this.enableSms = enableSms;
-            this.spraakKode = spraakKode;
-            this.prioritet = prioritet;
-            this.sikkerhetsnivaa = sikkerhetsnivaa;
-        }
-
-        public String getUrl() {
-            return url;
-        }
-
-        public KeyStore getKeyStore() {
-            return keyStore;
-        }
-
-        public String getKeystoreAlias() {
-            return keystoreAlias;
-        }
-
-        public String getKeystorePassword() {
-            return keystorePassword;
-        }
-
-        public String getMpcId() {
-            return mpcId;
-        }
-
-        public static Config from(DigitalPostInnbyggerConfig config, KeyStore keyStore) {
-            final String url = config.getEndpoint();
-            final String keystorePassword = config.getKeystore().getPassword();
-            final String keystoreAlias = config.getKeystore().getAlias();
-            final String mpcId = config.getMpcId();
-            final String spraakKode = config.getSpraakKode();
-            final Prioritet prioritet = config.getPrioritet();
-            final Sikkerhetsnivaa sikkerhetsnivaa = config.getSikkerhetsnivaa();
-            final boolean enableEmail = config.getFeature().isEnableEmailNotification();
-            final boolean enableSms = config.getFeature().isEnableSmsNotification();
-            return new Config(url, keyStore, keystoreAlias, keystorePassword, mpcId, enableEmail, enableSms, spraakKode, prioritet, sikkerhetsnivaa);
-        }
-
-        public String getSpraakKode() {
-            return spraakKode;
-        }
-
-        public Prioritet getPrioritet() {
-            return prioritet;
-        }
-
-        public Sikkerhetsnivaa getSikkerhetsNivaa() {
-            return sikkerhetsnivaa;
-        }
-
-        public boolean isEnableEmail() {
-            return enableEmail;
-        }
-
-        public boolean isEnableSms() {
-            return enableSms;
-        }
-    }
 
     public static class Kvittering implements ExternalReceipt {
         private ForretningsKvittering eksternKvittering;

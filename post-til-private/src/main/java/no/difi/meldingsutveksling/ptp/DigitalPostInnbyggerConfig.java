@@ -97,6 +97,14 @@ public class DigitalPostInnbyggerConfig {
         return feature != null ? feature : new FeatureToggle();
     }
 
+    public boolean isEnableEmailNotification() {
+        return getFeature().isEnableEmailNotification();
+    }
+
+    public boolean isEnableSmsNotification() {
+        return getFeature().isEnableSmsNotification();
+    }
+
     public static class FeatureToggle {
         private boolean enableEmailNotification = false;
         private boolean enableSmsNotification = false;
