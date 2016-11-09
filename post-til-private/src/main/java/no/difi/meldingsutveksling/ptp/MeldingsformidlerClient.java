@@ -51,7 +51,7 @@ public class MeldingsformidlerClient {
         ).build();
         DigitalPost.Builder digitalPost = DigitalPost.builder(mottaker, request.getSubject())
                 .virkningsdato(new Date())
-                .sikkerhetsnivaa(config.getSikkerhetsnivaa());
+                .sikkerhetsnivaa(config.getSecurityLevel());
         digitalPost = smsNotificationHandler.handle(request, digitalPost);
         digitalPost = emailNotificationHandler.handle(request, digitalPost);
 
@@ -67,8 +67,8 @@ public class MeldingsformidlerClient {
         Forsendelse forsendelse = Forsendelse.digital(behandlingsansvarlig, digitalPost.build(), dokumentpakke)
                 .konversasjonsId(request.getConversationId())
                 .mpcId(config.getMpcId())
-                .spraakkode(config.getSpraakKode())
-                .prioritet(config.getPrioritet())
+                .spraakkode(config.getLanguage())
+                .prioritet(config.getPriority())
                 .build();
 
         SikkerDigitalPostKlient klient = createSikkerDigitalPostKlient(aktoerOrganisasjonsnummer);
@@ -90,7 +90,7 @@ public class MeldingsformidlerClient {
 
     public ExternalReceipt sjekkEtterKvittering(String orgnr) {
         SikkerDigitalPostKlient klient = createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer.of(orgnr));
-        final ForretningsKvittering forretningsKvittering = klient.hentKvittering(KvitteringForespoersel.builder(config.getPrioritet()).mpcId(config.getMpcId()).build());
+        final ForretningsKvittering forretningsKvittering = klient.hentKvittering(KvitteringForespoersel.builder(config.getPriority()).mpcId(config.getMpcId()).build());
         if (forretningsKvittering == null) {
             return EMPTY_KVITTERING;
         }

@@ -124,9 +124,9 @@ public class MeldingsformidlerClientMain {
         config.setKeystore(keystoreValues);
         config.setEndpoint(URL_TESTMILJO);
         config.setMpcId(mpcId);
-        config.setPrioritet(PRIORITET);
-        config.setSikkerhetsnivaa(SIKKERHETSNIVAA);
-        config.setSpraakKode(SPRAAK_KODE);
+        config.setPriority(PRIORITET);
+        config.setSecurityLevel(SIKKERHETSNIVAA);
+        config.setLanguage(SPRAAK_KODE);
         return config;
     }
 

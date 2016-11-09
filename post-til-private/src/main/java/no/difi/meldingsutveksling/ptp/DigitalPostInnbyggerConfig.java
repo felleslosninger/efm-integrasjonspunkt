@@ -33,13 +33,13 @@ public class DigitalPostInnbyggerConfig {
     private String mpcId;
 
     @NotNull
-    private String spraakKode;
+    private String language;
 
     @NotNull
-    private Prioritet prioritet;
+    private Prioritet priority;
 
     @NotNull
-    private Sikkerhetsnivaa sikkerhetsnivaa;
+    private Sikkerhetsnivaa securityLevel;
 
     public String getMpcId() {
         return mpcId;
@@ -65,28 +65,28 @@ public class DigitalPostInnbyggerConfig {
         this.keystore = keystore;
     }
 
-    public String getSpraakKode() {
-        return spraakKode;
+    public String getLanguage() {
+        return language;
     }
 
-    public void setSpraakKode(String spraakKode) {
-        this.spraakKode = spraakKode;
+    public void setLanguage(String language) {
+        this.language = language;
     }
 
-    public Prioritet getPrioritet() {
-        return prioritet;
+    public Prioritet getPriority() {
+        return priority;
     }
 
-    public void setPrioritet(Prioritet prioritet) {
-        this.prioritet = prioritet;
+    public void setPriority(Prioritet priority) {
+        this.priority = priority;
     }
 
-    public Sikkerhetsnivaa getSikkerhetsnivaa() {
-        return sikkerhetsnivaa;
+    public Sikkerhetsnivaa getSecurityLevel() {
+        return securityLevel;
     }
 
-    public void setSikkerhetsnivaa(Sikkerhetsnivaa sikkerhetsnivaa) {
-        this.sikkerhetsnivaa = sikkerhetsnivaa;
+    public void setSecurityLevel(Sikkerhetsnivaa securityLevel) {
+        this.securityLevel = securityLevel;
     }
 
     public void setFeature(FeatureToggle feature) {
