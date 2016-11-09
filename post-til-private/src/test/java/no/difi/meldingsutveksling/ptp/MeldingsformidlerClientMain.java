@@ -9,6 +9,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,17 +35,27 @@ public class MeldingsformidlerClientMain {
             @Override
             public Document getDocument() {
                 final String filname = "Testdokument.DOCX";
+                return loadDocumentFromFile(filname, "Testdokument");
+            }
+
+            private Document loadDocumentFromFile(String filname, String title) {
                 try(final InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(filname)) {
                     final byte[] bytes = ByteStreams.toByteArray(resourceAsStream);
-                    return new Document(bytes, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", filname, "Testdokument");
+                    return new Document(bytes, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", filname, title);
                 } catch (IOException e) {
                     throw new RuntimeException("Unable to read Testdokument", e);
                 }
             }
 
             @Override
-            public List<Document> getAttachements() {
-                return null;
+            public List<Document> getAttachments() {
+                List<Document> attachements = new ArrayList<>();
+                for(int i = 1; i <= 2; i++) {
+                    final String filename = String.format("Vedlegg%d.DOCX", i);
+                    final String tittel = String.format("Vedlegg%d", i);
+                    attachements.add(loadDocumentFromFile(filename, tittel));
+                }
+                return attachements;
             }
 
             @Override

@@ -21,8 +21,10 @@ import java.security.KeyStore;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static no.difi.meldingsutveksling.logging.MarkerFactory.conversationIdMarker;
 
@@ -55,13 +57,9 @@ public class MeldingsformidlerClient {
         digitalPost = smsNotificationHandler.handle(request, digitalPost);
         digitalPost = emailNotificationHandler.handle(request, digitalPost);
 
-        Dokument dokument = Dokument.builder(
-                request.getDocument().getTitle(),
-                request.getDocument().getFileName(),
-                request.getDocument().getContents()
-        ).mimeType(request.getDocument().getMimeType())
-                .build();
-        Dokumentpakke dokumentpakke = Dokumentpakke.builder(dokument).build();
+        Dokument dokument = dokumentFromDocument(request.getDocument());
+        Dokumentpakke dokumentpakke = Dokumentpakke.builder(dokument).vedlegg(toVedlegg(request.getAttachments())).build();
+
         final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(request.getSenderOrgnumber());
         Avsender behandlingsansvarlig = Avsender.builder(aktoerOrganisasjonsnummer.forfremTilAvsender()).build();
         Forsendelse forsendelse = Forsendelse.digital(behandlingsansvarlig, digitalPost.build(), dokumentpakke)
@@ -77,6 +75,19 @@ public class MeldingsformidlerClient {
         } catch (SendException e) {
             throw new MeldingsformidlerException("Unable to send message to SDP", e);
         }
+    }
+
+    private List<Dokument> toVedlegg(List<Document> attachements) {
+        return attachements.stream().map(this::dokumentFromDocument).collect(Collectors.toList());
+    }
+
+    private Dokument dokumentFromDocument(Document document) {
+        return Dokument.builder(
+                document.getTitle(),
+                document.getFileName(),
+                document.getContents()
+        ).mimeType(document.getMimeType())
+                .build();
     }
 
     private SikkerDigitalPostKlient createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer) {

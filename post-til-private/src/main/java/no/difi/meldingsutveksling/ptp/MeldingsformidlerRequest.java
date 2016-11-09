@@ -17,7 +17,7 @@ public interface MeldingsformidlerRequest {
     /**
      * @return the attachements for the post (mail). This is the other documents in the JournalPost
      */
-    List<Document> getAttachements();
+    List<Document> getAttachments();
 
     /**
      *
