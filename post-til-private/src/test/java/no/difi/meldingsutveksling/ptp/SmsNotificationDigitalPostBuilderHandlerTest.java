@@ -10,18 +10,18 @@ import static org.mockito.Mockito.*;
 
 public class SmsNotificationDigitalPostBuilderHandlerTest {
 
-    private MeldingsformidlerClient.Config config;
+    private DigitalPostInnbyggerConfig config;
     private DigitalPost.Builder builder;
 
     @Before
     public void setup() {
-        config = mock(MeldingsformidlerClient.Config.class);
+        config = mock(DigitalPostInnbyggerConfig.class);
         builder = mock(DigitalPost.Builder.class);
     }
 
     @Test
     public void smsNotificationDisabledShouldNotSetEpostVarsel() {
-        when(config.isEnableSms()).thenReturn(false);
+        when(config.isEnableSmsNotification()).thenReturn(false);
 
         SmsNotificationDigitalPostBuilderHandler handler = new SmsNotificationDigitalPostBuilderHandler(config);
         handler.handle(new Request().withNotifiable(true), builder);
@@ -31,7 +31,7 @@ public class SmsNotificationDigitalPostBuilderHandlerTest {
 
     @Test
     public void notifiableFalseShouldNotSetEpostVarsel() {
-        when(config.isEnableSms()).thenReturn(true);
+        when(config.isEnableEmailNotification()).thenReturn(true);
 
         SmsNotificationDigitalPostBuilderHandler handler = new SmsNotificationDigitalPostBuilderHandler(config);
         handler.handle(new Request().withNotifiable(false), builder);
@@ -41,7 +41,7 @@ public class SmsNotificationDigitalPostBuilderHandlerTest {
 
     @Test
     public void notifiableAndSmsFeatureEnabledShouldSetEpostVarsel() {
-        when(config.isEnableSms()).thenReturn(true);
+        when(config.isEnableSmsNotification()).thenReturn(true);
 
         SmsNotificationDigitalPostBuilderHandler handler = new SmsNotificationDigitalPostBuilderHandler(config);
         handler.handle(new Request().withNotifiable(true), builder);

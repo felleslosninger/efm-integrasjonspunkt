@@ -5,9 +5,7 @@ import java.util.List;
 public class Request implements MeldingsformidlerRequest {
     private boolean notifiable;
 
-    public Request() {
-
-    }
+    public Request() {}
 
     @Override
     public Document getDocument() {
@@ -51,11 +49,6 @@ public class Request implements MeldingsformidlerRequest {
 
     @Override
     public String getOrgnrPostkasse() {
-        return null;
-    }
-
-    @Override
-    public String getSpraakKode() {
         return null;
     }
 
