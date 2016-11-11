@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.core.EDUCore;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import java.time.LocalDateTime;
 
 /**
@@ -22,6 +23,9 @@ public class MessageReceipt {
     private LocalDateTime lastUpdate;
     private ServiceIdentifier targetType;
     private boolean received;
+
+    @Lob
+    private String originalReceipt;
 
     MessageReceipt(){}
 
@@ -108,6 +112,14 @@ public class MessageReceipt {
 
     public void setReceived(boolean received) {
         this.received = received;
+    }
+
+    public String getOriginalReceipt() {
+        return originalReceipt;
+    }
+
+    public void setOriginalReceipt(String originalReceipt) {
+        this.originalReceipt = originalReceipt;
     }
 
     @Override

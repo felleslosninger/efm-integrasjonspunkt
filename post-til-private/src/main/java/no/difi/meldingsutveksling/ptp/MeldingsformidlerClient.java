@@ -7,7 +7,15 @@ import no.difi.meldingsutveksling.receipt.ExternalReceipt;
 import no.difi.meldingsutveksling.receipt.MessageReceipt;
 import no.difi.sdp.client2.KlientKonfigurasjon;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
-import no.difi.sdp.client2.domain.*;
+import no.difi.sdp.client2.domain.AktoerOrganisasjonsnummer;
+import no.difi.sdp.client2.domain.Avsender;
+import no.difi.sdp.client2.domain.Databehandler;
+import no.difi.sdp.client2.domain.Dokument;
+import no.difi.sdp.client2.domain.Dokumentpakke;
+import no.difi.sdp.client2.domain.Forsendelse;
+import no.difi.sdp.client2.domain.Mottaker;
+import no.difi.sdp.client2.domain.Noekkelpar;
+import no.difi.sdp.client2.domain.Sertifikat;
 import no.difi.sdp.client2.domain.digital_post.DigitalPost;
 import no.difi.sdp.client2.domain.exceptions.SendException;
 import no.difi.sdp.client2.domain.kvittering.ForretningsKvittering;
@@ -15,6 +23,7 @@ import no.difi.sdp.client2.domain.kvittering.KvitteringForespoersel;
 import no.digipost.api.representations.Organisasjonsnummer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 
 import java.lang.invoke.MethodHandles;
 import java.security.KeyStore;
@@ -79,36 +88,70 @@ public class MeldingsformidlerClient {
         }
     }
 
+    private SikkerDigitalPostKlient createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer, ClientInterceptor clientInterceptor) {
+        KlientKonfigurasjon klientKonfigurasjon = createKlientKonfigurasjonBuilder().soapInterceptors(clientInterceptor).build();
+
+        return createSikkerDigitalPostKlient(klientKonfigurasjon, aktoerOrganisasjonsnummer);
+    }
+
     private SikkerDigitalPostKlient createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer) {
-        KlientKonfigurasjon klientKonfigurasjon = KlientKonfigurasjon.builder(config.getEndpoint()).connectionTimeout(20, TimeUnit.SECONDS).build();
+        KlientKonfigurasjon klientKonfigurasjon = createKlientKonfigurasjonBuilder().build();
 
+        return createSikkerDigitalPostKlient(klientKonfigurasjon, aktoerOrganisasjonsnummer);
+    }
 
+    private SikkerDigitalPostKlient createSikkerDigitalPostKlient(KlientKonfigurasjon klientKonfigurasjon, AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer) {
         Databehandler tekniskAvsender = Databehandler.builder(aktoerOrganisasjonsnummer.forfremTilDatabehandler(), Noekkelpar.fraKeyStoreUtenTrustStore(keyStore, config.getKeystore().getAlias(), config.getKeystore().getPassword())).build();
 
         return new SikkerDigitalPostKlient(tekniskAvsender, klientKonfigurasjon);
     }
 
+    private KlientKonfigurasjon.Builder createKlientKonfigurasjonBuilder() {
+        return KlientKonfigurasjon.builder(config.getEndpoint()).connectionTimeout(20, TimeUnit.SECONDS);
+    }
+
+
     public ExternalReceipt sjekkEtterKvittering(String orgnr) {
-        SikkerDigitalPostKlient klient = createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer.of(orgnr));
+        Kvittering kvittering = new Kvittering();
+        PayloadInterceptor payloadInterceptor = new PayloadInterceptor(kvittering::setRawReceipt);
+        SikkerDigitalPostKlient klient = createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer.of(orgnr), payloadInterceptor);
         final ForretningsKvittering forretningsKvittering = klient.hentKvittering(KvitteringForespoersel.builder(config.getPriority()).mpcId(config.getMpcId()).build());
         if (forretningsKvittering == null) {
             return EMPTY_KVITTERING;
         }
-        return Kvittering.from(forretningsKvittering).withCallback(klient::bekreft);
+        return kvittering.setEksternKvittering(forretningsKvittering).withCallback(klient::bekreft);
     }
 
 
     public static class Kvittering implements ExternalReceipt {
         private ForretningsKvittering eksternKvittering;
         private Consumer<ForretningsKvittering> callback;
+        private String rawReceipt;
         private final ServiceIdentifier serviceIdentifier = ServiceIdentifier.DPI;
+
+        public Kvittering() {
+
+        }
 
         public Kvittering(ForretningsKvittering forretningsKvittering) {
             this.eksternKvittering = forretningsKvittering;
         }
 
+        public void setRawReceipt(String rawReceipt) {
+            this.rawReceipt = rawReceipt;
+        }
+
+        public String getRawReceipt() {
+            return rawReceipt;
+        }
+
         public Kvittering withCallback(Consumer<ForretningsKvittering> callback) {
             this.callback = callback;
+            return this;
+        }
+
+        public Kvittering setEksternKvittering(ForretningsKvittering eksternKvittering) {
+            this.eksternKvittering = eksternKvittering;
             return this;
         }
 
@@ -124,6 +167,7 @@ public class MeldingsformidlerClient {
             }
             receipt.setLastUpdate(LocalDateTime.ofInstant(eksternKvittering.getTidspunkt(), ZoneId.systemDefault()));
             receipt.setReceived(true);
+            receipt.setOriginalReceipt(getRawReceipt());
             return receipt;
         }
 
