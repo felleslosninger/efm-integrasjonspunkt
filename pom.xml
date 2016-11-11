@@ -5,7 +5,7 @@
     <groupId>no.difi.meldingsutveksling</groupId>
     <artifactId>parent-pom</artifactId>
     <packaging>pom</packaging>
-    <version>1.7.28-SNAPSHOT</version>
+    <version>1.7.34-SNAPSHOT</version>
     <name>Multiproject for meldingsutveksling</name>
 
     <scm>
@@ -42,6 +42,7 @@
 
     <modules>
         <module>common</module>
+        <module>security</module>
         <module>noarkexchange</module>
         <module>noarkexchange-p360</module>
         <module>noarkexchange-ephorte</module>
@@ -60,7 +61,6 @@
         <module>post-til-virksomhet</module>
         <module>post-til-private</module>
         <module>service-registry-client</module>
-        <module>security</module>
     </modules>
 
     <dependencyManagement>

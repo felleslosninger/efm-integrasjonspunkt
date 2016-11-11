@@ -3,7 +3,7 @@
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>1.7.28-SNAPSHOT</version>
+        <version>1.7.34-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -14,6 +14,11 @@
 
     <artifactId>post-til-private</artifactId>
     <dependencies>
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>domain</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.jhades</groupId>
             <artifactId>jhades</artifactId>
@@ -55,6 +60,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.10.19</version>
+        </dependency>
+        <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
             <version>1.1.0.Final</version>
@@ -63,7 +73,7 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>common</artifactId>
-            <version>1.7.28-SNAPSHOT</version>
+            <version>1.7.34-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

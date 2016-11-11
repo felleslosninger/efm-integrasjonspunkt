@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -16,9 +17,9 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 
 import java.io.UnsupportedEncodingException;
+import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import static no.difi.meldingsutveksling.core.EDUCoreMarker.markerFrom;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createErrorResponse;
@@ -28,11 +29,13 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
 
     public static final String MPC_ID = "no.difi.move-integrasjonspunkt";
     private final ServiceRegistryLookup serviceRegistry;
-    private MeldingsformidlerClient.Config config;
+    private KeyStore keyStore;
+    private DigitalPostInnbyggerConfig config;
 
-    public PostInnbyggerMessageStrategy(MeldingsformidlerClient.Config config, ServiceRegistryLookup serviceRegistryLookup) {
+    public PostInnbyggerMessageStrategy(DigitalPostInnbyggerConfig config, ServiceRegistryLookup serviceRegistryLookup, KeyStore keyStore) {
         this.config = config;
         this.serviceRegistry = serviceRegistryLookup;
+        this.keyStore = keyStore;
     }
 
     @Override
@@ -40,21 +43,20 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
         request.setServiceIdentifier(ServiceIdentifier.DPI);
         final ServiceRecord serviceRecord = serviceRegistry.getServiceRecord(request.getReceiver().getIdentifier());
 
-        MeldingsformidlerClient client = new MeldingsformidlerClient(config);
+        MeldingsformidlerClient client = new MeldingsformidlerClient(config, keyStore);
         try {
+            Audit.info(String.format("Sending message to DPI with conversation id %s", request.getId()), markerFrom(request));
             client.sendMelding(new EDUCoreMeldingsformidlerRequest(request, serviceRecord));
         } catch (MeldingsformidlerException e) {
             Audit.error("Failed to send message to DPI", markerFrom(request), e);
             return createErrorResponse(StatusMessage.UNABLE_TO_SEND_DPI);
         }
 
-        final MeldingsformidlerClient.Kvittering kvittering = client.sjekkEtterKvittering(request.getSender().getIdentifier());
-        kvittering.executeCallback(); // TODO: få denne inn i kjernekvitteringhåndtering
         return createOkResponse();
     }
 
     private static class EDUCoreMeldingsformidlerRequest implements MeldingsformidlerRequest {
-        public static final String NORSK_BOKMAAL = "1044";
+        public static final String KAN_VARSLES = "KAN_VARSLES";
         private final EDUCore request;
         private final ServiceRecord serviceRecord;
 
@@ -67,12 +69,21 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
         public Document getDocument() {
             final MeldingType meldingType = request.getPayloadAsMeldingType();
             final DokumentType dokumentType = meldingType.getJournpost().getDokument().get(0);
+            return from(dokumentType);
+        }
+
+        private Document from(DokumentType dokumentType) {
             return new Document(dokumentType.getFil().getBase64(), dokumentType.getVeMimeType(), dokumentType.getVeFilnavn(), dokumentType.getDbTittel());
         }
 
         @Override
-        public List<Document> getAttachements() {
-            return new ArrayList();
+        public List<Document> getAttachments() {
+            List<DokumentType> allFiles = request.getPayloadAsMeldingType().getJournpost().getDokument();
+            List<Document> attachments = new ArrayList<>();
+            for(int i = 1; i < allFiles.size(); i++) {
+                attachments.add(from(allFiles.get(i)));
+            }
+            return attachments;
         }
 
         @Override
@@ -92,7 +103,7 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
 
         @Override
         public String getConversationId() {
-            return String.valueOf(UUID.randomUUID()); /* TODO: finnes denne i EduCore? */
+            return request.getId();
         }
 
         @Override
@@ -115,8 +126,23 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
         }
 
         @Override
-        public String getSpraakKode() {
-            return NORSK_BOKMAAL; /* TODO: hvor hentes denne fra? EduCore? */
+        public String getEmail() {
+            return serviceRecord.getEpostAdresse();
+        }
+
+        @Override
+        public String getVarslingstekst() {
+            return serviceRecord.getVarslingsStatus();
+        }
+
+        @Override
+        public String getMobileNumber() {
+            return serviceRecord.getMobilnummer();
+        }
+
+        @Override
+        public boolean isNotifiable() {
+            return serviceRecord.getVarslingsStatus().equalsIgnoreCase(KAN_VARSLES);
         }
 
     }

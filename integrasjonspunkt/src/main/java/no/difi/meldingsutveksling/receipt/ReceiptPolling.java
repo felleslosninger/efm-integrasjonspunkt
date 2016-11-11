@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.List;
 
+import static no.difi.meldingsutveksling.ptp.MeldingsformidlerClient.EMPTY_KVITTERING;
 import static no.difi.meldingsutveksling.receipt.MessageReceiptMarker.markerFrom;
 
 /**
@@ -28,6 +29,13 @@ public class ReceiptPolling {
     @Autowired
     private MessageReceiptRepository messageReceiptRepository;
 
+    @Autowired
+    ReceiptStrategyFactory receiptStrategyFactory;
+
+    @Autowired
+    DpiReceiptService dpiReceiptService;
+
+    // TODO: fjernes etter test!
     // TODO: fjernes etter test!
     @PostConstruct
     private void addTestData() {
@@ -49,14 +57,29 @@ public class ReceiptPolling {
 
         receipts.forEach(r -> {
             log.info(markerFrom(r), "Checking status, messageId={}", r.getMessageId());
-            ReceiptStrategy strategy = ReceiptStrategyFactory.getFactory(r);
+            ReceiptStrategy strategy = receiptStrategyFactory.getFactory(r);
             if (strategy.checkReceived(r)) {
-                Audit.info("Changed status to \"received\" for messageId="+r.getMessageId(), markerFrom(r));
+                Audit.info("Changed status to \"received\" for messageId=" + r.getMessageId(), markerFrom(r));
                 r.setReceived(true);
             }
             // Save regardless due to possible change to lastUpdate
             messageReceiptRepository.save(r);
         });
 
+    }
+
+    @Scheduled(fixedRate = 10000)
+    public void dpiReceiptsScheduledTask() {
+        final ExternalReceipt externalReceipt = dpiReceiptService.checkForReceipts();
+        if(externalReceipt != EMPTY_KVITTERING) {
+            Audit.info("Got receipt (DPI)", externalReceipt.logMarkers());
+            final String id = externalReceipt.getId();
+            MessageReceipt receipt = messageReceiptRepository.findOne(id);
+            receipt = externalReceipt.update(receipt);
+            messageReceiptRepository.save(receipt);
+            Audit.info("Updated receipt (DPI)", externalReceipt.logMarkers());
+            externalReceipt.confirmReceipt();
+            Audit.info("Confirmed receipt (DPI)", externalReceipt.logMarkers());
+        }
     }
 }

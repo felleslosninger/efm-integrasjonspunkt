@@ -17,7 +17,7 @@ public interface MeldingsformidlerRequest {
     /**
      * @return the attachements for the post (mail). This is the other documents in the JournalPost
      */
-    List<Document> getAttachements();
+    List<Document> getAttachments();
 
     /**
      *
@@ -61,11 +61,27 @@ public interface MeldingsformidlerRequest {
      */
     String getOrgnrPostkasse();
 
-    // === Optional fields ===
     /**
-     * Optional - defaults to Norwegian
-     * @return
+     * Needed if email notification is enabled
+     * @return the email adress of the person(s) to be notified
      */
-    String getSpraakKode();
+    String getEmail();
 
+    /**
+     * Needed if notification is enabled
+     * @return text displayed in notification
+     */
+    String getVarslingstekst();
+
+    /**
+     * Needed if sms notification is enabled
+     * @return mobile phone number of person(s) to be notified
+     */
+    String getMobileNumber();
+
+    /**
+     *
+     * @return true if allowed to send notification(s) regarding the message being sent
+     */
+    boolean isNotifiable();
 }

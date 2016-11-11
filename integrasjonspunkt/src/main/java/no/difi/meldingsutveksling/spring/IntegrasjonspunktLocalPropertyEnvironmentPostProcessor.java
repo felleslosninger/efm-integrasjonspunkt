@@ -31,7 +31,6 @@ public class IntegrasjonspunktLocalPropertyEnvironmentPostProcessor implements E
             return;
         }
         try {
-
             final FileSystemResource resource = new FileSystemResource("integrasjonspunkt-local.properties");
             Properties loadAllProperties = PropertiesLoaderUtils.loadProperties(resource);
             environment.getPropertySources().addFirst(new PropertiesPropertySource("file:integrasjonspunkt-local.properties", loadAllProperties));
