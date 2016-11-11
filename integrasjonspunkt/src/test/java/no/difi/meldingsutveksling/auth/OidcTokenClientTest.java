@@ -29,7 +29,7 @@ public class OidcTokenClientTest {
         props.getOidc().setEnable(true);
         props.getOidc().setUrl(new URL("https://eid-exttest.difi.no/idporten-oidc-provider/token"));
         props.getOidc().setClientId("test_move");
-        props.getOidc().setScopes(Arrays.asList("scope_move_1", "scope_move_2"));
+        props.getOidc().setScopes(Arrays.asList("move/dpo.read","move/dpv.read","move/dpi.read"));
         props.getOidc().setKeystore(new IntegrasjonspunktProperties.Keystore());
         props.getOidc().getKeystore().setAlias("client_alias");
         props.getOidc().getKeystore().setPassword("changeit");
@@ -43,7 +43,7 @@ public class OidcTokenClientTest {
         String jwt = oidcTokenClient.generateJWT();
         SignedJWT parsedJWT = SignedJWT.parse(jwt);
         assertEquals("test_move", parsedJWT.getJWTClaimsSet().getIssuer());
-        assertEquals("scope_move_1 scope_move_2", parsedJWT.getJWTClaimsSet().getClaims().get("scope"));
+        assertEquals("move/dpo.read move/dpv.read move/dpi.read", parsedJWT.getJWTClaimsSet().getClaims().get("scope"));
     }
 
     @Test
