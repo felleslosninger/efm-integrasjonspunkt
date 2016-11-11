@@ -8,6 +8,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.net.URL;
+import java.util.List;
 
 /**
  * Configurable properties for Integrasjonspunkt.
@@ -43,7 +44,7 @@ public class IntegrasjonspunktProperties {
     private DigitalPostInnbyggerConfig dpi;
 
     @Valid
-    private IdportenOidc idportenOidc;
+    private Oidc oidc;
 
     /**
      * Feature toggles.
@@ -92,14 +93,18 @@ public class IntegrasjonspunktProperties {
 
     }
 
+    /**
+     * Idporten Oidc
+     */
     @Data
-    public static class IdportenOidc {
+    public static class Oidc {
 
-        @NotNull(message = "ID-porten OIDC endpoint base url must be configured.")
-        private URL baseUrl;
-
-        @NotNull(message = "ID-porten OIDC issuer must be configured.")
-        private String issuer;
+        @NotNull
+        private boolean enable;
+        private URL url;
+        private List<String> scopes;
+        private String clientId;
+        private Keystore keystore;
     }
 
     @Data

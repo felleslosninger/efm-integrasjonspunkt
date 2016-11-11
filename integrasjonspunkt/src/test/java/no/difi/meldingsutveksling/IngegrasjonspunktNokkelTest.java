@@ -1,12 +1,14 @@
 package no.difi.meldingsutveksling;
 
-import java.security.PrivateKey;
-import static junit.framework.Assert.assertNotNull;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.io.FileSystemResource;
+
+import java.security.PrivateKey;
+
+import static junit.framework.Assert.assertNotNull;
 
 @Ignore("Temporary ignored. Functionality is to be moved, reason queue handling.")
 public class IngegrasjonspunktNokkelTest {
@@ -15,16 +17,13 @@ public class IngegrasjonspunktNokkelTest {
 
     @Before
     public void init() {
-        IntegrasjonspunktProperties properties = new IntegrasjonspunktProperties();
+        IntegrasjonspunktProperties.Keystore keystore = new IntegrasjonspunktProperties.Keystore();
 
-        properties.setOrg(new IntegrasjonspunktProperties.Organization());
-        properties.getOrg().setKeystore(new IntegrasjonspunktProperties.Keystore());
+        keystore.setAlias("974720760");
+        keystore.setPassword("changeit");
+        keystore.setPath(new FileSystemResource("src/main/resources/test-certificates.jks"));
 
-        properties.getOrg().getKeystore().setAlias("974720760");
-        properties.getOrg().getKeystore().setPassword("changeit");
-        properties.getOrg().getKeystore().setPath(new FileSystemResource("src/main/resources/test-certificates.jks"));
-
-        nokkel = new IntegrasjonspunktNokkel(properties);
+        nokkel = new IntegrasjonspunktNokkel(keystore);
 
     }
 

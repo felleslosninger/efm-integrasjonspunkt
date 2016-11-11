@@ -2,8 +2,6 @@ package no.difi.meldingsutveksling;
 
 import no.difi.asic.SignatureHelper;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -18,14 +16,12 @@ import java.util.Enumeration;
  *
  * @author Glebnn Bech
  */
-@Component
 public class IntegrasjonspunktNokkel {
 
-    private final IntegrasjonspunktProperties properties;
+    private final IntegrasjonspunktProperties.Keystore keystore;
 
-    @Autowired
-    public IntegrasjonspunktNokkel(IntegrasjonspunktProperties properties) {
-        this.properties = properties;
+    public IntegrasjonspunktNokkel(IntegrasjonspunktProperties.Keystore keystore) {
+        this.keystore = keystore;
     }
 
     /**
@@ -38,18 +34,19 @@ public class IntegrasjonspunktNokkel {
         PrivateKey key = null;
         try (InputStream i = openKeyInputStream()) {
             KeyStore keystore = KeyStore.getInstance("JKS");
-            keystore.load(i, properties.getOrg().getKeystore().getPassword().toCharArray());
+            keystore.load(i, this.keystore.getPassword().toCharArray());
 
             Enumeration aliases = keystore.aliases();
             while (aliases.hasMoreElements()) {
                 String alias = (String) aliases.nextElement();
                 boolean isKey = keystore.isKeyEntry(alias);
-                if (isKey && alias.equals(properties.getOrg().getKeystore().getAlias())) {
-                    key = (PrivateKey) keystore.getKey(alias, properties.getOrg().getKeystore().getPassword().toCharArray());
+                if (isKey && alias.equals(this.keystore.getAlias())) {
+                    key = (PrivateKey) keystore.getKey(alias, this.keystore.getPassword().toCharArray());
                 }
             }
             if (key == null) {
-                throw new RuntimeException("no key with alias " + properties.getOrg().getKeystore().getAlias() + " found in the keystore " + properties.getOrg().getKeystore().getPath());
+                throw new RuntimeException("no key with alias " + this.keystore.getAlias() + " found in the keystore " +
+                        this.keystore.getPath());
             }
             return key;
         } catch (CertificateException | KeyStoreException | IOException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
@@ -62,20 +59,21 @@ public class IntegrasjonspunktNokkel {
         KeyPair result = null;
         try (InputStream i = openKeyInputStream()) {
             KeyStore keystore = KeyStore.getInstance("JKS");
-            keystore.load(i, properties.getOrg().getKeystore().getPassword().toCharArray());
+            keystore.load(i, this.keystore.getPassword().toCharArray());
             Enumeration aliases = keystore.aliases();
             for (; aliases.hasMoreElements();) {
                 String alias = (String) aliases.nextElement();
                 boolean isKey = keystore.isKeyEntry(alias);
-                if (isKey && alias.equals(properties.getOrg().getKeystore().getAlias())) {
-                    PrivateKey key = (PrivateKey) keystore.getKey(alias, properties.getOrg().getKeystore().getPassword().toCharArray());
+                if (isKey && alias.equals(this.keystore.getAlias())) {
+                    PrivateKey key = (PrivateKey) keystore.getKey(alias, this.keystore.getPassword().toCharArray());
                     X509Certificate c = (X509Certificate) keystore.getCertificate(alias);
                     result = new KeyPair(c.getPublicKey(), key);
                     break;
                 }
             }
             if (result == null) {
-                throw new RuntimeException("no key with alias " + properties.getOrg().getKeystore().getAlias() + " found in the keystore " + properties.getOrg().getKeystore().getPath());
+                throw new RuntimeException("no key with alias " + this.keystore.getAlias() + " found in the keystore " +
+                        this.keystore.getPath());
             }
         } catch (CertificateException | KeyStoreException | IOException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
             throw new RuntimeException(e);
@@ -88,18 +86,19 @@ public class IntegrasjonspunktNokkel {
         X509Certificate result = null;
         try (InputStream i = openKeyInputStream()) {
             KeyStore keystore = KeyStore.getInstance("JKS");
-            keystore.load(i, properties.getOrg().getKeystore().getPassword().toCharArray());
+            keystore.load(i, this.keystore.getPassword().toCharArray());
             Enumeration aliases = keystore.aliases();
             while (aliases.hasMoreElements()) {
                 String alias = (String) aliases.nextElement();
                 boolean isKey = keystore.isKeyEntry(alias);
-                if (isKey && alias.equals(properties.getOrg().getKeystore().getAlias())) {
+                if (isKey && alias.equals(this.keystore.getAlias())) {
                     result = (X509Certificate) keystore.getCertificate(alias);
                     break;
                 }
             }
             if (result == null) {
-                throw new RuntimeException("no key with alias " + properties.getOrg().getKeystore().getAlias() + " found in the keystore " + properties.getOrg().getKeystore().getPath());
+                throw new RuntimeException("no key with alias " + this.keystore.getAlias() + " found in the keystore " +
+                        this.keystore.getPath());
             }
         } catch (CertificateException | KeyStoreException | IOException | NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
@@ -110,14 +109,15 @@ public class IntegrasjonspunktNokkel {
     public SignatureHelper getSignatureHelper() {
         try {
             InputStream keyInputStream = openKeyInputStream();
-            return new SignatureHelper(keyInputStream, properties.getOrg().getKeystore().getPassword(), properties.getOrg().getKeystore().getAlias(), properties.getOrg().getKeystore().getPassword());
+            return new SignatureHelper(keyInputStream, this.keystore.getPassword(), this.keystore.getAlias(), this
+                    .keystore.getPassword());
         } catch (IOException e) {
-            throw new RuntimeException("keystore " + properties.getOrg().getKeystore().getPath() + " not found on file system.");
+            throw new RuntimeException("keystore " + this.keystore.getPath() + " not found on file system.");
         }
     }
 
     private InputStream openKeyInputStream() throws IOException {
-        return new FileInputStream(properties.getOrg().getKeystore().getPath().getFile());
+        return new FileInputStream(this.keystore.getPath().getFile());
     }
 
 }
