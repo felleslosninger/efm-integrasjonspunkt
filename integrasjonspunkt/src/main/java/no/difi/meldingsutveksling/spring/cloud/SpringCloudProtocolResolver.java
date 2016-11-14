@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.serviceregistry.spring.cloud;
+package no.difi.meldingsutveksling.spring.cloud;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

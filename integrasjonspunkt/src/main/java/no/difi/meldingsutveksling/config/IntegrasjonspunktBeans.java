@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.config;
 
-import no.difi.meldingsutveksling.AltinnFormidlingsTjenestenConfig;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.ServiceRegistryTransportFactory;
+import no.difi.meldingsutveksling.auth.OidcTokenClient;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.KeystoreProvider;
@@ -10,7 +10,6 @@ import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.ptp.MeldingsformidlerException;
 import no.difi.meldingsutveksling.receipt.DpiReceiptService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +17,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-
-import java.net.URISyntaxException;
 
 @Profile({"dev", "itest", "systest", "staging", "production"})
 @Configuration
@@ -29,19 +26,22 @@ public class IntegrasjonspunktBeans {
     @Autowired
     private IntegrasjonspunktProperties properties;
 
+    @Autowired
+    private OidcTokenClient oidcClient;
+
     @Bean
     public AltinnFormidlingsTjenestenConfig altinnConfig() {
         return properties.getAltinn();
     }
 
     @Bean
-    public ServiceRegistryLookup serviceRegistryLookup() throws URISyntaxException {
-        return new ServiceRegistryLookup(new RestClient(properties.getServiceregistryEndpoint()));
+    public TransportFactory serviceRegistryTransportFactory(ServiceRegistryLookup serviceRegistryLookup) {
+        return new ServiceRegistryTransportFactory(serviceRegistryLookup);
     }
 
     @Bean
-    public TransportFactory serviceRegistryTransportFactory(ServiceRegistryLookup serviceRegistryLookup) {
-        return new ServiceRegistryTransportFactory(serviceRegistryLookup);
+    public IntegrasjonspunktNokkel integrasjonspunktNokkel() {
+        return new IntegrasjonspunktNokkel(properties.getOrg().getKeystore());
     }
 
     @Bean

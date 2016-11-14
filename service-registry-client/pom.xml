@@ -3,13 +3,22 @@
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>1.7.32-SNAPSHOT</version>
+        <version>1.7.35-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>service-registry-client</artifactId>
 
     <dependencies>
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>security</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security.oauth</groupId>
+            <artifactId>spring-security-oauth2</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -70,11 +79,6 @@
             <artifactId>guava</artifactId>
             <version>19.0</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>no.difi.meldingsutveksling</groupId>-->
-            <!--<artifactId>serviceregistry-common</artifactId>-->
-            <!--<version>1.0.0-SNAPSHOT</version>-->
-        <!--</dependency>-->
     </dependencies>
 
 </project>

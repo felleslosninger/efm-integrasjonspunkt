@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -8,7 +9,10 @@ import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
-import no.difi.meldingsutveksling.ptp.*;
+import no.difi.meldingsutveksling.ptp.Document;
+import no.difi.meldingsutveksling.ptp.MeldingsformidlerClient;
+import no.difi.meldingsutveksling.ptp.MeldingsformidlerException;
+import no.difi.meldingsutveksling.ptp.MeldingsformidlerRequest;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 
@@ -65,12 +69,21 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
         public Document getDocument() {
             final MeldingType meldingType = request.getPayloadAsMeldingType();
             final DokumentType dokumentType = meldingType.getJournpost().getDokument().get(0);
+            return from(dokumentType);
+        }
+
+        private Document from(DokumentType dokumentType) {
             return new Document(dokumentType.getFil().getBase64(), dokumentType.getVeMimeType(), dokumentType.getVeFilnavn(), dokumentType.getDbTittel());
         }
 
         @Override
-        public List<Document> getAttachements() {
-            return new ArrayList<>();
+        public List<Document> getAttachments() {
+            List<DokumentType> allFiles = request.getPayloadAsMeldingType().getJournpost().getDokument();
+            List<Document> attachments = new ArrayList<>();
+            for(int i = 1; i < allFiles.size(); i++) {
+                attachments.add(from(allFiles.get(i)));
+            }
+            return attachments;
         }
 
         @Override

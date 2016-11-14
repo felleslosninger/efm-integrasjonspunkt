@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.ptp;
 
+import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;

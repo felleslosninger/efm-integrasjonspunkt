@@ -1,11 +1,15 @@
 package no.difi.meldingsutveksling.serviceregistry.client;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestOperations;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 
 /**
  * RestClient using simple http requests to manipulate services
@@ -16,18 +20,25 @@ import java.net.URISyntaxException;
  * Would perform HTTP GET against http://localhost:8080/organization/1234567
  * and return the HTTP Response body as a String
  */
+@Component
 public class RestClient {
+
+    private final IntegrasjonspunktProperties props;
+    private final RestOperations restTemplate;
+
     private final URI baseUrl;
-    private final RestTemplate template = new RestTemplate();
 
     /**
      * Creates a simple Rest Client based on RestTemplate.
      *
-     * @param baseUrl for instance http://localhost:8080
      * @throws URISyntaxException
      */
-    public RestClient(String baseUrl) throws URISyntaxException {
-        this.baseUrl = new URI(baseUrl);
+    @Autowired
+    public RestClient(IntegrasjonspunktProperties props, RestOperations restTemplate) throws MalformedURLException,
+            URISyntaxException {
+        this.props = props;
+        this.restTemplate = restTemplate;
+        this.baseUrl = new URL(props.getServiceregistryEndpoint()).toURI();
     }
 
     /**
@@ -39,12 +50,11 @@ public class RestClient {
     public String getResource(String resourcePath) {
         URI uri = UriComponentsBuilder.fromUri(baseUrl).pathSegment(resourcePath).build().toUri();
 
-        final ResponseEntity<String> entity = template.getForEntity(uri, String.class);
-        return entity.getBody();
+        return restTemplate.getForObject(uri, String.class);
     }
 
     public void putResource(String resourcePath) {
-        URI uri = baseUrl.resolve(resourcePath);
-        template.put(uri, String.class);
+        URI uri = UriComponentsBuilder.fromUri(baseUrl).pathSegment(resourcePath).build().toUri();
+        restTemplate.put(uri, String.class);
     }
 }

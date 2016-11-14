@@ -5,7 +5,7 @@
     <groupId>no.difi.meldingsutveksling</groupId>
     <artifactId>parent-pom</artifactId>
     <packaging>pom</packaging>
-    <version>1.7.32-SNAPSHOT</version>
+    <version>1.7.35-SNAPSHOT</version>
     <name>Multiproject for meldingsutveksling</name>
 
     <scm>
@@ -37,10 +37,12 @@
         <!-- bug with logstash-logback-encoder in 1.1.7, wait for 1.1.8 http://jira.qos.ch/browse/LOGBACK-1158 -->
         <logback.version>1.1.6</logback.version>
         <mockito.version>1.10.19</mockito.version>
-        <move-common.version>1.0.0</move-common.version>
+        <move-common.version>1.0.4</move-common.version>
     </properties>
 
     <modules>
+        <module>common</module>
+        <module>security</module>
         <module>noarkexchange</module>
         <module>noarkexchange-p360</module>
         <module>noarkexchange-ephorte</module>
@@ -76,7 +78,7 @@
             <dependency>
                 <groupId>no.difi.move-common</groupId>
                 <artifactId>move-dependencies</artifactId>
-                <version>1.0.1</version>
+                <version>${move-common.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

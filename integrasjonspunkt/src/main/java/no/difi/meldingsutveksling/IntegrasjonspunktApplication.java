@@ -1,9 +1,7 @@
 package no.difi.meldingsutveksling;
 
 import com.sun.xml.ws.transport.http.servlet.WSSpringServlet;
-import java.security.NoSuchAlgorithmException;
-import javax.crypto.Cipher;
-import no.difi.meldingsutveksling.serviceregistry.spring.cloud.SpringCloudProtocolResolver;
+import no.difi.meldingsutveksling.spring.cloud.SpringCloudProtocolResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -12,6 +10,9 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
+
+import javax.crypto.Cipher;
+import java.security.NoSuchAlgorithmException;
 
 @SpringBootApplication(exclude = {SolrAutoConfiguration.class})
 public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
