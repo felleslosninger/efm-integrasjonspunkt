@@ -25,7 +25,7 @@ public class MessageReceipt {
     private boolean received;
 
     @Lob
-    private String originalReceipt;
+    private String rawReceipt;
 
     MessageReceipt(){}
 
@@ -114,12 +114,12 @@ public class MessageReceipt {
         this.received = received;
     }
 
-    public String getOriginalReceipt() {
-        return originalReceipt;
+    public String getRawReceipt() {
+        return rawReceipt;
     }
 
-    public void setOriginalReceipt(String originalReceipt) {
-        this.originalReceipt = originalReceipt;
+    public void setRawReceipt(String rawReceipt) {
+        this.rawReceipt = rawReceipt;
     }
 
     @Override

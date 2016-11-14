@@ -179,7 +179,7 @@ public class MeldingsformidlerClient {
             }
             receipt.setLastUpdate(LocalDateTime.ofInstant(eksternKvittering.getTidspunkt(), ZoneId.systemDefault()));
             receipt.setReceived(true);
-            receipt.setOriginalReceipt(getRawReceipt());
+            receipt.setRawReceipt(getRawReceipt());
             return receipt;
         }
 
