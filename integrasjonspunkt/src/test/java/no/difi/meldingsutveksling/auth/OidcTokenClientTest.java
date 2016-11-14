@@ -17,6 +17,7 @@ import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 
+@Ignore("Manual testing class")
 public class OidcTokenClientTest {
 
     private IntegrasjonspunktProperties props;
