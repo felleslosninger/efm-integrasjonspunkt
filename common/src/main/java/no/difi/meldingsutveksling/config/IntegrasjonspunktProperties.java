@@ -1,14 +1,14 @@
 package no.difi.meldingsutveksling.config;
 
 import lombok.Data;
-import no.difi.meldingsutveksling.AltinnFormidlingsTjenestenConfig;
-import no.difi.meldingsutveksling.ptp.DigitalPostInnbyggerConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.net.URL;
+import java.util.List;
 
 /**
  * Configurable properties for Integrasjonspunkt.
@@ -42,6 +42,9 @@ public class IntegrasjonspunktProperties {
 
     @Valid
     private DigitalPostInnbyggerConfig dpi;
+
+    @Valid
+    private Oidc oidc;
 
     /**
      * Feature toggles.
@@ -88,6 +91,20 @@ public class IntegrasjonspunktProperties {
          */
         private String externalServiceEditionCode;
 
+    }
+
+    /**
+     * Idporten Oidc
+     */
+    @Data
+    public static class Oidc {
+
+        @NotNull
+        private boolean enable;
+        private URL url;
+        private List<String> scopes;
+        private String clientId;
+        private Keystore keystore;
     }
 
     @Data

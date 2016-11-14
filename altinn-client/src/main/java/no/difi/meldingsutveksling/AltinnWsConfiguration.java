@@ -2,6 +2,8 @@ package no.difi.meldingsutveksling;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+
+import no.difi.meldingsutveksling.config.AltinnFormidlingsTjenestenConfig;
 import org.springframework.context.ApplicationContext;
 
 public class AltinnWsConfiguration {

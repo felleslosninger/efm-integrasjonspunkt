@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling;
+package no.difi.meldingsutveksling.config;
 
 /**
  *

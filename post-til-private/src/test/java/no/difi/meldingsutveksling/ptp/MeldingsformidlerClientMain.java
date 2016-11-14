@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.ptp;
 
 import com.google.common.io.ByteStreams;
+import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.sdp.client2.domain.Prioritet;
 import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
 
