@@ -1,18 +1,17 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.ptp.MeldingsformidlerException;
+import org.springframework.core.io.Resource;
 
 public class KeystoreProvider {
 
-    private static File location;
     private static String password;
     private final KeyStore keystore;
 
@@ -21,24 +20,19 @@ public class KeystoreProvider {
     }
 
     public static KeystoreProvider from(IntegrasjonspunktProperties properties) throws MeldingsformidlerException {
-        try {
-            location = properties.getDpi().getKeystore().getPath().getFile();
-        } catch (IOException e) {
-            throw new MeldingsformidlerException("Could not open keystore file", e);
-        }
         password = properties.getDpi().getKeystore().getPassword();
-        final KeyStore keyStore = loadKeyStore(location, password.toCharArray());
+        final KeyStore keyStore = loadKeyStore(properties.getDpi().getKeystore().getPath(), password.toCharArray());
         return new KeystoreProvider(keyStore);
     }
 
-    private static KeyStore loadKeyStore(File filename, char[] password) throws MeldingsformidlerException {
+    private static KeyStore loadKeyStore(Resource filename, char[] password) throws MeldingsformidlerException {
         KeyStore keystore = null;
         try {
             keystore = KeyStore.getInstance(KeyStore.getDefaultType());
         } catch (KeyStoreException e) {
             throw new MeldingsformidlerException("Could not initialize keystore", e);
         }
-        try (FileInputStream file = new FileInputStream(filename)) {
+        try (InputStream file = filename.getInputStream()) {
             keystore.load(file, password);
         } catch (IOException e) {
             throw new MeldingsformidlerException("Could not open keystore file", e);
