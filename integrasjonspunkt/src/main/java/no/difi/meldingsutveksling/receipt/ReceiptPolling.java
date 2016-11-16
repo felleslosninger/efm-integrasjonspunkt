@@ -12,7 +12,7 @@ import javax.annotation.PostConstruct;
 import java.util.List;
 
 import static no.difi.meldingsutveksling.ptp.MeldingsformidlerClient.EMPTY_KVITTERING;
-import static no.difi.meldingsutveksling.receipt.MessageReceiptMarker.markerFrom;
+import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 
 /**
  * Periodically checks non final receipts, and their respective services for updates.
@@ -27,24 +27,31 @@ public class ReceiptPolling {
     private IntegrasjonspunktProperties props;
 
     @Autowired
-    private MessageReceiptRepository messageReceiptRepository;
+    private ConversationRepository conversationRepository;
 
     @Autowired
-    ReceiptStrategyFactory receiptStrategyFactory;
+    ConversationStrategyFactory conversationStrategyFactory;
 
     @Autowired
     DpiReceiptService dpiReceiptService;
 
     // TODO: fjernes etter test!
-    // TODO: fjernes etter test!
     @PostConstruct
     private void addTestData() {
-//        messageReceiptRepository.save(MessageReceipt.of("bb8323b9-1023-4046-b620-63c4f9120b62",
-//                "123", "foo", ServiceIdentifier.EDU));
-//        messageReceiptRepository.save(MessageReceipt.of("bb8323b9-1023-4046-b620-63c4f9120b63",
-//                "456", "bar", ServiceIdentifier.EDU));
-//        messageReceiptRepository.save(MessageReceipt.of("bb8323b9-1023-4046-b620-63c4f9120b64",
-//                "123456", "foobar", ServiceIdentifier.EDU));
+//        MessageReceipt r = MessageReceipt.of(ReceiptStatus.SENT, LocalDateTime.now());
+//        conversationRepository.save(Conversation.of("bb8323b9-1023-4046-b620-63c4f9120b62", "foo", "123",
+//                "fooTitle", ServiceIdentifier.EDU, r));
+//        MessageReceipt ra1 = MessageReceipt.of(ReceiptStatus.SENT, LocalDateTime.now());
+//        MessageReceipt ra2 = MessageReceipt.of(ReceiptStatus.DELIVERED, LocalDateTime.now().plusMinutes(1));
+//        conversationRepository.save(Conversation.of("bb8323b9-1023-4046-b620-63c4f9120b63", "bar", "456",
+//                "barTitle", ServiceIdentifier.EDU, ra1, ra2));
+//        MessageReceipt rb1 = MessageReceipt.of(ReceiptStatus.SENT, LocalDateTime.now());
+//        MessageReceipt rb2 = MessageReceipt.of(ReceiptStatus.DELIVERED, LocalDateTime.now().plusMinutes(1));
+//        MessageReceipt rb3 = MessageReceipt.of(ReceiptStatus.READ, LocalDateTime.now().plusMinutes(5));
+//        Conversation c = Conversation.of("bb8323b9-1023-4046-b620-63c4f9120b64", "foobar",  "123456",
+//                "foobarTitle", ServiceIdentifier.EDU, rb1, rb2, rb3);
+//        c.setPollable(false);
+//        conversationRepository.save(c);
     }
 
     @Scheduled(fixedRate = 60000)
@@ -53,17 +60,12 @@ public class ReceiptPolling {
             return;
         }
 
-        List<MessageReceipt> receipts = messageReceiptRepository.findByReceived(false);
+        List<Conversation> conversations = conversationRepository.findByPollable(true);
 
-        receipts.forEach(r -> {
-            log.info(markerFrom(r), "Checking status, messageId={}", r.getMessageId());
-            ReceiptStrategy strategy = receiptStrategyFactory.getFactory(r);
-            if (strategy.checkReceived(r)) {
-                Audit.info("Changed status to \"received\" for messageId=" + r.getMessageId(), markerFrom(r));
-                r.setReceived(true);
-            }
-            // Save regardless due to possible change to lastUpdate
-            messageReceiptRepository.save(r);
+        conversations.forEach(c -> {
+            log.info(markerFrom(c), "Checking status, conversationId={}", c.getConversationId());
+            ConversationStrategy strategy = conversationStrategyFactory.getFactory(c);
+            strategy.checkStatus(c);
         });
 
     }
@@ -74,9 +76,10 @@ public class ReceiptPolling {
         if(externalReceipt != EMPTY_KVITTERING) {
             Audit.info("Got receipt (DPI)", externalReceipt.logMarkers());
             final String id = externalReceipt.getId();
-            MessageReceipt receipt = messageReceiptRepository.findOne(id);
-            receipt = externalReceipt.update(receipt);
-            messageReceiptRepository.save(receipt);
+            Conversation conversation = conversationRepository.findOne(id);
+            // TODO: add receipt update to conversation
+//            receipt = externalReceipt.update(receipt);
+            conversationRepository.save(conversation);
             Audit.info("Updated receipt (DPI)", externalReceipt.logMarkers());
             externalReceipt.confirmReceipt();
             Audit.info("Confirmed receipt (DPI)", externalReceipt.logMarkers());

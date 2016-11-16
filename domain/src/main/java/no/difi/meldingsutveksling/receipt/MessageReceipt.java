@@ -1,10 +1,9 @@
 package no.difi.meldingsutveksling.receipt;
 
 import com.google.common.base.MoreObjects;
-import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.core.EDUCore;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import java.time.LocalDateTime;
@@ -16,82 +15,24 @@ import java.time.LocalDateTime;
 public class MessageReceipt {
 
     @Id
-    private String messageId;
-    private String messageReference;
-    private String messageTitle;
-    private String receiverIdentifier;
+    @GeneratedValue
+    private String id;
+
     private LocalDateTime lastUpdate;
-    private ServiceIdentifier targetType;
-    private boolean received;
+    private ReceiptStatus status;
 
     @Lob
     private String rawReceipt;
 
     MessageReceipt(){}
 
-    private MessageReceipt(String id, String msgRef, String msgTitle, String receiverIdentifier,
-                           ServiceIdentifier type) {
-        this.messageId = id;
-        this.messageReference = msgRef;
-        this.messageTitle = msgTitle;
-        this.receiverIdentifier = receiverIdentifier;
-        this.lastUpdate = LocalDateTime.now();
-        this.targetType = type;
-        this.received = false;
+    private MessageReceipt(ReceiptStatus status, LocalDateTime lastUpdate) {
+        this.status = status;
+        this.lastUpdate = lastUpdate;
     }
 
-    public static MessageReceipt of(String id, String msgRef, String msgTitle, String receiverIdentifier,
-                                    ServiceIdentifier type) {
-        return new MessageReceipt(id, msgRef, msgTitle, receiverIdentifier, type);
-    }
-
-    public static MessageReceipt of(EDUCore eduCore) {
-        if (eduCore.getServiceIdentifier() == null) {
-            throw new IllegalArgumentException("ServiceIdentifier not set on EDUCore.");
-        }
-
-        String msgTitle = "";
-        if (eduCore.getMessageType() == EDUCore.MessageType.EDU) {
-            msgTitle = eduCore.getPayloadAsMeldingType().getJournpost().getJpInnhold();
-        }
-
-        return new MessageReceipt(eduCore.getId(),
-                eduCore.getMessageReference(),
-                msgTitle,
-                eduCore.getReceiver().getIdentifier(),
-                eduCore.getServiceIdentifier());
-    }
-
-    public String getMessageId() {
-        return messageId;
-    }
-
-    public void setMessageId(String messageId) {
-        this.messageId = messageId;
-    }
-
-    public String getMessageReference() {
-        return messageReference;
-    }
-
-    public void setMessageReference(String messageReference) {
-        this.messageReference = messageReference;
-    }
-
-    public String getMessageTitle() {
-        return messageTitle;
-    }
-
-    public void setMessageTitle(String messageTitle) {
-        this.messageTitle = messageTitle;
-    }
-
-    public String getReceiverIdentifier() {
-        return receiverIdentifier;
-    }
-
-    public void setReceiverIdentifier(String receiverIdentifier) {
-        this.receiverIdentifier = receiverIdentifier;
+    public static MessageReceipt of(ReceiptStatus status, LocalDateTime lastUpdate) {
+        return new MessageReceipt(status, lastUpdate);
     }
 
     public LocalDateTime getLastUpdate() {
@@ -102,18 +43,6 @@ public class MessageReceipt {
         this.lastUpdate = lastUpdate;
     }
 
-    public ServiceIdentifier getTargetType() {
-        return targetType;
-    }
-
-    public boolean isReceived() {
-        return received;
-    }
-
-    public void setReceived(boolean received) {
-        this.received = received;
-    }
-
     public String getRawReceipt() {
         return rawReceipt;
     }
@@ -122,15 +51,21 @@ public class MessageReceipt {
         this.rawReceipt = rawReceipt;
     }
 
+    public ReceiptStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ReceiptStatus status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("messageId", messageId)
-                .add("messageReference", messageReference)
-                .add("messageTitle", messageTitle)
+                .add("id", id)
                 .add("lastUpdate", lastUpdate)
-                .add("targetType", targetType)
-                .add("received", received)
+                .add("status", status)
+                .add("rawReceipt", rawReceipt)
                 .toString();
     }
 }
