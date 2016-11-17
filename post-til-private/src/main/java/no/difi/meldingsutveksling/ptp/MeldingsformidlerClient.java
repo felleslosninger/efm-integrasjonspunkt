@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.receipt.ExternalReceipt;
 import no.difi.meldingsutveksling.receipt.MessageReceipt;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.sdp.client2.KlientKonfigurasjon;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.sdp.client2.domain.AktoerOrganisasjonsnummer;
@@ -175,10 +176,8 @@ public class MeldingsformidlerClient {
         public MessageReceipt update(final MessageReceipt messageReceipt) {
             MessageReceipt receipt = messageReceipt;
             if (messageReceipt == null) {
-                receipt = MessageReceipt.of(eksternKvittering.getKonversasjonsId(), eksternKvittering.getReferanseTilMeldingId(), " kvittering fra DPI uten tilhørende melding?", "Ukjent mottaker" /* no easy way of getting recipient from ForretningsKvittering */, ServiceIdentifier.DPI);
+                receipt = MessageReceipt.of(ReceiptStatus.SENT, LocalDateTime.ofInstant(eksternKvittering.getTidspunkt(), ZoneId.systemDefault()));
             }
-            receipt.setLastUpdate(LocalDateTime.ofInstant(eksternKvittering.getTidspunkt(), ZoneId.systemDefault()));
-            receipt.setReceived(true);
             receipt.setRawReceipt(getRawReceipt());
             return receipt;
         }
