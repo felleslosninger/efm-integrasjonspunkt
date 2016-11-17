@@ -18,6 +18,10 @@
         <if condition='property("ssl").contains("true")'>
             <then>
                 <ssl>
+                    <trustStore>
+                        <location>${jks}</location>
+                        <password>${password}</password>
+                    </trustStore>
                 </ssl>
             </then>
         </if>
