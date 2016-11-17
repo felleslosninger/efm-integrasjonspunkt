@@ -5,6 +5,8 @@
     <!-- Logstash destination -->
     <springProperty name="destination" source="app.logger.destination"/>
     <springProperty name="ssl" source="app.logger.enableSSL"/>
+    <springProperty name="jks" source="app.logger.jks"/>
+    <springProperty name="password" source="app.logger.password"/>
     <springProperty name="profiles" source="spring.profiles.active"/>
     <appender name="stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <droppedWarnFrequency>5</droppedWarnFrequency>
@@ -16,10 +18,6 @@
         <if condition='property("ssl").contains("true")'>
             <then>
                 <ssl>
-                    <trustStore>
-                        <location>classpath:logstash.jks-test</location>
-                        <password>logstash</password>
-                    </trustStore>
                 </ssl>
             </then>
         </if>
