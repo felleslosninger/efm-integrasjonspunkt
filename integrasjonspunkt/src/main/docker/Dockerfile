@@ -35,3 +35,5 @@ ENTRYPOINT ["/sbin/tini", "-g", "--", "sh", "-c", "./run.sh"]
 # Add jar last, since this changes the most
 ADD *.jar ${APP_DIR}/app.jar
 ADD run.sh ${APP_DIR}/
+
+HEALTHCHECK CMD curl -s --fail http://localhost:8080/manage/health > /dev/null || exit 1
