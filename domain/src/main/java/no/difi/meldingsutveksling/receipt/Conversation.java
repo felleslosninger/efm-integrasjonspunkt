@@ -46,12 +46,16 @@ public class Conversation {
         switch (serviceIdentifier) {
             case DPV:
                 this.pollable = true;
+                break;
             case DPI:
                 this.pollable = false;
+                break;
             case EDU:
                 this.pollable = false;
+                break;
             default:
                 this.pollable = false;
+                break;
         }
     }
 
