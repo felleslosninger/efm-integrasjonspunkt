@@ -1,7 +1,9 @@
-package no.difi.meldingsutveksling.ptp;
+package no.difi.meldingsutveksling.dpi;
 
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
+import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ExternalReceipt;
 import no.difi.meldingsutveksling.receipt.MessageReceipt;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
@@ -11,14 +13,7 @@ import java.time.LocalDateTime;
 public class EmptyKvittering implements ExternalReceipt {
 
     public static final String EMPTY = "empty";
-    public static final MessageReceipt EMPTY_RECEIPT = MessageReceipt.of(ReceiptStatus.SENT, LocalDateTime.now());
-
-    @Override
-    public MessageReceipt update(MessageReceipt messageReceipt) {
-        if (messageReceipt == null) {
-            return EMPTY_RECEIPT;
-        } else return messageReceipt;
-    }
+    private static final MessageReceipt EMPTY_RECEIPT = MessageReceipt.of(ReceiptStatus.OTHER, LocalDateTime.now());
 
     @Override
     public void confirmReceipt() {
@@ -29,11 +24,26 @@ public class EmptyKvittering implements ExternalReceipt {
 
     @Override
     public String getId() {
-        return "empty";
+        return EMPTY;
     }
 
     @Override
     public LogstashMarker logMarkers() {
-        return Markers.append("receipt_type", "empty");
+        return Markers.append("receipt_type", EMPTY);
+    }
+
+    @Override
+    public MessageReceipt toMessageReceipt() {
+        return EMPTY_RECEIPT;
+    }
+
+    @Override
+    public void auditLog() {
+        Audit.info("Got empty receipt", logMarkers());
+    }
+
+    @Override
+    public Conversation createConversation() {
+        return Conversation.of("", "", "", "empty receipt", null, EMPTY_RECEIPT);
     }
 }

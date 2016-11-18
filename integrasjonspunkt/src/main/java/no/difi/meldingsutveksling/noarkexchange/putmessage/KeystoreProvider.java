@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.ptp.MeldingsformidlerException;
+import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 
 import java.io.IOException;
 import java.io.InputStream;

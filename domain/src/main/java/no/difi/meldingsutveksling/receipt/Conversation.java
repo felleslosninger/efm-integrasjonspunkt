@@ -3,10 +3,13 @@ package no.difi.meldingsutveksling.receipt;
 import com.google.common.base.MoreObjects;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.core.EDUCore;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,9 +26,8 @@ public class Conversation {
     private boolean pollable;
     private ServiceIdentifier serviceIdentifier;
 
-    @Cascade(CascadeType.PERSIST)
-    @OneToMany(fetch = FetchType.EAGER)
-    List<MessageReceipt> messageReceipts;
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private List<MessageReceipt> messageReceipts;
 
     Conversation() {}
 

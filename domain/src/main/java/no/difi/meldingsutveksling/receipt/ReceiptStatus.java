@@ -9,7 +9,9 @@ import javax.xml.bind.annotation.XmlType;
 public enum ReceiptStatus {
     @XmlEnumValue("SENT") SENT("Sent"),
     @XmlEnumValue("DELIVERED")DELIVERED("Delivered"),
-    @XmlEnumValue("READ") READ("Read");
+    @XmlEnumValue("READ") READ("Read"),
+    @XmlEnumValue("FAIL") FAIL("Fail"),
+    @XmlEnumValue("OTHER") OTHER("Other");
 
     private final String status;
 

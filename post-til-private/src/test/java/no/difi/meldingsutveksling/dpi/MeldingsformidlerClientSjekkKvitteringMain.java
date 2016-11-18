@@ -1,10 +1,10 @@
-package no.difi.meldingsutveksling.ptp;
+package no.difi.meldingsutveksling.dpi;
 
 import no.difi.meldingsutveksling.receipt.ExternalReceipt;
 import no.difi.sdp.client2.domain.Prioritet;
 
-import static no.difi.meldingsutveksling.ptp.MeldingsformidlerClientMain.createKeyStore;
-import static no.difi.meldingsutveksling.ptp.MeldingsformidlerClientMain.getDigitalPostInnbyggerConfig;
+import static no.difi.meldingsutveksling.dpi.MeldingsformidlerClientMain.createKeyStore;
+import static no.difi.meldingsutveksling.dpi.MeldingsformidlerClientMain.getDigitalPostInnbyggerConfig;
 
 public class MeldingsformidlerClientSjekkKvitteringMain {
     private static final String SPRAAK_KODE = "NO";
