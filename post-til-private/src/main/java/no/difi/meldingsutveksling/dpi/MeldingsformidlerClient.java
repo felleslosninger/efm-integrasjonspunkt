@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.ptp;
+package no.difi.meldingsutveksling.dpi;
 
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;

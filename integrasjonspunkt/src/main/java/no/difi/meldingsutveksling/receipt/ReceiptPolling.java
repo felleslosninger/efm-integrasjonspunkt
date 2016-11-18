@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.List;
 
-import static no.difi.meldingsutveksling.ptp.MeldingsformidlerClient.EMPTY_KVITTERING;
+import static no.difi.meldingsutveksling.dpi.MeldingsformidlerClient.EMPTY_KVITTERING;
 import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 
 /**

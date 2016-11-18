@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.receipt;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.KeystoreProvider;
-import no.difi.meldingsutveksling.ptp.MeldingsformidlerClient;
 
 public class DpiReceiptService {
     private IntegrasjonspunktProperties properties;

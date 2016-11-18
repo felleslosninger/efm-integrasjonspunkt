@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.ptp;
+package no.difi.meldingsutveksling.dpi;
 
 import no.difi.sdp.client2.domain.kvittering.LeveringsKvittering;
 import org.junit.Test;
