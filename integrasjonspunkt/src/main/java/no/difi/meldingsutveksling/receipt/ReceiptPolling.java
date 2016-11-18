@@ -74,11 +74,10 @@ public class ReceiptPolling {
     public void dpiReceiptsScheduledTask() {
         final ExternalReceipt externalReceipt = dpiReceiptService.checkForReceipts();
         if(externalReceipt != EMPTY_KVITTERING) {
-            Audit.info("Got receipt (DPI)", externalReceipt.logMarkers());
+            externalReceipt.auditLog();
             final String id = externalReceipt.getId();
-            Conversation conversation = conversationRepository.findOne(id);
-            // TODO: add receipt update to conversation
-//            receipt = externalReceipt.update(receipt);
+            Conversation conversation = conversationRepository.findByConversationId(id).stream().findFirst().orElseGet(externalReceipt::createConversation);
+            conversation.addMessageReceipt(externalReceipt.toMessageReceipt());
             conversationRepository.save(conversation);
             Audit.info("Updated receipt (DPI)", externalReceipt.logMarkers());
             externalReceipt.confirmReceipt();
