@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 
 import static no.difi.meldingsutveksling.dpi.MeldingsformidlerClient.EMPTY_KVITTERING;
@@ -34,25 +33,6 @@ public class ReceiptPolling {
 
     @Autowired
     DpiReceiptService dpiReceiptService;
-
-    // TODO: fjernes etter test!
-    @PostConstruct
-    private void addTestData() {
-//        MessageReceipt r = MessageReceipt.of(ReceiptStatus.SENT, LocalDateTime.now());
-//        conversationRepository.save(Conversation.of("bb8323b9-1023-4046-b620-63c4f9120b62", "foo", "123",
-//                "fooTitle", ServiceIdentifier.EDU, r));
-//        MessageReceipt ra1 = MessageReceipt.of(ReceiptStatus.SENT, LocalDateTime.now());
-//        MessageReceipt ra2 = MessageReceipt.of(ReceiptStatus.DELIVERED, LocalDateTime.now().plusMinutes(1));
-//        conversationRepository.save(Conversation.of("bb8323b9-1023-4046-b620-63c4f9120b63", "bar", "456",
-//                "barTitle", ServiceIdentifier.EDU, ra1, ra2));
-//        MessageReceipt rb1 = MessageReceipt.of(ReceiptStatus.SENT, LocalDateTime.now());
-//        MessageReceipt rb2 = MessageReceipt.of(ReceiptStatus.DELIVERED, LocalDateTime.now().plusMinutes(1));
-//        MessageReceipt rb3 = MessageReceipt.of(ReceiptStatus.READ, LocalDateTime.now().plusMinutes(5));
-//        Conversation c = Conversation.of("bb8323b9-1023-4046-b620-63c4f9120b64", "foobar",  "123456",
-//                "foobarTitle", ServiceIdentifier.EDU, rb1, rb2, rb3);
-//        c.setPollable(false);
-//        conversationRepository.save(c);
-    }
 
     @Scheduled(fixedRate = 60000)
     public void checkReceiptStatus() {

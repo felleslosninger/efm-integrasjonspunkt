@@ -126,16 +126,6 @@ public class InternalQueue {
     }
 
     /**
-     * Checks whether to create a message receipt for DPI request
-     * @param request that will be sent
-     * @return true if request target transport is DPI and DPI receipts are enabled in properties
-     */
-    private boolean shouldCreateDpiReceipt(EDUCore request) {
-
-        return true;
-    }
-
-    /**
      * Place the input parameter on external queue. The external queue sends
      * messages to an external recipient using transport mechnism.
      *
