@@ -11,12 +11,12 @@
 
 
             <logger name="org.springframework.ws.client.MessageTracing">
-                <level value="TRACE"/>
+                <level value="INFO"/>
             </logger>
             <logger name="org.springframework.ws.server.MessageTracing">
-                <level value="TRACE"/>
+                <level value="INFO"/>
             </logger>
-            <root level="TRACE">
+            <root level="INFO">
                 <appender-ref ref="consoleAppender"/>
             </root>
 

@@ -72,16 +72,18 @@ public class ReceiptPolling {
 
     @Scheduled(fixedRate = 10000)
     public void dpiReceiptsScheduledTask() {
-        final ExternalReceipt externalReceipt = dpiReceiptService.checkForReceipts();
-        if(externalReceipt != EMPTY_KVITTERING) {
-            externalReceipt.auditLog();
-            final String id = externalReceipt.getId();
-            Conversation conversation = conversationRepository.findByConversationId(id).stream().findFirst().orElseGet(externalReceipt::createConversation);
-            conversation.addMessageReceipt(externalReceipt.toMessageReceipt());
-            conversationRepository.save(conversation);
-            Audit.info("Updated receipt (DPI)", externalReceipt.logMarkers());
-            externalReceipt.confirmReceipt();
-            Audit.info("Confirmed receipt (DPI)", externalReceipt.logMarkers());
+        if (props.getFeature().isEnableReceipts() && props.getFeature().isEnableDpiReceipts()) {
+            final ExternalReceipt externalReceipt = dpiReceiptService.checkForReceipts();
+            if (externalReceipt != EMPTY_KVITTERING) {
+                externalReceipt.auditLog();
+                final String id = externalReceipt.getId();
+                Conversation conversation = conversationRepository.findByConversationId(id).stream().findFirst().orElseGet(externalReceipt::createConversation);
+                conversation.addMessageReceipt(externalReceipt.toMessageReceipt());
+                conversationRepository.save(conversation);
+                Audit.info("Updated receipt (DPI)", externalReceipt.logMarkers());
+                externalReceipt.confirmReceipt();
+                Audit.info("Confirmed receipt (DPI)", externalReceipt.logMarkers());
+            }
         }
     }
 }
