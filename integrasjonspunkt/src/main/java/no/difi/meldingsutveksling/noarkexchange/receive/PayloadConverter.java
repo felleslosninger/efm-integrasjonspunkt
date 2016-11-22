@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+
 import javax.xml.bind.*;
 import javax.xml.namespace.QName;
 import javax.xml.transform.stream.StreamSource;
@@ -21,7 +23,7 @@ public class PayloadConverter<T> {
         try {
             jaxbContext = JAXBContext.newInstance(clazz);
         } catch (JAXBException e) {
-            throw new RuntimeException("Could not create JAXBContext for " + clazz, e);
+            throw new MeldingsUtvekslingRuntimeException("Could not create JAXBContext for " + clazz, e);
         }
     }
 
@@ -32,7 +34,7 @@ public class PayloadConverter<T> {
         try {
             jaxbContext = JAXBContext.newInstance(clazz);
         } catch (JAXBException e) {
-            throw new RuntimeException("Could not create JAXBContext for " + clazz, e);
+            throw new MeldingsUtvekslingRuntimeException("Could not create JAXBContext for " + clazz, e);
         }
     }
 
@@ -54,7 +56,7 @@ public class PayloadConverter<T> {
             marshaller.marshal(new JAXBElement<>(new QName(namespaceUri, localPart), clazz, message), sw);
             return sw.toString();
         } catch (JAXBException e) {
-            throw new RuntimeException("Unable to create marshaller for " + clazz, e);
+            throw new MeldingsUtvekslingRuntimeException("Unable to create marshaller for " + clazz, e);
         }
     }
 
@@ -66,7 +68,7 @@ public class PayloadConverter<T> {
             StreamSource source = new StreamSource(is);
             return unmarshaller.unmarshal(source, clazz).getValue();
         } catch (JAXBException e) {
-            throw new RuntimeException("Unable to create unmarshaller for " + clazz, e);
+            throw new MeldingsUtvekslingRuntimeException("Unable to create unmarshaller for " + clazz, e);
         }
     }
 }
