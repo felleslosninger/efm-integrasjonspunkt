@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling;
 import no.difi.asic.SignatureHelper;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.*;
@@ -32,7 +31,7 @@ public class IntegrasjonspunktNokkel {
     public PrivateKey loadPrivateKey() {
 
         PrivateKey key = null;
-        try (InputStream i = openKeyInputStream()) {
+        try (InputStream i = this.keystore.getPath().getInputStream()) {
             KeyStore keystore = KeyStore.getInstance("JKS");
             keystore.load(i, this.keystore.getPassword().toCharArray());
 
@@ -57,7 +56,7 @@ public class IntegrasjonspunktNokkel {
     public KeyPair getKeyPair() {
 
         KeyPair result = null;
-        try (InputStream i = openKeyInputStream()) {
+        try (InputStream i = this.keystore.getPath().getInputStream()) {
             KeyStore keystore = KeyStore.getInstance("JKS");
             keystore.load(i, this.keystore.getPassword().toCharArray());
             Enumeration aliases = keystore.aliases();
@@ -84,7 +83,7 @@ public class IntegrasjonspunktNokkel {
     public X509Certificate getX509Certificate() {
 
         X509Certificate result = null;
-        try (InputStream i = openKeyInputStream()) {
+        try (InputStream i = this.keystore.getPath().getInputStream()) {
             KeyStore keystore = KeyStore.getInstance("JKS");
             keystore.load(i, this.keystore.getPassword().toCharArray());
             Enumeration aliases = keystore.aliases();
@@ -108,16 +107,12 @@ public class IntegrasjonspunktNokkel {
 
     public SignatureHelper getSignatureHelper() {
         try {
-            InputStream keyInputStream = openKeyInputStream();
+            InputStream keyInputStream = this.keystore.getPath().getInputStream();
             return new SignatureHelper(keyInputStream, this.keystore.getPassword(), this.keystore.getAlias(), this
                     .keystore.getPassword());
         } catch (IOException e) {
             throw new RuntimeException("keystore " + this.keystore.getPath() + " not found on file system.");
         }
-    }
-
-    private InputStream openKeyInputStream() throws IOException {
-        return new FileInputStream(this.keystore.getPath().getFile());
     }
 
 }

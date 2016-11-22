@@ -168,6 +168,11 @@ public class IntegrasjonspunktProperties {
         private boolean enableReceipts;
 
         private boolean returnOkOnEmptyPayload;
+        private boolean enableDpiReceipts;
+
+        public boolean isEnableDpiReceipts() {
+            return enableDpiReceipts;
+        }
     }
 
 }

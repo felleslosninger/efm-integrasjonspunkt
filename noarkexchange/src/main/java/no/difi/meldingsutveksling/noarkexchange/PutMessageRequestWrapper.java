@@ -38,8 +38,7 @@ public class PutMessageRequestWrapper {
     }
 
     public String getRecieverPartyNumber() {
-        final String originalOrgNr = requestType.getEnvelope().getReceiver().getOrgnr();
-        return FiksFix.replaceOrgNummberWithKs(originalOrgNr);
+        return requestType.getEnvelope().getReceiver().getOrgnr();
     }
 
     public boolean hasSenderPartyNumber() {

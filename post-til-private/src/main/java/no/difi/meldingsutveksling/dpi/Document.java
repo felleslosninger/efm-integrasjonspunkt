@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.ptp;
+package no.difi.meldingsutveksling.dpi;
 
 public class Document {
     private byte[] contents;

@@ -11,8 +11,10 @@ import { Col,
             FormControl,
             ControlLabel,
             ButtonGroup,
+            Glyphicon,
             Button,
             Checkbox,
+            Table,
             Input } from 'react-bootstrap';
 import $ from 'jquery';
 
@@ -97,12 +99,13 @@ class AllReceipts extends React.Component {
                         <InputGroup>
                             <InputGroup.Addon>Filter</InputGroup.Addon>
                             <FormControl type="text" value={this.state.filter} onChange={this.handleFilter}></FormControl>
+                            <InputGroup.Addon onClick={() => this.setState({filter: ''})}>X</InputGroup.Addon>
                         </InputGroup>
                         <Checkbox inline checked={this.state.all} value={this.state.all} onChange={() => this.handleAll()}>
                             All
                         </Checkbox>
                         <Checkbox inline disabled={this.state.all} value={this.state.received} onChange={() => this.handleReceived()}>
-                            Received
+                            Completed
                         </Checkbox>
                     </FormGroup>
                 </form>
@@ -130,45 +133,75 @@ class ReceiptList extends React.Component {
     render() {
         if (!this.props.receipts) return (<div></div>);
         var k= 0;
-        var receiptNodes = this.props.receipts.map((r) => {
-            if (!r.messageId.includes(this.props.filter) &&
-                !r.messageReference.includes(this.props.filter) &&
-                !r.messageTitle.includes(this.props.filter) &&
-                !r.receiverIdentifier.includes(this.props.filter)) {
+        var receiptNodes = this.props.receipts.map((c) => {
+            if (!c.conversationId.includes(this.props.filter) &&
+                !c.messageReference.includes(this.props.filter) &&
+                !c.messageTitle.includes(this.props.filter) &&
+                !c.receiverIdentifier.includes(this.props.filter)) {
                 return null;
             } 
-            if (!this.props.all && r.received !== this.props.received) {
+
+            var isReceived = false;
+            c.messageReceipts.forEach((r) => {
+                if (r.status === 'READ') {
+                    isReceived = true;
+                }
+            });
+
+            if (!this.props.all && isReceived !== this.props.received) {
                 return null;
             }
             k++;
-            var monthVal = this.padZero(r.lastUpdate.monthValue);
-            var dayVal = this.padZero(r.lastUpdate.dayOfMonth);
-            var hourVal = this.padZero(r.lastUpdate.hour);
-            var minuteVal = this.padZero(r.lastUpdate.minute);
-            var secondVal = this.padZero(r.lastUpdate.second);
-            var lastUpdate = `${r.lastUpdate.year}.${monthVal}.${dayVal} ${hourVal}.${minuteVal}.${secondVal}`;
+
+
+            var statusNodes = c.messageReceipts.map((r, k) => {
+                var monthVal = this.padZero(r.lastUpdate.monthValue);
+                var dayVal = this.padZero(r.lastUpdate.dayOfMonth);
+                var hourVal = this.padZero(r.lastUpdate.hour);
+                var minuteVal = this.padZero(r.lastUpdate.minute);
+                var secondVal = this.padZero(r.lastUpdate.second);
+                var lastUpdate = `${r.lastUpdate.year}.${monthVal}.${dayVal} ${hourVal}.${minuteVal}.${secondVal}`;
+
+                return (
+                    <tr key={k}>
+                        <td>{k}</td>
+                        <td>{r.status}</td>
+                        <td>{lastUpdate}</td>
+                    </tr>
+                );
+            });
+
             return (
-                <Panel header={r.messageId} eventKey={k} key={k} >
+                <Panel header={c.conversationId} eventKey={k} key={k} >
                     <Label>messageId</Label>
-                    <p>{r.messageId}</p>
+                    <p>{c.conversationId}</p>
                     <hr style={{margin: "5px"}}/>
                     <Label>messageReference</Label>
-                    <p>{r.messageReference}</p>
+                    <p>{c.messageReference}</p>
                     <hr style={{margin: "5px"}}/>
                     <Label>messageTitle</Label>
-                    <p>{r.messageTitle}</p>
+                    <p>{c.messageTitle}</p>
                     <hr style={{margin: "5px"}}/>
                     <Label>receiverIdentifier</Label>
-                    <p>{r.receiverIdentifier}</p>
-                    <hr style={{margin: "5px"}}/>
-                    <Label>lastUpdate</Label>
-                    <p>{lastUpdate}</p>
+                    <p>{c.receiverIdentifier}</p>
                     <hr style={{margin: "5px"}}/>
                     <Label>serviceIdentifier</Label>
-                    <p>{r.targetType}</p>
+                    <p>{c.serviceIdentifier}</p>
                     <hr style={{margin: "5px"}}/>
-                    <Label>received</Label>
-                    <p>{r.received.toString()}</p>
+                    <Label>Status</Label>
+                    <br/>&nbsp;
+                    <Table striped bordered condensed hover>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Status</th>
+                                <th>Last update</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {statusNodes}
+                        </tbody>
+                    </Table>
                 </Panel>
             );
         });

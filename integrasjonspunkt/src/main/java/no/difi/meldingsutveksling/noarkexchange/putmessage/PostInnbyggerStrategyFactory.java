@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.ptp.MeldingsformidlerException;
+import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 
 public class PostInnbyggerStrategyFactory implements MessageStrategyFactory {

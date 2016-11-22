@@ -41,8 +41,7 @@ public class Adresseregister {
     }
 
     public Certificate getCertificate(String orgNumber) throws CertificateException {
-        String nOrgNumber = FiksFix.replaceOrgNummberWithKs(orgNumber);
-        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(nOrgNumber);
+        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(orgNumber);
 
         if (DPV.fullname().equals(serviceRecord.getServiceIdentifier())) {
             return null;
@@ -61,9 +60,8 @@ public class Adresseregister {
 
     public boolean hasAdresseregisterCertificate(String organisasjonsnummer) {
         log.info("hasAdresseregisterCertificate orgnr:" +organisasjonsnummer+"orgnr");
-        String nOrgnr = FiksFix.replaceOrgNummberWithKs(organisasjonsnummer);
         try {
-            getCertificate(nOrgnr);
+            getCertificate(organisasjonsnummer);
         } catch (CertificateException e) {
             return false;
         }

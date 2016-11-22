@@ -18,7 +18,7 @@ import static org.mockito.Mockito.*;
 /**
  * Test for the AppReceiptStrategy
  */
-public class AppReceiptStrategyTest {
+public class AppConversationStrategyTest {
 
     public static final String RECEIVER_ORG_NR = "11111111";
     public static final String SENDER_ORG_NR = "22222222";

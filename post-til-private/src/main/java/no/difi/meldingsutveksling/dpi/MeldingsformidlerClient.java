@@ -1,11 +1,13 @@
-package no.difi.meldingsutveksling.ptp;
+package no.difi.meldingsutveksling.dpi;
 
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
+import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ExternalReceipt;
 import no.difi.meldingsutveksling.receipt.MessageReceipt;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.sdp.client2.KlientKonfigurasjon;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.sdp.client2.domain.AktoerOrganisasjonsnummer;
@@ -30,6 +32,7 @@ import java.lang.invoke.MethodHandles;
 import java.security.KeyStore;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -142,11 +145,9 @@ public class MeldingsformidlerClient {
         private final ServiceIdentifier serviceIdentifier = ServiceIdentifier.DPI;
 
         public Kvittering() {
+   /* This is empty because we need an instance of Kvittering before we have all the values provided for Kvittering.
+    * But it could dropped empty constructor if we used a Builder */
 
-        }
-
-        public Kvittering(ForretningsKvittering forretningsKvittering) {
-            this.eksternKvittering = forretningsKvittering;
         }
 
         public void setRawReceipt(String rawReceipt) {
@@ -172,18 +173,6 @@ public class MeldingsformidlerClient {
         }
 
         @Override
-        public MessageReceipt update(final MessageReceipt messageReceipt) {
-            MessageReceipt receipt = messageReceipt;
-            if (messageReceipt == null) {
-                receipt = MessageReceipt.of(eksternKvittering.getKonversasjonsId(), eksternKvittering.getReferanseTilMeldingId(), " kvittering fra DPI uten tilhørende melding?", "Ukjent mottaker" /* no easy way of getting recipient from ForretningsKvittering */, ServiceIdentifier.DPI);
-            }
-            receipt.setLastUpdate(LocalDateTime.ofInstant(eksternKvittering.getTidspunkt(), ZoneId.systemDefault()));
-            receipt.setReceived(true);
-            receipt.setRawReceipt(getRawReceipt());
-            return receipt;
-        }
-
-        @Override
         public void confirmReceipt() {
             executeCallback();
         }
@@ -195,11 +184,48 @@ public class MeldingsformidlerClient {
 
         @Override
         public LogstashMarker logMarkers() {
-            return conversationIdMarker(getId()).and(Markers.append("receiptType", serviceIdentifier));
+            return conversationIdMarker(getId()).and(Markers.append("serviceIdentifier", serviceIdentifier));
         }
 
-        public static Kvittering from(ForretningsKvittering forretningsKvittering) {
-            return new Kvittering(forretningsKvittering);
+        @Override
+        public MessageReceipt toMessageReceipt() {
+            MessageReceipt domainReceipt = MessageReceipt.of(receiptStatus(), LocalDateTime.ofInstant(eksternKvittering.getTidspunkt(), ZoneId.systemDefault()));
+            domainReceipt.setRawReceipt(getRawReceipt());
+            return domainReceipt;
+        }
+
+        /**
+         * Audit logs the receipt description
+         */
+        @Override
+        public void auditLog() {
+            getReceiptType().invokeLoggerMethod(logMarkers());
+        }
+
+        @Override
+        public Conversation createConversation() {
+            Conversation conv = Conversation.of(getId(), "unknown message reference", "unknown receiver", "unknown message title", ServiceIdentifier.DPI);
+            conv.setMessageReceipts(new ArrayList<>(1));
+            return conv;
+        }
+
+        public ReceiptType getReceiptType() {
+            return ReceiptType.from(eksternKvittering);
+        }
+
+        private ReceiptStatus receiptStatus() {
+            switch (getReceiptType()) {
+                case DELIEVERED:
+                    return ReceiptStatus.DELIVERED;
+                case READ:
+                    return ReceiptStatus.READ;
+                case FEIL:
+                case NOTIFICATION_FAILED:
+                case POST_RETURNED:
+                    return ReceiptStatus.FAIL;
+                default:
+                    return ReceiptStatus.OTHER;
+            }
         }
     }
 
