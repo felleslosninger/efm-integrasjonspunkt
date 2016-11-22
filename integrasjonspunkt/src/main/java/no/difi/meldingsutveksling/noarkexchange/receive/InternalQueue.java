@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreMarker;
@@ -17,8 +18,10 @@ import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
+import no.difi.meldingsutveksling.receipt.Conversation;
+import no.difi.meldingsutveksling.receipt.ConversationRepository;
 import no.difi.meldingsutveksling.receipt.MessageReceipt;
-import no.difi.meldingsutveksling.receipt.MessageReceiptRepository;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -33,6 +36,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.time.LocalDateTime;
 
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
@@ -75,7 +79,7 @@ public class InternalQueue {
     private EDUCoreSender eduCoreSender;
 
     @Autowired
-    private MessageReceiptRepository messageReceiptRepository;
+    private ConversationRepository conversationRepository;
 
     private static JAXBContext jaxbContextdomain;
     private static JAXBContext jaxbContext;
@@ -107,7 +111,13 @@ public class InternalQueue {
         try {
             eduCoreSender.sendMessage(request);
             if (properties.getFeature().isEnableReceipts()) {
-                messageReceiptRepository.save(MessageReceipt.of(request));
+                if (request.getServiceIdentifier() == ServiceIdentifier.DPI && !properties.getFeature().isEnableDpiReceipts()) {
+                    logger.warn(EDUCoreMarker.markerFrom(request), "Sent message to DPI with receipts disabled");
+                } else {
+                    MessageReceipt receipt = MessageReceipt.of(ReceiptStatus.SENT, LocalDateTime.now());
+                    Conversation conversation = Conversation.of(request, receipt);
+                    conversationRepository.save(conversation);
+                }
             }
         } catch (Exception e) {
             Audit.error("Failed to send message... queue will retry", EDUCoreMarker.markerFrom(request));

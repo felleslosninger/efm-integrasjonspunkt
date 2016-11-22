@@ -7,12 +7,6 @@ import net.logstash.logback.marker.LogstashMarker;
  */
 public interface ExternalReceipt {
     /**
-     * Updates the domain receipt with values from the external receipt
-     * @param messageReceipt the domain receipt
-     */
-    MessageReceipt update(MessageReceipt messageReceipt);
-
-    /**
      * Used if necessary to confirm that the receipt has been successfully received
      */
     void confirmReceipt();
@@ -28,4 +22,21 @@ public interface ExternalReceipt {
      * @return markers to be used with log statements
      */
     LogstashMarker logMarkers();
+
+    /**
+     * Creates a internal message receipt from this external receipt
+     * @return a new domain MessageReceipt representing the external receipt
+     */
+    MessageReceipt toMessageReceipt();
+
+    /**
+     *  Performs audit logging of itself including a description
+     */
+    void auditLog();
+
+    /**
+     * Used to create a new Conversation if one does not exist
+     * @return Conversation to put receipts on
+     */
+    Conversation createConversation();
 }

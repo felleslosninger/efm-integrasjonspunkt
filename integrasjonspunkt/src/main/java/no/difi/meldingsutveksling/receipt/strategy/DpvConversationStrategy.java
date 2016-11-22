@@ -9,8 +9,7 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.ptv.CorrespondenceRequest;
-import no.difi.meldingsutveksling.receipt.MessageReceipt;
-import no.difi.meldingsutveksling.receipt.ReceiptStrategy;
+import no.difi.meldingsutveksling.receipt.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +19,10 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static no.difi.meldingsutveksling.receipt.MessageReceiptMarker.markerFrom;
+import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 
 @Component
-public class DpvReceiptStrategy implements ReceiptStrategy {
+public class DpvConversationStrategy implements ConversationStrategy {
 
     @Autowired
     private IntegrasjonspunktProperties properties;
@@ -31,11 +30,14 @@ public class DpvReceiptStrategy implements ReceiptStrategy {
     @Autowired
     private ServiceRegistryLookup serviceRegistryLookup;
 
+    @Autowired
+    private ConversationRepository conversationRepository;
+
     private static final String STATUS_CREATED = "Created";
     private static final String STATUS_READ = "Read";
 
     @Override
-    public boolean checkReceived(MessageReceipt receipt) {
+    public void checkStatus(Conversation conversation) {
 
         CorrespondenceAgencyConfiguration config = new CorrespondenceAgencyConfiguration.Builder()
                 .withExternalServiceCode(properties.getAltinnPTV().getExternalServiceCode())
@@ -44,10 +46,10 @@ public class DpvReceiptStrategy implements ReceiptStrategy {
                 .withSystemUserCode(properties.getAltinnPTV().getUsername())
                 .build();
 
-        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(receipt.getReceiverIdentifier());
-        final CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(markerFrom(receipt), config,
+        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(conversation.getReceiverIdentifier());
+        final CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(markerFrom(conversation), config,
                 serviceRecord.getEndPointURL());
-        GetCorrespondenceStatusDetailsV2 receiptRequest = CorrespondenceAgencyMessageFactory.createReceiptRequest(receipt);
+        GetCorrespondenceStatusDetailsV2 receiptRequest = CorrespondenceAgencyMessageFactory.createReceiptRequest(conversation);
         final CorrespondenceRequest request = new CorrespondenceRequest.Builder().withUsername(config
                 .getSystemUserCode()).withPassword(config.getPassword()).withPayload(receiptRequest).build();
 
@@ -60,26 +62,29 @@ public class DpvReceiptStrategy implements ReceiptStrategy {
         if (op.isPresent()) {
             List<StatusChangeV2> statusChanges = op.get().getStatusChanges().getValue().getStatusChangeV2();
 
+            Optional<StatusChangeV2> createdStatus = statusChanges.stream()
+                    .filter(s -> STATUS_CREATED.equals(s.getStatusType().value()))
+                    .findFirst();
+            boolean hasCreatedStatus = conversation.getMessageReceipts().stream().anyMatch(r -> r.getStatus() == ReceiptStatus.DELIVERED);
+            if (!hasCreatedStatus && createdStatus.isPresent()) {
+                ZonedDateTime createdZoned = createdStatus.get().getStatusDate().toGregorianCalendar().toZonedDateTime();
+                MessageReceipt receipt = MessageReceipt.of(ReceiptStatus.DELIVERED, createdZoned.toLocalDateTime());
+                conversation.addMessageReceipt(receipt);
+                conversationRepository.save(conversation);
+            }
+
             Optional<StatusChangeV2> readStatus = statusChanges.stream()
                     .filter(s -> STATUS_READ.equals(s.getStatusType().value()))
                     .findFirst();
             if (readStatus.isPresent()) {
                 ZonedDateTime readZoned = readStatus.get().getStatusDate().toGregorianCalendar().toZonedDateTime();
-                receipt.setLastUpdate(readZoned.toLocalDateTime());
-                return true;
+                MessageReceipt receipt = MessageReceipt.of(ReceiptStatus.READ, readZoned.toLocalDateTime());
+                conversation.addMessageReceipt(receipt);
+                conversation.setPollable(false);
+                conversationRepository.save(conversation);
             }
 
-            // If no "Read"-status yet, update with "Created" status date
-            Optional<StatusChangeV2> createdStatus = statusChanges.stream()
-                    .filter(s -> STATUS_CREATED.equals(s.getStatusType().value()))
-                    .findFirst();
-            if (createdStatus.isPresent()) {
-                ZonedDateTime createdZoned = createdStatus.get().getStatusDate().toGregorianCalendar().toZonedDateTime();
-                receipt.setLastUpdate(createdZoned.toLocalDateTime());
-                return false;
-            }
         }
 
-        return false;
     }
 }
