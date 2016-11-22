@@ -21,7 +21,7 @@ public class PayloadConverter<T> {
         try {
             jaxbContext = JAXBContext.newInstance(clazz);
         } catch (JAXBException e) {
-            throw new RuntimeException("Could not create JAXBContext for " + clazz);
+            throw new RuntimeException("Could not create JAXBContext for " + clazz, e);
         }
     }
 
@@ -32,7 +32,7 @@ public class PayloadConverter<T> {
         try {
             jaxbContext = JAXBContext.newInstance(clazz);
         } catch (JAXBException e) {
-            throw new RuntimeException("Could not create JAXBContext for " + clazz);
+            throw new RuntimeException("Could not create JAXBContext for " + clazz, e);
         }
     }
 
