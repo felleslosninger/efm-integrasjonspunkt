@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreMarker;
@@ -110,9 +111,13 @@ public class InternalQueue {
         try {
             eduCoreSender.sendMessage(request);
             if (properties.getFeature().isEnableReceipts()) {
-                MessageReceipt receipt = MessageReceipt.of(ReceiptStatus.SENT, LocalDateTime.now());
-                Conversation conversation = Conversation.of(request, receipt);
-                conversationRepository.save(conversation);
+                if (request.getServiceIdentifier() == ServiceIdentifier.DPI && !properties.getFeature().isEnableDpiReceipts()) {
+                    logger.warn(EDUCoreMarker.markerFrom(request), "Sent message to DPI with receipts disabled");
+                } else {
+                    MessageReceipt receipt = MessageReceipt.of(ReceiptStatus.SENT, LocalDateTime.now());
+                    Conversation conversation = Conversation.of(request, receipt);
+                    conversationRepository.save(conversation);
+                }
             }
         } catch (Exception e) {
             Audit.error("Failed to send message... queue will retry", EDUCoreMarker.markerFrom(request));
