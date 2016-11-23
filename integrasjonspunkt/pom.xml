@@ -457,7 +457,7 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>dokumentpakking</artifactId>
-            <version>1.7.38-SNAPSHOT</version>
+            <version>1.7.36-SNAPSHOT</version>
         </dependency>
 
         <dependency>
