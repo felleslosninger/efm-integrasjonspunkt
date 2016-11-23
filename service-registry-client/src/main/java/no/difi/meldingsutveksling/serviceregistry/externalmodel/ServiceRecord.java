@@ -104,11 +104,14 @@ public class ServiceRecord implements Serializable {
     }
 
     @Override
+    @SuppressWarnings({"squid:S00122", "squid:S1067"})
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ServiceRecord that = (ServiceRecord) o;
-        return Objects.equal(serviceIdentifier, that.serviceIdentifier) &&
+        return fysiskPost == that.fysiskPost &&
+                kanVarsles == that.kanVarsles &&
+                Objects.equal(serviceIdentifier, that.serviceIdentifier) &&
                 Objects.equal(organisationNumber, that.organisationNumber) &&
                 Objects.equal(pemCertificate, that.pemCertificate) &&
                 Objects.equal(endPointURL, that.endPointURL) &&
@@ -121,7 +124,7 @@ public class ServiceRecord implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(serviceIdentifier, organisationNumber, pemCertificate, endPointURL, orgnrPostkasse, postkasseAdresse, epostAdresse, varslingsStatus, mobilnummer);
+        return Objects.hashCode(serviceIdentifier, organisationNumber, pemCertificate, endPointURL, orgnrPostkasse, postkasseAdresse, epostAdresse, varslingsStatus, mobilnummer, fysiskPost, kanVarsles);
     }
 
     public String getEpostAdresse() {
