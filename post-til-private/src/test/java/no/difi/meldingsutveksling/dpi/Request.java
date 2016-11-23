@@ -72,6 +72,11 @@ public class Request implements MeldingsformidlerRequest {
         return notifiable;
     }
 
+    @Override
+    public boolean isPrintProvider() {
+        return false;
+    }
+
     public Request withNotifiable(boolean notifiable) {
         this.notifiable = notifiable;
         return this;

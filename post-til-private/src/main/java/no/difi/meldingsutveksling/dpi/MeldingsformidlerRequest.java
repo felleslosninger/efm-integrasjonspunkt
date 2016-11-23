@@ -84,4 +84,18 @@ public interface MeldingsformidlerRequest {
      * @return true if allowed to send notification(s) regarding the message being sent
      */
     boolean isNotifiable();
+
+    /**
+     * The print provider should be used if mailbox cannot be used technically or legally.
+     * Service Registry should be able to determine this based on KRR service.
+     *
+     * The rules are typically: the user has chosen a mailbox, the user has reserved from getting digital mail or the
+     * user has become inactive.
+     *
+     * The major techincal difference between digital post and physical/print is that the latter does not have a
+     * postkasseadresse.
+     *
+     * @return true if DPI print provider should be used instead of the preferred Digital mailbox
+     */
+    boolean isPrintProvider();
 }

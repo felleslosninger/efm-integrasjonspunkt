@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 public class ServiceRecord implements Serializable {
 
-    public static final ServiceRecord EMPTY = new ServiceRecord("", "", "", "", "", "", "");
+    public static final ServiceRecord EMPTY = new ServiceRecord("", "", "", "", "", "", "", false);
     private String serviceIdentifier;
     private String organisationNumber;
     private String pemCertificate;
@@ -17,6 +17,8 @@ public class ServiceRecord implements Serializable {
     private String epostAdresse;
     private String varslingsStatus;
     private String mobilnummer;
+    private boolean fysiskPost;
+    private boolean kanVarsles;
 
     public ServiceRecord(String serviceIdentifier, String organisationNumber, String pemCertificate, String endPointURL) {
         this.serviceIdentifier = serviceIdentifier;
@@ -25,8 +27,8 @@ public class ServiceRecord implements Serializable {
         this.endPointURL = endPointURL;
     }
 
-    public ServiceRecord(String serviceIdentifier, String organisationNumber, String pemCertificate
-            , String endPointURL, String epostAdresse, String varslingsStatus, String mobilnummer) {
+    private ServiceRecord(String serviceIdentifier, String organisationNumber, String pemCertificate
+            , String endPointURL, String epostAdresse, String varslingsStatus, String mobilnummer, boolean fysiskPost) {
         this.organisationNumber = organisationNumber;
         this.pemCertificate = pemCertificate;
         this.endPointURL = endPointURL;
@@ -34,6 +36,7 @@ public class ServiceRecord implements Serializable {
         this.epostAdresse = epostAdresse;
         this.varslingsStatus = varslingsStatus;
         this.mobilnummer = mobilnummer;
+        this.fysiskPost = fysiskPost;
     }
 
     /** Needed by gson **/
@@ -144,4 +147,22 @@ public class ServiceRecord implements Serializable {
     public String getMobilnummer() {
         return mobilnummer;
     }
+
+    public boolean isFysiskPost() {
+        return fysiskPost;
+    }
+
+    public void setFysiskPost(boolean fysiskPost) {
+        this.fysiskPost = fysiskPost;
+    }
+
+    public boolean isKanVarsles() {
+        return kanVarsles;
+    }
+
+    public void setKanVarsles(boolean kanVarsles) {
+        this.kanVarsles = kanVarsles;
+    }
+
+
 }

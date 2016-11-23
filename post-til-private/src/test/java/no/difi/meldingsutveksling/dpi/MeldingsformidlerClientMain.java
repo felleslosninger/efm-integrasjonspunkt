@@ -99,6 +99,11 @@ public class MeldingsformidlerClientMain {
             }
 
             @Override
+            public boolean isPrintProvider() {
+                return false;
+            }
+
+            @Override
             public String getConversationId() {
                 final String uuid = String.valueOf(UUID.randomUUID());
                 System.out.println("Melding sent med conversation id " + uuid);
