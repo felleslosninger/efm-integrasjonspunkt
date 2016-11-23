@@ -11,19 +11,14 @@ import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.sdp.client2.KlientKonfigurasjon;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.sdp.client2.domain.AktoerOrganisasjonsnummer;
-import no.difi.sdp.client2.domain.Avsender;
 import no.difi.sdp.client2.domain.Databehandler;
 import no.difi.sdp.client2.domain.Dokument;
 import no.difi.sdp.client2.domain.Dokumentpakke;
 import no.difi.sdp.client2.domain.Forsendelse;
-import no.difi.sdp.client2.domain.Mottaker;
 import no.difi.sdp.client2.domain.Noekkelpar;
-import no.difi.sdp.client2.domain.Sertifikat;
-import no.difi.sdp.client2.domain.digital_post.DigitalPost;
 import no.difi.sdp.client2.domain.exceptions.SendException;
 import no.difi.sdp.client2.domain.kvittering.ForretningsKvittering;
 import no.difi.sdp.client2.domain.kvittering.KvitteringForespoersel;
-import no.digipost.api.representations.Organisasjonsnummer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
@@ -33,7 +28,6 @@ import java.security.KeyStore;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -45,44 +39,29 @@ public class MeldingsformidlerClient {
 
     static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     public static final EmptyKvittering EMPTY_KVITTERING = new EmptyKvittering();
-    private SmsNotificationDigitalPostBuilderHandler smsNotificationHandler;
-    private EmailNotificationDigitalPostBuilderHandler emailNotificationHandler;
     private final DigitalPostInnbyggerConfig config;
     private KeyStore keyStore;
+    private ForsendelseHandlerFactory forsendelseHandlerFactory;
 
     public MeldingsformidlerClient(DigitalPostInnbyggerConfig config, KeyStore keyStore) {
         this.config = config;
         this.keyStore = keyStore;
-        smsNotificationHandler = new SmsNotificationDigitalPostBuilderHandler(config);
-        emailNotificationHandler = new EmailNotificationDigitalPostBuilderHandler(config);
+        forsendelseHandlerFactory = new ForsendelseHandlerFactory(config);
     }
 
     public void sendMelding(MeldingsformidlerRequest request) throws MeldingsformidlerException {
-        Mottaker mottaker = Mottaker.builder(
-                request.getMottakerPid(),
-                request.getPostkasseAdresse(),
-                Sertifikat.fraByteArray(request.getCertificate()),
-                Organisasjonsnummer.of(request.getOrgnrPostkasse())
-        ).build();
-        DigitalPost.Builder digitalPost = DigitalPost.builder(mottaker, request.getSubject())
-                .virkningsdato(new Date())
-                .sikkerhetsnivaa(config.getSecurityLevel());
-        digitalPost = smsNotificationHandler.handle(request, digitalPost);
-        digitalPost = emailNotificationHandler.handle(request, digitalPost);
-
         Dokument dokument = dokumentFromDocument(request.getDocument());
         Dokumentpakke dokumentpakke = Dokumentpakke.builder(dokument).vedlegg(toVedlegg(request.getAttachments())).build();
 
-        final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(request.getSenderOrgnumber());
-        Avsender behandlingsansvarlig = Avsender.builder(aktoerOrganisasjonsnummer.forfremTilAvsender()).build();
-        Forsendelse forsendelse = Forsendelse.digital(behandlingsansvarlig, digitalPost.build(), dokumentpakke)
-                .konversasjonsId(request.getConversationId())
+        ForsendelseBuilderHandler forsendelseBuilderHandler = forsendelseHandlerFactory.create(request);
+        Forsendelse.Builder forsendelseBuilder = forsendelseBuilderHandler.handle(request, dokumentpakke);
+
+        Forsendelse forsendelse = forsendelseBuilder.konversasjonsId(request.getConversationId())
                 .mpcId(config.getMpcId())
                 .spraakkode(config.getLanguage())
-                .prioritet(config.getPriority())
-                .build();
+                .prioritet(config.getPriority()).build();
 
-        SikkerDigitalPostKlient klient = createSikkerDigitalPostKlient(aktoerOrganisasjonsnummer);
+        SikkerDigitalPostKlient klient = createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer.of(request.getSenderOrgnumber()));
         try {
             klient.send(forsendelse);
         } catch (SendException e) {

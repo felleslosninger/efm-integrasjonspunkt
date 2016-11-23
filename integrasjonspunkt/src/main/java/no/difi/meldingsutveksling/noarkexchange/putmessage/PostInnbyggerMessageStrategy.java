@@ -145,5 +145,9 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
             return serviceRecord.getVarslingsStatus().equalsIgnoreCase(KAN_VARSLES);
         }
 
+        @Override
+        public boolean isPrintProvider() {
+            return serviceRecord.isFysiskPost();
+        }
     }
 }
