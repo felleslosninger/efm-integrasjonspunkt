@@ -46,6 +46,8 @@ public class IntegrasjonspunktProperties {
     @Valid
     private Oidc oidc;
 
+    private Mail mail;
+
     /**
      * Feature toggles.
      */
@@ -106,6 +108,20 @@ public class IntegrasjonspunktProperties {
         private String clientId;
         private Keystore keystore;
     }
+
+    /**
+     * Mail settings for
+     */
+    @Data
+    public static class Mail {
+
+        private String smtpHost;
+        private String smtpPort;
+        private String receiverAddress;
+        private String username;
+        private String password;
+    }
+
 
     @Data
     public static class NorskArkivstandardSystem {
