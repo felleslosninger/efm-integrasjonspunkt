@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.dpi;
 
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress;
+
 import java.util.List;
 
 /**
@@ -98,4 +100,8 @@ public interface MeldingsformidlerRequest {
      * @return true if DPI print provider should be used instead of the preferred Digital mailbox
      */
     boolean isPrintProvider();
+
+    PostAddress getPostAddress();
+
+    PostAddress getReturnAddress();
 }
