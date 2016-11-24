@@ -1,0 +1,54 @@
+package no.difi.meldingsutveksling.serviceregistry.externalmodel;
+
+import org.junit.Test;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+
+public class PostAddressTest {
+    @Test
+    public void isNorge() throws Exception {
+        PostAddress address = new PostAddress("", "", "", "", "", "", "", "norge");
+
+        assertThat(address.isNorge(), is(true));
+    }
+
+    @Test
+    public void CountryNoIsNorgeShouldBeTrue() {
+        PostAddress address = new PostAddress("", "", "", "", "", "", "", "no");
+
+        assertThat(address.isNorge(), is(true));
+    }
+
+    @Test
+    public void countryNorIsNorgeShouldBeTrue() {
+        PostAddress address = new PostAddress("", "", "", "", "", "", "", "nor");
+
+        assertThat(address.isNorge(), is(true));
+    }
+
+    @Test
+    public void countryNullIsNorgeShouldBeTrue() {
+        PostAddress address = new PostAddress("", "", "", "", "", "", "", null);
+
+        assertThat(address.isNorge(), is(true));
+    }
+
+    @Test
+    public void countryBlankIsNorgeShouldBeTrue() {
+        String country = "";
+        PostAddress address = new PostAddress("", "", "", "", "", "", "", country);
+
+        assertThat(address.isNorge(), is(true));
+    }
+
+    @Test
+    public void countrySwedenIsNorgeShouldBeFalse() {
+        String country = "Sweden";
+
+        PostAddress address = new PostAddress("", "", "", "", "", "", "", "Sweden");
+
+        assertThat(address.isNorge(), is(false));
+    }
+
+}

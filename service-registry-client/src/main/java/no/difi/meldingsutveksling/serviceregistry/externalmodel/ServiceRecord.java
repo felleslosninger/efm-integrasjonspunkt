@@ -19,6 +19,8 @@ public class ServiceRecord implements Serializable {
     private String mobilnummer;
     private boolean fysiskPost;
     private boolean kanVarsles;
+    private PostAddress postAddress;
+    private PostAddress returnAddress;
 
     public ServiceRecord(String serviceIdentifier, String organisationNumber, String pemCertificate, String endPointURL) {
         this.serviceIdentifier = serviceIdentifier;
@@ -103,29 +105,7 @@ public class ServiceRecord implements Serializable {
                 .toString();
     }
 
-    @Override
-    @SuppressWarnings({"squid:S00122", "squid:S1067"})
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ServiceRecord that = (ServiceRecord) o;
-        return fysiskPost == that.fysiskPost &&
-                kanVarsles == that.kanVarsles &&
-                Objects.equal(serviceIdentifier, that.serviceIdentifier) &&
-                Objects.equal(organisationNumber, that.organisationNumber) &&
-                Objects.equal(pemCertificate, that.pemCertificate) &&
-                Objects.equal(endPointURL, that.endPointURL) &&
-                Objects.equal(orgnrPostkasse, that.orgnrPostkasse) &&
-                Objects.equal(postkasseAdresse, that.postkasseAdresse) &&
-                Objects.equal(epostAdresse, that.epostAdresse) &&
-                Objects.equal(varslingsStatus, that.varslingsStatus) &&
-                Objects.equal(mobilnummer, that.mobilnummer);
-    }
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(serviceIdentifier, organisationNumber, pemCertificate, endPointURL, orgnrPostkasse, postkasseAdresse, epostAdresse, varslingsStatus, mobilnummer, fysiskPost, kanVarsles);
-    }
 
     public String getEpostAdresse() {
         return epostAdresse;
@@ -167,5 +147,45 @@ public class ServiceRecord implements Serializable {
         this.kanVarsles = kanVarsles;
     }
 
+    public PostAddress getPostAddress() {
+        return postAddress;
+    }
+
+    public void setPostAddress(PostAddress postAddress) {
+        this.postAddress = postAddress;
+    }
+
+    public PostAddress getReturnAddress() {
+        return returnAddress;
+    }
+
+    public void setReturnAddress(PostAddress returnAddress) {
+        this.returnAddress = returnAddress;
+    }
+
+    @Override
+    @SuppressWarnings({"squid:S00122", "squid:S1067"})
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ServiceRecord that = (ServiceRecord) o;
+        return fysiskPost == that.fysiskPost &&
+                kanVarsles == that.kanVarsles &&
+                Objects.equal(serviceIdentifier, that.serviceIdentifier) &&
+                Objects.equal(organisationNumber, that.organisationNumber) &&
+                Objects.equal(pemCertificate, that.pemCertificate) &&
+                Objects.equal(endPointURL, that.endPointURL) &&
+                Objects.equal(orgnrPostkasse, that.orgnrPostkasse) &&
+                Objects.equal(postkasseAdresse, that.postkasseAdresse) &&
+                Objects.equal(epostAdresse, that.epostAdresse) &&
+                Objects.equal(varslingsStatus, that.varslingsStatus) &&
+                Objects.equal(mobilnummer, that.mobilnummer) &&
+                Objects.equal(postAddress, that.postAddress);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(serviceIdentifier, organisationNumber, pemCertificate, endPointURL, orgnrPostkasse, postkasseAdresse, epostAdresse, varslingsStatus, mobilnummer, fysiskPost, kanVarsles, postAddress);
+    }
 
 }
