@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.dpi;
 
 import com.google.common.io.ByteStreams;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress;
 import no.difi.sdp.client2.domain.Prioritet;
 import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
 
@@ -101,6 +102,16 @@ public class MeldingsformidlerClientMain {
             @Override
             public boolean isPrintProvider() {
                 return false;
+            }
+
+            @Override
+            public PostAddress getPostAddress() {
+                return null;
+            }
+
+            @Override
+            public PostAddress getReturnAddress() {
+                return null;
             }
 
             @Override
