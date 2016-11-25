@@ -4,7 +4,7 @@ import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress;
 import no.difi.sdp.client2.domain.fysisk_post.KonvoluttAdresse;
 
-public class NorgeKonvoluttAdresseHandler extends KonvoluttAdresseHandler {
+public class NorgeKonvoluttAdresseHandler implements KonvoluttAdresseHandler {
     @Override
     public KonvoluttAdresse handle(MeldingsformidlerRequest request) {
         PostAddress postAddress = request.getPostAddress();
