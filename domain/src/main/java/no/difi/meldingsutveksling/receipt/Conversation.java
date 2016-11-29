@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.receipt;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.Lists;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.core.EDUCore;
 
@@ -65,6 +66,10 @@ public class Conversation {
                                   String messageTitle,
                                   ServiceIdentifier serviceIdentifier,
                                   MessageReceipt... receipts) {
+        if (receipts == null || receipts.length == 0) {
+            return new Conversation(conversationId, messageReference, receiverIdentifier, messageTitle,
+                    serviceIdentifier, Lists.newArrayList());
+        }
         return new Conversation(conversationId, messageReference, receiverIdentifier, messageTitle,
                 serviceIdentifier, Arrays.asList(receipts));
     }

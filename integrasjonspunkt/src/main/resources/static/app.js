@@ -167,6 +167,7 @@ class ReceiptList extends React.Component {
                         <td>{k}</td>
                         <td>{r.status}</td>
                         <td>{lastUpdate}</td>
+                        <td>{r.description}</td>
                     </tr>
                 );
             });
@@ -196,6 +197,7 @@ class ReceiptList extends React.Component {
                                 <th>#</th>
                                 <th>Status</th>
                                 <th>Last update</th>
+                                <th>Description</th>
                             </tr>
                         </thead>
                         <tbody>

@@ -114,7 +114,7 @@ public class InternalQueue {
                 if (request.getServiceIdentifier() == ServiceIdentifier.DPI && !properties.getFeature().isEnableDpiReceipts()) {
                     logger.warn(EDUCoreMarker.markerFrom(request), "Sent message to DPI with receipts disabled");
                 } else {
-                    MessageReceipt receipt = MessageReceipt.of(ReceiptStatus.SENT, LocalDateTime.now());
+                    MessageReceipt receipt = createSentReceipt(request);
                     Conversation conversation = Conversation.of(request, receipt);
                     conversationRepository.save(conversation);
                 }
@@ -124,6 +124,14 @@ public class InternalQueue {
             throw e;
         }
     }
+
+    private MessageReceipt createSentReceipt(EDUCore request) {
+        if (request.getMessageType() == EDUCore.MessageType.APPRECEIPT) {
+            return MessageReceipt.of(ReceiptStatus.SENT, LocalDateTime.now(), "AppReceipt");
+        }
+        return MessageReceipt.of(ReceiptStatus.SENT, LocalDateTime.now());
+    }
+
 
     /**
      * Place the input parameter on external queue. The external queue sends
