@@ -26,7 +26,8 @@ public class EduMailClient implements NoarkClient {
         EduMailSender eduMailSender = new EduMailSender(props);
         PutMessageRequestConverter converter = new PutMessageRequestConverter();
         byte[] requestAsBytes = converter.marshallToBytes(request);
-        eduMailSender.send(requestAsBytes, "Integrasjonspunkt: melding fra "+request.getEnvelope().getSender().getOrgnr());
+        eduMailSender.send(requestAsBytes, "Integrasjonspunkt: melding fra "+request.getEnvelope().getSender()
+                .getOrgnr()+", conversationId="+request.getEnvelope().getConversationId());
         return PutMessageResponseFactory.createOkResponse();
     }
 }
