@@ -5,7 +5,7 @@
     <groupId>no.difi.meldingsutveksling</groupId>
     <artifactId>parent-pom</artifactId>
     <packaging>pom</packaging>
-    <version>1.7.37-SNAPSHOT</version>
+    <version>1.7.39-SNAPSHOT</version>
     <name>Multiproject for meldingsutveksling</name>
 
     <scm>
@@ -222,7 +222,7 @@
             <plugin>
                 <groupId>external.atlassian.jgitflow</groupId>
                 <artifactId>jgitflow-maven-plugin</artifactId>
-                <version>1.0-m5.1</version>
+                <version>1.0-m5</version>
                 <configuration>
                     <flowInitContext>
                         <masterBranchName>master</masterBranchName>
@@ -233,7 +233,6 @@
                         <versionTagPrefix>v@</versionTagPrefix>
                     </flowInitContext>
                     <allowSnapshots>true</allowSnapshots>
-                    <squash>true</squash>
                     <scmCommentPrefix>[RELEASE] </scmCommentPrefix>
                 </configuration>
             </plugin>
