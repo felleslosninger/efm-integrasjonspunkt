@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.xml.transform.StringSource;
 
@@ -15,8 +16,10 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@Ignore("Manual test")
 public class EduMailSenderTest {
 
     private static String cdataTaggedXml = "<PutMessageRequest xmlns=\"http://www.arkivverket.no/Noark/Exchange/types\">\n"
@@ -45,9 +48,17 @@ public class EduMailSenderTest {
     @Before
     public void init() throws JAXBException {
         props = new IntegrasjonspunktProperties();
+        props.setMail(new IntegrasjonspunktProperties.Mail());
+        props.getMail().setSmtpHost("leikexcas13.difi.local");
+        props.getMail().setReceiverAddress("martin.wam@difi.no");
+        props.getMail().setSmtpPort("25");
+        props.getMail().setEnableAuth("false");
+        props.getMail().setUsername("");
+        props.getMail().setPassword("");
         mailSender = new EduMailSender(props);
 
         putMessageJaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
+        serviceRegistryLookup = mock(ServiceRegistryLookup.class);
 
         InfoRecord infoRecord = new InfoRecord("1234", "Foo", new EntityType("EDU", "EDU"));
         when(serviceRegistryLookup.getInfoRecord(anyString())).thenReturn(infoRecord);

@@ -25,7 +25,7 @@ public class EduMailSender {
         props.put("mail.smtp.host", properties.getMail().getSmtpHost());
         props.put("mail.smtp.port", properties.getMail().getSmtpPort());
         props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.auth", properties.getMail().getEnableAuth());
 
         Session session = Session.getDefaultInstance(props,
                 new javax.mail.Authenticator() {
