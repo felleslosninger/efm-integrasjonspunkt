@@ -6,9 +6,14 @@ import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.kvittering.EduDocumentFactory;
+import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.logging.MoveLogMarkers;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
+import no.difi.meldingsutveksling.receipt.Conversation;
+import no.difi.meldingsutveksling.receipt.ConversationRepository;
+import no.difi.meldingsutveksling.receipt.MessageReceipt;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.transport.Transport;
@@ -24,6 +29,8 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import javax.xml.bind.JAXBElement;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
@@ -58,6 +65,9 @@ public class MessagePolling implements ApplicationContextAware {
     @Autowired
     ServiceRegistryLookup serviceRegistryLookup;
 
+    @Autowired
+    ConversationRepository conversationRepository;
+
     private ServiceRecord serviceRecord;
 
     @Scheduled(fixedRate = 15000)
@@ -85,17 +95,39 @@ public class MessagePolling implements ApplicationContextAware {
             EduDocument eduDocument = client.download(request);
 
             if (!isKvittering(eduDocument)) {
-                internalQueue.enqueueNoark(eduDocument);
-            }
-            client.confirmDownload(request);
-            Audit.info("Message downloaded", markerFrom(reference).and(eduDocument.createLogstashMarkers()));
-            if (!isKvittering(eduDocument)) {
                 sendReceipt(eduDocument.getMessageInfo());
                 Audit.info("Delivery receipt sent", eduDocument.createLogstashMarkers());
-            } else {
+                internalQueue.enqueueNoark(eduDocument);
+            }
+
+            client.confirmDownload(request);
+            Audit.info("Message downloaded", markerFrom(reference).and(eduDocument.createLogstashMarkers()));
+
+            if (isKvittering(eduDocument)) {
                 Audit.info("Message is a receipt", eduDocument.createLogstashMarkers());
+                JAXBElement<Kvittering> jaxbKvit = (JAXBElement<Kvittering>) eduDocument.getAny();
+                MessageReceipt receipt = receiptFromKvittering(jaxbKvit.getValue());
+                Conversation conversation = conversationRepository.findByConversationId(eduDocument.getConversationId())
+                        .stream()
+                        .findFirst()
+                        .orElse(Conversation.of(eduDocument.getConversationId(),
+                                "unknown", eduDocument
+                                .getReceiverOrgNumber(),
+                                "unknown", ServiceIdentifier.EDU));
+                conversation.addMessageReceipt(receipt);
+                conversationRepository.save(conversation);
             }
         }
+    }
+
+    private MessageReceipt receiptFromKvittering(Kvittering kvittering) {
+        if (kvittering.getAapning() != null) {
+            return MessageReceipt.of(ReceiptStatus.OTHER, LocalDateTime.now(), "Åpningskvittering");
+        }
+        if (kvittering.getLevering() != null) {
+            return MessageReceipt.of(ReceiptStatus.DELIVERED, LocalDateTime.now());
+        }
+        return MessageReceipt.of(ReceiptStatus.OTHER, LocalDateTime.now());
     }
 
     private boolean isKvittering(EduDocument eduDocument) {
