@@ -18,12 +18,12 @@ public class PostAddress {
          */
     }
 
-    public PostAddress(String name, String street1, String street2, String street3, String street4, String postalCode, String postalArea, String country) {
+    public PostAddress(String name, StreetAddress streetAddress, String postalCode, String postalArea, String country) {
         this.name = name;
-        this.street1 = street1;
-        this.street2 = street2;
-        this.street3 = street3;
-        this.street4 = street4;
+        this.street1 = streetAddress.getStreet1();
+        this.street2 = streetAddress.getStreet2();
+        this.street3 = streetAddress.getStreet3();
+        this.street4 = streetAddress.getStreet4();
         this.postalCode = postalCode;
         this.postalArea = postalArea;
         this.country = country;

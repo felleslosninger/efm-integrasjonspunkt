@@ -41,7 +41,6 @@ public class PrintForsendelseHandler extends ForsendelseBuilderHandler {
         }
 
         KonvoluttAdresse kon = konvoluttAdresseHandler.handle(request);
-        // TODO property for utskriftsfarge, return strategy (shredding?), property for posttype dvs. a_prioritet eller b_økonomi
         TekniskMottaker utskriftsleverandoer = new TekniskMottaker(Organisasjonsnummer.of(request.getOrgnrPostkasse()), Sertifikat.fraByteArray(request.getCertificate()));
         FysiskPost fysiskPost = FysiskPost.builder().adresse(kon)
                 .retur(Returhaandtering.MAKULERING_MED_MELDING,

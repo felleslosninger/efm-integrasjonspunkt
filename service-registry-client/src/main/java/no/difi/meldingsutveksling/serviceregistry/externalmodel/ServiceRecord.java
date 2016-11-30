@@ -3,9 +3,7 @@ package no.difi.meldingsutveksling.serviceregistry.externalmodel;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
-import java.io.Serializable;
-
-public class ServiceRecord implements Serializable {
+public class ServiceRecord {
 
     public static final ServiceRecord EMPTY = new ServiceRecord("", "", "", "", "", "", "", false);
     private String serviceIdentifier;

@@ -8,28 +8,28 @@ import static org.hamcrest.core.Is.is;
 public class PostAddressTest {
     @Test
     public void isNorge() throws Exception {
-        PostAddress address = new PostAddress("", "", "", "", "", "", "", "norge");
+        PostAddress address = new PostAddress("", new StreetAddress("", "", "", ""), "", "", "norge");
 
         assertThat(address.isNorge(), is(true));
     }
 
     @Test
     public void CountryNoIsNorgeShouldBeTrue() {
-        PostAddress address = new PostAddress("", "", "", "", "", "", "", "no");
+        PostAddress address = new PostAddress("", new StreetAddress("", "", "", ""), "", "", "no");
 
         assertThat(address.isNorge(), is(true));
     }
 
     @Test
     public void countryNorIsNorgeShouldBeTrue() {
-        PostAddress address = new PostAddress("", "", "", "", "", "", "", "nor");
+        PostAddress address = new PostAddress("", new StreetAddress("", "", "", ""), "", "", "nor");
 
         assertThat(address.isNorge(), is(true));
     }
 
     @Test
     public void countryNullIsNorgeShouldBeTrue() {
-        PostAddress address = new PostAddress("", "", "", "", "", "", "", null);
+        PostAddress address = new PostAddress("", new StreetAddress("", "", "", ""), "", "", null);
 
         assertThat(address.isNorge(), is(true));
     }
@@ -37,7 +37,7 @@ public class PostAddressTest {
     @Test
     public void countryBlankIsNorgeShouldBeTrue() {
         String country = "";
-        PostAddress address = new PostAddress("", "", "", "", "", "", "", country);
+        PostAddress address = new PostAddress("", new StreetAddress("", "", "", ""), "", "", country);
 
         assertThat(address.isNorge(), is(true));
     }
@@ -46,7 +46,7 @@ public class PostAddressTest {
     public void countrySwedenIsNorgeShouldBeFalse() {
         String country = "Sweden";
 
-        PostAddress address = new PostAddress("", "", "", "", "", "", "", "Sweden");
+        PostAddress address = new PostAddress("", new StreetAddress("", "", "", ""), "", "", "Sweden");
 
         assertThat(address.isNorge(), is(false));
     }
