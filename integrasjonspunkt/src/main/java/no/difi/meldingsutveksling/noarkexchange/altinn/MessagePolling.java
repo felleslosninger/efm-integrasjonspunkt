@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange.altinn;
 
+import net.logstash.logback.marker.LogstashMarker;
+import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MessageInfo;
@@ -104,8 +106,9 @@ public class MessagePolling implements ApplicationContextAware {
             Audit.info("Message downloaded", markerFrom(reference).and(eduDocument.createLogstashMarkers()));
 
             if (isKvittering(eduDocument)) {
-                Audit.info("Message is a receipt", eduDocument.createLogstashMarkers());
                 JAXBElement<Kvittering> jaxbKvit = (JAXBElement<Kvittering>) eduDocument.getAny();
+                Audit.info("Message is a receipt", eduDocument.createLogstashMarkers().and(getReceiptTypeMarker
+                        (jaxbKvit.getValue())));
                 MessageReceipt receipt = receiptFromKvittering(jaxbKvit.getValue());
                 Conversation conversation = conversationRepository.findByConversationId(eduDocument.getConversationId())
                         .stream()
@@ -118,6 +121,17 @@ public class MessagePolling implements ApplicationContextAware {
                 conversationRepository.save(conversation);
             }
         }
+    }
+
+    private LogstashMarker getReceiptTypeMarker(Kvittering kvittering) {
+        final String field = "receipt-type";
+        if (kvittering.getLevering() != null) {
+            return Markers.append(field, "levering");
+        }
+        if (kvittering.getAapning() != null) {
+            return Markers.append(field, "åpning");
+        }
+        return Markers.append(field, "unkown");
     }
 
     private MessageReceipt receiptFromKvittering(Kvittering kvittering) {
