@@ -108,6 +108,7 @@ public class DigitalPostInnbyggerConfig {
     public static class FeatureToggle {
         private boolean enableEmailNotification = false;
         private boolean enableSmsNotification = false;
+        private boolean enablePrint = false;
 
         public boolean isEnableEmailNotification() {
             return enableEmailNotification;
@@ -123,6 +124,14 @@ public class DigitalPostInnbyggerConfig {
 
         public void setEnableSmsNotification(boolean enableSmsNotification) {
             this.enableSmsNotification = enableSmsNotification;
+        }
+
+        public boolean isEnablePrint() {
+            return enablePrint;
+        }
+
+        public void setEnablePrint(boolean enablePrint) {
+            this.enablePrint = enablePrint;
         }
     }
 
