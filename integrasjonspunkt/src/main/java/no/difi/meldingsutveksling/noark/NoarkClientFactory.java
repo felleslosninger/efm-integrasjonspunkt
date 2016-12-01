@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.noark;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.mail.EduMailClient;
+import no.difi.meldingsutveksling.mail.MailClient;
 import no.difi.meldingsutveksling.noarkexchange.*;
 
 import java.util.Optional;
@@ -40,7 +40,7 @@ public class NoarkClientFactory {
             case WEBSAK:
                 return new WebsakClient(settings);
             case MAIL:
-                return new EduMailClient(properties);
+                return new MailClient(properties);
             default:
                 throw new UnknownArchiveSystemException(noarkType.get());
         }

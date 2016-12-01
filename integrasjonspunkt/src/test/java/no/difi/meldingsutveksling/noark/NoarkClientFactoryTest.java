@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.noark;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.mail.EduMailClient;
+import no.difi.meldingsutveksling.mail.MailClient;
 import no.difi.meldingsutveksling.noarkexchange.*;
 import org.junit.Test;
 
@@ -22,7 +22,7 @@ public class NoarkClientFactoryTest {
         assertEquals(P360Client.class, f.from(properties).getClass());
         assertEquals(EphorteClient.class, f.from(properties).getClass());
         assertEquals(WebsakClient.class, f.from(properties).getClass());
-        assertEquals(EduMailClient.class, f.from(properties).getClass());
+        assertEquals(MailClient.class, f.from(properties).getClass());
     }
 
     @Test

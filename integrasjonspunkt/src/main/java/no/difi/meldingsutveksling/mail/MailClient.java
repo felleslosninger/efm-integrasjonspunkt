@@ -7,16 +7,15 @@ import no.difi.meldingsutveksling.noarkexchange.receive.PutMessageRequestConvert
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 
-public class EduMailClient implements NoarkClient {
+public class MailClient implements NoarkClient {
 
     private IntegrasjonspunktProperties props;
 
-    public EduMailClient(IntegrasjonspunktProperties props) {
+    public MailClient(IntegrasjonspunktProperties props) {
         this.props = props;
     }
 
     @Override
-
     public boolean canRecieveMessage(String orgnr) {
         return true;
     }
