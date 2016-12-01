@@ -581,6 +581,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>javax.mail</artifactId>
+            <version>1.5.6</version>
+        </dependency>
+
+        <dependency>
             <groupId>no.difi.move-common</groupId>
             <artifactId>audit</artifactId>
         </dependency>
