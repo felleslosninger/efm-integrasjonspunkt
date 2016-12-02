@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.serviceregistry.externalmodel;
 import com.google.common.collect.Sets;
 
 public class PostAddress {
+    public static final PostAddress EMPTY = new PostAddress();
     private String name;
     private String street1;
     private String street2;
@@ -13,9 +14,14 @@ public class PostAddress {
     private String country;
 
     public PostAddress() {
-        /**
-         * needed by json marshallar
-         */
+        name = "";
+        street1 = "";
+        street2 = "";
+        street3 = "";
+        street4 = "";
+        postalCode = "";
+        postalArea = "";
+        country = "";
     }
 
     public PostAddress(String name, StreetAddress streetAddress, String postalCode, String postalArea, String country) {

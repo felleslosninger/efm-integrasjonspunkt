@@ -5,7 +5,7 @@ import com.google.common.base.Objects;
 
 public class ServiceRecord {
 
-    public static final ServiceRecord EMPTY = new ServiceRecord("", "", "", "", "", "", "", false);
+    public static final ServiceRecord EMPTY = new ServiceRecord();
     private String serviceIdentifier;
     private String organisationNumber;
     private String pemCertificate;
@@ -27,20 +27,17 @@ public class ServiceRecord {
         this.endPointURL = endPointURL;
     }
 
-    private ServiceRecord(String serviceIdentifier, String organisationNumber, String pemCertificate
-            , String endPointURL, String epostAdresse, String varslingsStatus, String mobilnummer, boolean fysiskPost) {
-        this.organisationNumber = organisationNumber;
-        this.pemCertificate = pemCertificate;
-        this.endPointURL = endPointURL;
-        this.serviceIdentifier = serviceIdentifier;
-        this.epostAdresse = epostAdresse;
-        this.varslingsStatus = varslingsStatus;
-        this.mobilnummer = mobilnummer;
-        this.fysiskPost = fysiskPost;
-    }
-
-    /** Needed by gson **/
     public ServiceRecord() {
+        this.organisationNumber = "";
+        this.pemCertificate = "";
+        this.endPointURL = "";
+        this.serviceIdentifier = "";
+        this.epostAdresse = "";
+        this.varslingsStatus = "";
+        this.mobilnummer = "";
+        this.fysiskPost = false;
+        this.postAddress = PostAddress.EMPTY;
+        this.returnAddress = PostAddress.EMPTY;
     }
 
     public String getOrganisationNumber() {
