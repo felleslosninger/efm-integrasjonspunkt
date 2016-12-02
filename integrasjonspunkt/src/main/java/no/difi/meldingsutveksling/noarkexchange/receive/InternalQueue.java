@@ -100,8 +100,11 @@ public class InternalQueue {
     public void noarkListener(byte[] message, Session session) {
         MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrg().getNumber());
         EduDocument eduDocument = documentConverter.unmarshallFrom(message);
-
-        forwardToNoark(eduDocument);
+        try {
+            forwardToNoark(eduDocument);
+        } catch (Exception e) {
+            Audit.warn("Failed to forward message.. queue will retry", eduDocument.createLogstashMarkers());
+        }
     }
 
     @JmsListener(destination = EXTERNAL, containerFactory = "myJmsContainerFactory")
@@ -120,7 +123,7 @@ public class InternalQueue {
                 }
             }
         } catch (Exception e) {
-            Audit.error("Failed to send message... queue will retry", EDUCoreMarker.markerFrom(request));
+            Audit.warn("Failed to send message... queue will retry", EDUCoreMarker.markerFrom(request));
             throw e;
         }
     }
