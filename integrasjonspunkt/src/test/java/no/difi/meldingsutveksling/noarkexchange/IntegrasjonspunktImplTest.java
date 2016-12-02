@@ -3,6 +3,8 @@ package no.difi.meldingsutveksling.noarkexchange;
 import no.difi.meldingsutveksling.PutMessageObjectMother;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.core.EDUCoreSender;
+import no.difi.meldingsutveksling.core.EDUCoreService;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
@@ -22,6 +24,10 @@ public class IntegrasjonspunktImplTest {
 
     @Mock
     private InternalQueue queueMock;
+    @InjectMocks
+    private EDUCoreService coreServiceMock;
+    @InjectMocks
+    private EDUCoreSender coreSenderMock;
     @Mock
     private IntegrasjonspunktProperties propertiesMock;
     @Mock
@@ -35,6 +41,7 @@ public class IntegrasjonspunktImplTest {
     public void setUp() {
         initMocks(this);
 
+        integrasjonspunkt.setCoreService(coreServiceMock);
         InfoRecord infoRecord = new InfoRecord();
         infoRecord.setIdentifier("1234");
         infoRecord.setOrganizationName("foo");
