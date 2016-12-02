@@ -14,6 +14,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 
 import java.io.UnsupportedEncodingException;
@@ -144,6 +145,22 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
         public boolean isNotifiable() {
             return serviceRecord.getVarslingsStatus().equalsIgnoreCase(KAN_VARSLES);
         }
+
+        @Override
+        public boolean isPrintProvider() {
+            return serviceRecord.isFysiskPost();
+        }
+
+        @Override
+        public PostAddress getPostAddress() {
+            return serviceRecord.getPostAddress();
+        }
+
+        @Override
+        public PostAddress getReturnAddress() {
+            return serviceRecord.getReturnAddress();
+        }
+
 
     }
 }
