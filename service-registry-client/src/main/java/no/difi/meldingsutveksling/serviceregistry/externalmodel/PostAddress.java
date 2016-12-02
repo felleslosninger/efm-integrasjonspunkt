@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.serviceregistry.externalmodel;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.Sets;
 
 public class PostAddress {
@@ -102,5 +103,26 @@ public class PostAddress {
 
     public boolean isNorge() {
         return (country == null || "".equals(country)) || Sets.newHashSet("NORGE", "NO", "NOR").contains(country.toUpperCase());
+    }
+
+    @Override
+    @SuppressWarnings({"squid:S00122", "squid:S1067"})
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PostAddress address = (PostAddress) o;
+        return Objects.equal(name, address.name) &&
+                Objects.equal(street1, address.street1) &&
+                Objects.equal(street2, address.street2) &&
+                Objects.equal(street3, address.street3) &&
+                Objects.equal(street4, address.street4) &&
+                Objects.equal(postalCode, address.postalCode) &&
+                Objects.equal(postalArea, address.postalArea) &&
+                Objects.equal(country, address.country);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(name, street1, street2, street3, street4, postalCode, postalArea, country);
     }
 }
