@@ -12,9 +12,7 @@ import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.logging.MoveLogMarkers;
-import no.difi.meldingsutveksling.mxa.MXAImpl;
 import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
-import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
@@ -41,15 +39,12 @@ import java.time.LocalDateTime;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
 /**
- * The idea behind this queue is to avoid loosing messages before they are saved
- * in Noark System.
+ * The idea behind this queue is to avoid loosing messages before they are saved in Noark System.
  *
- * The way it works is that any exceptions that happens in after a message is
- * put on the queue is re-sent to the JMS listener. If the application is
- * restarted the message is also resent.
+ * The way it works is that any exceptions that happens in after a message is put on the queue is re-sent to the JMS listener. If
+ * the application is restarted the message is also resent.
  *
- * The JMS listener has the responsibility is to forward the message to the
- * archive system.
+ * The JMS listener has the responsibility is to forward the message to the archive system.
  *
  */
 @Component
@@ -66,12 +61,6 @@ public class InternalQueue {
 
     @Autowired
     private IntegrajonspunktReceiveImpl integrajonspunktReceive;
-
-    @Autowired
-    private IntegrasjonspunktImpl integrasjonspunktSend;
-
-    @Autowired
-    private MXAImpl mxa;
 
     @Autowired
     private IntegrasjonspunktProperties properties;
@@ -156,10 +145,9 @@ public class InternalQueue {
         return MessageReceipt.of(ReceiptStatus.SENT, LocalDateTime.now());
     }
 
-
     /**
-     * Place the input parameter on external queue. The external queue sends
-     * messages to an external recipient using transport mechnism.
+     * Place the input parameter on external queue. The external queue sends messages to an external recipient using transport
+     * mechnism.
      *
      * @param request the input parameter from IntegrasjonspunktImpl
      */
@@ -173,11 +161,9 @@ public class InternalQueue {
     }
 
     /**
-     * Places the input parameter on the NOARK queue. The NOARK queue sends
-     * messages from external sender to NOARK server.
+     * Places the input parameter on the NOARK queue. The NOARK queue sends messages from external sender to NOARK server.
      *
-     * @param eduDocument the eduDocument as received by
-     * IntegrasjonspunktReceiveImpl from an external source
+     * @param eduDocument the eduDocument as received by IntegrasjonspunktReceiveImpl from an external source
      */
     public void enqueueNoark(EduDocument eduDocument) {
         jmsTemplate.convertAndSend(NOARK, documentConverter.marshallToBytes(eduDocument));
@@ -191,8 +177,8 @@ public class InternalQueue {
             jaxbContextdomain.createMarshaller().marshal(d, os);
             byte[] tmp = os.toByteArray();
 
-            JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument> toDocument
-                    = (JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument>) jaxbContext.createUnmarshaller().unmarshal(new ByteArrayInputStream(tmp));
+            JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument> toDocument =
+                    (JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument>) jaxbContext.createUnmarshaller().unmarshal(new ByteArrayInputStream(tmp));
 
             final StandardBusinessDocument standardBusinessDocument = toDocument.getValue();
             Audit.info("SBD extracted", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));

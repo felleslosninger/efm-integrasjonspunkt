@@ -79,8 +79,6 @@ public class PutMessageSteps {
         transport = mock(Transport.class);
         when(transportFactory.createTransport(any(EduDocument.class))).thenReturn(transport);
         messageSender.setTransportFactory(transportFactory);
-
-        integrasjonspunkt.setMessageSender(messageSender);
         integrasjonspunkt.setAdresseRegister(adresseregister);
     }
 

@@ -1,33 +1,21 @@
 package no.difi.meldingsutveksling.mxa;
 
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.core.EDUCore;
-import no.difi.meldingsutveksling.core.EDUCoreFactory;
-import no.difi.meldingsutveksling.core.EDUCoreMarker;
-import no.difi.meldingsutveksling.core.EDUCoreSender;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.mxa.schema.MXADelegate;
-import no.difi.meldingsutveksling.mxa.schema.domain.Message;
-import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
-import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
-import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
+import java.io.StringReader;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.ws.BindingType;
-import java.io.StringReader;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
+import no.difi.meldingsutveksling.core.EDUCoreService;
+import no.difi.meldingsutveksling.logging.Audit;
 import static no.difi.meldingsutveksling.mxa.MessageMarker.markerFrom;
+import no.difi.meldingsutveksling.mxa.schema.MXADelegate;
+import no.difi.meldingsutveksling.mxa.schema.domain.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Component("mxaService")
 @WebService(portName = "MXAPort", serviceName = "MXA", targetNamespace = "http://webservice.ws.altut.patent.siriusit.com/", endpointInterface = "no.difi.meldingsutveksling.mxa.schema.MXADelegate")
@@ -35,22 +23,7 @@ import static no.difi.meldingsutveksling.mxa.MessageMarker.markerFrom;
 public class MXAImpl implements MXADelegate {
 
     @Autowired
-    private IntegrasjonspunktProperties properties;
-
-    @Autowired
-    private InternalQueue internalQueue;
-
-    @Autowired
-    private ServiceRegistryLookup serviceRegistryLookup;
-
-    @Autowired
-    private StrategyFactory strategyFactory;
-
-    @Autowired
-    private IntegrasjonspunktImpl integrasjonspunktImpl;
-
-    @Autowired
-    private EDUCoreSender eduCoreSender;
+    private EDUCoreService coreService;
 
     private static final Logger log = LoggerFactory.getLogger(MXAImpl.class);
     private static final int SUCCESS = 0;
@@ -72,29 +45,11 @@ public class MXAImpl implements MXADelegate {
         }
         Audit.info("MXA message received", markerFrom(msg));
 
-        if (isNullOrEmpty(properties.getOrg().getNumber())) {
-            Audit.error("Senders orgnr missing", markerFrom(msg));
-            throw new MeldingsUtvekslingRuntimeException("Missing senders orgnumber. Please configure orgnumber= in the integrasjonspunkt-local.properties");
-        }
-        if (isNullOrEmpty(msg.getParticipantId())) {
-            Audit.error("Receiver identifier missing", markerFrom(msg));
-            throw new MeldingsUtvekslingRuntimeException("Missing receiver identifier.");
-        }
-
-        EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
-        EDUCore message = eduCoreFactory.create(msg, properties.getOrg().getNumber());
-
         try {
-            if (properties.getFeature().isEnableQueue()) {
-                internalQueue.enqueueExternal(message);
-                Audit.info("MXA message enqueued", EDUCoreMarker.markerFrom(message));
-            } else {
-                Audit.info("Queue is disabled", EDUCoreMarker.markerFrom(message));
-                eduCoreSender.sendMessage(message);
-            }
+            coreService.queueMessage(msg);
         } catch (Exception e) {
-            e.printStackTrace();
-            Audit.error("Internal error", EDUCoreMarker.markerFrom(message));
+            log.error("Internal error", e);
+            Audit.error("Internal error", markerFrom(msg));
             return INTERNAL_ERROR;
         }
 

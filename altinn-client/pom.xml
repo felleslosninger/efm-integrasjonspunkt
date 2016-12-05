@@ -9,12 +9,6 @@
 
     <artifactId>altinn-client</artifactId>
 
-    <repositories>
-        <repository>
-            <id>Jsch</id>
-            <url>http://jsch.sf.net/maven2/</url>
-        </repository>
-    </repositories>
 
 <dependencies>
 

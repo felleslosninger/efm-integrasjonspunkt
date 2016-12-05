@@ -6,20 +6,13 @@ import javax.xml.ws.BindingType;
 import net.logstash.logback.encoder.org.apache.commons.lang.StringUtils;
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.core.EDUCore;
-import no.difi.meldingsutveksling.core.EDUCoreFactory;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.core.EDUCoreService;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.logging.MarkerFactory;
 import no.difi.meldingsutveksling.logging.MoveLogMarkers;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageMarker.markerFrom;
-import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategy;
-import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactory;
-import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
-import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,14 +20,11 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * This is the implementation of the wenbservice that case managenent systems
- * supporting the BEST/EDU stadard communicates with. The responsibility of this
- * component is to create, sign and encrypt a SBD message for delivery to a
- * PEPPOL access point
+ * This is the implementation of the wenbservice that case managenent systems supporting the BEST/EDU stadard communicates with.
+ * The responsibility of this component is to create, sign and encrypt a SBD message for delivery to a PEPPOL access point
  * <p/>
- * The access point for the recipient is looked up through ELMA and SMK, the
- * certificates are retrived through a MOCKED adress register component not yet
- * imolemented in any infrastructure.
+ * The access point for the recipient is looked up through ELMA and SMK, the certificates are retrived through a MOCKED adress
+ * register component not yet imolemented in any infrastructure.
  * <p/>
  * <p/>
  * User: glennbech Date: 31.10.14 Time: 15:26
@@ -47,13 +37,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
     private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktImpl.class);
 
     @Autowired
-    private MessageSender messageSender;
-
-    @Autowired
     private NoarkClient mshClient;
-
-    @Autowired
-    private InternalQueue internalQueue;
 
     @Autowired
     private IntegrasjonspunktProperties properties;
@@ -62,7 +46,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
     private Adresseregister adresseRegister;
 
     @Autowired
-    private StrategyFactory strategyFactory;
+    private EDUCoreService coreService;
 
     @Autowired
     ServiceRegistryLookup serviceRegistryLookup;
@@ -114,51 +98,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
             }
         }
 
-        // Validate sender identifier
-        if (!message.hasSenderPartyNumber()) {
-            Audit.error("Senders orgnr missing", markerFrom(message));
-            throw new MeldingsUtvekslingRuntimeException("Missing senders orgnumber. Please configure orgnumber= in the integrasjonspunkt-local.properties");
-        }
-        // Validate receiver identifier
-        if (!message.hasRecieverPartyNumber()) {
-            Audit.error("Receiver orgnr missing", markerFrom(message));
-            throw new MeldingsUtvekslingRuntimeException("Missing receivers orgnumber.");
-        }
-
-        EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
-        EDUCore coreMessage = eduCoreFactory.create(message.getRequest(), message.getSenderPartynumber());
-
-        if (properties.getFeature().isEnableQueue()) {
-            internalQueue.enqueueExternal(coreMessage);
-            Audit.info("Message enqueued", markerFrom(message));
-
-            return PutMessageResponseFactory.createOkResponse();
-        } else {
-            Audit.info("Queue is disabled", markerFrom(message));
-
-            if (adresseRegister.hasAdresseregisterCertificate(coreMessage.getReceiver().getIdentifier())) {
-                final ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(coreMessage
-                        .getReceiver().getIdentifier());
-                MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(serviceRecord);
-                MessageStrategy strategy = messageStrategyFactory.create(request.getPayload());
-                return strategy.send(coreMessage);
-            } else {
-                if (hasMshEndpoint()) {
-                    Audit.info("Send message to MSH", markerFrom(message));
-                    return mshClient.sendEduMelding(request);
-                }
-                Audit.error("Receiver not found", markerFrom(message));
-                return PutMessageResponseFactory.createErrorResponse(new MessageException(StatusMessage.UNABLE_TO_FIND_RECEIVER));
-            }
-        }
-    }
-
-    public MessageSender getMessageSender() {
-        return messageSender;
-    }
-
-    public void setMessageSender(MessageSender messageSender) {
-        this.messageSender = messageSender;
+        return coreService.queueMessage(message);
     }
 
     public void setMshClient(NoarkClient mshClient) {
@@ -169,11 +109,16 @@ public class IntegrasjonspunktImpl implements SOAPport {
         return mshClient;
     }
 
-    private static boolean validateResult(PutMessageResponseType response) {
-        return "OK".equals(response.getResult().getType());
-    }
-
     public void setAdresseRegister(Adresseregister adresseRegister) {
         this.adresseRegister = adresseRegister;
     }
+
+    public EDUCoreService getCoreService() {
+        return coreService;
+    }
+
+    public void setCoreService(EDUCoreService coreService) {
+        this.coreService = coreService;
+    }
+
 }
