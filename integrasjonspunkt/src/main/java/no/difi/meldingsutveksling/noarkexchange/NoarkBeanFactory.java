@@ -21,7 +21,7 @@ public class NoarkBeanFactory {
                 properties.getNoarkSystem().getUsername(),
                 properties.getNoarkSystem().getPassword(),
                 properties.getNoarkSystem().getDomain());
-        NoarkClient client = new NoarkClientFactory(clientSettings).from(properties.getNoarkSystem());
+        NoarkClient client = new NoarkClientFactory(clientSettings).from(properties);
         return client;
     }
 
@@ -32,7 +32,7 @@ public class NoarkBeanFactory {
                 properties.getNoarkSystem().getUsername(),
                 properties.getNoarkSystem().getPassword(),
                 properties.getNoarkSystem().getDomain());
-        NoarkClient client = new NoarkClientFactory(clientSettings).from(properties.getNoarkSystem());
+        NoarkClient client = new NoarkClientFactory(clientSettings).from(properties);
         return client;
     }
 }

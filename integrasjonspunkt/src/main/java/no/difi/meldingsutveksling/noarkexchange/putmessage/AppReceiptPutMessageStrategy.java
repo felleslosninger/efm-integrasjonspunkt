@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -45,6 +46,7 @@ class AppReceiptMessageStrategy implements MessageStrategy {
         AppReceiptType receipt = request.getPayloadAsAppreceiptType();
         if (asList("OK", "WARNING", "ERROR").contains(receipt.getType())) {
             request.swapSenderAndReceiver();
+            request.setServiceIdentifier(ServiceIdentifier.EDU);
             messageSender.sendMessage(request);
         }
         if ("OK".equals(receipt.getType())) {

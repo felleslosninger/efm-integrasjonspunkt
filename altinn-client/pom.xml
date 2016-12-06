@@ -3,18 +3,12 @@
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>1.7.38</version>
+        <version>1.7.39</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>altinn-client</artifactId>
 
-    <repositories>
-        <repository>
-            <id>Jsch</id>
-            <url>http://jsch.sf.net/maven2/</url>
-        </repository>
-    </repositories>
 
 <dependencies>
 
@@ -65,7 +59,7 @@
     <dependency>
         <groupId>no.difi.meldingsutveksling</groupId>
         <artifactId>dokumentpakking</artifactId>
-        <version>1.7.38</version>
+        <version>1.7.39</version>
     </dependency>
     <dependency>
         <groupId>org.mockito</groupId>

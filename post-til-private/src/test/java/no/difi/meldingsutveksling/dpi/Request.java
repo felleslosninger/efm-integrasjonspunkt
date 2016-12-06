@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.dpi;
 
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress;
+
 import java.util.List;
 
 public class Request implements MeldingsformidlerRequest {
@@ -70,6 +72,21 @@ public class Request implements MeldingsformidlerRequest {
     @Override
     public boolean isNotifiable() {
         return notifiable;
+    }
+
+    @Override
+    public boolean isPrintProvider() {
+        return false;
+    }
+
+    @Override
+    public PostAddress getPostAddress() {
+        return null;
+    }
+
+    @Override
+    public PostAddress getReturnAddress() {
+        return null;
     }
 
     public Request withNotifiable(boolean notifiable) {

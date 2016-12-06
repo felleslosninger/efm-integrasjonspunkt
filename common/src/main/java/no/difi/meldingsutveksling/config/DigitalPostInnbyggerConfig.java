@@ -23,7 +23,7 @@ public class DigitalPostInnbyggerConfig {
     @Valid
     private Keystore keystore;
 
-    private FeatureToggle feature;
+    private FeatureToggle feature = new FeatureToggle();
 
     /**
      * ID for queue messages are sent to and their corresponding receipts can be retrieved from.
@@ -94,7 +94,7 @@ public class DigitalPostInnbyggerConfig {
     }
 
     public FeatureToggle getFeature() {
-        return feature != null ? feature : new FeatureToggle();
+        return feature;
     }
 
     public boolean isEnableEmailNotification() {
@@ -108,6 +108,7 @@ public class DigitalPostInnbyggerConfig {
     public static class FeatureToggle {
         private boolean enableEmailNotification = false;
         private boolean enableSmsNotification = false;
+        private boolean enablePrint = false;
 
         public boolean isEnableEmailNotification() {
             return enableEmailNotification;
@@ -123,6 +124,14 @@ public class DigitalPostInnbyggerConfig {
 
         public void setEnableSmsNotification(boolean enableSmsNotification) {
             this.enableSmsNotification = enableSmsNotification;
+        }
+
+        public boolean isEnablePrint() {
+            return enablePrint;
+        }
+
+        public void setEnablePrint(boolean enablePrint) {
+            this.enablePrint = enablePrint;
         }
     }
 

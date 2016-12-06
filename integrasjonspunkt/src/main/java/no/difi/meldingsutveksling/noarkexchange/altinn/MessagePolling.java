@@ -1,14 +1,21 @@
 package no.difi.meldingsutveksling.noarkexchange.altinn;
 
+import net.logstash.logback.marker.LogstashMarker;
+import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.kvittering.EduDocumentFactory;
+import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.logging.MoveLogMarkers;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
+import no.difi.meldingsutveksling.receipt.Conversation;
+import no.difi.meldingsutveksling.receipt.ConversationRepository;
+import no.difi.meldingsutveksling.receipt.MessageReceipt;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.transport.Transport;
@@ -24,6 +31,8 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import javax.xml.bind.JAXBElement;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
@@ -58,6 +67,9 @@ public class MessagePolling implements ApplicationContextAware {
     @Autowired
     ServiceRegistryLookup serviceRegistryLookup;
 
+    @Autowired
+    ConversationRepository conversationRepository;
+
     private ServiceRecord serviceRecord;
 
     @Scheduled(fixedRate = 15000)
@@ -85,17 +97,51 @@ public class MessagePolling implements ApplicationContextAware {
             EduDocument eduDocument = client.download(request);
 
             if (!isKvittering(eduDocument)) {
-                internalQueue.enqueueNoark(eduDocument);
-            }
-            client.confirmDownload(request);
-            Audit.info("Message downloaded", markerFrom(reference).and(eduDocument.createLogstashMarkers()));
-            if (!isKvittering(eduDocument)) {
                 sendReceipt(eduDocument.getMessageInfo());
                 Audit.info("Delivery receipt sent", eduDocument.createLogstashMarkers());
-            } else {
-                Audit.info("Message is a receipt", eduDocument.createLogstashMarkers());
+                internalQueue.enqueueNoark(eduDocument);
+            }
+
+            client.confirmDownload(request);
+            Audit.info("Message downloaded", markerFrom(reference).and(eduDocument.createLogstashMarkers()));
+
+            if (isKvittering(eduDocument)) {
+                JAXBElement<Kvittering> jaxbKvit = (JAXBElement<Kvittering>) eduDocument.getAny();
+                Audit.info("Message is a receipt", eduDocument.createLogstashMarkers().and(getReceiptTypeMarker
+                        (jaxbKvit.getValue())));
+                MessageReceipt receipt = receiptFromKvittering(jaxbKvit.getValue());
+                Conversation conversation = conversationRepository.findByConversationId(eduDocument.getConversationId())
+                        .stream()
+                        .findFirst()
+                        .orElse(Conversation.of(eduDocument.getConversationId(),
+                                "unknown", eduDocument
+                                .getReceiverOrgNumber(),
+                                "unknown", ServiceIdentifier.EDU));
+                conversation.addMessageReceipt(receipt);
+                conversationRepository.save(conversation);
             }
         }
+    }
+
+    private LogstashMarker getReceiptTypeMarker(Kvittering kvittering) {
+        final String field = "receipt-type";
+        if (kvittering.getLevering() != null) {
+            return Markers.append(field, "levering");
+        }
+        if (kvittering.getAapning() != null) {
+            return Markers.append(field, "åpning");
+        }
+        return Markers.append(field, "unkown");
+    }
+
+    private MessageReceipt receiptFromKvittering(Kvittering kvittering) {
+        if (kvittering.getAapning() != null) {
+            return MessageReceipt.of(ReceiptStatus.OTHER, LocalDateTime.now(), "Åpningskvittering");
+        }
+        if (kvittering.getLevering() != null) {
+            return MessageReceipt.of(ReceiptStatus.DELIVERED, LocalDateTime.now());
+        }
+        return MessageReceipt.of(ReceiptStatus.OTHER, LocalDateTime.now());
     }
 
     private boolean isKvittering(EduDocument eduDocument) {

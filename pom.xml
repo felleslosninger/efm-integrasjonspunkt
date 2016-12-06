@@ -5,7 +5,7 @@
     <groupId>no.difi.meldingsutveksling</groupId>
     <artifactId>parent-pom</artifactId>
     <packaging>pom</packaging>
-    <version>1.7.38</version>
+    <version>1.7.39</version>
     <name>Multiproject for meldingsutveksling</name>
 
     <scm>
@@ -25,6 +25,10 @@
             <id>DIFI Move releases</id>
             <name>DIFI MOVE releases on Nexus</name>
             <url>https://beta-meldingsutveksling.difi.no/content/repositories/releases/</url>
+        </repository>
+        <repository>
+            <id>Jsch</id>
+            <url>http://jsch.sf.net/maven2/</url>
         </repository>
     </repositories>
 

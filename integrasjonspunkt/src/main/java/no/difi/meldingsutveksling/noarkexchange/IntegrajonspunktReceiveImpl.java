@@ -1,18 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import javax.jws.WebParam;
-import javax.jws.WebService;
-import javax.xml.bind.DatatypeConverter;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.ws.BindingType;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreFactory;
@@ -21,7 +10,6 @@ import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.kvittering.EduDocumentFactory;
 import no.difi.meldingsutveksling.logging.Audit;
-import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 import no.difi.meldingsutveksling.logging.MoveLogMarkers;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
@@ -29,6 +17,10 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.CorrelationInformation;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
+import no.difi.meldingsutveksling.receipt.Conversation;
+import no.difi.meldingsutveksling.receipt.ConversationRepository;
+import no.difi.meldingsutveksling.receipt.MessageReceipt;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
@@ -41,6 +33,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
+
+import javax.jws.WebParam;
+import javax.jws.WebService;
+import javax.xml.bind.DatatypeConverter;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.ws.BindingType;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
 /**
  *
@@ -60,6 +68,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final IntegrasjonspunktProperties properties;
     private final IntegrasjonspunktNokkel keyInfo;
+    private final ConversationRepository conversationRepository;
     private ApplicationContext context;
 
     @Autowired
@@ -68,7 +77,8 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
             Adresseregister adresseregisterService,
             IntegrasjonspunktProperties properties,
             IntegrasjonspunktNokkel keyInfo,
-            ServiceRegistryLookup serviceRegistryLookup) {
+            ServiceRegistryLookup serviceRegistryLookup,
+            ConversationRepository conversationRepository) {
 
         this.transportFactory = transportFactory;
         this.localNoark = localNoark;
@@ -76,6 +86,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
         this.properties = properties;
         this.keyInfo = keyInfo;
         this.serviceRegistryLookup = serviceRegistryLookup;
+        this.conversationRepository = conversationRepository;
     }
 
     @Override
@@ -116,6 +127,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
             eduDocument = convertAsicEntrytoEduDocument(decryptedAsicPackage);
             if (PayloadUtil.isAppReceipt(eduDocument.getPayload())) {
                 Audit.info("AppReceipt extracted", markerFrom(document));
+                registerReceipt(eduDocument);
             } else {
                 Audit.info("EDU Document extracted", markerFrom(document));
             }
@@ -127,6 +139,20 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
 
         forwardToNoarkSystemAndSendReceipts(document, eduDocument);
         return new CorrelationInformation();
+    }
+
+    private void registerReceipt(EDUCore eduCore) {
+        MessageReceipt receipt = MessageReceipt.of(ReceiptStatus.READ, LocalDateTime.now());
+        Conversation c = conversationRepository.findByConversationId(eduCore.getId())
+                .stream()
+                .findFirst()
+                .orElse(Conversation.of(eduCore.getId(),
+                        eduCore.getMessageReference(),
+                        eduCore.getReceiver().getIdentifier(),
+                        eduCore.getMessageReference(),
+                        ServiceIdentifier.EDU));
+        c.addMessageReceipt(receipt);
+        conversationRepository.save(c);
     }
 
     public byte[] decrypt(Payload payload) {
