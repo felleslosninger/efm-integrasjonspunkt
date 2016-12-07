@@ -22,6 +22,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.util.Base64;
 import java.util.Optional;
+import java.util.UUID;
 
 public class EDUCoreFactory {
 
@@ -91,7 +92,9 @@ public class EDUCoreFactory {
     public EDUCore create(Message message, String senderOrgNr) {
         EDUCore eduCore = createCommon(senderOrgNr, message.getParticipantId());
 
-        eduCore.setId(message.getIdproc());
+        // IdProc is regarded as message id for MXA, but UUID is needed by e.g. DPI.
+        String genId = UUID.randomUUID().toString();
+        eduCore.setId(genId);
         eduCore.setMessageReference(message.getMessageReference());
         eduCore.setMessageType(EDUCore.MessageType.EDU);
 
@@ -106,6 +109,7 @@ public class EDUCoreFactory {
             DokumentType dokumentType = of.createDokumentType();
             dokumentType.setVeFilnavn(a.getFilename());
             dokumentType.setVeMimeType(a.getMimeType());
+            dokumentType.setDbTittel(a.getName());
             FilType filType = of.createFilType();
             filType.setBase64(Base64.getDecoder().decode(a.getValue()));
             dokumentType.setFil(filType);
@@ -113,8 +117,12 @@ public class EDUCoreFactory {
             journpostType.getDokument().add(dokumentType);
         });
 
+        NoarksakType noarksakType = of.createNoarksakType();
+        noarksakType.setSaOfftittel(message.getContent().getMessageHeader());
+
         MeldingType meldingType = of.createMeldingType();
         meldingType.setJournpost(journpostType);
+        meldingType.setNoarksak(noarksakType);
 
         eduCore.setPayload(meldingType);
 
