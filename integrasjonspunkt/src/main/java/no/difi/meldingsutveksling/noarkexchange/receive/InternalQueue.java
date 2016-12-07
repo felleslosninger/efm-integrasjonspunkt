@@ -52,6 +52,7 @@ public class InternalQueue {
 
     private static final String EXTERNAL = "external";
     private static final String NOARK = "noark";
+    private static final String DLQ = "ActiveMQ.DLQ";
 
     private Logger logger = LoggerFactory.getLogger(InternalQueue.class);
 
@@ -89,8 +90,11 @@ public class InternalQueue {
     public void noarkListener(byte[] message, Session session) {
         MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrg().getNumber());
         EduDocument eduDocument = documentConverter.unmarshallFrom(message);
-
-        forwardToNoark(eduDocument);
+        try {
+            forwardToNoark(eduDocument);
+        } catch (Exception e) {
+            Audit.warn("Failed to forward message.. queue will retry", eduDocument.createLogstashMarkers());
+        }
     }
 
     @JmsListener(destination = EXTERNAL, containerFactory = "myJmsContainerFactory")
@@ -109,9 +113,29 @@ public class InternalQueue {
                 }
             }
         } catch (Exception e) {
-            Audit.error("Failed to send message... queue will retry", EDUCoreMarker.markerFrom(request));
+            Audit.warn("Failed to send message... queue will retry", EDUCoreMarker.markerFrom(request));
             throw e;
         }
+    }
+
+    /**
+     * Log failed messages as errors
+     */
+    @JmsListener(destination = DLQ)
+    public void dlqListener(byte[] message, Session session) {
+
+        try {
+            EDUCore request = eduCoreConverter.unmarshallFrom(message);
+            Audit.error("Failed to send message. Moved to DLQ", EDUCoreMarker.markerFrom(request));
+        } catch (Exception e) {
+        }
+
+        try {
+            EduDocument eduDocument = documentConverter.unmarshallFrom(message);
+            Audit.error("Failed to forward message. Moved to DLQ.", eduDocument.createLogstashMarkers());
+        } catch (Exception e) {
+        }
+
     }
 
     private MessageReceipt createSentReceipt(EDUCore request) {
