@@ -3,11 +3,12 @@ package no.difi.meldingsutveksling.logging;
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.FileReference;
-import static no.difi.meldingsutveksling.logging.MarkerFactory.*;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType;
 import org.apache.commons.io.FileUtils;
+
+import static no.difi.meldingsutveksling.logging.MarkerFactory.*;
 
 /**
  * Example usage: import static
