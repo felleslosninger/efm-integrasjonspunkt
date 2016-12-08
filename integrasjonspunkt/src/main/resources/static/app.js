@@ -121,6 +121,7 @@ class ReceiptList extends React.Component {
     constructor(props) {
         super(props);
         this.displayName = 'ReceiptList';
+        this.formatLocalDateTime.bind(this);
     }
 
     padZero(val) {
@@ -128,6 +129,15 @@ class ReceiptList extends React.Component {
             return `0${val}`
         }
         return val;
+    }
+
+    formatLocalDateTime(d) {
+        var monthVal = this.padZero(d.monthValue);
+        var dayVal = this.padZero(d.dayOfMonth);
+        var hourVal = this.padZero(d.hour);
+        var minuteVal = this.padZero(d.minute);
+        var secondVal = this.padZero(d.second);
+        return `${d.year}.${monthVal}.${dayVal} ${hourVal}.${minuteVal}.${secondVal}`;
     }
 
     render() {
@@ -155,12 +165,7 @@ class ReceiptList extends React.Component {
 
 
             var statusNodes = c.messageReceipts.map((r, k) => {
-                var monthVal = this.padZero(r.lastUpdate.monthValue);
-                var dayVal = this.padZero(r.lastUpdate.dayOfMonth);
-                var hourVal = this.padZero(r.lastUpdate.hour);
-                var minuteVal = this.padZero(r.lastUpdate.minute);
-                var secondVal = this.padZero(r.lastUpdate.second);
-                var lastUpdate = `${r.lastUpdate.year}.${monthVal}.${dayVal} ${hourVal}.${minuteVal}.${secondVal}`;
+                var lastUpdate = this.formatLocalDateTime(r.lastUpdate);
 
                 return (
                     <tr key={k}>
@@ -173,7 +178,7 @@ class ReceiptList extends React.Component {
             });
 
             return (
-                <Panel header={c.conversationId} eventKey={k} key={k} >
+                <Panel header={`${this.formatLocalDateTime(c.lastUpdate)} | ${c.conversationId}`} eventKey={k} key={k} >
                     <Label>messageId</Label>
                     <p>{c.conversationId}</p>
                     <hr style={{margin: "5px"}}/>
