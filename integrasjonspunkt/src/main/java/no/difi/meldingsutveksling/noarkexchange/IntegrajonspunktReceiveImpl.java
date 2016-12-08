@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.kvittering.EduDocumentFactory;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.logging.MoveLogMarkers;
+import no.difi.meldingsutveksling.mail.MailClient;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
@@ -69,6 +70,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
     private final IntegrasjonspunktProperties properties;
     private final IntegrasjonspunktNokkel keyInfo;
     private final ConversationRepository conversationRepository;
+    private final MessageSender messageSender;
     private ApplicationContext context;
 
     @Autowired
@@ -78,7 +80,8 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
             IntegrasjonspunktProperties properties,
             IntegrasjonspunktNokkel keyInfo,
             ServiceRegistryLookup serviceRegistryLookup,
-            ConversationRepository conversationRepository) {
+            ConversationRepository conversationRepository,
+            MessageSender messageSender) {
 
         this.transportFactory = transportFactory;
         this.localNoark = localNoark;
@@ -87,6 +90,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
         this.keyInfo = keyInfo;
         this.serviceRegistryLookup = serviceRegistryLookup;
         this.conversationRepository = conversationRepository;
+        this.messageSender = messageSender;
     }
 
     @Override
@@ -171,6 +175,13 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
             if (result.getType().equals(OK_TYPE)) {
                 Audit.info("Delivered archive", markerFrom(response));
                 sendReceiptOpen(inputDocument);
+                if (localNoark instanceof MailClient && eduCore.getMessageType() != EDUCore.MessageType.APPRECEIPT) {
+                    // Need to send AppReceipt manually in case receiver is mail
+                    eduCore.swapSenderAndReceiver();
+                    eduCore.setMessageType(EDUCore.MessageType.APPRECEIPT);
+                    eduCore.setPayload(result);
+                    messageSender.sendMessage(eduCore);
+                }
             } else {
                 Audit.error("Unexpected response from archive", markerFrom(response));
                 System.out.println(">>> archivesystem: " + response.getResult().getMessage().get(0).getText());
