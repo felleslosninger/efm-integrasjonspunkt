@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>parent-pom</artifactId>
+        <groupId>no.difi.meldingsutveksling</groupId>
+        <version>1.7.41-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>ks-svarut</artifactId>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jvnet.jaxb2.maven2</groupId>
+                <artifactId>maven-jaxb2-plugin</artifactId>
+                <version>0.13.0</version>
+                <executions>
+                    <execution>
+                        <id>xsd-generate</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <schemaLanguage>WSDL</schemaLanguage>
+                    <schemaDirectory>${basedir}/src/main/resources/wsdl</schemaDirectory>
+                    <schemaIncludes>
+                        <include>*.wsdl</include>
+                    </schemaIncludes>
+                    <generatePackage>no.difi.meldingsutveksling.ks</generatePackage>
+                    <strict>true</strict>
+                    <verbose>true</verbose>
+                    <extension>true</extension>
+                    <removeOldOutput>true</removeOldOutput>
+                    <args>
+                        <arg>-Xfluent-builder</arg>
+                    </args>
+                    <plugins>
+                        <plugin>
+                            <groupId>net.codesup.util</groupId>
+                            <artifactId>jaxb2-rich-contract-plugin</artifactId>
+                            <version>1.17.0</version>
+                        </plugin>
+                    </plugins>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
