@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 @RestController
 public class ReceiptController {
@@ -18,7 +21,9 @@ public class ReceiptController {
 
     @RequestMapping("/receipts")
     public List<Conversation> receipts() {
-        return Lists.newArrayList(repo.findAll());
+        Stream<Conversation> s = StreamSupport.stream(repo.findAll().spliterator(), false);
+        return s.sorted((a, b) -> b.getLastUpdate().compareTo(a.getLastUpdate()))
+                .collect(Collectors.toList());
     }
 
     @RequestMapping("/receipts/{id}")
