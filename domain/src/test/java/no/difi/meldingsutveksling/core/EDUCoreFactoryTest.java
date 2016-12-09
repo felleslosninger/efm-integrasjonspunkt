@@ -4,8 +4,8 @@ import no.difi.meldingsutveksling.mxa.schema.domain.Message;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +16,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.unmarshallPayload;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
@@ -218,7 +219,7 @@ public class EDUCoreFactoryTest {
     @Test
     public void testUnmarshallPayload() throws JAXBException {
         EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
-        MeldingType meldingType = (MeldingType) eduCoreFactory.unmarshallPayload(StringEscapeUtils.unescapeXml(escapedXml));
+        MeldingType meldingType = (MeldingType) unmarshallPayload(StringEscapeUtils.unescapeXml(escapedXml));
         assertEquals("210570", meldingType.getJournpost().getJpId());
     }
 
