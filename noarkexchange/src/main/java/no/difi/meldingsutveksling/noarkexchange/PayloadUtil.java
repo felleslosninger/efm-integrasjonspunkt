@@ -107,7 +107,7 @@ public class PayloadUtil {
 
     public static Object unmarshallPayload(Object payload) throws JAXBException {
         String p;
-        Object msg = null;
+        Object msg;
 
         if (payload instanceof String) {
             p = (String) payload;
@@ -119,11 +119,11 @@ public class PayloadUtil {
         if (PayloadUtil.isAppReceipt(payload)) {
             JAXBContext jaxbContext = JAXBContext.newInstance("no.difi.meldingsutveksling.noarkexchange.schema");
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            msg = unmarshaller.unmarshal(new StringSource((p)), AppReceiptType.class).getValue();
+            msg = unmarshaller.unmarshal(new StringSource(p), AppReceiptType.class).getValue();
         } else {
             JAXBContext jaxbContext = JAXBContext.newInstance(MeldingType.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            msg = unmarshaller.unmarshal(new StringSource((p)), MeldingType.class).getValue();
+            msg = unmarshaller.unmarshal(new StringSource(p), MeldingType.class).getValue();
         }
         return msg;
     }

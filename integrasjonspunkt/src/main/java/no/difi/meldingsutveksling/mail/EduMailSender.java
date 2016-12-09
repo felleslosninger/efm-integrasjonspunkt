@@ -61,17 +61,13 @@ public class EduMailSender {
 
                 Object payload = unmarshallPayload(request.getPayload());
                 List<DokumentType> docs = ((MeldingType) payload).getJournpost().getDokument();
-                docs.forEach(d -> {
-                    ByteArrayDataSource ds = new ByteArrayDataSource(d.getFil().getBase64(), d.getVeMimeType());
+                for (DokumentType doc : docs) {
+                    ByteArrayDataSource ds = new ByteArrayDataSource(doc.getFil().getBase64(), doc.getVeMimeType());
                     MimeBodyPart attachementPart = new MimeBodyPart();
-                    try {
-                        attachementPart.setDataHandler(new DataHandler(ds));
-                        attachementPart.setFileName(d.getVeFilnavn());
-                        mimeMultipart.addBodyPart(attachementPart);
-                    } catch (MessagingException e) {
-                        throw new MeldingsUtvekslingRuntimeException(e);
-                    }
-                });
+                    attachementPart.setDataHandler(new DataHandler(ds));
+                    attachementPart.setFileName(doc.getVeFilnavn());
+                    mimeMultipart.addBodyPart(attachementPart);
+                }
             }
 
             mimeMultipart.addBodyPart(mimeBodyPart);
@@ -82,4 +78,5 @@ public class EduMailSender {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
     }
+
 }
