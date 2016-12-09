@@ -18,7 +18,7 @@ import javax.xml.bind.JAXBException;
 import java.util.List;
 import java.util.Properties;
 
-import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.unmarshallPayload;
+import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.unmarshallPayloadAsMeldingType;
 
 public class EduMailSender {
 
@@ -59,8 +59,8 @@ public class EduMailSender {
             } else {
                 mimeBodyPart.setText("Du har fått en BestEdu melding. Se vedlegg for metadata og dokumenter.");
 
-                Object payload = unmarshallPayload(request.getPayload());
-                List<DokumentType> docs = ((MeldingType) payload).getJournpost().getDokument();
+                MeldingType meldingType = unmarshallPayloadAsMeldingType(request.getPayload());
+                List<DokumentType> docs = meldingType.getJournpost().getDokument();
                 for (DokumentType doc : docs) {
                     ByteArrayDataSource ds = new ByteArrayDataSource(doc.getFil().getBase64(), doc.getVeMimeType());
                     MimeBodyPart attachementPart = new MimeBodyPart();

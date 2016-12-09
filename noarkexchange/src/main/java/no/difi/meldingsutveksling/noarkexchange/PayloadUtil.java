@@ -127,4 +127,12 @@ public class PayloadUtil {
         }
         return msg;
     }
+
+    public static MeldingType unmarshallPayloadAsMeldingType(Object payload) throws JAXBException {
+        return (MeldingType) unmarshallPayload(payload);
+    }
+
+    public static AppReceiptType unmarshallPayloadAsAppReceiptType(Object payload) throws JAXBException {
+        return (AppReceiptType) unmarshallPayload(payload);
+    }
 }
