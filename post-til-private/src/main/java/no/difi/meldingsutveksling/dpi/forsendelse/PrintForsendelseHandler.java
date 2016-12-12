@@ -1,19 +1,12 @@
 package no.difi.meldingsutveksling.dpi.forsendelse;
 
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
+import no.difi.meldingsutveksling.config.dpi.PrintSettings;
 import no.difi.meldingsutveksling.dpi.ForsendelseBuilderHandler;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
-import no.difi.sdp.client2.domain.AktoerOrganisasjonsnummer;
-import no.difi.sdp.client2.domain.Avsender;
-import no.difi.sdp.client2.domain.Dokumentpakke;
-import no.difi.sdp.client2.domain.Forsendelse;
-import no.difi.sdp.client2.domain.Sertifikat;
-import no.difi.sdp.client2.domain.TekniskMottaker;
+import no.difi.sdp.client2.domain.*;
 import no.difi.sdp.client2.domain.fysisk_post.FysiskPost;
 import no.difi.sdp.client2.domain.fysisk_post.KonvoluttAdresse;
-import no.difi.sdp.client2.domain.fysisk_post.Posttype;
-import no.difi.sdp.client2.domain.fysisk_post.Returhaandtering;
-import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
 import no.digipost.api.representations.Organisasjonsnummer;
 
 public class PrintForsendelseHandler extends ForsendelseBuilderHandler {
@@ -42,10 +35,11 @@ public class PrintForsendelseHandler extends ForsendelseBuilderHandler {
 
         KonvoluttAdresse kon = konvoluttAdresseHandler.handle(request);
         TekniskMottaker utskriftsleverandoer = new TekniskMottaker(Organisasjonsnummer.of(request.getOrgnrPostkasse()), Sertifikat.fraByteArray(request.getCertificate()));
+        final PrintSettings printSettings = config.getPrintSettings();
         FysiskPost fysiskPost = FysiskPost.builder().adresse(kon)
-                .retur(Returhaandtering.MAKULERING_MED_MELDING,
+                .retur(printSettings.getReturnType().toExternal(),
                         returAdresseHandler.handle(request))
-                .sendesMed(Posttype.A_PRIORITERT).utskrift(Utskriftsfarge.SORT_HVIT, utskriftsleverandoer).build();
+                .sendesMed(printSettings.getShippingType().toExternal()).utskrift(printSettings.getInkType().toExternal(), utskriftsleverandoer).build();
 
         return Forsendelse.fysisk(avsender, fysiskPost, dokumentpakke);
     }

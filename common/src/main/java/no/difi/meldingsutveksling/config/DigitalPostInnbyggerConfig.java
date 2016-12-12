@@ -5,6 +5,7 @@
  */
 package no.difi.meldingsutveksling.config;
 
+import no.difi.meldingsutveksling.config.dpi.PrintSettings;
 import no.difi.sdp.client2.domain.Prioritet;
 import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
 import org.springframework.core.io.Resource;
@@ -40,6 +41,17 @@ public class DigitalPostInnbyggerConfig {
 
     @NotNull
     private Sikkerhetsnivaa securityLevel;
+
+    @NotNull
+    private PrintSettings printSettings;
+
+    public PrintSettings getPrintSettings() {
+        return printSettings;
+    }
+
+    public void setPrintSettings(PrintSettings printSettings) {
+        this.printSettings = printSettings;
+    }
 
     public String getMpcId() {
         return mpcId;
