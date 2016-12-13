@@ -31,7 +31,7 @@ aboutSide: "about.html"
 # list of additional links on the right of the top menu
 headerLinks:
   - title: Om Meldingsutveksling mellom offentlige virksomheter
-    url: /meldingsutveksling-mellom-offentlige-virksomheter/about.html
+    url: /move-integrasjonspunkt/about.html
   - title: GitHub
     url: https://github.com/difi/move-integrasjonspunkt
   - title: Issues

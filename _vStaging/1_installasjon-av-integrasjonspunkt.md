@@ -2,10 +2,9 @@
 title: Installasjon av integrasjonspunkt
 pageid: installasjonavintegrasjonspunkt
 layout: default
-description: En liten oppstart for å komme i gang.
+description: Beskrivelse av oppsett av integrajsonspunktet.
 isHome: false
 ---
-
 ### Krav til kjøremiljø 
 
 + Java 8 med JCE installert
@@ -35,19 +34,55 @@ Dersom JCE mangler vil integrasjonspunket stoppe under oppstart og skrive logmel
 
 ### Opprette en bruker til Altinn formidlingstjeneste
 
-Integrasjonspunktet kjører som et sluttbrukersystem mot AltInn's meldingsformidler. Integrsjonspunktet må registeres som et [sluttbrukersystem](https://www.altinn.no/no/Portalhjelp/Datasystemer/Sende-fra-sluttbrukersystem-datasystem/) i AltInn's portal.
-Informasjon om hvordan du logger på AltInn portal finner du [her](https://www.altinn.no/no/Portalhjelp/Innlogging-og-rapportering/).
+Integrasjonspunktet kjører som [datasystem](https://www.altinn.no/no/Portalhjelp/Datasystemer/) mot AltInn's meldingsformidler. Integrsjonspunktet må registeres som et datasystem AltInn's portal. Informasjon om hvordan dette gjøres finnes [her](https://www.altinn.no/no/Portalhjelp/Datasystemer/Registrere-datasystem/).
 
-Under opprettelse av sluttbrukersystemet vil du sette passord og få tildelt brukerid, disse skal senere brukes i properties filen som beskrives lenger ned
+Under opprettelse av datasystem velger du passord og får tildelt brukerid (ID), disse skal senere brukes i properties filen som beskrives lenger ned
 
-### Sette opp sertifikat i Java Key Store (JKS)
-Under piloten vil det kjøre med sertifikatkjede der Difi er Trusted Root. Deltagere vil derfor få tildelt sertifikater etterhvert som de blir en del av piloten.
+Eksempel:
+
+Registrere datasysem
+![Registrere datasysem i AltInn](../resources/altinnDatasystemRegistrer.PNG)
+
+
+Datasystem registrert
+![Datasystem registrert](../resources/altinnDatasystemRegistrert.PNG)
+
+
+Informasjon om hvordan du logger på AltInn portal finner du [her](https://www.altinn.no/no/Portalhjelp/Innlogging/).
+
+### Virksomhetssertifikat
+Integrasjonspunktet bruker vikrsomhetssrtifikat til krypering og signering av melidinger som går mellom integrasjonpunkter
+Virksomhetssertifikat som kan benyttes som kan benyttes leveres av [Commfides](https://www.commfides.com/e-ID/Bestill-Commfides-Virksomhetssertifikat.html) og [Buypass](http://www.buypass.no/bedrift/produkter-og-tjenester/buypass-virksomhetssertifikat)
+
+### Java Key Store (JKS)
+Virksomhetssertifikatene må ligge i en Java key store.
+Dersom du har p12 sertifikat kan dette konverteres til jks format slik: 
+
+```
+keytool -importkeystore -srckeystore [MY_FILE.p12] -srcstoretype pkcs12
+ -srcalias [ALIAS_SRC] -destkeystore [MY_KEYSTORE.jks]
+ -deststoretype jks -deststorepass [PASSWORD_JKS] -destalias [ALIAS]
+```
+
+forklaring på bruk av komandoen finnes [her](https://www.tbs-certificates.co.uk/FAQ/en/626.html)
+
+Keytool finner du i
+```
+%JAVA_HOME%/bin 
+```
+(f.eks C:\Program Files\Java\jre1.8.0_101\bin)
 
 Når du har fått sertifikatet, må det legges inn på serveren du kjører integrasjonspunket. Noter deg lokasjonen for sertifikatet, samt brukernavn og passord. 
 Dette legges senere inn som propertiene, keystorelocation, privatekeypassword, privatekeyalias
 
 ### Laste opp public virksomhetssertifikat
-Sertifikatet kan lastes opp til [virksomhetssertifikatserveren](https://beta-meldingsutveksling.difi.no/virksomhetssertifikat/)
+Public key (.cer fil) lastes opp til [virksomhetssertifikatserveren](https://beta-meldingsutveksling.difi.no/virksomhetssertifikat/)
+
+public key kan eksporteres fra keystore med komandoen
+
+```
+keytool -export -keystore [MY_KEYSTORE.jks] -alias [ALIAS] -file [FILENAME.cer]
+```
 
 ### Brannmursåpninger
 
@@ -69,22 +104,22 @@ Følgende verdier settest i integrasjonspunkt-local.properties
 **Propertie**              			|**Beskrivelse**														|**Eksempel**
 ------------------------------------|-----------------------------------------------------------------------|-----------------
 difi.move.org.number               	|Organisasjonsnummer til din organisasjon (9 siffer)					|123456789
-server.port							|Portnummer integrasjonspunktet skal kjøre på (default 9093) 			| 9093		  
+server.port							|Portnummer integrasjonspunktet skal kjøre på (default 9093) 			|9093		  
 									|																		|
-difi.move.noarkSystem.endpointURL 	|URL integrasjonspunktet finner sak-/arkivsystemets BestEdu tjenester 	| 
-difi.move.noarkSystem.type        	|Sak/-arkivsystem type 													|ephorte/P360/WebSak																	
+difi.move.noarkSystem.endpointURL 	|URL integrasjonspunktet finner sak-/arkivsystemets BestEdu tjenester 	|Se eksempelfil for eksempel 
+difi.move.noarkSystem.type        	|Sak/-arkivsystem type 													|ephorte/P360/WebSak/mail																	
 difi.move.noarkSystem.username\*   	|Brukernavn for autentisering mot sakarkivsystem						|svc_sakark
-difi.move.noarkSystem.password\*   	|Passord for autentisering mot sakarkivsystem							|
+difi.move.noarkSystem.password\*   	|Passord for autentisering mot sakarkivsystem							|changeit
 difi.move.noarkSystem.domain\*     	|Domene sakarkivsystemet kjører på										|
 									|																		|
 difi.move.msh.endpointURL\*\*		|Path til MSH 															|
 									|																		|
-difi.move.org.keystore.path			|Path til .jks fil	 													|
-difi.move.org.keystore.password    	|Passord til keystore 													|
-difi.move.org.keystore.alias		|Alieas til virksomhetssertifikatet som brukes i integrasjonspunktet 	| 
+difi.move.org.keystore.path			|Path til .jks fil	 													|c:\integrajsonspunkt\keystore.jks
+difi.move.org.keystore.password    	|Passord til keystore 													|changeit
+difi.move.org.keystore.alias		|Alieas til virksomhetssertifikatet som brukes i integrasjonspunktet 	|alias 
 									|																		|
-difi.move.altinn.username         	|Brukernavnet du fikk når du opprettet AltInn systembruker				|
-difi.move.altinn.password         	|Passord du satte når du opprettet AltInn systembruker					|
+difi.move.altinn.username         	|Brukernavnet du fikk når du opprettet AltInn systembruker				|123456
+difi.move.altinn.password         	|Passord du satte når du opprettet AltInn systembruker					|changeit
 
 
 
@@ -114,7 +149,7 @@ Oppsett for ephorte, [P360](../resources/Oppsett360.docx), WebSak
 Integrasjonspunktet startes fra kommandolinjen med kommandoen (Kjør som admindistrator)
 
 ```
-java -jar -Dspring.profiles.active=staging  integrasjonspunktet[versjon].jar
+java -jar -Dspring.profiles.active=staging -Dapp.logging.enableSSL=false  integrasjonspunkt-[versjon].jar
 ```
 
 
