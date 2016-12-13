@@ -20,6 +20,7 @@ jacoco.exec
 /integrasjonspunkt/build/certificate
 /integrasjonspunkt/activemq-data/
 /integrasjonspunkt/node_modules/
+/integrasjonspunkt/receipt.mv.db
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/

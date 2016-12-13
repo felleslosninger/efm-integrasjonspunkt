@@ -46,7 +46,7 @@ public class EduMailSender {
 
         try {
             Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress("integrasjonspunkt@difi.no"));
+            message.setFrom(new InternetAddress(properties.getMail().getSenderAddress()));
             message.setRecipients(Message.RecipientType.TO,
                     InternetAddress.parse(properties.getMail().getReceiverAddress()));
             message.setSubject(title);
