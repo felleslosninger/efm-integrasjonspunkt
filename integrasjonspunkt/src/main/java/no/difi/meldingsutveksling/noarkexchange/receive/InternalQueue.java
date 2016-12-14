@@ -193,10 +193,13 @@ public class InternalQueue {
         try {
             integrajonspunktReceive.forwardToNoarkSystem(standardBusinessDocument);
         } catch (MessageException e) {
-            Audit.error("Failed delivering to archive (1)", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));
+            Audit.error("Failed delivering to archive (1)", markerFrom(new StandardBusinessDocumentWrapper
+                    (standardBusinessDocument)), e);
             logger.error(markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)), e.getStatusMessage().getTechnicalMessage(), e);
         } catch (Exception e) {
-            Audit.error("Failed delivering to archive (2)", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));
+            Audit.error("Failed delivering to archive (2)", markerFrom(new StandardBusinessDocumentWrapper
+                    (standardBusinessDocument)), e);
+            logger.error("Failed delivering to archive", e);
             throw e;
         }
     }
