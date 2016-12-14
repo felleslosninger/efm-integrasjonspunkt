@@ -87,6 +87,10 @@
         <configuration>
           <schemaLanguage>WSDL</schemaLanguage>
           <schemaDirectory>${basedir}/src/main/resources/wsdl</schemaDirectory>
+          <bindingDirectory>${basedir}/src/main/resources</bindingDirectory>
+          <bindingIncludes>
+            <include>bindings.xml</include>
+          </bindingIncludes>
           <schemaIncludes>
             <include>*.wsdl</include>
           </schemaIncludes>
@@ -97,12 +101,18 @@
           <removeOldOutput>true</removeOldOutput>
           <args>
             <arg>-Xfluent-builder</arg>
+            <arg>-Xannotate</arg>
           </args>
           <plugins>
             <plugin>
               <groupId>net.codesup.util</groupId>
               <artifactId>jaxb2-rich-contract-plugin</artifactId>
               <version>1.17.0</version>
+            </plugin>
+            <plugin>
+              <groupId>org.jvnet.jaxb2_commons</groupId>
+              <artifactId>jaxb2-basics-annotate</artifactId>
+              <version>1.0.2</version>
             </plugin>
           </plugins>
         </configuration>
