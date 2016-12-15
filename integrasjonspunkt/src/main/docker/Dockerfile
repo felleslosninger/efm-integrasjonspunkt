@@ -27,8 +27,6 @@ RUN apk add --update \
 
 WORKDIR ${APP_DIR}
 
-EXPOSE 8080
-
 # Use tini to reap processes and signal handling
 ENTRYPOINT ["/sbin/tini", "-g", "--", "sh", "-c", "./run.sh"]
 
@@ -36,4 +34,4 @@ ENTRYPOINT ["/sbin/tini", "-g", "--", "sh", "-c", "./run.sh"]
 ADD *.jar ${APP_DIR}/app.jar
 ADD run.sh ${APP_DIR}/
 
-HEALTHCHECK CMD curl -s --fail http://localhost:8080/manage/health > /dev/null || exit 1
+HEALTHCHECK CMD curl -s --fail http://localhost:9093/manage/health > /dev/null || exit 1
