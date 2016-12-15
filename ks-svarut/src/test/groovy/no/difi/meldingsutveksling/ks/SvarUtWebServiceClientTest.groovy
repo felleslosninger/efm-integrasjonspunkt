@@ -4,6 +4,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import org.springframework.ws.test.client.MockWebServiceServer
@@ -17,6 +18,7 @@ import static org.springframework.ws.test.client.RequestMatchers.anything
 import static org.springframework.ws.test.client.ResponseCreators.withPayload
 
 @RunWith(SpringJUnit4ClassRunner.class)
+@SpringBootTest
 @ContextConfiguration(classes = [SvarUtConfiguration, SvarUtWebServiceTestConfiguration])
 class SvarUtWebServiceClientTest {
     @Autowired
