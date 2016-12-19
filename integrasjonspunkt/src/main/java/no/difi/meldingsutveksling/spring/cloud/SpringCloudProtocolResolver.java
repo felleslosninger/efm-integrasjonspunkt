@@ -1,7 +1,10 @@
 package no.difi.meldingsutveksling.spring.cloud;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.cloud.config.client.ConfigClientProperties;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -33,6 +36,9 @@ public class SpringCloudProtocolResolver implements ApplicationContextInitialize
     public void initialize(final ConfigurableApplicationContext c) {
         logger.info("Initialize with Spring Cloud Config Binary resource resolver.");
         c.addProtocolResolver(new ProtocolResolver() {
+
+            Map<String, ByteArrayResource> maps = new HashMap<>();
+
             @Override
             public Resource resolve(String location, ResourceLoader rl) {
 
@@ -40,6 +46,14 @@ public class SpringCloudProtocolResolver implements ApplicationContextInitialize
                     return null;
                 }
 
+                if (!maps.containsKey(location)) {
+                    fetchRemote(location);
+                }
+
+                return maps.get(location);
+            }
+
+            private void fetchRemote(String location) throws BeansException {
                 ConfigClientProperties bean = c.getBean(ConfigClientProperties.class);
                 String path = "/{name}/default/{label}/{resource}";
                 String label = "master";
@@ -54,11 +68,10 @@ public class SpringCloudProtocolResolver implements ApplicationContextInitialize
                 logger.info("Fetching resource " + location + " from cloud: " + bean.getRawUri() + "/" + bean.getName() + "/default/" + label + "/" + location.substring(PREFIX.length()));
                 try {
                     ResponseEntity<byte[]> exchange = new RestTemplate().exchange(bean.getRawUri() + path, HttpMethod.GET, entity, byte[].class, args);
-                    return new ByteArrayResource(exchange.getBody());
+                    maps.put(location, new ByteArrayResource(exchange.getBody()));
                 } catch (RestClientException rce) {
                     logger.error("Error loading cloud resource: " + location, rce);
                 }
-                return null;
             }
         });
     }
