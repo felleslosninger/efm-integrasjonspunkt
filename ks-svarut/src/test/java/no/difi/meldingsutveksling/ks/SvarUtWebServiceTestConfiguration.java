@@ -6,8 +6,8 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 public class SvarUtWebServiceTestConfiguration {
 
     @Bean
-    public SvarUtWebServiceClient svarUtClient(Jaxb2Marshaller marshaller) {
-        SvarUtWebServiceClient client = new SvarUtWebServiceClient();
+    public SvarUtWebServiceClientImpl svarUtClient(Jaxb2Marshaller marshaller) {
+        SvarUtWebServiceClientImpl client = new SvarUtWebServiceClientImpl();
         client.setDefaultUri("localhost");
         client.setMarshaller(marshaller);
         client.setUnmarshaller(marshaller);

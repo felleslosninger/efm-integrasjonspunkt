@@ -1,22 +1,10 @@
 package no.difi.meldingsutveksling.ks;
 
-import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
+/**
+ * Created by mfhoel on 15.12.2016.
+ */
+public interface SvarUtWebServiceClient {
+    String sendMessage(Forsendelse forsendelse);
 
-public class SvarUtWebServiceClient extends WebServiceGatewaySupport {
-    public String sendMessage(Forsendelse forsendelse) {
-
-
-
-        final SendForsendelse sendForsendelse = SendForsendelse.builder().withForsendelse(forsendelse).build();
-
-        final SendForsendelseResponse response = (SendForsendelseResponse) getWebServiceTemplate().marshalSendAndReceive(sendForsendelse);
-
-        return response.getReturn();
-    }
-
-    public ForsendelseStatus getForsendelseStatus(String forsendelseId) {
-        RetrieveForsendelseStatus request = RetrieveForsendelseStatus.builder().withForsendelsesid(forsendelseId).build();
-        final RetrieveForsendelseStatusResponse response = (RetrieveForsendelseStatusResponse) getWebServiceTemplate().marshalSendAndReceive(request);
-        return response.getReturn();
-    }
+    ForsendelseStatus getForsendelseStatus(String forsendesId);
 }

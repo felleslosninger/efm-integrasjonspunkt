@@ -22,7 +22,7 @@ import static org.springframework.ws.test.client.ResponseCreators.withPayload
 @ContextConfiguration(classes = [SvarUtConfiguration, SvarUtWebServiceTestConfiguration])
 class SvarUtWebServiceClientTest {
     @Autowired
-    SvarUtWebServiceClient client
+    SvarUtWebServiceClientImpl client
 
     MockWebServiceServer server
 

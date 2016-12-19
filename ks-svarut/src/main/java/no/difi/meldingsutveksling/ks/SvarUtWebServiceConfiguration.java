@@ -7,8 +7,8 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 @Configuration
 public class SvarUtWebServiceConfiguration {
     @Bean
-    public SvarUtWebServiceClient svarUtClient(Jaxb2Marshaller marshaller) {
-        SvarUtWebServiceClient client = new SvarUtWebServiceClient();
+    public SvarUtWebServiceClientImpl svarUtClient(Jaxb2Marshaller marshaller) {
+        SvarUtWebServiceClientImpl client = new SvarUtWebServiceClientImpl();
         client.setDefaultUri("http://localhost:8080");
         client.setMarshaller(marshaller);
         client.setUnmarshaller(marshaller);
