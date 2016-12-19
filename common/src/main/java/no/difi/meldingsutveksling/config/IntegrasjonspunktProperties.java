@@ -117,6 +117,7 @@ public class IntegrasjonspunktProperties {
 
         private String smtpHost;
         private String smtpPort;
+        private String senderAddress;
         private String receiverAddress;
         private String enableAuth;
         private String username;

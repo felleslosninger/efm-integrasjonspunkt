@@ -1,6 +1,8 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
+import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.xml.transform.StringSource;
 import org.w3c.dom.Document;
@@ -103,4 +105,34 @@ public class PayloadUtil {
         return result;
     }
 
+    public static Object unmarshallPayload(Object payload) throws JAXBException {
+        String p;
+        Object msg;
+
+        if (payload instanceof String) {
+            p = (String) payload;
+            p = StringEscapeUtils.unescapeHtml(p);
+        } else {
+            p = ((Node) payload).getFirstChild().getTextContent().trim();
+        }
+
+        if (PayloadUtil.isAppReceipt(payload)) {
+            JAXBContext jaxbContext = JAXBContext.newInstance("no.difi.meldingsutveksling.noarkexchange.schema");
+            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+            msg = unmarshaller.unmarshal(new StringSource(p), AppReceiptType.class).getValue();
+        } else {
+            JAXBContext jaxbContext = JAXBContext.newInstance(MeldingType.class);
+            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+            msg = unmarshaller.unmarshal(new StringSource(p), MeldingType.class).getValue();
+        }
+        return msg;
+    }
+
+    public static MeldingType unmarshallPayloadAsMeldingType(Object payload) throws JAXBException {
+        return (MeldingType) unmarshallPayload(payload);
+    }
+
+    public static AppReceiptType unmarshallPayloadAsAppReceiptType(Object payload) throws JAXBException {
+        return (AppReceiptType) unmarshallPayload(payload);
+    }
 }

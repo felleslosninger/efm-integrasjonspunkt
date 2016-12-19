@@ -5,12 +5,8 @@ import com.google.common.collect.Lists;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.core.EDUCore;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,6 +20,7 @@ public class Conversation {
     private String receiverIdentifier;
     private String messageReference;
     private String messageTitle;
+    private LocalDateTime lastUpdate;
     private boolean pollable;
     private ServiceIdentifier serviceIdentifier;
 
@@ -44,6 +41,7 @@ public class Conversation {
         this.messageTitle = messageTitle;
         this.messageReceipts = receipts;
         this.serviceIdentifier = serviceIdentifier;
+        this.lastUpdate = LocalDateTime.now();
         switch (serviceIdentifier) {
             case DPV:
                 this.pollable = true;
@@ -121,6 +119,7 @@ public class Conversation {
 
     public void addMessageReceipt(MessageReceipt receipt) {
         this.messageReceipts.add(receipt);
+        this.lastUpdate = LocalDateTime.now();
     }
 
     public void setMessageReceipts(List<MessageReceipt> messageReceipts) {
@@ -149,6 +148,14 @@ public class Conversation {
 
     public void setMessageTitle(String messageTitle) {
         this.messageTitle = messageTitle;
+    }
+
+    public LocalDateTime getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(LocalDateTime lastUpdate) {
+        this.lastUpdate = lastUpdate;
     }
 
     @Override

@@ -2,6 +2,10 @@ package no.difi.meldingsutveksling.mail;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
+import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
+import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 
 import javax.activation.DataHandler;
 import javax.mail.*;
@@ -10,7 +14,11 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
+import javax.xml.bind.JAXBException;
+import java.util.List;
 import java.util.Properties;
+
+import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.unmarshallPayloadAsMeldingType;
 
 public class EduMailSender {
 
@@ -20,7 +28,7 @@ public class EduMailSender {
         this.properties = properties;
     }
 
-    public void send(byte[] messageAsBytes, String title) {
+    public void send(PutMessageRequestType request, String title) {
         Properties props = new Properties();
         props.put("mail.smtp.host", properties.getMail().getSmtpHost());
         props.put("mail.smtp.port", properties.getMail().getSmtpPort());
@@ -38,28 +46,37 @@ public class EduMailSender {
 
         try {
             Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress("integrasjonspunkt@difi.no"));
+            message.setFrom(new InternetAddress(properties.getMail().getSenderAddress()));
             message.setRecipients(Message.RecipientType.TO,
                     InternetAddress.parse(properties.getMail().getReceiverAddress()));
             message.setSubject(title);
 
             MimeMultipart mimeMultipart = new MimeMultipart();
-            // Add content
             MimeBodyPart mimeBodyPart = new MimeBodyPart();
-            mimeBodyPart.setText("Melding vedlagt.");
-            mimeMultipart.addBodyPart(mimeBodyPart);
-            // Add attachement
-            ByteArrayDataSource ds = new ByteArrayDataSource(messageAsBytes, "application/octet-stream");
-            MimeBodyPart attachementPart = new MimeBodyPart();
-            attachementPart.setDataHandler(new DataHandler(ds));
-            attachementPart.setFileName(title+".xml");
-            mimeMultipart.addBodyPart(attachementPart);
 
+            if (PayloadUtil.isAppReceipt(request.getPayload())) {
+                mimeBodyPart.setText("Kvittering (AppReceipt) mottatt.");
+            } else {
+                mimeBodyPart.setText("Du har fått en BestEdu melding. Se vedlegg for metadata og dokumenter.");
+
+                MeldingType meldingType = unmarshallPayloadAsMeldingType(request.getPayload());
+                List<DokumentType> docs = meldingType.getJournpost().getDokument();
+                for (DokumentType doc : docs) {
+                    ByteArrayDataSource ds = new ByteArrayDataSource(doc.getFil().getBase64(), doc.getVeMimeType());
+                    MimeBodyPart attachementPart = new MimeBodyPart();
+                    attachementPart.setDataHandler(new DataHandler(ds));
+                    attachementPart.setFileName(doc.getVeFilnavn());
+                    mimeMultipart.addBodyPart(attachementPart);
+                }
+            }
+
+            mimeMultipart.addBodyPart(mimeBodyPart);
             message.setContent(mimeMultipart);
 
             Transport.send(message);
-        } catch (MessagingException e) {
+        } catch (MessagingException | JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
     }
+
 }
