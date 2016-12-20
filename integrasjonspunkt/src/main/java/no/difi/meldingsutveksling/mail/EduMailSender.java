@@ -54,7 +54,7 @@ public class EduMailSender {
             MimeMultipart mimeMultipart = new MimeMultipart();
             MimeBodyPart mimeBodyPart = new MimeBodyPart();
 
-            if (PayloadUtil.isAppReceipt(request)) {
+            if (PayloadUtil.isAppReceipt(request.getPayload())) {
                 mimeBodyPart.setText("Kvittering (AppReceipt) mottatt.");
             } else {
                 mimeBodyPart.setText("Du har fått en BestEdu melding. Se vedlegg for metadata og dokumenter.");
