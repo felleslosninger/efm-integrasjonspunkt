@@ -122,6 +122,7 @@ public class IntegrasjonspunktProperties {
         private String enableAuth;
         private String username;
         private String password;
+        private String trust;
     }
 
 

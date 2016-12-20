@@ -18,6 +18,7 @@ import javax.xml.bind.JAXBException;
 import java.util.List;
 import java.util.Properties;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.unmarshallPayloadAsMeldingType;
 
 public class EduMailSender {
@@ -34,6 +35,11 @@ public class EduMailSender {
         props.put("mail.smtp.port", properties.getMail().getSmtpPort());
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.auth", properties.getMail().getEnableAuth());
+
+        String trust = properties.getMail().getTrust();
+        if (!isNullOrEmpty(trust)) {
+            props.put("mail.smtp.ssl.trust", trust);
+        }
 
         Session session = Session.getDefaultInstance(props,
                 new javax.mail.Authenticator() {
