@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextbest;
 
 import com.google.common.collect.Lists;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.slf4j.Logger;
@@ -28,7 +29,6 @@ public class MessageOutController {
 
     private static final Logger log = LoggerFactory.getLogger(MessageOutController.class);
 
-    private static final String uploadDirPrefix = "upload/";
 
     @Autowired
     private OutgoingConversationResourceRepository repo;
@@ -38,6 +38,9 @@ public class MessageOutController {
 
     @Autowired
     private ServiceRegistryLookup sr;
+
+    @Autowired
+    private IntegrasjonspunktProperties props;
 
     @RequestMapping(value = "receivers/{receiverId}/capabilities", method = RequestMethod.GET)
     @ResponseBody
@@ -108,7 +111,7 @@ public class MessageOutController {
         return ResponseEntity.ok(conversationResource);
     }
 
-    @RequestMapping(value = "/out/messages/{conversationId}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/out/messages/{conversationId}", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity uploadFiles(
             @PathVariable("conversationId") String conversationId,
@@ -127,7 +130,12 @@ public class MessageOutController {
             log.info("Content-Type: "+file.getContentType());
             log.info("Size (bytes): "+file.getSize());
 
-            File localFile = new File(uploadDirPrefix+file.getOriginalFilename());
+            String filedir = props.getNextbest().getFiledir();
+            if (!filedir.endsWith("/")) {
+                filedir = filedir+"/";
+            }
+            filedir = filedir+conversationId+"/";
+            File localFile = new File(filedir+file.getOriginalFilename());
             localFile.getParentFile().mkdirs();
 
             try {
@@ -135,6 +143,11 @@ public class MessageOutController {
                 BufferedOutputStream bos = new BufferedOutputStream(os);
                 bos.write(file.getBytes());
                 bos.close();
+
+                if (!conversationResource.getFileRefs().contains(file.getOriginalFilename())) {
+                    conversationResource.addFileRef(file.getOriginalFilename());
+                }
+                repo.save(conversationResource);
             } catch (java.io.IOException e) {
                 log.error("Could not write file {f}", localFile, e);
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Could not write file");
