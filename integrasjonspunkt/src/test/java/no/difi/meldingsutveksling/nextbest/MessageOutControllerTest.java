@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -18,8 +19,7 @@ import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.RegexMatcher.matchesRegex;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
@@ -43,6 +43,10 @@ public class MessageOutControllerTest {
 
     @Before
     public void setup() {
+        IntegrasjonspunktProperties.NextBEST nextBEST = new IntegrasjonspunktProperties.NextBEST();
+        nextBEST.setFiledir("target/uploadtest");
+        when(props.getNextbest()).thenReturn(nextBEST);
+
         ServiceRecord serviceRecord = new ServiceRecord();
         serviceRecord.setServiceIdentifier(ServiceIdentifier.EDU.name());
         when(sr.getServiceRecord("1")).thenReturn(serviceRecord);
@@ -170,5 +174,20 @@ public class MessageOutControllerTest {
                 .andExpect(jsonPath("$.conversationId", matchesRegex("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}")))
                 .andExpect(jsonPath("$.receiverId", is("1")))
                 .andExpect(jsonPath("$.messagetypeId", is("1")));
+    }
+
+    @Test
+    public void testFileUpload() throws Exception {
+        MockMultipartFile data = new MockMultipartFile("data", "file.txt", "text/plain", "some text".getBytes());
+        mvc.perform(fileUpload("/out/messages/42")
+                .file(data))
+                .andExpect(status().isOk());
+
+        // Check that file is added to the conversation resource
+        mvc.perform(get("/out/messages/42")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.fileRefs", hasSize(1)))
+                .andExpect(jsonPath("$.fileRefs[0]", is("file.txt")));
     }
 }
