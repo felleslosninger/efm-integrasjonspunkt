@@ -2,6 +2,9 @@ package no.difi.meldingsutveksling.nextbest;
 
 import com.google.common.collect.Lists;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.receipt.Conversation;
+import no.difi.meldingsutveksling.receipt.ConversationRepository;
+import no.difi.meldingsutveksling.receipt.MessageReceipt;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.slf4j.Logger;
@@ -21,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
@@ -35,6 +39,9 @@ public class MessageOutController {
 
     @Autowired
     private IncomingConversationResourceRepository incRepo;
+
+    @Autowired
+    private ConversationRepository convRepo;
 
     @Autowired
     private ServiceRegistryLookup sr;
@@ -163,13 +170,27 @@ public class MessageOutController {
             @PathVariable("conversationId") String conversationId,
             @RequestParam(value = "messagetypeId", required = false) String messagetypeId,
             @RequestParam(value = "lastonly", required = false) boolean lastonly) {
-        throw new UnsupportedOperationException();
+        List<Conversation> clist = convRepo.findByConversationId(conversationId);
+        if (clist == null || clist.size() == 0) {
+            return ResponseEntity.notFound().build();
+        }
+        if (lastonly) {
+            MessageReceipt latestReceipt = clist.get(0).getMessageReceipts().stream()
+                    .sorted((a, b) -> b.getLastUpdate().compareTo(a.getLastUpdate()))
+                    .findFirst().get();
+            return ResponseEntity.ok(latestReceipt);
+        }
+        return ResponseEntity.ok(clist.get(0));
     }
 
-    @RequestMapping(value = "/out/types", method = RequestMethod.GET)
+    @RequestMapping(value = "/out/types/{identifier}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity getTypes(@PathVariable(value = "receiverId", required = false) String receiverId) {
-        throw new UnsupportedOperationException();
+    public ResponseEntity getTypes(@PathVariable(value = "identifier", required = true) String identifier) {
+        Optional<ServiceRecord> serviceRecord = Optional.ofNullable(sr.getServiceRecord(identifier));
+        if (serviceRecord.isPresent()) {
+            return ResponseEntity.ok(Arrays.asList(serviceRecord.get().getServiceIdentifier()));
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @RequestMapping(value = "/out/types/{messagetypeId}/prototype", method = RequestMethod.GET)

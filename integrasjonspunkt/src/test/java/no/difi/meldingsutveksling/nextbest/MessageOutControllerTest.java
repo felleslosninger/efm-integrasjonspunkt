@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.nextbest;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.receipt.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.junit.Before;
@@ -14,6 +15,10 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+
+import java.time.LocalDateTime;
+import java.util.Arrays;
 
 import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.RegexMatcher.matchesRegex;
@@ -41,6 +46,9 @@ public class MessageOutControllerTest {
     @MockBean
     private IntegrasjonspunktProperties props;
 
+    @MockBean
+    private ConversationRepository crepo;
+
     @Before
     public void setup() {
         IntegrasjonspunktProperties.NextBEST nextBEST = new IntegrasjonspunktProperties.NextBEST();
@@ -50,6 +58,11 @@ public class MessageOutControllerTest {
         ServiceRecord serviceRecord = new ServiceRecord();
         serviceRecord.setServiceIdentifier(ServiceIdentifier.EDU.name());
         when(sr.getServiceRecord("1")).thenReturn(serviceRecord);
+
+        MessageReceipt receiptSent = MessageReceipt.of(ReceiptStatus.SENT, LocalDateTime.now());
+        MessageReceipt receiptDelivered = MessageReceipt.of(ReceiptStatus.DELIVERED, LocalDateTime.now().plusMinutes(1));
+        Conversation receiptConversation = Conversation.of("42", "42ref", "123", "sometitle", ServiceIdentifier.EDU, receiptDelivered, receiptSent);
+        when(crepo.findByConversationId("42")).thenReturn(asList(receiptConversation));
 
         OutgoingConversationResource cr42 = OutgoingConversationResource.of("42", "1", "1");
         OutgoingConversationResource cr43 = OutgoingConversationResource.of("43", "1", "2");
@@ -66,6 +79,30 @@ public class MessageOutControllerTest {
         when(repo.findByReceiverIdAndMessagetypeId("1", "1")).thenReturn(asList(cr42));
         when(repo.findByReceiverIdAndMessagetypeId("1", "2")).thenReturn(asList(cr43));
         when(repo.findByReceiverIdAndMessagetypeId("2", "1")).thenReturn(asList(cr44));
+    }
+
+    @Test
+    public void getTracingsForIdShouldReturnOk() throws Exception {
+        mvc.perform(get("/tracings/42")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.messageReceipts", hasSize(2)));
+    }
+
+    @Test
+    public void getTracingWithOnlylastShouldReturnOk() throws Exception {
+        mvc.perform(get("/tracings/42")
+                .param("lastonly", "true")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status", is("DELIVERED")));
+    }
+
+    @Test
+    public void getTracingsForUnknownIdShouldFail() throws Exception {
+        mvc.perform(get("/tracings/43")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -189,5 +226,13 @@ public class MessageOutControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.fileRefs", hasSize(1)))
                 .andExpect(jsonPath("$.fileRefs[0]", is("file.txt")));
+    }
+
+    @Test
+    public void getOutTypesShouldReturnEdu() throws Exception {
+        mvc.perform(get("/out/types/1")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0]", is("EDU")));
     }
 }
