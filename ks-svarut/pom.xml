@@ -86,6 +86,12 @@
       <artifactId>domain</artifactId>
       <version>${project.parent.version}</version>
     </dependency>
+    <dependency>
+      <groupId>cglib</groupId>
+      <artifactId>cglib</artifactId>
+      <version>3.2.4</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   
   <build>

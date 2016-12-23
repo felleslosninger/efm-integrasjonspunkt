@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 @Configuration
-public class SvarUtWebServiceConfiguration {
+public class SvarUtWebServiceBeans {
     @Bean
     public SvarUtWebServiceClientImpl svarUtClient(Jaxb2Marshaller marshaller) {
         SvarUtWebServiceClientImpl client = new SvarUtWebServiceClientImpl();
