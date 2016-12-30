@@ -9,9 +9,7 @@ class SvarUtServiceTest extends Specification {
 
     def "setup"() {
 
-        service = new SvarUtService()
-        this.service.client = Mock(SvarUtWebServiceClient)
-        this.service.messageConverter = Mock(EDUCoreConverter)
+        service = new SvarUtService(Mock(EDUCoreConverter), Mock(SvarUtWebServiceClient))
     }
 
     def "When sending a domain message it is converted to forsendelse before being sent to svar ut"() {
