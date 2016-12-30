@@ -17,8 +17,8 @@ class DokumentTypeHandlerTest extends Specification {
         given:
         DokumentType dokumentType = new DokumentType(fil: new FilType(base64: data), veMimeType: "pdf", veFilnavn: "test.pdf")
         def builder = Mock(Dokument.Builder)
+        DokumentTypeHandler dhh = new DokumentTypeHandler(dokumentType, new FileTypeHandler(dokumentType))
         when:
-        DokumentTypeHandler dhh = new DokumentTypeHandler(dokumentType)
         builder = dhh.map(builder)
         then:
         1 * builder.withData(_) >> {

@@ -15,9 +15,11 @@ import java.util.List;
  */
 public class MeldingTypeHandler implements Handler<Forsendelse.Builder> {
     private final MeldingType meldingType;
+    private final FileTypeHandlerFactory fileTypeHandlerFactory;
 
-    public MeldingTypeHandler(MeldingType meldingType) {
+    public MeldingTypeHandler(MeldingType meldingType, FileTypeHandlerFactory factory) {
         this.meldingType = meldingType;
+        this.fileTypeHandlerFactory = factory;
     }
 
     @Override
@@ -26,7 +28,10 @@ public class MeldingTypeHandler implements Handler<Forsendelse.Builder> {
         final NoarksakType noarksak = meldingType.getNoarksak();
         builder.withTittel(noarksak.getSaOfftittel());
         for (DokumentType d : dokumentTypes) {
-            Dokument.Builder dokumentBuilder = new DokumentTypeHandler(d).map(Dokument.builder());
+            final FileTypeHandler fileTypeHandler = this.fileTypeHandlerFactory.createFileTypeHandler(d);
+            final DokumentTypeHandler dokumentHandler = new DokumentTypeHandler(d, fileTypeHandler);
+            Dokument.Builder dokumentBuilder = dokumentHandler.map(Dokument.builder());
+
             builder.addDokumenter(dokumentBuilder.build());
         }
         return builder;

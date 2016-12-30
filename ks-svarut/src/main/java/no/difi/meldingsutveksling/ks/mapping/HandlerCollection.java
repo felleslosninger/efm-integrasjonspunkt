@@ -1,8 +1,6 @@
 package no.difi.meldingsutveksling.ks.mapping;
 
-import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.ks.Forsendelse;
-import no.difi.meldingsutveksling.ks.mapping.edu.MeldingTypeHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,15 +10,8 @@ import java.util.List;
  *
  * Used to map EDUCore to Forsendelse (SvarUt payload)
  */
-public class EDUCoreHandler implements Handler<Forsendelse.Builder> {
-    private EDUCore eduCore;
-    List<Handler<Forsendelse.Builder>> handlers;
-
-    public EDUCoreHandler(EDUCore eduCore) {
-        this.eduCore = eduCore;
-        handlers = new ArrayList<>();
-        handlers.add(new MeldingTypeHandler(eduCore.getPayloadAsMeldingType()));
-    }
+public class HandlerCollection implements Handler<Forsendelse.Builder> {
+    List<Handler<Forsendelse.Builder>> handlers = new ArrayList<>();
 
     @Override
     public Forsendelse.Builder map(Forsendelse.Builder builder) {

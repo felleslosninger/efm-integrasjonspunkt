@@ -1,29 +1,22 @@
 package no.difi.meldingsutveksling.ks;
 
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
-import org.springframework.beans.factory.annotation.Autowired;
+import no.difi.meldingsutveksling.ks.mapping.Handler;
+import no.difi.meldingsutveksling.ks.mapping.HandlerFactory;
 
-import javax.activation.DataHandler;
-import javax.mail.util.ByteArrayDataSource;
+import java.util.List;
 
 public class EDUCoreConverterImpl implements EDUCoreConverter {
-    @Autowired
-    IntegrasjonspunktProperties properties;
+    HandlerFactory handlerFactory;
+
+    public EDUCoreConverterImpl(HandlerFactory handlerFactory) {
+        this.handlerFactory = handlerFactory;
+    }
 
     public Forsendelse convert(EDUCore domainMessage) {
-        byte[] data = new byte[1024];
-        final Dokument dokument = Dokument.builder().withData(new DataHandler(new ByteArrayDataSource(data, "pdf"))).build();
-        final Mottaker mottaker = Organisasjon.builder().build();
-        final Printkonfigurasjon printkonfigurasjon = Printkonfigurasjon.builder().build();
-        Forsendelse forsendelse = Forsendelse.builder()
-                .withTittel("Tittel")
-                .withAvgivendeSystem(properties.getNoarkSystem().getType())
-                .withDokumenter(dokument)
-                .withMottaker(mottaker)
-                .withPrintkonfigurasjon(printkonfigurasjon)
-                .withKrevNiva4Innlogging(true)
-                .withKryptert(true).build();
-        return forsendelse;
+        final List<Handler<Forsendelse.Builder>> handlers = handlerFactory.createHandlers(domainMessage);
+        Forsendelse.Builder forsendelse = Forsendelse.builder();
+        handlers.forEach(handler -> handler.map(forsendelse));
+        return forsendelse.build();
     }
 }

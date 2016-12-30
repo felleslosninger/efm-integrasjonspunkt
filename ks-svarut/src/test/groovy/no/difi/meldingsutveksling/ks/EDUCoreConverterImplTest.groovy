@@ -1,28 +1,29 @@
 package no.difi.meldingsutveksling.ks
 
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.core.EDUCore
+import no.difi.meldingsutveksling.ks.mapping.Handler
+import no.difi.meldingsutveksling.ks.mapping.HandlerFactory
 import spock.lang.Specification
 
-/**
- * Created by mfhoel on 16.12.2016.
- */
 class EDUCoreConverterImplTest extends Specification {
-    IntegrasjonspunktProperties.NorskArkivstandardSystem P360
-    IntegrasjonspunktProperties properties
+    EDUCoreConverterImpl eduConverter
 
     def setup() {
-        properties = new IntegrasjonspunktProperties()
-        properties.noarkSystem = new IntegrasjonspunktProperties.NorskArkivstandardSystem(type: "P360")
+        eduConverter = new EDUCoreConverterImpl(Mock(HandlerFactory))
     }
 
-    def "Converting EDUCore domain message to Forsendelse message"() {
+    def "EduConverter should use all converters provided by handlerFactory when converting eduCore"() {
         given:
         EDUCore eduCore = new EDUCore()
+        def handlers = new ArrayList<Handler<Forsendelse.Builder>>()
+        def handler = Mock(Handler)
+        handlers.addAll(handler, handler)
 
         when:
-        def convert = new EDUCoreConverterImpl(properties: properties).convert(eduCore)
+        this.eduConverter.convert(eduCore)
         then:
-        convert.avgivendeSystem == properties.noarkSystem.type
+        eduConverter.handlerFactory.createHandlers(eduCore) >> handlers
+
+        2*handler.map(_ as Forsendelse.Builder)
     }
 }

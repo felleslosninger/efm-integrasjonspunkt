@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import no.difi.meldingsutveksling.CertificateParser;
 import org.junit.Test;
 
 import java.io.IOException;

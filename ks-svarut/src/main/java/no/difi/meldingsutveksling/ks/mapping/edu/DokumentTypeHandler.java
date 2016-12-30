@@ -4,31 +4,23 @@ import no.difi.meldingsutveksling.ks.Dokument;
 import no.difi.meldingsutveksling.ks.mapping.Handler;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
 
-import javax.activation.DataHandler;
-import javax.mail.util.ByteArrayDataSource;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-
 /**
  * Used to map a single EDU DokumentType to Forsendelse
  */
 public class DokumentTypeHandler implements Handler<Dokument.Builder> {
     private DokumentType domainDocument;
+    private FileTypeHandler fileTypeHandler;
 
-    public DokumentTypeHandler(DokumentType domainDocument) {
+    public DokumentTypeHandler(DokumentType domainDocument, FileTypeHandler fileTypeHandler) {
         this.domainDocument = domainDocument;
+        this.fileTypeHandler = fileTypeHandler;
     }
 
     @Override
     public Dokument.Builder map(Dokument.Builder builder) {
-        try {
-            final DataHandler dataHandler = new DataHandler(new ByteArrayDataSource(new ByteArrayInputStream(domainDocument.getFil().getBase64()), domainDocument.getVeMimeType()));
-            builder.withData(dataHandler);
-            builder.withMimetype(domainDocument.getVeMimeType());
-            builder.withFilnavn(domainDocument.getVeFilnavn());
-        } catch (IOException e) {
-            throw new DokumenterHandlerException("Unable to map EDUCore documents to KS SvarUt Dokument documents", e);
-        }
+        fileTypeHandler.map(builder);
+        builder.withMimetype(domainDocument.getVeMimeType());
+        builder.withFilnavn(domainDocument.getVeFilnavn());
         return builder;
     }
 }

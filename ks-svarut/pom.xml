@@ -92,6 +92,11 @@
       <version>3.2.4</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>no.difi.meldingsutveksling</groupId>
+      <artifactId>dokumentpakking</artifactId>
+      <version>1.7.41-SNAPSHOT</version>
+    </dependency>
   </dependencies>
   
   <build>

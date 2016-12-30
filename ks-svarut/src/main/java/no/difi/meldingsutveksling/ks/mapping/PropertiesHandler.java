@@ -8,13 +8,11 @@ import no.difi.meldingsutveksling.ks.mapping.properties.SvarUtConfigHandler;
 import java.util.HashSet;
 import java.util.Set;
 
-public class PropertiesHandler {
-    private IntegrasjonspunktProperties properties;
+public class PropertiesHandler implements Handler<Forsendelse.Builder> {
     private Set<Handler<Forsendelse.Builder>> handlers;
 
     public PropertiesHandler(IntegrasjonspunktProperties properties) {
         this();
-        this.properties = properties;
         this.add(new AvgivendeSystemHandler(properties));
         this.add(new SvarUtConfigHandler(properties));
     }

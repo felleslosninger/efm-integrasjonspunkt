@@ -1,16 +1,26 @@
 package no.difi.meldingsutveksling.ks;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.ks.mapping.HandlerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 @Configuration
-@EnableConfigurationProperties({SvarUtProperties.class})
+@EnableConfigurationProperties({IntegrasjonspunktProperties.class})
 public class SvarUtConfiguration {
-    @Autowired
-    private SvarUtProperties properties;
+    private IntegrasjonspunktProperties properties;
+
+    public SvarUtConfiguration(IntegrasjonspunktProperties properties) {
+        this.properties = properties;
+    }
+
+    @Bean
+    public HandlerFactory handlerFactory(IntegrasjonspunktProperties properties) {
+        return new HandlerFactory(properties);
+    }
+
 
     @Bean
     public Jaxb2Marshaller marshaller() {

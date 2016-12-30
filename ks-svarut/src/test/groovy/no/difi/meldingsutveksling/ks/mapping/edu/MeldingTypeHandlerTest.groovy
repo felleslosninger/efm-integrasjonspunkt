@@ -1,20 +1,22 @@
 package no.difi.meldingsutveksling.ks.mapping.edu
 
+import no.difi.meldingsutveksling.config.SvarUtConfig
 import no.difi.meldingsutveksling.ks.Forsendelse
-import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType
-import no.difi.meldingsutveksling.noarkexchange.schema.core.FilType
-import no.difi.meldingsutveksling.noarkexchange.schema.core.JournpostType
-import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType
-import no.difi.meldingsutveksling.noarkexchange.schema.core.NoarksakType
+import no.difi.meldingsutveksling.noarkexchange.schema.core.*
 import spock.lang.Specification
 
 class MeldingTypeHandlerTest extends Specification {
+    SvarUtConfig properties
+
+    def setup() {
+        properties = new SvarUtConfig(kryptert: false)
+    }
 
     def "Mapping a MeldingType with two documents to Forsendelse"() {
         given:
         def meldingType = "a meldingstype with two documents"()
 
-        MeldingTypeHandler handler = new MeldingTypeHandler(meldingType)
+        MeldingTypeHandler handler = new MeldingTypeHandler(meldingType, new FileTypeHandlerFactory(properties))
         when:
         def builderResult = handler.map(Forsendelse.builder()).build()
         then:

@@ -7,8 +7,8 @@ import no.difi.meldingsutveksling.ks.Forsendelse;
  * Used to map needed properties for Svar Ut web service to Forsendelse
  */
 public class SvarUtConfigHandler extends PropertyHandler<Forsendelse.Builder> {
-    public SvarUtConfigHandler(IntegrasjonspunktProperties integrasjonspunktProperties) {
-        super(integrasjonspunktProperties);
+    public SvarUtConfigHandler(IntegrasjonspunktProperties properties) {
+        super(properties);
     }
 
     @Override

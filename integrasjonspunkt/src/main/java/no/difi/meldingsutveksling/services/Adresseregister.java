@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.services;
 
+import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.noarkexchange.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -20,7 +21,7 @@ public class Adresseregister {
 
     private static final Logger log = LoggerFactory.getLogger(Adresseregister.class);
 
-    ServiceRegistryLookup serviceRegistryLookup;
+    private ServiceRegistryLookup serviceRegistryLookup;
 
     @Autowired
     public Adresseregister(ServiceRegistryLookup serviceRegistryLookup) {
