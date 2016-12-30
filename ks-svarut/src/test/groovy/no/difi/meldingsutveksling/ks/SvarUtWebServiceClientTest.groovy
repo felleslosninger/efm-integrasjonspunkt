@@ -19,7 +19,7 @@ import static org.springframework.ws.test.client.ResponseCreators.withPayload
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
-@ContextConfiguration(classes = [SvarUtConfiguration, SvarUtWebServiceTestConfiguration])
+@ContextConfiguration(classes = [SvarUtConfiguration, SvarUtIntegrationTestConfiguration])
 class SvarUtWebServiceClientTest {
     @Autowired
     SvarUtWebServiceClientImpl client

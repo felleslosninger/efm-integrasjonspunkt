@@ -17,6 +17,11 @@ public class SvarUtConfiguration {
     }
 
     @Bean
+    public EDUCoreConverter eduCoreConverter(HandlerFactory handlerFactory) {
+        return new EDUCoreConverterImpl(handlerFactory);
+    }
+
+    @Bean
     public HandlerFactory handlerFactory(IntegrasjonspunktProperties properties) {
         return new HandlerFactory(properties);
     }

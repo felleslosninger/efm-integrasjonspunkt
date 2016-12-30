@@ -1,16 +1,17 @@
 package no.difi.meldingsutveksling.ks;
 
 import no.difi.meldingsutveksling.core.EDUCore;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class SvarUtService {
-    @Autowired
+    public EDUCoreConverter messageConverter;
     public SvarUtWebServiceClient client;
 
-    @Autowired
-    public EDUCoreConverter messageConverter;
+    public SvarUtService(EDUCoreConverter messageConverter, SvarUtWebServiceClient client) {
+        this.messageConverter = messageConverter;
+        this.client = client;
+    }
 
     public String send(EDUCore message) {
         final Forsendelse forsendelse = messageConverter.convert(message);
