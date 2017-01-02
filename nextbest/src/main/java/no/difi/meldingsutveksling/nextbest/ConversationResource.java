@@ -5,6 +5,7 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -16,16 +17,19 @@ public abstract class ConversationResource {
     private String conversationId;
     private String receiverId;
     private String messagetypeId;
+    private LocalDateTime lastUpdate;
     @ElementCollection
     @LazyCollection(value = LazyCollectionOption.FALSE)
     private List<String> fileRefs;
 
     ConversationResource() {}
 
-    ConversationResource(String conversationId, String receiverId, String messagetypeId, List<String> fileRefs){
+    ConversationResource(String conversationId, String receiverId, String messagetypeId, LocalDateTime lastUpdate,
+                         List<String> fileRefs){
         this.conversationId = conversationId;
         this.receiverId = receiverId;
         this.messagetypeId = messagetypeId;
+        this.lastUpdate = lastUpdate;
         this.fileRefs = fileRefs;
     }
 
@@ -57,6 +61,14 @@ public abstract class ConversationResource {
         return fileRefs;
     }
 
+    public LocalDateTime getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(LocalDateTime lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
+
     public void setFileRefs(List<String> fileRefs) {
         this.fileRefs = fileRefs;
     }
@@ -71,8 +83,8 @@ public abstract class ConversationResource {
                 .add("conversationId", conversationId)
                 .add("receiverId", receiverId)
                 .add("messagetypeId", messagetypeId)
+                .add("lastUpdate", lastUpdate)
                 .add("fileRefs", fileRefs)
                 .toString();
     }
-
 }

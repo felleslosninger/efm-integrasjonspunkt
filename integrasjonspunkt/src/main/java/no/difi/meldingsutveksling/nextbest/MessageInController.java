@@ -48,7 +48,19 @@ public class MessageInController {
     @ResponseBody
     public ResponseEntity popIncomingMessages(
             @PathVariable(value = "messagetypeId", required = false) String messagetypeId) {
-        throw new UnsupportedOperationException();
+
+        Optional<IncomingConversationResource> resource;
+        if (isNullOrEmpty(messagetypeId)) {
+            resource = repo.findFirstByOrderByLastUpdateAsc();
+        } else {
+            resource = repo.findFirstByMessagetypeIdOrderByLastUpdateAsc(messagetypeId);
+        }
+
+        if (resource.isPresent()) {
+            repo.delete(resource.get());
+            return ResponseEntity.ok(resource);
+        }
+        return ResponseEntity.notFound().build();
     }
 
 }
