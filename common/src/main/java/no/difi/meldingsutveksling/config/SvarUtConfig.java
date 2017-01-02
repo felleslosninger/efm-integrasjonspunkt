@@ -24,6 +24,10 @@ public class SvarUtConfig {
     @NotNull
     private Resource certificatePath;
 
+    private String username;
+
+    private String password;
+
 
     public X509Certificate getCertificate() {
         final InputStream inputStream;
@@ -38,5 +42,13 @@ public class SvarUtConfig {
         } catch (IOException | CertificateException e) {
             throw new ConfigException("Unable to open certificate file", e);
         }
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
     }
 }

@@ -25,7 +25,7 @@ import static org.springframework.ws.test.client.ResponseCreators.withPayload
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
-@ContextConfiguration(classes = [SvarUtConfiguration, SvarUtIntegrationTestConfiguration])
+@ContextConfiguration(classes = [SvarUtConfiguration, SvarUtWebServiceBeans])
 class SvarUtServiceIntegrationTest {
     @Autowired
     SvarUtService service
