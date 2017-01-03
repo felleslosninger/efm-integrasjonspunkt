@@ -1,11 +1,11 @@
 package no.difi.meldingsutveksling.nextbest;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Entity
@@ -15,23 +15,23 @@ public class IncomingConversationResource extends ConversationResource {
     IncomingConversationResource() {}
 
     IncomingConversationResource(String conversationId, String receiverId, String messagetypeId, LocalDateTime
-            lastUpdate, List<String> fileRefs){
+            lastUpdate, Map<Integer, String> fileRefs){
         super(conversationId, receiverId, messagetypeId, lastUpdate, fileRefs);
     }
 
     public static IncomingConversationResource of(String conversationId, String receiverId, String messagetypeId) {
         return new IncomingConversationResource(conversationId, receiverId, messagetypeId, LocalDateTime.now(),
-                Lists.newArrayList());
+                Maps.newHashMap());
     }
 
     public static IncomingConversationResource of(String receiverId, String messagetypeId) {
         String conversationId = UUID.randomUUID().toString();
         return new IncomingConversationResource(conversationId, receiverId, messagetypeId, LocalDateTime.now(),
-                Lists.newArrayList());
+                Maps.newHashMap());
     }
 
     public static IncomingConversationResource of(OutgoingConversationResource resource) {
         return new IncomingConversationResource(resource.getConversationId(), resource.getReceiverId(), resource
-                .getMessagetypeId(), LocalDateTime.now(), Lists.newArrayList());
+                .getMessagetypeId(), LocalDateTime.now(), resource.getFileRefs());
     }
 }

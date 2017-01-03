@@ -1,12 +1,12 @@
 package no.difi.meldingsutveksling.nextbest;
 
 import com.google.common.base.MoreObjects;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -18,14 +18,16 @@ public abstract class ConversationResource {
     private String receiverId;
     private String messagetypeId;
     private LocalDateTime lastUpdate;
-    @ElementCollection
-    @LazyCollection(value = LazyCollectionOption.FALSE)
-    private List<String> fileRefs;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @MapKeyColumn(name = "fileid")
+    @Column(name = "filename")
+    @CollectionTable(name = "filerefs", joinColumns = @JoinColumn(name = "ids"))
+    private Map<Integer, String> fileRefs;
 
     ConversationResource() {}
 
     ConversationResource(String conversationId, String receiverId, String messagetypeId, LocalDateTime lastUpdate,
-                         List<String> fileRefs){
+                         Map fileRefs){
         this.conversationId = conversationId;
         this.receiverId = receiverId;
         this.messagetypeId = messagetypeId;
@@ -57,7 +59,7 @@ public abstract class ConversationResource {
         this.messagetypeId = messagetypeId;
     }
 
-    public List<String> getFileRefs() {
+    public Map<Integer, String> getFileRefs() {
         return fileRefs;
     }
 
@@ -69,12 +71,13 @@ public abstract class ConversationResource {
         this.lastUpdate = lastUpdate;
     }
 
-    public void setFileRefs(List<String> fileRefs) {
+    public void setFileRefs(HashMap<Integer, String> fileRefs) {
         this.fileRefs = fileRefs;
     }
 
     public void addFileRef(String fileRef) {
-        this.fileRefs.add(fileRef);
+        Optional<Integer> max = this.fileRefs.keySet().stream().max(Integer::compare);
+        this.fileRefs.put(max.isPresent() ? max.get()+1 : 0, fileRef);
     }
 
     @Override

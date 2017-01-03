@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
@@ -151,7 +150,7 @@ public class MessageOutController {
                 bos.write(file.getBytes());
                 bos.close();
 
-                if (!conversationResource.getFileRefs().contains(file.getOriginalFilename())) {
+                if (!conversationResource.getFileRefs().values().contains(file.getOriginalFilename())) {
                     conversationResource.addFileRef(file.getOriginalFilename());
                 }
                 repo.save(conversationResource);
