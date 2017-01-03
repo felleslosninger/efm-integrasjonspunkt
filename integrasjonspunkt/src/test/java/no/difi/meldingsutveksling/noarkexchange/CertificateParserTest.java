@@ -1,14 +1,14 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.CertificateParser;
+import no.difi.meldingsutveksling.CertificateParserException;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 public class CertificateParserTest {
     private String certificate = TestConstants.certificate;
@@ -20,10 +20,8 @@ public class CertificateParserTest {
         try {
             final Certificate cert = parser.parse(certificate);
             assertThat(cert.getType(), is("X.509"));
-        } catch (CertificateException e) {
+        } catch (CertificateParserException e) {
             fail("Failed to parse certificate");
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }
