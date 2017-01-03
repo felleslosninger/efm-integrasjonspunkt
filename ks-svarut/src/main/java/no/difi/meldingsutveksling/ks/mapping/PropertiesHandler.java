@@ -26,6 +26,7 @@ public class PropertiesHandler implements Handler<Forsendelse.Builder> {
         return this;
     }
 
+    @Override
     public Forsendelse.Builder map(Forsendelse.Builder builder) {
         for (Handler<Forsendelse.Builder> handler : handlers) {
             builder = handler.map(builder);

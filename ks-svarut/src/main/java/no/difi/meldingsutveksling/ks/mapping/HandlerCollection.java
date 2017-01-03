@@ -15,9 +15,10 @@ public class HandlerCollection implements Handler<Forsendelse.Builder> {
 
     @Override
     public Forsendelse.Builder map(Forsendelse.Builder builder) {
+        Forsendelse.Builder result = builder;
         for (Handler<Forsendelse.Builder> handler : handlers) {
-            builder = handler.map(builder);
+            result = handler.map(result);
         }
-        return builder;
+        return result;
     }
 }

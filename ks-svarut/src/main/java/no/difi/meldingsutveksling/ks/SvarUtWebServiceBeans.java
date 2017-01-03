@@ -27,7 +27,7 @@ public class SvarUtWebServiceBeans {
         securityInterceptor.setSecurementPasswordType("PasswordText");
         securityInterceptor.setValidateResponse(false);
         securityInterceptor.setValidationActions("UsernameToken");
-        ClientInterceptor interceptors[] = {securityInterceptor};
+        ClientInterceptor[] interceptors = {securityInterceptor};
         client.setInterceptors(interceptors);
         return client;
     }

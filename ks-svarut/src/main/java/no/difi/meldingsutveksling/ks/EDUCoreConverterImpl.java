@@ -13,6 +13,7 @@ public class EDUCoreConverterImpl implements EDUCoreConverter {
         this.handlerFactory = handlerFactory;
     }
 
+    @Override
     public Forsendelse convert(EDUCore domainMessage) {
         final List<Handler<Forsendelse.Builder>> handlers = handlerFactory.createHandlers(domainMessage);
         Forsendelse.Builder forsendelse = Forsendelse.builder();

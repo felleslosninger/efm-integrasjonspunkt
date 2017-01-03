@@ -21,6 +21,7 @@ public class PropertyHandler<T> implements Handler<T> {
     }
 
     @Override
+    @SuppressWarnings({"squid:S00122", "squid:S1067"})
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof PropertyHandler)) return false;

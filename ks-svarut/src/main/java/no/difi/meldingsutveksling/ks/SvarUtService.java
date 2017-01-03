@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class SvarUtService {
-    public EDUCoreConverter messageConverter;
-    public SvarUtWebServiceClient client;
+    private EDUCoreConverter messageConverter;
+    private SvarUtWebServiceClient client;
 
     public SvarUtService(EDUCoreConverter messageConverter, SvarUtWebServiceClient client) {
         this.messageConverter = messageConverter;
@@ -16,8 +16,6 @@ public class SvarUtService {
     public String send(EDUCore message) {
         final Forsendelse forsendelse = messageConverter.convert(message);
 
-        final String forsendelseId = client.sendMessage(forsendelse);
-
-        return forsendelseId;
+        return client.sendMessage(forsendelse);
     }
 }

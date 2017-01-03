@@ -38,15 +38,17 @@ public class MeldingTypeHandler implements Handler<Forsendelse.Builder> {
     }
 
     @Override
+    @SuppressWarnings({"squid:S00122", "squid:S1067"})
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof MeldingTypeHandler)) return false;
         MeldingTypeHandler that = (MeldingTypeHandler) o;
-        return Objects.equal(meldingType, that.meldingType);
+        return Objects.equal(meldingType, that.meldingType) &&
+                Objects.equal(fileTypeHandlerFactory, that.fileTypeHandlerFactory);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(meldingType);
+        return Objects.hashCode(meldingType, fileTypeHandlerFactory);
     }
 }

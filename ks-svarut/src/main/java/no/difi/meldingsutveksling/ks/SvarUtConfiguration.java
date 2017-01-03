@@ -10,11 +10,6 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 @Configuration
 @EnableConfigurationProperties({IntegrasjonspunktProperties.class})
 public class SvarUtConfiguration {
-    private IntegrasjonspunktProperties properties;
-
-    public SvarUtConfiguration(IntegrasjonspunktProperties properties) {
-        this.properties = properties;
-    }
 
     @Bean
     public EDUCoreConverter eduCoreConverter(HandlerFactory handlerFactory) {

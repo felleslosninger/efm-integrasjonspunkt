@@ -12,19 +12,25 @@ import java.security.cert.X509Certificate;
 
 public class CertificateParser {
 
-    public CertificateParser() {
-    }
-
-    public X509Certificate parse(String certificate) throws IOException, CertificateException {
+    public X509Certificate parse(String certificate) throws CertificateParserException {
         return parse(new StringReader(certificate));
 
     }
 
-    public X509Certificate parse(Reader reader) throws CertificateException, IOException {
+    public X509Certificate parse(Reader reader) throws CertificateParserException {
         PEMParser pemParser = new PEMParser(reader);
 
-        final X509CertificateHolder holder  = (X509CertificateHolder) pemParser.readObject();
+        final X509CertificateHolder holder;
+        try {
+            holder = (X509CertificateHolder) pemParser.readObject();
+        } catch (IOException e) {
+            throw new CertificateParserException("Failed to read certificate from PEMParser", e);
+        }
         final JcaX509CertificateConverter jcaX509CertificateConverter = new JcaX509CertificateConverter();
-        return jcaX509CertificateConverter.getCertificate(holder);
+        try {
+            return jcaX509CertificateConverter.getCertificate(holder);
+        } catch (CertificateException e) {
+            throw new CertificateParserException("Failed to convert certificate to X509", e);
+        }
     }
 }
