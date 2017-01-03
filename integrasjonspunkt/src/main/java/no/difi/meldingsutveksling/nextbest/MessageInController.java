@@ -21,20 +21,20 @@ public class MessageInController {
     @Autowired
     private IncomingConversationResourceRepository repo;
 
-    @RequestMapping(value = "/in/messages/{conversationId}", method = RequestMethod.GET)
-    @ResponseBody
-    public ResponseEntity getMessageById(@PathVariable("conversationId") String conversationId) {
-        Optional<IncomingConversationResource> resource = Optional.ofNullable(repo.findOne(conversationId));
-        if (resource.isPresent()) {
-            return ResponseEntity.ok(resource.get());
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No conversation with supplied id found.");
-    }
-
     @RequestMapping(value = "/in/messages", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getIncomingMessages(
-            @RequestParam(value = "messagetypeId", required = false) String messagetypeId) {
+            @RequestParam(value = "messagetypeId", required = false) String messagetypeId,
+            @RequestParam(value = "conversationId", required = false) String conversationId) {
+
+        if (!isNullOrEmpty(conversationId)) {
+            Optional<IncomingConversationResource> resource = Optional.ofNullable(repo.findOne(conversationId));
+            if (resource.isPresent()) {
+                return ResponseEntity.ok(resource.get());
+            }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No conversation with supplied id found.");
+        }
+
         List<IncomingConversationResource> resources;
         if (!isNullOrEmpty(messagetypeId)) {
             resources = repo.findByMessagetypeId(messagetypeId);
@@ -44,10 +44,10 @@ public class MessageInController {
         return ResponseEntity.ok(resources);
     }
 
-    @RequestMapping(value = "/in/messages/pop/{messagetypeId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/in/messages/pop", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity popIncomingMessages(
-            @PathVariable(value = "messagetypeId", required = false) String messagetypeId) {
+            @RequestParam(value = "messagetypeId", required = false) String messagetypeId) {
 
         Optional<IncomingConversationResource> resource;
         if (isNullOrEmpty(messagetypeId)) {
@@ -58,7 +58,7 @@ public class MessageInController {
 
         if (resource.isPresent()) {
             repo.delete(resource.get());
-            return ResponseEntity.ok(resource);
+            return ResponseEntity.ok(resource.get());
         }
         return ResponseEntity.notFound().build();
     }

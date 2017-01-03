@@ -14,6 +14,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Optional;
+
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -58,6 +60,8 @@ public class MessageInControllerTest {
         when(repo.findAll()).thenReturn(asList(cr42, cr43, cr44));
         when(repo.findByMessagetypeId("1")).thenReturn(asList(cr42, cr44));
         when(repo.findByMessagetypeId("2")).thenReturn(asList(cr43));
+        when(repo.findFirstByOrderByLastUpdateAsc()).thenReturn(Optional.of(cr42));
+        when(repo.findFirstByMessagetypeIdOrderByLastUpdateAsc("1")).thenReturn(Optional.of(cr42));
     }
 
     @Test
@@ -94,7 +98,23 @@ public class MessageInControllerTest {
 
     @Test
     public void popIncomingShouldReturnOk() throws Exception {
+        mvc.perform(get("/in/messages/pop").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.*", hasSize(4)))
+                .andExpect(jsonPath("$.conversationId", is("42")))
+                .andExpect(jsonPath("$.receiverId", is("1")))
+                .andExpect(jsonPath("$.messagetypeId", is("1")))
+                .andExpect(jsonPath("$.fileRefs", hasSize(0)));
+    }
+
+    @Test
+    public void popIncomingWithMessageIdShouldReturnOk() throws Exception {
         mvc.perform(get("/in/messages/pop/1").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.*", hasSize(4)))
+                .andExpect(jsonPath("$.conversationId", is("42")))
+                .andExpect(jsonPath("$.receiverId", is("1")))
+                .andExpect(jsonPath("$.messagetypeId", is("1")))
+                .andExpect(jsonPath("$.fileRefs", hasSize(0)));
     }
 }
