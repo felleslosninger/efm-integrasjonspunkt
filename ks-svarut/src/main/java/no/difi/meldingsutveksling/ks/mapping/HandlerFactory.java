@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.ks.Forsendelse;
 import no.difi.meldingsutveksling.ks.mapping.edu.FileTypeHandlerFactory;
 import no.difi.meldingsutveksling.ks.mapping.edu.MeldingTypeHandler;
+import no.difi.meldingsutveksling.ks.mapping.edu.ReceiverHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,12 +20,13 @@ public class HandlerFactory {
 
     public List<Handler<Forsendelse.Builder>> createHandlers(EDUCore eduCore) {
         List<Handler<Forsendelse.Builder>> handlers = new ArrayList<>();
-        handlers.add(createEduHandlers(eduCore));
+        handlers.add(createMeldingHandlers(eduCore));
         handlers.add(createPropertiesHandler());
+        handlers.add(new ReceiverHandler(eduCore));
         return handlers;
     }
 
-    HandlerCollection createEduHandlers(EDUCore eduCore) {
+    private HandlerCollection createMeldingHandlers(EDUCore eduCore) {
         HandlerCollection handler = new HandlerCollection();
         final MeldingTypeHandler meldingTypeHandler = new MeldingTypeHandler(
                 eduCore.getPayloadAsMeldingType(),
@@ -34,7 +36,7 @@ public class HandlerFactory {
         return handler;
     }
 
-    PropertiesHandler createPropertiesHandler() {
+    private PropertiesHandler createPropertiesHandler() {
         return new PropertiesHandler(properties);
     }
 

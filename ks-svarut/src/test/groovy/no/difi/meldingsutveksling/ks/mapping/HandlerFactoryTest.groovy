@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.ks.mapping
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.core.EDUCore
+import no.difi.meldingsutveksling.ks.mapping.edu.ReceiverHandler
 import spock.lang.Specification
 
 class HandlerFactoryTest extends Specification {
@@ -16,5 +17,6 @@ class HandlerFactoryTest extends Specification {
         then:
         handlers.find { it instanceof HandlerCollection }
         handlers.find { it instanceof PropertiesHandler}
+        handlers.find { it instanceof ReceiverHandler}
     }
 }
