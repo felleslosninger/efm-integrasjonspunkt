@@ -3,7 +3,8 @@ package no.difi.meldingsutveksling.serviceregistry;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
@@ -11,9 +12,14 @@ import com.jayway.jsonpath.spi.json.GsonJsonProvider;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
+import java.lang.invoke.MethodHandles;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -21,6 +27,9 @@ public class ServiceRegistryLookup {
     private final RestClient client;
     private final LoadingCache<String, ServiceRecord> srCache;
     private final LoadingCache<String, InfoRecord> irCache;
+
+    private Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
 
     @Autowired
     public ServiceRegistryLookup(RestClient client) {
@@ -57,13 +66,19 @@ public class ServiceRegistryLookup {
     }
 
     private ServiceRecord loadServiceRecord(String identifier) {
-        final String serviceRecords = client.getResource("identifier/" + identifier);
-        final DocumentContext documentContext = JsonPath.parse(serviceRecords, jsonPathConfiguration());
-        ServiceRecord serviceRecord = documentContext.read("$.serviceRecord", ServiceRecord.class);
-        if (serviceRecord != null) {
-            return serviceRecord;
+        ServiceRecord serviceRecord = ServiceRecord.EMPTY;
+        try {
+            final String serviceRecords = client.getResource("identifier/" + identifier);
+            final DocumentContext documentContext = JsonPath.parse(serviceRecords, jsonPathConfiguration());
+            serviceRecord = documentContext.read("$.serviceRecord", ServiceRecord.class);
+        } catch(HttpClientErrorException httpException) {
+            if (httpException.getStatusCode() == HttpStatus.NOT_FOUND) {
+                logger.info("RestClient returned 404 NOT_FOUND when looking up service record with identifier {}", identifier, httpException);
+            } else {
+                throw new ServiceRegistryLookupException(String.format("RestClient threw exception when looking up service record with identifier %s", identifier), httpException);
+            }
         }
-        return ServiceRecord.EMPTY;
+        return serviceRecord;
     }
 
     /**
