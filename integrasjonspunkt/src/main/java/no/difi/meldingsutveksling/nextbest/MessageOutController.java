@@ -200,7 +200,7 @@ public class MessageOutController {
         throw new UnsupportedOperationException();
     }
 
-    @RequestMapping("/transferqueue/{conversationId}")
+    @RequestMapping(value = "/transferqueue/{conversationId}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity transferQueue(@PathVariable("conversationId") String conversationId) {
         Optional<OutgoingConversationResource> resource = Optional.ofNullable(repo.findOne(conversationId));
