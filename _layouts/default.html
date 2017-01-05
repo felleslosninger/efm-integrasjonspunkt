@@ -68,23 +68,24 @@
 								</div>
 							{% endif %}
 						</div>
-					</div>
+					</div>					
 				</div>				
 				{% if page.url contains site.aboutSide %}
 					{{content}}
-				{% else %}
+				{% else %}					
 					<div id="main" class="with-aside">
 						<section id="content" tabindex="-1">
 							<article class="one-col">
 								{% if site.downloadUrl != "" %}
-									<div class="body">
-										<div class="button custom" data-button-type="0" data-url="{{ site.downloadUrl }}" role="button" tabindex="0">
+									<div class="body">										
+										<div class="button custom" data-button-type="0" data-url="{{ site.downloadUrl }}" role="button" tabindex="0" id="downloadurl">
 											<div class="logo">
 												<img alt="logo" src="//www.difi.no/modules/contrib/difi_ckeditor_widgets/plugins/difibutton/icons/difibutton.png">
 											</div>
 											<div class="text">
-												<div class="title">Integrasjonspunktet</div>
-												<div class="sub-title">Trykk her for å laste ned nyeste versjon</div>
+												<div class="title " id="titleField">Henter versjonsinfo...</div>
+												<div class="sub-title" id="subtitle1"></div>
+												<div class="sub-title" id="subtitle2"></div>
 											</div>
 											<div class="arrow">›</div>
 										</div>
@@ -144,5 +145,16 @@
 			<script type="text/javascript" src="//www.difi.no/_style/lib/bootstrap3/js/bootstrap.js"></script>
 			<script type="text/javascript" src="//www.difi.no/themes/contrib/difi3/js/jquery.flexnav.min.js"></script>
 			<script type="text/javascript" src="{{site.baseurl}}/assets/js/docs.min.js"></script>
+			<script type="text/javascript" src="{{site.baseurl}}/assets/js/nexusproxyclient.js">
+						$(function() {
+							var proxyUrl = "http://nexusproxy.azurewebsites.net/latest?env=staging&callback=?";
+							$.getJSON( proxyUrl)
+								.done(function( data ) { 
+								$( "#downloadurl" ).attr("data-url", data.downloadUri);
+								$( "#titleField").text(data.baseVersion)
+								$( "#sha1Field").text( " Sha1: "+ data.sha1);
+								})
+							});
+					</script>
 		</body>
 	</html>
