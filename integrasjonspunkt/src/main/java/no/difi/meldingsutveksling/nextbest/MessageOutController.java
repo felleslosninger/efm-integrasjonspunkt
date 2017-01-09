@@ -48,16 +48,6 @@ public class MessageOutController {
     @Autowired
     private IntegrasjonspunktProperties props;
 
-    @RequestMapping(value = "receivers/{receiverId}/capabilities", method = RequestMethod.GET)
-    @ResponseBody
-    public ResponseEntity getCapabilities(@PathVariable("receiverId") String receiverId) {
-        Optional<ServiceRecord> serviceRecord = Optional.ofNullable(sr.getServiceRecord(receiverId));
-        if (serviceRecord.isPresent()) {
-            return ResponseEntity.ok(Arrays.asList(serviceRecord.get().getServiceIdentifier()));
-        }
-        return ResponseEntity.notFound().build();
-    }
-
     @RequestMapping(value = "/out/messages", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getAllResources(

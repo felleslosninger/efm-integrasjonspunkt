@@ -107,13 +107,6 @@ public class MessageOutControllerTest {
     }
 
     @Test
-    public void getCapabilitiesShouldReturnOk() throws Exception {
-        mvc.perform(get("/receivers/1/capabilities").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().json("['EDU']", true));
-    }
-
-    @Test
     public void getMessageShouldReturnOk() throws Exception {
         mvc.perform(get("/out/messages/42").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
