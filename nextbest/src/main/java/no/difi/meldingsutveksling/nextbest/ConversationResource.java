@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextbest;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.MoreObjects;
 
 import javax.persistence.*;
@@ -15,8 +16,10 @@ public abstract class ConversationResource {
 
     @Id
     private String conversationId;
+    private String senderId;
     private String receiverId;
     private String messagetypeId;
+    @JsonIgnore
     private LocalDateTime lastUpdate;
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "fileid")
@@ -26,9 +29,10 @@ public abstract class ConversationResource {
 
     ConversationResource() {}
 
-    ConversationResource(String conversationId, String receiverId, String messagetypeId, LocalDateTime lastUpdate,
-                         Map fileRefs){
+    ConversationResource(String conversationId, String senderId, String receiverId, String messagetypeId,
+                         LocalDateTime lastUpdate, Map fileRefs){
         this.conversationId = conversationId;
+        this.senderId = senderId;
         this.receiverId = receiverId;
         this.messagetypeId = messagetypeId;
         this.lastUpdate = lastUpdate;
@@ -49,6 +53,14 @@ public abstract class ConversationResource {
 
     public void setReceiverId(String receiverId) {
         this.receiverId = receiverId;
+    }
+
+    public String getSenderId() {
+        return senderId;
+    }
+
+    public void setSenderId(String senderId) {
+        this.senderId = senderId;
     }
 
     public String getMessagetypeId() {

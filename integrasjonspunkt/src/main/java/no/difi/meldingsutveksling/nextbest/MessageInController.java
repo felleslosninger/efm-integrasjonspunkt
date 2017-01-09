@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +36,8 @@ public class MessageInController {
     @ResponseBody
     public ResponseEntity getIncomingMessages(
             @RequestParam(value = "messagetypeId", required = false) String messagetypeId,
-            @RequestParam(value = "conversationId", required = false) String conversationId) {
+            @RequestParam(value = "conversationId", required = false) String conversationId,
+            @RequestParam(value = "senderId", required = false) String senderId) {
 
         if (!isNullOrEmpty(conversationId)) {
             Optional<IncomingConversationResource> resource = Optional.ofNullable(repo.findOne(conversationId));
@@ -47,9 +49,17 @@ public class MessageInController {
 
         List<IncomingConversationResource> resources;
         if (!isNullOrEmpty(messagetypeId)) {
-            resources = repo.findByMessagetypeId(messagetypeId);
+            if (!isNullOrEmpty(senderId)) {
+                resources = repo.findByMessagetypeIdAndSenderId(messagetypeId, senderId);
+            } else {
+                resources = repo.findByMessagetypeId(messagetypeId);
+            }
         } else {
-            resources = Lists.newArrayList(repo.findAll());
+            if (!isNullOrEmpty(senderId)) {
+                resources = repo.findBySenderId(senderId);
+            } else {
+                resources = Lists.newArrayList(repo.findAll());
+            }
         }
         return ResponseEntity.ok(resources);
     }
@@ -57,6 +67,40 @@ public class MessageInController {
     @RequestMapping(value = "/in/messages/pop", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity popIncomingMessages(
+            @RequestParam(value = "messagetypeId", required = false) String messagetypeId) throws FileNotFoundException {
+
+        Optional<IncomingConversationResource> resource;
+        if (isNullOrEmpty(messagetypeId)) {
+            resource = repo.findFirstByOrderByLastUpdateAsc();
+        } else {
+            resource = repo.findFirstByMessagetypeIdOrderByLastUpdateAsc(messagetypeId);
+        }
+
+        if (resource.isPresent()) {
+            String fileName = resource.get().getFileRefs().get(0);
+            String filedir = props.getNextbest().getFiledir();
+            if (!filedir.endsWith("/")) {
+                filedir = filedir+"/";
+            }
+            filedir = filedir+resource.get().getConversationId()+"/";
+            File file = new File(filedir+fileName);
+
+            InputStreamResource isr = new InputStreamResource(new FileInputStream(file));
+
+            repo.delete(resource.get());
+
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachement; filename="+fileName)
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .contentLength(file.length())
+                    .body(isr);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @RequestMapping(value = "/in/messages/peek", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity peekIncomingMessages(
             @RequestParam(value = "messagetypeId", required = false) String messagetypeId) {
 
         Optional<IncomingConversationResource> resource;
@@ -67,7 +111,6 @@ public class MessageInController {
         }
 
         if (resource.isPresent()) {
-            repo.delete(resource.get());
             return ResponseEntity.ok(resource.get());
         }
         return ResponseEntity.notFound().build();

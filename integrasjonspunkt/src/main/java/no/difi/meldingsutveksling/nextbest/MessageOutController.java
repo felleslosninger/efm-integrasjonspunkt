@@ -85,6 +85,7 @@ public class MessageOutController {
     public ResponseEntity createResource(
             @RequestParam("receiverId") String receiverId,
             @RequestParam("messagetypeId") String messagetypeId,
+            @RequestParam(value = "senderId", required = false) String senderId,
             @RequestParam(value = "conversationId", required = false) String conversationId) throws URISyntaxException {
 
         if (isNullOrEmpty(receiverId)) {
@@ -94,13 +95,21 @@ public class MessageOutController {
             return ResponseEntity.badRequest().body("Required String parameter \'messagetypeId\' is not present");
         }
 
+        String sender;
+        if (isNullOrEmpty(senderId)) {
+            sender = props.getOrg().getNumber();
+        } else {
+            sender = senderId;
+        }
+
         OutgoingConversationResource conversationResource;
         if (isNullOrEmpty(conversationId)) {
-            conversationResource = OutgoingConversationResource.of(receiverId, messagetypeId);
+            conversationResource = OutgoingConversationResource.of(sender, receiverId, messagetypeId);
         } else {
             conversationResource = repo.findOne(conversationId);
             if (conversationResource == null) {
-                conversationResource = OutgoingConversationResource.of(conversationId, receiverId, messagetypeId);
+                conversationResource = OutgoingConversationResource.of(conversationId, sender, receiverId,
+                        messagetypeId);
             }
         }
         repo.save(conversationResource);

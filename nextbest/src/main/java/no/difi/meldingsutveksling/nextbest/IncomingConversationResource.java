@@ -14,24 +14,26 @@ public class IncomingConversationResource extends ConversationResource {
 
     IncomingConversationResource() {}
 
-    IncomingConversationResource(String conversationId, String receiverId, String messagetypeId, LocalDateTime
+    IncomingConversationResource(String conversationId, String senderId, String receiverId, String messagetypeId,
+                                 LocalDateTime
             lastUpdate, Map<Integer, String> fileRefs){
-        super(conversationId, receiverId, messagetypeId, lastUpdate, fileRefs);
+        super(conversationId, senderId, receiverId, messagetypeId, lastUpdate, fileRefs);
     }
 
-    public static IncomingConversationResource of(String conversationId, String receiverId, String messagetypeId) {
-        return new IncomingConversationResource(conversationId, receiverId, messagetypeId, LocalDateTime.now(),
-                Maps.newHashMap());
+    public static IncomingConversationResource of(String conversationId, String senderId, String receiverId,
+                                                  String messagetypeId) {
+        return new IncomingConversationResource(conversationId, senderId, receiverId, messagetypeId,
+                LocalDateTime.now(), Maps.newHashMap());
     }
 
-    public static IncomingConversationResource of(String receiverId, String messagetypeId) {
+    public static IncomingConversationResource of(String senderId, String receiverId, String messagetypeId) {
         String conversationId = UUID.randomUUID().toString();
-        return new IncomingConversationResource(conversationId, receiverId, messagetypeId, LocalDateTime.now(),
-                Maps.newHashMap());
+        return new IncomingConversationResource(conversationId, senderId, receiverId, messagetypeId,
+                LocalDateTime.now(), Maps.newHashMap());
     }
 
     public static IncomingConversationResource of(OutgoingConversationResource resource) {
-        return new IncomingConversationResource(resource.getConversationId(), resource.getReceiverId(), resource
-                .getMessagetypeId(), LocalDateTime.now(), resource.getFileRefs());
+        return new IncomingConversationResource(resource.getConversationId(), resource.getSenderId(),
+                resource.getReceiverId(), resource.getMessagetypeId(), LocalDateTime.now(), resource.getFileRefs());
     }
 }
