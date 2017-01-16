@@ -60,7 +60,7 @@ public class NextBestQueue {
             filedir = filedir+"/";
         }
         filedir = filedir+eduDocument.getConversationId()+"/";
-        File localFile = new File(filedir+"message.zip");
+        File localFile = new File(filedir+props.getNextbest().getAsicfile());
         localFile.getParentFile().mkdirs();
 
         try {

@@ -48,6 +48,7 @@ public class IntegrasjonspunktProperties {
 
     private Mail mail;
 
+    @Valid
     private NextBEST nextbest;
 
     /**
@@ -135,6 +136,9 @@ public class IntegrasjonspunktProperties {
 
         @NotNull
         private String filedir;
+
+        @NotNull
+        private String asicfile;
     }
 
     @Data

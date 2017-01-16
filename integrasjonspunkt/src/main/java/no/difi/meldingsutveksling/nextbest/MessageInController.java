@@ -132,11 +132,11 @@ public class MessageInController {
             filedir = filedir+"/";
         }
         filedir = filedir+conversationId+"/";
-        File file = new File(filedir+"message.zip");
+        File file = new File(filedir+props.getNextbest().getAsicfile());
 
         InputStreamResource isr = new InputStreamResource(new FileInputStream(file));
         return ResponseEntity.ok()
-                .header("Content-Disposition", "attachement; filename=message.zip")
+                .header("Content-Disposition", "attachement; filename="+props.getNextbest().getAsicfile())
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .contentLength(file.length())
                 .body(isr);
@@ -178,7 +178,7 @@ public class MessageInController {
             filedir = filedir+"/";
         }
         filedir = filedir+resource.getConversationId()+"/";
-        File file = new File(filedir+"message.zip");
+        File file = new File(filedir+props.getNextbest().getAsicfile());
 
         try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(file))) {
             ZipEntry entry;
