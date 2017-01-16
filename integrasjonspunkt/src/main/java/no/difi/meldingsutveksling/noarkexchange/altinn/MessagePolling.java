@@ -11,6 +11,8 @@ import no.difi.meldingsutveksling.kvittering.EduDocumentFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.logging.MoveLogMarkers;
+import no.difi.meldingsutveksling.nextbest.NextBestQueue;
+import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationRepository;
@@ -32,6 +34,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.xml.bind.JAXBElement;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -70,10 +73,13 @@ public class MessagePolling implements ApplicationContextAware {
     @Autowired
     ConversationRepository conversationRepository;
 
+    @Autowired
+    private NextBestQueue nextBestQueue;
+
     private ServiceRecord serviceRecord;
 
     @Scheduled(fixedRate = 15000)
-    public void checkForNewMessages() {
+    public void checkForNewMessages() throws IOException, MessageException {
         MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrg().getNumber());
         logger.debug("Checking for new messages");
 
@@ -95,6 +101,13 @@ public class MessagePolling implements ApplicationContextAware {
         for (FileReference reference : fileReferences) {
             final DownloadRequest request = new DownloadRequest(reference.getValue(), properties.getOrg().getNumber());
             EduDocument eduDocument = client.download(request);
+
+            if (isNextBest(eduDocument)) {
+                logger.info("NextBest Message received");
+                client.confirmDownload(request);
+                nextBestQueue.enqueueEduDocument(eduDocument);
+                return;
+            }
 
             if (!isKvittering(eduDocument)) {
                 sendReceipt(eduDocument.getMessageInfo());
@@ -146,6 +159,11 @@ public class MessagePolling implements ApplicationContextAware {
 
     private boolean isKvittering(EduDocument eduDocument) {
         return eduDocument.getStandardBusinessDocumentHeader().getDocumentIdentification().getType().equalsIgnoreCase(StandardBusinessDocumentHeader.KVITTERING_TYPE);
+    }
+
+    private boolean isNextBest(EduDocument eduDocument) {
+        return eduDocument.getStandardBusinessDocumentHeader().getDocumentIdentification().getType()
+                .equalsIgnoreCase(StandardBusinessDocumentHeader.NEXTBEST_TYPE);
     }
 
     private void sendReceipt(MessageInfo messageInfo) {

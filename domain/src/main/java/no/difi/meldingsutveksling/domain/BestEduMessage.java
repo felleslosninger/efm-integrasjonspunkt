@@ -12,7 +12,7 @@ public class BestEduMessage implements ByteArrayFile {
 	}
 
 	public String getFileName() {
-		return "edu_best.xml";
+		return "best_edu.xml";
 	}
 
 	public byte[] getBytes() {

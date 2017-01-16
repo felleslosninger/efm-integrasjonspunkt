@@ -2,6 +2,8 @@ package no.difi.meldingsutveksling.nextbest;
 
 import com.google.common.collect.Lists;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.noarkexchange.MessageContextException;
+import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationRepository;
 import no.difi.meldingsutveksling.receipt.MessageReceipt;
@@ -19,6 +21,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,6 +50,9 @@ public class MessageOutController {
 
     @Autowired
     private IntegrasjonspunktProperties props;
+
+    @Autowired
+    private MessageSender messageSender;
 
     @RequestMapping(value = "/out/messages", method = RequestMethod.GET)
     @ResponseBody
@@ -152,11 +158,18 @@ public class MessageOutController {
                 if (!conversationResource.getFileRefs().values().contains(file.getOriginalFilename())) {
                     conversationResource.addFileRef(file.getOriginalFilename());
                 }
-                repo.save(conversationResource);
+                repo.delete(conversationResource);
             } catch (java.io.IOException e) {
                 log.error("Could not write file {f}", localFile, e);
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Could not write file");
             }
+        }
+
+        try {
+            messageSender.sendMessage(conversationResource);
+        } catch (MessageContextException | IOException e) {
+            log.error("Send message failed.", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error during sending. Check logs");
         }
 
         return ResponseEntity.ok().build();

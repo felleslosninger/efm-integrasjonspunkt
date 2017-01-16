@@ -3,21 +3,22 @@ package no.difi.meldingsutveksling.noarkexchange;
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.StandardBusinessDocumentConverter;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Archive;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateAsice;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateSBD;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
-import no.difi.meldingsutveksling.domain.Avsender;
-import no.difi.meldingsutveksling.domain.BestEduMessage;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.Mottaker;
+import no.difi.meldingsutveksling.domain.*;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.nextbest.ConversationResource;
 import no.difi.meldingsutveksling.noarkexchange.receive.EDUCoreConverter;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
+import org.apache.commons.io.FileUtils;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,8 +30,11 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static no.difi.meldingsutveksling.core.EDUCoreMarker.markerFrom;
@@ -50,6 +54,9 @@ public class StandardBusinessDocumentFactory {
 
     @Autowired
     private IntegrasjonspunktNokkel integrasjonspunktNokkel;
+
+    @Autowired
+    private IntegrasjonspunktProperties props;
 
     static {
         try {
@@ -89,13 +96,46 @@ public class StandardBusinessDocumentFactory {
         return new CreateSBD().createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload, conversationId, DOCUMENT_TYPE_MELDING, shipment.getJournalpostId());
     }
 
+    public EduDocument create(ConversationResource shipmentMeta, MessageContext context) throws MessageException, IOException {
+
+        List<ByteArrayFile> attachements = new ArrayList<>();
+        for (String filename : shipmentMeta.getFileRefs().values()) {
+            String filedir = props.getNextbest().getFiledir();
+            if (!filedir.endsWith("/")) {
+                filedir = filedir+"/";
+            }
+            filedir = filedir+shipmentMeta.getConversationId()+"/";
+            File file = new File(filedir+filename);
+
+            byte[] bytes = FileUtils.readFileToByteArray(file);
+            attachements.add(new NextBestAttachement(bytes, filename));
+        }
+
+        Archive archive;
+        try {
+            archive = createAsicePackage(context.getAvsender(), context.getMottaker(), attachements);
+        } catch (IOException e) {
+            throw new MessageException(e, StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT);
+        }
+        Payload payload = new Payload(encryptArchive(context.getMottaker(), archive));
+
+        return new CreateSBD().createSBD(context.getAvsender().getOrgNummer(), context.getMottaker().getOrgNummer(), payload,
+                context.getConversationId(), StandardBusinessDocumentHeader.NEXTBEST_TYPE, context.getJournalPostId());
+    }
+
     private byte[] encryptArchive(Mottaker mottaker, Archive archive) {
         return new CmsUtil().createCMS(archive.getBytes()
                 , (X509Certificate) mottaker.getSertifikat());
     }
 
-    private Archive createAsicePackage(Avsender avsender, Mottaker mottaker, BestEduMessage bestEduMessage) throws IOException {
-        return new CreateAsice().createAsice(bestEduMessage, integrasjonspunktNokkel.getSignatureHelper(), avsender, mottaker);
+    private Archive createAsicePackage(Avsender avsender, Mottaker mottaker, ByteArrayFile byteArrayFile) throws
+            IOException {
+        return new CreateAsice().createAsice(byteArrayFile, integrasjonspunktNokkel.getSignatureHelper(), avsender, mottaker);
+    }
+
+    private Archive createAsicePackage(Avsender avsender, Mottaker mottaker, List<ByteArrayFile> byteArrayFile) throws
+            IOException {
+        return new CreateAsice().createAsice(byteArrayFile, integrasjonspunktNokkel.getSignatureHelper(), avsender, mottaker);
     }
 
     public static EduDocument create(StandardBusinessDocument fromDocument) {

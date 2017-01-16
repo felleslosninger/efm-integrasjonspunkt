@@ -1,21 +1,15 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import com.google.common.base.Strings;
-import java.security.PrivateKey;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
-import static no.difi.meldingsutveksling.core.EDUCoreMarker.markerFrom;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.Noekkelpar;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.logging.Audit;
-import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createErrorResponse;
-import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createOkResponse;
+import no.difi.meldingsutveksling.nextbest.ConversationResource;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
@@ -25,6 +19,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+
+import java.io.IOException;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static no.difi.meldingsutveksling.core.EDUCoreMarker.markerFrom;
+import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createErrorResponse;
+import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createOkResponse;
 
 public class MessageSender implements ApplicationContextAware {
 
@@ -53,27 +57,27 @@ public class MessageSender implements ApplicationContextAware {
         this.standardBusinessDocumentFactory = standardBusinessDocumentFactory;
     }
 
-    private Avsender createAvsender(EDUCore message) throws MessageContextException {
+    private Avsender createAvsender(String identifier) throws MessageContextException {
         Certificate certificate;
         try {
-            certificate = adresseregister.getCertificate(message.getSender().getIdentifier());
+            certificate = adresseregister.getCertificate(identifier);
         } catch (CertificateException e) {
             throw new MessageContextException(e, StatusMessage.MISSING_SENDER_CERTIFICATE);
         }
         PrivateKey privatNoekkel = keyInfo.loadPrivateKey();
 
-        return Avsender.builder(new Organisasjonsnummer(message.getSender().getIdentifier()), new Noekkelpar(privatNoekkel, certificate)).build();
+        return Avsender.builder(new Organisasjonsnummer(identifier), new Noekkelpar(privatNoekkel, certificate)).build();
     }
 
-    private Mottaker createMottaker(String orgnr) throws MessageContextException {
+    private Mottaker createMottaker(String identifier) throws MessageContextException {
         Certificate receiverCertificate;
         try {
-            receiverCertificate = lookupCertificate(orgnr);
+            receiverCertificate = lookupCertificate(identifier);
         } catch (CertificateException e) {
             throw new MessageContextException(e, StatusMessage.MISSING_RECIEVER_CERTIFICATE);
         }
 
-        return Mottaker.builder(new Organisasjonsnummer(orgnr), receiverCertificate).build();
+        return Mottaker.builder(new Organisasjonsnummer(identifier), receiverCertificate).build();
     }
 
     private Certificate lookupCertificate(String orgnr) throws CertificateException {
@@ -110,6 +114,38 @@ public class MessageSender implements ApplicationContextAware {
         return createOkResponse();
     }
 
+    public void sendMessage(ConversationResource conversation) throws MessageContextException, IOException {
+        MessageContext messageContext = createMessageContext(conversation);
+
+        EduDocument edu;
+        try {
+            edu = standardBusinessDocumentFactory.create(conversation, messageContext);
+            log.info("EduMessage created from ConversationResource");
+        } catch (MessageException e) {
+            log.error("Failed creating EduMessage from ConversationResource", e);
+            return;
+        }
+
+        Transport t = transportFactory.createTransport(edu);
+        t.send(context, edu);
+
+        log.info("ConversationResource sent");
+    }
+
+    private MessageContext createMessageContext(ConversationResource conversation) throws MessageContextException {
+        if (isNullOrEmpty(conversation.getReceiverId())) {
+            throw new MessageContextException(StatusMessage.MISSING_RECIEVER_ORGANIZATION_NUMBER);
+        }
+
+        MessageContext context = new MessageContext();
+        context.setAvsender(createAvsender(conversation.getSenderId()));
+        context.setMottaker(createMottaker(conversation.getReceiverId()));
+        context.setJpId("");
+        context.setConversationId(conversation.getConversationId());
+
+        return context;
+    }
+
     /**
      * Creates MessageContext to contain data needed to send a message such as sender/recipient party numbers and certificates
      *
@@ -119,7 +155,7 @@ public class MessageSender implements ApplicationContextAware {
      * @return MessageContext containing data about the shipment
      */
     protected MessageContext createMessageContext(EDUCore message) throws MessageContextException {
-        if (Strings.isNullOrEmpty(message.getReceiver().getIdentifier())) {
+        if (isNullOrEmpty(message.getReceiver().getIdentifier())) {
             throw new MessageContextException(StatusMessage.MISSING_RECIEVER_ORGANIZATION_NUMBER);
         }
 
@@ -127,7 +163,7 @@ public class MessageSender implements ApplicationContextAware {
 
         Avsender avsender;
         final Mottaker mottaker;
-        avsender = createAvsender(message);
+        avsender = createAvsender(message.getSender().getIdentifier());
         mottaker = createMottaker(message.getReceiver().getIdentifier());
 
         if (message.getMessageType() == EDUCore.MessageType.EDU) {
