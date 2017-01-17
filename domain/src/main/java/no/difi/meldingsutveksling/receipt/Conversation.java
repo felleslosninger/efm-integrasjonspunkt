@@ -15,7 +15,7 @@ public class Conversation {
 
     @Id
     @GeneratedValue
-    private String id;
+    private Integer genId;
     private String conversationId;
     private String receiverIdentifier;
     private String messageReference;
@@ -81,12 +81,12 @@ public class Conversation {
                 msgTitle, eduCore.getServiceIdentifier() , Arrays.asList(receipts));
     }
 
-    public String getId() {
-        return id;
+    public Integer getId() {
+        return genId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setId(Integer genId) {
+        this.genId = genId;
     }
 
     public boolean isPollable() {
@@ -161,7 +161,7 @@ public class Conversation {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("id", id)
+                .add("genId", genId)
                 .add("conversationId", conversationId)
                 .add("messageReference", messageReference)
                 .add("receiverIdentifier", receiverIdentifier)

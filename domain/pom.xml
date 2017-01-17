@@ -8,7 +8,7 @@
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>1.7.44-HOTFIX</version>
+        <version>1.7.43</version>
     </parent>
 
     <properties>

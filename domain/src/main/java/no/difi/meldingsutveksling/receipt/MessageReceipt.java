@@ -16,7 +16,7 @@ public class MessageReceipt {
 
     @Id
     @GeneratedValue
-    private String id;
+    private Integer genId;
 
     private LocalDateTime lastUpdate;
     private ReceiptStatus status;
@@ -76,7 +76,7 @@ public class MessageReceipt {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("id", id)
+                .add("genId", genId)
                 .add("lastUpdate", lastUpdate)
                 .add("status", status)
                 .add("description", description)
