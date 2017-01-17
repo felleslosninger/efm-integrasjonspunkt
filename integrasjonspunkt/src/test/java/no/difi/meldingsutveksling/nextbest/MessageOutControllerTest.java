@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.nextbest;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationRepository;
 import no.difi.meldingsutveksling.receipt.MessageReceipt;
@@ -50,11 +51,17 @@ public class MessageOutControllerTest {
     @MockBean
     private ConversationRepository crepo;
 
+    @MockBean
+    private MessageSender messageSender;
+
     @Before
     public void setup() {
         IntegrasjonspunktProperties.NextBEST nextBEST = new IntegrasjonspunktProperties.NextBEST();
         nextBEST.setFiledir("target/uploadtest");
+        IntegrasjonspunktProperties.Organization org = new IntegrasjonspunktProperties.Organization();
+        org.setNumber("3");
         when(props.getNextbest()).thenReturn(nextBEST);
+        when(props.getOrg()).thenReturn(org);
 
         ServiceRecord serviceRecord = new ServiceRecord();
         serviceRecord.setServiceIdentifier(ServiceIdentifier.EDU.name());
@@ -65,9 +72,9 @@ public class MessageOutControllerTest {
         Conversation receiptConversation = Conversation.of("42", "42ref", "123", "sometitle", ServiceIdentifier.EDU, receiptDelivered, receiptSent);
         when(crepo.findByConversationId("42")).thenReturn(asList(receiptConversation));
 
-        OutgoingConversationResource cr42 = OutgoingConversationResource.of("42", "1", "EDU");
-        OutgoingConversationResource cr43 = OutgoingConversationResource.of("43", "1", "POST_VIRKSOMHET");
-        OutgoingConversationResource cr44 = OutgoingConversationResource.of("44", "2", "EDU");
+        OutgoingConversationResource cr42 = OutgoingConversationResource.of("42", "2", "1", "EDU");
+        OutgoingConversationResource cr43 = OutgoingConversationResource.of("43", "2", "1", "POST_VIRKSOMHET");
+        OutgoingConversationResource cr44 = OutgoingConversationResource.of("44", "1", "2", "EDU");
 
         when(repo.findOne("42")).thenReturn(cr42);
         when(repo.findOne("43")).thenReturn(cr43);
@@ -202,6 +209,7 @@ public class MessageOutControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.conversationId", matchesRegex("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}")))
                 .andExpect(jsonPath("$.receiverId", is("1")))
+                .andExpect(jsonPath("$.senderId", is("3")))
                 .andExpect(jsonPath("$.messagetypeId", is("EDU")));
     }
 

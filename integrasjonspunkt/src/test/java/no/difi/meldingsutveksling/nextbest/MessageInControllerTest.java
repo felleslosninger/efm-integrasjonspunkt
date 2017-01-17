@@ -50,9 +50,9 @@ public class MessageInControllerTest {
         serviceRecord.setServiceIdentifier(ServiceIdentifier.EDU.name());
         when(sr.getServiceRecord("1")).thenReturn(serviceRecord);
 
-        IncomingConversationResource cr42 = IncomingConversationResource.of("42", "1", "1");
-        IncomingConversationResource cr43 = IncomingConversationResource.of("43", "1", "2");
-        IncomingConversationResource cr44 = IncomingConversationResource.of("44", "2", "1");
+        IncomingConversationResource cr42 = IncomingConversationResource.of("42", "2", "1", "1");
+        IncomingConversationResource cr43 = IncomingConversationResource.of("43", "2", "1", "2");
+        IncomingConversationResource cr44 = IncomingConversationResource.of("44", "1", "2", "1");
 
         when(repo.findOne("42")).thenReturn(cr42);
         when(repo.findOne("43")).thenReturn(cr43);
@@ -66,13 +66,15 @@ public class MessageInControllerTest {
 
     @Test
     public void getMessageWithIdShouldReturnOk() throws Exception {
-        mvc.perform(get("/in/messages/42").accept(MediaType.APPLICATION_JSON))
+        mvc.perform(get("/in/messages")
+                .accept(MediaType.APPLICATION_JSON)
+                .param("conversationId", "42"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(4)))
+                .andExpect(jsonPath("$.*", hasSize(5)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
+                .andExpect(jsonPath("$.senderId", is("2")))
                 .andExpect(jsonPath("$.receiverId", is("1")))
-                .andExpect(jsonPath("$.messagetypeId", is("1")))
-                .andExpect(jsonPath("$.fileRefs", hasSize(0)));
+                .andExpect(jsonPath("$.messagetypeId", is("1")));
     }
 
     @Test
@@ -97,24 +99,26 @@ public class MessageInControllerTest {
     }
 
     @Test
-    public void popIncomingShouldReturnOk() throws Exception {
-        mvc.perform(get("/in/messages/pop").accept(MediaType.APPLICATION_JSON))
+    public void peekIncomingShouldReturnOk() throws Exception {
+        mvc.perform(get("/in/messages/peek").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(4)))
+                .andExpect(jsonPath("$.*", hasSize(5)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
+                .andExpect(jsonPath("$.senderId", is("2")))
                 .andExpect(jsonPath("$.receiverId", is("1")))
-                .andExpect(jsonPath("$.messagetypeId", is("1")))
-                .andExpect(jsonPath("$.fileRefs", hasSize(0)));
+                .andExpect(jsonPath("$.messagetypeId", is("1")));
     }
 
     @Test
-    public void popIncomingWithMessageIdShouldReturnOk() throws Exception {
-        mvc.perform(get("/in/messages/pop/1").accept(MediaType.APPLICATION_JSON))
+    public void peekIncomingWithMessageIdShouldReturnOk() throws Exception {
+        mvc.perform(get("/in/messages/peek")
+                .accept(MediaType.APPLICATION_JSON)
+                .param("messagetypeId", "1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(4)))
+                .andExpect(jsonPath("$.*", hasSize(5)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
+                .andExpect(jsonPath("$.senderId", is("2")))
                 .andExpect(jsonPath("$.receiverId", is("1")))
-                .andExpect(jsonPath("$.messagetypeId", is("1")))
-                .andExpect(jsonPath("$.fileRefs", hasSize(0)));
+                .andExpect(jsonPath("$.messagetypeId", is("1")));
     }
 }
