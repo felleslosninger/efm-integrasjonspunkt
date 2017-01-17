@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextbest;
 
+import com.google.common.collect.Lists;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
@@ -8,7 +9,6 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
-import org.apache.commons.compress.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +16,7 @@ import org.springframework.stereotype.Component;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -38,7 +37,7 @@ public class NextBestQueue {
     @Autowired
     private IntegrasjonspunktProperties props;
 
-    public void enqueueEduDocument(EduDocument eduDocument) throws IOException, MessageException {
+    public void enqueueEduDocument(EduDocument eduDocument) throws MessageException {
 
         if (!(eduDocument.getAny() instanceof Payload)) {
             log.error("Message attachement not instance of Payload.");
@@ -47,13 +46,13 @@ public class NextBestQueue {
         }
 
         byte[] decryptedAsicPackage = decrypt((Payload)eduDocument.getAny());
-        Map<String, byte[]> contentFromAsic = getContentFromAsic(decryptedAsicPackage);
+        List<String> contentFromAsic = getContentFromAsic(decryptedAsicPackage);
 
         IncomingConversationResource message = IncomingConversationResource.of(eduDocument.getConversationId(),
                 eduDocument.getSenderOrgNumber(),
                 eduDocument.getReceiverOrgNumber(), "OEP");
 
-        contentFromAsic.keySet().forEach(k -> message.addFileRef(k));
+        contentFromAsic.forEach(message::addFileRef);
 
         String filedir = props.getNextbest().getFiledir();
         if (!filedir.endsWith("/")) {
@@ -68,10 +67,11 @@ public class NextBestQueue {
             BufferedOutputStream bos = new BufferedOutputStream(os);
             bos.write(decryptedAsicPackage);
             bos.close();
+            os.close();
 
             repoIn.save(message);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Could not write asic container to disc.", e);
         }
 
     }
@@ -82,15 +82,16 @@ public class NextBestQueue {
         return cmsUtil.decryptCMS(cmsEncZip, keyInfo.loadPrivateKey());
     }
 
-    public Map<String, byte[]> getContentFromAsic(byte[] bytes) throws IOException, MessageException {
-        Map<String, byte[]> files = new HashMap<>();
+    public List<String> getContentFromAsic(byte[] bytes) throws MessageException {
+        List<String> files = Lists.newArrayList();
 
         try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes))) {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
-                files.put(entry.getName(), IOUtils.toByteArray(zipInputStream));
+                files.add(entry.getName());
             }
         } catch (Exception e) {
+            log.error("Failed reading entries in asic.", e);
             throw new MessageException(StatusMessage.UNABLE_TO_EXTRACT_ZIP_CONTENTS);
         }
         return files;

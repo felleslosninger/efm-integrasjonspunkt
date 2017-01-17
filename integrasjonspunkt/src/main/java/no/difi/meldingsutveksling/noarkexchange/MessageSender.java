@@ -20,7 +20,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -114,7 +113,7 @@ public class MessageSender implements ApplicationContextAware {
         return createOkResponse();
     }
 
-    public void sendMessage(ConversationResource conversation) throws MessageContextException, IOException {
+    public void sendMessage(ConversationResource conversation) throws MessageContextException {
         MessageContext messageContext = createMessageContext(conversation);
 
         EduDocument edu;
@@ -159,7 +158,7 @@ public class MessageSender implements ApplicationContextAware {
             throw new MessageContextException(StatusMessage.MISSING_RECIEVER_ORGANIZATION_NUMBER);
         }
 
-        MessageContext context = new MessageContext();
+        MessageContext messageContext = new MessageContext();
 
         Avsender avsender;
         final Mottaker mottaker;
@@ -167,17 +166,17 @@ public class MessageSender implements ApplicationContextAware {
         mottaker = createMottaker(message.getReceiver().getIdentifier());
 
         if (message.getMessageType() == EDUCore.MessageType.EDU) {
-            context.setJpId(message.getPayloadAsMeldingType().getJournpost().getJpId());
+            messageContext.setJpId(message.getPayloadAsMeldingType().getJournpost().getJpId());
         } else {
-            context.setJpId("");
+            messageContext.setJpId("");
         }
 
         String converationId = message.getId();
 
-        context.setMottaker(mottaker);
-        context.setAvsender(avsender);
-        context.setConversationId(converationId);
-        return context;
+        messageContext.setMottaker(mottaker);
+        messageContext.setAvsender(avsender);
+        messageContext.setConversationId(converationId);
+        return messageContext;
     }
 
     public void setAdresseregister(Adresseregister adresseregister) {

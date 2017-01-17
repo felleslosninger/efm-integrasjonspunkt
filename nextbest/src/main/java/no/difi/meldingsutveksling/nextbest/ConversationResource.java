@@ -5,7 +5,6 @@ import com.google.common.base.MoreObjects;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -83,7 +82,7 @@ public abstract class ConversationResource {
         this.lastUpdate = lastUpdate;
     }
 
-    public void setFileRefs(HashMap<Integer, String> fileRefs) {
+    public void setFileRefs(Map<Integer, String> fileRefs) {
         this.fileRefs = fileRefs;
     }
 

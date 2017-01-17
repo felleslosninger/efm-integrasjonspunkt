@@ -34,7 +34,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.xml.bind.JAXBElement;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -79,7 +78,7 @@ public class MessagePolling implements ApplicationContextAware {
     private ServiceRecord serviceRecord;
 
     @Scheduled(fixedRate = 15000)
-    public void checkForNewMessages() throws IOException, MessageException {
+    public void checkForNewMessages() throws MessageException {
         MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrg().getNumber());
         logger.debug("Checking for new messages");
 

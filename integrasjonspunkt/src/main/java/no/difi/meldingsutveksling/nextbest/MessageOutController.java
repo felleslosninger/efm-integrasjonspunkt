@@ -21,7 +21,6 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -154,6 +153,7 @@ public class MessageOutController {
                 BufferedOutputStream bos = new BufferedOutputStream(os);
                 bos.write(file.getBytes());
                 bos.close();
+                os.close();
 
                 if (!conversationResource.getFileRefs().values().contains(file.getOriginalFilename())) {
                     conversationResource.addFileRef(file.getOriginalFilename());
@@ -167,7 +167,7 @@ public class MessageOutController {
 
         try {
             messageSender.sendMessage(conversationResource);
-        } catch (MessageContextException | IOException e) {
+        } catch (MessageContextException e) {
             log.error("Send message failed.", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error during sending. Check logs");
         }
@@ -182,7 +182,7 @@ public class MessageOutController {
             @RequestParam(value = "messagetypeId", required = false) String messagetypeId,
             @RequestParam(value = "lastonly", required = false) boolean lastonly) {
         List<Conversation> clist = convRepo.findByConversationId(conversationId);
-        if (clist == null || clist.size() == 0) {
+        if (clist == null || clist.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         if (lastonly) {

@@ -13,14 +13,17 @@ public class NextBestAttachement implements ByteArrayFile {
 		this(new ByteArray(content), filename);
 	}
 
+	@Override
 	public String getFileName() {
 		return this.filename;
 	}
 
+	@Override
 	public byte[] getBytes() {
 		return content.getByteArray();
 	}
 
+	@Override
 	public String getMimeType() {
 		return "text/xml";
 	}

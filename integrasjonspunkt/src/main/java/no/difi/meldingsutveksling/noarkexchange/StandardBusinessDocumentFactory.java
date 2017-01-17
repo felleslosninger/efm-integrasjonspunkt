@@ -96,7 +96,7 @@ public class StandardBusinessDocumentFactory {
         return new CreateSBD().createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload, conversationId, DOCUMENT_TYPE_MELDING, shipment.getJournalpostId());
     }
 
-    public EduDocument create(ConversationResource shipmentMeta, MessageContext context) throws MessageException, IOException {
+    public EduDocument create(ConversationResource shipmentMeta, MessageContext context) throws MessageException {
 
         List<ByteArrayFile> attachements = new ArrayList<>();
         for (String filename : shipmentMeta.getFileRefs().values()) {
@@ -107,7 +107,13 @@ public class StandardBusinessDocumentFactory {
             filedir = filedir+shipmentMeta.getConversationId()+"/";
             File file = new File(filedir+filename);
 
-            byte[] bytes = FileUtils.readFileToByteArray(file);
+            byte[] bytes = new byte[0];
+            try {
+                bytes = FileUtils.readFileToByteArray(file);
+            } catch (IOException e) {
+                log.error("Could not read file \""+file.getName()+"\"", e);
+                throw new MessageException(e, StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT);
+            }
             attachements.add(new NextBestAttachement(bytes, filename));
         }
 

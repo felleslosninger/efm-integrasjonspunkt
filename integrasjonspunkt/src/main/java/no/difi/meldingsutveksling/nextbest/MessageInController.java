@@ -27,6 +27,10 @@ public class MessageInController {
 
     private static final Logger log = LoggerFactory.getLogger(MessageInController.class);
 
+    private static final String NO_CONVO_FOUND = "No conversation with supplied id found.";
+    private static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
+    private static final String HEADER_FILENAME = "attachement; filename=";
+
     @Autowired
     private IncomingConversationResourceRepository repo;
 
@@ -45,7 +49,7 @@ public class MessageInController {
             if (resource.isPresent()) {
                 return ResponseEntity.ok(resource.get());
             }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No conversation with supplied id found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(NO_CONVO_FOUND);
         }
 
         List<IncomingConversationResource> resources;
@@ -91,7 +95,7 @@ public class MessageInController {
             repo.delete(resource.get());
 
             return ResponseEntity.ok()
-                    .header("Content-Disposition", "attachement; filename="+fileName)
+                    .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME+fileName)
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .contentLength(file.length())
                     .body(isr);
@@ -124,7 +128,7 @@ public class MessageInController {
 
         Optional<IncomingConversationResource> resource = Optional.ofNullable(repo.findOne(conversationId));
         if (!resource.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No conversation with supplied id found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(NO_CONVO_FOUND);
         }
 
         String filedir = props.getNextbest().getFiledir();
@@ -136,7 +140,7 @@ public class MessageInController {
 
         InputStreamResource isr = new InputStreamResource(new FileInputStream(file));
         return ResponseEntity.ok()
-                .header("Content-Disposition", "attachement; filename="+props.getNextbest().getAsicfile())
+                .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME+props.getNextbest().getAsicfile())
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .contentLength(file.length())
                 .body(isr);
@@ -150,7 +154,7 @@ public class MessageInController {
 
         Optional<IncomingConversationResource> resource = Optional.ofNullable(repo.findOne(conversationId));
         if (!resource.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No conversation with supplied id found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(NO_CONVO_FOUND);
         }
 
         if (!resource.get().getFileRefs().containsKey(fileId)) {
@@ -161,11 +165,12 @@ public class MessageInController {
             byte[] fileFromAsic = getFileFromAsic(resource.get(), fileId);
 
             return ResponseEntity.ok()
-                    .header("Content-Disposition", "attachement; filename="+resource.get().getFileRefs().get(fileId))
+                    .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME+resource.get().getFileRefs().get(fileId))
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .contentLength(fileFromAsic.length)
                     .body(fileFromAsic);
         } catch (MessageException e) {
+            log.error("Failed reading file from asic container.", e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("File with given id not found in archive.");
         }
     }
