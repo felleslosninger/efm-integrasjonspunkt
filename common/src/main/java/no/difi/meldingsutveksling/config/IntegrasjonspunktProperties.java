@@ -44,6 +44,9 @@ public class IntegrasjonspunktProperties {
     private DigitalPostInnbyggerConfig dpi;
 
     @Valid
+    private SvarUtConfig dps;
+
+    @Valid
     private Oidc oidc;
 
     private Mail mail;

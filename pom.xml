@@ -66,6 +66,7 @@
         <module>post-til-virksomhet</module>
         <module>post-til-private</module>
         <module>service-registry-client</module>
+        <module>ks-svarut</module>
     </modules>
 
     <dependencyManagement>
