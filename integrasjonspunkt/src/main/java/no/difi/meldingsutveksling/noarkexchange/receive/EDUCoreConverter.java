@@ -15,7 +15,6 @@ public class EDUCoreConverter {
 
     private static final String CHARSET_UTF8 = "UTF-8";
     private static final String MESSAGE_TYPE_NAMESPACE = "http://www.arkivverket.no/Noark4-1-WS-WD/types";
-    private static final String APP_RECEIPT_NAMESPACE = "http://www.arkivverket.no/Noark/Exchange/types";
 
     private static final JAXBContext jaxbContext;
     static {
@@ -34,7 +33,7 @@ public class EDUCoreConverter {
             payloadConverter = new PayloadConverter<>(MeldingType.class, MESSAGE_TYPE_NAMESPACE, "Melding");
             payloadAsString = payloadConverter.marshallToString(message.getPayloadAsMeldingType());
         } else {
-            payloadConverter = new PayloadConverter<>(AppReceiptType.class, APP_RECEIPT_NAMESPACE, "AppReceipt");
+            payloadConverter = new PayloadConverter<>(AppReceiptType.class, null, "AppReceipt");
             payloadAsString = payloadConverter.marshallToString(message.getPayloadAsAppreceiptType());
         }
         message.setPayload(payloadAsString);
