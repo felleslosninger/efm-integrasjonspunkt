@@ -17,10 +17,13 @@ jacoco.exec
 /**/generated-sources/wsimport
 /noarkexchange/src/main/java/no/difi/meldingsutveksling/noarkexchange/schema/receive/receive_ReceivePortImpl.java
 /integrasjonspunkt-logs
+/integrasjonspunkt/integrasjonspunkt-logs/
 /integrasjonspunkt-logs/application.log
 /integrasjonspunkt/build/certificate
 /integrasjonspunkt/activemq-data/
 /integrasjonspunkt/node_modules/
+/integrasjonspunkt/upload/
+/integrasjonspunkt/bootstrap.properties
 /integrasjonspunkt/receipt.mv.db
 
 # Mobile Tools for Java (J2ME)
