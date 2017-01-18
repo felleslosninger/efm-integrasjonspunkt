@@ -100,7 +100,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
             return forwardToNoarkSystem(standardBusinessDocument);
         } catch (MessageException e) {
             StandardBusinessDocumentWrapper documentWrapper = new StandardBusinessDocumentWrapper(standardBusinessDocument);
-            Audit.error("Failed to deliver archive", markerFrom(documentWrapper));
+            Audit.error("Failed to deliver archive", markerFrom(documentWrapper), e);
             logger.error(markerFrom(documentWrapper),
                     e.getStatusMessage().getTechnicalMessage(), e);
             return new CorrelationInformation();
@@ -114,7 +114,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
             adresseregisterService.validateCertificates(document);
             Audit.info("Certificates validated", markerFrom(document));
         } catch (MessageException e) {
-            Audit.error(e.getMessage(), markerFrom(document));
+            Audit.error(e.getMessage(), markerFrom(document), e);
             throw e;
         }
 
@@ -137,7 +137,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
             }
 
         } catch (IOException | JAXBException e) {
-            Audit.error("Failed to extract EDUdocument", markerFrom(document));
+            Audit.error("Failed to extract EDUdocument", markerFrom(document), e);
             throw new MessageException(e, StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
         }
 
