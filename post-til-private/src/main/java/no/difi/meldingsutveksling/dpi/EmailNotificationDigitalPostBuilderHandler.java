@@ -12,7 +12,7 @@ public class EmailNotificationDigitalPostBuilderHandler extends DigitalPostBuild
     @Override
     public DigitalPost.Builder handle(MeldingsformidlerRequest request, DigitalPost.Builder builder) {
         if (getConfig().isEnableEmailNotification() && request.isNotifiable()) {
-            builder.epostVarsel(EpostVarsel.builder(request.getEmail(), request.getVarslingstekst()).build());
+            builder.epostVarsel(EpostVarsel.builder(request.getEmailAddress(), request.getEmailVarslingstekst()).build());
         }
         return builder;
     }

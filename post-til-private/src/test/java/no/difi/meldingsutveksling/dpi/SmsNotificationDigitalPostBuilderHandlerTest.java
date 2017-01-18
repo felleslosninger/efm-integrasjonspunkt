@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.dpi;
 
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.sdp.client2.domain.digital_post.DigitalPost;
-import no.difi.sdp.client2.domain.digital_post.EpostVarsel;
+import no.difi.sdp.client2.domain.digital_post.SmsVarsel;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,27 +27,26 @@ public class SmsNotificationDigitalPostBuilderHandlerTest {
         SmsNotificationDigitalPostBuilderHandler handler = new SmsNotificationDigitalPostBuilderHandler(config);
         handler.handle(new Request().withNotifiable(true), builder);
 
-        verify(builder, never()).epostVarsel(any(EpostVarsel.class));
+        verify(builder, never()).smsVarsel(any(SmsVarsel.class));
     }
 
     @Test
-    public void notifiableFalseShouldNotSetEpostVarsel() {
+    public void notifiableFalseShouldNotSetSmsVarsel() {
         when(config.isEnableEmailNotification()).thenReturn(true);
 
         SmsNotificationDigitalPostBuilderHandler handler = new SmsNotificationDigitalPostBuilderHandler(config);
         handler.handle(new Request().withNotifiable(false), builder);
 
-        verify(builder, never()).epostVarsel(any(EpostVarsel.class));
+        verify(builder, never()).smsVarsel(any(SmsVarsel.class));
     }
 
     @Test
-    public void notifiableAndSmsFeatureEnabledShouldSetEpostVarsel() {
+    public void notifiableAndSmsFeatureEnabledShouldSetSmsVarsel() {
         when(config.isEnableSmsNotification()).thenReturn(true);
 
         SmsNotificationDigitalPostBuilderHandler handler = new SmsNotificationDigitalPostBuilderHandler(config);
         handler.handle(new Request().withNotifiable(true), builder);
 
-        verify(builder).epostVarsel(any(EpostVarsel.class));
+        verify(builder).smsVarsel(any(SmsVarsel.class));
     }
-
 }

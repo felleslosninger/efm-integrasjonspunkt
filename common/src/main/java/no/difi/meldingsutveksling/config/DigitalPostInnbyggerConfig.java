@@ -26,6 +26,10 @@ public class DigitalPostInnbyggerConfig {
 
     private FeatureToggle feature = new FeatureToggle();
 
+    private Sms sms = new Sms();
+
+    private Email email = new Email();
+
     /**
      * ID for queue messages are sent to and their corresponding receipts can be retrieved from.
      * This is to avoid reading receipts from other applications that use the same service
@@ -117,16 +121,32 @@ public class DigitalPostInnbyggerConfig {
         return getFeature().isEnableSmsNotification();
     }
 
+    public Sms getSms() {
+        return sms;
+    }
+
+    public void setSms(Sms sms) {
+        this.sms = sms;
+    }
+
+    public Email getEmail() {
+        return email;
+    }
+
+    public void setEmail(Email email) {
+        this.email = email;
+    }
+
     public static class FeatureToggle {
         private boolean enableEmailNotification = false;
         private boolean enableSmsNotification = false;
         private boolean enablePrint = false;
 
-        public boolean isEnableEmailNotification() {
+        boolean isEnableEmailNotification() {
             return enableEmailNotification;
         }
 
-        public boolean isEnableSmsNotification() {
+        boolean isEnableSmsNotification() {
             return enableSmsNotification;
         }
 
@@ -144,6 +164,32 @@ public class DigitalPostInnbyggerConfig {
 
         public void setEnablePrint(boolean enablePrint) {
             this.enablePrint = enablePrint;
+        }
+    }
+
+    public static class Sms {
+        @NotNull
+        private String varslingstekst;
+
+        public String getVarslingstekst() {
+            return varslingstekst;
+        }
+
+        public void setVarslingstekst(String varslingstekst) {
+            this.varslingstekst = varslingstekst;
+        }
+    }
+
+    public static class Email {
+        @NotNull
+        private String varslingstekst;
+
+        public String getVarslingstekst() {
+            return varslingstekst;
+        }
+
+        public void setVarslingstekst(String varslingstekst) {
+            this.varslingstekst = varslingstekst;
         }
     }
 
