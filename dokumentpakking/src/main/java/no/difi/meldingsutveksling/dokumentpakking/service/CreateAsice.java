@@ -12,6 +12,8 @@ import no.difi.meldingsutveksling.domain.Mottaker;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 
 public class CreateAsice {
@@ -22,14 +24,24 @@ public class CreateAsice {
         manifestFactory = new ManifestFactory();
     }
 
-    public Archive createAsice(ByteArrayFile forsendelse, SignatureHelper signatureHelper, Avsender avsender, Mottaker mottaker) throws IOException {
+    public Archive createAsice(ByteArrayFile forsendelse, SignatureHelper signatureHelper, Avsender avsender,
+                               Mottaker mottaker) throws IOException {
+        return createAsice(Arrays.asList(forsendelse), signatureHelper, avsender, mottaker);
+    }
 
-        Manifest manifest = manifestFactory.createManifest(avsender.getOrgNummer(), mottaker.getOrgNummer(), forsendelse);
+    public Archive createAsice(List<ByteArrayFile> forsendelse, SignatureHelper signatureHelper, Avsender avsender,
+                               Mottaker mottaker) throws IOException {
+
+        Manifest manifest = manifestFactory.createManifest(avsender.getOrgNummer(), mottaker.getOrgNummer(),
+                forsendelse.get(0));
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         AsicWriter asicWriter = AsicWriterFactory.newFactory()
                 .newContainer(bos)
-                .add(new ByteArrayInputStream(forsendelse.getBytes()), "best_edu.xml")
                 .add(new ByteArrayInputStream(manifest.getBytes()), "manifest.xml");
+        for (ByteArrayFile f : forsendelse) {
+            asicWriter.add(new ByteArrayInputStream(f.getBytes()), f.getFileName());
+        }
+
         asicWriter.sign(signatureHelper);
         return new Archive(bos.toByteArray());
     }

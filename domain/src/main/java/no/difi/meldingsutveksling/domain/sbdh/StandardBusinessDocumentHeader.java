@@ -59,6 +59,7 @@ public class StandardBusinessDocumentHeader {
     public static final String KVITTERING_VERSION = "urn:no:difi:meldingsutveksling:1.0";
     public static final String MELDING_TYPE = "melding";
     public static final String MELDING_VERSION = "urn:no:difi:meldingsutveksling:1.0";
+    public static final String NEXTBEST_TYPE = "nextbest";
 
     @XmlElement(name = "HeaderVersion", required = true)
     protected String headerVersion;

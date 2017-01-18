@@ -346,6 +346,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jetty</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+        </dependency>
 
         <!-- start of logging/monitoring dependencies -->
         <dependency>
@@ -471,6 +475,12 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>kvittering</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>test-tools</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
@@ -608,5 +618,20 @@
             <artifactId>post-til-virksomhet</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>nextbest</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+        </dependency>
+
     </dependencies>
 </project>

@@ -51,6 +51,9 @@ public class IntegrasjonspunktProperties {
 
     private Mail mail;
 
+    @Valid
+    private NextBEST nextbest;
+
     /**
      * Feature toggles.
      */
@@ -128,6 +131,18 @@ public class IntegrasjonspunktProperties {
         private String trust;
     }
 
+    /**
+     * Settings for NextBEST
+     */
+    @Data
+    public static class NextBEST {
+
+        @NotNull
+        private String filedir;
+
+        @NotNull
+        private String asicfile;
+    }
 
     @Data
     public static class NorskArkivstandardSystem {
