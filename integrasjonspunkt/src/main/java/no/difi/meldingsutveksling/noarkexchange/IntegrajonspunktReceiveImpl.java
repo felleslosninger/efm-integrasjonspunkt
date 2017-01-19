@@ -184,7 +184,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
                 }
             } else {
                 Audit.error("Unexpected response from archive", markerFrom(response));
-                System.out.println(">>> archivesystem: " + response.getResult().getMessage().get(0).getText());
+                logger.error(">>> archivesystem: " + response.getResult().getMessage().get(0).getText());
             }
         }
 
