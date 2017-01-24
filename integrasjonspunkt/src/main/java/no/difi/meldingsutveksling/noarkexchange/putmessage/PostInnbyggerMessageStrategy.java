@@ -72,11 +72,12 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
         public Document getDocument() {
             final MeldingType meldingType = request.getPayloadAsMeldingType();
             final DokumentType dokumentType = meldingType.getJournpost().getDokument().get(0);
-            return from(dokumentType);
+            final String tittel = getSubject();
+            return createDocument(tittel, dokumentType);
         }
 
-        private Document from(DokumentType dokumentType) {
-            return new Document(dokumentType.getFil().getBase64(), dokumentType.getVeMimeType(), dokumentType.getVeFilnavn(), dokumentType.getDbTittel());
+        private Document createDocument(String tittel, DokumentType dokumentType) {
+            return new Document(dokumentType.getFil().getBase64(), dokumentType.getVeMimeType(), dokumentType.getVeFilnavn(), tittel);
         }
 
         @Override
@@ -84,7 +85,8 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
             List<DokumentType> allFiles = request.getPayloadAsMeldingType().getJournpost().getDokument();
             List<Document> attachments = new ArrayList<>();
             for(int i = 1; i < allFiles.size(); i++) {
-                attachments.add(from(allFiles.get(i)));
+                final DokumentType a = allFiles.get(i);
+                attachments.add(createDocument(a.getDbTittel(), a));
             }
             return attachments;
         }
@@ -96,7 +98,7 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
 
         @Override
         public String getSubject() {
-            return request.getPayloadAsMeldingType().getNoarksak().getSaOfftittel(); /* TODO: er dette riktig sted og finne subject */
+            return request.getPayloadAsMeldingType().getJournpost().getJpOffinnhold();
         }
 
         @Override
