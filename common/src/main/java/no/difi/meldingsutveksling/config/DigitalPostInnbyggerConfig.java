@@ -12,6 +12,7 @@ import org.springframework.core.io.Resource;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 /**
  *
@@ -26,8 +27,10 @@ public class DigitalPostInnbyggerConfig {
 
     private FeatureToggle feature = new FeatureToggle();
 
+    @Valid
     private Sms sms = new Sms();
 
+    @Valid
     private Email email = new Email();
 
     /**
@@ -168,7 +171,7 @@ public class DigitalPostInnbyggerConfig {
     }
 
     public static class Sms {
-        @NotNull
+        @Size(max=160)
         private String varslingstekst;
 
         public String getVarslingstekst() {
@@ -181,7 +184,7 @@ public class DigitalPostInnbyggerConfig {
     }
 
     public static class Email {
-        @NotNull
+        @Size(max=500)
         private String varslingstekst;
 
         public String getVarslingstekst() {
