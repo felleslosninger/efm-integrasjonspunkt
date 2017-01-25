@@ -1,10 +1,11 @@
 package no.difi.meldingsutveksling;
 
+import no.difi.meldingsutveksling.config.AltinnFormidlingsTjenestenConfig;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import org.springframework.context.ApplicationContext;
+
 import java.net.MalformedURLException;
 import java.net.URL;
-
-import no.difi.meldingsutveksling.config.AltinnFormidlingsTjenestenConfig;
-import org.springframework.context.ApplicationContext;
 
 public class AltinnWsConfiguration {
 
@@ -34,18 +35,18 @@ public class AltinnWsConfiguration {
     private AltinnWsConfiguration() {
     }
 
-    public static AltinnWsConfiguration fromConfiguration(String hostName, ApplicationContext context) {
+    public static AltinnWsConfiguration fromConfiguration(ServiceRecord serviceRecord, ApplicationContext context) {
         AltinnFormidlingsTjenestenConfig config = context.getBean(AltinnFormidlingsTjenestenConfig.class);
-        URL streamingserviceUrl = createUrl(hostName + config.getStreamingserviceUrl());
-        URL brokerserviceUrl = createUrl(hostName + config.getBrokerserviceUrl());
+        URL streamingserviceUrl = createUrl(serviceRecord.getEndPointURL() + config.getStreamingserviceUrl());
+        URL brokerserviceUrl = createUrl(serviceRecord.getEndPointURL() + config.getBrokerserviceUrl());
 
         return new Builder()
                 .withUsername(config.getUsername())
                 .withPassword(config.getPassword())
                 .withStreamingServiceUrl(streamingserviceUrl)
                 .withBrokerServiceUrl(brokerserviceUrl)
-                .withExternalServiceCode(config.getExternalServiceCode())
-                .withExternalServiceEditionCode(config.getExternalServiceEditionCode())
+                .withExternalServiceCode(serviceRecord.getServiceCode())
+                .withExternalServiceEditionCode(Integer.valueOf(serviceRecord.getServiceEditionCode()))
                 .build();
     }
 

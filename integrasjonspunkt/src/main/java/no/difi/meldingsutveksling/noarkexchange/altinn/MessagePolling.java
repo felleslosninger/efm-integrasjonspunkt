@@ -88,7 +88,7 @@ public class MessagePolling implements ApplicationContextAware {
             serviceRecord = serviceRegistryLookup.getServiceRecord(properties.getOrg().getNumber());
         }
 
-        AltinnWsConfiguration configuration = AltinnWsConfiguration.fromConfiguration(serviceRecord.getEndPointURL(), context);
+        AltinnWsConfiguration configuration = AltinnWsConfiguration.fromConfiguration(serviceRecord, context);
         AltinnWsClient client = new AltinnWsClient(configuration);
 
         List<FileReference> fileReferences = client.availableFiles(properties.getOrg().getNumber());
