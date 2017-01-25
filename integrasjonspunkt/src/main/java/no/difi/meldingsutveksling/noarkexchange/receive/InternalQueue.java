@@ -155,7 +155,7 @@ public class InternalQueue {
         try {
             jmsTemplate.convertAndSend(EXTERNAL, eduCoreConverter.marshallToBytes(request));
         } catch (Exception e) {
-            Audit.error("Unable to send message", EDUCoreMarker.markerFrom(request));
+            Audit.error("Unable to send message", EDUCoreMarker.markerFrom(request), e);
             throw e;
         }
     }

@@ -1,21 +1,23 @@
 package no.difi.meldingsutveksling.mxa;
 
-import java.io.StringReader;
-import javax.jws.WebParam;
-import javax.jws.WebService;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.ws.BindingType;
 import no.difi.meldingsutveksling.core.EDUCoreService;
 import no.difi.meldingsutveksling.logging.Audit;
-import static no.difi.meldingsutveksling.mxa.MessageMarker.markerFrom;
 import no.difi.meldingsutveksling.mxa.schema.MXADelegate;
 import no.difi.meldingsutveksling.mxa.schema.domain.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.jws.WebParam;
+import javax.jws.WebService;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.ws.BindingType;
+import java.io.StringReader;
+
+import static no.difi.meldingsutveksling.mxa.MessageMarker.markerFrom;
 
 @Component("mxaService")
 @WebService(portName = "MXAPort", serviceName = "MXA", targetNamespace = "http://webservice.ws.altut.patent.siriusit.com/", endpointInterface = "no.difi.meldingsutveksling.mxa.schema.MXADelegate")
@@ -39,8 +41,8 @@ public class MXAImpl implements MXADelegate {
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             msg = (Message) unmarshaller.unmarshal(new StringReader(arg0));
         } catch (JAXBException e) {
-            e.printStackTrace();
-            Audit.error("XML parse error", markerFrom(msg));
+            log.error("XML parse error", e);
+            Audit.error("XML parse error", markerFrom(msg), e);
             return XML_PARSE_ERROR;
         }
         Audit.info("MXA message received", markerFrom(msg));
@@ -49,7 +51,7 @@ public class MXAImpl implements MXADelegate {
             coreService.queueMessage(msg);
         } catch (Exception e) {
             log.error("Internal error", e);
-            Audit.error("Internal error", markerFrom(msg));
+            Audit.error("Internal error", markerFrom(msg), e);
             return INTERNAL_ERROR;
         }
 

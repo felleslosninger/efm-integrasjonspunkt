@@ -36,7 +36,7 @@ public class EDUCoreFactory {
             eduCore.setPayload(unmarshallPayload(putMessageRequestType.getPayload()));
         } catch (JAXBException e) {
             Audit.error("Payload unmarshalling failed. Request causing error: {}",
-                    PutMessageMarker.markerFrom(new PutMessageRequestWrapper(putMessageRequestType)));
+                    PutMessageMarker.markerFrom(new PutMessageRequestWrapper(putMessageRequestType)), e);
             throw new MeldingsUtvekslingRuntimeException(e);
         }
 
