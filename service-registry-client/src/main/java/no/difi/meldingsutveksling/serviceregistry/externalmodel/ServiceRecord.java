@@ -15,7 +15,6 @@ public class ServiceRecord {
     private String orgnrPostkasse;
     private String postkasseAdresse;
     private String epostAdresse;
-    private String varslingsStatus;
     private String mobilnummer;
     private boolean fysiskPost;
     private boolean kanVarsles;
@@ -35,7 +34,6 @@ public class ServiceRecord {
         this.endPointURL = "";
         this.serviceIdentifier = "";
         this.epostAdresse = "";
-        this.varslingsStatus = "";
         this.mobilnummer = "";
         this.fysiskPost = false;
         this.postAddress = PostAddress.EMPTY;
@@ -130,16 +128,8 @@ public class ServiceRecord {
         this.epostAdresse = epostAdresse;
     }
 
-    public void setVarslingsStatus(String varslingsStatus) {
-        this.varslingsStatus = varslingsStatus;
-    }
-
     public void setMobilnummer(String mobilnummer) {
         this.mobilnummer = mobilnummer;
-    }
-
-    public String getVarslingsStatus() {
-        return varslingsStatus;
     }
 
     public String getMobilnummer() {
@@ -195,14 +185,13 @@ public class ServiceRecord {
                 Objects.equal(orgnrPostkasse, that.orgnrPostkasse) &&
                 Objects.equal(postkasseAdresse, that.postkasseAdresse) &&
                 Objects.equal(epostAdresse, that.epostAdresse) &&
-                Objects.equal(varslingsStatus, that.varslingsStatus) &&
                 Objects.equal(mobilnummer, that.mobilnummer) &&
-                Objects.equal(postAddress, that.postAddress);
+                Objects.equal(postAddress, that.postAddress) &&
+                Objects.equal(returnAddress, that.returnAddress);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(serviceIdentifier, organisationNumber, pemCertificate, endPointURL, orgnrPostkasse, postkasseAdresse, epostAdresse, varslingsStatus, mobilnummer, fysiskPost, kanVarsles, postAddress);
+        return Objects.hashCode(serviceIdentifier, organisationNumber, pemCertificate, endPointURL, orgnrPostkasse, postkasseAdresse, epostAdresse, mobilnummer, fysiskPost, kanVarsles, postAddress, returnAddress);
     }
-
 }

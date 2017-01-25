@@ -67,13 +67,19 @@ public interface MeldingsformidlerRequest {
      * Needed if email notification is enabled
      * @return the email adress of the person(s) to be notified
      */
-    String getEmail();
+    String getEmailAddress();
 
     /**
-     * Needed if notification is enabled
+     * Needed if sms notification is enabled
      * @return text displayed in notification
      */
-    String getVarslingstekst();
+    String getSmsVarslingstekst();
+
+    /**
+     * Needed if e-mail notification is enabled
+     * @return text displayed in notification
+     */
+    String getEmailVarslingstekst();
 
     /**
      * Needed if sms notification is enabled

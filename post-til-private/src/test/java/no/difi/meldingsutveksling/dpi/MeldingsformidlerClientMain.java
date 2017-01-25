@@ -80,12 +80,17 @@ public class MeldingsformidlerClientMain {
             }
 
             @Override
-            public String getEmail() {
+            public String getEmailAddress() {
                 return null;
             }
 
             @Override
-            public String getVarslingstekst() {
+            public String getSmsVarslingstekst() {
+                return null;
+            }
+
+            @Override
+            public String getEmailVarslingstekst() {
                 return null;
             }
 
@@ -163,10 +168,10 @@ public class MeldingsformidlerClientMain {
     }
 
     static KeyStore createKeyStore() throws MeldingsformidlerException {
-        return setupKeyStore("kontaktinfo-client-test.jks", "changeit".toCharArray());
+        return setupKeyStore("changeit".toCharArray());
     }
 
-    private static KeyStore setupKeyStore(String filename, char[] password) throws MeldingsformidlerException {
+    private static KeyStore setupKeyStore(char[] password) throws MeldingsformidlerException {
         KeyStore keystore;
         try {
             keystore = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -175,7 +180,7 @@ public class MeldingsformidlerClientMain {
         }
         final FileInputStream file;
         try {
-            file = new FileInputStream(filename);
+            file = new FileInputStream("kontaktinfo-client-test.jks");
         } catch (FileNotFoundException e) {
             throw new MeldingsformidlerException("Could not open keystore file", e);
         }
