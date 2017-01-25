@@ -10,6 +10,8 @@ public class ServiceRecord {
     private String organisationNumber;
     private String pemCertificate;
     private String endPointURL;
+    private String serviceCode;
+    private String serviceEditionCode;
     private String orgnrPostkasse;
     private String postkasseAdresse;
     private String epostAdresse;
@@ -72,6 +74,22 @@ public class ServiceRecord {
         this.endPointURL = endPointURL;
     }
 
+    public String getServiceCode() {
+        return serviceCode;
+    }
+
+    public void setServiceCode(String serviceCode) {
+        this.serviceCode = serviceCode;
+    }
+
+    public String getServiceEditionCode() {
+        return serviceEditionCode;
+    }
+
+    public void setServiceEditionCode(String serviceEditionCode) {
+        this.serviceEditionCode = serviceEditionCode;
+    }
+
     public String getOrgnrPostkasse() {
         return orgnrPostkasse;
     }
@@ -95,6 +113,8 @@ public class ServiceRecord {
                 .add("organisationNumber", organisationNumber)
                 .add("pemCertificate", pemCertificate)
                 .add("endPointURL", endPointURL)
+                .add("serviceCode", serviceCode)
+                .add("serviceEditionCode", serviceEditionCode)
                 .add("orgnrPostkasse", orgnrPostkasse)
                 .add("postkasseAdresse", postkasseAdresse)
                 .toString();
@@ -170,6 +190,8 @@ public class ServiceRecord {
                 Objects.equal(organisationNumber, that.organisationNumber) &&
                 Objects.equal(pemCertificate, that.pemCertificate) &&
                 Objects.equal(endPointURL, that.endPointURL) &&
+                Objects.equal(serviceCode, that.serviceCode) &&
+                Objects.equal(serviceEditionCode, that.serviceEditionCode) &&
                 Objects.equal(orgnrPostkasse, that.orgnrPostkasse) &&
                 Objects.equal(postkasseAdresse, that.postkasseAdresse) &&
                 Objects.equal(epostAdresse, that.epostAdresse) &&

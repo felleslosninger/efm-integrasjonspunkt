@@ -29,7 +29,7 @@ public class ServiceRegistryTransportFactory implements TransportFactory {
 
         Optional<ServiceRecord> serviceRecord = Optional.of(serviceRegistryLookup.getServiceRecord(message.getReceiverOrgNumber()));
 
-        Optional<Transport> transport = serviceRecord.filter(isServiceIdentifier("edu")).map(s -> new AltinnTransport(s.getEndPointURL()));
+        Optional<Transport> transport = serviceRecord.filter(isServiceIdentifier("edu")).map(s -> new AltinnTransport(s));
         if(!transport.isPresent()) {
             // example
             //transport = serviceRecord.filter(isServiceIdentifier("some_identifier")).map(s -> new SomeOtherTransport(s.getEndPointURL()));
