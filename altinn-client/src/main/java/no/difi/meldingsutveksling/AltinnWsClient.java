@@ -71,7 +71,7 @@ public class AltinnWsClient {
             Audit.error("Message failed to upload", request.getMarkers(), e);
             throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, AltinnReasonFactory.from(e), e);
         } catch (IOException e) {
-            Audit.error("Message failed to upload", request.getMarkers());
+            Audit.error("Message failed to upload", request.getMarkers(), e);
             throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, e);
         }
     }

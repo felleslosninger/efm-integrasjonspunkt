@@ -10,10 +10,11 @@ public class ServiceRecord {
     private String organisationNumber;
     private String pemCertificate;
     private String endPointURL;
+    private String serviceCode;
+    private String serviceEditionCode;
     private String orgnrPostkasse;
     private String postkasseAdresse;
     private String epostAdresse;
-    private String varslingsStatus;
     private String mobilnummer;
     private boolean fysiskPost;
     private boolean kanVarsles;
@@ -33,7 +34,6 @@ public class ServiceRecord {
         this.endPointURL = "";
         this.serviceIdentifier = "";
         this.epostAdresse = "";
-        this.varslingsStatus = "";
         this.mobilnummer = "";
         this.fysiskPost = false;
         this.postAddress = PostAddress.EMPTY;
@@ -72,6 +72,22 @@ public class ServiceRecord {
         this.endPointURL = endPointURL;
     }
 
+    public String getServiceCode() {
+        return serviceCode;
+    }
+
+    public void setServiceCode(String serviceCode) {
+        this.serviceCode = serviceCode;
+    }
+
+    public String getServiceEditionCode() {
+        return serviceEditionCode;
+    }
+
+    public void setServiceEditionCode(String serviceEditionCode) {
+        this.serviceEditionCode = serviceEditionCode;
+    }
+
     public String getOrgnrPostkasse() {
         return orgnrPostkasse;
     }
@@ -95,6 +111,8 @@ public class ServiceRecord {
                 .add("organisationNumber", organisationNumber)
                 .add("pemCertificate", pemCertificate)
                 .add("endPointURL", endPointURL)
+                .add("serviceCode", serviceCode)
+                .add("serviceEditionCode", serviceEditionCode)
                 .add("orgnrPostkasse", orgnrPostkasse)
                 .add("postkasseAdresse", postkasseAdresse)
                 .toString();
@@ -110,16 +128,8 @@ public class ServiceRecord {
         this.epostAdresse = epostAdresse;
     }
 
-    public void setVarslingsStatus(String varslingsStatus) {
-        this.varslingsStatus = varslingsStatus;
-    }
-
     public void setMobilnummer(String mobilnummer) {
         this.mobilnummer = mobilnummer;
-    }
-
-    public String getVarslingsStatus() {
-        return varslingsStatus;
     }
 
     public String getMobilnummer() {
@@ -170,17 +180,18 @@ public class ServiceRecord {
                 Objects.equal(organisationNumber, that.organisationNumber) &&
                 Objects.equal(pemCertificate, that.pemCertificate) &&
                 Objects.equal(endPointURL, that.endPointURL) &&
+                Objects.equal(serviceCode, that.serviceCode) &&
+                Objects.equal(serviceEditionCode, that.serviceEditionCode) &&
                 Objects.equal(orgnrPostkasse, that.orgnrPostkasse) &&
                 Objects.equal(postkasseAdresse, that.postkasseAdresse) &&
                 Objects.equal(epostAdresse, that.epostAdresse) &&
-                Objects.equal(varslingsStatus, that.varslingsStatus) &&
                 Objects.equal(mobilnummer, that.mobilnummer) &&
-                Objects.equal(postAddress, that.postAddress);
+                Objects.equal(postAddress, that.postAddress) &&
+                Objects.equal(returnAddress, that.returnAddress);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(serviceIdentifier, organisationNumber, pemCertificate, endPointURL, orgnrPostkasse, postkasseAdresse, epostAdresse, varslingsStatus, mobilnummer, fysiskPost, kanVarsles, postAddress);
+        return Objects.hashCode(serviceIdentifier, organisationNumber, pemCertificate, endPointURL, orgnrPostkasse, postkasseAdresse, epostAdresse, mobilnummer, fysiskPost, kanVarsles, postAddress, returnAddress);
     }
-
 }

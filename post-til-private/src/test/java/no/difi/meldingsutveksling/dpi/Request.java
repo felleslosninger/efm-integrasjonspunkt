@@ -7,7 +7,7 @@ import java.util.List;
 public class Request implements MeldingsformidlerRequest {
     private boolean notifiable;
 
-    public Request() {}
+    Request() {}
 
     @Override
     public Document getDocument() {
@@ -55,12 +55,17 @@ public class Request implements MeldingsformidlerRequest {
     }
 
     @Override
-    public String getEmail() {
+    public String getEmailAddress() {
         return null;
     }
 
     @Override
-    public String getVarslingstekst() {
+    public String getSmsVarslingstekst() {
+        return null;
+    }
+
+    @Override
+    public String getEmailVarslingstekst() {
         return null;
     }
 
@@ -89,7 +94,7 @@ public class Request implements MeldingsformidlerRequest {
         return null;
     }
 
-    public Request withNotifiable(boolean notifiable) {
+    Request withNotifiable(boolean notifiable) {
         this.notifiable = notifiable;
         return this;
     }

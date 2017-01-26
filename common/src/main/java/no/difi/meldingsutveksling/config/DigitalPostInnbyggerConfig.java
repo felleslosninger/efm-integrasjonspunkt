@@ -12,6 +12,7 @@ import org.springframework.core.io.Resource;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 /**
  *
@@ -25,6 +26,12 @@ public class DigitalPostInnbyggerConfig {
     private Keystore keystore;
 
     private FeatureToggle feature = new FeatureToggle();
+
+    @Valid
+    private Sms sms = new Sms();
+
+    @Valid
+    private Email email = new Email();
 
     /**
      * ID for queue messages are sent to and their corresponding receipts can be retrieved from.
@@ -117,16 +124,32 @@ public class DigitalPostInnbyggerConfig {
         return getFeature().isEnableSmsNotification();
     }
 
+    public Sms getSms() {
+        return sms;
+    }
+
+    public void setSms(Sms sms) {
+        this.sms = sms;
+    }
+
+    public Email getEmail() {
+        return email;
+    }
+
+    public void setEmail(Email email) {
+        this.email = email;
+    }
+
     public static class FeatureToggle {
         private boolean enableEmailNotification = false;
         private boolean enableSmsNotification = false;
         private boolean enablePrint = false;
 
-        public boolean isEnableEmailNotification() {
+        boolean isEnableEmailNotification() {
             return enableEmailNotification;
         }
 
-        public boolean isEnableSmsNotification() {
+        boolean isEnableSmsNotification() {
             return enableSmsNotification;
         }
 
@@ -144,6 +167,32 @@ public class DigitalPostInnbyggerConfig {
 
         public void setEnablePrint(boolean enablePrint) {
             this.enablePrint = enablePrint;
+        }
+    }
+
+    public static class Sms {
+        @Size(max=160)
+        private String varslingstekst;
+
+        public String getVarslingstekst() {
+            return varslingstekst;
+        }
+
+        public void setVarslingstekst(String varslingstekst) {
+            this.varslingstekst = varslingstekst;
+        }
+    }
+
+    public static class Email {
+        @Size(max=500)
+        private String varslingstekst;
+
+        public String getVarslingstekst() {
+            return varslingstekst;
+        }
+
+        public void setVarslingstekst(String varslingstekst) {
+            this.varslingstekst = varslingstekst;
         }
     }
 

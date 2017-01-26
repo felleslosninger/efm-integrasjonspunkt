@@ -33,7 +33,7 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
     private KeyStore keyStore;
     private DigitalPostInnbyggerConfig config;
 
-    public PostInnbyggerMessageStrategy(DigitalPostInnbyggerConfig config, ServiceRegistryLookup serviceRegistryLookup, KeyStore keyStore) {
+    PostInnbyggerMessageStrategy(DigitalPostInnbyggerConfig config, ServiceRegistryLookup serviceRegistryLookup, KeyStore keyStore) {
         this.config = config;
         this.serviceRegistry = serviceRegistryLookup;
         this.keyStore = keyStore;
@@ -47,7 +47,7 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
         MeldingsformidlerClient client = new MeldingsformidlerClient(config, keyStore);
         try {
             Audit.info(String.format("Sending message to DPI with conversation id %s", request.getId()), markerFrom(request));
-            client.sendMelding(new EDUCoreMeldingsformidlerRequest(request, serviceRecord));
+            client.sendMelding(new EDUCoreMeldingsformidlerRequest(config, request, serviceRecord));
         } catch (MeldingsformidlerException e) {
             Audit.error("Failed to send message to DPI", markerFrom(request), e);
             return createErrorResponse(StatusMessage.UNABLE_TO_SEND_DPI);
@@ -57,11 +57,13 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
     }
 
     private static class EDUCoreMeldingsformidlerRequest implements MeldingsformidlerRequest {
-        public static final String KAN_VARSLES = "KAN_VARSLES";
+        static final String KAN_VARSLES = "KAN_VARSLES";
+        private final DigitalPostInnbyggerConfig config;
         private final EDUCore request;
         private final ServiceRecord serviceRecord;
 
-        public EDUCoreMeldingsformidlerRequest(EDUCore request, ServiceRecord serviceRecord) {
+        EDUCoreMeldingsformidlerRequest(DigitalPostInnbyggerConfig config, EDUCore request, ServiceRecord serviceRecord) {
+            this.config = config;
             this.request = request;
             this.serviceRecord = serviceRecord;
         }
@@ -70,11 +72,12 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
         public Document getDocument() {
             final MeldingType meldingType = request.getPayloadAsMeldingType();
             final DokumentType dokumentType = meldingType.getJournpost().getDokument().get(0);
-            return from(dokumentType);
+            final String tittel = getSubject();
+            return createDocument(tittel, dokumentType);
         }
 
-        private Document from(DokumentType dokumentType) {
-            return new Document(dokumentType.getFil().getBase64(), dokumentType.getVeMimeType(), dokumentType.getVeFilnavn(), dokumentType.getDbTittel());
+        private Document createDocument(String tittel, DokumentType dokumentType) {
+            return new Document(dokumentType.getFil().getBase64(), dokumentType.getVeMimeType(), dokumentType.getVeFilnavn(), tittel);
         }
 
         @Override
@@ -82,7 +85,8 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
             List<DokumentType> allFiles = request.getPayloadAsMeldingType().getJournpost().getDokument();
             List<Document> attachments = new ArrayList<>();
             for(int i = 1; i < allFiles.size(); i++) {
-                attachments.add(from(allFiles.get(i)));
+                final DokumentType a = allFiles.get(i);
+                attachments.add(createDocument(a.getDbTittel(), a));
             }
             return attachments;
         }
@@ -94,7 +98,7 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
 
         @Override
         public String getSubject() {
-            return request.getPayloadAsMeldingType().getNoarksak().getSaOfftittel(); /* TODO: er dette riktig sted og finne subject */
+            return request.getPayloadAsMeldingType().getJournpost().getJpOffinnhold();
         }
 
         @Override
@@ -127,13 +131,18 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
         }
 
         @Override
-        public String getEmail() {
+        public String getEmailAddress() {
             return serviceRecord.getEpostAdresse();
         }
 
         @Override
-        public String getVarslingstekst() {
-            return serviceRecord.getVarslingsStatus();
+        public String getSmsVarslingstekst() {
+            return config.getSms().getVarslingstekst();
+        }
+
+        @Override
+        public String getEmailVarslingstekst() {
+            return config.getEmail().getVarslingstekst();
         }
 
         @Override
@@ -143,7 +152,7 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
 
         @Override
         public boolean isNotifiable() {
-            return serviceRecord.getVarslingsStatus().equalsIgnoreCase(KAN_VARSLES);
+            return serviceRecord.isKanVarsles();
         }
 
         @Override

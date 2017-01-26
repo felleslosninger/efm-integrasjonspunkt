@@ -100,7 +100,7 @@ public class MessageSender implements ApplicationContextAware {
             edu = standardBusinessDocumentFactory.create(message, messageContext.getConversationId(), messageContext.getAvsender(), messageContext.getMottaker());
             Audit.info("EDUdocument created", markerFrom(message));
         } catch (MessageException e) {
-            Audit.error("Failed to create EDUdocument", markerFrom(message));
+            Audit.error("Failed to create EDUdocument", markerFrom(message), e);
             log.error(markerFrom(message), e.getStatusMessage().getTechnicalMessage(), e);
             return createErrorResponse(e);
         }
