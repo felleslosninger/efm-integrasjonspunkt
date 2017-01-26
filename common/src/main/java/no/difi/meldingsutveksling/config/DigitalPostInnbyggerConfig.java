@@ -12,7 +12,6 @@ import org.springframework.core.io.Resource;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 /**
  *
@@ -28,10 +27,10 @@ public class DigitalPostInnbyggerConfig {
     private FeatureToggle feature = new FeatureToggle();
 
     @Valid
-    private Sms sms = new Sms();
+    private IntegrasjonspunktProperties.Sms sms = new IntegrasjonspunktProperties.Sms();
 
     @Valid
-    private Email email = new Email();
+    private IntegrasjonspunktProperties.Email email = new IntegrasjonspunktProperties.Email();
 
     /**
      * ID for queue messages are sent to and their corresponding receipts can be retrieved from.
@@ -124,19 +123,19 @@ public class DigitalPostInnbyggerConfig {
         return getFeature().isEnableSmsNotification();
     }
 
-    public Sms getSms() {
+    public IntegrasjonspunktProperties.Sms getSms() {
         return sms;
     }
 
-    public void setSms(Sms sms) {
+    public void setSms(IntegrasjonspunktProperties.Sms sms) {
         this.sms = sms;
     }
 
-    public Email getEmail() {
+    public IntegrasjonspunktProperties.Email getEmail() {
         return email;
     }
 
-    public void setEmail(Email email) {
+    public void setEmail(IntegrasjonspunktProperties.Email email) {
         this.email = email;
     }
 
@@ -170,31 +169,7 @@ public class DigitalPostInnbyggerConfig {
         }
     }
 
-    public static class Sms {
-        @Size(max=160)
-        private String varslingstekst;
 
-        public String getVarslingstekst() {
-            return varslingstekst;
-        }
-
-        public void setVarslingstekst(String varslingstekst) {
-            this.varslingstekst = varslingstekst;
-        }
-    }
-
-    public static class Email {
-        @Size(max=500)
-        private String varslingstekst;
-
-        public String getVarslingstekst() {
-            return varslingstekst;
-        }
-
-        public void setVarslingstekst(String varslingstekst) {
-            this.varslingstekst = varslingstekst;
-        }
-    }
 
     public static class Keystore {
 

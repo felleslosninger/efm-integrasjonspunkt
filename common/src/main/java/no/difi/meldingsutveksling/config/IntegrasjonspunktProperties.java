@@ -90,15 +90,12 @@ public class IntegrasjonspunktProperties {
 
         private String username;
         private String password;
-        /**
-         * TODO: descrive
-         */
         private String externalServiceCode;
-        /**
-         * TODO: descrive
-         */
         private String externalServiceEditionCode;
-
+        private boolean notifyEmail;
+        private boolean notifySMS;
+        private Sms sms;
+        private Email email;
     }
 
     /**
@@ -210,6 +207,19 @@ public class IntegrasjonspunktProperties {
         public boolean isEnableDpiReceipts() {
             return enableDpiReceipts;
         }
+    }
+
+    @Data
+    public static class Sms {
+        @Size(max=160)
+        private String varslingstekst;
+    }
+
+    @Data
+    public static class Email {
+        @Size(max=500)
+        private String varslingstekst;
+        private String emne;
     }
 
 }
