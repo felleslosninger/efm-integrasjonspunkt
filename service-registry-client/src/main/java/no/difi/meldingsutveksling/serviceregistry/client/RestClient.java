@@ -48,7 +48,18 @@ public class RestClient {
      * @return response body
      */
     public String getResource(String resourcePath) {
-        URI uri = UriComponentsBuilder.fromUri(baseUrl).pathSegment(resourcePath).build().toUri();
+        return getResource(resourcePath, null);
+    }
+
+
+    /**
+     * Performs HTTP GET against baseUrl/resourcePath
+     *
+     * @param resourcePath which is resolved against baseUrl
+     * @return response body
+     */
+    public String getResource(String resourcePath, String query) {
+        URI uri = UriComponentsBuilder.fromUri(baseUrl).pathSegment(resourcePath).query(query).build().toUri();
 
         return restTemplate.getForObject(uri, String.class);
     }
