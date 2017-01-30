@@ -1,23 +1,28 @@
 package no.difi.meldingsutveksling.ptv;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
+import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.core.EDUCoreFactory;
 import no.difi.meldingsutveksling.mxa.schema.domain.Message;
 import no.difi.meldingsutveksling.noarkexchange.PayloadException;
-import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
 import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyValues;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
-import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.xml.transform.StringSource;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import org.springframework.xml.transform.StringSource;
 
 /**
  * Testclass for {@link CorrespondenceAgencyMessageFactory}
@@ -154,6 +159,8 @@ public class CorrespondenceAgencyMessageFactoryTest {
     private JAXBContext putMessageJaxbContext;
     private JAXBContext mxaMessageJaxbContext;
     private CorrespondenceAgencyConfiguration postConfig;
+    private ServiceRegistryLookup srMock;
+    private EDUCoreFactory eduCoreFactory;
 
     @Before
     public void initializeJaxb() throws JAXBException {
@@ -162,38 +169,30 @@ public class CorrespondenceAgencyMessageFactoryTest {
 
         postConfig = mock(CorrespondenceAgencyConfiguration.class);
         when(postConfig.getSystemUserCode()).thenReturn("AAS_TEST");
+
+        srMock = mock(ServiceRegistryLookup.class);
+        InfoRecord infoRecord = new InfoRecord("910075918", "Fylkesmannen i Sogn og Fjordane", new EntityType("DPV", "DPV"));
+        when(srMock.getInfoRecord(any())).thenReturn(infoRecord);
+
+        eduCoreFactory = new EDUCoreFactory(srMock);
     }
 
     @Test
     public void testFactoryForEscapedXMLPutMessage() throws PayloadException, JAXBException {
-        PutMessageRequestWrapper msgFromEscaped = new PutMessageRequestWrapper(createPutMessageEscapedXml(escapedXml));
-        InfoRecord infoMock = mock(InfoRecord.class);
-        when(infoMock.getIdentifier()).thenReturn("910075918");
-        when(infoMock.getOrganizationName()).thenReturn("Fylkesmannen i Sogn og Fjordane");
-        CorrespondenceAgencyValues values = CorrespondenceAgencyValues.from(msgFromEscaped, infoMock, infoMock);
-
-        assertFields(CorrespondenceAgencyMessageFactory.create(postConfig, values));
+        EDUCore eduCore = eduCoreFactory.create(createPutMessageEscapedXml(escapedXml), "910075918");
+        assertFields(CorrespondenceAgencyMessageFactory.create(postConfig, eduCore));
     }
 
     @Test
     public void testFactoryForEscapedXMLMXAMessage() throws PayloadException, JAXBException {
-        Message mxaMessage = createMxaMessageEscapedXml(cdataTaggedMxaXml);
-        InfoRecord infoMock = mock(InfoRecord.class);
-        when(infoMock.getIdentifier()).thenReturn("910075918");
-        when(infoMock.getOrganizationName()).thenReturn("Fylkesmannen i Sogn og Fjordane");
-        CorrespondenceAgencyValues values = CorrespondenceAgencyValues.from(mxaMessage, infoMock, infoMock);
-
-        assertFields(CorrespondenceAgencyMessageFactory.create(postConfig, values));
+        EDUCore eduCore = eduCoreFactory.create(createMxaMessageEscapedXml(cdataTaggedMxaXml), "910075918");
+        assertFields(CorrespondenceAgencyMessageFactory.create(postConfig, eduCore));
     }
 
     @Test
     public void testFactoryForCDataXML() throws PayloadException, JAXBException {
-        PutMessageRequestWrapper msgFromCdata = new PutMessageRequestWrapper(createPutMessageCdataXml(cdataTaggedXml));
-        InfoRecord infoMock = mock(InfoRecord.class);
-        when(infoMock.getIdentifier()).thenReturn("910075918");
-        when(infoMock.getOrganizationName()).thenReturn("Fylkesmannen i Sogn og Fjordane");
-        CorrespondenceAgencyValues values = CorrespondenceAgencyValues.from(msgFromCdata, infoMock, infoMock);
-        assertFields(CorrespondenceAgencyMessageFactory.create(postConfig, values));
+        EDUCore eduCore = eduCoreFactory.create(createPutMessageCdataXml(cdataTaggedXml), "910075918");
+        assertFields(CorrespondenceAgencyMessageFactory.create(postConfig, eduCore));
     }
 
     private void assertFields(InsertCorrespondenceV2 c) {

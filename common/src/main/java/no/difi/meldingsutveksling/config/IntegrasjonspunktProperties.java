@@ -5,10 +5,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
 
 import javax.validation.Valid;
+import javax.validation.constraints.AssertFalse;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.net.URL;
 import java.util.List;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Configurable properties for Integrasjonspunkt.
@@ -90,14 +93,24 @@ public class IntegrasjonspunktProperties {
 
         private String username;
         private String password;
-        /**
-         * TODO: descrive
-         */
         private String externalServiceCode;
-        /**
-         * TODO: descrive
-         */
         private String externalServiceEditionCode;
+        private Sms sms;
+        @Valid
+        private Email email;
+
+        @Data
+        public static class Email {
+            @Size(max=500)
+            private String varslingstekst;
+            private String emne;
+
+            @AssertFalse(message = "Both \"varslingstekst\" and \"emne\" must be set, if either has a value.")
+            public boolean isValidVarsling() {
+                return isNullOrEmpty(varslingstekst) ^ isNullOrEmpty(emne);
+            }
+
+        }
 
     }
 
@@ -210,6 +223,12 @@ public class IntegrasjonspunktProperties {
         public boolean isEnableDpiReceipts() {
             return enableDpiReceipts;
         }
+    }
+
+    @Data
+    public static class Sms {
+        @Size(max=160)
+        private String varslingstekst;
     }
 
 }

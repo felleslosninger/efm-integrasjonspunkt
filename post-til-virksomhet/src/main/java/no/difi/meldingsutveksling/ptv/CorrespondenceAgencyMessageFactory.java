@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.ptv;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import no.altinn.schemas.serviceengine.formsengine._2009._10.TransportType;
 import no.altinn.schemas.services.serviceengine.correspondence._2010._10.AttachmentsV2;
 import no.altinn.schemas.services.serviceengine.correspondence._2010._10.ExternalContentV2;
@@ -14,7 +15,6 @@ import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespon
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentExternalBEV2List;
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentV2;
 import no.difi.meldingsutveksling.core.EDUCore;
-import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyValues;
 import no.difi.meldingsutveksling.receipt.Conversation;
 
 import javax.xml.bind.JAXBElement;
@@ -22,9 +22,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.time.ZonedDateTime;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Class used to create an InsertCorrespondenceV2 object based on an internal message format.
@@ -67,32 +65,6 @@ public class CorrespondenceAgencyMessageFactory {
         correspondence.setVisibleDateTime(toXmlGregorianCalendar(ZonedDateTime.now()));
         correspondence.setDueDateTime(toXmlGregorianCalendar(ZonedDateTime.now().plusDays(7)));
 
-        Notification2009 notification = new Notification2009();
-        no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory notificationFactory = new no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory();
-        notification.setFromAddress(notificationFactory.createNotification2009FromAddress("no-reply@altinn.no"));
-        // The date and time the notification should be sent
-        notification.setShipmentDateTime(toXmlGregorianCalendar(ZonedDateTime.now().plusMinutes(5)));
-        // Language code of the notification
-        notification.setLanguageCode(notificationFactory.createNotification2009LanguageCode("1044"));
-        // Notification type
-        notification.setNotificationType(notificationFactory.createNotification2009NotificationType("offentlig_etat"));
-
-        TextTokenSubstitutionBEList tokens = new TextTokenSubstitutionBEList();
-        // Name of the message sender
-        tokens.getTextToken().add(createTextToken(0, edu.getSender().getName()));
-        // Message area, based on ServiceEdition
-        tokens.getTextToken().add(createTextToken(1, serviceEditionMapping.get(Integer.valueOf(getServiceEditionCode(postConfig).getValue()))));
-        // Name of the message recipient
-        tokens.getTextToken().add(createTextToken(2, edu.getReceiver().getName()));
-        notification.setTextTokens(notificationFactory.createNotification2009TextTokens(tokens));
-
-        JAXBElement<ReceiverEndPointBEList> receiverEndpoints = createReceiverEndPoint();
-        notification.setReceiverEndPoints(receiverEndpoints);
-
-        NotificationBEList notifications = new NotificationBEList();
-        notifications.getNotification().add(notification);
-        correspondence.setNotifications(objectFactory.createMyInsertCorrespondenceV2Notifications(notifications));
-
         ExternalContentV2 externalContentV2 = new ExternalContentV2();
         externalContentV2.setLanguageCode(objectFactory.createExternalContentV2LanguageCode("1044"));
         externalContentV2.setMessageTitle(objectFactory.createExternalContentV2MessageTitle(edu.getPayloadAsMeldingType().getJournpost().getJpInnhold()));
@@ -123,6 +95,13 @@ public class CorrespondenceAgencyMessageFactory {
         externalContentV2.setAttachments(objectFactory.createExternalContentV2Attachments(attachmentsV2));
         correspondence.setContent(objectFactory.createMyInsertCorrespondenceV2Content(externalContentV2));
 
+        List<Notification2009> notificationList = createNotifications(postConfig, edu);
+
+        NotificationBEList notifications = new NotificationBEList();
+        List<Notification2009> notification = notifications.getNotification();
+        notificationList.forEach(notification::add);
+        correspondence.setNotifications(objectFactory.createMyInsertCorrespondenceV2Notifications(notifications));
+
         no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory correspondenceObjectFactory = new no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory();
         final InsertCorrespondenceV2 myInsertCorrespondenceV2 = correspondenceObjectFactory.createInsertCorrespondenceV2();
         myInsertCorrespondenceV2.setCorrespondence(correspondence);
@@ -133,96 +112,104 @@ public class CorrespondenceAgencyMessageFactory {
         return myInsertCorrespondenceV2;
     }
 
+    private static List<Notification2009> createNotifications(CorrespondenceAgencyConfiguration config, EDUCore edu) {
+
+        List<Notification2009> notifications = Lists.newArrayList();
+
+        if (config.isNotifyEmail() && config.isNotifySms()) {
+            notifications.add(createNotification(config, edu, TransportType.EMAIL, 0));
+            notifications.add(createNotification(config, edu, TransportType.EMAIL, 7));
+            notifications.add(createNotification(config, edu, TransportType.SMS, 0));
+            notifications.add(createNotification(config, edu, TransportType.SMS, 7));
+        } else if (config.isNotifySms()) {
+            notifications.add(createNotification(config, edu, TransportType.SMS, 0));
+            notifications.add(createNotification(config, edu, TransportType.SMS, 7));
+        } else if (config.isNotifyEmail()){
+            notifications.add(createNotification(config, edu, TransportType.EMAIL, 0));
+            notifications.add(createNotification(config, edu, TransportType.EMAIL, 7));
+        } else {
+            notifications.add(createNotification(config, edu, null, 0));
+            notifications.add(createNotification(config, edu, null, 7));
+        }
+
+        return notifications;
+    }
+
+    private static Notification2009 createNotification(CorrespondenceAgencyConfiguration config, EDUCore edu,
+                                                       TransportType type, int delayInDays) {
+
+        Notification2009 notification = new Notification2009();
+        no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory notificationFactory = new no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory();
+        notification.setFromAddress(notificationFactory.createNotification2009FromAddress("no-reply@altinn.no"));
+        // The date and time the notification should be sent
+        if (delayInDays == 0) {
+            notification.setShipmentDateTime(toXmlGregorianCalendar(ZonedDateTime.now().plusMinutes(5)));
+        } else {
+            notification.setShipmentDateTime(toXmlGregorianCalendar(ZonedDateTime.now().plusDays(delayInDays)));
+        }
+        // Language code of the notification
+        notification.setLanguageCode(notificationFactory.createNotification2009LanguageCode("1044"));
+        // Notification type
+        if (type == null) {
+            notification.setNotificationType(notificationFactory.createNotification2009NotificationType("offentlig_etat"));
+            notification.setTextTokens(notificationFactory.createNotification2009TextTokens(createTokens(config, null,
+                    edu)));
+            JAXBElement<ReceiverEndPointBEList> receiverEndpoints = createReceiverEndPoint(type);
+            notification.setReceiverEndPoints(receiverEndpoints);
+        } else {
+            notification.setNotificationType(notificationFactory.createNotification2009NotificationType("TokenTextOnly"));
+            notification.setTextTokens(notificationFactory.createNotification2009TextTokens(createTokens(config, type,
+                    edu)));
+            JAXBElement<ReceiverEndPointBEList> receiverEndpoints = createReceiverEndPoint(type);
+            notification.setReceiverEndPoints(receiverEndpoints);
+        }
+
+
+        JAXBElement<ReceiverEndPointBEList> receiverEndpoints = createReceiverEndPoint(type);
+        notification.setReceiverEndPoints(receiverEndpoints);
+
+        return notification;
+    }
+
+    private static TextTokenSubstitutionBEList createTokens(CorrespondenceAgencyConfiguration config,
+                                                                TransportType type,
+                                                                EDUCore edu) {
+
+        TextTokenSubstitutionBEList tokens = new TextTokenSubstitutionBEList();
+
+        if (type == null) {
+            tokens.getTextToken().add(createTextToken(0, edu.getSender().getName()));
+            tokens.getTextToken().add(createTextToken(1, serviceEditionMapping.get(Integer.valueOf(getServiceEditionCode
+                    (config).getValue()))));
+            tokens.getTextToken().add(createTextToken(2, edu.getReceiver().getName()));
+            return tokens;
+        }
+
+        switch (type) {
+            case EMAIL:
+                tokens.getTextToken().add(createTextToken(0, config.getEmailSubject()));
+                tokens.getTextToken().add(createTextToken(1, config.getEmailBody()));
+                break;
+            case SMS:
+                tokens.getTextToken().add(createTextToken(0, config.getSmsText()));
+                tokens.getTextToken().add(createTextToken(1, ""));
+                break;
+            default:
+                tokens.getTextToken().add(createTextToken(0, edu.getSender().getName()));
+                tokens.getTextToken().add(createTextToken(1, serviceEditionMapping.get(Integer.valueOf(getServiceEditionCode
+                        (config).getValue()))));
+                tokens.getTextToken().add(createTextToken(2, edu.getReceiver().getName()));
+        }
+
+        return tokens;
+    }
+
     private static ZonedDateTime getAllowSystemDeleteDateTime(EDUCore edu) {
         if (edu.getMessageType() == EDUCore.MessageType.EDU) {
             return ZonedDateTime.now().plusMinutes(5);
         } else {
             return ZonedDateTime.now().plusMinutes(5);
         }
-    }
-
-    public static InsertCorrespondenceV2 create(CorrespondenceAgencyConfiguration postConfig, CorrespondenceAgencyValues values) {
-
-        MyInsertCorrespondenceV2 correspondence = new MyInsertCorrespondenceV2();
-        ObjectFactory objectFactory = new ObjectFactory();
-
-        correspondence.setReportee(objectFactory.createMyInsertCorrespondenceV2Reportee(values.getReportee()));
-        // Service code, default 4255
-        correspondence.setServiceCode(getServiceCode(postConfig));
-        // Service edition, default 10
-        correspondence.setServiceEdition(getServiceEditionCode(postConfig));
-        // Should the user be allowed to forward the message from portal
-        correspondence.setAllowForwarding(objectFactory.createMyInsertCorrespondenceV2AllowForwarding(false));
-        // Name of the message sender, always "Avsender"
-        correspondence.setMessageSender(objectFactory.createMyInsertCorrespondenceV2MessageSender("Avsender"));
-        // The date and time the message should be visible in the Portal
-        correspondence.setVisibleDateTime(toXmlGregorianCalendar(ZonedDateTime.now()));
-        correspondence.setDueDateTime(toXmlGregorianCalendar(ZonedDateTime.now().plusDays(7)));
-
-        Notification2009 notification = new Notification2009();
-        no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory notificationFactory = new no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory();
-        notification.setFromAddress(notificationFactory.createNotification2009FromAddress("no-reply@altinn.no"));
-        // The date and time the notification should be sent
-        notification.setShipmentDateTime(toXmlGregorianCalendar(ZonedDateTime.now().plusMinutes(5)));
-        // Language code of the notification
-        notification.setLanguageCode(notificationFactory.createNotification2009LanguageCode("1044"));
-        // Notification type
-        notification.setNotificationType(notificationFactory.createNotification2009NotificationType("offentlig_etat"));
-
-        TextTokenSubstitutionBEList tokens = new TextTokenSubstitutionBEList();
-        // Name of the message sender
-        tokens.getTextToken().add(createTextToken(0, values.getSenderOrgName()));
-        // Message area, based on ServiceEdition
-        tokens.getTextToken().add(createTextToken(1, serviceEditionMapping.get(Integer.valueOf(getServiceEditionCode(postConfig).getValue()))));
-        // Name of the message recipient
-        tokens.getTextToken().add(createTextToken(2, values.getReceiverOrgName()));
-        notification.setTextTokens(notificationFactory.createNotification2009TextTokens(tokens));
-
-        JAXBElement<ReceiverEndPointBEList> receiverEndpoints = createReceiverEndPoint();
-        notification.setReceiverEndPoints(receiverEndpoints);
-
-        NotificationBEList notifications = new NotificationBEList();
-        notifications.getNotification().add(notification);
-        correspondence.setNotifications(objectFactory.createMyInsertCorrespondenceV2Notifications(notifications));
-
-        ExternalContentV2 externalContentV2 = new ExternalContentV2();
-        externalContentV2.setLanguageCode(objectFactory.createExternalContentV2LanguageCode("1044"));
-        externalContentV2.setMessageTitle(objectFactory.createExternalContentV2MessageTitle(values.getMessageTitle()));
-        externalContentV2.setMessageSummary(objectFactory.createExternalContentV2MessageSummary(values.getMessageSummary()));
-        externalContentV2.setMessageBody(objectFactory.createExternalContentV2MessageBody(values.getMessageBody()));
-
-        // The date and time the message can be deleted by the user
-        correspondence.setAllowSystemDeleteDateTime(
-                objectFactory.createMyInsertCorrespondenceV2AllowSystemDeleteDateTime(
-                        toXmlGregorianCalendar(values.getAllowSystemDeleteDateTime())));
-
-        // FunctionType
-        no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory reporteeFactory = new no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory();
-        BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
-        values.getAttachments().forEach(a -> {
-            BinaryAttachmentV2 binaryAttachmentV2 = new BinaryAttachmentV2();
-            binaryAttachmentV2.setFunctionType(AttachmentFunctionType.fromValue("Unspecified"));
-            binaryAttachmentV2.setFileName(reporteeFactory.createBinaryAttachmentV2FileName(a.getFilename()));
-            binaryAttachmentV2.setName(reporteeFactory.createBinaryAttachmentV2Name(a.getName()));
-            binaryAttachmentV2.setEncrypted(false);
-            binaryAttachmentV2.setSendersReference(reporteeFactory.createBinaryAttachmentV2SendersReference("AttachmentReference_as123452"));
-            binaryAttachmentV2.setData(reporteeFactory.createBinaryAttachmentV2Data(a.getData()));
-            attachmentExternalBEV2List.getBinaryAttachmentV2().add(binaryAttachmentV2);
-        });
-
-        AttachmentsV2 attachmentsV2 = new AttachmentsV2();
-        attachmentsV2.setBinaryAttachments(objectFactory.createAttachmentsV2BinaryAttachments(attachmentExternalBEV2List));
-        externalContentV2.setAttachments(objectFactory.createExternalContentV2Attachments(attachmentsV2));
-        correspondence.setContent(objectFactory.createMyInsertCorrespondenceV2Content(externalContentV2));
-
-        no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory correspondenceObjectFactory = new no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory();
-        final InsertCorrespondenceV2 myInsertCorrespondenceV2 = correspondenceObjectFactory.createInsertCorrespondenceV2();
-        myInsertCorrespondenceV2.setCorrespondence(correspondence);
-        myInsertCorrespondenceV2.setSystemUserCode(postConfig.getSystemUserCode());
-        // Reference set by the message sender
-        myInsertCorrespondenceV2.setExternalShipmentReference(values.getExternalShipmentReference());
-
-        return myInsertCorrespondenceV2;
     }
 
     public static GetCorrespondenceStatusDetailsV2 createReceiptRequest(Conversation conversation) {
@@ -267,10 +254,10 @@ public class CorrespondenceAgencyMessageFactory {
         return textToken;
     }
 
-    private static JAXBElement<ReceiverEndPointBEList> createReceiverEndPoint() {
+    private static JAXBElement<ReceiverEndPointBEList> createReceiverEndPoint(TransportType type) {
         no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory objectFactory = new no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory();
         ReceiverEndPoint receiverEndPoint = new ReceiverEndPoint();
-        receiverEndPoint.setTransportType(objectFactory.createReceiverEndPointTransportType(TransportType.fromValue("Email")));
+        receiverEndPoint.setTransportType(objectFactory.createReceiverEndPointTransportType(type));
         ReceiverEndPointBEList receiverEndpoints = new ReceiverEndPointBEList();
         receiverEndpoints.getReceiverEndPoint().add(receiverEndPoint);
         return objectFactory.createNotification2009ReceiverEndPoints(receiverEndpoints);
