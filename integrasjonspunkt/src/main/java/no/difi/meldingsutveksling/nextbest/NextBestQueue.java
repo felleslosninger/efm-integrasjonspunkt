@@ -52,6 +52,7 @@ public class NextBestQueue {
                 eduDocument.getSenderOrgNumber(),
                 eduDocument.getReceiverOrgNumber(), "OEP");
 
+        message.addFileRef(props.getNextbest().getAsicfile());
         contentFromAsic.forEach(message::addFileRef);
 
         String filedir = props.getNextbest().getFiledir();
