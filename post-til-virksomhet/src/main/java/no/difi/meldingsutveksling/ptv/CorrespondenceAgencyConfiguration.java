@@ -6,6 +6,11 @@ public class CorrespondenceAgencyConfiguration {
     private String externalServiceCode;
     private String password;
     private String systemUserCode;
+    private boolean notifyEmail;
+    private boolean notifySms;
+    private String smsText;
+    private String emailSubject;
+    private String emailBody;
 
     private CorrespondenceAgencyConfiguration() {
     }
@@ -24,6 +29,26 @@ public class CorrespondenceAgencyConfiguration {
 
     public String getPassword() {
         return password;
+    }
+
+    public boolean isNotifyEmail() {
+        return notifyEmail;
+    }
+
+    public boolean isNotifySms() {
+        return notifySms;
+    }
+
+    public String getSmsText() {
+        return smsText;
+    }
+
+    public String getEmailSubject() {
+        return emailSubject;
+    }
+
+    public String getEmailBody() {
+        return emailBody;
     }
 
     public static class Builder {
@@ -51,6 +76,24 @@ public class CorrespondenceAgencyConfiguration {
 
         public Builder withPassword(String password) {
             correspondenceAgencyConfiguration.password = password;
+            return this;
+        }
+
+        public Builder withSmsText(String smsText) {
+            correspondenceAgencyConfiguration.smsText = smsText;
+            correspondenceAgencyConfiguration.notifySms = true;
+            return this;
+        }
+
+        public Builder withEmailSubject(String emailSubject) {
+            correspondenceAgencyConfiguration.emailSubject = emailSubject;
+            correspondenceAgencyConfiguration.notifyEmail = true;
+            return this;
+        }
+
+        public Builder withEmailBody(String emailBody) {
+            correspondenceAgencyConfiguration.emailBody = emailBody;
+            correspondenceAgencyConfiguration.notifyEmail = true;
             return this;
         }
 

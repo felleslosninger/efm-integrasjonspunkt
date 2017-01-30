@@ -3,12 +3,19 @@ package no.difi.meldingsutveksling.config;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
+import org.springframework.validation.annotation.Validated;
 
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
+import javax.validation.constraints.AssertFalse;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.List;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Configurable properties for Integrasjonspunkt.
@@ -92,10 +99,52 @@ public class IntegrasjonspunktProperties {
         private String password;
         private String externalServiceCode;
         private String externalServiceEditionCode;
-        private boolean notifyEmail;
-        private boolean notifySMS;
         private Sms sms;
+        @Valid
         private Email email;
+
+        public class EmailConstraintValidator implements ConstraintValidator {
+
+            @Override
+            public void initialize(Annotation constraintAnnotation) {
+
+            }
+
+            @Override
+            public boolean isValid(Object value, ConstraintValidatorContext context) {
+                return false;
+            }
+        }
+
+        @Validated
+        public static class Email {
+            @Size(max=500)
+            private String varslingstekst;
+            private String emne;
+
+            public String getVarslingstekst() {
+                return varslingstekst;
+            }
+
+            public void setVarslingstekst(String varslingstekst) {
+                this.varslingstekst = varslingstekst;
+            }
+
+            public String getEmne() {
+                return emne;
+            }
+
+            public void setEmne(String emne) {
+                this.emne = emne;
+            }
+
+            @AssertFalse(message = "Both \"varslingstekst\" and \"emne\" must be set, if either has a value.")
+            public boolean isValidVarsling() {
+                return isNullOrEmpty(varslingstekst) ^ isNullOrEmpty(emne);
+            }
+
+        }
+
     }
 
     /**
@@ -213,13 +262,6 @@ public class IntegrasjonspunktProperties {
     public static class Sms {
         @Size(max=160)
         private String varslingstekst;
-    }
-
-    @Data
-    public static class Email {
-        @Size(max=500)
-        private String varslingstekst;
-        private String emne;
     }
 
 }

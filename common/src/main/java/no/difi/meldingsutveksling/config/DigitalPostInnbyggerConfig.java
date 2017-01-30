@@ -12,6 +12,7 @@ import org.springframework.core.io.Resource;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 /**
  *
@@ -30,7 +31,7 @@ public class DigitalPostInnbyggerConfig {
     private IntegrasjonspunktProperties.Sms sms = new IntegrasjonspunktProperties.Sms();
 
     @Valid
-    private IntegrasjonspunktProperties.Email email = new IntegrasjonspunktProperties.Email();
+    private Email email = new Email();
 
     /**
      * ID for queue messages are sent to and their corresponding receipts can be retrieved from.
@@ -131,11 +132,11 @@ public class DigitalPostInnbyggerConfig {
         this.sms = sms;
     }
 
-    public IntegrasjonspunktProperties.Email getEmail() {
+    public Email getEmail() {
         return email;
     }
 
-    public void setEmail(IntegrasjonspunktProperties.Email email) {
+    public void setEmail(Email email) {
         this.email = email;
     }
 
@@ -215,5 +216,19 @@ public class DigitalPostInnbyggerConfig {
         }
 
     }
+
+    public static class Email {
+        @Size(max=500)
+        private String varslingstekst;
+
+        public String getVarslingstekst() {
+            return varslingstekst;
+        }
+
+        public void setVarslingstekst(String varslingstekst) {
+            this.varslingstekst = varslingstekst;
+        }
+    }
+
 
 }
