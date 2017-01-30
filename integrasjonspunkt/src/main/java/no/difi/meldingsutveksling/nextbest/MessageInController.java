@@ -2,9 +2,6 @@ package no.difi.meldingsutveksling.nextbest;
 
 import com.google.common.collect.Lists;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.noarkexchange.MessageException;
-import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +11,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Optional;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
@@ -69,40 +66,6 @@ public class MessageInController {
         return ResponseEntity.ok(resources);
     }
 
-    @RequestMapping(value = "/in/messages/pop", method = RequestMethod.GET)
-    @ResponseBody
-    public ResponseEntity popIncomingMessages(
-            @RequestParam(value = "messagetypeId", required = false) String messagetypeId) throws FileNotFoundException {
-
-        Optional<IncomingConversationResource> resource;
-        if (isNullOrEmpty(messagetypeId)) {
-            resource = repo.findFirstByOrderByLastUpdateAsc();
-        } else {
-            resource = repo.findFirstByMessagetypeIdOrderByLastUpdateAsc(messagetypeId);
-        }
-
-        if (resource.isPresent()) {
-            String fileName = resource.get().getFileRefs().get(0);
-            String filedir = props.getNextbest().getFiledir();
-            if (!filedir.endsWith("/")) {
-                filedir = filedir+"/";
-            }
-            filedir = filedir+resource.get().getConversationId()+"/";
-            File file = new File(filedir+fileName);
-
-            InputStreamResource isr = new InputStreamResource(new FileInputStream(file));
-
-            repo.delete(resource.get());
-
-            return ResponseEntity.ok()
-                    .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME+fileName)
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .contentLength(file.length())
-                    .body(isr);
-        }
-        return ResponseEntity.notFound().build();
-    }
-
     @RequestMapping(value = "/in/messages/peek", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity peekIncomingMessages(
@@ -121,78 +84,38 @@ public class MessageInController {
         return ResponseEntity.notFound().build();
     }
 
-    @RequestMapping(value = "/in/messages/asic", method = RequestMethod.GET)
+    @RequestMapping(value = "/in/messages/pop", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity getZipFromMessage(
-            @RequestParam(value = "conversationId") String conversationId) throws IOException {
+    public ResponseEntity popIncomingMessages(
+            @RequestParam(value = "messagetypeId", required = false) String messagetypeId) throws FileNotFoundException {
 
-        Optional<IncomingConversationResource> resource = Optional.ofNullable(repo.findOne(conversationId));
-        if (!resource.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(NO_CONVO_FOUND);
+        Optional<IncomingConversationResource> resource;
+        if (isNullOrEmpty(messagetypeId)) {
+            resource = repo.findFirstByOrderByLastUpdateAsc();
+        } else {
+            resource = repo.findFirstByMessagetypeIdOrderByLastUpdateAsc(messagetypeId);
         }
 
-        String filedir = props.getNextbest().getFiledir();
-        if (!filedir.endsWith("/")) {
-            filedir = filedir+"/";
-        }
-        filedir = filedir+conversationId+"/";
-        File file = new File(filedir+props.getNextbest().getAsicfile());
+        if (resource.isPresent()) {
+            String filedir = props.getNextbest().getFiledir();
+            if (!filedir.endsWith("/")) {
+                filedir = filedir+"/";
+            }
+            filedir = filedir+resource.get().getConversationId()+"/";
+            String filename = resource.get().getFileRefs().get(0);
+            File file = new File(filedir+filename);
 
-        InputStreamResource isr = new InputStreamResource(new FileInputStream(file));
-        return ResponseEntity.ok()
-                .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME+props.getNextbest().getAsicfile())
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .contentLength(file.length())
-                .body(isr);
-    }
+            InputStreamResource isr = new InputStreamResource(new FileInputStream(file));
 
-    @RequestMapping(value = "/in/messages/file", method = RequestMethod.GET)
-    @ResponseBody
-    public ResponseEntity getFileFromMessage(
-            @RequestParam(value = "conversationId") String conversationId,
-            @RequestParam(value = "fileId") Integer fileId) throws IOException {
-
-        Optional<IncomingConversationResource> resource = Optional.ofNullable(repo.findOne(conversationId));
-        if (!resource.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(NO_CONVO_FOUND);
-        }
-
-        if (!resource.get().getFileRefs().containsKey(fileId)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No file with given id found for conversation");
-        }
-
-        try {
-            byte[] fileFromAsic = getFileFromAsic(resource.get(), fileId);
+            repo.delete(resource.get());
 
             return ResponseEntity.ok()
-                    .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME+resource.get().getFileRefs().get(fileId))
+                    .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME+filename)
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .contentLength(fileFromAsic.length)
-                    .body(fileFromAsic);
-        } catch (MessageException e) {
-            log.error("Failed reading file from asic container.", e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("File with given id not found in archive.");
+                    .contentLength(file.length())
+                    .body(isr);
         }
+        return ResponseEntity.notFound().build();
     }
 
-    public byte[] getFileFromAsic(IncomingConversationResource resource, Integer fileId) throws IOException,
-            MessageException {
-
-        String filedir = props.getNextbest().getFiledir();
-        if (!filedir.endsWith("/")) {
-            filedir = filedir+"/";
-        }
-        filedir = filedir+resource.getConversationId()+"/";
-        File file = new File(filedir+props.getNextbest().getAsicfile());
-
-        try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(file))) {
-            ZipEntry entry;
-            while ((entry = zipInputStream.getNextEntry()) != null) {
-                if (entry.getName().equals(resource.getFileRefs().get(fileId))) {
-                    return IOUtils.toByteArray(zipInputStream);
-                }
-            }
-        }
-        throw new MessageException(StatusMessage.UNABLE_TO_EXTRACT_ZIP_CONTENTS);
-    }
 }
