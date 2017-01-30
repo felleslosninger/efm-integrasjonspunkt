@@ -98,7 +98,8 @@ public class CorrespondenceAgencyMessageFactory {
         List<Notification2009> notificationList = createNotifications(postConfig, edu);
 
         NotificationBEList notifications = new NotificationBEList();
-        notificationList.forEach(n -> notifications.getNotification().add(n));
+        List<Notification2009> notification = notifications.getNotification();
+        notificationList.forEach(notification::add);
         correspondence.setNotifications(objectFactory.createMyInsertCorrespondenceV2Notifications(notifications));
 
         no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory correspondenceObjectFactory = new no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory();
@@ -199,14 +200,6 @@ public class CorrespondenceAgencyMessageFactory {
                         (config).getValue()))));
                 tokens.getTextToken().add(createTextToken(2, edu.getReceiver().getName()));
         }
-
-        return tokens;
-    }
-
-    private static TextTokenSubstitutionBEList createCustomSmsTokens(CorrespondenceAgencyConfiguration config) {
-        TextTokenSubstitutionBEList tokens = new TextTokenSubstitutionBEList();
-        tokens.getTextToken().add(createTextToken(0, config.getSmsText()));
-        tokens.getTextToken().add(createTextToken(1, ""));
 
         return tokens;
     }
