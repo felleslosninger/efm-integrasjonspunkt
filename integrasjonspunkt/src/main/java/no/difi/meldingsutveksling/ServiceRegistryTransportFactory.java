@@ -18,7 +18,7 @@ public class ServiceRegistryTransportFactory implements TransportFactory {
 
     /**
      * Creates instance of factory with needed dependency to determine the transport to create
-     * @param serviceRegistryLookup
+     * @param serviceRegistryLookup service to lookup service record
      */
     public ServiceRegistryTransportFactory(ServiceRegistryLookup serviceRegistryLookup) {
         this.serviceRegistryLookup = serviceRegistryLookup;

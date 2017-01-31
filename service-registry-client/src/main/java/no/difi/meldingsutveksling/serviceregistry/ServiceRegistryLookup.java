@@ -9,8 +9,10 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.spi.json.GsonJsonProvider;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.Notification;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,22 +27,24 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class ServiceRegistryLookup {
     private final RestClient client;
-    private final LoadingCache<String, ServiceRecord> srCache;
-    private final LoadingCache<String, InfoRecord> irCache;
+    private IntegrasjonspunktProperties properties;
+    private final LoadingCache<Parameters, ServiceRecord> srCache;
+    private final LoadingCache<Parameters, InfoRecord> irCache;
 
     private Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 
     @Autowired
-    public ServiceRegistryLookup(RestClient client) {
+    public ServiceRegistryLookup(RestClient client, IntegrasjonspunktProperties properties) {
         this.client = client;
+        this.properties = properties;
 
         this.srCache = CacheBuilder.newBuilder()
                 .maximumSize(100)
                 .expireAfterWrite(1, TimeUnit.MINUTES)
-                .build(new CacheLoader<String, ServiceRecord>() {
+                .build(new CacheLoader<Parameters, ServiceRecord>() {
                     @Override
-                    public ServiceRecord load(String key) throws Exception {
+                    public ServiceRecord load(Parameters key) throws Exception {
                         return loadServiceRecord(key);
                     }
                 });
@@ -48,9 +52,9 @@ public class ServiceRegistryLookup {
         this.irCache = CacheBuilder.newBuilder()
                 .maximumSize(100)
                 .expireAfterWrite(1, TimeUnit.MINUTES)
-                .build(new CacheLoader<String, InfoRecord>() {
+                .build(new CacheLoader<Parameters, InfoRecord>() {
                     @Override
-                    public InfoRecord load(String key) throws Exception {
+                    public InfoRecord load(Parameters key) throws Exception {
                         return loadInfoRecord(key);
                     }
                 });
@@ -62,20 +66,21 @@ public class ServiceRegistryLookup {
      * @return a ServiceRecord if found. Otherwise an empty ServiceRecord is returned.
      */
     public ServiceRecord getServiceRecord(String identifier) {
-        return srCache.getUnchecked(identifier);
+        Notification notification = properties.isVarslingsplikt()? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
+        return srCache.getUnchecked(new Parameters(identifier, notification));
     }
 
-    private ServiceRecord loadServiceRecord(String identifier) {
+    private ServiceRecord loadServiceRecord(Parameters parameters) {
         ServiceRecord serviceRecord = ServiceRecord.EMPTY;
         try {
-            final String serviceRecords = client.getResource("identifier/" + identifier);
+            final String serviceRecords = client.getResource("identifier/" + parameters.getIdentifier(), parameters.getQuery());
             final DocumentContext documentContext = JsonPath.parse(serviceRecords, jsonPathConfiguration());
             serviceRecord = documentContext.read("$.serviceRecord", ServiceRecord.class);
         } catch(HttpClientErrorException httpException) {
             if (httpException.getStatusCode() == HttpStatus.NOT_FOUND) {
-                logger.info("RestClient returned 404 NOT_FOUND when looking up service record with identifier {}", identifier, httpException);
+                logger.info("RestClient returned 404 NOT_FOUND when looking up service record with identifier {}", parameters, httpException);
             } else {
-                throw new ServiceRegistryLookupException(String.format("RestClient threw exception when looking up service record with identifier %s", identifier), httpException);
+                throw new ServiceRegistryLookupException(String.format("RestClient threw exception when looking up service record with identifier %s", parameters), httpException);
             }
         }
         return serviceRecord;
@@ -87,11 +92,12 @@ public class ServiceRegistryLookup {
      * @return an {@link InfoRecord} for the respective identifier
      */
     public InfoRecord getInfoRecord(String identifier) {
-        return irCache.getUnchecked(identifier);
+        Notification notification = properties.isVarslingsplikt()? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
+        return irCache.getUnchecked(new Parameters(identifier, notification));
     }
 
-    private InfoRecord loadInfoRecord(String identifier) {
-        final String infoRecordString = client.getResource("identifier/" + identifier);
+    private InfoRecord loadInfoRecord(Parameters parameters) {
+        final String infoRecordString = client.getResource("identifier/" + parameters.getIdentifier(), parameters.getQuery());
         final DocumentContext documentContext = JsonPath.parse(infoRecordString, jsonPathConfiguration());
         return documentContext.read("$.infoRecord", InfoRecord.class);
     }
