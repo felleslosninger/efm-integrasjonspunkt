@@ -21,6 +21,13 @@ public class ScopeFactory {
         return scope;
     }
 
+    public static Scope fromMessagetypeId(String messagetypeId) {
+        Scope scope = createDefaultScope();
+        scope.setType(ScopeType.MessagetypeId.name());
+        scope.setInstanceIdentifier(messagetypeId);
+        return scope;
+    }
+
     private static Scope createDefaultScope() {
         Scope scope = new Scope();
         scope.setIdentifier(DEFAULT_IDENTIFIER);

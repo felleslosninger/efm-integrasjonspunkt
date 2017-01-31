@@ -107,7 +107,7 @@ public class StandardBusinessDocumentFactory {
             filedir = filedir+shipmentMeta.getConversationId()+"/";
             File file = new File(filedir+filename);
 
-            byte[] bytes = new byte[0];
+            byte[] bytes;
             try {
                 bytes = FileUtils.readFileToByteArray(file);
             } catch (IOException e) {
@@ -125,8 +125,9 @@ public class StandardBusinessDocumentFactory {
         }
         Payload payload = new Payload(encryptArchive(context.getMottaker(), archive));
 
-        return new CreateSBD().createSBD(context.getAvsender().getOrgNummer(), context.getMottaker().getOrgNummer(), payload,
-                context.getConversationId(), StandardBusinessDocumentHeader.NEXTBEST_TYPE, context.getJournalPostId());
+        EduDocument sbd = new CreateSBD().createSBD(context.getAvsender().getOrgNummer(), context.getMottaker().getOrgNummer(), payload,
+                context.getConversationId(), StandardBusinessDocumentHeader.NEXTBEST_TYPE, context.getJournalPostId(), shipmentMeta.getMessagetypeId());
+        return sbd;
     }
 
     private byte[] encryptArchive(Mottaker mottaker, Archive archive) {
