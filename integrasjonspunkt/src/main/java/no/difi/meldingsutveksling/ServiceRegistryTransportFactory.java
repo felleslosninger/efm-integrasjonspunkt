@@ -8,7 +8,8 @@ import no.difi.meldingsutveksling.transport.TransportFactory;
 import no.difi.meldingsutveksling.transport.altinn.AltinnTransport;
 
 import java.util.Optional;
-import java.util.function.Predicate;
+
+import static no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord.isServiceIdentifier;
 
 /**
  * Used to create transport based on service registry lookup.
@@ -33,8 +34,6 @@ public class ServiceRegistryTransportFactory implements TransportFactory {
         return transport.orElseThrow(() -> new RuntimeException("Failed to create transport"));
     }
 
-    private Predicate<? super ServiceRecord> isServiceIdentifier(String identifier) {
-        return s -> s.getServiceIdentifier().equalsIgnoreCase(identifier);
-    }
+
 
 }

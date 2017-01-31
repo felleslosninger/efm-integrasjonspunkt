@@ -38,7 +38,7 @@ public class IntegrasjonspunktProperties {
     private NorskArkivstandardSystem noarkSystem;
 
     @Valid
-    private MessageServiceHandler msh;
+    private MessageServiceHandler msh = new MessageServiceHandler();
 
     @Valid
     private DigitalPostInnbyggerConfig dpi;

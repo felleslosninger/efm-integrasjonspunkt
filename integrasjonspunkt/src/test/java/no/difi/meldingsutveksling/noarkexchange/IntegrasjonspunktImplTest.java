@@ -1,24 +1,33 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import no.difi.meldingsutveksling.GetCanReceiveObjectMother;
 import no.difi.meldingsutveksling.PutMessageObjectMother;
+import no.difi.meldingsutveksling.ServiceRecordObjectMother;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreSender;
 import no.difi.meldingsutveksling.core.EDUCoreService;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
+import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageRequestType;
+import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
+import no.difi.meldingsutveksling.services.Adresseregister;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class IntegrasjonspunktImplTest {
 
+    public static final String IDENTIFIER = "1234";
     @InjectMocks
     private IntegrasjonspunktImpl integrasjonspunkt = new IntegrasjonspunktImpl();
 
@@ -37,6 +46,12 @@ public class IntegrasjonspunktImplTest {
     @Mock
     private ServiceRegistryLookup serviceRegistryLookup;
 
+    @Mock
+    private NoarkClient msh;
+
+    @Mock
+    private Adresseregister adresseregister;
+
     @Before
     public void setUp() {
         initMocks(this);
@@ -50,6 +65,71 @@ public class IntegrasjonspunktImplTest {
         when(propertiesMock.getFeature()).thenReturn(featureMock);
         when(propertiesMock.getOrg()).thenReturn(organizationMock);
         when(featureMock.isEnableQueue()).thenReturn(true);
+    }
+
+    @Test
+    public void shouldBeAbleToReceiveWhenServiceIdentifierIsDPOAndHasCertificate() {
+        when(adresseregister.hasAdresseregisterCertificate("1234")).thenReturn(true);
+        GetCanReceiveMessageRequestType request = GetCanReceiveObjectMother.createRequest("1234");
+        final GetCanReceiveMessageResponseType canReceiveMessage = integrasjonspunkt.getCanReceiveMessage(request);
+
+        assertThat(canReceiveMessage.isResult(), is(true));
+    }
+
+    @Test
+    public void shouldCheckWithMSHWhenServiceIdentifierIsDPOAndAdresseregisterMissingCertificate() {
+        when(adresseregister.hasAdresseregisterCertificate("1234")).thenReturn(false);
+        enableMsh();
+        final GetCanReceiveMessageRequestType request = GetCanReceiveObjectMother.createRequest(IDENTIFIER);
+
+        integrasjonspunkt.getCanReceiveMessage(request);
+
+        verify(this.msh).canRecieveMessage(IDENTIFIER);
+    }
+
+    @Test
+    public void shouldBeAbleToReceiveWhenServiceIdentifierIsDPVAndMSHIsDisabled() {
+        when(adresseregister.hasAdresseregisterCertificate(IDENTIFIER)).thenReturn(true);
+        when(serviceRegistryLookup.getServiceRecord(IDENTIFIER)).thenReturn(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER));
+        disableMsh();
+        final GetCanReceiveMessageRequestType request = GetCanReceiveObjectMother.createRequest(IDENTIFIER);
+
+        final GetCanReceiveMessageResponseType canReceiveMessage = integrasjonspunkt.getCanReceiveMessage(request);
+
+        assertThat(canReceiveMessage.isResult(), is(true));
+    }
+
+    @Test
+    public void shouldNotBeAbleToReceiveWhenMshEnabledAndServiceRecordIsDVPAndMshCannotReceive() {
+        //when(adresseregister.hasAdresseregisterCertificate(IDENTIFIER)).thenReturn(true);
+        when(serviceRegistryLookup.getServiceRecord(IDENTIFIER)).thenReturn(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER));
+        enableMsh();
+        when(msh.canRecieveMessage(IDENTIFIER)).thenReturn(false);
+        final GetCanReceiveMessageRequestType request = GetCanReceiveObjectMother.createRequest(IDENTIFIER);
+
+        final GetCanReceiveMessageResponseType response = integrasjonspunkt.getCanReceiveMessage(request);
+
+        assertThat(response.isResult(), is(false));
+    }
+
+    @Test
+    public void shouldCheckWithMSHWhenServiceIdentifierIsDPVAndMSHEnabled() {
+        when(serviceRegistryLookup.getServiceRecord(IDENTIFIER)).thenReturn(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER));
+        enableMsh();
+        final GetCanReceiveMessageResponseType response = integrasjonspunkt.getCanReceiveMessage(GetCanReceiveObjectMother.createRequest(IDENTIFIER));
+
+        verify(this.msh).canRecieveMessage(IDENTIFIER);
+    }
+
+    private void disableMsh() {
+        final IntegrasjonspunktProperties.MessageServiceHandler mshDisabled = new IntegrasjonspunktProperties.MessageServiceHandler();
+        when(propertiesMock.getMsh()).thenReturn(mshDisabled);
+    }
+
+    private void enableMsh() {
+        final IntegrasjonspunktProperties.MessageServiceHandler mshEnabled = new IntegrasjonspunktProperties.MessageServiceHandler();
+        mshEnabled.setEndpointURL("http://localhost");
+        when(propertiesMock.getMsh()).thenReturn(mshEnabled);
     }
 
     @Test(expected = MeldingsUtvekslingRuntimeException.class)
