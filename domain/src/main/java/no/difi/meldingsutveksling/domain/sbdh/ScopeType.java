@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.domain.sbdh;
 
 public enum ScopeType {
-    JournalpostId,
-    ConversationId,
-    MessagetypeId
+    JOURNALPOST_ID,
+    CONVERSATION_ID,
+    MESSAGETYPE_ID
 }

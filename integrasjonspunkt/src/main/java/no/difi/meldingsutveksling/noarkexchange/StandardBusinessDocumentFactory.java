@@ -125,9 +125,9 @@ public class StandardBusinessDocumentFactory {
         }
         Payload payload = new Payload(encryptArchive(context.getMottaker(), archive));
 
-        EduDocument sbd = new CreateSBD().createSBD(context.getAvsender().getOrgNummer(), context.getMottaker().getOrgNummer(), payload,
-                context.getConversationId(), StandardBusinessDocumentHeader.NEXTBEST_TYPE, context.getJournalPostId(), shipmentMeta.getMessagetypeId());
-        return sbd;
+        return new CreateSBD().createSBD(context.getAvsender().getOrgNummer(), context.getMottaker().getOrgNummer(),
+                payload, context.getConversationId(), StandardBusinessDocumentHeader.NEXTBEST_TYPE,
+                context.getJournalPostId(), shipmentMeta.getMessagetypeId());
     }
 
     private byte[] encryptArchive(Mottaker mottaker, Archive archive) {

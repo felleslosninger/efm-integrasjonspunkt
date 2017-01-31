@@ -235,8 +235,8 @@ public class StandardBusinessDocumentHeader {
 
         private static final String HEADER_VERSION = "1.0";
 
-        private static final String TYPE_JOURNALPOST_ID = "JournalpostId";
-        private static final String TYPE_CONVERSATIONID = "ConversationId";
+        private static final String TYPE_JOURNALPOST_ID = "JOURNALPOST_ID";
+        private static final String TYPE_CONVERSATIONID = "CONVERSATION_ID";
 
         private Organisasjonsnummer avsender;
         private Organisasjonsnummer mottaker;

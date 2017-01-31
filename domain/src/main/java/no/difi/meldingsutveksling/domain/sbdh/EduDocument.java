@@ -111,15 +111,15 @@ public class EduDocument {
     }
 
     public final String getJournalPostId() {
-        return findScope(ScopeType.JournalpostId).getInstanceIdentifier();
+        return findScope(ScopeType.JOURNALPOST_ID).getInstanceIdentifier();
     }
 
     public String getConversationId() {
-        return findScope(ScopeType.ConversationId).getInstanceIdentifier();
+        return findScope(ScopeType.CONVERSATION_ID).getInstanceIdentifier();
     }
 
     public String getMessagetypeId() {
-        return findScope(ScopeType.MessagetypeId).getInstanceIdentifier();
+        return findScope(ScopeType.MESSAGETYPE_ID).getInstanceIdentifier();
     }
 
     private Scope findScope(ScopeType scopeType) {
