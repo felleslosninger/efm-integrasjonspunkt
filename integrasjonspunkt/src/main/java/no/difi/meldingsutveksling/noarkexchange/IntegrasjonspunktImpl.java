@@ -79,7 +79,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
             isDpv = true;
         }
 
-        if (!mshCanReceive && !certificateAvailable) {
+        if (!mshCanReceive && !certificateAvailable && !isDpv) {
             Audit.error("CanReceive = false", marker);
         }
         response.setResult(certificateAvailable || mshCanReceive || isDpv);
