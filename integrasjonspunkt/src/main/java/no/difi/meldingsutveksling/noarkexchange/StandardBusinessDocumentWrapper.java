@@ -42,11 +42,11 @@ public class StandardBusinessDocumentWrapper {
     }
 
     public String getConversationId() {
-        return findScope(ScopeType.ConversationId.name()).getInstanceIdentifier();
+        return findScope(ScopeType.CONVERSATION_ID.name()).getInstanceIdentifier();
     }
 
     public final String getJournalPostId() {
-        return findScope(ScopeType.JournalpostId.name()).getInstanceIdentifier();
+        return findScope(ScopeType.JOURNALPOST_ID.name()).getInstanceIdentifier();
     }
 
     public MessageInfo getMessageInfo() {
