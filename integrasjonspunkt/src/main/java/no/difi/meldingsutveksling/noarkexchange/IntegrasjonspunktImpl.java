@@ -53,7 +53,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
     private EDUCoreService coreService;
 
     @Autowired
-    ServiceRegistryLookup serviceRegistryLookup;
+    private ServiceRegistryLookup serviceRegistryLookup;
 
     @Override
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
@@ -69,20 +69,20 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
         final LogstashMarker marker = MarkerFactory.receiverMarker(organisasjonsnummer);
         boolean mshCanReceive = false;
+        boolean isDpv = false;
         if (certificateAvailable) {
             Audit.info("CanReceive = true", marker);
         } else if (hasMshEndpoint()) {
             mshCanReceive = mshClient.canRecieveMessage(organisasjonsnummer);
             Audit.info(String.format("MSH canReceive = %s", mshCanReceive), marker);
+        } else if (DPV.fullname().equals(serviceRecord.getServiceIdentifier())) {
+            isDpv = true;
         }
-        if (hasMshEndpoint() && ServiceRecord.isServiceIdentifier(DPV.fullname()).test(serviceRecord)) {
-            mshCanReceive = mshClient.canRecieveMessage(organisasjonsnummer);
-            Audit.info(String.format("MSH canReceive = %s", mshCanReceive), marker);
-        }
+
         if (!mshCanReceive && !certificateAvailable) {
             Audit.error("CanReceive = false", marker);
         }
-        response.setResult(certificateAvailable || mshCanReceive);
+        response.setResult(certificateAvailable || mshCanReceive || isDpv);
         return response;
     }
 
@@ -128,7 +128,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
         return coreService;
     }
 
-    public void setCoreService(EDUCoreService coreService) {
+    void setCoreService(EDUCoreService coreService) {
         this.coreService = coreService;
     }
 

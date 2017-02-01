@@ -27,7 +27,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 public class IntegrasjonspunktImplTest {
 
-    public static final String IDENTIFIER = "1234";
+    private static final String IDENTIFIER = "1234";
     @InjectMocks
     private IntegrasjonspunktImpl integrasjonspunkt = new IntegrasjonspunktImpl();
 
@@ -70,6 +70,7 @@ public class IntegrasjonspunktImplTest {
     @Test
     public void shouldBeAbleToReceiveWhenServiceIdentifierIsDPOAndHasCertificate() {
         when(adresseregister.hasAdresseregisterCertificate("1234")).thenReturn(true);
+        disableMsh();
         GetCanReceiveMessageRequestType request = GetCanReceiveObjectMother.createRequest("1234");
         final GetCanReceiveMessageResponseType canReceiveMessage = integrasjonspunkt.getCanReceiveMessage(request);
 
@@ -119,6 +120,15 @@ public class IntegrasjonspunktImplTest {
         final GetCanReceiveMessageResponseType response = integrasjonspunkt.getCanReceiveMessage(GetCanReceiveObjectMother.createRequest(IDENTIFIER));
 
         verify(this.msh).canRecieveMessage(IDENTIFIER);
+    }
+
+    @Test
+    public void shouldBeAbleToReceiveWhenMSHDisabledAndServiceIdentifierIsDPV() {
+        when(serviceRegistryLookup.getServiceRecord(IDENTIFIER)).thenReturn(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER));
+        disableMsh();
+        final GetCanReceiveMessageResponseType result = integrasjonspunkt.getCanReceiveMessage(GetCanReceiveObjectMother.createRequest(IDENTIFIER));
+
+        assertThat(result.isResult(), is(true));
     }
 
     private void disableMsh() {
