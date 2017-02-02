@@ -16,8 +16,6 @@ import org.springframework.util.StringUtils;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
-
 @Component
 public class Adresseregister {
 
@@ -45,10 +43,6 @@ public class Adresseregister {
 
     public Certificate getCertificate(String orgNumber) throws CertificateException {
         ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(orgNumber);
-
-        if (DPV.fullname().equals(serviceRecord.getServiceIdentifier())) {
-            return null;
-        }
 
         String pemCertificate = serviceRecord.getPemCertificate();
         if (StringUtils.isEmpty(pemCertificate)) {

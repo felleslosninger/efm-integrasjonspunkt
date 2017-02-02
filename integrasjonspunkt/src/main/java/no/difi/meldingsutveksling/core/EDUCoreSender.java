@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.core;
 
 import com.google.common.base.Strings;
+import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.logging.MoveLogMarkers;
@@ -15,17 +16,14 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.services.Adresseregister;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
+
 @Component
 public class EDUCoreSender {
-
-    private static final Logger log = LoggerFactory.getLogger(EDUCoreSender.class);
-
     private final IntegrasjonspunktProperties properties;
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final StrategyFactory strategyFactory;
@@ -33,11 +31,11 @@ public class EDUCoreSender {
     private final NoarkClient mshClient;
 
     @Autowired
-    public EDUCoreSender(IntegrasjonspunktProperties properties,
-            ServiceRegistryLookup serviceRegistryLookup,
-            StrategyFactory strategyFactory,
-            Adresseregister adresseregister,
-            NoarkClient mshClient) {
+    EDUCoreSender(IntegrasjonspunktProperties properties,
+                  ServiceRegistryLookup serviceRegistryLookup,
+                  StrategyFactory strategyFactory,
+                  Adresseregister adresseregister,
+                  NoarkClient mshClient) {
         this.properties = properties;
         this.serviceRegistryLookup = serviceRegistryLookup;
         this.strategyFactory = strategyFactory;
@@ -51,17 +49,25 @@ public class EDUCoreSender {
         final ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(message.getReceiver().getIdentifier());
         final MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(serviceRecord);
         PutMessageResponseType result;
-        if (adresseRegister.hasAdresseregisterCertificate(message.getReceiver().getIdentifier())) {
-            Audit.info("Receiver validated", EDUCoreMarker.markerFrom(message));
+        final LogstashMarker marker = EDUCoreMarker.markerFrom(message);
+        if (adresseRegister.hasAdresseregisterCertificate(message.getReceiver().getIdentifier())
+                && !DPV.fullname().equals(serviceRecord.getServiceIdentifier())) {
+            Audit.info("Receiver validated", marker);
 
             MessageStrategy strategy = messageStrategyFactory.create(message.getPayload());
             result = strategy.send(message);
-        } else if (!Strings.isNullOrEmpty(properties.getMsh().getEndpointURL())) {
-            Audit.info("Send message to MSH", EDUCoreMarker.markerFrom(message));
+        } else if (!Strings.isNullOrEmpty(properties.getMsh().getEndpointURL())
+                && mshClient.canRecieveMessage(message.getReceiver().getIdentifier())) {
+            Audit.info("Send message to MSH", marker);
             EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
             result = mshClient.sendEduMelding(eduCoreFactory.createPutMessageFromCore(message));
+        } else if (DPV.fullname().equals(serviceRecord.getServiceIdentifier())) {
+            Audit.info("Send message to DPV", marker);
+            MessageStrategy strategy = messageStrategyFactory.create(message.getPayload());
+            result = strategy.send(message);
         } else {
-            Audit.error("Receiver not found", EDUCoreMarker.markerFrom(message));
+            Audit.error("Unable to send message: recipient does not have IP OR MSH is not configured OR service" +
+                    " identifier is not " + DPV.fullname(), marker);
             result = PutMessageResponseFactory.createErrorResponse(new MessageException(StatusMessage.UNABLE_TO_FIND_RECEIVER));
         }
 
