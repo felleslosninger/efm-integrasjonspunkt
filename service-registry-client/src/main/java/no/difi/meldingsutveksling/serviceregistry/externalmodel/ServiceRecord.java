@@ -42,7 +42,7 @@ public class ServiceRecord {
         this.returnAddress = PostAddress.EMPTY;
     }
 
-    public static Predicate<? super ServiceRecord> isServiceIdentifier(String identifier) {
+    public static Predicate<ServiceRecord> isServiceIdentifier(String identifier) {
         return s -> s != null && s.getServiceIdentifier().equalsIgnoreCase(identifier);
     }
 
