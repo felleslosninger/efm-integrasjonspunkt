@@ -6,13 +6,16 @@
 package no.difi.meldingsutveksling.config;
 
 import no.difi.meldingsutveksling.config.dpi.PrintSettings;
+import no.difi.meldingsutveksling.config.dpi.securitylevel.SecurityLevel;
+import no.difi.meldingsutveksling.config.dpi.securitylevel.ValidSecurityLevel;
 import no.difi.sdp.client2.domain.Prioritet;
-import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
 import org.springframework.core.io.Resource;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+
+import static no.difi.meldingsutveksling.config.dpi.securitylevel.SecurityLevel.INVALID;
 
 /**
  *
@@ -46,8 +49,9 @@ public class DigitalPostInnbyggerConfig {
     @NotNull
     private Prioritet priority;
 
-    @NotNull
-    private Sikkerhetsnivaa securityLevel;
+    @Valid
+    @ValidSecurityLevel(message = "Gyldig verdi er 3 eller 4", invalidValues = INVALID)
+    private SecurityLevel securityLevel;
 
     @NotNull
     private PrintSettings printSettings;
@@ -100,11 +104,11 @@ public class DigitalPostInnbyggerConfig {
         this.priority = priority;
     }
 
-    public Sikkerhetsnivaa getSecurityLevel() {
+    public SecurityLevel getSecurityLevel() {
         return securityLevel;
     }
 
-    public void setSecurityLevel(Sikkerhetsnivaa securityLevel) {
+    public void setSecurityLevel(SecurityLevel securityLevel) {
         this.securityLevel = securityLevel;
     }
 
