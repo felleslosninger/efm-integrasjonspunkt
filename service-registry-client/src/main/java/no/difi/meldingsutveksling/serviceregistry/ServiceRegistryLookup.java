@@ -9,6 +9,7 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.spi.json.GsonJsonProvider;
+import com.nimbusds.jose.proc.BadJWSException;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
@@ -82,6 +83,9 @@ public class ServiceRegistryLookup {
             } else {
                 throw new ServiceRegistryLookupException(String.format("RestClient threw exception when looking up service record with identifier %s", parameters), httpException);
             }
+        } catch (BadJWSException e) {
+            logger.error("Bad signature in service record response", e);
+            throw new ServiceRegistryLookupException("Bad signature in service record response", e);
         }
         return serviceRecord;
     }
@@ -97,7 +101,12 @@ public class ServiceRegistryLookup {
     }
 
     private InfoRecord loadInfoRecord(Parameters parameters) {
-        final String infoRecordString = client.getResource("identifier/" + parameters.getIdentifier(), parameters.getQuery());
+        final String infoRecordString;
+        try {
+            infoRecordString = client.getResource("identifier/" + parameters.getIdentifier(), parameters.getQuery());
+        } catch (BadJWSException e) {
+            throw new ServiceRegistryLookupException("Bad signature in response from service registry", e);
+        }
         final DocumentContext documentContext = JsonPath.parse(infoRecordString, jsonPathConfiguration());
         return documentContext.read("$.infoRecord", InfoRecord.class);
     }

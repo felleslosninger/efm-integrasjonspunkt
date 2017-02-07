@@ -609,6 +609,10 @@
             <artifactId>audit</artifactId>
         </dependency>
         <dependency>
+            <groupId>no.difi.move-common</groupId>
+            <artifactId>security</artifactId>
+        </dependency>
+        <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>transport-file</artifactId>
             <version>${project.parent.version}</version>

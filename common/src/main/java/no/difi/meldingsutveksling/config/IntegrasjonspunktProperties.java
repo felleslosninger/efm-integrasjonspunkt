@@ -57,6 +57,9 @@ public class IntegrasjonspunktProperties {
     @Valid
     private NextBEST nextbest;
 
+    @Valid
+    private Sign sign;
+
     /**
      * Use this parameter to indicate that the message are related to vedtak/messages that require the recipient to be
      * notified. This parameter is passed over to ServiceRegistry to determine where the message should be sent.
@@ -132,6 +135,17 @@ public class IntegrasjonspunktProperties {
         private URL url;
         private List<String> scopes;
         private String clientId;
+        private Keystore keystore;
+    }
+
+    /**
+     * SR signing
+     */
+    @Data
+    public static class Sign {
+
+        @NotNull
+        private boolean enable;
         private Keystore keystore;
     }
 
