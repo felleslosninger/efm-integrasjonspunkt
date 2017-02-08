@@ -1,9 +1,12 @@
 package no.difi.meldingsutveksling.config;
 
 import lombok.Data;
+import no.difi.meldingsutveksling.logging.MoveLogMarkers;
+import org.slf4j.MDC;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
 
+import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 import javax.validation.constraints.AssertFalse;
 import javax.validation.constraints.NotNull;
@@ -21,6 +24,11 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 @Data
 @ConfigurationProperties(prefix = "difi.move")
 public class IntegrasjonspunktProperties {
+
+    @PostConstruct
+    private void postConstruct() {
+        MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, getOrg().getNumber());
+    }
 
     @Valid
     private Organization org;
