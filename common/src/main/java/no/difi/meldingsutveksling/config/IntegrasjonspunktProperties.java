@@ -144,7 +144,6 @@ public class IntegrasjonspunktProperties {
     @Data
     public static class Sign {
 
-        @NotNull
         private boolean enable;
         private Keystore keystore;
     }

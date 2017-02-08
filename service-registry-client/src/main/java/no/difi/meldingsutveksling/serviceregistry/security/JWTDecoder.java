@@ -22,6 +22,12 @@ public class JWTDecoder {
     @Qualifier("signingKeystoreHelper")
     private KeystoreHelper keystoreHelper;
 
+    CertificateFactory certificateFactory;
+
+    public JWTDecoder() throws CertificateException {
+        certificateFactory = CertificateFactory.getInstance("X.509");
+    }
+
     public String getPayload(String serialized) throws BadJWSException {
 
         JWSObject jwsObject;
@@ -32,13 +38,6 @@ public class JWTDecoder {
         }
 
         byte[] decode = jwsObject.getHeader().getX509CertChain().get(0).decode();
-        CertificateFactory certificateFactory = null;
-        try {
-            certificateFactory = CertificateFactory.getInstance("X.509");
-        } catch (CertificateException e) {
-            throw new BadJWSException("Could not get certificate factory for type \"X.509\"", e);
-        }
-
         Certificate certificate;
         try {
             certificate = certificateFactory.generateCertificate(new ByteArrayInputStream(decode));
