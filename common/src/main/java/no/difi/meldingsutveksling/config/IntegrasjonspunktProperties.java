@@ -1,9 +1,12 @@
 package no.difi.meldingsutveksling.config;
 
 import lombok.Data;
+import no.difi.meldingsutveksling.logging.MoveLogMarkers;
+import org.slf4j.MDC;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
 
+import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 import javax.validation.constraints.AssertFalse;
 import javax.validation.constraints.NotNull;
@@ -72,6 +75,12 @@ public class IntegrasjonspunktProperties {
      */
     @Valid
     private FeatureToggle feature;
+
+    @PostConstruct
+    private void postConstruct() {
+        MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, getOrg().getNumber());
+    }
+
 
     public FeatureToggle getFeature() {
         if (this.feature == null) {

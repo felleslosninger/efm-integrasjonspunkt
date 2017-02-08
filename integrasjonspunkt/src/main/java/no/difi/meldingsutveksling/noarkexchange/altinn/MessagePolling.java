@@ -10,7 +10,6 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.kvittering.EduDocumentFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.logging.MoveLogMarkers;
 import no.difi.meldingsutveksling.nextbest.NextBestQueue;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
@@ -24,7 +23,6 @@ import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -79,7 +77,6 @@ public class MessagePolling implements ApplicationContextAware {
 
     @Scheduled(fixedRate = 15000)
     public void checkForNewMessages() throws MessageException {
-        MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrg().getNumber());
         logger.debug("Checking for new messages");
 
         // TODO: if ServiceRegistry returns a ServiceRecord to something other than Altinn formidlingstjeneste this
