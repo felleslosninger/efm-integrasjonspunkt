@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.serviceregistry;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.nimbusds.jose.proc.BadJWSException;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
@@ -53,7 +54,7 @@ public class ServiceRegistryLookupTest {
     }
 
     @Test
-    public void clientThrowsExceptionWithHttpStatusNotFoundShouldReturnsEmptyServiceRecord() {
+    public void clientThrowsExceptionWithHttpStatusNotFoundShouldReturnsEmptyServiceRecord() throws BadJWSException {
         final String badOrgnr = "-100";
         when(client.getResource("identifier/" + badOrgnr, query)).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
 
@@ -63,7 +64,7 @@ public class ServiceRegistryLookupTest {
     }
 
     @Test
-    public void clientThrowsExceptionWithInternalServerErrorThenServiceShouldThrowServiceRegistryLookupException() {
+    public void clientThrowsExceptionWithInternalServerErrorThenServiceShouldThrowServiceRegistryLookupException() throws BadJWSException {
         thrown.expect(UncheckedExecutionException.class);
         when(client.getResource(any(String.class))).thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
@@ -71,7 +72,7 @@ public class ServiceRegistryLookupTest {
     }
 
     @Test
-    public void organizationWithoutServiceRecord() {
+    public void organizationWithoutServiceRecord() throws BadJWSException {
         final String json = new SRContentBuilder().build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
@@ -81,7 +82,7 @@ public class ServiceRegistryLookupTest {
     }
 
     @Test
-    public void organizationWithSingleServiceRecordHasServiceRecord() {
+    public void organizationWithSingleServiceRecordHasServiceRecord() throws BadJWSException {
         final String json = new SRContentBuilder().withServiceRecord(edu).build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
