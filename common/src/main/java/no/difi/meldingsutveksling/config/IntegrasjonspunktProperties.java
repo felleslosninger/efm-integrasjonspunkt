@@ -25,11 +25,6 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 @ConfigurationProperties(prefix = "difi.move")
 public class IntegrasjonspunktProperties {
 
-    @PostConstruct
-    private void postConstruct() {
-        MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, getOrg().getNumber());
-    }
-
     @Valid
     private Organization org;
 
@@ -80,6 +75,12 @@ public class IntegrasjonspunktProperties {
      */
     @Valid
     private FeatureToggle feature;
+
+    @PostConstruct
+    private void postConstruct() {
+        MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, getOrg().getNumber());
+    }
+
 
     public FeatureToggle getFeature() {
         if (this.feature == null) {
