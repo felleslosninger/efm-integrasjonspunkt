@@ -9,7 +9,8 @@ import javax.xml.bind.annotation.XmlType;
 public enum ServiceIdentifier {
     @XmlEnumValue("EDU")    EDU("EDU"),
     @XmlEnumValue("DPV")    DPV("POST_VIRKSOMHET"),
-    @XmlEnumValue("DPI")    DPI("DPI");
+    @XmlEnumValue("DPI")    DPI("DPI"),
+    @XmlEnumValue("FIKS")   FIKS("FIKS");
 
     private final String fullname;
 
