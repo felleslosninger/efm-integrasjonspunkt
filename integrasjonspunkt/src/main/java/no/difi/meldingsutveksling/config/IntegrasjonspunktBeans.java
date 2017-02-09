@@ -47,8 +47,12 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public MessageSender messageSender(TransportFactory transportFactory, Adresseregister adresseregister, IntegrasjonspunktNokkel integrasjonspunktNokkel, StandardBusinessDocumentFactory standardBusinessDocumentFactory) {
-        return new MessageSender(transportFactory, adresseregister, properties, integrasjonspunktNokkel, standardBusinessDocumentFactory);
+    public MessageSender messageSender(TransportFactory transportFactory, Adresseregister adresseregister,
+                                       IntegrasjonspunktNokkel integrasjonspunktNokkel,
+                                       StandardBusinessDocumentFactory standardBusinessDocumentFactory,
+                                       ServiceRegistryLookup serviceRegistryLookup) {
+        return new MessageSender(transportFactory, adresseregister, properties, integrasjonspunktNokkel,
+                standardBusinessDocumentFactory, serviceRegistryLookup);
     }
 
     @Bean

@@ -5,16 +5,19 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-import java.security.cert.CertificateException;
-import static junit.framework.TestCase.assertFalse;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.services.Adresseregister;
+import sun.security.x509.X509CertImpl;
+
+import java.security.cert.CertificateException;
+
+import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
-import sun.security.x509.X509CertImpl;
 
 public class KanMottaMeldingerSteps {
 
@@ -113,9 +116,9 @@ public class KanMottaMeldingerSteps {
     @Given("^virksomhet (.+) i Adresseregisteret$")
     public void virksomhet_i_Adresseregisteret(String finnes) throws Throwable {
         if ("finnes".equals(finnes)) {
-            when(adresseRegister.getCertificate(any(String.class))).thenReturn(new X509CertImpl());
+            when(adresseRegister.getCertificate(any(ServiceRecord.class))).thenReturn(new X509CertImpl());
         } else if ("finnes ikke".equals(finnes)) {
-            when(adresseRegister.getCertificate(any(String.class))).thenThrow(CertificateException.class);
+            when(adresseRegister.getCertificate(any(ServiceRecord.class))).thenThrow(CertificateException.class);
         }
     }
 

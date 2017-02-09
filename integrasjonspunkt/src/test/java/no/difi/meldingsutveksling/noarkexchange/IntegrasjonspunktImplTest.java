@@ -14,6 +14,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageRespo
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,6 +63,9 @@ public class IntegrasjonspunktImplTest {
         infoRecord.setOrganizationName("foo");
         when(serviceRegistryLookup.getInfoRecord(anyString())).thenReturn(infoRecord);
 
+        ServiceRecord serviceRecord = ServiceRecordObjectMother.createDPVServiceRecord("1234");
+        when(serviceRegistryLookup.getServiceRecord(anyString())).thenReturn(serviceRecord);
+
         when(propertiesMock.getFeature()).thenReturn(featureMock);
         when(propertiesMock.getOrg()).thenReturn(organizationMock);
         when(featureMock.isEnableQueue()).thenReturn(true);
@@ -69,7 +73,7 @@ public class IntegrasjonspunktImplTest {
 
     @Test
     public void shouldBeAbleToReceiveWhenServiceIdentifierIsDPOAndHasCertificate() {
-        when(adresseregister.hasAdresseregisterCertificate("1234")).thenReturn(true);
+        when(adresseregister.hasAdresseregisterCertificate(any(ServiceRecord.class))).thenReturn(true);
         disableMsh();
         GetCanReceiveMessageRequestType request = GetCanReceiveObjectMother.createRequest("1234");
         final GetCanReceiveMessageResponseType canReceiveMessage = integrasjonspunkt.getCanReceiveMessage(request);
@@ -79,7 +83,7 @@ public class IntegrasjonspunktImplTest {
 
     @Test
     public void shouldCheckWithMSHWhenServiceIdentifierIsDPOAndAdresseregisterMissingCertificate() {
-        when(adresseregister.hasAdresseregisterCertificate("1234")).thenReturn(false);
+        when(adresseregister.hasAdresseregisterCertificate(any(ServiceRecord.class))).thenReturn(false);
         enableMsh();
         final GetCanReceiveMessageRequestType request = GetCanReceiveObjectMother.createRequest(IDENTIFIER);
 
@@ -90,8 +94,9 @@ public class IntegrasjonspunktImplTest {
 
     @Test
     public void shouldBeAbleToReceiveWhenServiceIdentifierIsDPVAndMSHIsDisabled() {
-        when(adresseregister.hasAdresseregisterCertificate(IDENTIFIER)).thenReturn(true);
-        when(serviceRegistryLookup.getServiceRecord(IDENTIFIER)).thenReturn(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER));
+        ServiceRecord serviceRecord = ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER);
+        when(adresseregister.hasAdresseregisterCertificate(serviceRecord)).thenReturn(true);
+        when(serviceRegistryLookup.getServiceRecord(IDENTIFIER)).thenReturn(serviceRecord);
         disableMsh();
         final GetCanReceiveMessageRequestType request = GetCanReceiveObjectMother.createRequest(IDENTIFIER);
 

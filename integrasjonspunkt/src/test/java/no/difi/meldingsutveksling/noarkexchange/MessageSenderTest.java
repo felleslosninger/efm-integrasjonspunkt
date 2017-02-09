@@ -1,13 +1,14 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import java.security.cert.CertificateException;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.ServiceRecordObjectMother;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.Receiver;
 import no.difi.meldingsutveksling.core.Sender;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.JournpostType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
@@ -18,9 +19,12 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import java.security.cert.CertificateException;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MessageSenderTest {
@@ -43,12 +47,21 @@ public class MessageSenderTest {
     @Mock
     private IntegrasjonspunktNokkel integrasjonspunktNokkel;
 
+    @Mock
+    private ServiceRegistryLookup serviceRegistryLookup;
+
     @Before
     public void setUp() {
         messageSender = new MessageSender();
         messageSender.setProperties(propertiesMock);
         messageSender.setKeyInfo(integrasjonspunktNokkel);
         messageSender.setAdresseregister(adresseregister);
+        messageSender.setServiceRegistryLookup(serviceRegistryLookup);
+
+        when(serviceRegistryLookup.getServiceRecord(SENDER_PARTY_NUMBER))
+                .thenReturn(ServiceRecordObjectMother.createDPVServiceRecord(SENDER_PARTY_NUMBER));
+        when(serviceRegistryLookup.getServiceRecord(RECIEVER_PARTY_NUMBER))
+                .thenReturn(ServiceRecordObjectMother.createDPVServiceRecord(RECIEVER_PARTY_NUMBER));
     }
 
     @Test
@@ -67,7 +80,8 @@ public class MessageSenderTest {
         expectedException.expect(new StatusMatches(StatusMessage.MISSING_RECIEVER_CERTIFICATE));
         EDUCore request = new RequestBuilder().withSender().withReciever().build();
 
-        when(adresseregister.getCertificate(RECIEVER_PARTY_NUMBER)).thenThrow(new CertificateException("hello"));
+        when(adresseregister.getCertificate(ServiceRecordObjectMother.createDPVServiceRecord(RECIEVER_PARTY_NUMBER)))
+                .thenThrow(new CertificateException("hello"));
 
         messageSender.createMessageContext(request);
     }
@@ -78,7 +92,8 @@ public class MessageSenderTest {
         expectedException.expect(new StatusMatches(StatusMessage.MISSING_SENDER_CERTIFICATE));
         EDUCore request = new RequestBuilder().withSender().withReciever().build();
 
-        when(adresseregister.getCertificate(SENDER_PARTY_NUMBER)).thenThrow(new CertificateException("hello"));
+        when(adresseregister.getCertificate(ServiceRecordObjectMother.createDPVServiceRecord(SENDER_PARTY_NUMBER)))
+                .thenThrow(new CertificateException("hello"));
 
         messageSender.createMessageContext(request);
     }
