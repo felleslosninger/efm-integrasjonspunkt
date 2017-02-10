@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
+import com.google.common.collect.ImmutableMap;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
@@ -8,6 +9,7 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.lang.NotImplementedException;
 
+import java.util.Map;
 import java.util.Optional;
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.*;
@@ -22,11 +24,14 @@ public class StrategyFactory {
     private final PostVirksomhetStrategyFactory postVirksomhetStrategyFactory;
     private final MessageStrategyFactory postInnbyggerStrategyFactory;
     private final FiksMessageStrategyFactory fiksMessageStrategyFactory;
+    private final Map<String, MessageStrategyFactory> factories;
 
     public StrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup,
                            KeystoreProvider keystoreProvider, IntegrasjonspunktProperties properties) {
         eduMessageStrategyFactory = EduMessageStrategyFactory.newInstance(messageSender, properties);
         postVirksomhetStrategyFactory = PostVirksomhetStrategyFactory.newInstance(messageSender.getProperties(), serviceRegistryLookup);
+
+
 
         try {
             postInnbyggerStrategyFactory = PostInnbyggerStrategyFactory.newInstance(messageSender.getProperties(), serviceRegistryLookup, keystoreProvider);
@@ -35,6 +40,12 @@ public class StrategyFactory {
         }
 
         fiksMessageStrategyFactory = FiksMessageStrategyFactory.newInstance();
+        factories = ImmutableMap.<String, MessageStrategyFactory>builder()
+                .put(EDU.fullname(), eduMessageStrategyFactory)
+                .put(DPI.fullname(), postInnbyggerStrategyFactory)
+                .put(DPV.fullname(), postVirksomhetStrategyFactory)
+                .put(FIKS.fullname(), fiksMessageStrategyFactory)
+                .build();
     }
 
     /**
@@ -49,19 +60,11 @@ public class StrategyFactory {
         if (isEmpty(serviceRecord.getServiceIdentifier())) {
             throw new IllegalArgumentException("serviceRecord is missing a serviceIdentifier");
         }
-
-        if (EDU.fullname().equalsIgnoreCase(serviceRecord.getServiceIdentifier())) {
-            return eduMessageStrategyFactory;
-        } else if (DPV.fullname().equalsIgnoreCase(serviceRecord.getServiceIdentifier())) {
-            return postVirksomhetStrategyFactory;
-        } else if (DPI.fullname().equalsIgnoreCase(serviceRecord.getServiceIdentifier())) {
-            return postInnbyggerStrategyFactory;
-        } else if (FIKS.fullname().equalsIgnoreCase(serviceRecord.getServiceIdentifier())) {
-            return fiksMessageStrategyFactory;
-        } else {
+        final MessageStrategyFactory factory = factories.get(serviceRecord.getServiceIdentifier());
+        if (factory == null) {
             throw new NotImplementedException(String.format("Integrasjonspunkt has no message strategy matching service identifier matching %s", serviceRecord.getServiceIdentifier()));
         }
-
+        return factory;
     }
 
 }
