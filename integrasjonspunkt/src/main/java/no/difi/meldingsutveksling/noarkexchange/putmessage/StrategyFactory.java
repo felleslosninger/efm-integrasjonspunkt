@@ -20,18 +20,11 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
  */
 public class StrategyFactory {
 
-    private final EduMessageStrategyFactory eduMessageStrategyFactory;
-    private final PostVirksomhetStrategyFactory postVirksomhetStrategyFactory;
     private final MessageStrategyFactory postInnbyggerStrategyFactory;
-    private final FiksMessageStrategyFactory fiksMessageStrategyFactory;
     private final Map<String, MessageStrategyFactory> factories;
 
     public StrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup,
                            KeystoreProvider keystoreProvider, IntegrasjonspunktProperties properties) {
-        eduMessageStrategyFactory = EduMessageStrategyFactory.newInstance(messageSender, properties);
-        postVirksomhetStrategyFactory = PostVirksomhetStrategyFactory.newInstance(messageSender.getProperties(), serviceRegistryLookup);
-
-
 
         try {
             postInnbyggerStrategyFactory = PostInnbyggerStrategyFactory.newInstance(messageSender.getProperties(), serviceRegistryLookup, keystoreProvider);
@@ -39,12 +32,11 @@ public class StrategyFactory {
             throw new MeldingsUtvekslingRuntimeException("Unable to create client for sikker digital post", e);
         }
 
-        fiksMessageStrategyFactory = FiksMessageStrategyFactory.newInstance();
         factories = ImmutableMap.<String, MessageStrategyFactory>builder()
-                .put(EDU.fullname(), eduMessageStrategyFactory)
+                .put(EDU.fullname(), EduMessageStrategyFactory.newInstance(messageSender, properties))
                 .put(DPI.fullname(), postInnbyggerStrategyFactory)
-                .put(DPV.fullname(), postVirksomhetStrategyFactory)
-                .put(FIKS.fullname(), fiksMessageStrategyFactory)
+                .put(DPV.fullname(), PostVirksomhetStrategyFactory.newInstance(messageSender.getProperties(), serviceRegistryLookup))
+                .put(FIKS.fullname(), FiksMessageStrategyFactory.newInstance())
                 .build();
     }
 
