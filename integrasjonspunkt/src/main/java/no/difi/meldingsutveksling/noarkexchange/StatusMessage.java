@@ -11,7 +11,9 @@ public enum StatusMessage {
     MISSING_PAYLOAD("Request has missing or empty payload", "Missing payload", 8),
     APP_RECEIPT_CONTAINS_ERROR("Technical error from the receiving archive system", "AppReceipt contains an error", 9),
     POST_VIRKSOMHET_REQUEST_MISSING_VALUES("Teknisk feil: Kunne ikke sende post til virksomhet", "Failed to create Correspondence Agency Request", 10),
-    UNABLE_TO_SEND_DPI("Klarte ikke sende post til digital post til innbygger", "Failed to send message to DPI Meldingsformidler", 11);
+    UNABLE_TO_SEND_DPI("Klarte ikke sende post til digital post til innbygger", "Failed to send message to DPI Meldingsformidler", 11),
+    MISSING_RECEIVER_IN_SERVICE_REGISTRY("MOVE Service registry har ikke nok tilgjengelig informasjon om mottaker til å sende melding", "SR returned 404 not found", 12);
+
 
     private final String endUserMessage;
     private final String technicalMessage;
@@ -33,9 +35,5 @@ public enum StatusMessage {
 
     public String getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 }

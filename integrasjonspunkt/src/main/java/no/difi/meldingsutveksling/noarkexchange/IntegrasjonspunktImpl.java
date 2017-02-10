@@ -61,6 +61,43 @@ public class IntegrasjonspunktImpl implements SOAPport {
         String organisasjonsnummer = getCanReceiveMessageRequest.getReceiver().getOrgnr();
 
         GetCanReceiveMessageResponseType response = new GetCanReceiveMessageResponseType();
+
+        response.setResult(canReceiveMessage(organisasjonsnummer));
+        return response;
+    }
+
+    private boolean hasMshEndpoint() {
+        return !StringUtils.isBlank(properties.getMsh().getEndpointURL());
+    }
+
+    @Override
+    public PutMessageResponseType putMessage(PutMessageRequestType request) {
+        MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrg().getNumber());
+        PutMessageRequestWrapper message = new PutMessageRequestWrapper(request);
+        if (!message.hasSenderPartyNumber()) {
+            message.setSenderPartyNumber(properties.getOrg().getNumber());
+        }
+
+        Audit.info("Received EDU message", markerFrom(message));
+
+        if (!canReceiveMessage(message.getRecieverPartyNumber())) {
+            Audit.error("Cannot send message to recipient", markerFrom(message));
+            return PutMessageResponseFactory.createErrorResponse(StatusMessage.MISSING_RECEIVER_IN_SERVICE_REGISTRY);
+        }
+
+        if (PayloadUtil.isEmpty(message.getPayload())) {
+            Audit.error("Payload is missing", markerFrom(message));
+            if (properties.getFeature().isReturnOkOnEmptyPayload()) {
+                return PutMessageResponseFactory.createOkResponse();
+            } else {
+                return PutMessageResponseFactory.createErrorResponse(new MessageException(StatusMessage.MISSING_PAYLOAD));
+            }
+        }
+
+        return coreService.queueMessage(message);
+    }
+
+    private boolean canReceiveMessage(String organisasjonsnummer) {
         boolean certificateAvailable;
 
         certificateAvailable = adresseRegister.hasAdresseregisterCertificate(organisasjonsnummer);
@@ -82,34 +119,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
         if (!mshCanReceive && !certificateAvailable && !isDpv) {
             Audit.error("CanReceive = false", marker);
         }
-        response.setResult(certificateAvailable || mshCanReceive || isDpv);
-        return response;
-    }
-
-    private boolean hasMshEndpoint() {
-        return !StringUtils.isBlank(properties.getMsh().getEndpointURL());
-    }
-
-    @Override
-    public PutMessageResponseType putMessage(PutMessageRequestType request) {
-        MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrg().getNumber());
-        PutMessageRequestWrapper message = new PutMessageRequestWrapper(request);
-        if (!message.hasSenderPartyNumber()) {
-            message.setSenderPartyNumber(properties.getOrg().getNumber());
-        }
-
-        Audit.info("Received EDU message", markerFrom(message));
-
-        if (PayloadUtil.isEmpty(message.getPayload())) {
-            Audit.error("Payload is missing", markerFrom(message));
-            if (properties.getFeature().isReturnOkOnEmptyPayload()) {
-                return PutMessageResponseFactory.createOkResponse();
-            } else {
-                return PutMessageResponseFactory.createErrorResponse(new MessageException(StatusMessage.MISSING_PAYLOAD));
-            }
-        }
-
-        return coreService.queueMessage(message);
+        return certificateAvailable || mshCanReceive || isDpv;
     }
 
     public void setMshClient(NoarkClient mshClient) {
