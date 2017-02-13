@@ -63,6 +63,7 @@ public class Adresseregister {
         try {
             getCertificate(serviceRecord);
         } catch (Exception e) {
+            log.warn("getCertificate: ", e);
             return false;
         }
         return true;
