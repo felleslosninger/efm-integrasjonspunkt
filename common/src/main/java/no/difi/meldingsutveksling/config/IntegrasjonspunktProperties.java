@@ -50,7 +50,7 @@ public class IntegrasjonspunktProperties {
     private DigitalPostInnbyggerConfig dpi;
 
     @Valid
-    private SvarUtConfig dps;
+    private SvarUtConfig dps = new SvarUtConfig();
 
     @Valid
     private Oidc oidc;
@@ -194,11 +194,11 @@ public class IntegrasjonspunktProperties {
         private String username;
         private String password;
         /**
-         * TODO: descrive
+         * If the authentication is of type NTLM (Windows) this is the domain the username belongs to
          */
         private String domain;
         /**
-         * TODO: descrive
+         * The type of archive system you are using, eg. Ephorte, p360, websak, mail...
          */
         @NotNull
         private String type;
