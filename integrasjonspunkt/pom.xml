@@ -254,6 +254,12 @@
 
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>ks-svarut</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>service-registry-client</artifactId>
             <version>${project.parent.version}</version>
         </dependency>

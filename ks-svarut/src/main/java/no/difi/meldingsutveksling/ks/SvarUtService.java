@@ -8,9 +8,9 @@ public class SvarUtService {
     private EDUCoreConverter messageConverter;
     private SvarUtWebServiceClient client;
 
-    public SvarUtService(EDUCoreConverter messageConverter, SvarUtWebServiceClient client) {
+    public SvarUtService(EDUCoreConverter messageConverter, SvarUtWebServiceClient svarUtClient) {
         this.messageConverter = messageConverter;
-        this.client = client;
+        this.client = svarUtClient;
     }
 
     public String send(EDUCore message) {

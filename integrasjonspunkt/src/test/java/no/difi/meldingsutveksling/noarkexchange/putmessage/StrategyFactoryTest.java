@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.ks.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -33,8 +34,10 @@ public class StrategyFactoryTest {
         when(properties.getDpi()).thenReturn(dpic);
         final ServiceRegistryLookup serviceRegistryLookup = mock(ServiceRegistryLookup.class);
 
+
         final KeystoreProvider keystoreProvider = mock(KeystoreProvider.class);
-        strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider, properties);
+        SvarUtService svarUtService = mock(SvarUtService.class);
+        strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider, svarUtService, properties);
     }
 
     @Test

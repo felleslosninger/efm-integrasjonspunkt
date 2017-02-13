@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
+import no.difi.meldingsutveksling.ks.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -20,12 +21,10 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
  */
 public class StrategyFactory {
 
-    private final MessageStrategyFactory postInnbyggerStrategyFactory;
     private final Map<String, MessageStrategyFactory> factories;
 
-    public StrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup,
-                           KeystoreProvider keystoreProvider, IntegrasjonspunktProperties properties) {
-
+    public StrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup, KeystoreProvider keystoreProvider, SvarUtService svarUtService, IntegrasjonspunktProperties properties) {
+        MessageStrategyFactory postInnbyggerStrategyFactory;
         try {
             postInnbyggerStrategyFactory = PostInnbyggerStrategyFactory.newInstance(messageSender.getProperties(), serviceRegistryLookup, keystoreProvider);
         } catch (MeldingsformidlerException e) {
@@ -36,7 +35,7 @@ public class StrategyFactory {
                 .put(EDU.fullname(), EduMessageStrategyFactory.newInstance(messageSender, properties))
                 .put(DPI.fullname(), postInnbyggerStrategyFactory)
                 .put(DPV.fullname(), PostVirksomhetStrategyFactory.newInstance(messageSender.getProperties(), serviceRegistryLookup))
-                .put(FIKS.fullname(), FiksMessageStrategyFactory.newInstance())
+                .put(FIKS.fullname(), FiksMessageStrategyFactory.newInstance(svarUtService))
                 .build();
     }
 

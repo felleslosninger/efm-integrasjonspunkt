@@ -24,8 +24,10 @@ public class SvarUtConfig {
     @NotNull
     private Resource certificatePath;
 
+    @NotNull
     private String username;
 
+    @NotNull
     private String password;
 
 
