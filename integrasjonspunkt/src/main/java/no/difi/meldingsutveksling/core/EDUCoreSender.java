@@ -50,7 +50,7 @@ public class EDUCoreSender {
         final MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(serviceRecord);
         PutMessageResponseType result;
         final LogstashMarker marker = EDUCoreMarker.markerFrom(message);
-        if (adresseRegister.hasAdresseregisterCertificate(message.getReceiver().getIdentifier())
+        if (adresseRegister.hasAdresseregisterCertificate(serviceRecord)
                 && !DPV.fullname().equals(serviceRecord.getServiceIdentifier())) {
             Audit.info("Receiver validated", marker);
 

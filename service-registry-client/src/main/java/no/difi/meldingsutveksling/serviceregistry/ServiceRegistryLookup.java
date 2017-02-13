@@ -79,7 +79,8 @@ public class ServiceRegistryLookup {
             serviceRecord = documentContext.read("$.serviceRecord", ServiceRecord.class);
         } catch(HttpClientErrorException httpException) {
             if (httpException.getStatusCode() == HttpStatus.NOT_FOUND) {
-                logger.info("RestClient returned 404 NOT_FOUND when looking up service record with identifier {}", parameters, httpException);
+                logger.warn("RestClient returned 404 NOT_FOUND when looking up service record with identifier {}",
+                        parameters, httpException);
             } else {
                 throw new ServiceRegistryLookupException(String.format("RestClient threw exception when looking up service record with identifier %s", parameters), httpException);
             }

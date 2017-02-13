@@ -63,9 +63,16 @@ public class IntegrasjonspunktImpl implements SOAPport {
         GetCanReceiveMessageResponseType response = new GetCanReceiveMessageResponseType();
         boolean certificateAvailable;
 
-        certificateAvailable = adresseRegister.hasAdresseregisterCertificate(organisasjonsnummer);
+        final ServiceRecord serviceRecord;
+        try {
+            serviceRecord = serviceRegistryLookup.getServiceRecord(organisasjonsnummer);
+        } catch (Exception e) {
+            log.error("Exception during service registry lookup: ", e);
+            response.setResult(false);
+            return response;
+        }
 
-        final ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(organisasjonsnummer);
+        certificateAvailable = adresseRegister.hasAdresseregisterCertificate(serviceRecord);
 
         final LogstashMarker marker = MarkerFactory.receiverMarker(organisasjonsnummer);
         boolean mshCanReceive = false;
