@@ -2,10 +2,10 @@ package no.difi.meldingsutveksling.ks;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.ks.mapping.HandlerFactory;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 @Configuration
 @EnableConfigurationProperties({IntegrasjonspunktProperties.class})
@@ -21,12 +21,9 @@ public class SvarUtConfiguration {
         return new HandlerFactory(properties);
     }
 
-
     @Bean
-    public Jaxb2Marshaller marshaller() {
-        Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
-        marshaller.setContextPath(Forsendelse.class.getPackage().getName());
-        return marshaller;
+    public SvarUtService svarUtService(EDUCoreConverter converter, SvarUtWebServiceClient svarUtClient, ServiceRegistryLookup serviceRegistryLookup) {
+        return new SvarUtService(svarUtClient, serviceRegistryLookup, converter);
     }
 
 }

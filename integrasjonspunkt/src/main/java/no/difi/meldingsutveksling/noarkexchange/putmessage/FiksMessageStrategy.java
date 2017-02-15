@@ -9,7 +9,6 @@ class FiksMessageStrategy implements MessageStrategy {
     private SvarUtService svarUtService;
 
     FiksMessageStrategy(SvarUtService svarUtService) {
-
         this.svarUtService = svarUtService;
     }
 

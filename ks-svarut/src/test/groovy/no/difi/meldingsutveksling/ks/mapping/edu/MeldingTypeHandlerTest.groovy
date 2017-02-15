@@ -5,6 +5,8 @@ import no.difi.meldingsutveksling.ks.Forsendelse
 import no.difi.meldingsutveksling.noarkexchange.schema.core.*
 import spock.lang.Specification
 
+import java.security.cert.X509Certificate
+
 class MeldingTypeHandlerTest extends Specification {
     SvarUtConfig properties
 
@@ -16,7 +18,7 @@ class MeldingTypeHandlerTest extends Specification {
         given:
         def meldingType = "a meldingstype with two documents"()
 
-        MeldingTypeHandler handler = new MeldingTypeHandler(meldingType, new FileTypeHandlerFactory(properties))
+        MeldingTypeHandler handler = new MeldingTypeHandler(meldingType, new FileTypeHandlerFactory(properties, Mock(X509Certificate)))
         when:
         def builderResult = handler.map(Forsendelse.builder()).build()
         then:
