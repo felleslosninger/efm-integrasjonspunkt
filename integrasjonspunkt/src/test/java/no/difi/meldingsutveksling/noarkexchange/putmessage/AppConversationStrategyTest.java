@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreFactory;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
@@ -10,7 +11,6 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -29,10 +29,16 @@ public class AppConversationStrategyTest {
             "</AppReceipt>";
 
     private MessageSender messageSender;
+    private IntegrasjonspunktProperties properties;
 
     @Before
     public void init() {
-        messageSender = Mockito.mock(MessageSender.class);
+        messageSender = mock(MessageSender.class);
+        properties = mock(IntegrasjonspunktProperties.class);
+        IntegrasjonspunktProperties.NorskArkivstandardSystem noark = mock(IntegrasjonspunktProperties
+                .NorskArkivstandardSystem.class);
+        when(noark.getType()).thenReturn("p360");
+        when(properties.getNoarkSystem()).thenReturn(noark);
     }
 
     /**
@@ -40,7 +46,7 @@ public class AppConversationStrategyTest {
      */
     @Test
     public void appReceiptsShouldBeReturnedToSender() {
-        AppReceiptMessageStrategy strategy = new AppReceiptMessageStrategy(messageSender);
+        AppReceiptMessageStrategy strategy = new AppReceiptMessageStrategy(messageSender, properties);
         PutMessageRequestType request = createPutMessageRequestType();
 
         ServiceRegistryLookup srMock = mock(ServiceRegistryLookup.class);

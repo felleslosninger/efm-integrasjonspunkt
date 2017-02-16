@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -25,6 +26,7 @@ import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory
 class AppReceiptMessageStrategy implements MessageStrategy {
 
     private final MessageSender messageSender;
+    private final IntegrasjonspunktProperties properties;
 
     private static final JAXBContext jaxbContext;
 
@@ -36,8 +38,9 @@ class AppReceiptMessageStrategy implements MessageStrategy {
         }
     }
 
-    public AppReceiptMessageStrategy(MessageSender messageSender) {
+    public AppReceiptMessageStrategy(MessageSender messageSender, IntegrasjonspunktProperties properties) {
         this.messageSender = messageSender;
+        this.properties = properties;
     }
 
     @Override
@@ -45,7 +48,9 @@ class AppReceiptMessageStrategy implements MessageStrategy {
         Audit.info("Received AppReceipt", markerFrom(request));
         AppReceiptType receipt = request.getPayloadAsAppreceiptType();
         if (asList("OK", "WARNING", "ERROR").contains(receipt.getType())) {
-            request.swapSenderAndReceiver();
+            if (!"ephorte".equalsIgnoreCase(properties.getNoarkSystem().getType())) {
+                request.swapSenderAndReceiver();
+            }
             request.setServiceIdentifier(ServiceIdentifier.EDU);
             messageSender.sendMessage(request);
         }

@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
@@ -21,8 +22,9 @@ public class StrategyFactory {
     private final PostVirksomhetStrategyFactory postVirksomhetStrategyFactory;
     private final MessageStrategyFactory postInnbyggerStrategyFactory;
 
-    public StrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup, KeystoreProvider keystoreProvider) {
-        eduMessageStrategyFactory = EduMessageStrategyFactory.newInstance(messageSender);
+    public StrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup,
+                           KeystoreProvider keystoreProvider, IntegrasjonspunktProperties properties) {
+        eduMessageStrategyFactory = EduMessageStrategyFactory.newInstance(messageSender, properties);
         postVirksomhetStrategyFactory = PostVirksomhetStrategyFactory.newInstance(messageSender.getProperties(), serviceRegistryLookup);
 
         try {
