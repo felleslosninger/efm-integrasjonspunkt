@@ -24,6 +24,7 @@ public class HandlerFactory {
         handlers.add(createMeldingHandlers(eduCore, certificate));
         handlers.add(createPropertiesHandler());
         handlers.add(new ReceiverHandler(eduCore));
+        handlers.add(new ForsendelseHandler());
         return handlers;
     }
 
