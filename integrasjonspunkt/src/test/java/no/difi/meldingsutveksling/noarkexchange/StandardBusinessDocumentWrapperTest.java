@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import no.difi.meldingsutveksling.dokumentpakking.service.ScopeFactory;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.BusinessScope;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.DocumentIdentification;
@@ -17,8 +16,8 @@ import static org.junit.Assert.assertEquals;
 public class StandardBusinessDocumentWrapperTest {
 
     public static final String DEFAULT_IDENTIFIER = "urn:no:difi:sdp:1.0";
-    public static final String TYPE_CONVERSATION_ID = ScopeType.ConversationId.name();
-    public static final String TYPE_JOURNAL_POST_ID = ScopeType.JournalpostId.name();
+    public static final String TYPE_CONVERSATION_ID = ScopeType.CONVERSATION_ID.name();
+    public static final String TYPE_JOURNAL_POST_ID = ScopeType.JOURNALPOST_ID.name();
 
     public static final String JOURNALPOST_ID = "1234";
     public static final String CONVERSATION_ID = "5555";

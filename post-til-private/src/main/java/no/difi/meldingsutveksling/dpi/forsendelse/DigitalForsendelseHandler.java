@@ -5,12 +5,7 @@ import no.difi.meldingsutveksling.dpi.EmailNotificationDigitalPostBuilderHandler
 import no.difi.meldingsutveksling.dpi.ForsendelseBuilderHandler;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
 import no.difi.meldingsutveksling.dpi.SmsNotificationDigitalPostBuilderHandler;
-import no.difi.sdp.client2.domain.AktoerOrganisasjonsnummer;
-import no.difi.sdp.client2.domain.Avsender;
-import no.difi.sdp.client2.domain.Dokumentpakke;
-import no.difi.sdp.client2.domain.Forsendelse;
-import no.difi.sdp.client2.domain.Mottaker;
-import no.difi.sdp.client2.domain.Sertifikat;
+import no.difi.sdp.client2.domain.*;
 import no.difi.sdp.client2.domain.digital_post.DigitalPost;
 import no.digipost.api.representations.Organisasjonsnummer;
 
@@ -38,7 +33,7 @@ public class DigitalForsendelseHandler extends ForsendelseBuilderHandler {
         final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(request.getSenderOrgnumber());
         DigitalPost.Builder digitalPost = DigitalPost.builder(mottaker, request.getSubject())
                 .virkningsdato(new Date())
-                .sikkerhetsnivaa(config.getSecurityLevel());
+                .sikkerhetsnivaa(config.getSecurityLevel().toExternal());
         digitalPost = smsNotificationHandler.handle(request, digitalPost);
         digitalPost = emailNotificationHandler.handle(request, digitalPost);
         Avsender behandlingsansvarlig = Avsender.builder(aktoerOrganisasjonsnummer.forfremTilAvsender()).build();

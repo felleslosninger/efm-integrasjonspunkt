@@ -20,6 +20,7 @@ import java.util.UUID;
 
 import static no.difi.meldingsutveksling.dokumentpakking.service.ScopeFactory.fromConversationId;
 import static no.difi.meldingsutveksling.dokumentpakking.service.ScopeFactory.fromJournalPostId;
+import static no.difi.meldingsutveksling.dokumentpakking.service.ScopeFactory.fromMessagetypeId;
 
 public class CreateSBD {
 	public static final String STANDARD = "urn:no:difi:meldingsutveksling:1.0";
@@ -28,18 +29,33 @@ public class CreateSBD {
 
     public EduDocument createSBD(Organisasjonsnummer avsender, Organisasjonsnummer mottaker, Object payload, String conversationId, String type, String journalPostId) {
 		EduDocument doc = new EduDocument();
-		doc.setStandardBusinessDocumentHeader(createHeader(avsender, mottaker, conversationId, type, journalPostId));
+		doc.setStandardBusinessDocumentHeader(createHeader(avsender, mottaker, conversationId, type, journalPostId, null));
 		doc.setAny(payload);
 		return doc;
 	}
 
-	private StandardBusinessDocumentHeader createHeader(Organisasjonsnummer avsender, Organisasjonsnummer mottaker, String conversationId, String documentType, String journalPostId) {
+	public EduDocument createSBD(Organisasjonsnummer avsender, Organisasjonsnummer mottaker, Object payload, String
+			conversationId, String type, String journalPostId, String messagetypeId) {
+		EduDocument doc = new EduDocument();
+		doc.setStandardBusinessDocumentHeader(createHeader(avsender, mottaker, conversationId, type, journalPostId, messagetypeId));
+		doc.setAny(payload);
+		return doc;
+	}
+
+	private StandardBusinessDocumentHeader createHeader(Organisasjonsnummer avsender, Organisasjonsnummer mottaker,
+														String conversationId, String documentType, String
+																journalPostId, String messagetypeId) {
 		StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader();
 		header.setHeaderVersion(HEADER_VERSION);
 		header.getSender().add(createPartner(avsender));
 		header.getReceiver().add(createPartner(mottaker));
 		header.setDocumentIdentification(createDocumentIdentification(documentType));
-		header.setBusinessScope(createBusinessScope(fromConversationId(conversationId), fromJournalPostId(journalPostId)));
+		if (messagetypeId != null) {
+			header.setBusinessScope(createBusinessScope(fromConversationId(conversationId), fromJournalPostId(journalPostId),
+					fromMessagetypeId(messagetypeId)));
+		} else {
+			header.setBusinessScope(createBusinessScope(fromConversationId(conversationId), fromJournalPostId(journalPostId)));
+		}
 		return header;
 	}
 

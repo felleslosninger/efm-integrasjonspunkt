@@ -9,15 +9,22 @@ public class ScopeFactory {
 
     public static Scope fromJournalPostId(String journalPostId) {
         Scope scope = createDefaultScope();
-        scope.setType(ScopeType.JournalpostId.name());
+        scope.setType(ScopeType.JOURNALPOST_ID.name());
         scope.setInstanceIdentifier(journalPostId);
         return scope;
     }
 
     public static Scope fromConversationId(String conversationId) {
         Scope scope = createDefaultScope();
-        scope.setType(ScopeType.ConversationId.name());
+        scope.setType(ScopeType.CONVERSATION_ID.name());
         scope.setInstanceIdentifier(conversationId);
+        return scope;
+    }
+
+    public static Scope fromMessagetypeId(String messagetypeId) {
+        Scope scope = createDefaultScope();
+        scope.setType(ScopeType.MESSAGETYPE_ID.name());
+        scope.setInstanceIdentifier(messagetypeId);
         return scope;
     }
 

@@ -1,14 +1,20 @@
 package no.difi.meldingsutveksling.config;
 
 import lombok.Data;
+import no.difi.meldingsutveksling.logging.MoveLogMarkers;
+import org.slf4j.MDC;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
 
+import javax.annotation.PostConstruct;
 import javax.validation.Valid;
+import javax.validation.constraints.AssertFalse;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.net.URL;
 import java.util.List;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Configurable properties for Integrasjonspunkt.
@@ -38,7 +44,7 @@ public class IntegrasjonspunktProperties {
     private NorskArkivstandardSystem noarkSystem;
 
     @Valid
-    private MessageServiceHandler msh;
+    private MessageServiceHandler msh = new MessageServiceHandler();
 
     @Valid
     private DigitalPostInnbyggerConfig dpi;
@@ -54,11 +60,27 @@ public class IntegrasjonspunktProperties {
     @Valid
     private NextBEST nextbest;
 
+    @Valid
+    private Sign sign;
+
+    /**
+     * Use this parameter to indicate that the message are related to vedtak/messages that require the recipient to be
+     * notified. This parameter is passed over to ServiceRegistry to determine where the message should be sent.
+     * (See http://begrep.difi.no/SikkerDigitalPost/1.2.3/forretningslag/varsling for more information)
+     */
+    private boolean varslingsplikt = false;
+
     /**
      * Feature toggles.
      */
     @Valid
     private FeatureToggle feature;
+
+    @PostConstruct
+    private void postConstruct() {
+        MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, getOrg().getNumber());
+    }
+
 
     public FeatureToggle getFeature() {
         if (this.feature == null) {
@@ -90,14 +112,24 @@ public class IntegrasjonspunktProperties {
 
         private String username;
         private String password;
-        /**
-         * TODO: descrive
-         */
         private String externalServiceCode;
-        /**
-         * TODO: descrive
-         */
         private String externalServiceEditionCode;
+        private Sms sms;
+        @Valid
+        private Email email;
+
+        @Data
+        public static class Email {
+            @Size(max=500)
+            private String varslingstekst;
+            private String emne;
+
+            @AssertFalse(message = "Both \"varslingstekst\" and \"emne\" must be set, if either has a value.")
+            public boolean isValidVarsling() {
+                return isNullOrEmpty(varslingstekst) ^ isNullOrEmpty(emne);
+            }
+
+        }
 
     }
 
@@ -112,6 +144,16 @@ public class IntegrasjonspunktProperties {
         private URL url;
         private List<String> scopes;
         private String clientId;
+        private Keystore keystore;
+    }
+
+    /**
+     * SR signing
+     */
+    @Data
+    public static class Sign {
+
+        private boolean enable;
         private Keystore keystore;
     }
 
@@ -210,6 +252,12 @@ public class IntegrasjonspunktProperties {
         public boolean isEnableDpiReceipts() {
             return enableDpiReceipts;
         }
+    }
+
+    @Data
+    public static class Sms {
+        @Size(max=160)
+        private String varslingstekst;
     }
 
 }

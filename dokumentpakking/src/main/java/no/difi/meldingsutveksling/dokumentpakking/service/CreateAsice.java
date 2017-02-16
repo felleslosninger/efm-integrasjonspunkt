@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.dokumentpakking.service;
 
 import no.difi.asic.AsicWriter;
 import no.difi.asic.AsicWriterFactory;
+import no.difi.asic.MimeType;
 import no.difi.asic.SignatureHelper;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Archive;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Manifest;
@@ -39,7 +40,7 @@ public class CreateAsice {
                 .newContainer(bos)
                 .add(new ByteArrayInputStream(manifest.getBytes()), "manifest.xml");
         for (ByteArrayFile f : forsendelse) {
-            asicWriter.add(new ByteArrayInputStream(f.getBytes()), f.getFileName());
+            asicWriter.add(new ByteArrayInputStream(f.getBytes()), f.getFileName(), MimeType.forString(f.getMimeType()));
         }
 
         asicWriter.sign(signatureHelper);

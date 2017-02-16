@@ -50,8 +50,9 @@ public class NextBestQueue {
 
         IncomingConversationResource message = IncomingConversationResource.of(eduDocument.getConversationId(),
                 eduDocument.getSenderOrgNumber(),
-                eduDocument.getReceiverOrgNumber(), "OEP");
+                eduDocument.getReceiverOrgNumber(), eduDocument.getMessagetypeId());
 
+        message.addFileRef(props.getNextbest().getAsicfile());
         contentFromAsic.forEach(message::addFileRef);
 
         String filedir = props.getNextbest().getFiledir();

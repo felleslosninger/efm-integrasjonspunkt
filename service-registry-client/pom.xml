@@ -3,7 +3,7 @@
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>1.7.47</version>
+        <version>1.7.48</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -14,6 +14,10 @@
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>security</artifactId>
             <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.difi.move-common</groupId>
+            <artifactId>security</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.security.oauth</groupId>

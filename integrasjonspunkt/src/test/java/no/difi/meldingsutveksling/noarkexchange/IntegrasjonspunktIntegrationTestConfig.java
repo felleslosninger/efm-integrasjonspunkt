@@ -46,8 +46,12 @@ public class IntegrasjonspunktIntegrationTestConfig {
     private IntegrasjonspunktProperties properties;
 
     @Bean
-    public MessageSender messageSender(TransportFactory transportFactory, Adresseregister adresseregister, IntegrasjonspunktNokkel integrasjonspunktNokkel, StandardBusinessDocumentFactory standardBusinessDocumentFactory) {
-        return new MessageSender(transportFactory, adresseregister, properties, integrasjonspunktNokkel, standardBusinessDocumentFactory);
+    public MessageSender messageSender(TransportFactory transportFactory, Adresseregister adresseregister,
+                                       IntegrasjonspunktNokkel integrasjonspunktNokkel,
+                                       StandardBusinessDocumentFactory standardBusinessDocumentFactory,
+                                       ServiceRegistryLookup serviceRegistryLookup) {
+        return new MessageSender(transportFactory, adresseregister, properties, integrasjonspunktNokkel,
+                standardBusinessDocumentFactory, serviceRegistryLookup);
     }
 
     @Bean
@@ -57,7 +61,7 @@ public class IntegrasjonspunktIntegrationTestConfig {
 
     @Bean
     public StrategyFactory messageStrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup, KeystoreProvider keystoreProvider) {
-        return new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider);
+        return new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider, properties);
     }
 
     // Mocks
@@ -98,7 +102,7 @@ public class IntegrasjonspunktIntegrationTestConfig {
     @Primary
     public Adresseregister adresseregister() {
         Adresseregister adresseregisterMock = mock(Adresseregister.class);
-        when(adresseregisterMock.hasAdresseregisterCertificate(anyString())).thenReturn(true);
+        when(adresseregisterMock.hasAdresseregisterCertificate(any(ServiceRecord.class))).thenReturn(true);
         return adresseregisterMock;
     }
 

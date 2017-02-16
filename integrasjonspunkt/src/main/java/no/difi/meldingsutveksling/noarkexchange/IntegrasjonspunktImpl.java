@@ -1,8 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import javax.jws.WebParam;
-import javax.jws.WebService;
-import javax.xml.ws.BindingType;
 import net.logstash.logback.encoder.org.apache.commons.lang.StringUtils;
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -10,14 +7,21 @@ import no.difi.meldingsutveksling.core.EDUCoreService;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.logging.MarkerFactory;
 import no.difi.meldingsutveksling.logging.MoveLogMarkers;
-import static no.difi.meldingsutveksling.noarkexchange.PutMessageMarker.markerFrom;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.jws.WebParam;
+import javax.jws.WebService;
+import javax.xml.ws.BindingType;
+
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
+import static no.difi.meldingsutveksling.noarkexchange.PutMessageMarker.markerFrom;
 
 /**
  * This is the implementation of the wenbservice that case managenent systems supporting the BEST/EDU stadard communicates with.
@@ -49,7 +53,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
     private EDUCoreService coreService;
 
     @Autowired
-    ServiceRegistryLookup serviceRegistryLookup;
+    private ServiceRegistryLookup serviceRegistryLookup;
 
     @Override
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
@@ -57,21 +61,35 @@ public class IntegrasjonspunktImpl implements SOAPport {
         String organisasjonsnummer = getCanReceiveMessageRequest.getReceiver().getOrgnr();
 
         GetCanReceiveMessageResponseType response = new GetCanReceiveMessageResponseType();
-        boolean canReceive;
+        boolean certificateAvailable;
 
-        canReceive = adresseRegister.hasAdresseregisterCertificate(organisasjonsnummer);
+        final ServiceRecord serviceRecord;
+        try {
+            serviceRecord = serviceRegistryLookup.getServiceRecord(organisasjonsnummer);
+        } catch (Exception e) {
+            log.error("Exception during service registry lookup: ", e);
+            response.setResult(false);
+            return response;
+        }
+
+        certificateAvailable = adresseRegister.hasAdresseregisterCertificate(serviceRecord);
 
         final LogstashMarker marker = MarkerFactory.receiverMarker(organisasjonsnummer);
-        if (canReceive) {
+        boolean mshCanReceive = false;
+        boolean isDpv = false;
+        if (certificateAvailable) {
             Audit.info("CanReceive = true", marker);
         } else if (hasMshEndpoint()) {
-            canReceive = mshClient.canRecieveMessage(organisasjonsnummer);
-            Audit.info(String.format("MSH canReceive = %s", canReceive), marker);
+            mshCanReceive = mshClient.canRecieveMessage(organisasjonsnummer);
+            Audit.info(String.format("MSH canReceive = %s", mshCanReceive), marker);
+        } else if (DPV.fullname().equals(serviceRecord.getServiceIdentifier())) {
+            isDpv = true;
         }
-        if (!canReceive) {
+
+        if (!mshCanReceive && !certificateAvailable && !isDpv) {
             Audit.error("CanReceive = false", marker);
         }
-        response.setResult(canReceive);
+        response.setResult(certificateAvailable || mshCanReceive || isDpv);
         return response;
     }
 
@@ -117,7 +135,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
         return coreService;
     }
 
-    public void setCoreService(EDUCoreService coreService) {
+    void setCoreService(EDUCoreService coreService) {
         this.coreService = coreService;
     }
 

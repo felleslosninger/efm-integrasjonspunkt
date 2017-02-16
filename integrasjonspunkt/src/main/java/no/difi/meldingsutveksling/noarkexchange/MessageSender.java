@@ -11,6 +11,8 @@ import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextbest.ConversationResource;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
@@ -45,21 +47,27 @@ public class MessageSender implements ApplicationContextAware {
 
     private StandardBusinessDocumentFactory standardBusinessDocumentFactory;
 
+    private ServiceRegistryLookup serviceRegistryLookup;
+
     public MessageSender() {
     }
 
-    public MessageSender(TransportFactory transportFactory, Adresseregister adresseregister, IntegrasjonspunktProperties properties, IntegrasjonspunktNokkel keyInfo, StandardBusinessDocumentFactory standardBusinessDocumentFactory) {
+    public MessageSender(TransportFactory transportFactory, Adresseregister adresseregister,
+                         IntegrasjonspunktProperties properties, IntegrasjonspunktNokkel keyInfo,
+                         StandardBusinessDocumentFactory standardBusinessDocumentFactory, ServiceRegistryLookup serviceRegistryLookup) {
         this.transportFactory = transportFactory;
         this.adresseregister = adresseregister;
         this.properties = properties;
         this.keyInfo = keyInfo;
         this.standardBusinessDocumentFactory = standardBusinessDocumentFactory;
+        this.serviceRegistryLookup = serviceRegistryLookup;
     }
 
     private Avsender createAvsender(String identifier) throws MessageContextException {
+        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(identifier);
         Certificate certificate;
         try {
-            certificate = adresseregister.getCertificate(identifier);
+            certificate = adresseregister.getCertificate(serviceRecord);
         } catch (CertificateException e) {
             throw new MessageContextException(e, StatusMessage.MISSING_SENDER_CERTIFICATE);
         }
@@ -80,8 +88,9 @@ public class MessageSender implements ApplicationContextAware {
     }
 
     private Certificate lookupCertificate(String orgnr) throws CertificateException {
+        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(orgnr);
         Certificate certificate;
-        certificate = adresseregister.getCertificate(orgnr);
+        certificate = adresseregister.getCertificate(serviceRecord);
         return certificate;
     }
 
@@ -209,6 +218,14 @@ public class MessageSender implements ApplicationContextAware {
 
     public StandardBusinessDocumentFactory getStandardBusinessDocumentFactory() {
         return standardBusinessDocumentFactory;
+    }
+
+    public ServiceRegistryLookup getServiceRegistryLookup() {
+        return serviceRegistryLookup;
+    }
+
+    public void setServiceRegistryLookup(ServiceRegistryLookup serviceRegistryLookup) {
+        this.serviceRegistryLookup = serviceRegistryLookup;
     }
 
     @Override

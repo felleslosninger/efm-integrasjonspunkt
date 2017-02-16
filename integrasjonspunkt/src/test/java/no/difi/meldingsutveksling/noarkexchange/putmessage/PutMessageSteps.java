@@ -5,14 +5,6 @@ import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-import java.io.InputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.cert.CertificateException;
-import java.util.ArrayList;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.stream.StreamSource;
 import no.difi.asic.SignatureHelper;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -29,12 +21,23 @@ import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
 import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
-import static org.mockito.Mockito.*;
 import org.springframework.context.ApplicationContext;
 import sun.security.x509.X509CertImpl;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.cert.CertificateException;
+import java.util.ArrayList;
+
+import static org.mockito.Mockito.*;
 
 /**
  * Makes sure that the integrasjonspunkt can handle receipt messages on the send interface
@@ -60,7 +63,7 @@ public class PutMessageSteps {
     public void setup() throws MessageException, CertificateException {
         integrasjonspunkt = new IntegrasjonspunktImpl();
         adresseregister = mock(Adresseregister.class);
-        when(adresseregister.getCertificate(any(String.class))).thenReturn(new X509CertImpl());
+        when(adresseregister.getCertificate(any(ServiceRecord.class))).thenReturn(new X509CertImpl());
 
         messageSender = new MessageSender();
         messageSender.setAdresseregister(adresseregister);

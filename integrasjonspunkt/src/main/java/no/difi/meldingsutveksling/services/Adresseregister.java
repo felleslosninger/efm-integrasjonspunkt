@@ -16,8 +16,6 @@ import org.springframework.util.StringUtils;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
-
 @Component
 public class Adresseregister {
 
@@ -31,41 +29,41 @@ public class Adresseregister {
     }
 
     public void validateCertificates(StandardBusinessDocumentWrapper documentWrapper) throws MessageException {
+        ServiceRecord receiverServiceRecord = serviceRegistryLookup.getServiceRecord(documentWrapper.getReceiverOrgNumber());
         try {
-            getCertificate(documentWrapper.getReceiverOrgNumber());
+            getCertificate(receiverServiceRecord);
         } catch (CertificateException e) {
             throw new MessageException(e, StatusMessage.MISSING_RECIEVER_CERTIFICATE);
         }
+
+        ServiceRecord senderServiceRecord = serviceRegistryLookup.getServiceRecord(documentWrapper.getSenderOrgNumber());
         try {
-            getCertificate(documentWrapper.getSenderOrgNumber());
+            getCertificate(senderServiceRecord);
         } catch (CertificateException e) {
             throw new MessageException(e, StatusMessage.MISSING_SENDER_CERTIFICATE);
         }
     }
 
-    public Certificate getCertificate(String orgNumber) throws CertificateException {
-        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(orgNumber);
-
-        if (DPV.fullname().equals(serviceRecord.getServiceIdentifier())) {
-            return null;
-        }
+    public Certificate getCertificate(ServiceRecord serviceRecord) throws CertificateException {
 
         String pemCertificate = serviceRecord.getPemCertificate();
         if (StringUtils.isEmpty(pemCertificate)) {
-            throw new CertificateException("ServiceRegistry does not have public certificate for " + orgNumber);
+            throw new CertificateException("ServiceRegistry does not have public certificate for " + serviceRecord.getOrganisationNumber());
         }
         try {
             return new CertificateParser().parse(pemCertificate);
         } catch (CertificateParserException e) {
-            throw new CertificateException(String.format("Failed to parse pem certificate: invalid certificate for organization %s? ", orgNumber), e);
+            throw new CertificateException(String.format("Failed to parse pem certificate: invalid certificate for " +
+                    "organization %s? ", serviceRecord.getOrganisationNumber()), e);
         }
     }
 
-    public boolean hasAdresseregisterCertificate(String organisasjonsnummer) {
-        log.info("hasAdresseregisterCertificate orgnr:" +organisasjonsnummer+"orgnr");
+    public boolean hasAdresseregisterCertificate(ServiceRecord serviceRecord) {
+        log.info("hasAdresseregisterCertificate orgnr:" +serviceRecord.getOrganisationNumber());
         try {
-            getCertificate(organisasjonsnummer);
-        } catch (CertificateException e) {
+            getCertificate(serviceRecord);
+        } catch (Exception e) {
+            log.warn("getCertificate: ", e);
             return false;
         }
         return true;

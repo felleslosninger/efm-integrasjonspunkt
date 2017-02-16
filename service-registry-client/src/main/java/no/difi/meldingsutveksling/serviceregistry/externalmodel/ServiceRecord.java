@@ -3,6 +3,8 @@ package no.difi.meldingsutveksling.serviceregistry.externalmodel;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
+import java.util.function.Predicate;
+
 public class ServiceRecord {
 
     public static final ServiceRecord EMPTY = new ServiceRecord();
@@ -38,6 +40,10 @@ public class ServiceRecord {
         this.fysiskPost = false;
         this.postAddress = PostAddress.EMPTY;
         this.returnAddress = PostAddress.EMPTY;
+    }
+
+    public static Predicate<ServiceRecord> isServiceIdentifier(String identifier) {
+        return s -> s != null && s.getServiceIdentifier().equalsIgnoreCase(identifier);
     }
 
     public String getOrganisationNumber() {

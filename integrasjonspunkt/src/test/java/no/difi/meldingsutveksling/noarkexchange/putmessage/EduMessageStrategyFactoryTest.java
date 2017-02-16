@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import org.junit.Before;
@@ -103,11 +104,13 @@ public class EduMessageStrategyFactoryTest {
             "    &lt;/AppReceipt&gt;";
 
     private MessageSender messageSender;
+    private IntegrasjonspunktProperties properties;
 
     @Before
     public void createContxt() {
+        properties = mock(IntegrasjonspunktProperties.class);
         messageSender = mock(MessageSender.class);
-        eduMessageStrategyFactory = EduMessageStrategyFactory.newInstance(messageSender);
+        eduMessageStrategyFactory = EduMessageStrategyFactory.newInstance(messageSender, properties);
     }
 
     @Test
@@ -125,7 +128,7 @@ public class EduMessageStrategyFactoryTest {
 
     @Test
     public void testShouldCreateAppReceiptStrategy() {
-        assertTrue(eduMessageStrategyFactory.newInstance(messageSender).create(appReceiptPayload) instanceof AppReceiptMessageStrategy);
+        assertTrue(eduMessageStrategyFactory.newInstance(messageSender, properties).create(appReceiptPayload) instanceof AppReceiptMessageStrategy);
         assertEquals(AppReceiptMessageStrategy.class, eduMessageStrategyFactory.create(appReceiptPayload).getClass());
     }
 

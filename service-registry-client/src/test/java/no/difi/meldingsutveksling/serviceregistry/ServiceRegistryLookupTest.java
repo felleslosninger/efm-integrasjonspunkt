@@ -3,9 +3,12 @@ package no.difi.meldingsutveksling.serviceregistry;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.nimbusds.jose.proc.BadJWSException;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.Notification;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.junit.Before;
 import org.junit.Rule;
@@ -22,6 +25,7 @@ import java.util.HashMap;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -39,16 +43,20 @@ public class ServiceRegistryLookupTest {
     private ServiceRegistryLookup service;
     private ServiceRecord post = new ServiceRecord("POST", "000", "certificate", "http://localhost:6789");
     private ServiceRecord edu = new ServiceRecord("EDU", "000", "certificate", "http://localhost:4567");
+    private String query;
 
     @Before
     public void setup() {
-        service = new ServiceRegistryLookup(client);
+        final IntegrasjonspunktProperties properties = mock(IntegrasjonspunktProperties.class);
+        when(properties.isVarslingsplikt()).thenReturn(false);
+        service = new ServiceRegistryLookup(client, properties);
+        query = Notification.NOT_OBLIGATED.createQuery();
     }
 
     @Test
-    public void clientThrowsExceptionWithHttpStatusNotFoundShouldReturnsEmptyServiceRecord() {
+    public void clientThrowsExceptionWithHttpStatusNotFoundShouldReturnsEmptyServiceRecord() throws BadJWSException {
         final String badOrgnr = "-100";
-        when(client.getResource("identifier/" + badOrgnr)).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
+        when(client.getResource("identifier/" + badOrgnr, query)).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
 
         final ServiceRecord serviceRecord = service.getServiceRecord(badOrgnr);
 
@@ -56,7 +64,7 @@ public class ServiceRegistryLookupTest {
     }
 
     @Test
-    public void clientThrowsExceptionWithInternalServerErrorThenServiceShouldThrowServiceRegistryLookupException() {
+    public void clientThrowsExceptionWithInternalServerErrorThenServiceShouldThrowServiceRegistryLookupException() throws BadJWSException {
         thrown.expect(UncheckedExecutionException.class);
         when(client.getResource(any(String.class))).thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
@@ -64,9 +72,9 @@ public class ServiceRegistryLookupTest {
     }
 
     @Test
-    public void organizationWithoutServiceRecord() {
+    public void organizationWithoutServiceRecord() throws BadJWSException {
         final String json = new SRContentBuilder().build();
-        when(client.getResource("identifier/" + ORGNR)).thenReturn(json);
+        when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
         final ServiceRecord serviceRecord = this.service.getServiceRecord(ORGNR);
 
@@ -74,9 +82,9 @@ public class ServiceRegistryLookupTest {
     }
 
     @Test
-    public void organizationWithSingleServiceRecordHasServiceRecord() {
+    public void organizationWithSingleServiceRecordHasServiceRecord() throws BadJWSException {
         final String json = new SRContentBuilder().withServiceRecord(edu).build();
-        when(client.getResource("identifier/" + ORGNR)).thenReturn(json);
+        when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
         final ServiceRecord serviceRecord = service.getServiceRecord(ORGNR);
 

@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.dpi;
 
 import com.google.common.io.ByteStreams;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
+import no.difi.meldingsutveksling.config.dpi.securitylevel.SecurityLevel;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress;
 import no.difi.sdp.client2.domain.Prioritet;
 import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
@@ -162,7 +163,7 @@ public class MeldingsformidlerClientMain {
         config.setEndpoint(URL_TESTMILJO);
         config.setMpcId(mpcId);
         config.setPriority(PRIORITET);
-        config.setSecurityLevel(SIKKERHETSNIVAA);
+        config.setSecurityLevel(SecurityLevel.LEVEL_3);
         config.setLanguage(SPRAAK_KODE);
         return config;
     }
