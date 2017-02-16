@@ -33,7 +33,7 @@ public class StrategyFactoryTest {
         final ServiceRegistryLookup serviceRegistryLookup = mock(ServiceRegistryLookup.class);
 
         final KeystoreProvider keystoreProvider = mock(KeystoreProvider.class);
-        strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider);
+        strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider, properties);
     }
 
     @Test
