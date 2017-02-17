@@ -47,6 +47,8 @@ public class PayloadUtil {
     }
 
     public static String payloadAsString(Object payload) {
+        System.out.println(payload);
+        System.out.println(payload.getClass().getName());
         if(payload instanceof String) {
             return ((String) payload);
         } else if (payload instanceof Node) {
