@@ -54,6 +54,20 @@
                 <groupId>org.jvnet.jax-ws-commons</groupId>
                 <artifactId>jaxws-maven-plugin</artifactId>
 
+                <dependencies>
+                    <dependency>
+                        <groupId>org.jvnet.jaxb2_commons</groupId>
+                        <artifactId>jaxb2-namespace-prefix</artifactId>
+                        <version>1.3</version>
+                    </dependency>
+                </dependencies>
+
+                <configuration>
+                    <xjcArgs>
+                        <xjcArg>-Xnamespace-prefix</xjcArg>
+                    </xjcArgs>
+                </configuration>
+
                 <executions>
                     <execution>
                         <id>integrasjonspunkt-exec</id>
@@ -69,6 +83,10 @@
                                 <vmArg>-Djavax.xml.accessExternalDTD=all</vmArg>
                                 <vmArg>-Djavax.xml.accessExternalSchema=all</vmArg>
                             </vmArgs>
+                            <bindingFiles>
+                                <bindingFile>${basedir}/src/wsdl/bindings.xml</bindingFile>
+                            </bindingFiles>
+                            <extension>true</extension>
                             <verbose>true</verbose>
                         </configuration>
                     </execution>
@@ -92,7 +110,6 @@
                         </configuration>
                     </execution>
                 </executions>
-
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
