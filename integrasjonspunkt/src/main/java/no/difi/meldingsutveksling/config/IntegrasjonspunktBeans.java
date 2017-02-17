@@ -62,7 +62,7 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public StrategyFactory messageStrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup, KeystoreProvider meldingsformidlerKeystoreProvider) {
+    public StrategyFactory messageStrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup, KeystoreProvider meldingsformidlerKeystoreProvider, SvarUtService svarUtService) {
         return new StrategyFactory(messageSender, serviceRegistryLookup, meldingsformidlerKeystoreProvider, svarUtService, properties);
     }
 
