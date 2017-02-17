@@ -5,11 +5,9 @@ import no.difi.meldingsutveksling.CertificateParserException;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import org.springframework.stereotype.Service;
 
 import java.security.cert.X509Certificate;
 
-@Service
 public class SvarUtService {
     private SvarUtWebServiceClient client;
     private ServiceRegistryLookup serviceRegistryLookup;
