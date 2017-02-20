@@ -12,7 +12,7 @@
             <jxb:package name="no.difi.meldingsutveksling.noarkexchange.schema" />
         </jxb:schemaBindings>
         <jxb:bindings>
-            <namespace:prefix name="" />
+            <namespace:prefix name="" namespaceURI="http://www.arkivverket.no/Noark/Exchange/types" />
         </jxb:bindings>
     </jxb:bindings>
 

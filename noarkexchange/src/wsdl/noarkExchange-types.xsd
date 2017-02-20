@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
            targetNamespace="http://www.arkivverket.no/Noark/Exchange/types"
-           xmlns:types="http://www.arkivverket.no/Noark/Exchange/types" elementFormDefault="unqualified">
+           xmlns:types="http://www.arkivverket.no/Noark/Exchange/types" elementFormDefault="qualified" attributeFormDefault="unqualified">
   <!-- FMSF/BEST project definitions to facilitate ebXml integration 
        See http://www.efylke.no for more information
   -->
