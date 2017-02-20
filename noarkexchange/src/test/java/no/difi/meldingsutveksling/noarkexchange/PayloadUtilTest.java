@@ -24,6 +24,8 @@ public class PayloadUtilTest {
     public void appReceiptMedFeilmeldingIsNotOkType() throws JAXBException, XMLStreamException {
         PutMessageRequestType value = testData.loadFromClasspath("p360/PutMessageAppReceiptFeilmelding.xml");
 
+        System.out.println("Value: "+value);
+        System.out.println("Payload: "+value.getPayload());
         final AppReceiptType appReceiptType = PayloadUtil.getAppReceiptType(value.getPayload());
         assertFalse(appReceiptType.getType().equals("OK"));
     }

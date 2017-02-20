@@ -14,7 +14,8 @@ import java.io.UnsupportedEncodingException;
 public class EDUCoreConverter {
 
     private static final String CHARSET_UTF8 = "UTF-8";
-    private static final String MESSAGE_TYPE_NAMESPACE = "http://www.arkivverket.no/Noark4-1-WS-WD/types";
+    private static final String MESSAGE_TYPE_NS = "http://www.arkivverket.no/Noark4-1-WS-WD/types";
+    private static final String APPRECEIPT_TYPE_NS = "http://www.arkivverket.no/Noark/Exchange/types";
 
     private static final JAXBContext jaxbContext;
     static {
@@ -30,13 +31,13 @@ public class EDUCoreConverter {
         String payloadAsString;
         PayloadConverter payloadConverter;
         if (message.getMessageType() == EDUCore.MessageType.EDU) {
-            payloadConverter = new PayloadConverter<>(MeldingType.class, MESSAGE_TYPE_NAMESPACE, "Melding");
+            payloadConverter = new PayloadConverter<>(MeldingType.class, MESSAGE_TYPE_NS, "Melding");
             payloadAsString = payloadConverter.marshallToString(message.getPayloadAsMeldingType());
         } else {
-            payloadConverter = new PayloadConverter<>(AppReceiptType.class, null, "AppReceipt");
+            payloadConverter = new PayloadConverter<>(AppReceiptType.class, APPRECEIPT_TYPE_NS, "AppReceipt");
             payloadAsString = payloadConverter.marshallToString(message.getPayloadAsAppreceiptType());
         }
-        message.setPayload(payloadAsString);
+       message.setPayload(payloadAsString);
 
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
         try {

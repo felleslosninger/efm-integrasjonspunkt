@@ -1,8 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.*;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -17,6 +15,12 @@ public class TestData<T> {
         this.classtype = classtype;
         ctx = JAXBContext.newInstance(classtype);
         unmarshaller = ctx.createUnmarshaller();
+        unmarshaller.setEventHandler(new ValidationEventHandler() {
+            @Override
+            public boolean handleEvent(ValidationEvent event) {
+                throw new RuntimeException(event.getMessage(), event.getLinkedException());
+            }
+        });
     }
 
     public T loadFromClasspath(String fileName) throws JAXBException, XMLStreamException {
