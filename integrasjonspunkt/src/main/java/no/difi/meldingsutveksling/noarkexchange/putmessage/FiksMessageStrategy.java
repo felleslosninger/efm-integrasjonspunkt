@@ -14,7 +14,7 @@ class FiksMessageStrategy implements MessageStrategy {
 
     @Override
     public PutMessageResponseType send(EDUCore request) {
-        final String send = svarUtService.send(request); // TODO return value
+        svarUtService.send(request); // TODO return value
         return PutMessageResponseFactory.createOkResponse();
     }
 }
