@@ -25,6 +25,7 @@ public class PayloadUtilTest {
         PutMessageRequestType value = testData.loadFromClasspath("p360/PutMessageAppReceiptFeilmelding.xml");
 
         System.out.println("Value: "+value);
+        System.out.println(value.getEnvelope().getConversationId());
         System.out.println("Payload: "+value.getPayload());
         final AppReceiptType appReceiptType = PayloadUtil.getAppReceiptType(value.getPayload());
         assertFalse(appReceiptType.getType().equals("OK"));
