@@ -7,6 +7,7 @@ public class Forsendelse {
 
     private MetadataForImport metadataForImport;
 
+    @Data
     public static class MetadataForImport {
         private int sakssekvensnummer;
         private int saksaar;
