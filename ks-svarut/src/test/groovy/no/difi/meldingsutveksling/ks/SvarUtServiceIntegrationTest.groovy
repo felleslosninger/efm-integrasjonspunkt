@@ -3,11 +3,8 @@ package no.difi.meldingsutveksling.ks
 import no.difi.meldingsutveksling.core.EDUCore
 import no.difi.meldingsutveksling.core.Receiver
 import no.difi.meldingsutveksling.core.Sender
-import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType
-import no.difi.meldingsutveksling.noarkexchange.schema.core.FilType
-import no.difi.meldingsutveksling.noarkexchange.schema.core.JournpostType
-import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType
-import no.difi.meldingsutveksling.noarkexchange.schema.core.NoarksakType
+import no.difi.meldingsutveksling.noarkexchange.schema.core.*
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -25,7 +22,7 @@ import static org.springframework.ws.test.client.ResponseCreators.withPayload
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
-@ContextConfiguration(classes = [SvarUtConfiguration, SvarUtWebServiceBeans])
+@ContextConfiguration(classes = [SvarUtConfiguration, SvarUtWebServiceBeans, MockConfiguration])
 class SvarUtServiceIntegrationTest {
     @Autowired
     SvarUtService service
@@ -34,6 +31,9 @@ class SvarUtServiceIntegrationTest {
     SvarUtWebServiceClientImpl client
 
     MockWebServiceServer server
+
+    @Autowired
+    ServiceRegistryLookup serviceRegistryLookup
 
     @Before
     void setup() {

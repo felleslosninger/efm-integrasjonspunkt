@@ -13,16 +13,16 @@
 
   <jaxb:bindings schemaLocation="wsdl/ForsendelsesServiceV6.wsdl" node="/wsdl:definitions/wsdl:types/xs:schema">
     <jaxb:bindings node="xs:complexType[@name='sendForsendelse']">
-      <annox:annotateClass>@javax.xml.bind.annotation.XmlRootElement(name="SendForsendelse")</annox:annotateClass>
+      <annox:annotateClass>@javax.xml.bind.annotation.XmlRootElement</annox:annotateClass>
     </jaxb:bindings>
     <jaxb:bindings node="xs:complexType[@name='sendForsendelseResponse']">
-      <annox:annotateClass>@javax.xml.bind.annotation.XmlRootElement(name="SendForsendelseResponse")</annox:annotateClass>
+      <annox:annotateClass>@javax.xml.bind.annotation.XmlRootElement</annox:annotateClass>
     </jaxb:bindings>
     <jaxb:bindings node="xs:complexType[@name='retrieveForsendelseStatus']">
-      <annox:annotateClass>@javax.xml.bind.annotation.XmlRootElement(name="RetrieveForsendelseStatus")</annox:annotateClass>
+      <annox:annotateClass>@javax.xml.bind.annotation.XmlRootElement</annox:annotateClass>
     </jaxb:bindings>
     <jaxb:bindings node="xs:complexType[@name='retrieveForsendelseStatusResponse']">
-      <annox:annotateClass>@javax.xml.bind.annotation.XmlRootElement(name="RetrieveForsendelseStatusResponse")</annox:annotateClass>
+      <annox:annotateClass>@javax.xml.bind.annotation.XmlRootElement</annox:annotateClass>
     </jaxb:bindings>
   </jaxb:bindings>
   <!--

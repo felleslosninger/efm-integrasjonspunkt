@@ -14,7 +14,7 @@ class BestEDUMessageStrategy implements MessageStrategy {
 
     private MessageSender messageSender;
 
-    public BestEDUMessageStrategy(MessageSender messageSender) {
+    BestEDUMessageStrategy(MessageSender messageSender) {
         this.messageSender = messageSender;
     }
 

@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.ks.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -9,6 +10,7 @@ import org.apache.commons.lang.NotImplementedException;
 import org.junit.Before;
 import org.junit.Test;
 
+import static no.difi.meldingsutveksling.ServiceIdentifier.FIKS;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -32,8 +34,19 @@ public class StrategyFactoryTest {
         when(properties.getDpi()).thenReturn(dpic);
         final ServiceRegistryLookup serviceRegistryLookup = mock(ServiceRegistryLookup.class);
 
+
         final KeystoreProvider keystoreProvider = mock(KeystoreProvider.class);
-        strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider, properties);
+        SvarUtService svarUtService = mock(SvarUtService.class);
+        strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider, svarUtService, properties);
+    }
+
+    @Test
+    public void givenFiksServiceRecordShouldCreateFIKSMessageStrategyFactory() {
+        ServiceRecord fiksServiceRecord = new ServiceRecord(FIKS.name(), "112233445", "certificate", "http://localhost");
+
+        MessageStrategyFactory factory = strategyFactory.getFactory(fiksServiceRecord);
+
+        assertThat(factory, instanceOf(FiksMessageStrategyFactory.class));
     }
 
     @Test
