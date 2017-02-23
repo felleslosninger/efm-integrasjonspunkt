@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.core;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
@@ -156,5 +157,25 @@ public class EDUCore {
                 .add("sender", sender)
                 .add("receiver", receiver)
                 .toString();
+    }
+
+    @Override
+    @SuppressWarnings({"squid:S00122", "squid:S1067"})
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        EDUCore eduCore = (EDUCore) o;
+        return Objects.equal(id, eduCore.id) &&
+                Objects.equal(messageReference, eduCore.messageReference) &&
+                Objects.equal(sender, eduCore.sender) &&
+                Objects.equal(receiver, eduCore.receiver) &&
+                serviceIdentifier == eduCore.serviceIdentifier &&
+                messageType == eduCore.messageType &&
+                Objects.equal(payload, eduCore.payload);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id, messageReference, sender, receiver, serviceIdentifier, messageType, payload);
     }
 }

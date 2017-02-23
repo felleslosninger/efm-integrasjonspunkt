@@ -19,7 +19,7 @@ import static org.springframework.ws.test.client.ResponseCreators.withPayload
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
-@ContextConfiguration(classes = [SvarUtConfiguration, SvarUtWebServiceBeans])
+@ContextConfiguration(classes = [SvarUtWebServiceBeans])
 class SvarUtWebServiceClientTest {
     @Autowired
     SvarUtWebServiceClientImpl client
@@ -50,11 +50,14 @@ class SvarUtWebServiceClientTest {
                 .withKrevNiva4Innlogging(true)
                 .withKryptert(true).build()
 
+        SvarUtRequest request = new SvarUtRequest("http://localhost", forsendelse)
+
         SendForsendelseResponse payload = SendForsendelseResponse.builder().withReturn("123").build()
+
         JAXBContext context = JAXBContext.newInstance(payload.getClass())
 
         server.expect(anything()).andRespond(withPayload(new JAXBSource(context, payload)))
-        client.sendMessage(forsendelse)
+        client.sendMessage(request)
 
         server.verify()
     }
@@ -67,7 +70,7 @@ class SvarUtWebServiceClientTest {
         JAXBContext context = JAXBContext.newInstance(response.getClass())
         server.expect(anything()).andRespond(withPayload(new JAXBSource(context, response)))
 
-        client.getForsendelseStatus("123")
+        client.getForsendelseStatus("http://localhost", "123")
 
         server.verify()
     }

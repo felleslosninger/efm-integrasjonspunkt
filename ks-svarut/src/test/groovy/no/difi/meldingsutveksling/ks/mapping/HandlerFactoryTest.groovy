@@ -5,6 +5,8 @@ import no.difi.meldingsutveksling.core.EDUCore
 import no.difi.meldingsutveksling.ks.mapping.edu.ReceiverHandler
 import spock.lang.Specification
 
+import java.security.cert.X509Certificate
+
 class HandlerFactoryTest extends Specification {
     def "test createHandlers"() {
         given:
@@ -13,7 +15,7 @@ class HandlerFactoryTest extends Specification {
             def eduCore = new EDUCore()
 
         when:
-        def handlers = handlerFactory.createHandlers(eduCore)
+        def handlers = handlerFactory.createHandlers(eduCore, Mock(X509Certificate))
         then:
         handlers.find { it instanceof HandlerCollection }
         handlers.find { it instanceof PropertiesHandler}

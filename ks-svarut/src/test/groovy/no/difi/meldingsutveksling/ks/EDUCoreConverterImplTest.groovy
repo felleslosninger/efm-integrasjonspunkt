@@ -5,6 +5,8 @@ import no.difi.meldingsutveksling.ks.mapping.Handler
 import no.difi.meldingsutveksling.ks.mapping.HandlerFactory
 import spock.lang.Specification
 
+import java.security.cert.X509Certificate
+
 class EDUCoreConverterImplTest extends Specification {
     EDUCoreConverterImpl eduConverter
 
@@ -17,12 +19,13 @@ class EDUCoreConverterImplTest extends Specification {
         EDUCore eduCore = new EDUCore()
         def handlers = new ArrayList<Handler<Forsendelse.Builder>>()
         def handler = Mock(Handler)
+        def certificate = Mock(X509Certificate)
         handlers.addAll(handler, handler)
 
         when:
-        this.eduConverter.convert(eduCore)
+        this.eduConverter.convert(eduCore, certificate)
         then:
-        eduConverter.handlerFactory.createHandlers(eduCore) >> handlers
+        eduConverter.handlerFactory.createHandlers(eduCore, certificate) >> handlers
 
         2*handler.map(_ as Forsendelse.Builder)
     }
