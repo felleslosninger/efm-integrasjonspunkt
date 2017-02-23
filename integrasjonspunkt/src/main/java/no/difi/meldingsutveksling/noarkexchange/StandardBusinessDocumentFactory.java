@@ -81,6 +81,10 @@ public class StandardBusinessDocumentFactory {
     public EduDocument create(EDUCore shipment, String conversationId, Avsender avsender, Mottaker mottaker) throws MessageException {
         EDUCoreConverter eduCoreConverter = new EDUCoreConverter();
         byte[] marshalledShipment = eduCoreConverter.marshallToBytes(shipment);
+        if (shipment.getMessageType() == EDUCore.MessageType.APPRECEIPT) {
+            // MOVE-191: Need to remove ns prefix due to it giving errors in ephorte
+            marshalledShipment = new String(marshalledShipment).replaceAll(":ns2|ns2:", "").getBytes();
+        }
 
         BestEduMessage bestEduMessage = new BestEduMessage(marshalledShipment);
         LogstashMarker marker = markerFrom(shipment);
