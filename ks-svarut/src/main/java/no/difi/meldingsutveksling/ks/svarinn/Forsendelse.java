@@ -6,6 +6,7 @@ import lombok.Data;
 public class Forsendelse {
 
     private MetadataForImport metadataForImport;
+    private String downloadUrl;
 
     @Data
     public static class MetadataForImport {
