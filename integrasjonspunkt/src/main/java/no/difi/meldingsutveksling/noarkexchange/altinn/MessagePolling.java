@@ -101,8 +101,9 @@ public class MessagePolling implements ApplicationContextAware {
             if (isNextBest(eduDocument)) {
                 logger.info("NextBest Message received");
                 client.confirmDownload(request);
+                Audit.info("Message downloaded", markerFrom(reference).and(eduDocument.createLogstashMarkers()));
                 nextBestQueue.enqueueEduDocument(eduDocument);
-                return;
+                continue;
             }
 
             if (!isKvittering(eduDocument)) {
