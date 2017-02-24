@@ -27,6 +27,8 @@ public class SvarInnService {
             } catch (IOException e) {
                 throw new SvarInnForsendelseException("Unable to unzip file", e);
             }
+            SvarInnMessageFactory messageFactory;
+            // create SvarInnMessage <- forsendelse and SvarInnFile
             // mapToEduCore (f and svarInnFile)
             // enqueueToNoark
             // sendConfirm
