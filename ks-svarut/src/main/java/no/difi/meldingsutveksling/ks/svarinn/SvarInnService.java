@@ -1,15 +1,20 @@
 package no.difi.meldingsutveksling.ks.svarinn;
 
+import org.springframework.http.MediaType;
+
+import java.io.IOException;
 import java.util.List;
 
 public class SvarInnService {
 
-    SvarInnClient svarInnClient;
+    private SvarInnClient svarInnClient;
     private SvarInnFileDecryptor decryptor;
+    private SvarInnUnzipper unzipper;
 
-    public SvarInnService(SvarInnClient svarInnClient, SvarInnFileDecryptor decryptor) {
+    public SvarInnService(SvarInnClient svarInnClient, SvarInnFileDecryptor decryptor, SvarInnUnzipper unzipper) {
         this.svarInnClient = svarInnClient;
         this.decryptor = decryptor;
+        this.unzipper = unzipper;
     }
 
     public void hentNyeMeldinger() {
@@ -17,6 +22,11 @@ public class SvarInnService {
         forsendelses.forEach(f -> {
             final SvarInnFile svarInnFile = svarInnClient.downloadFile(f.getDownloadUrl());
             final byte[] decrypt = decryptor.decrypt(svarInnFile.getContents());
+            try {
+                final List<SvarInnFile> unzip = unzipper.unzip(new SvarInnFile(MediaType.ALL, decrypt));
+            } catch (IOException e) {
+                throw new SvarInnForsendelseException("Unable to unzip file", e);
+            }
             // mapToEduCore (f and svarInnFile)
             // enqueueToNoark
             // sendConfirm
