@@ -10,7 +10,7 @@ import java.util.zip.ZipInputStream
 public class SvarInnFileDecryptorTest {
     @Test
     public void shouldBeAbleToDecryptGivenBytesFromSvarInn() {
-        final Resource path = new UrlResource(getClass().getResource("/somadalen.jks"));
+        final Resource path = new UrlResource(getClass().getResource("/somdalen.jks"));
         final Keystore keystore = new Keystore(path: path, password: "changeit", alias: "somdalen");
         def bytes = getClass().getResource("/somdalen-dokumenter-ae68b33d.zip").bytes
 
