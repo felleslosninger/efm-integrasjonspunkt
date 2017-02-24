@@ -1,21 +1,43 @@
 package no.difi.meldingsutveksling.ks;
 
+import no.difi.meldingsutveksling.CertificateParser;
+import no.difi.meldingsutveksling.CertificateParserException;
 import no.difi.meldingsutveksling.core.EDUCore;
-import org.springframework.stereotype.Service;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 
-@Service
+import java.security.cert.X509Certificate;
+
 public class SvarUtService {
-    private EDUCoreConverter messageConverter;
     private SvarUtWebServiceClient client;
+    private ServiceRegistryLookup serviceRegistryLookup;
+    private EDUCoreConverter messageConverter;
+    CertificateParser certificateParser;
 
-    public SvarUtService(EDUCoreConverter messageConverter, SvarUtWebServiceClient client) {
+    public SvarUtService(SvarUtWebServiceClient svarUtClient, ServiceRegistryLookup serviceRegistryLookup, EDUCoreConverter messageConverter) {
+        this.client = svarUtClient;
+        this.serviceRegistryLookup = serviceRegistryLookup;
         this.messageConverter = messageConverter;
-        this.client = client;
+        certificateParser = new CertificateParser();
     }
 
     public String send(EDUCore message) {
-        final Forsendelse forsendelse = messageConverter.convert(message);
+        final ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(message.getReceiver().getIdentifier());
 
-        return client.sendMessage(forsendelse);
+        final X509Certificate x509Certificate = toX509Certificate(serviceRecord.getPemCertificate());
+
+        final Forsendelse forsendelse = messageConverter.convert(message, x509Certificate);
+        SvarUtRequest svarUtRequest = new SvarUtRequest(serviceRecord.getEndPointURL(), forsendelse);
+        return client.sendMessage(svarUtRequest);
     }
+
+    private X509Certificate toX509Certificate(String pemCertificate) {
+        try {
+            return certificateParser.parse(pemCertificate);
+        } catch (CertificateParserException e) {
+            throw new SvarUtServiceException("Certificate is invalid", e);
+        }
+    }
+
+
 }

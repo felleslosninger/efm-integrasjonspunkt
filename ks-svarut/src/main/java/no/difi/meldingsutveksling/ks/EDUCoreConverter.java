@@ -2,9 +2,8 @@ package no.difi.meldingsutveksling.ks;
 
 import no.difi.meldingsutveksling.core.EDUCore;
 
-/**
- * Created by mfhoel on 15.12.2016.
- */
+import java.security.cert.X509Certificate;
+
 public interface EDUCoreConverter {
-    Forsendelse convert(EDUCore domainMessage);
+    Forsendelse convert(EDUCore domainMessage, X509Certificate certificate);
 }
