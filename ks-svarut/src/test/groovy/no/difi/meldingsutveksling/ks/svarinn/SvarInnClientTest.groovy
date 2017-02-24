@@ -8,7 +8,6 @@ import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.io.ByteArrayResource
-import org.springframework.core.io.Resource
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
@@ -39,9 +38,8 @@ public class SvarInnClientTest {
 
     @Test
     public void checkForNewMessages() {
-        this.server.expect(ExpectedCount.once(), requestTo(Matchers.endsWith("svarinn/mottaker/hentNyeForsendelser"))).andRespond(withSuccess(new File("src/test/resources/sampleresponse.json").text, MediaType.APPLICATION_JSON))
+        this.server.expect(ExpectedCount.once(), requestTo(Matchers.endsWith("svarinn/mottaker/hentNyeForsendelser"))).andRespond(withSuccess(getClass().getResource("/sampleresponse.json").text, MediaType.APPLICATION_JSON))
         final List<Forsend> forsendelses = client.checkForNewMessages();
-        println "<<< Forsendelse: $forsendelses";
 
         this.server.verify()
     }
@@ -49,10 +47,9 @@ public class SvarInnClientTest {
     @Test
     public void lastNedFil() {
         String downloadUrl = "path/to/file"
-        Resource resource = new ByteArrayResource(new File("src/test/resources/Testdokument.pdf").getBytes())
+        def bytes = getClass().getResource("/decrypted-dokumenter-ae68b33d.zip").getBytes()
 
-
-        this.server.expect(ExpectedCount.once(), requestTo(Matchers.equalTo(downloadUrl))).andRespond(withSuccess(resource, SvarInnClient.APPLICATION_ZIP))
+        this.server.expect(ExpectedCount.once(), requestTo(Matchers.equalTo(downloadUrl))).andRespond(withSuccess(new ByteArrayResource(bytes), SvarInnClient.APPLICATION_ZIP))
 
         def receive = client.downloadFile(downloadUrl)
 
@@ -60,7 +57,7 @@ public class SvarInnClientTest {
 
         assert receive instanceof SvarInnFile
         assert receive.mediaType == SvarInnClient.APPLICATION_ZIP
-        assert receive.contents == new File("src/test/resources/Testdokument.pdf").getBytes()
+        assert receive.contents == bytes
     }
 
 }
