@@ -19,12 +19,10 @@ public class SvarInnUnzipperTest {
     void givenSvarInnZipFileWithTwoFilesThenUnzipperShouldReturnTwoSvarInnFiles() {
         def zipFile = createZipFileWithEmptyFiles("file1.txt", "file2.txt")
 
-        SvarInnFile svarInnFile = new SvarInnFile(SvarInnClient.APPLICATION_ZIP, zipFile)
-
-        def files = new SvarInnUnzipper().unzip(svarInnFile)
+        def files = new SvarInnUnzipper().unzip(zipFile)
 
         assert files.size() == 2
-        assert files.contents == Collections.nCopies(2, content)
+        assert files == ["file1.txt": content, "file2.txt": content]
     }
 
     def createZipFileWithEmptyFiles(String... filenames) {

@@ -11,6 +11,8 @@ import org.springframework.http.MediaType;
 @Data
 class SvarInnFile {
     @NonNull
+    private String filnavn;
+    @NonNull
     private MediaType mediaType;
     @NonNull
     private byte[] contents;

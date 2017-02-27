@@ -1,22 +1,20 @@
 package no.difi.meldingsutveksling.ks.svarinn;
 
-import org.springframework.http.MediaType;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class SvarInnUnzipper {
-    public List<SvarInnFile> unzip(SvarInnFile svarInnZipFile) throws IOException {
-        final ZipInputStream inputStream = new ZipInputStream(new ByteArrayInputStream(svarInnZipFile.getContents()));
+    public Map<String, byte[]> unzip(byte[] zipFile) throws IOException {
+        final ZipInputStream inputStream = new ZipInputStream(new ByteArrayInputStream(zipFile));
 
 
         ZipEntry zipEntry;
-        List<SvarInnFile> decompressedFiles = new ArrayList<>();
+        Map<String, byte[]> decompressedFiles = new HashMap<>();
         while ((zipEntry = inputStream.getNextEntry()) != null) {
             if(zipEntry.isDirectory())
                 continue;
@@ -27,7 +25,7 @@ public class SvarInnUnzipper {
             while ((len = inputStream.read(buffer)) != -1) {
                 outputStream.write(buffer, 0, len);
             }
-            decompressedFiles.add(new SvarInnFile(MediaType.ALL, outputStream.toByteArray()));
+            decompressedFiles.put(zipEntry.getName(), outputStream.toByteArray());
             outputStream.close();
         }
 

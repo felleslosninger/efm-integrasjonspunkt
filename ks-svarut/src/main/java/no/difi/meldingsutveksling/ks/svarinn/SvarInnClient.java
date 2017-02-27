@@ -25,13 +25,9 @@ public class SvarInnClient {
     public SvarInnFile downloadFile(String url) {
         final ResponseEntity<byte[]> forEntity = restTemplate.getForEntity(url, byte[].class);
 
-        System.out.println("Statuscode: " + forEntity.getStatusCode());
-        System.out.println("Content type: " + forEntity.getHeaders().getContentType());
-
-        SvarInnFile svarInnFile = new SvarInnFile(forEntity.getHeaders().getContentType(), forEntity.getBody());
+        SvarInnFile svarInnFile = new SvarInnFile("dokumenter.zip", forEntity.getHeaders().getContentType(), forEntity.getBody());
+        svarInnFile.setMediaType(forEntity.getHeaders().getContentType());
 
         return svarInnFile;
     }
-
-
 }

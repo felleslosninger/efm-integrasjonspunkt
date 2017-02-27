@@ -2,11 +2,15 @@ package no.difi.meldingsutveksling.ks.svarinn;
 
 import lombok.Data;
 
+import java.util.List;
+import java.util.Map;
+
 @Data
 public class Forsendelse {
 
     private MetadataForImport metadataForImport;
     private String downloadUrl;
+    private List<Map<String, String>> filmetadata;
 
     @Data
     public static class MetadataForImport {
@@ -17,7 +21,6 @@ public class Forsendelse {
         private String dokumentetsDato;
         private String tittel;
     }
-
 
     public static class MetaDataFraAvleverendeSystem {
 
