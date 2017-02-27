@@ -2,8 +2,7 @@ package no.difi.meldingsutveksling.ks.svarinn
 
 import org.junit.Before
 import org.junit.Test
-
-import static no.difi.meldingsutveksling.ks.svarinn.SvarInnClient.APPLICATION_ZIP
+import org.springframework.http.MediaType
 
 public class SvarInnMessageTest {
     private int sakssekvensnummer
@@ -26,9 +25,20 @@ public class SvarInnMessageTest {
     @Test
     public void givenSvarInnMessageToEduCoreShouldCreateEduCoreWithContent() {
         final Forsendelse forsendelse = createForsendelse()
-        SvarInnMessage message = new SvarInnMessage(new SvarInnFile(APPLICATION_ZIP, new byte[1] { 0x0 }), forsendelse)
+        byte[] content = [1,2,3,4]
+        def List<SvarInnFile> files = [new SvarInnFile("fil1.txt", MediaType.TEXT_PLAIN, content)]
+        SvarInnMessage message = new SvarInnMessage(forsendelse, files)
 
         def core = message.toEduCore()
+        assert core
+        assert core.getPayloadAsMeldingType()
+        assert core.getPayloadAsMeldingType().journpost
+        assert core.getPayloadAsMeldingType().journpost.getDokument().size() == 1
+        core.getPayloadAsMeldingType().journpost.getDokument().each {
+            assert it.fil?.base64 == content
+            assert it.veMimeType == files.get(0).mediaType.toString()
+        }
+
 
 //        assert core.get
     }
