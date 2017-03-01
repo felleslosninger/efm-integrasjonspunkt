@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.ks.mapping.edu
 
-import no.difi.meldingsutveksling.config.SvarUtConfig
+import no.difi.meldingsutveksling.config.FiksConfig
 import no.difi.meldingsutveksling.ks.Forsendelse
 import no.difi.meldingsutveksling.noarkexchange.schema.core.*
 import spock.lang.Specification
@@ -8,10 +8,10 @@ import spock.lang.Specification
 import java.security.cert.X509Certificate
 
 class MeldingTypeHandlerTest extends Specification {
-    SvarUtConfig properties
+    FiksConfig properties
 
     def setup() {
-        properties = new SvarUtConfig(kryptert: false)
+        properties = new FiksConfig(kryptert: false)
     }
 
     def "Mapping a MeldingType with two documents to Forsendelse"() {

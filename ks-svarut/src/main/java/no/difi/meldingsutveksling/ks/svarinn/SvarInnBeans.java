@@ -14,7 +14,7 @@ public class SvarInnBeans {
     @Bean
     public RestTemplate svarInnRestTemplate(IntegrasjonspunktProperties properties) {
         RestTemplateBuilder builder = new RestTemplateBuilder();
-        builder = builder.basicAuthorization(properties.getDps().getUsername(), properties.getDps().getPassword());
+        builder = builder.basicAuthorization(properties.getDps().getInn().getUsername(), properties.getDps().getInn().getPassword());
         return builder.build();
     }
 

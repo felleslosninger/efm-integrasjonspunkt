@@ -1,16 +1,16 @@
 package no.difi.meldingsutveksling.ks.mapping.properties
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
-import no.difi.meldingsutveksling.config.SvarUtConfig
+import no.difi.meldingsutveksling.config.FiksConfig
 import no.difi.meldingsutveksling.ks.Forsendelse
 import spock.lang.Specification
 
-class SvarUtConfigHandlerTest extends Specification {
+class FiksConfigHandlerTest extends Specification {
     def properties = new IntegrasjonspunktProperties()
 
     def "test map"() {
         given:
-        properties.dps = new SvarUtConfig(kryptert: false, konverteringsKode: "abc")
+        properties.dps = new FiksConfig(kryptert: false, ut: new FiksConfig.SvarUt(konverteringsKode: "abc"))
         SvarUtConfigHandler handler = new SvarUtConfigHandler(properties)
         Forsendelse.Builder builder = Forsendelse.builder()
 

@@ -31,7 +31,7 @@ public class SvarUtWebServiceBeans {
     @Bean
     public HttpComponentsMessageSender svarUtMessageSender(IntegrasjonspunktProperties properties) {
         HttpComponentsMessageSender httpMessageSender = new HttpComponentsMessageSender();
-        httpMessageSender.setCredentials(new UsernamePasswordCredentials(properties.getDps().getUsername(), properties.getDps().getPassword()));
+        httpMessageSender.setCredentials(new UsernamePasswordCredentials(properties.getDps().getUt().getUsername(), properties.getDps().getUt().getPassword()));
         return httpMessageSender;
     }
 

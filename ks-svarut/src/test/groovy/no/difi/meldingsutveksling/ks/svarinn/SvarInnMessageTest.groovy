@@ -30,17 +30,20 @@ public class SvarInnMessageTest {
         SvarInnMessage message = new SvarInnMessage(forsendelse, files)
 
         def core = message.toEduCore()
-        assert core
-        assert core.getPayloadAsMeldingType()
-        assert core.getPayloadAsMeldingType().journpost
-        assert core.getPayloadAsMeldingType().journpost.getDokument().size() == 1
+        assert core?.getPayloadAsMeldingType()?.journpost?.getDokument()?.size() == 1
         core.getPayloadAsMeldingType().journpost.getDokument().each {
             assert it.fil?.base64 == content
             assert it.veMimeType == files.get(0).mediaType.toString()
         }
-
-
-//        assert core.get
+        forsendelse.metadataForImport.with {
+            def meldingType = core.getPayloadAsMeldingType()
+            assert dokumentetsDato == meldingType?.journpost?.jpDokdato
+            assert journalposttype == meldingType?.journpost?.jpNdoktype
+            assert journalstatus == meldingType?.journpost?.jpStatus
+            assert sakssekvensnummer == meldingType?.noarksak?.saSeknr?.toInteger()
+            assert this.saksaar == meldingType?.noarksak?.saSaar?.toInteger()
+            assert this.tittel == meldingType?.noarksak?.saTittel
+        }
     }
 
     private Forsendelse createForsendelse() {
