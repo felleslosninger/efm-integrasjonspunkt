@@ -21,6 +21,6 @@ class FiksConfigHandlerTest extends Specification {
 
         then:
         forsendelse.kryptert == properties.fiks.kryptert
-        forsendelse.konteringskode == properties.fiks.konverteringsKode
+        forsendelse.konteringskode == properties.fiks.ut.konverteringsKode
     }
 }
