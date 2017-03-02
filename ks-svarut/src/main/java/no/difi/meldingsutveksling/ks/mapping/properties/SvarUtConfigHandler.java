@@ -13,8 +13,8 @@ public class SvarUtConfigHandler extends PropertyHandler<Forsendelse.Builder> {
 
     @Override
     public Forsendelse.Builder map(Forsendelse.Builder builder) {
-        builder.withKonteringskode(getProperties().getDps().getUt().getKonverteringsKode());
-        builder.withKryptert(getProperties().getDps().isKryptert());
+        builder.withKonteringskode(getProperties().getFiks().getUt().getKonverteringsKode());
+        builder.withKryptert(getProperties().getFiks().isKryptert());
         return builder;
     }
 }

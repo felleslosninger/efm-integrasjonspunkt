@@ -10,7 +10,7 @@ class FiksConfigHandlerTest extends Specification {
 
     def "test map"() {
         given:
-        properties.dps = new FiksConfig(kryptert: false, ut: new FiksConfig.SvarUt(konverteringsKode: "abc"))
+        properties.fiks = new FiksConfig(kryptert: false, ut: new FiksConfig.SvarUt(konverteringsKode: "abc"))
         SvarUtConfigHandler handler = new SvarUtConfigHandler(properties)
         Forsendelse.Builder builder = Forsendelse.builder()
 
@@ -20,7 +20,7 @@ class FiksConfigHandlerTest extends Specification {
         def forsendelse = builder.build()
 
         then:
-        forsendelse.kryptert == properties.dps.kryptert
-        forsendelse.konteringskode == properties.dps.konverteringsKode
+        forsendelse.kryptert == properties.fiks.kryptert
+        forsendelse.konteringskode == properties.fiks.konverteringsKode
     }
 }

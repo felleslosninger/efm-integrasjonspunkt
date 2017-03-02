@@ -50,7 +50,7 @@ public class IntegrasjonspunktProperties {
     private DigitalPostInnbyggerConfig dpi;
 
     @Valid
-    private FiksConfig dps = new FiksConfig();
+    private FiksConfig fiks = new FiksConfig();
 
     @Valid
     private Oidc oidc;
