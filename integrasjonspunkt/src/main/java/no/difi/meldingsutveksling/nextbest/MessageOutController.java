@@ -2,8 +2,6 @@ package no.difi.meldingsutveksling.nextbest;
 
 import com.google.common.collect.Lists;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.noarkexchange.MessageContextException;
-import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationRepository;
 import no.difi.meldingsutveksling.receipt.MessageReceipt;
@@ -51,7 +49,7 @@ public class MessageOutController {
     private IntegrasjonspunktProperties props;
 
     @Autowired
-    private MessageSender messageSender;
+    private NextBestServiceBus nextBestServiceBus;
 
     @RequestMapping(value = "/out/messages", method = RequestMethod.GET)
     @ResponseBody
@@ -166,8 +164,8 @@ public class MessageOutController {
         }
 
         try {
-            messageSender.sendMessage(conversationResource);
-        } catch (MessageContextException e) {
+            nextBestServiceBus.putMessage(conversationResource);
+        } catch (NextBestException e) {
             log.error("Send message failed.", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error during sending. Check logs");
         }

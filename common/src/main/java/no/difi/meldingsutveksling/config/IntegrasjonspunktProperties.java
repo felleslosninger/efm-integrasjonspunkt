@@ -184,6 +184,9 @@ public class IntegrasjonspunktProperties {
 
         @NotNull
         private String asicfile;
+
+        @NotNull
+        private String sasToken;
     }
 
     @Data

@@ -140,7 +140,7 @@ public class MessageSender implements ApplicationContextAware {
         log.info("ConversationResource sent");
     }
 
-    private MessageContext createMessageContext(ConversationResource conversation) throws MessageContextException {
+    public MessageContext createMessageContext(ConversationResource conversation) throws MessageContextException {
         if (isNullOrEmpty(conversation.getReceiverId())) {
             throw new MessageContextException(StatusMessage.MISSING_RECIEVER_ORGANIZATION_NUMBER);
         }

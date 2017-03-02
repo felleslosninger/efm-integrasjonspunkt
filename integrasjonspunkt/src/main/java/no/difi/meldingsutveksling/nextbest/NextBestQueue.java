@@ -37,7 +37,11 @@ public class NextBestQueue {
     @Autowired
     private IntegrasjonspunktProperties props;
 
-    public void enqueueEduDocument(EduDocument eduDocument) throws MessageException {
+    public void enqueueConversationResource(IncomingConversationResource resource) {
+        repoIn.save(resource);
+    }
+
+    public void enqueueEduDocument(EduDocument eduDocument) {
 
         if (!(eduDocument.getAny() instanceof Payload)) {
             log.error("Message attachement not instance of Payload.");
@@ -46,7 +50,13 @@ public class NextBestQueue {
         }
 
         byte[] decryptedAsicPackage = decrypt((Payload)eduDocument.getAny());
-        List<String> contentFromAsic = getContentFromAsic(decryptedAsicPackage);
+        List<String> contentFromAsic = null;
+        try {
+            contentFromAsic = getContentFromAsic(decryptedAsicPackage);
+        } catch (MessageException e) {
+            log.error("Could not get contents from asic");
+            throw new MeldingsUtvekslingRuntimeException("Could not get contents from asic");
+        }
 
         IncomingConversationResource message = IncomingConversationResource.of(eduDocument.getConversationId(),
                 eduDocument.getSenderOrgNumber(),
