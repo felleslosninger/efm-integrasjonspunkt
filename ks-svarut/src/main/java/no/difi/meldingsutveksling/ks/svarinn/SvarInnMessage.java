@@ -3,6 +3,8 @@ package no.difi.meldingsutveksling.ks.svarinn;
 import lombok.Data;
 import lombok.NonNull;
 import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.core.Receiver;
+import no.difi.meldingsutveksling.core.Sender;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.*;
 
 import java.util.List;
@@ -19,7 +21,6 @@ public class SvarInnMessage {
         ObjectFactory objectFactory = new ObjectFactory();
 
         final MeldingType meldingType = objectFactory.createMeldingType();
-//        journpostType.setJpDokdato(forsendelse.getMetadataForImport());
         JournpostType journpostType = createJournpostType();
         final List<DokumentType> dokumentTypes = svarInnFiles.stream().map(sif -> {
             final DokumentType dokumentType = objectFactory.createDokumentType();
@@ -37,26 +38,43 @@ public class SvarInnMessage {
         meldingType.setJournpost(journpostType);
         final EDUCore eduCore = new EDUCore();
         eduCore.setPayload(meldingType);
+        eduCore.setSender(createSender());
+        eduCore.setReceiver(createReceiver());
         return eduCore;
+    }
+
+    private Sender createSender() {
+        final Sender sender = new Sender();
+        sender.setIdentifier(forsendelse.getSvarSendesTil().getOrgnr());
+        return sender;
+    }
+
+    private Receiver createReceiver() {
+        Receiver receiver = new Receiver();
+        receiver.setIdentifier(forsendelse.getMottaker().getOrgnr());
+        return receiver;
     }
 
     private NoarksakType createNoarkSak() {
         ObjectFactory objectFactory = new ObjectFactory();
         final NoarksakType noarksakType = objectFactory.createNoarksakType();
-        final Forsendelse.MetadataForImport metadataForImport = forsendelse.getMetadataForImport();
-        noarksakType.setSaSeknr(String.valueOf(metadataForImport.getSakssekvensnummer()));
-        noarksakType.setSaSaar(String.valueOf(metadataForImport.getSaksaar()));
-        noarksakType.setSaTittel(metadataForImport.getTittel());
+        final Forsendelse.MetadataFraAvleverendeSystem metadata = forsendelse.getMetadataFraAvleverendeSystem();
+        noarksakType.setSaSeknr(String.valueOf(metadata.getSakssekvensnummer()));
+        noarksakType.setSaSaar(String.valueOf(metadata.getSaksaar()));
+        noarksakType.setSaTittel(metadata.getTittel());
         return noarksakType;
     }
 
     private JournpostType createJournpostType() {
         ObjectFactory objectFactory = new ObjectFactory();
         final JournpostType journpostType = objectFactory.createJournpostType();
-        final Forsendelse.MetadataForImport metadataForImport = forsendelse.getMetadataForImport();
-        journpostType.setJpDokdato(metadataForImport.getDokumentetsDato());
-        journpostType.setJpNdoktype(metadataForImport.getJournalposttype());
-        journpostType.setJpStatus(metadataForImport.getJournalstatus());
+        final Forsendelse.MetadataFraAvleverendeSystem metadata = forsendelse.getMetadataFraAvleverendeSystem();
+        journpostType.setJpDokdato(metadata.getDokumentetsDato());
+        journpostType.setJpNdoktype(metadata.getJournalposttype());
+        journpostType.setJpStatus(metadata.getJournalstatus());
+        journpostType.setJpJaar(metadata.getJournalaar());
+        journpostType.setJpSeknr(metadata.getJournalsekvensnummer());
+        journpostType.setJpJpostnr(metadata.getJournalpostnummer());
         return journpostType;
     }
 }
