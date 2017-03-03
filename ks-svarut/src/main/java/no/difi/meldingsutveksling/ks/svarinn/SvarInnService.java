@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.ks.svarinn;
 
+import no.difi.meldingsutveksling.IncommingQueue;
 import no.difi.meldingsutveksling.core.EDUCore;
 
 import java.io.IOException;
@@ -11,12 +12,14 @@ public class SvarInnService {
     private SvarInnClient svarInnClient;
     private SvarInnFileDecryptor decryptor;
     private SvarInnUnzipper unzipper;
+    private IncommingQueue queue;
     private SvarInnFileFactory svarInnFileFactory;
 
-    public SvarInnService(SvarInnClient svarInnClient, SvarInnFileDecryptor decryptor, SvarInnUnzipper unzipper) {
+    public SvarInnService(SvarInnClient svarInnClient, SvarInnFileDecryptor decryptor, SvarInnUnzipper unzipper, IncommingQueue queue) {
         this.svarInnClient = svarInnClient;
         this.decryptor = decryptor;
         this.unzipper = unzipper;
+        this.queue = queue;
         svarInnFileFactory = new SvarInnFileFactory();
 
     }
@@ -35,10 +38,10 @@ public class SvarInnService {
             // create SvarInnFile with unzipped file and correct mimetype
             final List<SvarInnFile> files = svarInnFileFactory.createFiles(forsendelse.getFilmetadata(), unzippedFile);
 
-            SvarInnMessageFactory messageFactory = new SvarInnMessageFactory();
             final SvarInnMessage message = new SvarInnMessage(forsendelse, files);
 
             final EDUCore eduCore = message.toEduCore();
+            //queue.enqueueNoark(eduCore); // TODO
             // create SvarInnMessage <- forsendelse and SvarInnFile
             // mapToEduCore (forsendelse and svarInnFile)
             // enqueueToNoark
