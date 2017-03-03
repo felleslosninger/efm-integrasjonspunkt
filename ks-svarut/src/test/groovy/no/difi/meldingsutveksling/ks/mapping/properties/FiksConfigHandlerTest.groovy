@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.ks.mapping.properties
 
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.config.FiksConfig
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.ks.Forsendelse
 import spock.lang.Specification
 

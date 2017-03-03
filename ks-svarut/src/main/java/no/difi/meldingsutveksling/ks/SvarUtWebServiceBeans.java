@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.ks;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +12,7 @@ import org.springframework.ws.soap.axiom.AxiomSoapMessageFactory;
 import org.springframework.ws.transport.http.HttpComponentsMessageSender;
 
 @Configuration
+@ConditionalOnProperty(name="difi.move.fiks.enabled", havingValue = "true")
 @EnableConfigurationProperties({IntegrasjonspunktProperties.class})
 public class SvarUtWebServiceBeans {
     @Bean

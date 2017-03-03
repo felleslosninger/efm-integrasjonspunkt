@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
@@ -20,6 +21,11 @@ public class PostInnbyggerStrategyFactory implements MessageStrategyFactory {
     @Override
     public MessageStrategy create(Object payload) {
         return new PostInnbyggerMessageStrategy(clientConfig, serviceRegistryLookup, keystoreProvider.getKeyStore());
+    }
+
+    @Override
+    public ServiceIdentifier getServiceIdentifier() {
+        return ServiceIdentifier.DPI;
     }
 
     public static MessageStrategyFactory newInstance(IntegrasjonspunktProperties properties, ServiceRegistryLookup serviceRegistryLookup, KeystoreProvider keystoreProvider) throws MeldingsformidlerException {

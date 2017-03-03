@@ -37,7 +37,9 @@ public class StrategyFactoryTest {
 
         final KeystoreProvider keystoreProvider = mock(KeystoreProvider.class);
         SvarUtService svarUtService = mock(SvarUtService.class);
-        strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider, svarUtService, properties);
+        strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider, properties);
+        strategyFactory.registerMessageStrategyFactory(FiksMessageStrategyFactory.newInstance(svarUtService));
+
     }
 
     @Test
