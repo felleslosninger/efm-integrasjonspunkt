@@ -6,9 +6,8 @@ import com.microsoft.windowsazure.exception.ServiceException;
 import com.microsoft.windowsazure.services.servicebus.ServiceBusConfiguration;
 import com.microsoft.windowsazure.services.servicebus.ServiceBusContract;
 import com.microsoft.windowsazure.services.servicebus.ServiceBusService;
-import com.microsoft.windowsazure.services.servicebus.models.BrokeredMessage;
-import com.microsoft.windowsazure.services.servicebus.models.ReceiveMessageOptions;
-import com.microsoft.windowsazure.services.servicebus.models.ReceiveMode;
+import com.microsoft.windowsazure.services.servicebus.models.*;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
@@ -23,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import javax.xml.bind.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,31 +34,49 @@ public class NextBestServiceBus {
 
     private static final Logger log = LoggerFactory.getLogger(NextBestServiceBus.class);
 
-    private static final String NEXTBEST_NS = "nextbest";
-    private static final String NEXTBEST_QUEUE = "nextbestqueue";
+    private static final String NEXTBEST_QUEUE_PREFIX = "nextbestqueue";
 
     private ServiceBusContract service;
+    private IntegrasjonspunktProperties props;
     private StandardBusinessDocumentFactory sbdf;
     private MessageSender messageSender;
     private JAXBContext jaxbContext;
+    private String queuePath;
 
     @Autowired
     public NextBestServiceBus(IntegrasjonspunktProperties props,
                               StandardBusinessDocumentFactory sbdf,
                               MessageSender messageSender) throws JAXBException {
 
+        this.props = props;
+        this.sbdf = sbdf;
+        this.messageSender = messageSender;
+
         Configuration config = ServiceBusConfiguration.configureWithSASAuthentication(
-                NEXTBEST_NS,
+                props.getNextbest().getServiceBus().getNamespace(),
                 "RootManageSharedAccessKey",
-                props.getNextbest().getSasToken(),
+                props.getNextbest().getServiceBus().getSasToken(),
                 ".servicebus.windows.net"
         );
+        this.service = ServiceBusService.create(config);
 
         this.jaxbContext = JAXBContext.newInstance(EduDocument.class, Payload.class);
 
-        this.service = ServiceBusService.create(config);
-        this.sbdf = sbdf;
-        this.messageSender = messageSender;
+    }
+
+    @PostConstruct
+    private void init() throws ServiceException {
+
+        // Create queue if it does not already exist
+        queuePath = String.format("%s%s%s", NEXTBEST_QUEUE_PREFIX,
+                props.getOrg().getNumber(),
+                props.getNextbest().getServiceBus().getMode());
+        ListQueuesResult queues = service.listQueues();
+        if (!queues.getItems().stream().anyMatch(i -> i.getPath().contains(queuePath))) {
+            log.info("Queue with id {} does not already exist, creating it..", queuePath);
+            QueueInfo qi = new QueueInfo(queuePath);
+            service.createQueue(qi);
+        }
     }
 
     public void putMessage(OutgoingConversationResource resource) throws NextBestException {
@@ -76,7 +94,13 @@ public class NextBestServiceBus {
 
             msg = new BrokeredMessage(os.toByteArray());
 
-            service.sendMessage(NEXTBEST_QUEUE, msg);
+            String queuePath = NEXTBEST_QUEUE_PREFIX + resource.getReceiverId();
+            if (ServiceIdentifier.DPE_INNSYN.fullname().equals(resource.getMessagetypeId())) {
+                queuePath = queuePath + "innsyn";
+            } else {
+                queuePath = queuePath + "data";
+            }
+            service.sendMessage(queuePath, msg);
         } catch (ServiceException | MessageException | JAXBException e) {
             log.error("Could not send conversation resource", e);
             throw new NextBestException(e);
@@ -93,10 +117,10 @@ public class NextBestServiceBus {
         try {
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             for (;;) {
-                BrokeredMessage msg = service.receiveQueueMessage(NEXTBEST_QUEUE, opts).getValue();
+                BrokeredMessage msg = service.receiveQueueMessage(queuePath, opts) .getValue();
 
                 if (msg == null || isNullOrEmpty(msg.getMessageId())) break;
-                log.info("Received message from queue \"{}\" with id {}", NEXTBEST_QUEUE, msg.getMessageId());
+                log.info("Received message on queue \"{}\" with id {}", queuePath, msg.getMessageId());
 
                 EduDocument eduDocument = ((JAXBElement<EduDocument>) unmarshaller.unmarshal(msg.getBody())).getValue();
                 messages.add(eduDocument);

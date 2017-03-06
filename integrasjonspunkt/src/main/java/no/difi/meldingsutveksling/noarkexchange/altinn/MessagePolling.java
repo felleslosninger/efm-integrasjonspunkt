@@ -83,9 +83,11 @@ public class MessagePolling implements ApplicationContextAware {
     @Scheduled(fixedRate = 5000L)
     public void checkForNewNextBestMessages() throws NextBestException {
 
-        logger.debug("Checking for new NextBest messages..");
-        List<EduDocument> messages = nextBestServiceBus.getAllMessages();
-        messages.forEach(nextBestQueue::enqueueEduDocument);
+        if (properties.getNextbest().getServiceBus().isEnable()) {
+            logger.debug("Checking for new NextBest messages..");
+            List<EduDocument> messages = nextBestServiceBus.getAllMessages();
+            messages.forEach(nextBestQueue::enqueueEduDocument);
+        }
     }
 
     @Scheduled(fixedRate = 15000)
