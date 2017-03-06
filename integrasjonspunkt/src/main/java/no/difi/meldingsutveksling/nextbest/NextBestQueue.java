@@ -37,10 +37,6 @@ public class NextBestQueue {
     @Autowired
     private IntegrasjonspunktProperties props;
 
-    public void enqueueConversationResource(IncomingConversationResource resource) {
-        repoIn.save(resource);
-    }
-
     public void enqueueEduDocument(EduDocument eduDocument) {
 
         if (!(eduDocument.getAny() instanceof Payload)) {
