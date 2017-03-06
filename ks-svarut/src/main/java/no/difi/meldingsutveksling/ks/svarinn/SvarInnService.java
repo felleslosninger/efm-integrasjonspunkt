@@ -1,7 +1,10 @@
 package no.difi.meldingsutveksling.ks.svarinn;
 
-import no.difi.meldingsutveksling.IncommingQueue;
 import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.core.EDUCoreFactory;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 
 import java.io.IOException;
 import java.util.List;
@@ -12,14 +15,14 @@ public class SvarInnService {
     private SvarInnClient svarInnClient;
     private SvarInnFileDecryptor decryptor;
     private SvarInnUnzipper unzipper;
-    private IncommingQueue queue;
+    private NoarkClient noarkClient;
     private SvarInnFileFactory svarInnFileFactory;
 
-    public SvarInnService(SvarInnClient svarInnClient, SvarInnFileDecryptor decryptor, SvarInnUnzipper unzipper, IncommingQueue queue) {
+    public SvarInnService(SvarInnClient svarInnClient, SvarInnFileDecryptor decryptor, SvarInnUnzipper unzipper, NoarkClient noarkClient) {
         this.svarInnClient = svarInnClient;
         this.decryptor = decryptor;
         this.unzipper = unzipper;
-        this.queue = queue;
+        this.noarkClient = noarkClient;
         svarInnFileFactory = new SvarInnFileFactory();
 
     }
@@ -41,6 +44,10 @@ public class SvarInnService {
             final SvarInnMessage message = new SvarInnMessage(forsendelse, files);
 
             final EDUCore eduCore = message.toEduCore();
+            PutMessageRequestType putMessage = EDUCoreFactory.createPutMessageFromCore(eduCore);
+
+            final PutMessageResponseType putMessageResponseType = noarkClient.sendEduMelding(putMessage);
+
             //queue.enqueueNoark(eduCore); // TODO
             // create SvarInnMessage <- forsendelse and SvarInnFile
             // mapToEduCore (forsendelse and svarInnFile)

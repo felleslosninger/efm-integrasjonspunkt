@@ -62,7 +62,7 @@ public class EDUCoreFactory {
         return eduCore;
     }
 
-    public PutMessageRequestType createPutMessageFromCore(EDUCore message) {
+    public static PutMessageRequestType createPutMessageFromCore(EDUCore message) {
         no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory of = new no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory();
 
         AddressType receiverAddressType = of.createAddressType();

@@ -27,6 +27,7 @@ public class SvarInnClientTest {
     @Autowired
     RestTemplate restTemplate
 
+
     @Autowired
     SvarInnClient client
     private server
@@ -58,6 +59,18 @@ public class SvarInnClientTest {
         assert receive instanceof SvarInnFile
         assert receive.mediaType == SvarInnClient.APPLICATION_ZIP
         assert receive.contents == bytes
+    }
+
+    @Test
+    public void testConfirmMessage() {
+        def forsendelse = new Forsendelse(id: "123456")
+        this.server.expect(ExpectedCount.once(),
+                requestTo(Matchers.endsWith("svarinn/kvitterMottak/forsendelse/${forsendelse.id}"))).
+                andRespond(withSuccess())
+
+        client.confirmMessage(forsendelse.id)
+
+        this.server.verify()
     }
 
 }

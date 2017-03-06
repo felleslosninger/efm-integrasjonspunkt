@@ -7,6 +7,7 @@ import java.util.Map;
 
 @Data
 public class Forsendelse {
+    private String id;
     private MetadataFraAvleverendeSystem metadataFraAvleverendeSystem;
     private MetadataForImport metadataForImport;
     private String downloadUrl;

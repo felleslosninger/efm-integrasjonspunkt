@@ -16,7 +16,8 @@ public class SvarInnClient {
     }
 
     public List<Forsendelse> checkForNewMessages() {
-        final List<Forsendelse> forsendelser = Arrays.asList(restTemplate.getForObject("https://test.svarut.ks.no/tjenester/svarinn/mottaker/hentNyeForsendelser", Forsendelse[].class));
+        // TODO property
+        final List<Forsendelse> forsendelser = Arrays.asList(restTemplate.getForObject("/mottaker/hentNyeForsendelser", Forsendelse[].class));
 
         return forsendelser;
 
@@ -29,5 +30,10 @@ public class SvarInnClient {
         svarInnFile.setMediaType(forEntity.getHeaders().getContentType());
 
         return svarInnFile;
+    }
+
+    // TODO property
+    public void confirmMessage(String forsendelseId) {
+        restTemplate.postForLocation("/kvitterMottak/forsendelse/{forsendelseId}", null, forsendelseId);
     }
 }

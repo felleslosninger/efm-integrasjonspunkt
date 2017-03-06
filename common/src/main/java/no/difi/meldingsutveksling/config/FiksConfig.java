@@ -26,6 +26,8 @@ public class FiksConfig {
 
     @Data
     public static class SvarInn {
+        private String baseUrl;
+
         private String username;
 
         private String password;

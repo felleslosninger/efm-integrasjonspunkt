@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
-import no.difi.meldingsutveksling.IncommingQueue;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
@@ -49,7 +48,7 @@ import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom
  *
  */
 @Component
-public class InternalQueue implements IncommingQueue {
+public class InternalQueue {
 
     private static final String EXTERNAL = "external";
     private static final String NOARK = "noark";
