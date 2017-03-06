@@ -67,6 +67,10 @@ public class NextBestServiceBus {
     @PostConstruct
     private void init() throws ServiceException {
 
+        if (!props.getNextbest().getServiceBus().isEnable()) {
+            return;
+        }
+
         // Create queue if it does not already exist
         queuePath = String.format("%s%s%s", NEXTBEST_QUEUE_PREFIX,
                 props.getOrg().getNumber(),

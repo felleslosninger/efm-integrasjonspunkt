@@ -180,6 +180,10 @@ public class MessageOutController {
         try {
             if (ServiceIdentifier.DPE_INNSYN.fullname().equals(conversationResource.getMessagetypeId()) ||
                     ServiceIdentifier.DPE_DATA.fullname().equals(conversationResource.getMessagetypeId())) {
+                if (!props.getNextbest().getServiceBus().isEnable()) {
+                    return ResponseEntity.badRequest().body(String.format("Service Bus disabled, cannot send messages" +
+                            " of types %s,%s", ServiceIdentifier.DPE_INNSYN.fullname(), ServiceIdentifier.DPE_DATA.fullname()));
+                }
                 nextBestServiceBus.putMessage(conversationResource);
             } else {
                 messageSender.sendMessage(conversationResource);
