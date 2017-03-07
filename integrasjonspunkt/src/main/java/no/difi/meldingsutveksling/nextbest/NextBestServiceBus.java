@@ -55,7 +55,7 @@ public class NextBestServiceBus {
 
         Configuration config = ServiceBusConfiguration.configureWithSASAuthentication(
                 props.getNextbest().getServiceBus().getNamespace(),
-                "RootManageSharedAccessKey",
+                props.getNextbest().getServiceBus().getSasKeyName(),
                 props.getNextbest().getServiceBus().getSasToken(),
                 ".servicebus.windows.net"
         );

@@ -192,6 +192,8 @@ public class IntegrasjonspunktProperties {
 
             private boolean enable;
             @NotNull
+            private String sasKeyName;
+            @NotNull
             private String sasToken;
             @Pattern(regexp = "innsyn|data", flags = Pattern.Flag.CASE_INSENSITIVE)
             private String mode;
