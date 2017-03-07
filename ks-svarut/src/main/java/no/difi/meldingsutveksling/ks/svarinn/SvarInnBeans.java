@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.ks.svarinn;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -23,6 +24,21 @@ public class SvarInnBeans {
     @Bean
     public SvarInnClient svarInnClient(RestTemplate svarInnRestTemplate) {
         return new SvarInnClient(svarInnRestTemplate);
+    }
+
+    @Bean
+    public SvarInnFileDecryptor svarInnFileDecryptor(IntegrasjonspunktProperties properties) {
+        return new SvarInnFileDecryptor(properties.getOrg().getKeystore());
+    }
+
+    @Bean
+    public SvarInnUnzipper svarInnUnzipper() {
+        return new SvarInnUnzipper();
+    }
+
+    @Bean
+    SvarInnService svarInnService(SvarInnClient svarInnClient, SvarInnFileDecryptor svarInnFileDecryptor, SvarInnUnzipper svarInnUnzipper, NoarkClient localNoark) {
+        return new SvarInnService(svarInnClient, svarInnFileDecryptor, svarInnUnzipper, localNoark);
     }
 
 }

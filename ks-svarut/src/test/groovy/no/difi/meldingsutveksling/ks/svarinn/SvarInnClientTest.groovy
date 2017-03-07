@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.ks.svarinn
 
-import no.difi.meldingsutveksling.ks.svarinn.Forsendelse as Forsend
+import no.difi.meldingsutveksling.ks.MockConfiguration
 import org.hamcrest.Matchers
 import org.junit.Before
 import org.junit.Test
@@ -21,7 +21,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 @RunWith(SpringJUnit4ClassRunner)
 @SpringBootTest
-@ContextConfiguration(classes = [SvarInnBeans])
+@ContextConfiguration(classes = [SvarInnBeans, MockConfiguration])
 @ActiveProfiles("dev")
 public class SvarInnClientTest {
     @Autowired
@@ -40,7 +40,7 @@ public class SvarInnClientTest {
     @Test
     public void checkForNewMessages() {
         this.server.expect(ExpectedCount.once(), requestTo(Matchers.endsWith("svarinn/mottaker/hentNyeForsendelser"))).andRespond(withSuccess(getClass().getResource("/sampleresponse.json").text, MediaType.APPLICATION_JSON))
-        final List<Forsend> forsendelses = client.checkForNewMessages();
+        client.checkForNewMessages();
 
         this.server.verify()
     }

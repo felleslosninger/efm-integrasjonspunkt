@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.ks.svarinn;
 
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreFactory;
+import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
@@ -29,7 +30,10 @@ public class SvarInnService {
 
     public void hentNyeMeldinger() {
         final List<Forsendelse> forsendelses = svarInnClient.checkForNewMessages();
-        forsendelses.forEach(forsendelse -> {
+        if (!forsendelses.isEmpty()) {
+            Audit.info(String.format("%d new messages in FIKS", forsendelses.size()));
+        }
+        for(Forsendelse forsendelse : forsendelses) {
             final SvarInnFile svarInnFile = svarInnClient.downloadFile(forsendelse.getDownloadUrl());
             final byte[] decrypt = decryptor.decrypt(svarInnFile.getContents());
             final Map<String, byte[]> unzippedFile;
@@ -48,11 +52,14 @@ public class SvarInnService {
 
             final PutMessageResponseType putMessageResponseType = noarkClient.sendEduMelding(putMessage);
 
-            //queue.enqueueNoark(eduCore); // TODO
-            // create SvarInnMessage <- forsendelse and SvarInnFile
-            // mapToEduCore (forsendelse and svarInnFile)
-            // enqueueToNoark
-            // sendConfirm
-        });
+            if ("OK".equals(putMessageResponseType.getResult().getType())) {
+                Audit.info("Message successfully forwarded");
+                svarInnClient.confirmMessage(forsendelse.getId());
+            } else if ("WARNING".equals(putMessageResponseType.getResult().getType())) {
+                Audit.info("Archive system responded with warning");
+            } else {
+                Audit.error("New message failed");
+            }
+        }
     }
 }

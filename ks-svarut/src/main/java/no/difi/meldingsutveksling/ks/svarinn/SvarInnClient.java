@@ -16,7 +16,6 @@ public class SvarInnClient {
     }
 
     public List<Forsendelse> checkForNewMessages() {
-        // TODO property
         final List<Forsendelse> forsendelser = Arrays.asList(restTemplate.getForObject("/mottaker/hentNyeForsendelser", Forsendelse[].class));
 
         return forsendelser;
@@ -32,7 +31,6 @@ public class SvarInnClient {
         return svarInnFile;
     }
 
-    // TODO property
     public void confirmMessage(String forsendelseId) {
         restTemplate.postForLocation("/kvitterMottak/forsendelse/{forsendelseId}", null, forsendelseId);
     }
