@@ -59,11 +59,6 @@
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>domain</artifactId>
-            <version>1.6.7-SNAPSHOT</version>
-        </dependency>
     </dependencies>
 
 </project>
