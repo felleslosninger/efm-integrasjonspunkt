@@ -87,18 +87,17 @@ public class NextBestServiceBus {
     public void putMessage(OutgoingConversationResource resource) throws NextBestException {
 
         BrokeredMessage msg;
-        try {
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             MessageContext context = messageSender.createMessageContext(resource);
             EduDocument eduDocument = sbdf.create(resource, context);
 
             Marshaller marshaller = jaxbContext.createMarshaller();
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
+
             ObjectFactory of = new ObjectFactory();
             JAXBElement<EduDocument> sbd = of.createStandardBusinessDocument(eduDocument);
             marshaller.marshal(sbd, os);
 
             msg = new BrokeredMessage(os.toByteArray());
-            os.close();
 
             String queue = NEXTBEST_QUEUE_PREFIX + resource.getReceiverId();
             if (ServiceIdentifier.DPE_INNSYN.fullname().equals(resource.getMessagetypeId())) {
