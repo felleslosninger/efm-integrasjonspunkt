@@ -50,8 +50,8 @@ public class NextBestQueue {
         try {
             contentFromAsic = getContentFromAsic(decryptedAsicPackage);
         } catch (MessageException e) {
-            log.error("Could not get contents from asic");
-            throw new MeldingsUtvekslingRuntimeException("Could not get contents from asic");
+            log.error("Could not get contents from asic", e);
+            throw new MeldingsUtvekslingRuntimeException("Could not get contents from asic", e);
         }
 
         IncomingConversationResource message = IncomingConversationResource.of(eduDocument.getConversationId(),

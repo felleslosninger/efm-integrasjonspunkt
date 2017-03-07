@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.xml.bind.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -97,15 +98,16 @@ public class NextBestServiceBus {
             marshaller.marshal(sbd, os);
 
             msg = new BrokeredMessage(os.toByteArray());
+            os.close();
 
-            String queuePath = NEXTBEST_QUEUE_PREFIX + resource.getReceiverId();
+            String queue = NEXTBEST_QUEUE_PREFIX + resource.getReceiverId();
             if (ServiceIdentifier.DPE_INNSYN.fullname().equals(resource.getMessagetypeId())) {
-                queuePath = queuePath + "innsyn";
+                queue = queue + "innsyn";
             } else {
-                queuePath = queuePath + "data";
+                queue = queue + "data";
             }
-            service.sendMessage(queuePath, msg);
-        } catch (ServiceException | MessageException | JAXBException e) {
+            service.sendMessage(queue, msg);
+        } catch (ServiceException | MessageException | JAXBException | IOException e) {
             log.error("Could not send conversation resource", e);
             throw new NextBestException(e);
         }
@@ -123,7 +125,9 @@ public class NextBestServiceBus {
             for (;;) {
                 BrokeredMessage msg = service.receiveQueueMessage(queuePath, opts) .getValue();
 
-                if (msg == null || isNullOrEmpty(msg.getMessageId())) break;
+                if (msg == null || isNullOrEmpty(msg.getMessageId())) {
+                    break;
+                }
                 log.info("Received message on queue \"{}\" with id {}", queuePath, msg.getMessageId());
 
                 EduDocument eduDocument = ((JAXBElement<EduDocument>) unmarshaller.unmarshal(msg.getBody())).getValue();
