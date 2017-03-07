@@ -102,9 +102,9 @@ public class NextBestServiceBus {
 
             String queue = NEXTBEST_QUEUE_PREFIX + resource.getReceiverId();
             if (ServiceIdentifier.DPE_INNSYN.fullname().equals(resource.getMessagetypeId())) {
-                queue = queue + "innsyn";
+                queue = queue + ServiceBusQueueMode.INNSYN.fullname();
             } else {
-                queue = queue + "data";
+                queue = queue + ServiceBusQueueMode.DATA.fullname();
             }
             service.sendMessage(queue, msg);
         } catch (ServiceException | MessageException | JAXBException | IOException e) {
@@ -122,10 +122,10 @@ public class NextBestServiceBus {
         ArrayList<EduDocument> messages = Lists.newArrayList();
         try {
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            for (;;) {
-                BrokeredMessage msg = service.receiveQueueMessage(queuePath, opts) .getValue();
+            BrokeredMessage msg;
+            while ((msg = service.receiveQueueMessage(queuePath, opts).getValue()) != null) {
 
-                if (msg == null || isNullOrEmpty(msg.getMessageId())) {
+                if (isNullOrEmpty(msg.getMessageId())) {
                     break;
                 }
                 log.info("Received message on queue \"{}\" with id {}", queuePath, msg.getMessageId());
