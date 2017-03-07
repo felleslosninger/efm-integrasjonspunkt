@@ -10,7 +10,9 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.kvittering.EduDocumentFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.nextbest.NextBestException;
 import no.difi.meldingsutveksling.nextbest.NextBestQueue;
+import no.difi.meldingsutveksling.nextbest.NextBestServiceBus;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.Conversation;
@@ -74,6 +76,19 @@ public class MessagePolling implements ApplicationContextAware {
     private NextBestQueue nextBestQueue;
 
     private ServiceRecord serviceRecord;
+
+    @Autowired
+    private NextBestServiceBus nextBestServiceBus;
+
+    @Scheduled(fixedRate = 5000L)
+    public void checkForNewNextBestMessages() throws NextBestException {
+
+        if (properties.getNextbest().getServiceBus().isEnable()) {
+            logger.debug("Checking for new NextBest messages..");
+            List<EduDocument> messages = nextBestServiceBus.getAllMessages();
+            messages.forEach(nextBestQueue::enqueueEduDocument);
+        }
+    }
 
     @Scheduled(fixedRate = 15000)
     public void checkForNewMessages() throws MessageException {

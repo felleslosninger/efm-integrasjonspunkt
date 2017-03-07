@@ -10,6 +10,7 @@ import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 import javax.validation.constraints.AssertFalse;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.net.URL;
 import java.util.List;
@@ -181,9 +182,23 @@ public class IntegrasjonspunktProperties {
 
         @NotNull
         private String filedir;
-
         @NotNull
         private String asicfile;
+        @Valid
+        private ServiceBus serviceBus;
+
+        @Data
+        public static class ServiceBus {
+
+            private boolean enable;
+            @NotNull
+            private String sasToken;
+            @Pattern(regexp = "innsyn|data", flags = Pattern.Flag.CASE_INSENSITIVE)
+            private String mode;
+            @NotNull
+            private String namespace;
+        }
+
     }
 
     @Data

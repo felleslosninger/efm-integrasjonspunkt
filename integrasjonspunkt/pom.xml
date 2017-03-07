@@ -643,5 +643,12 @@
             <artifactId>springfox-swagger-ui</artifactId>
         </dependency>
 
-    </dependencies>
+        <dependency>
+            <groupId>com.microsoft.azure</groupId>
+            <artifactId>azure-servicebus</artifactId>
+            <version>0.9.7</version>
+        </dependency>
+
+
+</dependencies>
 </project>

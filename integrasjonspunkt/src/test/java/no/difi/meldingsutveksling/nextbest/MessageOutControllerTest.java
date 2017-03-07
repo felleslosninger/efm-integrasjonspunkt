@@ -54,6 +54,9 @@ public class MessageOutControllerTest {
     @MockBean
     private MessageSender messageSender;
 
+    @MockBean
+    private NextBestServiceBus nextBestServiceBus;
+
     @Before
     public void setup() {
         IntegrasjonspunktProperties.NextBEST nextBEST = new IntegrasjonspunktProperties.NextBEST();
