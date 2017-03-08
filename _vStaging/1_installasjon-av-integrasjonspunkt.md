@@ -114,7 +114,7 @@ difi.move.noarkSystem.domain\*      |Domene sakarkivsystemet kjører på        
                                     |                                                                                                              |
 difi.move.msh.endpointURL\*\*       |Path til MSH                                                                                                  |
                                     |                                                                                                              |
-difi.move.altinn.username           |Brukernavnet du får ved [opprettelse av AltInn systembruker](#Opprette-bruker-til-altinn-formidlingstjeneste) |123456
+difi.move.altinn.username           |Brukernavnet du får ved [opprettelse av AltInn systembruker](#opprette-bruker-til-altinn-formidlingstjeneste) |123456
 difi.move.altinn.password           |Passord du satte når du opprettet AltInn systembruker                                                         |changeit
 
 
@@ -137,6 +137,7 @@ c:/
 
 ### Opprette bruker til AltInn formidlingstjeneste
 
+> Gjelder DPO
 Integrasjonspunktet kjører som [datasystem](https://www.altinn.no/no/Portalhjelp/Datasystemer/) mot AltInn's meldingsformidler. Integrsjonspunktet må registeres som et datasystem AltInn's portal. Informasjon om hvordan dette gjøres finnes [her](https://www.altinn.no/no/Portalhjelp/Datasystemer/Registrere-datasystem/).
 
 Under opprettelse av datasystem velger du passord og får tildelt brukerid (ID), disse skal senere brukes i properties filen som beskrives lenger ned
@@ -156,6 +157,7 @@ Informasjon om hvordan du logger på AltInn portal finner du [her](https://www.a
 
 ### Konfigurere sak-/arkivsystem til å bruke Integrsjonspunktet
 
+> Gjelder DPO
 Oppsett for ephorte, [P360](../resources/Oppsett360.docx), WebSak
 
 
