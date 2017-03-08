@@ -91,6 +91,7 @@ Opprett filen integrasjonspunkt-local.properties på området
 Følgende verdier settest i integrasjonspunkt-local.properties
 
 For alle installasjoner
+
 **Propertie**                       |**Beskrivelse**                                                                                               |**Eksempel**
 ------------------------------------|--------------------------------------------------------------------------------------------------------------|-----------------
 server.port                         |Portnummer integrasjonspunktet skal kjøre på (default 9093)                                                   |9093
@@ -101,6 +102,7 @@ difi.move.org.keystore.password     |Passord til keystore                       
 difi.move.org.keystore.alias        |Alieas til virksomhetssertifikatet som brukes i integrasjonspunktet                                           |alias
 
 DPO spesifikke
+
 **Propertie**                       |**Beskrivelse**                                                                                               |**Eksempel**
 ------------------------------------|--------------------------------------------------------------------------------------------------------------|-----------------
 difi.move.noarkSystem.endpointURL   |URL integrasjonspunktet finner sak-/arkivsystemets BestEdu tjenester                                          |Se eksempelfil for eksempel
