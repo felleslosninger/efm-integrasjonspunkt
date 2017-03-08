@@ -138,6 +138,7 @@ c:/
 ### Opprette bruker til AltInn formidlingstjeneste
 
 > Gjelder DPO
+
 Integrasjonspunktet kjører som [datasystem](https://www.altinn.no/no/Portalhjelp/Datasystemer/) mot AltInn's meldingsformidler. Integrsjonspunktet må registeres som et datasystem AltInn's portal. Informasjon om hvordan dette gjøres finnes [her](https://www.altinn.no/no/Portalhjelp/Datasystemer/Registrere-datasystem/).
 
 Under opprettelse av datasystem velger du passord og får tildelt brukerid (ID), disse skal senere brukes i properties filen som beskrives lenger ned
@@ -158,6 +159,7 @@ Informasjon om hvordan du logger på AltInn portal finner du [her](https://www.a
 ### Konfigurere sak-/arkivsystem til å bruke Integrsjonspunktet
 
 > Gjelder DPO
+
 Oppsett for ephorte, [P360](../resources/Oppsett360.docx), WebSak
 
 
