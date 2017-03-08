@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextbest;
 
 import com.google.common.collect.Lists;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.MessageContextException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
@@ -34,7 +35,6 @@ public class MessageOutController {
 
     private static final Logger log = LoggerFactory.getLogger(MessageOutController.class);
 
-
     @Autowired
     private OutgoingConversationResourceRepository repo;
 
@@ -52,6 +52,9 @@ public class MessageOutController {
 
     @Autowired
     private MessageSender messageSender;
+
+    @Autowired
+    private NextBestServiceBus nextBestServiceBus;
 
     @RequestMapping(value = "/out/messages", method = RequestMethod.GET)
     @ResponseBody
@@ -99,6 +102,15 @@ public class MessageOutController {
         if (isNullOrEmpty(messagetypeId)) {
             return ResponseEntity.badRequest().body("Required String parameter \'messagetypeId\' is not present");
         }
+
+        List<String> supportedTypes = Arrays.asList(ServiceIdentifier.EDU.fullname(),
+                ServiceIdentifier.DPE_INNSYN.fullname(),
+                ServiceIdentifier.DPE_DATA.fullname());
+        if (!supportedTypes.contains(messagetypeId)) {
+            return ResponseEntity.badRequest().body("messagetypeId \'"+messagetypeId+"\' not supported. Supported " +
+                    "types: "+supportedTypes);
+        }
+
 
         String sender;
         if (isNullOrEmpty(senderId)) {
@@ -166,8 +178,17 @@ public class MessageOutController {
         }
 
         try {
-            messageSender.sendMessage(conversationResource);
-        } catch (MessageContextException e) {
+            if (ServiceIdentifier.DPE_INNSYN.fullname().equals(conversationResource.getMessagetypeId()) ||
+                    ServiceIdentifier.DPE_DATA.fullname().equals(conversationResource.getMessagetypeId())) {
+                if (!props.getNextbest().getServiceBus().isEnable()) {
+                    return ResponseEntity.badRequest().body(String.format("Service Bus disabled, cannot send messages" +
+                            " of types %s,%s", ServiceIdentifier.DPE_INNSYN.fullname(), ServiceIdentifier.DPE_DATA.fullname()));
+                }
+                nextBestServiceBus.putMessage(conversationResource);
+            } else {
+                messageSender.sendMessage(conversationResource);
+            }
+        } catch (NextBestException | MessageContextException e) {
             log.error("Send message failed.", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error during sending. Check logs");
         }

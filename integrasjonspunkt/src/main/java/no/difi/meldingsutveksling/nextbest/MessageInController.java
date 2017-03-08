@@ -63,6 +63,11 @@ public class MessageInController {
                 resources = Lists.newArrayList(repo.findAll());
             }
         }
+
+        if (resources.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
         return ResponseEntity.ok(resources);
     }
 
@@ -81,7 +86,7 @@ public class MessageInController {
         if (resource.isPresent()) {
             return ResponseEntity.ok(resource.get());
         }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.noContent().build();
     }
 
     @RequestMapping(value = "/in/messages/pop", method = RequestMethod.GET)
@@ -115,7 +120,7 @@ public class MessageInController {
                     .contentLength(file.length())
                     .body(isr);
         }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.noContent().build();
     }
 
 }
