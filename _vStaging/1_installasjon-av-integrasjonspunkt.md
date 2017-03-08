@@ -91,28 +91,28 @@ Opprett filen integrasjonspunkt-local.properties på området
 Følgende verdier settest i integrasjonspunkt-local.properties
 
 For alle installasjoner
-**Propertie**                       |**Beskrivelse**                                                        |**Eksempel**
-------------------------------------|-----------------------------------------------------------------------|-----------------
-server.port                         |Portnummer integrasjonspunktet skal kjøre på (default 9093)            |9093
-                                    |                                                                       |
-difi.move.org.number                |Organisasjonsnummer til din organisasjon (9 siffer)                    |123456789
-difi.move.org.keystore.path         |Path til .jks fil                                                      |c:\integrajsonspunkt\keystore.jks
-difi.move.org.keystore.password     |Passord til keystore                                                   |changeit
-difi.move.org.keystore.alias        |Alieas til virksomhetssertifikatet som brukes i integrasjonspunktet    |alias
+**Propertie**                       |**Beskrivelse**                                                                                               |**Eksempel**
+------------------------------------|--------------------------------------------------------------------------------------------------------------|-----------------
+server.port                         |Portnummer integrasjonspunktet skal kjøre på (default 9093)                                                   |9093
+                                    |                                                                                                              |
+difi.move.org.number                |Organisasjonsnummer til din organisasjon (9 siffer)                                                           |123456789
+difi.move.org.keystore.path         |Path til .jks fil                                                                                             |c:\integrajsonspunkt\keystore.jks
+difi.move.org.keystore.password     |Passord til keystore                                                                                          |changeit
+difi.move.org.keystore.alias        |Alieas til virksomhetssertifikatet som brukes i integrasjonspunktet                                           |alias
 
 DPO spesifikke
-**Propertie**                       |**Beskrivelse**                                                        |**Eksempel**
-------------------------------------|-----------------------------------------------------------------------|-----------------
-difi.move.noarkSystem.endpointURL   |URL integrasjonspunktet finner sak-/arkivsystemets BestEdu tjenester   |Se eksempelfil for eksempel
-difi.move.noarkSystem.type          |Sak/-arkivsystem type                                                  |ephorte/P360/WebSak/mail
-difi.move.noarkSystem.username\*    |Brukernavn for autentisering mot sakarkivsystem                        |svc_sakark
-difi.move.noarkSystem.password\*    |Passord for autentisering mot sakarkivsystem                           |changeit
-difi.move.noarkSystem.domain\*      |Domene sakarkivsystemet kjører på                                      |
-                                    |                                                                       |
-difi.move.msh.endpointURL\*\*       |Path til MSH                                                           |
-                                    |                                                                       |
-difi.move.altinn.username           |Brukernavnet du får ved [opprettelse av AltInn systembruker](#Opprette-bruker-til-AltInn-formidlingstjeneste)             |123456
-difi.move.altinn.password           |Passord du satte når du opprettet AltInn systembruker                  |changeit
+**Propertie**                       |**Beskrivelse**                                                                                               |**Eksempel**
+------------------------------------|--------------------------------------------------------------------------------------------------------------|-----------------
+difi.move.noarkSystem.endpointURL   |URL integrasjonspunktet finner sak-/arkivsystemets BestEdu tjenester                                          |Se eksempelfil for eksempel
+difi.move.noarkSystem.type          |Sak/-arkivsystem type                                                                                         |ephorte/P360/WebSak/mail
+difi.move.noarkSystem.username\*    |Brukernavn for autentisering mot sakarkivsystem                                                               |svc_sakark
+difi.move.noarkSystem.password\*    |Passord for autentisering mot sakarkivsystem                                                                  |changeit
+difi.move.noarkSystem.domain\*      |Domene sakarkivsystemet kjører på                                                                             |
+                                    |                                                                                                              |
+difi.move.msh.endpointURL\*\*       |Path til MSH                                                                                                  |
+                                    |                                                                                                              |
+difi.move.altinn.username           |Brukernavnet du får ved [opprettelse av AltInn systembruker](#Opprette-bruker-til-AltInn-formidlingstjeneste) |123456
+difi.move.altinn.password           |Passord du satte når du opprettet AltInn systembruker                                                         |changeit
 
 
 
@@ -132,7 +132,7 @@ c:/
    |-- integrasjonspunkt-local.properties
 ```
 
-### (#Opprette-bruker-til-AltInn-formidlingstjeneste)
+### Opprette-bruker-til-AltInn-formidlingstjeneste
 
 Integrasjonspunktet kjører som [datasystem](https://www.altinn.no/no/Portalhjelp/Datasystemer/) mot AltInn's meldingsformidler. Integrsjonspunktet må registeres som et datasystem AltInn's portal. Informasjon om hvordan dette gjøres finnes [her](https://www.altinn.no/no/Portalhjelp/Datasystemer/Registrere-datasystem/).
 
