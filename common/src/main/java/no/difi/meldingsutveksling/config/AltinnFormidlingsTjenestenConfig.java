@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.config;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 /**
  *
  * @author Nikolai Luthman <nikolai dot luthman at inmeta dot no>
@@ -24,6 +26,10 @@ public class AltinnFormidlingsTjenestenConfig {
     private int externalServiceEditionCode;
     private String streamingserviceUrl;
     private String brokerserviceUrl;
+
+    public boolean isEnableDpo() {
+        return !isNullOrEmpty(username) && !isNullOrEmpty(password);
+    }
 
     public String getUsername() {
         return username;

@@ -92,6 +92,11 @@ public class MessagePolling implements ApplicationContextAware {
 
     @Scheduled(fixedRate = 15000)
     public void checkForNewMessages() throws MessageException {
+
+        if (!properties.getAltinn().isEnableDpo()) {
+            return;
+        }
+
         logger.debug("Checking for new messages");
 
         // TODO: if ServiceRegistry returns a ServiceRecord to something other than Altinn formidlingstjeneste this
