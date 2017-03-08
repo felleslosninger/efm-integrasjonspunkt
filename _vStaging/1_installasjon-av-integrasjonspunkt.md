@@ -111,7 +111,7 @@ difi.move.noarkSystem.domain\*      |Domene sakarkivsystemet kjører på        
                                     |                                                                       |
 difi.move.msh.endpointURL\*\*       |Path til MSH                                                           |
                                     |                                                                       |
-difi.move.altinn.username           |Brukernavnet du får ved [opprettelse av AltInn systembruker](#Opprette-bruker-til-Altinn-formidlingstjeneste)             |123456
+difi.move.altinn.username           |Brukernavnet du får ved [opprettelse av AltInn systembruker](### Opprette-bruker-til-Altinn-formidlingstjeneste)             |123456
 difi.move.altinn.password           |Passord du satte når du opprettet AltInn systembruker                  |changeit
 
 
