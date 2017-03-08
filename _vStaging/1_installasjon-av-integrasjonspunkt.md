@@ -111,7 +111,7 @@ difi.move.noarkSystem.domain\*      |Domene sakarkivsystemet kjører på        
                                     |                                                                       |
 difi.move.msh.endpointURL\*\*       |Path til MSH                                                           |
                                     |                                                                       |
-difi.move.altinn.username           |Brukernavnet du får ved [opprettelse av AltInn systembruker](#Opprette-bruker-til-altinn-formidlingstjeneste)             |123456
+difi.move.altinn.username           |Brukernavnet du får ved [opprettelse av AltInn systembruker](#Opprette-bruker-til-AltInn-formidlingstjeneste)             |123456
 difi.move.altinn.password           |Passord du satte når du opprettet AltInn systembruker                  |changeit
 
 
@@ -132,7 +132,7 @@ c:/
    |-- integrasjonspunkt-local.properties
 ```
 
-### (#Opprette-bruker-til-Altinn-formidlingstjeneste)
+### (#Opprette-bruker-til-AltInn-formidlingstjeneste)
 
 Integrasjonspunktet kjører som [datasystem](https://www.altinn.no/no/Portalhjelp/Datasystemer/) mot AltInn's meldingsformidler. Integrsjonspunktet må registeres som et datasystem AltInn's portal. Informasjon om hvordan dette gjøres finnes [her](https://www.altinn.no/no/Portalhjelp/Datasystemer/Registrere-datasystem/).
 
