@@ -19,7 +19,7 @@ isHome: false
 Integrasjonspunktet og DeployMangager er Java applikasjoner og krever derfor at man har Java kjøremiljø installert på maskinen dette skal kjøre.
 For å verifisere om java er installert og hvilken versjon kan du i et kommandolinje vindu bruke kommandoen
 
-```
+```powershell
 java -version
 ```
 
