@@ -17,7 +17,7 @@ isHome: false
 ### Installere Java runtime environment (JRE)
 
 Integrasjonspunktet og DeployMangager er Java applikasjoner og krever derfor at man har Java kjøremiljø installert på maskinen dette skal kjøre.
-For å verifisere om java er installert og hvilken versjon kan du i et komandolinje vindu bruke komandoen
+For å verifisere om java er installert og hvilken versjon kan du i et kommandolinje vindu bruke kommandoen
 
 ```
 java -version
@@ -36,7 +36,7 @@ Dersom JCE mangler vil integrasjonspunket stoppe under oppstart og skrive logmel
 
 ### Virksomhetssertifikat
 
-Integrasjonspunktet bruker vikrsomhetssrtifikat til krypering og signering av melidinger som går mellom integrasjonpunkter
+Integrasjonspunktet bruker virksomhetssertifikat til kryptering og signering av meldinger som går mellom integrasjonpunkter.
 Virksomhetssertifikat som kan benyttes som kan benyttes leveres av [Commfides](https://www.commfides.com/e-ID/Bestill-Commfides-Virksomhetssertifikat.html) og [Buypass](http://www.buypass.no/bedrift/produkter-og-tjenester/buypass-virksomhetssertifikat)
 
 ### Java Key Store (JKS)
