@@ -4,7 +4,6 @@ import javax.xml.bind.*;
 import javax.xml.namespace.QName;
 import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
 
 public class PayloadConverterImpl<T> implements PayloadConverter<T> {
@@ -36,28 +35,7 @@ public class PayloadConverterImpl<T> implements PayloadConverter<T> {
         }
     }
 
-    public byte[] marshallToBytes(T message) {
-        final ByteArrayOutputStream os = new ByteArrayOutputStream();
-        try {
-            Marshaller marshaller = jaxbContext.createMarshaller();
-            marshaller.marshal(new JAXBElement<>(new QName(namespaceUri, localPart), clazz, message), os);
-            return os.toByteArray();
-        } catch (JAXBException e) {
-            throw new PayloadConverterException("Unable to create marshaller for " + clazz, e);
-        }
-    }
-
-    public String marshallToString(T message) {
-        final StringWriter sw = new StringWriter();
-        try {
-            Marshaller marshaller = jaxbContext.createMarshaller();
-            marshaller.marshal(new JAXBElement<>(new QName(namespaceUri, localPart), clazz, message), sw);
-            return sw.toString();
-        } catch (JAXBException e) {
-            throw new PayloadConverterException("Unable to create marshaller for " + clazz, e);
-        }
-    }
-
+    @Override
     public T unmarshallFrom(byte[] message) {
         final ByteArrayInputStream is = new ByteArrayInputStream(message);
         Unmarshaller unmarshaller;
@@ -70,8 +48,16 @@ public class PayloadConverterImpl<T> implements PayloadConverter<T> {
         }
     }
 
+    @Override
     public Object marshallToPayload(T message) {
-        return marshallToString(message);
+        final StringWriter sw = new StringWriter();
+        try {
+            Marshaller marshaller = jaxbContext.createMarshaller();
+            marshaller.marshal(new JAXBElement<>(new QName(namespaceUri, localPart), clazz, message), sw);
+            return sw.toString();
+        } catch (JAXBException e) {
+            throw new PayloadConverterException("Unable to create marshaller for " + clazz, e);
+        }
     }
 
     public static class PayloadConverterException extends RuntimeException {
