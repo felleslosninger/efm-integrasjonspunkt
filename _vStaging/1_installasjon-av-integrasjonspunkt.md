@@ -1,15 +1,15 @@
----
+﻿---
 title: Installasjon av integrasjonspunkt
 pageid: installasjonavintegrasjonspunkt
 layout: default
-description: Beskrivelse av oppsett av integrajsonspunktet.
+description: Beskrivelse av oppsett av integrasjonspunktet.
 isHome: false
 ---
 
 ### Krav til kjøremiljø
 
 + Java 8 med JCE installert
-+ 3x tilgjengelig minne i forhold til størte meldinger ønsket sendt
++ 3x tilgjengelig minne i forhold til største meldinger ønsket sendt
 + Nødvendige brannmursåpninger
 + BestEdu ekspederingskanal skrudd på i sak-/arkivsystem
 
