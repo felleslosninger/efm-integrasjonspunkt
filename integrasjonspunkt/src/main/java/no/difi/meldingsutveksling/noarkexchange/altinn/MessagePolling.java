@@ -44,7 +44,6 @@ import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom
 @Component
 public class MessagePolling implements ApplicationContextAware {
 
-    private static final String PREFIX_NORWAY = "9908:";
     private Logger logger = LoggerFactory.getLogger(MessagePolling.class);
 
     ApplicationContext context;
@@ -71,6 +70,9 @@ public class MessagePolling implements ApplicationContextAware {
     ConversationRepository conversationRepository;
 
     @Autowired
+    List<MessageDownloaderModule> messageDownloaders;
+
+    @Autowired
     private NextBestQueue nextBestQueue;
 
     private ServiceRecord serviceRecord;
@@ -78,13 +80,17 @@ public class MessagePolling implements ApplicationContextAware {
     @Scheduled(fixedRate = 15000)
     public void checkForNewMessages() throws MessageException {
         logger.debug("Checking for new messages");
+        for (MessageDownloaderModule task : messageDownloaders) {
+            logger.debug("performing enabled task");
+            task.downloadFiles();
+        }
 
-        // TODO: if ServiceRegistry returns a ServiceRecord to something other than Altinn formidlingstjeneste this
-        // will fail
         if (serviceRecord == null) {
             serviceRecord = serviceRegistryLookup.getServiceRecord(properties.getOrg().getNumber());
         }
 
+        // TODO: if ServiceRegistry returns a ServiceRecord to something other than Altinn formidlingstjeneste this
+        // will fail
         AltinnWsConfiguration configuration = AltinnWsConfiguration.fromConfiguration(serviceRecord, context);
         AltinnWsClient client = new AltinnWsClient(configuration);
 

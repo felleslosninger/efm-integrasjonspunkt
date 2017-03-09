@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.ks.svarinn;
 
+import no.difi.meldingsutveksling.MessageDownloaderModule;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreFactory;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -7,11 +8,11 @@ import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.List;
 import java.util.Map;
 
-public class SvarInnService {
+public class SvarInnService implements MessageDownloaderModule {
 
     private SvarInnClient svarInnClient;
     private SvarInnFileDecryptor decryptor;
@@ -26,6 +27,11 @@ public class SvarInnService {
         this.noarkClient = noarkClient;
         svarInnFileFactory = new SvarInnFileFactory();
 
+    }
+
+    @Override
+    public void downloadFiles() {
+        hentNyeMeldinger();
     }
 
     public void hentNyeMeldinger() {
