@@ -29,6 +29,7 @@ public class JmsConfiguration {
         redeliveryPolicy.setMaximumRedeliveries(30);
         redeliveryPolicy.setUseExponentialBackOff(true);
         connectionFactory.setRedeliveryPolicy(redeliveryPolicy);
+        connectionFactory.setNonBlockingRedelivery(true);
 
         return connectionFactory;
     }
