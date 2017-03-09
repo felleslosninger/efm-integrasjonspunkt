@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.Receiver;
 import no.difi.meldingsutveksling.core.Sender;
 import no.difi.meldingsutveksling.noarkexchange.receive.PayloadConverter;
+import no.difi.meldingsutveksling.noarkexchange.receive.PayloadConverterImpl;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.*;
 
 import java.util.List;
@@ -17,6 +18,8 @@ public class SvarInnMessage {
     Forsendelse forsendelse;
     @NonNull
     List<SvarInnFile> svarInnFiles;
+
+    private PayloadConverter<MeldingType> payloadConverter = new PayloadConverterImpl<>(MeldingType.class, "http://www.arkivverket.no/Noark4-1-WS-WD/types", MeldingType.class.getName());
 
     EDUCore toEduCore() {
         ObjectFactory objectFactory = new ObjectFactory();
@@ -42,8 +45,8 @@ public class SvarInnMessage {
         // this is done because of a bug in when sending messages via NoarkClient:
         // The payload util doesn't correctly handle payloads that are MeldingType.
         // And I am afraid of fixing that bug might lead to trouble in the archive system.
-        final String meldingTypeAsString = new PayloadConverter<>(MeldingType.class, "http://www.arkivverket.no/Noark4-1-WS-WD/types", MeldingType.class.getName()).marshallToString(meldingType);
-        eduCore.setPayload(meldingTypeAsString);
+        final Object payload = payloadConverter.marshallToPayload(meldingType);
+        eduCore.setPayload(payload);
         eduCore.setSender(createSender());
         eduCore.setReceiver(createReceiver());
         return eduCore;

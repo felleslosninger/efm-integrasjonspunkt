@@ -28,12 +28,12 @@ public class EDUCoreConverter {
     public byte[] marshallToBytes(EDUCore message) {
         // Need to marshall payload before marshalling the message, since the payload can have different types
         String payloadAsString;
-        PayloadConverter payloadConverter;
+        PayloadConverterImpl payloadConverter;
         if (message.getMessageType() == EDUCore.MessageType.EDU) {
-            payloadConverter = new PayloadConverter<>(MeldingType.class, MESSAGE_TYPE_NAMESPACE, "Melding");
+            payloadConverter = new PayloadConverterImpl<>(MeldingType.class, MESSAGE_TYPE_NAMESPACE, "Melding");
             payloadAsString = payloadConverter.marshallToString(message.getPayloadAsMeldingType());
         } else {
-            payloadConverter = new PayloadConverter<>(AppReceiptType.class, null, "AppReceipt");
+            payloadConverter = new PayloadConverterImpl<>(AppReceiptType.class, null, "AppReceipt");
             payloadAsString = payloadConverter.marshallToString(message.getPayloadAsAppreceiptType());
         }
         message.setPayload(payloadAsString);
@@ -56,12 +56,12 @@ public class EDUCoreConverter {
             unmarshaller = jaxbContext.createUnmarshaller();
             StreamSource source = new StreamSource(is);
             EDUCore eduCore = unmarshaller.unmarshal(source, EDUCore.class).getValue();
-            PayloadConverter payloadConverter;
+            PayloadConverterImpl payloadConverter;
             if (eduCore.getMessageType() == EDUCore.MessageType.EDU) {
-                payloadConverter = new PayloadConverter<>(MeldingType.class);
+                payloadConverter = new PayloadConverterImpl<>(MeldingType.class);
                 eduCore.setPayload(payloadConverter.unmarshallFrom(((String)eduCore.getPayload()).getBytes(CHARSET_UTF8)));
             } else {
-                payloadConverter = new PayloadConverter<>(AppReceiptType.class);
+                payloadConverter = new PayloadConverterImpl<>(AppReceiptType.class);
                 eduCore.setPayload(payloadConverter.unmarshallFrom(((String)eduCore.getPayload()).getBytes(CHARSET_UTF8)));
             }
             return eduCore;

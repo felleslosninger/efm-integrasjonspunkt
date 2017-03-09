@@ -29,6 +29,7 @@ public class SvarInnMessageTest {
         byte[] content = [1, 2, 3, 4]
         def List<SvarInnFile> files = [new SvarInnFile("fil1.txt", MediaType.TEXT_PLAIN, content)]
         SvarInnMessage message = new SvarInnMessage(forsendelse, files)
+        message.payloadConverter = { meldingtype -> meldingtype }
 
         def core = message.toEduCore()
 
