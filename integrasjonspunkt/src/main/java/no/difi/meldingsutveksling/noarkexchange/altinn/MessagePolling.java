@@ -24,6 +24,7 @@ import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -70,7 +71,7 @@ public class MessagePolling implements ApplicationContextAware {
     ConversationRepository conversationRepository;
 
     @Autowired
-    List<MessageDownloaderModule> messageDownloaders;
+    ObjectProvider<List<MessageDownloaderModule>> messageDownloaders;
 
     @Autowired
     private NextBestQueue nextBestQueue;
@@ -80,9 +81,11 @@ public class MessagePolling implements ApplicationContextAware {
     @Scheduled(fixedRate = 15000)
     public void checkForNewMessages() throws MessageException {
         logger.debug("Checking for new messages");
-        for (MessageDownloaderModule task : messageDownloaders) {
-            logger.debug("performing enabled task");
-            task.downloadFiles();
+        if (messageDownloaders.getIfAvailable() != null) {
+            for (MessageDownloaderModule task : messageDownloaders.getObject()) {
+                logger.debug("performing enabled task");
+                task.downloadFiles();
+            }
         }
 
         if (serviceRecord == null) {
