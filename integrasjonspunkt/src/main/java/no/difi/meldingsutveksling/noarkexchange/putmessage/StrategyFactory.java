@@ -63,7 +63,7 @@ public class StrategyFactory {
         return factory;
     }
 
-    public boolean hasFactory(ServiceRecord serviceRecord) {
-        return factories.containsKey(serviceRecord.getServiceIdentifier());
+    public boolean hasFactory(String serviceIdentifier) {
+        return factories.containsKey(serviceIdentifier);
     }
 }

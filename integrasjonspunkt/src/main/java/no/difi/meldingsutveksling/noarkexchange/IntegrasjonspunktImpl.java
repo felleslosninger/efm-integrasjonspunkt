@@ -94,11 +94,12 @@ public class IntegrasjonspunktImpl implements SOAPport {
             Audit.error("CanReceive = false", marker);
         }
 
-        if (!strategyFactory.hasFactory(serviceRecord)) {
+        boolean strategyFactoryAvailable = strategyFactory.hasFactory(serviceRecord.getServiceIdentifier());
+        if (!strategyFactoryAvailable) {
             Audit.warn(String.format("StrategyFactory for %s not found. Feature toggle?", serviceRecord.getServiceIdentifier()), marker);
         }
 
-        response.setResult((certificateAvailable || mshCanReceive || isDpv ) && strategyFactory.hasFactory(serviceRecord));
+        response.setResult((certificateAvailable || mshCanReceive || isDpv ) && strategyFactoryAvailable);
         return response;
     }
 

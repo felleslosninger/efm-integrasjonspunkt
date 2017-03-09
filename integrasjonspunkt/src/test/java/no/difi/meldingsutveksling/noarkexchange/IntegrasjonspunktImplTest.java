@@ -2,12 +2,14 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.GetCanReceiveObjectMother;
 import no.difi.meldingsutveksling.PutMessageObjectMother;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.ServiceRecordObjectMother;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreSender;
 import no.difi.meldingsutveksling.core.EDUCoreService;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageResponseType;
@@ -46,6 +48,8 @@ public class IntegrasjonspunktImplTest {
     private IntegrasjonspunktProperties.FeatureToggle featureMock;
     @Mock
     private ServiceRegistryLookup serviceRegistryLookup;
+    @Mock
+    private StrategyFactory strategyFactory;
 
     @Mock
     private NoarkClient msh;
@@ -69,6 +73,10 @@ public class IntegrasjonspunktImplTest {
         when(propertiesMock.getFeature()).thenReturn(featureMock);
         when(propertiesMock.getOrg()).thenReturn(organizationMock);
         when(featureMock.isEnableQueue()).thenReturn(true);
+        when(strategyFactory.hasFactory(ServiceIdentifier.EDU.fullname())).thenReturn(true);
+        when(strategyFactory.hasFactory(ServiceIdentifier.DPI.fullname())).thenReturn(true);
+        when(strategyFactory.hasFactory(ServiceIdentifier.DPV.fullname())).thenReturn(true);
+
     }
 
     @Test
