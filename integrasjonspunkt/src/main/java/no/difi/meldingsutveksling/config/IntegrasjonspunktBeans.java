@@ -7,7 +7,10 @@ import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.ks.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory;
-import no.difi.meldingsutveksling.noarkexchange.putmessage.*;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.FiksMessageStrategyFactory;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.KeystoreProvider;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactory;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.receipt.DpiReceiptService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.services.Adresseregister;
@@ -16,7 +19,7 @@ import no.difi.move.common.config.KeystoreProperties;
 import no.difi.move.common.oauth.KeystoreHelper;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -64,7 +67,7 @@ public class IntegrasjonspunktBeans {
         return KeystoreProvider.from(properties);
     }
 
-    @ConditionalOnBean(SvarUtService.class)
+    @ConditionalOnProperty(name="difi.move.fiks.enabled", havingValue = "true")
     @Bean
     public FiksMessageStrategyFactory fiksMessageStrategyFactory(SvarUtService svarUtService) {
         return FiksMessageStrategyFactory.newInstance(svarUtService);
