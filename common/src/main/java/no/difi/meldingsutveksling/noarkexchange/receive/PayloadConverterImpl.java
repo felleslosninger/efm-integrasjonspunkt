@@ -49,7 +49,7 @@ public class PayloadConverterImpl<T> implements PayloadConverter<T> {
     }
 
     @Override
-    public Object marshallToPayload(T message) {
+    public String marshallToString(T message) {
         final StringWriter sw = new StringWriter();
         try {
             Marshaller marshaller = jaxbContext.createMarshaller();
@@ -58,6 +58,11 @@ public class PayloadConverterImpl<T> implements PayloadConverter<T> {
         } catch (JAXBException e) {
             throw new PayloadConverterException("Unable to create marshaller for " + clazz, e);
         }
+    }
+
+    @Override
+    public Object marshallToPayload(T message) {
+        return marshallToString(message);
     }
 
     public static class PayloadConverterException extends RuntimeException {

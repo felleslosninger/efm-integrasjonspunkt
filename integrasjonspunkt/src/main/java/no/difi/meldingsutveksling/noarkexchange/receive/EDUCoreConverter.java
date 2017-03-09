@@ -28,22 +28,22 @@ public class EDUCoreConverter {
 
     public byte[] marshallToBytes(EDUCore message) {
         // Need to marshall payload before marshalling the message, since the payload can have different types
-        String payloadAsString;
+        String marshalledPayload;
         PayloadConverterImpl payloadConverter;
         if (message.getMessageType() == EDUCore.MessageType.EDU) {
             payloadConverter = new PayloadConverterImpl<>(MeldingType.class, MESSAGE_TYPE_NAMESPACE, "Melding");
-            payloadAsString = payloadConverter.marshallToString(message.getPayloadAsMeldingType());
+            marshalledPayload = payloadConverter.marshallToString(message.getPayloadAsMeldingType());
         } else {
             payloadConverter = new PayloadConverterImpl<>(AppReceiptType.class, APPRECEIPT_NAMESPACE, "AppReceipt");
-            payloadAsString = payloadConverter.marshallToString(message.getPayloadAsAppreceiptType());
+            marshalledPayload = payloadConverter.marshallToString(message.getPayloadAsAppreceiptType());
         }
-        message.setPayload(payloadAsString);
+        message.setPayload(marshalledPayload);
 
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
         try {
             Marshaller marshaller = jaxbContext.createMarshaller();
             marshaller.marshal(new JAXBElement<>(new QName("uri", "local"), EDUCore.class, message), os);
-            message.setPayload(payloadConverter.unmarshallFrom(payloadAsString.getBytes(CHARSET_UTF8)));
+            message.setPayload(payloadConverter.unmarshallFrom(marshalledPayload.getBytes(CHARSET_UTF8)));
             return os.toByteArray();
         } catch (JAXBException | UnsupportedEncodingException e) {
             throw new RuntimeException("Unable to create marshaller for " + EDUCore.class, e);

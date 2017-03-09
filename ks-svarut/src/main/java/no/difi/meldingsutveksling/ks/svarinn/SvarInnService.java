@@ -32,10 +32,6 @@ public class SvarInnService implements MessageDownloaderModule {
 
     @Override
     public void downloadFiles() {
-        hentNyeMeldinger();
-    }
-
-    public void hentNyeMeldinger() {
         final List<Forsendelse> forsendelses = svarInnClient.checkForNewMessages();
         if (!forsendelses.isEmpty()) {
             Audit.info(String.format("%d new messages in FIKS", forsendelses.size()));

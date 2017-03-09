@@ -64,7 +64,7 @@ public class SvarInnIntegrationTest {
         server.expect(requestTo(Matchers.containsString("/svarinn/forsendelse/"))).andRespond(withSuccess(zipFile, SvarInnClient.APPLICATION_ZIP))
         server.expect(requestTo(Matchers.endsWith("svarinn/kvitterMottak/forsendelse/${forsendelseId}"))).andRespond(withSuccess())
 
-        svarInnService.hentNyeMeldinger()
+        svarInnService.downloadFiles()
 
         verify(noarkClient).sendEduMelding(Mockito.any(PutMessageRequestType));
         server.verify()

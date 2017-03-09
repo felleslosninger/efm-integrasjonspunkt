@@ -7,5 +7,7 @@ package no.difi.meldingsutveksling.noarkexchange.receive;
 public interface PayloadConverter<T> {
     T unmarshallFrom(byte[] message);
 
+    String marshallToString(T message);
+
     Object marshallToPayload(T message);
 }
