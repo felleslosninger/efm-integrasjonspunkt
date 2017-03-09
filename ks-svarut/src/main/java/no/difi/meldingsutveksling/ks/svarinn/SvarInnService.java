@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.ks.svarinn;
 
+import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.MessageDownloaderModule;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreFactory;
@@ -8,7 +9,7 @@ import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -47,6 +48,10 @@ public class SvarInnService implements MessageDownloaderModule {
                 unzippedFile = unzipper.unzip(decrypt);
             } catch (IOException e) {
                 throw new SvarInnForsendelseException("Unable to unzip file", e);
+            }
+            if (unzippedFile.values().isEmpty()) {
+                Audit.error("Zipfile is empty: skipping message", Markers.append("fiks-id", forsendelse.getId()));
+                continue;
             }
             // create SvarInnFile with unzipped file and correct mimetype
             final List<SvarInnFile> files = svarInnFileFactory.createFiles(forsendelse.getFilmetadata(), unzippedFile);

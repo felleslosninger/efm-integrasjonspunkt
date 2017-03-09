@@ -22,6 +22,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.web.client.RestTemplate
 
+import static org.mockito.Mockito.never
 import static org.mockito.Mockito.verify
 import static org.mockito.Mockito.when
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
@@ -52,19 +53,29 @@ public class SvarInnIntegrationTest {
     @Before
     public void setup() {
         server = MockRestServiceServer.bindTo(restTemplate).build()
-        byte[] zipFile = getClass().getResource("/somdalen-dokumenter-ae68b33d.zip").getBytes()
         String response = getClass().getResource("/sampleresponse.json").text
         server.expect(requestTo(Matchers.endsWith("/svarinn/mottaker/hentNyeForsendelser"))).andRespond(withSuccess(response, MediaType.APPLICATION_JSON))
-        server.expect(requestTo(Matchers.containsString("/svarinn/forsendelse/"))).andRespond(withSuccess(zipFile, SvarInnClient.APPLICATION_ZIP))
-        server.expect(requestTo(Matchers.endsWith("svarinn/kvitterMottak/forsendelse/${forsendelseId}"))).andRespond(withSuccess())
         when(noarkClient.sendEduMelding(Mockito.any(PutMessageRequestType.class))).thenReturn(new PutMessageResponseType(result: new AppReceiptType(type: "OK")))
     }
 
     @Test
     public void receiveMessageFromFiks() {
+        byte[] zipFile = getClass().getResource("/somdalen-dokumenter-ae68b33d.zip").getBytes()
+        server.expect(requestTo(Matchers.containsString("/svarinn/forsendelse/"))).andRespond(withSuccess(zipFile, SvarInnClient.APPLICATION_ZIP))
+        server.expect(requestTo(Matchers.endsWith("svarinn/kvitterMottak/forsendelse/${forsendelseId}"))).andRespond(withSuccess())
+
         svarInnService.hentNyeMeldinger()
 
         verify(noarkClient).sendEduMelding(Mockito.any(PutMessageRequestType));
         server.verify()
+    }
+
+    @Test
+    public void downloadedEmptyZipFile() {
+        byte[] emptyZipFile = getClass().getResource("/empty_encrypted_svarinnfiles.zip").getBytes()
+        server.expect(requestTo(Matchers.containsString("/svarinn/forsendelse/"))).andRespond(withSuccess(emptyZipFile, SvarInnClient.APPLICATION_ZIP))
+
+        svarInnService.downloadFiles()
+        verify(noarkClient, never()).sendEduMelding(Mockito.any(PutMessageRequestType))
     }
 }
