@@ -220,7 +220,10 @@ public class MessageOutController {
     public ResponseEntity getTypes(@PathVariable(value = "identifier", required = true) String identifier) {
         Optional<ServiceRecord> serviceRecord = Optional.ofNullable(sr.getServiceRecord(identifier));
         if (serviceRecord.isPresent()) {
-            return ResponseEntity.ok(Arrays.asList(serviceRecord.get().getServiceIdentifier()));
+            ArrayList<String> types = Lists.newArrayList();
+            types.add(serviceRecord.get().getServiceIdentifier());
+            types.addAll(serviceRecord.get().getDpeCapabilities());
+            return ResponseEntity.ok(types);
         }
         return ResponseEntity.notFound().build();
     }
