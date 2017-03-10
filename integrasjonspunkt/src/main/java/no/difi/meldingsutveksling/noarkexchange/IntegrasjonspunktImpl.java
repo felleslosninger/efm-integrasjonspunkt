@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.core.EDUCoreService;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.logging.MarkerFactory;
 import no.difi.meldingsutveksling.logging.MoveLogMarkers;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -55,6 +56,9 @@ public class IntegrasjonspunktImpl implements SOAPport {
     @Autowired
     private ServiceRegistryLookup serviceRegistryLookup;
 
+    @Autowired
+    private StrategyFactory strategyFactory;
+
     @Override
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
 
@@ -89,7 +93,13 @@ public class IntegrasjonspunktImpl implements SOAPport {
         if (!mshCanReceive && !certificateAvailable && !isDpv) {
             Audit.error("CanReceive = false", marker);
         }
-        response.setResult(certificateAvailable || mshCanReceive || isDpv);
+
+        boolean strategyFactoryAvailable = strategyFactory.hasFactory(serviceRecord.getServiceIdentifier());
+        if (!strategyFactoryAvailable) {
+            Audit.warn(String.format("StrategyFactory for %s not found. Feature toggle?", serviceRecord.getServiceIdentifier()), marker);
+        }
+
+        response.setResult((certificateAvailable || mshCanReceive || isDpv ) && strategyFactoryAvailable);
         return response;
     }
 

@@ -1,11 +1,11 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import no.difi.meldingsutveksling.Decryptor;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreFactory;
-import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.kvittering.EduDocumentFactory;
@@ -161,8 +161,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
 
     public byte[] decrypt(Payload payload) {
         byte[] cmsEncZip = DatatypeConverter.parseBase64Binary(payload.getContent());
-        CmsUtil cmsUtil = new CmsUtil();
-        return cmsUtil.decryptCMS(cmsEncZip, keyInfo.loadPrivateKey());
+        return new Decryptor(keyInfo).decrypt(cmsEncZip);
     }
 
     public void forwardToNoarkSystemAndSendReceipts(StandardBusinessDocumentWrapper inputDocument, EDUCore eduCore) {

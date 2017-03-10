@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.ks
 
+import no.difi.meldingsutveksling.noarkexchange.NoarkClient
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
 import org.mockito.Mockito
@@ -17,5 +18,10 @@ public class MockConfiguration {
         def pem = this.getClass().getClassLoader().getResource("difi-cert-test.pem").text
         when(lookup.getServiceRecord(Mockito.any(String))).thenReturn(new ServiceRecord("FIKS", "123456789", pem, "http://localhost"))
         return lookup
+    }
+
+    @Bean
+    public NoarkClient noarkClient() {
+        return mock(NoarkClient)
     }
 }

@@ -10,6 +10,7 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.lang.NotImplementedException;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -23,7 +24,7 @@ public class StrategyFactory {
 
     private final Map<String, MessageStrategyFactory> factories;
 
-    public StrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup, KeystoreProvider keystoreProvider, SvarUtService svarUtService, IntegrasjonspunktProperties properties) {
+    public StrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup, KeystoreProvider keystoreProvider, IntegrasjonspunktProperties properties) {
         MessageStrategyFactory postInnbyggerStrategyFactory;
         try {
             postInnbyggerStrategyFactory = PostInnbyggerStrategyFactory.newInstance(messageSender.getProperties(), serviceRegistryLookup, keystoreProvider);
@@ -31,12 +32,18 @@ public class StrategyFactory {
             throw new MeldingsUtvekslingRuntimeException("Unable to create client for sikker digital post", e);
         }
 
-        factories = ImmutableMap.<String, MessageStrategyFactory>builder()
-                .put(EDU.fullname(), EduMessageStrategyFactory.newInstance(messageSender, properties))
-                .put(DPI.fullname(), postInnbyggerStrategyFactory)
-                .put(DPV.fullname(), PostVirksomhetStrategyFactory.newInstance(messageSender.getProperties(), serviceRegistryLookup))
-                .put(FIKS.fullname(), FiksMessageStrategyFactory.newInstance(svarUtService))
-                .build();
+        factories = new HashMap<>();
+        factories.put(EDU.fullname(), EduMessageStrategyFactory.newInstance(messageSender, properties));
+        factories.put(DPI.fullname(), postInnbyggerStrategyFactory);
+        factories.put(DPV.fullname(), PostVirksomhetStrategyFactory.newInstance(messageSender.getProperties(), serviceRegistryLookup));
+    }
+
+    /**
+     * Used with feature toggling to enable new message strategies
+     * @param messageStrategyFactory an implementation/instance of a MessageStrategyFactory
+     */
+    public void registerMessageStrategyFactory(MessageStrategyFactory messageStrategyFactory) {
+        factories.put(messageStrategyFactory.getServiceIdentifier().fullname(), messageStrategyFactory);
     }
 
     /**
@@ -58,4 +65,7 @@ public class StrategyFactory {
         return factory;
     }
 
+    public boolean hasFactory(String serviceIdentifier) {
+        return factories.containsKey(serviceIdentifier);
+    }
 }
