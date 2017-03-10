@@ -103,7 +103,7 @@ public class MessageOutController {
             return ResponseEntity.badRequest().body("Required String parameter \'messagetypeId\' is not present");
         }
 
-        List<String> supportedTypes = Arrays.asList(ServiceIdentifier.EDU.fullname(),
+        List<String> supportedTypes = Arrays.asList(ServiceIdentifier.DPO.fullname(),
                 ServiceIdentifier.DPE_INNSYN.fullname(),
                 ServiceIdentifier.DPE_DATA.fullname());
         if (!supportedTypes.contains(messagetypeId)) {

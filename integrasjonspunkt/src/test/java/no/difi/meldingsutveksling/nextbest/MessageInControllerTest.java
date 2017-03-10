@@ -47,7 +47,7 @@ public class MessageInControllerTest {
         when(props.getNextbest()).thenReturn(nextBEST);
 
         ServiceRecord serviceRecord = new ServiceRecord();
-        serviceRecord.setServiceIdentifier(ServiceIdentifier.EDU.name());
+        serviceRecord.setServiceIdentifier(ServiceIdentifier.DPO.name());
         when(sr.getServiceRecord("1")).thenReturn(serviceRecord);
 
         IncomingConversationResource cr42 = IncomingConversationResource.of("42", "2", "1", "1");

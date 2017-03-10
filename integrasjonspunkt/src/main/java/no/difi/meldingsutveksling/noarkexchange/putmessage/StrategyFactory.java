@@ -32,7 +32,7 @@ public class StrategyFactory {
         }
 
         factories = ImmutableMap.<String, MessageStrategyFactory>builder()
-                .put(EDU.fullname(), EduMessageStrategyFactory.newInstance(messageSender, properties))
+                .put(DPO.fullname(), EduMessageStrategyFactory.newInstance(messageSender, properties))
                 .put(DPI.fullname(), postInnbyggerStrategyFactory)
                 .put(DPV.fullname(), PostVirksomhetStrategyFactory.newInstance(messageSender.getProperties(), serviceRegistryLookup))
                 .put(FIKS.fullname(), FiksMessageStrategyFactory.newInstance(svarUtService))

@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.receipt;
 
 import no.difi.meldingsutveksling.receipt.strategy.DpvConversationStrategy;
-import no.difi.meldingsutveksling.receipt.strategy.EduConversationStrategy;
+import no.difi.meldingsutveksling.receipt.strategy.DpoConversationStrategy;
 import no.difi.meldingsutveksling.receipt.strategy.NoOperationStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -10,11 +10,11 @@ import org.springframework.stereotype.Component;
 public class ConversationStrategyFactory {
 
     private DpvConversationStrategy dpvConversationStrategy;
-    private EduConversationStrategy eduReceiptStrategy;
+    private DpoConversationStrategy eduReceiptStrategy;
 
     @Autowired
     ConversationStrategyFactory(DpvConversationStrategy dpvConversationStrategy,
-                                EduConversationStrategy eduReceiptStrategy) {
+                                DpoConversationStrategy eduReceiptStrategy) {
         this.dpvConversationStrategy = dpvConversationStrategy;
         this.eduReceiptStrategy = eduReceiptStrategy;
     }
@@ -23,7 +23,7 @@ public class ConversationStrategyFactory {
         switch (conversation.getServiceIdentifier()) {
             case DPV:
                 return dpvConversationStrategy;
-            case EDU:
+            case DPO:
                 return eduReceiptStrategy;
             default:
                 return new NoOperationStrategy();

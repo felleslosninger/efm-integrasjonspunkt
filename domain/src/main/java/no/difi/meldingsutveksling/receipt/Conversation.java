@@ -49,7 +49,7 @@ public class Conversation {
             case DPI:
                 this.pollable = false;
                 break;
-            case EDU:
+            case DPO:
                 this.pollable = false;
                 break;
             default:

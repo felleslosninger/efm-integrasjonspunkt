@@ -51,7 +51,7 @@ class AppReceiptMessageStrategy implements MessageStrategy {
             if (!"ephorte".equalsIgnoreCase(properties.getNoarkSystem().getType())) {
                 request.swapSenderAndReceiver();
             }
-            request.setServiceIdentifier(ServiceIdentifier.EDU);
+            request.setServiceIdentifier(ServiceIdentifier.DPO);
             messageSender.sendMessage(request);
         }
         if ("OK".equals(receipt.getType())) {

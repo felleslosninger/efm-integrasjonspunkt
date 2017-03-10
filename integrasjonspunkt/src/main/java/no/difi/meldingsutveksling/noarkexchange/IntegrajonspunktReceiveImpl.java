@@ -154,7 +154,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
                         eduCore.getMessageReference(),
                         eduCore.getReceiver().getIdentifier(),
                         eduCore.getMessageReference(),
-                        ServiceIdentifier.EDU));
+                        ServiceIdentifier.DPO));
         c.addMessageReceipt(receipt);
         conversationRepository.save(c);
     }

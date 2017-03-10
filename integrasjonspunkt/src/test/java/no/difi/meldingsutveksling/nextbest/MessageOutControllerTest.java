@@ -68,13 +68,14 @@ public class MessageOutControllerTest {
         when(props.getOrg()).thenReturn(org);
 
         ServiceRecord serviceRecord = new ServiceRecord();
-        serviceRecord.setServiceIdentifier(ServiceIdentifier.EDU.name());
+        serviceRecord.setServiceIdentifier(ServiceIdentifier.DPO.name());
         serviceRecord.setDpeCapabilities(Lists.newArrayList());
         when(sr.getServiceRecord("1")).thenReturn(serviceRecord);
 
         MessageReceipt receiptSent = MessageReceipt.of(ReceiptStatus.SENT, LocalDateTime.now());
         MessageReceipt receiptDelivered = MessageReceipt.of(ReceiptStatus.DELIVERED, LocalDateTime.now().plusMinutes(1));
-        Conversation receiptConversation = Conversation.of("42", "42ref", "123", "sometitle", ServiceIdentifier.EDU, receiptDelivered, receiptSent);
+        Conversation receiptConversation = Conversation.of("42", "42ref", "123", "sometitle", ServiceIdentifier.DPO,
+                receiptDelivered, receiptSent);
         when(crepo.findByConversationId("42")).thenReturn(asList(receiptConversation));
 
         OutgoingConversationResource cr42 = OutgoingConversationResource.of("42", "2", "1", "EDU");
