@@ -26,6 +26,7 @@ import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -46,7 +47,6 @@ import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom
 @Component
 public class MessagePolling implements ApplicationContextAware {
 
-    private static final String PREFIX_NORWAY = "9908:";
     private Logger logger = LoggerFactory.getLogger(MessagePolling.class);
 
     ApplicationContext context;
@@ -71,6 +71,9 @@ public class MessagePolling implements ApplicationContextAware {
 
     @Autowired
     ConversationRepository conversationRepository;
+
+    @Autowired
+    ObjectProvider<List<MessageDownloaderModule>> messageDownloaders;
 
     @Autowired
     private NextBestQueue nextBestQueue;
@@ -98,13 +101,19 @@ public class MessagePolling implements ApplicationContextAware {
         }
 
         logger.debug("Checking for new messages");
+        if (messageDownloaders.getIfAvailable() != null) {
+            for (MessageDownloaderModule task : messageDownloaders.getObject()) {
+                logger.debug("performing enabled task");
+                task.downloadFiles();
+            }
+        }
 
-        // TODO: if ServiceRegistry returns a ServiceRecord to something other than Altinn formidlingstjeneste this
-        // will fail
         if (serviceRecord == null) {
             serviceRecord = serviceRegistryLookup.getServiceRecord(properties.getOrg().getNumber());
         }
 
+        // TODO: if ServiceRegistry returns a ServiceRecord to something other than Altinn formidlingstjeneste this
+        // will fail
         AltinnWsConfiguration configuration = AltinnWsConfiguration.fromConfiguration(serviceRecord, context);
         AltinnWsClient client = new AltinnWsClient(configuration);
 

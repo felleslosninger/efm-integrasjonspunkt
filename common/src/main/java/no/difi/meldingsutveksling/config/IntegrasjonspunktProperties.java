@@ -51,7 +51,7 @@ public class IntegrasjonspunktProperties {
     private DigitalPostInnbyggerConfig dpi;
 
     @Valid
-    private SvarUtConfig dps = new SvarUtConfig();
+    private FiksConfig fiks = new FiksConfig();
 
     @Valid
     private Oidc oidc;
@@ -266,9 +266,6 @@ public class IntegrasjonspunktProperties {
         private boolean returnOkOnEmptyPayload;
         private boolean enableDpiReceipts;
 
-        public boolean isEnableDpiReceipts() {
-            return enableDpiReceipts;
-        }
     }
 
     @Data
