@@ -79,7 +79,7 @@ public class MessageOutControllerTest {
         when(crepo.findByConversationId("42")).thenReturn(asList(receiptConversation));
 
         OutgoingConversationResource cr42 = OutgoingConversationResource.of("42", "2", "1", "DPO");
-        OutgoingConversationResource cr43 = OutgoingConversationResource.of("43", "2", "1", "POST_VIRKSOMHET");
+        OutgoingConversationResource cr43 = OutgoingConversationResource.of("43", "2", "1", "DPV");
         OutgoingConversationResource cr44 = OutgoingConversationResource.of("44", "1", "2", "DPO");
 
         when(repo.findOne("42")).thenReturn(cr42);
@@ -89,9 +89,9 @@ public class MessageOutControllerTest {
         when(repo.findByReceiverId("1")).thenReturn(asList(cr42, cr43));
         when(repo.findByReceiverId("2")).thenReturn(asList(cr44));
         when(repo.findByMessagetypeId("DPO")).thenReturn(asList(cr42, cr44));
-        when(repo.findByMessagetypeId("POST_VIRKSOMHET")).thenReturn(asList(cr43));
+        when(repo.findByMessagetypeId("DPV")).thenReturn(asList(cr43));
         when(repo.findByReceiverIdAndMessagetypeId("1", "DPO")).thenReturn(asList(cr42));
-        when(repo.findByReceiverIdAndMessagetypeId("1", "POST_VIRKSOMHET")).thenReturn(asList(cr43));
+        when(repo.findByReceiverIdAndMessagetypeId("1", "DPV")).thenReturn(asList(cr43));
         when(repo.findByReceiverIdAndMessagetypeId("2", "DPO")).thenReturn(asList(cr44));
     }
 
@@ -144,7 +144,7 @@ public class MessageOutControllerTest {
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[*].conversationId", containsInAnyOrder("42", "43")))
                 .andExpect(jsonPath("$[*].receiverId", containsInAnyOrder("1", "1")))
-                .andExpect(jsonPath("$[*].messagetypeId", containsInAnyOrder("DPO", "POST_VIRKSOMHET")));
+                .andExpect(jsonPath("$[*].messagetypeId", containsInAnyOrder("DPO", "DPV")));
     }
 
     @Test
@@ -163,13 +163,13 @@ public class MessageOutControllerTest {
     public void getMessagesWithReceiverAndTypeShouldReturnOk() throws Exception {
         mvc.perform(get("/out/messages")
                 .param("receiverId", "1")
-                .param("messagetypeId", "POST_VIRKSOMHET")
+                .param("messagetypeId", "DPV")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].conversationId", is("43")))
                 .andExpect(jsonPath("$[0].receiverId", is("1")))
-                .andExpect(jsonPath("$[0].messagetypeId", is("POST_VIRKSOMHET")))
+                .andExpect(jsonPath("$[0].messagetypeId", is("DPV")))
                 .andExpect(jsonPath("$[0].fileRefs.*", hasSize(0)));
     }
 

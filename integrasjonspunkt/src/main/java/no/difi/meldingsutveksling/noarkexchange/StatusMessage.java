@@ -10,7 +10,7 @@ public enum StatusMessage {
     UNABLE_TO_FIND_RECEIVER("Mottaker ikke funnet", "Motaker ikke funnet i Adresseregister eller på MSH",7),
     MISSING_PAYLOAD("Request has missing or empty payload", "Missing payload", 8),
     APP_RECEIPT_CONTAINS_ERROR("Technical error from the receiving archive system", "AppReceipt contains an error", 9),
-    POST_VIRKSOMHET_REQUEST_MISSING_VALUES("Teknisk feil: Kunne ikke sende post til virksomhet", "Failed to create Correspondence Agency Request", 10),
+    DPV_REQUEST_MISSING_VALUES("Teknisk feil: Kunne ikke sende post til virksomhet", "Failed to create Correspondence Agency Request", 10),
     UNABLE_TO_SEND_DPI("Klarte ikke sende post til digital post til innbygger", "Failed to send message to DPI Meldingsformidler", 11);
 
     private final String endUserMessage;

@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlType;
 public enum ServiceIdentifier {
 
     @XmlEnumValue("DPO")    DPO("DPO"),
-    @XmlEnumValue("DPV")    DPV("POST_VIRKSOMHET"),
+    @XmlEnumValue("DPV")    DPV("DPV"),
     @XmlEnumValue("DPI")    DPI("DPI"),
     @XmlEnumValue("FIKS")   FIKS("FIKS"),
     @XmlEnumValue("DPE_innsyn")   DPE_INNSYN("DPE_innsyn"),

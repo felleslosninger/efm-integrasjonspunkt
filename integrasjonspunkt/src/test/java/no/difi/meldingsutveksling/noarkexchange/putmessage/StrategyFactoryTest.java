@@ -66,7 +66,7 @@ public class StrategyFactoryTest {
 
     @Test
     public void givenPostServiceRecordShouldCreatePostMessageStrategyFactory() {
-        ServiceRecord postServiceRecord = new ServiceRecord("POST_VIRKSOMHET", "12346442", "certificate", "http://localhost");
+        ServiceRecord postServiceRecord = new ServiceRecord("DPV", "12346442", "certificate", "http://localhost");
 
         final MessageStrategyFactory factory = strategyFactory.getFactory(postServiceRecord);
 
