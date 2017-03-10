@@ -2,7 +2,12 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 
 import no.difi.meldingsutveksling.noarkexchange.p360.PutMessageRequestMapper;
-import no.difi.meldingsutveksling.noarkexchange.p360.schema.*;
+import no.difi.meldingsutveksling.noarkexchange.p360.schema.AddressType;
+import no.difi.meldingsutveksling.noarkexchange.p360.schema.AppReceiptType;
+import no.difi.meldingsutveksling.noarkexchange.p360.schema.GetCanReceiveMessageRequestType;
+import no.difi.meldingsutveksling.noarkexchange.p360.schema.GetCanReceiveMessageResponseType;
+import no.difi.meldingsutveksling.noarkexchange.p360.schema.ObjectFactory;
+import no.difi.meldingsutveksling.noarkexchange.p360.schema.StatusMessageType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import org.modelmapper.ModelMapper;
@@ -64,7 +69,18 @@ public class P360Client implements NoarkClient {
 
         setUnmappedValues(response, theResponse);
 
+        if (!isValid(theResponse)) {
+            theResponse = new PutMessageResponseType();
+            final no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType appReceiptType = new no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType();
+            theResponse.setResult(appReceiptType);
+            appReceiptType.setType("OK");
+        }
+
         return theResponse;
+    }
+
+    private boolean isValid(PutMessageResponseType theResponse) {
+        return theResponse != null && theResponse.getResult() != null;
     }
 
     /**
