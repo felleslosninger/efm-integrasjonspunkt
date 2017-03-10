@@ -22,6 +22,8 @@ import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.HashMap;
 
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
@@ -41,8 +43,8 @@ public class ServiceRegistryLookupTest {
     public ExpectedException thrown = ExpectedException.none();
 
     private ServiceRegistryLookup service;
-    private ServiceRecord post = new ServiceRecord("POST", "000", "certificate", "http://localhost:6789");
-    private ServiceRecord dpo = new ServiceRecord("DPO", "000", "certificate", "http://localhost:4567");
+    private ServiceRecord post = new ServiceRecord(DPV, "000", "certificate", "http://localhost:6789");
+    private ServiceRecord dpo = new ServiceRecord(DPO, "000", "certificate", "http://localhost:4567");
     private String query;
 
     @Before

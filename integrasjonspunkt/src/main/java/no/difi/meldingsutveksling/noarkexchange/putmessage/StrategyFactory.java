@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
@@ -13,14 +14,13 @@ import java.util.Map;
 import java.util.Optional;
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.*;
-import static org.apache.commons.lang.StringUtils.isEmpty;
 
 /**
  * PutMessages are delivered based on their ServiceRecord as returned from ServiceRegistry
  */
 public class StrategyFactory {
 
-    private final Map<String, MessageStrategyFactory> factories;
+    private final Map<ServiceIdentifier, MessageStrategyFactory> factories;
 
     public StrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup, KeystoreProvider keystoreProvider, IntegrasjonspunktProperties properties) {
         MessageStrategyFactory postInnbyggerStrategyFactory;
@@ -31,9 +31,9 @@ public class StrategyFactory {
         }
 
         factories = new HashMap<>();
-        factories.put(DPO.fullname(), EduMessageStrategyFactory.newInstance(messageSender, properties));
-        factories.put(DPI.fullname(), postInnbyggerStrategyFactory);
-        factories.put(DPV.fullname(), PostVirksomhetStrategyFactory.newInstance(messageSender.getProperties(), serviceRegistryLookup));
+        factories.put(DPO, EduMessageStrategyFactory.newInstance(messageSender, properties));
+        factories.put(DPI, postInnbyggerStrategyFactory);
+        factories.put(DPV, PostVirksomhetStrategyFactory.newInstance(messageSender.getProperties(), serviceRegistryLookup));
     }
 
     /**
@@ -41,7 +41,7 @@ public class StrategyFactory {
      * @param messageStrategyFactory an implementation/instance of a MessageStrategyFactory
      */
     public void registerMessageStrategyFactory(MessageStrategyFactory messageStrategyFactory) {
-        factories.put(messageStrategyFactory.getServiceIdentifier().fullname(), messageStrategyFactory);
+        factories.put(messageStrategyFactory.getServiceIdentifier(), messageStrategyFactory);
     }
 
     /**
@@ -53,7 +53,7 @@ public class StrategyFactory {
      */
     public MessageStrategyFactory getFactory(ServiceRecord serviceRecord) {
         Optional.ofNullable(serviceRecord).orElseThrow(() -> new IllegalArgumentException("serviceRecord cannot be null"));
-        if (isEmpty(serviceRecord.getServiceIdentifier())) {
+        if (serviceRecord.getServiceIdentifier() == null) {
             throw new IllegalArgumentException("serviceRecord is missing a serviceIdentifier");
         }
         final MessageStrategyFactory factory = factories.get(serviceRecord.getServiceIdentifier());
@@ -63,7 +63,7 @@ public class StrategyFactory {
         return factory;
     }
 
-    public boolean hasFactory(String serviceIdentifier) {
+    public boolean hasFactory(ServiceIdentifier serviceIdentifier) {
         return factories.containsKey(serviceIdentifier);
     }
 }

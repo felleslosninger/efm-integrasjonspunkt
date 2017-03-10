@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static no.difi.meldingsutveksling.ServiceIdentifier.FIKS;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertThat;
@@ -45,7 +46,7 @@ public class StrategyFactoryTest {
 
     @Test
     public void givenFiksServiceRecordShouldCreateFIKSMessageStrategyFactory() {
-        ServiceRecord fiksServiceRecord = new ServiceRecord(FIKS.name(), "112233445", "certificate", "http://localhost");
+        ServiceRecord fiksServiceRecord = new ServiceRecord(FIKS, "112233445", "certificate", "http://localhost");
 
         MessageStrategyFactory factory = strategyFactory.getFactory(fiksServiceRecord);
 
@@ -55,7 +56,7 @@ public class StrategyFactoryTest {
     @Test
     public void givenEduServiceRecordShouldCreateEduMessageStrategyFactory() {
         // given
-        ServiceRecord eduServiceRecord = new ServiceRecord(DPO.name(), "12345678", "certificate", "http://localhost");
+        ServiceRecord eduServiceRecord = new ServiceRecord(DPO, "12345678", "certificate", "http://localhost");
 
         // when
         final MessageStrategyFactory factory = strategyFactory.getFactory(eduServiceRecord);
@@ -66,7 +67,7 @@ public class StrategyFactoryTest {
 
     @Test
     public void givenPostServiceRecordShouldCreatePostMessageStrategyFactory() {
-        ServiceRecord postServiceRecord = new ServiceRecord("DPV", "12346442", "certificate", "http://localhost");
+        ServiceRecord postServiceRecord = new ServiceRecord(DPV, "12346442", "certificate", "http://localhost");
 
         final MessageStrategyFactory factory = strategyFactory.getFactory(postServiceRecord);
 
@@ -85,7 +86,7 @@ public class StrategyFactoryTest {
 
     @Test(expected = NotImplementedException.class)
     public void unknownServiceRecordThrowsException() {
-        strategyFactory.getFactory(new ServiceRecord("unknown", "123456", "certificate", "http://localhost"));
+        strategyFactory.getFactory(new ServiceRecord(null, "123456", "certificate", "http://localhost"));
     }
 
 }

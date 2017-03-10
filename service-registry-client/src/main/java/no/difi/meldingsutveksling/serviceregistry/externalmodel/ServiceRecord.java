@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.serviceregistry.externalmodel;
 
 import lombok.Data;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -9,7 +10,7 @@ import java.util.function.Predicate;
 public class ServiceRecord {
 
     public static final ServiceRecord EMPTY = new ServiceRecord();
-    private String serviceIdentifier;
+    private ServiceIdentifier serviceIdentifier;
     private String organisationNumber;
     private String pemCertificate;
     private String endPointURL;
@@ -25,7 +26,7 @@ public class ServiceRecord {
     private PostAddress returnAddress;
     private List<String> dpeCapabilities;
 
-    public ServiceRecord(String serviceIdentifier, String organisationNumber, String pemCertificate, String endPointURL) {
+    public ServiceRecord(ServiceIdentifier serviceIdentifier, String organisationNumber, String pemCertificate, String endPointURL) {
         this.serviceIdentifier = serviceIdentifier;
         this.organisationNumber = organisationNumber;
         this.pemCertificate = pemCertificate;
@@ -36,7 +37,6 @@ public class ServiceRecord {
         this.organisationNumber = "";
         this.pemCertificate = "";
         this.endPointURL = "";
-        this.serviceIdentifier = "";
         this.epostAdresse = "";
         this.mobilnummer = "";
         this.fysiskPost = false;
@@ -44,8 +44,8 @@ public class ServiceRecord {
         this.returnAddress = PostAddress.EMPTY;
     }
 
-    public static Predicate<ServiceRecord> isServiceIdentifier(String identifier) {
-        return s -> s != null && s.getServiceIdentifier().equalsIgnoreCase(identifier);
+    public static Predicate<ServiceRecord> isServiceIdentifier(ServiceIdentifier identifier) {
+        return s -> s != null && s.getServiceIdentifier().equals(identifier);
     }
 
 }

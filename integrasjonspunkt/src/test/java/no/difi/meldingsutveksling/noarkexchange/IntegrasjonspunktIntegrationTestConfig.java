@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.Avsender;
@@ -137,7 +138,7 @@ public class IntegrasjonspunktIntegrationTestConfig {
         when(srMock.getInfoRecord(anyString())).thenReturn(ir);
 
         ServiceRecord sr = mock(ServiceRecord.class);
-        when(sr.getServiceIdentifier()).thenReturn("DPO");
+        when(sr.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPO);
         when(sr.getOrganisationNumber()).thenReturn("1337");
         when(srMock.getServiceRecord(anyString())).thenReturn(sr);
 

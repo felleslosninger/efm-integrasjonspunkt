@@ -68,7 +68,7 @@ public class MessageOutControllerTest {
         when(props.getOrg()).thenReturn(org);
 
         ServiceRecord serviceRecord = new ServiceRecord();
-        serviceRecord.setServiceIdentifier(ServiceIdentifier.DPO.name());
+        serviceRecord.setServiceIdentifier(ServiceIdentifier.DPO);
         serviceRecord.setDpeCapabilities(Lists.newArrayList());
         when(sr.getServiceRecord("1")).thenReturn(serviceRecord);
 

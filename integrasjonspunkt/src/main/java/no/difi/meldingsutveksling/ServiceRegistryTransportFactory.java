@@ -9,6 +9,7 @@ import no.difi.meldingsutveksling.transport.altinn.AltinnTransport;
 
 import java.util.Optional;
 
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord.isServiceIdentifier;
 
 /**
@@ -30,7 +31,7 @@ public class ServiceRegistryTransportFactory implements TransportFactory {
 
         Optional<ServiceRecord> serviceRecord = Optional.of(serviceRegistryLookup.getServiceRecord(message.getReceiverOrgNumber()));
 
-        Optional<Transport> transport = serviceRecord.filter(isServiceIdentifier("DPO")).map(AltinnTransport::new);
+        Optional<Transport> transport = serviceRecord.filter(isServiceIdentifier(DPO)).map(AltinnTransport::new);
         return transport.orElseThrow(() -> new RuntimeException("Failed to create transport"));
     }
 
