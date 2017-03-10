@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextbest;
 
+import com.google.common.collect.Lists;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
@@ -68,6 +69,7 @@ public class MessageOutControllerTest {
 
         ServiceRecord serviceRecord = new ServiceRecord();
         serviceRecord.setServiceIdentifier(ServiceIdentifier.EDU.name());
+        serviceRecord.setDpeCapabilities(Lists.newArrayList());
         when(sr.getServiceRecord("1")).thenReturn(serviceRecord);
 
         MessageReceipt receiptSent = MessageReceipt.of(ReceiptStatus.SENT, LocalDateTime.now());
