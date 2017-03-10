@@ -78,9 +78,9 @@ public class MessageOutControllerTest {
                 receiptDelivered, receiptSent);
         when(crepo.findByConversationId("42")).thenReturn(asList(receiptConversation));
 
-        OutgoingConversationResource cr42 = OutgoingConversationResource.of("42", "2", "1", "EDU");
+        OutgoingConversationResource cr42 = OutgoingConversationResource.of("42", "2", "1", "DPO");
         OutgoingConversationResource cr43 = OutgoingConversationResource.of("43", "2", "1", "POST_VIRKSOMHET");
-        OutgoingConversationResource cr44 = OutgoingConversationResource.of("44", "1", "2", "EDU");
+        OutgoingConversationResource cr44 = OutgoingConversationResource.of("44", "1", "2", "DPO");
 
         when(repo.findOne("42")).thenReturn(cr42);
         when(repo.findOne("43")).thenReturn(cr43);
@@ -88,11 +88,11 @@ public class MessageOutControllerTest {
         when(repo.findAll()).thenReturn(asList(cr42, cr43, cr44));
         when(repo.findByReceiverId("1")).thenReturn(asList(cr42, cr43));
         when(repo.findByReceiverId("2")).thenReturn(asList(cr44));
-        when(repo.findByMessagetypeId("EDU")).thenReturn(asList(cr42, cr44));
+        when(repo.findByMessagetypeId("DPO")).thenReturn(asList(cr42, cr44));
         when(repo.findByMessagetypeId("POST_VIRKSOMHET")).thenReturn(asList(cr43));
-        when(repo.findByReceiverIdAndMessagetypeId("1", "EDU")).thenReturn(asList(cr42));
+        when(repo.findByReceiverIdAndMessagetypeId("1", "DPO")).thenReturn(asList(cr42));
         when(repo.findByReceiverIdAndMessagetypeId("1", "POST_VIRKSOMHET")).thenReturn(asList(cr43));
-        when(repo.findByReceiverIdAndMessagetypeId("2", "EDU")).thenReturn(asList(cr44));
+        when(repo.findByReceiverIdAndMessagetypeId("2", "DPO")).thenReturn(asList(cr44));
     }
 
     @Test
@@ -126,7 +126,7 @@ public class MessageOutControllerTest {
                 .andExpect(jsonPath("$.*", hasSize(5)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
                 .andExpect(jsonPath("$.receiverId", is("1")))
-                .andExpect(jsonPath("$.messagetypeId", is("EDU")))
+                .andExpect(jsonPath("$.messagetypeId", is("DPO")))
                 .andExpect(jsonPath("$.fileRefs.*", hasSize(0)));
     }
 
@@ -144,19 +144,19 @@ public class MessageOutControllerTest {
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[*].conversationId", containsInAnyOrder("42", "43")))
                 .andExpect(jsonPath("$[*].receiverId", containsInAnyOrder("1", "1")))
-                .andExpect(jsonPath("$[*].messagetypeId", containsInAnyOrder("EDU", "POST_VIRKSOMHET")));
+                .andExpect(jsonPath("$[*].messagetypeId", containsInAnyOrder("DPO", "POST_VIRKSOMHET")));
     }
 
     @Test
     public void getMessagesWithTypeShouldReturnOk() throws Exception {
         mvc.perform(get("/out/messages")
-                .param("messagetypeId", "EDU")
+                .param("messagetypeId", "DPO")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[*].conversationId", containsInAnyOrder("42", "44")))
                 .andExpect(jsonPath("$[*].receiverId", containsInAnyOrder("1", "2")))
-                .andExpect(jsonPath("$[*].messagetypeId", containsInAnyOrder("EDU", "EDU")));
+                .andExpect(jsonPath("$[*].messagetypeId", containsInAnyOrder("DPO", "DPO")));
     }
 
     @Test
@@ -177,21 +177,21 @@ public class MessageOutControllerTest {
     public void createResourceWithConversationIdShouldReturnExisting() throws Exception {
         mvc.perform(post("/out/messages")
                 .param("receiverId", "1")
-                .param("messagetypeId", "EDU")
+                .param("messagetypeId", "DPO")
                 .param("conversationId", "42")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.*", hasSize(5)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
                 .andExpect(jsonPath("$.receiverId", is("1")))
-                .andExpect(jsonPath("$.messagetypeId", is("EDU")))
+                .andExpect(jsonPath("$.messagetypeId", is("DPO")))
                 .andExpect(jsonPath("$.fileRefs.*", hasSize(0)));
     }
 
     @Test
     public void createResourceWithoutReceiverShouldFail() throws Exception {
         mvc.perform(post("/out/messages")
-                .param("messagetypeId", "EDU")
+                .param("messagetypeId", "DPO")
                 .param("conversationId", "42")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
@@ -210,13 +210,13 @@ public class MessageOutControllerTest {
     public void createResourceWithoutConversationIdShouldReturnOk() throws Exception {
         mvc.perform(post("/out/messages")
                 .param("receiverId", "1")
-                .param("messagetypeId", "EDU")
+                .param("messagetypeId", "DPO")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.conversationId", matchesRegex("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}")))
                 .andExpect(jsonPath("$.receiverId", is("1")))
                 .andExpect(jsonPath("$.senderId", is("3")))
-                .andExpect(jsonPath("$.messagetypeId", is("EDU")));
+                .andExpect(jsonPath("$.messagetypeId", is("DPO")));
     }
 
     @Test
@@ -235,10 +235,10 @@ public class MessageOutControllerTest {
     }
 
     @Test
-    public void getOutTypesShouldReturnEdu() throws Exception {
+    public void getOutTypesShouldReturnDPO() throws Exception {
         mvc.perform(get("/out/types/1")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0]", is("EDU")));
+                .andExpect(jsonPath("$[0]", is("DPO")));
     }
 }

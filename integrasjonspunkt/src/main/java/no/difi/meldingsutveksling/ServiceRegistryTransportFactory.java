@@ -30,7 +30,7 @@ public class ServiceRegistryTransportFactory implements TransportFactory {
 
         Optional<ServiceRecord> serviceRecord = Optional.of(serviceRegistryLookup.getServiceRecord(message.getReceiverOrgNumber()));
 
-        Optional<Transport> transport = serviceRecord.filter(isServiceIdentifier("edu")).map(AltinnTransport::new);
+        Optional<Transport> transport = serviceRecord.filter(isServiceIdentifier("DPO")).map(AltinnTransport::new);
         return transport.orElseThrow(() -> new RuntimeException("Failed to create transport"));
     }
 

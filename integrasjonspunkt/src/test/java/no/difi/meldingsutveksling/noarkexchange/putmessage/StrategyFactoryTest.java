@@ -10,6 +10,7 @@ import org.apache.commons.lang.NotImplementedException;
 import org.junit.Before;
 import org.junit.Test;
 
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.ServiceIdentifier.FIKS;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertThat;
@@ -54,7 +55,7 @@ public class StrategyFactoryTest {
     @Test
     public void givenEduServiceRecordShouldCreateEduMessageStrategyFactory() {
         // given
-        ServiceRecord eduServiceRecord = new ServiceRecord("EDU", "12345678", "certificate", "http://localhost");
+        ServiceRecord eduServiceRecord = new ServiceRecord(DPO.name(), "12345678", "certificate", "http://localhost");
 
         // when
         final MessageStrategyFactory factory = strategyFactory.getFactory(eduServiceRecord);
