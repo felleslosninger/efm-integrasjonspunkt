@@ -1,9 +1,9 @@
 package no.difi.meldingsutveksling.nextbest;
 
 import com.google.common.collect.Lists;
+import no.difi.meldingsutveksling.Decryptor;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
@@ -85,8 +85,7 @@ public class NextBestQueue {
 
     public byte[] decrypt(Payload payload) {
         byte[] cmsEncZip = DatatypeConverter.parseBase64Binary(payload.getContent());
-        CmsUtil cmsUtil = new CmsUtil();
-        return cmsUtil.decryptCMS(cmsEncZip, keyInfo.loadPrivateKey());
+        return new Decryptor(keyInfo).decrypt(cmsEncZip);
     }
 
     public List<String> getContentFromAsic(byte[] bytes) throws MessageException {

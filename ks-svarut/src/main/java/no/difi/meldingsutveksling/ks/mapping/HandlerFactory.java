@@ -32,7 +32,7 @@ public class HandlerFactory {
         HandlerCollection handler = new HandlerCollection();
         final MeldingTypeHandler meldingTypeHandler = new MeldingTypeHandler(
                 eduCore.getPayloadAsMeldingType(),
-                new FileTypeHandlerFactory(properties.getDps(), certificate)
+                new FileTypeHandlerFactory(properties.getFiks(), certificate)
         );
         handler.handlers.add(meldingTypeHandler);
         return handler;

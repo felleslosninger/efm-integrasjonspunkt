@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import com.sun.org.apache.xerces.internal.dom.ElementNSImpl;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -57,6 +58,11 @@ public final class EduMessageStrategyFactory implements MessageStrategyFactory {
         }
         Audit.error("Unknown payload string");
         throw new MeldingsUtvekslingRuntimeException("Unknown String based payload " + payload);
+    }
+
+    @Override
+    public ServiceIdentifier getServiceIdentifier() {
+        return ServiceIdentifier.EDU;
     }
 
     private boolean isMeldingTypePayload(Object payload) {

@@ -67,7 +67,7 @@ public class IntegrasjonspunktIntegrationTestConfig {
 
     @Bean
     public StrategyFactory messageStrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup, KeystoreProvider keystoreProvider, SvarUtService svarUtService) {
-        return new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider, svarUtService, properties);
+        return new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider, properties);
     }
 
     // Mocks

@@ -7,7 +7,9 @@ import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.ks.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.FiksMessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.KeystoreProvider;
+import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.receipt.DpiReceiptService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -15,11 +17,15 @@ import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import no.difi.move.common.config.KeystoreProperties;
 import no.difi.move.common.oauth.KeystoreHelper;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+
+import java.util.List;
 
 @Profile({"dev", "itest", "systest", "staging", "production"})
 @Configuration
@@ -61,11 +67,23 @@ public class IntegrasjonspunktBeans {
         return KeystoreProvider.from(properties);
     }
 
+    @ConditionalOnProperty(name="difi.move.fiks.enabled", havingValue = "true")
+    @Bean
+    public FiksMessageStrategyFactory fiksMessageStrategyFactory(SvarUtService svarUtService) {
+        return FiksMessageStrategyFactory.newInstance(svarUtService);
+    }
+
     @Bean
     public StrategyFactory messageStrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup, KeystoreProvider meldingsformidlerKeystoreProvider,
-                                                  SvarUtService svarUtService) {
-        return new StrategyFactory(messageSender, serviceRegistryLookup, meldingsformidlerKeystoreProvider, svarUtService, properties);
+                                                  ObjectProvider<List<MessageStrategyFactory>> messageStrategyFactory) {
+        final StrategyFactory strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, meldingsformidlerKeystoreProvider, properties);
+        if(messageStrategyFactory.getIfAvailable() != null) {
+            messageStrategyFactory.getIfAvailable().forEach(strategyFactory::registerMessageStrategyFactory);
+        }
+        return strategyFactory;
     }
+
+
 
     @Bean
     public DpiReceiptService dpiReceiptService(IntegrasjonspunktProperties integrasjonspunktProperties, KeystoreProvider keystoreProvider) {

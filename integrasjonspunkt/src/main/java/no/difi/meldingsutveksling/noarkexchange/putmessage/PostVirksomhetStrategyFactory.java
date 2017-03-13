@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -43,5 +44,10 @@ public class PostVirksomhetStrategyFactory implements MessageStrategyFactory {
     @Override
     public MessageStrategy create(Object payload) {
         return new PostVirksomhetMessageStrategy(configuration, serviceRegistryLookup);
+    }
+
+    @Override
+    public ServiceIdentifier getServiceIdentifier() {
+        return ServiceIdentifier.DPV;
     }
 }
