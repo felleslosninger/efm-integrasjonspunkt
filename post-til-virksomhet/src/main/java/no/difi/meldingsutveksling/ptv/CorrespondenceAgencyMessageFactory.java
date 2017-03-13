@@ -154,7 +154,7 @@ public class CorrespondenceAgencyMessageFactory {
             notification.setNotificationType(notificationFactory.createNotification2009NotificationType("offentlig_etat"));
             notification.setTextTokens(notificationFactory.createNotification2009TextTokens(createTokens(config, null,
                     edu)));
-            JAXBElement<ReceiverEndPointBEList> receiverEndpoints = createReceiverEndPoint(type);
+            JAXBElement<ReceiverEndPointBEList> receiverEndpoints = createReceiverEndPoint(TransportType.EMAIL);
             notification.setReceiverEndPoints(receiverEndpoints);
         } else {
             notification.setNotificationType(notificationFactory.createNotification2009NotificationType("TokenTextOnly"));
@@ -163,10 +163,6 @@ public class CorrespondenceAgencyMessageFactory {
             JAXBElement<ReceiverEndPointBEList> receiverEndpoints = createReceiverEndPoint(type);
             notification.setReceiverEndPoints(receiverEndpoints);
         }
-
-
-        JAXBElement<ReceiverEndPointBEList> receiverEndpoints = createReceiverEndPoint(type);
-        notification.setReceiverEndPoints(receiverEndpoints);
 
         return notification;
     }
