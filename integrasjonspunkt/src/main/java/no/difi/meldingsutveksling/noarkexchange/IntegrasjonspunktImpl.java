@@ -86,7 +86,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
         } else if (hasMshEndpoint()) {
             mshCanReceive = mshClient.canRecieveMessage(organisasjonsnummer);
             Audit.info(String.format("MSH canReceive = %s", mshCanReceive), marker);
-        } else if (DPV.fullname().equals(serviceRecord.getServiceIdentifier())) {
+        } else if (DPV.equals(serviceRecord.getServiceIdentifier())) {
             isDpv = true;
         }
 
