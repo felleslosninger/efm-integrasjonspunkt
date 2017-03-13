@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.ks.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory;
@@ -14,7 +15,8 @@ class FiksMessageStrategy implements MessageStrategy {
 
     @Override
     public PutMessageResponseType send(EDUCore request) {
-        svarUtService.send(request); // TODO return value
+        request.setServiceIdentifier(ServiceIdentifier.FIKS);
+        svarUtService.send(request);
         return PutMessageResponseFactory.createOkResponse();
     }
 }
