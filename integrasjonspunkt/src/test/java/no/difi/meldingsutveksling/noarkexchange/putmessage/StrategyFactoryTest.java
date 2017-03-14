@@ -43,7 +43,7 @@ public class StrategyFactoryTest {
 
     @Test
     public void givenFiksServiceRecordShouldCreateFIKSMessageStrategyFactory() {
-        ServiceRecord fiksServiceRecord = new ServiceRecord(FIKS, "112233445", "certificate", "http://localhost");
+        ServiceRecord fiksServiceRecord = new ServiceRecord(DPF, "112233445", "certificate", "http://localhost");
 
         MessageStrategyFactory factory = strategyFactory.getFactory(fiksServiceRecord);
 
