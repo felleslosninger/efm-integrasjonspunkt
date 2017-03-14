@@ -9,7 +9,7 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.lang.NotImplementedException;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -30,7 +30,7 @@ public class StrategyFactory {
             throw new MeldingsUtvekslingRuntimeException("Unable to create client for sikker digital post", e);
         }
 
-        factories = new HashMap<>();
+        factories = new EnumMap<>(ServiceIdentifier.class);
         factories.put(DPO, EduMessageStrategyFactory.newInstance(messageSender, properties));
         factories.put(DPI, postInnbyggerStrategyFactory);
         factories.put(DPV, PostVirksomhetStrategyFactory.newInstance(messageSender.getProperties(), serviceRegistryLookup));
