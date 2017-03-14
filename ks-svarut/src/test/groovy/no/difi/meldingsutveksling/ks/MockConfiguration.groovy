@@ -7,6 +7,7 @@ import org.mockito.Mockito
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
+import static no.difi.meldingsutveksling.ServiceIdentifier.FIKS
 import static org.mockito.Mockito.mock
 import static org.mockito.Mockito.when
 
@@ -16,7 +17,7 @@ public class MockConfiguration {
     public ServiceRegistryLookup serviceRegistryLookup() {
         def lookup = mock(ServiceRegistryLookup)
         def pem = this.getClass().getClassLoader().getResource("difi-cert-test.pem").text
-        when(lookup.getServiceRecord(Mockito.any(String))).thenReturn(new ServiceRecord("FIKS", "123456789", pem, "http://localhost"))
+        when(lookup.getServiceRecord(Mockito.any(String))).thenReturn(new ServiceRecord(FIKS, "123456789", pem, "http://localhost"))
         return lookup
     }
 

@@ -1,18 +1,15 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
+import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.ks.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
-import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import org.apache.commons.lang.NotImplementedException;
 import org.junit.Before;
 import org.junit.Test;
 
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
-import static no.difi.meldingsutveksling.ServiceIdentifier.FIKS;
+import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -82,11 +79,6 @@ public class StrategyFactoryTest {
     @Test(expected = IllegalArgumentException.class)
     public void serviceRecordWithoutServiceIdentifierThrowsError() {
         strategyFactory.getFactory(new ServiceRecord(null, "1235465", "certificate", "http://localhost"));
-    }
-
-    @Test(expected = NotImplementedException.class)
-    public void unknownServiceRecordThrowsException() {
-        strategyFactory.getFactory(new ServiceRecord(null, "123456", "certificate", "http://localhost"));
     }
 
 }
