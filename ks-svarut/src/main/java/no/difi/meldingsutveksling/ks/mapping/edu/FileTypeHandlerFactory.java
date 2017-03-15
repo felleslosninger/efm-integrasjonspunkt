@@ -14,7 +14,7 @@ public class FileTypeHandlerFactory {
         this.certificate = certificate;
     }
 
-    FileTypeHandler createFileTypeHandler(DokumentType dokumentType) {
+    public FileTypeHandler createFileTypeHandler(DokumentType dokumentType) {
         final FileTypeHandler fileTypeHandler = new FileTypeHandler(dokumentType);
         if (fiksConfig.isKryptert()) {
             fileTypeHandler.encryptMappedDataWith(certificate);
