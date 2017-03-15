@@ -11,6 +11,9 @@ public class ConversationResourceMarkers {
     private static final String RECEIVER_ID = "receiver_id";
     private static final String MESSAGETYPE_ID = "messagetype_id";
 
+    private ConversationResourceMarkers() {
+    }
+
     public static LogstashMarker markerFrom(ConversationResource resource) {
 
         final LogstashMarker conversationIdMarker = Markers.append(CONVERSATION_ID, resource.getConversationId());
