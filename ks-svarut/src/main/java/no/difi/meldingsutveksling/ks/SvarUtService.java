@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.ks;
 import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.CertificateParserException;
 import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 
@@ -29,6 +30,11 @@ public class SvarUtService {
         final Forsendelse forsendelse = messageConverter.convert(message, x509Certificate);
         SvarUtRequest svarUtRequest = new SvarUtRequest(serviceRecord.getEndPointURL(), forsendelse);
         return client.sendMessage(svarUtRequest);
+    }
+
+    public void getForsendelseStatus(final Conversation conversation) {
+        final ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(conversation.getReceiverIdentifier());
+        client.getForsendelseStatus(serviceRecord.getEndPointURL(), conversation.getConversationId());
     }
 
     private X509Certificate toX509Certificate(String pemCertificate) {
