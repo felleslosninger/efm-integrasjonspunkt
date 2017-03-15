@@ -155,7 +155,7 @@ public class MessagePolling implements ApplicationContextAware {
                         .orElse(Conversation.of(eduDocument.getConversationId(),
                                 "unknown", eduDocument
                                 .getReceiverOrgNumber(),
-                                "unknown", ServiceIdentifier.EDU));
+                                "unknown", ServiceIdentifier.DPO));
                 conversation.addMessageReceipt(receipt);
                 conversationRepository.save(conversation);
             }

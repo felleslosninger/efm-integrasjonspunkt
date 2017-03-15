@@ -103,7 +103,7 @@ public class MessageOutController {
             return ResponseEntity.badRequest().body("Required String parameter \'messagetypeId\' is not present");
         }
 
-        List<String> supportedTypes = Arrays.asList(ServiceIdentifier.EDU.fullname(),
+        List<String> supportedTypes = Arrays.asList(ServiceIdentifier.DPO.fullname(),
                 ServiceIdentifier.DPE_INNSYN.fullname(),
                 ServiceIdentifier.DPE_DATA.fullname());
         if (!supportedTypes.contains(messagetypeId)) {
@@ -221,7 +221,7 @@ public class MessageOutController {
         Optional<ServiceRecord> serviceRecord = Optional.ofNullable(sr.getServiceRecord(identifier));
         if (serviceRecord.isPresent()) {
             ArrayList<String> types = Lists.newArrayList();
-            types.add(serviceRecord.get().getServiceIdentifier());
+            types.add(serviceRecord.get().getServiceIdentifier().toString());
             types.addAll(serviceRecord.get().getDpeCapabilities());
             return ResponseEntity.ok(types);
         }

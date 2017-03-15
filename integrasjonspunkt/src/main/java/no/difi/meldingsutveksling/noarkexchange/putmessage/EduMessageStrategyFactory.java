@@ -62,7 +62,7 @@ public final class EduMessageStrategyFactory implements MessageStrategyFactory {
 
     @Override
     public ServiceIdentifier getServiceIdentifier() {
-        return ServiceIdentifier.EDU;
+        return ServiceIdentifier.DPO;
     }
 
     private boolean isMeldingTypePayload(Object payload) {

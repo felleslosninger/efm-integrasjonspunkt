@@ -45,7 +45,7 @@ public class EduMailSenderTest {
         putMessageJaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
         serviceRegistryLookup = mock(ServiceRegistryLookup.class);
 
-        InfoRecord infoRecord = new InfoRecord("1234", "Foo", new EntityType("EDU", "EDU"));
+        InfoRecord infoRecord = new InfoRecord("1234", "Foo", new EntityType("Organisasjonsledd", "ORGL"));
         when(serviceRegistryLookup.getInfoRecord(anyString())).thenReturn(infoRecord);
     }
 

@@ -17,7 +17,7 @@ public class FiksMessageStrategyFactory implements MessageStrategyFactory{
 
     @Override
     public ServiceIdentifier getServiceIdentifier() {
-        return ServiceIdentifier.FIKS;
+        return ServiceIdentifier.DPF;
     }
 
     public static FiksMessageStrategyFactory newInstance(SvarUtService svarUtService) {

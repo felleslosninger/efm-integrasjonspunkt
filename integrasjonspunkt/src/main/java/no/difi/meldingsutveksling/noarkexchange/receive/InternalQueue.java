@@ -103,7 +103,7 @@ public class InternalQueue {
         EDUCore request = eduCoreConverter.unmarshallFrom(message);
         try {
             eduCoreSender.sendMessage(request);
-            if (properties.getFeature().isEnableReceipts()) {
+            if (properties.getFeature().isEnableReceipts() && request.getServiceIdentifier() != null) {
                 if (request.getServiceIdentifier() == ServiceIdentifier.DPI && !properties.getFeature().isEnableDpiReceipts()) {
                     logger.warn(EDUCoreMarker.markerFrom(request), "Sent message to DPI with receipts disabled");
                 } else {

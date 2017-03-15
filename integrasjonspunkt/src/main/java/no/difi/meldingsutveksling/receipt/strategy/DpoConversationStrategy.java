@@ -5,9 +5,10 @@ import no.difi.meldingsutveksling.receipt.ConversationStrategy;
 import org.springframework.stereotype.Component;
 
 @Component
-public class EduConversationStrategy implements ConversationStrategy {
+public class DpoConversationStrategy implements ConversationStrategy {
 
     @Override
     public void checkStatus(Conversation conversation) {
+        // No polling needed for DPO.
     }
 }

@@ -73,9 +73,9 @@ public class IntegrasjonspunktImplTest {
         when(propertiesMock.getFeature()).thenReturn(featureMock);
         when(propertiesMock.getOrg()).thenReturn(organizationMock);
         when(featureMock.isEnableQueue()).thenReturn(true);
-        when(strategyFactory.hasFactory(ServiceIdentifier.EDU.fullname())).thenReturn(true);
-        when(strategyFactory.hasFactory(ServiceIdentifier.DPI.fullname())).thenReturn(true);
-        when(strategyFactory.hasFactory(ServiceIdentifier.DPV.fullname())).thenReturn(true);
+        when(strategyFactory.hasFactory(ServiceIdentifier.DPO)).thenReturn(true);
+        when(strategyFactory.hasFactory(ServiceIdentifier.DPI)).thenReturn(true);
+        when(strategyFactory.hasFactory(ServiceIdentifier.DPV)).thenReturn(true);
 
     }
 
