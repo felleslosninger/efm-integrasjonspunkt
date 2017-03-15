@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DpoConversationStrategy implements ConversationStrategy {
-    private static final ServiceIdentifier serviceIdentifier = ServiceIdentifier.EDU;
+    private static final ServiceIdentifier serviceIdentifier = ServiceIdentifier.DPO;
 
     @Override
     public void checkStatus(Conversation conversation) {

@@ -19,6 +19,6 @@ public class FiksConversationStrategy implements ConversationStrategy {
 
     @Override
     public ServiceIdentifier getServiceIdentifier() {
-        return ServiceIdentifier.FIKS;
+        return ServiceIdentifier.DPF;
     }
 }
