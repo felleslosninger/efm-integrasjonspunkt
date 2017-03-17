@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
@@ -51,7 +50,6 @@ class AppReceiptMessageStrategy implements MessageStrategy {
             if (!"ephorte".equalsIgnoreCase(properties.getNoarkSystem().getType())) {
                 request.swapSenderAndReceiver();
             }
-            request.setServiceIdentifier(ServiceIdentifier.DPO);
             messageSender.sendMessage(request);
         }
         if ("OK".equals(receipt.getType())) {
