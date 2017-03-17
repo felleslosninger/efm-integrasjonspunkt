@@ -32,9 +32,15 @@ public class SvarUtService {
         return client.sendMessage(svarUtRequest);
     }
 
-    public void getForsendelseStatus(final Conversation conversation) {
+    public ForsendelseStatus getMessageReceipt(final Conversation conversation) {
         final ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(conversation.getReceiverIdentifier());
-        client.getForsendelseStatus(serviceRecord.getEndPointURL(), conversation.getConversationId());
+        final String forsendelseId = client.getForsendelseId(serviceRecord.getEndPointURL(), conversation.getConversationId());
+
+        final ForsendelseStatus forsendelseStatus = client.getForsendelseStatus(serviceRecord.getEndPointURL(), forsendelseId);
+//        MessageReceipt.of(forsendelseStatus.value())
+
+        // TODO: create messageReceipt from forsendelse status
+        return forsendelseStatus;
     }
 
     private X509Certificate toX509Certificate(String pemCertificate) {
@@ -46,4 +52,7 @@ public class SvarUtService {
     }
 
 
+    public String getForsendelseIdFor(Conversation conversation) {
+        return null;
+    }
 }

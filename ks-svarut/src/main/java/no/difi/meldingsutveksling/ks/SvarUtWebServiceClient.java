@@ -1,7 +1,9 @@
 package no.difi.meldingsutveksling.ks;
 
 public interface SvarUtWebServiceClient {
-    ForsendelseStatus getForsendelseStatus(String uri, String forsendesId);
-
     String sendMessage(SvarUtRequest svarUtRequest);
+
+    String getForsendelseId(String uri, String eksternRef);
+
+    ForsendelseStatus getForsendelseStatus(String uri, String forsendesId);
 }
