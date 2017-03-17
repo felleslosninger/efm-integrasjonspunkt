@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.services;
 
 import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.CertificateParserException;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
@@ -59,6 +60,11 @@ public class Adresseregister {
     }
 
     public boolean hasAdresseregisterCertificate(ServiceRecord serviceRecord) {
+
+        if (ServiceIdentifier.DPV.equals(serviceRecord.getServiceIdentifier())) {
+            return false;
+        }
+
         log.info("hasAdresseregisterCertificate orgnr:" +serviceRecord.getOrganisationNumber());
         try {
             getCertificate(serviceRecord);

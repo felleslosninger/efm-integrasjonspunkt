@@ -20,7 +20,6 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 
 @Component
@@ -51,8 +50,7 @@ public class EDUCoreSender {
         final MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(serviceRecord);
         PutMessageResponseType result;
         final LogstashMarker marker = EDUCoreMarker.markerFrom(message);
-        if (adresseRegister.hasAdresseregisterCertificate(serviceRecord)
-                && !DPV.equals(serviceRecord.getServiceIdentifier())) {
+        if (adresseRegister.hasAdresseregisterCertificate(serviceRecord)) {
             Audit.info("Receiver validated", marker);
 
             MessageStrategy strategy = messageStrategyFactory.create(message.getPayload());
@@ -61,7 +59,6 @@ public class EDUCoreSender {
                 && mshClient.canRecieveMessage(message.getReceiver().getIdentifier())) {
             Audit.info("Send message to MSH", marker);
             EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
-            message.setServiceIdentifier(DPO);
             result = mshClient.sendEduMelding(eduCoreFactory.createPutMessageFromCore(message));
         } else if (DPV.equals(serviceRecord.getServiceIdentifier())) {
             Audit.info("Send message to DPV", marker);

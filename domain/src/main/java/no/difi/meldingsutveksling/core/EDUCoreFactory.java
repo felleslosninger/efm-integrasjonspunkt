@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 
 import javax.xml.bind.JAXBException;
 import java.util.Base64;
@@ -134,6 +135,9 @@ public class EDUCoreFactory {
 
         eduCore.setSender(createSender(senderInfo));
         eduCore.setReceiver(createReceiver(receiverInfo));
+
+        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(receiverOrgNr);
+        eduCore.setServiceIdentifier(serviceRecord.getServiceIdentifier());
 
         return eduCore;
     }
