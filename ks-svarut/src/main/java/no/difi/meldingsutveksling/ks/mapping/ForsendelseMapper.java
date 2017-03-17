@@ -14,7 +14,12 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.security.cert.X509Certificate;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 public class ForsendelseMapper {
@@ -68,8 +73,11 @@ public class ForsendelseMapper {
     }
 
     private XMLGregorianCalendar journalDatoFrom(String jpDokdato) {
+        LocalDateTime localDateTime = LocalDateTime.of(LocalDate.parse(jpDokdato), LocalTime.of(0, 0));
+
+        GregorianCalendar gcal = GregorianCalendar.from(localDateTime.atZone(ZoneId.systemDefault()));
         try {
-            return DatatypeFactory.newInstance().newXMLGregorianCalendar(jpDokdato);
+            return DatatypeFactory.newInstance().newXMLGregorianCalendar(gcal);
         } catch (DatatypeConfigurationException e) {
             throw new ForsendelseMappingException("Unable to map journalDato", e);
         }
@@ -89,7 +97,7 @@ public class ForsendelseMapper {
         List<Dokument> dokumenter = new ArrayList<>(dokumentTypes.size());
         for (DokumentType d : dokumentTypes) {
             final FileTypeHandler fileTypeHandler = fileTypeHandlerFactory.createFileTypeHandler(d);
-            Dokument.Builder dokumentBuilder =  fileTypeHandler.map(Dokument.builder());
+            Dokument.Builder dokumentBuilder = fileTypeHandler.map(Dokument.builder());
 
             dokumentBuilder.withFilnavn(d.getVeFilnavn());
             dokumentBuilder.withMimetype(d.getVeMimeType());

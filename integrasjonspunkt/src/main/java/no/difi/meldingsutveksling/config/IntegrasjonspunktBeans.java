@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.config;
 
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.ServiceRegistryTransportFactory;
+import no.difi.meldingsutveksling.auth.OidcTokenClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.ks.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
@@ -35,12 +36,11 @@ import java.util.List;
 @EnableConfigurationProperties({IntegrasjonspunktProperties.class})
 public class IntegrasjonspunktBeans {
 
-    private final IntegrasjonspunktProperties properties;
+    @Autowired
+    private IntegrasjonspunktProperties properties;
 
     @Autowired
-    public IntegrasjonspunktBeans(IntegrasjonspunktProperties properties) {
-        this.properties = properties;
-    }
+    private OidcTokenClient oidcClient;
 
     @Bean
     public AltinnFormidlingsTjenestenConfig altinnConfig() {
