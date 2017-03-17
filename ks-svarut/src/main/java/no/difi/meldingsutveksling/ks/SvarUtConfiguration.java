@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.ks;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.ks.mapping.HandlerFactory;
+import no.difi.meldingsutveksling.ks.mapping.ForsendelseMapper;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -15,18 +15,13 @@ import org.springframework.context.annotation.Configuration;
 public class SvarUtConfiguration {
 
     @Bean
-    public EDUCoreConverter eduCoreConverter(HandlerFactory handlerFactory) {
-        return new EDUCoreConverterImpl(handlerFactory);
+    public ForsendelseMapper forsendelseMapper(IntegrasjonspunktProperties properties, ServiceRegistryLookup serviceRegistryLookup) {
+        return new ForsendelseMapper(properties, serviceRegistryLookup);
     }
 
     @Bean
-    public HandlerFactory handlerFactory(IntegrasjonspunktProperties properties) {
-        return new HandlerFactory(properties);
-    }
-
-    @Bean
-    public SvarUtService svarUtService(EDUCoreConverter converter, SvarUtWebServiceClient svarUtClient, ServiceRegistryLookup serviceRegistryLookup) {
-        return new SvarUtService(svarUtClient, serviceRegistryLookup, converter);
+    public SvarUtService svarUtService(ForsendelseMapper forsendelseMapper, SvarUtWebServiceClient svarUtClient, ServiceRegistryLookup serviceRegistryLookup) {
+        return new SvarUtService(svarUtClient, serviceRegistryLookup, forsendelseMapper);
     }
 
 }

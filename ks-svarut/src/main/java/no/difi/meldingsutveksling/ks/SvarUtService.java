@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.ks;
 import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.CertificateParserException;
 import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.ks.mapping.ForsendelseMapper;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -12,13 +13,13 @@ import java.security.cert.X509Certificate;
 public class SvarUtService {
     private SvarUtWebServiceClient client;
     private ServiceRegistryLookup serviceRegistryLookup;
-    private EDUCoreConverter messageConverter;
+    private ForsendelseMapper forsendelseMapper;
     CertificateParser certificateParser;
 
-    public SvarUtService(SvarUtWebServiceClient svarUtClient, ServiceRegistryLookup serviceRegistryLookup, EDUCoreConverter messageConverter) {
+    public SvarUtService(SvarUtWebServiceClient svarUtClient, ServiceRegistryLookup serviceRegistryLookup, ForsendelseMapper forsendelseMapper) {
         this.client = svarUtClient;
         this.serviceRegistryLookup = serviceRegistryLookup;
-        this.messageConverter = messageConverter;
+        this.forsendelseMapper = forsendelseMapper;
         certificateParser = new CertificateParser();
     }
 
@@ -27,7 +28,8 @@ public class SvarUtService {
 
         final X509Certificate x509Certificate = toX509Certificate(serviceRecord.getPemCertificate());
 
-        final Forsendelse forsendelse = messageConverter.convert(message, x509Certificate);
+
+        final Forsendelse forsendelse = forsendelseMapper.mapFrom(message, x509Certificate);
         SvarUtRequest svarUtRequest = new SvarUtRequest(serviceRecord.getEndPointURL(), forsendelse);
         return client.sendMessage(svarUtRequest);
     }
