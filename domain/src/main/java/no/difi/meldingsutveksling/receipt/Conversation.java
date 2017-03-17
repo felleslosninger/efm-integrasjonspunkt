@@ -44,14 +44,11 @@ public class Conversation {
         this.lastUpdate = LocalDateTime.now();
         switch (serviceIdentifier) {
             case DPV:
+            case DPF:
                 this.pollable = true;
                 break;
             case DPI:
-                this.pollable = false;
-                break;
             case DPO:
-                this.pollable = false;
-                break;
             default:
                 this.pollable = false;
                 break;

@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.config;
 
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.ServiceRegistryTransportFactory;
-import no.difi.meldingsutveksling.auth.OidcTokenClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.ks.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
@@ -11,6 +10,7 @@ import no.difi.meldingsutveksling.noarkexchange.putmessage.FiksMessageStrategyFa
 import no.difi.meldingsutveksling.noarkexchange.putmessage.KeystoreProvider;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
+import no.difi.meldingsutveksling.receipt.ConversationRepository;
 import no.difi.meldingsutveksling.receipt.ConversationStrategy;
 import no.difi.meldingsutveksling.receipt.ConversationStrategyFactory;
 import no.difi.meldingsutveksling.receipt.DpiReceiptService;
@@ -35,11 +35,12 @@ import java.util.List;
 @EnableConfigurationProperties({IntegrasjonspunktProperties.class})
 public class IntegrasjonspunktBeans {
 
-    @Autowired
-    private IntegrasjonspunktProperties properties;
+    private final IntegrasjonspunktProperties properties;
 
     @Autowired
-    private OidcTokenClient oidcClient;
+    public IntegrasjonspunktBeans(IntegrasjonspunktProperties properties) {
+        this.properties = properties;
+    }
 
     @Bean
     public AltinnFormidlingsTjenestenConfig altinnConfig() {
@@ -78,8 +79,8 @@ public class IntegrasjonspunktBeans {
 
     @ConditionalOnProperty(name="difi.move.fiks.enabled", havingValue = "true")
     @Bean
-    public FiksConversationStrategy fiksConversationStrategy(SvarUtService svarUtService) {
-        return new FiksConversationStrategy(svarUtService);
+    public FiksConversationStrategy fiksConversationStrategy(SvarUtService svarUtService, ConversationRepository conversationRepository) {
+        return new FiksConversationStrategy(svarUtService, conversationRepository);
     }
 
     @Bean
