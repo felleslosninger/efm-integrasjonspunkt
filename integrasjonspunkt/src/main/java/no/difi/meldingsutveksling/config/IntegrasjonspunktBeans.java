@@ -11,7 +11,11 @@ import no.difi.meldingsutveksling.noarkexchange.putmessage.FiksMessageStrategyFa
 import no.difi.meldingsutveksling.noarkexchange.putmessage.KeystoreProvider;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
+import no.difi.meldingsutveksling.receipt.ConversationRepository;
+import no.difi.meldingsutveksling.receipt.ConversationStrategy;
+import no.difi.meldingsutveksling.receipt.ConversationStrategyFactory;
 import no.difi.meldingsutveksling.receipt.DpiReceiptService;
+import no.difi.meldingsutveksling.receipt.strategy.FiksConversationStrategy;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.TransportFactory;
@@ -73,9 +77,22 @@ public class IntegrasjonspunktBeans {
         return FiksMessageStrategyFactory.newInstance(svarUtService);
     }
 
+    @ConditionalOnProperty(name="difi.move.fiks.enabled", havingValue = "true")
+    @Bean
+    public FiksConversationStrategy fiksConversationStrategy(SvarUtService svarUtService, ConversationRepository conversationRepository) {
+        return new FiksConversationStrategy(svarUtService, conversationRepository);
+    }
+
+    @Bean
+    public ConversationStrategyFactory conversationStrategyFactory(List<ConversationStrategy> conversationStrategies) {
+        ConversationStrategyFactory conversationStrategyFactory = new ConversationStrategyFactory();
+        conversationStrategies.forEach(conversationStrategyFactory::registerStrategy);
+        return conversationStrategyFactory;
+    }
+
     @Bean
     public StrategyFactory messageStrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup, KeystoreProvider meldingsformidlerKeystoreProvider,
-                                                  ObjectProvider<List<MessageStrategyFactory>> messageStrategyFactory) {
+                                                  @SuppressWarnings("SpringJavaAutowiringInspection") ObjectProvider<List<MessageStrategyFactory>> messageStrategyFactory) {
         final StrategyFactory strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, meldingsformidlerKeystoreProvider, properties);
         if(messageStrategyFactory.getIfAvailable() != null) {
             messageStrategyFactory.getIfAvailable().forEach(strategyFactory::registerMessageStrategyFactory);

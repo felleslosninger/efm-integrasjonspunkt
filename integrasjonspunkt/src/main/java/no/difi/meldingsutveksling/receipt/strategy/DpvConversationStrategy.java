@@ -4,6 +4,7 @@ import no.altinn.schemas.services.serviceengine.correspondence._2014._10.StatusC
 import no.altinn.schemas.services.serviceengine.correspondence._2014._10.StatusV2;
 import no.altinn.services.serviceengine.correspondence._2009._10.GetCorrespondenceStatusDetailsV2;
 import no.altinn.services.serviceengine.correspondence._2009._10.GetCorrespondenceStatusDetailsV2Response;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
@@ -23,6 +24,7 @@ import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 
 @Component
 public class DpvConversationStrategy implements ConversationStrategy {
+    private static final ServiceIdentifier serviceIdentifier = ServiceIdentifier.DPV;
 
     @Autowired
     private IntegrasjonspunktProperties properties;
@@ -86,5 +88,10 @@ public class DpvConversationStrategy implements ConversationStrategy {
 
         }
 
+    }
+
+    @Override
+    public ServiceIdentifier getServiceIdentifier() {
+        return serviceIdentifier;
     }
 }
