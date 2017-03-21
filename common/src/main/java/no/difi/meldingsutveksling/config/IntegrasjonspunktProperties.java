@@ -143,6 +143,7 @@ public class IntegrasjonspunktProperties {
         @NotNull
         private boolean enable;
         private URL url;
+        private String audience;
         private List<String> scopes;
         private String clientId;
         private Keystore keystore;
