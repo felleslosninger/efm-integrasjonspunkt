@@ -40,6 +40,7 @@ public class OidcTokenClientTest {
         props.setOidc(new IntegrasjonspunktProperties.Oidc());
         props.getOidc().setEnable(true);
         props.getOidc().setUrl(new URL("https://oidc-ver2.difi.no/idporten-oidc-provider/token"));
+        props.getOidc().setAudience("https://oidc-ver2.difi.no/idporten-oidc-provider/");
         props.getOidc().setClientId("test_move");
         props.getOidc().setScopes(scopes);
         props.getOidc().setKeystore(new IntegrasjonspunktProperties.Keystore());
@@ -75,7 +76,7 @@ public class OidcTokenClientTest {
         OidcTokenClient oidcTokenClient = new OidcTokenClient(props);
         OauthRestTemplateConfig config = new OauthRestTemplateConfig(props, oidcTokenClient);
         RestOperations ops = config.restTemplate();
-        String response = ops.getForObject("http://localhost:9099/identifier/910075918", String.class);
+        String response = ops.getForObject("http://localhost:9099/identifier/06068700602", String.class);
         System.out.println(response);
     }
 
