@@ -8,16 +8,18 @@ public class AltinnReason {
 
     private final String message;
     private final String userId;
+    private final String localized;
 
-    AltinnReason(Integer id, String message, String userId) {
+    AltinnReason(Integer id, String message, String userId, String localized) {
         this.id = id;
         this.message = message;
         this.userId = userId;
+        this.localized = localized;
     }
 
     @Override
     public String toString() {
-        return String.format("Reason: %s. ErrorId: %d. UserId: %s", message, id, userId);
+        return String.format("Reason: %s. LocalizedErrorMessage: %s. ErrorId: %d. UserId: %s", message, localized, id, userId);
     }
 
     public Integer getId() {
@@ -30,5 +32,9 @@ public class AltinnReason {
 
     public String getUserId() {
         return userId;
+    }
+
+    public String getLocalized() {
+        return localized;
     }
 }

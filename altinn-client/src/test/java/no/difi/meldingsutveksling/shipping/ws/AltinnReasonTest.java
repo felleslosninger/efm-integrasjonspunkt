@@ -13,7 +13,8 @@ public class AltinnReasonTest {
         int id = 1;
         String message = "Something went terribly wrong";
         String userid = "200";
-        altinnReason = new AltinnReason(id, message, userid);
+        String localizedMessage = "Details why it went wrong";
+        altinnReason = new AltinnReason(id, message, userid, localizedMessage);
     }
 
     @Test
@@ -35,5 +36,12 @@ public class AltinnReasonTest {
         String actual = altinnReason.toString();
 
         assertTrue(actual.contains(altinnReason.getUserId()));
+    }
+
+    @Test
+    public void toStringShouldContainLocalizedMessage() {
+        String actual = altinnReason.toString();
+
+        assertTrue(actual.contains(altinnReason.getLocalized()));
     }
 }
