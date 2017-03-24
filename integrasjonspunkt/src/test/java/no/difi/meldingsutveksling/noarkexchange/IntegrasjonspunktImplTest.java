@@ -114,19 +114,6 @@ public class IntegrasjonspunktImplTest {
     }
 
     @Test
-    public void shouldNotBeAbleToReceiveWhenMshEnabledAndServiceRecordIsDVPAndMshCannotReceive() {
-        //when(adresseregister.hasAdresseregisterCertificate(IDENTIFIER)).thenReturn(true);
-        when(serviceRegistryLookup.getServiceRecord(IDENTIFIER)).thenReturn(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER));
-        enableMsh();
-        when(msh.canRecieveMessage(IDENTIFIER)).thenReturn(false);
-        final GetCanReceiveMessageRequestType request = GetCanReceiveObjectMother.createRequest(IDENTIFIER);
-
-        final GetCanReceiveMessageResponseType response = integrasjonspunkt.getCanReceiveMessage(request);
-
-        assertThat(response.isResult(), is(false));
-    }
-
-    @Test
     public void shouldCheckWithMSHWhenServiceIdentifierIsDPVAndMSHEnabled() {
         when(serviceRegistryLookup.getServiceRecord(IDENTIFIER)).thenReturn(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER));
         enableMsh();
