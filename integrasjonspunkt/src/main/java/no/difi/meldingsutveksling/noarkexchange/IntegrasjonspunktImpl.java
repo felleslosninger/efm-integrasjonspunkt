@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import net.logstash.logback.encoder.org.apache.commons.lang.StringUtils;
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCoreService;
@@ -85,8 +84,9 @@ public class IntegrasjonspunktImpl implements SOAPport {
         boolean isDpv = false;
         if (certificateAvailable) {
             Audit.info("CanReceive = true", marker);
-        } else if (hasMshEndpoint() && (mshCanReceive = mshClient.canRecieveMessage(organisasjonsnummer))) {
-            Audit.info(String.format("MSH canReceive = %s", mshCanReceive), marker);
+        } else if (mshClient.canRecieveMessage(organisasjonsnummer)) {
+            mshCanReceive = true;
+            Audit.info("MSH canReceive = true", marker);
         } else if (DPV.equals(serviceRecord.getServiceIdentifier())) {
             isDpv = true;
         }
@@ -102,10 +102,6 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
         response.setResult((certificateAvailable || mshCanReceive || isDpv ) && strategyFactoryAvailable);
         return response;
-    }
-
-    private boolean hasMshEndpoint() {
-        return !StringUtils.isBlank(properties.getMsh().getEndpointURL());
     }
 
     @Override

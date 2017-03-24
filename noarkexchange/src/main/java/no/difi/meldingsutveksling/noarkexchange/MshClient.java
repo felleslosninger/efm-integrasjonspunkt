@@ -6,6 +6,7 @@ import org.springframework.ws.soap.client.core.SoapActionCallback;
 
 import javax.xml.bind.JAXBElement;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.logging.MarkerFactory.receiverMarker;
 
 public class MshClient implements NoarkClient {
@@ -23,6 +24,11 @@ public class MshClient implements NoarkClient {
 
     @Override
     public boolean canRecieveMessage(String orgnr) {
+
+        if (isNullOrEmpty(endpointURL)) {
+            return false;
+        }
+
         GetCanReceiveMessageRequestType requestType = new GetCanReceiveMessageRequestType();
         AddressType addressType = new AddressType();
         addressType.setOrgnr(orgnr);
