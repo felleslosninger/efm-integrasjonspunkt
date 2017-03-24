@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.Avsender;
@@ -10,7 +11,9 @@ import no.difi.meldingsutveksling.ks.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.KeystoreProvider;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
+import no.difi.meldingsutveksling.receipt.ConversationStrategyFactory;
 import no.difi.meldingsutveksling.receipt.DpiReceiptService;
+import no.difi.meldingsutveksling.receipt.ReceiptPolling;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
@@ -94,6 +97,18 @@ public class IntegrasjonspunktIntegrationTestConfig {
 
     @Bean
     @Primary
+    public ReceiptPolling receiptPolling() {
+        return mock(ReceiptPolling.class);
+    }
+
+    @Bean
+    @Primary
+    public ConversationStrategyFactory conversationStrategyFactory() {
+        return mock(ConversationStrategyFactory.class);
+    }
+
+    @Bean
+    @Primary
     public JmsTemplate jmsTemplate() {
         return mock(JmsTemplate.class);
     }
@@ -133,11 +148,11 @@ public class IntegrasjonspunktIntegrationTestConfig {
         InfoRecord ir = mock(InfoRecord.class);
         when(ir.getIdentifier()).thenReturn("1337");
         when(ir.getOrganizationName()).thenReturn("foo");
-        when(ir.getEntityType()).thenReturn(new EntityType("EDU", "EDU"));
+        when(ir.getEntityType()).thenReturn(new EntityType("Organisasjonsledd", "ORGL"));
         when(srMock.getInfoRecord(anyString())).thenReturn(ir);
 
         ServiceRecord sr = mock(ServiceRecord.class);
-        when(sr.getServiceIdentifier()).thenReturn("EDU");
+        when(sr.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPO);
         when(sr.getOrganisationNumber()).thenReturn("1337");
         when(srMock.getServiceRecord(anyString())).thenReturn(sr);
 

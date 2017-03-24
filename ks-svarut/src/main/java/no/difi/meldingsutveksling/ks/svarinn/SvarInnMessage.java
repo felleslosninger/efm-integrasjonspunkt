@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.ks.svarinn;
 
 import lombok.Data;
 import lombok.NonNull;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.Receiver;
 import no.difi.meldingsutveksling.core.Sender;
@@ -49,6 +50,7 @@ public class SvarInnMessage {
         eduCore.setPayload(payload);
         eduCore.setSender(createSender());
         eduCore.setReceiver(createReceiver());
+        eduCore.setServiceIdentifier(ServiceIdentifier.DPF);
         return eduCore;
     }
 

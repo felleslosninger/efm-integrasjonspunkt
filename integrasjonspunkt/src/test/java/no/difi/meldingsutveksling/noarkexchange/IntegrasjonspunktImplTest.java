@@ -73,9 +73,9 @@ public class IntegrasjonspunktImplTest {
         when(propertiesMock.getFeature()).thenReturn(featureMock);
         when(propertiesMock.getOrg()).thenReturn(organizationMock);
         when(featureMock.isEnableQueue()).thenReturn(true);
-        when(strategyFactory.hasFactory(ServiceIdentifier.EDU.fullname())).thenReturn(true);
-        when(strategyFactory.hasFactory(ServiceIdentifier.DPI.fullname())).thenReturn(true);
-        when(strategyFactory.hasFactory(ServiceIdentifier.DPV.fullname())).thenReturn(true);
+        when(strategyFactory.hasFactory(ServiceIdentifier.DPO)).thenReturn(true);
+        when(strategyFactory.hasFactory(ServiceIdentifier.DPI)).thenReturn(true);
+        when(strategyFactory.hasFactory(ServiceIdentifier.DPV)).thenReturn(true);
 
     }
 
@@ -111,19 +111,6 @@ public class IntegrasjonspunktImplTest {
         final GetCanReceiveMessageResponseType canReceiveMessage = integrasjonspunkt.getCanReceiveMessage(request);
 
         assertThat(canReceiveMessage.isResult(), is(true));
-    }
-
-    @Test
-    public void shouldNotBeAbleToReceiveWhenMshEnabledAndServiceRecordIsDVPAndMshCannotReceive() {
-        //when(adresseregister.hasAdresseregisterCertificate(IDENTIFIER)).thenReturn(true);
-        when(serviceRegistryLookup.getServiceRecord(IDENTIFIER)).thenReturn(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER));
-        enableMsh();
-        when(msh.canRecieveMessage(IDENTIFIER)).thenReturn(false);
-        final GetCanReceiveMessageRequestType request = GetCanReceiveObjectMother.createRequest(IDENTIFIER);
-
-        final GetCanReceiveMessageResponseType response = integrasjonspunkt.getCanReceiveMessage(request);
-
-        assertThat(response.isResult(), is(false));
     }
 
     @Test

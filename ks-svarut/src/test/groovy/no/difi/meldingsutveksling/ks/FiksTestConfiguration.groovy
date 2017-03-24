@@ -1,14 +1,15 @@
 package no.difi.meldingsutveksling.ks
 
+import no.difi.meldingsutveksling.ks.mapping.ForsendelseMapper
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-public class FiksTestConfiguration {
+class FiksTestConfiguration {
     @Bean
-    SvarUtService svarUtService(SvarUtWebServiceClient svarUtWebServiceClient, ServiceRegistryLookup serviceRegistryLookup, EDUCoreConverter eduCoreConverter) {
-        return new SvarUtService(svarUtWebServiceClient, serviceRegistryLookup, eduCoreConverter)
+    SvarUtService svarUtService(SvarUtWebServiceClient svarUtWebServiceClient, ServiceRegistryLookup serviceRegistryLookup, ForsendelseMapper forsendelseMapper) {
+        return new SvarUtService(svarUtWebServiceClient, serviceRegistryLookup, forsendelseMapper)
     }
 
 }

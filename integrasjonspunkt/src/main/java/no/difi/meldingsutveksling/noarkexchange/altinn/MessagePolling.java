@@ -96,10 +96,6 @@ public class MessagePolling implements ApplicationContextAware {
     @Scheduled(fixedRate = 15000)
     public void checkForNewMessages() throws MessageException {
 
-        if (!properties.getAltinn().isEnableDpo()) {
-            return;
-        }
-
         logger.debug("Checking for new messages");
         if (messageDownloaders.getIfAvailable() != null) {
             for (MessageDownloaderModule task : messageDownloaders.getObject()) {
@@ -110,6 +106,10 @@ public class MessagePolling implements ApplicationContextAware {
 
         if (serviceRecord == null) {
             serviceRecord = serviceRegistryLookup.getServiceRecord(properties.getOrg().getNumber());
+        }
+
+        if (!properties.getAltinn().isEnableDpo()) {
+            return;
         }
 
         // TODO: if ServiceRegistry returns a ServiceRecord to something other than Altinn formidlingstjeneste this
@@ -155,7 +155,7 @@ public class MessagePolling implements ApplicationContextAware {
                         .orElse(Conversation.of(eduDocument.getConversationId(),
                                 "unknown", eduDocument
                                 .getReceiverOrgNumber(),
-                                "unknown", ServiceIdentifier.EDU));
+                                "unknown", ServiceIdentifier.DPO));
                 conversation.addMessageReceipt(receipt);
                 conversationRepository.save(conversation);
             }

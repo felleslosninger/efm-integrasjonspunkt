@@ -57,11 +57,20 @@ class SvarUtServiceIntegrationTest {
 
     def "an edu message"() {
         EDUCore eduCore = new EDUCore()
-        eduCore.payload = new MeldingType(journpost:
-                new JournpostType(
-                        dokument: [new DokumentType(fil: new FilType(base64: [0x0,0x1,0x2]))]
+        eduCore.payload = new MeldingType(
+                journpost: new JournpostType(
+                        dokument: [new DokumentType(fil: new FilType(base64: [0x0,0x1,0x2]))],
+                        jpJaar: "123",
+                        jpSeknr: "123",
+                        jpJpostnr: "123",
+                        jpNdoktype: "foo",
+                        jpStatus: "foo",
+                        jpDokdato: "2017-01-01"
                 ),
-                noarksak: new NoarksakType(saOfftittel: "Test brev")
+                noarksak: new NoarksakType(
+                        saSeknr: "123",
+                        saOfftittel: "Test brev",
+                        saSaar: "123")
         )
         eduCore.sender = new Sender(name: "Difi", identifier: "991825827")
         eduCore.receiver = new Receiver(name: "Lote", identifier: "1234")

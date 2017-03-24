@@ -3,7 +3,7 @@
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>1.7.52</version>
+        <version>1.7.53</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>noarkexchange-p360</artifactId>
@@ -44,7 +44,22 @@
             <version>${project.parent.version}</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>2.4.7</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.ws</groupId>
+            <artifactId>spring-ws-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -70,6 +85,20 @@
                             </vmArgs>
                             <verbose>true</verbose>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- The gmavenplus plugin is used to compile Groovy code. To learn more about this plugin,
+                visit https://github.com/groovy/GMavenPlus/wiki -->
+                <groupId>org.codehaus.gmavenplus</groupId>
+                <artifactId>gmavenplus-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>

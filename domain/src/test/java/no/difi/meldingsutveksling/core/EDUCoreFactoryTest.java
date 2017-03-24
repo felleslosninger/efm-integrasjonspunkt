@@ -1,11 +1,13 @@
 package no.difi.meldingsutveksling.core;
 
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.mxa.schema.domain.Message;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -212,8 +214,10 @@ public class EDUCoreFactoryTest {
         mxaMessageJaxbContext = JAXBContext.newInstance(Message.class);
         serviceRegistryLookup = Mockito.mock(ServiceRegistryLookup.class);
 
-        InfoRecord infoRecord = new InfoRecord("1234", "Foo", new EntityType("EDU", "EDU"));
+        InfoRecord infoRecord = new InfoRecord("1234", "Foo", new EntityType("Organisasjonsledd", "ORGL"));
+        ServiceRecord serviceRecord = new ServiceRecord(ServiceIdentifier.DPO, "1234", "pem123", "http://foo");
         when(serviceRegistryLookup.getInfoRecord(anyString())).thenReturn(infoRecord);
+        when(serviceRegistryLookup.getServiceRecord(anyString())).thenReturn(serviceRecord);
     }
 
     @Test

@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.ptv;
 
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreFactory;
 import no.difi.meldingsutveksling.mxa.schema.domain.Message;
@@ -11,6 +12,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.xml.transform.StringSource;
@@ -172,7 +174,9 @@ public class CorrespondenceAgencyMessageFactoryTest {
 
         srMock = mock(ServiceRegistryLookup.class);
         InfoRecord infoRecord = new InfoRecord("910075918", "Fylkesmannen i Sogn og Fjordane", new EntityType("DPV", "DPV"));
+        ServiceRecord serviceRecord = new ServiceRecord(ServiceIdentifier.DPO, "1234", "pem123", "http://foo");
         when(srMock.getInfoRecord(any())).thenReturn(infoRecord);
+        when(srMock.getServiceRecord(any())).thenReturn(serviceRecord);
 
         eduCoreFactory = new EDUCoreFactory(srMock);
     }

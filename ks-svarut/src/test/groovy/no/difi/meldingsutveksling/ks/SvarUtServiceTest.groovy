@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.ks
 import no.difi.meldingsutveksling.CertificateParser
 import no.difi.meldingsutveksling.core.EDUCore
 import no.difi.meldingsutveksling.core.Receiver
+import no.difi.meldingsutveksling.ks.mapping.FiksMapper
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
 import spock.lang.Specification
@@ -15,7 +16,7 @@ class SvarUtServiceTest extends Specification {
     def "setup"() {
 
         def serviceRegistry = Mock(ServiceRegistryLookup)
-        service = new SvarUtService(Mock(SvarUtWebServiceClient), serviceRegistry, Mock(EDUCoreConverter))
+        service = new SvarUtService(Mock(SvarUtWebServiceClient), serviceRegistry, Mock(FiksMapper))
         service.certificateParser = Mock(CertificateParser)
         serviceRegistry.getServiceRecord(IDENTIFIER) >> new ServiceRecord(pemCertificate: "asdf")
     }
@@ -30,7 +31,7 @@ class SvarUtServiceTest extends Specification {
         service.send(domainMessage)
 
         then:
-        1 * service.messageConverter.convert(this.domainMessage, _) >> forsendelse
+        1 * service.fiksMapper.mapFrom(this.domainMessage, _) >> forsendelse
         then:
         1 * service.client.sendMessage(request)
     }

@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static no.difi.meldingsutveksling.nextbest.logging.ConversationResourceMarkers.markerFrom;
 
 @RestController
 public class MessageInController {
@@ -113,6 +114,7 @@ public class MessageInController {
             InputStreamResource isr = new InputStreamResource(new FileInputStream(file));
 
             repo.delete(resource.get());
+            log.info(markerFrom(resource.get()), "Conversation with id={} popped from queue", resource.get().getConversationId());
 
             return ResponseEntity.ok()
                     .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME+filename)

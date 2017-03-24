@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static no.difi.meldingsutveksling.nextbest.logging.ConversationResourceMarkers.markerFrom;
 
 @RestController
 public class MessageOutController {
@@ -103,7 +104,7 @@ public class MessageOutController {
             return ResponseEntity.badRequest().body("Required String parameter \'messagetypeId\' is not present");
         }
 
-        List<String> supportedTypes = Arrays.asList(ServiceIdentifier.EDU.fullname(),
+        List<String> supportedTypes = Arrays.asList(ServiceIdentifier.DPO.fullname(),
                 ServiceIdentifier.DPE_INNSYN.fullname(),
                 ServiceIdentifier.DPE_DATA.fullname());
         if (!supportedTypes.contains(messagetypeId)) {
@@ -129,7 +130,11 @@ public class MessageOutController {
                         messagetypeId);
             }
         }
+
         repo.save(conversationResource);
+        log.info(markerFrom(conversationResource), "Created new conversation resource with id={}",
+                conversationResource.getConversationId());
+
         return ResponseEntity.ok(conversationResource);
     }
 
@@ -147,10 +152,8 @@ public class MessageOutController {
         ArrayList<String> files = Lists.newArrayList(request.getFileNames());
         for (String f : files) {
             MultipartFile file = request.getFile(f);
-            log.info("Key: "+file.getName());
-            log.info("Name: "+file.getOriginalFilename());
-            log.info("Content-Type: "+file.getContentType());
-            log.info("Size (bytes): "+file.getSize());
+            log.info(markerFrom(conversationResource), "Adding file \"{}\" ({}, {} bytes) to {}",
+                    file.getOriginalFilename(), file.getContentType(), file.getSize(), conversationResource.getConversationId());
 
             String filedir = props.getNextbest().getFiledir();
             if (!filedir.endsWith("/")) {
@@ -170,7 +173,6 @@ public class MessageOutController {
                 if (!conversationResource.getFileRefs().values().contains(file.getOriginalFilename())) {
                     conversationResource.addFileRef(file.getOriginalFilename());
                 }
-                repo.delete(conversationResource);
             } catch (java.io.IOException e) {
                 log.error("Could not write file {f}", localFile, e);
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Could not write file");
@@ -181,17 +183,23 @@ public class MessageOutController {
             if (ServiceIdentifier.DPE_INNSYN.fullname().equals(conversationResource.getMessagetypeId()) ||
                     ServiceIdentifier.DPE_DATA.fullname().equals(conversationResource.getMessagetypeId())) {
                 if (!props.getNextbest().getServiceBus().isEnable()) {
-                    return ResponseEntity.badRequest().body(String.format("Service Bus disabled, cannot send messages" +
-                            " of types %s,%s", ServiceIdentifier.DPE_INNSYN.fullname(), ServiceIdentifier.DPE_DATA.fullname()));
+                    String responseStr = String.format("Service Bus disabled, cannot send messages" +
+                            " of types %s,%s", ServiceIdentifier.DPE_INNSYN.fullname(), ServiceIdentifier.DPE_DATA.fullname());
+                    log.error(markerFrom(conversationResource), responseStr);
+                    return ResponseEntity.badRequest().body(responseStr);
                 }
                 nextBestServiceBus.putMessage(conversationResource);
+                log.info(markerFrom(conversationResource), "Message sent to service bus");
             } else {
                 messageSender.sendMessage(conversationResource);
+                log.info(markerFrom(conversationResource), "Message sent to altinn");
             }
         } catch (NextBestException | MessageContextException e) {
             log.error("Send message failed.", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error during sending. Check logs");
         }
+
+        repo.delete(conversationResource);
 
         return ResponseEntity.ok().build();
     }
@@ -221,7 +229,7 @@ public class MessageOutController {
         Optional<ServiceRecord> serviceRecord = Optional.ofNullable(sr.getServiceRecord(identifier));
         if (serviceRecord.isPresent()) {
             ArrayList<String> types = Lists.newArrayList();
-            types.add(serviceRecord.get().getServiceIdentifier());
+            types.add(serviceRecord.get().getServiceIdentifier().toString());
             types.addAll(serviceRecord.get().getDpeCapabilities());
             return ResponseEntity.ok(types);
         }
