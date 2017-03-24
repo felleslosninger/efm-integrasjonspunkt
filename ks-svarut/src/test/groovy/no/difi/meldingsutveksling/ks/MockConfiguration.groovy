@@ -25,7 +25,7 @@ public class MockConfiguration {
         return lookup
     }
 
-    @Bean
+    @Bean(name = "localNoark")
     public NoarkClient noarkClient() {
         return mock(NoarkClient)
     }
