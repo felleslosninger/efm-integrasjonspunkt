@@ -45,7 +45,11 @@
             <groupId>no.difi.move-common</groupId>
             <artifactId>webservice-tools</artifactId>
         </dependency>
-        
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>
