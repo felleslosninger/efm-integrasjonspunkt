@@ -27,12 +27,6 @@ public class NoarkBeanFactory {
 
     @Bean(name = "mshClient")
     public NoarkClient mshClient() {
-        NoarkClientSettings clientSettings = new NoarkClientSettings(
-                properties.getNoarkSystem().getEndpointURL(),
-                properties.getNoarkSystem().getUsername(),
-                properties.getNoarkSystem().getPassword(),
-                properties.getNoarkSystem().getDomain());
-        NoarkClient client = new NoarkClientFactory(clientSettings).from(properties);
-        return client;
+        return new MshClient(properties.getMsh().getEndpointURL());
     }
 }

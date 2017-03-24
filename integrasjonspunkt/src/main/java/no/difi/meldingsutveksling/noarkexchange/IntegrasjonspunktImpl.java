@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.jws.WebParam;
 import javax.jws.WebService;
@@ -42,6 +43,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
     private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktImpl.class);
 
     @Autowired
+    @Qualifier("mshClient")
     private NoarkClient mshClient;
 
     @Autowired
@@ -83,8 +85,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
         boolean isDpv = false;
         if (certificateAvailable) {
             Audit.info("CanReceive = true", marker);
-        } else if (hasMshEndpoint()) {
-            mshCanReceive = mshClient.canRecieveMessage(organisasjonsnummer);
+        } else if (hasMshEndpoint() && (mshCanReceive = mshClient.canRecieveMessage(organisasjonsnummer))) {
             Audit.info(String.format("MSH canReceive = %s", mshCanReceive), marker);
         } else if (DPV.equals(serviceRecord.getServiceIdentifier())) {
             isDpv = true;
