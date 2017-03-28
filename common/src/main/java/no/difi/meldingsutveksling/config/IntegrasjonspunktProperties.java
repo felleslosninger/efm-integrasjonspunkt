@@ -226,10 +226,7 @@ public class IntegrasjonspunktProperties {
     @Data
     public static class MessageServiceHandler {
 
-        private String username;
-        private String password;
         private String endpointURL;
-
     }
 
     @Data
