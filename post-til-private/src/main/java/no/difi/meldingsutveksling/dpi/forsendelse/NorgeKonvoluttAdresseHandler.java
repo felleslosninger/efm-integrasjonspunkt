@@ -8,6 +8,7 @@ public class NorgeKonvoluttAdresseHandler implements KonvoluttAdresseHandler {
     @Override
     public KonvoluttAdresse handle(MeldingsformidlerRequest request) {
         PostAddress postAddress = request.getPostAddress();
-        return KonvoluttAdresse.build(postAddress.getName()).iNorge(postAddress.getStreet1(), postAddress.getStreet2(), postAddress.getStreet3(), postAddress.getPostalCode(), postAddress.getPostalArea()).build();
+        return KonvoluttAdresse.build(postAddress.getName()).iNorge(postAddress.getStreet(), null,
+                null, postAddress.getPostalCode(), postAddress.getPostalArea()).build();
     }
 }

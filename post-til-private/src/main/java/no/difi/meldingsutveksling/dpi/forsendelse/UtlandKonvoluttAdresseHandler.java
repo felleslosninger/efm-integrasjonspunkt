@@ -8,6 +8,7 @@ public class UtlandKonvoluttAdresseHandler implements KonvoluttAdresseHandler {
     @Override
     public KonvoluttAdresse handle(MeldingsformidlerRequest request) {
         PostAddress postAddress = request.getPostAddress();
-        return KonvoluttAdresse.build(postAddress.getName()).iUtlandet(postAddress.getStreet1(), postAddress.getStreet2(), postAddress.getStreet3(), postAddress.getStreet4(), postAddress.getCountry()).build();
+        return KonvoluttAdresse.build(postAddress.getName()).iUtlandet(postAddress.getStreet(), null,
+                null, null, postAddress.getCountry()).build();
     }
 }

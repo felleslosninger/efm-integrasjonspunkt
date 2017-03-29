@@ -11,6 +11,8 @@ import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategy;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
+import no.difi.meldingsutveksling.noarkexchange.receive.EDUCoreConverter;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -60,7 +62,11 @@ public class EDUCoreSender {
                 && mshClient.canRecieveMessage(message.getReceiver().getIdentifier())) {
             Audit.info("Send message to MSH", marker);
             EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
-            result = mshClient.sendEduMelding(eduCoreFactory.createPutMessageFromCore(message));
+
+            PutMessageRequestType putMessage = eduCoreFactory.createPutMessageFromCore(message);
+            EDUCoreConverter eduCoreConverter = new EDUCoreConverter();
+            putMessage.setPayload(eduCoreConverter.payloadAsString(message));
+            result = mshClient.sendEduMelding(putMessage);
         } else if (DPV.equals(serviceRecord.getServiceIdentifier())) {
             Audit.info("Send message to DPV", marker);
             MessageStrategy strategy = messageStrategyFactory.create(message.getPayload());

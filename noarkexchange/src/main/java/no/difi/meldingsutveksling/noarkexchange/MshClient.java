@@ -46,9 +46,11 @@ public class MshClient implements NoarkClient {
 
         final WebServiceTemplate template = templateFactory.createTemplate("no.difi.meldingsutveksling.noarkexchange.schema",
                 PutMessageMarker.markerFrom(new PutMessageRequestWrapper(request)));
+        ObjectFactory of = new ObjectFactory();
+        JAXBElement<PutMessageRequestType> putMessageRequest = of.createPutMessageRequest(request);
         @SuppressWarnings("unchecked")
         JAXBElement<PutMessageResponseType> response = (JAXBElement) template.marshalSendAndReceive(endpointURL,
-                request,
+                putMessageRequest,
                 new SoapActionCallback(SOAP_ACTION));
 
         PutMessageResponseType responseValue = response.getValue();

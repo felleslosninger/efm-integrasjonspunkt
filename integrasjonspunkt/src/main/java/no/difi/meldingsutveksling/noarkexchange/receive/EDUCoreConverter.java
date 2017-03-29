@@ -50,6 +50,17 @@ public class EDUCoreConverter {
         }
     }
 
+    public String payloadAsString(EDUCore message) {
+        PayloadConverterImpl payloadConverter;
+        if (message.getMessageType() == EDUCore.MessageType.EDU) {
+            payloadConverter = new PayloadConverterImpl<>(MeldingType.class, MESSAGE_TYPE_NAMESPACE, "Melding");
+            return payloadConverter.marshallToString(message.getPayloadAsMeldingType());
+        } else {
+            payloadConverter = new PayloadConverterImpl<>(AppReceiptType.class, APPRECEIPT_NAMESPACE, "AppReceipt");
+            return payloadConverter.marshallToString(message.getPayloadAsAppreceiptType());
+        }
+    }
+
     public EDUCore unmarshallFrom(byte[] message) {
         final ByteArrayInputStream is = new ByteArrayInputStream(message);
         Unmarshaller unmarshaller;
