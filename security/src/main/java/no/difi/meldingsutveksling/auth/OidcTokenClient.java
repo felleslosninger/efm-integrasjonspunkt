@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.auth;
 
+import com.google.common.base.Strings;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -32,6 +33,7 @@ import java.util.UUID;
 @Component
 public class OidcTokenClient {
 
+    private static final String CLIENT_ID_PREFIX = "MOVE_IP_";
     private static final Logger log = LoggerFactory.getLogger(OidcTokenClient.class);
 
     private IntegrasjonspunktProperties props;
@@ -87,9 +89,13 @@ public class OidcTokenClient {
             scopes = props.getOidc().getScopes().stream().reduce((a, b) -> a + " " + b).orElse("");
         }
 
+        String clientId = props.getOidc().getClientId();
+        if (Strings.isNullOrEmpty(clientId)) {
+            clientId = CLIENT_ID_PREFIX+props.getOrg().getNumber();
+        }
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
                 .audience(props.getOidc().getAudience())
-                .issuer(props.getOidc().getClientId())
+                .issuer(clientId)
                 .claim("scope", scopes)
                 .jwtID(UUID.randomUUID().toString())
                 .issueTime(Date.from(Instant.now()))
