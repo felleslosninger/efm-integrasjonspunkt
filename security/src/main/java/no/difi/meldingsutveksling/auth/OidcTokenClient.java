@@ -88,7 +88,7 @@ public class OidcTokenClient {
         }
 
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                .audience("https://eid-vag-opensso.difi.local/idporten-oidc-provider/")
+                .audience(props.getOidc().getAudience())
                 .issuer(props.getOidc().getClientId())
                 .claim("scope", scopes)
                 .jwtID(UUID.randomUUID().toString())
