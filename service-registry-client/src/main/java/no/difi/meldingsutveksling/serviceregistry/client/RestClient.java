@@ -2,8 +2,10 @@ package no.difi.meldingsutveksling.serviceregistry.client;
 
 import com.nimbusds.jose.proc.BadJWSException;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.serviceregistry.security.JWTDecoder;
+import no.difi.move.common.oauth.JWTDecoder;
+import no.difi.move.common.oauth.KeystoreHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -16,6 +18,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.cert.CertificateException;
 
 import static java.util.Arrays.asList;
 
@@ -43,12 +46,13 @@ public class RestClient {
      * @throws URISyntaxException
      */
     @Autowired
-    public RestClient(IntegrasjonspunktProperties props, RestOperations restTemplate, JWTDecoder jwtDecoder) throws
-            MalformedURLException,
-            URISyntaxException {
+    public RestClient(IntegrasjonspunktProperties props,
+                      RestOperations restTemplate,
+                      @Qualifier("signingKeystoreHelper") KeystoreHelper keystoreHelper)
+            throws MalformedURLException, URISyntaxException, CertificateException {
         this.props = props;
         this.restTemplate = restTemplate;
-        this.jwtDecoder = jwtDecoder;
+        this.jwtDecoder = new JWTDecoder(keystoreHelper);
         this.baseUrl = new URL(props.getServiceregistryEndpoint()).toURI();
     }
 
