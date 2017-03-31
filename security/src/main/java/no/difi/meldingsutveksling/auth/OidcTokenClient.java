@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.auth;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -25,15 +26,24 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.cert.CertificateEncodingException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Component
 public class OidcTokenClient {
 
     private static final String CLIENT_ID_PREFIX = "MOVE_IP_";
+
+    private static final String SCOPE_DPO = "move/dpo.read";
+    private static final String SCOPE_DPV = "move/dpv.read";
+    private static final String SCOPE_DPF = "move/dpf.read";
+    private static final List<String> SCOPES_DPI = Arrays.asList("move/dpi.read",
+            "global/kontaktinformasjon.read",
+            "global/sikkerdigitalpost.read",
+            "global/varslingsstatus.read",
+            "global/sertifikat.read",
+            "global/navn.read",
+            "global/postadresse.read");
+
     private static final Logger log = LoggerFactory.getLogger(OidcTokenClient.class);
 
     private IntegrasjonspunktProperties props;
@@ -84,10 +94,6 @@ public class OidcTokenClient {
         }
 
         JWSHeader jwsHeader = new JWSHeader.Builder(JWSAlgorithm.RS256).x509CertChain(certChain).build();
-        String scopes = "";
-        if (props.getOidc().getScopes() != null) {
-            scopes = props.getOidc().getScopes().stream().reduce((a, b) -> a + " " + b).orElse("");
-        }
 
         String clientId = props.getOidc().getClientId();
         if (Strings.isNullOrEmpty(clientId)) {
@@ -96,7 +102,7 @@ public class OidcTokenClient {
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
                 .audience(props.getOidc().getAudience())
                 .issuer(clientId)
-                .claim("scope", scopes)
+                .claim("scope", getCurrentScopes())
                 .jwtID(UUID.randomUUID().toString())
                 .issueTime(Date.from(Instant.now()))
                 .expirationTime(Date.from(Instant.now().plusSeconds(120)))
@@ -114,6 +120,25 @@ public class OidcTokenClient {
         log.info("SerializedJWT: {}", serializedJwt);
 
         return serializedJwt;
+    }
+
+    private String getCurrentScopes() {
+
+        ArrayList<String> scopeList = Lists.newArrayList();
+        if (props.getFeature().isEnableDPO() || props.getFeature().isEnableDPE()) {
+            scopeList.add(SCOPE_DPO);
+        }
+        if (props.getFeature().isEnableDPV()) {
+            scopeList.add(SCOPE_DPV);
+        }
+        if (props.getFeature().isEnableDPF()) {
+            scopeList.add(SCOPE_DPF);
+        }
+        if (props.getFeature().isEnableDPI()) {
+            scopeList.addAll(SCOPES_DPI);
+        }
+
+        return scopeList.stream().reduce((a, b) -> a + " " + b).orElse("");
     }
 
 }
