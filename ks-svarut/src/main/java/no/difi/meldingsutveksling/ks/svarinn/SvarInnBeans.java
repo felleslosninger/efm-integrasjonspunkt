@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
-@ConditionalOnProperty(name="difi.move.fiks.enabled", havingValue = "true")
+@ConditionalOnProperty(name="difi.move.feature.enableDPF", havingValue = "true")
 @EnableConfigurationProperties(IntegrasjonspunktProperties.class)
 public class SvarInnBeans {
     @Bean

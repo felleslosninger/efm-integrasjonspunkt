@@ -13,6 +13,7 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +33,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.nextbest.logging.ConversationResourceMarkers.markerFrom;
 
 @RestController
+@ConditionalOnProperty(name = "difi.move.feature.enableDPE", havingValue = "true")
 public class MessageOutController {
 
     private static final Logger log = LoggerFactory.getLogger(MessageOutController.class);
