@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import javax.annotation.PostConstruct;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -57,19 +56,6 @@ public class MessageOutController {
     @Autowired
     private NextBestServiceBus nextBestServiceBus;
 
-    private List<String> supportedTypes;
-
-    @PostConstruct
-    public void init() {
-        supportedTypes = Lists.newArrayList();
-        if (props.getFeature().isEnableDPO()) {
-            supportedTypes.add(ServiceIdentifier.DPO.fullname());
-        }
-        if (props.getFeature().isEnableDPE()) {
-            supportedTypes.add(ServiceIdentifier.DPE_DATA.fullname());
-            supportedTypes.add(ServiceIdentifier.DPE_INNSYN.fullname());
-        }
-    }
 
     @RequestMapping(value = "/out/messages", method = RequestMethod.GET)
     @ResponseBody
@@ -118,6 +104,14 @@ public class MessageOutController {
             return ResponseEntity.badRequest().body("Required String parameter \'messagetypeId\' is not present");
         }
 
+        List<String> supportedTypes = Lists.newArrayList();
+        if (props.getFeature().isEnableDPO()) {
+            supportedTypes.add(ServiceIdentifier.DPO.fullname());
+        }
+        if (props.getFeature().isEnableDPE()) {
+            supportedTypes.add(ServiceIdentifier.DPE_DATA.fullname());
+            supportedTypes.add(ServiceIdentifier.DPE_INNSYN.fullname());
+        }
         if (!supportedTypes.contains(messagetypeId)) {
             return ResponseEntity.badRequest().body("messagetypeId \'"+messagetypeId+"\' not supported. Supported " +
                     "types: "+supportedTypes);

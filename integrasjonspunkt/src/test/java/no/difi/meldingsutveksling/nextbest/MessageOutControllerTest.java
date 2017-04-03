@@ -67,6 +67,11 @@ public class MessageOutControllerTest {
         when(props.getNextbest()).thenReturn(nextBEST);
         when(props.getOrg()).thenReturn(org);
 
+        IntegrasjonspunktProperties.FeatureToggle featureToggle = new IntegrasjonspunktProperties.FeatureToggle();
+        featureToggle.setEnableDPO(true);
+        featureToggle.setEnableDPE(true);
+        when(props.getFeature()).thenReturn(featureToggle);
+
         ServiceRecord serviceRecord = new ServiceRecord();
         serviceRecord.setServiceIdentifier(ServiceIdentifier.DPO);
         serviceRecord.setDpeCapabilities(Lists.newArrayList());
