@@ -9,7 +9,6 @@ import javax.validation.constraints.Pattern;
 @Data
 public class FiksConfig {
     private boolean kryptert = true;
-    private boolean enabled;
 
     SvarUt ut = new SvarUt();
     SvarInn inn = new SvarInn();

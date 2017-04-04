@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 
-@ConditionalOnProperty(name="difi.move.fiks.enabled", havingValue = "true")
+@ConditionalOnProperty(name="difi.move.feature.enableDPF", havingValue = "true")
 @Configuration
 @EnableConfigurationProperties({IntegrasjonspunktProperties.class})
 public class SvarUtConfiguration {

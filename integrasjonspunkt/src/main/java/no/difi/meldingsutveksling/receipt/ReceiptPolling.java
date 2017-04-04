@@ -52,7 +52,7 @@ public class ReceiptPolling {
 
     @Scheduled(fixedRate = 10000)
     public void dpiReceiptsScheduledTask() {
-        if (props.getFeature().isEnableReceipts() && props.getFeature().isEnableDpiReceipts()) {
+        if (props.getFeature().isEnableReceipts() && props.getFeature().isEnableDPI()) {
             final ExternalReceipt externalReceipt = dpiReceiptService.checkForReceipts();
             if (externalReceipt != EMPTY_KVITTERING) {
                 externalReceipt.auditLog();

@@ -31,9 +31,15 @@ public class StrategyFactory {
         }
 
         factories = new EnumMap<>(ServiceIdentifier.class);
-        factories.put(DPO, EduMessageStrategyFactory.newInstance(messageSender, properties));
-        factories.put(DPI, postInnbyggerStrategyFactory);
-        factories.put(DPV, PostVirksomhetStrategyFactory.newInstance(messageSender.getProperties(), serviceRegistryLookup));
+        if (properties.getFeature().isEnableDPO()) {
+            factories.put(DPO, EduMessageStrategyFactory.newInstance(messageSender, properties));
+        }
+        if (properties.getFeature().isEnableDPI()) {
+            factories.put(DPI, postInnbyggerStrategyFactory);
+        }
+        if (properties.getFeature().isEnableDPV()) {
+            factories.put(DPV, PostVirksomhetStrategyFactory.newInstance(messageSender.getProperties(), serviceRegistryLookup));
+        }
     }
 
     /**

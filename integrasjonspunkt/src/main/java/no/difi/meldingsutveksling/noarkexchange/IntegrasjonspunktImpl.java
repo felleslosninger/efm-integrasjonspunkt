@@ -97,7 +97,8 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
         boolean strategyFactoryAvailable = strategyFactory.hasFactory(serviceRecord.getServiceIdentifier());
         if (!strategyFactoryAvailable) {
-            Audit.warn(String.format("StrategyFactory for %s not found. Feature toggle?", serviceRecord.getServiceIdentifier()), marker);
+            Audit.error(String.format("StrategyFactory for %s not found. Feature toggle might be disabled.",
+                    serviceRecord.getServiceIdentifier()), marker);
         }
 
         response.setResult((certificateAvailable || mshCanReceive || isDpv ) && strategyFactoryAvailable);

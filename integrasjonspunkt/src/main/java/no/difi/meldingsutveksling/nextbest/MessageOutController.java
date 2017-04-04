@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,6 +55,22 @@ public class MessageOutController {
 
     @Autowired
     private NextBestServiceBus nextBestServiceBus;
+
+
+    private List<String> getSupportedTypes() {
+
+        List<String> supportedTypes = Lists.newArrayList();
+        if (props.getFeature().isEnableDPO()) {
+            supportedTypes.add(ServiceIdentifier.DPO.fullname());
+        }
+        if (props.getFeature().isEnableDPE()) {
+            supportedTypes.add(ServiceIdentifier.DPE_DATA.fullname());
+            supportedTypes.add(ServiceIdentifier.DPE_INNSYN.fullname());
+        }
+
+        return supportedTypes;
+    }
+
 
     @RequestMapping(value = "/out/messages", method = RequestMethod.GET)
     @ResponseBody
@@ -104,21 +119,13 @@ public class MessageOutController {
             return ResponseEntity.badRequest().body("Required String parameter \'messagetypeId\' is not present");
         }
 
-        List<String> supportedTypes = Arrays.asList(ServiceIdentifier.DPO.fullname(),
-                ServiceIdentifier.DPE_INNSYN.fullname(),
-                ServiceIdentifier.DPE_DATA.fullname());
+        List<String> supportedTypes = getSupportedTypes();
         if (!supportedTypes.contains(messagetypeId)) {
             return ResponseEntity.badRequest().body("messagetypeId \'"+messagetypeId+"\' not supported. Supported " +
                     "types: "+supportedTypes);
         }
 
-
-        String sender;
-        if (isNullOrEmpty(senderId)) {
-            sender = props.getOrg().getNumber();
-        } else {
-            sender = senderId;
-        }
+        String sender = isNullOrEmpty(senderId) ? props.getOrg().getNumber() : senderId;
 
         OutgoingConversationResource conversationResource;
         if (isNullOrEmpty(conversationId)) {

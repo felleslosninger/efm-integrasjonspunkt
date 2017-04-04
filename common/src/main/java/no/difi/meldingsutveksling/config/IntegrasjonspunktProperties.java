@@ -262,7 +262,15 @@ public class IntegrasjonspunktProperties {
         private boolean enableReceipts;
 
         private boolean returnOkOnEmptyPayload;
-        private boolean enableDpiReceipts;
+
+        /**
+         * Service toggles
+         */
+        private boolean enableDPO;
+        private boolean enableDPV;
+        private boolean enableDPI;
+        private boolean enableDPF;
+        private boolean enableDPE;
 
     }
 
