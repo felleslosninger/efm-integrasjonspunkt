@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling;
 
 import com.sun.xml.ws.transport.http.servlet.WSSpringServlet;
-import no.difi.meldingsutveksling.spring.cloud.SpringCloudProtocolResolver;
+import no.difi.move.common.config.SpringCloudProtocolResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
