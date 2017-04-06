@@ -6,14 +6,15 @@ import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ExternalReceipt;
 import no.difi.meldingsutveksling.receipt.MessageReceipt;
-import no.difi.meldingsutveksling.receipt.ReceiptStatus;
+import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 
 import java.time.LocalDateTime;
 
 public class EmptyKvittering implements ExternalReceipt {
 
     public static final String EMPTY = "empty";
-    private static final MessageReceipt EMPTY_RECEIPT = MessageReceipt.of(ReceiptStatus.OTHER, LocalDateTime.now());
+    private static final MessageReceipt EMPTY_RECEIPT = MessageReceipt.of(GenericReceiptStatus.OTHER.toString(), LocalDateTime
+            .now());
 
     @Override
     public void confirmReceipt() {

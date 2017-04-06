@@ -11,8 +11,8 @@ public class ReceiptTypeTest {
     public void receiptTypeOfLeveringsKvitteringShouldBeDelievered() {
         LeveringsKvittering leveringsKvittering = new LeveringsKvittering(null, null);
 
-        ReceiptType actual = ReceiptType.from(leveringsKvittering);
+        DpiReceiptStatus actual = DpiReceiptStatus.from(leveringsKvittering);
 
-        assertThat(actual, is(ReceiptType.DELIEVERED));
+        assertThat(actual, is(DpiReceiptStatus.DELIEVERED));
     }
 }

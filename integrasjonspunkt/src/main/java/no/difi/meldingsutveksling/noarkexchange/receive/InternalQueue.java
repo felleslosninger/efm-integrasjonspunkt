@@ -18,7 +18,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessD
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationRepository;
 import no.difi.meldingsutveksling.receipt.MessageReceipt;
-import no.difi.meldingsutveksling.receipt.ReceiptStatus;
+import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -135,9 +135,9 @@ public class InternalQueue {
 
     private MessageReceipt createSentReceipt(EDUCore request) {
         if (request.getMessageType() == EDUCore.MessageType.APPRECEIPT) {
-            return MessageReceipt.of(ReceiptStatus.SENT, LocalDateTime.now(), "AppReceipt");
+            return MessageReceipt.of(GenericReceiptStatus.SENT.toString(), LocalDateTime.now(), "AppReceipt");
         }
-        return MessageReceipt.of(ReceiptStatus.SENT, LocalDateTime.now());
+        return MessageReceipt.of(GenericReceiptStatus.SENT.toString(), LocalDateTime.now());
     }
 
     /**

@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.ks.mapping
 
 import no.difi.meldingsutveksling.ks.ForsendelseStatus
-import no.difi.meldingsutveksling.receipt.ReceiptStatus
+import no.difi.meldingsutveksling.receipt.GenericReceiptStatus
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -16,17 +16,17 @@ class ForsendelseStatusMapperTest extends Specification {
         mapper.mapFrom(forsendelsestatus) == receiptStatus
         where:
         forsendelsestatus                  | receiptStatus
-        ForsendelseStatus.LEST             | ReceiptStatus.READ
-        ForsendelseStatus.MOTTATT          | ReceiptStatus.DELIVERED
-        ForsendelseStatus.AVVIST           | ReceiptStatus.FAIL
-        ForsendelseStatus.AKSEPTERT        | ReceiptStatus.SENT
-        ForsendelseStatus.IKKE_LEVERT      | ReceiptStatus.OTHER
-        ForsendelseStatus.MANUELT_HANDTERT | ReceiptStatus.DELIVERED
-        ForsendelseStatus.LEVERT_SDP       | ReceiptStatus.DELIVERED
-        ForsendelseStatus.PRINTET          | ReceiptStatus.DELIVERED
-        ForsendelseStatus.SENDT_DIGITALT   | ReceiptStatus.DELIVERED
-        ForsendelseStatus.SENDT_PRINT      | ReceiptStatus.DELIVERED
-        ForsendelseStatus.SENDT_SDP        | ReceiptStatus.DELIVERED
-        ForsendelseStatus.VARSLET          | ReceiptStatus.DELIVERED
+        ForsendelseStatus.LEST             | GenericReceiptStatus.READ
+        ForsendelseStatus.MOTTATT          | GenericReceiptStatus.DELIVERED
+        ForsendelseStatus.AVVIST           | GenericReceiptStatus.FAIL
+        ForsendelseStatus.AKSEPTERT        | GenericReceiptStatus.SENT
+        ForsendelseStatus.IKKE_LEVERT      | GenericReceiptStatus.OTHER
+        ForsendelseStatus.MANUELT_HANDTERT | GenericReceiptStatus.DELIVERED
+        ForsendelseStatus.LEVERT_SDP       | GenericReceiptStatus.DELIVERED
+        ForsendelseStatus.PRINTET          | GenericReceiptStatus.DELIVERED
+        ForsendelseStatus.SENDT_DIGITALT   | GenericReceiptStatus.DELIVERED
+        ForsendelseStatus.SENDT_PRINT      | GenericReceiptStatus.DELIVERED
+        ForsendelseStatus.SENDT_SDP        | GenericReceiptStatus.DELIVERED
+        ForsendelseStatus.VARSLET          | GenericReceiptStatus.DELIVERED
     }
 }
