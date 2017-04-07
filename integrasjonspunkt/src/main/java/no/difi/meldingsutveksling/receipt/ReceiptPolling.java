@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.receipt;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.dpi.DpiReceiptStatus;
 import no.difi.meldingsutveksling.logging.Audit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +59,11 @@ public class ReceiptPolling {
                 externalReceipt.auditLog();
                 final String id = externalReceipt.getId();
                 Conversation conversation = conversationRepository.findByConversationId(id).stream().findFirst().orElseGet(externalReceipt::createConversation);
-                conversation.addMessageReceipt(externalReceipt.toMessageReceipt());
+                MessageReceipt receipt = externalReceipt.toMessageReceipt();
+                conversation.addMessageReceipt(receipt);
+                if (receipt.getStatus() == DpiReceiptStatus.READ.toString()) {
+                    conversation.setFinished(true);
+                }
                 conversationRepository.save(conversation);
                 Audit.info("Updated receipt (DPI)", externalReceipt.logMarkers());
                 externalReceipt.confirmReceipt();

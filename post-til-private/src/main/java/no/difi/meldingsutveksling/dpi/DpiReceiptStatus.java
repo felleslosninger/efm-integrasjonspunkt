@@ -14,7 +14,7 @@ import no.difi.sdp.client2.domain.kvittering.VarslingFeiletKvittering;
 import java.util.HashMap;
 import java.util.function.BiConsumer;
 
-enum DpiReceiptStatus implements ReceiptStatus {
+public enum DpiReceiptStatus implements ReceiptStatus {
     DELIEVERED("Kvittering på at digital post er tilgjengeliggjort eller at en fysisk post er postlagt", Audit::info),
     READ("Kvittering fra Innbygger for at digital post er åpnet", Audit::info),
     NOTIFICATION_FAILED("Kvittering for at en spesifisert varsling ikke har blitt sendt", Audit::error),

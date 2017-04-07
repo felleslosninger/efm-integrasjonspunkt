@@ -85,6 +85,7 @@ public class DpvConversationStrategy implements ConversationStrategy {
                 MessageReceipt receipt = MessageReceipt.of(GenericReceiptStatus.READ.toString(), readZoned.toLocalDateTime());
                 conversation.addMessageReceipt(receipt);
                 conversation.setPollable(false);
+                conversation.setFinished(true);
                 conversationRepository.save(conversation);
             }
 

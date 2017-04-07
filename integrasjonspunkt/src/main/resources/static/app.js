@@ -151,14 +151,7 @@ class ReceiptList extends React.Component {
                 return null;
             } 
 
-            var isReceived = false;
-            c.messageReceipts.forEach((r) => {
-                if (r.status === 'READ') {
-                    isReceived = true;
-                }
-            });
-
-            if (!this.props.all && isReceived !== this.props.received) {
+            if (!this.props.all && c.finished !== this.props.received) {
                 return null;
             }
             k++;

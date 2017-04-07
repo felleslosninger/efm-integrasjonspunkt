@@ -19,6 +19,7 @@ public class FiksConversationStrategy implements ConversationStrategy {
         final MessageReceipt messageReceipt = svarUtService.getMessageReceipt(conversation);
         if (messageReceipt.getStatus() == DpfReceiptStatus.LEST.toString()) {
             conversation.setPollable(false);
+            conversation.setFinished(true);
         }
         conversation.addMessageReceipt(messageReceipt);
         conversationRepository.save(conversation);
