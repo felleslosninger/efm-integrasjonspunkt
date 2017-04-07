@@ -26,6 +26,11 @@ public class StrategyFactoryTest {
         final IntegrasjonspunktProperties.PostVirksomheter ptvMock = mock(IntegrasjonspunktProperties.PostVirksomheter.class);
         final DigitalPostInnbyggerConfig dpic = mock(DigitalPostInnbyggerConfig.class);
         final DigitalPostInnbyggerConfig.Keystore keystore = mock(DigitalPostInnbyggerConfig.Keystore.class);
+        IntegrasjonspunktProperties.FeatureToggle featureMock = mock(IntegrasjonspunktProperties.FeatureToggle.class);
+        when(featureMock.isEnableDPO()).thenReturn(true);
+        when(featureMock.isEnableDPI()).thenReturn(true);
+        when(featureMock.isEnableDPV()).thenReturn(true);
+        when(properties.getFeature()).thenReturn(featureMock);
         when(dpic.getKeystore()).thenReturn(keystore);
         when(dpic.getFeature()).thenReturn(new DigitalPostInnbyggerConfig.FeatureToggle());
         when(messageSender.getProperties()).thenReturn(properties);

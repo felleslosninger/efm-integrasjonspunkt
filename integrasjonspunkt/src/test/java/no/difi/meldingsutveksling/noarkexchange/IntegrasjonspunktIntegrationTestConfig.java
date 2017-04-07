@@ -21,6 +21,7 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
+import no.difi.move.common.oauth.KeystoreHelper;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -61,6 +62,12 @@ public class IntegrasjonspunktIntegrationTestConfig {
     @Bean
     public KeystoreProvider keystoreProvider() {
         return mock(KeystoreProvider.class);
+    }
+
+    @Bean(name = "signingKeystoreHelper")
+    @Primary
+    public KeystoreHelper keystoreHelper() {
+        return mock(KeystoreHelper.class);
     }
 
     @Bean

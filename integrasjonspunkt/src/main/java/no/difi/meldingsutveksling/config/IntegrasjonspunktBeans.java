@@ -71,13 +71,13 @@ public class IntegrasjonspunktBeans {
         return KeystoreProvider.from(properties);
     }
 
-    @ConditionalOnProperty(name="difi.move.fiks.enabled", havingValue = "true")
+    @ConditionalOnProperty(name="difi.move.feature.enableDPF", havingValue = "true")
     @Bean
     public FiksMessageStrategyFactory fiksMessageStrategyFactory(SvarUtService svarUtService) {
         return FiksMessageStrategyFactory.newInstance(svarUtService);
     }
 
-    @ConditionalOnProperty(name="difi.move.fiks.enabled", havingValue = "true")
+    @ConditionalOnProperty(name="difi.move.feature.enableDPF", havingValue = "true")
     @Bean
     public FiksConversationStrategy fiksConversationStrategy(SvarUtService svarUtService, ConversationRepository conversationRepository) {
         return new FiksConversationStrategy(svarUtService, conversationRepository);

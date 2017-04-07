@@ -108,7 +108,7 @@ public class MessagePolling implements ApplicationContextAware {
             serviceRecord = serviceRegistryLookup.getServiceRecord(properties.getOrg().getNumber());
         }
 
-        if (!properties.getAltinn().isEnableDpo()) {
+        if (!properties.getFeature().isEnableDPO()) {
             return;
         }
 
