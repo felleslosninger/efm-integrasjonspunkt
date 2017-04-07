@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import org.springframework.ws.client.core.WebServiceTemplate;
-import org.springframework.ws.soap.client.core.SoapActionCallback;
 
 import javax.xml.bind.JAXBElement;
 
@@ -10,8 +9,6 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.logging.MarkerFactory.receiverMarker;
 
 public class MshClient implements NoarkClient {
-
-    private static final String SOAP_ACTION = "http://www.arkivverket.no/Noark/Exchange/IEDUImport/PutMessage";
 
     private String endpointURL;
     private WebServiceTemplateFactory templateFactory;
@@ -49,9 +46,7 @@ public class MshClient implements NoarkClient {
         ObjectFactory of = new ObjectFactory();
         JAXBElement<PutMessageRequestType> putMessageRequest = of.createPutMessageRequest(request);
         @SuppressWarnings("unchecked")
-        JAXBElement<PutMessageResponseType> response = (JAXBElement) template.marshalSendAndReceive(endpointURL,
-                putMessageRequest,
-                new SoapActionCallback(SOAP_ACTION));
+        JAXBElement<PutMessageResponseType> response = (JAXBElement) template.marshalSendAndReceive(endpointURL, putMessageRequest);
 
         PutMessageResponseType responseValue = response.getValue();
 

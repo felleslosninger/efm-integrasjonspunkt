@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.receipt;
 
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dpi.DpiReceiptStatus;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -44,9 +45,11 @@ public class ReceiptPolling {
         List<Conversation> conversations = conversationRepository.findByPollable(true);
 
         conversations.forEach(c -> {
-            log.info(markerFrom(c), "Checking status, conversationId={}", c.getConversationId());
-            ConversationStrategy strategy = conversationStrategyFactory.getFactory(c);
-            strategy.checkStatus(c);
+            if (serviceEnabled(c.getServiceIdentifier())) {
+                log.info(markerFrom(c), "Checking status, conversationId={}", c.getConversationId());
+                ConversationStrategy strategy = conversationStrategyFactory.getFactory(c);
+                strategy.checkStatus(c);
+            }
         });
 
     }
@@ -71,4 +74,20 @@ public class ReceiptPolling {
             }
         }
     }
+
+    private boolean serviceEnabled(ServiceIdentifier si) {
+        switch (si) {
+            case DPO:
+                return props.getFeature().isEnableDPO();
+            case DPV:
+                return props.getFeature().isEnableDPV();
+            case DPF:
+                return props.getFeature().isEnableDPF();
+            case DPI:
+                return props.getFeature().isEnableDPI();
+            default:
+                return false;
+        }
+    }
+
 }
