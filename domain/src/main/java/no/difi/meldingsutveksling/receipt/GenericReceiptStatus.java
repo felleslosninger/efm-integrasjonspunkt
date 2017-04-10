@@ -19,6 +19,7 @@ public enum GenericReceiptStatus implements ReceiptStatus {
         this.status = status;
     }
 
+    @Override
     public String getStatus() {
         return status;
     }
