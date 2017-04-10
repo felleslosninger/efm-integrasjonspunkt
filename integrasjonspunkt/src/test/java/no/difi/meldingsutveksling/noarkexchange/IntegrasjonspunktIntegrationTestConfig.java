@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.ks.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.KeystoreProvider;
@@ -60,7 +61,8 @@ public class IntegrasjonspunktIntegrationTestConfig {
     }
 
     @Bean
-    public KeystoreProvider keystoreProvider() {
+    @Primary
+    public KeystoreProvider meldingsformidlerKeystoreProvider() throws MeldingsformidlerException {
         return mock(KeystoreProvider.class);
     }
 
