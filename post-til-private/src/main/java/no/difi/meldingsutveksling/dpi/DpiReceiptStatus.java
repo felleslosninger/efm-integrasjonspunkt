@@ -43,6 +43,7 @@ public enum DpiReceiptStatus implements ReceiptStatus {
         this.loggerMethod = loggerMethod;
     }
 
+    @Override
     public String getStatus() {
         return this.status;
     }
