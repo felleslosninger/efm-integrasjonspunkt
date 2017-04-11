@@ -57,6 +57,10 @@ public class DpvConversationStrategy implements ConversationStrategy {
 
         GetCorrespondenceStatusDetailsV2Response result = (GetCorrespondenceStatusDetailsV2Response) client
                 .sendStatusRequest(request);
+        if (result == null) {
+            // Error is picked up by soap fault interceptor
+            return;
+        }
 
         // TODO: need to find a way to search for CorrespondenceIDs (in response( as ConversationID is not unqiue
         List<StatusV2> statusList = result.getGetCorrespondenceStatusDetailsV2Result().getValue().getStatusList().getValue().getStatusV2();

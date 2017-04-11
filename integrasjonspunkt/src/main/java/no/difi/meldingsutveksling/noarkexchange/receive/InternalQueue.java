@@ -14,6 +14,7 @@ import no.difi.meldingsutveksling.logging.MoveLogMarkers;
 import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationRepository;
@@ -101,8 +102,10 @@ public class InternalQueue {
         MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrg().getNumber());
         EDUCore request = eduCoreConverter.unmarshallFrom(message);
         try {
-            eduCoreSender.sendMessage(request);
-            if (properties.getFeature().isEnableReceipts() && request.getServiceIdentifier() != null) {
+            PutMessageResponseType response = eduCoreSender.sendMessage(request);
+            if (properties.getFeature().isEnableReceipts() &&
+                    request.getServiceIdentifier() != null &&
+                    "OK".equals(response.getResult().getType())) {
                 MessageReceipt receipt = createSentReceipt(request);
                 Conversation conversation = Conversation.of(request, receipt);
                 conversationRepository.save(conversation);

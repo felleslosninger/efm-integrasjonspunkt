@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.noarkexchange.putmessage;
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory;
+import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
@@ -34,7 +35,9 @@ public class PostVirksomhetMessageStrategy implements MessageStrategy {
                 .withPassword(config.getPassword())
                 .withPayload(correspondence).build();
 
-        client.sendCorrespondence(request);
+        if (client.sendCorrespondence(request) == null) {
+            return PutMessageResponseFactory.createErrorResponse(StatusMessage.DPV_REQUEST_MISSING_VALUES);
+        }
         return PutMessageResponseFactory.createOkResponse();
     }
 }
