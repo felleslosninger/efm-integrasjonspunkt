@@ -2,8 +2,8 @@ package no.difi.meldingsutveksling.receipt;
 
 import org.springframework.data.repository.CrudRepository;
 
-/**
- * Repository for message receipts.
- */
+import java.util.List;
+
 public interface MessageReceiptRepository extends CrudRepository<MessageReceipt, String> {
+    List<MessageReceipt> findByGenIdGreaterThanEqual(Integer id);
 }

@@ -1,23 +1,26 @@
 package no.difi.meldingsutveksling.receipt;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.google.common.base.MoreObjects;
+import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Lob;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 /**
  * Used for storing and tracking receipt information.
  */
 @Entity
+@Data
 public class MessageReceipt {
 
     @Id
     @GeneratedValue
     private Integer genId;
-
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "conversation_id")
+    private Conversation conversation;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private LocalDateTime lastUpdate;
     private ReceiptStatus status;
     private String description;
@@ -39,38 +42,6 @@ public class MessageReceipt {
 
     public static MessageReceipt of(ReceiptStatus status, LocalDateTime lastUpdate, String description) {
         return new MessageReceipt(status, lastUpdate, description);
-    }
-
-    public LocalDateTime getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(LocalDateTime lastUpdate) {
-        this.lastUpdate = lastUpdate;
-    }
-
-    public String getRawReceipt() {
-        return rawReceipt;
-    }
-
-    public void setRawReceipt(String rawReceipt) {
-        this.rawReceipt = rawReceipt;
-    }
-
-    public ReceiptStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(ReceiptStatus status) {
-        this.status = status;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     @Override

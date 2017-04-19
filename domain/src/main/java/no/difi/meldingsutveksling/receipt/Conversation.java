@@ -1,7 +1,9 @@
 package no.difi.meldingsutveksling.receipt;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
+import lombok.Data;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.core.EDUCore;
 
@@ -11,6 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Entity
+@Data
 public class Conversation {
 
     @Id
@@ -20,11 +23,12 @@ public class Conversation {
     private String receiverIdentifier;
     private String messageReference;
     private String messageTitle;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private LocalDateTime lastUpdate;
     private boolean pollable;
     private ServiceIdentifier serviceIdentifier;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "conversation")
     private List<MessageReceipt> messageReceipts;
 
     Conversation() {}
@@ -78,81 +82,9 @@ public class Conversation {
                 msgTitle, eduCore.getServiceIdentifier() , Arrays.asList(receipts));
     }
 
-    public Integer getId() {
-        return genId;
-    }
-
-    public void setId(Integer genId) {
-        this.genId = genId;
-    }
-
-    public boolean isPollable() {
-        return pollable;
-    }
-
-    public void setPollable(boolean pollable) {
-        this.pollable = pollable;
-    }
-
-    public String getConversationId() {
-        return conversationId;
-    }
-
-    public void setConversationId(String conversationId) {
-        this.conversationId = conversationId;
-    }
-
-    public ServiceIdentifier getServiceIdentifier() {
-        return serviceIdentifier;
-    }
-
-    public void setServiceIdentifier(ServiceIdentifier serviceIdentifier) {
-        this.serviceIdentifier = serviceIdentifier;
-    }
-
-    public List<MessageReceipt> getMessageReceipts() {
-        return messageReceipts;
-    }
-
     public void addMessageReceipt(MessageReceipt receipt) {
         this.messageReceipts.add(receipt);
         this.lastUpdate = LocalDateTime.now();
-    }
-
-    public void setMessageReceipts(List<MessageReceipt> messageReceipts) {
-        this.messageReceipts = messageReceipts;
-    }
-
-    public String getReceiverIdentifier() {
-        return receiverIdentifier;
-    }
-
-    public void setReceiverIdentifier(String receiverIdentifier) {
-        this.receiverIdentifier = receiverIdentifier;
-    }
-
-    public String getMessageReference() {
-        return messageReference;
-    }
-
-    public void setMessageReference(String messageReference) {
-        this.messageReference = messageReference;
-    }
-
-    public String getMessageTitle() {
-        return messageTitle;
-    }
-
-    public void setMessageTitle(String messageTitle) {
-        this.messageTitle = messageTitle;
-    }
-
-    public LocalDateTime getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(LocalDateTime lastUpdate) {
-        this.lastUpdate = lastUpdate;
     }
 
     @Override
