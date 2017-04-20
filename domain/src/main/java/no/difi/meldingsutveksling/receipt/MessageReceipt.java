@@ -16,10 +16,9 @@ public class MessageReceipt {
 
     @Id
     @GeneratedValue
-    private Integer genId;
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "conversation_id")
-    private Conversation conversation;
+    private Integer recId;
+    @Column(insertable = false, updatable = false, name = "conv_id")
+    private Integer convId;
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private LocalDateTime lastUpdate;
     private ReceiptStatus status;
@@ -47,7 +46,7 @@ public class MessageReceipt {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("genId", genId)
+                .add("recId", recId)
                 .add("lastUpdate", lastUpdate)
                 .add("status", status)
                 .add("description", description)

@@ -6,12 +6,15 @@ import no.difi.meldingsutveksling.receipt.ConversationRepository;
 import no.difi.meldingsutveksling.receipt.MessageReceipt;
 import no.difi.meldingsutveksling.receipt.MessageReceiptRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -32,8 +35,14 @@ public class ReceiptController {
     }
 
     @RequestMapping("/receipts/{id}")
-    public Conversation receipt(@PathVariable("id") String id) {
-        return convoRepo.findOne(id);
+    public ResponseEntity receipt(@PathVariable("id") Integer id) {
+
+        Optional<Conversation> c = convoRepo.findByConvId(id);
+        if (!c.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(c.get());
     }
 
     @RequestMapping("/receipts/queue")
@@ -42,17 +51,49 @@ public class ReceiptController {
     }
 
     @RequestMapping("/statuses")
-    public List<MessageReceipt> statuses(
-            @RequestParam(value = "fromId", required = false) Integer fromId) {
+    public ResponseEntity statuses(
+            @RequestParam(value = "fromId", required = false) Integer fromId,
+            @RequestParam(value = "convId", required = false) Integer convId) {
 
-        Stream<MessageReceipt> s;
+        List<MessageReceipt> receipts;
         if (fromId != null) {
-            s = StreamSupport.stream(receiptRepo.findByGenIdGreaterThanEqual(fromId).spliterator(), false);
+            if (convId != null) {
+                receipts = receiptRepo.findAllByConvIdAndRecIdGreaterThanEqual(convId, fromId);
+            } else {
+                receipts = receiptRepo.findByRecIdGreaterThanEqual(fromId);
+            }
         } else {
-            s = StreamSupport.stream(receiptRepo.findAll().spliterator(), false);
+            if (convId != null) {
+                receipts = receiptRepo.findAllByConvId(convId);
+            } else {
+                receipts = Lists.newArrayList(receiptRepo.findAll());
+            }
         }
 
-        return s.sorted((a, b) -> b.getLastUpdate().compareTo(a.getLastUpdate())).collect(Collectors.toList());
+        Stream<MessageReceipt> s = StreamSupport.stream(receipts.spliterator(), false);
+        List<MessageReceipt> sorted = s.sorted(Comparator.comparingInt(r -> r.getRecId())).collect(Collectors.toList());
+        return ResponseEntity.ok(sorted);
+    }
+
+    @RequestMapping("/statuses/{id}")
+    public ResponseEntity status(@PathVariable("id") Integer id) {
+
+        Optional<MessageReceipt> r = receiptRepo.findByRecId(id);
+        if (!r.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(r.get());
+    }
+
+    @RequestMapping("/statuses/peek")
+    public ResponseEntity statusPeek() {
+        Optional<MessageReceipt> r = receiptRepo.findFirstByOrderByLastUpdateAsc();
+        if (r.isPresent()) {
+            return ResponseEntity.ok(r.get());
+        }
+
+        return ResponseEntity.noContent().build();
     }
 
 

@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.receipt;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import lombok.Data;
@@ -18,17 +19,19 @@ public class Conversation {
 
     @Id
     @GeneratedValue
-    private Integer genId;
+    private Integer convId;
     private String conversationId;
     private String receiverIdentifier;
     private String messageReference;
     private String messageTitle;
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private LocalDateTime lastUpdate;
+    @JsonIgnore
     private boolean pollable;
     private ServiceIdentifier serviceIdentifier;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "conversation")
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "conv_id")
     private List<MessageReceipt> messageReceipts;
 
     Conversation() {}
@@ -90,7 +93,7 @@ public class Conversation {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("genId", genId)
+                .add("convId", convId)
                 .add("conversationId", conversationId)
                 .add("messageReference", messageReference)
                 .add("receiverIdentifier", receiverIdentifier)
