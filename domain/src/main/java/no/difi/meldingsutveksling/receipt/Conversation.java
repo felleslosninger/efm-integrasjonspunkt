@@ -10,8 +10,9 @@ import no.difi.meldingsutveksling.core.EDUCore;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Entity
 @Data
@@ -72,8 +73,11 @@ public class Conversation {
             return new Conversation(conversationId, messageReference, receiverIdentifier, messageTitle,
                     serviceIdentifier, Lists.newArrayList());
         }
+        List<MessageReceipt> receiptList = Stream.of(receipts)
+                .peek(r -> r.setConversationId(conversationId))
+                .collect(Collectors.toList());
         return new Conversation(conversationId, messageReference, receiverIdentifier, messageTitle,
-                serviceIdentifier, Arrays.asList(receipts));
+                serviceIdentifier, receiptList);
     }
 
     public static Conversation of(EDUCore eduCore, MessageReceipt... receipts) {
@@ -81,11 +85,15 @@ public class Conversation {
         if (eduCore.getMessageType() == EDUCore.MessageType.EDU) {
             msgTitle = eduCore.getPayloadAsMeldingType().getJournpost().getJpInnhold();
         }
+        List<MessageReceipt> receiptList = Stream.of(receipts)
+                .peek(r -> r.setConversationId(eduCore.getId()))
+                .collect(Collectors.toList());
         return new Conversation(eduCore.getId(), eduCore.getMessageReference(), eduCore.getReceiver().getIdentifier(),
-                msgTitle, eduCore.getServiceIdentifier() , Arrays.asList(receipts));
+                msgTitle, eduCore.getServiceIdentifier() , receiptList);
     }
 
     public void addMessageReceipt(MessageReceipt receipt) {
+        receipt.setConversationId(getConversationId());
         this.messageReceipts.add(receipt);
         this.lastUpdate = LocalDateTime.now();
     }

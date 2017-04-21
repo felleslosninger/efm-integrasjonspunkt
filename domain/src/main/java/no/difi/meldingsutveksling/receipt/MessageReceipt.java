@@ -19,6 +19,7 @@ public class MessageReceipt {
     private Integer recId;
     @Column(insertable = false, updatable = false, name = "conv_id")
     private Integer convId;
+    private String conversationId;
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private LocalDateTime lastUpdate;
     private ReceiptStatus status;
