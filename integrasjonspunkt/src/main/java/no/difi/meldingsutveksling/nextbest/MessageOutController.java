@@ -7,7 +7,7 @@ import no.difi.meldingsutveksling.noarkexchange.MessageContextException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationRepository;
-import no.difi.meldingsutveksling.receipt.MessageReceipt;
+import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.slf4j.Logger;
@@ -222,10 +222,10 @@ public class MessageOutController {
             return ResponseEntity.notFound().build();
         }
         if (lastonly) {
-            MessageReceipt latestReceipt = clist.get(0).getMessageReceipts().stream()
+            MessageStatus latestStatus = clist.get(0).getMessageStatuses().stream()
                     .sorted((a, b) -> b.getLastUpdate().compareTo(a.getLastUpdate()))
                     .findFirst().get();
-            return ResponseEntity.ok(latestReceipt);
+            return ResponseEntity.ok(latestStatus);
         }
         return ResponseEntity.ok(clist.get(0));
     }

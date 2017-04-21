@@ -12,11 +12,11 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Data
-public class MessageReceipt {
+public class MessageStatus {
 
     @Id
     @GeneratedValue
-    private Integer recId;
+    private Integer statId;
     @Column(insertable = false, updatable = false, name = "conv_id")
     private Integer convId;
     private String conversationId;
@@ -28,26 +28,26 @@ public class MessageReceipt {
     @Lob
     private String rawReceipt;
 
-    MessageReceipt(){}
+    MessageStatus(){}
 
-    private MessageReceipt(ReceiptStatus status, LocalDateTime lastUpdate, String description) {
+    private MessageStatus(ReceiptStatus status, LocalDateTime lastUpdate, String description) {
         this.status = status;
         this.lastUpdate = lastUpdate;
         this.description = description;
     }
 
-    public static MessageReceipt of(ReceiptStatus status, LocalDateTime lastUpdate) {
-        return new MessageReceipt(status, lastUpdate, null);
+    public static MessageStatus of(ReceiptStatus status, LocalDateTime lastUpdate) {
+        return new MessageStatus(status, lastUpdate, null);
     }
 
-    public static MessageReceipt of(ReceiptStatus status, LocalDateTime lastUpdate, String description) {
-        return new MessageReceipt(status, lastUpdate, description);
+    public static MessageStatus of(ReceiptStatus status, LocalDateTime lastUpdate, String description) {
+        return new MessageStatus(status, lastUpdate, description);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("recId", recId)
+                .add("statId", statId)
                 .add("lastUpdate", lastUpdate)
                 .add("status", status)
                 .add("description", description)

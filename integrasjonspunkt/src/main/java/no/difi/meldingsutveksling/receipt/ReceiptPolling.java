@@ -61,7 +61,7 @@ public class ReceiptPolling {
                 externalReceipt.auditLog();
                 final String id = externalReceipt.getId();
                 Conversation conversation = conversationRepository.findByConversationId(id).stream().findFirst().orElseGet(externalReceipt::createConversation);
-                conversation.addMessageReceipt(externalReceipt.toMessageReceipt());
+                conversation.addMessageStatus(externalReceipt.toMessageStatus());
                 conversationRepository.save(conversation);
                 Audit.info("Updated receipt (DPI)", externalReceipt.logMarkers());
                 externalReceipt.confirmReceipt();

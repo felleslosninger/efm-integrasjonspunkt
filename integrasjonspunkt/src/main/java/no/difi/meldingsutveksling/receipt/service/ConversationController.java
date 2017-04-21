@@ -3,8 +3,8 @@ package no.difi.meldingsutveksling.receipt.service;
 import com.google.common.collect.Lists;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationRepository;
-import no.difi.meldingsutveksling.receipt.MessageReceipt;
-import no.difi.meldingsutveksling.receipt.MessageReceiptRepository;
+import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.MessageStatusRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,22 +20,22 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 @RestController
-public class ReceiptController {
+public class ConversationController {
 
     @Autowired
     private ConversationRepository convoRepo;
 
     @Autowired
-    private MessageReceiptRepository receiptRepo;
+    private MessageStatusRepository statusRepo;
 
-    @RequestMapping("/receipts")
-    public List<Conversation> receipts() {
+    @RequestMapping("/conversations")
+    public List<Conversation> conversations() {
         Stream<Conversation> s = StreamSupport.stream(convoRepo.findAll().spliterator(), false);
         return s.sorted((a, b) -> b.getLastUpdate().compareTo(a.getLastUpdate())).collect(Collectors.toList());
     }
 
-    @RequestMapping("/receipts/{id}")
-    public ResponseEntity receipt(@PathVariable("id") Integer id) {
+    @RequestMapping("/conversations/{id}")
+    public ResponseEntity conversation(@PathVariable("id") Integer id) {
 
         Optional<Conversation> c = convoRepo.findByConvId(id);
         if (!c.isPresent()) {
@@ -45,8 +45,8 @@ public class ReceiptController {
         return ResponseEntity.ok(c.get());
     }
 
-    @RequestMapping("/receipts/queue")
-    public List<Conversation> queuedReceipts() {
+    @RequestMapping("/conversations/queue")
+    public List<Conversation> queuedConversations() {
         return Lists.newArrayList(convoRepo.findByPollable(true));
     }
 
@@ -55,30 +55,30 @@ public class ReceiptController {
             @RequestParam(value = "fromId", required = false) Integer fromId,
             @RequestParam(value = "convId", required = false) Integer convId) {
 
-        List<MessageReceipt> receipts;
+        List<MessageStatus> statuses;
         if (fromId != null) {
             if (convId != null) {
-                receipts = receiptRepo.findAllByConvIdAndRecIdGreaterThanEqual(convId, fromId);
+                statuses = statusRepo.findAllByConvIdAndStatIdGreaterThanEqual(convId, fromId);
             } else {
-                receipts = receiptRepo.findByRecIdGreaterThanEqual(fromId);
+                statuses = statusRepo.findByStatIdGreaterThanEqual(fromId);
             }
         } else {
             if (convId != null) {
-                receipts = receiptRepo.findAllByConvId(convId);
+                statuses = statusRepo.findAllByConvId(convId);
             } else {
-                receipts = Lists.newArrayList(receiptRepo.findAll());
+                statuses = Lists.newArrayList(statusRepo.findAll());
             }
         }
 
-        Stream<MessageReceipt> s = StreamSupport.stream(receipts.spliterator(), false);
-        List<MessageReceipt> sorted = s.sorted(Comparator.comparingInt(r -> r.getRecId())).collect(Collectors.toList());
+        Stream<MessageStatus> s = StreamSupport.stream(statuses.spliterator(), false);
+        List<MessageStatus> sorted = s.sorted(Comparator.comparingInt(r -> r.getStatId())).collect(Collectors.toList());
         return ResponseEntity.ok(sorted);
     }
 
     @RequestMapping("/statuses/{id}")
     public ResponseEntity status(@PathVariable("id") Integer id) {
 
-        Optional<MessageReceipt> r = receiptRepo.findByRecId(id);
+        Optional<MessageStatus> r = statusRepo.findByStatId(id);
         if (!r.isPresent()) {
             return ResponseEntity.notFound().build();
         }
@@ -88,7 +88,7 @@ public class ReceiptController {
 
     @RequestMapping("/statuses/peek")
     public ResponseEntity statusPeek() {
-        Optional<MessageReceipt> r = receiptRepo.findFirstByOrderByLastUpdateAsc();
+        Optional<MessageStatus> r = statusRepo.findFirstByOrderByLastUpdateAsc();
         if (r.isPresent()) {
             return ResponseEntity.ok(r.get());
         }

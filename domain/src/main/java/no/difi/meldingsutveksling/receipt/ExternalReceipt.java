@@ -25,9 +25,9 @@ public interface ExternalReceipt {
 
     /**
      * Creates a internal message receipt from this external receipt
-     * @return a new domain MessageReceipt representing the external receipt
+     * @return a new domain MessageStatus representing the external receipt
      */
-    MessageReceipt toMessageReceipt();
+    MessageStatus toMessageStatus();
 
     /**
      *  Performs audit logging of itself including a description

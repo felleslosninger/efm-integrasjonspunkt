@@ -67,7 +67,7 @@ class AllReceipts extends React.Component {
 
     componentDidMount() {
         $.ajax({
-            url: '/receipts',
+            url: '/conversations',
             dataType: 'json',
             cache: false,
             success: function(data) {

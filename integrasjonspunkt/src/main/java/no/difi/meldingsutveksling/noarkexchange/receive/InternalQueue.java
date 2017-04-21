@@ -18,7 +18,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationRepository;
-import no.difi.meldingsutveksling.receipt.MessageReceipt;
+import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,8 +106,8 @@ public class InternalQueue {
             if (properties.getFeature().isEnableReceipts() &&
                     request.getServiceIdentifier() != null &&
                     "OK".equals(response.getResult().getType())) {
-                MessageReceipt receipt = createSentReceipt(request);
-                Conversation conversation = Conversation.of(request, receipt);
+                MessageStatus status = createSentStatus(request);
+                Conversation conversation = Conversation.of(request, status);
                 conversationRepository.save(conversation);
             }
         } catch (Exception e) {
@@ -136,11 +136,11 @@ public class InternalQueue {
 
     }
 
-    private MessageReceipt createSentReceipt(EDUCore request) {
+    private MessageStatus createSentStatus(EDUCore request) {
         if (request.getMessageType() == EDUCore.MessageType.APPRECEIPT) {
-            return MessageReceipt.of(ReceiptStatus.SENT, LocalDateTime.now(), "AppReceipt");
+            return MessageStatus.of(ReceiptStatus.SENT, LocalDateTime.now(), "AppReceipt");
         }
-        return MessageReceipt.of(ReceiptStatus.SENT, LocalDateTime.now());
+        return MessageStatus.of(ReceiptStatus.SENT, LocalDateTime.now());
     }
 
     /**

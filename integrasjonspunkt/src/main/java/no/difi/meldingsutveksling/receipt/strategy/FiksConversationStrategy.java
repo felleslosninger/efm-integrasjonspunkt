@@ -15,11 +15,11 @@ public class FiksConversationStrategy implements ConversationStrategy {
 
     @Override
     public void checkStatus(Conversation conversation) {
-        final MessageReceipt messageReceipt = svarUtService.getMessageReceipt(conversation);
-        if (messageReceipt.getStatus() == ReceiptStatus.READ) {
+        final MessageStatus messageStatus = svarUtService.getMessageReceipt(conversation);
+        if (messageStatus.getStatus() == ReceiptStatus.READ) {
             conversation.setPollable(false);
         }
-        conversation.addMessageReceipt(messageReceipt);
+        conversation.addMessageStatus(messageStatus);
         conversationRepository.save(conversation);
     }
 
