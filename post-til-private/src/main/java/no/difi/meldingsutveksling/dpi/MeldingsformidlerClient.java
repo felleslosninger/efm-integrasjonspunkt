@@ -6,7 +6,7 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ExternalReceipt;
-import no.difi.meldingsutveksling.receipt.MessageReceipt;
+import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.sdp.client2.KlientKonfigurasjon;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
@@ -167,8 +167,8 @@ public class MeldingsformidlerClient {
         }
 
         @Override
-        public MessageReceipt toMessageReceipt() {
-            MessageReceipt domainReceipt = MessageReceipt.of(receiptStatus(), LocalDateTime.ofInstant(eksternKvittering.getTidspunkt(), ZoneId.systemDefault()));
+        public MessageStatus toMessageStatus() {
+            MessageStatus domainReceipt = MessageStatus.of(receiptStatus(), LocalDateTime.ofInstant(eksternKvittering.getTidspunkt(), ZoneId.systemDefault()));
             domainReceipt.setRawReceipt(getRawReceipt());
             return domainReceipt;
         }
@@ -184,7 +184,7 @@ public class MeldingsformidlerClient {
         @Override
         public Conversation createConversation() {
             Conversation conv = Conversation.of(getId(), "unknown message reference", "unknown receiver", "unknown message title", ServiceIdentifier.DPI);
-            conv.setMessageReceipts(new ArrayList<>(1));
+            conv.setMessageStatuses(new ArrayList<>(1));
             return conv;
         }
 

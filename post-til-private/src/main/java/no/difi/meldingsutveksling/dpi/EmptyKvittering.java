@@ -5,7 +5,7 @@ import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ExternalReceipt;
-import no.difi.meldingsutveksling.receipt.MessageReceipt;
+import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 
 import java.time.LocalDateTime;
@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public class EmptyKvittering implements ExternalReceipt {
 
     public static final String EMPTY = "empty";
-    private static final MessageReceipt EMPTY_RECEIPT = MessageReceipt.of(ReceiptStatus.OTHER, LocalDateTime.now());
+    private static final MessageStatus EMPTY_RECEIPT = MessageStatus.of(ReceiptStatus.OTHER, LocalDateTime.now());
 
     @Override
     public void confirmReceipt() {
@@ -33,7 +33,7 @@ public class EmptyKvittering implements ExternalReceipt {
     }
 
     @Override
-    public MessageReceipt toMessageReceipt() {
+    public MessageStatus toMessageStatus() {
         return EMPTY_RECEIPT;
     }
 
