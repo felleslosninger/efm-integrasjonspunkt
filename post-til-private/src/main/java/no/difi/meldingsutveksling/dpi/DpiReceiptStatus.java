@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.function.BiConsumer;
 
 public enum DpiReceiptStatus implements ReceiptStatus {
-    DELIEVERED("Kvittering på at digital post er tilgjengeliggjort eller at en fysisk post er postlagt", Audit::info),
+    DELIVERED("Kvittering på at digital post er tilgjengeliggjort eller at en fysisk post er postlagt", Audit::info),
     READ("Kvittering fra Innbygger for at digital post er åpnet", Audit::info),
     NOTIFICATION_FAILED("Kvittering for at en spesifisert varsling ikke har blitt sendt", Audit::error),
     READY_FOR_PRINT("Kvittering fra utskrift og forsendelsestjenesten om at melding er mottatt og lagt til print", Audit::info),
@@ -27,7 +27,7 @@ public enum DpiReceiptStatus implements ReceiptStatus {
     private static final HashMap<Class, DpiReceiptStatus> mapper;
     static {
         mapper = new HashMap<>();
-        mapper.put(LeveringsKvittering.class, DELIEVERED);
+        mapper.put(LeveringsKvittering.class, DELIVERED);
         mapper.put(AapningsKvittering.class, READ);
         mapper.put(VarslingFeiletKvittering.class, NOTIFICATION_FAILED);
         mapper.put(MottaksKvittering.class, READY_FOR_PRINT);
