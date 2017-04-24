@@ -145,7 +145,7 @@ public class MessagePolling implements ApplicationContextAware {
                 JAXBElement<Kvittering> jaxbKvit = (JAXBElement<Kvittering>) eduDocument.getAny();
                 Audit.info("Message is a receipt", eduDocument.createLogstashMarkers().and(getReceiptTypeMarker
                         (jaxbKvit.getValue())));
-                MessageReceipt receipt = receiptFromKvittering(jaxbKvit.getValue());
+                MessageStatus status = statusFromKvittering(jaxbKvit.getValue());
                 Conversation conversation = conversationRepository.findByConversationId(eduDocument.getConversationId())
                         .stream()
                         .findFirst()
@@ -153,7 +153,7 @@ public class MessagePolling implements ApplicationContextAware {
                                 "unknown", eduDocument
                                 .getReceiverOrgNumber(),
                                 "unknown", ServiceIdentifier.DPO));
-                conversation.addMessageReceipt(receipt);
+                conversation.addMessageStatus(status);
                 conversationRepository.save(conversation);
             }
         }
@@ -170,10 +170,10 @@ public class MessagePolling implements ApplicationContextAware {
         return Markers.append(field, "unkown");
     }
 
-    private MessageReceipt receiptFromKvittering(Kvittering kvittering) {
+    private MessageStatus statusFromKvittering(Kvittering kvittering) {
         DpoReceiptStatus status = DpoReceiptStatus.of(kvittering);
         LocalDateTime tidspunkt = kvittering.getTidspunkt().toGregorianCalendar().toZonedDateTime().toLocalDateTime();
-        return MessageReceipt.of(status.toString(), tidspunkt);
+        return MessageStatus.of(status.toString(), tidspunkt);
     }
 
     private boolean isKvittering(EduDocument eduDocument) {

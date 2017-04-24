@@ -62,9 +62,9 @@ public class ReceiptPolling {
                 externalReceipt.auditLog();
                 final String id = externalReceipt.getId();
                 Conversation conversation = conversationRepository.findByConversationId(id).stream().findFirst().orElseGet(externalReceipt::createConversation);
-                MessageReceipt receipt = externalReceipt.toMessageReceipt();
-                conversation.addMessageReceipt(receipt);
-                if (receipt.getStatus() == DpiReceiptStatus.READ.toString()) {
+                MessageStatus status = externalReceipt.toMessageStatus();
+                conversation.addMessageStatus(status);
+                if (status.getStatus() == DpiReceiptStatus.READ.toString()) {
                     conversation.setFinished(true);
                 }
                 conversationRepository.save(conversation);

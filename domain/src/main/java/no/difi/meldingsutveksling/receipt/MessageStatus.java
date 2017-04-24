@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.receipt;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.google.common.base.MoreObjects;
 import lombok.Data;
 
@@ -11,12 +12,15 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Data
-public class MessageReceipt {
+public class MessageStatus {
 
     @Id
     @GeneratedValue
-    private Integer genId;
-
+    private Integer statId;
+    @Column(insertable = false, updatable = false, name = "conv_id")
+    private Integer convId;
+    private String conversationId;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private LocalDateTime lastUpdate;
     private String status;
     private String description;
@@ -24,26 +28,26 @@ public class MessageReceipt {
     @Lob
     private String rawReceipt;
 
-    MessageReceipt(){}
+    MessageStatus(){}
 
-    private MessageReceipt(String status, LocalDateTime lastUpdate, String description) {
+    private MessageStatus(String status, LocalDateTime lastUpdate, String description) {
         this.status = status;
         this.lastUpdate = lastUpdate;
         this.description = description;
     }
 
-    public static MessageReceipt of(String status, LocalDateTime lastUpdate) {
-        return new MessageReceipt(status, lastUpdate, null);
+    public static MessageStatus of(String status, LocalDateTime lastUpdate) {
+        return new MessageStatus(status, lastUpdate, null);
     }
 
-    public static MessageReceipt of(String status, LocalDateTime lastUpdate, String description) {
-        return new MessageReceipt(status, lastUpdate, description);
+    public static MessageStatus of(String status, LocalDateTime lastUpdate, String description) {
+        return new MessageStatus(status, lastUpdate, description);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("genId", genId)
+                .add("statId", statId)
                 .add("lastUpdate", lastUpdate)
                 .add("status", status)
                 .add("description", description)

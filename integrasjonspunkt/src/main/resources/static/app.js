@@ -67,7 +67,7 @@ class AllReceipts extends React.Component {
 
     componentDidMount() {
         $.ajax({
-            url: '/receipts',
+            url: '/conversations',
             dataType: 'json',
             cache: false,
             success: function(data) {
@@ -158,20 +158,18 @@ class ReceiptList extends React.Component {
 
 
             var statusNodes = c.messageReceipts.map((r, k) => {
-                var lastUpdate = this.formatLocalDateTime(r.lastUpdate);
-
                 return (
                     <tr key={k}>
                         <td>{k}</td>
                         <td>{r.status}</td>
-                        <td>{lastUpdate}</td>
+                        <td>{r.lastUpdate}</td>
                         <td>{r.description}</td>
                     </tr>
                 );
             });
 
             return (
-                <Panel header={`${this.formatLocalDateTime(c.lastUpdate)} | ${c.conversationId}`} eventKey={k} key={k} >
+                <Panel header={`${c.lastUpdate} | ${c.conversationId}`} eventKey={k} key={k} >
                     <Label>messageId</Label>
                     <p>{c.conversationId}</p>
                     <hr style={{margin: "5px"}}/>

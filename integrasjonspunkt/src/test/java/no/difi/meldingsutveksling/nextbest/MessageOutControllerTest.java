@@ -6,8 +6,8 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationRepository;
-import no.difi.meldingsutveksling.receipt.MessageReceipt;
 import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
+import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.junit.Before;
@@ -77,9 +77,9 @@ public class MessageOutControllerTest {
         serviceRecord.setDpeCapabilities(Lists.newArrayList());
         when(sr.getServiceRecord("1")).thenReturn(serviceRecord);
 
-        MessageReceipt receiptSent = MessageReceipt.of(GenericReceiptStatus.SENT.toString(), LocalDateTime.now());
-        MessageReceipt receiptDelivered = MessageReceipt.of(GenericReceiptStatus.DELIVERED.toString(), LocalDateTime.now()
-                .plusMinutes(1));
+        MessageStatus receiptSent = MessageStatus.of(GenericReceiptStatus.SENT.toString(), LocalDateTime.now());
+        MessageStatus receiptDelivered = MessageStatus.of(GenericReceiptStatus.DELIVERED.toString(),
+                LocalDateTime.now().plusMinutes(1));
         Conversation receiptConversation = Conversation.of("42", "42ref", "123", "sometitle", ServiceIdentifier.DPO,
                 receiptDelivered, receiptSent);
         when(crepo.findByConversationId("42")).thenReturn(asList(receiptConversation));
@@ -106,7 +106,7 @@ public class MessageOutControllerTest {
         mvc.perform(get("/tracings/42")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.messageReceipts", hasSize(2)));
+                .andExpect(jsonPath("$.messageStatuses", hasSize(2)));
     }
 
     @Test

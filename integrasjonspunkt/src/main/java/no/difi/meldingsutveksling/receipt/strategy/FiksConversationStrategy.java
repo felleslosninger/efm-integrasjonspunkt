@@ -16,12 +16,12 @@ public class FiksConversationStrategy implements ConversationStrategy {
 
     @Override
     public void checkStatus(Conversation conversation) {
-        final MessageReceipt messageReceipt = svarUtService.getMessageReceipt(conversation);
-        if (messageReceipt.getStatus() == DpfReceiptStatus.LEST.toString()) {
+        final MessageStatus messageStatus = svarUtService.getMessageReceipt(conversation);
+        if (messageStatus.getStatus() == DpfReceiptStatus.LEST.toString()) {
             conversation.setPollable(false);
             conversation.setFinished(true);
         }
-        conversation.addMessageReceipt(messageReceipt);
+        conversation.addMessageStatus(messageStatus);
         conversationRepository.save(conversation);
     }
 

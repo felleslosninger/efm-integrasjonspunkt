@@ -57,6 +57,10 @@ public class DpvConversationStrategy implements ConversationStrategy {
 
         GetCorrespondenceStatusDetailsV2Response result = (GetCorrespondenceStatusDetailsV2Response) client
                 .sendStatusRequest(request);
+        if (result == null) {
+            // Error is picked up by soap fault interceptor
+            return;
+        }
 
         // TODO: need to find a way to search for CorrespondenceIDs (in response( as ConversationID is not unqiue
         List<StatusV2> statusList = result.getGetCorrespondenceStatusDetailsV2Result().getValue().getStatusList().getValue().getStatusV2();
@@ -67,13 +71,13 @@ public class DpvConversationStrategy implements ConversationStrategy {
             Optional<StatusChangeV2> createdStatus = statusChanges.stream()
                     .filter(s -> STATUS_CREATED.equals(s.getStatusType().value()))
                     .findFirst();
-            boolean hasCreatedStatus = conversation.getMessageReceipts().stream()
+            boolean hasCreatedStatus = conversation.getMessageStatuses().stream()
                     .anyMatch(r -> r.getStatus() == GenericReceiptStatus.DELIVERED.toString());
             if (!hasCreatedStatus && createdStatus.isPresent()) {
                 ZonedDateTime createdZoned = createdStatus.get().getStatusDate().toGregorianCalendar().toZonedDateTime();
-                MessageReceipt receipt = MessageReceipt.of(GenericReceiptStatus.DELIVERED.toString(), createdZoned
+                MessageStatus receipt = MessageStatus.of(GenericReceiptStatus.DELIVERED.toString(), createdZoned
                         .toLocalDateTime());
-                conversation.addMessageReceipt(receipt);
+                conversation.addMessageStatus(receipt);
                 conversationRepository.save(conversation);
             }
 
@@ -82,8 +86,9 @@ public class DpvConversationStrategy implements ConversationStrategy {
                     .findFirst();
             if (readStatus.isPresent()) {
                 ZonedDateTime readZoned = readStatus.get().getStatusDate().toGregorianCalendar().toZonedDateTime();
-                MessageReceipt receipt = MessageReceipt.of(GenericReceiptStatus.READ.toString(), readZoned.toLocalDateTime());
-                conversation.addMessageReceipt(receipt);
+                MessageStatus receipt = MessageStatus.of(GenericReceiptStatus.READ.toString(), readZoned
+                        .toLocalDateTime());
+                conversation.addMessageStatus(receipt);
                 conversation.setPollable(false);
                 conversation.setFinished(true);
                 conversationRepository.save(conversation);
