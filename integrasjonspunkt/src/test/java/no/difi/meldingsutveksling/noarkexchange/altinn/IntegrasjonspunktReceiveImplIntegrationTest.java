@@ -15,8 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.WebIntegrationTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -24,6 +23,7 @@ import javax.xml.bind.JAXBException;
 import java.io.IOException;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 /**
  * Integration test for {@link IntegrajonspunktReceiveImpl} (via {@link InternalQueue}).
@@ -31,8 +31,7 @@ import static org.mockito.Mockito.*;
  * Mock overrides are configured in {@link no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktIntegrationTestConfig}
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(IntegrasjonspunktApplication.class)
-@WebIntegrationTest
+@SpringBootTest(classes = IntegrasjonspunktApplication.class, webEnvironment = RANDOM_PORT, properties = {"app.local.properties.enable=false"})
 @ActiveProfiles("test")
 public class IntegrasjonspunktReceiveImplIntegrationTest {
 
