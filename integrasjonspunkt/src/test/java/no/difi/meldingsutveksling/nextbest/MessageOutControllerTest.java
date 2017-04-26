@@ -101,30 +101,6 @@ public class MessageOutControllerTest {
     }
 
     @Test
-    public void getTracingsForIdShouldReturnOk() throws Exception {
-        mvc.perform(get("/tracings/42")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.messageStatuses", hasSize(2)));
-    }
-
-    @Test
-    public void getTracingWithOnlylastShouldReturnOk() throws Exception {
-        mvc.perform(get("/tracings/42")
-                .param("lastonly", "true")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status", is("DELIVERED")));
-    }
-
-    @Test
-    public void getTracingsForUnknownIdShouldFail() throws Exception {
-        mvc.perform(get("/tracings/43")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
     public void getMessageShouldReturnOk() throws Exception {
         mvc.perform(get("/out/messages/42").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
