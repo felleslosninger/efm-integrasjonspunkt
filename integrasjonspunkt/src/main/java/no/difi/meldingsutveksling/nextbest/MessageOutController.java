@@ -1,13 +1,12 @@
 package no.difi.meldingsutveksling.nextbest;
 
 import com.google.common.collect.Lists;
+import io.swagger.annotations.*;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.MessageContextException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
-import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationRepository;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.slf4j.Logger;
@@ -31,6 +30,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.nextbest.logging.ConversationResourceMarkers.markerFrom;
 
 @RestController
+@Api
 public class MessageOutController {
 
     private static final Logger log = LoggerFactory.getLogger(MessageOutController.class);
@@ -73,9 +73,14 @@ public class MessageOutController {
 
 
     @RequestMapping(value = "/out/messages", method = RequestMethod.GET)
-    @ResponseBody
+    @ApiOperation(value = "Get all outgoing messages")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success", response = ConversationResource[].class)
+    })
     public ResponseEntity getAllResources(
+            @ApiParam(value = "Receiver id")
             @RequestParam(value = "receiverId", required = false) String receiverId,
+            @ApiParam(value = "Messagetype id")
             @RequestParam(value = "messagetypeId", required = false) String messagetypeId) {
 
         List<OutgoingConversationResource> resources;
@@ -95,8 +100,13 @@ public class MessageOutController {
     }
 
     @RequestMapping(value = "/out/messages/{conversationId}", method = RequestMethod.GET)
-    @ResponseBody
-    public ResponseEntity getStatusForMessage(@PathVariable("conversationId") String conversationId) {
+    @ApiOperation(value = "Find message", notes = "Find message with given conversation id")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success", response = ConversationResource.class)
+    })
+    public ResponseEntity getStatusForMessage(
+            @ApiParam(value = "Conversation id", required = true)
+            @PathVariable("conversationId") String conversationId) {
         Optional<OutgoingConversationResource> resource = Optional.ofNullable(repo.findOne(conversationId));
         if (resource.isPresent()) {
             return ResponseEntity.ok().body(resource.get());
@@ -105,11 +115,19 @@ public class MessageOutController {
     }
 
     @RequestMapping(value = "/out/messages", method = RequestMethod.POST)
-    @ResponseBody
+    @ApiOperation(value = "Create conversation", notes = "Create a new conversation with the given values")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success", response = ConversationResource.class),
+            @ApiResponse(code = 400, message = "Bad request", response = String.class)
+    })
     public ResponseEntity createResource(
+            @ApiParam(value = "Receiver id", required = true)
             @RequestParam("receiverId") String receiverId,
+            @ApiParam(value = "Messagetype id", required = true)
             @RequestParam("messagetypeId") String messagetypeId,
+            @ApiParam(value = "Sender id")
             @RequestParam(value = "senderId", required = false) String senderId,
+            @ApiParam(value = "Conversation id", defaultValue = "Generated UUID")
             @RequestParam(value = "conversationId", required = false) String conversationId) throws URISyntaxException {
 
         if (isNullOrEmpty(receiverId)) {
@@ -146,8 +164,15 @@ public class MessageOutController {
     }
 
     @RequestMapping(value = "/out/messages/{conversationId}", method = RequestMethod.POST)
-    @ResponseBody
+    @ApiOperation(value = "Upload files and send", notes = "Upload files to a conversation and send")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success", response = String.class),
+            @ApiResponse(code = 400, message = "Bad request", response = String.class),
+            @ApiResponse(code = 404, message = "Not found", response = String.class),
+            @ApiResponse(code = 500, message = "Internal error", response = String.class)
+    })
     public ResponseEntity uploadFiles(
+            @ApiParam(value = "Conversation id")
             @PathVariable("conversationId") String conversationId,
             MultipartHttpServletRequest request) {
 
@@ -211,28 +236,15 @@ public class MessageOutController {
         return ResponseEntity.ok().build();
     }
 
-    @RequestMapping(value = "/tracings/{conversationId}", method = RequestMethod.GET)
-    @ResponseBody
-    public ResponseEntity getTracings(
-            @PathVariable("conversationId") String conversationId,
-            @RequestParam(value = "messagetypeId", required = false) String messagetypeId,
-            @RequestParam(value = "lastonly", required = false) boolean lastonly) {
-        List<Conversation> clist = convRepo.findByConversationId(conversationId);
-        if (clist == null || clist.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        if (lastonly) {
-            MessageStatus latestStatus = clist.get(0).getMessageStatuses().stream()
-                    .sorted((a, b) -> b.getLastUpdate().compareTo(a.getLastUpdate()))
-                    .findFirst().get();
-            return ResponseEntity.ok(latestStatus);
-        }
-        return ResponseEntity.ok(clist.get(0));
-    }
-
     @RequestMapping(value = "/out/types/{identifier}", method = RequestMethod.GET)
-    @ResponseBody
-    public ResponseEntity getTypes(@PathVariable(value = "identifier", required = true) String identifier) {
+    @ApiOperation(value = "Supported message types", notes = "Get a list of supported message types for this endpoint")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success", response = String[].class),
+            @ApiResponse(code = 404, message = "Not found", response = String.class)
+    })
+    public ResponseEntity getTypes(
+            @ApiParam(value = "Identifier", required = true)
+            @PathVariable(value = "identifier") String identifier) {
         Optional<ServiceRecord> serviceRecord = Optional.ofNullable(sr.getServiceRecord(identifier));
         if (serviceRecord.isPresent()) {
             ArrayList<String> types = Lists.newArrayList();
@@ -244,7 +256,7 @@ public class MessageOutController {
     }
 
     @RequestMapping(value = "/out/types/{messagetypeId}/prototype", method = RequestMethod.GET)
-    @ResponseBody
+    @ApiOperation(value = "Prototypes", hidden = true)
     public ResponseEntity getPrototype(
             @PathVariable("messagetypeId") String messagetypeId,
             @RequestParam(value = "receiverId", required = false) String receiverId) {
@@ -252,6 +264,7 @@ public class MessageOutController {
     }
 
     @RequestMapping(value = "/transferqueue/{conversationId}", method = RequestMethod.GET)
+    @ApiOperation(value = "Transfer conversation between queue (internal use)", hidden = true)
     @ResponseBody
     public ResponseEntity transferQueue(@PathVariable("conversationId") String conversationId) {
         Optional<OutgoingConversationResource> resource = Optional.ofNullable(repo.findOne(conversationId));
