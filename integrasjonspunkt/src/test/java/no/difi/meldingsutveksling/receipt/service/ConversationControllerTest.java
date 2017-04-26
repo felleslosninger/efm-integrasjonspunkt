@@ -104,7 +104,6 @@ public class ConversationControllerTest {
                 .andExpect(jsonPath("$.receiverIdentifier", is("42")))
                 .andExpect(jsonPath("$.messageReference", is("foo")))
                 .andExpect(jsonPath("$.messageTitle", is("foo")))
-                .andExpect(jsonPath("$.lastUpdate", is(NOW_MINUS_5_MIN.toString())))
                 .andExpect(jsonPath("$.serviceIdentifier", is("DPO")));
     }
 

@@ -1,16 +1,14 @@
 package no.difi.meldingsutveksling.receipt.service;
 
 import com.google.common.collect.Lists;
+import io.swagger.annotations.*;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationRepository;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatusRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Comparator;
 import java.util.List;
@@ -20,6 +18,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 @RestController
+@Api
 public class ConversationController {
 
     @Autowired
@@ -28,14 +27,24 @@ public class ConversationController {
     @Autowired
     private MessageStatusRepository statusRepo;
 
-    @RequestMapping("/conversations")
+    @RequestMapping(value = "/conversations", method = RequestMethod.GET)
+    @ApiOperation(value = "Get all conversations", notes = "Gets a list of all conversations")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success", response = Conversation[].class)
+    })
     public List<Conversation> conversations() {
         Stream<Conversation> s = StreamSupport.stream(convoRepo.findAll().spliterator(), false);
         return s.sorted((a, b) -> b.getLastUpdate().compareTo(a.getLastUpdate())).collect(Collectors.toList());
     }
 
-    @RequestMapping("/conversations/{id}")
-    public ResponseEntity conversation(@PathVariable("id") Integer id) {
+    @RequestMapping(value = "/conversations/{id}", method = RequestMethod.GET)
+    @ApiOperation(value = "Find conversation", notes = "Find conversation based on id")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success", response = Conversation.class)
+    })
+    public ResponseEntity conversation(
+            @ApiParam(value = "Conversation id", required = true)
+            @PathVariable("id") Integer id) {
 
         Optional<Conversation> c = convoRepo.findByConvId(id);
         if (!c.isPresent()) {
@@ -45,14 +54,24 @@ public class ConversationController {
         return ResponseEntity.ok(c.get());
     }
 
-    @RequestMapping("/conversations/queue")
+    @RequestMapping(value = "/conversations/queue", method = RequestMethod.GET)
+    @ApiOperation(value = "Queued conversations", notes = "Get all conversations with not-finished state")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success", response = Conversation[].class)
+    })
     public List<Conversation> queuedConversations() {
         return Lists.newArrayList(convoRepo.findByPollable(true));
     }
 
-    @RequestMapping("/statuses")
+    @RequestMapping(value = "/statuses", method = RequestMethod.GET)
+    @ApiOperation(value = "Get all statuses", notes = "Get a list of all statuses with given parameters")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success", response = MessageStatus[].class)
+    })
     public ResponseEntity statuses(
+            @ApiParam(value = "Get all statuses with id equals to given value and higher")
             @RequestParam(value = "fromId", required = false) Integer fromId,
+            @ApiParam(value = "Get all statuses with given convId")
             @RequestParam(value = "convId", required = false) Integer convId) {
 
         List<MessageStatus> statuses;
@@ -75,8 +94,14 @@ public class ConversationController {
         return ResponseEntity.ok(sorted);
     }
 
-    @RequestMapping("/statuses/{id}")
-    public ResponseEntity status(@PathVariable("id") Integer id) {
+    @RequestMapping(value = "/statuses/{id}", method = RequestMethod.GET)
+    @ApiOperation(value = "Find status", notes = "Find status with given id")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success", response = MessageStatus.class)
+    })
+    public ResponseEntity status(
+            @ApiParam(value = "Status id", required = true)
+            @PathVariable("id") Integer id) {
 
         Optional<MessageStatus> r = statusRepo.findByStatId(id);
         if (!r.isPresent()) {
@@ -86,7 +111,11 @@ public class ConversationController {
         return ResponseEntity.ok(r.get());
     }
 
-    @RequestMapping("/statuses/peek")
+    @RequestMapping(value = "/statuses/peek", method = RequestMethod.GET)
+    @ApiOperation(value = "Latest status", notes = "Get status with latest update")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success", response = MessageStatus.class)
+    })
     public ResponseEntity statusPeek() {
         Optional<MessageStatus> r = statusRepo.findFirstByOrderByLastUpdateAsc();
         if (r.isPresent()) {
