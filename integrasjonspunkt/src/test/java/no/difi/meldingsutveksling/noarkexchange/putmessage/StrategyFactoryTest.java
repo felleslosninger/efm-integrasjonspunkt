@@ -5,6 +5,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.ks.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,6 +13,7 @@ import org.junit.Test;
 import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -26,6 +28,7 @@ public class StrategyFactoryTest {
         final IntegrasjonspunktProperties.PostVirksomheter ptvMock = mock(IntegrasjonspunktProperties.PostVirksomheter.class);
         final DigitalPostInnbyggerConfig dpic = mock(DigitalPostInnbyggerConfig.class);
         final DigitalPostInnbyggerConfig.Keystore keystore = mock(DigitalPostInnbyggerConfig.Keystore.class);
+        final IntegrasjonspunktProperties.Organization orgMock = mock(IntegrasjonspunktProperties.Organization.class);
         IntegrasjonspunktProperties.FeatureToggle featureMock = mock(IntegrasjonspunktProperties.FeatureToggle.class);
         when(featureMock.isEnableDPO()).thenReturn(true);
         when(featureMock.isEnableDPI()).thenReturn(true);
@@ -36,7 +39,9 @@ public class StrategyFactoryTest {
         when(messageSender.getProperties()).thenReturn(properties);
         when(properties.getAltinnPTV()).thenReturn(ptvMock);
         when(properties.getDpi()).thenReturn(dpic);
+        when(properties.getOrg()).thenReturn(orgMock);
         final ServiceRegistryLookup serviceRegistryLookup = mock(ServiceRegistryLookup.class);
+        when(serviceRegistryLookup.getInfoRecord(anyString())).thenReturn(mock(InfoRecord.class));
 
 
         final KeystoreProvider keystoreProvider = mock(KeystoreProvider.class);

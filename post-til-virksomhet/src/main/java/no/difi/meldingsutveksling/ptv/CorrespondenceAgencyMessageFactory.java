@@ -60,7 +60,7 @@ public class CorrespondenceAgencyMessageFactory {
         // Should the user be allowed to forward the message from portal
         correspondence.setAllowForwarding(objectFactory.createMyInsertCorrespondenceV2AllowForwarding(false));
         // Name of the message sender, always "Avsender"
-        correspondence.setMessageSender(objectFactory.createMyInsertCorrespondenceV2MessageSender("Avsender"));
+        correspondence.setMessageSender(objectFactory.createMyInsertCorrespondenceV2MessageSender(postConfig.getSender()));
         // The date and time the message should be visible in the Portal
         correspondence.setVisibleDateTime(toXmlGregorianCalendar(ZonedDateTime.now()));
         correspondence.setDueDateTime(toXmlGregorianCalendar(ZonedDateTime.now().plusDays(7)));

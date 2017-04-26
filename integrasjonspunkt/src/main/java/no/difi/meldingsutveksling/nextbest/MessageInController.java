@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextbest;
 
 import com.google.common.collect.Lists;
+import io.swagger.annotations.*;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.nextbest.logging.ConversationResourceMarkers.markerFrom;
 
 @RestController
+@Api
 public class MessageInController {
 
     private static final Logger log = LoggerFactory.getLogger(MessageInController.class);
@@ -36,10 +38,18 @@ public class MessageInController {
     private IntegrasjonspunktProperties props;
 
     @RequestMapping(value = "/in/messages", method = RequestMethod.GET)
-    @ResponseBody
+    @ApiOperation(value = "Get all incoming messages")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success", response = ConversationResource[].class),
+            @ApiResponse(code = 404, message = "Not found", response = String.class),
+            @ApiResponse(code = 204, message = "No countent", response = String.class)
+    })
     public ResponseEntity getIncomingMessages(
+            @ApiParam(value = "Messagetype id")
             @RequestParam(value = "messagetypeId", required = false) String messagetypeId,
+            @ApiParam(value = "Conversation id")
             @RequestParam(value = "conversationId", required = false) String conversationId,
+            @ApiParam(value = "Sender id")
             @RequestParam(value = "senderId", required = false) String senderId) {
 
         if (!isNullOrEmpty(conversationId)) {
@@ -73,8 +83,13 @@ public class MessageInController {
     }
 
     @RequestMapping(value = "/in/messages/peek", method = RequestMethod.GET)
-    @ResponseBody
+    @ApiOperation(value = "Peek incoming queue", notes = "Gets the first message in the incoming queue")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success", response = ConversationResource.class),
+            @ApiResponse(code = 204, message = "No content", response = String.class)
+    })
     public ResponseEntity peekIncomingMessages(
+            @ApiParam(value = "Messagetype id")
             @RequestParam(value = "messagetypeId", required = false) String messagetypeId) {
 
         Optional<IncomingConversationResource> resource;
@@ -91,8 +106,14 @@ public class MessageInController {
     }
 
     @RequestMapping(value = "/in/messages/pop", method = RequestMethod.GET)
-    @ResponseBody
+    @ApiOperation(value = "Pop incoming queue", notes = "Gets the ASiC for the first message in queue, then removes " +
+            "the message from the queue")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success", response = InputStreamResource.class),
+            @ApiResponse(code = 204, message = "No content", response = String.class)
+    })
     public ResponseEntity popIncomingMessages(
+            @ApiParam(value = "Messagetype id")
             @RequestParam(value = "messagetypeId", required = false) String messagetypeId) throws FileNotFoundException {
 
         Optional<IncomingConversationResource> resource;

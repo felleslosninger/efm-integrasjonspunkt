@@ -11,6 +11,7 @@ public class CorrespondenceAgencyConfiguration {
     private String smsText;
     private String emailSubject;
     private String emailBody;
+    private String sender;
 
     private CorrespondenceAgencyConfiguration() {
     }
@@ -49,6 +50,10 @@ public class CorrespondenceAgencyConfiguration {
 
     public String getEmailBody() {
         return emailBody;
+    }
+
+    public String getSender() {
+        return sender;
     }
 
     public static class Builder {
@@ -94,6 +99,11 @@ public class CorrespondenceAgencyConfiguration {
         public Builder withEmailBody(String emailBody) {
             correspondenceAgencyConfiguration.emailBody = emailBody;
             correspondenceAgencyConfiguration.notifyEmail = true;
+            return this;
+        }
+
+        public Builder withSender(String sender) {
+            correspondenceAgencyConfiguration.sender = sender;
             return this;
         }
 

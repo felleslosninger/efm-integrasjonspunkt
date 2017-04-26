@@ -157,7 +157,7 @@ class ReceiptList extends React.Component {
             k++;
 
 
-            var statusNodes = c.messageReceipts.map((r, k) => {
+            var statusNodes = c.messageStatuses.map((r, k) => {
                 return (
                     <tr key={k}>
                         <td>{k}</td>
