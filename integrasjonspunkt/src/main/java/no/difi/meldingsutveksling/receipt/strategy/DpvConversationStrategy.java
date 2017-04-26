@@ -72,10 +72,10 @@ public class DpvConversationStrategy implements ConversationStrategy {
                     .filter(s -> STATUS_CREATED.equals(s.getStatusType().value()))
                     .findFirst();
             boolean hasCreatedStatus = conversation.getMessageStatuses().stream()
-                    .anyMatch(r -> r.getStatus() == GenericReceiptStatus.DELIVERED.toString());
+                    .anyMatch(r -> r.getStatus() == GenericReceiptStatus.LEVERT.toString());
             if (!hasCreatedStatus && createdStatus.isPresent()) {
                 ZonedDateTime createdZoned = createdStatus.get().getStatusDate().toGregorianCalendar().toZonedDateTime();
-                MessageStatus receipt = MessageStatus.of(GenericReceiptStatus.DELIVERED.toString(), createdZoned
+                MessageStatus receipt = MessageStatus.of(GenericReceiptStatus.LEVERT.toString(), createdZoned
                         .toLocalDateTime());
                 conversation.addMessageStatus(receipt);
                 conversationRepository.save(conversation);
@@ -86,7 +86,7 @@ public class DpvConversationStrategy implements ConversationStrategy {
                     .findFirst();
             if (readStatus.isPresent()) {
                 ZonedDateTime readZoned = readStatus.get().getStatusDate().toGregorianCalendar().toZonedDateTime();
-                MessageStatus receipt = MessageStatus.of(GenericReceiptStatus.READ.toString(), readZoned
+                MessageStatus receipt = MessageStatus.of(GenericReceiptStatus.LEST.toString(), readZoned
                         .toLocalDateTime());
                 conversation.addMessageStatus(receipt);
                 conversation.setPollable(false);

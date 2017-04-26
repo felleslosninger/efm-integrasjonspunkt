@@ -15,23 +15,23 @@ import java.util.HashMap;
 import java.util.function.BiConsumer;
 
 public enum DpiReceiptStatus implements ReceiptStatus {
-    DELIVERED("Kvittering på at digital post er tilgjengeliggjort eller at en fysisk post er postlagt", Audit::info),
-    READ("Kvittering fra Innbygger for at digital post er åpnet", Audit::info),
-    NOTIFICATION_FAILED("Kvittering for at en spesifisert varsling ikke har blitt sendt", Audit::error),
-    READY_FOR_PRINT("Kvittering fra utskrift og forsendelsestjenesten om at melding er mottatt og lagt til print", Audit::info),
-    POST_RETURNED("Kvittering fra utskrift og forsendelsestjenesten om at posten ikke har blitt levert til Mottaker.", Audit::warn),
+    LEVERT("Kvittering på at digital post er tilgjengeliggjort eller at en fysisk post er postlagt", Audit::info),
+    LEST("Kvittering fra Innbygger for at digital post er åpnet", Audit::info),
+    VARSLING_FEILET("Kvittering for at en spesifisert varsling ikke har blitt sendt", Audit::error),
+    KLAR_FOR_PRINT("Kvittering fra utskrift og forsendelsestjenesten om at melding er mottatt og lagt til print", Audit::info),
+    POST_RETURNERT("Kvittering fra utskrift og forsendelsestjenesten om at posten ikke har blitt levert til Mottaker.", Audit::warn),
     FEIL("Generell melding om at det har skjedd en feil", Audit::error),
-    UNKNOWN("Kvittering ukjent for integrasjonspunktet", Audit::warn);
+    UKJENT("Kvittering ukjent for integrasjonspunktet", Audit::warn);
 
 
     private static final HashMap<Class, DpiReceiptStatus> mapper;
     static {
         mapper = new HashMap<>();
-        mapper.put(LeveringsKvittering.class, DELIVERED);
-        mapper.put(AapningsKvittering.class, READ);
-        mapper.put(VarslingFeiletKvittering.class, NOTIFICATION_FAILED);
-        mapper.put(MottaksKvittering.class, READY_FOR_PRINT);
-        mapper.put(ReturpostKvittering.class, POST_RETURNED);
+        mapper.put(LeveringsKvittering.class, LEVERT);
+        mapper.put(AapningsKvittering.class, LEST);
+        mapper.put(VarslingFeiletKvittering.class, VARSLING_FEILET);
+        mapper.put(MottaksKvittering.class, KLAR_FOR_PRINT);
+        mapper.put(ReturpostKvittering.class, POST_RETURNERT);
         mapper.put(Feil.class, FEIL);
     }
 
@@ -53,7 +53,7 @@ public enum DpiReceiptStatus implements ReceiptStatus {
     }
 
     public static DpiReceiptStatus from(ForretningsKvittering forretningsKvittering) {
-        return mapper.getOrDefault(forretningsKvittering.getClass(), UNKNOWN);
+        return mapper.getOrDefault(forretningsKvittering.getClass(), UKJENT);
     }
 
 }

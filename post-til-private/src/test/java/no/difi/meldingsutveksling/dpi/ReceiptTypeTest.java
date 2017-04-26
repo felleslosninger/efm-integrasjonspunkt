@@ -13,6 +13,6 @@ public class ReceiptTypeTest {
 
         DpiReceiptStatus actual = DpiReceiptStatus.from(leveringsKvittering);
 
-        assertThat(actual, is(DpiReceiptStatus.DELIVERED));
+        assertThat(actual, is(DpiReceiptStatus.LEVERT));
     }
 }

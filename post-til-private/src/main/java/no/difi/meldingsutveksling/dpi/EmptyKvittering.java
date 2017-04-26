@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public class EmptyKvittering implements ExternalReceipt {
 
     public static final String EMPTY = "empty";
-    private static final MessageStatus EMPTY_RECEIPT = MessageStatus.of(GenericReceiptStatus.OTHER.toString(),
+    private static final MessageStatus EMPTY_RECEIPT = MessageStatus.of(GenericReceiptStatus.ANNET.toString(),
             LocalDateTime.now());
 
     @Override

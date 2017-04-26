@@ -64,7 +64,7 @@ public class ReceiptPolling {
                 Conversation conversation = conversationRepository.findByConversationId(id).stream().findFirst().orElseGet(externalReceipt::createConversation);
                 MessageStatus status = externalReceipt.toMessageStatus();
                 conversation.addMessageStatus(status);
-                if (status.getStatus() == DpiReceiptStatus.READ.toString()) {
+                if (status.getStatus() == DpiReceiptStatus.LEST.toString()) {
                     conversation.setFinished(true);
                 }
                 conversationRepository.save(conversation);

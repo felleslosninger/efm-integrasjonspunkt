@@ -77,8 +77,8 @@ public class MessageOutControllerTest {
         serviceRecord.setDpeCapabilities(Lists.newArrayList());
         when(sr.getServiceRecord("1")).thenReturn(serviceRecord);
 
-        MessageStatus receiptSent = MessageStatus.of(GenericReceiptStatus.SENT.toString(), LocalDateTime.now());
-        MessageStatus receiptDelivered = MessageStatus.of(GenericReceiptStatus.DELIVERED.toString(),
+        MessageStatus receiptSent = MessageStatus.of(GenericReceiptStatus.SENDT.toString(), LocalDateTime.now());
+        MessageStatus receiptDelivered = MessageStatus.of(GenericReceiptStatus.LEVERT.toString(),
                 LocalDateTime.now().plusMinutes(1));
         Conversation receiptConversation = Conversation.of("42", "42ref", "123", "sometitle", ServiceIdentifier.DPO,
                 receiptDelivered, receiptSent);

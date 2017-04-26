@@ -147,7 +147,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
     }
 
     private void registerReceipt(EDUCore eduCore) {
-        MessageStatus status = MessageStatus.of(GenericReceiptStatus.READ.toString(), LocalDateTime.now());
+        MessageStatus status = MessageStatus.of(GenericReceiptStatus.LEST.toString(), LocalDateTime.now());
         Conversation c = conversationRepository.findByConversationId(eduCore.getId())
                 .stream()
                 .findFirst()

@@ -138,9 +138,9 @@ public class InternalQueue {
 
     private MessageStatus createSentStatus(EDUCore request) {
         if (request.getMessageType() == EDUCore.MessageType.APPRECEIPT) {
-            return MessageStatus.of(GenericReceiptStatus.SENT.toString(), LocalDateTime.now(), "AppReceipt");
+            return MessageStatus.of(GenericReceiptStatus.SENDT.toString(), LocalDateTime.now(), "AppReceipt");
         }
-        return MessageStatus.of(GenericReceiptStatus.SENT.toString(), LocalDateTime.now());
+        return MessageStatus.of(GenericReceiptStatus.SENDT.toString(), LocalDateTime.now());
     }
 
     /**
