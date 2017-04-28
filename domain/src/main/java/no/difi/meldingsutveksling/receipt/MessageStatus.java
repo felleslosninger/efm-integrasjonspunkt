@@ -22,7 +22,7 @@ public class MessageStatus {
     private String conversationId;
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private LocalDateTime lastUpdate;
-    private ReceiptStatus status;
+    private String status;
     private String description;
 
     @Lob
@@ -30,17 +30,17 @@ public class MessageStatus {
 
     MessageStatus(){}
 
-    private MessageStatus(ReceiptStatus status, LocalDateTime lastUpdate, String description) {
+    private MessageStatus(String status, LocalDateTime lastUpdate, String description) {
         this.status = status;
         this.lastUpdate = lastUpdate;
         this.description = description;
     }
 
-    public static MessageStatus of(ReceiptStatus status, LocalDateTime lastUpdate) {
+    public static MessageStatus of(String status, LocalDateTime lastUpdate) {
         return new MessageStatus(status, lastUpdate, null);
     }
 
-    public static MessageStatus of(ReceiptStatus status, LocalDateTime lastUpdate, String description) {
+    public static MessageStatus of(String status, LocalDateTime lastUpdate, String description) {
         return new MessageStatus(status, lastUpdate, description);
     }
 

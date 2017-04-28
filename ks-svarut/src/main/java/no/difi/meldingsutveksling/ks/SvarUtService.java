@@ -4,9 +4,9 @@ import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.CertificateParserException;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.ks.mapping.FiksMapper;
+import no.difi.meldingsutveksling.ks.receipt.DpfReceiptStatus;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
-import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 
@@ -42,8 +42,8 @@ public class SvarUtService {
         final String forsendelseId = client.getForsendelseId(serviceRecord.getEndPointURL(), conversation.getConversationId());
 
         final ForsendelseStatus forsendelseStatus = client.getForsendelseStatus(serviceRecord.getEndPointURL(), forsendelseId);
-        final ReceiptStatus receiptStatus = fiksMapper.mapFrom(forsendelseStatus);
-        return MessageStatus.of(receiptStatus, LocalDateTime.now());
+        final DpfReceiptStatus receiptStatus = fiksMapper.mapFrom(forsendelseStatus);
+        return MessageStatus.of(receiptStatus.toString(), LocalDateTime.now());
     }
 
     private X509Certificate toX509Certificate(String pemCertificate) {

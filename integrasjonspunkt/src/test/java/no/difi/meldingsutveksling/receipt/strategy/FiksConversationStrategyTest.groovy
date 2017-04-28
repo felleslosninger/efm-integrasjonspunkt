@@ -1,10 +1,10 @@
 package no.difi.meldingsutveksling.receipt.strategy
 
 import no.difi.meldingsutveksling.ks.SvarUtService
+import no.difi.meldingsutveksling.ks.receipt.DpfReceiptStatus
 import no.difi.meldingsutveksling.receipt.Conversation
 import no.difi.meldingsutveksling.receipt.ConversationRepository
 import no.difi.meldingsutveksling.receipt.MessageStatus
-import no.difi.meldingsutveksling.receipt.ReceiptStatus
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -27,7 +27,7 @@ class FiksConversationStrategyTest {
 
     @Test
     void "given message receipt with status read then conversation should be set non pollable"() {
-        def messageReceipt = MessageStatus.of(ReceiptStatus.READ, LocalDateTime.now())
+        def messageReceipt = MessageStatus.of(DpfReceiptStatus.LEST.toString(), LocalDateTime.now())
         Conversation conversation = mock(Conversation)
         FiksConversationStrategy strategy = new FiksConversationStrategy(service, mock(ConversationRepository))
         when(service.getMessageReceipt(any(Conversation))).thenReturn(messageReceipt)

@@ -46,20 +46,20 @@ public class ConversationControllerTest {
         final String cId1 = "123";
         final String cId2 = "321";
 
-        MessageStatus cId1ms1 = MessageStatus.of(ReceiptStatus.SENT, NOW_MINUS_5_MIN);
+        MessageStatus cId1ms1 = MessageStatus.of(GenericReceiptStatus.SENDT.toString(), NOW_MINUS_5_MIN);
         cId1ms1.setStatId(1);
         cId1ms1.setConvId(1);
-        MessageStatus cId1ms2 = MessageStatus.of(ReceiptStatus.DELIVERED, NOW_MINUS_5_MIN);
+        MessageStatus cId1ms2 = MessageStatus.of(GenericReceiptStatus.LEVERT.toString(), NOW_MINUS_5_MIN);
         cId1ms2.setStatId(2);
         cId1ms2.setConvId(1);
 
-        MessageStatus cId2ms1 = MessageStatus.of(ReceiptStatus.SENT, NOW);
+        MessageStatus cId2ms1 = MessageStatus.of(GenericReceiptStatus.SENDT.toString(), NOW);
         cId2ms1.setStatId(3);
         cId2ms1.setConvId(2);
-        MessageStatus cId2ms2 = MessageStatus.of(ReceiptStatus.DELIVERED, NOW);
+        MessageStatus cId2ms2 = MessageStatus.of(GenericReceiptStatus.LEVERT.toString(), NOW);
         cId2ms2.setStatId(4);
         cId2ms2.setConvId(2);
-        MessageStatus cId2ms3 = MessageStatus.of(ReceiptStatus.READ, NOW);
+        MessageStatus cId2ms3 = MessageStatus.of(GenericReceiptStatus.LEST.toString(), NOW);
         cId2ms3.setStatId(5);
         cId2ms3.setConvId(2);
 

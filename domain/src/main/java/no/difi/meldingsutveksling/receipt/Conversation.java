@@ -29,6 +29,7 @@ public class Conversation {
     private LocalDateTime lastUpdate;
     @JsonIgnore
     private boolean pollable;
+    private boolean finished;
     private ServiceIdentifier serviceIdentifier;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
@@ -80,12 +81,12 @@ public class Conversation {
                 serviceIdentifier, statusList);
     }
 
-    public static Conversation of(EDUCore eduCore, MessageStatus... statusess) {
+    public static Conversation of(EDUCore eduCore, MessageStatus... statuses) {
         String msgTitle = "";
         if (eduCore.getMessageType() == EDUCore.MessageType.EDU) {
             msgTitle = eduCore.getPayloadAsMeldingType().getJournpost().getJpInnhold();
         }
-        List<MessageStatus> statusListList = Stream.of(statusess)
+        List<MessageStatus> statusListList = Stream.of(statuses)
                 .peek(r -> r.setConversationId(eduCore.getId()))
                 .collect(Collectors.toList());
         return new Conversation(eduCore.getId(), eduCore.getMessageReference(), eduCore.getReceiver().getIdentifier(),

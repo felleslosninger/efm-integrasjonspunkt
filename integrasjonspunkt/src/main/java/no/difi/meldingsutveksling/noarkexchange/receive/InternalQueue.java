@@ -18,8 +18,8 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationRepository;
+import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
-import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -138,9 +138,9 @@ public class InternalQueue {
 
     private MessageStatus createSentStatus(EDUCore request) {
         if (request.getMessageType() == EDUCore.MessageType.APPRECEIPT) {
-            return MessageStatus.of(ReceiptStatus.SENT, LocalDateTime.now(), "AppReceipt");
+            return MessageStatus.of(GenericReceiptStatus.SENDT.toString(), LocalDateTime.now(), "AppReceipt");
         }
-        return MessageStatus.of(ReceiptStatus.SENT, LocalDateTime.now());
+        return MessageStatus.of(GenericReceiptStatus.SENDT.toString(), LocalDateTime.now());
     }
 
     /**

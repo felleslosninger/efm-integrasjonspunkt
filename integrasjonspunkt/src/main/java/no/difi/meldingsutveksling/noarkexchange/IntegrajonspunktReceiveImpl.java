@@ -20,8 +20,8 @@ import no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationRepository;
+import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
-import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
@@ -147,7 +147,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
     }
 
     private void registerReceipt(EDUCore eduCore) {
-        MessageStatus status = MessageStatus.of(ReceiptStatus.READ, LocalDateTime.now());
+        MessageStatus status = MessageStatus.of(GenericReceiptStatus.LEST.toString(), LocalDateTime.now());
         Conversation c = conversationRepository.findByConversationId(eduCore.getId())
                 .stream()
                 .findFirst()
@@ -157,6 +157,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
                         eduCore.getMessageReference(),
                         ServiceIdentifier.DPO));
         c.addMessageStatus(status);
+        c.setFinished(true);
         conversationRepository.save(c);
     }
 

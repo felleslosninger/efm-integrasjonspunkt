@@ -6,8 +6,8 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationRepository;
+import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
-import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.junit.Before;
@@ -77,8 +77,9 @@ public class MessageOutControllerTest {
         serviceRecord.setDpeCapabilities(Lists.newArrayList());
         when(sr.getServiceRecord("1")).thenReturn(serviceRecord);
 
-        MessageStatus receiptSent = MessageStatus.of(ReceiptStatus.SENT, LocalDateTime.now());
-        MessageStatus receiptDelivered = MessageStatus.of(ReceiptStatus.DELIVERED, LocalDateTime.now().plusMinutes(1));
+        MessageStatus receiptSent = MessageStatus.of(GenericReceiptStatus.SENDT.toString(), LocalDateTime.now());
+        MessageStatus receiptDelivered = MessageStatus.of(GenericReceiptStatus.LEVERT.toString(),
+                LocalDateTime.now().plusMinutes(1));
         Conversation receiptConversation = Conversation.of("42", "42ref", "123", "sometitle", ServiceIdentifier.DPO,
                 receiptDelivered, receiptSent);
         when(crepo.findByConversationId("42")).thenReturn(asList(receiptConversation));

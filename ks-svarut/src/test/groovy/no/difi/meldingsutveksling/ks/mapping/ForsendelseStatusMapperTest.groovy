@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.ks.mapping
 
 import no.difi.meldingsutveksling.ks.ForsendelseStatus
-import no.difi.meldingsutveksling.receipt.ReceiptStatus
+import no.difi.meldingsutveksling.ks.receipt.DpfReceiptStatus
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -16,17 +16,17 @@ class ForsendelseStatusMapperTest extends Specification {
         mapper.mapFrom(forsendelsestatus) == receiptStatus
         where:
         forsendelsestatus                  | receiptStatus
-        ForsendelseStatus.LEST             | ReceiptStatus.READ
-        ForsendelseStatus.MOTTATT          | ReceiptStatus.DELIVERED
-        ForsendelseStatus.AVVIST           | ReceiptStatus.FAIL
-        ForsendelseStatus.AKSEPTERT        | ReceiptStatus.SENT
-        ForsendelseStatus.IKKE_LEVERT      | ReceiptStatus.OTHER
-        ForsendelseStatus.MANUELT_HANDTERT | ReceiptStatus.DELIVERED
-        ForsendelseStatus.LEVERT_SDP       | ReceiptStatus.DELIVERED
-        ForsendelseStatus.PRINTET          | ReceiptStatus.DELIVERED
-        ForsendelseStatus.SENDT_DIGITALT   | ReceiptStatus.DELIVERED
-        ForsendelseStatus.SENDT_PRINT      | ReceiptStatus.DELIVERED
-        ForsendelseStatus.SENDT_SDP        | ReceiptStatus.DELIVERED
-        ForsendelseStatus.VARSLET          | ReceiptStatus.DELIVERED
+        ForsendelseStatus.LEST             | DpfReceiptStatus.LEST
+        ForsendelseStatus.MOTTATT          | DpfReceiptStatus.MOTTATT
+        ForsendelseStatus.AVVIST           | DpfReceiptStatus.AVVIST
+        ForsendelseStatus.AKSEPTERT        | DpfReceiptStatus.AKSEPTERT
+        ForsendelseStatus.IKKE_LEVERT      | DpfReceiptStatus.IKKE_LEVERT
+        ForsendelseStatus.MANUELT_HANDTERT | DpfReceiptStatus.MANULT_HANDTERT
+        ForsendelseStatus.LEVERT_SDP       | DpfReceiptStatus.LEVERT_SDP
+        ForsendelseStatus.PRINTET          | DpfReceiptStatus.PRINTET
+        ForsendelseStatus.SENDT_DIGITALT   | DpfReceiptStatus.SENDT_DIGITALT
+        ForsendelseStatus.SENDT_PRINT      | DpfReceiptStatus.SENDT_PRINT
+        ForsendelseStatus.SENDT_SDP        | DpfReceiptStatus.SENDT_SDP
+        ForsendelseStatus.VARSLET          | DpfReceiptStatus.VARSLET
     }
 }
