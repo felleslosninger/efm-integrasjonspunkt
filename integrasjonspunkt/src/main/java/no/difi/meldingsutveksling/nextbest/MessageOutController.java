@@ -222,9 +222,21 @@ public class MessageOutController {
                 }
                 nextBestServiceBus.putMessage(conversationResource);
                 log.info(markerFrom(conversationResource), "Message sent to service bus");
-            } else {
+            } else if (ServiceIdentifier.DPO.fullname().equals(conversationResource.getMessagetypeId())){
+                ServiceRecord serviceRecord = sr.getServiceRecord(conversationResource.getReceiverId());
+                if (!serviceRecord.getServiceIdentifier().equals(ServiceIdentifier.DPO)) {
+                    String errorStr = String.format("Cannot send DPO message - receiver has ServiceIdentifier \"%s\"",
+                            serviceRecord.getServiceIdentifier());
+                    log.error(markerFrom(conversationResource), errorStr);
+                    return ResponseEntity.badRequest().body(errorStr);
+                }
                 messageSender.sendMessage(conversationResource);
                 log.info(markerFrom(conversationResource), "Message sent to altinn");
+            } else {
+                String errorStr = String.format("Cannot send message - messagetypeId \"%s\" not supported",
+                        conversationResource.getMessagetypeId());
+                log.error(markerFrom(conversationResource), errorStr);
+                return ResponseEntity.badRequest().body(errorStr);
             }
         } catch (NextBestException | MessageContextException e) {
             log.error("Send message failed.", e);
