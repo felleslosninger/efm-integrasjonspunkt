@@ -133,6 +133,10 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
             if (PayloadUtil.isAppReceipt(eduDocument.getPayload())) {
                 Audit.info("AppReceipt extracted", markerFrom(document));
                 registerReceipt(eduDocument);
+                if (!properties.getFeature().isForwardReceivedAppReceipts()) {
+                    Audit.info("AppReceipt forwarding disabled - will not deliver to archive");
+                    return new CorrelationInformation();
+                }
             } else {
                 Audit.info("EDU Document extracted", markerFrom(document));
             }

@@ -260,7 +260,7 @@ public class IntegrasjonspunktProperties {
         private boolean enableQueue;
 
         private boolean enableReceipts;
-
+        private boolean forwardReceivedAppReceipts;
         private boolean returnOkOnEmptyPayload;
 
         /**
