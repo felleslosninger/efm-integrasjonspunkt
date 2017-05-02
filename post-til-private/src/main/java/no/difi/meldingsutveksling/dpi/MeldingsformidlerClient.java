@@ -6,16 +6,10 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ExternalReceipt;
-import no.difi.meldingsutveksling.receipt.MessageReceipt;
-import no.difi.meldingsutveksling.receipt.ReceiptStatus;
+import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.sdp.client2.KlientKonfigurasjon;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
-import no.difi.sdp.client2.domain.AktoerOrganisasjonsnummer;
-import no.difi.sdp.client2.domain.Databehandler;
-import no.difi.sdp.client2.domain.Dokument;
-import no.difi.sdp.client2.domain.Dokumentpakke;
-import no.difi.sdp.client2.domain.Forsendelse;
-import no.difi.sdp.client2.domain.Noekkelpar;
+import no.difi.sdp.client2.domain.*;
 import no.difi.sdp.client2.domain.exceptions.SendException;
 import no.difi.sdp.client2.domain.kvittering.ForretningsKvittering;
 import no.difi.sdp.client2.domain.kvittering.KvitteringForespoersel;
@@ -167,8 +161,9 @@ public class MeldingsformidlerClient {
         }
 
         @Override
-        public MessageReceipt toMessageReceipt() {
-            MessageReceipt domainReceipt = MessageReceipt.of(receiptStatus(), LocalDateTime.ofInstant(eksternKvittering.getTidspunkt(), ZoneId.systemDefault()));
+        public MessageStatus toMessageStatus() {
+            MessageStatus domainReceipt = MessageStatus.of(getReceiptType().toString(),
+                    LocalDateTime.ofInstant(eksternKvittering.getTidspunkt(), ZoneId.systemDefault()));
             domainReceipt.setRawReceipt(getRawReceipt());
             return domainReceipt;
         }
@@ -184,28 +179,14 @@ public class MeldingsformidlerClient {
         @Override
         public Conversation createConversation() {
             Conversation conv = Conversation.of(getId(), "unknown message reference", "unknown receiver", "unknown message title", ServiceIdentifier.DPI);
-            conv.setMessageReceipts(new ArrayList<>(1));
+            conv.setMessageStatuses(new ArrayList<>(1));
             return conv;
         }
 
-        public ReceiptType getReceiptType() {
-            return ReceiptType.from(eksternKvittering);
+        public DpiReceiptStatus getReceiptType() {
+            return DpiReceiptStatus.from(eksternKvittering);
         }
 
-        private ReceiptStatus receiptStatus() {
-            switch (getReceiptType()) {
-                case DELIEVERED:
-                    return ReceiptStatus.DELIVERED;
-                case READ:
-                    return ReceiptStatus.READ;
-                case FEIL:
-                case NOTIFICATION_FAILED:
-                case POST_RETURNED:
-                    return ReceiptStatus.FAIL;
-                default:
-                    return ReceiptStatus.OTHER;
-            }
-        }
     }
 
 

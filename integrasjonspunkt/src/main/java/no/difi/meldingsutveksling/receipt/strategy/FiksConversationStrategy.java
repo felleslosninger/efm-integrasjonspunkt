@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.receipt.strategy;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.ks.SvarUtService;
+import no.difi.meldingsutveksling.ks.receipt.DpfReceiptStatus;
 import no.difi.meldingsutveksling.receipt.*;
 
 public class FiksConversationStrategy implements ConversationStrategy {
@@ -15,11 +16,12 @@ public class FiksConversationStrategy implements ConversationStrategy {
 
     @Override
     public void checkStatus(Conversation conversation) {
-        final MessageReceipt messageReceipt = svarUtService.getMessageReceipt(conversation);
-        if (messageReceipt.getStatus() == ReceiptStatus.READ) {
+        final MessageStatus messageStatus = svarUtService.getMessageReceipt(conversation);
+        if (messageStatus.getStatus() == DpfReceiptStatus.LEST.toString()) {
             conversation.setPollable(false);
+            conversation.setFinished(true);
         }
-        conversation.addMessageReceipt(messageReceipt);
+        conversation.addMessageStatus(messageStatus);
         conversationRepository.save(conversation);
     }
 

@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.ks.mapping;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.ks.Forsendelse;
 import no.difi.meldingsutveksling.ks.ForsendelseStatus;
-import no.difi.meldingsutveksling.receipt.ReceiptStatus;
+import no.difi.meldingsutveksling.ks.receipt.DpfReceiptStatus;
 
 import java.security.cert.X509Certificate;
 
@@ -20,7 +20,7 @@ public class FiksMapper {
         return forsendelseMapper.mapFrom(eduCore, certificate);
     }
 
-    public ReceiptStatus mapFrom(ForsendelseStatus forsendelseStatus) {
+    public DpfReceiptStatus mapFrom(ForsendelseStatus forsendelseStatus) {
         return forsendelseStatusMapper.mapFrom(forsendelseStatus);
     }
 }

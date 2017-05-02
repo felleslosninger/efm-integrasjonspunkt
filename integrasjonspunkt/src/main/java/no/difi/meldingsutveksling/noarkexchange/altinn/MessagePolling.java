@@ -15,10 +15,7 @@ import no.difi.meldingsutveksling.nextbest.NextBestQueue;
 import no.difi.meldingsutveksling.nextbest.NextBestServiceBus;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
-import no.difi.meldingsutveksling.receipt.Conversation;
-import no.difi.meldingsutveksling.receipt.ConversationRepository;
-import no.difi.meldingsutveksling.receipt.MessageReceipt;
-import no.difi.meldingsutveksling.receipt.ReceiptStatus;
+import no.difi.meldingsutveksling.receipt.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.transport.Transport;
@@ -148,7 +145,7 @@ public class MessagePolling implements ApplicationContextAware {
                 JAXBElement<Kvittering> jaxbKvit = (JAXBElement<Kvittering>) eduDocument.getAny();
                 Audit.info("Message is a receipt", eduDocument.createLogstashMarkers().and(getReceiptTypeMarker
                         (jaxbKvit.getValue())));
-                MessageReceipt receipt = receiptFromKvittering(jaxbKvit.getValue());
+                MessageStatus status = statusFromKvittering(jaxbKvit.getValue());
                 Conversation conversation = conversationRepository.findByConversationId(eduDocument.getConversationId())
                         .stream()
                         .findFirst()
@@ -156,7 +153,7 @@ public class MessagePolling implements ApplicationContextAware {
                                 "unknown", eduDocument
                                 .getReceiverOrgNumber(),
                                 "unknown", ServiceIdentifier.DPO));
-                conversation.addMessageReceipt(receipt);
+                conversation.addMessageStatus(status);
                 conversationRepository.save(conversation);
             }
         }
@@ -173,14 +170,10 @@ public class MessagePolling implements ApplicationContextAware {
         return Markers.append(field, "unkown");
     }
 
-    private MessageReceipt receiptFromKvittering(Kvittering kvittering) {
-        if (kvittering.getAapning() != null) {
-            return MessageReceipt.of(ReceiptStatus.OTHER, LocalDateTime.now(), "Åpningskvittering");
-        }
-        if (kvittering.getLevering() != null) {
-            return MessageReceipt.of(ReceiptStatus.DELIVERED, LocalDateTime.now());
-        }
-        return MessageReceipt.of(ReceiptStatus.OTHER, LocalDateTime.now());
+    private MessageStatus statusFromKvittering(Kvittering kvittering) {
+        DpoReceiptStatus status = DpoReceiptStatus.of(kvittering);
+        LocalDateTime tidspunkt = kvittering.getTidspunkt().toGregorianCalendar().toZonedDateTime().toLocalDateTime();
+        return MessageStatus.of(status.toString(), tidspunkt);
     }
 
     private boolean isKvittering(EduDocument eduDocument) {

@@ -14,11 +14,12 @@ import no.difi.meldingsutveksling.logging.MoveLogMarkers;
 import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationRepository;
-import no.difi.meldingsutveksling.receipt.MessageReceipt;
-import no.difi.meldingsutveksling.receipt.ReceiptStatus;
+import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
+import no.difi.meldingsutveksling.receipt.MessageStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -101,10 +102,12 @@ public class InternalQueue {
         MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrg().getNumber());
         EDUCore request = eduCoreConverter.unmarshallFrom(message);
         try {
-            eduCoreSender.sendMessage(request);
-            if (properties.getFeature().isEnableReceipts() && request.getServiceIdentifier() != null) {
-                MessageReceipt receipt = createSentReceipt(request);
-                Conversation conversation = Conversation.of(request, receipt);
+            PutMessageResponseType response = eduCoreSender.sendMessage(request);
+            if (properties.getFeature().isEnableReceipts() &&
+                    request.getServiceIdentifier() != null &&
+                    "OK".equals(response.getResult().getType())) {
+                MessageStatus status = createSentStatus(request);
+                Conversation conversation = Conversation.of(request, status);
                 conversationRepository.save(conversation);
             }
         } catch (Exception e) {
@@ -133,11 +136,11 @@ public class InternalQueue {
 
     }
 
-    private MessageReceipt createSentReceipt(EDUCore request) {
+    private MessageStatus createSentStatus(EDUCore request) {
         if (request.getMessageType() == EDUCore.MessageType.APPRECEIPT) {
-            return MessageReceipt.of(ReceiptStatus.SENT, LocalDateTime.now(), "AppReceipt");
+            return MessageStatus.of(GenericReceiptStatus.SENDT.toString(), LocalDateTime.now(), "AppReceipt");
         }
-        return MessageReceipt.of(ReceiptStatus.SENT, LocalDateTime.now());
+        return MessageStatus.of(GenericReceiptStatus.SENDT.toString(), LocalDateTime.now());
     }
 
     /**
