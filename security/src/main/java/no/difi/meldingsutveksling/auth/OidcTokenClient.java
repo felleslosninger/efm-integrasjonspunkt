@@ -122,7 +122,7 @@ public class OidcTokenClient {
         return serializedJwt;
     }
 
-    private String getCurrentScopes() {
+    public String getCurrentScopes() {
 
         ArrayList<String> scopeList = Lists.newArrayList();
         if (props.getFeature().isEnableDPO() || props.getFeature().isEnableDPE()) {
