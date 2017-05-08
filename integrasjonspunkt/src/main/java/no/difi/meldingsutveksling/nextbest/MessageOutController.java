@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextbest;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.swagger.annotations.*;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -21,12 +22,15 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.net.URISyntaxException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static no.difi.meldingsutveksling.nextbest.ConversationDirection.INCOMING;
+import static no.difi.meldingsutveksling.nextbest.ConversationDirection.OUTGOING;
 import static no.difi.meldingsutveksling.nextbest.logging.ConversationResourceMarkers.markerFrom;
 
 @RestController
@@ -35,11 +39,8 @@ public class MessageOutController {
 
     private static final Logger log = LoggerFactory.getLogger(MessageOutController.class);
 
-    @Autowired
-    private OutgoingConversationResourceRepository repo;
-
-    @Autowired
-    private IncomingConversationResourceRepository incRepo;
+    private DirectionalConversationResourceRepository outRepo;
+    private DirectionalConversationResourceRepository inRepo;
 
     @Autowired
     private ConversationRepository convRepo;
@@ -56,6 +57,12 @@ public class MessageOutController {
     @Autowired
     private NextBestServiceBus nextBestServiceBus;
 
+    @Autowired
+    public MessageOutController(ConversationResourceRepository repo) {
+        outRepo = new DirectionalConversationResourceRepository(repo, OUTGOING);
+        inRepo = new DirectionalConversationResourceRepository(repo, INCOMING);
+    }
+
 
     private List<String> getSupportedTypes() {
 
@@ -66,6 +73,9 @@ public class MessageOutController {
         if (props.getFeature().isEnableDPE()) {
             supportedTypes.add(ServiceIdentifier.DPE_DATA.fullname());
             supportedTypes.add(ServiceIdentifier.DPE_INNSYN.fullname());
+        }
+        if (props.getFeature().isEnableDPV()) {
+            supportedTypes.add(ServiceIdentifier.DPV.fullname());
         }
 
         return supportedTypes;
@@ -83,18 +93,18 @@ public class MessageOutController {
             @ApiParam(value = "Messagetype id")
             @RequestParam(value = "messagetypeId", required = false) String messagetypeId) {
 
-        List<OutgoingConversationResource> resources;
+        List<ConversationResource> resources;
         if (!isNullOrEmpty(receiverId) && !isNullOrEmpty(messagetypeId)) {
-            resources = repo.findByReceiverIdAndMessagetypeId(receiverId, messagetypeId);
+            resources = outRepo.findByReceiverIdAndMessagetypeId(receiverId, messagetypeId);
         }
         else if (!isNullOrEmpty(receiverId)) {
-            resources = repo.findByReceiverId(receiverId);
+            resources = outRepo.findByReceiverId(receiverId);
         }
         else if (!isNullOrEmpty(messagetypeId)) {
-            resources = repo.findByMessagetypeId(messagetypeId);
+            resources = outRepo.findByMessagetypeId(messagetypeId);
         }
         else {
-            resources = Lists.newArrayList(repo.findAll());
+            resources = Lists.newArrayList(outRepo.findAll());
         }
         return ResponseEntity.ok(resources);
     }
@@ -107,7 +117,7 @@ public class MessageOutController {
     public ResponseEntity getStatusForMessage(
             @ApiParam(value = "Conversation id", required = true)
             @PathVariable("conversationId") String conversationId) {
-        Optional<OutgoingConversationResource> resource = Optional.ofNullable(repo.findOne(conversationId));
+        Optional<ConversationResource> resource = outRepo.findByConversationId(conversationId);
         if (resource.isPresent()) {
             return ResponseEntity.ok().body(resource.get());
         }
@@ -121,46 +131,30 @@ public class MessageOutController {
             @ApiResponse(code = 400, message = "Bad request", response = String.class)
     })
     public ResponseEntity createResource(
-            @ApiParam(value = "Receiver id", required = true)
-            @RequestParam("receiverId") String receiverId,
-            @ApiParam(value = "Messagetype id", required = true)
-            @RequestParam("messagetypeId") String messagetypeId,
-            @ApiParam(value = "Sender id")
-            @RequestParam(value = "senderId", required = false) String senderId,
-            @ApiParam(value = "Conversation id", defaultValue = "Generated UUID")
-            @RequestParam(value = "conversationId", required = false) String conversationId) throws URISyntaxException {
+            @RequestBody ConversationResource cr) {
 
-        if (isNullOrEmpty(receiverId)) {
+        if (isNullOrEmpty(cr.getReceiverId())) {
             return ResponseEntity.badRequest().body("Required String parameter \'receiverId\' is not present");
         }
-        if (isNullOrEmpty(messagetypeId)) {
+        if (isNullOrEmpty(cr.getMessagetypeId())) {
             return ResponseEntity.badRequest().body("Required String parameter \'messagetypeId\' is not present");
         }
 
         List<String> supportedTypes = getSupportedTypes();
-        if (!supportedTypes.contains(messagetypeId)) {
-            return ResponseEntity.badRequest().body("messagetypeId \'"+messagetypeId+"\' not supported. Supported " +
+        if (!supportedTypes.contains(cr.getMessagetypeId())) {
+            return ResponseEntity.badRequest().body("messagetypeId \'"+cr.getMessagetypeId()+"\' not supported. Supported " +
                     "types: "+supportedTypes);
         }
 
-        String sender = isNullOrEmpty(senderId) ? props.getOrg().getNumber() : senderId;
+        cr.setSenderId(isNullOrEmpty(cr.getSenderId()) ? props.getOrg().getNumber() : cr.getSenderId());
+        cr.setLastUpdate(LocalDateTime.now());
+        cr.setConversationId(isNullOrEmpty(cr.getConversationId()) ? UUID.randomUUID().toString() : cr.getConversationId());
+        cr.setFileRefs(cr.getFileRefs() == null ? Maps.newHashMap() : cr.getFileRefs());
 
-        OutgoingConversationResource conversationResource;
-        if (isNullOrEmpty(conversationId)) {
-            conversationResource = OutgoingConversationResource.of(sender, receiverId, messagetypeId);
-        } else {
-            conversationResource = repo.findOne(conversationId);
-            if (conversationResource == null) {
-                conversationResource = OutgoingConversationResource.of(conversationId, sender, receiverId,
-                        messagetypeId);
-            }
-        }
+        outRepo.save(cr);
+        log.info(markerFrom(cr), "Created new conversation resource with id={}", cr.getConversationId());
 
-        repo.save(conversationResource);
-        log.info(markerFrom(conversationResource), "Created new conversation resource with id={}",
-                conversationResource.getConversationId());
-
-        return ResponseEntity.ok(conversationResource);
+        return ResponseEntity.ok(cr);
     }
 
     @RequestMapping(value = "/out/messages/{conversationId}", method = RequestMethod.POST)
@@ -176,10 +170,11 @@ public class MessageOutController {
             @PathVariable("conversationId") String conversationId,
             MultipartHttpServletRequest request) {
 
-        OutgoingConversationResource conversationResource = repo.findOne(conversationId);
-        if (conversationResource == null) {
+        Optional<ConversationResource> find = outRepo.findByConversationId(conversationId);
+        if (!find.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No conversation with supplied id found");
         }
+        ConversationResource conversationResource = find.get();
 
         ArrayList<String> files = Lists.newArrayList(request.getFileNames());
         for (String f : files) {
@@ -243,7 +238,7 @@ public class MessageOutController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error during sending. Check logs");
         }
 
-        repo.delete(conversationResource);
+        outRepo.delete(conversationResource);
 
         return ResponseEntity.ok().build();
     }
@@ -279,10 +274,10 @@ public class MessageOutController {
     @ApiOperation(value = "Transfer conversation between queue (internal use)", hidden = true)
     @ResponseBody
     public ResponseEntity transferQueue(@PathVariable("conversationId") String conversationId) {
-        Optional<OutgoingConversationResource> resource = Optional.ofNullable(repo.findOne(conversationId));
+        Optional<ConversationResource> resource = outRepo.findByConversationId(conversationId);
         if (resource.isPresent()) {
-            repo.delete(resource.get());
-            incRepo.save(IncomingConversationResource.of(resource.get()));
+            resource.get().setDirection(INCOMING);
+            inRepo.save(resource.get());
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Conversation with supplied id not found.");

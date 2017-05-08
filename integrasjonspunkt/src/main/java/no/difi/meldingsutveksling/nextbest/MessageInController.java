@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static no.difi.meldingsutveksling.nextbest.ConversationDirection.INCOMING;
 import static no.difi.meldingsutveksling.nextbest.logging.ConversationResourceMarkers.markerFrom;
 
 @RestController
@@ -31,11 +32,15 @@ public class MessageInController {
     private static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
     private static final String HEADER_FILENAME = "attachement; filename=";
 
-    @Autowired
-    private IncomingConversationResourceRepository repo;
+    private DirectionalConversationResourceRepository repo;
 
     @Autowired
     private IntegrasjonspunktProperties props;
+
+    @Autowired
+    public MessageInController(ConversationResourceRepository cRepo) {
+        repo = new DirectionalConversationResourceRepository(cRepo, INCOMING);
+    }
 
     @RequestMapping(value = "/in/messages", method = RequestMethod.GET)
     @ApiOperation(value = "Get all incoming messages")
@@ -53,14 +58,14 @@ public class MessageInController {
             @RequestParam(value = "senderId", required = false) String senderId) {
 
         if (!isNullOrEmpty(conversationId)) {
-            Optional<IncomingConversationResource> resource = Optional.ofNullable(repo.findOne(conversationId));
+            Optional<ConversationResource> resource = repo.findByConversationId(conversationId);
             if (resource.isPresent()) {
                 return ResponseEntity.ok(resource.get());
             }
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(NO_CONVO_FOUND);
         }
 
-        List<IncomingConversationResource> resources;
+        List<ConversationResource> resources;
         if (!isNullOrEmpty(messagetypeId)) {
             if (!isNullOrEmpty(senderId)) {
                 resources = repo.findByMessagetypeIdAndSenderId(messagetypeId, senderId);
@@ -92,7 +97,7 @@ public class MessageInController {
             @ApiParam(value = "Messagetype id")
             @RequestParam(value = "messagetypeId", required = false) String messagetypeId) {
 
-        Optional<IncomingConversationResource> resource;
+        Optional<ConversationResource> resource;
         if (isNullOrEmpty(messagetypeId)) {
             resource = repo.findFirstByOrderByLastUpdateAsc();
         } else {
@@ -116,7 +121,7 @@ public class MessageInController {
             @ApiParam(value = "Messagetype id")
             @RequestParam(value = "messagetypeId", required = false) String messagetypeId) throws FileNotFoundException {
 
-        Optional<IncomingConversationResource> resource;
+        Optional<ConversationResource> resource;
         if (isNullOrEmpty(messagetypeId)) {
             resource = repo.findFirstByOrderByLastUpdateAsc();
         } else {

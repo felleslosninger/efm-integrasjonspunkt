@@ -84,7 +84,7 @@ public class NextBestServiceBus {
         }
     }
 
-    public void putMessage(OutgoingConversationResource resource) throws NextBestException {
+    public void putMessage(ConversationResource resource) throws NextBestException {
 
         BrokeredMessage msg;
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {

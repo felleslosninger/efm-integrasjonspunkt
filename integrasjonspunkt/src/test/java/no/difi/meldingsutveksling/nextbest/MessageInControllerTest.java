@@ -19,6 +19,7 @@ import java.util.Optional;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -31,8 +32,7 @@ public class MessageInControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
-    private IncomingConversationResourceRepository repo;
+    private DirectionalConversationResourceRepository repo;
 
     @MockBean
     private ServiceRegistryLookup sr;
@@ -42,6 +42,7 @@ public class MessageInControllerTest {
 
     @Before
     public void setup() {
+        repo = mock(DirectionalConversationResourceRepository.class);
         IntegrasjonspunktProperties.NextBEST nextBEST = new IntegrasjonspunktProperties.NextBEST();
         nextBEST.setFiledir("target/uploadtest");
         when(props.getNextbest()).thenReturn(nextBEST);
@@ -54,9 +55,9 @@ public class MessageInControllerTest {
         IncomingConversationResource cr43 = IncomingConversationResource.of("43", "2", "1", "2");
         IncomingConversationResource cr44 = IncomingConversationResource.of("44", "1", "2", "1");
 
-        when(repo.findOne("42")).thenReturn(cr42);
-        when(repo.findOne("43")).thenReturn(cr43);
-        when(repo.findOne("1337")).thenReturn(null);
+        when(repo.findByConversationId("42")).thenReturn(Optional.of(cr42));
+        when(repo.findByConversationId("43")).thenReturn(Optional.of(cr43));
+        when(repo.findByConversationId("1337")).thenReturn(Optional.empty());
         when(repo.findAll()).thenReturn(asList(cr42, cr43, cr44));
         when(repo.findByMessagetypeId("1")).thenReturn(asList(cr42, cr44));
         when(repo.findByMessagetypeId("2")).thenReturn(asList(cr43));

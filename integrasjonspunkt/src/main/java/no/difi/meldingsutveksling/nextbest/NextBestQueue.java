@@ -1,5 +1,8 @@
 package no.difi.meldingsutveksling.nextbest;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.collect.Lists;
 import no.difi.meldingsutveksling.Decryptor;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
@@ -9,6 +12,7 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,22 +24,25 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import static no.difi.meldingsutveksling.nextbest.ConversationDirection.INCOMING;
+
 @Component
 public class NextBestQueue {
 
     private static final Logger log = LoggerFactory.getLogger(NextBestQueue.class);
 
-    @Autowired
-    private IncomingConversationResourceRepository repoIn;
-
-    @Autowired
-    private OutgoingConversationResourceRepository repoOut;
+    private DirectionalConversationResourceRepository inRepo;
 
     @Autowired
     private IntegrasjonspunktNokkel keyInfo;
 
     @Autowired
     private IntegrasjonspunktProperties props;
+
+    @Autowired
+    public NextBestQueue(ConversationResourceRepository repo) {
+        inRepo = new DirectionalConversationResourceRepository(repo, INCOMING);
+    }
 
     public void enqueueEduDocument(EduDocument eduDocument) {
 
@@ -54,9 +61,13 @@ public class NextBestQueue {
             throw new MeldingsUtvekslingRuntimeException("Could not get contents from asic", e);
         }
 
-        IncomingConversationResource message = IncomingConversationResource.of(eduDocument.getConversationId(),
-                eduDocument.getSenderOrgNumber(),
-                eduDocument.getReceiverOrgNumber(), eduDocument.getMessagetypeId());
+        ConversationResource message;
+        try {
+            message = getConversationFromAsic(decryptedAsicPackage);
+        } catch (MessageException e) {
+            log.error("Could not get conversation from asic", e);
+            throw new MeldingsUtvekslingRuntimeException("Could not get conversation from asic", e);
+        }
 
         message.addFileRef(props.getNextbest().getAsicfile());
         contentFromAsic.forEach(message::addFileRef);
@@ -76,7 +87,7 @@ public class NextBestQueue {
             bos.close();
             os.close();
 
-            repoIn.save(message);
+            inRepo.save(message);
         } catch (IOException e) {
             log.error("Could not write asic container to disc.", e);
         }
@@ -101,5 +112,27 @@ public class NextBestQueue {
             throw new MessageException(StatusMessage.UNABLE_TO_EXTRACT_ZIP_CONTENTS);
         }
         return files;
+    }
+
+    public ConversationResource getConversationFromAsic(byte[] bytes) throws MessageException {
+        try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes))) {
+            ZipEntry entry;
+            while ((entry = zipInputStream.getNextEntry()) != null) {
+                if ("conversation.json".equals(entry.getName())) {
+                    StringWriter stringWriter = new StringWriter();
+                    IOUtils.copy(zipInputStream, stringWriter);
+                    String s = stringWriter.toString();
+                    ObjectMapper om = new ObjectMapper();
+                    om.registerModule(new JavaTimeModule());
+                    om.configure(JsonParser.Feature.AUTO_CLOSE_SOURCE, false);
+                    ConversationResource cr = om.readValue(zipInputStream, ConversationResource.class);
+                    return cr;
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed reading entries in asic.", e);
+            throw new MessageException(StatusMessage.UNABLE_TO_EXTRACT_ZIP_CONTENTS);
+        }
+        return null;
     }
 }

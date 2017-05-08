@@ -1,7 +1,11 @@
 package no.difi.meldingsutveksling.nextbest;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.common.base.MoreObjects;
+import lombok.Data;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -10,21 +14,41 @@ import java.util.Optional;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "direction")
+@DiscriminatorColumn(name = "type")
+@Data
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "messagetypeId",
+        visible = true)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = DpoConversationResource.class, name = "DPO"),
+        @JsonSubTypes.Type(value = DpvConversationResource.class, name = "DPV"),
+        @JsonSubTypes.Type(value = DpiConversationResource.class, name = "DPI"),
+        @JsonSubTypes.Type(value = DpfConversationResource.class, name = "DPF"),
+        @JsonSubTypes.Type(value = DpeInnsynConversationResource.class, name = "DPE_innsyn"),
+        @JsonSubTypes.Type(value = DpeDataConversationResource.class, name = "DPE_data")
+})
 public abstract class ConversationResource {
 
     @Id
     private String conversationId;
+    private String messagetypeId;
     private String senderId;
     private String receiverId;
-    private String messagetypeId;
-    @JsonIgnore
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private LocalDateTime lastUpdate;
+    @JsonIgnore
+    private ConversationDirection direction;
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "fileid")
     @Column(name = "filename")
     @CollectionTable(name = "filerefs", joinColumns = @JoinColumn(name = "ids"))
     private Map<Integer, String> fileRefs;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @MapKeyColumn(name = "propId")
+    @Column(name = "prop")
+    @CollectionTable(name = "props", joinColumns = @JoinColumn(name = "pids"))
+    private Map<String, String> customProperties;
 
     ConversationResource() {}
 
@@ -38,53 +62,7 @@ public abstract class ConversationResource {
         this.fileRefs = fileRefs;
     }
 
-    public String getConversationId() {
-        return conversationId;
-    }
 
-    public void setConversationId(String conversationId) {
-        this.conversationId = conversationId;
-    }
-
-    public String getReceiverId() {
-        return receiverId;
-    }
-
-    public void setReceiverId(String receiverId) {
-        this.receiverId = receiverId;
-    }
-
-    public String getSenderId() {
-        return senderId;
-    }
-
-    public void setSenderId(String senderId) {
-        this.senderId = senderId;
-    }
-
-    public String getMessagetypeId() {
-        return messagetypeId;
-    }
-
-    public void setMessagetypeId(String messagetypeId) {
-        this.messagetypeId = messagetypeId;
-    }
-
-    public Map<Integer, String> getFileRefs() {
-        return fileRefs;
-    }
-
-    public LocalDateTime getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(LocalDateTime lastUpdate) {
-        this.lastUpdate = lastUpdate;
-    }
-
-    public void setFileRefs(Map<Integer, String> fileRefs) {
-        this.fileRefs = fileRefs;
-    }
 
     public void addFileRef(String fileRef) {
         Optional<Integer> max = this.fileRefs.keySet().stream().max(Integer::compare);

@@ -22,10 +22,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.RegexMatcher.matchesRegex;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -37,11 +39,10 @@ public class MessageOutControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
-    private OutgoingConversationResourceRepository repo;
+    private DirectionalConversationResourceRepository repo;
 
     @MockBean
-    private IncomingConversationResourceRepository increpo;
+    private DirectionalConversationResourceRepository increpo;
 
     @MockBean
     private ServiceRegistryLookup sr;
@@ -60,6 +61,7 @@ public class MessageOutControllerTest {
 
     @Before
     public void setup() {
+        repo = mock(DirectionalConversationResourceRepository.class);
         IntegrasjonspunktProperties.NextBEST nextBEST = new IntegrasjonspunktProperties.NextBEST();
         nextBEST.setFiledir("target/uploadtest");
         IntegrasjonspunktProperties.Organization org = new IntegrasjonspunktProperties.Organization();
@@ -88,9 +90,9 @@ public class MessageOutControllerTest {
         OutgoingConversationResource cr43 = OutgoingConversationResource.of("43", "2", "1", "DPV");
         OutgoingConversationResource cr44 = OutgoingConversationResource.of("44", "1", "2", "DPO");
 
-        when(repo.findOne("42")).thenReturn(cr42);
-        when(repo.findOne("43")).thenReturn(cr43);
-        when(repo.findOne("1337")).thenReturn(null);
+        when(repo.findByConversationId("42")).thenReturn(Optional.of(cr42));
+        when(repo.findByConversationId("43")).thenReturn(Optional.of(cr43));
+        when(repo.findByConversationId("1337")).thenReturn(Optional.empty());
         when(repo.findAll()).thenReturn(asList(cr42, cr43, cr44));
         when(repo.findByReceiverId("1")).thenReturn(asList(cr42, cr43));
         when(repo.findByReceiverId("2")).thenReturn(asList(cr44));
