@@ -7,7 +7,6 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.MessageContextException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
-import no.difi.meldingsutveksling.receipt.ConversationRepository;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.slf4j.Logger;
@@ -42,9 +41,6 @@ public class MessageOutController {
 
     private DirectionalConversationResourceRepository outRepo;
     private DirectionalConversationResourceRepository inRepo;
-
-    @Autowired
-    private ConversationRepository convRepo;
 
     @Autowired
     private ServiceRegistryLookup sr;
@@ -91,8 +87,8 @@ public class MessageOutController {
     public ResponseEntity getAllResources(
             @ApiParam(value = "Receiver id")
             @RequestParam(value = "receiverId", required = false) String receiverId,
-            @ApiParam(value = "Messagetype id")
-            @RequestParam(value = "messagetypeId", required = false) ServiceIdentifier serviceIdentifier) {
+            @ApiParam(value = "Service Identifier")
+            @RequestParam(value = "serviceIdentifier", required = false) ServiceIdentifier serviceIdentifier) {
 
         List<ConversationResource> resources;
         if (!isNullOrEmpty(receiverId) && serviceIdentifier != null) {
@@ -138,12 +134,12 @@ public class MessageOutController {
             return ResponseEntity.badRequest().body("Required String parameter \'receiverId\' is not present");
         }
         if (cr.getServiceIdentifier() == null) {
-            return ResponseEntity.badRequest().body("Required String parameter \'messagetypeId\' is not present");
+            return ResponseEntity.badRequest().body("Required String parameter \'serviceIdentifier\' is not present");
         }
 
         if (!getSupportedTypes().contains(cr.getServiceIdentifier())) {
-            return ResponseEntity.badRequest().body("messagetypeId \'"+cr.getServiceIdentifier()+"\' not supported. Supported " +
-                    "types: "+getSupportedTypes());
+            return ResponseEntity.badRequest().body("serviceIdentifier \'"+cr.getServiceIdentifier()+"\' not " +
+                    "supported. Supported types: "+getSupportedTypes());
         }
 
         cr.setSenderId(isNullOrEmpty(cr.getSenderId()) ? props.getOrg().getNumber() : cr.getSenderId());
@@ -228,7 +224,7 @@ public class MessageOutController {
                 messageSender.sendMessage(conversationResource);
                 log.info(markerFrom(conversationResource), "Message sent to altinn");
             } else {
-                String errorStr = String.format("Cannot send message - messagetypeId \"%s\" not supported",
+                String errorStr = String.format("Cannot send message - serviceIdentifier \"%s\" not supported",
                         conversationResource.getServiceIdentifier());
                 log.error(markerFrom(conversationResource), errorStr);
                 return ResponseEntity.badRequest().body(errorStr);
@@ -262,10 +258,10 @@ public class MessageOutController {
         return ResponseEntity.notFound().build();
     }
 
-    @RequestMapping(value = "/out/types/{messagetypeId}/prototype", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/out/types/{serviceIdentifier}/prototype", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Prototypes", hidden = true)
     public ResponseEntity getPrototype(
-            @PathVariable("messagetypeId") String messagetypeId,
+            @PathVariable("serviceIdentifier") ServiceIdentifier serviceIdentifier,
             @RequestParam(value = "receiverId", required = false) String receiverId) {
         throw new UnsupportedOperationException();
     }

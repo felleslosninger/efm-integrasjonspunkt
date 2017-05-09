@@ -51,8 +51,8 @@ public class MessageInController {
             @ApiResponse(code = 204, message = "No countent", response = String.class)
     })
     public ResponseEntity getIncomingMessages(
-            @ApiParam(value = "Messagetype id")
-            @RequestParam(value = "messagetypeId", required = false) ServiceIdentifier serviceIdentifier,
+            @ApiParam(value = "Service Identifier")
+            @RequestParam(value = "serviceIdentifier", required = false) ServiceIdentifier serviceIdentifier,
             @ApiParam(value = "Conversation id")
             @RequestParam(value = "conversationId", required = false) String conversationId,
             @ApiParam(value = "Sender id")
@@ -95,8 +95,8 @@ public class MessageInController {
             @ApiResponse(code = 204, message = "No content", response = String.class)
     })
     public ResponseEntity peekIncomingMessages(
-            @ApiParam(value = "Messagetype id")
-            @RequestParam(value = "messagetypeId", required = false) ServiceIdentifier serviceIdentifier) {
+            @ApiParam(value = "Service Identifier")
+            @RequestParam(value = "serviceIdentifier", required = false) ServiceIdentifier serviceIdentifier) {
 
         Optional<ConversationResource> resource;
         if (serviceIdentifier == null) {
@@ -119,8 +119,8 @@ public class MessageInController {
             @ApiResponse(code = 204, message = "No content", response = String.class)
     })
     public ResponseEntity popIncomingMessages(
-            @ApiParam(value = "Messagetype id")
-            @RequestParam(value = "messagetypeId", required = false) ServiceIdentifier serviceIdentifier) throws
+            @ApiParam(value = "Service Identifier")
+            @RequestParam(value = "serviceIdentifier", required = false) ServiceIdentifier serviceIdentifier) throws
             FileNotFoundException {
 
         Optional<ConversationResource> resource;
