@@ -65,18 +65,18 @@ public class MessageOutController {
     }
 
 
-    private List<String> getSupportedTypes() {
+    private List<ServiceIdentifier> getSupportedTypes() {
 
-        List<String> supportedTypes = Lists.newArrayList();
+        List<ServiceIdentifier> supportedTypes = Lists.newArrayList();
         if (props.getFeature().isEnableDPO()) {
-            supportedTypes.add(ServiceIdentifier.DPO.fullname());
+            supportedTypes.add(ServiceIdentifier.DPO);
         }
         if (props.getFeature().isEnableDPE()) {
-            supportedTypes.add(ServiceIdentifier.DPE_DATA.fullname());
-            supportedTypes.add(ServiceIdentifier.DPE_INNSYN.fullname());
+            supportedTypes.add(ServiceIdentifier.DPE_DATA);
+            supportedTypes.add(ServiceIdentifier.DPE_INNSYN);
         }
         if (props.getFeature().isEnableDPV()) {
-            supportedTypes.add(ServiceIdentifier.DPV.fullname());
+            supportedTypes.add(ServiceIdentifier.DPV);
         }
 
         return supportedTypes;
@@ -92,17 +92,17 @@ public class MessageOutController {
             @ApiParam(value = "Receiver id")
             @RequestParam(value = "receiverId", required = false) String receiverId,
             @ApiParam(value = "Messagetype id")
-            @RequestParam(value = "messagetypeId", required = false) String messagetypeId) {
+            @RequestParam(value = "messagetypeId", required = false) ServiceIdentifier serviceIdentifier) {
 
         List<ConversationResource> resources;
-        if (!isNullOrEmpty(receiverId) && !isNullOrEmpty(messagetypeId)) {
-            resources = outRepo.findByReceiverIdAndMessagetypeId(receiverId, messagetypeId);
+        if (!isNullOrEmpty(receiverId) && serviceIdentifier != null) {
+            resources = outRepo.findByReceiverIdAndServiceIdentifier(receiverId, serviceIdentifier);
         }
         else if (!isNullOrEmpty(receiverId)) {
             resources = outRepo.findByReceiverId(receiverId);
         }
-        else if (!isNullOrEmpty(messagetypeId)) {
-            resources = outRepo.findByMessagetypeId(messagetypeId);
+        else if (serviceIdentifier != null) {
+            resources = outRepo.findByServiceIdentifier(serviceIdentifier);
         }
         else {
             resources = Lists.newArrayList(outRepo.findAll());
@@ -137,14 +137,13 @@ public class MessageOutController {
         if (isNullOrEmpty(cr.getReceiverId())) {
             return ResponseEntity.badRequest().body("Required String parameter \'receiverId\' is not present");
         }
-        if (isNullOrEmpty(cr.getMessagetypeId())) {
+        if (cr.getServiceIdentifier() == null) {
             return ResponseEntity.badRequest().body("Required String parameter \'messagetypeId\' is not present");
         }
 
-        List<String> supportedTypes = getSupportedTypes();
-        if (!supportedTypes.contains(cr.getMessagetypeId())) {
-            return ResponseEntity.badRequest().body("messagetypeId \'"+cr.getMessagetypeId()+"\' not supported. Supported " +
-                    "types: "+supportedTypes);
+        if (!getSupportedTypes().contains(cr.getServiceIdentifier())) {
+            return ResponseEntity.badRequest().body("messagetypeId \'"+cr.getServiceIdentifier()+"\' not supported. Supported " +
+                    "types: "+getSupportedTypes());
         }
 
         cr.setSenderId(isNullOrEmpty(cr.getSenderId()) ? props.getOrg().getNumber() : cr.getSenderId());
@@ -208,17 +207,17 @@ public class MessageOutController {
         }
 
         try {
-            if (ServiceIdentifier.DPE_INNSYN.fullname().equals(conversationResource.getMessagetypeId()) ||
-                    ServiceIdentifier.DPE_DATA.fullname().equals(conversationResource.getMessagetypeId())) {
+            if (ServiceIdentifier.DPE_INNSYN == conversationResource.getServiceIdentifier() ||
+                    ServiceIdentifier.DPE_DATA == conversationResource.getServiceIdentifier()) {
                 if (!props.getNextbest().getServiceBus().isEnable()) {
                     String responseStr = String.format("Service Bus disabled, cannot send messages" +
-                            " of types %s,%s", ServiceIdentifier.DPE_INNSYN.fullname(), ServiceIdentifier.DPE_DATA.fullname());
+                            " of types %s,%s", ServiceIdentifier.DPE_INNSYN.toString(), ServiceIdentifier.DPE_DATA.toString());
                     log.error(markerFrom(conversationResource), responseStr);
                     return ResponseEntity.badRequest().body(responseStr);
                 }
                 nextBestServiceBus.putMessage(conversationResource);
                 log.info(markerFrom(conversationResource), "Message sent to service bus");
-            } else if (ServiceIdentifier.DPO.fullname().equals(conversationResource.getMessagetypeId())){
+            } else if (ServiceIdentifier.DPO == conversationResource.getServiceIdentifier()){
                 ServiceRecord serviceRecord = sr.getServiceRecord(conversationResource.getReceiverId());
                 if (!serviceRecord.getServiceIdentifier().equals(ServiceIdentifier.DPO)) {
                     String errorStr = String.format("Cannot send DPO message - receiver has ServiceIdentifier \"%s\"",
@@ -230,7 +229,7 @@ public class MessageOutController {
                 log.info(markerFrom(conversationResource), "Message sent to altinn");
             } else {
                 String errorStr = String.format("Cannot send message - messagetypeId \"%s\" not supported",
-                        conversationResource.getMessagetypeId());
+                        conversationResource.getServiceIdentifier());
                 log.error(markerFrom(conversationResource), errorStr);
                 return ResponseEntity.badRequest().body(errorStr);
             }

@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.nextbest;
 
+import no.difi.meldingsutveksling.ServiceIdentifier;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -35,12 +37,12 @@ public class DirectionalConversationResourceRepository {
         return repo.findByConversationIdAndDirection(cId, direction);
     }
 
-    public List<ConversationResource> findByMessagetypeIdAndSenderId(String messagetypeId, String senderId) {
-        return repo.findByMessagetypeIdAndSenderIdAndDirection(messagetypeId, senderId, direction);
+    public List<ConversationResource> findByServiceIdentifierAndSenderId(ServiceIdentifier serviceIdentifier, String senderId) {
+        return repo.findByServiceIdentifierAndSenderIdAndDirection(serviceIdentifier, senderId, direction);
     }
 
-    public List<ConversationResource> findByMessagetypeId(String messagetypeId) {
-        return repo.findByMessagetypeIdAndDirection(messagetypeId, direction);
+    public List<ConversationResource> findByServiceIdentifier(ServiceIdentifier serviceIdentifier) {
+        return repo.findByServiceIdentifierAndDirection(serviceIdentifier, direction);
     }
 
     public List<ConversationResource> findBySenderId(String senderId) {
@@ -51,12 +53,12 @@ public class DirectionalConversationResourceRepository {
         return repo.findFirstByDirectionOrderByLastUpdateAsc(direction);
     }
 
-    public Optional<ConversationResource> findFirstByMessagetypeIdOrderByLastUpdateAsc(String messagetypeId) {
-        return repo.findFirstByMessagetypeIdAndDirectionOrderByLastUpdateAsc(messagetypeId, direction);
+    public Optional<ConversationResource> findFirstByServiceIdentifierOrderByLastUpdateAsc(ServiceIdentifier serviceIdentifier) {
+        return repo.findFirstByServiceIdentifierAndDirectionOrderByLastUpdateAsc(serviceIdentifier, direction);
     }
 
-    public List<ConversationResource> findByReceiverIdAndMessagetypeId(String receiverId, String messagetypeId) {
-        return repo.findByReceiverIdAndMessagetypeIdAndDirection(receiverId, messagetypeId, direction);
+    public List<ConversationResource> findByReceiverIdAndServiceIdentifier(String receiverId, ServiceIdentifier serviceIdentifier) {
+        return repo.findByReceiverIdAndServiceIdentifierAndDirection(receiverId, serviceIdentifier, direction);
     }
 
     public List<ConversationResource> findByReceiverId(String receiverId) {

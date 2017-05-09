@@ -100,7 +100,7 @@ public class NextBestServiceBus {
             msg = new BrokeredMessage(os.toByteArray());
 
             String queue = NEXTBEST_QUEUE_PREFIX + resource.getReceiverId();
-            if (ServiceIdentifier.DPE_INNSYN.fullname().equals(resource.getMessagetypeId())) {
+            if (ServiceIdentifier.DPE_INNSYN == resource.getServiceIdentifier()) {
                 queue = queue + ServiceBusQueueMode.INNSYN.fullname();
             } else {
                 queue = queue + ServiceBusQueueMode.DATA.fullname();

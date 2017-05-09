@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.nextbest;
 
 import com.google.common.collect.Lists;
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.receipt.Conversation;
@@ -26,11 +25,14 @@ import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.RegexMatcher.matchesRegex;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(MessageOutController.class)
@@ -75,20 +77,20 @@ public class MessageOutControllerTest {
         when(props.getFeature()).thenReturn(featureToggle);
 
         ServiceRecord serviceRecord = new ServiceRecord();
-        serviceRecord.setServiceIdentifier(ServiceIdentifier.DPO);
+        serviceRecord.setServiceIdentifier(DPO);
         serviceRecord.setDpeCapabilities(Lists.newArrayList());
         when(sr.getServiceRecord("1")).thenReturn(serviceRecord);
 
         MessageStatus receiptSent = MessageStatus.of(GenericReceiptStatus.SENDT.toString(), LocalDateTime.now());
         MessageStatus receiptDelivered = MessageStatus.of(GenericReceiptStatus.LEVERT.toString(),
                 LocalDateTime.now().plusMinutes(1));
-        Conversation receiptConversation = Conversation.of("42", "42ref", "123", "sometitle", ServiceIdentifier.DPO,
+        Conversation receiptConversation = Conversation.of("42", "42ref", "123", "sometitle", DPO,
                 receiptDelivered, receiptSent);
         when(crepo.findByConversationId("42")).thenReturn(asList(receiptConversation));
 
-        OutgoingConversationResource cr42 = OutgoingConversationResource.of("42", "2", "1", "DPO");
-        OutgoingConversationResource cr43 = OutgoingConversationResource.of("43", "2", "1", "DPV");
-        OutgoingConversationResource cr44 = OutgoingConversationResource.of("44", "1", "2", "DPO");
+        DpoConversationResource cr42 = DpoConversationResource.of("42", "2", "1");
+        DpoConversationResource cr43 = DpoConversationResource.of("43", "2", "1");
+        DpoConversationResource cr44 = DpoConversationResource.of("44", "1", "2");
 
         when(repo.findByConversationId("42")).thenReturn(Optional.of(cr42));
         when(repo.findByConversationId("43")).thenReturn(Optional.of(cr43));
@@ -96,11 +98,11 @@ public class MessageOutControllerTest {
         when(repo.findAll()).thenReturn(asList(cr42, cr43, cr44));
         when(repo.findByReceiverId("1")).thenReturn(asList(cr42, cr43));
         when(repo.findByReceiverId("2")).thenReturn(asList(cr44));
-        when(repo.findByMessagetypeId("DPO")).thenReturn(asList(cr42, cr44));
-        when(repo.findByMessagetypeId("DPV")).thenReturn(asList(cr43));
-        when(repo.findByReceiverIdAndMessagetypeId("1", "DPO")).thenReturn(asList(cr42));
-        when(repo.findByReceiverIdAndMessagetypeId("1", "DPV")).thenReturn(asList(cr43));
-        when(repo.findByReceiverIdAndMessagetypeId("2", "DPO")).thenReturn(asList(cr44));
+        when(repo.findByServiceIdentifier(DPO)).thenReturn(asList(cr42, cr44));
+        when(repo.findByServiceIdentifier(DPV)).thenReturn(asList(cr43));
+        when(repo.findByReceiverIdAndServiceIdentifier("1", DPO)).thenReturn(asList(cr42));
+        when(repo.findByReceiverIdAndServiceIdentifier("1", DPV)).thenReturn(asList(cr43));
+        when(repo.findByReceiverIdAndServiceIdentifier("2", DPO)).thenReturn(asList(cr44));
     }
 
     @Test

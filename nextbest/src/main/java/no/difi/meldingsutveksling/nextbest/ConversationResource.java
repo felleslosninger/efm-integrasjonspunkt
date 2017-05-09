@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.common.base.MoreObjects;
 import lombok.Data;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.xml.LocalDateTimeAdapter;
 
 import javax.persistence.*;
@@ -21,15 +22,15 @@ import java.util.Optional;
 @Data
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
-        property = "messagetypeId",
+        property = "serviceIdentifier",
         visible = true)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = DpoConversationResource.class, name = "DPO"),
         @JsonSubTypes.Type(value = DpvConversationResource.class, name = "DPV"),
         @JsonSubTypes.Type(value = DpiConversationResource.class, name = "DPI"),
         @JsonSubTypes.Type(value = DpfConversationResource.class, name = "DPF"),
-        @JsonSubTypes.Type(value = DpeInnsynConversationResource.class, name = "DPE_innsyn"),
-        @JsonSubTypes.Type(value = DpeDataConversationResource.class, name = "DPE_data")
+        @JsonSubTypes.Type(value = DpeInnsynConversationResource.class, name = "DPE_INNSYN"),
+        @JsonSubTypes.Type(value = DpeDataConversationResource.class, name = "DPE_DATA")
 })
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -40,7 +41,7 @@ public abstract class ConversationResource {
     @XmlElement
     private String conversationId;
     @XmlElement
-    private String messagetypeId;
+    private ServiceIdentifier serviceIdentifier;
     @XmlElement
     private String senderId;
     @XmlElement
@@ -66,12 +67,12 @@ public abstract class ConversationResource {
 
     ConversationResource() {}
 
-    ConversationResource(String conversationId, String senderId, String receiverId, String messagetypeId,
+    ConversationResource(String conversationId, String senderId, String receiverId, ServiceIdentifier serviceIdentifier,
                          LocalDateTime lastUpdate, Map fileRefs){
         this.conversationId = conversationId;
         this.senderId = senderId;
         this.receiverId = receiverId;
-        this.messagetypeId = messagetypeId;
+        this.serviceIdentifier = serviceIdentifier;
         this.lastUpdate = lastUpdate;
         this.fileRefs = fileRefs;
     }
@@ -88,7 +89,7 @@ public abstract class ConversationResource {
         return MoreObjects.toStringHelper(this)
                 .add("conversationId", conversationId)
                 .add("receiverId", receiverId)
-                .add("messagetypeId", messagetypeId)
+                .add("serviceIdentifier", serviceIdentifier)
                 .add("lastUpdate", lastUpdate)
                 .add("fileRefs", fileRefs)
                 .toString();

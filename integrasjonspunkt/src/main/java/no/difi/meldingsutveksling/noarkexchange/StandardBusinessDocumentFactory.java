@@ -132,7 +132,7 @@ public class StandardBusinessDocumentFactory {
 
         return new CreateSBD().createSBD(context.getAvsender().getOrgNummer(), context.getMottaker().getOrgNummer(),
                 payload, context.getConversationId(), StandardBusinessDocumentHeader.NEXTBEST_TYPE,
-                context.getJournalPostId(), shipmentMeta.getMessagetypeId());
+                context.getJournalPostId());
     }
 
     private byte[] encryptArchive(Mottaker mottaker, Archive archive) {

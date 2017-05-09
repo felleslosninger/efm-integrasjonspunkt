@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.nextbest;
 
 import com.google.common.collect.Lists;
 import io.swagger.annotations.*;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +52,7 @@ public class MessageInController {
     })
     public ResponseEntity getIncomingMessages(
             @ApiParam(value = "Messagetype id")
-            @RequestParam(value = "messagetypeId", required = false) String messagetypeId,
+            @RequestParam(value = "messagetypeId", required = false) ServiceIdentifier serviceIdentifier,
             @ApiParam(value = "Conversation id")
             @RequestParam(value = "conversationId", required = false) String conversationId,
             @ApiParam(value = "Sender id")
@@ -66,11 +67,11 @@ public class MessageInController {
         }
 
         List<ConversationResource> resources;
-        if (!isNullOrEmpty(messagetypeId)) {
+        if (serviceIdentifier != null) {
             if (!isNullOrEmpty(senderId)) {
-                resources = repo.findByMessagetypeIdAndSenderId(messagetypeId, senderId);
+                resources = repo.findByServiceIdentifierAndSenderId(serviceIdentifier, senderId);
             } else {
-                resources = repo.findByMessagetypeId(messagetypeId);
+                resources = repo.findByServiceIdentifier(serviceIdentifier);
             }
         } else {
             if (!isNullOrEmpty(senderId)) {
@@ -95,13 +96,13 @@ public class MessageInController {
     })
     public ResponseEntity peekIncomingMessages(
             @ApiParam(value = "Messagetype id")
-            @RequestParam(value = "messagetypeId", required = false) String messagetypeId) {
+            @RequestParam(value = "messagetypeId", required = false) ServiceIdentifier serviceIdentifier) {
 
         Optional<ConversationResource> resource;
-        if (isNullOrEmpty(messagetypeId)) {
+        if (serviceIdentifier == null) {
             resource = repo.findFirstByOrderByLastUpdateAsc();
         } else {
-            resource = repo.findFirstByMessagetypeIdOrderByLastUpdateAsc(messagetypeId);
+            resource = repo.findFirstByServiceIdentifierOrderByLastUpdateAsc(serviceIdentifier);
         }
 
         if (resource.isPresent()) {
@@ -119,13 +120,14 @@ public class MessageInController {
     })
     public ResponseEntity popIncomingMessages(
             @ApiParam(value = "Messagetype id")
-            @RequestParam(value = "messagetypeId", required = false) String messagetypeId) throws FileNotFoundException {
+            @RequestParam(value = "messagetypeId", required = false) ServiceIdentifier serviceIdentifier) throws
+            FileNotFoundException {
 
         Optional<ConversationResource> resource;
-        if (isNullOrEmpty(messagetypeId)) {
+        if (serviceIdentifier == null) {
             resource = repo.findFirstByOrderByLastUpdateAsc();
         } else {
-            resource = repo.findFirstByMessagetypeIdOrderByLastUpdateAsc(messagetypeId);
+            resource = repo.findFirstByServiceIdentifierOrderByLastUpdateAsc(serviceIdentifier);
         }
 
         if (resource.isPresent()) {

@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextbest;
 
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
@@ -11,11 +12,11 @@ public interface ConversationResourceRepository extends CrudRepository<Conversat
     Optional<ConversationResource> findByConversationIdAndDirection(String conversationId, ConversationDirection direction);
 
     List<ConversationResource> findByReceiverIdAndDirection(String receiverId, ConversationDirection direction);
-    List<ConversationResource> findByMessagetypeIdAndDirection(String messagetypeId, ConversationDirection direction);
-    List<ConversationResource> findByReceiverIdAndMessagetypeIdAndDirection(String receiverId, String messagetypeId, ConversationDirection direction);
+    List<ConversationResource> findByServiceIdentifierAndDirection(ServiceIdentifier serviceIdentifier, ConversationDirection direction);
+    List<ConversationResource> findByReceiverIdAndServiceIdentifierAndDirection(String receiverId, ServiceIdentifier serviceIdentifier, ConversationDirection direction);
 
     List<ConversationResource> findBySenderIdAndDirection(String senderId, ConversationDirection direction);
-    List<ConversationResource> findByMessagetypeIdAndSenderIdAndDirection(String messagetypeId, String senderId, ConversationDirection direction);
+    List<ConversationResource> findByServiceIdentifierAndSenderIdAndDirection(ServiceIdentifier serviceIdentifier, String senderId, ConversationDirection direction);
     Optional<ConversationResource> findFirstByDirectionOrderByLastUpdateAsc(ConversationDirection direction);
-    Optional<ConversationResource> findFirstByMessagetypeIdAndDirectionOrderByLastUpdateAsc(String messagetypeId, ConversationDirection direction);
+    Optional<ConversationResource> findFirstByServiceIdentifierAndDirectionOrderByLastUpdateAsc(ServiceIdentifier serviceIdentifier, ConversationDirection direction);
 }
