@@ -61,7 +61,7 @@ public class NextBestServiceBus {
         );
         this.service = ServiceBusService.create(config);
 
-        this.jaxbContext = JAXBContext.newInstance(EduDocument.class, Payload.class);
+        this.jaxbContext = JAXBContext.newInstance(EduDocument.class, Payload.class, ConversationResource.class);
 
     }
 

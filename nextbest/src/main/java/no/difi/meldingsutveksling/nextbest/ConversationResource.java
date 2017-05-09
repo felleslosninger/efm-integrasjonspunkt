@@ -6,8 +6,11 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.common.base.MoreObjects;
 import lombok.Data;
+import no.difi.meldingsutveksling.xml.LocalDateTimeAdapter;
 
 import javax.persistence.*;
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
@@ -28,14 +31,23 @@ import java.util.Optional;
         @JsonSubTypes.Type(value = DpeInnsynConversationResource.class, name = "DPE_innsyn"),
         @JsonSubTypes.Type(value = DpeDataConversationResource.class, name = "DPE_data")
 })
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlSeeAlso({DpeInnsynConversationResource.class, DpoConversationResource.class})
 public abstract class ConversationResource {
 
     @Id
+    @XmlElement
     private String conversationId;
+    @XmlElement
     private String messagetypeId;
+    @XmlElement
     private String senderId;
+    @XmlElement
     private String receiverId;
     @JsonFormat(shape = JsonFormat.Shape.STRING)
+    @XmlElement
+    @XmlJavaTypeAdapter(LocalDateTimeAdapter.class)
     private LocalDateTime lastUpdate;
     @JsonIgnore
     private ConversationDirection direction;
@@ -43,11 +55,13 @@ public abstract class ConversationResource {
     @MapKeyColumn(name = "fileid")
     @Column(name = "filename")
     @CollectionTable(name = "filerefs", joinColumns = @JoinColumn(name = "ids"))
+    @XmlElement
     private Map<Integer, String> fileRefs;
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "propId")
     @Column(name = "prop")
     @CollectionTable(name = "props", joinColumns = @JoinColumn(name = "pids"))
+    @XmlElement
     private Map<String, String> customProperties;
 
     ConversationResource() {}

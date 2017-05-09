@@ -1,8 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.StandardBusinessDocumentConverter;
@@ -106,15 +103,6 @@ public class StandardBusinessDocumentFactory {
     public EduDocument create(ConversationResource shipmentMeta, MessageContext context) throws MessageException {
 
         List<ByteArrayFile> attachements = new ArrayList<>();
-        ObjectMapper om = new ObjectMapper();
-        om.registerModule(new JavaTimeModule());
-        byte[] json;
-        try {
-            json = om.writeValueAsBytes(shipmentMeta);
-        } catch (JsonProcessingException e) {
-            throw new MessageException(e, StatusMessage.UNABLE_TO_MARSHALL_CONVERSATION);
-        }
-        attachements.add(new NextBestAttachement(json, "conversation.json"));
 
         for (String filename : shipmentMeta.getFileRefs().values()) {
             String filedir = props.getNextbest().getFiledir();
@@ -140,7 +128,7 @@ public class StandardBusinessDocumentFactory {
         } catch (IOException e) {
             throw new MessageException(e, StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT);
         }
-        Payload payload = new Payload(encryptArchive(context.getMottaker(), archive));
+        Payload payload = new Payload(encryptArchive(context.getMottaker(), archive), shipmentMeta);
 
         return new CreateSBD().createSBD(context.getAvsender().getOrgNummer(), context.getMottaker().getOrgNummer(),
                 payload, context.getConversationId(), StandardBusinessDocumentHeader.NEXTBEST_TYPE,

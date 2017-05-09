@@ -1,9 +1,7 @@
 package no.difi.meldingsutveksling.nextbest;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import no.difi.meldingsutveksling.Decryptor;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -12,7 +10,6 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +50,7 @@ public class NextBestQueue {
         }
 
         byte[] decryptedAsicPackage = decrypt((Payload)eduDocument.getAny());
-        List<String> contentFromAsic = null;
+        List<String> contentFromAsic;
         try {
             contentFromAsic = getContentFromAsic(decryptedAsicPackage);
         } catch (MessageException e) {
@@ -61,14 +58,9 @@ public class NextBestQueue {
             throw new MeldingsUtvekslingRuntimeException("Could not get contents from asic", e);
         }
 
-        ConversationResource message;
-        try {
-            message = getConversationFromAsic(decryptedAsicPackage);
-        } catch (MessageException e) {
-            log.error("Could not get conversation from asic", e);
-            throw new MeldingsUtvekslingRuntimeException("Could not get conversation from asic", e);
-        }
+        ConversationResource message = ((Payload) eduDocument.getAny()).getConversation();
 
+        message.setFileRefs(Maps.newHashMap());
         message.addFileRef(props.getNextbest().getAsicfile());
         contentFromAsic.forEach(message::addFileRef);
 
@@ -114,25 +106,4 @@ public class NextBestQueue {
         return files;
     }
 
-    public ConversationResource getConversationFromAsic(byte[] bytes) throws MessageException {
-        try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes))) {
-            ZipEntry entry;
-            while ((entry = zipInputStream.getNextEntry()) != null) {
-                if ("conversation.json".equals(entry.getName())) {
-                    StringWriter stringWriter = new StringWriter();
-                    IOUtils.copy(zipInputStream, stringWriter);
-                    String s = stringWriter.toString();
-                    ObjectMapper om = new ObjectMapper();
-                    om.registerModule(new JavaTimeModule());
-                    om.configure(JsonParser.Feature.AUTO_CLOSE_SOURCE, false);
-                    ConversationResource cr = om.readValue(zipInputStream, ConversationResource.class);
-                    return cr;
-                }
-            }
-        } catch (Exception e) {
-            log.error("Failed reading entries in asic.", e);
-            throw new MessageException(StatusMessage.UNABLE_TO_EXTRACT_ZIP_CONTENTS);
-        }
-        return null;
-    }
 }
