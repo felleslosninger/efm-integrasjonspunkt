@@ -42,7 +42,7 @@ public class MessageInController {
         repo = new DirectionalConversationResourceRepository(cRepo, INCOMING);
     }
 
-    @RequestMapping(value = "/in/messages", method = RequestMethod.GET)
+    @RequestMapping(value = "/in/messages", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get all incoming messages")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = ConversationResource[].class),
@@ -87,7 +87,7 @@ public class MessageInController {
         return ResponseEntity.ok(resources);
     }
 
-    @RequestMapping(value = "/in/messages/peek", method = RequestMethod.GET)
+    @RequestMapping(value = "/in/messages/peek", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Peek incoming queue", notes = "Gets the first message in the incoming queue")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = ConversationResource.class),
@@ -110,7 +110,7 @@ public class MessageInController {
         return ResponseEntity.noContent().build();
     }
 
-    @RequestMapping(value = "/in/messages/pop", method = RequestMethod.GET)
+    @RequestMapping(value = "/in/messages/pop", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Pop incoming queue", notes = "Gets the ASiC for the first message in queue, then removes " +
             "the message from the queue")
     @ApiResponses({

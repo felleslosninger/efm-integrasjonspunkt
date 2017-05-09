@@ -83,7 +83,7 @@ public class MessageOutController {
     }
 
 
-    @RequestMapping(value = "/out/messages", method = RequestMethod.GET)
+    @RequestMapping(value = "/out/messages", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get all outgoing messages")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = ConversationResource[].class)
@@ -110,7 +110,7 @@ public class MessageOutController {
         return ResponseEntity.ok(resources);
     }
 
-    @RequestMapping(value = "/out/messages/{conversationId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/out/messages/{conversationId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Find message", notes = "Find message with given conversation id")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = ConversationResource.class)
@@ -244,7 +244,7 @@ public class MessageOutController {
         return ResponseEntity.ok().build();
     }
 
-    @RequestMapping(value = "/out/types/{identifier}", method = RequestMethod.GET)
+    @RequestMapping(value = "/out/types/{identifier}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Supported message types", notes = "Get a list of supported message types for this endpoint")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = String[].class),
@@ -263,7 +263,7 @@ public class MessageOutController {
         return ResponseEntity.notFound().build();
     }
 
-    @RequestMapping(value = "/out/types/{messagetypeId}/prototype", method = RequestMethod.GET)
+    @RequestMapping(value = "/out/types/{messagetypeId}/prototype", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Prototypes", hidden = true)
     public ResponseEntity getPrototype(
             @PathVariable("messagetypeId") String messagetypeId,
