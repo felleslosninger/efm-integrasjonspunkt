@@ -5,11 +5,11 @@ import no.difi.meldingsutveksling.ks.SvarUtService;
 import no.difi.meldingsutveksling.ks.receipt.DpfReceiptStatus;
 import no.difi.meldingsutveksling.receipt.*;
 
-public class FiksConversationStrategy implements ConversationStrategy {
+public class FiksStatusStrategy implements StatusStrategy {
     private SvarUtService svarUtService;
     private ConversationRepository conversationRepository;
 
-    public FiksConversationStrategy(SvarUtService svarUtService, ConversationRepository conversationRepository) {
+    public FiksStatusStrategy(SvarUtService svarUtService, ConversationRepository conversationRepository) {
         this.svarUtService = svarUtService;
         this.conversationRepository = conversationRepository;
     }

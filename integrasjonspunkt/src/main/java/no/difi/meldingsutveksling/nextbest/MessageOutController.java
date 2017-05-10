@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import io.swagger.annotations.*;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.noarkexchange.MessageContextException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -55,29 +54,13 @@ public class MessageOutController {
     private NextBestServiceBus nextBestServiceBus;
 
     @Autowired
+    private ConversationStrategyFactory strategyFactory;
+
+    @Autowired
     public MessageOutController(ConversationResourceRepository repo) {
         outRepo = new DirectionalConversationResourceRepository(repo, OUTGOING);
         inRepo = new DirectionalConversationResourceRepository(repo, INCOMING);
     }
-
-
-    private List<ServiceIdentifier> getSupportedTypes() {
-
-        List<ServiceIdentifier> supportedTypes = Lists.newArrayList();
-        if (props.getFeature().isEnableDPO()) {
-            supportedTypes.add(ServiceIdentifier.DPO);
-        }
-        if (props.getFeature().isEnableDPE()) {
-            supportedTypes.add(ServiceIdentifier.DPE_DATA);
-            supportedTypes.add(ServiceIdentifier.DPE_INNSYN);
-        }
-        if (props.getFeature().isEnableDPV()) {
-            supportedTypes.add(ServiceIdentifier.DPV);
-        }
-
-        return supportedTypes;
-    }
-
 
     @RequestMapping(value = "/out/messages", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get all outgoing messages")
@@ -137,9 +120,9 @@ public class MessageOutController {
             return ResponseEntity.badRequest().body("Required String parameter \'serviceIdentifier\' is not present");
         }
 
-        if (!getSupportedTypes().contains(cr.getServiceIdentifier())) {
+        if (!strategyFactory.getEnabledServices().contains(cr.getServiceIdentifier())) {
             return ResponseEntity.badRequest().body("serviceIdentifier \'"+cr.getServiceIdentifier()+"\' not " +
-                    "supported. Supported types: "+getSupportedTypes());
+                    "supported. Supported types: "+strategyFactory.getEnabledServices());
         }
 
         cr.setSenderId(isNullOrEmpty(cr.getSenderId()) ? props.getOrg().getNumber() : cr.getSenderId());
@@ -202,41 +185,19 @@ public class MessageOutController {
             }
         }
 
-        try {
-            if (ServiceIdentifier.DPE_INNSYN == conversationResource.getServiceIdentifier() ||
-                    ServiceIdentifier.DPE_DATA == conversationResource.getServiceIdentifier()) {
-                if (!props.getNextbest().getServiceBus().isEnable()) {
-                    String responseStr = String.format("Service Bus disabled, cannot send messages" +
-                            " of types %s,%s", ServiceIdentifier.DPE_INNSYN.toString(), ServiceIdentifier.DPE_DATA.toString());
-                    log.error(markerFrom(conversationResource), responseStr);
-                    return ResponseEntity.badRequest().body(responseStr);
-                }
-                nextBestServiceBus.putMessage(conversationResource);
-                log.info(markerFrom(conversationResource), "Message sent to service bus");
-            } else if (ServiceIdentifier.DPO == conversationResource.getServiceIdentifier()){
-                ServiceRecord serviceRecord = sr.getServiceRecord(conversationResource.getReceiverId());
-                if (!serviceRecord.getServiceIdentifier().equals(ServiceIdentifier.DPO)) {
-                    String errorStr = String.format("Cannot send DPO message - receiver has ServiceIdentifier \"%s\"",
-                            serviceRecord.getServiceIdentifier());
-                    log.error(markerFrom(conversationResource), errorStr);
-                    return ResponseEntity.badRequest().body(errorStr);
-                }
-                messageSender.sendMessage(conversationResource);
-                log.info(markerFrom(conversationResource), "Message sent to altinn");
-            } else {
-                String errorStr = String.format("Cannot send message - serviceIdentifier \"%s\" not supported",
-                        conversationResource.getServiceIdentifier());
-                log.error(markerFrom(conversationResource), errorStr);
-                return ResponseEntity.badRequest().body(errorStr);
-            }
-        } catch (NextBestException | MessageContextException e) {
-            log.error("Send message failed.", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error during sending. Check logs");
+        Optional<ConversationStrategy> strategy = strategyFactory.getStrategy(conversationResource);
+        if (!strategy.isPresent()) {
+            String errorStr = String.format("Cannot send message - serviceIdentifier \"%s\" not supported",
+                    conversationResource.getServiceIdentifier());
+            log.error(markerFrom(conversationResource), errorStr);
+            return ResponseEntity.badRequest().body(errorStr);
         }
+        ResponseEntity response = strategy.get().send(conversationResource);
+        if (response.getStatusCode() == HttpStatus.OK) {
+            outRepo.delete(conversationResource);
+        }
+        return response;
 
-        outRepo.delete(conversationResource);
-
-        return ResponseEntity.ok().build();
     }
 
     @RequestMapping(value = "/out/types/{identifier}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

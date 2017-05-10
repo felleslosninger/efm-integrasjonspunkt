@@ -3,11 +3,11 @@ package no.difi.meldingsutveksling.receipt.strategy;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.receipt.Conversation;
-import no.difi.meldingsutveksling.receipt.ConversationStrategy;
+import no.difi.meldingsutveksling.receipt.StatusStrategy;
 
 import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 
-public class NoOperationStrategy implements ConversationStrategy {
+public class NoOperationStrategy implements StatusStrategy {
 
     @Override
     public void checkStatus(Conversation conversation) {
