@@ -83,7 +83,7 @@ public class CorrespondenceAgencyMessageFactory {
         }
 
         return create(config, cr.getConversationId(), cr.getReceiverId(), cr.getReceiverName(),
-                cr.getMessageContent(), attachmentExternalBEV2List);
+                cr.getMessageTitle(), cr.getMessageContent(), attachmentExternalBEV2List);
     }
 
     public static InsertCorrespondenceV2 create(CorrespondenceAgencyConfiguration config, EDUCore edu) {
@@ -100,16 +100,18 @@ public class CorrespondenceAgencyMessageFactory {
             binaryAttachmentV2.setData(reporteeFactory.createBinaryAttachmentV2Data(d.getFil().getBase64()));
             attachmentExternalBEV2List.getBinaryAttachmentV2().add(binaryAttachmentV2);
         });
+        String title = edu.getPayloadAsMeldingType().getJournpost().getJpInnhold();
         String content = edu.getPayloadAsMeldingType().getJournpost().getJpOffinnhold();
 
-        return create(config, edu.getId(), edu.getReceiver().getIdentifier(), edu.getReceiver().getName(), content,
-                attachmentExternalBEV2List);
+        return create(config, edu.getId(), edu.getReceiver().getIdentifier(), edu.getReceiver().getName(), title,
+                content, attachmentExternalBEV2List);
     }
 
     public static InsertCorrespondenceV2 create(CorrespondenceAgencyConfiguration config,
                                                 String conversationId,
                                                 String receiverIdentifier,
                                                 String receiverName,
+                                                String messageTitle,
                                                 String messageContent,
                                                 BinaryAttachmentExternalBEV2List attachments) {
 
@@ -131,8 +133,8 @@ public class CorrespondenceAgencyMessageFactory {
 
         ExternalContentV2 externalContentV2 = new ExternalContentV2();
         externalContentV2.setLanguageCode(objectFactory.createExternalContentV2LanguageCode("1044"));
-        externalContentV2.setMessageTitle(objectFactory.createExternalContentV2MessageTitle(messageContent));
-        externalContentV2.setMessageSummary(objectFactory.createExternalContentV2MessageSummary(messageContent));
+        externalContentV2.setMessageTitle(objectFactory.createExternalContentV2MessageTitle(messageTitle));
+        externalContentV2.setMessageSummary(objectFactory.createExternalContentV2MessageSummary(messageTitle));
         externalContentV2.setMessageBody(objectFactory.createExternalContentV2MessageBody(messageContent));
 
         // The date and time the message can be deleted by the user

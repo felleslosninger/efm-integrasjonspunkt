@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Data
 public class DpvConversationResource extends ConversationResource {
 
+    private String messageTitle;
     private String messageContent;
 
     DpvConversationResource() {}
