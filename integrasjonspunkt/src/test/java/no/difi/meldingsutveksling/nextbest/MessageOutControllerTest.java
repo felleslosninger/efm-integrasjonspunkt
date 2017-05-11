@@ -8,6 +8,8 @@ import no.difi.meldingsutveksling.receipt.ConversationRepository;
 import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,11 +18,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
@@ -29,6 +33,7 @@ import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static no.difi.meldingsutveksling.nextbest.ConversationDirection.OUTGOING;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -43,6 +48,9 @@ public class MessageOutControllerTest {
 
     @MockBean
     private ConversationResourceRepository repo;
+
+    @MockBean
+    private ConversationStrategyFactory strategyFactory;
 
     @MockBean
     private ServiceRegistryLookup sr;
@@ -72,11 +80,18 @@ public class MessageOutControllerTest {
         featureToggle.setEnableDPO(true);
         featureToggle.setEnableDPE(true);
         when(props.getFeature()).thenReturn(featureToggle);
+        when(strategyFactory.getEnabledServices()).thenReturn(Arrays.asList(DPO, DPV));
 
         ServiceRecord serviceRecord = new ServiceRecord();
         serviceRecord.setServiceIdentifier(DPO);
         serviceRecord.setDpeCapabilities(Lists.newArrayList());
         when(sr.getServiceRecord("1")).thenReturn(serviceRecord);
+        InfoRecord fooInfo = new InfoRecord("1", "foo", new EntityType("org", "org"));
+        when(sr.getInfoRecord("1")).thenReturn(fooInfo);
+        InfoRecord barInfo = new InfoRecord("2", "bar", new EntityType("org", "org"));
+        when(sr.getInfoRecord("2")).thenReturn(barInfo);
+        InfoRecord bazInfo = new InfoRecord("3", "baz", new EntityType("org", "org"));
+        when(sr.getInfoRecord("3")).thenReturn(bazInfo);
 
         MessageStatus receiptSent = MessageStatus.of(GenericReceiptStatus.SENDT.toString(), LocalDateTime.now());
         MessageStatus receiptDelivered = MessageStatus.of(GenericReceiptStatus.LEVERT.toString(),
@@ -88,6 +103,10 @@ public class MessageOutControllerTest {
         DpoConversationResource cr42 = DpoConversationResource.of("42", "2", "1");
         DpvConversationResource cr43 = DpvConversationResource.of("43", "2", "1");
         DpoConversationResource cr44 = DpoConversationResource.of("44", "1", "2");
+
+        DpoConversationStrategy dpoMock = mock(DpoConversationStrategy.class);
+        when(dpoMock.send(cr42)).thenReturn(ResponseEntity.ok().build());
+        when(strategyFactory.getStrategy(cr42)).thenReturn(Optional.of(dpoMock));
 
         when(repo.findByConversationIdAndDirection("42", OUTGOING)).thenReturn(Optional.of(cr42));
         when(repo.findByConversationIdAndDirection("43", OUTGOING)).thenReturn(Optional.of(cr43));
@@ -106,7 +125,7 @@ public class MessageOutControllerTest {
     public void getMessageShouldReturnOk() throws Exception {
         mvc.perform(get("/out/messages/42").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(8)))
+                .andExpect(jsonPath("$.*", hasSize(10)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
                 .andExpect(jsonPath("$.receiverId", is("1")))
                 .andExpect(jsonPath("$.serviceIdentifier", is("DPO")))
@@ -163,7 +182,7 @@ public class MessageOutControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(8)))
+                .andExpect(jsonPath("$.*", hasSize(10)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
                 .andExpect(jsonPath("$.receiverId", is("1")))
                 .andExpect(jsonPath("$.serviceIdentifier", is("DPO")))
