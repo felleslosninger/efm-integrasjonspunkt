@@ -45,7 +45,11 @@ public abstract class ConversationResource {
     @XmlElement
     private String senderId;
     @XmlElement
+    private String senderName;
+    @XmlElement
     private String receiverId;
+    @XmlElement
+    private String receiverName;
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     @XmlElement
     @XmlJavaTypeAdapter(LocalDateTimeAdapter.class)
