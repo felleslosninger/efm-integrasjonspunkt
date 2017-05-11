@@ -5,6 +5,7 @@ import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.ks.*;
 import no.difi.meldingsutveksling.ks.mapping.edu.FileTypeHandler;
 import no.difi.meldingsutveksling.ks.mapping.edu.FileTypeHandlerFactory;
+import no.difi.meldingsutveksling.noarkexchange.schema.core.AvsmotType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -25,6 +26,7 @@ import java.util.List;
 public class ForsendelseMapper {
     private IntegrasjonspunktProperties properties;
     private ServiceRegistryLookup serviceRegistry;
+    private AvsmotType avsender;
 
     public ForsendelseMapper(IntegrasjonspunktProperties properties, ServiceRegistryLookup serviceRegistry) {
         this.properties = properties;
@@ -68,9 +70,31 @@ public class ForsendelseMapper {
         metadata.withJournalposttype(meldingType.getJournpost().getJpNdoktype());
         metadata.withJournalstatus(meldingType.getJournpost().getJpStatus());
         metadata.withJournaldato(journalDatoFrom(meldingType.getJournpost().getJpDokdato()));
+        metadata.withTittel(meldingType.getJournpost().getJpOffinnhold());
+
+        String avsendernavn = getAvsnederNavn(meldingType);
+        if(avsendernavn != null) {
+            metadata.withSaksbehandler(avsendernavn);
+        }
 
         return metadata.build();
     }
+
+    private String getAvsnederNavn(MeldingType meldingType){
+        AvsmotType avsender = getAvsender(meldingType);
+        if (avsender != null){
+            return avsender.getAmNavn();
+        }
+        return null;
+    }
+
+
+    private AvsmotType getAvsender(MeldingType meldingType) {
+        List<AvsmotType> avsmotlist = meldingType.getJournpost().getAvsmot();
+        return avsmotlist.stream().filter(f -> f.getAmIhtype().equals("0")).findFirst().orElse(null);
+    }
+
+
 
     private XMLGregorianCalendar journalDatoFrom(String jpDokdato) {
         LocalDateTime localDateTime = LocalDateTime.of(LocalDate.parse(jpDokdato), LocalTime.of(0, 0));

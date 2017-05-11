@@ -1,6 +1,8 @@
 package no.difi.meldingsutveksling.ks.svarinn
 
 import no.difi.meldingsutveksling.noarkexchange.receive.PayloadConverter
+import no.difi.meldingsutveksling.noarkexchange.schema.core.AvsmotType
+import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType
 import org.junit.Before
 import org.junit.Test
 import org.springframework.http.MediaType
@@ -8,20 +10,33 @@ import org.springframework.http.MediaType
 public class SvarInnMessageTest {
     private int sakssekvensnummer
     private int saksaar
+    private int journalsekvensnummer
+    private int journalpostnummer
+    private int journalaar
     private String journalposttype
-    private String journalStatus
-    private String dokumentsDato
+    private String journalstatus
+    private String dokumentetsDato
     private String tittel
     private String orgnr = "22222222"
+    private String journaltittel
+    private String saksbehandler
+    private String journaldato
+
+
 
     @Before
     public void setup() {
         sakssekvensnummer = 123
         saksaar = 2017
+        journalaar = 2017
+        journalsekvensnummer = 1
         journalposttype = "type"
-        journalStatus = "journalStatus"
-        dokumentsDato = "2017"
+        journalstatus = "journalstatus"
+        dokumentetsDato = "2017"
         tittel = "tittel"
+        journaltittel = "journaltittel"
+        saksbehandler = "En Saksbehandler"
+        journaldato = "1441922400000"
     }
 
     @Test
@@ -51,11 +66,20 @@ public class SvarInnMessageTest {
             assert journalstatus == meldingType?.journpost?.jpStatus
             assert journaldato == meldingType?.journpost?.jpJdato
             assert dokumentetsDato == meldingType?.journpost?.jpDokdato
+            assert journaltittel == meldingType?.journpost?.jpOffinnhold
+
+            def avs =  getAvsender(meldingType)
+            assert saksbehandler == avs.amNavn
         }
 
         assert forsendelse.svarSendesTil.orgnr == core?.sender?.identifier
         assert forsendelse.mottaker.orgnr == core?.receiver?.identifier
 
+    }
+
+    private AvsmotType getAvsender(MeldingType meldingType) {
+        List<AvsmotType> avsmotlist = meldingType.getJournpost().getAvsmot();
+        return avsmotlist.stream().filter{f -> (f.getAmIhtype() == "0") }.findFirst().orElse(null)
     }
 
     private Forsendelse createForsendelse() {
@@ -64,14 +88,23 @@ public class SvarInnMessageTest {
                         new Forsendelse.MetadataForImport(
                                 saksaar: saksaar,
                                 journalposttype: journalposttype,
-                                journalstatus: journalStatus,
-                                dokumentetsDato: dokumentsDato,
+                                journalstatus: journalstatus,
+                                dokumentetsDato: dokumentetsDato,
                                 tittel: tittel,
                         ),
                 metadataFraAvleverendeSystem:
                         new Forsendelse.MetadataFraAvleverendeSystem(
                                 sakssekvensnummer: sakssekvensnummer,
-                                journalaar: 2021
+                                saksaar: saksaar,
+                                journalaar: journalaar,
+                                journalsekvensnummer: journalsekvensnummer,
+                                journalpostnummer: journalpostnummer,
+                                journalposttype: journalposttype,
+                                journalstatus: journalstatus,
+                                journaldato: journaldato,
+                                dokumentetsDato: dokumentetsDato,
+                                tittel: journaltittel,
+                                saksBehandler: saksbehandler
                         ),
                 svarSendesTil:
                     new Forsendelse.SvarSendesTil(orgnr: orgnr),

@@ -86,6 +86,16 @@ public class SvarInnMessage {
         journpostType.setJpJaar(metadata.getJournalaar());
         journpostType.setJpSeknr(metadata.getJournalsekvensnummer());
         journpostType.setJpJpostnr(metadata.getJournalpostnummer());
+        journpostType.setJpOffinnhold(metadata.getTittel());
+        journpostType.setJpJdato(metadata.getJournaldato());
+        journpostType.getAvsmot().add(CreateSaksbehandlerAvsernder(metadata));
         return journpostType;
+    }
+
+    private AvsmotType CreateSaksbehandlerAvsernder(Forsendelse.MetadataFraAvleverendeSystem metadata){
+        AvsmotType avsender = new AvsmotType();
+        avsender.setAmIhtype("0");
+        avsender.setAmNavn(metadata.getSaksBehandler());
+        return avsender;
     }
 }
