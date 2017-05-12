@@ -14,8 +14,6 @@ import java.util.Optional;
 @Component
 public class ConversationStrategyFactory {
 
-    private IntegrasjonspunktProperties props;
-
     private Map<ServiceIdentifier, ConversationStrategy> strategies;
 
     @Autowired
