@@ -12,7 +12,7 @@ import no.difi.meldingsutveksling.ks.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.KeystoreProvider;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
-import no.difi.meldingsutveksling.receipt.ConversationStrategyFactory;
+import no.difi.meldingsutveksling.receipt.StatusStrategyFactory;
 import no.difi.meldingsutveksling.receipt.DpiReceiptService;
 import no.difi.meldingsutveksling.receipt.ReceiptPolling;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -112,8 +112,8 @@ public class IntegrasjonspunktIntegrationTestConfig {
 
     @Bean
     @Primary
-    public ConversationStrategyFactory conversationStrategyFactory() {
-        return mock(ConversationStrategyFactory.class);
+    public StatusStrategyFactory statusStrategyFactory() {
+        return mock(StatusStrategyFactory.class);
     }
 
     @Bean

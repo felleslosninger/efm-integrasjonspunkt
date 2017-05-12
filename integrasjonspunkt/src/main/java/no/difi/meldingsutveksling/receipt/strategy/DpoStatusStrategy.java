@@ -2,11 +2,11 @@ package no.difi.meldingsutveksling.receipt.strategy;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.receipt.Conversation;
-import no.difi.meldingsutveksling.receipt.ConversationStrategy;
+import no.difi.meldingsutveksling.receipt.StatusStrategy;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DpoConversationStrategy implements ConversationStrategy {
+public class DpoStatusStrategy implements StatusStrategy {
     private static final ServiceIdentifier serviceIdentifier = ServiceIdentifier.DPO;
 
     @Override
