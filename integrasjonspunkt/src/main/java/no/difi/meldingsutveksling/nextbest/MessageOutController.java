@@ -115,15 +115,18 @@ public class MessageOutController {
             @RequestBody ConversationResource cr) {
 
         if (isNullOrEmpty(cr.getReceiverId())) {
-            return ResponseEntity.badRequest().body("Required String parameter \'receiverId\' is not present");
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().error("receiverId_not_present")
+                    .errorDescription("Required String parameter \'receiverId\' is not present"));
         }
         if (cr.getServiceIdentifier() == null) {
-            return ResponseEntity.badRequest().body("Required String parameter \'serviceIdentifier\' is not present");
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().error("serviceIdentifier_not_present")
+                    .errorDescription("Required String parameter \'serviceIdentifier\' is not present"));
         }
 
         if (!strategyFactory.getEnabledServices().contains(cr.getServiceIdentifier())) {
-            return ResponseEntity.badRequest().body("serviceIdentifier \'"+cr.getServiceIdentifier()+"\' not " +
-                    "supported. Supported types: "+strategyFactory.getEnabledServices());
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().error("serviceIdentifier_not_supported")
+                    .errorDescription(String.format("serviceIdentifier '%s' not supported. Supported types: %s",
+                            cr.getServiceIdentifier(), strategyFactory.getEnabledServices())));
         }
 
         cr.setSenderId(isNullOrEmpty(cr.getSenderId()) ? props.getOrg().getNumber() : cr.getSenderId());
@@ -156,7 +159,8 @@ public class MessageOutController {
 
         Optional<ConversationResource> find = outRepo.findByConversationId(conversationId);
         if (!find.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No conversation with supplied id found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error("not_found")
+                    .errorDescription("No conversation with supplied id found"));
         }
         ConversationResource conversationResource = find.get();
 
@@ -186,7 +190,8 @@ public class MessageOutController {
                 }
             } catch (java.io.IOException e) {
                 log.error("Could not write file {f}", localFile, e);
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Could not write file");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                        ErrorResponse.builder().error("write_file_error").errorDescription("Could not write file"));
             }
         }
 
@@ -195,7 +200,8 @@ public class MessageOutController {
             String errorStr = String.format("Cannot send message - serviceIdentifier \"%s\" not supported",
                     conversationResource.getServiceIdentifier());
             log.error(markerFrom(conversationResource), errorStr);
-            return ResponseEntity.badRequest().body(errorStr);
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().error("serviceIdentifier_not_supported")
+                    .errorDescription(errorStr));
         }
         ResponseEntity response = strategy.get().send(conversationResource);
         if (response.getStatusCode() == HttpStatus.OK) {
@@ -242,7 +248,8 @@ public class MessageOutController {
             inRepo.save(resource.get());
             return ResponseEntity.ok().build();
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Conversation with supplied id not found.");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error("not_found")
+                .errorDescription("Conversation with supplied id not found."));
     }
 
 }

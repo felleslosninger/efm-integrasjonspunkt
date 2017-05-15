@@ -63,7 +63,8 @@ public class MessageInController {
             if (resource.isPresent()) {
                 return ResponseEntity.ok(resource.get());
             }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(NO_CONVO_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error("not_found")
+                    .errorDescription(NO_CONVO_FOUND));
         }
 
         List<ConversationResource> resources;
