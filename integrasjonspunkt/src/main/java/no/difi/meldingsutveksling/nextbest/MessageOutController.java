@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static no.difi.meldingsutveksling.nextbest.ConversationDirection.INCOMING;
 import static no.difi.meldingsutveksling.nextbest.ConversationDirection.OUTGOING;
 import static no.difi.meldingsutveksling.nextbest.logging.ConversationResourceMarkers.markerFrom;
@@ -116,17 +117,24 @@ public class MessageOutController {
 
         if (isNullOrEmpty(cr.getReceiverId())) {
             return ResponseEntity.badRequest().body(ErrorResponse.builder().error("receiverId_not_present")
-                    .errorDescription("Required String parameter \'receiverId\' is not present"));
+                    .errorDescription("Required String parameter \'receiverId\' is not present").build());
         }
         if (cr.getServiceIdentifier() == null) {
             return ResponseEntity.badRequest().body(ErrorResponse.builder().error("serviceIdentifier_not_present")
-                    .errorDescription("Required String parameter \'serviceIdentifier\' is not present"));
+                    .errorDescription("Required String parameter \'serviceIdentifier\' is not present").build());
         }
 
         if (!strategyFactory.getEnabledServices().contains(cr.getServiceIdentifier())) {
             return ResponseEntity.badRequest().body(ErrorResponse.builder().error("serviceIdentifier_not_supported")
                     .errorDescription(String.format("serviceIdentifier '%s' not supported. Supported types: %s",
-                            cr.getServiceIdentifier(), strategyFactory.getEnabledServices())));
+                            cr.getServiceIdentifier(), strategyFactory.getEnabledServices())).build());
+        }
+
+        ServiceRecord receiverServiceRecord = sr.getServiceRecord(cr.getReceiverId());
+        if (receiverServiceRecord.getServiceIdentifier() == DPV &&
+                cr.getServiceIdentifier() != DPV) {
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().error("not_in_elma")
+                    .errorDescription("Receiver not found in ELMA, not creating message.").build());
         }
 
         cr.setSenderId(isNullOrEmpty(cr.getSenderId()) ? props.getOrg().getNumber() : cr.getSenderId());
@@ -160,7 +168,7 @@ public class MessageOutController {
         Optional<ConversationResource> find = outRepo.findByConversationId(conversationId);
         if (!find.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error("not_found")
-                    .errorDescription("No conversation with supplied id found"));
+                    .errorDescription("No conversation with supplied id found").build());
         }
         ConversationResource conversationResource = find.get();
 
@@ -191,7 +199,7 @@ public class MessageOutController {
             } catch (java.io.IOException e) {
                 log.error("Could not write file {f}", localFile, e);
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                        ErrorResponse.builder().error("write_file_error").errorDescription("Could not write file"));
+                        ErrorResponse.builder().error("write_file_error").errorDescription("Could not write file").build());
             }
         }
 
@@ -201,7 +209,7 @@ public class MessageOutController {
                     conversationResource.getServiceIdentifier());
             log.error(markerFrom(conversationResource), errorStr);
             return ResponseEntity.badRequest().body(ErrorResponse.builder().error("serviceIdentifier_not_supported")
-                    .errorDescription(errorStr));
+                    .errorDescription(errorStr).build());
         }
         ResponseEntity response = strategy.get().send(conversationResource);
         if (response.getStatusCode() == HttpStatus.OK) {
@@ -249,7 +257,7 @@ public class MessageOutController {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error("not_found")
-                .errorDescription("Conversation with supplied id not found."));
+                .errorDescription("Conversation with supplied id not found.").build());
     }
 
 }
