@@ -116,23 +116,35 @@ public class MessageOutController {
             @RequestBody ConversationResource cr) {
 
         if (isNullOrEmpty(cr.getReceiverId())) {
-            return ResponseEntity.badRequest().body("Required String parameter \'receiverId\' is not present");
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().error("receiverId_not_present")
+                    .errorDescription("Required String parameter \'receiverId\' is not present").build());
         }
         if (cr.getServiceIdentifier() == null) {
-            return ResponseEntity.badRequest().body("Required String parameter \'serviceIdentifier\' is not present");
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().error("serviceIdentifier_not_present")
+                    .errorDescription("Required String parameter \'serviceIdentifier\' is not present").build());
         }
 
         if (!strategyFactory.getEnabledServices().contains(cr.getServiceIdentifier())) {
-            return ResponseEntity.badRequest().body("serviceIdentifier \'"+cr.getServiceIdentifier()+"\' not " +
-                    "supported. Supported types: "+strategyFactory.getEnabledServices());
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().error("serviceIdentifier_not_supported")
+                    .errorDescription(String.format("serviceIdentifier '%s' not supported. Supported types: %s",
+                            cr.getServiceIdentifier(), strategyFactory.getEnabledServices())).build());
         }
 
         ServiceRecord receiverServiceRecord = sr.getServiceRecord(cr.getReceiverId());
         if (receiverServiceRecord.getServiceIdentifier() == DPV &&
                 cr.getServiceIdentifier() != DPV) {
-            return ResponseEntity.badRequest().body("Receiver not found in ELMA, not creating message.");
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().error("not_in_elma")
+                    .errorDescription("Receiver not found in ELMA, not creating message.").build());
         }
 
+        setDefaults(cr);
+        outRepo.save(cr);
+        log.info(markerFrom(cr), "Created new conversation resource with id={}", cr.getConversationId());
+
+        return ResponseEntity.ok(cr);
+    }
+
+    private void setDefaults(ConversationResource cr) {
         cr.setSenderId(isNullOrEmpty(cr.getSenderId()) ? props.getOrg().getNumber() : cr.getSenderId());
         InfoRecord senderInfo = sr.getInfoRecord(cr.getSenderId());
         InfoRecord receiverInfo = sr.getInfoRecord(cr.getReceiverId());
@@ -141,11 +153,6 @@ public class MessageOutController {
         cr.setLastUpdate(LocalDateTime.now());
         cr.setConversationId(isNullOrEmpty(cr.getConversationId()) ? UUID.randomUUID().toString() : cr.getConversationId());
         cr.setFileRefs(cr.getFileRefs() == null ? Maps.newHashMap() : cr.getFileRefs());
-
-        outRepo.save(cr);
-        log.info(markerFrom(cr), "Created new conversation resource with id={}", cr.getConversationId());
-
-        return ResponseEntity.ok(cr);
     }
 
     @RequestMapping(value = "/out/messages/{conversationId}", method = RequestMethod.POST)
@@ -163,7 +170,8 @@ public class MessageOutController {
 
         Optional<ConversationResource> find = outRepo.findByConversationId(conversationId);
         if (!find.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No conversation with supplied id found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error("not_found")
+                    .errorDescription("No conversation with supplied id found").build());
         }
         ConversationResource conversationResource = find.get();
 
@@ -193,7 +201,8 @@ public class MessageOutController {
                 }
             } catch (java.io.IOException e) {
                 log.error("Could not write file {f}", localFile, e);
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Could not write file");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                        ErrorResponse.builder().error("write_file_error").errorDescription("Could not write file").build());
             }
         }
 
@@ -202,7 +211,8 @@ public class MessageOutController {
             String errorStr = String.format("Cannot send message - serviceIdentifier \"%s\" not supported",
                     conversationResource.getServiceIdentifier());
             log.error(markerFrom(conversationResource), errorStr);
-            return ResponseEntity.badRequest().body(errorStr);
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().error("serviceIdentifier_not_supported")
+                    .errorDescription(errorStr).build());
         }
         ResponseEntity response = strategy.get().send(conversationResource);
         if (response.getStatusCode() == HttpStatus.OK) {
@@ -249,7 +259,8 @@ public class MessageOutController {
             inRepo.save(resource.get());
             return ResponseEntity.ok().build();
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Conversation with supplied id not found.");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error("not_found")
+                .errorDescription("Conversation with supplied id not found.").build());
     }
 
 }
