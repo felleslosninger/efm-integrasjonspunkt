@@ -121,14 +121,18 @@ public class MessageInController {
     })
     public ResponseEntity popIncomingMessages(
             @ApiParam(value = "Service Identifier")
-            @RequestParam(value = "serviceIdentifier", required = false) ServiceIdentifier serviceIdentifier) throws
-            FileNotFoundException {
+            @RequestParam(value = "serviceIdentifier", required = false) Optional<ServiceIdentifier> serviceIdentifier,
+            @RequestParam(value = "conversationId", required = false) Optional<String> conversationId)
+            throws FileNotFoundException {
 
         Optional<ConversationResource> resource;
-        if (serviceIdentifier == null) {
-            resource = repo.findFirstByOrderByLastUpdateAsc();
+        if (conversationId.isPresent()) {
+            resource = repo.findByConversationId(conversationId.get());
+        }
+        else if (serviceIdentifier.isPresent()) {
+            resource = repo.findFirstByServiceIdentifierOrderByLastUpdateAsc(serviceIdentifier.get());
         } else {
-            resource = repo.findFirstByServiceIdentifierOrderByLastUpdateAsc(serviceIdentifier);
+            resource = repo.findFirstByOrderByLastUpdateAsc();
         }
 
         if (resource.isPresent()) {
