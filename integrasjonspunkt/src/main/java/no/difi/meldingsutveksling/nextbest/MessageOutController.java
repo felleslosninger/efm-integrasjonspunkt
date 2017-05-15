@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static no.difi.meldingsutveksling.nextbest.ConversationDirection.INCOMING;
 import static no.difi.meldingsutveksling.nextbest.ConversationDirection.OUTGOING;
 import static no.difi.meldingsutveksling.nextbest.logging.ConversationResourceMarkers.markerFrom;
@@ -124,6 +125,12 @@ public class MessageOutController {
         if (!strategyFactory.getEnabledServices().contains(cr.getServiceIdentifier())) {
             return ResponseEntity.badRequest().body("serviceIdentifier \'"+cr.getServiceIdentifier()+"\' not " +
                     "supported. Supported types: "+strategyFactory.getEnabledServices());
+        }
+
+        ServiceRecord receiverServiceRecord = sr.getServiceRecord(cr.getReceiverId());
+        if (receiverServiceRecord.getServiceIdentifier() == DPV &&
+                cr.getServiceIdentifier() != DPV) {
+            return ResponseEntity.badRequest().body("Receiver not found in ELMA, not creating message.");
         }
 
         cr.setSenderId(isNullOrEmpty(cr.getSenderId()) ? props.getOrg().getNumber() : cr.getSenderId());
