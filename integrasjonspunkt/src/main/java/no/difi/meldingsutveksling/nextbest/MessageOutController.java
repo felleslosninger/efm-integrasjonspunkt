@@ -137,6 +137,14 @@ public class MessageOutController {
                     .errorDescription("Receiver not found in ELMA, not creating message.").build());
         }
 
+        setDefaults(cr);
+        outRepo.save(cr);
+        log.info(markerFrom(cr), "Created new conversation resource with id={}", cr.getConversationId());
+
+        return ResponseEntity.ok(cr);
+    }
+
+    private void setDefaults(ConversationResource cr) {
         cr.setSenderId(isNullOrEmpty(cr.getSenderId()) ? props.getOrg().getNumber() : cr.getSenderId());
         InfoRecord senderInfo = sr.getInfoRecord(cr.getSenderId());
         InfoRecord receiverInfo = sr.getInfoRecord(cr.getReceiverId());
@@ -145,11 +153,6 @@ public class MessageOutController {
         cr.setLastUpdate(LocalDateTime.now());
         cr.setConversationId(isNullOrEmpty(cr.getConversationId()) ? UUID.randomUUID().toString() : cr.getConversationId());
         cr.setFileRefs(cr.getFileRefs() == null ? Maps.newHashMap() : cr.getFileRefs());
-
-        outRepo.save(cr);
-        log.info(markerFrom(cr), "Created new conversation resource with id={}", cr.getConversationId());
-
-        return ResponseEntity.ok(cr);
     }
 
     @RequestMapping(value = "/out/messages/{conversationId}", method = RequestMethod.POST)
