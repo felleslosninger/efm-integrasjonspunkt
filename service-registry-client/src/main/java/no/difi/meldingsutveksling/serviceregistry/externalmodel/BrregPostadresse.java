@@ -11,6 +11,7 @@ public class BrregPostadresse {
     private String land;
 
     public BrregPostadresse() {
+        // Needed by gson
     }
 
     public BrregPostadresse(String adresse, String postnummer, String poststed, String land) {
