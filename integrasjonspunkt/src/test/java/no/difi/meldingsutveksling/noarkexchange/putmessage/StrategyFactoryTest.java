@@ -30,6 +30,9 @@ public class StrategyFactoryTest {
         final DigitalPostInnbyggerConfig.Keystore keystore = mock(DigitalPostInnbyggerConfig.Keystore.class);
         final IntegrasjonspunktProperties.Organization orgMock = mock(IntegrasjonspunktProperties.Organization.class);
         IntegrasjonspunktProperties.FeatureToggle featureMock = mock(IntegrasjonspunktProperties.FeatureToggle.class);
+        IntegrasjonspunktProperties.NextBEST nextBestMock = mock(IntegrasjonspunktProperties.NextBEST.class);
+        when(nextBestMock.getFiledir()).thenReturn("upload/");
+        when(properties.getNextbest()).thenReturn(nextBestMock);
         when(featureMock.isEnableDPO()).thenReturn(true);
         when(featureMock.isEnableDPI()).thenReturn(true);
         when(featureMock.isEnableDPV()).thenReturn(true);

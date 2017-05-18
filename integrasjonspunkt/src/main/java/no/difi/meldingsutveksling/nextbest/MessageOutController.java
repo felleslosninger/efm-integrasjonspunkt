@@ -1,18 +1,19 @@
 package no.difi.meldingsutveksling.nextbest;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.swagger.annotations.*;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.noarkexchange.MessageContextException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
-import no.difi.meldingsutveksling.receipt.ConversationRepository;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,12 +22,16 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.net.URISyntaxException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
+import static no.difi.meldingsutveksling.nextbest.ConversationDirection.INCOMING;
+import static no.difi.meldingsutveksling.nextbest.ConversationDirection.OUTGOING;
 import static no.difi.meldingsutveksling.nextbest.logging.ConversationResourceMarkers.markerFrom;
 
 @RestController
@@ -35,14 +40,8 @@ public class MessageOutController {
 
     private static final Logger log = LoggerFactory.getLogger(MessageOutController.class);
 
-    @Autowired
-    private OutgoingConversationResourceRepository repo;
-
-    @Autowired
-    private IncomingConversationResourceRepository incRepo;
-
-    @Autowired
-    private ConversationRepository convRepo;
+    private DirectionalConversationResourceRepository outRepo;
+    private DirectionalConversationResourceRepository inRepo;
 
     @Autowired
     private ServiceRegistryLookup sr;
@@ -56,23 +55,16 @@ public class MessageOutController {
     @Autowired
     private NextBestServiceBus nextBestServiceBus;
 
+    @Autowired
+    private ConversationStrategyFactory strategyFactory;
 
-    private List<String> getSupportedTypes() {
-
-        List<String> supportedTypes = Lists.newArrayList();
-        if (props.getFeature().isEnableDPO()) {
-            supportedTypes.add(ServiceIdentifier.DPO.fullname());
-        }
-        if (props.getFeature().isEnableDPE()) {
-            supportedTypes.add(ServiceIdentifier.DPE_DATA.fullname());
-            supportedTypes.add(ServiceIdentifier.DPE_INNSYN.fullname());
-        }
-
-        return supportedTypes;
+    @Autowired
+    public MessageOutController(ConversationResourceRepository repo) {
+        outRepo = new DirectionalConversationResourceRepository(repo, OUTGOING);
+        inRepo = new DirectionalConversationResourceRepository(repo, INCOMING);
     }
 
-
-    @RequestMapping(value = "/out/messages", method = RequestMethod.GET)
+    @RequestMapping(value = "/out/messages", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get all outgoing messages")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = ConversationResource[].class)
@@ -80,26 +72,26 @@ public class MessageOutController {
     public ResponseEntity getAllResources(
             @ApiParam(value = "Receiver id")
             @RequestParam(value = "receiverId", required = false) String receiverId,
-            @ApiParam(value = "Messagetype id")
-            @RequestParam(value = "messagetypeId", required = false) String messagetypeId) {
+            @ApiParam(value = "Service Identifier")
+            @RequestParam(value = "serviceIdentifier", required = false) ServiceIdentifier serviceIdentifier) {
 
-        List<OutgoingConversationResource> resources;
-        if (!isNullOrEmpty(receiverId) && !isNullOrEmpty(messagetypeId)) {
-            resources = repo.findByReceiverIdAndMessagetypeId(receiverId, messagetypeId);
+        List<ConversationResource> resources;
+        if (!isNullOrEmpty(receiverId) && serviceIdentifier != null) {
+            resources = outRepo.findByReceiverIdAndServiceIdentifier(receiverId, serviceIdentifier);
         }
         else if (!isNullOrEmpty(receiverId)) {
-            resources = repo.findByReceiverId(receiverId);
+            resources = outRepo.findByReceiverId(receiverId);
         }
-        else if (!isNullOrEmpty(messagetypeId)) {
-            resources = repo.findByMessagetypeId(messagetypeId);
+        else if (serviceIdentifier != null) {
+            resources = outRepo.findByServiceIdentifier(serviceIdentifier);
         }
         else {
-            resources = Lists.newArrayList(repo.findAll());
+            resources = Lists.newArrayList(outRepo.findAll());
         }
         return ResponseEntity.ok(resources);
     }
 
-    @RequestMapping(value = "/out/messages/{conversationId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/out/messages/{conversationId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Find message", notes = "Find message with given conversation id")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = ConversationResource.class)
@@ -107,60 +99,60 @@ public class MessageOutController {
     public ResponseEntity getStatusForMessage(
             @ApiParam(value = "Conversation id", required = true)
             @PathVariable("conversationId") String conversationId) {
-        Optional<OutgoingConversationResource> resource = Optional.ofNullable(repo.findOne(conversationId));
+        Optional<ConversationResource> resource = outRepo.findByConversationId(conversationId);
         if (resource.isPresent()) {
             return ResponseEntity.ok().body(resource.get());
         }
         return ResponseEntity.notFound().build();
     }
 
-    @RequestMapping(value = "/out/messages", method = RequestMethod.POST)
+    @RequestMapping(value = "/out/messages", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Create conversation", notes = "Create a new conversation with the given values")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = ConversationResource.class),
             @ApiResponse(code = 400, message = "Bad request", response = String.class)
     })
     public ResponseEntity createResource(
-            @ApiParam(value = "Receiver id", required = true)
-            @RequestParam("receiverId") String receiverId,
-            @ApiParam(value = "Messagetype id", required = true)
-            @RequestParam("messagetypeId") String messagetypeId,
-            @ApiParam(value = "Sender id")
-            @RequestParam(value = "senderId", required = false) String senderId,
-            @ApiParam(value = "Conversation id", defaultValue = "Generated UUID")
-            @RequestParam(value = "conversationId", required = false) String conversationId) throws URISyntaxException {
+            @RequestBody ConversationResource cr) {
 
-        if (isNullOrEmpty(receiverId)) {
-            return ResponseEntity.badRequest().body("Required String parameter \'receiverId\' is not present");
+        if (isNullOrEmpty(cr.getReceiverId())) {
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().error("receiverId_not_present")
+                    .errorDescription("Required String parameter \'receiverId\' is not present").build());
         }
-        if (isNullOrEmpty(messagetypeId)) {
-            return ResponseEntity.badRequest().body("Required String parameter \'messagetypeId\' is not present");
+        if (cr.getServiceIdentifier() == null) {
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().error("serviceIdentifier_not_present")
+                    .errorDescription("Required String parameter \'serviceIdentifier\' is not present").build());
         }
 
-        List<String> supportedTypes = getSupportedTypes();
-        if (!supportedTypes.contains(messagetypeId)) {
-            return ResponseEntity.badRequest().body("messagetypeId \'"+messagetypeId+"\' not supported. Supported " +
-                    "types: "+supportedTypes);
+        if (!strategyFactory.getEnabledServices().contains(cr.getServiceIdentifier())) {
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().error("serviceIdentifier_not_supported")
+                    .errorDescription(String.format("serviceIdentifier '%s' not supported. Supported types: %s",
+                            cr.getServiceIdentifier(), strategyFactory.getEnabledServices())).build());
         }
 
-        String sender = isNullOrEmpty(senderId) ? props.getOrg().getNumber() : senderId;
-
-        OutgoingConversationResource conversationResource;
-        if (isNullOrEmpty(conversationId)) {
-            conversationResource = OutgoingConversationResource.of(sender, receiverId, messagetypeId);
-        } else {
-            conversationResource = repo.findOne(conversationId);
-            if (conversationResource == null) {
-                conversationResource = OutgoingConversationResource.of(conversationId, sender, receiverId,
-                        messagetypeId);
-            }
+        ServiceRecord receiverServiceRecord = sr.getServiceRecord(cr.getReceiverId());
+        if (receiverServiceRecord.getServiceIdentifier() == DPV &&
+                cr.getServiceIdentifier() != DPV) {
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().error("not_in_elma")
+                    .errorDescription("Receiver not found in ELMA, not creating message.").build());
         }
 
-        repo.save(conversationResource);
-        log.info(markerFrom(conversationResource), "Created new conversation resource with id={}",
-                conversationResource.getConversationId());
+        setDefaults(cr);
+        outRepo.save(cr);
+        log.info(markerFrom(cr), "Created new conversation resource with id={}", cr.getConversationId());
 
-        return ResponseEntity.ok(conversationResource);
+        return ResponseEntity.ok(cr);
+    }
+
+    private void setDefaults(ConversationResource cr) {
+        cr.setSenderId(isNullOrEmpty(cr.getSenderId()) ? props.getOrg().getNumber() : cr.getSenderId());
+        InfoRecord senderInfo = sr.getInfoRecord(cr.getSenderId());
+        InfoRecord receiverInfo = sr.getInfoRecord(cr.getReceiverId());
+        cr.setSenderName(senderInfo.getOrganizationName());
+        cr.setReceiverName(receiverInfo.getOrganizationName());
+        cr.setLastUpdate(LocalDateTime.now());
+        cr.setConversationId(isNullOrEmpty(cr.getConversationId()) ? UUID.randomUUID().toString() : cr.getConversationId());
+        cr.setFileRefs(cr.getFileRefs() == null ? Maps.newHashMap() : cr.getFileRefs());
     }
 
     @RequestMapping(value = "/out/messages/{conversationId}", method = RequestMethod.POST)
@@ -176,10 +168,12 @@ public class MessageOutController {
             @PathVariable("conversationId") String conversationId,
             MultipartHttpServletRequest request) {
 
-        OutgoingConversationResource conversationResource = repo.findOne(conversationId);
-        if (conversationResource == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No conversation with supplied id found");
+        Optional<ConversationResource> find = outRepo.findByConversationId(conversationId);
+        if (!find.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error("not_found")
+                    .errorDescription("No conversation with supplied id found").build());
         }
+        ConversationResource conversationResource = find.get();
 
         ArrayList<String> files = Lists.newArrayList(request.getFileNames());
         for (String f : files) {
@@ -207,48 +201,28 @@ public class MessageOutController {
                 }
             } catch (java.io.IOException e) {
                 log.error("Could not write file {f}", localFile, e);
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Could not write file");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                        ErrorResponse.builder().error("write_file_error").errorDescription("Could not write file").build());
             }
         }
 
-        try {
-            if (ServiceIdentifier.DPE_INNSYN.fullname().equals(conversationResource.getMessagetypeId()) ||
-                    ServiceIdentifier.DPE_DATA.fullname().equals(conversationResource.getMessagetypeId())) {
-                if (!props.getNextbest().getServiceBus().isEnable()) {
-                    String responseStr = String.format("Service Bus disabled, cannot send messages" +
-                            " of types %s,%s", ServiceIdentifier.DPE_INNSYN.fullname(), ServiceIdentifier.DPE_DATA.fullname());
-                    log.error(markerFrom(conversationResource), responseStr);
-                    return ResponseEntity.badRequest().body(responseStr);
-                }
-                nextBestServiceBus.putMessage(conversationResource);
-                log.info(markerFrom(conversationResource), "Message sent to service bus");
-            } else if (ServiceIdentifier.DPO.fullname().equals(conversationResource.getMessagetypeId())){
-                ServiceRecord serviceRecord = sr.getServiceRecord(conversationResource.getReceiverId());
-                if (!serviceRecord.getServiceIdentifier().equals(ServiceIdentifier.DPO)) {
-                    String errorStr = String.format("Cannot send DPO message - receiver has ServiceIdentifier \"%s\"",
-                            serviceRecord.getServiceIdentifier());
-                    log.error(markerFrom(conversationResource), errorStr);
-                    return ResponseEntity.badRequest().body(errorStr);
-                }
-                messageSender.sendMessage(conversationResource);
-                log.info(markerFrom(conversationResource), "Message sent to altinn");
-            } else {
-                String errorStr = String.format("Cannot send message - messagetypeId \"%s\" not supported",
-                        conversationResource.getMessagetypeId());
-                log.error(markerFrom(conversationResource), errorStr);
-                return ResponseEntity.badRequest().body(errorStr);
-            }
-        } catch (NextBestException | MessageContextException e) {
-            log.error("Send message failed.", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error during sending. Check logs");
+        Optional<ConversationStrategy> strategy = strategyFactory.getStrategy(conversationResource);
+        if (!strategy.isPresent()) {
+            String errorStr = String.format("Cannot send message - serviceIdentifier \"%s\" not supported",
+                    conversationResource.getServiceIdentifier());
+            log.error(markerFrom(conversationResource), errorStr);
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().error("serviceIdentifier_not_supported")
+                    .errorDescription(errorStr).build());
         }
+        ResponseEntity response = strategy.get().send(conversationResource);
+        if (response.getStatusCode() == HttpStatus.OK) {
+            outRepo.delete(conversationResource);
+        }
+        return response;
 
-        repo.delete(conversationResource);
-
-        return ResponseEntity.ok().build();
     }
 
-    @RequestMapping(value = "/out/types/{identifier}", method = RequestMethod.GET)
+    @RequestMapping(value = "/out/types/{identifier}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Supported message types", notes = "Get a list of supported message types for this endpoint")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = String[].class),
@@ -267,10 +241,10 @@ public class MessageOutController {
         return ResponseEntity.notFound().build();
     }
 
-    @RequestMapping(value = "/out/types/{messagetypeId}/prototype", method = RequestMethod.GET)
+    @RequestMapping(value = "/out/types/{serviceIdentifier}/prototype", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Prototypes", hidden = true)
     public ResponseEntity getPrototype(
-            @PathVariable("messagetypeId") String messagetypeId,
+            @PathVariable("serviceIdentifier") ServiceIdentifier serviceIdentifier,
             @RequestParam(value = "receiverId", required = false) String receiverId) {
         throw new UnsupportedOperationException();
     }
@@ -279,13 +253,14 @@ public class MessageOutController {
     @ApiOperation(value = "Transfer conversation between queue (internal use)", hidden = true)
     @ResponseBody
     public ResponseEntity transferQueue(@PathVariable("conversationId") String conversationId) {
-        Optional<OutgoingConversationResource> resource = Optional.ofNullable(repo.findOne(conversationId));
+        Optional<ConversationResource> resource = outRepo.findByConversationId(conversationId);
         if (resource.isPresent()) {
-            repo.delete(resource.get());
-            incRepo.save(IncomingConversationResource.of(resource.get()));
+            resource.get().setDirection(INCOMING);
+            inRepo.save(resource.get());
             return ResponseEntity.ok().build();
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Conversation with supplied id not found.");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error("not_found")
+                .errorDescription("Conversation with supplied id not found.").build());
     }
 
 }

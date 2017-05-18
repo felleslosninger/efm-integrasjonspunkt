@@ -12,10 +12,10 @@ import no.difi.meldingsutveksling.noarkexchange.putmessage.KeystoreProvider;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.receipt.ConversationRepository;
-import no.difi.meldingsutveksling.receipt.ConversationStrategy;
-import no.difi.meldingsutveksling.receipt.ConversationStrategyFactory;
+import no.difi.meldingsutveksling.receipt.StatusStrategy;
+import no.difi.meldingsutveksling.receipt.StatusStrategyFactory;
 import no.difi.meldingsutveksling.receipt.DpiReceiptService;
-import no.difi.meldingsutveksling.receipt.strategy.FiksConversationStrategy;
+import no.difi.meldingsutveksling.receipt.strategy.FiksStatusStrategy;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.TransportFactory;
@@ -79,15 +79,15 @@ public class IntegrasjonspunktBeans {
 
     @ConditionalOnProperty(name="difi.move.feature.enableDPF", havingValue = "true")
     @Bean
-    public FiksConversationStrategy fiksConversationStrategy(SvarUtService svarUtService, ConversationRepository conversationRepository) {
-        return new FiksConversationStrategy(svarUtService, conversationRepository);
+    public FiksStatusStrategy fiksConversationStrategy(SvarUtService svarUtService, ConversationRepository conversationRepository) {
+        return new FiksStatusStrategy(svarUtService, conversationRepository);
     }
 
     @Bean
-    public ConversationStrategyFactory conversationStrategyFactory(List<ConversationStrategy> conversationStrategies) {
-        ConversationStrategyFactory conversationStrategyFactory = new ConversationStrategyFactory();
-        conversationStrategies.forEach(conversationStrategyFactory::registerStrategy);
-        return conversationStrategyFactory;
+    public StatusStrategyFactory statusStrategyFactory(List<StatusStrategy> statusStrategies) {
+        StatusStrategyFactory statusStrategyFactory = new StatusStrategyFactory();
+        statusStrategies.forEach(statusStrategyFactory::registerStrategy);
+        return statusStrategyFactory;
     }
 
     @Bean

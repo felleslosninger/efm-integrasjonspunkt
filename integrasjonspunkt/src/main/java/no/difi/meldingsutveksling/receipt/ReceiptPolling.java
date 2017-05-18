@@ -31,7 +31,7 @@ public class ReceiptPolling {
     private ConversationRepository conversationRepository;
 
     @Autowired
-    ConversationStrategyFactory conversationStrategyFactory;
+    StatusStrategyFactory statusStrategyFactory;
 
     @Autowired
     DpiReceiptService dpiReceiptService;
@@ -47,7 +47,7 @@ public class ReceiptPolling {
         conversations.forEach(c -> {
             if (serviceEnabled(c.getServiceIdentifier())) {
                 log.info(markerFrom(c), "Checking status, conversationId={}", c.getConversationId());
-                ConversationStrategy strategy = conversationStrategyFactory.getFactory(c);
+                StatusStrategy strategy = statusStrategyFactory.getFactory(c);
                 strategy.checkStatus(c);
             }
         });

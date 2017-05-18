@@ -13,7 +13,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.net.URL;
-import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
@@ -144,7 +143,6 @@ public class IntegrasjonspunktProperties {
         private boolean enable;
         private URL url;
         private String audience;
-        private List<String> scopes;
         private String clientId;
         private Keystore keystore;
     }

@@ -118,10 +118,6 @@ public class EduDocument {
         return findScope(ScopeType.CONVERSATION_ID).getInstanceIdentifier();
     }
 
-    public String getMessagetypeId() {
-        return findScope(ScopeType.MESSAGETYPE_ID).getInstanceIdentifier();
-    }
-
     private Scope findScope(ScopeType scopeType) {
         final List<Scope> scopes = getStandardBusinessDocumentHeader().getBusinessScope().getScope();
         for (Scope scope : scopes) {

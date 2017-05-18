@@ -61,7 +61,7 @@ public class NextBestServiceBus {
         );
         this.service = ServiceBusService.create(config);
 
-        this.jaxbContext = JAXBContext.newInstance(EduDocument.class, Payload.class);
+        this.jaxbContext = JAXBContext.newInstance(EduDocument.class, Payload.class, ConversationResource.class);
 
     }
 
@@ -84,7 +84,7 @@ public class NextBestServiceBus {
         }
     }
 
-    public void putMessage(OutgoingConversationResource resource) throws NextBestException {
+    public void putMessage(ConversationResource resource) throws NextBestException {
 
         BrokeredMessage msg;
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
@@ -100,7 +100,7 @@ public class NextBestServiceBus {
             msg = new BrokeredMessage(os.toByteArray());
 
             String queue = NEXTBEST_QUEUE_PREFIX + resource.getReceiverId();
-            if (ServiceIdentifier.DPE_INNSYN.fullname().equals(resource.getMessagetypeId())) {
+            if (ServiceIdentifier.DPE_INNSYN == resource.getServiceIdentifier()) {
                 queue = queue + ServiceBusQueueMode.INNSYN.fullname();
             } else {
                 queue = queue + ServiceBusQueueMode.DATA.fullname();

@@ -16,7 +16,7 @@ import static org.mockito.Matchers.any
 import static org.mockito.Mockito.*
 
 @RunWith(JUnit4)
-class FiksConversationStrategyTest {
+class FiksStatusStrategyTest {
     private SvarUtService service
 
     @Before
@@ -29,7 +29,7 @@ class FiksConversationStrategyTest {
     void "given message receipt with status read then conversation should be set non pollable"() {
         def messageReceipt = MessageStatus.of(DpfReceiptStatus.LEST.toString(), LocalDateTime.now())
         Conversation conversation = mock(Conversation)
-        FiksConversationStrategy strategy = new FiksConversationStrategy(service, mock(ConversationRepository))
+        FiksStatusStrategy strategy = new FiksStatusStrategy(service, mock(ConversationRepository))
         when(service.getMessageReceipt(any(Conversation))).thenReturn(messageReceipt)
 
         strategy.checkStatus(conversation)
