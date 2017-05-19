@@ -22,11 +22,11 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Optional;
 
 public class ForsendelseMapper {
     private IntegrasjonspunktProperties properties;
     private ServiceRegistryLookup serviceRegistry;
-    private AvsmotType avsender;
 
     public ForsendelseMapper(IntegrasjonspunktProperties properties, ServiceRegistryLookup serviceRegistry) {
         this.properties = properties;
@@ -39,7 +39,7 @@ public class ForsendelseMapper {
         builder.withKunDigitalLevering(true);
 
         final MeldingType meldingType = eduCore.getPayloadAsMeldingType();
-        builder.withTittel(meldingType.getNoarksak().getSaOfftittel());
+        builder.withTittel(meldingType.getJournpost().getJpOffinnhold());
 
         final FileTypeHandlerFactory fileTypeHandlerFactory = new FileTypeHandlerFactory(properties.getFiks(), certificate);
         builder.withDokumenter(mapFrom(meldingType.getJournpost().getDokument(), fileTypeHandlerFactory));
@@ -69,41 +69,30 @@ public class ForsendelseMapper {
         metadata.withJournalpostnummer(Integer.valueOf(meldingType.getJournpost().getJpJpostnr()));
         metadata.withJournalposttype(meldingType.getJournpost().getJpNdoktype());
         metadata.withJournalstatus(meldingType.getJournpost().getJpStatus());
-        metadata.withJournaldato(journalDatoFrom(meldingType.getJournpost().getJpDokdato()));
+        metadata.withJournaldato(journalDatoFrom(meldingType.getJournpost().getJpJdato()));
+        metadata.withDokumentetsDato(journalDatoFrom(meldingType.getJournpost().getJpDokdato()));
         metadata.withTittel(meldingType.getJournpost().getJpOffinnhold());
 
-        String avsendernavn = getAvsnederNavn(meldingType);
-        if(avsendernavn != null) {
-            metadata.withSaksbehandler(avsendernavn);
-        }
+        Optional<AvsmotType> avsender = getAvsender(meldingType);
+        avsender.map(a -> a.getAmNavn()).ifPresent(metadata::withSaksbehandler);
 
         return metadata.build();
     }
 
-    private String getAvsnederNavn(MeldingType meldingType){
-        AvsmotType avsender = getAvsender(meldingType);
-        if (avsender != null){
-            return avsender.getAmNavn();
-        }
-        return null;
-    }
 
-
-    private AvsmotType getAvsender(MeldingType meldingType) {
+    private Optional<AvsmotType> getAvsender(MeldingType meldingType) {
         List<AvsmotType> avsmotlist = meldingType.getJournpost().getAvsmot();
-        return avsmotlist.stream().filter(f -> f.getAmIhtype().equals("0")).findFirst().orElse(null);
+        return avsmotlist.stream().filter(f -> f.getAmIhtype().equals("0")).findFirst();
     }
 
-
-
-    private XMLGregorianCalendar journalDatoFrom(String jpDokdato) {
-        LocalDateTime localDateTime = LocalDateTime.of(LocalDate.parse(jpDokdato), LocalTime.of(0, 0));
+    private XMLGregorianCalendar journalDatoFrom(String jpDato) {
+        LocalDateTime localDateTime = LocalDateTime.of(LocalDate.parse(jpDato), LocalTime.of(0, 0));
 
         GregorianCalendar gcal = GregorianCalendar.from(localDateTime.atZone(ZoneId.systemDefault()));
         try {
             return DatatypeFactory.newInstance().newXMLGregorianCalendar(gcal);
         } catch (DatatypeConfigurationException e) {
-            throw new ForsendelseMappingException("Unable to map journalDato", e);
+            throw new ForsendelseMappingException("Unable to map date", e);
         }
     }
 
