@@ -205,7 +205,6 @@ public class IntegrasjonspunktProperties {
     @Data
     public static class NorskArkivstandardSystem {
 
-        @NotNull
         private String endpointURL;
         private String username;
         private String password;
@@ -216,7 +215,6 @@ public class IntegrasjonspunktProperties {
         /**
          * The type of archive system you are using, eg. Ephorte, p360, websak, mail...
          */
-        @NotNull
         private String type;
 
     }

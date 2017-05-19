@@ -6,7 +6,6 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.ServiceRecordObjectMother;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
-import no.difi.meldingsutveksling.core.EDUCoreSender;
 import no.difi.meldingsutveksling.core.EDUCoreService;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
@@ -38,8 +37,6 @@ public class IntegrasjonspunktImplTest {
     private InternalQueue queueMock;
     @InjectMocks
     private EDUCoreService coreServiceMock;
-    @InjectMocks
-    private EDUCoreSender coreSenderMock;
     @Mock
     private IntegrasjonspunktProperties propertiesMock;
     @Mock
