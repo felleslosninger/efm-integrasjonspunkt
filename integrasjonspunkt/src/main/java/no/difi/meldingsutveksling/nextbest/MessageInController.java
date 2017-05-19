@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.nextbest;
 
 import com.google.common.collect.Lists;
 import io.swagger.annotations.*;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static no.difi.meldingsutveksling.nextbest.ConversationDirection.INCOMING;
 import static no.difi.meldingsutveksling.nextbest.logging.ConversationResourceMarkers.markerFrom;
 
 @RestController
@@ -31,13 +33,17 @@ public class MessageInController {
     private static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
     private static final String HEADER_FILENAME = "attachement; filename=";
 
-    @Autowired
-    private IncomingConversationResourceRepository repo;
+    private DirectionalConversationResourceRepository repo;
 
     @Autowired
     private IntegrasjonspunktProperties props;
 
-    @RequestMapping(value = "/in/messages", method = RequestMethod.GET)
+    @Autowired
+    public MessageInController(ConversationResourceRepository cRepo) {
+        repo = new DirectionalConversationResourceRepository(cRepo, INCOMING);
+    }
+
+    @RequestMapping(value = "/in/messages", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get all incoming messages")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = ConversationResource[].class),
@@ -45,27 +51,28 @@ public class MessageInController {
             @ApiResponse(code = 204, message = "No countent", response = String.class)
     })
     public ResponseEntity getIncomingMessages(
-            @ApiParam(value = "Messagetype id")
-            @RequestParam(value = "messagetypeId", required = false) String messagetypeId,
+            @ApiParam(value = "Service Identifier")
+            @RequestParam(value = "serviceIdentifier", required = false) ServiceIdentifier serviceIdentifier,
             @ApiParam(value = "Conversation id")
             @RequestParam(value = "conversationId", required = false) String conversationId,
             @ApiParam(value = "Sender id")
             @RequestParam(value = "senderId", required = false) String senderId) {
 
         if (!isNullOrEmpty(conversationId)) {
-            Optional<IncomingConversationResource> resource = Optional.ofNullable(repo.findOne(conversationId));
+            Optional<ConversationResource> resource = repo.findByConversationId(conversationId);
             if (resource.isPresent()) {
                 return ResponseEntity.ok(resource.get());
             }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(NO_CONVO_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error("not_found")
+                    .errorDescription(NO_CONVO_FOUND).build());
         }
 
-        List<IncomingConversationResource> resources;
-        if (!isNullOrEmpty(messagetypeId)) {
+        List<ConversationResource> resources;
+        if (serviceIdentifier != null) {
             if (!isNullOrEmpty(senderId)) {
-                resources = repo.findByMessagetypeIdAndSenderId(messagetypeId, senderId);
+                resources = repo.findByServiceIdentifierAndSenderId(serviceIdentifier, senderId);
             } else {
-                resources = repo.findByMessagetypeId(messagetypeId);
+                resources = repo.findByServiceIdentifier(serviceIdentifier);
             }
         } else {
             if (!isNullOrEmpty(senderId)) {
@@ -82,21 +89,21 @@ public class MessageInController {
         return ResponseEntity.ok(resources);
     }
 
-    @RequestMapping(value = "/in/messages/peek", method = RequestMethod.GET)
+    @RequestMapping(value = "/in/messages/peek", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Peek incoming queue", notes = "Gets the first message in the incoming queue")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = ConversationResource.class),
             @ApiResponse(code = 204, message = "No content", response = String.class)
     })
     public ResponseEntity peekIncomingMessages(
-            @ApiParam(value = "Messagetype id")
-            @RequestParam(value = "messagetypeId", required = false) String messagetypeId) {
+            @ApiParam(value = "Service Identifier")
+            @RequestParam(value = "serviceIdentifier", required = false) ServiceIdentifier serviceIdentifier) {
 
-        Optional<IncomingConversationResource> resource;
-        if (isNullOrEmpty(messagetypeId)) {
+        Optional<ConversationResource> resource;
+        if (serviceIdentifier == null) {
             resource = repo.findFirstByOrderByLastUpdateAsc();
         } else {
-            resource = repo.findFirstByMessagetypeIdOrderByLastUpdateAsc(messagetypeId);
+            resource = repo.findFirstByServiceIdentifierOrderByLastUpdateAsc(serviceIdentifier);
         }
 
         if (resource.isPresent()) {
@@ -105,7 +112,7 @@ public class MessageInController {
         return ResponseEntity.noContent().build();
     }
 
-    @RequestMapping(value = "/in/messages/pop", method = RequestMethod.GET)
+    @RequestMapping(value = "/in/messages/pop", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Pop incoming queue", notes = "Gets the ASiC for the first message in queue, then removes " +
             "the message from the queue")
     @ApiResponses({
@@ -113,14 +120,19 @@ public class MessageInController {
             @ApiResponse(code = 204, message = "No content", response = String.class)
     })
     public ResponseEntity popIncomingMessages(
-            @ApiParam(value = "Messagetype id")
-            @RequestParam(value = "messagetypeId", required = false) String messagetypeId) throws FileNotFoundException {
+            @ApiParam(value = "Service Identifier")
+            @RequestParam(value = "serviceIdentifier", required = false) Optional<ServiceIdentifier> serviceIdentifier,
+            @RequestParam(value = "conversationId", required = false) Optional<String> conversationId)
+            throws FileNotFoundException {
 
-        Optional<IncomingConversationResource> resource;
-        if (isNullOrEmpty(messagetypeId)) {
-            resource = repo.findFirstByOrderByLastUpdateAsc();
+        Optional<ConversationResource> resource;
+        if (conversationId.isPresent()) {
+            resource = repo.findByConversationId(conversationId.get());
+        }
+        else if (serviceIdentifier.isPresent()) {
+            resource = repo.findFirstByServiceIdentifierOrderByLastUpdateAsc(serviceIdentifier.get());
         } else {
-            resource = repo.findFirstByMessagetypeIdOrderByLastUpdateAsc(messagetypeId);
+            resource = repo.findFirstByOrderByLastUpdateAsc();
         }
 
         if (resource.isPresent()) {

@@ -4,11 +4,11 @@
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>1.7.56</version>
+        <version>1.7.57-SNAPSHOT</version>
     </parent>
 
     <artifactId>post-til-virksomhet</artifactId>
-    <version>1.7.56</version>
+    <version>1.7.57-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
@@ -19,6 +19,11 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>domain</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>nextbest</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
