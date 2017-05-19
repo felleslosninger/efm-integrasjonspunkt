@@ -18,6 +18,7 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -38,12 +39,12 @@ public class EDUCoreSender {
                   ServiceRegistryLookup serviceRegistryLookup,
                   StrategyFactory strategyFactory,
                   Adresseregister adresseregister,
-                  @Qualifier("mshClient") NoarkClient mshClient) {
+                  @Qualifier("mshClient") ObjectProvider<NoarkClient> mshClient) {
         this.properties = properties;
         this.serviceRegistryLookup = serviceRegistryLookup;
         this.strategyFactory = strategyFactory;
         this.adresseRegister = adresseregister;
-        this.mshClient = mshClient;
+        this.mshClient = mshClient.getIfAvailable();
     }
 
     public PutMessageResponseType sendMessage(EDUCore message) {
