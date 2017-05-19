@@ -88,11 +88,11 @@ public class SvarInnMessage {
         journpostType.setJpJpostnr(metadata.getJournalpostnummer());
         journpostType.setJpOffinnhold(metadata.getTittel());
         journpostType.setJpJdato(metadata.getJournaldato());
-        journpostType.getAvsmot().add(CreateSaksbehandlerAvsernder(metadata));
+        journpostType.getAvsmot().add(createSaksbehandlerAvsernder(metadata));
         return journpostType;
     }
 
-    private AvsmotType CreateSaksbehandlerAvsernder(Forsendelse.MetadataFraAvleverendeSystem metadata){
+    private AvsmotType createSaksbehandlerAvsernder(Forsendelse.MetadataFraAvleverendeSystem metadata){
         AvsmotType avsender = new AvsmotType();
         avsender.setAmIhtype("0");
         avsender.setAmNavn(metadata.getSaksBehandler());

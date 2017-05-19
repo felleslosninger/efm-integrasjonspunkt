@@ -82,7 +82,7 @@ public class ForsendelseMapper {
 
     private Optional<AvsmotType> getAvsender(MeldingType meldingType) {
         List<AvsmotType> avsmotlist = meldingType.getJournpost().getAvsmot();
-        return avsmotlist.stream().filter(f -> f.getAmIhtype().equals("0")).findFirst();
+        return avsmotlist.stream().filter(f -> "0".equals(f.getAmIhtype())).findFirst();
     }
 
     private XMLGregorianCalendar journalDatoFrom(String jpDato) {
