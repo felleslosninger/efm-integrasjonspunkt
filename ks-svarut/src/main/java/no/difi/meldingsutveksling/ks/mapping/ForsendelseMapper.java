@@ -110,10 +110,19 @@ public class ForsendelseMapper {
     private Mottaker mottakerFrom(InfoRecord infoRecord) {
         Organisasjon.Builder<Void> mottaker = Organisasjon.builder();
         mottaker.withOrgnr(infoRecord.getIdentifier());
-
-        mottaker.withPostnr("0192");
-        mottaker.withPoststed("Oslo");
         mottaker.withNavn(infoRecord.getOrganizationName());
+
+        if (infoRecord.getPostadresse() != null) {
+            mottaker.withAdresse1(infoRecord.getPostadresse().getAdresse());
+            mottaker.withPostnr(infoRecord.getPostadresse().getPostnummer());
+            mottaker.withPoststed(infoRecord.getPostadresse().getPoststed());
+            mottaker.withLand(infoRecord.getPostadresse().getLand());
+        } else {
+            mottaker.withPostnr("0192");
+            mottaker.withPoststed("Oslo");
+            mottaker.withLand("Norge");
+        }
+        
         return mottaker.build();
     }
 
