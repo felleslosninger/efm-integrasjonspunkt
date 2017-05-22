@@ -34,6 +34,7 @@ public class OidcTokenClient {
     private static final String CLIENT_ID_PREFIX = "MOVE_IP_";
 
     private static final String SCOPE_DPO = "move/dpo.read";
+    private static final String SCOPE_DPE = "move/dpe.read";
     private static final String SCOPE_DPV = "move/dpv.read";
     private static final String SCOPE_DPF = "move/dpf.read";
     private static final List<String> SCOPES_DPI = Arrays.asList("move/dpi.read",
@@ -125,8 +126,11 @@ public class OidcTokenClient {
     public String getCurrentScopes() {
 
         ArrayList<String> scopeList = Lists.newArrayList();
-        if (props.getFeature().isEnableDPO() || props.getFeature().isEnableDPE()) {
+        if (props.getFeature().isEnableDPO()) {
             scopeList.add(SCOPE_DPO);
+        }
+        if (props.getFeature().isEnableDPE()) {
+            scopeList.add(SCOPE_DPE);
         }
         if (props.getFeature().isEnableDPV()) {
             scopeList.add(SCOPE_DPV);

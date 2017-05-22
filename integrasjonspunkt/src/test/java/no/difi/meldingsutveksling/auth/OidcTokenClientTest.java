@@ -24,6 +24,7 @@ public class OidcTokenClientTest {
     private IntegrasjonspunktProperties props;
     private List<String> scopes = Arrays.asList(
                 "move/dpo.read",
+                "move/dpe.read",
                 "move/dpv.read",
                 "move/dpi.read",
                 "global/kontaktinformasjon.read",
@@ -48,8 +49,9 @@ public class OidcTokenClientTest {
         props.getOidc().getKeystore().setPath(new FileSystemResource("src/test/resources/kontaktinfo-client-test.jks"));
 
         props.setFeature(new IntegrasjonspunktProperties.FeatureToggle());
-        props.getFeature().setEnableDPI(true);
         props.getFeature().setEnableDPO(true);
+        props.getFeature().setEnableDPE(true);
+        props.getFeature().setEnableDPI(true);
         props.getFeature().setEnableDPV(true);
 
     }
