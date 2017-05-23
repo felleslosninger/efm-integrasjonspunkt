@@ -5093,9 +5093,9 @@
         <wsdl:port name="CustomBinding_ICorrespondenceAgencyExternal"
                    binding="tns:CustomBinding_ICorrespondenceAgencyExternal">
             <soap12:address
-                    location="http://tt02.altinn.basefarm.net/ServiceEngineExternal/CorrespondenceAgencyExternal.svc"/>
+                    location="http://tt02.altinn.no/ServiceEngineExternal/CorrespondenceAgencyExternal.svc"/>
             <wsa10:EndpointReference>
-                <wsa10:Address>http://tt02.altinn.basefarm.net/ServiceEngineExternal/CorrespondenceAgencyExternal.svc
+                <wsa10:Address>http://tt02.altinn.no/ServiceEngineExternal/CorrespondenceAgencyExternal.svc
                 </wsa10:Address>
             </wsa10:EndpointReference>
         </wsdl:port>
