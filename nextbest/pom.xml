@@ -3,7 +3,7 @@
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>1.7.58-SNAPSHOT</version>
+        <version>1.7.57</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>nextbest</artifactId>
