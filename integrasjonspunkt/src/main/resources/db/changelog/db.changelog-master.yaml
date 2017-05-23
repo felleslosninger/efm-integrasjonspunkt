@@ -1,0 +1,61 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: maw
+      changes:
+        - dropColumn:
+            columnName: direction
+            tableName: conversation_resource
+        - dropColumn:
+            columnName: messagetype_id
+            tableName: conversation_resource
+  - changeSet:
+      id: 2
+      author: maw
+      changes:
+        - addColumn:
+            tableName: conversation_resource
+            columns:
+              - column:
+                  name: direction
+                  type: integer
+              - column:
+                  name: type
+                  type: varchar(31)
+              - column:
+                  name: receiver_name
+                  type: varchar(255)
+              - column:
+                  name: sender_name
+                  type: varchar(255)
+              - column:
+                  name: service_identifier
+                  type: integer
+              - column:
+                  name: jp_id
+                  type: varchar(255)
+              - column:
+                  name: message_content
+                  type: varchar(255)
+              - column:
+                  name: message_title
+                  type: varchar(255)
+        - createTable:
+            tableName: props
+            columns:
+              - column:
+                  name: pids
+                  type: varchar(255)
+                  constraints:
+                    foreignKeyName: fk_props_cr
+                    nullable: false
+                    references: conversation_resource(conversation_id)
+              - column:
+                  name: prop
+                  type: varchar(255)
+              - column:
+                  name: prop_id
+                  type: varchar(255)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
