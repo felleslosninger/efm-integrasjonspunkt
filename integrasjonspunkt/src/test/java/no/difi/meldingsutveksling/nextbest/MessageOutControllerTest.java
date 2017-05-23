@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.nextbest;
 
 import com.google.common.collect.Lists;
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.receipt.Conversation;
@@ -9,6 +8,8 @@ import no.difi.meldingsutveksling.receipt.ConversationRepository;
 import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,18 +18,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.RegexMatcher.matchesRegex;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
+import static no.difi.meldingsutveksling.nextbest.ConversationDirection.OUTGOING;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(MessageOutController.class)
@@ -38,10 +47,10 @@ public class MessageOutControllerTest {
     private MockMvc mvc;
 
     @MockBean
-    private OutgoingConversationResourceRepository repo;
+    private ConversationResourceRepository repo;
 
     @MockBean
-    private IncomingConversationResourceRepository increpo;
+    private ConversationStrategyFactory strategyFactory;
 
     @MockBean
     private ServiceRegistryLookup sr;
@@ -71,44 +80,55 @@ public class MessageOutControllerTest {
         featureToggle.setEnableDPO(true);
         featureToggle.setEnableDPE(true);
         when(props.getFeature()).thenReturn(featureToggle);
+        when(strategyFactory.getEnabledServices()).thenReturn(Arrays.asList(DPO, DPV));
 
         ServiceRecord serviceRecord = new ServiceRecord();
-        serviceRecord.setServiceIdentifier(ServiceIdentifier.DPO);
+        serviceRecord.setServiceIdentifier(DPO);
         serviceRecord.setDpeCapabilities(Lists.newArrayList());
         when(sr.getServiceRecord("1")).thenReturn(serviceRecord);
+        InfoRecord fooInfo = new InfoRecord("1", "foo", new EntityType("org", "org"));
+        when(sr.getInfoRecord("1")).thenReturn(fooInfo);
+        InfoRecord barInfo = new InfoRecord("2", "bar", new EntityType("org", "org"));
+        when(sr.getInfoRecord("2")).thenReturn(barInfo);
+        InfoRecord bazInfo = new InfoRecord("3", "baz", new EntityType("org", "org"));
+        when(sr.getInfoRecord("3")).thenReturn(bazInfo);
 
         MessageStatus receiptSent = MessageStatus.of(GenericReceiptStatus.SENDT.toString(), LocalDateTime.now());
         MessageStatus receiptDelivered = MessageStatus.of(GenericReceiptStatus.LEVERT.toString(),
                 LocalDateTime.now().plusMinutes(1));
-        Conversation receiptConversation = Conversation.of("42", "42ref", "123", "sometitle", ServiceIdentifier.DPO,
+        Conversation receiptConversation = Conversation.of("42", "42ref", "123", "sometitle", DPO,
                 receiptDelivered, receiptSent);
         when(crepo.findByConversationId("42")).thenReturn(asList(receiptConversation));
 
-        OutgoingConversationResource cr42 = OutgoingConversationResource.of("42", "2", "1", "DPO");
-        OutgoingConversationResource cr43 = OutgoingConversationResource.of("43", "2", "1", "DPV");
-        OutgoingConversationResource cr44 = OutgoingConversationResource.of("44", "1", "2", "DPO");
+        DpoConversationResource cr42 = DpoConversationResource.of("42", "2", "1");
+        DpvConversationResource cr43 = DpvConversationResource.of("43", "2", "1");
+        DpoConversationResource cr44 = DpoConversationResource.of("44", "1", "2");
 
-        when(repo.findOne("42")).thenReturn(cr42);
-        when(repo.findOne("43")).thenReturn(cr43);
-        when(repo.findOne("1337")).thenReturn(null);
+        DpoConversationStrategy dpoMock = mock(DpoConversationStrategy.class);
+        when(dpoMock.send(cr42)).thenReturn(ResponseEntity.ok().build());
+        when(strategyFactory.getStrategy(cr42)).thenReturn(Optional.of(dpoMock));
+
+        when(repo.findByConversationIdAndDirection("42", OUTGOING)).thenReturn(Optional.of(cr42));
+        when(repo.findByConversationIdAndDirection("43", OUTGOING)).thenReturn(Optional.of(cr43));
+        when(repo.findByConversationIdAndDirection("1337", OUTGOING)).thenReturn(Optional.empty());
         when(repo.findAll()).thenReturn(asList(cr42, cr43, cr44));
-        when(repo.findByReceiverId("1")).thenReturn(asList(cr42, cr43));
-        when(repo.findByReceiverId("2")).thenReturn(asList(cr44));
-        when(repo.findByMessagetypeId("DPO")).thenReturn(asList(cr42, cr44));
-        when(repo.findByMessagetypeId("DPV")).thenReturn(asList(cr43));
-        when(repo.findByReceiverIdAndMessagetypeId("1", "DPO")).thenReturn(asList(cr42));
-        when(repo.findByReceiverIdAndMessagetypeId("1", "DPV")).thenReturn(asList(cr43));
-        when(repo.findByReceiverIdAndMessagetypeId("2", "DPO")).thenReturn(asList(cr44));
+        when(repo.findByReceiverIdAndDirection("1", OUTGOING)).thenReturn(asList(cr42, cr43));
+        when(repo.findByReceiverIdAndDirection("2", OUTGOING)).thenReturn(asList(cr44));
+        when(repo.findByServiceIdentifierAndDirection(DPO, OUTGOING)).thenReturn(asList(cr42, cr44));
+        when(repo.findByServiceIdentifierAndDirection(DPV, OUTGOING)).thenReturn(asList(cr43));
+        when(repo.findByReceiverIdAndServiceIdentifierAndDirection("1", DPO, OUTGOING)).thenReturn(asList(cr42));
+        when(repo.findByReceiverIdAndServiceIdentifierAndDirection("1", DPV, OUTGOING)).thenReturn(asList(cr43));
+        when(repo.findByReceiverIdAndServiceIdentifierAndDirection("2", DPO, OUTGOING)).thenReturn(asList(cr44));
     }
 
     @Test
     public void getMessageShouldReturnOk() throws Exception {
         mvc.perform(get("/out/messages/42").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(5)))
+                .andExpect(jsonPath("$.*", hasSize(10)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
                 .andExpect(jsonPath("$.receiverId", is("1")))
-                .andExpect(jsonPath("$.messagetypeId", is("DPO")))
+                .andExpect(jsonPath("$.serviceIdentifier", is("DPO")))
                 .andExpect(jsonPath("$.fileRefs.*", hasSize(0)));
     }
 
@@ -126,54 +146,53 @@ public class MessageOutControllerTest {
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[*].conversationId", containsInAnyOrder("42", "43")))
                 .andExpect(jsonPath("$[*].receiverId", containsInAnyOrder("1", "1")))
-                .andExpect(jsonPath("$[*].messagetypeId", containsInAnyOrder("DPO", "DPV")));
+                .andExpect(jsonPath("$[*].serviceIdentifier", containsInAnyOrder("DPO", "DPV")));
     }
 
     @Test
     public void getMessagesWithTypeShouldReturnOk() throws Exception {
         mvc.perform(get("/out/messages")
-                .param("messagetypeId", "DPO")
+                .param("serviceIdentifier", "DPO")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[*].conversationId", containsInAnyOrder("42", "44")))
                 .andExpect(jsonPath("$[*].receiverId", containsInAnyOrder("1", "2")))
-                .andExpect(jsonPath("$[*].messagetypeId", containsInAnyOrder("DPO", "DPO")));
+                .andExpect(jsonPath("$[*].serviceIdentifier", containsInAnyOrder("DPO", "DPO")));
     }
 
     @Test
     public void getMessagesWithReceiverAndTypeShouldReturnOk() throws Exception {
         mvc.perform(get("/out/messages")
                 .param("receiverId", "1")
-                .param("messagetypeId", "DPV")
+                .param("serviceIdentifier", "DPV")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].conversationId", is("43")))
                 .andExpect(jsonPath("$[0].receiverId", is("1")))
-                .andExpect(jsonPath("$[0].messagetypeId", is("DPV")))
+                .andExpect(jsonPath("$[0].serviceIdentifier", is("DPV")))
                 .andExpect(jsonPath("$[0].fileRefs.*", hasSize(0)));
     }
 
     @Test
     public void createResourceWithConversationIdShouldReturnExisting() throws Exception {
         mvc.perform(post("/out/messages")
-                .param("receiverId", "1")
-                .param("messagetypeId", "DPO")
-                .param("conversationId", "42")
+                .content("{\"receiverId\": 1, \"serviceIdentifier\": \"DPO\", \"conversationId\": \"42\"}")
+                .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(5)))
+                .andExpect(jsonPath("$.*", hasSize(10)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
                 .andExpect(jsonPath("$.receiverId", is("1")))
-                .andExpect(jsonPath("$.messagetypeId", is("DPO")))
+                .andExpect(jsonPath("$.serviceIdentifier", is("DPO")))
                 .andExpect(jsonPath("$.fileRefs.*", hasSize(0)));
     }
 
     @Test
     public void createResourceWithoutReceiverShouldFail() throws Exception {
         mvc.perform(post("/out/messages")
-                .param("messagetypeId", "DPO")
+                .param("serviceIdentifier", "DPO")
                 .param("conversationId", "42")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
@@ -191,14 +210,14 @@ public class MessageOutControllerTest {
     @Test
     public void createResourceWithoutConversationIdShouldReturnOk() throws Exception {
         mvc.perform(post("/out/messages")
-                .param("receiverId", "1")
-                .param("messagetypeId", "DPO")
+                .content("{ \"receiverId\": 1, \"serviceIdentifier\": \"DPO\" }")
+                .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.conversationId", matchesRegex("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}")))
                 .andExpect(jsonPath("$.receiverId", is("1")))
                 .andExpect(jsonPath("$.senderId", is("3")))
-                .andExpect(jsonPath("$.messagetypeId", is("DPO")));
+                .andExpect(jsonPath("$.serviceIdentifier", is("DPO")));
     }
 
     @Test

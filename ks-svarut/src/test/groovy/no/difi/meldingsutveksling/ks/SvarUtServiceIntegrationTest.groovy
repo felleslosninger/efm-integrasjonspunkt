@@ -65,7 +65,8 @@ class SvarUtServiceIntegrationTest {
                         jpJpostnr: "123",
                         jpNdoktype: "foo",
                         jpStatus: "foo",
-                        jpDokdato: "2017-01-01"
+                        jpDokdato: "2017-01-01",
+                        jpJdato: "2017-01-01"
                 ),
                 noarksak: new NoarksakType(
                         saSeknr: "123",

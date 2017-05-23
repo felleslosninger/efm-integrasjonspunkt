@@ -27,6 +27,8 @@ import java.net.URISyntaxException;
 import java.time.Instant;
 import java.util.Date;
 
+import static java.util.Arrays.asList;
+
 @Configuration
 @EnableOAuth2Client
 public class OauthRestTemplateConfig {
@@ -46,7 +48,7 @@ public class OauthRestTemplateConfig {
             DefaultAccessTokenRequest atr = new DefaultAccessTokenRequest();
             BaseOAuth2ProtectedResourceDetails resource = new BaseOAuth2ProtectedResourceDetails();
             resource.setAccessTokenUri(String.valueOf(props.getOidc().getUrl().toURI()));
-            resource.setScope(props.getOidc().getScopes());
+            resource.setScope(asList(oidcTokenClient.getCurrentScopes().split(" ")));
             resource.setClientId(props.getOidc().getClientId());
 
             OAuth2RestTemplate rt = new OAuth2RestTemplate(resource, new DefaultOAuth2ClientContext(atr));

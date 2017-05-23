@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextbest;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import no.difi.meldingsutveksling.Decryptor;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -20,22 +21,25 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import static no.difi.meldingsutveksling.nextbest.ConversationDirection.INCOMING;
+
 @Component
 public class NextBestQueue {
 
     private static final Logger log = LoggerFactory.getLogger(NextBestQueue.class);
 
-    @Autowired
-    private IncomingConversationResourceRepository repoIn;
-
-    @Autowired
-    private OutgoingConversationResourceRepository repoOut;
+    private DirectionalConversationResourceRepository inRepo;
 
     @Autowired
     private IntegrasjonspunktNokkel keyInfo;
 
     @Autowired
     private IntegrasjonspunktProperties props;
+
+    @Autowired
+    public NextBestQueue(ConversationResourceRepository repo) {
+        inRepo = new DirectionalConversationResourceRepository(repo, INCOMING);
+    }
 
     public void enqueueEduDocument(EduDocument eduDocument) {
 
@@ -46,7 +50,7 @@ public class NextBestQueue {
         }
 
         byte[] decryptedAsicPackage = decrypt((Payload)eduDocument.getAny());
-        List<String> contentFromAsic = null;
+        List<String> contentFromAsic;
         try {
             contentFromAsic = getContentFromAsic(decryptedAsicPackage);
         } catch (MessageException e) {
@@ -54,10 +58,9 @@ public class NextBestQueue {
             throw new MeldingsUtvekslingRuntimeException("Could not get contents from asic", e);
         }
 
-        IncomingConversationResource message = IncomingConversationResource.of(eduDocument.getConversationId(),
-                eduDocument.getSenderOrgNumber(),
-                eduDocument.getReceiverOrgNumber(), eduDocument.getMessagetypeId());
+        ConversationResource message = ((Payload) eduDocument.getAny()).getConversation();
 
+        message.setFileRefs(Maps.newHashMap());
         message.addFileRef(props.getNextbest().getAsicfile());
         contentFromAsic.forEach(message::addFileRef);
 
@@ -76,7 +79,7 @@ public class NextBestQueue {
             bos.close();
             os.close();
 
-            repoIn.save(message);
+            inRepo.save(message);
         } catch (IOException e) {
             log.error("Could not write asic container to disc.", e);
         }
@@ -102,4 +105,5 @@ public class NextBestQueue {
         }
         return files;
     }
+
 }

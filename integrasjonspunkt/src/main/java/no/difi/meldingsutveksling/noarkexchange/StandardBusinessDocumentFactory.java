@@ -103,6 +103,7 @@ public class StandardBusinessDocumentFactory {
     public EduDocument create(ConversationResource shipmentMeta, MessageContext context) throws MessageException {
 
         List<ByteArrayFile> attachements = new ArrayList<>();
+
         for (String filename : shipmentMeta.getFileRefs().values()) {
             String filedir = props.getNextbest().getFiledir();
             if (!filedir.endsWith("/")) {
@@ -127,11 +128,11 @@ public class StandardBusinessDocumentFactory {
         } catch (IOException e) {
             throw new MessageException(e, StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT);
         }
-        Payload payload = new Payload(encryptArchive(context.getMottaker(), archive));
+        Payload payload = new Payload(encryptArchive(context.getMottaker(), archive), shipmentMeta);
 
         return new CreateSBD().createSBD(context.getAvsender().getOrgNummer(), context.getMottaker().getOrgNummer(),
                 payload, context.getConversationId(), StandardBusinessDocumentHeader.NEXTBEST_TYPE,
-                context.getJournalPostId(), shipmentMeta.getMessagetypeId());
+                context.getJournalPostId());
     }
 
     private byte[] encryptArchive(Mottaker mottaker, Archive archive) {
