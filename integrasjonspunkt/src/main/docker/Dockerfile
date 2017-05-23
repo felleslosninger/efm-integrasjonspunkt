@@ -5,7 +5,7 @@ LABEL package="no.difi" artifact="meldingsutveksling" version="1.0" description=
 
 ENV APP_DIR=/var/lib/difi \
     APP_PROFILE=dev \
-    HOST=tt02.altinn.basefarm.net \
+    HOST=tt02.altinn.no \
     PORT=443 \
     KEYSTOREFILE=${JAVA_HOME}/lib/security/cacerts \
     KEYSTOREPASS=changeit \

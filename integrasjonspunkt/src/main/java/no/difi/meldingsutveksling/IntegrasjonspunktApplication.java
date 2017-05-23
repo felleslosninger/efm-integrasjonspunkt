@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling;
 
 import com.sun.xml.ws.transport.http.servlet.WSSpringServlet;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktPropertiesValidator;
 import no.difi.move.common.config.SpringCloudProtocolResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.validation.Validator;
 
 import javax.crypto.Cipher;
 import java.security.NoSuchAlgorithmException;
@@ -29,6 +31,11 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
         ServletRegistrationBean reg = new ServletRegistrationBean(servlet, "/noarkExchange", "/receive", "/mxa");
         reg.setLoadOnStartup(1);
         return reg;
+    }
+
+    @Bean
+    public static Validator configurationPropertiesValidator() {
+        return new IntegrasjonspunktPropertiesValidator();
     }
 
     public static void main(String[] args) {

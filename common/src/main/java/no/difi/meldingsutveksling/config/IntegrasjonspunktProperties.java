@@ -13,7 +13,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.net.URL;
-import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
@@ -144,7 +143,6 @@ public class IntegrasjonspunktProperties {
         private boolean enable;
         private URL url;
         private String audience;
-        private List<String> scopes;
         private String clientId;
         private Keystore keystore;
     }
@@ -207,7 +205,6 @@ public class IntegrasjonspunktProperties {
     @Data
     public static class NorskArkivstandardSystem {
 
-        @NotNull
         private String endpointURL;
         private String username;
         private String password;
@@ -218,7 +215,6 @@ public class IntegrasjonspunktProperties {
         /**
          * The type of archive system you are using, eg. Ephorte, p360, websak, mail...
          */
-        @NotNull
         private String type;
 
     }

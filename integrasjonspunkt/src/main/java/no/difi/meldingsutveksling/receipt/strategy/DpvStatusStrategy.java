@@ -23,7 +23,7 @@ import java.util.Optional;
 import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 
 @Component
-public class DpvConversationStrategy implements ConversationStrategy {
+public class DpvStatusStrategy implements StatusStrategy {
     private static final ServiceIdentifier serviceIdentifier = ServiceIdentifier.DPV;
 
     @Autowired

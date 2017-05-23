@@ -90,16 +90,27 @@ public class MessagePolling implements ApplicationContextAware {
         }
     }
 
-    @Scheduled(fixedRate = 15000)
-    public void checkForNewMessages() throws MessageException {
+    @Scheduled(fixedRateString = "${difi.move.fiks.pollingrate}")
+    public void checkForFiksMessages() {
 
-        logger.debug("Checking for new messages");
+        if (!properties.getFeature().isEnableDPF()) {
+            return;
+        }
+
+        logger.debug("Checking for new FIKS messages");
         if (messageDownloaders.getIfAvailable() != null) {
             for (MessageDownloaderModule task : messageDownloaders.getObject()) {
                 logger.debug("performing enabled task");
                 task.downloadFiles();
             }
         }
+
+    }
+
+    @Scheduled(fixedRate = 15000)
+    public void checkForNewMessages() throws MessageException {
+
+        logger.debug("Checking for new messages");
 
         if (serviceRecord == null) {
             serviceRecord = serviceRegistryLookup.getServiceRecord(properties.getOrg().getNumber());

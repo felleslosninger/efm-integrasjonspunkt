@@ -1111,7 +1111,7 @@
         <wsdl:port name="BasicHttpBinding_IBrokerServiceExternalBasic"
                    binding="tns:BasicHttpBinding_IBrokerServiceExternalBasic">
             <soap:address
-                    location="http://tt02.altinn.basefarm.net/ServiceEngineExternal/BrokerServiceExternalBasic.svc"/>
+                    location="http://tt02.altinn.no/ServiceEngineExternal/BrokerServiceExternalBasic.svc"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>

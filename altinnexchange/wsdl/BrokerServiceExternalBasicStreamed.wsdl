@@ -422,7 +422,7 @@
         <wsdl:port name="BasicHttpBinding_IBrokerServiceExternalBasicStreamed"
                    binding="tns:BasicHttpBinding_IBrokerServiceExternalBasicStreamed">
             <soap:address
-                    location="http://at06.altinn.basefarm.net/ServiceEngineExternal/BrokerServiceExternalBasicStreamed.svc"/>
+                    location="http://at06.altinn.no/ServiceEngineExternal/BrokerServiceExternalBasicStreamed.svc"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>

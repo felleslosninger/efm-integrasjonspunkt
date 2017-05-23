@@ -2,13 +2,7 @@ package no.difi.meldingsutveksling.dokumentpakking.service;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
-import no.difi.meldingsutveksling.domain.sbdh.BusinessScope;
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
-import no.difi.meldingsutveksling.domain.sbdh.DocumentIdentification;
-import no.difi.meldingsutveksling.domain.sbdh.Partner;
-import no.difi.meldingsutveksling.domain.sbdh.PartnerIdentification;
-import no.difi.meldingsutveksling.domain.sbdh.Scope;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
+import no.difi.meldingsutveksling.domain.sbdh.*;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -20,7 +14,6 @@ import java.util.UUID;
 
 import static no.difi.meldingsutveksling.dokumentpakking.service.ScopeFactory.fromConversationId;
 import static no.difi.meldingsutveksling.dokumentpakking.service.ScopeFactory.fromJournalPostId;
-import static no.difi.meldingsutveksling.dokumentpakking.service.ScopeFactory.fromMessagetypeId;
 
 public class CreateSBD {
 	public static final String STANDARD = "urn:no:difi:meldingsutveksling:1.0";
@@ -29,33 +22,20 @@ public class CreateSBD {
 
     public EduDocument createSBD(Organisasjonsnummer avsender, Organisasjonsnummer mottaker, Object payload, String conversationId, String type, String journalPostId) {
 		EduDocument doc = new EduDocument();
-		doc.setStandardBusinessDocumentHeader(createHeader(avsender, mottaker, conversationId, type, journalPostId, null));
-		doc.setAny(payload);
-		return doc;
-	}
-
-	public EduDocument createSBD(Organisasjonsnummer avsender, Organisasjonsnummer mottaker, Object payload, String
-			conversationId, String type, String journalPostId, String messagetypeId) {
-		EduDocument doc = new EduDocument();
-		doc.setStandardBusinessDocumentHeader(createHeader(avsender, mottaker, conversationId, type, journalPostId, messagetypeId));
+		doc.setStandardBusinessDocumentHeader(createHeader(avsender, mottaker, conversationId, type, journalPostId));
 		doc.setAny(payload);
 		return doc;
 	}
 
 	private StandardBusinessDocumentHeader createHeader(Organisasjonsnummer avsender, Organisasjonsnummer mottaker,
 														String conversationId, String documentType, String
-																journalPostId, String messagetypeId) {
+																journalPostId) {
 		StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader();
 		header.setHeaderVersion(HEADER_VERSION);
 		header.getSender().add(createPartner(avsender));
 		header.getReceiver().add(createPartner(mottaker));
 		header.setDocumentIdentification(createDocumentIdentification(documentType));
-		if (messagetypeId != null) {
-			header.setBusinessScope(createBusinessScope(fromConversationId(conversationId), fromJournalPostId(journalPostId),
-					fromMessagetypeId(messagetypeId)));
-		} else {
-			header.setBusinessScope(createBusinessScope(fromConversationId(conversationId), fromJournalPostId(journalPostId)));
-		}
+		header.setBusinessScope(createBusinessScope(fromConversationId(conversationId), fromJournalPostId(journalPostId)));
 		return header;
 	}
 

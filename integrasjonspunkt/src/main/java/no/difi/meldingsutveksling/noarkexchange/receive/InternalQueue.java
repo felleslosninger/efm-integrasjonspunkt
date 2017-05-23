@@ -23,6 +23,7 @@ import no.difi.meldingsutveksling.receipt.MessageStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
@@ -59,7 +60,6 @@ public class InternalQueue {
     @Autowired
     private JmsTemplate jmsTemplate;
 
-    @Autowired
     private IntegrajonspunktReceiveImpl integrajonspunktReceive;
 
     @Autowired
@@ -76,6 +76,11 @@ public class InternalQueue {
 
     private final DocumentConverter documentConverter = new DocumentConverter();
     private final EDUCoreConverter eduCoreConverter = new EDUCoreConverter();
+
+    @Autowired
+    InternalQueue(ObjectProvider<IntegrajonspunktReceiveImpl> integrajonspunktReceive) {
+        this.integrajonspunktReceive = integrajonspunktReceive.getIfAvailable();
+    }
 
     static {
         try {

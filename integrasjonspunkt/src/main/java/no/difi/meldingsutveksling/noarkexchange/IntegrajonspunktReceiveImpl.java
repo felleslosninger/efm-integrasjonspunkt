@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
@@ -76,16 +77,16 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
 
     @Autowired
     public IntegrajonspunktReceiveImpl(TransportFactory transportFactory,
-            @Qualifier("localNoark") NoarkClient localNoark,
-            Adresseregister adresseregisterService,
-            IntegrasjonspunktProperties properties,
-            IntegrasjonspunktNokkel keyInfo,
-            ServiceRegistryLookup serviceRegistryLookup,
-            ConversationRepository conversationRepository,
-            MessageSender messageSender) {
+                                       @Qualifier("localNoark") ObjectProvider<NoarkClient> localNoark,
+                                       Adresseregister adresseregisterService,
+                                       IntegrasjonspunktProperties properties,
+                                       IntegrasjonspunktNokkel keyInfo,
+                                       ServiceRegistryLookup serviceRegistryLookup,
+                                       ConversationRepository conversationRepository,
+                                       MessageSender messageSender) {
 
         this.transportFactory = transportFactory;
-        this.localNoark = localNoark;
+        this.localNoark = localNoark.getIfAvailable();
         this.adresseregisterService = adresseregisterService;
         this.properties = properties;
         this.keyInfo = keyInfo;

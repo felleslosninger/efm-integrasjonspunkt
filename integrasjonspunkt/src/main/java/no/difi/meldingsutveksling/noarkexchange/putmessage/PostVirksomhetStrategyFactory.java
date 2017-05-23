@@ -41,6 +41,9 @@ public class PostVirksomhetStrategyFactory implements MessageStrategyFactory {
         if (emailSubject.isPresent() && !"".equals(emailSubject.get())) {
             builder.withEmailSubject(emailSubject.get()).withEmailBody(properties.getAltinnPTV().getEmail().getVarslingstekst());
         }
+
+        builder.withNextbestFiledir(properties.getNextbest().getFiledir());
+
         CorrespondenceAgencyConfiguration config = builder.build();
         return new PostVirksomhetStrategyFactory(config, serviceRegistryLookup);
     }
@@ -53,5 +56,9 @@ public class PostVirksomhetStrategyFactory implements MessageStrategyFactory {
     @Override
     public ServiceIdentifier getServiceIdentifier() {
         return ServiceIdentifier.DPV;
+    }
+
+    public CorrespondenceAgencyConfiguration getConfig() {
+        return this.configuration;
     }
 }

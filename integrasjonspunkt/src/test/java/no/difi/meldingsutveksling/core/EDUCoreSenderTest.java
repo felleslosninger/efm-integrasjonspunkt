@@ -14,6 +14,7 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.ObjectProvider;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -44,7 +45,10 @@ public class EDUCoreSenderTest {
         final PutMessageResponseType response = PutMessageResponseFactory.createOkResponse();
         when(messageStrategy.send(any(EDUCore.class))).thenReturn(response);
         when(mshClient.sendEduMelding(any(PutMessageRequestType.class))).thenReturn(response);
-        eduCoreSender = new EDUCoreSender(properties, serviceRegistryLookup, strategyFactory, adresseregister, mshClient);
+        ObjectProvider objectProvider = mock(ObjectProvider.class);
+        when(objectProvider.getIfAvailable()).thenReturn(mshClient);
+
+        eduCoreSender = new EDUCoreSender(properties, serviceRegistryLookup, strategyFactory, adresseregister, objectProvider);
         setupDefaultProperties();
         setupDefaultMessage();
     }
