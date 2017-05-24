@@ -2,6 +2,12 @@ databaseChangeLog:
   - changeSet:
       id: 1
       author: maw
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: conversation_resource
+        - columnExists:
+            columnName: messagetype_id
       changes:
         - dropColumn:
             columnName: direction
@@ -12,6 +18,13 @@ databaseChangeLog:
   - changeSet:
       id: 2
       author: maw
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: conversation_resource
+        - not:
+            - tableExists:
+                tableName: props
       changes:
         - addColumn:
             tableName: conversation_resource
