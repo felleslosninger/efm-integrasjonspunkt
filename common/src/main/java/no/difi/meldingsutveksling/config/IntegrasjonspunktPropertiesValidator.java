@@ -7,6 +7,8 @@ import org.springframework.validation.Validator;
 public class IntegrasjonspunktPropertiesValidator implements Validator {
 
     private static final String EMPTY_FIELD = "empty_field";
+    private static final String DPO_ERROR_MSG = "DPO enabled - cannot be null";
+    private static final String DPV_ERROR_MSG = "DPV enabled - cannot be null";
 
     @Override
     public boolean supports(Class<?> clazz) {
@@ -18,15 +20,15 @@ public class IntegrasjonspunktPropertiesValidator implements Validator {
         IntegrasjonspunktProperties props = (IntegrasjonspunktProperties) target;
 
         if (props.getFeature().isEnableDPO()) {
-            ValidationUtils.rejectIfEmpty(errors, "noarkSystem.type", EMPTY_FIELD, "DPO enabled - cannot be null");
-            ValidationUtils.rejectIfEmpty(errors, "noarkSystem.endpointURL", EMPTY_FIELD, "DPO enabled - cannot be null");
+            ValidationUtils.rejectIfEmpty(errors, "noarkSystem.type", EMPTY_FIELD, DPO_ERROR_MSG);
+            ValidationUtils.rejectIfEmpty(errors, "noarkSystem.endpointURL", EMPTY_FIELD, DPO_ERROR_MSG);
         }
 
         if (props.getFeature().isEnableDPV()) {
-            ValidationUtils.rejectIfEmpty(errors, "altinnPTV.externalServiceCode", EMPTY_FIELD, "DPV enabled - cannot be null");
-            ValidationUtils.rejectIfEmpty(errors, "altinnPTV.externalServiceEditionCode", EMPTY_FIELD, "DPV enabled - cannot be null");
-            ValidationUtils.rejectIfEmpty(errors, "altinnPTV.username", EMPTY_FIELD, "DPV enabled - cannot be null");
-            ValidationUtils.rejectIfEmpty(errors, "altinnPTV.password", EMPTY_FIELD, "DPV enabled - cannot be null");
+            ValidationUtils.rejectIfEmpty(errors, "altinnPTV.externalServiceCode", EMPTY_FIELD, DPV_ERROR_MSG);
+            ValidationUtils.rejectIfEmpty(errors, "altinnPTV.externalServiceEditionCode", EMPTY_FIELD, DPV_ERROR_MSG);
+            ValidationUtils.rejectIfEmpty(errors, "altinnPTV.username", EMPTY_FIELD, DPV_ERROR_MSG);
+            ValidationUtils.rejectIfEmpty(errors, "altinnPTV.password", EMPTY_FIELD, DPV_ERROR_MSG);
         }
 
     }
