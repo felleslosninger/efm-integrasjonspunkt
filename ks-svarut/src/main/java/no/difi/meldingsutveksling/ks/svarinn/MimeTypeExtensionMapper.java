@@ -24,6 +24,9 @@ public class MimeTypeExtensionMapper {
         mimeTypeMap.put(MediaType.APPLICATION_PDF_VALUE, "PDF");
     }
 
+    private MimeTypeExtensionMapper() {
+    }
+
     public static String getExtension(String mimeType) {
         if (mimeTypeMap.containsKey(mimeType)) {
             return mimeTypeMap.get(mimeType);
