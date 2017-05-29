@@ -60,8 +60,7 @@ public class SvarInnMessage {
         // this is done because of a bug in when sending messages via NoarkClient:
         // The payload util doesn't correctly handle payloads that are MeldingType.
         // And I am afraid of fixing that bug might lead to trouble in the archive system.
-        String payload = (String) payloadConverter.marshallToPayload(meldingType);
-        payload = payload.replaceAll(":ns2|ns2:", "");
+        String payload = payloadConverter.marshallToString(meldingType).replaceAll(":ns2|ns2:", "");
         eduCore.setPayload(payload);
         eduCore.setSender(createSender());
         eduCore.setReceiver(createReceiver());
