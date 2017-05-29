@@ -6,6 +6,8 @@ import org.springframework.validation.Validator;
 
 public class IntegrasjonspunktPropertiesValidator implements Validator {
 
+    private static String EMPTY_FIELD = "empty_field";
+
     @Override
     public boolean supports(Class<?> clazz) {
         return clazz == IntegrasjonspunktProperties.class;
@@ -16,15 +18,15 @@ public class IntegrasjonspunktPropertiesValidator implements Validator {
         IntegrasjonspunktProperties props = (IntegrasjonspunktProperties) target;
 
         if (props.getFeature().isEnableDPO()) {
-            ValidationUtils.rejectIfEmpty(errors, "noarkSystem.type", "empty_field", "DPO enabled - cannot be null");
-            ValidationUtils.rejectIfEmpty(errors, "noarkSystem.endpointURL", "empty_field", "DPO enabled - cannot be null");
+            ValidationUtils.rejectIfEmpty(errors, "noarkSystem.type", EMPTY_FIELD, "DPO enabled - cannot be null");
+            ValidationUtils.rejectIfEmpty(errors, "noarkSystem.endpointURL", EMPTY_FIELD, "DPO enabled - cannot be null");
         }
 
         if (props.getFeature().isEnableDPV()) {
-            ValidationUtils.rejectIfEmpty(errors, "altinnPTV.externalServiceCode", "empty_field", "DPV enabled - cannot be null");
-            ValidationUtils.rejectIfEmpty(errors, "altinnPTV.externalServiceEditionCode", "empty_field", "DPV enabled - cannot be null");
-            ValidationUtils.rejectIfEmpty(errors, "altinnPTV.username", "empty_field", "DPV enabled - cannot be null");
-            ValidationUtils.rejectIfEmpty(errors, "altinnPTV.password", "empty_field", "DPV enabled - cannot be null");
+            ValidationUtils.rejectIfEmpty(errors, "altinnPTV.externalServiceCode", EMPTY_FIELD, "DPV enabled - cannot be null");
+            ValidationUtils.rejectIfEmpty(errors, "altinnPTV.externalServiceEditionCode", EMPTY_FIELD, "DPV enabled - cannot be null");
+            ValidationUtils.rejectIfEmpty(errors, "altinnPTV.username", EMPTY_FIELD, "DPV enabled - cannot be null");
+            ValidationUtils.rejectIfEmpty(errors, "altinnPTV.password", EMPTY_FIELD, "DPV enabled - cannot be null");
         }
 
     }
