@@ -29,7 +29,7 @@ public class SvarInnBeans {
 
     @Bean
     public SvarInnFileDecryptor svarInnFileDecryptor(IntegrasjonspunktProperties properties) {
-        return new SvarInnFileDecryptor(properties.getOrg().getKeystore());
+        return new SvarInnFileDecryptor(properties.getFiks().getKeystore());
     }
 
     @Bean

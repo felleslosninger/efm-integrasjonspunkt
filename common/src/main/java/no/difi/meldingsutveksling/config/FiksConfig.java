@@ -10,6 +10,10 @@ import javax.validation.constraints.Pattern;
 public class FiksConfig {
     private boolean kryptert = true;
 
+    @Valid
+    @NotNull(message = "Certificate properties for FIKS not set.")
+    private IntegrasjonspunktProperties.Keystore keystore;
+
     SvarUt ut = new SvarUt();
     SvarInn inn = new SvarInn();
 

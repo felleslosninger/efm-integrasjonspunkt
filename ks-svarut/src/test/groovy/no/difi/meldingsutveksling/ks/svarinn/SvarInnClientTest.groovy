@@ -24,9 +24,9 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 @ContextConfiguration(classes = [SvarInnBeans, MockConfiguration])
 @ActiveProfiles("dev")
 public class SvarInnClientTest {
+
     @Autowired
     RestTemplate restTemplate
-
 
     @Autowired
     SvarInnClient client
