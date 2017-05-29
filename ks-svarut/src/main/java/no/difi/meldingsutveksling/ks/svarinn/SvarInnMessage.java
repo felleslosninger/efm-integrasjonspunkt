@@ -23,11 +23,6 @@ public class SvarInnMessage {
     private PayloadConverter<MeldingType> payloadConverter = new PayloadConverterImpl<>(MeldingType.class,
             "http://www.arkivverket.no/Noark4-1-WS-WD/types", "Melding");
 
-    public SvarInnMessage(Forsendelse forsendelse, List<SvarInnFile> svarInnFiles) {
-        this.forsendelse = forsendelse;
-        this.svarInnFiles = svarInnFiles;
-    }
-
     EDUCore toEduCore() {
         ObjectFactory objectFactory = new ObjectFactory();
 
