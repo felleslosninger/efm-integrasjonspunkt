@@ -18,6 +18,7 @@ public class Forsendelse {
     @Data
     public static class Mottaker {
         private String orgnr;
+        private String navn;
     }
 
     @Data
@@ -49,5 +50,6 @@ public class Forsendelse {
     @Data
     public static class SvarSendesTil {
         private String orgnr;
+        private String navn;
     }
 }

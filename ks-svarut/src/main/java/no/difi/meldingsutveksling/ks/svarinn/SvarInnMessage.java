@@ -20,7 +20,13 @@ public class SvarInnMessage {
     @NonNull
     List<SvarInnFile> svarInnFiles;
 
-    private PayloadConverter<MeldingType> payloadConverter = new PayloadConverterImpl<>(MeldingType.class, "http://www.arkivverket.no/Noark4-1-WS-WD/types", MeldingType.class.getName());
+    private PayloadConverter<MeldingType> payloadConverter = new PayloadConverterImpl<>(MeldingType.class,
+            "http://www.arkivverket.no/Noark4-1-WS-WD/types", "Melding");
+
+    public SvarInnMessage(Forsendelse forsendelse, List<SvarInnFile> svarInnFiles) {
+        this.forsendelse = forsendelse;
+        this.svarInnFiles = svarInnFiles;
+    }
 
     EDUCore toEduCore() {
         ObjectFactory objectFactory = new ObjectFactory();
@@ -29,7 +35,15 @@ public class SvarInnMessage {
         JournpostType journpostType = createJournpostType();
         final List<DokumentType> dokumentTypes = svarInnFiles.stream().map(sif -> {
             final DokumentType dokumentType = objectFactory.createDokumentType();
-            dokumentType.setVeMimeType(sif.getMediaType().toString());
+
+            String mimeType = sif.getMediaType().toString();
+            dokumentType.setVeMimeType(mimeType);
+            dokumentType.setVeDokformat(MimeTypeExtensionMapper.getExtension(mimeType));
+
+            dokumentType.setDbTittel(sif.getFilnavn());
+            dokumentType.setVeFilnavn(sif.getFilnavn());
+            // Value does not exist in FIKS, must be hard coded
+            dokumentType.setVeVariant("P");
             final FilType fil = objectFactory.createFilType();
             fil.setBase64(sif.getContents());
             dokumentType.setFil(fil);
@@ -46,7 +60,8 @@ public class SvarInnMessage {
         // this is done because of a bug in when sending messages via NoarkClient:
         // The payload util doesn't correctly handle payloads that are MeldingType.
         // And I am afraid of fixing that bug might lead to trouble in the archive system.
-        final Object payload = payloadConverter.marshallToPayload(meldingType);
+        String payload = (String) payloadConverter.marshallToPayload(meldingType);
+        payload = payload.replaceAll(":ns2|ns2:", "");
         eduCore.setPayload(payload);
         eduCore.setSender(createSender());
         eduCore.setReceiver(createReceiver());
@@ -57,12 +72,14 @@ public class SvarInnMessage {
     private Sender createSender() {
         final Sender sender = new Sender();
         sender.setIdentifier(forsendelse.getSvarSendesTil().getOrgnr());
+        sender.setName(forsendelse.getSvarSendesTil().getNavn());
         return sender;
     }
 
     private Receiver createReceiver() {
         Receiver receiver = new Receiver();
         receiver.setIdentifier(forsendelse.getMottaker().getOrgnr());
+        receiver.setName(forsendelse.getMottaker().getNavn());
         return receiver;
     }
 
@@ -87,6 +104,7 @@ public class SvarInnMessage {
         journpostType.setJpSeknr(metadata.getJournalsekvensnummer());
         journpostType.setJpJpostnr(metadata.getJournalpostnummer());
         journpostType.setJpOffinnhold(metadata.getTittel());
+        journpostType.setJpInnhold(metadata.getTittel());
         journpostType.setJpJdato(metadata.getJournaldato());
         journpostType.getAvsmot().add(createSaksbehandlerAvsernder(metadata));
         return journpostType;
