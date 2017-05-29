@@ -6,7 +6,7 @@ import org.springframework.validation.Validator;
 
 public class IntegrasjonspunktPropertiesValidator implements Validator {
 
-    private static String EMPTY_FIELD = "empty_field";
+    private static final String EMPTY_FIELD = "empty_field";
 
     @Override
     public boolean supports(Class<?> clazz) {
