@@ -20,5 +20,12 @@ public class IntegrasjonspunktPropertiesValidator implements Validator {
             ValidationUtils.rejectIfEmpty(errors, "noarkSystem.endpointURL", "empty_field", "DPO enabled - cannot be null");
         }
 
+        if (props.getFeature().isEnableDPV()) {
+            ValidationUtils.rejectIfEmpty(errors, "altinnPTV.externalServiceCode", "empty_field", "DPV enabled - cannot be null");
+            ValidationUtils.rejectIfEmpty(errors, "altinnPTV.externalServiceEditionCode", "empty_field", "DPV enabled - cannot be null");
+            ValidationUtils.rejectIfEmpty(errors, "altinnPTV.username", "empty_field", "DPV enabled - cannot be null");
+            ValidationUtils.rejectIfEmpty(errors, "altinnPTV.password", "empty_field", "DPV enabled - cannot be null");
+        }
+
     }
 }
