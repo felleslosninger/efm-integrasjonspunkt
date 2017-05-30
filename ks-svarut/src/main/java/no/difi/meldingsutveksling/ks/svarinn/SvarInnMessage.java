@@ -56,6 +56,9 @@ public class SvarInnMessage {
         // The payload util doesn't correctly handle payloads that are MeldingType.
         // And I am afraid of fixing that bug might lead to trouble in the archive system.
         String payload = payloadConverter.marshallToString(meldingType).replaceAll(":ns2|ns2:", "");
+        // TODO: Quickfix due to demo 30.05.17 - possible bug in ephorte? See jira issue MOVE-259
+        payload = payload.replace("<journpost>", "<journpost xmlns=\"\">");
+        payload = payload.replace("<noarksak>", "<noarksak xmlns=\"\">");
         eduCore.setPayload(payload);
         eduCore.setSender(createSender());
         eduCore.setReceiver(createReceiver());
