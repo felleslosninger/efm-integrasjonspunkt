@@ -49,7 +49,11 @@ public class Forsendelse {
 
     @Data
     public static class SvarSendesTil {
-        private String orgnr;
+        private String adresse1;
+        private String postnr;
+        private String poststed;
         private String navn;
+        private String land;
+        private String orgnr;
     }
 }

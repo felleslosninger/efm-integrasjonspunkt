@@ -103,11 +103,25 @@ public class SvarInnMessage {
         journpostType.setJpOffinnhold(metadata.getTittel());
         journpostType.setJpInnhold(metadata.getTittel());
         journpostType.setJpJdato(metadata.getJournaldato());
-        journpostType.getAvsmot().add(createSaksbehandlerAvsernder(metadata));
+        journpostType.getAvsmot().add(createSaksbehandlerAvsender(metadata));
+        journpostType.getAvsmot().add(createAvsender());
         return journpostType;
     }
 
-    private AvsmotType createSaksbehandlerAvsernder(Forsendelse.MetadataFraAvleverendeSystem metadata){
+    private AvsmotType createAvsender() {
+        Forsendelse.SvarSendesTil sst = forsendelse.getSvarSendesTil();
+        AvsmotType avsender = new AvsmotType();
+        avsender.setAmIhtype("1");
+        avsender.setAmAdresse(sst.getAdresse1());
+        avsender.setAmPostnr(sst.getPostnr());
+        avsender.setAmPoststed(sst.getPoststed());
+        avsender.setAmNavn(sst.getNavn());
+        avsender.setAmUtland(sst.getLand());
+        avsender.setAmOrgnr(sst.getOrgnr());
+        return avsender;
+    }
+
+    private AvsmotType createSaksbehandlerAvsender(Forsendelse.MetadataFraAvleverendeSystem metadata){
         AvsmotType avsender = new AvsmotType();
         avsender.setAmIhtype("0");
         avsender.setAmNavn(metadata.getSaksBehandler());
