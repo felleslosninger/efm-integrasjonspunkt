@@ -34,7 +34,12 @@ import java.util.Optional;
 })
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlSeeAlso({DpeInnsynConversationResource.class, DpoConversationResource.class})
+@XmlSeeAlso({DpoConversationResource.class,
+        DpvConversationResource.class,
+        DpiConversationResource.class,
+        DpfConversationResource.class,
+        DpeInnsynConversationResource.class,
+        DpeDataConversationResource.class})
 public abstract class ConversationResource {
 
     @Id
