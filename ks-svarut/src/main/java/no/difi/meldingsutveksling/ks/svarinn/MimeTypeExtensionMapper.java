@@ -22,6 +22,7 @@ public class MimeTypeExtensionMapper {
         mimeTypeMap.put("application/vnd.ms-powerpoint", "PPT");
         mimeTypeMap.put("application/vnd.openxmlformats-officedocument.presentationml.presentation", "PPTX");
         mimeTypeMap.put(MediaType.APPLICATION_PDF_VALUE, "PDF");
+        mimeTypeMap.put("text/plain", "TXT");
     }
 
     private MimeTypeExtensionMapper() {
