@@ -14,6 +14,10 @@ import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.EDUCoreConverter;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
+import no.difi.meldingsutveksling.receipt.Conversation;
+import no.difi.meldingsutveksling.receipt.ConversationRepository;
+import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
+import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.services.Adresseregister;
@@ -22,6 +26,8 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
@@ -33,17 +39,20 @@ public class EDUCoreSender {
     private final StrategyFactory strategyFactory;
     private final Adresseregister adresseRegister;
     private final NoarkClient mshClient;
+    private final ConversationRepository conversationRepository;
 
     @Autowired
     EDUCoreSender(IntegrasjonspunktProperties properties,
                   ServiceRegistryLookup serviceRegistryLookup,
                   StrategyFactory strategyFactory,
                   Adresseregister adresseregister,
+                  ConversationRepository conversationRepository,
                   @Qualifier("mshClient") ObjectProvider<NoarkClient> mshClient) {
         this.properties = properties;
         this.serviceRegistryLookup = serviceRegistryLookup;
         this.strategyFactory = strategyFactory;
         this.adresseRegister = adresseregister;
+        this.conversationRepository = conversationRepository;
         this.mshClient = mshClient.getIfAvailable();
     }
 
@@ -79,7 +88,21 @@ public class EDUCoreSender {
         }
 
         auditResult(result, message);
+        createReceiptIfValidResult(result, message);
         return result;
+    }
+
+    private void createReceiptIfValidResult(PutMessageResponseType result, EDUCore message) {
+        if (properties.getFeature().isEnableReceipts() &&
+                message.getServiceIdentifier() != null &&
+                "OK".equals(result.getResult().getType())) {
+            MessageStatus status = MessageStatus.of(GenericReceiptStatus.SENDT.toString(), LocalDateTime.now());
+            if (message.getMessageType() == EDUCore.MessageType.APPRECEIPT) {
+                status.setDescription("AppReceipt");
+            }
+            Conversation conversation = Conversation.of(message, status);
+            conversationRepository.save(conversation);
+        }
     }
 
     private void auditResult(PutMessageResponseType result, EDUCore message) {

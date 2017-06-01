@@ -14,12 +14,7 @@ import no.difi.meldingsutveksling.logging.MoveLogMarkers;
 import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
-import no.difi.meldingsutveksling.receipt.Conversation;
-import no.difi.meldingsutveksling.receipt.ConversationRepository;
-import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -35,7 +30,6 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.time.LocalDateTime;
 
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
@@ -67,9 +61,6 @@ public class InternalQueue {
 
     @Autowired
     private EDUCoreSender eduCoreSender;
-
-    @Autowired
-    private ConversationRepository conversationRepository;
 
     private static JAXBContext jaxbContextdomain;
     private static JAXBContext jaxbContext;
@@ -107,14 +98,7 @@ public class InternalQueue {
         MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrg().getNumber());
         EDUCore request = eduCoreConverter.unmarshallFrom(message);
         try {
-            PutMessageResponseType response = eduCoreSender.sendMessage(request);
-            if (properties.getFeature().isEnableReceipts() &&
-                    request.getServiceIdentifier() != null &&
-                    "OK".equals(response.getResult().getType())) {
-                MessageStatus status = createSentStatus(request);
-                Conversation conversation = Conversation.of(request, status);
-                conversationRepository.save(conversation);
-            }
+            eduCoreSender.sendMessage(request);
         } catch (Exception e) {
             Audit.warn("Failed to send message... queue will retry", EDUCoreMarker.markerFrom(request));
             throw e;
@@ -139,13 +123,6 @@ public class InternalQueue {
         } catch (Exception e) {
         }
 
-    }
-
-    private MessageStatus createSentStatus(EDUCore request) {
-        if (request.getMessageType() == EDUCore.MessageType.APPRECEIPT) {
-            return MessageStatus.of(GenericReceiptStatus.SENDT.toString(), LocalDateTime.now(), "AppReceipt");
-        }
-        return MessageStatus.of(GenericReceiptStatus.SENDT.toString(), LocalDateTime.now());
     }
 
     /**
