@@ -72,7 +72,7 @@ public class DpvStatusStrategy implements StatusStrategy {
                     .filter(s -> STATUS_CREATED.equals(s.getStatusType().value()))
                     .findFirst();
             boolean hasCreatedStatus = conversation.getMessageStatuses().stream()
-                    .anyMatch(r -> r.getStatus() == GenericReceiptStatus.LEVERT.toString());
+                    .anyMatch(r -> GenericReceiptStatus.LEVERT.toString().equals(r.getStatus()) );
             if (!hasCreatedStatus && createdStatus.isPresent()) {
                 ZonedDateTime createdZoned = createdStatus.get().getStatusDate().toGregorianCalendar().toZonedDateTime();
                 MessageStatus receipt = MessageStatus.of(GenericReceiptStatus.LEVERT.toString(), createdZoned
