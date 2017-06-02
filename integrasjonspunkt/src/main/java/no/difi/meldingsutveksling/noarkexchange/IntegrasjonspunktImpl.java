@@ -96,12 +96,12 @@ public class IntegrasjonspunktImpl implements SOAPport {
         }
 
         boolean strategyFactoryAvailable = strategyFactory.hasFactory(serviceRecord.getServiceIdentifier());
-        if (!strategyFactoryAvailable) {
+        if (!strategyFactoryAvailable && !mshCanReceive) {
             Audit.error(String.format("StrategyFactory for %s not found. Feature toggle might be disabled.",
                     serviceRecord.getServiceIdentifier()), marker);
         }
 
-        response.setResult((certificateAvailable || mshCanReceive || isDpv ) && strategyFactoryAvailable);
+        response.setResult(((certificateAvailable || isDpv ) && strategyFactoryAvailable) || mshCanReceive);
         return response;
     }
 

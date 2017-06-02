@@ -9,6 +9,7 @@ import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactor
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
+import no.difi.meldingsutveksling.receipt.ConversationRepository;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.services.Adresseregister;
@@ -23,6 +24,7 @@ public class EDUCoreSenderTest {
 
     private IntegrasjonspunktProperties properties;
     private ServiceRegistryLookup serviceRegistryLookup;
+    private ConversationRepository conversationRepository;
     private StrategyFactory strategyFactory;
     private Adresseregister adresseregister;
     private NoarkClient mshClient;
@@ -34,10 +36,14 @@ public class EDUCoreSenderTest {
     public void setup() {
         properties = mock(IntegrasjonspunktProperties.class);
         serviceRegistryLookup = mock(ServiceRegistryLookup.class);
+        conversationRepository = mock(ConversationRepository.class);
         strategyFactory = mock(StrategyFactory.class);
         adresseregister = mock(Adresseregister.class);
         mshClient = mock(NoarkClient.class);
 
+        IntegrasjonspunktProperties.FeatureToggle featureToggle = new IntegrasjonspunktProperties.FeatureToggle();
+        featureToggle.setEnableReceipts(false);
+        when(properties.getFeature()).thenReturn(featureToggle);
         final MessageStrategyFactory messageStrategyFactory = mock(MessageStrategyFactory.class);
         when(strategyFactory.getFactory(any(ServiceRecord.class))).thenReturn(messageStrategyFactory);
         final MessageStrategy messageStrategy = mock(MessageStrategy.class);
@@ -48,7 +54,8 @@ public class EDUCoreSenderTest {
         ObjectProvider objectProvider = mock(ObjectProvider.class);
         when(objectProvider.getIfAvailable()).thenReturn(mshClient);
 
-        eduCoreSender = new EDUCoreSender(properties, serviceRegistryLookup, strategyFactory, adresseregister, objectProvider);
+        eduCoreSender = new EDUCoreSender(properties, serviceRegistryLookup, strategyFactory, adresseregister,
+                conversationRepository, objectProvider);
         setupDefaultProperties();
         setupDefaultMessage();
     }

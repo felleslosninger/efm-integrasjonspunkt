@@ -1,13 +1,12 @@
 package no.difi.meldingsutveksling.ks.svarinn
 
-import no.difi.meldingsutveksling.noarkexchange.receive.PayloadConverter
 import no.difi.meldingsutveksling.noarkexchange.schema.core.AvsmotType
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType
 import org.junit.Before
 import org.junit.Test
 import org.springframework.http.MediaType
 
-public class SvarInnMessageTest {
+class SvarInnMessageTest {
     private int sakssekvensnummer
     private int saksaar
     private int journalsekvensnummer
@@ -25,7 +24,7 @@ public class SvarInnMessageTest {
 
 
     @Before
-    public void setup() {
+    void setup() {
         sakssekvensnummer = 123
         saksaar = 2017
         journalaar = 2017
@@ -40,23 +39,22 @@ public class SvarInnMessageTest {
     }
 
     @Test
-    public void givenSvarInnMessageToEduCoreShouldCreateEduCoreWithContent() {
+    void givenSvarInnMessageToEduCoreShouldCreateEduCoreWithContent() {
         final Forsendelse forsendelse = createForsendelse()
         byte[] content = [1, 2, 3, 4]
-        def List<SvarInnFile> files = [new SvarInnFile("fil1.txt", MediaType.TEXT_PLAIN, content)]
+        def files = [new SvarInnFile("fil1.txt", MediaType.TEXT_PLAIN, content)]
         SvarInnMessage message = new SvarInnMessage(forsendelse, files)
-        message.payloadConverter = [marshallToPayload: {meldingtype -> meldingtype}] as PayloadConverter
 
         def core = message.toEduCore()
 
+        def meldingType = message.payloadConverter.unmarshallFrom((core.getPayload() as String).bytes)
 
-        assert core?.getPayloadAsMeldingType()?.journpost?.getDokument()?.size() == 1
-        core.getPayloadAsMeldingType().journpost.getDokument().each {
+        assert meldingType?.journpost?.getDokument()?.size() == 1
+        meldingType?.journpost.getDokument().each {
             assert it.fil?.base64 == content
             assert it.veMimeType == files.get(0).mediaType.toString()
         }
         forsendelse.metadataFraAvleverendeSystem.with {
-            def meldingType = core.getPayloadAsMeldingType()
             assert sakssekvensnummer == meldingType?.noarksak?.saSeknr?.toInteger()
             assert saksaar == meldingType?.noarksak?.saSaar?.toInteger()
             assert journalaar == meldingType?.journpost?.jpJaar
