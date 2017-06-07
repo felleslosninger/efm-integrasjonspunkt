@@ -13,8 +13,6 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceRequest;
 import no.difi.meldingsutveksling.receipt.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,8 +24,8 @@ import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 
 @Component
 public class DpvStatusStrategy implements StatusStrategy {
+
     private static final ServiceIdentifier serviceIdentifier = ServiceIdentifier.DPV;
-    private static final Logger log = LoggerFactory.getLogger(DpvStatusStrategy.class);
 
     @Autowired
     private IntegrasjonspunktProperties properties;
