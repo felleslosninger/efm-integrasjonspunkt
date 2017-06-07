@@ -17,7 +17,7 @@ public class FiksStatusStrategy implements StatusStrategy {
     @Override
     public void checkStatus(Conversation conversation) {
         final MessageStatus messageStatus = svarUtService.getMessageReceipt(conversation);
-        if (messageStatus.getStatus() == DpfReceiptStatus.LEST.toString()) {
+        if (DpfReceiptStatus.LEST.toString().equals(messageStatus.getStatus())) {
             conversation.setPollable(false);
             conversation.setFinished(true);
         }
