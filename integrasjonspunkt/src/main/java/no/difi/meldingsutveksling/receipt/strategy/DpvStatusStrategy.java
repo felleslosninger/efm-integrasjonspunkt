@@ -24,6 +24,7 @@ import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 
 @Component
 public class DpvStatusStrategy implements StatusStrategy {
+
     private static final ServiceIdentifier serviceIdentifier = ServiceIdentifier.DPV;
 
     @Autowired
@@ -71,12 +72,12 @@ public class DpvStatusStrategy implements StatusStrategy {
             Optional<StatusChangeV2> createdStatus = statusChanges.stream()
                     .filter(s -> STATUS_CREATED.equals(s.getStatusType().value()))
                     .findFirst();
+            String levertStatus = GenericReceiptStatus.LEVERT.toString();
             boolean hasCreatedStatus = conversation.getMessageStatuses().stream()
-                    .anyMatch(r -> GenericReceiptStatus.LEVERT.toString().equals(r.getStatus()) );
+                    .anyMatch(r -> levertStatus.equals(r.getStatus()) );
             if (!hasCreatedStatus && createdStatus.isPresent()) {
                 ZonedDateTime createdZoned = createdStatus.get().getStatusDate().toGregorianCalendar().toZonedDateTime();
-                MessageStatus receipt = MessageStatus.of(GenericReceiptStatus.LEVERT.toString(), createdZoned
-                        .toLocalDateTime());
+                MessageStatus receipt = MessageStatus.of(levertStatus, createdZoned.toLocalDateTime());
                 conversation.addMessageStatus(receipt);
                 conversationRepository.save(conversation);
             }
@@ -84,10 +85,10 @@ public class DpvStatusStrategy implements StatusStrategy {
             Optional<StatusChangeV2> readStatus = statusChanges.stream()
                     .filter(s -> STATUS_READ.equals(s.getStatusType().value()))
                     .findFirst();
+            String lestStatus = GenericReceiptStatus.LEST.toString();
             if (readStatus.isPresent()) {
                 ZonedDateTime readZoned = readStatus.get().getStatusDate().toGregorianCalendar().toZonedDateTime();
-                MessageStatus receipt = MessageStatus.of(GenericReceiptStatus.LEST.toString(), readZoned
-                        .toLocalDateTime());
+                MessageStatus receipt = MessageStatus.of(lestStatus, readZoned.toLocalDateTime());
                 conversation.addMessageStatus(receipt);
                 conversation.setPollable(false);
                 conversation.setFinished(true);
