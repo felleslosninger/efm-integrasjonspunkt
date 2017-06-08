@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.auth.OidcTokenClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.ks.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.FiksMessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.KeystoreProvider;
@@ -23,6 +24,7 @@ import no.difi.move.common.config.KeystoreProperties;
 import no.difi.move.common.oauth.KeystoreHelper;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -73,8 +75,8 @@ public class IntegrasjonspunktBeans {
 
     @ConditionalOnProperty(name="difi.move.feature.enableDPF", havingValue = "true")
     @Bean
-    public FiksMessageStrategyFactory fiksMessageStrategyFactory(SvarUtService svarUtService) {
-        return FiksMessageStrategyFactory.newInstance(svarUtService);
+    public FiksMessageStrategyFactory fiksMessageStrategyFactory(SvarUtService svarUtService, @Qualifier("localNoark") NoarkClient localNoark) {
+        return FiksMessageStrategyFactory.newInstance(svarUtService, localNoark);
     }
 
     @ConditionalOnProperty(name="difi.move.feature.enableDPF", havingValue = "true")

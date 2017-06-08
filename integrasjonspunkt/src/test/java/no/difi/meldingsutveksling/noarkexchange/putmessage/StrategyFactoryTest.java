@@ -4,6 +4,7 @@ import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.ks.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -49,8 +50,9 @@ public class StrategyFactoryTest {
 
         final KeystoreProvider keystoreProvider = mock(KeystoreProvider.class);
         SvarUtService svarUtService = mock(SvarUtService.class);
+        NoarkClient noarkClientMock = mock(NoarkClient.class);
         strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider, properties);
-        strategyFactory.registerMessageStrategyFactory(FiksMessageStrategyFactory.newInstance(svarUtService));
+        strategyFactory.registerMessageStrategyFactory(FiksMessageStrategyFactory.newInstance(svarUtService, noarkClientMock));
 
     }
 
