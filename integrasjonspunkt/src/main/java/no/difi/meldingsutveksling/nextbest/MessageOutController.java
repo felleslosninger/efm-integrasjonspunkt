@@ -178,7 +178,7 @@ public class MessageOutController {
         ArrayList<String> files = Lists.newArrayList(request.getFileNames());
         for (String f : files) {
             MultipartFile file = request.getFile(f);
-            log.info(markerFrom(conversationResource), "Adding file \"{}\" ({}, {} bytes) to {}",
+            log.trace(markerFrom(conversationResource), "Adding file \"{}\" ({}, {} bytes) to {}",
                     file.getOriginalFilename(), file.getContentType(), file.getSize(), conversationResource.getConversationId());
 
             String filedir = props.getNextbest().getFiledir();
