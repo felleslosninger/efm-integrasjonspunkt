@@ -1,9 +1,12 @@
-package no.difi.meldingsutveksling.ks
+package no.difi.meldingsutveksling.ks.svarut
 
 import no.difi.meldingsutveksling.CertificateParser
 import no.difi.meldingsutveksling.core.EDUCore
 import no.difi.meldingsutveksling.core.Receiver
 import no.difi.meldingsutveksling.ks.mapping.FiksMapper
+import no.difi.meldingsutveksling.ks.svarut.SvarUtRequest
+import no.difi.meldingsutveksling.ks.svarut.SvarUtService
+import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceClient
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
 import spock.lang.Specification

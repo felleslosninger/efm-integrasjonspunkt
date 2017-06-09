@@ -2,9 +2,9 @@ package no.difi.meldingsutveksling.ks.mapping;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
-import no.difi.meldingsutveksling.ks.*;
 import no.difi.meldingsutveksling.ks.mapping.edu.FileTypeHandler;
 import no.difi.meldingsutveksling.ks.mapping.edu.FileTypeHandlerFactory;
+import no.difi.meldingsutveksling.ks.svarut.*;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.AvsmotType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;

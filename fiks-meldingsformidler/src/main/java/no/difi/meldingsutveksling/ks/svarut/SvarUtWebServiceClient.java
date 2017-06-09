@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.ks;
+package no.difi.meldingsutveksling.ks.svarut;
 
 public interface SvarUtWebServiceClient {
     String sendMessage(SvarUtRequest svarUtRequest);

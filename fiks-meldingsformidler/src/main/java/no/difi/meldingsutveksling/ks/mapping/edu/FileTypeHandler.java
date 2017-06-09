@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.ks.mapping.edu;
 
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
-import no.difi.meldingsutveksling.ks.Dokument;
 import no.difi.meldingsutveksling.ks.mapping.Handler;
+import no.difi.meldingsutveksling.ks.svarut.Dokument;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
 
 import javax.activation.DataHandler;

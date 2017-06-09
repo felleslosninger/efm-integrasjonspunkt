@@ -157,7 +157,7 @@
           <schemaIncludes>
             <include>*.wsdl</include>
           </schemaIncludes>
-          <generatePackage>no.difi.meldingsutveksling.ks</generatePackage>
+          <generatePackage>no.difi.meldingsutveksling.ks.svarut</generatePackage>
           <strict>true</strict>
           <verbose>true</verbose>
           <extension>true</extension>

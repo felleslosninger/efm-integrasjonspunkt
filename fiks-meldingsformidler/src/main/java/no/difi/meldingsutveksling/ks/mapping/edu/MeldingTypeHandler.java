@@ -1,9 +1,9 @@
 package no.difi.meldingsutveksling.ks.mapping.edu;
 
 import com.google.common.base.Objects;
-import no.difi.meldingsutveksling.ks.Dokument;
-import no.difi.meldingsutveksling.ks.Forsendelse;
 import no.difi.meldingsutveksling.ks.mapping.Handler;
+import no.difi.meldingsutveksling.ks.svarut.Dokument;
+import no.difi.meldingsutveksling.ks.svarut.Forsendelse;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.NoarksakType;

@@ -1,9 +1,9 @@
 package no.difi.meldingsutveksling.ks.mapping;
 
 import no.difi.meldingsutveksling.core.EDUCore;
-import no.difi.meldingsutveksling.ks.Forsendelse;
-import no.difi.meldingsutveksling.ks.ForsendelseStatus;
 import no.difi.meldingsutveksling.ks.receipt.DpfReceiptStatus;
+import no.difi.meldingsutveksling.ks.svarut.Forsendelse;
+import no.difi.meldingsutveksling.ks.svarut.ForsendelseStatus;
 
 import java.security.cert.X509Certificate;
 

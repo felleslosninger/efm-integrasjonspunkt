@@ -1,8 +1,13 @@
-package no.difi.meldingsutveksling.ks
+package no.difi.meldingsutveksling.ks.svarut
 
 import no.difi.meldingsutveksling.core.EDUCore
 import no.difi.meldingsutveksling.core.Receiver
 import no.difi.meldingsutveksling.core.Sender
+import no.difi.meldingsutveksling.ks.MockConfiguration
+import no.difi.meldingsutveksling.ks.svarut.SvarUtConfiguration
+import no.difi.meldingsutveksling.ks.svarut.SvarUtService
+import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceBeans
+import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceClientImpl
 import no.difi.meldingsutveksling.noarkexchange.schema.core.*
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
 import org.junit.Before

@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.ks;
+package no.difi.meldingsutveksling.ks.svarut;
 
 import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.CertificateParserException;

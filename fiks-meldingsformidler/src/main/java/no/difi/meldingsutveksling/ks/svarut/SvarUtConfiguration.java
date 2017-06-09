@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.ks;
+package no.difi.meldingsutveksling.ks.svarut;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.ks.mapping.FiksMapper;

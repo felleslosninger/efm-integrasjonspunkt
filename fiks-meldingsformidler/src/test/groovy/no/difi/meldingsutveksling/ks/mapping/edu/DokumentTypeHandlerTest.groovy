@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.ks.mapping.edu
 
-import no.difi.meldingsutveksling.ks.Dokument
+import no.difi.meldingsutveksling.ks.svarut.Dokument
 import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType
 import no.difi.meldingsutveksling.noarkexchange.schema.core.FilType
 import spock.lang.Specification

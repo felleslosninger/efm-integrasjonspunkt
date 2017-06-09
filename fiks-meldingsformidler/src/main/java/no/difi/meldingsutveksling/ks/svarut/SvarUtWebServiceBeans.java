@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.ks;
+package no.difi.meldingsutveksling.ks.svarut;
 
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;

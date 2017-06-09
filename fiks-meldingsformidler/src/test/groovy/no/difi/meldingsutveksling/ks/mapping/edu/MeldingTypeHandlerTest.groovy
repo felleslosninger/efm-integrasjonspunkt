@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.ks.mapping.edu
 
 import no.difi.meldingsutveksling.config.FiksConfig
-import no.difi.meldingsutveksling.ks.Forsendelse
+import no.difi.meldingsutveksling.ks.svarut.Forsendelse
 import no.difi.meldingsutveksling.noarkexchange.schema.core.*
 import spock.lang.Specification
 
