@@ -37,6 +37,7 @@ public class SvarInnService implements MessageDownloaderModule {
             Audit.info(String.format("%d new messages in FIKS", forsendelses.size()));
         }
         for(Forsendelse forsendelse : forsendelses) {
+
             final SvarInnFile svarInnFile = svarInnClient.downloadFile(forsendelse.getDownloadUrl());
             final byte[] decrypt = decryptor.decrypt(svarInnFile.getContents());
             final Map<String, byte[]> unzippedFile;
@@ -51,6 +52,10 @@ public class SvarInnService implements MessageDownloaderModule {
             }
             // create SvarInnFile with unzipped file and correct mimetype
             final List<SvarInnFile> files = svarInnFileFactory.createFiles(forsendelse.getFilmetadata(), unzippedFile);
+
+            if (!validateRequiredFields(forsendelse, files)) {
+                continue;
+            }
 
             final SvarInnMessage message = new SvarInnMessage(forsendelse, files);
 
@@ -69,4 +74,28 @@ public class SvarInnService implements MessageDownloaderModule {
             }
         }
     }
+
+    private boolean validateRequiredFields(Forsendelse forsendelse, List<SvarInnFile> files) {
+        Forsendelse.MetadataFraAvleverendeSystem metadata = forsendelse.getMetadataFraAvleverendeSystem();
+
+        SvarInnFieldValidator validator = SvarInnFieldValidator.validator()
+                .addField(metadata.getTittel(), "jpInnhold")
+                .addField(forsendelse.getMottaker().getOrgnr(), "receiver: orgnr")
+                .addField(forsendelse.getSvarSendesTil().getOrgnr(), "sender: orgnr")
+                .addField(forsendelse.getSvarSendesTil().getNavn(), "sender: name");
+        files.stream().forEach(f -> {
+            validator.addField(f.getMediaType().toString(), "veDokformat") // veDokformat
+            .addField(f.getFilnavn(), "dbTittel"); // dbTittel
+        });
+
+        if (!validator.getMissing().isEmpty()) {
+            String missingFields = validator.getMissing().stream().reduce((a, b) -> a + ", " + b).get();
+            Audit.error(String.format("Message with id=%s has the following missing field(s): %s",
+                    forsendelse.getId(), missingFields));
+            return false;
+        }
+
+        return true;
+    }
+
 }

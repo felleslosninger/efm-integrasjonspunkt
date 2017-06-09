@@ -32,7 +32,7 @@
       "journalstatus": null,
       "journaldato": null,
       "dokumentetsDato": null,
-      "tittel": null,
+      "tittel": "testtittel",
       "saksBehandler": null,
       "ekstraMetadata": []
     },
