@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.ks.SvarUtService;
+import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 
 public class FiksMessageStrategyFactory implements MessageStrategyFactory{

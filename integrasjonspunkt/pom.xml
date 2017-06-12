@@ -254,7 +254,7 @@
 
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>ks-svarut</artifactId>
+            <artifactId>fiks-meldingsformidler</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 

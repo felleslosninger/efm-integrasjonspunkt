@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.noarkexchange.putmessage;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreFactory;
-import no.difi.meldingsutveksling.ks.SvarUtService;
+import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.EDUCoreConverter;

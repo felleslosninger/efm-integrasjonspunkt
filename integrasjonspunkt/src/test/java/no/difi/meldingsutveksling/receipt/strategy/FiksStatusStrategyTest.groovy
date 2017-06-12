@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.receipt.strategy
 
-import no.difi.meldingsutveksling.ks.SvarUtService
+import no.difi.meldingsutveksling.ks.svarut.SvarUtService
 import no.difi.meldingsutveksling.ks.receipt.DpfReceiptStatus
 import no.difi.meldingsutveksling.receipt.Conversation
 import no.difi.meldingsutveksling.receipt.ConversationRepository
