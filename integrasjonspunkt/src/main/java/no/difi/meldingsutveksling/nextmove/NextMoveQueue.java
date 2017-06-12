@@ -72,13 +72,9 @@ public class NextMoveQueue {
         File localFile = new File(filedir+props.getNextbest().getAsicfile());
         localFile.getParentFile().mkdirs();
 
-        try {
-            FileOutputStream os = new FileOutputStream(localFile);
-            BufferedOutputStream bos = new BufferedOutputStream(os);
+        try (FileOutputStream os = new FileOutputStream(localFile);
+            BufferedOutputStream bos = new BufferedOutputStream(os)) {
             bos.write(decryptedAsicPackage);
-            bos.close();
-            os.close();
-
             inRepo.save(message);
         } catch (IOException e) {
             log.error("Could not write asic container to disc.", e);

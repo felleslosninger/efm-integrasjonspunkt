@@ -189,12 +189,9 @@ public class MessageOutController {
             File localFile = new File(filedir+file.getOriginalFilename());
             localFile.getParentFile().mkdirs();
 
-            try {
-                FileOutputStream os = new FileOutputStream(localFile);
-                BufferedOutputStream bos = new BufferedOutputStream(os);
+            try (FileOutputStream os = new FileOutputStream(localFile);
+                BufferedOutputStream bos = new BufferedOutputStream(os)) {
                 bos.write(file.getBytes());
-                bos.close();
-                os.close();
 
                 if (!conversationResource.getFileRefs().values().contains(file.getOriginalFilename())) {
                     conversationResource.addFileRef(file.getOriginalFilename());
