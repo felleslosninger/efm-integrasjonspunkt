@@ -35,7 +35,7 @@ public class NextMoveServiceBus {
 
     private static final Logger log = LoggerFactory.getLogger(NextMoveServiceBus.class);
 
-    private static final String NEXTBEST_QUEUE_PREFIX = "nextbestqueue";
+    private static final String NEXTMOVE_QUEUE_PREFIX = "nextbestqueue";
 
     private ServiceBusContract service;
     private IntegrasjonspunktProperties props;
@@ -73,7 +73,7 @@ public class NextMoveServiceBus {
         }
 
         // Create queue if it does not already exist
-        queuePath = String.format("%s%s%s", NEXTBEST_QUEUE_PREFIX,
+        queuePath = String.format("%s%s%s", NEXTMOVE_QUEUE_PREFIX,
                 props.getOrg().getNumber(),
                 props.getNextbest().getServiceBus().getMode());
         ListQueuesResult queues = service.listQueues();
@@ -99,7 +99,7 @@ public class NextMoveServiceBus {
 
             msg = new BrokeredMessage(os.toByteArray());
 
-            String queue = NEXTBEST_QUEUE_PREFIX + resource.getReceiverId();
+            String queue = NEXTMOVE_QUEUE_PREFIX + resource.getReceiverId();
             if (ServiceIdentifier.DPE_INNSYN == resource.getServiceIdentifier()) {
                 queue = queue + ServiceBusQueueMode.INNSYN.fullname();
             } else {

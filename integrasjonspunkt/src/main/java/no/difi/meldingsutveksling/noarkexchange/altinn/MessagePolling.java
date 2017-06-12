@@ -138,7 +138,7 @@ public class MessagePolling implements ApplicationContextAware {
             final DownloadRequest request = new DownloadRequest(reference.getValue(), properties.getOrg().getNumber());
             EduDocument eduDocument = client.download(request);
 
-            if (isNextBest(eduDocument)) {
+            if (isNextMove(eduDocument)) {
                 logger.info("NextBest Message received");
                 client.confirmDownload(request);
                 Audit.info("Message downloaded", markerFrom(reference).and(eduDocument.createLogstashMarkers()));
@@ -194,9 +194,9 @@ public class MessagePolling implements ApplicationContextAware {
         return eduDocument.getStandardBusinessDocumentHeader().getDocumentIdentification().getType().equalsIgnoreCase(StandardBusinessDocumentHeader.KVITTERING_TYPE);
     }
 
-    private boolean isNextBest(EduDocument eduDocument) {
+    private boolean isNextMove(EduDocument eduDocument) {
         return eduDocument.getStandardBusinessDocumentHeader().getDocumentIdentification().getType()
-                .equalsIgnoreCase(StandardBusinessDocumentHeader.NEXTBEST_TYPE);
+                .equalsIgnoreCase(StandardBusinessDocumentHeader.NEXTMOVE_TYPE);
     }
 
     private void sendReceipt(MessageInfo messageInfo) {

@@ -127,7 +127,7 @@ public class StandardBusinessDocumentFactory {
         Payload payload = new Payload(encryptArchive(context.getMottaker(), archive), shipmentMeta);
 
         return new CreateSBD().createSBD(context.getAvsender().getOrgNummer(), context.getMottaker().getOrgNummer(),
-                payload, context.getConversationId(), StandardBusinessDocumentHeader.NEXTBEST_TYPE,
+                payload, context.getConversationId(), StandardBusinessDocumentHeader.NEXTMOVE_TYPE,
                 context.getJournalPostId());
     }
 
