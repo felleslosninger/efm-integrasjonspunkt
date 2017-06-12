@@ -15,8 +15,8 @@ import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespon
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentExternalBEV2List;
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentV2;
 import no.difi.meldingsutveksling.core.EDUCore;
-import no.difi.meldingsutveksling.nextbest.DpvConversationResource;
-import no.difi.meldingsutveksling.nextbest.NextMoveException;
+import no.difi.meldingsutveksling.nextmove.DpvConversationResource;
+import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import org.apache.commons.io.FileUtils;
 

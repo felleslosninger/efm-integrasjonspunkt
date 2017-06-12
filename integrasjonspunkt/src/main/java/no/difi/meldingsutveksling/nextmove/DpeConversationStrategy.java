@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.nextbest;
+package no.difi.meldingsutveksling.nextmove;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import static no.difi.meldingsutveksling.nextbest.logging.ConversationResourceMarkers.markerFrom;
+import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
 
 @Component
 public class DpeConversationStrategy implements ConversationStrategy {

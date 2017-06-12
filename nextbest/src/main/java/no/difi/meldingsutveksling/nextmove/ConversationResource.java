@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.nextbest;
+package no.difi.meldingsutveksling.nextmove;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;

@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.nextbest;
+package no.difi.meldingsutveksling.nextmove;
 
 import com.google.common.collect.Lists;
 import io.swagger.annotations.*;
@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static no.difi.meldingsutveksling.nextbest.ConversationDirection.INCOMING;
-import static no.difi.meldingsutveksling.nextbest.logging.ConversationResourceMarkers.markerFrom;
+import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
+import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
 
 @RestController
 @Api

@@ -1,8 +1,8 @@
-package no.difi.meldingsutveksling.nextbest.logging;
+package no.difi.meldingsutveksling.nextmove.logging;
 
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.logging.MarkerFactory;
-import no.difi.meldingsutveksling.nextbest.ConversationResource;
+import no.difi.meldingsutveksling.nextmove.ConversationResource;
 
 public class ConversationResourceMarkers {
 

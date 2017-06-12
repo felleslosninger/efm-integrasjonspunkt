@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.nextbest;
+package no.difi.meldingsutveksling.nextmove;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -21,12 +21,12 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static no.difi.meldingsutveksling.nextbest.ConversationDirection.INCOMING;
+import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 
 @Component
-public class NextBestQueue {
+public class NextMoveQueue {
 
-    private static final Logger log = LoggerFactory.getLogger(NextBestQueue.class);
+    private static final Logger log = LoggerFactory.getLogger(NextMoveQueue.class);
 
     private DirectionalConversationResourceRepository inRepo;
 
@@ -37,7 +37,7 @@ public class NextBestQueue {
     private IntegrasjonspunktProperties props;
 
     @Autowired
-    public NextBestQueue(ConversationResourceRepository repo) {
+    public NextMoveQueue(ConversationResourceRepository repo) {
         inRepo = new DirectionalConversationResourceRepository(repo, INCOMING);
     }
 

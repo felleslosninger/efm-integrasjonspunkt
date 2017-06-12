@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.nextbest;
+package no.difi.meldingsutveksling.nextmove;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;

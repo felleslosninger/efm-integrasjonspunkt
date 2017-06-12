@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.nextbest;
+package no.difi.meldingsutveksling.nextmove;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -30,9 +30,9 @@ import java.util.UUID;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
-import static no.difi.meldingsutveksling.nextbest.ConversationDirection.INCOMING;
-import static no.difi.meldingsutveksling.nextbest.ConversationDirection.OUTGOING;
-import static no.difi.meldingsutveksling.nextbest.logging.ConversationResourceMarkers.markerFrom;
+import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
+import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
+import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
 
 @RestController
 @Api

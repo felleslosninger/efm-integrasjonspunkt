@@ -1,8 +1,8 @@
-package no.difi.meldingsutveksling.nextbest;
+package no.difi.meldingsutveksling.nextmove;
 
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.nextbest.logging.ConversationResourceMarkers;
+import no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PostVirksomhetStrategyFactory;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;

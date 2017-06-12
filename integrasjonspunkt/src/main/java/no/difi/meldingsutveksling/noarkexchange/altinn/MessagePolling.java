@@ -10,9 +10,9 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.kvittering.EduDocumentFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.nextbest.NextBestQueue;
-import no.difi.meldingsutveksling.nextbest.NextMoveServiceBus;
-import no.difi.meldingsutveksling.nextbest.NextMoveException;
+import no.difi.meldingsutveksling.nextmove.NextMoveQueue;
+import no.difi.meldingsutveksling.nextmove.NextMoveServiceBus;
+import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.Conversation;
@@ -76,7 +76,7 @@ public class MessagePolling implements ApplicationContextAware {
     ObjectProvider<List<MessageDownloaderModule>> messageDownloaders;
 
     @Autowired
-    private NextBestQueue nextBestQueue;
+    private NextMoveQueue nextMoveQueue;
 
     private ServiceRecord serviceRecord;
 
@@ -89,7 +89,7 @@ public class MessagePolling implements ApplicationContextAware {
         if (properties.getNextbest().getServiceBus().isEnable()) {
             logger.debug("Checking for new NextMove messages..");
             List<EduDocument> messages = nextMoveServiceBus.getAllMessages();
-            messages.forEach(nextBestQueue::enqueueEduDocument);
+            messages.forEach(nextMoveQueue::enqueueEduDocument);
         }
     }
 
@@ -142,7 +142,7 @@ public class MessagePolling implements ApplicationContextAware {
                 logger.info("NextBest Message received");
                 client.confirmDownload(request);
                 Audit.info("Message downloaded", markerFrom(reference).and(eduDocument.createLogstashMarkers()));
-                nextBestQueue.enqueueEduDocument(eduDocument);
+                nextMoveQueue.enqueueEduDocument(eduDocument);
                 continue;
             }
 

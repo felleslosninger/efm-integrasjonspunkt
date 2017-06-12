@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.nextbest;
+package no.difi.meldingsutveksling.nextmove;
 
 import com.google.common.collect.Lists;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -31,7 +31,7 @@ import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.RegexMatcher.matchesRegex;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
-import static no.difi.meldingsutveksling.nextbest.ConversationDirection.OUTGOING;
+import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
