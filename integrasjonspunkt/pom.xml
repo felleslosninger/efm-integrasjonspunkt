@@ -650,7 +650,7 @@
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>nextbest</artifactId>
+            <artifactId>nextmove</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
