@@ -10,12 +10,15 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.kvittering.EduDocumentFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.nextbest.NextBestException;
 import no.difi.meldingsutveksling.nextbest.NextBestQueue;
-import no.difi.meldingsutveksling.nextbest.NextBestServiceBus;
+import no.difi.meldingsutveksling.nextbest.NextMoveServiceBus;
+import no.difi.meldingsutveksling.nextbest.NextMoveException;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
-import no.difi.meldingsutveksling.receipt.*;
+import no.difi.meldingsutveksling.receipt.Conversation;
+import no.difi.meldingsutveksling.receipt.ConversationRepository;
+import no.difi.meldingsutveksling.receipt.DpoReceiptStatus;
+import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.transport.Transport;
@@ -78,14 +81,14 @@ public class MessagePolling implements ApplicationContextAware {
     private ServiceRecord serviceRecord;
 
     @Autowired
-    private NextBestServiceBus nextBestServiceBus;
+    private NextMoveServiceBus nextMoveServiceBus;
 
     @Scheduled(fixedRate = 5000L)
-    public void checkForNewNextBestMessages() throws NextBestException {
+    public void checkForNewNextBestMessages() throws NextMoveException {
 
         if (properties.getNextbest().getServiceBus().isEnable()) {
-            logger.debug("Checking for new NextBest messages..");
-            List<EduDocument> messages = nextBestServiceBus.getAllMessages();
+            logger.debug("Checking for new NextMove messages..");
+            List<EduDocument> messages = nextMoveServiceBus.getAllMessages();
             messages.forEach(nextBestQueue::enqueueEduDocument);
         }
     }

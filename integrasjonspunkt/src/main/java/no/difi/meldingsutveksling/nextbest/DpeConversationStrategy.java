@@ -17,11 +17,11 @@ public class DpeConversationStrategy implements ConversationStrategy {
     private static final Logger log = LoggerFactory.getLogger(DpeConversationStrategy.class);
 
     private IntegrasjonspunktProperties props;
-    private NextBestServiceBus serviceBus;
+    private NextMoveServiceBus serviceBus;
 
     @Autowired
     DpeConversationStrategy(IntegrasjonspunktProperties props,
-                            NextBestServiceBus serviceBus) {
+                            NextMoveServiceBus serviceBus) {
         this.props = props;
         this.serviceBus = serviceBus;
     }
@@ -37,7 +37,7 @@ public class DpeConversationStrategy implements ConversationStrategy {
         }
         try {
             serviceBus.putMessage(conversationResource);
-        } catch (NextBestException e) {
+        } catch (NextMoveException e) {
             log.error("Send message failed.", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error during sending. Check logs");
         }

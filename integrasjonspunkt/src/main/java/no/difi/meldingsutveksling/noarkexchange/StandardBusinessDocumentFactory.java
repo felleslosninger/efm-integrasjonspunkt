@@ -115,7 +115,7 @@ public class StandardBusinessDocumentFactory {
                 log.error("Could not read file \""+file.getName()+"\"", e);
                 throw new MessageException(e, StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT);
             }
-            attachements.add(new NextBestAttachement(bytes, filename));
+            attachements.add(new NextMoveAttachement(bytes, filename));
         }
 
         Archive archive;

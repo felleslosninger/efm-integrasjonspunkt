@@ -31,9 +31,9 @@ import java.util.List;
 import static com.google.common.base.Strings.isNullOrEmpty;
 
 @Component
-public class NextBestServiceBus {
+public class NextMoveServiceBus {
 
-    private static final Logger log = LoggerFactory.getLogger(NextBestServiceBus.class);
+    private static final Logger log = LoggerFactory.getLogger(NextMoveServiceBus.class);
 
     private static final String NEXTBEST_QUEUE_PREFIX = "nextbestqueue";
 
@@ -45,7 +45,7 @@ public class NextBestServiceBus {
     private String queuePath;
 
     @Autowired
-    public NextBestServiceBus(IntegrasjonspunktProperties props,
+    public NextMoveServiceBus(IntegrasjonspunktProperties props,
                               StandardBusinessDocumentFactory sbdf,
                               MessageSender messageSender) throws JAXBException {
 
@@ -84,7 +84,7 @@ public class NextBestServiceBus {
         }
     }
 
-    public void putMessage(ConversationResource resource) throws NextBestException {
+    public void putMessage(ConversationResource resource) throws NextMoveException {
 
         BrokeredMessage msg;
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
@@ -108,12 +108,12 @@ public class NextBestServiceBus {
             service.sendMessage(queue, msg);
         } catch (ServiceException | MessageException | JAXBException | IOException e) {
             log.error("Could not send conversation resource", e);
-            throw new NextBestException(e);
+            throw new NextMoveException(e);
         }
 
     }
 
-    public List<EduDocument> getAllMessages() throws NextBestException {
+    public List<EduDocument> getAllMessages() throws NextMoveException {
 
         ReceiveMessageOptions opts = ReceiveMessageOptions.DEFAULT;
         opts.setReceiveMode(ReceiveMode.PEEK_LOCK);
@@ -135,7 +135,7 @@ public class NextBestServiceBus {
             }
         } catch (ServiceException | JAXBException e) {
             log.error("Failed to fetch new message(s)", e);
-            throw new NextBestException(e);
+            throw new NextMoveException(e);
         }
 
         return messages;

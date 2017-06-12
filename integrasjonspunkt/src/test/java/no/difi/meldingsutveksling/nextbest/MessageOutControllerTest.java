@@ -65,7 +65,7 @@ public class MessageOutControllerTest {
     private MessageSender messageSender;
 
     @MockBean
-    private NextBestServiceBus nextBestServiceBus;
+    private NextMoveServiceBus nextMoveServiceBus;
 
     @Before
     public void setup() {

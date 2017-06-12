@@ -53,7 +53,7 @@ public class MessageOutController {
     private MessageSender messageSender;
 
     @Autowired
-    private NextBestServiceBus nextBestServiceBus;
+    private NextMoveServiceBus nextMoveServiceBus;
 
     @Autowired
     private ConversationStrategyFactory strategyFactory;
