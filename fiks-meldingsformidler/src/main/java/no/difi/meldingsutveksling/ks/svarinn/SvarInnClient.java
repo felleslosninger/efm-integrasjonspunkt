@@ -16,10 +16,7 @@ public class SvarInnClient {
     }
 
     public List<Forsendelse> checkForNewMessages() {
-        final List<Forsendelse> forsendelser = Arrays.asList(restTemplate.getForObject("/mottaker/hentNyeForsendelser", Forsendelse[].class));
-
-        return forsendelser;
-
+        return Arrays.asList(restTemplate.getForObject("/mottaker/hentNyeForsendelser", Forsendelse[].class));
     }
 
     public SvarInnFile downloadFile(String url) {

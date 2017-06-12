@@ -18,7 +18,7 @@ import java.util.function.Function;
 public class FileTypeHandler implements Handler<Dokument.Builder> {
     private final DokumentType domainDocument;
     private X509Certificate certificate;
-    private final Function<byte[], byte[]> noop = b -> b;
+    private static final Function<byte[], byte[]> noop = b -> b;
     private final Function<byte[], byte[]> encrypt = b -> new CmsUtil().createCMS(b, certificate);
     private Function<byte[], byte[]> transform = noop;
 

@@ -83,10 +83,10 @@ public class SvarInnService implements MessageDownloaderModule {
                 .addField(forsendelse.getMottaker().getOrgnr(), "receiver: orgnr")
                 .addField(forsendelse.getSvarSendesTil().getOrgnr(), "sender: orgnr")
                 .addField(forsendelse.getSvarSendesTil().getNavn(), "sender: name");
-        files.stream().forEach(f -> {
+        files.stream().forEach(f ->
             validator.addField(f.getMediaType().toString(), "veDokformat") // veDokformat
-            .addField(f.getFilnavn(), "dbTittel"); // dbTittel
-        });
+            .addField(f.getFilnavn(), "dbTittel") // dbTittel
+        );
 
         if (!validator.getMissing().isEmpty()) {
             String missingFields = validator.getMissing().stream().reduce((a, b) -> a + ", " + b).get();
