@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.dokumentpakking.xml;
 
-import no.difi.meldingsutveksling.nextbest.ConversationResource;
+import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import org.apache.commons.codec.binary.Base64;
 
 import javax.xml.bind.annotation.XmlAccessType;

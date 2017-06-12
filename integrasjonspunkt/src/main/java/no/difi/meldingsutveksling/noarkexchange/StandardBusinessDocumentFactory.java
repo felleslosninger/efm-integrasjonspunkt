@@ -15,7 +15,7 @@ import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.nextbest.ConversationResource;
+import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.noarkexchange.receive.EDUCoreConverter;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.apache.commons.io.FileUtils;
@@ -115,7 +115,7 @@ public class StandardBusinessDocumentFactory {
                 log.error("Could not read file \""+file.getName()+"\"", e);
                 throw new MessageException(e, StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT);
             }
-            attachements.add(new NextBestAttachement(bytes, filename));
+            attachements.add(new NextMoveAttachement(bytes, filename));
         }
 
         Archive archive;
@@ -127,7 +127,7 @@ public class StandardBusinessDocumentFactory {
         Payload payload = new Payload(encryptArchive(context.getMottaker(), archive), shipmentMeta);
 
         return new CreateSBD().createSBD(context.getAvsender().getOrgNummer(), context.getMottaker().getOrgNummer(),
-                payload, context.getConversationId(), StandardBusinessDocumentHeader.NEXTBEST_TYPE,
+                payload, context.getConversationId(), StandardBusinessDocumentHeader.NEXTMOVE_TYPE,
                 context.getJournalPostId());
     }
 
