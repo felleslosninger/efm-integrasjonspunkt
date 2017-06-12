@@ -136,4 +136,4 @@ queue/*.queue
 integrasjonspunkt-logs/*.log
 
 # Overrides (files for tests)
-!/ks-svarut/src/test/resources/somdalen.jks
+!/fiks-meldingsformidler/src/test/resources/somdalen.jks
