@@ -46,7 +46,7 @@ public class IntegrasjonspunktBeans {
 
     @Bean
     public AltinnFormidlingsTjenestenConfig altinnConfig() {
-        return properties.getAltinn();
+        return properties.getDpo();
     }
 
     @Bean
