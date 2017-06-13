@@ -25,10 +25,10 @@ public class IntegrasjonspunktPropertiesValidator implements Validator {
         }
 
         if (props.getFeature().isEnableDPV()) {
-            ValidationUtils.rejectIfEmpty(errors, "altinnPTV.externalServiceCode", EMPTY_FIELD, DPV_ERROR_MSG);
-            ValidationUtils.rejectIfEmpty(errors, "altinnPTV.externalServiceEditionCode", EMPTY_FIELD, DPV_ERROR_MSG);
-            ValidationUtils.rejectIfEmpty(errors, "altinnPTV.username", EMPTY_FIELD, DPV_ERROR_MSG);
-            ValidationUtils.rejectIfEmpty(errors, "altinnPTV.password", EMPTY_FIELD, DPV_ERROR_MSG);
+            ValidationUtils.rejectIfEmpty(errors, "dpv.externalServiceCode", EMPTY_FIELD, DPV_ERROR_MSG);
+            ValidationUtils.rejectIfEmpty(errors, "dpv.externalServiceEditionCode", EMPTY_FIELD, DPV_ERROR_MSG);
+            ValidationUtils.rejectIfEmpty(errors, "dpv.username", EMPTY_FIELD, DPV_ERROR_MSG);
+            ValidationUtils.rejectIfEmpty(errors, "dpv.password", EMPTY_FIELD, DPV_ERROR_MSG);
         }
 
     }

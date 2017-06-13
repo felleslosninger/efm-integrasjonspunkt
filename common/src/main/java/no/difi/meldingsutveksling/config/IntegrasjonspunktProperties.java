@@ -35,10 +35,10 @@ public class IntegrasjonspunktProperties {
     private String serviceregistryEndpoint;
 
     @Valid
-    private AltinnFormidlingsTjenestenConfig altinn;
+    private AltinnFormidlingsTjenestenConfig dpo;
 
     @Valid
-    private PostVirksomheter altinnPTV;
+    private PostVirksomheter dpv;
 
     @Valid
     private NorskArkivstandardSystem noarkSystem;
