@@ -43,10 +43,10 @@ public class DpvStatusStrategy implements StatusStrategy {
     public void checkStatus(Conversation conversation) {
 
         CorrespondenceAgencyConfiguration config = new CorrespondenceAgencyConfiguration.Builder()
-                .withExternalServiceCode(properties.getAltinnPTV().getExternalServiceCode())
-                .withExternalServiceEditionCode(properties.getAltinnPTV().getExternalServiceEditionCode())
-                .withPassword(properties.getAltinnPTV().getPassword())
-                .withSystemUserCode(properties.getAltinnPTV().getUsername())
+                .withExternalServiceCode(properties.getDpv().getExternalServiceCode())
+                .withExternalServiceEditionCode(properties.getDpv().getExternalServiceEditionCode())
+                .withPassword(properties.getDpv().getPassword())
+                .withSystemUserCode(properties.getDpv().getUsername())
                 .build();
 
         ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(conversation.getReceiverIdentifier());

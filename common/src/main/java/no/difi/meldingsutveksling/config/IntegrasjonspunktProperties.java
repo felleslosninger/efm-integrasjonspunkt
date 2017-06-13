@@ -38,7 +38,7 @@ public class IntegrasjonspunktProperties {
     private AltinnFormidlingsTjenestenConfig altinn;
 
     @Valid
-    private PostVirksomheter altinnPTV;
+    private PostVirksomheter dpv;
 
     @Valid
     private NorskArkivstandardSystem noarkSystem;
