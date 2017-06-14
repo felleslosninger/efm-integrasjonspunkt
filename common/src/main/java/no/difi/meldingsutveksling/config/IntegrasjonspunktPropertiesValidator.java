@@ -31,5 +31,9 @@ public class IntegrasjonspunktPropertiesValidator implements Validator {
             ValidationUtils.rejectIfEmpty(errors, "dpv.password", EMPTY_FIELD, DPV_ERROR_MSG);
         }
 
+        if (props.getFeature().isEnableDPE() && !props.getSign().isEnable()) {
+            errors.rejectValue("sign.enable", "cannot_be_false", "DPE enabled - cannot be false");
+        }
+
     }
 }

@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.serviceregistry;
 
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -31,6 +33,7 @@ public class ServiceRegistryLookup {
     private IntegrasjonspunktProperties properties;
     private final LoadingCache<Parameters, ServiceRecord> srCache;
     private final LoadingCache<Parameters, InfoRecord> irCache;
+    private final Supplier<String> sasTokenSupplier;
 
     private Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -39,6 +42,8 @@ public class ServiceRegistryLookup {
     public ServiceRegistryLookup(RestClient client, IntegrasjonspunktProperties properties) {
         this.client = client;
         this.properties = properties;
+
+        this.sasTokenSupplier = Suppliers.memoizeWithExpiration(loadSasToken(), 1, TimeUnit.MINUTES);
 
         this.srCache = CacheBuilder.newBuilder()
                 .maximumSize(100)
@@ -114,6 +119,26 @@ public class ServiceRegistryLookup {
 
     private int getNumberOfServiceRecords(DocumentContext documentContext) {
         return documentContext.read("$.serviceRecords.length()");
+    }
+
+    /**
+     * Method to fetch SAS token from Service Registry.
+     * Token is cached with 1 minute timeout.
+     *
+     * @return SAS token
+     */
+    public String getSasToken() {
+        return sasTokenSupplier.get();
+    }
+
+    private Supplier<String> loadSasToken() {
+        return () -> {
+            try {
+                return client.getResource("sastoken");
+            } catch (BadJWSException e) {
+                throw new ServiceRegistryLookupException("Bad signature in response from service registry", e);
+            }
+        };
     }
 
     private Configuration jsonPathConfiguration() {

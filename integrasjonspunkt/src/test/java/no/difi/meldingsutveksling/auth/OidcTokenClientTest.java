@@ -86,5 +86,14 @@ public class OidcTokenClientTest {
         System.out.println(response);
     }
 
+    @Test
+    @Ignore("Manual test")
+    public void testSasTokenFetch() throws URISyntaxException {
+        OidcTokenClient oidcTokenClient = new OidcTokenClient(props);
+        OauthRestTemplateConfig config = new OauthRestTemplateConfig(props, oidcTokenClient);
+        RestOperations ops = config.restTemplate();
+        String response = ops.getForObject("http://localhost:9099/sastoken", String.class);
+        System.out.println(response);
+    }
 
 }
