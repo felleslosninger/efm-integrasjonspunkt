@@ -60,12 +60,12 @@ public class EDUCoreSender {
         MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrg().getNumber());
 
         final ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(message.getReceiver().getIdentifier());
-        final MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(serviceRecord);
         PutMessageResponseType result;
         final LogstashMarker marker = EDUCoreMarker.markerFrom(message);
         if (adresseRegister.hasAdresseregisterCertificate(serviceRecord)) {
             Audit.info("Receiver validated", marker);
 
+            final MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(serviceRecord);
             MessageStrategy strategy = messageStrategyFactory.create(message.getPayload());
             result = strategy.send(message);
         } else if (!isNullOrEmpty(properties.getMsh().getEndpointURL())
@@ -79,6 +79,7 @@ public class EDUCoreSender {
             result = mshClient.sendEduMelding(putMessage);
         } else if (DPV.equals(serviceRecord.getServiceIdentifier())) {
             Audit.info("Send message to DPV", marker);
+            final MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(serviceRecord);
             MessageStrategy strategy = messageStrategyFactory.create(message.getPayload());
             result = strategy.send(message);
         } else {
