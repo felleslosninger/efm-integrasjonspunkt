@@ -32,9 +32,17 @@ public class ConversationController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = Conversation[].class)
     })
-    public List<Conversation> conversations() {
-        Stream<Conversation> s = StreamSupport.stream(convoRepo.findAll().spliterator(), false);
-        return s.sorted((a, b) -> b.getLastUpdate().compareTo(a.getLastUpdate())).collect(Collectors.toList());
+    public List<Conversation> conversations(
+            @ApiParam(value = "Filter conversations based on finished status")
+            @RequestParam(value = "finished", required = false) Optional<Boolean> finished) {
+
+        List<Conversation> conversations;
+        if (finished.isPresent()) {
+            conversations = convoRepo.findByFinished(finished.get());
+        } else {
+            conversations = Lists.newArrayList(convoRepo.findAll());
+        }
+        return conversations.stream().sorted((a, b) -> b.getLastUpdate().compareTo(a.getLastUpdate())).collect(Collectors.toList());
     }
 
     @RequestMapping(value = "/conversations/{id}", method = RequestMethod.GET)

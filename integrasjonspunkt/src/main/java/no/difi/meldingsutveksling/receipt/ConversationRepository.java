@@ -9,4 +9,5 @@ public interface ConversationRepository  extends CrudRepository<Conversation, St
     Optional<Conversation> findByConvId(Integer convId);
     List<Conversation> findByConversationId(String conversationId);
     List<Conversation> findByPollable(boolean pollable);
+    List<Conversation> findByFinished(boolean finished);
 }
