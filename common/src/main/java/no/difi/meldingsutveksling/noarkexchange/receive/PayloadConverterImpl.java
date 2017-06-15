@@ -54,7 +54,11 @@ public class PayloadConverterImpl<T> implements PayloadConverter<T> {
         try {
             Marshaller marshaller = jaxbContext.createMarshaller();
             marshaller.marshal(new JAXBElement<>(new QName(namespaceUri, localPart), clazz, message), sw);
-            return sw.toString();
+            // TODO: Quickfix due to demo 30.05.17 - possible bug in ephorte? See jira issue MOVE-259
+            String payload = sw.toString().replaceAll(":ns2|ns2:", "");
+            payload = payload.replace("<journpost>", "<journpost xmlns=\"\">");
+            payload = payload.replace("<noarksak>", "<noarksak xmlns=\"\">");
+            return payload;
         } catch (JAXBException e) {
             throw new PayloadConverterException("Unable to create marshaller for " + clazz, e);
         }

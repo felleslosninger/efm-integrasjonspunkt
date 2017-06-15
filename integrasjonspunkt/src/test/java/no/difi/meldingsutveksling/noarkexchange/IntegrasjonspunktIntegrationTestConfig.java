@@ -8,7 +8,7 @@ import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
-import no.difi.meldingsutveksling.ks.SvarUtService;
+import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.KeystoreProvider;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;

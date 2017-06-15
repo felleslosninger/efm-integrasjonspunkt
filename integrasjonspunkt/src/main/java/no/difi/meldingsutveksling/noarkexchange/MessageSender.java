@@ -9,7 +9,7 @@ import no.difi.meldingsutveksling.domain.Noekkelpar;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.nextbest.ConversationResource;
+import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;

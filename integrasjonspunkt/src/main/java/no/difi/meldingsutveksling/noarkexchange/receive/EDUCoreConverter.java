@@ -17,6 +17,11 @@ public class EDUCoreConverter {
     private static final String MESSAGE_TYPE_NAMESPACE = "http://www.arkivverket.no/Noark4-1-WS-WD/types";
     private static final String APPRECEIPT_NAMESPACE = "http://www.arkivverket.no/Noark/Exchange/types";
 
+    private static final PayloadConverter meldingTypeConverter = new PayloadConverterImpl<>(MeldingType.class,
+            MESSAGE_TYPE_NAMESPACE, "Melding");
+    private static final PayloadConverter appReceiptConverter = new PayloadConverterImpl<>(AppReceiptType.class,
+            APPRECEIPT_NAMESPACE, "AppReceipt");
+
     private static final JAXBContext jaxbContext;
     static {
         try {
@@ -29,12 +34,12 @@ public class EDUCoreConverter {
     public byte[] marshallToBytes(EDUCore message) {
         // Need to marshall payload before marshalling the message, since the payload can have different types
         String marshalledPayload;
-        PayloadConverterImpl payloadConverter;
+        PayloadConverter payloadConverter;
         if (message.getMessageType() == EDUCore.MessageType.EDU) {
-            payloadConverter = new PayloadConverterImpl<>(MeldingType.class, MESSAGE_TYPE_NAMESPACE, "Melding");
+            payloadConverter = meldingTypeConverter;
             marshalledPayload = payloadConverter.marshallToString(message.getPayloadAsMeldingType());
         } else {
-            payloadConverter = new PayloadConverterImpl<>(AppReceiptType.class, APPRECEIPT_NAMESPACE, "AppReceipt");
+            payloadConverter = appReceiptConverter;
             marshalledPayload = payloadConverter.marshallToString(message.getPayloadAsAppreceiptType());
         }
         message.setPayload(marshalledPayload);
@@ -50,14 +55,19 @@ public class EDUCoreConverter {
         }
     }
 
+    public String meldingTypeAsString(MeldingType meldingType) {
+        return meldingTypeConverter.marshallToString(meldingType);
+    }
+
+    public String appReceiptAsString(AppReceiptType appReceiptType) {
+        return appReceiptConverter.marshallToString(appReceiptType);
+    }
+
     public String payloadAsString(EDUCore message) {
-        PayloadConverterImpl payloadConverter;
         if (message.getMessageType() == EDUCore.MessageType.EDU) {
-            payloadConverter = new PayloadConverterImpl<>(MeldingType.class, MESSAGE_TYPE_NAMESPACE, "Melding");
-            return payloadConverter.marshallToString(message.getPayloadAsMeldingType());
+            return meldingTypeConverter.marshallToString(message.getPayloadAsMeldingType());
         } else {
-            payloadConverter = new PayloadConverterImpl<>(AppReceiptType.class, APPRECEIPT_NAMESPACE, "AppReceipt");
-            return payloadConverter.marshallToString(message.getPayloadAsAppreceiptType());
+            return appReceiptConverter.marshallToString(message.getPayloadAsAppreceiptType());
         }
     }
 

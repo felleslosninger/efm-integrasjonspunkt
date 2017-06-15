@@ -24,22 +24,22 @@ public class PostVirksomhetStrategyFactory implements MessageStrategyFactory {
 
         InfoRecord infoRecord = serviceRegistryLookup.getInfoRecord(properties.getOrg().getNumber());
         CorrespondenceAgencyConfiguration.Builder builder = new CorrespondenceAgencyConfiguration.Builder()
-                .withExternalServiceCode(properties.getAltinnPTV().getExternalServiceCode())
-                .withExternalServiceEditionCode(properties.getAltinnPTV().getExternalServiceEditionCode())
-                .withPassword(properties.getAltinnPTV().getPassword())
-                .withSystemUserCode(properties.getAltinnPTV().getUsername())
+                .withExternalServiceCode(properties.getDpv().getExternalServiceCode())
+                .withExternalServiceEditionCode(properties.getDpv().getExternalServiceEditionCode())
+                .withPassword(properties.getDpv().getPassword())
+                .withSystemUserCode(properties.getDpv().getUsername())
                 .withSender(infoRecord.getOrganizationName());
 
-        Optional<String> smsVarslingstekst = Optional.of(properties.getAltinnPTV()).map(IntegrasjonspunktProperties
+        Optional<String> smsVarslingstekst = Optional.of(properties.getDpv()).map(IntegrasjonspunktProperties
                 .PostVirksomheter::getSms).map(IntegrasjonspunktProperties.Sms::getVarslingstekst);
         if (smsVarslingstekst.isPresent() && !"".equals(smsVarslingstekst.get())) {
             builder.withSmsText(smsVarslingstekst.get());
         }
 
-        Optional<String> emailSubject = Optional.of(properties.getAltinnPTV()).map(IntegrasjonspunktProperties
+        Optional<String> emailSubject = Optional.of(properties.getDpv()).map(IntegrasjonspunktProperties
                 .PostVirksomheter::getEmail).map(IntegrasjonspunktProperties.PostVirksomheter.Email::getEmne);
         if (emailSubject.isPresent() && !"".equals(emailSubject.get())) {
-            builder.withEmailSubject(emailSubject.get()).withEmailBody(properties.getAltinnPTV().getEmail().getVarslingstekst());
+            builder.withEmailSubject(emailSubject.get()).withEmailBody(properties.getDpv().getEmail().getVarslingstekst());
         }
 
         builder.withNextbestFiledir(properties.getNextbest().getFiledir());

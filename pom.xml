@@ -5,7 +5,7 @@
     <groupId>no.difi.meldingsutveksling</groupId>
     <artifactId>parent-pom</artifactId>
     <packaging>pom</packaging>
-    <version>1.7.60</version>
+    <version>1.7.61</version>
     <name>Multiproject for meldingsutveksling</name>
 
     <scm>
@@ -66,8 +66,8 @@
         <module>post-til-virksomhet</module>
         <module>post-til-private</module>
         <module>service-registry-client</module>
-        <module>nextbest</module>
-        <module>ks-svarut</module>
+        <module>nextmove</module>
+        <module>fiks-meldingsformidler</module>
     </modules>
 
     <dependencyManagement>

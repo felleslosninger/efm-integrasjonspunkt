@@ -7,12 +7,14 @@ import com.google.common.collect.Lists;
 import lombok.Data;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.logging.Audit;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 
 @Entity
 @Data
@@ -42,13 +44,12 @@ public class Conversation {
                          String messageReference,
                          String receiverIdentifier,
                          String messageTitle,
-                         ServiceIdentifier serviceIdentifier,
-                         List<MessageStatus> statuses) {
+                         ServiceIdentifier serviceIdentifier) {
         this.conversationId = conversationId;
         this.messageReference = messageReference;
         this.receiverIdentifier = receiverIdentifier;
         this.messageTitle = messageTitle;
-        this.messageStatuses = statuses;
+        this.messageStatuses = Lists.newArrayList();
         this.serviceIdentifier = serviceIdentifier;
         this.lastUpdate = LocalDateTime.now();
         switch (serviceIdentifier) {
@@ -70,15 +71,14 @@ public class Conversation {
                                   String messageTitle,
                                   ServiceIdentifier serviceIdentifier,
                                   MessageStatus... statuses) {
-        if (statuses == null || statuses.length == 0) {
-            return new Conversation(conversationId, messageReference, receiverIdentifier, messageTitle,
-                    serviceIdentifier, Lists.newArrayList());
+
+        Conversation c = new Conversation(conversationId, messageReference, receiverIdentifier, messageTitle, serviceIdentifier);
+        if (statuses != null && statuses.length > 0) {
+            Stream.of(statuses)
+                    .peek(r -> r.setConversationId(conversationId))
+                    .forEach(c::addMessageStatus);
         }
-        List<MessageStatus> statusList = Stream.of(statuses)
-                .peek(r -> r.setConversationId(conversationId))
-                .collect(Collectors.toList());
-        return new Conversation(conversationId, messageReference, receiverIdentifier, messageTitle,
-                serviceIdentifier, statusList);
+        return c;
     }
 
     public static Conversation of(EDUCore eduCore, MessageStatus... statuses) {
@@ -86,17 +86,23 @@ public class Conversation {
         if (eduCore.getMessageType() == EDUCore.MessageType.EDU) {
             msgTitle = eduCore.getPayloadAsMeldingType().getJournpost().getJpInnhold();
         }
-        List<MessageStatus> statusListList = Stream.of(statuses)
-                .peek(r -> r.setConversationId(eduCore.getId()))
-                .collect(Collectors.toList());
-        return new Conversation(eduCore.getId(), eduCore.getMessageReference(), eduCore.getReceiver().getIdentifier(),
-                msgTitle, eduCore.getServiceIdentifier() , statusListList);
+
+        Conversation c = new Conversation(eduCore.getId(), eduCore.getMessageReference(),
+                eduCore.getReceiver().getIdentifier(), msgTitle, eduCore.getServiceIdentifier());
+
+        if (statuses != null && statuses.length > 0) {
+            Stream.of(statuses)
+                    .peek(r -> r.setConversationId(eduCore.getId()))
+                    .forEach(c::addMessageStatus);
+        }
+        return c;
     }
 
     public void addMessageStatus(MessageStatus status) {
         status.setConversationId(getConversationId());
         this.messageStatuses.add(status);
         this.lastUpdate = LocalDateTime.now();
+        Audit.info(String.format("Conversation [%s] updated with status %s", getConversationId(), status.getStatus()), markerFrom(this));
     }
 
     @Override

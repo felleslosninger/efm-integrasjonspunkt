@@ -10,12 +10,15 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.kvittering.EduDocumentFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.nextbest.NextBestException;
-import no.difi.meldingsutveksling.nextbest.NextBestQueue;
-import no.difi.meldingsutveksling.nextbest.NextBestServiceBus;
+import no.difi.meldingsutveksling.nextmove.NextMoveQueue;
+import no.difi.meldingsutveksling.nextmove.NextMoveServiceBus;
+import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
-import no.difi.meldingsutveksling.receipt.*;
+import no.difi.meldingsutveksling.receipt.Conversation;
+import no.difi.meldingsutveksling.receipt.ConversationRepository;
+import no.difi.meldingsutveksling.receipt.DpoReceiptStatus;
+import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.transport.Transport;
@@ -73,20 +76,20 @@ public class MessagePolling implements ApplicationContextAware {
     ObjectProvider<List<MessageDownloaderModule>> messageDownloaders;
 
     @Autowired
-    private NextBestQueue nextBestQueue;
+    private NextMoveQueue nextMoveQueue;
 
     private ServiceRecord serviceRecord;
 
     @Autowired
-    private NextBestServiceBus nextBestServiceBus;
+    private NextMoveServiceBus nextMoveServiceBus;
 
     @Scheduled(fixedRate = 5000L)
-    public void checkForNewNextBestMessages() throws NextBestException {
+    public void checkForNewNextBestMessages() throws NextMoveException {
 
         if (properties.getNextbest().getServiceBus().isEnable()) {
-            logger.debug("Checking for new NextBest messages..");
-            List<EduDocument> messages = nextBestServiceBus.getAllMessages();
-            messages.forEach(nextBestQueue::enqueueEduDocument);
+            logger.debug("Checking for new NextMove messages..");
+            List<EduDocument> messages = nextMoveServiceBus.getAllMessages();
+            messages.forEach(nextMoveQueue::enqueueEduDocument);
         }
     }
 
@@ -135,11 +138,11 @@ public class MessagePolling implements ApplicationContextAware {
             final DownloadRequest request = new DownloadRequest(reference.getValue(), properties.getOrg().getNumber());
             EduDocument eduDocument = client.download(request);
 
-            if (isNextBest(eduDocument)) {
+            if (isNextMove(eduDocument)) {
                 logger.info("NextBest Message received");
                 client.confirmDownload(request);
                 Audit.info("Message downloaded", markerFrom(reference).and(eduDocument.createLogstashMarkers()));
-                nextBestQueue.enqueueEduDocument(eduDocument);
+                nextMoveQueue.enqueueEduDocument(eduDocument);
                 continue;
             }
 
@@ -191,9 +194,9 @@ public class MessagePolling implements ApplicationContextAware {
         return eduDocument.getStandardBusinessDocumentHeader().getDocumentIdentification().getType().equalsIgnoreCase(StandardBusinessDocumentHeader.KVITTERING_TYPE);
     }
 
-    private boolean isNextBest(EduDocument eduDocument) {
+    private boolean isNextMove(EduDocument eduDocument) {
         return eduDocument.getStandardBusinessDocumentHeader().getDocumentIdentification().getType()
-                .equalsIgnoreCase(StandardBusinessDocumentHeader.NEXTBEST_TYPE);
+                .equalsIgnoreCase(StandardBusinessDocumentHeader.NEXTMOVE_TYPE);
     }
 
     private void sendReceipt(MessageInfo messageInfo) {
