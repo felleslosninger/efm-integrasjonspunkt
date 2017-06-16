@@ -36,8 +36,8 @@ public class IntegrasjonspunktPropertiesValidator implements Validator {
         }
 
         if (props.getSign().isEnable()) {
-            ValidationUtils.rejectIfEmpty(errors, "sign.cer", EMPTY_FIELD, "Sign verification enabled, must specify" +
-                    " certificate");
+            ValidationUtils.rejectIfEmpty(errors, "sign.certificate", EMPTY_FIELD, "Sign verification enabled, must" +
+                    " specify certificate");
         }
 
     }

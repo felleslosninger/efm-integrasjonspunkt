@@ -55,7 +55,7 @@ public class OidcTokenClientTest {
 
         props.setSign(new IntegrasjonspunktProperties.Sign());
         props.getSign().setEnable(true);
-        props.getSign().setCer(new FileSystemResource("src/test/resources/kontaktinfo-client.cer"));
+        props.getSign().setCertificate(new FileSystemResource("src/test/resources/kontaktinfo-client.cer"));
 
         props.setFeature(new IntegrasjonspunktProperties.FeatureToggle());
         props.getFeature().setEnableDPO(true);

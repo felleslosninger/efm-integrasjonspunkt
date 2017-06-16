@@ -56,7 +56,7 @@ public class RestClient {
 
         this.jwtDecoder = new JWTDecoder();
         this.pk = CertificateFactory.getInstance("X.509")
-                .generateCertificate(this.props.getSign().getCer().getInputStream()).getPublicKey();
+                .generateCertificate(this.props.getSign().getCertificate().getInputStream()).getPublicKey();
     }
 
     /**
