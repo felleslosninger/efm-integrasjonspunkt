@@ -35,5 +35,10 @@ public class IntegrasjonspunktPropertiesValidator implements Validator {
             errors.rejectValue("sign.enable", "cannot_be_false", "DPE enabled - cannot be false");
         }
 
+        if (props.getSign().isEnable()) {
+            ValidationUtils.rejectIfEmpty(errors, "sign.cer", EMPTY_FIELD, "Sign verification enabled, must specify" +
+                    " certificate");
+        }
+
     }
 }
