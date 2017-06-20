@@ -13,15 +13,13 @@ import no.difi.meldingsutveksling.noarkexchange.putmessage.KeystoreProvider;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.receipt.ConversationRepository;
+import no.difi.meldingsutveksling.receipt.DpiReceiptService;
 import no.difi.meldingsutveksling.receipt.StatusStrategy;
 import no.difi.meldingsutveksling.receipt.StatusStrategyFactory;
-import no.difi.meldingsutveksling.receipt.DpiReceiptService;
 import no.difi.meldingsutveksling.receipt.strategy.FiksStatusStrategy;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.TransportFactory;
-import no.difi.move.common.config.KeystoreProperties;
-import no.difi.move.common.oauth.KeystoreHelper;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -109,13 +107,4 @@ public class IntegrasjonspunktBeans {
         return new DpiReceiptService(integrasjonspunktProperties, keystoreProvider);
     }
 
-    @Bean(name = "signingKeystoreHelper")
-    public KeystoreHelper signingKeystoreHelper() {
-        KeystoreProperties keystoreProperties = new KeystoreProperties();
-        keystoreProperties.setLocation(properties.getSign().getKeystore().getPath());
-        keystoreProperties.setAlias(properties.getSign().getKeystore().getAlias());
-        keystoreProperties.setEntryPassword(properties.getSign().getKeystore().getPassword());
-        keystoreProperties.setStorePassword(properties.getSign().getKeystore().getPassword());
-        return new KeystoreHelper(keystoreProperties);
-    }
 }

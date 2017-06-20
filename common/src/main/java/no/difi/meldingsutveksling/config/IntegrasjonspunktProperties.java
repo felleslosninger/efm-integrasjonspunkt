@@ -154,7 +154,7 @@ public class IntegrasjonspunktProperties {
     public static class Sign {
 
         private boolean enable;
-        private Keystore keystore;
+        private Resource certificate;
     }
 
     /**

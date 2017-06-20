@@ -1,17 +1,21 @@
 package no.difi.meldingsutveksling.auth;
 
+import com.nimbusds.jose.proc.BadJWSException;
 import com.nimbusds.jwt.SignedJWT;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.OauthRestTemplateConfig;
+import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.web.client.RestOperations;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.cert.CertificateException;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
@@ -37,6 +41,7 @@ public class OidcTokenClientTest {
     @Before
     public void setup() throws MalformedURLException {
         props = new IntegrasjonspunktProperties();
+        props.setServiceregistryEndpoint("http://localhost:9099/");
 
         props.setOidc(new IntegrasjonspunktProperties.Oidc());
         props.getOidc().setEnable(true);
@@ -47,6 +52,10 @@ public class OidcTokenClientTest {
         props.getOidc().getKeystore().setAlias("client_alias");
         props.getOidc().getKeystore().setPassword("changeit");
         props.getOidc().getKeystore().setPath(new FileSystemResource("src/test/resources/kontaktinfo-client-test.jks"));
+
+        props.setSign(new IntegrasjonspunktProperties.Sign());
+        props.getSign().setEnable(true);
+        props.getSign().setCertificate(new FileSystemResource("src/test/resources/kontaktinfo-client.cer"));
 
         props.setFeature(new IntegrasjonspunktProperties.FeatureToggle());
         props.getFeature().setEnableDPO(true);
@@ -86,5 +95,15 @@ public class OidcTokenClientTest {
         System.out.println(response);
     }
 
+    @Test
+    @Ignore("Manual test")
+    public void testSasTokenFetch() throws URISyntaxException, IOException, CertificateException, BadJWSException {
+        OidcTokenClient oidcTokenClient = new OidcTokenClient(props);
+        OauthRestTemplateConfig config = new OauthRestTemplateConfig(props, oidcTokenClient);
+        RestOperations ops = config.restTemplate();
+        RestClient restClient = new RestClient(props, ops);
+        String response = restClient.getResource("sastoken");
+        System.out.println(response);
+    }
 
 }

@@ -12,17 +12,17 @@ import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.KeystoreProvider;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
-import no.difi.meldingsutveksling.receipt.StatusStrategyFactory;
 import no.difi.meldingsutveksling.receipt.DpiReceiptService;
 import no.difi.meldingsutveksling.receipt.ReceiptPolling;
+import no.difi.meldingsutveksling.receipt.StatusStrategyFactory;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
-import no.difi.move.common.oauth.KeystoreHelper;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -64,12 +64,6 @@ public class IntegrasjonspunktIntegrationTestConfig {
     @Primary
     public KeystoreProvider meldingsformidlerKeystoreProvider() throws MeldingsformidlerException {
         return mock(KeystoreProvider.class);
-    }
-
-    @Bean(name = "signingKeystoreHelper")
-    @Primary
-    public KeystoreHelper keystoreHelper() {
-        return mock(KeystoreHelper.class);
     }
 
     @Bean
@@ -166,5 +160,11 @@ public class IntegrasjonspunktIntegrationTestConfig {
         when(srMock.getServiceRecord(anyString())).thenReturn(sr);
 
         return srMock;
+    }
+
+    @Bean
+    @Primary
+    public RestClient restClient() {
+        return mock(RestClient.class);
     }
 }

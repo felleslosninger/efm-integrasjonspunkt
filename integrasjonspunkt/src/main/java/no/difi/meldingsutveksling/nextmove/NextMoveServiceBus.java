@@ -16,6 +16,7 @@ import no.difi.meldingsutveksling.noarkexchange.MessageContext;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +38,8 @@ public class NextMoveServiceBus {
 
     private static final String NEXTMOVE_QUEUE_PREFIX = "nextbestqueue";
 
-    private ServiceBusContract service;
     private IntegrasjonspunktProperties props;
+    private ServiceRegistryLookup sr;
     private StandardBusinessDocumentFactory sbdf;
     private MessageSender messageSender;
     private JAXBContext jaxbContext;
@@ -47,19 +48,14 @@ public class NextMoveServiceBus {
     @Autowired
     public NextMoveServiceBus(IntegrasjonspunktProperties props,
                               StandardBusinessDocumentFactory sbdf,
+                              ServiceRegistryLookup sr,
                               MessageSender messageSender) throws JAXBException {
 
         this.props = props;
         this.sbdf = sbdf;
+        this.sr = sr;
         this.messageSender = messageSender;
 
-        Configuration config = ServiceBusConfiguration.configureWithSASAuthentication(
-                props.getNextbest().getServiceBus().getNamespace(),
-                props.getNextbest().getServiceBus().getSasKeyName(),
-                props.getNextbest().getServiceBus().getSasToken(),
-                ".servicebus.windows.net"
-        );
-        this.service = ServiceBusService.create(config);
 
         this.jaxbContext = JAXBContext.newInstance(EduDocument.class, Payload.class, ConversationResource.class);
 
@@ -73,6 +69,7 @@ public class NextMoveServiceBus {
         }
 
         // Create queue if it does not already exist
+        ServiceBusContract service = createContract();
         queuePath = String.format("%s%s%s", NEXTMOVE_QUEUE_PREFIX,
                 props.getOrg().getNumber(),
                 props.getNextbest().getServiceBus().getMode());
@@ -86,6 +83,7 @@ public class NextMoveServiceBus {
 
     public void putMessage(ConversationResource resource) throws NextMoveException {
 
+        ServiceBusContract service = createContract();
         BrokeredMessage msg;
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             MessageContext context = messageSender.createMessageContext(resource);
@@ -118,6 +116,7 @@ public class NextMoveServiceBus {
         ReceiveMessageOptions opts = ReceiveMessageOptions.DEFAULT;
         opts.setReceiveMode(ReceiveMode.PEEK_LOCK);
 
+        ServiceBusContract service = createContract();
         ArrayList<EduDocument> messages = Lists.newArrayList();
         try {
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
@@ -141,4 +140,21 @@ public class NextMoveServiceBus {
         return messages;
     }
 
+    private ServiceBusContract createContract() {
+
+        String sasToken;
+        if (props.getOidc().isEnable()) {
+            sasToken = sr.getSasToken();
+        } else {
+            sasToken = props.getNextbest().getServiceBus().getSasToken();
+        }
+
+        Configuration config = ServiceBusConfiguration.configureWithSASAuthentication(
+                props.getNextbest().getServiceBus().getNamespace(),
+                props.getNextbest().getServiceBus().getSasKeyName(),
+                sasToken,
+                ".servicebus.windows.net"
+        );
+        return ServiceBusService.create(config);
+    }
 }

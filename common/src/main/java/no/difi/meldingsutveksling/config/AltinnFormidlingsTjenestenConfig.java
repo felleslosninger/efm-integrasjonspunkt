@@ -18,8 +18,6 @@ public class AltinnFormidlingsTjenestenConfig {
      */
     private String password;
 
-    private String externalServiceCode;
-    private int externalServiceEditionCode;
     private String streamingserviceUrl;
     private String brokerserviceUrl;
 
