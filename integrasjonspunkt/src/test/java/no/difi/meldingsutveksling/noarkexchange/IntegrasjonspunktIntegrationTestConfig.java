@@ -16,6 +16,7 @@ import no.difi.meldingsutveksling.receipt.DpiReceiptService;
 import no.difi.meldingsutveksling.receipt.ReceiptPolling;
 import no.difi.meldingsutveksling.receipt.StatusStrategyFactory;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -159,5 +160,11 @@ public class IntegrasjonspunktIntegrationTestConfig {
         when(srMock.getServiceRecord(anyString())).thenReturn(sr);
 
         return srMock;
+    }
+
+    @Bean
+    @Primary
+    public RestClient restClient() {
+        return mock(RestClient.class);
     }
 }
