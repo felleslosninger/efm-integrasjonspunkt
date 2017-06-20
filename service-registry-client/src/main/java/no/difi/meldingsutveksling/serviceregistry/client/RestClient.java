@@ -3,9 +3,7 @@ package no.difi.meldingsutveksling.serviceregistry.client;
 import com.nimbusds.jose.proc.BadJWSException;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.move.common.oauth.JWTDecoder;
-import no.difi.move.common.oauth.KeystoreHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -14,11 +12,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.PublicKey;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 
 import static java.util.Arrays.asList;
 
@@ -37,6 +37,7 @@ public class RestClient {
     private final IntegrasjonspunktProperties props;
     private final RestOperations restTemplate;
     private final JWTDecoder jwtDecoder;
+    private final PublicKey pk;
 
     private final URI baseUrl;
 
@@ -47,13 +48,15 @@ public class RestClient {
      */
     @Autowired
     public RestClient(IntegrasjonspunktProperties props,
-                      RestOperations restTemplate,
-                      @Qualifier("signingKeystoreHelper") KeystoreHelper keystoreHelper)
-            throws MalformedURLException, URISyntaxException, CertificateException {
+                      RestOperations restTemplate)
+            throws IOException, URISyntaxException, CertificateException {
         this.props = props;
         this.restTemplate = restTemplate;
-        this.jwtDecoder = new JWTDecoder(keystoreHelper);
         this.baseUrl = new URL(props.getServiceregistryEndpoint()).toURI();
+
+        this.jwtDecoder = new JWTDecoder();
+        this.pk = CertificateFactory.getInstance("X.509")
+                .generateCertificate(this.props.getSign().getCertificate().getInputStream()).getPublicKey();
     }
 
     /**
@@ -82,7 +85,7 @@ public class RestClient {
 
             HttpEntity<Object> httpEntity = new HttpEntity<>(headers);
             ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.GET, httpEntity, String.class);
-            return jwtDecoder.getPayload(response.getBody());
+            return jwtDecoder.getPayload(response.getBody(), pk);
         }
 
         return restTemplate.getForObject(uri, String.class);
