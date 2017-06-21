@@ -34,7 +34,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     @Override
     public Document getDocument() {
         String primaryFileName = cr.getFileRefs().get(0);
-        return new Document(getContent(primaryFileName), getExtension(primaryFileName).orElse(defaultMimeType), primaryFileName, primaryFileName);
+        return new Document(getContent(primaryFileName), getExtension(primaryFileName).orElse(defaultMimeType), primaryFileName, "Under utvikling");
     }
 
     @Override
@@ -42,7 +42,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
         final List<Document> docList = Lists.newArrayList();
         cr.getFileRefs().forEach((k, f) -> {
             if (k != 0) {
-                docList.add(new Document(getContent(f), getExtension(f).orElse(defaultMimeType), f, f));
+                docList.add(new Document(getContent(f), getExtension(f).orElse(defaultMimeType), f, "Under utvikling"));
             }
         });
 
