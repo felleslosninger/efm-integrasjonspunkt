@@ -8,12 +8,13 @@
     <springProperty name="jks" source="app.logger.jks"/>
     <springProperty name="password" source="app.logger.password"/>
     <springProperty name="profiles" source="spring.profiles.active"/>
+    <springProperty name="orgnr" source="difi.move.org.number"/>
     <appender name="stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <droppedWarnFrequency>5</droppedWarnFrequency>
         <destination>${destination}</destination>
         <!-- encoder is required -->
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <customFields>{"appname":"${project.artifactId}","buildinfo.version":"${project.version}","buildinfo.lastcommit":"${buildNumber}"}</customFields>
+            <customFields>{"appname":"${project.artifactId}","buildinfo.version":"${project.version}","buildinfo.lastcommit":"${buildNumber}","orgnr":"${orgnr}"}</customFields>
         </encoder>
         <if condition='property("ssl").contains("true")'>
             <then>
