@@ -76,6 +76,7 @@ public class EDUCoreFactory {
 
         EnvelopeType envelopeType = of.createEnvelopeType();
         envelopeType.setConversationId(message.getId());
+        envelopeType.setContentNamespace("http://www.arkivverket.no/Noark4-1-WS-WD/types");
         envelopeType.setReceiver(receiverAddressType);
         envelopeType.setSender(senderAddressType);
 

@@ -47,7 +47,7 @@ class AppReceiptMessageStrategy implements MessageStrategy {
         Audit.info("Received AppReceipt", markerFrom(request));
         AppReceiptType receipt = request.getPayloadAsAppreceiptType();
         if (asList("OK", "WARNING", "ERROR").contains(receipt.getType())) {
-            if (!"ephorte".equalsIgnoreCase(properties.getNoarkSystem().getType())) {
+            if ("p360".equalsIgnoreCase(properties.getNoarkSystem().getType())) {
                 request.swapSenderAndReceiver();
             }
             messageSender.sendMessage(request);
