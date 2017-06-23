@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.core;
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.logging.MoveLogMarkers;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory;
@@ -21,7 +20,6 @@ import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.services.Adresseregister;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -57,8 +55,6 @@ public class EDUCoreSender {
     }
 
     public PutMessageResponseType sendMessage(EDUCore message) {
-        MDC.put(MoveLogMarkers.KEY_ORGANISATION_NUMBER, properties.getOrg().getNumber());
-
         final ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(message.getReceiver().getIdentifier());
         PutMessageResponseType result;
         final LogstashMarker marker = EDUCoreMarker.markerFrom(message);
