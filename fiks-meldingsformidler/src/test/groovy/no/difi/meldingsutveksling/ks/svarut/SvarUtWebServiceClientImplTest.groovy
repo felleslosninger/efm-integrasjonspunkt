@@ -43,7 +43,7 @@ class SvarUtWebServiceClientImplTest {
 
         final Dokument dokument = Dokument.builder().withData(new DataHandler(new ByteArrayDataSource(data, "pdf"))).build()
 
-        final OrganisasjonDigitalAdresse mottaker = OrganisasjonDigitalAdresse.builder().build()
+        final Adresse mottaker = Adresse.builder().build()
 
         final Printkonfigurasjon printkonfigurasjon = Printkonfigurasjon.builder().build()
         Forsendelse forsendelse = Forsendelse.builder()
