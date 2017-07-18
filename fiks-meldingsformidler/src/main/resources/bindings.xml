@@ -11,7 +11,7 @@
     </jaxb:globalBindings>-->
 
 
-  <jaxb:bindings schemaLocation="wsdl/ForsendelsesServiceV6.wsdl" node="/wsdl:definitions/wsdl:types/xs:schema">
+  <jaxb:bindings schemaLocation="wsdl/ForsendelsesServiceV8.wsdl" node="/wsdl:definitions/wsdl:types/xs:schema">
     <jaxb:bindings node="xs:complexType[@name='sendForsendelse']">
       <annox:annotateClass>@javax.xml.bind.annotation.XmlRootElement</annox:annotateClass>
     </jaxb:bindings>
