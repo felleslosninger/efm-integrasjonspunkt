@@ -103,8 +103,6 @@ public class ForsendelseMapper {
         Adresse.Builder<Void> mottaker = Adresse.builder();
         mottaker.withDigitalAdresse(orgAdr.build());
 
-//        mottaker.withNavn(infoRecord.getOrganizationName());
-
         PostAdresse.Builder<Void> postAdr = PostAdresse.builder();
         if (infoRecord.getPostadresse() != null) {
             postAdr.withAdresse1(infoRecord.getPostadresse().getAdresse());
