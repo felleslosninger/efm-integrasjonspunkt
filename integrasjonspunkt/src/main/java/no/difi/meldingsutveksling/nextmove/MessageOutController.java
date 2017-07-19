@@ -12,16 +12,21 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.xml.sax.SAXException;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
+import javax.xml.XMLConstants;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import java.io.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +44,7 @@ import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMa
 public class MessageOutController {
 
     private static final Logger log = LoggerFactory.getLogger(MessageOutController.class);
+    private static final String ARKIVMELDING_FILE = "arkivmelding.xml";
 
     private DirectionalConversationResourceRepository outRepo;
     private DirectionalConversationResourceRepository inRepo;
@@ -181,6 +187,20 @@ public class MessageOutController {
             log.trace(markerFrom(conversationResource), "Adding file \"{}\" ({}, {} bytes) to {}",
                     file.getOriginalFilename(), file.getContentType(), file.getSize(), conversationResource.getConversationId());
 
+            if (ARKIVMELDING_FILE.equals(file.getOriginalFilename())) {
+                try {
+                    validateArkivmelding(file.getInputStream());
+                } catch (IOException e) {
+                    log.error("Could not read file {}", file.getOriginalFilename(), e);
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                            ErrorResponse.builder().error("read_file_error").errorDescription("Could not read file").build());
+                } catch (SAXException e) {
+                    log.warn("{} XML validation failed", file.getOriginalFilename(), e);
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                            ErrorResponse.builder().error("xml_validation_error").errorDescription("arkivmelding.xml validation error: "+e.getLocalizedMessage()).build());
+                }
+            }
+
             String filedir = props.getNextbest().getFiledir();
             if (!filedir.endsWith("/")) {
                 filedir = filedir+"/";
@@ -197,7 +217,7 @@ public class MessageOutController {
                     conversationResource.addFileRef(file.getOriginalFilename());
                 }
             } catch (java.io.IOException e) {
-                log.error("Could not write file {f}", localFile, e);
+                log.error("Could not write file {}", localFile, e);
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                         ErrorResponse.builder().error("write_file_error").errorDescription("Could not write file").build());
             }
@@ -260,4 +280,18 @@ public class MessageOutController {
                 .errorDescription("Conversation with supplied id not found.").build());
     }
 
+    private void validateArkivmelding(InputStream is) throws SAXException {
+        ClassPathResource md = new ClassPathResource("xsd/metadatakatalog.xsd");
+        ClassPathResource am = new ClassPathResource("xsd/arkivmelding.xsd");
+        SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        try {
+            Schema schema = factory.newSchema(new Source[]{
+                    new StreamSource(md.getInputStream()),
+                    new StreamSource(am.getInputStream())
+            });
+            schema.newValidator().validate(new StreamSource(is));
+        } catch (IOException e) {
+            log.error("Error reading xsd", e);
+        }
+    }
 }
