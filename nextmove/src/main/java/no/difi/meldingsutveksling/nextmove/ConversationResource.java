@@ -61,6 +61,9 @@ public abstract class ConversationResource {
     private LocalDateTime lastUpdate;
     @JsonIgnore
     private ConversationDirection direction;
+    @XmlElement
+    @JsonIgnore
+    private boolean hasArkivmelding;
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "fileid")
     @Column(name = "filename")

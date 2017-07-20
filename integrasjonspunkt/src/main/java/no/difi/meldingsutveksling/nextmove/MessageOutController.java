@@ -190,6 +190,7 @@ public class MessageOutController {
             if (ARKIVMELDING_FILE.equals(file.getOriginalFilename())) {
                 try {
                     validateArkivmelding(file.getInputStream());
+                    conversationResource.setHasArkivmelding(true);
                 } catch (IOException e) {
                     log.error("Could not read file {}", file.getOriginalFilename(), e);
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
