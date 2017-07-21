@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.swagger.annotations.*;
+import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
@@ -22,6 +23,9 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.xml.sax.SAXException;
 
 import javax.xml.XMLConstants;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
@@ -190,15 +194,20 @@ public class MessageOutController {
             if (ARKIVMELDING_FILE.equals(file.getOriginalFilename())) {
                 try {
                     validateArkivmelding(file.getInputStream());
+                    conversationResource.setArkivmelding(unmarshalArkivmelding(file.getInputStream()));
                     conversationResource.setHasArkivmelding(true);
                 } catch (IOException e) {
                     log.error("Could not read file {}", file.getOriginalFilename(), e);
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                             ErrorResponse.builder().error("read_file_error").errorDescription("Could not read file").build());
                 } catch (SAXException e) {
-                    log.warn("{} XML validation failed", file.getOriginalFilename(), e);
+                    log.error("{} XML validation failed", file.getOriginalFilename(), e);
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                             ErrorResponse.builder().error("xml_validation_error").errorDescription("arkivmelding.xml validation error: "+e.getLocalizedMessage()).build());
+                } catch (JAXBException e) {
+                    log.error("Could not unmarshal {}", file.getOriginalFilename(), e);
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                            ErrorResponse.builder().error("xml_unmarshal").errorDescription("arkivmelding.xml unmarshalling error: "+e.getLocalizedMessage()).build());
                 }
             }
 
@@ -295,4 +304,11 @@ public class MessageOutController {
             log.error("Error reading xsd", e);
         }
     }
+
+    private Arkivmelding unmarshalArkivmelding(InputStream inputStream) throws JAXBException {
+        JAXBContext jaxbContext = JAXBContext.newInstance(Arkivmelding.class);
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        return unmarshaller.unmarshal(new StreamSource(inputStream), Arkivmelding.class).getValue();
+    }
+
 }
