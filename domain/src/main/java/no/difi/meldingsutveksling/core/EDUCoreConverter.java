@@ -1,6 +1,7 @@
-package no.difi.meldingsutveksling.noarkexchange.receive;
+package no.difi.meldingsutveksling.core;
 
-import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.noarkexchange.receive.PayloadConverter;
+import no.difi.meldingsutveksling.noarkexchange.receive.PayloadConverterImpl;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 

@@ -16,7 +16,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
-import no.difi.meldingsutveksling.noarkexchange.receive.EDUCoreConverter;
+import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.apache.commons.io.FileUtils;
 import org.modelmapper.ModelMapper;

@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.noarkexchange.receive;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import no.difi.meldingsutveksling.core.EDUCoreMarker;
 import no.difi.meldingsutveksling.core.EDUCoreSender;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;

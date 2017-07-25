@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
 import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import org.junit.Test;
 
 import static org.hamcrest.core.Is.is;
