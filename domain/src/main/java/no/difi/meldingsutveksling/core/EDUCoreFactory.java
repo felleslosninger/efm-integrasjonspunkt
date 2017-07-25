@@ -1,8 +1,10 @@
 package no.difi.meldingsutveksling.core;
 
+import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.mxa.schema.domain.Message;
+import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageMarker;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
@@ -126,6 +128,31 @@ public class EDUCoreFactory {
 
         return eduCore;
     }
+
+    public EDUCore create(ConversationResource cr, Arkivmelding arkivmelding) {
+        EDUCore eduCore = createCommon(cr.getSenderId(), cr.getReceiverId());
+        eduCore.setId(cr.getConversationId());
+        eduCore.setMessageType(EDUCore.MessageType.EDU);
+        eduCore.setMessageReference(cr.getConversationId());
+
+        // TODO: map arkivmelding to MeldingType
+        ObjectFactory of = new ObjectFactory();
+
+        JournpostType journpostType = of.createJournpostType();
+        NoarksakType noarksakType = of.createNoarksakType();
+
+        MeldingType meldingType = of.createMeldingType();
+        meldingType.setJournpost(journpostType);
+        meldingType.setNoarksak(noarksakType);
+
+        // Further usage expects payload to be marshalled
+
+
+        eduCore.setPayload(meldingType);
+
+        return eduCore;
+    }
+
 
     private EDUCore createCommon(String senderOrgNr, String receiverOrgNr) {
 

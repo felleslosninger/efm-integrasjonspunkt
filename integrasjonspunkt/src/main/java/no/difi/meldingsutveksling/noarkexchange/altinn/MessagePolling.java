@@ -142,7 +142,11 @@ public class MessagePolling implements ApplicationContextAware {
                 logger.info("NextBest Message received");
                 client.confirmDownload(request);
                 Audit.info("Message downloaded", markerFrom(reference).and(eduDocument.createLogstashMarkers()));
-                nextMoveQueue.enqueueEduDocument(eduDocument);
+                if (!properties.getNoarkSystem().getEndpointURL().isEmpty()) {
+                    internalQueue.enqueueNoark(eduDocument);
+                } else {
+                    nextMoveQueue.enqueueEduDocument(eduDocument);
+                }
                 continue;
             }
 

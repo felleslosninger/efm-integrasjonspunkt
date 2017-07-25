@@ -12,7 +12,8 @@ public enum StatusMessage {
     APP_RECEIPT_CONTAINS_ERROR("Technical error from the receiving archive system", "AppReceipt contains an error", 9),
     DPV_REQUEST_MISSING_VALUES("Teknisk feil: Kunne ikke sende post til virksomhet", "Failed to create Correspondence Agency Request", 10),
     UNABLE_TO_SEND_DPI("Klarte ikke sende post til digital post til innbygger", "Failed to send message to DPI Meldingsformidler", 11),
-    UNABLE_TO_MARSHALL_CONVERSATION("Klarte ikke skrive melding til fil", "Unable to marshall conversation", 12);
+    UNABLE_TO_MARSHALL_CONVERSATION("Klarte ikke skrive melding til fil", "Unable to marshall conversation", 12),
+    UNABLE_TO_EXTRACT_ARKIVMELDING("Teknisk feil: kan ikke behandle melding", "Unable to extract Arkivmelding", 13);
 
     private final String endUserMessage;
     private final String technicalMessage;
