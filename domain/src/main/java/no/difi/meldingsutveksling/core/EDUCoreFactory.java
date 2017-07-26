@@ -1,6 +1,10 @@
 package no.difi.meldingsutveksling.core;
 
+import com.google.common.collect.Lists;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
+import no.arkivverket.standarder.noark5.arkivmelding.Dokumentbeskrivelse;
+import no.arkivverket.standarder.noark5.arkivmelding.Dokumentobjekt;
+import no.arkivverket.standarder.noark5.arkivmelding.Registrering;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.mxa.schema.domain.Message;
@@ -15,11 +19,17 @@ import no.difi.meldingsutveksling.noarkexchange.schema.core.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import org.apache.commons.io.IOUtils;
 
 import javax.xml.bind.JAXBException;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.unmarshallPayload;
 
@@ -129,28 +139,75 @@ public class EDUCoreFactory {
         return eduCore;
     }
 
-    public EDUCore create(ConversationResource cr, Arkivmelding arkivmelding) {
+    public EDUCore create(ConversationResource cr, Arkivmelding arkivmelding, byte[] asic) {
         EDUCore eduCore = createCommon(cr.getSenderId(), cr.getReceiverId());
         eduCore.setId(cr.getConversationId());
         eduCore.setMessageType(EDUCore.MessageType.EDU);
         eduCore.setMessageReference(cr.getConversationId());
 
-        // TODO: map arkivmelding to MeldingType
         ObjectFactory of = new ObjectFactory();
-
         JournpostType journpostType = of.createJournpostType();
+
+        List<Dokumentobjekt> docs = Lists.newArrayList();
+        arkivmelding.getMappe().stream()
+                .flatMap(m -> m.getBasisregistrering().stream())
+                .forEach(r -> docs.addAll(dokObjFromReg(r)));
+        arkivmelding.getRegistrering().forEach(r -> docs.addAll(dokObjFromReg(r)));
+
+        docs.forEach(d -> {
+            DokumentType dokumentType = of.createDokumentType();
+            String filename = d.getReferanseDokumentfil();
+            dokumentType.setVeFilnavn(filename);
+            // TODO: tittel og mimetype
+            FilType filType = of.createFilType();
+            try {
+                filType.setBase64(Base64.getDecoder().decode(getFileFromAsic(filename, asic)));
+            } catch (IOException e) {
+                throw new MeldingsUtvekslingRuntimeException(String.format("Error getting file %s from ASiC", filename), e);
+            }
+            dokumentType.setFil(filType);
+
+            journpostType.getDokument().add(dokumentType);
+
+        });
+
         NoarksakType noarksakType = of.createNoarksakType();
+        // TODO: map arkivmelding til MeldingType
 
         MeldingType meldingType = of.createMeldingType();
         meldingType.setJournpost(journpostType);
         meldingType.setNoarksak(noarksakType);
 
         // Further usage expects payload to be marshalled
-
-
-        eduCore.setPayload(meldingType);
+        EDUCoreConverter eduCoreConverter = new EDUCoreConverter();
+        eduCore.setPayload(eduCoreConverter.meldingTypeAsString(meldingType));
 
         return eduCore;
+    }
+
+    private List<Dokumentobjekt> dokObjFromReg(Registrering r) {
+        List<Dokumentobjekt> docs = Lists.newArrayList();
+        r.getDokumentbeskrivelseAndDokumentobjekt().stream()
+                .filter(o -> o instanceof Dokumentbeskrivelse)
+                .flatMap(d -> ((Dokumentbeskrivelse)d).getDokumentobjekt().stream())
+                .forEach(docs::add);
+        r.getDokumentbeskrivelseAndDokumentobjekt().stream()
+                .filter(o -> o instanceof Dokumentobjekt)
+                .map(d -> (Dokumentobjekt)d)
+                .forEach(docs::add);
+        return docs;
+    }
+
+    public byte[] getFileFromAsic(String fileName, byte[] bytes) throws IOException {
+        try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes))) {
+            ZipEntry entry;
+            while ((entry = zipInputStream.getNextEntry()) != null) {
+                if (fileName.equals(entry.getName())) {
+                    return IOUtils.toByteArray(zipInputStream);
+                }
+            }
+        }
+        throw new MeldingsUtvekslingRuntimeException(String.format("File %s is missing from ASiC", fileName));
     }
 
 

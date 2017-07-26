@@ -165,7 +165,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
         }
         ConversationResource cr = payload.getConversation();
 
-        EDUCore eduCore = new EDUCoreFactory(serviceRegistryLookup).create(cr, arkivmelding);
+        EDUCore eduCore = new EDUCoreFactory(serviceRegistryLookup).create(cr, arkivmelding, decryptedAsicPackage);
         registerReceipt(eduCore);
 
         return eduCore;
@@ -244,7 +244,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
         try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes))) {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
-                if ("best_edu.xml".equals(entry.getName())) {
+                if ("arkivmelding.xml".equals(entry.getName())) {
                     JAXBContext jaxbContext = JAXBContext.newInstance(Arkivmelding.class);
                     Unmarshaller unMarshaller = jaxbContext.createUnmarshaller();
                     return unMarshaller.unmarshal(new StreamSource(zipInputStream), Arkivmelding.class).getValue();
