@@ -61,6 +61,8 @@ public abstract class ConversationResource {
     private LocalDateTime lastUpdate;
     @JsonIgnore
     private ConversationDirection direction;
+    @JsonIgnore
+    private boolean locked;
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "fileid")
     @Column(name = "filename")
