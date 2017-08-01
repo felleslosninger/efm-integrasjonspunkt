@@ -72,3 +72,19 @@ databaseChangeLog:
                   constraints:
                     primaryKey: true
                     nullable: false
+  - changeSet:
+      id: 1
+      author: maw
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: conversation_resource
+        - columnExists:
+            columnName: messagetype_id
+      changes:
+        - dropColumn:
+            columnName: direction
+            tableName: conversation_resource
+        - dropColumn:
+            columnName: messagetype_id
+            tableName: conversation_resource
