@@ -1,12 +1,9 @@
 package no.difi.meldingsutveksling.ks.svarinn;
 
 import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
-
-import java.util.HashMap;
 
 public class MimeTypeExtensionMapper {
 

@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 
 public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
-    private static final String defaultMimeType = MediaType.APPLICATION_PDF_VALUE;
+    private static final String DEFAULT_MIME_TYPE = MediaType.APPLICATION_PDF_VALUE;
 
     private IntegrasjonspunktProperties props;
     private DpiConversationResource cr;
@@ -34,7 +34,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     @Override
     public Document getDocument() {
         String primaryFileName = cr.getFileRefs().get(0);
-        return new Document(getContent(primaryFileName), getExtension(primaryFileName).orElse(defaultMimeType), primaryFileName, "Under utvikling");
+        return new Document(getContent(primaryFileName), getExtension(primaryFileName).orElse(DEFAULT_MIME_TYPE), primaryFileName, "Under utvikling");
     }
 
     @Override
@@ -42,7 +42,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
         final List<Document> docList = Lists.newArrayList();
         cr.getFileRefs().forEach((k, f) -> {
             if (k != 0) {
-                docList.add(new Document(getContent(f), getExtension(f).orElse(defaultMimeType), f, "Under utvikling"));
+                docList.add(new Document(getContent(f), getExtension(f).orElse(DEFAULT_MIME_TYPE), f, "Under utvikling"));
             }
         });
 
