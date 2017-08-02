@@ -265,4 +265,18 @@
    <sha1>1b8fa2179b3937cada939317bb135815e79c0ac2</sha1>
    <cpe>cpe:/a:jasper_project:jasper:8.0.33</cpe>
 </suppress>
+   <suppress>
+      <notes><![CDATA[
+   file name: spring-cloud-context-1.2.3.RELEASE.jar
+   ]]></notes>
+      <sha1>040e765f0303e42c5c0c9ca134e95db120da9124</sha1>
+      <cve>CVE-2016-9878</cve>
+   </suppress>
+   <suppress>
+      <notes><![CDATA[
+   file name: postgresql-9.1-901.jdbc4.jar
+   ]]></notes>
+      <sha1>153f2f92a786f12fc111d0111f709012df87c808</sha1>
+      <cve>CVE-2017-7484</cve>
+   </suppress>
 </suppressions>

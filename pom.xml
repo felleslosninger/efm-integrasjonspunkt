@@ -251,7 +251,7 @@
                 <artifactId>dependency-check-maven</artifactId>
                 <version>1.4.3</version>
                 <configuration>
-                    <format>XML</format>
+                    <format>ALL</format>
                 </configuration>
             </plugin>
         </plugins>
