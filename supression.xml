@@ -279,4 +279,10 @@
       <sha1>153f2f92a786f12fc111d0111f709012df87c808</sha1>
       <cve>CVE-2017-7484</cve>
    </suppress>
+   <suppress>
+      <notes><![CDATA[
+        Suppress CVE-2016-9878
+        ]]></notes>
+      <cve>CVE-2016-9878</cve>
+   </suppress>
 </suppressions>
