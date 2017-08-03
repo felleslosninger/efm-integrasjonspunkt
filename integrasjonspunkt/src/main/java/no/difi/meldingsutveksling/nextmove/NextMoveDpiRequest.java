@@ -8,18 +8,18 @@ import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.io.FileUtils;
-import org.springframework.http.MediaType;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
+
+import static no.difi.meldingsutveksling.ks.svarinn.MimeTypeExtensionMapper.getMimetype;
 
 public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
-    private static final String DEFAULT_MIME_TYPE = MediaType.APPLICATION_PDF_VALUE;
+    private static final String DEFAULT_EXT = "PDF";
 
     private IntegrasjonspunktProperties props;
     private DpiConversationResource cr;
@@ -34,7 +34,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     @Override
     public Document getDocument() {
         String primaryFileName = cr.getFileRefs().get(0);
-        return new Document(getContent(primaryFileName), getExtension(primaryFileName).orElse(DEFAULT_MIME_TYPE), primaryFileName, "Under utvikling");
+        return new Document(getContent(primaryFileName), getMime(getExtension(primaryFileName)), primaryFileName, "Under utvikling");
     }
 
     @Override
@@ -42,15 +42,23 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
         final List<Document> docList = Lists.newArrayList();
         cr.getFileRefs().forEach((k, f) -> {
             if (k != 0) {
-                docList.add(new Document(getContent(f), getExtension(f).orElse(DEFAULT_MIME_TYPE), f, "Under utvikling"));
+                docList.add(new Document(getContent(f), getMime(getExtension(f)), f, "Under utvikling"));
             }
         });
 
         return docList;
     }
 
-    private Optional<String> getExtension(String fileName) {
-        return Stream.of(fileName.split(".")).reduce((a, b) -> b);
+    private String getMime(String ext) {
+        // DPI specific override
+        if ("XML".equals(ext)) {
+            return "application/ehf+xml";
+        }
+        return getMimetype(ext);
+    }
+
+    private String getExtension(String fileName) {
+        return Stream.of(fileName.split(".")).reduce((a, b) -> b).orElse(DEFAULT_EXT);
     }
 
     private byte[] getContent(String fileName) {

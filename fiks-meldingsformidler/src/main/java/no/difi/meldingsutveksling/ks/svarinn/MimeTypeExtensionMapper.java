@@ -12,15 +12,25 @@ public class MimeTypeExtensionMapper {
     private static final HashBiMap<String, String> mimeTypeMap = HashBiMap.create();
 
     static {
-        mimeTypeMap.put("application/msword", "DOC");
-        mimeTypeMap.put("application/vnd.openxmlformats-officedocument.wordprocessingml.document", "DOCX");
-        mimeTypeMap.put("application/vnd.ms-excel", "XLS");
-        mimeTypeMap.put("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "XLSX");
-        mimeTypeMap.put("application/vnd.openxmlformats-officedocument.spreadsheetml.template", "XLTX");
-        mimeTypeMap.put("application/vnd.ms-powerpoint", "PPT");
-        mimeTypeMap.put("application/vnd.openxmlformats-officedocument.presentationml.presentation", "PPTX");
-        mimeTypeMap.put(MediaType.APPLICATION_PDF_VALUE, "PDF");
-        mimeTypeMap.put("text/plain", "TXT");
+        mimeTypeMap.put("application/pdf", "pdf");
+        mimeTypeMap.put("text/html", "html");
+        mimeTypeMap.put("text/plain", "txt");
+        mimeTypeMap.put("application/msword", "doc");
+        mimeTypeMap.put("application/vnd.openxmlformats-officedocument.wordprocessingml.document", "docx");
+        mimeTypeMap.put("application/vnd.ms-excel", "xls");
+        mimeTypeMap.put("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "xlsx");
+        mimeTypeMap.put("application/vnd.openxmlformats-officedocument.spreadsheetml.template", "xltx");
+        mimeTypeMap.put("application/vnd.ms-powerpoint", "ppt");
+        mimeTypeMap.put("application/vnd.openxmlformats-officedocument.presentationml.presentation", "pptx");
+        mimeTypeMap.put("application/vnd.oasis.opendocument.formula", "odf");
+        mimeTypeMap.put("application/vnd.oasis.opendocument.text", "odt");
+        mimeTypeMap.put("application/vnd.oasis.opendocument.spreadsheet", "fods");
+        mimeTypeMap.put("application/vnd.oasis.opendocument.presentation", "fodp");
+        mimeTypeMap.put("application/vnd.oasis.opendocument.graphics", "fodg");
+        mimeTypeMap.put("image/gif", "gif");
+        mimeTypeMap.put("image/jpeg", "jpeg");
+        mimeTypeMap.put("image/png", "png");
+        mimeTypeMap.put("application/octet-stream", "zip");
     }
 
     private MimeTypeExtensionMapper() {
@@ -30,7 +40,7 @@ public class MimeTypeExtensionMapper {
      * Returns extension based on mimeType.
      *
      * @param mimeType the mime type to map
-     * @return the mapped extension, or "PDF" as default if no mapping was found
+     * @return the mapped extension, or "pdf" as default if no mapping was found
      */
     public static String getExtension(String mimeType) {
         if (mimeTypeMap.containsKey(mimeType)) {
@@ -38,7 +48,7 @@ public class MimeTypeExtensionMapper {
         }
 
         log.error(String.format("MimeType \'%s\' not in map - defaulting to PDF", mimeType));
-        return "PDF";
+        return "pdf";
     }
 
     /**
@@ -48,7 +58,7 @@ public class MimeTypeExtensionMapper {
      * @return the mapped mime type, or "application/pdf" as default if no mapping was found
      */
     public static String getMimetype(String extension) {
-        String ext = extension.toUpperCase();
+        String ext = extension.toLowerCase();
         if (mimeTypeMap.containsValue(ext)) {
             return mimeTypeMap.inverse().get(ext);
         }
