@@ -1,10 +1,7 @@
 package no.difi.meldingsutveksling.core;
 
 import com.google.common.collect.Lists;
-import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
-import no.arkivverket.standarder.noark5.arkivmelding.Dokumentbeskrivelse;
-import no.arkivverket.standarder.noark5.arkivmelding.Dokumentobjekt;
-import no.arkivverket.standarder.noark5.arkivmelding.Registrering;
+import no.arkivverket.standarder.noark5.arkivmelding.*;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.mxa.schema.domain.Message;
@@ -16,6 +13,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
 import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.*;
+import no.difi.meldingsutveksling.noarkexchange.schema.core.ObjectFactory;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -28,6 +26,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -139,40 +138,81 @@ public class EDUCoreFactory {
         return eduCore;
     }
 
-    public EDUCore create(ConversationResource cr, Arkivmelding arkivmelding, byte[] asic) {
+    public EDUCore create(ConversationResource cr, Arkivmelding am, byte[] asic) {
         EDUCore eduCore = createCommon(cr.getSenderId(), cr.getReceiverId());
         eduCore.setId(cr.getConversationId());
         eduCore.setMessageType(EDUCore.MessageType.EDU);
         eduCore.setMessageReference(cr.getConversationId());
 
+        if (!(am.getMappe().get(0) instanceof Saksmappe)) {
+            throw new MeldingsUtvekslingRuntimeException(String.format("Mappe in Arkivmelding %s not instance of Saksmappe", cr.getConversationId()));
+        }
         ObjectFactory of = new ObjectFactory();
+        NoarksakType noarksakType = of.createNoarksakType();
+        Saksmappe sm = (Saksmappe) am.getMappe().get(0);
+        noarksakType.setSaSaar(sm.getSaksaar().toString());
+        noarksakType.setSaSeknr(sm.getSakssekvensnummer().toString());
+        noarksakType.setSaAnsvinit(sm.getSaksansvarlig());
+        noarksakType.setSaAdmkort(sm.getAdministrativEnhet());
+        noarksakType.setSaOfftittel(sm.getOffentligTittel());
+
+        if (!(sm.getBasisregistrering().get(0) instanceof Journalpost)) {
+            throw new MeldingsUtvekslingRuntimeException(String.format("Basisregistrering in Arkivmelding %s not instance of Journalpost", cr.getConversationId()));
+        }
         JournpostType journpostType = of.createJournpostType();
+        Journalpost jp = (Journalpost)  sm.getBasisregistrering().get(0);
+        journpostType.setJpJaar(jp.getJournalaar().toString());
+        journpostType.setJpSeknr(jp.getJournalsekvensnummer().toString());
+        journpostType.setJpJpostnr(jp.getJournalpostnummer().toString());
+        journpostType.setJpJdato(jp.getJournaldato().toString());
+        journpostType.setJpNdoktype(jp.getJournalposttype().value());
+        journpostType.setJpDokdato(jp.getDokumentetsDato().toString());
+        journpostType.setJpUoff(sm.getSkjerming().getSkjermingshjemmel());
 
-        List<Dokumentobjekt> docs = Lists.newArrayList();
-        arkivmelding.getMappe().stream()
-                .flatMap(m -> m.getBasisregistrering().stream())
-                .forEach(r -> docs.addAll(dokObjFromReg(r)));
-        arkivmelding.getRegistrering().forEach(r -> docs.addAll(dokObjFromReg(r)));
+        jp.getKorrespondansepart().forEach(k -> {
+            AvsmotType avsmotType = of.createAvsmotType();
+            avsmotType.setAmNavn(k.getKorrespondansepartNavn());
+            avsmotType.setAmIhtype(k.getKorrespondanseparttype().value());
+            avsmotType.setAmAdmkort(k.getAdministrativEnhet());
+            avsmotType.setAmSbhinit(k.getSaksbehandler());
+            avsmotType.setAmAvskm(jp.getAvskrivning().get(0).getAvskrivningsmaate().value());
+            avsmotType.setAmAvskdato(jp.getAvskrivning().get(0).getAvskrivningsdato().toString());
+            avsmotType.setAmAvsavdok(jp.getAvskrivning().get(0).getReferanseAvskrivesAvJournalpost());
 
-        docs.forEach(d -> {
-            DokumentType dokumentType = of.createDokumentType();
-            String filename = d.getReferanseDokumentfil();
-            dokumentType.setVeFilnavn(filename);
-            // TODO: tittel og mimetype
-            FilType filType = of.createFilType();
-            try {
-                filType.setBase64(Base64.getDecoder().decode(getFileFromAsic(filename, asic)));
-            } catch (IOException e) {
-                throw new MeldingsUtvekslingRuntimeException(String.format("Error getting file %s from ASiC", filename), e);
-            }
-            dokumentType.setFil(filType);
-
-            journpostType.getDokument().add(dokumentType);
-
+            journpostType.getAvsmot().add(avsmotType);
         });
 
-        NoarksakType noarksakType = of.createNoarksakType();
-        // TODO: map arkivmelding til MeldingType
+        jp.getDokumentbeskrivelseAndDokumentobjekt().stream()
+                .filter(d -> d instanceof Dokumentbeskrivelse)
+                .forEach(b -> {
+                    Dokumentbeskrivelse db = (Dokumentbeskrivelse) b;
+                    db.getDokumentobjekt().forEach(dobj -> {
+                        DokumentType dokumentType = of.createDokumentType();
+                        String filename = dobj.getReferanseDokumentfil();
+                        dokumentType.setVeFilnavn(filename);
+                        dokumentType.setDbTittel(db.getTittel());
+                        dokumentType.setDlRnr(db.getDokumentnummer().toString());
+                        dokumentType.setDlType(db.getTilknyttetRegistreringSom().value());
+
+                        String[] split = dobj.getReferanseDokumentfil().split(".");
+                        String ext = Stream.of(split).reduce((p, e) -> e).orElse("pdf");
+                        // TODO: set mimetype after mimetypermapper merge
+                        dokumentType.setVeMimeType(ext);
+                        dokumentType.setVeVariant(dobj.getVariantformat().value());
+
+                        FilType filType = of.createFilType();
+                        try {
+                            filType.setBase64(Base64.getDecoder().decode(getFileFromAsic(filename, asic)));
+                        } catch (IOException e) {
+                            throw new MeldingsUtvekslingRuntimeException(String.format("Error getting file %s from ASiC", filename), e);
+                        }
+                        dokumentType.setFil(filType);
+
+                        journpostType.getDokument().add(dokumentType);
+                    });
+
+
+                });
 
         MeldingType meldingType = of.createMeldingType();
         meldingType.setJournpost(journpostType);
