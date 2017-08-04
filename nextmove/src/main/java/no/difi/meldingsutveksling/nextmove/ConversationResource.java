@@ -65,6 +65,8 @@ public abstract class ConversationResource {
     @XmlElement
     @JsonIgnore
     private boolean hasArkivmelding;
+    @JsonIgnore
+    private boolean locked;
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "fileid")
     @Column(name = "filename")
