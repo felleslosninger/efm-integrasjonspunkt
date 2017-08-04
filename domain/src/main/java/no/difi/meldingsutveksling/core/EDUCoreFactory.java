@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import static no.difi.meldingsutveksling.MimeTypeExtensionMapper.getMimetype;
 import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.unmarshallPayload;
 
 public class EDUCoreFactory {
@@ -196,8 +197,7 @@ public class EDUCoreFactory {
 
                         String[] split = dobj.getReferanseDokumentfil().split(".");
                         String ext = Stream.of(split).reduce((p, e) -> e).orElse("pdf");
-                        // TODO: set mimetype after mimetypermapper merge
-                        dokumentType.setVeMimeType(ext);
+                        dokumentType.setVeMimeType(getMimetype(ext));
                         dokumentType.setVeVariant(dobj.getVariantformat().value());
 
                         FilType filType = of.createFilType();
