@@ -73,18 +73,20 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
   - changeSet:
-      id: 1
+      id: 3
       author: maw
       preConditions:
         - onFail: MARK_RAN
         - tableExists:
             tableName: conversation_resource
-        - columnExists:
-            columnName: messagetype_id
+        - not:
+            - columnExists:
+                columnName: locked
       changes:
-        - dropColumn:
-            columnName: direction
+        - addColumn:
             tableName: conversation_resource
-        - dropColumn:
-            columnName: messagetype_id
-            tableName: conversation_resource
+            columns:
+              - column:
+                  name: locked
+                  type: boolean
+                  valueBoolean: false
