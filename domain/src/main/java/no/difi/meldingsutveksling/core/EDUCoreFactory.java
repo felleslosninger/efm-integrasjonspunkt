@@ -179,7 +179,12 @@ public class EDUCoreFactory {
         jp.getKorrespondansepart().forEach(k -> {
             AvsmotType avsmotType = of.createAvsmotType();
             avsmotType.setAmNavn(k.getKorrespondansepartNavn());
-            avsmotType.setAmIhtype(k.getKorrespondanseparttype().value());
+            if ("avsender".equals(k.getKorrespondanseparttype().value().toLowerCase())) {
+                avsmotType.setAmIhtype("0");
+            }
+            if ("mottaker".equals(k.getKorrespondanseparttype().value().toLowerCase())) {
+                avsmotType.setAmIhtype("1");
+            }
             avsmotType.setAmAdmkort(k.getAdministrativEnhet());
             avsmotType.setAmSbhinit(k.getSaksbehandler());
             if (!jp.getAvskrivning().isEmpty()) {
