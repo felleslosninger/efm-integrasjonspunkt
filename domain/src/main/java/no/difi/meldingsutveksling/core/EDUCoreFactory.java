@@ -2,6 +2,8 @@ package no.difi.meldingsutveksling.core;
 
 import com.google.common.collect.Lists;
 import no.arkivverket.standarder.noark5.arkivmelding.*;
+import no.arkivverket.standarder.noark5.metadatakatalog.Avskrivningsmaate;
+import no.arkivverket.standarder.noark5.metadatakatalog.Journalposttype;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.mxa.schema.domain.Message;
@@ -20,8 +22,10 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.io.IOUtils;
 
 import javax.xml.bind.JAXBException;
+import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +34,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import static java.util.Optional.ofNullable;
 import static no.difi.meldingsutveksling.MimeTypeExtensionMapper.getMimetype;
 import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.unmarshallPayload;
 
@@ -145,14 +150,14 @@ public class EDUCoreFactory {
         eduCore.setMessageType(EDUCore.MessageType.EDU);
         eduCore.setMessageReference(cr.getConversationId());
 
-        if (!(am.getMappe().get(0) instanceof Saksmappe)) {
+        if (am.getMappe().isEmpty() || !(am.getMappe().get(0) instanceof Saksmappe)) {
             throw new MeldingsUtvekslingRuntimeException(String.format("Mappe in Arkivmelding %s not instance of Saksmappe", cr.getConversationId()));
         }
         ObjectFactory of = new ObjectFactory();
         NoarksakType noarksakType = of.createNoarksakType();
         Saksmappe sm = (Saksmappe) am.getMappe().get(0);
-        noarksakType.setSaSaar(sm.getSaksaar().toString());
-        noarksakType.setSaSeknr(sm.getSakssekvensnummer().toString());
+        ofNullable(sm.getSaksaar()).map(s -> s.toString()).ifPresent(noarksakType::setSaSaar);
+        ofNullable(sm.getSakssekvensnummer()).map(BigInteger::toString).ifPresent(noarksakType::setSaSeknr);
         noarksakType.setSaAnsvinit(sm.getSaksansvarlig());
         noarksakType.setSaAdmkort(sm.getAdministrativEnhet());
         noarksakType.setSaOfftittel(sm.getOffentligTittel());
@@ -162,13 +167,14 @@ public class EDUCoreFactory {
         }
         JournpostType journpostType = of.createJournpostType();
         Journalpost jp = (Journalpost)  sm.getBasisregistrering().get(0);
-        journpostType.setJpJaar(jp.getJournalaar().toString());
-        journpostType.setJpSeknr(jp.getJournalsekvensnummer().toString());
-        journpostType.setJpJpostnr(jp.getJournalpostnummer().toString());
-        journpostType.setJpJdato(jp.getJournaldato().toString());
-        journpostType.setJpNdoktype(jp.getJournalposttype().value());
-        journpostType.setJpDokdato(jp.getDokumentetsDato().toString());
-        journpostType.setJpUoff(sm.getSkjerming().getSkjermingshjemmel());
+        ofNullable(jp.getJournalaar()).map(BigInteger::toString).ifPresent(journpostType::setJpJaar);
+        ofNullable(jp.getJournalsekvensnummer()).map(BigInteger::toString).ifPresent(journpostType::setJpSeknr);
+        ofNullable(jp.getJournalpostnummer()).map(BigInteger::toString).ifPresent(journpostType::setJpJpostnr);
+        ofNullable(jp.getJournaldato()).map(XMLGregorianCalendar::toString).ifPresent(journpostType::setJpJdato);
+        ofNullable(jp.getJournalposttype()).map(Journalposttype::value).ifPresent(journpostType::setJpNdoktype);
+        ofNullable(jp.getDokumentetsDato()).map(XMLGregorianCalendar::toString).ifPresent(journpostType::setJpDokdato);
+        ofNullable(sm.getSkjerming()).map(Skjerming::getSkjermingshjemmel).ifPresent(journpostType::setJpUoff);
+
 
         jp.getKorrespondansepart().forEach(k -> {
             AvsmotType avsmotType = of.createAvsmotType();
@@ -176,9 +182,12 @@ public class EDUCoreFactory {
             avsmotType.setAmIhtype(k.getKorrespondanseparttype().value());
             avsmotType.setAmAdmkort(k.getAdministrativEnhet());
             avsmotType.setAmSbhinit(k.getSaksbehandler());
-            avsmotType.setAmAvskm(jp.getAvskrivning().get(0).getAvskrivningsmaate().value());
-            avsmotType.setAmAvskdato(jp.getAvskrivning().get(0).getAvskrivningsdato().toString());
-            avsmotType.setAmAvsavdok(jp.getAvskrivning().get(0).getReferanseAvskrivesAvJournalpost());
+            if (!jp.getAvskrivning().isEmpty()) {
+                Avskrivning avs = jp.getAvskrivning().get(0);
+                ofNullable(avs.getAvskrivningsmaate()).map(Avskrivningsmaate::value).ifPresent(avsmotType::setAmAvskm);
+                ofNullable(avs.getAvskrivningsdato()).map(XMLGregorianCalendar::toString).ifPresent(avsmotType::setAmAvskdato);
+                avsmotType.setAmAvsavdok(avs.getReferanseAvskrivesAvJournalpost());
+            }
 
             journpostType.getAvsmot().add(avsmotType);
         });
@@ -202,7 +211,7 @@ public class EDUCoreFactory {
 
                         FilType filType = of.createFilType();
                         try {
-                            filType.setBase64(Base64.getDecoder().decode(getFileFromAsic(filename, asic)));
+                            filType.setBase64(getFileFromAsic(filename, asic));
                         } catch (IOException e) {
                             throw new MeldingsUtvekslingRuntimeException(String.format("Error getting file %s from ASiC", filename), e);
                         }
