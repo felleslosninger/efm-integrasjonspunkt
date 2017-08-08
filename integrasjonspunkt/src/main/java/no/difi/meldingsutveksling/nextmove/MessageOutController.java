@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import io.swagger.annotations.*;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -32,10 +33,8 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import java.io.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
@@ -185,31 +184,22 @@ public class MessageOutController {
         }
         ConversationResource conversationResource = find.get();
 
+        Optional<String> arkivmeldingFile = request.getFileMap().values().stream()
+                .map(MultipartFile::getOriginalFilename)
+                .filter(f -> ARKIVMELDING_FILE.equals(f))
+                .findFirst();
+        if (arkivmeldingFile.isPresent()) {
+            ResponseEntity arkivmeldingResponse = handleArkivmelding(request, conversationResource);
+            if (arkivmeldingResponse.getStatusCode() != HttpStatus.OK) {
+                return arkivmeldingResponse;
+            }
+        }
+
         ArrayList<String> files = Lists.newArrayList(request.getFileNames());
         for (String f : files) {
             MultipartFile file = request.getFile(f);
             log.trace(markerFrom(conversationResource), "Adding file \"{}\" ({}, {} bytes) to {}",
                     file.getOriginalFilename(), file.getContentType(), file.getSize(), conversationResource.getConversationId());
-
-            if (ARKIVMELDING_FILE.equals(file.getOriginalFilename())) {
-                try {
-                    validateArkivmelding(file.getInputStream());
-                    conversationResource.setArkivmelding(unmarshalArkivmelding(file.getInputStream()));
-                    conversationResource.setHasArkivmelding(true);
-                } catch (IOException e) {
-                    log.error("Could not read file {}", file.getOriginalFilename(), e);
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                            ErrorResponse.builder().error("read_file_error").errorDescription("Could not read file").build());
-                } catch (SAXException e) {
-                    log.error("{} XML validation failed", file.getOriginalFilename(), e);
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                            ErrorResponse.builder().error("xml_validation_error").errorDescription("arkivmelding.xml validation error: "+e.getLocalizedMessage()).build());
-                } catch (JAXBException e) {
-                    log.error("Could not unmarshal {}", file.getOriginalFilename(), e);
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                            ErrorResponse.builder().error("xml_unmarshal").errorDescription("arkivmelding.xml unmarshalling error: "+e.getLocalizedMessage()).build());
-                }
-            }
 
             String filedir = props.getNextbest().getFiledir();
             if (!filedir.endsWith("/")) {
@@ -247,6 +237,42 @@ public class MessageOutController {
         }
         return response;
 
+    }
+
+    private ResponseEntity handleArkivmelding(MultipartHttpServletRequest request, ConversationResource cr) {
+        MultipartFile file = request.getFileMap().values().stream()
+                .filter(f -> ARKIVMELDING_FILE.equals(f.getOriginalFilename()))
+                .findFirst().get();
+        try {
+            validateArkivmelding(file.getInputStream());
+            cr.setArkivmelding(unmarshalArkivmelding(file.getInputStream()));
+            cr.setHasArkivmelding(true);
+        } catch (IOException e) {
+            log.error("Could not read file {}", file.getOriginalFilename(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    ErrorResponse.builder().error("read_file_error").errorDescription("Could not read file").build());
+        } catch (SAXException e) {
+            log.error("{} XML validation failed", file.getOriginalFilename(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    ErrorResponse.builder().error("xml_validation_error").errorDescription("arkivmelding.xml validation error: "+e.getLocalizedMessage()).build());
+        } catch (JAXBException e) {
+            log.error("Could not unmarshal {}", file.getOriginalFilename(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    ErrorResponse.builder().error("xml_unmarshal").errorDescription("arkivmelding.xml unmarshalling error: "+e.getLocalizedMessage()).build());
+        }
+
+        List<String> files = request.getFileMap().values().stream()
+                .map(MultipartFile::getOriginalFilename)
+                .collect(Collectors.toList());
+        List<String> amFiles = ArkivmeldingUtil.getFilenames(cr.getArkivmelding());
+        if (!files.containsAll(amFiles)) {
+            String filesString = amFiles.stream().collect(Collectors.joining(", "));
+            log.error("Arkivmelding: missing files from upload, expected [{}]", filesString);
+            return ResponseEntity.badRequest().body(
+                    ErrorResponse.builder().error("missing_files").errorDescription("missing files from upload: "+filesString).build());
+        }
+
+        return ResponseEntity.ok().build();
     }
 
     @RequestMapping(value = "/out/types/{identifier}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

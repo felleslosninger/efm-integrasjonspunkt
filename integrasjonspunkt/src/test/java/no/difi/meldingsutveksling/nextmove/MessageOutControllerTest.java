@@ -242,8 +242,10 @@ public class MessageOutControllerTest {
         File arkivmelding = new File("src/test/resources/arkivmelding_ok.xml");
         byte[] am_bytes = FileUtils.readFileToByteArray(arkivmelding);
         MockMultipartFile data = new MockMultipartFile("data", "arkivmelding.xml", "application/xml", am_bytes);
+        MockMultipartFile testpdf = new MockMultipartFile("data2", "test.pdf", "application/pdf", "foo".getBytes());
         mvc.perform(fileUpload("/out/messages/42")
-                .file(data))
+                .file(data)
+                .file(testpdf))
                 .andExpect(status().isOk());
     }
 
