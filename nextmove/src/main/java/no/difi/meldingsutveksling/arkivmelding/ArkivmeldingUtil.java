@@ -10,6 +10,9 @@ import java.util.List;
 
 public class ArkivmeldingUtil {
 
+    private ArkivmeldingUtil() {
+    }
+
     public static List<String> getFilenames(Arkivmelding am) {
         List<String> filenames = Lists.newArrayList();
 

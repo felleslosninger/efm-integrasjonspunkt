@@ -186,7 +186,7 @@ public class MessageOutController {
 
         Optional<String> arkivmeldingFile = request.getFileMap().values().stream()
                 .map(MultipartFile::getOriginalFilename)
-                .filter(f -> ARKIVMELDING_FILE.equals(f))
+                .filter(ARKIVMELDING_FILE::equals)
                 .findFirst();
         if (arkivmeldingFile.isPresent()) {
             ResponseEntity arkivmeldingResponse = handleArkivmelding(request, conversationResource);

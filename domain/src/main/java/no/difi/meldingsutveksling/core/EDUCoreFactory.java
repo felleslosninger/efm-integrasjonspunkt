@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.core;
 
-import com.google.common.collect.Lists;
 import no.arkivverket.standarder.noark5.arkivmelding.*;
 import no.arkivverket.standarder.noark5.metadatakatalog.Avskrivningsmaate;
 import no.arkivverket.standarder.noark5.metadatakatalog.Journalposttype;
@@ -27,7 +26,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Base64;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -179,10 +177,10 @@ public class EDUCoreFactory {
         jp.getKorrespondansepart().forEach(k -> {
             AvsmotType avsmotType = of.createAvsmotType();
             avsmotType.setAmNavn(k.getKorrespondansepartNavn());
-            if ("avsender".equals(k.getKorrespondanseparttype().value().toLowerCase())) {
+            if ("avsender".equalsIgnoreCase(k.getKorrespondanseparttype().value())) {
                 avsmotType.setAmIhtype("0");
             }
-            if ("mottaker".equals(k.getKorrespondanseparttype().value().toLowerCase())) {
+            if ("mottaker".equalsIgnoreCase(k.getKorrespondanseparttype().value())) {
                 avsmotType.setAmIhtype("1");
             }
             avsmotType.setAmAdmkort(k.getAdministrativEnhet());
@@ -202,30 +200,8 @@ public class EDUCoreFactory {
                 .forEach(b -> {
                     Dokumentbeskrivelse db = (Dokumentbeskrivelse) b;
                     db.getDokumentobjekt().forEach(dobj -> {
-                        DokumentType dokumentType = of.createDokumentType();
-                        String filename = dobj.getReferanseDokumentfil();
-                        dokumentType.setVeFilnavn(filename);
-                        dokumentType.setDbTittel(db.getTittel());
-                        dokumentType.setDlRnr(db.getDokumentnummer().toString());
-                        dokumentType.setDlType(db.getTilknyttetRegistreringSom().value());
-
-                        String[] split = dobj.getReferanseDokumentfil().split(".");
-                        String ext = Stream.of(split).reduce((p, e) -> e).orElse("pdf");
-                        dokumentType.setVeMimeType(getMimetype(ext));
-                        dokumentType.setVeVariant(dobj.getVariantformat().value());
-
-                        FilType filType = of.createFilType();
-                        try {
-                            filType.setBase64(getFileFromAsic(filename, asic));
-                        } catch (IOException e) {
-                            throw new MeldingsUtvekslingRuntimeException(String.format("Error getting file %s from ASiC", filename), e);
-                        }
-                        dokumentType.setFil(filType);
-
-                        journpostType.getDokument().add(dokumentType);
+                        journpostType.getDokument().add(createDokumentType(db, dobj, asic));
                     });
-
-
                 });
 
         MeldingType meldingType = of.createMeldingType();
@@ -239,17 +215,29 @@ public class EDUCoreFactory {
         return eduCore;
     }
 
-    private List<Dokumentobjekt> dokObjFromReg(Registrering r) {
-        List<Dokumentobjekt> docs = Lists.newArrayList();
-        r.getDokumentbeskrivelseAndDokumentobjekt().stream()
-                .filter(o -> o instanceof Dokumentbeskrivelse)
-                .flatMap(d -> ((Dokumentbeskrivelse)d).getDokumentobjekt().stream())
-                .forEach(docs::add);
-        r.getDokumentbeskrivelseAndDokumentobjekt().stream()
-                .filter(o -> o instanceof Dokumentobjekt)
-                .map(d -> (Dokumentobjekt)d)
-                .forEach(docs::add);
-        return docs;
+    private DokumentType createDokumentType(Dokumentbeskrivelse db, Dokumentobjekt dobj, byte[] asic) {
+        ObjectFactory of = new ObjectFactory();
+        DokumentType dokumentType = of.createDokumentType();
+        String filename = dobj.getReferanseDokumentfil();
+        dokumentType.setVeFilnavn(filename);
+        dokumentType.setDbTittel(db.getTittel());
+        dokumentType.setDlRnr(db.getDokumentnummer().toString());
+        dokumentType.setDlType(db.getTilknyttetRegistreringSom().value());
+
+        String[] split = dobj.getReferanseDokumentfil().split(".");
+        String ext = Stream.of(split).reduce((p, e) -> e).orElse("pdf");
+        dokumentType.setVeMimeType(getMimetype(ext));
+        dokumentType.setVeVariant(dobj.getVariantformat().value());
+
+        FilType filType = of.createFilType();
+        try {
+            filType.setBase64(getFileFromAsic(filename, asic));
+        } catch (IOException e) {
+            throw new MeldingsUtvekslingRuntimeException(String.format("Error getting file %s from ASiC", filename), e);
+        }
+        dokumentType.setFil(filType);
+
+        return dokumentType;
     }
 
     public byte[] getFileFromAsic(String fileName, byte[] bytes) throws IOException {

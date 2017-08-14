@@ -130,22 +130,16 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
         if (document.isNextMove()) {
             eduDocument = convertConversationToEducore(document);
         } else {
-            try {
-                eduDocument = convertAsicEntrytoEduDocument(decryptedAsicPackage);
-                if (PayloadUtil.isAppReceipt(eduDocument.getPayload())) {
-                    Audit.info("AppReceipt extracted", markerFrom(document));
-                    registerReceipt(eduDocument);
-                    if (!properties.getFeature().isForwardReceivedAppReceipts()) {
-                        Audit.info("AppReceipt forwarding disabled - will not deliver to archive");
-                        return new CorrelationInformation();
-                    }
-                } else {
-                    Audit.info("EDU Document extracted", markerFrom(document));
+            eduDocument = convertAsicEntrytoEduDocument(decryptedAsicPackage);
+            if (PayloadUtil.isAppReceipt(eduDocument.getPayload())) {
+                Audit.info("AppReceipt extracted", markerFrom(document));
+                registerReceipt(eduDocument);
+                if (!properties.getFeature().isForwardReceivedAppReceipts()) {
+                    Audit.info("AppReceipt forwarding disabled - will not deliver to archive");
+                    return new CorrelationInformation();
                 }
-
-            } catch (IOException | JAXBException e) {
-                Audit.error("Failed to extract EDUdocument", markerFrom(document), e);
-                throw new MessageException(e, StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
+            } else {
+                Audit.info("EDU Document extracted", markerFrom(document));
             }
         }
 
@@ -156,13 +150,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
     private EDUCore convertConversationToEducore(StandardBusinessDocumentWrapper doc) throws MessageException {
         Payload payload = doc.getPayload();
         byte[] decryptedAsicPackage = decrypt(payload);
-        Arkivmelding arkivmelding = null;
-        try {
-            arkivmelding = convertAsicEntryToArkivmelding(decryptedAsicPackage);
-        } catch (IOException | JAXBException e) {
-            Audit.error("Failed to extract Arkivmelding", markerFrom(doc), e);
-            throw new MessageException(e, StatusMessage.UNABLE_TO_EXTRACT_ARKIVMELDING);
-        }
+        Arkivmelding arkivmelding = convertAsicEntryToArkivmelding(decryptedAsicPackage);
         ConversationResource cr = payload.getConversation();
 
         EDUCore eduCore = new EDUCoreFactory(serviceRegistryLookup).create(cr, arkivmelding, decryptedAsicPackage);
@@ -226,7 +214,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
         t.send(context, receipt);
     }
 
-    public EDUCore convertAsicEntrytoEduDocument(byte[] bytes) throws MessageException, IOException, JAXBException {
+    public EDUCore convertAsicEntrytoEduDocument(byte[] bytes) throws MessageException {
         try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes))) {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
@@ -236,11 +224,13 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
                     return unMarshaller.unmarshal(new StreamSource(zipInputStream), EDUCore.class).getValue();
                 }
             }
+        } catch (IOException | JAXBException e) {
+            throw new MessageException(StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
         }
         throw new MessageException(StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
     }
 
-    public Arkivmelding convertAsicEntryToArkivmelding(byte[] bytes) throws IOException, JAXBException, MessageException {
+    public Arkivmelding convertAsicEntryToArkivmelding(byte[] bytes) throws MessageException {
         try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes))) {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
@@ -250,6 +240,8 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
                     return unMarshaller.unmarshal(new StreamSource(zipInputStream), Arkivmelding.class).getValue();
                 }
             }
+        } catch (IOException | JAXBException e) {
+            throw new MessageException(StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
         }
         throw new MessageException(StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
     }
