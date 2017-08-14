@@ -15,7 +15,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static no.difi.meldingsutveksling.ks.svarinn.MimeTypeExtensionMapper.getMimetype;
+import static no.difi.meldingsutveksling.MimeTypeExtensionMapper.getMimetype;
 
 public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 

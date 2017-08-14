@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.Decryptor;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.ServiceIdentifier;
@@ -11,6 +12,7 @@ import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.kvittering.EduDocumentFactory;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.mail.MailClient;
+import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
@@ -117,16 +119,17 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
             throw e;
         }
 
-        if (document.isReciept()) {
+        if (document.isReceipt()) {
             Audit.info("Messagetype Receipt", markerFrom(document));
             return new CorrelationInformation();
         }
 
-        // TODO: remove? or move to send leveringskvittering i internal queue?
         Payload payload = document.getPayload();
         byte[] decryptedAsicPackage = decrypt(payload);
         EDUCore eduDocument;
-        try {
+        if (document.isNextMove()) {
+            eduDocument = convertConversationToEducore(document);
+        } else {
             eduDocument = convertAsicEntrytoEduDocument(decryptedAsicPackage);
             if (PayloadUtil.isAppReceipt(eduDocument.getPayload())) {
                 Audit.info("AppReceipt extracted", markerFrom(document));
@@ -138,14 +141,22 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
             } else {
                 Audit.info("EDU Document extracted", markerFrom(document));
             }
-
-        } catch (IOException | JAXBException e) {
-            Audit.error("Failed to extract EDUdocument", markerFrom(document), e);
-            throw new MessageException(e, StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
         }
 
         forwardToNoarkSystemAndSendReceipts(document, eduDocument);
         return new CorrelationInformation();
+    }
+
+    private EDUCore convertConversationToEducore(StandardBusinessDocumentWrapper doc) throws MessageException {
+        Payload payload = doc.getPayload();
+        byte[] decryptedAsicPackage = decrypt(payload);
+        Arkivmelding arkivmelding = convertAsicEntryToArkivmelding(decryptedAsicPackage);
+        ConversationResource cr = payload.getConversation();
+
+        EDUCore eduCore = new EDUCoreFactory(serviceRegistryLookup).create(cr, arkivmelding, decryptedAsicPackage);
+        registerReceipt(eduCore);
+
+        return eduCore;
     }
 
     private void registerReceipt(EDUCore eduCore) {
@@ -203,7 +214,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
         t.send(context, receipt);
     }
 
-    public EDUCore convertAsicEntrytoEduDocument(byte[] bytes) throws MessageException, IOException, JAXBException {
+    public EDUCore convertAsicEntrytoEduDocument(byte[] bytes) throws MessageException {
         try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes))) {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
@@ -213,6 +224,24 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
                     return unMarshaller.unmarshal(new StreamSource(zipInputStream), EDUCore.class).getValue();
                 }
             }
+        } catch (IOException | JAXBException e) {
+            throw new MessageException(e, StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
+        }
+        throw new MessageException(StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
+    }
+
+    public Arkivmelding convertAsicEntryToArkivmelding(byte[] bytes) throws MessageException {
+        try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes))) {
+            ZipEntry entry;
+            while ((entry = zipInputStream.getNextEntry()) != null) {
+                if ("arkivmelding.xml".equals(entry.getName())) {
+                    JAXBContext jaxbContext = JAXBContext.newInstance(Arkivmelding.class);
+                    Unmarshaller unMarshaller = jaxbContext.createUnmarshaller();
+                    return unMarshaller.unmarshal(new StreamSource(zipInputStream), Arkivmelding.class).getValue();
+                }
+            }
+        } catch (IOException | JAXBException e) {
+            throw new MessageException(e, StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
         }
         throw new MessageException(StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
     }

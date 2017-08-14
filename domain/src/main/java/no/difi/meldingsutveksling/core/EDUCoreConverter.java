@@ -1,6 +1,8 @@
-package no.difi.meldingsutveksling.noarkexchange.receive;
+package no.difi.meldingsutveksling.core;
 
-import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.noarkexchange.receive.PayloadConverter;
+import no.difi.meldingsutveksling.noarkexchange.receive.PayloadConverterImpl;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 
@@ -27,7 +29,7 @@ public class EDUCoreConverter {
         try {
             jaxbContext = JAXBContext.newInstance(EDUCore.class);
         } catch (JAXBException e) {
-            throw new RuntimeException(e);
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
     }
 
@@ -51,7 +53,7 @@ public class EDUCoreConverter {
             message.setPayload(payloadConverter.unmarshallFrom(marshalledPayload.getBytes(CHARSET_UTF8)));
             return os.toByteArray();
         } catch (JAXBException | UnsupportedEncodingException e) {
-            throw new RuntimeException("Unable to create marshaller for " + EDUCore.class, e);
+            throw new MeldingsUtvekslingRuntimeException("Unable to create marshaller for " + EDUCore.class, e);
         }
     }
 
@@ -88,7 +90,7 @@ public class EDUCoreConverter {
             }
             return eduCore;
         } catch (JAXBException | UnsupportedEncodingException  e) {
-            throw new RuntimeException("Unable to create unmarshaller for " + EDUCore.class, e);
+            throw new MeldingsUtvekslingRuntimeException("Unable to create unmarshaller for " + EDUCore.class, e);
         }
     }
 }

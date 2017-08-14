@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.ks.svarinn;
+package no.difi.meldingsutveksling;
 
 import com.google.common.collect.HashBiMap;
 import org.slf4j.Logger;
