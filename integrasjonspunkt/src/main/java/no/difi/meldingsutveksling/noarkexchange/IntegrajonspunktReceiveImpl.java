@@ -225,7 +225,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
                 }
             }
         } catch (IOException | JAXBException e) {
-            throw new MessageException(StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
+            throw new MessageException(e, StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
         }
         throw new MessageException(StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
     }
@@ -241,7 +241,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
                 }
             }
         } catch (IOException | JAXBException e) {
-            throw new MessageException(StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
+            throw new MessageException(e, StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
         }
         throw new MessageException(StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
     }

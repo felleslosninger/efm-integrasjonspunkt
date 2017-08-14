@@ -199,9 +199,9 @@ public class EDUCoreFactory {
                 .filter(d -> d instanceof Dokumentbeskrivelse)
                 .forEach(b -> {
                     Dokumentbeskrivelse db = (Dokumentbeskrivelse) b;
-                    db.getDokumentobjekt().forEach(dobj -> {
-                        journpostType.getDokument().add(createDokumentType(db, dobj, asic));
-                    });
+                    db.getDokumentobjekt().forEach(dobj ->
+                        journpostType.getDokument().add(createDokumentType(db, dobj, asic))
+                    );
                 });
 
         MeldingType meldingType = of.createMeldingType();
