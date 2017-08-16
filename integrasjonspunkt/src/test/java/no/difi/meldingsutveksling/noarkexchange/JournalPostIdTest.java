@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,14 +49,6 @@ public class JournalPostIdTest {
         JournalpostId id = JournalpostId.fromPutMessage(new PutMessageRequestWrapper(request));
         assertEquals("219816", id.value());
 
-    }
-
-    private PutMessageRequestType createPutMessageEscapedXml(String payload) {
-        PutMessageRequestType request = new PutMessageRequestType();
-        EnvelopeType type = new EnvelopeType();
-        request.setEnvelope(type);
-        request.setPayload(payload);
-        return request;
     }
 
     private PutMessageRequestType createPutMessageRequestWith(String payload) throws JAXBException {
