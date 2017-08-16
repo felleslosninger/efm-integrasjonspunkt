@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.net.URL;
+import java.security.KeyStore;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
@@ -218,23 +219,31 @@ public class IntegrasjonspunktProperties {
 
     @Data
     public static class Keystore {
+        /**
+         * Type of KeyStore
+         *
+         * Examples: JKS, Windows-MY
+         */
+        private String type = KeyStore.getDefaultType();
 
         /**
          * Keystore alias for key.
          */
         @NotNull
         private String alias;
+
         /**
          * Path of jks file.
+         *
+         * May be empty if type = Windows-MY
          */
-
-        @NotNull
         private Resource path;
+
         /**
          * Password of keystore and entry.
          */
         @NotNull
-        private String password;
+        private String password = "";
 
     }
 
