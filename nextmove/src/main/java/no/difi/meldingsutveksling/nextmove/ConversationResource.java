@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.common.base.MoreObjects;
 import lombok.Data;
+import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.xml.LocalDateTimeAdapter;
 
@@ -61,6 +62,11 @@ public abstract class ConversationResource {
     private LocalDateTime lastUpdate;
     @JsonIgnore
     private ConversationDirection direction;
+    @XmlElement
+    @JsonIgnore
+    private boolean hasArkivmelding;
+    @JsonIgnore
+    private boolean locked;
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "fileid")
     @Column(name = "filename")
@@ -73,6 +79,9 @@ public abstract class ConversationResource {
     @CollectionTable(name = "props", joinColumns = @JoinColumn(name = "pids"))
     @XmlElement
     private Map<String, String> customProperties;
+    @JsonIgnore
+    @Transient
+    private Arkivmelding arkivmelding;
 
     ConversationResource() {}
 
@@ -103,4 +112,5 @@ public abstract class ConversationResource {
                 .add("fileRefs", fileRefs)
                 .toString();
     }
+
 }

@@ -63,8 +63,12 @@ public class StandardBusinessDocumentWrapper {
         return new Scope();
     }
 
-    public boolean isReciept() {
+    public boolean isReceipt() {
         return document.getStandardBusinessDocumentHeader().getDocumentIdentification().getType().equalsIgnoreCase(StandardBusinessDocumentHeader.KVITTERING_TYPE);
+    }
+
+    public boolean isNextMove() {
+        return StandardBusinessDocumentHeader.NEXTMOVE_TYPE.equalsIgnoreCase(document.getStandardBusinessDocumentHeader().getDocumentIdentification().getType());
     }
 
     public Payload getPayload() {

@@ -72,3 +72,41 @@ databaseChangeLog:
                   constraints:
                     primaryKey: true
                     nullable: false
+  - changeSet:
+      id: 3
+      author: maw
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: conversation_resource
+        - not:
+            - columnExists:
+                tableName: conversation_resource
+                columnName: locked
+      changes:
+        - addColumn:
+            tableName: conversation_resource
+            columns:
+              - column:
+                  name: locked
+                  type: boolean
+                  valueBoolean: false
+  - changeSet:
+      id: 4
+      author: maw
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: conversation_resource
+        - not:
+            - columnExists:
+                tableName: conversation_resource
+                columnName: has_arkivmelding
+      changes:
+        - addColumn:
+            tableName: conversation_resource
+            columns:
+              - column:
+                  name: has_arkivmelding
+                  type: boolean
+                  valueBoolean: false

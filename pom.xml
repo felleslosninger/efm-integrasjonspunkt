@@ -5,7 +5,7 @@
     <groupId>no.difi.meldingsutveksling</groupId>
     <artifactId>parent-pom</artifactId>
     <packaging>pom</packaging>
-    <version>1.7.62</version>
+    <version>1.7.63</version>
     <name>Multiproject for meldingsutveksling</name>
 
     <scm>
@@ -34,14 +34,13 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.boot.version>1.4.0.RELEASE</spring.boot.version>
         <commons.lang.version>2.3</commons.lang.version>
         <apache.commons.version>10.0-b28</apache.commons.version>
         <jacoco.version>0.7.5.201505241946</jacoco.version>
         <!-- bug with logstash-logback-encoder in 1.1.7, wait for 1.1.8 http://jira.qos.ch/browse/LOGBACK-1158 -->
         <logback.version>1.1.6</logback.version>
         <mockito.version>1.10.19</mockito.version>
-        <move-common.version>1.0.16</move-common.version>
+        <move-common.version>1.0.20</move-common.version>
         <maven.javadoc.skip>true</maven.javadoc.skip>
     </properties>
 
@@ -252,7 +251,7 @@
                 <artifactId>dependency-check-maven</artifactId>
                 <version>1.4.3</version>
                 <configuration>
-                    <format>XML</format>
+                    <format>ALL</format>
                 </configuration>
             </plugin>
         </plugins>

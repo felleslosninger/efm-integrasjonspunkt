@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,6 +24,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Optional;
@@ -233,6 +235,28 @@ public class MessageOutControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.fileRefs.*", hasSize(1)))
                 .andExpect(jsonPath("$.fileRefs.0", is("file.txt")));
+    }
+
+    @Test
+    public void arkivmeldingShouldValidate() throws Exception {
+        File arkivmelding = new File("src/test/resources/arkivmelding_ok.xml");
+        byte[] am_bytes = FileUtils.readFileToByteArray(arkivmelding);
+        MockMultipartFile data = new MockMultipartFile("data", "arkivmelding.xml", "application/xml", am_bytes);
+        MockMultipartFile testpdf = new MockMultipartFile("data2", "test.pdf", "application/pdf", "foo".getBytes());
+        mvc.perform(fileUpload("/out/messages/42")
+                .file(data)
+                .file(testpdf))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void arkivmeldingShouldFail() throws Exception {
+        File arkivmelding = new File("src/test/resources/arkivmelding_error.xml");
+        byte[] am_bytes = FileUtils.readFileToByteArray(arkivmelding);
+        MockMultipartFile data = new MockMultipartFile("data", "arkivmelding.xml", "application/xml", am_bytes);
+        mvc.perform(fileUpload("/out/messages/42")
+                .file(data))
+                .andExpect(status().is5xxServerError());
     }
 
     @Test
