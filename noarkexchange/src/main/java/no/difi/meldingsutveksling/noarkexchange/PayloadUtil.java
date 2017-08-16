@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.xml.transform.StringSource;
 import org.w3c.dom.Document;
@@ -22,8 +21,6 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-
-import static org.apache.commons.lang.StringEscapeUtils.unescapeHtml;
 
 public class PayloadUtil {
     public static final String APP_RECEIPT_INDICATOR = "AppReceipt";
@@ -90,7 +87,6 @@ public class PayloadUtil {
             String doc;
             if (message.getPayload() instanceof String) {
                 doc = (String) message.getPayload();
-                doc = unescapeHtml(doc);
             } else {
                 doc = ((Node) message.getPayload()).getFirstChild().getTextContent().trim();
             }
@@ -111,7 +107,6 @@ public class PayloadUtil {
 
         if (payload instanceof String) {
             p = (String) payload;
-            p = StringEscapeUtils.unescapeHtml(p);
         } else {
             p = ((Node) payload).getFirstChild().getTextContent().trim();
         }
