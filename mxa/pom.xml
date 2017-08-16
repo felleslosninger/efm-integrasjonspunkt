@@ -3,7 +3,7 @@
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>1.7.63-SNAPSHOT</version>
+        <version>1.7.64-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>mxa</artifactId>
@@ -17,7 +17,7 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>test-tools</artifactId>
-            <version>1.7.63-SNAPSHOT</version>
+            <version>1.7.64-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
