@@ -73,6 +73,10 @@ public class EDUCoreConverter {
         }
     }
 
+    public MeldingType payloadAsMeldingType(byte[] payload) {
+        return (MeldingType) meldingTypeConverter.unmarshallFrom(payload);
+    }
+
     public EDUCore unmarshallFrom(byte[] message) {
         final ByteArrayInputStream is = new ByteArrayInputStream(message);
         Unmarshaller unmarshaller;
