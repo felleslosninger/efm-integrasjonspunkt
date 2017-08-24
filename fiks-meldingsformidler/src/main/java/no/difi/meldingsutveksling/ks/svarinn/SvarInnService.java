@@ -6,12 +6,15 @@ import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreFactory;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
+import no.difi.meldingsutveksling.noarkexchange.logging.PutMessageResponseMarkers;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+
+import static java.lang.String.format;
 
 public class SvarInnService implements MessageDownloaderModule {
 
@@ -34,10 +37,10 @@ public class SvarInnService implements MessageDownloaderModule {
     public void downloadFiles() {
         final List<Forsendelse> forsendelses = svarInnClient.checkForNewMessages();
         if (!forsendelses.isEmpty()) {
-            Audit.info(String.format("%d new messages in FIKS", forsendelses.size()));
+            Audit.info(format("%d new messages in FIKS", forsendelses.size()));
         }
         for(Forsendelse forsendelse : forsendelses) {
-
+            Audit.info(format("Downloading message with fiks-id %s", forsendelse.getId()), Markers.append("fiks-id", forsendelse.getId()));
             final SvarInnFile svarInnFile = svarInnClient.downloadFile(forsendelse.getDownloadUrl());
             final byte[] decrypt = decryptor.decrypt(svarInnFile.getContents());
             final Map<String, byte[]> unzippedFile;
@@ -62,15 +65,16 @@ public class SvarInnService implements MessageDownloaderModule {
             final EDUCore eduCore = message.toEduCore();
             PutMessageRequestType putMessage = EDUCoreFactory.createPutMessageFromCore(eduCore);
 
-            final PutMessageResponseType putMessageResponseType = noarkClient.sendEduMelding(putMessage);
+            final PutMessageResponseType response = noarkClient.sendEduMelding(putMessage);
 
-            if ("OK".equals(putMessageResponseType.getResult().getType())) {
+            if ("OK".equals(response.getResult().getType())) {
                 Audit.info("Message successfully forwarded");
                 svarInnClient.confirmMessage(forsendelse.getId());
-            } else if ("WARNING".equals(putMessageResponseType.getResult().getType())) {
-                Audit.info("Archive system responded with warning");
+            } else if ("WARNING".equals(response.getResult().getType())) {
+                Audit.info(format("Archive system responded with warning for message with fiks-id %s",
+                        forsendelse.getId()), PutMessageResponseMarkers.markerFrom(response));
             } else {
-                Audit.error("New message failed");
+                Audit.error(format("Message with fiks-id %s failed", forsendelse.getId()), PutMessageResponseMarkers.markerFrom(response));
             }
         }
     }
@@ -90,7 +94,7 @@ public class SvarInnService implements MessageDownloaderModule {
 
         if (!validator.getMissing().isEmpty()) {
             String missingFields = validator.getMissing().stream().reduce((a, b) -> a + ", " + b).get();
-            Audit.error(String.format("Message with id=%s has the following missing field(s): %s",
+            Audit.error(format("Message with id=%s has the following missing field(s): %s",
                     forsendelse.getId(), missingFields));
             return false;
         }
