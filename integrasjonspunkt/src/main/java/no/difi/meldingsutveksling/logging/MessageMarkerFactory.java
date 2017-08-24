@@ -4,8 +4,6 @@ import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.FileReference;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType;
 import org.apache.commons.io.FileUtils;
 
 import static no.difi.meldingsutveksling.logging.MarkerFactory.*;
@@ -35,15 +33,6 @@ public class MessageMarkerFactory {
      */
     public static LogstashMarker payloadSizeMarker(byte[] bytes) {
         return Markers.append(PAYLOAD_SIZE, FileUtils.byteCountToDisplaySize(bytes.length));
-    }
-
-    public static LogstashMarker markerFrom(PutMessageResponseType response) {
-        LogstashMarker marker = responseTypeMarker(response.getResult().getType());
-        for (StatusMessageType s : response.getResult().getMessage()) {
-            marker.and(responseMessageTextMarker(s.getText()));
-            marker.and(responseMessageCodeMarker(s.getCode()));
-        }
-        return marker;
     }
 
     /**
