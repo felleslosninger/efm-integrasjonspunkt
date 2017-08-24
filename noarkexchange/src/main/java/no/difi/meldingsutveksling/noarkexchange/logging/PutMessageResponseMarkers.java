@@ -10,6 +10,9 @@ import static no.difi.meldingsutveksling.logging.MarkerFactory.responseTypeMarke
 
 public class PutMessageResponseMarkers {
 
+    private PutMessageResponseMarkers() {
+    }
+
     public static LogstashMarker markerFrom(PutMessageResponseType response) {
         LogstashMarker marker = responseTypeMarker(response.getResult().getType());
         for (StatusMessageType s : response.getResult().getMessage()) {
