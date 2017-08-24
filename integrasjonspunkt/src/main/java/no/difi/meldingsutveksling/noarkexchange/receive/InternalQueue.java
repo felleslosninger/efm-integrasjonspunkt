@@ -88,6 +88,7 @@ public class InternalQueue {
             forwardToNoark(eduDocument);
         } catch (Exception e) {
             Audit.warn("Failed to forward message.. queue will retry", eduDocument.createLogstashMarkers());
+            throw e;
         }
     }
 
