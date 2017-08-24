@@ -73,22 +73,18 @@ public class PayloadUtil {
         return r.getValue();
     }
 
-    public static String queryPayload(PutMessageRequestWrapper message, String xpath) throws PayloadException {
+    public static String queryPayload(Object payload, String xpath) throws PayloadException {
         String result;
-
-        if(message.getMessageType() != PutMessageRequestWrapper.MessageType.EDUMESSAGE){
-            return "";
-        }
 
         XPathFactory xPathFactory = XPathFactory.newInstance();
         XPath xPath = xPathFactory.newXPath();
         try {
             XPathExpression expression = xPath.compile(xpath);
             String doc;
-            if (message.getPayload() instanceof String) {
-                doc = (String) message.getPayload();
+            if (payload instanceof String) {
+                doc = (String) payload;
             } else {
-                doc = ((Node) message.getPayload()).getFirstChild().getTextContent().trim();
+                doc = ((Node) payload).getFirstChild().getTextContent().trim();
             }
 
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
