@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.ks.mapping;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import no.difi.meldingsutveksling.ks.mapping.edu.FileTypeHandler;
 import no.difi.meldingsutveksling.ks.mapping.edu.FileTypeHandlerFactory;
 import no.difi.meldingsutveksling.ks.svarut.*;
@@ -38,7 +39,7 @@ public class ForsendelseMapper {
         builder.withEksternref(eduCore.getId());
         builder.withKunDigitalLevering(true);
 
-        final MeldingType meldingType = eduCore.getPayloadAsMeldingType();
+        final MeldingType meldingType = new EDUCoreConverter().payloadAsMeldingType(eduCore.getPayload());
         builder.withTittel(meldingType.getJournpost().getJpOffinnhold());
 
         final FileTypeHandlerFactory fileTypeHandlerFactory = new FileTypeHandlerFactory(properties.getFiks(), certificate);

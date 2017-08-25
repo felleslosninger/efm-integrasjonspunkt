@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
-import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import org.springframework.util.StringUtils;
 import org.springframework.xml.transform.StringSource;
 import org.w3c.dom.Document;
@@ -22,6 +22,7 @@ import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
+@Slf4j
 public class PayloadUtil {
     public static final String APP_RECEIPT_INDICATOR = "AppReceipt";
     public static final String PAYLOAD_UNKNOWN_TYPE = "Payload is of unknown type cannot determine what type of message it is";
@@ -97,33 +98,13 @@ public class PayloadUtil {
         return result;
     }
 
-    public static Object unmarshallPayload(Object payload) throws JAXBException {
-        String p;
-        Object msg;
-
-        if (payload instanceof String) {
-            p = (String) payload;
-        } else {
-            p = ((Node) payload).getFirstChild().getTextContent().trim();
+    public static String queryJpId(Object payload) {
+        try {
+            return queryPayload(payload, "/Melding/journpost/jpId");
+        } catch (PayloadException e) {
+            log.warn("Could not read jpId from payload", e);
+            return "";
         }
-
-        if (PayloadUtil.isAppReceipt(payload)) {
-            JAXBContext jaxbContext = JAXBContext.newInstance("no.difi.meldingsutveksling.noarkexchange.schema");
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            msg = unmarshaller.unmarshal(new StringSource(p), AppReceiptType.class).getValue();
-        } else {
-            JAXBContext jaxbContext = JAXBContext.newInstance(MeldingType.class);
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            msg = unmarshaller.unmarshal(new StringSource(p), MeldingType.class).getValue();
-        }
-        return msg;
     }
 
-    public static MeldingType unmarshallPayloadAsMeldingType(Object payload) throws JAXBException {
-        return (MeldingType) unmarshallPayload(payload);
-    }
-
-    public static AppReceiptType unmarshallPayloadAsAppReceiptType(Object payload) throws JAXBException {
-        return (AppReceiptType) unmarshallPayload(payload);
-    }
 }

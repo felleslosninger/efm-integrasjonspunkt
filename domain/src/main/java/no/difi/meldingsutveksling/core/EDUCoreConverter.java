@@ -5,13 +5,13 @@ import no.difi.meldingsutveksling.noarkexchange.receive.PayloadConverter;
 import no.difi.meldingsutveksling.noarkexchange.receive.PayloadConverterImpl;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
+import org.w3c.dom.Node;
 
 import javax.xml.bind.*;
 import javax.xml.namespace.QName;
 import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.UnsupportedEncodingException;
 
 public class EDUCoreConverter {
 
@@ -34,25 +34,12 @@ public class EDUCoreConverter {
     }
 
     public byte[] marshallToBytes(EDUCore message) {
-        // Need to marshall payload before marshalling the message, since the payload can have different types
-        String marshalledPayload;
-        PayloadConverter payloadConverter;
-        if (message.getMessageType() == EDUCore.MessageType.EDU) {
-            payloadConverter = meldingTypeConverter;
-            marshalledPayload = payloadConverter.marshallToString(message.getPayloadAsMeldingType());
-        } else {
-            payloadConverter = appReceiptConverter;
-            marshalledPayload = payloadConverter.marshallToString(message.getPayloadAsAppreceiptType());
-        }
-        message.setPayload(marshalledPayload);
-
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
         try {
             Marshaller marshaller = jaxbContext.createMarshaller();
             marshaller.marshal(new JAXBElement<>(new QName("uri", "local"), EDUCore.class, message), os);
-            message.setPayload(payloadConverter.unmarshallFrom(marshalledPayload.getBytes(CHARSET_UTF8)));
             return os.toByteArray();
-        } catch (JAXBException | UnsupportedEncodingException e) {
+        } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException("Unable to create marshaller for " + EDUCore.class, e);
         }
     }
@@ -65,16 +52,20 @@ public class EDUCoreConverter {
         return appReceiptConverter.marshallToString(appReceiptType);
     }
 
-    public String payloadAsString(EDUCore message) {
-        if (message.getMessageType() == EDUCore.MessageType.EDU) {
-            return meldingTypeConverter.marshallToString(message.getPayloadAsMeldingType());
-        } else {
-            return appReceiptConverter.marshallToString(message.getPayloadAsAppreceiptType());
-        }
+    public static MeldingType payloadAsMeldingType(Object payload) {
+        return (MeldingType) meldingTypeConverter.unmarshallFrom(payloadBytes(payload));
     }
 
-    public MeldingType payloadAsMeldingType(byte[] payload) {
-        return (MeldingType) meldingTypeConverter.unmarshallFrom(payload);
+    public AppReceiptType payloadAsAppReceipt(Object payload) {
+        return (AppReceiptType) appReceiptConverter.unmarshallFrom(payloadBytes(payload));
+    }
+
+    private static byte[] payloadBytes(Object payload) {
+        if (payload instanceof String) {
+            return ((String) payload).getBytes();
+        } else {
+            return ((Node) payload).getFirstChild().getTextContent().trim().getBytes();
+        }
     }
 
     public EDUCore unmarshallFrom(byte[] message) {
@@ -83,17 +74,8 @@ public class EDUCoreConverter {
         try {
             unmarshaller = jaxbContext.createUnmarshaller();
             StreamSource source = new StreamSource(is);
-            EDUCore eduCore = unmarshaller.unmarshal(source, EDUCore.class).getValue();
-            PayloadConverterImpl payloadConverter;
-            if (eduCore.getMessageType() == EDUCore.MessageType.EDU) {
-                payloadConverter = new PayloadConverterImpl<>(MeldingType.class);
-                eduCore.setPayload(payloadConverter.unmarshallFrom(((String)eduCore.getPayload()).getBytes(CHARSET_UTF8)));
-            } else {
-                payloadConverter = new PayloadConverterImpl<>(AppReceiptType.class);
-                eduCore.setPayload(payloadConverter.unmarshallFrom(((String)eduCore.getPayload()).getBytes(CHARSET_UTF8)));
-            }
-            return eduCore;
-        } catch (JAXBException | UnsupportedEncodingException  e) {
+            return unmarshaller.unmarshal(source, EDUCore.class).getValue();
+        } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException("Unable to create unmarshaller for " + EDUCore.class, e);
         }
     }

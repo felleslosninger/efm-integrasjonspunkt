@@ -5,9 +5,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.noarkexchange.PayloadException;
+import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -18,6 +21,7 @@ import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 
 @Entity
 @Data
+@Slf4j
 public class Conversation {
 
     @Id
@@ -84,7 +88,12 @@ public class Conversation {
     public static Conversation of(EDUCore eduCore, MessageStatus... statuses) {
         String msgTitle = "";
         if (eduCore.getMessageType() == EDUCore.MessageType.EDU) {
-            msgTitle = eduCore.getPayloadAsMeldingType().getJournpost().getJpInnhold();
+            String jpInnholdXpath = "Melding/journpost/jpInnhold";
+            try {
+                msgTitle = PayloadUtil.queryPayload(eduCore.getPayload(), jpInnholdXpath);
+            } catch (PayloadException e) {
+                log.error("Could not read jpInnhold from payload", e);
+            }
         }
 
         Conversation c = new Conversation(eduCore.getId(), eduCore.getMessageReference(),

@@ -4,6 +4,8 @@ import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.mxa.schema.domain.Message;
 import no.difi.meldingsutveksling.nextmove.DpoConversationResource;
+import no.difi.meldingsutveksling.noarkexchange.PayloadException;
+import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -25,7 +27,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
-import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.unmarshallPayload;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
@@ -230,26 +231,27 @@ public class EDUCoreFactoryTest {
     @Test
     public void testUnmarshallPayload() throws JAXBException {
         EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
-        MeldingType meldingType = (MeldingType) unmarshallPayload(StringEscapeUtils.unescapeXml(escapedXml));
+        MeldingType meldingType = new EDUCoreConverter().payloadAsMeldingType(StringEscapeUtils.unescapeXml(escapedXml));
         assertEquals("210570", meldingType.getJournpost().getJpId());
     }
 
     @Test
-    public void testCreateFromPutMessage() throws JAXBException {
+    public void testCreateFromPutMessage() throws JAXBException, PayloadException {
         EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
         PutMessageRequestType putMessage = createPutMessageCdataXml(cdataTaggedXml);
 
         EDUCore eduCore = eduCoreFactory.create(putMessage, "1234");
-        assertEquals("219816", eduCore.getPayloadAsMeldingType().getJournpost().getJpId());
+        assertEquals("219816", PayloadUtil.queryJpId(eduCore.getPayload()));
+
     }
 
     @Test
-    public void testCreateFromMXAMessage() throws JAXBException {
+    public void testCreateFromMXAMessage() throws JAXBException, PayloadException {
         Message message = createMxaMessageEscapedXml(cdataTaggedMxaXml);
         EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
 
         EDUCore eduCore = eduCoreFactory.create(message, "1234");
-        assertEquals("P1234-5-test", eduCore.getPayloadAsMeldingType().getJournpost().getJpId());
+        assertEquals("P1234-5-test", PayloadUtil.queryJpId(eduCore.getPayload()));
     }
 
     @Test
@@ -279,7 +281,7 @@ public class EDUCoreFactoryTest {
         EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
         EDUCore eduCore = eduCoreFactory.create(cr, am, zipBytes);
         EDUCoreConverter eduCoreConverter = new EDUCoreConverter();
-        MeldingType meldingType = eduCoreConverter.payloadAsMeldingType(((String) eduCore.getPayload()).getBytes());
+        MeldingType meldingType = eduCoreConverter.payloadAsMeldingType(eduCore.getPayload());
 
         assertEquals(convId, eduCore.getMessageReference());
         assertEquals("Blah", meldingType.getNoarksak().getSaAdmkort());

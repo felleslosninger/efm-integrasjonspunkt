@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.noarkexchange;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import org.w3c.dom.Node;
 
-import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.queryPayload;
+import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.queryJpId;
 
 /**
  * Wrapper for a NOARK JournalpostID. The class will extract The NOARK jpID field for different
@@ -14,7 +14,6 @@ import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.queryPayload;
 public class JournalpostId {
 
     private String jpId;
-    private static String jpIdXpath= "/Melding/journpost/jpId";
 
     public JournalpostId(String jpId) {
         this.jpId = jpId;
@@ -24,12 +23,12 @@ public class JournalpostId {
         if(message.getMessageType() != PutMessageRequestWrapper.MessageType.EDUMESSAGE){
             return new JournalpostId("");
         }
-        return new JournalpostId(queryPayload(message.getPayload(), jpIdXpath));
+        return new JournalpostId(queryJpId(message.getPayload()));
     }
 
     public static JournalpostId fromPayload(Object payload) throws PayloadException {
         if (payload instanceof String || payload instanceof Node) {
-            return new JournalpostId(queryPayload(payload, jpIdXpath));
+            return new JournalpostId(queryJpId(payload));
         }
         if (payload instanceof MeldingType) {
             return new JournalpostId(((MeldingType)payload).getJournpost().getJpId());

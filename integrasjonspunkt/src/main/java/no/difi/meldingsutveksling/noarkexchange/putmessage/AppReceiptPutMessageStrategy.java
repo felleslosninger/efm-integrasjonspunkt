@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
@@ -45,7 +46,7 @@ class AppReceiptMessageStrategy implements MessageStrategy {
     @Override
     public PutMessageResponseType send(EDUCore request) {
         Audit.info("Received AppReceipt", markerFrom(request));
-        AppReceiptType receipt = request.getPayloadAsAppreceiptType();
+        AppReceiptType receipt = new EDUCoreConverter().payloadAsAppReceipt(request.getPayload());
         if (asList("OK", "WARNING", "ERROR").contains(receipt.getType())) {
             if ("p360".equalsIgnoreCase(properties.getNoarkSystem().getType())) {
                 request.swapSenderAndReceiver();

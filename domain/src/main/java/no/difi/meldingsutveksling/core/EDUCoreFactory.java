@@ -1,14 +1,14 @@
 package no.difi.meldingsutveksling.core;
 
+import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.*;
 import no.arkivverket.standarder.noark5.metadatakatalog.Avskrivningsmaate;
 import no.arkivverket.standarder.noark5.metadatakatalog.Journalposttype;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.mxa.schema.domain.Message;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
+import no.difi.meldingsutveksling.noarkexchange.PayloadException;
 import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
-import no.difi.meldingsutveksling.noarkexchange.PutMessageMarker;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
 import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
@@ -20,22 +20,21 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.io.IOUtils;
 
-import javax.xml.bind.JAXBException;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Base64;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Optional.ofNullable;
 import static no.difi.meldingsutveksling.MimeTypeExtensionMapper.getMimetype;
-import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.unmarshallPayload;
 
+@Slf4j
 public class EDUCoreFactory {
 
     private ServiceRegistryLookup serviceRegistryLookup;
@@ -48,32 +47,27 @@ public class EDUCoreFactory {
         PutMessageRequestWrapper requestWrapper = new PutMessageRequestWrapper(putMessageRequestType);
         EDUCore eduCore = createCommon(senderOrgNr, requestWrapper.getRecieverPartyNumber());
 
-        try {
-            eduCore.setPayload(unmarshallPayload(putMessageRequestType.getPayload()));
-        } catch (JAXBException e) {
-            Audit.error("Payload unmarshalling failed. Request causing error: {}",
-                    PutMessageMarker.markerFrom(new PutMessageRequestWrapper(putMessageRequestType)), e);
-            throw new MeldingsUtvekslingRuntimeException(e);
-        }
-
+        eduCore.setPayload(putMessageRequestType.getPayload());
         eduCore.setId(requestWrapper.getConversationId());
         if (PayloadUtil.isAppReceipt(putMessageRequestType.getPayload())) {
             eduCore.setMessageType(EDUCore.MessageType.APPRECEIPT);
         } else {
             eduCore.setMessageType(EDUCore.MessageType.EDU);
-            Optional<String> saId = Optional.of(eduCore)
-                    .map(EDUCore::getPayloadAsMeldingType)
-                    .map(MeldingType::getNoarksak)
-                    .map(NoarksakType::getSaId);
-            Optional<String> jpostnr = Optional.of(eduCore)
-                    .map(EDUCore::getPayloadAsMeldingType)
-                    .map(MeldingType::getJournpost)
-                    .map(JournpostType::getJpJpostnr);
-            if (saId.isPresent() && jpostnr.isPresent()) {
-                eduCore.setMessageReference(String.format("%s-%s", saId.get(), jpostnr.get()));
+            String saIdXpath = "Melding/noarksak/saId";
+            String jpostnrXpath = "Melding/journpost/jpJpostnr";
+            String saId = "";
+            String jpJpostnr = "";
+            try {
+                saId = PayloadUtil.queryPayload(eduCore.getPayload(), saIdXpath);
+                jpJpostnr = PayloadUtil.queryPayload(eduCore.getPayload(), jpostnrXpath);
+            } catch (PayloadException e) {
+                log.error("Failed reading saId and/or jpJpostnr from payload", e);
+            }
+
+            if (!isNullOrEmpty(saId) && !isNullOrEmpty(jpJpostnr)) {
+                eduCore.setMessageReference(String.format("%s-%s", saId, jpJpostnr));
             }
         }
-
 
         return eduCore;
     }
@@ -137,7 +131,8 @@ public class EDUCoreFactory {
         meldingType.setJournpost(journpostType);
         meldingType.setNoarksak(noarksakType);
 
-        eduCore.setPayload(meldingType);
+        String payload = new EDUCoreConverter().meldingTypeAsString(meldingType);
+        eduCore.setPayload(payload);
 
         return eduCore;
     }
@@ -208,7 +203,6 @@ public class EDUCoreFactory {
         meldingType.setJournpost(journpostType);
         meldingType.setNoarksak(noarksakType);
 
-        // Further usage expects payload to be marshalled
         EDUCoreConverter eduCoreConverter = new EDUCoreConverter();
         eduCore.setPayload(eduCoreConverter.meldingTypeAsString(meldingType));
 

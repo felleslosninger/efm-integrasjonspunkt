@@ -15,8 +15,10 @@ import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespon
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentExternalBEV2List;
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentV2;
 import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import no.difi.meldingsutveksling.nextmove.DpvConversationResource;
 import no.difi.meldingsutveksling.nextmove.NextMoveException;
+import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import org.apache.commons.io.FileUtils;
 
@@ -90,7 +92,8 @@ public class CorrespondenceAgencyMessageFactory {
 
         no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory reporteeFactory = new no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory();
         BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
-        edu.getPayloadAsMeldingType().getJournpost().getDokument().forEach(d -> {
+        MeldingType meldingType = new EDUCoreConverter().payloadAsMeldingType(edu.getPayload());
+        meldingType.getJournpost().getDokument().forEach(d -> {
             BinaryAttachmentV2 binaryAttachmentV2 = new BinaryAttachmentV2();
             binaryAttachmentV2.setFunctionType(AttachmentFunctionType.fromValue("Unspecified"));
             binaryAttachmentV2.setFileName(reporteeFactory.createBinaryAttachmentV2FileName(d.getVeFilnavn()));
@@ -100,8 +103,8 @@ public class CorrespondenceAgencyMessageFactory {
             binaryAttachmentV2.setData(reporteeFactory.createBinaryAttachmentV2Data(d.getFil().getBase64()));
             attachmentExternalBEV2List.getBinaryAttachmentV2().add(binaryAttachmentV2);
         });
-        String title = edu.getPayloadAsMeldingType().getJournpost().getJpInnhold();
-        String content = edu.getPayloadAsMeldingType().getJournpost().getJpOffinnhold();
+        String title = meldingType.getJournpost().getJpInnhold();
+        String content = meldingType.getJournpost().getJpOffinnhold();
 
         return create(config, edu.getId(), edu.getReceiver().getIdentifier(), edu.getReceiver().getName(), title,
                 content, attachmentExternalBEV2List);

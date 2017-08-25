@@ -175,7 +175,7 @@ public class MessageSender implements ApplicationContextAware {
         mottaker = createMottaker(message.getReceiver().getIdentifier());
 
         if (message.getMessageType() == EDUCore.MessageType.EDU) {
-            messageContext.setJpId(message.getPayloadAsMeldingType().getJournpost().getJpId());
+            messageContext.setJpId(message.getJournalpostId());
         } else {
             messageContext.setJpId("");
         }

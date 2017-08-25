@@ -1,13 +1,10 @@
 package no.difi.meldingsutveksling.ks.svarut
 
 import no.difi.meldingsutveksling.core.EDUCore
+import no.difi.meldingsutveksling.core.EDUCoreConverter
 import no.difi.meldingsutveksling.core.Receiver
 import no.difi.meldingsutveksling.core.Sender
 import no.difi.meldingsutveksling.ks.MockConfiguration
-import no.difi.meldingsutveksling.ks.svarut.SvarUtConfiguration
-import no.difi.meldingsutveksling.ks.svarut.SvarUtService
-import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceBeans
-import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceClientImpl
 import no.difi.meldingsutveksling.noarkexchange.schema.core.*
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
 import org.junit.Before
@@ -62,7 +59,7 @@ class SvarUtServiceIntegrationTest {
 
     def "an edu message"() {
         EDUCore eduCore = new EDUCore()
-        eduCore.payload = new MeldingType(
+        def meldingType = new MeldingType(
                 journpost: new JournpostType(
                         dokument: [new DokumentType(fil: new FilType(base64: [0x0,0x1,0x2]))],
                         jpJaar: "123",
@@ -78,6 +75,7 @@ class SvarUtServiceIntegrationTest {
                         saOfftittel: "Test brev",
                         saSaar: "123")
         )
+        eduCore.payload = new EDUCoreConverter().meldingTypeAsString(meldingType)
         eduCore.sender = new Sender(name: "Difi", identifier: "991825827")
         eduCore.receiver = new Receiver(name: "Lote", identifier: "1234")
         return eduCore
