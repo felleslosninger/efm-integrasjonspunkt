@@ -52,6 +52,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
+import static no.difi.meldingsutveksling.noarkexchange.logging.PutMessageResponseMarkers.markerFrom;
 
 /**
  *
