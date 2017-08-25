@@ -131,7 +131,7 @@ public class EDUCoreFactory {
         meldingType.setJournpost(journpostType);
         meldingType.setNoarksak(noarksakType);
 
-        String payload = new EDUCoreConverter().meldingTypeAsString(meldingType);
+        String payload = EDUCoreConverter.meldingTypeAsString(meldingType);
         eduCore.setPayload(payload);
 
         return eduCore;
@@ -203,8 +203,7 @@ public class EDUCoreFactory {
         meldingType.setJournpost(journpostType);
         meldingType.setNoarksak(noarksakType);
 
-        EDUCoreConverter eduCoreConverter = new EDUCoreConverter();
-        eduCore.setPayload(eduCoreConverter.meldingTypeAsString(meldingType));
+        eduCore.setPayload(EDUCoreConverter.meldingTypeAsString(meldingType));
 
         return eduCore;
     }

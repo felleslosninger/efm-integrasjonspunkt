@@ -79,8 +79,7 @@ public class StandardBusinessDocumentFactory {
     }
 
     public EduDocument create(EDUCore shipment, String conversationId, Avsender avsender, Mottaker mottaker) throws MessageException {
-        EDUCoreConverter eduCoreConverter = new EDUCoreConverter();
-        byte[] marshalledShipment = eduCoreConverter.marshallToBytes(shipment);
+        byte[] marshalledShipment = EDUCoreConverter.marshallToBytes(shipment);
 
         BestEduMessage bestEduMessage = new BestEduMessage(marshalledShipment);
         LogstashMarker marker = markerFrom(shipment);

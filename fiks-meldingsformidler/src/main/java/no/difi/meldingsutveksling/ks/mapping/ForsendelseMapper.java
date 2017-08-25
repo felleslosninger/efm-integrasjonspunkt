@@ -39,7 +39,7 @@ public class ForsendelseMapper {
         builder.withEksternref(eduCore.getId());
         builder.withKunDigitalLevering(true);
 
-        final MeldingType meldingType = new EDUCoreConverter().payloadAsMeldingType(eduCore.getPayload());
+        final MeldingType meldingType = EDUCoreConverter.payloadAsMeldingType(eduCore.getPayload());
         builder.withTittel(meldingType.getJournpost().getJpOffinnhold());
 
         final FileTypeHandlerFactory fileTypeHandlerFactory = new FileTypeHandlerFactory(properties.getFiks(), certificate);

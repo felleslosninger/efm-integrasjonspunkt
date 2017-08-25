@@ -10,12 +10,10 @@ import static org.junit.Assert.assertThat;
 public class EDUCoreConverterTest {
     @Test
     public void marshallToBytes() throws Exception {
-        EDUCoreConverter converter = new EDUCoreConverter();
-//        PutMessageObjectMother.createMessageRequestType("123");
         EDUCore eduCore = new EDUCore();
-        final byte[] bytes = converter.marshallToBytes(eduCore);
+        final byte[] bytes = EDUCoreConverter.marshallToBytes(eduCore);
 
-        final EDUCore afterConvert = converter.unmarshallFrom(bytes);
+        final EDUCore afterConvert = EDUCoreConverter.unmarshallFrom(bytes);
         assertThat(afterConvert, is(eduCore));
     }
 

@@ -65,7 +65,6 @@ public class InternalQueue {
     private static JAXBContext jaxbContext;
 
     private final DocumentConverter documentConverter = new DocumentConverter();
-    private final EDUCoreConverter eduCoreConverter = new EDUCoreConverter();
 
     @Autowired
     InternalQueue(ObjectProvider<IntegrajonspunktReceiveImpl> integrajonspunktReceive) {
@@ -94,7 +93,7 @@ public class InternalQueue {
 
     @JmsListener(destination = EXTERNAL, containerFactory = "myJmsContainerFactory")
     public void externalListener(byte[] message, Session session) {
-        EDUCore request = eduCoreConverter.unmarshallFrom(message);
+        EDUCore request = EDUCoreConverter.unmarshallFrom(message);
         try {
             eduCoreSender.sendMessage(request);
         } catch (Exception e) {
@@ -110,7 +109,7 @@ public class InternalQueue {
     public void dlqListener(byte[] message, Session session) {
 
         try {
-            EDUCore request = eduCoreConverter.unmarshallFrom(message);
+            EDUCore request = EDUCoreConverter.unmarshallFrom(message);
             Audit.error("Failed to send message. Moved to DLQ", EDUCoreMarker.markerFrom(request));
         } catch (Exception e) {
         }
@@ -131,7 +130,7 @@ public class InternalQueue {
      */
     public void enqueueExternal(EDUCore request) {
         try {
-            jmsTemplate.convertAndSend(EXTERNAL, eduCoreConverter.marshallToBytes(request));
+            jmsTemplate.convertAndSend(EXTERNAL, EDUCoreConverter.marshallToBytes(request));
         } catch (Exception e) {
             Audit.error("Unable to send message", EDUCoreMarker.markerFrom(request), e);
             throw e;

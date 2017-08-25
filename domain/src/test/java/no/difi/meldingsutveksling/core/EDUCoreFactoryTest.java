@@ -231,7 +231,7 @@ public class EDUCoreFactoryTest {
     @Test
     public void testUnmarshallPayload() throws JAXBException {
         EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
-        MeldingType meldingType = new EDUCoreConverter().payloadAsMeldingType(StringEscapeUtils.unescapeXml(escapedXml));
+        MeldingType meldingType = EDUCoreConverter.payloadAsMeldingType(StringEscapeUtils.unescapeXml(escapedXml));
         assertEquals("210570", meldingType.getJournpost().getJpId());
     }
 
@@ -280,8 +280,7 @@ public class EDUCoreFactoryTest {
 
         EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
         EDUCore eduCore = eduCoreFactory.create(cr, am, zipBytes);
-        EDUCoreConverter eduCoreConverter = new EDUCoreConverter();
-        MeldingType meldingType = eduCoreConverter.payloadAsMeldingType(eduCore.getPayload());
+        MeldingType meldingType = EDUCoreConverter.payloadAsMeldingType(eduCore.getPayload());
 
         assertEquals(convId, eduCore.getMessageReference());
         assertEquals("Blah", meldingType.getNoarksak().getSaAdmkort());

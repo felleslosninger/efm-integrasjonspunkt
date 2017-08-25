@@ -33,7 +33,7 @@ public class EDUCoreConverter {
         }
     }
 
-    public byte[] marshallToBytes(EDUCore message) {
+    public static byte[] marshallToBytes(EDUCore message) {
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
         try {
             Marshaller marshaller = jaxbContext.createMarshaller();
@@ -44,31 +44,7 @@ public class EDUCoreConverter {
         }
     }
 
-    public String meldingTypeAsString(MeldingType meldingType) {
-        return meldingTypeConverter.marshallToString(meldingType);
-    }
-
-    public String appReceiptAsString(AppReceiptType appReceiptType) {
-        return appReceiptConverter.marshallToString(appReceiptType);
-    }
-
-    public static MeldingType payloadAsMeldingType(Object payload) {
-        return (MeldingType) meldingTypeConverter.unmarshallFrom(payloadBytes(payload));
-    }
-
-    public AppReceiptType payloadAsAppReceipt(Object payload) {
-        return (AppReceiptType) appReceiptConverter.unmarshallFrom(payloadBytes(payload));
-    }
-
-    private static byte[] payloadBytes(Object payload) {
-        if (payload instanceof String) {
-            return ((String) payload).getBytes();
-        } else {
-            return ((Node) payload).getFirstChild().getTextContent().trim().getBytes();
-        }
-    }
-
-    public EDUCore unmarshallFrom(byte[] message) {
+    public static EDUCore unmarshallFrom(byte[] message) {
         final ByteArrayInputStream is = new ByteArrayInputStream(message);
         Unmarshaller unmarshaller;
         try {
@@ -77,6 +53,30 @@ public class EDUCoreConverter {
             return unmarshaller.unmarshal(source, EDUCore.class).getValue();
         } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException("Unable to create unmarshaller for " + EDUCore.class, e);
+        }
+    }
+
+    public static String meldingTypeAsString(MeldingType meldingType) {
+        return meldingTypeConverter.marshallToString(meldingType);
+    }
+
+    public static String appReceiptAsString(AppReceiptType appReceiptType) {
+        return appReceiptConverter.marshallToString(appReceiptType);
+    }
+
+    public static MeldingType payloadAsMeldingType(Object payload) {
+        return (MeldingType) meldingTypeConverter.unmarshallFrom(payloadBytes(payload));
+    }
+
+    public static AppReceiptType payloadAsAppReceipt(Object payload) {
+        return (AppReceiptType) appReceiptConverter.unmarshallFrom(payloadBytes(payload));
+    }
+
+    private static byte[] payloadBytes(Object payload) {
+        if (payload instanceof String) {
+            return ((String) payload).getBytes();
+        } else {
+            return ((Node) payload).getFirstChild().getTextContent().trim().getBytes();
         }
     }
 }

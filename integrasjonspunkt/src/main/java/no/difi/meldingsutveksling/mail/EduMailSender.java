@@ -64,7 +64,7 @@ public class EduMailSender {
             } else {
                 mimeBodyPart.setText("Du har fått en BestEdu melding. Se vedlegg for metadata og dokumenter.");
 
-                MeldingType meldingType = new EDUCoreConverter().payloadAsMeldingType(request.getPayload());
+                MeldingType meldingType = EDUCoreConverter.payloadAsMeldingType(request.getPayload());
                 List<DokumentType> docs = meldingType.getJournpost().getDokument();
                 for (DokumentType doc : docs) {
                     ByteArrayDataSource ds = new ByteArrayDataSource(doc.getFil().getBase64(), doc.getVeMimeType());

@@ -92,7 +92,7 @@ public class CorrespondenceAgencyMessageFactory {
 
         no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory reporteeFactory = new no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory();
         BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
-        MeldingType meldingType = new EDUCoreConverter().payloadAsMeldingType(edu.getPayload());
+        MeldingType meldingType = EDUCoreConverter.payloadAsMeldingType(edu.getPayload());
         meldingType.getJournpost().getDokument().forEach(d -> {
             BinaryAttachmentV2 binaryAttachmentV2 = new BinaryAttachmentV2();
             binaryAttachmentV2.setFunctionType(AttachmentFunctionType.fromValue("Unspecified"));
