@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling;
 
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
+import org.eclipse.persistence.jaxb.JAXBContextFactory;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -16,7 +17,7 @@ public class StandardBusinessDocumentConverter {
 
     static {
         try {
-            ctx = JAXBContext.newInstance(EduDocument.class);
+            ctx = JAXBContextFactory.createContext(new Class[]{EduDocument.class}, null);
         } catch (JAXBException e) {
             throw new RuntimeException("Could not initialize " + StandardBusinessDocumentConverter.class, e);
         }

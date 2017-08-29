@@ -27,7 +27,7 @@
 		<xs:sequence>
 			<xs:element name="systemID" type="GUID"/>
 			<xs:element name="mappeID" type="n5mdk:mappeID" minOccurs="0"/>
-			<xs:element minOccurs="0" name="ReferanseForeldermappe" nillable="true" type="GUID"/>
+			<xs:element minOccurs="0" name="ReferanseForeldermappe" type="GUID"/>
 			<xs:element name="tittel" type="n5mdk:tittel"/>
 			<xs:element name="offentligTittel" type="n5mdk:offentligTittel" minOccurs="0"/>
 			<xs:element name="beskrivelse" type="n5mdk:beskrivelse" minOccurs="0"/>

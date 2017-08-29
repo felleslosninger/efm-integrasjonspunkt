@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
 import no.difi.meldingsutveksling.mxa.schema.domain.Message;
+import org.eclipse.persistence.jaxb.JAXBContextFactory;
 
 import javax.xml.bind.*;
 import javax.xml.namespace.QName;
@@ -13,7 +14,7 @@ public class MessageConverter {
     private static final JAXBContext jaxbContext;
     static {
         try {
-            jaxbContext = JAXBContext.newInstance(Message.class);
+            jaxbContext = JAXBContextFactory.createContext(new Class[]{Message.class}, null);
         } catch (JAXBException e) {
             throw new RuntimeException("Could not create JAXBContext for " + Message.class);
         }

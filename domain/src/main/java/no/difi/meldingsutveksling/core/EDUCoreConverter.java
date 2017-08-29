@@ -5,6 +5,7 @@ import no.difi.meldingsutveksling.noarkexchange.receive.PayloadConverter;
 import no.difi.meldingsutveksling.noarkexchange.receive.PayloadConverterImpl;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
+import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.w3c.dom.Node;
 
 import javax.xml.bind.*;
@@ -15,7 +16,6 @@ import java.io.ByteArrayOutputStream;
 
 public class EDUCoreConverter {
 
-    private static final String CHARSET_UTF8 = "UTF-8";
     private static final String MESSAGE_TYPE_NAMESPACE = "http://www.arkivverket.no/Noark4-1-WS-WD/types";
     private static final String APPRECEIPT_NAMESPACE = "http://www.arkivverket.no/Noark/Exchange/types";
 
@@ -27,7 +27,7 @@ public class EDUCoreConverter {
     private static final JAXBContext jaxbContext;
     static {
         try {
-            jaxbContext = JAXBContext.newInstance(EDUCore.class);
+            jaxbContext = JAXBContextFactory.createContext(new Class[]{EDUCore.class}, null);
         } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }

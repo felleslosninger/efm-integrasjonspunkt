@@ -40,22 +40,26 @@
             </plugin>
 
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>jaxb2-maven-plugin</artifactId>
-                <version>1.6</version>
+                <groupId>org.jvnet.jaxb2.maven2</groupId>
+                <artifactId>maven-jaxb2-plugin</artifactId>
+                <version>0.13.0</version>
                 <executions>
                     <execution>
-                        <id>xjc-kvit</id>
+                        <id>xsd-generate</id>
+                        <phase>generate-sources</phase>
                         <goals>
-                            <goal>xjc</goal>
+                            <goal>generate</goal>
                         </goals>
-                        <configuration>
-                            <schemaFiles>sdp-kvittering.xsd</schemaFiles>
-                            <packageName>no.difi.meldingsutveksling.kvittering.xsd</packageName>
-                            <clearOutputDir>true</clearOutputDir>
-                        </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <schemaDirectory>${basedir}/src/main/xsd</schemaDirectory>
+                    <schemaIncludes>
+                        <include>sdp-kvittering.xsd</include>
+                    </schemaIncludes>
+                    <generatePackage>no.difi.meldingsutveksling.kvittering.xsd</generatePackage>
+                    <removeOldOutput>true</removeOldOutput>
+                </configuration>
             </plugin>
         </plugins>
     </build>

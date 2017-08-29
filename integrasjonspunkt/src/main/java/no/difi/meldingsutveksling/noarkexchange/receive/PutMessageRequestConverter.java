@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
+import org.eclipse.persistence.jaxb.JAXBContextFactory;
 
 import javax.xml.bind.*;
 import javax.xml.namespace.QName;
@@ -13,7 +14,7 @@ public class PutMessageRequestConverter {
     private static final JAXBContext jaxbContext;
     static {
         try {
-            jaxbContext = JAXBContext.newInstance("no.difi.meldingsutveksling.kvittering.xsd:no.difi.meldingsutveksling.noarkexchange.schema");
+            jaxbContext = JAXBContextFactory.createContext("no.difi.meldingsutveksling.kvittering.xsd:no.difi.meldingsutveksling.noarkexchange.schema", Thread.currentThread().getContextClassLoader());
         } catch (JAXBException e) {
             throw new RuntimeException("Could not create JAXBContext for " + PutMessageRequestType.class);
         }

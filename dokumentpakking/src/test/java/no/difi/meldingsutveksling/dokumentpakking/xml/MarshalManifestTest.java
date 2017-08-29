@@ -1,19 +1,18 @@
 package no.difi.meldingsutveksling.dokumentpakking.xml;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.eclipse.persistence.jaxb.JAXBContextFactory;
+import org.junit.Test;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
-
-import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 public class MarshalManifestTest {
 	@Test
@@ -27,7 +26,7 @@ public class MarshalManifestTest {
 
 		InputStream is = new ByteArrayInputStream(os.toByteArray());
 
-		JAXBContext jaxbContext = JAXBContext.newInstance(Manifest.class);
+		JAXBContext jaxbContext = JAXBContextFactory.createContext(new Class[]{Manifest.class}, null);
 		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 		Manifest kopi = (Manifest) jaxbUnmarshaller.unmarshal(is);
 		assertThat(kopi.getHoveddokument().getTittel().getTittel(), is(original.getHoveddokument().getTittel().getTittel()));

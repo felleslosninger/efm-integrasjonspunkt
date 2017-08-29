@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.shipping.sftp.ExternalServiceBuilder;
 import no.difi.meldingsutveksling.shipping.sftp.RecipientBuilder;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
+import org.eclipse.persistence.jaxb.JAXBContextFactory;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -23,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -39,7 +41,8 @@ public class AltinnPackage {
 
     static {
         try {
-            ctx = JAXBContext.newInstance(BrokerServiceManifest.class, BrokerServiceRecipientList.class, EduDocument.class, Payload.class, Kvittering.class);
+            ctx = JAXBContextFactory.createContext(new Class[]{BrokerServiceManifest.class,
+                    BrokerServiceRecipientList.class, EduDocument.class, Payload.class, Kvittering.class}, new HashMap());
         } catch (JAXBException e) {
             throw new RuntimeException("Could not create JAXBContext", e);
         }

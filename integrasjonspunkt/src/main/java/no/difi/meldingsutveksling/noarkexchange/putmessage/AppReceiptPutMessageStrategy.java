@@ -3,16 +3,12 @@ package no.difi.meldingsutveksling.noarkexchange.putmessage;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreConverter;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
 
 import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.core.EDUCoreMarker.markerFrom;
@@ -27,16 +23,6 @@ class AppReceiptMessageStrategy implements MessageStrategy {
 
     private final MessageSender messageSender;
     private final IntegrasjonspunktProperties properties;
-
-    private static final JAXBContext jaxbContext;
-
-    static {
-        try {
-            jaxbContext = JAXBContext.newInstance("no.difi.meldingsutveksling.noarkexchange.schema");
-        } catch (JAXBException e) {
-            throw new MeldingsUtvekslingRuntimeException(e);
-        }
-    }
 
     public AppReceiptMessageStrategy(MessageSender messageSender, IntegrasjonspunktProperties properties) {
         this.messageSender = messageSender;
