@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.mail;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
@@ -73,7 +74,16 @@ public class EduMailSender {
                     attachementPart.setDataHandler(new DataHandler(ds));
                     attachementPart.setFileName(doc.getVeFilnavn());
                     mimeMultipart.addBodyPart(attachementPart);
+                    // Set file content to null since we want the payload xml later as attachement
+                    doc.getFil().setBase64(null);
                 }
+                EDUCoreConverter eduCoreConverter = new EDUCoreConverter();
+                String payload = eduCoreConverter.meldingTypeAsString(meldingType);
+                MimeBodyPart payloadAttachement = new MimeBodyPart();
+                ByteArrayDataSource ds = new ByteArrayDataSource(payload.getBytes(), "application/xml");
+                payloadAttachement.setDataHandler(new DataHandler(ds));
+                payloadAttachement.setFileName("payload.xml");
+                mimeMultipart.addBodyPart(payloadAttachement);
             }
 
             mimeMultipart.addBodyPart(mimeBodyPart);

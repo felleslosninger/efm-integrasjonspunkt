@@ -29,4 +29,9 @@ public class MockConfiguration {
     public NoarkClient noarkClient() {
         return mock(NoarkClient)
     }
+
+    @Bean(name = "fiksMailClient")
+    NoarkClient fiksMailCLient() {
+        return mock(NoarkClient)
+    }
 }
