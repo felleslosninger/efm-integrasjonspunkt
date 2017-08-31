@@ -6,6 +6,7 @@ import org.springframework.core.io.Resource;
 
 import java.io.IOException;
 import java.security.*;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 /**
@@ -88,22 +89,20 @@ public class IntegrasjonspunktNokkel {
         String password = properties.getPassword();
         Resource path = properties.getPath();
 
-        KeyStore.ProtectionParameter protectionParameter = new KeyStore.PasswordProtection(password.toCharArray());
-
         try{
-            KeyStore.Builder builder;
+            KeyStore keyStore = KeyStore.getInstance(type);
 
             if( path == null || "none".equalsIgnoreCase(path.getFilename()) ){
 
-                builder = KeyStore.Builder.newInstance(type, null, protectionParameter);
+                keyStore.load(null, password.toCharArray());
             }else{
 
-                builder = KeyStore.Builder.newInstance(type, null, path.getFile(), protectionParameter);
+                keyStore.load(path.getInputStream(), password.toCharArray());
             }
 
-            return builder.getKeyStore();
+            return keyStore;
 
-        } catch ( KeyStoreException | IOException e) {
+        } catch ( KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
 
             throw new IllegalStateException("Unable to load KeyStore", e);
         }
