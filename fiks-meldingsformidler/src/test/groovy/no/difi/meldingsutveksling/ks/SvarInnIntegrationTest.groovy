@@ -16,6 +16,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
@@ -24,9 +25,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.web.client.RestTemplate
 
-import static org.mockito.Mockito.never
-import static org.mockito.Mockito.verify
-import static org.mockito.Mockito.when
+import static org.mockito.Mockito.*
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 
@@ -50,6 +49,7 @@ public class SvarInnIntegrationTest {
     IntegrasjonspunktProperties integrasjonspunktProperties
 
     @Autowired
+    @Qualifier("localNoark")
     NoarkClient noarkClient
 
     @Before
