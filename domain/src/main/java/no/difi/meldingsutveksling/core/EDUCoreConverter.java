@@ -33,6 +33,9 @@ public class EDUCoreConverter {
         }
     }
 
+    private EDUCoreConverter() {
+    }
+
     public static byte[] marshallToBytes(EDUCore message) {
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
         try {
