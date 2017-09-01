@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import io.swagger.annotations.*;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.logging.Audit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
 
@@ -272,7 +274,8 @@ public class MessageInController {
             }
 
             repo.delete(resource.get());
-            log.info(markerFrom(resource.get()), "Conversation with id={} popped from queue", resource.get().getConversationId());
+            Audit.info(format("Conversation with id=%s popped from queue", resource.get().getConversationId()),
+                    markerFrom(resource.get()));
 
             return ResponseEntity.ok()
                     .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME+filename)
@@ -286,7 +289,7 @@ public class MessageInController {
     private ResponseEntity fileNotFoundErrorResponse(String filename) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
                 .error("file_not_found")
-                .errorDescription(String.format("File %s not found on server", filename))
+                .errorDescription(format("File %s not found on server", filename))
                 .build());
     }
 

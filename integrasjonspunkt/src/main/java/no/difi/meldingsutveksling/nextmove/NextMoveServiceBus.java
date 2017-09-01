@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
+import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.MessageContext;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
@@ -30,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 
 @Component
 public class NextMoveServiceBus {
@@ -70,7 +72,7 @@ public class NextMoveServiceBus {
 
         // Create queue if it does not already exist
         ServiceBusContract service = createContract();
-        queuePath = String.format("%s%s%s", NEXTMOVE_QUEUE_PREFIX,
+        queuePath = format("%s%s%s", NEXTMOVE_QUEUE_PREFIX,
                 props.getOrg().getNumber(),
                 props.getNextbest().getServiceBus().getMode());
         ListQueuesResult queues = service.listQueues();
@@ -126,7 +128,7 @@ public class NextMoveServiceBus {
                 if (isNullOrEmpty(msg.getMessageId())) {
                     break;
                 }
-                log.info("Received message on queue \"{}\" with id {}", queuePath, msg.getMessageId());
+                Audit.info(format("Received message on queue=%s with id=%s", queuePath, msg.getMessageId()));
 
                 EduDocument eduDocument = ((JAXBElement<EduDocument>) unmarshaller.unmarshal(msg.getBody())).getValue();
                 messages.add(eduDocument);
