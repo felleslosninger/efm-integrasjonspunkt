@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.lang.invoke.MethodHandles;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -83,9 +84,9 @@ public class ServiceRegistryLookup {
             final DocumentContext documentContext = JsonPath.parse(serviceRecords, jsonPathConfiguration());
             serviceRecord = documentContext.read("$.serviceRecord", ServiceRecord.class);
         } catch(HttpClientErrorException httpException) {
-            if (httpException.getStatusCode() == HttpStatus.NOT_FOUND) {
-                logger.warn("RestClient returned 404 NOT_FOUND when looking up service record with identifier {}",
-                        parameters, httpException);
+            if (Arrays.asList(HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED).contains(httpException.getStatusCode())) {
+                logger.warn("RestClient returned {} when looking up service record with identifier {}",
+                        httpException.getStatusCode(), parameters, httpException);
             } else {
                 throw new ServiceRegistryLookupException(String.format("RestClient threw exception when looking up service record with identifier %s", parameters), httpException);
             }
