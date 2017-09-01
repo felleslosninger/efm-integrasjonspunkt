@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import org.slf4j.Logger;
@@ -79,7 +80,7 @@ public class NextMoveQueue {
         } catch (IOException e) {
             log.error("Could not write asic container to disc.", e);
         }
-
+        Audit.info(String.format("Message with id=%s put on local queue", message.getConversationId()));
     }
 
     public byte[] decrypt(Payload payload) {
