@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.dpi.Document;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
@@ -58,17 +59,18 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
         static final String KAN_VARSLES = "KAN_VARSLES";
         private final DigitalPostInnbyggerConfig config;
         private final EDUCore request;
+        private final MeldingType meldingType;
         private final ServiceRecord serviceRecord;
 
         EDUCoreMeldingsformidlerRequest(DigitalPostInnbyggerConfig config, EDUCore request, ServiceRecord serviceRecord) {
             this.config = config;
             this.request = request;
             this.serviceRecord = serviceRecord;
+            this.meldingType = EDUCoreConverter.payloadAsMeldingType(request.getPayload());
         }
 
         @Override
         public Document getDocument() {
-            final MeldingType meldingType = request.getPayloadAsMeldingType();
             final DokumentType dokumentType = meldingType.getJournpost().getDokument().get(0);
             final String tittel = getSubject();
             return createDocument(tittel, dokumentType);
@@ -80,7 +82,7 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
 
         @Override
         public List<Document> getAttachments() {
-            List<DokumentType> allFiles = request.getPayloadAsMeldingType().getJournpost().getDokument();
+            List<DokumentType> allFiles = meldingType.getJournpost().getDokument();
             List<Document> attachments = new ArrayList<>();
             for(int i = 1; i < allFiles.size(); i++) {
                 final DokumentType a = allFiles.get(i);
@@ -96,7 +98,7 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
 
         @Override
         public String getSubject() {
-            return request.getPayloadAsMeldingType().getJournpost().getJpOffinnhold();
+            return meldingType.getJournpost().getJpOffinnhold();
         }
 
         @Override

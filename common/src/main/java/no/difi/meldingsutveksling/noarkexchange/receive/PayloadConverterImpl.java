@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
+import org.eclipse.persistence.jaxb.JAXBContextFactory;
+
 import javax.xml.bind.*;
 import javax.xml.namespace.QName;
 import javax.xml.transform.stream.StreamSource;
@@ -18,7 +20,7 @@ public class PayloadConverterImpl<T> implements PayloadConverter<T> {
         this.namespaceUri = namespaceUri;
         this.localPart = localPart;
         try {
-            jaxbContext = JAXBContext.newInstance(clazz);
+            jaxbContext = JAXBContextFactory.createContext(new Class[]{clazz}, null);
         } catch (JAXBException e) {
             throw new PayloadConverterException("Could not create JAXBContext for " + clazz, e);
         }
@@ -29,7 +31,7 @@ public class PayloadConverterImpl<T> implements PayloadConverter<T> {
         this.namespaceUri = "uri";
         this.localPart = "local";
         try {
-            jaxbContext = JAXBContext.newInstance(clazz);
+            jaxbContext = JAXBContextFactory.createContext(new Class[]{clazz}, null);
         } catch (JAXBException e) {
             throw new PayloadConverterException("Could not create JAXBContext for " + clazz, e);
         }

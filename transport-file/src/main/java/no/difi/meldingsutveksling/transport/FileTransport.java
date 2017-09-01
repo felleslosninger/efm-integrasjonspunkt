@@ -1,20 +1,22 @@
 package no.difi.meldingsutveksling.transport;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.namespace.QName;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
+import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationContext;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.namespace.QName;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 
 /**
  * Oxalis implementation of the trasnport interface. Uses the oxalis outbound module to transmit the SBD
@@ -33,7 +35,7 @@ public class FileTransport implements Transport {
 
         File f = new File(fileName);
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(EduDocument.class, Payload.class, Kvittering.class);
+            JAXBContext jaxbContext = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, Kvittering.class}, null);
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
             jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             jaxbMarshaller.marshal(new ObjectFactory().createStandardBusinessDocument(eduDocument), new FileOutputStream(f));

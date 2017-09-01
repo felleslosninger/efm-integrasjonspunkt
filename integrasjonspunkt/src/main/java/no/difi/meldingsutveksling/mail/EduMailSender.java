@@ -15,12 +15,10 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
-import javax.xml.bind.JAXBException;
 import java.util.List;
 import java.util.Properties;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.unmarshallPayloadAsMeldingType;
 
 public class EduMailSender {
 
@@ -66,7 +64,7 @@ public class EduMailSender {
             } else {
                 mimeBodyPart.setText("Du har fått en BestEdu melding. Se vedlegg for metadata og dokumenter.");
 
-                MeldingType meldingType = unmarshallPayloadAsMeldingType(request.getPayload());
+                MeldingType meldingType = EDUCoreConverter.payloadAsMeldingType(request.getPayload());
                 List<DokumentType> docs = meldingType.getJournpost().getDokument();
                 for (DokumentType doc : docs) {
                     ByteArrayDataSource ds = new ByteArrayDataSource(doc.getFil().getBase64(), doc.getVeMimeType());
@@ -90,7 +88,7 @@ public class EduMailSender {
             message.setContent(mimeMultipart);
 
             Transport.send(message);
-        } catch (MessagingException | JAXBException e) {
+        } catch (MessagingException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
     }

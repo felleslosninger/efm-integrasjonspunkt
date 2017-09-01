@@ -69,8 +69,6 @@ public class EDUCoreSender {
             EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
 
             PutMessageRequestType putMessage = eduCoreFactory.createPutMessageFromCore(message);
-            EDUCoreConverter eduCoreConverter = new EDUCoreConverter();
-            putMessage.setPayload(eduCoreConverter.payloadAsString(message));
             result = mshClient.sendEduMelding(putMessage);
         } else if (DPV.equals(serviceRecord.getServiceIdentifier())) {
             Audit.info("Send message to DPV", marker);

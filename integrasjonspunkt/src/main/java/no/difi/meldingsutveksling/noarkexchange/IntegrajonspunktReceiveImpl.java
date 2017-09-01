@@ -27,6 +27,7 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
+import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -220,7 +221,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
                 if ("best_edu.xml".equals(entry.getName())) {
-                    JAXBContext jaxbContext = JAXBContext.newInstance(EDUCore.class);
+                    JAXBContext jaxbContext = JAXBContextFactory.createContext(new Class[]{EDUCore.class}, null);
                     Unmarshaller unMarshaller = jaxbContext.createUnmarshaller();
                     return unMarshaller.unmarshal(new StreamSource(zipInputStream), EDUCore.class).getValue();
                 }
@@ -236,7 +237,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
                 if ("arkivmelding.xml".equals(entry.getName())) {
-                    JAXBContext jaxbContext = JAXBContext.newInstance(Arkivmelding.class);
+                    JAXBContext jaxbContext = JAXBContextFactory.createContext(new Class[]{Arkivmelding.class}, null);
                     Unmarshaller unMarshaller = jaxbContext.createUnmarshaller();
                     return unMarshaller.unmarshal(new StreamSource(zipInputStream), Arkivmelding.class).getValue();
                 }

@@ -6,8 +6,6 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.Receiver;
 import no.difi.meldingsutveksling.core.Sender;
-import no.difi.meldingsutveksling.noarkexchange.schema.core.JournpostType;
-import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import org.hamcrest.Description;
@@ -150,9 +148,6 @@ public class MessageSenderTest {
         }
 
         public RequestBuilder withJournalpostId() {
-            when(request.getPayloadAsMeldingType()).thenReturn(mock(MeldingType.class));
-            when(request.getPayloadAsMeldingType().getJournpost()).thenReturn(mock(JournpostType.class));
-            when(request.getPayloadAsMeldingType().getJournpost().getJpId()).thenReturn(JOURNALPOST_ID);
             when(request.getJournalpostId()).thenReturn(JOURNALPOST_ID);
             return this;
         }

@@ -4,6 +4,7 @@ import no.difi.meldingsutveksling.core.EDUCoreService;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.mxa.schema.MXADelegate;
 import no.difi.meldingsutveksling.mxa.schema.domain.Message;
+import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,7 @@ public class MXAImpl implements MXADelegate {
         JAXBContext jaxbContext = null;
         Message msg = null;
         try {
-            jaxbContext = JAXBContext.newInstance(Message.class);
+            jaxbContext = JAXBContextFactory.createContext(new Class[]{Message.class}, null);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             msg = (Message) unmarshaller.unmarshal(new StringReader(arg0));
         } catch (JAXBException e) {
