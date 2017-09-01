@@ -75,8 +75,7 @@ public class EduMailSender {
                     // Set file content to null since we want the payload xml later as attachement
                     doc.getFil().setBase64(null);
                 }
-                EDUCoreConverter eduCoreConverter = new EDUCoreConverter();
-                String payload = eduCoreConverter.meldingTypeAsString(meldingType);
+                String payload = EDUCoreConverter.meldingTypeAsString(meldingType);
                 MimeBodyPart payloadAttachement = new MimeBodyPart();
                 ByteArrayDataSource ds = new ByteArrayDataSource(payload.getBytes(), "application/xml");
                 payloadAttachement.setDataHandler(new DataHandler(ds));
