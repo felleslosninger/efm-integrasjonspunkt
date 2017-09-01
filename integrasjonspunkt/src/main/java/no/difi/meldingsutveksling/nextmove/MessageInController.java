@@ -274,7 +274,7 @@ public class MessageInController {
             }
 
             repo.delete(resource.get());
-            Audit.info(format("Conversation with id={} popped from queue", resource.get().getConversationId()),
+            Audit.info(format("Conversation with id=%s popped from queue", resource.get().getConversationId()),
                     markerFrom(resource.get()));
 
             return ResponseEntity.ok()
