@@ -285,4 +285,16 @@
         ]]></notes>
       <cve>CVE-2016-9878</cve>
    </suppress>
+   <suppress>
+      <notes><![CDATA[
+         CVE-2016-3720 false positive
+        ]]></notes>
+      <cve>CVE-2016-3720</cve>
+   </suppress>
+   <suppress>
+      <notes><![CDATA[
+         CVE-2016-7051 false positive
+        ]]></notes>
+      <cve>CVE-2016-7051</cve>
+   </suppress>
 </suppressions>
