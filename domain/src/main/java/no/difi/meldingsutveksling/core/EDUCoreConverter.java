@@ -14,6 +14,8 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 public class EDUCoreConverter {
 
     private static final String MESSAGE_TYPE_NAMESPACE = "http://www.arkivverket.no/Noark4-1-WS-WD/types";
@@ -77,9 +79,9 @@ public class EDUCoreConverter {
 
     private static byte[] payloadBytes(Object payload) {
         if (payload instanceof String) {
-            return ((String) payload).getBytes();
+            return ((String) payload).getBytes(UTF_8);
         } else {
-            return ((Node) payload).getFirstChild().getTextContent().trim().getBytes();
+            return ((Node) payload).getFirstChild().getTextContent().trim().getBytes(UTF_8);
         }
     }
 }
