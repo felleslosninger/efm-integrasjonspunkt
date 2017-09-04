@@ -117,8 +117,6 @@ public class MessageSender implements ApplicationContextAware {
         Transport t = transportFactory.createTransport(edu);
         t.send(context, edu);
 
-        Audit.info("Message sent", markerFrom(message));
-
         return createOkResponse();
     }
 

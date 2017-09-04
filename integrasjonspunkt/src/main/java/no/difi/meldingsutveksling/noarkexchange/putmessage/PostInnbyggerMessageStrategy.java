@@ -55,6 +55,11 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
         return createOkResponse();
     }
 
+    @Override
+    public String serviceName() {
+        return "DPI";
+    }
+
     private static class EDUCoreMeldingsformidlerRequest implements MeldingsformidlerRequest {
         static final String KAN_VARSLES = "KAN_VARSLES";
         private final DigitalPostInnbyggerConfig config;

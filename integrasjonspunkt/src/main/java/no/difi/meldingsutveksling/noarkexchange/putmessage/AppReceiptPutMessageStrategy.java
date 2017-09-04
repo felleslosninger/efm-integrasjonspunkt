@@ -48,5 +48,10 @@ class AppReceiptMessageStrategy implements MessageStrategy {
         return createOkResponse();
     }
 
+    @Override
+    public String serviceName() {
+        return "AppReceipt";
+    }
+
 
 }

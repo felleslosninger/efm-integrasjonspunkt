@@ -50,4 +50,9 @@ class FiksMessageStrategy implements MessageStrategy {
 
         return PutMessageResponseFactory.createOkResponse();
     }
+
+    @Override
+    public String serviceName() {
+        return "DPF";
+    }
 }
