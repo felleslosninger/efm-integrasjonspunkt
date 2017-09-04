@@ -119,6 +119,9 @@ public class EDUCore {
     }
 
     public String getJournalpostId() {
+        if (this.getMessageType() == MessageType.APPRECEIPT) {
+            return "";
+        }
         return PayloadUtil.queryJpId(this.payload);
     }
 
