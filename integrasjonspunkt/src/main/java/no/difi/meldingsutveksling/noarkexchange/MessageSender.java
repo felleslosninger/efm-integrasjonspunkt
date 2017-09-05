@@ -117,8 +117,6 @@ public class MessageSender implements ApplicationContextAware {
         Transport t = transportFactory.createTransport(edu);
         t.send(context, edu);
 
-        Audit.info("Message sent", markerFrom(message));
-
         return createOkResponse();
     }
 
@@ -175,7 +173,7 @@ public class MessageSender implements ApplicationContextAware {
         mottaker = createMottaker(message.getReceiver().getIdentifier());
 
         if (message.getMessageType() == EDUCore.MessageType.EDU) {
-            messageContext.setJpId(message.getPayloadAsMeldingType().getJournpost().getJpId());
+            messageContext.setJpId(message.getJournalpostId());
         } else {
             messageContext.setJpId("");
         }

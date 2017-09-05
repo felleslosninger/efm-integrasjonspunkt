@@ -41,8 +41,7 @@ class FiksMessageStrategy implements MessageStrategy {
             Object oldPayload = request.getPayload();
             request.swapSenderAndReceiver();
             request.setMessageType(EDUCore.MessageType.APPRECEIPT);
-            EDUCoreConverter eduCoreConverter = new EDUCoreConverter();
-            request.setPayload(eduCoreConverter.appReceiptAsString(receipt));
+            request.setPayload(EDUCoreConverter.appReceiptAsString(receipt));
             PutMessageRequestType putMessage = EDUCoreFactory.createPutMessageFromCore(request);
             noarkClient.sendEduMelding(putMessage);
             request.setPayload(oldPayload);
@@ -50,5 +49,10 @@ class FiksMessageStrategy implements MessageStrategy {
 
 
         return PutMessageResponseFactory.createOkResponse();
+    }
+
+    @Override
+    public String serviceName() {
+        return "DPF";
     }
 }

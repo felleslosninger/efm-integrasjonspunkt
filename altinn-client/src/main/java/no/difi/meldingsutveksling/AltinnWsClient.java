@@ -66,12 +66,12 @@ public class AltinnWsClient {
             parameters.setDataStream(outputStream.toByteArray());
 
             ReceiptExternalStreamedBE receiptAltinn = streamingService.uploadFileStreamedBasic(parameters, FILE_NAME, senderReference, request.getSender(), configuration.getPassword(), configuration.getUsername());
-            Audit.info("Message uploaded", markerFrom(receiptAltinn).and(request.getMarkers()));
+            Audit.info("Message uploaded to altinn", markerFrom(receiptAltinn).and(request.getMarkers()));
         } catch (IBrokerServiceExternalBasicStreamedUploadFileStreamedBasicAltinnFaultFaultFaultMessage e) {
-            Audit.error("Message failed to upload", request.getMarkers(), e);
+            Audit.error("Message failed to upload to altinn", request.getMarkers(), e);
             throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, AltinnReasonFactory.from(e), e);
         } catch (IOException e) {
-            Audit.error("Message failed to upload", request.getMarkers(), e);
+            Audit.error("Message failed to upload to altinn", request.getMarkers(), e);
             throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, e);
         }
     }

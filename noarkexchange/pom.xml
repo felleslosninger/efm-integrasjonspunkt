@@ -3,7 +3,7 @@
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>1.7.64</version>
+        <version>1.7.65</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>noarkexchange</artifactId>
@@ -38,7 +38,7 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>test-tools</artifactId>
-            <version>1.7.64</version>
+            <version>1.7.65</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -99,23 +99,26 @@
 
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>jaxb2-maven-plugin</artifactId>
-                <version>1.6</version>
+                <groupId>org.jvnet.jaxb2.maven2</groupId>
+                <artifactId>maven-jaxb2-plugin</artifactId>
+                <version>0.13.0</version>
                 <executions>
                     <execution>
-                        <id>xjc-educore</id>
+                        <id>xsd-generate</id>
+                        <phase>generate-sources</phase>
                         <goals>
-                            <goal>xjc</goal>
+                            <goal>generate</goal>
                         </goals>
-                        <configuration>
-                            <packageName>no.difi.meldingsutveksling.noarkexchange.schema.core</packageName>
-                            <schemaDirectory>src/wsdl</schemaDirectory>
-                            <schemaFiles>noark4-1-ws-wd-types.xsd</schemaFiles>
-                            <clearOutputDir>true</clearOutputDir>
-                        </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <generatePackage>no.difi.meldingsutveksling.noarkexchange.schema.core</generatePackage>
+                    <schemaDirectory>${basedir}/src/wsdl</schemaDirectory>
+                    <schemaIncludes>
+                        <include>noark4-1-ws-wd-types.xsd</include>
+                    </schemaIncludes>
+                    <removeOldOutput>true</removeOldOutput>
+                </configuration>
             </plugin>
         </plugins>
     </build>

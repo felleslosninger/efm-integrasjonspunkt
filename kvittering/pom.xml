@@ -2,12 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>kvittering</artifactId>
-    <version>1.7.64</version>
+    <version>1.7.65</version>
 
     <parent>
         <groupId>no.difi.meldingsutveksling</groupId>
         <artifactId>parent-pom</artifactId>
-        <version>1.7.64</version>
+        <version>1.7.65</version>
     </parent>
 
     <build>
@@ -40,22 +40,26 @@
             </plugin>
 
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>jaxb2-maven-plugin</artifactId>
-                <version>1.6</version>
+                <groupId>org.jvnet.jaxb2.maven2</groupId>
+                <artifactId>maven-jaxb2-plugin</artifactId>
+                <version>0.13.0</version>
                 <executions>
                     <execution>
-                        <id>xjc-kvit</id>
+                        <id>xsd-generate</id>
+                        <phase>generate-sources</phase>
                         <goals>
-                            <goal>xjc</goal>
+                            <goal>generate</goal>
                         </goals>
-                        <configuration>
-                            <schemaFiles>sdp-kvittering.xsd</schemaFiles>
-                            <packageName>no.difi.meldingsutveksling.kvittering.xsd</packageName>
-                            <clearOutputDir>true</clearOutputDir>
-                        </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <schemaDirectory>${basedir}/src/main/xsd</schemaDirectory>
+                    <schemaIncludes>
+                        <include>sdp-kvittering.xsd</include>
+                    </schemaIncludes>
+                    <generatePackage>no.difi.meldingsutveksling.kvittering.xsd</generatePackage>
+                    <removeOldOutput>true</removeOldOutput>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -64,19 +68,19 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>domain</artifactId>
-            <version>1.7.64</version>
+            <version>1.7.65</version>
         </dependency>
 
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>dokumentpakking</artifactId>
-            <version>1.7.64</version>
+            <version>1.7.65</version>
         </dependency>
 
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>noarkexchange</artifactId>
-            <version>1.7.64</version>
+            <version>1.7.65</version>
         </dependency>
 
         <dependency>

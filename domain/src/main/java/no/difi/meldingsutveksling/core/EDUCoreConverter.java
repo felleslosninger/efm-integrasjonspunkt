@@ -5,17 +5,19 @@ import no.difi.meldingsutveksling.noarkexchange.receive.PayloadConverter;
 import no.difi.meldingsutveksling.noarkexchange.receive.PayloadConverterImpl;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
+import org.eclipse.persistence.jaxb.JAXBContextFactory;
+import org.w3c.dom.Node;
 
 import javax.xml.bind.*;
 import javax.xml.namespace.QName;
 import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.UnsupportedEncodingException;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class EDUCoreConverter {
 
-    private static final String CHARSET_UTF8 = "UTF-8";
     private static final String MESSAGE_TYPE_NAMESPACE = "http://www.arkivverket.no/Noark4-1-WS-WD/types";
     private static final String APPRECEIPT_NAMESPACE = "http://www.arkivverket.no/Noark/Exchange/types";
 
@@ -27,74 +29,59 @@ public class EDUCoreConverter {
     private static final JAXBContext jaxbContext;
     static {
         try {
-            jaxbContext = JAXBContext.newInstance(EDUCore.class);
+            jaxbContext = JAXBContextFactory.createContext(new Class[]{EDUCore.class}, null);
         } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
     }
 
-    public byte[] marshallToBytes(EDUCore message) {
-        // Need to marshall payload before marshalling the message, since the payload can have different types
-        String marshalledPayload;
-        PayloadConverter payloadConverter;
-        if (message.getMessageType() == EDUCore.MessageType.EDU) {
-            payloadConverter = meldingTypeConverter;
-            marshalledPayload = payloadConverter.marshallToString(message.getPayloadAsMeldingType());
-        } else {
-            payloadConverter = appReceiptConverter;
-            marshalledPayload = payloadConverter.marshallToString(message.getPayloadAsAppreceiptType());
-        }
-        message.setPayload(marshalledPayload);
+    private EDUCoreConverter() {
+    }
 
+    public static byte[] marshallToBytes(EDUCore message) {
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
         try {
             Marshaller marshaller = jaxbContext.createMarshaller();
             marshaller.marshal(new JAXBElement<>(new QName("uri", "local"), EDUCore.class, message), os);
-            message.setPayload(payloadConverter.unmarshallFrom(marshalledPayload.getBytes(CHARSET_UTF8)));
             return os.toByteArray();
-        } catch (JAXBException | UnsupportedEncodingException e) {
+        } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException("Unable to create marshaller for " + EDUCore.class, e);
         }
     }
 
-    public String meldingTypeAsString(MeldingType meldingType) {
-        return meldingTypeConverter.marshallToString(meldingType);
-    }
-
-    public String appReceiptAsString(AppReceiptType appReceiptType) {
-        return appReceiptConverter.marshallToString(appReceiptType);
-    }
-
-    public String payloadAsString(EDUCore message) {
-        if (message.getMessageType() == EDUCore.MessageType.EDU) {
-            return meldingTypeConverter.marshallToString(message.getPayloadAsMeldingType());
-        } else {
-            return appReceiptConverter.marshallToString(message.getPayloadAsAppreceiptType());
-        }
-    }
-
-    public MeldingType payloadAsMeldingType(byte[] payload) {
-        return (MeldingType) meldingTypeConverter.unmarshallFrom(payload);
-    }
-
-    public EDUCore unmarshallFrom(byte[] message) {
+    public static EDUCore unmarshallFrom(byte[] message) {
         final ByteArrayInputStream is = new ByteArrayInputStream(message);
         Unmarshaller unmarshaller;
         try {
             unmarshaller = jaxbContext.createUnmarshaller();
             StreamSource source = new StreamSource(is);
-            EDUCore eduCore = unmarshaller.unmarshal(source, EDUCore.class).getValue();
-            PayloadConverterImpl payloadConverter;
-            if (eduCore.getMessageType() == EDUCore.MessageType.EDU) {
-                payloadConverter = new PayloadConverterImpl<>(MeldingType.class);
-                eduCore.setPayload(payloadConverter.unmarshallFrom(((String)eduCore.getPayload()).getBytes(CHARSET_UTF8)));
-            } else {
-                payloadConverter = new PayloadConverterImpl<>(AppReceiptType.class);
-                eduCore.setPayload(payloadConverter.unmarshallFrom(((String)eduCore.getPayload()).getBytes(CHARSET_UTF8)));
-            }
-            return eduCore;
-        } catch (JAXBException | UnsupportedEncodingException  e) {
+            return unmarshaller.unmarshal(source, EDUCore.class).getValue();
+        } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException("Unable to create unmarshaller for " + EDUCore.class, e);
+        }
+    }
+
+    public static String meldingTypeAsString(MeldingType meldingType) {
+        return meldingTypeConverter.marshallToString(meldingType);
+    }
+
+    public static String appReceiptAsString(AppReceiptType appReceiptType) {
+        return appReceiptConverter.marshallToString(appReceiptType);
+    }
+
+    public static MeldingType payloadAsMeldingType(Object payload) {
+        return (MeldingType) meldingTypeConverter.unmarshallFrom(payloadBytes(payload));
+    }
+
+    public static AppReceiptType payloadAsAppReceipt(Object payload) {
+        return (AppReceiptType) appReceiptConverter.unmarshallFrom(payloadBytes(payload));
+    }
+
+    private static byte[] payloadBytes(Object payload) {
+        if (payload instanceof String) {
+            return ((String) payload).getBytes(UTF_8);
+        } else {
+            return ((Node) payload).getFirstChild().getTextContent().trim().getBytes(UTF_8);
         }
     }
 }

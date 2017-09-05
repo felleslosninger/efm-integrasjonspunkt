@@ -5,6 +5,7 @@ import no.difi.meldingsutveksling.ServiceRegistryTransportFactory;
 import no.difi.meldingsutveksling.auth.OidcTokenClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
+import no.difi.meldingsutveksling.mail.MailClient;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory;
@@ -30,6 +31,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 import java.util.List;
+import java.util.Optional;
 
 @Profile({"dev", "itest", "systest", "staging", "production"})
 @Configuration
@@ -100,11 +102,13 @@ public class IntegrasjonspunktBeans {
         return strategyFactory;
     }
 
-
-
     @Bean
     public DpiReceiptService dpiReceiptService(IntegrasjonspunktProperties integrasjonspunktProperties, KeystoreProvider keystoreProvider) {
         return new DpiReceiptService(integrasjonspunktProperties, keystoreProvider);
     }
 
+    @Bean(name = "fiksMailClient")
+    public NoarkClient fiksMailClient(IntegrasjonspunktProperties properties) {
+        return new MailClient(properties, Optional.ofNullable(properties.getFiks().getInn().getMailSubject()));
+    }
 }

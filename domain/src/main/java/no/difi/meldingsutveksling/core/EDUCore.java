@@ -2,19 +2,18 @@ package no.difi.meldingsutveksling.core;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
-import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
+import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
 
-import static no.difi.meldingsutveksling.core.EDUCore.MessageType.EDU;
-
 /**
  * Internal mapping object for generic handling of e.g. BEST EDU and MXA formats.
  */
+@Slf4j
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "EDUCore", propOrder = {
         "id",
@@ -120,18 +119,10 @@ public class EDUCore {
     }
 
     public String getJournalpostId() {
-        if (getMessageType() == EDU) {
-            return ((MeldingType) getPayload()).getJournpost().getJpId();
+        if (this.getMessageType() == MessageType.APPRECEIPT) {
+            return "";
         }
-        return "";
-    }
-
-    public MeldingType getPayloadAsMeldingType() {
-        return (MeldingType) getPayload();
-    }
-
-    public AppReceiptType getPayloadAsAppreceiptType() {
-        return (AppReceiptType) getPayload();
+        return PayloadUtil.queryJpId(this.payload);
     }
 
     public void swapSenderAndReceiver() {

@@ -15,6 +15,7 @@ import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
+import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -65,7 +66,6 @@ public class InternalQueue {
     private static JAXBContext jaxbContext;
 
     private final DocumentConverter documentConverter = new DocumentConverter();
-    private final EDUCoreConverter eduCoreConverter = new EDUCoreConverter();
 
     @Autowired
     InternalQueue(ObjectProvider<IntegrajonspunktReceiveImpl> integrajonspunktReceive) {
@@ -74,8 +74,8 @@ public class InternalQueue {
 
     static {
         try {
-            jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class, Kvittering.class);
-            jaxbContextdomain = JAXBContext.newInstance(EduDocument.class, Payload.class, Kvittering.class);
+            jaxbContext = JAXBContextFactory.createContext(new Class[]{StandardBusinessDocument.class, Payload.class, Kvittering.class}, null);
+            jaxbContextdomain = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, Kvittering.class}, null);
         } catch (JAXBException e) {
             throw new RuntimeException("Could not start internal queue: Failed to create JAXBContext", e);
         }
@@ -94,7 +94,7 @@ public class InternalQueue {
 
     @JmsListener(destination = EXTERNAL, containerFactory = "myJmsContainerFactory")
     public void externalListener(byte[] message, Session session) {
-        EDUCore request = eduCoreConverter.unmarshallFrom(message);
+        EDUCore request = EDUCoreConverter.unmarshallFrom(message);
         try {
             eduCoreSender.sendMessage(request);
         } catch (Exception e) {
@@ -110,7 +110,7 @@ public class InternalQueue {
     public void dlqListener(byte[] message, Session session) {
 
         try {
-            EDUCore request = eduCoreConverter.unmarshallFrom(message);
+            EDUCore request = EDUCoreConverter.unmarshallFrom(message);
             Audit.error("Failed to send message. Moved to DLQ", EDUCoreMarker.markerFrom(request));
         } catch (Exception e) {
         }
@@ -131,7 +131,7 @@ public class InternalQueue {
      */
     public void enqueueExternal(EDUCore request) {
         try {
-            jmsTemplate.convertAndSend(EXTERNAL, eduCoreConverter.marshallToBytes(request));
+            jmsTemplate.convertAndSend(EXTERNAL, EDUCoreConverter.marshallToBytes(request));
         } catch (Exception e) {
             Audit.error("Unable to send message", EDUCoreMarker.markerFrom(request), e);
             throw e;

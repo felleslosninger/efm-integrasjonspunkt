@@ -4,6 +4,7 @@ import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
+import org.eclipse.persistence.jaxb.JAXBContextFactory;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -18,7 +19,7 @@ public class DocumentConverter {
 
     static {
         try {
-            ctx = JAXBContext.newInstance(EduDocument.class, Payload.class, Kvittering.class);
+            ctx = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, Kvittering.class}, null);
         } catch (JAXBException e) {
             throw new RuntimeException("Could not initialize " + DocumentConverter.class, e);
         }

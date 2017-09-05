@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.Scope;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
+import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.w3c.dom.Node;
 
 import javax.xml.bind.JAXBContext;
@@ -86,7 +87,7 @@ public class StandardBusinessDocumentWrapper {
         Unmarshaller unMarshallerP;
         Payload payload;
         try {
-            jaxbContextP = JAXBContext.newInstance(Payload.class);
+            jaxbContextP = JAXBContextFactory.createContext(new Class[]{Payload.class}, null);
             unMarshallerP = jaxbContextP.createUnmarshaller();
             payload = unMarshallerP.unmarshal((org.w3c.dom.Node) any, Payload.class).getValue();
         } catch (JAXBException e) {

@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.ks.svarinn;
 
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.MessageDownloaderModule;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreFactory;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -22,15 +23,19 @@ public class SvarInnService implements MessageDownloaderModule {
     private SvarInnFileDecryptor decryptor;
     private SvarInnUnzipper unzipper;
     private NoarkClient noarkClient;
+    private NoarkClient mailClient;
     private SvarInnFileFactory svarInnFileFactory;
+    private IntegrasjonspunktProperties properties;
 
-    public SvarInnService(SvarInnClient svarInnClient, SvarInnFileDecryptor decryptor, SvarInnUnzipper unzipper, NoarkClient noarkClient) {
+    public SvarInnService(SvarInnClient svarInnClient, SvarInnFileDecryptor decryptor, SvarInnUnzipper unzipper,
+                          NoarkClient noarkClient, NoarkClient mailClient, IntegrasjonspunktProperties properties) {
         this.svarInnClient = svarInnClient;
         this.decryptor = decryptor;
         this.unzipper = unzipper;
         this.noarkClient = noarkClient;
+        this.mailClient = mailClient;
+        this.properties = properties;
         svarInnFileFactory = new SvarInnFileFactory();
-
     }
 
     @Override
@@ -56,26 +61,35 @@ public class SvarInnService implements MessageDownloaderModule {
             // create SvarInnFile with unzipped file and correct mimetype
             final List<SvarInnFile> files = svarInnFileFactory.createFiles(forsendelse.getFilmetadata(), unzippedFile);
 
-            if (!validateRequiredFields(forsendelse, files)) {
-                continue;
-            }
-
             final SvarInnMessage message = new SvarInnMessage(forsendelse, files);
-
             final EDUCore eduCore = message.toEduCore();
             PutMessageRequestType putMessage = EDUCoreFactory.createPutMessageFromCore(eduCore);
 
-            final PutMessageResponseType response = noarkClient.sendEduMelding(putMessage);
+            if (!validateRequiredFields(forsendelse, files)) {
+                checkAndSendMail(putMessage, forsendelse.getId());
+                continue;
+            }
 
+            final PutMessageResponseType response = noarkClient.sendEduMelding(putMessage);
             if ("OK".equals(response.getResult().getType())) {
                 Audit.info("Message successfully forwarded");
                 svarInnClient.confirmMessage(forsendelse.getId());
             } else if ("WARNING".equals(response.getResult().getType())) {
                 Audit.info(format("Archive system responded with warning for message with fiks-id %s",
                         forsendelse.getId()), PutMessageResponseMarkers.markerFrom(response));
+                svarInnClient.confirmMessage(forsendelse.getId());
             } else {
                 Audit.error(format("Message with fiks-id %s failed", forsendelse.getId()), PutMessageResponseMarkers.markerFrom(response));
+                checkAndSendMail(putMessage, forsendelse.getId());
             }
+        }
+    }
+
+    private void checkAndSendMail(PutMessageRequestType message, String fiksId) {
+        if (properties.getFiks().getInn().isMailOnError()) {
+            Audit.info(format("Sending message with id=%s by mail", fiksId));
+            mailClient.sendEduMelding(message);
+            svarInnClient.confirmMessage(fiksId);
         }
     }
 

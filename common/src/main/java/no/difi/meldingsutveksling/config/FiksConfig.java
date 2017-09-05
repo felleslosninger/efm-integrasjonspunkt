@@ -32,9 +32,9 @@ public class FiksConfig {
     public static class SvarInn {
         @NotNull
         private String baseUrl;
-
         private String username;
-
         private String password;
+        private boolean mailOnError;
+        private String mailSubject;
     }
 }

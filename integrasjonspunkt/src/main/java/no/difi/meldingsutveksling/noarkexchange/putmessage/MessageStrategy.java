@@ -9,4 +9,5 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
  */
 public interface MessageStrategy {
     PutMessageResponseType send(EDUCore request);
+    String serviceName();
 }

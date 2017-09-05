@@ -1,21 +1,9 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import org.w3c.dom.Document;
+import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-
-import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.queryPayload;
-import static org.apache.commons.lang.StringEscapeUtils.unescapeHtml;
+import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.queryJpId;
 
 /**
  * Wrapper for a NOARK JournalpostID. The class will extract The NOARK jpID field for different
@@ -23,17 +11,29 @@ import static org.apache.commons.lang.StringEscapeUtils.unescapeHtml;
  *
  * @author Glenn Bech
  */
-class JournalpostId {
+public class JournalpostId {
 
     private String jpId;
-    private static String jpIdXpath= "/Melding/journpost/jpId";
 
     public JournalpostId(String jpId) {
         this.jpId = jpId;
     }
 
     public static JournalpostId fromPutMessage(PutMessageRequestWrapper message) throws PayloadException {
-        return new JournalpostId(queryPayload(message, jpIdXpath));
+        if(message.getMessageType() != PutMessageRequestWrapper.MessageType.EDUMESSAGE){
+            return new JournalpostId("");
+        }
+        return new JournalpostId(queryJpId(message.getPayload()));
+    }
+
+    public static JournalpostId fromPayload(Object payload) throws PayloadException {
+        if (payload instanceof String || payload instanceof Node) {
+            return new JournalpostId(queryJpId(payload));
+        }
+        if (payload instanceof MeldingType) {
+            return new JournalpostId(((MeldingType)payload).getJournpost().getJpId());
+        }
+        return new JournalpostId("");
     }
 
     public String value() {

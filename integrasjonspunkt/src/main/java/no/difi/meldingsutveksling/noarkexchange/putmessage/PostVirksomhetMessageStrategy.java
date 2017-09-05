@@ -40,4 +40,9 @@ public class PostVirksomhetMessageStrategy implements MessageStrategy {
         }
         return PutMessageResponseFactory.createOkResponse();
     }
+
+    @Override
+    public String serviceName() {
+        return "DPV";
+    }
 }

@@ -21,4 +21,9 @@ class BestEDUMessageStrategy implements MessageStrategy {
     public PutMessageResponseType send(EDUCore request) {
         return messageSender.sendMessage(request);
     }
+
+    @Override
+    public String serviceName() {
+        return "DPO";
+    }
 }

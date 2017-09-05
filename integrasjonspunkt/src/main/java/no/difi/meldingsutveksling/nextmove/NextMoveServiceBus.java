@@ -12,12 +12,14 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
+import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.MessageContext;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 
 @Component
 public class NextMoveServiceBus {
@@ -50,15 +53,11 @@ public class NextMoveServiceBus {
                               StandardBusinessDocumentFactory sbdf,
                               ServiceRegistryLookup sr,
                               MessageSender messageSender) throws JAXBException {
-
         this.props = props;
         this.sbdf = sbdf;
         this.sr = sr;
         this.messageSender = messageSender;
-
-
-        this.jaxbContext = JAXBContext.newInstance(EduDocument.class, Payload.class, ConversationResource.class);
-
+        this.jaxbContext = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, ConversationResource.class}, null);
     }
 
     @PostConstruct
@@ -70,7 +69,7 @@ public class NextMoveServiceBus {
 
         // Create queue if it does not already exist
         ServiceBusContract service = createContract();
-        queuePath = String.format("%s%s%s", NEXTMOVE_QUEUE_PREFIX,
+        queuePath = format("%s%s%s", NEXTMOVE_QUEUE_PREFIX,
                 props.getOrg().getNumber(),
                 props.getNextbest().getServiceBus().getMode());
         ListQueuesResult queues = service.listQueues();
@@ -126,7 +125,7 @@ public class NextMoveServiceBus {
                 if (isNullOrEmpty(msg.getMessageId())) {
                     break;
                 }
-                log.info("Received message on queue \"{}\" with id {}", queuePath, msg.getMessageId());
+                Audit.info(format("Received message on queue=%s with id=%s", queuePath, msg.getMessageId()));
 
                 EduDocument eduDocument = ((JAXBElement<EduDocument>) unmarshaller.unmarshal(msg.getBody())).getValue();
                 messages.add(eduDocument);

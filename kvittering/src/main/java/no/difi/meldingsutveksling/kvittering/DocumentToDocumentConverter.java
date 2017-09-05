@@ -5,6 +5,7 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
+import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.w3c.dom.Document;
 
 import javax.xml.bind.JAXBContext;
@@ -31,7 +32,7 @@ class DocumentToDocumentConverter {
 
     static {
         try {
-            jaxBContext = JAXBContext.newInstance(EduDocument.class, Kvittering.class);
+            jaxBContext = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Kvittering.class}, null);
         } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException(e.getMessage(), e);
         }
