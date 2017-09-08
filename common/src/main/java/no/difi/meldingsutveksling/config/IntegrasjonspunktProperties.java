@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.config;
 
 import lombok.Data;
+import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
 
@@ -100,6 +101,7 @@ public class IntegrasjonspunktProperties {
     }
 
     @Data
+    @ToString(exclude = "password")
     public static class PostVirksomheter {
 
         private String username;
@@ -153,6 +155,7 @@ public class IntegrasjonspunktProperties {
      * Mail settings for
      */
     @Data
+    @ToString(exclude = "password")
     public static class Mail {
 
         private String smtpHost;
@@ -179,6 +182,7 @@ public class IntegrasjonspunktProperties {
         private ServiceBus serviceBus;
 
         @Data
+        @ToString(exclude = "sasToken")
         public static class ServiceBus {
 
             private boolean enable;
@@ -195,6 +199,7 @@ public class IntegrasjonspunktProperties {
     }
 
     @Data
+    @ToString(exclude = "password")
     public static class NorskArkivstandardSystem {
 
         private String endpointURL;
@@ -218,6 +223,7 @@ public class IntegrasjonspunktProperties {
     }
 
     @Data
+    @ToString(exclude = "password")
     public static class Keystore {
         /**
          * Type of KeyStore
