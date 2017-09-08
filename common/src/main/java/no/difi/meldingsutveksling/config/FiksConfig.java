@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.config;
 
 import lombok.Data;
+import lombok.ToString;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -18,6 +19,7 @@ public class FiksConfig {
     SvarInn inn = new SvarInn();
 
     @Data
+    @ToString(exclude = "password")
     public static class SvarUt {
         @Valid()
         @Pattern(regexp = "^[a-zA-Z0-9\\-\\.øæåØÆÅ]{0,20}$")
@@ -29,6 +31,7 @@ public class FiksConfig {
     }
 
     @Data
+    @ToString(exclude = "password")
     public static class SvarInn {
         @NotNull
         private String baseUrl;
