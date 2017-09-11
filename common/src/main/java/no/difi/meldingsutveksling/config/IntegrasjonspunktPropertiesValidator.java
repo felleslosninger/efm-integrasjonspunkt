@@ -40,7 +40,7 @@ public class IntegrasjonspunktPropertiesValidator implements Validator {
                     " specify certificate");
         }
 
-        if ("mail".equals(props.getNoarkSystem().getType())) {
+        if (props.getNoarkSystem() != null && "mail".equals(props.getNoarkSystem().getType())) {
             String errorMsg = "Noark system type set to mail - cannot be null";
             ValidationUtils.rejectIfEmpty(errors, "mail.smtpHost", EMPTY_FIELD, errorMsg);
             ValidationUtils.rejectIfEmpty(errors, "mail.smtpPort", EMPTY_FIELD, errorMsg);
