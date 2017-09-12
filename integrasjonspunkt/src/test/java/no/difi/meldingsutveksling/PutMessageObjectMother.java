@@ -14,6 +14,7 @@ public class PutMessageObjectMother {
         AddressType senderAddress = new AddressType();
         senderAddress.setOrgnr(orgNumber);
         envelope.setSender(senderAddress);
+        envelope.setConversationId("123");
         AddressType receiverAddress = new AddressType();
         receiverAddress.setOrgnr("42");
         envelope.setReceiver(receiverAddress);
