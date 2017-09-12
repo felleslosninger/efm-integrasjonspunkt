@@ -96,8 +96,11 @@ public class EDUCoreSender {
             if (message.getMessageType() == EDUCore.MessageType.APPRECEIPT) {
                 status.setDescription("AppReceipt");
             }
-            Conversation conversation = Conversation.of(message, status);
-            conversationRepository.save(conversation);
+            Optional<Conversation> conv = conversationRepository.findByConversationId(message.getId()).stream().findFirst();
+            conv.ifPresent(c -> {
+                c.addMessageStatus(status);
+                conversationRepository.save(c);
+            });
         }
     }
 

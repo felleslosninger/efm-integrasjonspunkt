@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType
 @XmlEnum(String.class)
 public enum GenericReceiptStatus implements ReceiptStatus {
+    @XmlEnumValue("OPPRETTET")OPPRETTET("OPPRETTET"),
     @XmlEnumValue("SENDT")SENDT("Sendt"),
     @XmlEnumValue("LEVERT")LEVERT("Levert"),
     @XmlEnumValue("LEST")LEST("Lest"),
