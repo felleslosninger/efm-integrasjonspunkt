@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.services;
 
 import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.CertificateParserException;
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
@@ -16,6 +15,10 @@ import org.springframework.util.StringUtils;
 
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+
+import static java.util.Arrays.asList;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_INNSYN;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 
 @Component
 public class Adresseregister {
@@ -61,7 +64,7 @@ public class Adresseregister {
 
     public boolean hasAdresseregisterCertificate(ServiceRecord serviceRecord) {
 
-        if (ServiceIdentifier.DPV.equals(serviceRecord.getServiceIdentifier())) {
+        if (asList(DPV, DPE_INNSYN).contains(serviceRecord.getServiceIdentifier())) {
             return false;
         }
 

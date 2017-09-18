@@ -39,6 +39,7 @@ public class StrategyFactory {
         }
         if (properties.getFeature().isEnableDPV()) {
             factories.put(DPV, PostVirksomhetStrategyFactory.newInstance(messageSender.getProperties(), serviceRegistryLookup));
+            factories.put(DPE_INNSYN, PostVirksomhetStrategyFactory.newInstance(messageSender.getProperties(), serviceRegistryLookup));
         }
     }
 

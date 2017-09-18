@@ -17,6 +17,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_INNSYN;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 
 @Entity
@@ -97,7 +99,8 @@ public class Conversation {
         }
 
         Conversation c = new Conversation(eduCore.getId(), eduCore.getMessageReference(),
-                eduCore.getReceiver().getIdentifier(), msgTitle, eduCore.getServiceIdentifier());
+                eduCore.getReceiver().getIdentifier(), msgTitle,
+                eduCore.getServiceIdentifier() == DPE_INNSYN ? DPV : eduCore.getServiceIdentifier());
 
         if (statuses != null && statuses.length > 0) {
             Stream.of(statuses)
