@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.KeystoreProvider;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
+import no.difi.meldingsutveksling.receipt.ConversationRepository;
 import no.difi.meldingsutveksling.receipt.DpiReceiptService;
 import no.difi.meldingsutveksling.receipt.ReceiptPolling;
 import no.difi.meldingsutveksling.receipt.StatusStrategyFactory;
@@ -76,7 +77,6 @@ public class IntegrasjonspunktIntegrationTestConfig {
         return new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider, properties);
     }
 
-    // Mocks
     @Bean
     @Primary
     public TransportFactory transportFactory() {
@@ -166,5 +166,11 @@ public class IntegrasjonspunktIntegrationTestConfig {
     @Primary
     public RestClient restClient() {
         return mock(RestClient.class);
+    }
+
+    @Bean
+    @Primary
+    public ConversationRepository conversationRepository() {
+        return mock(ConversationRepository.class);
     }
 }

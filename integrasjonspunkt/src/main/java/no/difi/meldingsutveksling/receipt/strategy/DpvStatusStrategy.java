@@ -11,8 +11,6 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.ptv.CorrespondenceRequest;
 import no.difi.meldingsutveksling.receipt.*;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,9 +29,6 @@ public class DpvStatusStrategy implements StatusStrategy {
     private IntegrasjonspunktProperties properties;
 
     @Autowired
-    private ServiceRegistryLookup serviceRegistryLookup;
-
-    @Autowired
     private ConversationRepository conversationRepository;
 
     private static final String STATUS_CREATED = "Created";
@@ -47,11 +42,10 @@ public class DpvStatusStrategy implements StatusStrategy {
                 .withExternalServiceEditionCode(properties.getDpv().getExternalServiceEditionCode())
                 .withPassword(properties.getDpv().getPassword())
                 .withSystemUserCode(properties.getDpv().getUsername())
+                .withEndpointUrl(properties.getDpv().getEndpointUrl().toString())
                 .build();
 
-        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(conversation.getReceiverIdentifier());
-        final CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(markerFrom(conversation), config,
-                serviceRecord.getEndPointURL());
+        final CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(markerFrom(conversation), config);
         GetCorrespondenceStatusDetailsV2 receiptRequest = CorrespondenceAgencyMessageFactory.createReceiptRequest(conversation);
         final CorrespondenceRequest request = new CorrespondenceRequest.Builder().withUsername(config
                 .getSystemUserCode()).withPassword(config.getPassword()).withPayload(receiptRequest).build();

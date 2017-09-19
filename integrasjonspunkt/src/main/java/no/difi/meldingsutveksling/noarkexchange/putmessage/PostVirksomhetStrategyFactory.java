@@ -44,13 +44,15 @@ public class PostVirksomhetStrategyFactory implements MessageStrategyFactory {
 
         builder.withNextbestFiledir(properties.getNextbest().getFiledir());
 
+        builder.withEndpointUrl(properties.getDpv().getEndpointUrl().toString());
+
         CorrespondenceAgencyConfiguration config = builder.build();
         return new PostVirksomhetStrategyFactory(config, serviceRegistryLookup);
     }
 
     @Override
     public MessageStrategy create(Object payload) {
-        return new PostVirksomhetMessageStrategy(configuration, serviceRegistryLookup);
+        return new PostVirksomhetMessageStrategy(configuration);
     }
 
     @Override
