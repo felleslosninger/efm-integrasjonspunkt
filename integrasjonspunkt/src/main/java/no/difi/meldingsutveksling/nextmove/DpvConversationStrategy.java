@@ -45,9 +45,7 @@ public class DpvConversationStrategy implements ConversationStrategy {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
 
-        CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(ConversationResourceMarkers.markerFrom(cr),
-                config,
-                props.getDpv().getEndpointUrl().toString());
+        CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(ConversationResourceMarkers.markerFrom(cr), config);
         final CorrespondenceRequest request = new CorrespondenceRequest.Builder()
                 .withUsername(config.getSystemUserCode())
                 .withPassword(config.getPassword())

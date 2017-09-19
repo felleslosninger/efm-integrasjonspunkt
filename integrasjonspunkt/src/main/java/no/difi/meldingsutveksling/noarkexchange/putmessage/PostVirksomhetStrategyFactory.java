@@ -52,7 +52,7 @@ public class PostVirksomhetStrategyFactory implements MessageStrategyFactory {
 
     @Override
     public MessageStrategy create(Object payload) {
-        return new PostVirksomhetMessageStrategy(configuration, serviceRegistryLookup);
+        return new PostVirksomhetMessageStrategy(configuration);
     }
 
     @Override

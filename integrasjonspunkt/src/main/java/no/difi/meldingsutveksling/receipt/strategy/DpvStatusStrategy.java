@@ -45,8 +45,7 @@ public class DpvStatusStrategy implements StatusStrategy {
                 .withEndpointUrl(properties.getDpv().getEndpointUrl().toString())
                 .build();
 
-        final CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(markerFrom(conversation), config,
-                properties.getDpv().getEndpointUrl().toString());
+        final CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(markerFrom(conversation), config);
         GetCorrespondenceStatusDetailsV2 receiptRequest = CorrespondenceAgencyMessageFactory.createReceiptRequest(conversation);
         final CorrespondenceRequest request = new CorrespondenceRequest.Builder().withUsername(config
                 .getSystemUserCode()).withPassword(config.getPassword()).withPayload(receiptRequest).build();
