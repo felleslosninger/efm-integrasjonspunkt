@@ -49,7 +49,7 @@ public class DpvConversationStrategy implements ConversationStrategy {
         ServiceRecord serviceRecord = sr.getServiceRecord(cr.getReceiverId());
         CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(ConversationResourceMarkers.markerFrom(cr),
                 config,
-                serviceRecord.getEndPointURL());
+                props.getDpv().getEndpointUrl().toString());
         final CorrespondenceRequest request = new CorrespondenceRequest.Builder()
                 .withUsername(config.getSystemUserCode())
                 .withPassword(config.getPassword())
