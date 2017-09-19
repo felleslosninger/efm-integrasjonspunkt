@@ -106,6 +106,7 @@ public class IntegrasjonspunktProperties {
 
         private String username;
         private String password;
+        private URL endpointUrl;
         private String externalServiceCode;
         private String externalServiceEditionCode;
         private Sms sms;

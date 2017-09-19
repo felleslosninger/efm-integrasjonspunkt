@@ -28,6 +28,8 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Arrays.asList;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_INNSYN;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 
 @Component
@@ -72,7 +74,7 @@ public class EDUCoreSender {
 
             PutMessageRequestType putMessage = eduCoreFactory.createPutMessageFromCore(message);
             result = mshClient.sendEduMelding(putMessage);
-        } else if (DPV.equals(serviceRecord.getServiceIdentifier())) {
+        } else if (asList(DPV, DPE_INNSYN).contains(serviceRecord.getServiceIdentifier())) {
             Audit.info("Send message to DPV", marker);
             final MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(serviceRecord);
             strategy = messageStrategyFactory.create(message.getPayload());

@@ -19,6 +19,8 @@ import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.xml.ws.BindingType;
 
+import static java.util.Arrays.asList;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_INNSYN;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageMarker.markerFrom;
 
@@ -85,7 +87,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
         } else if (mshClient.canRecieveMessage(organisasjonsnummer)) {
             mshCanReceive = true;
             Audit.info("MSH canReceive = true", marker);
-        } else if (DPV.equals(serviceRecord.getServiceIdentifier())) {
+        } else if (asList(DPV, DPE_INNSYN).contains(serviceRecord.getServiceIdentifier())) {
             isDpv = true;
         }
 

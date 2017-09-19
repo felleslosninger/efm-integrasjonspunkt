@@ -13,6 +13,7 @@ public class CorrespondenceAgencyConfiguration {
     private String emailBody;
     private String sender;
     private String nextbestFiledir;
+    private String endpointUrl;
 
     private CorrespondenceAgencyConfiguration() {
     }
@@ -59,6 +60,10 @@ public class CorrespondenceAgencyConfiguration {
 
     public String getNextbestFiledir() {
         return nextbestFiledir;
+    }
+
+    public String getEndpointUrl() {
+        return endpointUrl;
     }
 
     public static class Builder {
@@ -114,6 +119,11 @@ public class CorrespondenceAgencyConfiguration {
 
         public Builder withNextbestFiledir(String filedir) {
             correspondenceAgencyConfiguration.nextbestFiledir = filedir;
+            return this;
+        }
+
+        public Builder withEndpointUrl(String endpointUrl) {
+            correspondenceAgencyConfiguration.endpointUrl = endpointUrl;
             return this;
         }
 
