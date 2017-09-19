@@ -63,7 +63,7 @@ public class OauthRestTemplateConfig {
         private DefaultOAuth2AccessToken getAccessToken() {
             IdportenOidcTokenResponse oidcTokenResponse = oidcTokenClient.fetchToken();
             DefaultOAuth2AccessToken oa2at = new DefaultOAuth2AccessToken(oidcTokenResponse.getAccessToken());
-            oa2at.setExpiration(Date.from(Instant.now().plusSeconds(250)));
+            oa2at.setExpiration(Date.from(Instant.now().plusSeconds(oidcTokenResponse.getExpiresIn())));
             oa2at.setScope(Sets.newHashSet(oidcTokenResponse.getScope()));
             return oa2at;
         }
