@@ -11,6 +11,9 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertThat;
@@ -23,13 +26,14 @@ public class StrategyFactoryTest {
     private StrategyFactory strategyFactory;
 
     @Before
-    public void setup() {
+    public void setup() throws MalformedURLException {
         final MessageSender messageSender = mock(MessageSender.class);
         final IntegrasjonspunktProperties properties = mock(IntegrasjonspunktProperties.class);
         final IntegrasjonspunktProperties.PostVirksomheter ptvMock = mock(IntegrasjonspunktProperties.PostVirksomheter.class);
         final DigitalPostInnbyggerConfig dpic = mock(DigitalPostInnbyggerConfig.class);
         final DigitalPostInnbyggerConfig.Keystore keystore = mock(DigitalPostInnbyggerConfig.Keystore.class);
         final IntegrasjonspunktProperties.Organization orgMock = mock(IntegrasjonspunktProperties.Organization.class);
+        when(ptvMock.getEndpointUrl()).thenReturn(new URL("http://foo"));
         IntegrasjonspunktProperties.FeatureToggle featureMock = mock(IntegrasjonspunktProperties.FeatureToggle.class);
         IntegrasjonspunktProperties.NextBEST nextBestMock = mock(IntegrasjonspunktProperties.NextBEST.class);
         when(nextBestMock.getFiledir()).thenReturn("upload/");
