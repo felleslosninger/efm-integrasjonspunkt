@@ -9,7 +9,6 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.ptv.CorrespondenceRequest;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +45,6 @@ public class DpvConversationStrategy implements ConversationStrategy {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
 
-        ServiceRecord serviceRecord = sr.getServiceRecord(cr.getReceiverId());
         CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(ConversationResourceMarkers.markerFrom(cr),
                 config,
                 props.getDpv().getEndpointUrl().toString());
