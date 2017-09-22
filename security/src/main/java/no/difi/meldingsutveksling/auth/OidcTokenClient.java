@@ -25,7 +25,8 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.cert.CertificateEncodingException;
-import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 @Component
@@ -105,8 +106,8 @@ public class OidcTokenClient {
                 .issuer(clientId)
                 .claim("scope", getCurrentScopes())
                 .jwtID(UUID.randomUUID().toString())
-                .issueTime(Date.from(Instant.now()))
-                .expirationTime(Date.from(Instant.now().plusSeconds(120)))
+                .issueTime(Date.from(ZonedDateTime.now(ZoneOffset.UTC).toInstant()))
+                .expirationTime(Date.from(ZonedDateTime.now(ZoneOffset.UTC).toInstant().plusSeconds(120)))
                 .build();
 
         JWSSigner signer = new RSASSASigner(nokkel.loadPrivateKey());
