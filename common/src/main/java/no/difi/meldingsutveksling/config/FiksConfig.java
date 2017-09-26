@@ -13,7 +13,7 @@ public class FiksConfig {
 
     @Valid
     @NotNull(message = "Certificate properties for FIKS not set.")
-    private IntegrasjonspunktProperties.Keystore keystore;
+    private KeyStoreProperties keystore;
 
     SvarUt ut = new SvarUt();
     SvarInn inn = new SvarInn();

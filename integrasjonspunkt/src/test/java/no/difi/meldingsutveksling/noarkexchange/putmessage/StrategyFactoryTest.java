@@ -1,7 +1,9 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
+import no.difi.meldingsutveksling.KeystoreProvider;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.config.KeyStoreProperties;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
@@ -31,7 +33,7 @@ public class StrategyFactoryTest {
         final IntegrasjonspunktProperties properties = mock(IntegrasjonspunktProperties.class);
         final IntegrasjonspunktProperties.PostVirksomheter ptvMock = mock(IntegrasjonspunktProperties.PostVirksomheter.class);
         final DigitalPostInnbyggerConfig dpic = mock(DigitalPostInnbyggerConfig.class);
-        final DigitalPostInnbyggerConfig.Keystore keystore = mock(DigitalPostInnbyggerConfig.Keystore.class);
+        final KeyStoreProperties keystore = mock(KeyStoreProperties.class);
         final IntegrasjonspunktProperties.Organization orgMock = mock(IntegrasjonspunktProperties.Organization.class);
         when(ptvMock.getEndpointUrl()).thenReturn(new URL("http://foo"));
         IntegrasjonspunktProperties.FeatureToggle featureMock = mock(IntegrasjonspunktProperties.FeatureToggle.class);

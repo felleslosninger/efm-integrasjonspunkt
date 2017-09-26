@@ -2,12 +2,12 @@ package no.difi.meldingsutveksling.ks.svarinn;
 
 import no.difi.meldingsutveksling.Decryptor;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.config.KeyStoreProperties;
 
 public class SvarInnFileDecryptor {
-    IntegrasjonspunktProperties.Keystore keystore;
+    KeyStoreProperties keystore;
 
-    public SvarInnFileDecryptor(IntegrasjonspunktProperties.Keystore keystore) {
+    public SvarInnFileDecryptor(KeyStoreProperties keystore) {
         this.keystore = keystore;
     }
 

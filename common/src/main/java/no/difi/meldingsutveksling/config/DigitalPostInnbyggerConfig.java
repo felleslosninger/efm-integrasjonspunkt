@@ -9,7 +9,6 @@ import no.difi.meldingsutveksling.config.dpi.PrintSettings;
 import no.difi.meldingsutveksling.config.dpi.securitylevel.SecurityLevel;
 import no.difi.meldingsutveksling.config.dpi.securitylevel.ValidSecurityLevel;
 import no.difi.sdp.client2.domain.Prioritet;
-import org.springframework.core.io.Resource;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -26,7 +25,7 @@ public class DigitalPostInnbyggerConfig {
     private String endpoint;
 
     @Valid
-    private Keystore keystore;
+    private KeyStoreProperties keystore;
 
     private FeatureToggle feature = new FeatureToggle();
 
@@ -80,11 +79,11 @@ public class DigitalPostInnbyggerConfig {
         this.endpoint = endpoint;
     }
 
-    public Keystore getKeystore() {
+    public KeyStoreProperties getKeystore() {
         return keystore;
     }
 
-    public void setKeystore(Keystore keystore) {
+    public void setKeystore(KeyStoreProperties keystore) {
         this.keystore = keystore;
     }
 
@@ -172,53 +171,6 @@ public class DigitalPostInnbyggerConfig {
         public void setEnablePrint(boolean enablePrint) {
             this.enablePrint = enablePrint;
         }
-    }
-
-
-
-    public static class Keystore {
-
-        /**
-         * Keystore alias for key.
-         */
-        @NotNull
-        private String alias;
-        /**
-         * Path of jks file.
-         */
-
-        @NotNull
-        private Resource path;
-        /**
-         * Password of keystore and entry.
-         */
-        @NotNull
-        private String password;
-
-        public String getAlias() {
-            return alias;
-        }
-
-        public void setAlias(String alias) {
-            this.alias = alias;
-        }
-
-        public Resource getPath() {
-            return path;
-        }
-
-        public void setPath(Resource path) {
-            this.path = path;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
-        }
-
     }
 
     public static class Email {

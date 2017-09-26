@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.config;
 import lombok.Data;
 import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.core.io.Resource;
 
 import javax.validation.Valid;
@@ -11,7 +12,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.net.URL;
-import java.security.KeyStore;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
@@ -97,7 +97,8 @@ public class IntegrasjonspunktProperties {
          */
         @Valid
         @NotNull(message = "Certificate properties not set.")
-        private Keystore keystore;
+        @NestedConfigurationProperty
+        private KeyStoreProperties keystore;
     }
 
     @Data
@@ -139,7 +140,8 @@ public class IntegrasjonspunktProperties {
         private URL url;
         private String audience;
         private String clientId;
-        private Keystore keystore;
+        @NestedConfigurationProperty
+        private KeyStoreProperties keystore;
     }
 
     /**
@@ -221,37 +223,6 @@ public class IntegrasjonspunktProperties {
     public static class MessageServiceHandler {
 
         private String endpointURL;
-    }
-
-    @Data
-    @ToString(exclude = "password")
-    public static class Keystore {
-        /**
-         * Type of KeyStore
-         *
-         * Examples: JKS, Windows-MY
-         */
-        private String type = KeyStore.getDefaultType();
-
-        /**
-         * Keystore alias for key.
-         */
-        @NotNull
-        private String alias;
-
-        /**
-         * Path of jks file.
-         *
-         * May be empty if type = Windows-MY
-         */
-        private Resource path;
-
-        /**
-         * Password of keystore and entry.
-         */
-        @NotNull
-        private String password = "";
-
     }
 
     @Data

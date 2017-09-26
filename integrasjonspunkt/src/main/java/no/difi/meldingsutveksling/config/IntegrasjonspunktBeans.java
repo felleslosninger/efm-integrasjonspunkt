@@ -5,12 +5,13 @@ import no.difi.meldingsutveksling.ServiceRegistryTransportFactory;
 import no.difi.meldingsutveksling.auth.OidcTokenClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
+import no.difi.meldingsutveksling.lang.KeystoreProviderException;
 import no.difi.meldingsutveksling.mail.MailClient;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.FiksMessageStrategyFactory;
-import no.difi.meldingsutveksling.noarkexchange.putmessage.KeystoreProvider;
+import no.difi.meldingsutveksling.KeystoreProvider;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.receipt.ConversationRepository;
@@ -70,7 +71,11 @@ public class IntegrasjonspunktBeans {
 
     @Bean
     public KeystoreProvider meldingsformidlerKeystoreProvider() throws MeldingsformidlerException {
-        return KeystoreProvider.from(properties);
+        try {
+            return KeystoreProvider.from(properties.getDpi().getKeystore());
+        }catch (KeystoreProviderException e){
+            throw new MeldingsformidlerException("Unable to create keystore for DPI", e);
+        }
     }
 
     @ConditionalOnProperty(name="difi.move.feature.enableDPF", havingValue = "true")

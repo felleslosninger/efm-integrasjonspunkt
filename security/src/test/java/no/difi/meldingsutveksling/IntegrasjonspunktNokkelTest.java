@@ -4,6 +4,7 @@ import com.google.common.io.ByteStreams;
 import no.difi.asic.*;
 import no.difi.commons.asic.jaxb.asic.Certificate;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.config.KeyStoreProperties;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -35,7 +36,7 @@ public class IntegrasjonspunktNokkelTest {
     @BeforeClass
     public static void before()throws Exception{
 
-        IntegrasjonspunktProperties.Keystore properties = new IntegrasjonspunktProperties.Keystore();
+        KeyStoreProperties properties = new KeyStoreProperties();
         properties.setAlias(ALIAS);
         properties.setPassword("changeit");
         properties.setPath(new ClassPathResource("/test.jks"));
