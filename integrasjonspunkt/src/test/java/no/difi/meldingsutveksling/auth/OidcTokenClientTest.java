@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.auth;
 import com.nimbusds.jose.proc.BadJWSException;
 import com.nimbusds.jwt.SignedJWT;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.config.KeyStoreProperties;
 import no.difi.meldingsutveksling.config.OauthRestTemplateConfig;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import org.junit.Before;
@@ -48,7 +49,7 @@ public class OidcTokenClientTest {
         props.getOidc().setUrl(new URL("https://oidc-ver2.difi.no/idporten-oidc-provider/token"));
         props.getOidc().setAudience("https://oidc-ver2.difi.no/idporten-oidc-provider/");
         props.getOidc().setClientId("test_move");
-        props.getOidc().setKeystore(new IntegrasjonspunktProperties.Keystore());
+        props.getOidc().setKeystore(new KeyStoreProperties());
         props.getOidc().getKeystore().setAlias("client_alias");
         props.getOidc().getKeystore().setPassword("changeit");
         props.getOidc().getKeystore().setPath(new FileSystemResource("src/test/resources/kontaktinfo-client-test.jks"));

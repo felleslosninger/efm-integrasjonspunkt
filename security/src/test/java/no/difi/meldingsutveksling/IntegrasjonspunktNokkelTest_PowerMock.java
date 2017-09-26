@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling;
 
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.config.KeyStoreProperties;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,91 +10,71 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.core.io.PathResource;
+import org.springframework.core.io.Resource;
 
+import java.io.ByteArrayInputStream;
 import java.security.KeyStore;
 
 import static org.mockito.Mockito.*;
 
-/**
- * Created by Even
- */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({KeyStore.class, IntegrasjonspunktNokkel.class})
+@PrepareForTest({KeyStore.class, IntegrasjonspunktNokkel.class, KeystoreProvider.class})
 public class IntegrasjonspunktNokkelTest_PowerMock {
-
-    @Mock
-    KeyStore.Builder mockBuilderWith3;
-
-    @Mock
-    KeyStore.Builder mockBuilderWith4;
 
     @Mock
     KeyStore keyStore;
 
+    @Mock
+    Resource file;
+
     @Before
     public void before()throws Exception{
+        PowerMockito.mockStatic(KeyStore.class);
+        when(KeyStore.getInstance(anyString())).thenReturn(keyStore);
 
-        PowerMockito.mockStatic(KeyStore.Builder.class);
-
-        when(KeyStore.Builder.newInstance(any(), any(), any())).thenReturn(mockBuilderWith3);
-        when(KeyStore.Builder.newInstance(any(), any(), any(), any())).thenReturn(mockBuilderWith4);
-
-        when(mockBuilderWith3.getKeyStore()).thenReturn(keyStore);
-        when(mockBuilderWith4.getKeyStore()).thenReturn(keyStore);
+        when(file.getInputStream()).thenReturn(new ByteArrayInputStream("test content".getBytes()));
     }
 
     @Test
     public void testLoadKeyStoreWithoutPath()throws Exception{
 
-        IntegrasjonspunktProperties.Keystore properties = new IntegrasjonspunktProperties.Keystore();
+        KeyStoreProperties properties = new KeyStoreProperties();
         properties.setAlias("alias");
         properties.setPassword("password");
         properties.setType("type");
 
-        new IntegrasjonspunktNokkel(properties);
+        IntegrasjonspunktNokkel integrasjonspunktNokkel = new IntegrasjonspunktNokkel(properties);
 
-        PowerMockito.verifyStatic(never());
-        KeyStore.Builder.newInstance(any(), any(), any(), any());
-
-        PowerMockito.verifyStatic(times(1));
-        KeyStore.Builder.newInstance(any(), any(), any());
+        Assert.assertEquals(keyStore, integrasjonspunktNokkel.getKeyStore());
     }
 
     @Test
     public void testLoadKeyStoreWithNONEPath()throws Exception{
 
-        IntegrasjonspunktProperties.Keystore properties = new IntegrasjonspunktProperties.Keystore();
+        KeyStoreProperties properties = new KeyStoreProperties();
         properties.setAlias("alias");
         properties.setPassword("password");
         properties.setType("type");
 
         properties.setPath(new PathResource("NONE"));
 
-        new IntegrasjonspunktNokkel(properties);
+        IntegrasjonspunktNokkel integrasjonspunktNokkel = new IntegrasjonspunktNokkel(properties);
 
-        PowerMockito.verifyStatic(never());
-        KeyStore.Builder.newInstance(any(), any(), any(), any());
-
-        PowerMockito.verifyStatic(times(1));
-        KeyStore.Builder.newInstance(any(), any(), any());
+        Assert.assertEquals(keyStore, integrasjonspunktNokkel.getKeyStore());
     }
 
 
     @Test
     public void testLoadKeyStoreWithPath() throws Exception{
 
-        IntegrasjonspunktProperties.Keystore properties = new IntegrasjonspunktProperties.Keystore();
+        KeyStoreProperties properties = new KeyStoreProperties();
         properties.setAlias("alias");
         properties.setPassword("password");
         properties.setType("type");
-        properties.setPath(new PathResource("foo"));
+        properties.setPath(file);
 
-        new IntegrasjonspunktNokkel(properties);
+        IntegrasjonspunktNokkel integrasjonspunktNokkel = new IntegrasjonspunktNokkel(properties);
 
-        PowerMockito.verifyStatic(never());
-        KeyStore.Builder.newInstance(any(), any(), any());
-
-        PowerMockito.verifyStatic(times(1));
-        KeyStore.Builder.newInstance(any(), any(), any(), any());
+        Assert.assertEquals(keyStore, integrasjonspunktNokkel.getKeyStore());
     }
 }

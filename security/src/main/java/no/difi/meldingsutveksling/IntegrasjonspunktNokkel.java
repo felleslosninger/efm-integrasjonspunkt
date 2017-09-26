@@ -1,12 +1,10 @@
 package no.difi.meldingsutveksling;
 
 import no.difi.asic.SignatureHelper;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import org.springframework.core.io.Resource;
+import no.difi.meldingsutveksling.config.KeyStoreProperties;
+import no.difi.meldingsutveksling.lang.KeystoreProviderException;
 
-import java.io.IOException;
 import java.security.*;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 /**
@@ -16,15 +14,19 @@ import java.security.cert.X509Certificate;
  */
 public class IntegrasjonspunktNokkel {
 
-    protected final IntegrasjonspunktProperties.Keystore properties;
+    protected final KeyStoreProperties properties;
 
     protected KeyStore keyStore;
 
-    public IntegrasjonspunktNokkel(IntegrasjonspunktProperties.Keystore properties) {
+    public IntegrasjonspunktNokkel(KeyStoreProperties properties) {
 
         this.properties = properties;
 
-        this.keyStore = loadKeyStore();
+        try {
+            this.keyStore = KeystoreProvider.loadKeyStore(properties);
+        }catch (KeystoreProviderException e){
+            throw new IllegalStateException(e);
+        }
     }
 
     /**
@@ -82,31 +84,6 @@ public class IntegrasjonspunktNokkel {
 
     }
 
-
-    protected KeyStore loadKeyStore() {
-
-        String type = properties.getType();
-        String password = properties.getPassword();
-        Resource path = properties.getPath();
-
-        try{
-            KeyStore keyStore = KeyStore.getInstance(type);
-
-            if( path == null || "none".equalsIgnoreCase(path.getFilename()) ){
-
-                keyStore.load(null, password.toCharArray());
-            }else{
-
-                keyStore.load(path.getInputStream(), password.toCharArray());
-            }
-
-            return keyStore;
-
-        } catch ( KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
-
-            throw new IllegalStateException("Unable to load KeyStore", e);
-        }
-    }
 
     public KeyStore getKeyStore() {
         return keyStore;
