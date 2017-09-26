@@ -57,6 +57,7 @@ public class OidcTokenClient {
 
     public IdportenOidcTokenResponse fetchToken() {
         RestTemplate restTemplate = new RestTemplate();
+        restTemplate.setErrorHandler(new OidcErrorHandler());
 
         LinkedMultiValueMap<String, String> attrMap = new LinkedMultiValueMap<>();
         attrMap.add("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer");
