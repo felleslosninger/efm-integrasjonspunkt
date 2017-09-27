@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.ks.svarinn
 
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties.Keystore
+import no.difi.meldingsutveksling.config.KeyStoreProperties
 import org.junit.Test
 import org.springframework.core.io.Resource
 import org.springframework.core.io.UrlResource
@@ -11,7 +11,7 @@ public class SvarInnFileDecryptorTest {
     @Test
     public void shouldBeAbleToDecryptGivenBytesFromSvarInn() {
         final Resource path = new UrlResource(getClass().getResource("/somdalen.jks"));
-        final Keystore keystore = new Keystore(path: path, password: "changeit", alias: "somdalen");
+        final KeyStoreProperties keystore = new KeyStoreProperties(path: path, password: "changeit", alias: "somdalen");
         def bytes = getClass().getResource("/somdalen-dokumenter-ae68b33d.zip").bytes
 
         SvarInnFileDecryptor decryptor = new SvarInnFileDecryptor(keystore);
