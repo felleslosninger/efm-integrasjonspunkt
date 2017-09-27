@@ -81,7 +81,7 @@ public class RestClient {
 
         if (props.getSign().isEnable()) {
             HttpHeaders headers = new HttpHeaders();
-            headers.put("Accept", asList("application/jose"));
+            headers.put("Accept", asList("application/jose, application/json"));
 
             HttpEntity<Object> httpEntity = new HttpEntity<>(headers);
             ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.GET, httpEntity, String.class);
