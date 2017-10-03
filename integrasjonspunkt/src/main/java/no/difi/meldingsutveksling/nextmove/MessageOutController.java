@@ -38,7 +38,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
 import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
@@ -140,13 +139,6 @@ public class MessageOutController {
                             cr.getServiceIdentifier(), strategyFactory.getEnabledServices())).build());
         }
 
-        ServiceRecord receiverServiceRecord = sr.getServiceRecord(cr.getReceiverId());
-        if (receiverServiceRecord.getServiceIdentifier() == DPV &&
-                cr.getServiceIdentifier() != DPV) {
-            return ResponseEntity.badRequest().body(ErrorResponse.builder().error("not_in_elma")
-                    .errorDescription("Receiver not found in ELMA, not creating message.").build());
-        }
-
         setDefaults(cr);
         outRepo.save(cr);
         log.info(markerFrom(cr), "Created new conversation resource with id={}", cr.getConversationId());
@@ -183,14 +175,14 @@ public class MessageOutController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error("not_found")
                     .errorDescription("No conversation with supplied id found").build());
         }
-        ConversationResource conversationResource = find.get();
+        ConversationResource cr = find.get();
 
         Optional<String> arkivmeldingFile = request.getFileMap().values().stream()
                 .map(MultipartFile::getOriginalFilename)
                 .filter(ARKIVMELDING_FILE::equals)
                 .findFirst();
         if (arkivmeldingFile.isPresent()) {
-            ResponseEntity arkivmeldingResponse = handleArkivmelding(request, conversationResource);
+            ResponseEntity arkivmeldingResponse = handleArkivmelding(request, cr);
             if (arkivmeldingResponse.getStatusCode() != HttpStatus.OK) {
                 return arkivmeldingResponse;
             }
@@ -199,8 +191,8 @@ public class MessageOutController {
         ArrayList<String> files = Lists.newArrayList(request.getFileNames());
         for (String f : files) {
             MultipartFile file = request.getFile(f);
-            log.trace(markerFrom(conversationResource), "Adding file \"{}\" ({}, {} bytes) to {}",
-                    file.getOriginalFilename(), file.getContentType(), file.getSize(), conversationResource.getConversationId());
+            log.trace(markerFrom(cr), "Adding file \"{}\" ({}, {} bytes) to {}",
+                    file.getOriginalFilename(), file.getContentType(), file.getSize(), cr.getConversationId());
 
             String filedir = props.getNextbest().getFiledir();
             if (!filedir.endsWith("/")) {
@@ -214,8 +206,8 @@ public class MessageOutController {
                 BufferedOutputStream bos = new BufferedOutputStream(os)) {
                 bos.write(file.getBytes());
 
-                if (!conversationResource.getFileRefs().values().contains(file.getOriginalFilename())) {
-                    conversationResource.addFileRef(file.getOriginalFilename());
+                if (!cr.getFileRefs().values().contains(file.getOriginalFilename())) {
+                    cr.addFileRef(file.getOriginalFilename());
                 }
             } catch (java.io.IOException e) {
                 log.error("Could not write file {}", localFile, e);
@@ -224,17 +216,23 @@ public class MessageOutController {
             }
         }
 
-        Optional<ConversationStrategy> strategy = strategyFactory.getStrategy(conversationResource);
+        ServiceRecord receiverServiceRecord = sr.getServiceRecord(cr.getReceiverId());
+        if (receiverServiceRecord.getServiceIdentifier() == ServiceIdentifier.DPV &&
+                cr.getServiceIdentifier() == ServiceIdentifier.DPI) {
+            cr = DpvConversationResource.of((DpiConversationResource)cr);
+        }
+
+        Optional<ConversationStrategy> strategy = strategyFactory.getStrategy(cr);
         if (!strategy.isPresent()) {
             String errorStr = String.format("Cannot send message - serviceIdentifier \"%s\" not supported",
-                    conversationResource.getServiceIdentifier());
-            log.error(markerFrom(conversationResource), errorStr);
+                    cr.getServiceIdentifier());
+            log.error(markerFrom(cr), errorStr);
             return ResponseEntity.badRequest().body(ErrorResponse.builder().error("serviceIdentifier_not_supported")
                     .errorDescription(errorStr).build());
         }
-        ResponseEntity response = strategy.get().send(conversationResource);
+        ResponseEntity response = strategy.get().send(cr);
         if (response.getStatusCode() == HttpStatus.OK) {
-            outRepo.delete(conversationResource);
+            outRepo.delete(cr);
         }
         return response;
 
