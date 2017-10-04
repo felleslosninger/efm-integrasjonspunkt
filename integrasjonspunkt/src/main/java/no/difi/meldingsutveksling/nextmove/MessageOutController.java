@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.xml.sax.SAXException;
 
+import javax.transaction.Transactional;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -165,6 +166,7 @@ public class MessageOutController {
             @ApiResponse(code = 404, message = "Not found", response = String.class),
             @ApiResponse(code = 500, message = "Internal error", response = String.class)
     })
+    @Transactional
     public ResponseEntity uploadFiles(
             @ApiParam(value = "Conversation id")
             @PathVariable("conversationId") String conversationId,
