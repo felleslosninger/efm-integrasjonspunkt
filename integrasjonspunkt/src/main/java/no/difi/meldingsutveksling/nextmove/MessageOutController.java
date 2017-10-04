@@ -197,6 +197,10 @@ public class MessageOutController {
         }
 
         ArrayList<String> files = Lists.newArrayList(request.getFileNames());
+        // MOVE-414: temp fix until arkivmelding implementation
+        if (files.contains("hoveddokument")) {
+            Collections.swap(files, files.indexOf("hoveddokument"), 0);
+        }
         for (String f : files) {
             MultipartFile file = request.getFile(f);
             log.trace(markerFrom(conversationResource), "Adding file \"{}\" ({}, {} bytes) to {}",
