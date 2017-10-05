@@ -34,6 +34,7 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -211,7 +212,7 @@ public class MessageOutController {
             try (FileOutputStream os = new FileOutputStream(localFile);
                 BufferedOutputStream bos = new BufferedOutputStream(os)) {
                 if (cr.getCustomProperties().containsKey("base64") && "true".equalsIgnoreCase(cr.getCustomProperties().get("base64"))) {
-                    bos.write(Base64.getDecoder().decode(file.getBytes()));
+                    bos.write(Base64.getDecoder().decode(new String(file.getBytes()).getBytes(StandardCharsets.UTF_8)));
                 } else {
                     bos.write(file.getBytes());
                 }
