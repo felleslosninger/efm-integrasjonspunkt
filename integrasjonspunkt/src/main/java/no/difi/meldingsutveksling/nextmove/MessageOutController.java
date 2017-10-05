@@ -210,7 +210,11 @@ public class MessageOutController {
 
             try (FileOutputStream os = new FileOutputStream(localFile);
                 BufferedOutputStream bos = new BufferedOutputStream(os)) {
-                bos.write(file.getBytes());
+                if (cr.getCustomProperties().containsKey("base64")) {
+                    bos.write(Base64.getDecoder().decode(file.getBytes()));
+                } else {
+                    bos.write(file.getBytes());
+                }
 
                 if (!cr.getFileRefs().values().contains(file.getOriginalFilename())) {
                     cr.addFileRef(file.getOriginalFilename());
