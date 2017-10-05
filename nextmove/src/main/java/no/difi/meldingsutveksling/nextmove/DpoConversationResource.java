@@ -18,7 +18,7 @@ public class DpoConversationResource extends ConversationResource {
     DpoConversationResource() {}
 
     private DpoConversationResource(String conversationId, String senderId, String receiverId) {
-        super(conversationId, senderId, receiverId, ServiceIdentifier.DPO, LocalDateTime.now(), Maps.newHashMap());
+        super(conversationId, senderId, receiverId, ServiceIdentifier.DPO, LocalDateTime.now(), Maps.newHashMap(), Maps.newHashMap());
     }
 
     public static DpoConversationResource of(String conversationId, String senderId, String receiverId) {

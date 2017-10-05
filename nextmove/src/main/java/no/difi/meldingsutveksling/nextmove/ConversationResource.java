@@ -86,13 +86,14 @@ public abstract class ConversationResource {
     ConversationResource() {}
 
     ConversationResource(String conversationId, String senderId, String receiverId, ServiceIdentifier serviceIdentifier,
-                         LocalDateTime lastUpdate, Map fileRefs){
+                         LocalDateTime lastUpdate, Map fileRefs, Map customProperties){
         this.conversationId = conversationId;
         this.senderId = senderId;
         this.receiverId = receiverId;
         this.serviceIdentifier = serviceIdentifier;
         this.lastUpdate = lastUpdate;
         this.fileRefs = fileRefs;
+        this.customProperties = customProperties;
     }
 
 

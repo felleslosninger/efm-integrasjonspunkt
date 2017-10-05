@@ -19,7 +19,7 @@ public class DpvConversationResource extends ConversationResource {
     DpvConversationResource() {}
 
     private DpvConversationResource(String conversationId, String senderId, String receiverId) {
-        super(conversationId, senderId, receiverId, ServiceIdentifier.DPV, LocalDateTime.now(), Maps.newHashMap());
+        super(conversationId, senderId, receiverId, ServiceIdentifier.DPV, LocalDateTime.now(), Maps.newHashMap(), Maps.newHashMap());
     }
 
     public static DpvConversationResource of(String conversationId, String senderId, String receiverId) {
