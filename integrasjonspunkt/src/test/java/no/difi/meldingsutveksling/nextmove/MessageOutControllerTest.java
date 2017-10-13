@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.receipt.Conversation;
-import no.difi.meldingsutveksling.receipt.ConversationRepository;
 import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -61,9 +60,6 @@ public class MessageOutControllerTest {
     private IntegrasjonspunktProperties props;
 
     @MockBean
-    private ConversationRepository crepo;
-
-    @MockBean
     private MessageSender messageSender;
 
     @MockBean
@@ -100,7 +96,6 @@ public class MessageOutControllerTest {
                 LocalDateTime.now().plusMinutes(1));
         Conversation receiptConversation = Conversation.of("42", "42ref", "123", "sometitle", DPO,
                 receiptDelivered, receiptSent);
-        when(crepo.findByConversationId("42")).thenReturn(asList(receiptConversation));
 
         DpoConversationResource cr42 = DpoConversationResource.of("42", "2", "1");
         DpvConversationResource cr43 = DpvConversationResource.of("43", "2", "1");

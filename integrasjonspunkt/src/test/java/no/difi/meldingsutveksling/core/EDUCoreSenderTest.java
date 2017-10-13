@@ -9,7 +9,7 @@ import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactor
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import no.difi.meldingsutveksling.receipt.ConversationRepository;
+import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.services.Adresseregister;
@@ -24,7 +24,7 @@ public class EDUCoreSenderTest {
 
     private IntegrasjonspunktProperties properties;
     private ServiceRegistryLookup serviceRegistryLookup;
-    private ConversationRepository conversationRepository;
+    private ConversationService conversationService;
     private StrategyFactory strategyFactory;
     private Adresseregister adresseregister;
     private NoarkClient mshClient;
@@ -36,7 +36,7 @@ public class EDUCoreSenderTest {
     public void setup() {
         properties = mock(IntegrasjonspunktProperties.class);
         serviceRegistryLookup = mock(ServiceRegistryLookup.class);
-        conversationRepository = mock(ConversationRepository.class);
+        conversationService = mock(ConversationService.class);
         strategyFactory = mock(StrategyFactory.class);
         adresseregister = mock(Adresseregister.class);
         mshClient = mock(NoarkClient.class);
@@ -55,7 +55,7 @@ public class EDUCoreSenderTest {
         when(objectProvider.getIfAvailable()).thenReturn(mshClient);
 
         eduCoreSender = new EDUCoreSender(properties, serviceRegistryLookup, strategyFactory, adresseregister,
-                conversationRepository, objectProvider);
+                conversationService, objectProvider);
         setupDefaultProperties();
         setupDefaultMessage();
     }

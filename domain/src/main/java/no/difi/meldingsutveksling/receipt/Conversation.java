@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.core.EDUCore;
-import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.noarkexchange.PayloadException;
 import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 
@@ -87,6 +87,18 @@ public class Conversation {
         return c;
     }
 
+    public static Conversation of(ConversationResource cr, MessageStatus... statuses) {
+        Conversation c = new Conversation(cr.getConversationId(), cr.getConversationId(), cr.getReceiverId(),
+                "", cr.getServiceIdentifier());
+        if (statuses != null && statuses.length > 0) {
+            Stream.of(statuses)
+                    .peek(r -> r.setConversationId(cr.getConversationId()))
+                    .forEach(c::addMessageStatus);
+        }
+        return c;
+
+    }
+
     public static Conversation of(EDUCore eduCore, MessageStatus... statuses) {
         String msgTitle = "";
         if (eduCore.getMessageType() == EDUCore.MessageType.EDU) {
@@ -114,7 +126,7 @@ public class Conversation {
         status.setConversationId(getConversationId());
         this.messageStatuses.add(status);
         this.lastUpdate = LocalDateTime.now();
-        Audit.info(String.format("Conversation [%s] updated with status %s", getConversationId(), status.getStatus()), markerFrom(this));
+        log.debug(String.format("Conversation [%s] updated with status %s", getConversationId(), status.getStatus()), markerFrom(this));
     }
 
     @Override

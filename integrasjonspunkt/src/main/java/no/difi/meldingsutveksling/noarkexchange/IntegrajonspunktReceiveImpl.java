@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.noarkexchange;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.Decryptor;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreFactory;
@@ -19,10 +18,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.CorrelationInformation;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
-import no.difi.meldingsutveksling.receipt.Conversation;
-import no.difi.meldingsutveksling.receipt.ConversationRepository;
-import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
@@ -48,7 +44,6 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.BindingType;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -73,7 +68,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final IntegrasjonspunktProperties properties;
     private final IntegrasjonspunktNokkel keyInfo;
-    private final ConversationRepository conversationRepository;
+    private final ConversationService conversationService;
     private final MessageSender messageSender;
     private ApplicationContext context;
 
@@ -84,7 +79,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
                                        IntegrasjonspunktProperties properties,
                                        IntegrasjonspunktNokkel keyInfo,
                                        ServiceRegistryLookup serviceRegistryLookup,
-                                       ConversationRepository conversationRepository,
+                                       ConversationService conversationService,
                                        MessageSender messageSender) {
 
         this.transportFactory = transportFactory;
@@ -93,7 +88,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
         this.properties = properties;
         this.keyInfo = keyInfo;
         this.serviceRegistryLookup = serviceRegistryLookup;
-        this.conversationRepository = conversationRepository;
+        this.conversationService = conversationService;
         this.messageSender = messageSender;
     }
 
@@ -135,7 +130,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
             eduDocument = convertAsicEntrytoEduDocument(decryptedAsicPackage);
             if (PayloadUtil.isAppReceipt(eduDocument.getPayload())) {
                 Audit.info("AppReceipt extracted", markerFrom(document));
-                registerReceipt(eduDocument);
+                conversationService.registerReadStatus(eduDocument);
                 if (!properties.getFeature().isForwardReceivedAppReceipts()) {
                     Audit.info("AppReceipt forwarding disabled - will not deliver to archive");
                     return new CorrelationInformation();
@@ -156,24 +151,9 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
         ConversationResource cr = payload.getConversation();
 
         EDUCore eduCore = new EDUCoreFactory(serviceRegistryLookup).create(cr, arkivmelding, decryptedAsicPackage);
-        registerReceipt(eduCore);
+        conversationService.registerReadStatus(eduCore);
 
         return eduCore;
-    }
-
-    private void registerReceipt(EDUCore eduCore) {
-        MessageStatus status = MessageStatus.of(GenericReceiptStatus.LEST.toString(), LocalDateTime.now());
-        Conversation c = conversationRepository.findByConversationId(eduCore.getId())
-                .stream()
-                .findFirst()
-                .orElse(Conversation.of(eduCore.getId(),
-                        eduCore.getMessageReference(),
-                        eduCore.getReceiver().getIdentifier(),
-                        eduCore.getMessageReference(),
-                        ServiceIdentifier.DPO));
-        c.addMessageStatus(status);
-        c.setFinished(true);
-        conversationRepository.save(c);
     }
 
     public byte[] decrypt(Payload payload) {

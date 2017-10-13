@@ -29,7 +29,7 @@ public class DpvStatusStrategy implements StatusStrategy {
     private IntegrasjonspunktProperties properties;
 
     @Autowired
-    private ConversationRepository conversationRepository;
+    private ConversationService conversationService;
 
     private static final String STATUS_CREATED = "Created";
     private static final String STATUS_READ = "Read";
@@ -71,9 +71,8 @@ public class DpvStatusStrategy implements StatusStrategy {
                     .anyMatch(r -> levertStatus.equals(r.getStatus()) );
             if (!hasCreatedStatus && createdStatus.isPresent()) {
                 ZonedDateTime createdZoned = createdStatus.get().getStatusDate().toGregorianCalendar().toZonedDateTime();
-                MessageStatus receipt = MessageStatus.of(levertStatus, createdZoned.toLocalDateTime());
-                conversation.addMessageStatus(receipt);
-                conversationRepository.save(conversation);
+                MessageStatus status = MessageStatus.of(levertStatus, createdZoned.toLocalDateTime());
+                conversationService.registerStatus(conversation, status);
             }
 
             Optional<StatusChangeV2> readStatus = statusChanges.stream()
@@ -82,15 +81,11 @@ public class DpvStatusStrategy implements StatusStrategy {
             String lestStatus = GenericReceiptStatus.LEST.toString();
             if (readStatus.isPresent()) {
                 ZonedDateTime readZoned = readStatus.get().getStatusDate().toGregorianCalendar().toZonedDateTime();
-                MessageStatus receipt = MessageStatus.of(lestStatus, readZoned.toLocalDateTime());
-                conversation.addMessageStatus(receipt);
-                conversation.setPollable(false);
-                conversation.setFinished(true);
-                conversationRepository.save(conversation);
+                MessageStatus status = MessageStatus.of(lestStatus, readZoned.toLocalDateTime());
+                conversationService.registerStatus(conversation, status);
+                conversationService.markFinished(conversation);
             }
-
         }
-
     }
 
     @Override

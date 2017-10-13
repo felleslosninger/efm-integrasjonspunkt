@@ -31,6 +31,9 @@ public class ReceiptPolling {
     private ConversationRepository conversationRepository;
 
     @Autowired
+    private ConversationService conversationService;
+
+    @Autowired
     StatusStrategyFactory statusStrategyFactory;
 
     @Autowired
@@ -61,13 +64,11 @@ public class ReceiptPolling {
             if (externalReceipt != EMPTY_KVITTERING) {
                 externalReceipt.auditLog();
                 final String id = externalReceipt.getId();
-                Conversation conversation = conversationRepository.findByConversationId(id).stream().findFirst().orElseGet(externalReceipt::createConversation);
                 MessageStatus status = externalReceipt.toMessageStatus();
-                conversation.addMessageStatus(status);
+                conversationService.registerStatus(id, status);
                 if (DpiReceiptStatus.LEST.toString().equals(status.getStatus())) {
-                    conversation.setFinished(true);
+                    conversationService.markFinished(id);
                 }
-                conversationRepository.save(conversation);
                 Audit.info("Updated receipt (DPI)", externalReceipt.logMarkers());
                 externalReceipt.confirmReceipt();
                 Audit.info("Confirmed receipt (DPI)", externalReceipt.logMarkers());
