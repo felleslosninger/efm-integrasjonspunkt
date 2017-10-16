@@ -14,6 +14,7 @@ public enum DpfReceiptStatus implements ReceiptStatus {
     SENDT_DIGITALT("Sendt digitalt"),
     SENDT_PRINT("Sendt print"),
     SENDT_SDP("Sendt SDP"),
+    KLAR_FOR_MOTTAK("Klar for mottak"),
     VARSLET("Varslet");
 
     private String status;
