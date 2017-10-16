@@ -23,7 +23,7 @@ public class FiksStatusStrategy implements StatusStrategy {
         }
         boolean hasStatus = conversation.getMessageStatuses().stream()
                 .map(MessageStatus::getStatus)
-                .anyMatch(s -> messageStatus.getStatus().equals(s));
+                .anyMatch(messageStatus.getStatus()::equals);
         if (!hasStatus) {
             conversation.addMessageStatus(messageStatus);
         }
