@@ -297,4 +297,16 @@
         ]]></notes>
       <cve>CVE-2016-7051</cve>
    </suppress>
+   <suppress>
+      <notes><![CDATA[
+         CVE-2015-5184 false positive, hawtio console plugin not in use
+        ]]></notes>
+      <cve>CVE-2015-5184</cve>
+   </suppress>
+   <suppress>
+      <notes><![CDATA[
+         CVE-2016-7051 false positive, only for version 4.0 and lower (project at 4.1)
+        ]]></notes>
+      <cve>CVE-2016-7051</cve>
+   </suppress>
 </suppressions>
