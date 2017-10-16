@@ -21,7 +21,12 @@ public class FiksStatusStrategy implements StatusStrategy {
             conversation.setPollable(false);
             conversation.setFinished(true);
         }
-        conversation.addMessageStatus(messageStatus);
+        boolean hasStatus = conversation.getMessageStatuses().stream()
+                .map(MessageStatus::getStatus)
+                .anyMatch(s -> messageStatus.getStatus().equals(s));
+        if (!hasStatus) {
+            conversation.addMessageStatus(messageStatus);
+        }
         conversationRepository.save(conversation);
     }
 
