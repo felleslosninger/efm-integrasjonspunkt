@@ -321,4 +321,10 @@
         ]]></notes>
       <cve>CVE-2015-6420</cve>
    </suppress>
+   <suppress>
+      <notes><![CDATA[
+         CVE-2016-6652 false positive, newer version used
+        ]]></notes>
+      <cve>CVE-2016-6652</cve>
+   </suppress>
 </suppressions>
