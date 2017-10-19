@@ -8,7 +8,7 @@
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>1.7.71</version>
+        <version>1.7.72-SNAPSHOT</version>
     </parent>
 
     <properties>
