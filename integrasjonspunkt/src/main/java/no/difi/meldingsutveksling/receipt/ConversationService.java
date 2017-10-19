@@ -32,8 +32,13 @@ public class ConversationService {
     }
 
     public void registerStatus(Conversation conversation, MessageStatus status) {
-        conversation.addMessageStatus(status);
-        repo.save(conversation);
+        boolean hasStatus = conversation.getMessageStatuses().stream()
+                .map(MessageStatus::getStatus)
+                .anyMatch(status.getStatus()::equals);
+        if (!hasStatus) {
+            conversation.addMessageStatus(status);
+            repo.save(conversation);
+        }
     }
 
     public void markFinished(String conversationId) {

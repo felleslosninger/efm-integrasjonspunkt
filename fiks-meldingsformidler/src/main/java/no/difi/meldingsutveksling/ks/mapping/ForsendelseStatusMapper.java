@@ -22,6 +22,7 @@ public class ForsendelseStatusMapper {
         mapping.put(ForsendelseStatus.SENDT_PRINT, DpfReceiptStatus.SENDT_PRINT);
         mapping.put(ForsendelseStatus.SENDT_SDP, DpfReceiptStatus.SENDT_SDP);
         mapping.put(ForsendelseStatus.VARSLET, DpfReceiptStatus.VARSLET);
+        mapping.put(ForsendelseStatus.KLAR_FOR_MOTTAK, DpfReceiptStatus.KLAR_FOR_MOTTAK);
     }
 
     public DpfReceiptStatus mapFrom(ForsendelseStatus forsendelseStatus) {
