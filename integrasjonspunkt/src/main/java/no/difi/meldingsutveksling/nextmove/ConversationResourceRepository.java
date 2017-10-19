@@ -8,6 +8,8 @@ import java.util.Optional;
 
 public interface ConversationResourceRepository extends CrudRepository<ConversationResource, String> {
 
+    void deleteByConversationId(String conversationId);
+
     List<ConversationResource> findAllByDirection(ConversationDirection direction);
     Optional<ConversationResource> findByConversationIdAndDirection(String conversationId, ConversationDirection direction);
 

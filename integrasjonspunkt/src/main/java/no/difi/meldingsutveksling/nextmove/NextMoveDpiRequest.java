@@ -34,7 +34,8 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     @Override
     public Document getDocument() {
         String primaryFileName = cr.getFileRefs().get(0);
-        return new Document(getContent(primaryFileName), getMime(getExtension(primaryFileName)), primaryFileName, "Under utvikling");
+        return new Document(getContent(primaryFileName), getMime(getExtension(primaryFileName)), primaryFileName,
+                cr.getCustomProperties().getOrDefault(primaryFileName, "Missing title"));
     }
 
     @Override
@@ -42,7 +43,8 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
         final List<Document> docList = Lists.newArrayList();
         cr.getFileRefs().forEach((k, f) -> {
             if (k != 0) {
-                docList.add(new Document(getContent(f), getMime(getExtension(f)), f, "Under utvikling"));
+                docList.add(new Document(getContent(f), getMime(getExtension(f)), f,
+                        cr.getCustomProperties().getOrDefault(f, "Missing title")));
             }
         });
 
