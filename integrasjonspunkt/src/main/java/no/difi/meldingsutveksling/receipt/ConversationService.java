@@ -1,12 +1,11 @@
 package no.difi.meldingsutveksling.receipt;
 
 import lombok.extern.log4j.Log4j;
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static java.lang.String.format;
@@ -53,7 +52,7 @@ public class ConversationService {
     }
 
     public void registerConversation(EDUCore message) {
-        MessageStatus ms = MessageStatus.of(GenericReceiptStatus.OPPRETTET.toString(), LocalDateTime.now());
+        MessageStatus ms = MessageStatus.of(GenericReceiptStatus.OPPRETTET);
         if (message.getMessageType() == EDUCore.MessageType.APPRECEIPT) {
             ms.setDescription("AppReceipt");
         }
@@ -61,32 +60,15 @@ public class ConversationService {
         repo.save(conversation);
     }
 
-    public void registerSentStatus(EDUCore message) {
-        MessageStatus status = MessageStatus.of(GenericReceiptStatus.SENDT.toString(), LocalDateTime.now());
-        if (message.getMessageType() == EDUCore.MessageType.APPRECEIPT) {
-            status.setDescription("AppReceipt");
+    public Conversation registerConversation(ConversationResource cr) {
+        Optional<Conversation> find = repo.findByConversationId(cr.getConversationId()).stream().findFirst();
+        if (find.isPresent()) {
+            log.warn(String.format("Conversation with id=%s already exists, not recreating", cr.getConversationId()));
+            return find.get();
         }
-        Optional<Conversation> conv = repo.findByConversationId(message.getId()).stream().findFirst();
-        conv.ifPresent(c -> {
-            c.addMessageStatus(status);
-            repo.save(c);
-        });
-    }
-
-    public void registerReadStatus(EDUCore message) {
-        MessageStatus status = MessageStatus.of(GenericReceiptStatus.LEST.toString(), LocalDateTime.now());
-        Conversation c = repo.findByConversationId(message.getId())
-                .stream()
-                .findFirst()
-                .orElse(Conversation.of(message.getId(),
-                        message.getMessageReference(),
-                        message.getReceiver().getIdentifier(),
-                        message.getMessageReference(),
-                        ServiceIdentifier.DPO));
-        c.addMessageStatus(status);
-        c.setFinished(true);
-        c.setPollable(false);
-        repo.save(c);
+        MessageStatus ms = MessageStatus.of(GenericReceiptStatus.OPPRETTET);
+        Conversation c = Conversation.of(cr, ms);
+        return repo.save(c);
     }
 
 }

@@ -10,8 +10,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 
-import java.time.LocalDateTime
-
 import static org.mockito.Matchers.any
 import static org.mockito.Mockito.*
 
@@ -27,7 +25,7 @@ class FiksStatusStrategyTest {
 
     @Test
     void "given message receipt with status read then conversation should be set non pollable"() {
-        def messageReceipt = MessageStatus.of(DpfReceiptStatus.LEST.toString(), LocalDateTime.now())
+        def messageReceipt = MessageStatus.of(DpfReceiptStatus.LEST)
         Conversation conversation = mock(Conversation)
         def conversationService = mock(ConversationService)
         FiksStatusStrategy strategy = new FiksStatusStrategy(service, conversationService)

@@ -36,12 +36,16 @@ public class MessageStatus {
         this.description = description;
     }
 
-    public static MessageStatus of(String status, LocalDateTime lastUpdate) {
-        return new MessageStatus(status, lastUpdate, null);
+    public static MessageStatus of(ReceiptStatus status) {
+        return new MessageStatus(status.toString(), LocalDateTime.now(), null);
     }
 
-    public static MessageStatus of(String status, LocalDateTime lastUpdate, String description) {
-        return new MessageStatus(status, lastUpdate, description);
+    public static MessageStatus of(ReceiptStatus status, LocalDateTime lastUpdate) {
+        return new MessageStatus(status.toString(), lastUpdate, null);
+    }
+
+    public static MessageStatus of(ReceiptStatus status, LocalDateTime lastUpdate, String description) {
+        return new MessageStatus(status.toString(), lastUpdate, description);
     }
 
     @Override

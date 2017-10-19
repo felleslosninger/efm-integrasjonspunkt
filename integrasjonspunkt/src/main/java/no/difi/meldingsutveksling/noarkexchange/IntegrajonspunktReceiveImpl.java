@@ -19,6 +19,8 @@ import no.difi.meldingsutveksling.noarkexchange.schema.receive.CorrelationInform
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import no.difi.meldingsutveksling.receipt.ConversationService;
+import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
+import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
@@ -130,7 +132,8 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
             eduDocument = convertAsicEntrytoEduDocument(decryptedAsicPackage);
             if (PayloadUtil.isAppReceipt(eduDocument.getPayload())) {
                 Audit.info("AppReceipt extracted", markerFrom(document));
-                conversationService.registerReadStatus(eduDocument);
+                conversationService.registerStatus(eduDocument.getId(), MessageStatus.of(GenericReceiptStatus.LEST));
+                conversationService.markFinished(eduDocument.getId());
                 if (!properties.getFeature().isForwardReceivedAppReceipts()) {
                     Audit.info("AppReceipt forwarding disabled - will not deliver to archive");
                     return new CorrelationInformation();
@@ -151,7 +154,8 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
         ConversationResource cr = payload.getConversation();
 
         EDUCore eduCore = new EDUCoreFactory(serviceRegistryLookup).create(cr, arkivmelding, decryptedAsicPackage);
-        conversationService.registerReadStatus(eduCore);
+        conversationService.registerStatus(eduCore.getId(), MessageStatus.of(GenericReceiptStatus.LEST));
+        conversationService.markFinished(eduCore.getId());
 
         return eduCore;
     }

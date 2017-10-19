@@ -182,7 +182,7 @@ public class MessagePolling implements ApplicationContextAware {
     private MessageStatus statusFromKvittering(Kvittering kvittering) {
         DpoReceiptStatus status = DpoReceiptStatus.of(kvittering);
         LocalDateTime tidspunkt = kvittering.getTidspunkt().toGregorianCalendar().toZonedDateTime().toLocalDateTime();
-        return MessageStatus.of(status.toString(), tidspunkt);
+        return MessageStatus.of(status, tidspunkt);
     }
 
     private boolean isKvittering(EduDocument eduDocument) {

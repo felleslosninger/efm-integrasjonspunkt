@@ -5,6 +5,9 @@ import io.swagger.annotations.*;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.receipt.ConversationService;
+import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.NextmoveReceiptStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +45,9 @@ public class MessageInController {
 
     @Autowired
     private IntegrasjonspunktProperties props;
+
+    @Autowired
+    private ConversationService conversationService;
 
     @Autowired
     public MessageInController(ConversationResourceRepository cRepo) {
@@ -168,6 +174,8 @@ public class MessageInController {
 
         if (resource.isPresent()) {
             repo.delete(resource.get());
+            conversationService.registerStatus(resource.get().getConversationId(),
+                    MessageStatus.of(NextmoveReceiptStatus.POPPET));
             return ResponseEntity.ok().build();
         }
 
@@ -274,6 +282,8 @@ public class MessageInController {
             }
 
             repo.delete(resource.get());
+            conversationService.registerStatus(resource.get().getConversationId(),
+                    MessageStatus.of(NextmoveReceiptStatus.POPPET));
             Audit.info(format("Conversation with id=%s popped from queue", resource.get().getConversationId()),
                     markerFrom(resource.get()));
 

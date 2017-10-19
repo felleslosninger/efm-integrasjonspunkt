@@ -91,8 +91,8 @@ public class MessageOutControllerTest {
         InfoRecord bazInfo = new InfoRecord("3", "baz", new EntityType("org", "org"));
         when(sr.getInfoRecord("3")).thenReturn(bazInfo);
 
-        MessageStatus receiptSent = MessageStatus.of(GenericReceiptStatus.SENDT.toString(), LocalDateTime.now());
-        MessageStatus receiptDelivered = MessageStatus.of(GenericReceiptStatus.LEVERT.toString(),
+        MessageStatus receiptSent = MessageStatus.of(GenericReceiptStatus.SENDT);
+        MessageStatus receiptDelivered = MessageStatus.of(GenericReceiptStatus.LEVERT,
                 LocalDateTime.now().plusMinutes(1));
         Conversation receiptConversation = Conversation.of("42", "42ref", "123", "sometitle", DPO,
                 receiptDelivered, receiptSent);

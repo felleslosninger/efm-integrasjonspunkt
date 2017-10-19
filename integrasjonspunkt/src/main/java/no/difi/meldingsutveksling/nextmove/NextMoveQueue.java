@@ -11,6 +11,10 @@ import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
+import no.difi.meldingsutveksling.receipt.Conversation;
+import no.difi.meldingsutveksling.receipt.ConversationService;
+import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.NextmoveReceiptStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +40,9 @@ public class NextMoveQueue {
 
     @Autowired
     private IntegrasjonspunktProperties props;
+
+    @Autowired
+    private ConversationService conversationService;
 
     @Autowired
     public NextMoveQueue(ConversationResourceRepository repo) {
@@ -80,6 +87,8 @@ public class NextMoveQueue {
         } catch (IOException e) {
             log.error("Could not write asic container to disc.", e);
         }
+        Conversation c = conversationService.registerConversation(message);
+        conversationService.registerStatus(c, MessageStatus.of(NextmoveReceiptStatus.LEST_FRA_SERVICEBUS));
         Audit.info(String.format("Message with id=%s put on local queue", message.getConversationId()));
     }
 

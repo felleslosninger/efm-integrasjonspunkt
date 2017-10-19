@@ -33,7 +33,6 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.time.LocalDateTime;
 
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
@@ -115,7 +114,7 @@ public class InternalQueue {
      */
     @JmsListener(destination = DLQ)
     public void dlqListener(byte[] message, Session session) {
-        MessageStatus ms = MessageStatus.of(GenericReceiptStatus.FEIL.toString(), LocalDateTime.now());
+        MessageStatus ms = MessageStatus.of(GenericReceiptStatus.FEIL);
         String conversationId = "";
         String errorMsg = "";
 
