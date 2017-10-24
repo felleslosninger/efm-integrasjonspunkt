@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.altinn;
 
+import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.*;
@@ -22,8 +23,6 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,9 +43,8 @@ import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom
  * downloaded forwarded to the Archive system.
  */
 @Component
+@Slf4j
 public class MessagePolling implements ApplicationContextAware {
-
-    private Logger logger = LoggerFactory.getLogger(MessagePolling.class);
 
     ApplicationContext context;
 
@@ -86,7 +84,7 @@ public class MessagePolling implements ApplicationContextAware {
     public void checkForNewNextBestMessages() throws NextMoveException {
 
         if (properties.getNextbest().getServiceBus().isEnable()) {
-            logger.debug("Checking for new NextMove messages..");
+            log.debug("Checking for new NextMove messages..");
             List<EduDocument> messages = nextMoveServiceBus.getAllMessages();
             messages.forEach(nextMoveQueue::enqueueEduDocument);
         }
@@ -99,10 +97,10 @@ public class MessagePolling implements ApplicationContextAware {
             return;
         }
 
-        logger.debug("Checking for new FIKS messages");
+        log.debug("Checking for new FIKS messages");
         if (messageDownloaders.getIfAvailable() != null) {
             for (MessageDownloaderModule task : messageDownloaders.getObject()) {
-                logger.debug("performing enabled task");
+                log.debug("performing enabled task");
                 task.downloadFiles();
             }
         }
@@ -112,7 +110,7 @@ public class MessagePolling implements ApplicationContextAware {
     @Scheduled(fixedRate = 15000)
     public void checkForNewMessages() throws MessageException {
 
-        logger.debug("Checking for new messages");
+        log.debug("Checking for new messages");
 
         if (serviceRecord == null) {
             serviceRecord = serviceRegistryLookup.getServiceRecord(properties.getOrg().getNumber());
@@ -134,36 +132,40 @@ public class MessagePolling implements ApplicationContextAware {
         }
 
         for (FileReference reference : fileReferences) {
-            final DownloadRequest request = new DownloadRequest(reference.getValue(), properties.getOrg().getNumber());
-            EduDocument eduDocument = client.download(request);
+            try {
+                final DownloadRequest request = new DownloadRequest(reference.getValue(), properties.getOrg().getNumber());
+                EduDocument eduDocument = client.download(request);
 
-            if (isNextMove(eduDocument)) {
-                logger.info("NextBest Message received");
+                if (isNextMove(eduDocument)) {
+                    log.info("NextBest Message received");
+                    client.confirmDownload(request);
+                    Audit.info("Message downloaded", markerFrom(reference).and(eduDocument.createLogstashMarkers()));
+                    if (!properties.getNoarkSystem().getEndpointURL().isEmpty()) {
+                        internalQueue.enqueueNoark(eduDocument);
+                    } else {
+                        nextMoveQueue.enqueueEduDocument(eduDocument);
+                    }
+                    continue;
+                }
+
+                if (!isKvittering(eduDocument)) {
+                    sendReceipt(eduDocument.getMessageInfo());
+                    Audit.info("Delivery receipt sent", eduDocument.createLogstashMarkers());
+                    internalQueue.enqueueNoark(eduDocument);
+                }
+
                 client.confirmDownload(request);
                 Audit.info("Message downloaded", markerFrom(reference).and(eduDocument.createLogstashMarkers()));
-                if (!properties.getNoarkSystem().getEndpointURL().isEmpty()) {
-                    internalQueue.enqueueNoark(eduDocument);
-                } else {
-                    nextMoveQueue.enqueueEduDocument(eduDocument);
+
+                if (isKvittering(eduDocument)) {
+                    JAXBElement<Kvittering> jaxbKvit = (JAXBElement<Kvittering>) eduDocument.getAny();
+                    Audit.info("Message is a receipt", eduDocument.createLogstashMarkers().and(getReceiptTypeMarker
+                            (jaxbKvit.getValue())));
+                    MessageStatus status = statusFromKvittering(jaxbKvit.getValue());
+                    conversationService.registerStatus(eduDocument.getConversationId(), status);
                 }
-                continue;
-            }
-
-            if (!isKvittering(eduDocument)) {
-                sendReceipt(eduDocument.getMessageInfo());
-                Audit.info("Delivery receipt sent", eduDocument.createLogstashMarkers());
-                internalQueue.enqueueNoark(eduDocument);
-            }
-
-            client.confirmDownload(request);
-            Audit.info("Message downloaded", markerFrom(reference).and(eduDocument.createLogstashMarkers()));
-
-            if (isKvittering(eduDocument)) {
-                JAXBElement<Kvittering> jaxbKvit = (JAXBElement<Kvittering>) eduDocument.getAny();
-                Audit.info("Message is a receipt", eduDocument.createLogstashMarkers().and(getReceiptTypeMarker
-                        (jaxbKvit.getValue())));
-                MessageStatus status = statusFromKvittering(jaxbKvit.getValue());
-                conversationService.registerStatus(eduDocument.getConversationId(), status);
+            } catch (Exception e) {
+                log.error("Error during Altinn message polling", e);
             }
         }
     }
