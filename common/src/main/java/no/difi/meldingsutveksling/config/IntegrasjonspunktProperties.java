@@ -197,6 +197,7 @@ public class IntegrasjonspunktProperties {
             private String mode;
             @NotNull
             private String namespace;
+            private String receiptQueue;
         }
 
     }

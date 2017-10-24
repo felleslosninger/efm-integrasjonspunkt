@@ -35,6 +35,7 @@ public class ConversationStrategyFactory {
         if (props.getFeature().isEnableDPE()) {
             strategies.put(ServiceIdentifier.DPE_INNSYN, dpeStrat);
             strategies.put(ServiceIdentifier.DPE_DATA, dpeStrat);
+            strategies.put(ServiceIdentifier.DPE_RECEIPT, dpeStrat);
         }
     }
 

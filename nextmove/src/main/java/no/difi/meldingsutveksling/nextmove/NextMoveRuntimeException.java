@@ -6,6 +6,10 @@ public class NextMoveRuntimeException extends RuntimeException {
         super(e);
     }
 
+    NextMoveRuntimeException(String s) {
+        super(s);
+    }
+
     public NextMoveRuntimeException(String s, Exception e) {
         super(s, e);
     }

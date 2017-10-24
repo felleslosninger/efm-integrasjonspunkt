@@ -7,12 +7,10 @@ import com.microsoft.windowsazure.services.servicebus.ServiceBusConfiguration;
 import com.microsoft.windowsazure.services.servicebus.ServiceBusContract;
 import com.microsoft.windowsazure.services.servicebus.ServiceBusService;
 import com.microsoft.windowsazure.services.servicebus.models.*;
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
-import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.MessageContext;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
@@ -33,6 +31,8 @@ import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.DATA;
+import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.INNSYN;
 
 @Component
 public class NextMoveServiceBus {
@@ -97,10 +97,18 @@ public class NextMoveServiceBus {
             msg = new BrokeredMessage(os.toByteArray());
 
             String queue = NEXTMOVE_QUEUE_PREFIX + resource.getReceiverId();
-            if (ServiceIdentifier.DPE_INNSYN == resource.getServiceIdentifier()) {
-                queue = queue + ServiceBusQueueMode.INNSYN.fullname();
-            } else {
-                queue = queue + ServiceBusQueueMode.DATA.fullname();
+            switch (resource.getServiceIdentifier()) {
+                case DPE_INNSYN:
+                    queue = queue + INNSYN.fullname();
+                    break;
+                case DPE_DATA:
+                    queue = queue + DATA.fullname();
+                    break;
+                case DPE_RECEIPT:
+                    queue = queue + receiptTarget();
+                    break;
+                default:
+                    throw new NextMoveException("ServiceBus has no queue for ServiceIdentifier=" + resource.getServiceIdentifier());
             }
             service.sendMessage(queue, msg);
         } catch (ServiceException | MessageException | JAXBException | IOException e) {
@@ -125,7 +133,7 @@ public class NextMoveServiceBus {
                 if (isNullOrEmpty(msg.getMessageId())) {
                     break;
                 }
-                Audit.info(format("Received message on queue=%s with id=%s", queuePath, msg.getMessageId()));
+                log.debug(format("Received message on queue=%s with id=%s", queuePath, msg.getMessageId()));
 
                 EduDocument eduDocument = ((JAXBElement<EduDocument>) unmarshaller.unmarshal(msg.getBody())).getValue();
                 messages.add(eduDocument);
@@ -155,5 +163,15 @@ public class NextMoveServiceBus {
                 ".servicebus.windows.net"
         );
         return ServiceBusService.create(config);
+    }
+
+    private String receiptTarget() {
+        if (!isNullOrEmpty(props.getNextbest().getServiceBus().getReceiptQueue())) {
+            return props.getNextbest().getServiceBus().getReceiptQueue();
+        }
+        if (INNSYN.fullname().equals(props.getNextbest().getServiceBus().getMode())) {
+            return DATA.fullname();
+        }
+        return INNSYN.fullname();
     }
 }
