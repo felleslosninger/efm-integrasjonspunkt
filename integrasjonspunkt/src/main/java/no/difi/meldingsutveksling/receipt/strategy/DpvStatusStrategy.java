@@ -82,7 +82,7 @@ public class DpvStatusStrategy implements StatusStrategy {
             if (readStatus.isPresent()) {
                 ZonedDateTime readZoned = readStatus.get().getStatusDate().toGregorianCalendar().toZonedDateTime();
                 MessageStatus status = MessageStatus.of(lestStatus, readZoned.toLocalDateTime());
-                conversationService.registerStatus(conversation, status);
+                conversation  = conversationService.registerStatus(conversation, status);
                 conversationService.markFinished(conversation);
             }
         }

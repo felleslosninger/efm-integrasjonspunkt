@@ -1,14 +1,19 @@
 package no.difi.meldingsutveksling.receipt;
 
 import lombok.extern.log4j.Log4j;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
+import org.assertj.core.util.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 import static java.lang.String.format;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPF;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 
 @Component
 @Log4j
@@ -16,39 +21,43 @@ public class ConversationService {
 
     private ConversationRepository repo;
 
+    private static final List<ServiceIdentifier> POLLABLES = Lists.newArrayList(DPV, DPF);
+
     @Autowired
     public ConversationService(ConversationRepository repo) {
         this.repo = repo;
     }
 
-    public void registerStatus(String conversationId, MessageStatus status) {
+    public Optional<Conversation> registerStatus(String conversationId, MessageStatus status) {
         Optional<Conversation> c = repo.findByConversationId(conversationId).stream().findFirst();
         if (c.isPresent()) {
-            registerStatus(c.get(), status);
+            return Optional.of(registerStatus(c.get(), status));
         } else {
             log.warn(format("Conversation with id=%s not found, cannot register receipt status=%s", conversationId, status));
+            return Optional.empty();
         }
     }
 
-    public void registerStatus(Conversation conversation, MessageStatus status) {
+    public Conversation registerStatus(Conversation conversation, MessageStatus status) {
         boolean hasStatus = conversation.getMessageStatuses().stream()
                 .map(MessageStatus::getStatus)
                 .anyMatch(status.getStatus()::equals);
         if (!hasStatus) {
             conversation.addMessageStatus(status);
-            repo.save(conversation);
+
+            if (GenericReceiptStatus.SENDT.toString().equals(status.getStatus()) &&
+                    POLLABLES.contains(conversation.getServiceIdentifier())) {
+                conversation.setPollable(true);
+            }
+            return repo.save(conversation);
         }
+        return conversation;
     }
 
-    public void markFinished(String conversationId) {
-        Optional<Conversation> c = repo.findByConversationId(conversationId).stream().findFirst();
-        c.ifPresent(this::markFinished);
-    }
-
-    public void markFinished(Conversation conversation) {
+    public Conversation markFinished(Conversation conversation) {
         conversation.setFinished(true);
         conversation.setPollable(false);
-        repo.save(conversation);
+        return repo.save(conversation);
     }
 
     public void registerConversation(EDUCore message) {

@@ -58,17 +58,6 @@ public class Conversation {
         this.messageStatuses = Lists.newArrayList();
         this.serviceIdentifier = serviceIdentifier;
         this.lastUpdate = LocalDateTime.now();
-        switch (serviceIdentifier) {
-            case DPV:
-            case DPF:
-                this.pollable = true;
-                break;
-            case DPI:
-            case DPO:
-            default:
-                this.pollable = false;
-                break;
-        }
     }
 
     public static Conversation of(String conversationId,
