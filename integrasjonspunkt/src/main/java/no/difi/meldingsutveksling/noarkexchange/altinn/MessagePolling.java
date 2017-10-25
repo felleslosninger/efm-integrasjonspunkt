@@ -36,6 +36,7 @@ import javax.xml.bind.JAXBElement;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static java.lang.String.format;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
 /**
@@ -128,18 +129,19 @@ public class MessagePolling implements ApplicationContextAware {
         List<FileReference> fileReferences = client.availableFiles(properties.getOrg().getNumber());
 
         if (!fileReferences.isEmpty()) {
-            Audit.info("New message(s) detected");
+            log.debug("New message(s) detected");
         }
 
         for (FileReference reference : fileReferences) {
             try {
                 final DownloadRequest request = new DownloadRequest(reference.getValue(), properties.getOrg().getNumber());
+                log.debug(format("Downloading message with altinnId=%s", reference.getValue()));
                 EduDocument eduDocument = client.download(request);
+                Audit.info(format("Downloaded message with id=%s", eduDocument.getConversationId()), eduDocument.createLogstashMarkers());
 
                 if (isNextMove(eduDocument)) {
-                    log.info("NextBest Message received");
+                    log.debug(format("NextMove message id=%s", eduDocument.getConversationId()));
                     client.confirmDownload(request);
-                    Audit.info("Message downloaded", markerFrom(reference).and(eduDocument.createLogstashMarkers()));
                     if (!properties.getNoarkSystem().getEndpointURL().isEmpty()) {
                         internalQueue.enqueueNoark(eduDocument);
                     } else {
@@ -150,22 +152,22 @@ public class MessagePolling implements ApplicationContextAware {
 
                 if (!isKvittering(eduDocument)) {
                     sendReceipt(eduDocument.getMessageInfo());
-                    Audit.info("Delivery receipt sent", eduDocument.createLogstashMarkers());
+                    log.debug(eduDocument.createLogstashMarkers(), "Delivery receipt sent");
                     internalQueue.enqueueNoark(eduDocument);
                 }
 
                 client.confirmDownload(request);
-                Audit.info("Message downloaded", markerFrom(reference).and(eduDocument.createLogstashMarkers()));
+                log.debug(markerFrom(reference).and(eduDocument.createLogstashMarkers()), "Message confirmed downloaded");
 
                 if (isKvittering(eduDocument)) {
                     JAXBElement<Kvittering> jaxbKvit = (JAXBElement<Kvittering>) eduDocument.getAny();
-                    Audit.info("Message is a receipt", eduDocument.createLogstashMarkers().and(getReceiptTypeMarker
-                            (jaxbKvit.getValue())));
+                    Audit.info(format("Message id=%s is a receipt", eduDocument.getConversationId()),
+                            eduDocument.createLogstashMarkers().and(getReceiptTypeMarker(jaxbKvit.getValue())));
                     MessageStatus status = statusFromKvittering(jaxbKvit.getValue());
                     conversationService.registerStatus(eduDocument.getConversationId(), status);
                 }
             } catch (Exception e) {
-                log.error("Error during Altinn message polling", e);
+                log.error(format("Error during Altinn message polling, message altinnId=%s", reference.getValue()), e);
             }
         }
     }
