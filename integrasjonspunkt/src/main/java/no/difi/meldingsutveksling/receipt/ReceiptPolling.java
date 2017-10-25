@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 import static no.difi.meldingsutveksling.dpi.MeldingsformidlerClient.EMPTY_KVITTERING;
 import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
@@ -65,9 +66,9 @@ public class ReceiptPolling {
                 externalReceipt.auditLog();
                 final String id = externalReceipt.getId();
                 MessageStatus status = externalReceipt.toMessageStatus();
-                conversationService.registerStatus(id, status);
-                if (DpiReceiptStatus.LEST.toString().equals(status.getStatus())) {
-                    conversationService.markFinished(id);
+                Optional<Conversation> c = conversationService.registerStatus(id, status);
+                if (c.isPresent() && DpiReceiptStatus.LEST.toString().equals(status.getStatus())) {
+                    conversationService.markFinished(c.get());
                 }
                 Audit.info("Updated receipt (DPI)", externalReceipt.logMarkers());
                 externalReceipt.confirmReceipt();
