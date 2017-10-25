@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.receipt.Conversation;
+import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -49,6 +50,9 @@ public class MessageOutControllerTest {
 
     @MockBean
     private ConversationResourceRepository repo;
+
+    @MockBean
+    private ConversationService conversationService;
 
     @MockBean
     private ConversationStrategyFactory strategyFactory;
