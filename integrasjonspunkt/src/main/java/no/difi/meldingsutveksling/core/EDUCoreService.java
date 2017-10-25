@@ -10,15 +10,10 @@ import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import no.difi.meldingsutveksling.receipt.Conversation;
-import no.difi.meldingsutveksling.receipt.ConversationRepository;
-import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
@@ -33,7 +28,7 @@ public class EDUCoreService {
     private final EDUCoreSender coreSender;
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final InternalQueue queue;
-    private final ConversationRepository conversationRepository;
+    private final ConversationService conversationService;
 
     @Autowired
     public EDUCoreService(
@@ -41,12 +36,12 @@ public class EDUCoreService {
             EDUCoreSender coreSender,
             ServiceRegistryLookup serviceRegistryLookup,
             InternalQueue queue,
-            ConversationRepository conversationRepository) {
+            ConversationService conversationService) {
         this.properties = properties;
         this.coreSender = coreSender;
         this.serviceRegistryLookup = serviceRegistryLookup;
         this.queue = queue;
-        this.conversationRepository = conversationRepository;
+        this.conversationService = conversationService;
     }
 
     public PutMessageResponseType queueMessage(Message msg) {
@@ -84,7 +79,7 @@ public class EDUCoreService {
     }
 
     private PutMessageResponseType queueMessage(EDUCore message) {
-        createConversation(message);
+        conversationService.registerConversation(message);
         if (properties.getFeature().isEnableQueue()) {
             queue.enqueueExternal(message);
             Audit.info("Message enqueued", EDUCoreMarker.markerFrom(message));
@@ -93,15 +88,6 @@ public class EDUCoreService {
             Audit.info("Queue is disabled", EDUCoreMarker.markerFrom(message));
             return coreSender.sendMessage(message);
         }
-    }
-
-    private void createConversation(EDUCore message) {
-        MessageStatus ms = MessageStatus.of(GenericReceiptStatus.OPPRETTET.toString(), LocalDateTime.now());
-        if (message.getMessageType() == EDUCore.MessageType.APPRECEIPT) {
-            ms.setDescription("AppReceipt");
-        }
-        Conversation conversation = Conversation.of(message, ms);
-        conversationRepository.save(conversation);
     }
 
 }

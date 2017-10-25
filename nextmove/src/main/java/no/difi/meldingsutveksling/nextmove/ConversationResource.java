@@ -31,7 +31,8 @@ import java.util.Optional;
         @JsonSubTypes.Type(value = DpiConversationResource.class, name = "DPI"),
         @JsonSubTypes.Type(value = DpfConversationResource.class, name = "DPF"),
         @JsonSubTypes.Type(value = DpeInnsynConversationResource.class, name = "DPE_INNSYN"),
-        @JsonSubTypes.Type(value = DpeDataConversationResource.class, name = "DPE_DATA")
+        @JsonSubTypes.Type(value = DpeDataConversationResource.class, name = "DPE_DATA"),
+        @JsonSubTypes.Type(value = DpeReceiptConversationResource.class, name = "DPE_RECEIPT")
 })
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -40,7 +41,8 @@ import java.util.Optional;
         DpiConversationResource.class,
         DpfConversationResource.class,
         DpeInnsynConversationResource.class,
-        DpeDataConversationResource.class})
+        DpeDataConversationResource.class,
+        DpeReceiptConversationResource.class})
 public abstract class ConversationResource {
 
     @Id

@@ -7,27 +7,20 @@ import no.difi.meldingsutveksling.receipt.*;
 
 public class FiksStatusStrategy implements StatusStrategy {
     private SvarUtService svarUtService;
-    private ConversationRepository conversationRepository;
+    private ConversationService conversationService;
 
-    public FiksStatusStrategy(SvarUtService svarUtService, ConversationRepository conversationRepository) {
+    public FiksStatusStrategy(SvarUtService svarUtService, ConversationService conversationService) {
         this.svarUtService = svarUtService;
-        this.conversationRepository = conversationRepository;
+        this.conversationService = conversationService;
     }
 
     @Override
     public void checkStatus(Conversation conversation) {
         final MessageStatus messageStatus = svarUtService.getMessageReceipt(conversation);
+        conversationService.registerStatus(conversation, messageStatus);
         if (DpfReceiptStatus.LEST.toString().equals(messageStatus.getStatus())) {
-            conversation.setPollable(false);
-            conversation.setFinished(true);
+            conversationService.markFinished(conversation);
         }
-        boolean hasStatus = conversation.getMessageStatuses().stream()
-                .map(MessageStatus::getStatus)
-                .anyMatch(messageStatus.getStatus()::equals);
-        if (!hasStatus) {
-            conversation.addMessageStatus(messageStatus);
-        }
-        conversationRepository.save(conversation);
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import no.difi.meldingsutveksling.Decryptor;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
@@ -11,6 +12,7 @@ import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
+import no.difi.meldingsutveksling.receipt.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +21,13 @@ import org.springframework.stereotype.Component;
 import javax.xml.bind.DatatypeConverter;
 import java.io.*;
 import java.util.List;
+import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import static java.util.Arrays.asList;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_DATA;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_INNSYN;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 
 @Component
@@ -36,6 +42,12 @@ public class NextMoveQueue {
 
     @Autowired
     private IntegrasjonspunktProperties props;
+
+    @Autowired
+    private ConversationService conversationService;
+
+    @Autowired
+    private ConversationStrategyFactory conversationStrategyFactory;
 
     @Autowired
     public NextMoveQueue(ConversationResourceRepository repo) {
@@ -60,6 +72,11 @@ public class NextMoveQueue {
         }
 
         ConversationResource message = ((Payload) eduDocument.getAny()).getConversation();
+        if (ServiceIdentifier.DPE_RECEIPT.equals(message.getServiceIdentifier())) {
+            log.debug(String.format("Message with id=%s is a receipt", message.getConversationId()));
+            conversationService.registerStatus(message.getConversationId(), MessageStatus.of(GenericReceiptStatus.LEVERT));
+            return;
+        }
 
         message.setFileRefs(Maps.newHashMap());
         message.addFileRef(props.getNextbest().getAsicfile());
@@ -80,7 +97,18 @@ public class NextMoveQueue {
         } catch (IOException e) {
             log.error("Could not write asic container to disc.", e);
         }
+        Conversation c = conversationService.registerConversation(message);
+        conversationService.registerStatus(c, MessageStatus.of(NextmoveReceiptStatus.LEST_FRA_SERVICEBUS));
         Audit.info(String.format("Message with id=%s put on local queue", message.getConversationId()));
+        sendReceipt(message);
+    }
+
+    private void sendReceipt(ConversationResource cr) {
+        if (asList(DPE_INNSYN, DPE_DATA).contains(cr.getServiceIdentifier())) {
+            DpeReceiptConversationResource dpeReceipt = DpeReceiptConversationResource.of(cr);
+            Optional<ConversationStrategy> strategy = conversationStrategyFactory.getStrategy(dpeReceipt);
+            strategy.ifPresent(s -> s.send(dpeReceipt));
+        }
     }
 
     public byte[] decrypt(Payload payload) {

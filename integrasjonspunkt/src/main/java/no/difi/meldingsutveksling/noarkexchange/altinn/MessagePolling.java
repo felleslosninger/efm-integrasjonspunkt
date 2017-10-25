@@ -16,8 +16,7 @@ import no.difi.meldingsutveksling.nextmove.NextMoveQueue;
 import no.difi.meldingsutveksling.nextmove.NextMoveServiceBus;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
-import no.difi.meldingsutveksling.receipt.Conversation;
-import no.difi.meldingsutveksling.receipt.ConversationRepository;
+import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.DpoReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -68,7 +67,7 @@ public class MessagePolling implements ApplicationContextAware {
     ServiceRegistryLookup serviceRegistryLookup;
 
     @Autowired
-    ConversationRepository conversationRepository;
+    ConversationService conversationService;
 
     @Autowired
     ObjectProvider<List<MessageDownloaderModule>> messageDownloaders;
@@ -163,15 +162,7 @@ public class MessagePolling implements ApplicationContextAware {
                     Audit.info("Message is a receipt", eduDocument.createLogstashMarkers().and(getReceiptTypeMarker
                             (jaxbKvit.getValue())));
                     MessageStatus status = statusFromKvittering(jaxbKvit.getValue());
-                    Conversation conversation = conversationRepository.findByConversationId(eduDocument.getConversationId())
-                            .stream()
-                            .findFirst()
-                            .orElse(Conversation.of(eduDocument.getConversationId(),
-                                    "unknown", eduDocument
-                                            .getReceiverOrgNumber(),
-                                    "unknown", ServiceIdentifier.DPO));
-                    conversation.addMessageStatus(status);
-                    conversationRepository.save(conversation);
+                    conversationService.registerStatus(eduDocument.getConversationId(), status);
                 }
             } catch (Exception e) {
                 log.error("Error during Altinn message polling", e);
@@ -193,7 +184,7 @@ public class MessagePolling implements ApplicationContextAware {
     private MessageStatus statusFromKvittering(Kvittering kvittering) {
         DpoReceiptStatus status = DpoReceiptStatus.of(kvittering);
         LocalDateTime tidspunkt = kvittering.getTidspunkt().toGregorianCalendar().toZonedDateTime().toLocalDateTime();
-        return MessageStatus.of(status.toString(), tidspunkt);
+        return MessageStatus.of(status, tidspunkt);
     }
 
     private boolean isKvittering(EduDocument eduDocument) {

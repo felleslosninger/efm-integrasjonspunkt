@@ -15,8 +15,7 @@ import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
-import no.difi.meldingsutveksling.receipt.Conversation;
-import no.difi.meldingsutveksling.receipt.ConversationRepository;
+import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
@@ -34,8 +33,6 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.time.LocalDateTime;
-import java.util.Optional;
 
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
@@ -69,7 +66,7 @@ public class InternalQueue {
     private EDUCoreSender eduCoreSender;
 
     @Autowired
-    private ConversationRepository conversationRepository;
+    private ConversationService conversationService;
 
     private static JAXBContext jaxbContextdomain;
     private static JAXBContext jaxbContext;
@@ -117,15 +114,15 @@ public class InternalQueue {
      */
     @JmsListener(destination = DLQ)
     public void dlqListener(byte[] message, Session session) {
-        MessageStatus ms = MessageStatus.of(GenericReceiptStatus.FEIL.toString(), LocalDateTime.now());
-        Optional<Conversation> conv = Optional.empty();
+        MessageStatus ms = MessageStatus.of(GenericReceiptStatus.FEIL);
+        String conversationId = "";
         String errorMsg = "";
 
         try {
             EDUCore request = EDUCoreConverter.unmarshallFrom(message);
             errorMsg = "Failed to send message. Moved to DLQ";
             Audit.error(errorMsg, EDUCoreMarker.markerFrom(request));
-            conv = conversationRepository.findByConversationId(request.getId()).stream().findFirst();
+            conversationId = request.getId();
         } catch (Exception e) {
         }
 
@@ -133,13 +130,12 @@ public class InternalQueue {
             EduDocument eduDocument = documentConverter.unmarshallFrom(message);
             errorMsg = "Failed to forward message. Moved to DLQ.";
             Audit.error(errorMsg, eduDocument.createLogstashMarkers());
-            conv = conversationRepository.findByConversationId(eduDocument.getConversationId()).stream().findFirst();
+            conversationId = eduDocument.getConversationId();
         } catch (Exception e) {
         }
 
         ms.setDescription(errorMsg);
-        conv.ifPresent(c -> c.addMessageStatus(ms));
-        conv.ifPresent(conversationRepository::save);
+        conversationService.registerStatus(conversationId, ms);
     }
 
     /**

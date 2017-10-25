@@ -6,6 +6,10 @@ public class NextMoveException extends Exception {
         super(e);
     }
 
+    NextMoveException(String s) {
+        super(s);
+    }
+
     public NextMoveException(String s, Exception e) {
         super(s, e);
     }

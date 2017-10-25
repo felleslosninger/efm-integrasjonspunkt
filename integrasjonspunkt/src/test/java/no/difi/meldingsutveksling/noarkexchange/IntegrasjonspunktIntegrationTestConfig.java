@@ -12,10 +12,7 @@ import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
 import no.difi.meldingsutveksling.KeystoreProvider;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
-import no.difi.meldingsutveksling.receipt.ConversationRepository;
-import no.difi.meldingsutveksling.receipt.DpiReceiptService;
-import no.difi.meldingsutveksling.receipt.ReceiptPolling;
-import no.difi.meldingsutveksling.receipt.StatusStrategyFactory;
+import no.difi.meldingsutveksling.receipt.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
@@ -166,6 +163,12 @@ public class IntegrasjonspunktIntegrationTestConfig {
     @Primary
     public RestClient restClient() {
         return mock(RestClient.class);
+    }
+
+    @Bean
+    @Primary
+    public ConversationService conversationService() {
+        return mock(ConversationService.class);
     }
 
     @Bean
