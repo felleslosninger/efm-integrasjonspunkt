@@ -45,6 +45,8 @@ class FiksMessageStrategy implements MessageStrategy {
             PutMessageRequestType putMessage = EDUCoreFactory.createPutMessageFromCore(request);
             noarkClient.sendEduMelding(putMessage);
             request.setPayload(oldPayload);
+            request.setMessageType(EDUCore.MessageType.EDU);
+            request.swapSenderAndReceiver();
         }
 
 
