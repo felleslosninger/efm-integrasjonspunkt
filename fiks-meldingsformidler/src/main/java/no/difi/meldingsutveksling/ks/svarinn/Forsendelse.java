@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.ks.svarinn;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class Forsendelse {
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class MetadataFraAvleverendeSystem {
         private int sakssekvensnummer;
         private int saksaar;
@@ -34,7 +36,6 @@ public class Forsendelse {
         private String dokumentetsDato;
         private String tittel;
         private String saksBehandler;
-        private List<String> ekstraMetadata;
     }
 
     @Data
