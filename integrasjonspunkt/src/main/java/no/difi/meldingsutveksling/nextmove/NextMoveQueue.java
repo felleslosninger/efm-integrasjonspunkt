@@ -99,7 +99,8 @@ public class NextMoveQueue {
         }
         Conversation c = conversationService.registerConversation(message);
         conversationService.registerStatus(c, MessageStatus.of(NextmoveReceiptStatus.LEST_FRA_SERVICEBUS));
-        Audit.info(String.format("Message with id=%s put on local queue", message.getConversationId()));
+        Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] put on local queue",
+                message.getConversationId(), message.getServiceIdentifier()));
         sendReceipt(message);
     }
 
