@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.ptv;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import no.altinn.schemas.serviceengine.formsengine._2009._10.TransportType;
 import no.altinn.schemas.services.serviceengine.correspondence._2010._10.AttachmentsV2;
@@ -29,7 +28,12 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.File;
 import java.io.IOException;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Class used to create an InsertCorrespondenceV2 object based on an internal message format.
@@ -84,8 +88,8 @@ public class CorrespondenceAgencyMessageFactory {
             attachmentExternalBEV2List.getBinaryAttachmentV2().add(binaryAttachmentV2);
         }
 
-        return create(config, cr.getConversationId(), cr.getReceiverId(), cr.getReceiverName(),
-                cr.getMessageTitle(), cr.getMessageContent(), attachmentExternalBEV2List);
+        return create(config, cr.getConversationId(), cr.getReceiverId(), cr.getMessageTitle(),
+                cr.getMessageContent(), attachmentExternalBEV2List);
     }
 
     public static InsertCorrespondenceV2 create(CorrespondenceAgencyConfiguration config, EDUCore edu) {
@@ -106,14 +110,12 @@ public class CorrespondenceAgencyMessageFactory {
         String title = meldingType.getJournpost().getJpInnhold();
         String content = meldingType.getJournpost().getJpOffinnhold();
 
-        return create(config, edu.getId(), edu.getReceiver().getIdentifier(), edu.getReceiver().getName(), title,
-                content, attachmentExternalBEV2List);
+        return create(config, edu.getId(), edu.getReceiver().getIdentifier(), title, content, attachmentExternalBEV2List);
     }
 
     public static InsertCorrespondenceV2 create(CorrespondenceAgencyConfiguration config,
                                                 String conversationId,
                                                 String receiverIdentifier,
-                                                String receiverName,
                                                 String messageTitle,
                                                 String messageContent,
                                                 BinaryAttachmentExternalBEV2List attachments) {
@@ -152,7 +154,7 @@ public class CorrespondenceAgencyMessageFactory {
         externalContentV2.setAttachments(objectFactory.createExternalContentV2Attachments(attachmentsV2));
         correspondence.setContent(objectFactory.createMyInsertCorrespondenceV2Content(externalContentV2));
 
-        List<Notification2009> notificationList = createNotifications(config, receiverName);
+        List<Notification2009> notificationList = createNotifications(config);
 
         NotificationBEList notifications = new NotificationBEList();
         List<Notification2009> notification = notifications.getNotification();
@@ -169,89 +171,46 @@ public class CorrespondenceAgencyMessageFactory {
         return myInsertCorrespondenceV2;
     }
 
-    private static List<Notification2009> createNotifications(CorrespondenceAgencyConfiguration config, String receiverName) {
+    private static List<Notification2009> createNotifications(CorrespondenceAgencyConfiguration config) {
 
         List<Notification2009> notifications = Lists.newArrayList();
 
         if (config.isNotifyEmail() && config.isNotifySms()) {
-            notifications.add(createNotification(config, receiverName, TransportType.EMAIL, 0));
-            notifications.add(createNotification(config, receiverName, TransportType.EMAIL, 7));
-            notifications.add(createNotification(config, receiverName, TransportType.SMS, 0));
-            notifications.add(createNotification(config, receiverName, TransportType.SMS, 7));
+            notifications.add(createNotification(config, TransportType.BOTH));
         } else if (config.isNotifySms()) {
-            notifications.add(createNotification(config, receiverName, TransportType.SMS, 0));
-            notifications.add(createNotification(config, receiverName, TransportType.SMS, 7));
+            notifications.add(createNotification(config, TransportType.SMS));
         } else if (config.isNotifyEmail()){
-            notifications.add(createNotification(config, receiverName, TransportType.EMAIL, 0));
-            notifications.add(createNotification(config, receiverName, TransportType.EMAIL, 7));
-        } else {
-            notifications.add(createNotification(config, receiverName, null, 0));
-            notifications.add(createNotification(config, receiverName, null, 7));
+            notifications.add(createNotification(config, TransportType.EMAIL));
         }
 
         return notifications;
     }
 
-    private static Notification2009 createNotification(CorrespondenceAgencyConfiguration config, String receiverName,
-                                                       TransportType type, int delayInDays) {
+    private static Notification2009 createNotification(CorrespondenceAgencyConfiguration config, TransportType type) {
 
         Notification2009 notification = new Notification2009();
         no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory notificationFactory = new no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory();
         notification.setFromAddress(notificationFactory.createNotification2009FromAddress("no-reply@altinn.no"));
         // The date and time the notification should be sent
-        if (delayInDays == 0) {
-            notification.setShipmentDateTime(toXmlGregorianCalendar(ZonedDateTime.now().plusMinutes(5)));
-        } else {
-            notification.setShipmentDateTime(toXmlGregorianCalendar(ZonedDateTime.now().plusDays(delayInDays)));
-        }
+        notification.setShipmentDateTime(toXmlGregorianCalendar(ZonedDateTime.now().plusMinutes(5)));
         // Language code of the notification
         notification.setLanguageCode(notificationFactory.createNotification2009LanguageCode("1044"));
         // Notification type
-        if (type == null) {
-            notification.setNotificationType(notificationFactory.createNotification2009NotificationType("offentlig_etat"));
-            notification.setTextTokens(notificationFactory.createNotification2009TextTokens(createTokens(config, null,
-                    receiverName)));
-            JAXBElement<ReceiverEndPointBEList> receiverEndpoints = createReceiverEndPoint(TransportType.EMAIL);
-            notification.setReceiverEndPoints(receiverEndpoints);
-        } else {
-            notification.setNotificationType(notificationFactory.createNotification2009NotificationType("TokenTextOnly"));
-            notification.setTextTokens(notificationFactory.createNotification2009TextTokens(createTokens(config, type,
-                    receiverName)));
-            JAXBElement<ReceiverEndPointBEList> receiverEndpoints = createReceiverEndPoint(type);
-            notification.setReceiverEndPoints(receiverEndpoints);
-        }
+        notification.setNotificationType(notificationFactory.createNotification2009NotificationType("VarselDPVMedRevarsel"));
+        notification.setTextTokens(notificationFactory.createNotification2009TextTokens(createTokens(config)));
+        JAXBElement<ReceiverEndPointBEList> receiverEndpoints = createReceiverEndPoint(type);
+        notification.setReceiverEndPoints(receiverEndpoints);
 
         return notification;
     }
 
-    private static TextTokenSubstitutionBEList createTokens(CorrespondenceAgencyConfiguration config,
-                                                                TransportType type,
-                                                                String receiverName) {
+    private static TextTokenSubstitutionBEList createTokens(CorrespondenceAgencyConfiguration config) {
 
         TextTokenSubstitutionBEList tokens = new TextTokenSubstitutionBEList();
-
-        if (type == null) {
-            tokens.getTextToken().add(createTextToken(0, config.getSender()));
-            tokens.getTextToken().add(createTextToken(1, serviceEditionMapping.get(Integer.valueOf(getServiceEditionCode
-                    (config).getValue()))));
-            tokens.getTextToken().add(createTextToken(2, receiverName));
-            return tokens;
-        }
-
-        switch (type) {
-            case EMAIL:
-                tokens.getTextToken().add(createTextToken(0, config.getEmailSubject()));
-                tokens.getTextToken().add(createTextToken(1, config.getEmailBody()));
-                break;
-            case SMS:
-                tokens.getTextToken().add(createTextToken(0, config.getSmsText()));
-                tokens.getTextToken().add(createTextToken(1, ""));
-                break;
-            default:
-                tokens.getTextToken().add(createTextToken(0, config.getSender()));
-                tokens.getTextToken().add(createTextToken(1, serviceEditionMapping.get(Integer.valueOf(getServiceEditionCode
-                        (config).getValue()))));
-                tokens.getTextToken().add(createTextToken(2, receiverName));
+        if (!isNullOrEmpty(config.getNotificationText())) {
+            tokens.getTextToken().add(createTextToken(1, config.getNotificationText()));
+        } else {
+            tokens.getTextToken().add(createTextToken(1, String.format("Du har mottatt en melding fra %s.", config.getSender())));
         }
 
         return tokens;
@@ -282,14 +241,14 @@ public class CorrespondenceAgencyMessageFactory {
 
     private static JAXBElement<String> getServiceCode(CorrespondenceAgencyConfiguration postConfig) {
         String serviceCodeProp= postConfig.getExternalServiceCode();
-        String serviceCode= !Strings.isNullOrEmpty(serviceCodeProp) ? serviceCodeProp : "4255";
+        String serviceCode= !isNullOrEmpty(serviceCodeProp) ? serviceCodeProp : "4255";
         ObjectFactory objectFactory = new ObjectFactory();
         return objectFactory.createMyInsertCorrespondenceV2ServiceCode(serviceCode);
     }
 
     private static JAXBElement<String> getServiceEditionCode(CorrespondenceAgencyConfiguration postConfig) {
         String serviceEditionProp = postConfig.getExternalServiceEditionCode();
-        String serviceEdition = !Strings.isNullOrEmpty(serviceEditionProp) ? serviceEditionProp : "10";
+        String serviceEdition = !isNullOrEmpty(serviceEditionProp) ? serviceEditionProp : "10";
         ObjectFactory objectFactory = new ObjectFactory();
         return objectFactory.createMyInsertCorrespondenceV2ServiceEdition(serviceEdition);
     }
