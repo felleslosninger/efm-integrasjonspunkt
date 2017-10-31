@@ -126,7 +126,7 @@ public class MessagePolling implements ApplicationContextAware {
         AltinnWsConfiguration configuration = AltinnWsConfiguration.fromConfiguration(serviceRecord, context);
         AltinnWsClient client = new AltinnWsClient(configuration);
 
-        List<FileReference> fileReferences = client.availableFiles(properties.getOrg().getNumber());
+        List<FileReference> fileReferences = client.availableFiles(serviceRecord);
 
         if (!fileReferences.isEmpty()) {
             log.debug("New message(s) detected");
