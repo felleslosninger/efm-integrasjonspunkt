@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.*;
+import no.difi.meldingsutveksling.altinn.mock.brokerbasic.ObjectFactory;
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.*;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -15,6 +16,7 @@ import no.difi.meldingsutveksling.shipping.ws.RecipientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.soap.MTOMFeature;
@@ -90,7 +92,7 @@ public class AltinnWsClient {
     }
 
 
-    public List<FileReference> availableFiles(String partyNumber) {
+    public List<FileReference> availableFiles(String orgnr) {
 
         BrokerServiceExternalBasicSF brokerServiceExternalBasicSF;
         brokerServiceExternalBasicSF = new BrokerServiceExternalBasicSF(configuration.getBrokerServiceUrl());
@@ -100,7 +102,11 @@ public class AltinnWsClient {
 
         BrokerServiceSearch searchParameters = new BrokerServiceSearch();
         searchParameters.setFileStatus(BrokerServiceAvailableFileStatus.UPLOADED);
-        searchParameters.setReportee(partyNumber);
+        searchParameters.setReportee(orgnr);
+        ObjectFactory of = new ObjectFactory();
+        JAXBElement<String> serviceCode = of.createBrokerServiceAvailableFileExternalServiceCode(configuration.getExternalServiceCode());
+        searchParameters.setExternalServiceCode(serviceCode);
+        searchParameters.setExternalServiceEditionCode(configuration.getExternalServiceEditionCode());
 
         BrokerServiceAvailableFileList filesBasic;
         try {
