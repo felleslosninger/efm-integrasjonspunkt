@@ -8,7 +8,6 @@ import no.difi.meldingsutveksling.altinn.mock.brokerbasic.ObjectFactory;
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.*;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.shipping.ws.AltinnReasonFactory;
 import no.difi.meldingsutveksling.shipping.ws.AltinnWsException;
@@ -93,7 +92,7 @@ public class AltinnWsClient {
     }
 
 
-    public List<FileReference> availableFiles(ServiceRecord sr) {
+    public List<FileReference> availableFiles(String orgnr) {
 
         BrokerServiceExternalBasicSF brokerServiceExternalBasicSF;
         brokerServiceExternalBasicSF = new BrokerServiceExternalBasicSF(configuration.getBrokerServiceUrl());
@@ -103,11 +102,11 @@ public class AltinnWsClient {
 
         BrokerServiceSearch searchParameters = new BrokerServiceSearch();
         searchParameters.setFileStatus(BrokerServiceAvailableFileStatus.UPLOADED);
-        searchParameters.setReportee(sr.getOrganisationNumber());
+        searchParameters.setReportee(orgnr);
         ObjectFactory of = new ObjectFactory();
-        JAXBElement<String> serviceCode = of.createBrokerServiceAvailableFileExternalServiceCode(sr.getServiceCode());
+        JAXBElement<String> serviceCode = of.createBrokerServiceAvailableFileExternalServiceCode(configuration.getExternalServiceCode());
         searchParameters.setExternalServiceCode(serviceCode);
-        searchParameters.setExternalServiceEditionCode(Integer.valueOf(sr.getServiceEditionCode()));
+        searchParameters.setExternalServiceEditionCode(configuration.getExternalServiceEditionCode());
 
         BrokerServiceAvailableFileList filesBasic;
         try {
