@@ -7,13 +7,10 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.core.io.Resource;
 
 import javax.validation.Valid;
-import javax.validation.constraints.AssertFalse;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.net.URL;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Configurable properties for Integrasjonspunkt.
@@ -110,22 +107,9 @@ public class IntegrasjonspunktProperties {
         private URL endpointUrl;
         private String externalServiceCode;
         private String externalServiceEditionCode;
-        private Sms sms;
-        @Valid
-        private Email email;
-
-        @Data
-        public static class Email {
-            @Size(max=500)
-            private String varslingstekst;
-            private String emne;
-
-            @AssertFalse(message = "Both \"varslingstekst\" and \"emne\" must be set, if either has a value.")
-            public boolean isValidVarsling() {
-                return isNullOrEmpty(varslingstekst) ^ isNullOrEmpty(emne);
-            }
-
-        }
+        private boolean notifyEmail;
+        private boolean notifySms;
+        private String notificationText;
 
     }
 
