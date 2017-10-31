@@ -8,9 +8,7 @@ public class CorrespondenceAgencyConfiguration {
     private String systemUserCode;
     private boolean notifyEmail;
     private boolean notifySms;
-    private String smsText;
-    private String emailSubject;
-    private String emailBody;
+    private String notificationText;
     private String sender;
     private String nextbestFiledir;
     private String endpointUrl;
@@ -42,16 +40,8 @@ public class CorrespondenceAgencyConfiguration {
         return notifySms;
     }
 
-    public String getSmsText() {
-        return smsText;
-    }
-
-    public String getEmailSubject() {
-        return emailSubject;
-    }
-
-    public String getEmailBody() {
-        return emailBody;
+    public String getNotificationText() {
+        return notificationText;
     }
 
     public String getSender() {
@@ -94,21 +84,18 @@ public class CorrespondenceAgencyConfiguration {
             return this;
         }
 
-        public Builder withSmsText(String smsText) {
-            correspondenceAgencyConfiguration.smsText = smsText;
-            correspondenceAgencyConfiguration.notifySms = true;
+        public Builder withNotifyEmail(boolean notifyEmail) {
+            correspondenceAgencyConfiguration.notifyEmail = notifyEmail;
             return this;
         }
 
-        public Builder withEmailSubject(String emailSubject) {
-            correspondenceAgencyConfiguration.emailSubject = emailSubject;
-            correspondenceAgencyConfiguration.notifyEmail = true;
+        public Builder withNotifySms(boolean notifySms) {
+            correspondenceAgencyConfiguration.notifySms = notifySms;
             return this;
         }
 
-        public Builder withEmailBody(String emailBody) {
-            correspondenceAgencyConfiguration.emailBody = emailBody;
-            correspondenceAgencyConfiguration.notifyEmail = true;
+        public Builder withNotificationText(String notificationText) {
+            correspondenceAgencyConfiguration.notificationText = notificationText;
             return this;
         }
 
