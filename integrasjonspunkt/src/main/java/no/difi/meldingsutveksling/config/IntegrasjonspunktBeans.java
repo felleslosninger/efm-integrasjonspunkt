@@ -14,10 +14,7 @@ import no.difi.meldingsutveksling.noarkexchange.putmessage.FiksMessageStrategyFa
 import no.difi.meldingsutveksling.KeystoreProvider;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
-import no.difi.meldingsutveksling.receipt.ConversationRepository;
-import no.difi.meldingsutveksling.receipt.DpiReceiptService;
-import no.difi.meldingsutveksling.receipt.StatusStrategy;
-import no.difi.meldingsutveksling.receipt.StatusStrategyFactory;
+import no.difi.meldingsutveksling.receipt.*;
 import no.difi.meldingsutveksling.receipt.strategy.FiksStatusStrategy;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.services.Adresseregister;
@@ -86,8 +83,8 @@ public class IntegrasjonspunktBeans {
 
     @ConditionalOnProperty(name="difi.move.feature.enableDPF", havingValue = "true")
     @Bean
-    public FiksStatusStrategy fiksConversationStrategy(SvarUtService svarUtService, ConversationRepository conversationRepository) {
-        return new FiksStatusStrategy(svarUtService, conversationRepository);
+    public FiksStatusStrategy fiksConversationStrategy(SvarUtService svarUtService, ConversationService conversationService) {
+        return new FiksStatusStrategy(svarUtService, conversationService);
     }
 
     @Bean

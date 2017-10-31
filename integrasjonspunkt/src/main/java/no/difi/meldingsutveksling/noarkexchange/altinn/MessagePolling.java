@@ -16,8 +16,7 @@ import no.difi.meldingsutveksling.nextmove.NextMoveQueue;
 import no.difi.meldingsutveksling.nextmove.NextMoveServiceBus;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
-import no.difi.meldingsutveksling.receipt.Conversation;
-import no.difi.meldingsutveksling.receipt.ConversationRepository;
+import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.DpoReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -37,6 +36,7 @@ import javax.xml.bind.JAXBElement;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static java.lang.String.format;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
 /**
@@ -68,7 +68,7 @@ public class MessagePolling implements ApplicationContextAware {
     ServiceRegistryLookup serviceRegistryLookup;
 
     @Autowired
-    ConversationRepository conversationRepository;
+    ConversationService conversationService;
 
     @Autowired
     ObjectProvider<List<MessageDownloaderModule>> messageDownloaders;
@@ -129,18 +129,19 @@ public class MessagePolling implements ApplicationContextAware {
         List<FileReference> fileReferences = client.availableFiles(properties.getOrg().getNumber());
 
         if (!fileReferences.isEmpty()) {
-            Audit.info("New message(s) detected");
+            log.debug("New message(s) detected");
         }
 
         for (FileReference reference : fileReferences) {
             try {
                 final DownloadRequest request = new DownloadRequest(reference.getValue(), properties.getOrg().getNumber());
+                log.debug(format("Downloading message with altinnId=%s", reference.getValue()));
                 EduDocument eduDocument = client.download(request);
+                Audit.info(format("Downloaded message with id=%s", eduDocument.getConversationId()), eduDocument.createLogstashMarkers());
 
                 if (isNextMove(eduDocument)) {
-                    log.info("NextBest Message received");
+                    log.debug(format("NextMove message id=%s", eduDocument.getConversationId()));
                     client.confirmDownload(request);
-                    Audit.info("Message downloaded", markerFrom(reference).and(eduDocument.createLogstashMarkers()));
                     if (!properties.getNoarkSystem().getEndpointURL().isEmpty()) {
                         internalQueue.enqueueNoark(eduDocument);
                     } else {
@@ -151,30 +152,22 @@ public class MessagePolling implements ApplicationContextAware {
 
                 if (!isKvittering(eduDocument)) {
                     sendReceipt(eduDocument.getMessageInfo());
-                    Audit.info("Delivery receipt sent", eduDocument.createLogstashMarkers());
+                    log.debug(eduDocument.createLogstashMarkers(), "Delivery receipt sent");
                     internalQueue.enqueueNoark(eduDocument);
                 }
 
                 client.confirmDownload(request);
-                Audit.info("Message downloaded", markerFrom(reference).and(eduDocument.createLogstashMarkers()));
+                log.debug(markerFrom(reference).and(eduDocument.createLogstashMarkers()), "Message confirmed downloaded");
 
                 if (isKvittering(eduDocument)) {
                     JAXBElement<Kvittering> jaxbKvit = (JAXBElement<Kvittering>) eduDocument.getAny();
-                    Audit.info("Message is a receipt", eduDocument.createLogstashMarkers().and(getReceiptTypeMarker
-                            (jaxbKvit.getValue())));
+                    Audit.info(format("Message id=%s is a receipt", eduDocument.getConversationId()),
+                            eduDocument.createLogstashMarkers().and(getReceiptTypeMarker(jaxbKvit.getValue())));
                     MessageStatus status = statusFromKvittering(jaxbKvit.getValue());
-                    Conversation conversation = conversationRepository.findByConversationId(eduDocument.getConversationId())
-                            .stream()
-                            .findFirst()
-                            .orElse(Conversation.of(eduDocument.getConversationId(),
-                                    "unknown", eduDocument
-                                            .getReceiverOrgNumber(),
-                                    "unknown", ServiceIdentifier.DPO));
-                    conversation.addMessageStatus(status);
-                    conversationRepository.save(conversation);
+                    conversationService.registerStatus(eduDocument.getConversationId(), status);
                 }
             } catch (Exception e) {
-                log.error("Error during Altinn message polling", e);
+                log.error(format("Error during Altinn message polling, message altinnId=%s", reference.getValue()), e);
             }
         }
     }
@@ -193,7 +186,7 @@ public class MessagePolling implements ApplicationContextAware {
     private MessageStatus statusFromKvittering(Kvittering kvittering) {
         DpoReceiptStatus status = DpoReceiptStatus.of(kvittering);
         LocalDateTime tidspunkt = kvittering.getTidspunkt().toGregorianCalendar().toZonedDateTime().toLocalDateTime();
-        return MessageStatus.of(status.toString(), tidspunkt);
+        return MessageStatus.of(status, tidspunkt);
     }
 
     private boolean isKvittering(EduDocument eduDocument) {

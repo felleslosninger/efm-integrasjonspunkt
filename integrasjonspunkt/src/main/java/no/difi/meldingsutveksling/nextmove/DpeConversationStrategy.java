@@ -43,7 +43,8 @@ public class DpeConversationStrategy implements ConversationStrategy {
             log.error("Send message failed.", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error during sending. Check logs");
         }
-        Audit.info(format("Message with id=%s sent to service bus", conversationResource.getConversationId()),
+        Audit.info(format("Message [id=%s, serviceIdentifier=%s] sent to service bus",
+                conversationResource.getConversationId(), conversationResource.getServiceIdentifier()),
                 markerFrom(conversationResource));
 
         return ResponseEntity.ok().build();

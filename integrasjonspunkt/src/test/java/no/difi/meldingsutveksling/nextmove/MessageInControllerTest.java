@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.io.FileUtils;
@@ -37,6 +38,9 @@ public class MessageInControllerTest {
 
     @MockBean
     private ConversationResourceRepository repo;
+
+    @MockBean
+    private ConversationService conversationService;
 
     @MockBean
     private ServiceRegistryLookup sr;

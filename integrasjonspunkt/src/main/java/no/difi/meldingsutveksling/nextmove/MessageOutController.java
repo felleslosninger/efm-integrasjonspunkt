@@ -8,6 +8,9 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
+import no.difi.meldingsutveksling.receipt.ConversationService;
+import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
+import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -68,6 +71,9 @@ public class MessageOutController {
 
     @Autowired
     private ConversationStrategyFactory strategyFactory;
+
+    @Autowired
+    private ConversationService conversationService;
 
     @Autowired
     public MessageOutController(ConversationResourceRepository repo) {
@@ -143,7 +149,9 @@ public class MessageOutController {
 
         setDefaults(cr);
         outRepo.save(cr);
-        log.info(markerFrom(cr), "Created new conversation resource with id={}", cr.getConversationId());
+        conversationService.registerConversation(cr);
+        log.info(markerFrom(cr), "Created new conversation resource [id={}, serviceIdentifier={}]",
+                cr.getConversationId(), cr.getServiceIdentifier());
 
         return ResponseEntity.ok(cr);
     }
@@ -243,6 +251,7 @@ public class MessageOutController {
         }
         ResponseEntity response = strategy.get().send(cr);
         if (response.getStatusCode() == HttpStatus.OK) {
+            conversationService.registerStatus(cr.getConversationId(), MessageStatus.of(GenericReceiptStatus.SENDT));
             outRepo.delete(cr);
         }
         return response;

@@ -13,7 +13,7 @@ import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-import no.difi.meldingsutveksling.receipt.ConversationRepository;
+import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -53,7 +53,7 @@ public class IntegrasjonspunktImplTest {
     @Mock
     private Adresseregister adresseregister;
     @Mock
-    private ConversationRepository conversationRepository;
+    private ConversationService conversationService;
 
     @Before
     public void setUp() {

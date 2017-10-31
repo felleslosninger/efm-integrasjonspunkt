@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 import static no.difi.meldingsutveksling.dpi.MeldingsformidlerClient.EMPTY_KVITTERING;
 import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
@@ -29,6 +30,9 @@ public class ReceiptPolling {
 
     @Autowired
     private ConversationRepository conversationRepository;
+
+    @Autowired
+    private ConversationService conversationService;
 
     @Autowired
     StatusStrategyFactory statusStrategyFactory;
@@ -61,13 +65,11 @@ public class ReceiptPolling {
             if (externalReceipt != EMPTY_KVITTERING) {
                 externalReceipt.auditLog();
                 final String id = externalReceipt.getId();
-                Conversation conversation = conversationRepository.findByConversationId(id).stream().findFirst().orElseGet(externalReceipt::createConversation);
                 MessageStatus status = externalReceipt.toMessageStatus();
-                conversation.addMessageStatus(status);
-                if (DpiReceiptStatus.LEST.toString().equals(status.getStatus())) {
-                    conversation.setFinished(true);
+                Optional<Conversation> c = conversationService.registerStatus(id, status);
+                if (c.isPresent() && DpiReceiptStatus.LEST.toString().equals(status.getStatus())) {
+                    conversationService.markFinished(c.get());
                 }
-                conversationRepository.save(conversation);
                 Audit.info("Updated receipt (DPI)", externalReceipt.logMarkers());
                 externalReceipt.confirmReceipt();
                 Audit.info("Confirmed receipt (DPI)", externalReceipt.logMarkers());

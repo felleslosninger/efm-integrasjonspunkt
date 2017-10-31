@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.MessageContextException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -44,7 +45,9 @@ public class DpoConversationStrategy implements ConversationStrategy {
             log.error("Send message failed.", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error during sending. Check logs");
         }
-        log.info(markerFrom(conversationResource), "Message sent to altinn");
+        Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] sent to altinn",
+                conversationResource.getConversationId(), conversationResource.getServiceIdentifier()),
+                markerFrom(conversationResource));
 
         return ResponseEntity.ok().build();
     }

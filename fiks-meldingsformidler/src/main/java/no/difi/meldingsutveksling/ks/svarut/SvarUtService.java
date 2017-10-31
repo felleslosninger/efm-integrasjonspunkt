@@ -11,7 +11,6 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 
 import java.security.cert.X509Certificate;
-import java.time.LocalDateTime;
 
 public class SvarUtService {
     private SvarUtWebServiceClient client;
@@ -43,7 +42,7 @@ public class SvarUtService {
 
         final ForsendelseStatus forsendelseStatus = client.getForsendelseStatus(serviceRecord.getEndPointURL(), forsendelseId);
         final DpfReceiptStatus receiptStatus = fiksMapper.mapFrom(forsendelseStatus);
-        return MessageStatus.of(receiptStatus.toString(), LocalDateTime.now());
+        return MessageStatus.of(receiptStatus);
     }
 
     private X509Certificate toX509Certificate(String pemCertificate) {

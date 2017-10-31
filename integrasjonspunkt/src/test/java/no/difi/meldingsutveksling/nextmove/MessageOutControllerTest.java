@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.receipt.Conversation;
-import no.difi.meldingsutveksling.receipt.ConversationRepository;
+import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -52,6 +52,9 @@ public class MessageOutControllerTest {
     private ConversationResourceRepository repo;
 
     @MockBean
+    private ConversationService conversationService;
+
+    @MockBean
     private ConversationStrategyFactory strategyFactory;
 
     @MockBean
@@ -59,9 +62,6 @@ public class MessageOutControllerTest {
 
     @MockBean
     private IntegrasjonspunktProperties props;
-
-    @MockBean
-    private ConversationRepository crepo;
 
     @MockBean
     private MessageSender messageSender;
@@ -95,12 +95,11 @@ public class MessageOutControllerTest {
         InfoRecord bazInfo = new InfoRecord("3", "baz", new EntityType("org", "org"));
         when(sr.getInfoRecord("3")).thenReturn(bazInfo);
 
-        MessageStatus receiptSent = MessageStatus.of(GenericReceiptStatus.SENDT.toString(), LocalDateTime.now());
-        MessageStatus receiptDelivered = MessageStatus.of(GenericReceiptStatus.LEVERT.toString(),
+        MessageStatus receiptSent = MessageStatus.of(GenericReceiptStatus.SENDT);
+        MessageStatus receiptDelivered = MessageStatus.of(GenericReceiptStatus.LEVERT,
                 LocalDateTime.now().plusMinutes(1));
         Conversation receiptConversation = Conversation.of("42", "42ref", "123", "sometitle", DPO,
                 receiptDelivered, receiptSent);
-        when(crepo.findByConversationId("42")).thenReturn(asList(receiptConversation));
 
         DpoConversationResource cr42 = DpoConversationResource.of("42", "2", "1");
         DpvConversationResource cr43 = DpvConversationResource.of("43", "2", "1");

@@ -162,7 +162,7 @@ public class MeldingsformidlerClient {
 
         @Override
         public MessageStatus toMessageStatus() {
-            MessageStatus domainReceipt = MessageStatus.of(getReceiptType().toString(),
+            MessageStatus domainReceipt = MessageStatus.of(getReceiptType(),
                     LocalDateTime.ofInstant(eksternKvittering.getTidspunkt(), ZoneId.systemDefault()));
             domainReceipt.setRawReceipt(getRawReceipt());
             return domainReceipt;
