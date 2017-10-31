@@ -97,6 +97,8 @@ public class CorrespondenceAgencyMessageFactoryTest {
 
         postConfig = mock(CorrespondenceAgencyConfiguration.class);
         when(postConfig.getSystemUserCode()).thenReturn("AAS_TEST");
+        when(postConfig.isNotifyEmail()).thenReturn(true);
+        when(postConfig.getSender()).thenReturn("foo");
 
         srMock = mock(ServiceRegistryLookup.class);
         InfoRecord infoRecord = new InfoRecord("910075918", "Fylkesmannen i Sogn og Fjordane", new EntityType("DPV", "DPV"));
@@ -131,9 +133,9 @@ public class CorrespondenceAgencyMessageFactoryTest {
         assertEquals("Edu testdokument.DOCX", c.getCorrespondence().getContent().getValue()
                 .getAttachments().getValue().getBinaryAttachments().getValue()
                 .getBinaryAttachmentV2().get(0).getFileName().getValue());
-        assertEquals("Administrasjon", c.getCorrespondence().getNotifications().getValue()
+        assertEquals("Du har mottatt en melding fra foo.", c.getCorrespondence().getNotifications().getValue()
                 .getNotification().get(0).getTextTokens().getValue()
-                .getTextToken().get(1).getTokenValue().getValue());
+                .getTextToken().get(0).getTokenValue().getValue());
     }
 
     private PutMessageRequestType createPutMessageEscapedXml(String payload) {
