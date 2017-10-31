@@ -24,9 +24,11 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     private IntegrasjonspunktProperties props;
     private DpiConversationResource cr;
     private ServiceRecord serviceRecord;
+    private NextMoveUtils nextMoveUtils;
 
-    public NextMoveDpiRequest(IntegrasjonspunktProperties props, DpiConversationResource cr, ServiceRecord serviceRecord) {
+    public NextMoveDpiRequest(IntegrasjonspunktProperties props, NextMoveUtils nextMoveUtils, DpiConversationResource cr, ServiceRecord serviceRecord) {
         this.props = props;
+        this.nextMoveUtils = nextMoveUtils;
         this.cr = cr;
         this.serviceRecord = serviceRecord;
     }
@@ -64,11 +66,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     }
 
     private byte[] getContent(String fileName) {
-        String filedir = props.getNextbest().getFiledir();
-        if (!filedir.endsWith("/")) {
-            filedir = filedir + "/";
-        }
-        filedir = filedir + cr.getConversationId() + "/";
+        String filedir = nextMoveUtils.getConversationFiledirPath(this.cr);
         File file = new File(filedir + fileName);
 
         byte[] content;

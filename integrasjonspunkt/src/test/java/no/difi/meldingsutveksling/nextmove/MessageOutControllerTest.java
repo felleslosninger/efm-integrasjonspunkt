@@ -15,6 +15,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -69,10 +70,15 @@ public class MessageOutControllerTest {
     @MockBean
     private NextMoveServiceBus nextMoveServiceBus;
 
+    @MockBean
+    private NextMoveUtils nextMoveUtils;
+
     @Before
     public void setup() {
+        String filedir = "target/uploadtest/";
         IntegrasjonspunktProperties.NextBEST nextBEST = new IntegrasjonspunktProperties.NextBEST();
-        nextBEST.setFiledir("target/uploadtest");
+        nextBEST.setFiledir(filedir);
+        when(nextMoveUtils.getConversationFiledirPath(Matchers.any())).thenReturn(filedir);
         IntegrasjonspunktProperties.Organization org = new IntegrasjonspunktProperties.Organization();
         org.setNumber("3");
         when(props.getNextbest()).thenReturn(nextBEST);

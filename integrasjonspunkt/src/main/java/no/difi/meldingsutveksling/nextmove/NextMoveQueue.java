@@ -50,6 +50,9 @@ public class NextMoveQueue {
     private ConversationStrategyFactory conversationStrategyFactory;
 
     @Autowired
+    private NextMoveUtils nextMoveUtils;
+
+    @Autowired
     public NextMoveQueue(ConversationResourceRepository repo) {
         inRepo = new DirectionalConversationResourceRepository(repo, INCOMING);
     }
@@ -82,11 +85,7 @@ public class NextMoveQueue {
         message.addFileRef(props.getNextbest().getAsicfile());
         contentFromAsic.forEach(message::addFileRef);
 
-        String filedir = props.getNextbest().getFiledir();
-        if (!filedir.endsWith("/")) {
-            filedir = filedir+"/";
-        }
-        filedir = filedir+eduDocument.getConversationId()+"/";
+        String filedir = nextMoveUtils.getConversationFiledirPath(message);
         File localFile = new File(filedir+props.getNextbest().getAsicfile());
         localFile.getParentFile().mkdirs();
 
