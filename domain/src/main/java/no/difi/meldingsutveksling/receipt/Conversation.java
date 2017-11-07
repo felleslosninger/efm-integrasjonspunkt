@@ -11,6 +11,8 @@ import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.noarkexchange.PayloadException;
 import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -25,6 +27,8 @@ import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 @Data
 @Slf4j
 public class Conversation {
+
+    public static final Logger statusLogger = LoggerFactory.getLogger("STATUS");
 
     @Id
     @GeneratedValue
@@ -115,7 +119,8 @@ public class Conversation {
         status.setConversationId(getConversationId());
         this.messageStatuses.add(status);
         this.lastUpdate = LocalDateTime.now();
-        log.debug(String.format("Conversation [%s] updated with status %s", getConversationId(), status.getStatus()), markerFrom(this));
+        statusLogger.info(markerFrom(this).and(markerFrom(status)), String.format("Conversation [id=%s] updated with status \"%s\"",
+                this.getConversationId(), status.getStatus()));
     }
 
     @Override
