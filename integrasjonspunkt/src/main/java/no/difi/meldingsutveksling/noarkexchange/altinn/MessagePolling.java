@@ -81,7 +81,7 @@ public class MessagePolling implements ApplicationContextAware {
     @Autowired
     private NextMoveServiceBus nextMoveServiceBus;
 
-    @Scheduled(fixedRate = 5000L)
+    @Scheduled(fixedRateString = "${difi.move.nextbest.serviceBus.pollingrate}")
     public void checkForNewNextBestMessages() throws NextMoveException {
 
         if (properties.getNextbest().getServiceBus().isEnable()) {
