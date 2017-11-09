@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import net.logstash.logback.marker.LogstashMarker;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCoreService;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -108,6 +109,15 @@ public class IntegrasjonspunktImpl implements SOAPport {
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType request) {
         PutMessageRequestWrapper message = new PutMessageRequestWrapper(request);
+
+        ServiceRecord receiverRecord = serviceRegistryLookup.getServiceRecord(message.getRecieverPartyNumber());
+        if (PayloadUtil.isAppReceipt(message.getPayload()) &&
+                receiverRecord.getServiceIdentifier() != ServiceIdentifier.DPO) {
+            Audit.info(String.format("Message is AppReceipt, but receiver (%s) is not DPO. Discarding message.",
+                    message.getRecieverPartyNumber()), markerFrom(message));
+            return PutMessageResponseFactory.createOkResponse();
+        }
+
         if (!message.hasSenderPartyNumber()) {
             message.setSenderPartyNumber(properties.getOrg().getNumber());
         }
