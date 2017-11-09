@@ -76,6 +76,9 @@ public class MessageOutController {
     private ConversationService conversationService;
 
     @Autowired
+    private NextMoveUtils nextMoveUtils;
+
+    @Autowired
     public MessageOutController(ConversationResourceRepository repo) {
         outRepo = new DirectionalConversationResourceRepository(repo, OUTGOING);
         inRepo = new DirectionalConversationResourceRepository(repo, INCOMING);
@@ -209,11 +212,7 @@ public class MessageOutController {
             log.trace(markerFrom(cr), "Adding file \"{}\" ({}, {} bytes) to {}",
                     file.getOriginalFilename(), file.getContentType(), file.getSize(), cr.getConversationId());
 
-            String filedir = props.getNextbest().getFiledir();
-            if (!filedir.endsWith("/")) {
-                filedir = filedir+"/";
-            }
-            filedir = filedir+conversationId+"/";
+            String filedir = nextMoveUtils.getConversationFiledirPath(cr);
             File localFile = new File(filedir+file.getOriginalFilename());
             localFile.getParentFile().mkdirs();
 
@@ -253,6 +252,7 @@ public class MessageOutController {
         if (response.getStatusCode() == HttpStatus.OK) {
             conversationService.registerStatus(cr.getConversationId(), MessageStatus.of(GenericReceiptStatus.SENDT));
             outRepo.delete(cr);
+            nextMoveUtils.deleteFiles(cr);
         }
         return response;
 

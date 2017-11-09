@@ -17,6 +17,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
+import no.difi.meldingsutveksling.nextmove.NextMoveUtils;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
@@ -58,6 +59,9 @@ public class StandardBusinessDocumentFactory {
 
     @Autowired
     private IntegrasjonspunktProperties props;
+
+    @Autowired
+    private NextMoveUtils nextMoveUtils;
 
     static {
         try {
@@ -101,11 +105,7 @@ public class StandardBusinessDocumentFactory {
         List<ByteArrayFile> attachements = new ArrayList<>();
 
         for (String filename : shipmentMeta.getFileRefs().values()) {
-            String filedir = props.getNextbest().getFiledir();
-            if (!filedir.endsWith("/")) {
-                filedir = filedir+"/";
-            }
-            filedir = filedir+shipmentMeta.getConversationId()+"/";
+            String filedir = nextMoveUtils.getConversationFiledirPath(shipmentMeta);
             File file = new File(filedir+filename);
 
             byte[] bytes;
