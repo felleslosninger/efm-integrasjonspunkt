@@ -20,13 +20,16 @@ public class DpiConversationStrategy implements ConversationStrategy {
     private IntegrasjonspunktProperties props;
     private ServiceRegistryLookup sr;
     private KeystoreProvider keystore;
+    private NextMoveUtils nextMoveUtils;
 
     @Autowired
     DpiConversationStrategy(IntegrasjonspunktProperties props,
                             ServiceRegistryLookup sr,
+                            NextMoveUtils nextMoveUtils,
                             KeystoreProvider keystore) {
         this.props = props;
         this.sr = sr;
+        this.nextMoveUtils = nextMoveUtils;
         this.keystore = keystore;
     }
 
@@ -36,7 +39,7 @@ public class DpiConversationStrategy implements ConversationStrategy {
         DpiConversationResource cr = (DpiConversationResource) conversationResource;
         ServiceRecord serviceRecord = sr.getServiceRecord(cr.getReceiverId());
 
-        NextMoveDpiRequest request = new NextMoveDpiRequest(props, cr, serviceRecord);
+        NextMoveDpiRequest request = new NextMoveDpiRequest(props, nextMoveUtils, cr, serviceRecord);
         MeldingsformidlerClient client = new MeldingsformidlerClient(props.getDpi(), keystore.getKeyStore());
         try {
             client.sendMelding(request);
