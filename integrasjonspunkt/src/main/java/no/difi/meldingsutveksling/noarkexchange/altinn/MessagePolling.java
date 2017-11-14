@@ -86,8 +86,7 @@ public class MessagePolling implements ApplicationContextAware {
 
         if (properties.getNextbest().getServiceBus().isEnable()) {
             log.debug("Checking for new NextMove messages..");
-            List<EduDocument> messages = nextMoveServiceBus.getAllMessages();
-            messages.forEach(nextMoveQueue::enqueueEduDocument);
+            nextMoveServiceBus.getAllMessages();
         }
     }
 
