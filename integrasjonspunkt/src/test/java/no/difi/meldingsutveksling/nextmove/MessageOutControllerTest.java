@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import com.google.common.collect.Lists;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
+import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
@@ -72,6 +73,9 @@ public class MessageOutControllerTest {
 
     @MockBean
     private NextMoveUtils nextMoveUtils;
+
+    @MockBean
+    private InternalQueue internalQueue;
 
     @Before
     public void setup() {
