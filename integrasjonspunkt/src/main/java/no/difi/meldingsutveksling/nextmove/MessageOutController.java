@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
+import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
@@ -77,6 +78,9 @@ public class MessageOutController {
 
     @Autowired
     private NextMoveUtils nextMoveUtils;
+
+    @Autowired
+    private InternalQueue internalQueue;
 
     @Autowired
     public MessageOutController(ConversationResourceRepository repo) {
@@ -240,21 +244,8 @@ public class MessageOutController {
             cr = DpvConversationResource.of((DpiConversationResource)cr);
         }
 
-        Optional<ConversationStrategy> strategy = strategyFactory.getStrategy(cr);
-        if (!strategy.isPresent()) {
-            String errorStr = String.format("Cannot send message - serviceIdentifier \"%s\" not supported",
-                    cr.getServiceIdentifier());
-            log.error(markerFrom(cr), errorStr);
-            return ResponseEntity.badRequest().body(ErrorResponse.builder().error("serviceIdentifier_not_supported")
-                    .errorDescription(errorStr).build());
-        }
-        ResponseEntity response = strategy.get().send(cr);
-        if (response.getStatusCode() == HttpStatus.OK) {
-            conversationService.registerStatus(cr.getConversationId(), MessageStatus.of(GenericReceiptStatus.SENDT));
-            outRepo.delete(cr);
-            nextMoveUtils.deleteFiles(cr);
-        }
-        return response;
+        internalQueue.enqueueNextmove(cr);
+        return ResponseEntity.ok().build();
 
     }
 
