@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import com.google.common.collect.Lists;
 import com.microsoft.windowsazure.Configuration;
 import com.microsoft.windowsazure.exception.ServiceException;
 import com.microsoft.windowsazure.services.servicebus.ServiceBusConfiguration;
@@ -11,12 +10,14 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
+import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.MessageContext;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.assertj.core.util.Lists;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,12 +28,16 @@ import javax.annotation.PostConstruct;
 import javax.xml.bind.*;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_DATA;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_INNSYN;
 import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.DATA;
 import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.INNSYN;
+import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
 
 @Component
 public class NextMoveServiceBus {
@@ -45,6 +50,7 @@ public class NextMoveServiceBus {
     private ServiceRegistryLookup sr;
     private StandardBusinessDocumentFactory sbdf;
     private MessageSender messageSender;
+    private NextMoveQueue nextMoveQueue;
     private JAXBContext jaxbContext;
     private String queuePath;
 
@@ -52,11 +58,13 @@ public class NextMoveServiceBus {
     public NextMoveServiceBus(IntegrasjonspunktProperties props,
                               StandardBusinessDocumentFactory sbdf,
                               ServiceRegistryLookup sr,
-                              MessageSender messageSender) throws JAXBException {
+                              MessageSender messageSender,
+                              NextMoveQueue nextMoveQueue) throws JAXBException {
         this.props = props;
         this.sbdf = sbdf;
         this.sr = sr;
         this.messageSender = messageSender;
+        this.nextMoveQueue = nextMoveQueue;
         this.jaxbContext = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, ConversationResource.class}, null);
     }
 
@@ -118,33 +126,53 @@ public class NextMoveServiceBus {
 
     }
 
-    public List<EduDocument> getAllMessages() throws NextMoveException {
+    public void getAllMessages() throws NextMoveException {
 
         ReceiveMessageOptions opts = ReceiveMessageOptions.DEFAULT;
         opts.setReceiveMode(ReceiveMode.PEEK_LOCK);
 
         ServiceBusContract service = createContract();
-        ArrayList<EduDocument> messages = Lists.newArrayList();
-        try {
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            BrokeredMessage msg;
-            while ((msg = service.receiveQueueMessage(queuePath, opts).getValue()) != null) {
-
-                if (isNullOrEmpty(msg.getMessageId())) {
+        ArrayList<BrokeredMessage> messages = Lists.newArrayList();
+        while (true) {
+            try {
+                BrokeredMessage msg = service.receiveQueueMessage(queuePath, opts).getValue();
+                if (msg == null || isNullOrEmpty(msg.getMessageId())) {
                     break;
                 }
                 log.debug(format("Received message on queue=%s with id=%s", queuePath, msg.getMessageId()));
+                messages.add(msg);
 
-                EduDocument eduDocument = ((JAXBElement<EduDocument>) unmarshaller.unmarshal(msg.getBody())).getValue();
-                messages.add(eduDocument);
-                service.deleteMessage(msg);
+            } catch (ServiceException e) {
+                log.error("Failed to fetch new message", e);
             }
-        } catch (ServiceException | JAXBException e) {
-            log.error("Failed to fetch new message(s)", e);
-            throw new NextMoveException(e);
         }
 
-        return messages;
+        for (BrokeredMessage msg : messages) {
+            try {
+                Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+                EduDocument eduDocument = ((JAXBElement<EduDocument>) unmarshaller.unmarshal(msg.getBody())).getValue();
+                Optional<ConversationResource> cr = nextMoveQueue.enqueueEduDocument(eduDocument);
+                cr.ifPresent(this::sendReceipt);
+                service.deleteMessage(msg);
+            } catch (JAXBException | ServiceException e) {
+                log.error("Failed to put message on local queue", e);
+            }
+        }
+    }
+
+    private void sendReceipt(ConversationResource cr) {
+
+        if (asList(DPE_INNSYN, DPE_DATA).contains(cr.getServiceIdentifier())) {
+            DpeReceiptConversationResource dpeReceipt = DpeReceiptConversationResource.of(cr);
+            try {
+                putMessage(dpeReceipt);
+                Audit.info(format("Message [id=%s, serviceIdentifier=%s] sent to service bus",
+                        dpeReceipt.getConversationId(), dpeReceipt.getServiceIdentifier()),
+                        markerFrom(dpeReceipt));
+            } catch (NextMoveException e) {
+                log.error("Send receipt for message [id={}] failed", dpeReceipt.getConversationId(), e);
+            }
+        }
     }
 
     private ServiceBusContract createContract() {

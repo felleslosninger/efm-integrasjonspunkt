@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.receipt.NextmoveReceiptStatus;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.transaction.Transactional;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,6 +48,9 @@ public class MessageInController {
 
     @Autowired
     private ConversationService conversationService;
+
+    @Autowired
+    private NextMoveUtils nextMoveUtils;
 
     @Autowired
     public MessageInController(ConversationResourceRepository cRepo) {
@@ -178,6 +180,9 @@ public class MessageInController {
             repo.delete(resource.get());
             conversationService.registerStatus(resource.get().getConversationId(),
                     MessageStatus.of(NextmoveReceiptStatus.POPPET));
+            Audit.info(format("Conversation with id=%s deleted from queue", resource.get().getConversationId()),
+                    markerFrom(resource.get()));
+            nextMoveUtils.deleteFiles(resource.get());
             return ResponseEntity.ok().build();
         }
 
@@ -211,11 +216,7 @@ public class MessageInController {
                 return lockedMessageErrorResponse();
             }
 
-            String filedir = props.getNextbest().getFiledir();
-            if (!filedir.endsWith("/")) {
-                filedir = filedir+"/";
-            }
-            filedir = filedir+resource.get().getConversationId()+"/";
+            String filedir = nextMoveUtils.getConversationFiledirPath(resource.get());
             String filename = resource.get().getFileRefs().get(0);
             File file = new File(filedir+filename);
 
@@ -268,19 +269,18 @@ public class MessageInController {
                 return lockedMessageErrorResponse();
             }
 
-            String filedir = props.getNextbest().getFiledir();
-            if (!filedir.endsWith("/")) {
-                filedir = filedir+"/";
-            }
-            filedir = filedir+resource.get().getConversationId()+"/";
+            String filedir = nextMoveUtils.getConversationFiledirPath(resource.get());
             String filename = resource.get().getFileRefs().get(0);
             File file = new File(filedir+filename);
+            long fileLength = file.length();
 
             InputStreamResource isr = null;
+            byte[] bytes;
             try {
-                isr = new InputStreamResource(new FileInputStream(file));
-            } catch (FileNotFoundException e) {
-                log.error("Request file \"{}\" not found on server", filename, e);
+                bytes = FileUtils.readFileToByteArray(file);
+                isr = new InputStreamResource(new ByteArrayInputStream(bytes));
+            } catch (IOException e) {
+                log.error("Could not read file \"{}\"", filename, e);
                 return fileNotFoundErrorResponse(filename);
             }
 
@@ -289,11 +289,12 @@ public class MessageInController {
                     MessageStatus.of(NextmoveReceiptStatus.POPPET));
             Audit.info(format("Conversation with id=%s popped from queue", resource.get().getConversationId()),
                     markerFrom(resource.get()));
+            nextMoveUtils.deleteFiles(resource.get());
 
             return ResponseEntity.ok()
                     .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME+filename)
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .contentLength(file.length())
+                    .contentLength(fileLength)
                     .body(isr);
         }
         return ResponseEntity.noContent().build();

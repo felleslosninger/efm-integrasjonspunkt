@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.receipt;
 
-import lombok.extern.log4j.Log4j;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
@@ -16,7 +16,7 @@ import static no.difi.meldingsutveksling.ServiceIdentifier.DPF;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 
 @Component
-@Log4j
+@Slf4j
 public class ConversationService {
 
     private ConversationRepository repo;

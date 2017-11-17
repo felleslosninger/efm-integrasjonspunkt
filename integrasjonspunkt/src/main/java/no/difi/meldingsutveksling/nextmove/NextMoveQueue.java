@@ -25,9 +25,6 @@ import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static java.util.Arrays.asList;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_DATA;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_INNSYN;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 
 @Component
@@ -47,14 +44,14 @@ public class NextMoveQueue {
     private ConversationService conversationService;
 
     @Autowired
-    private ConversationStrategyFactory conversationStrategyFactory;
+    private NextMoveUtils nextMoveUtils;
 
     @Autowired
     public NextMoveQueue(ConversationResourceRepository repo) {
         inRepo = new DirectionalConversationResourceRepository(repo, INCOMING);
     }
 
-    public void enqueueEduDocument(EduDocument eduDocument) {
+    public Optional<ConversationResource> enqueueEduDocument(EduDocument eduDocument) {
 
         if (!(eduDocument.getAny() instanceof Payload)) {
             log.error("Message attachement not instance of Payload.");
@@ -75,18 +72,14 @@ public class NextMoveQueue {
         if (ServiceIdentifier.DPE_RECEIPT.equals(message.getServiceIdentifier())) {
             log.debug(String.format("Message with id=%s is a receipt", message.getConversationId()));
             conversationService.registerStatus(message.getConversationId(), MessageStatus.of(GenericReceiptStatus.LEVERT));
-            return;
+            return Optional.empty();
         }
 
         message.setFileRefs(Maps.newHashMap());
         message.addFileRef(props.getNextbest().getAsicfile());
         contentFromAsic.forEach(message::addFileRef);
 
-        String filedir = props.getNextbest().getFiledir();
-        if (!filedir.endsWith("/")) {
-            filedir = filedir+"/";
-        }
-        filedir = filedir+eduDocument.getConversationId()+"/";
+        String filedir = nextMoveUtils.getConversationFiledirPath(message);
         File localFile = new File(filedir+props.getNextbest().getAsicfile());
         localFile.getParentFile().mkdirs();
 
@@ -101,15 +94,7 @@ public class NextMoveQueue {
         conversationService.registerStatus(c, MessageStatus.of(NextmoveReceiptStatus.LEST_FRA_SERVICEBUS));
         Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] put on local queue",
                 message.getConversationId(), message.getServiceIdentifier()));
-        sendReceipt(message);
-    }
-
-    private void sendReceipt(ConversationResource cr) {
-        if (asList(DPE_INNSYN, DPE_DATA).contains(cr.getServiceIdentifier())) {
-            DpeReceiptConversationResource dpeReceipt = DpeReceiptConversationResource.of(cr);
-            Optional<ConversationStrategy> strategy = conversationStrategyFactory.getStrategy(dpeReceipt);
-            strategy.ifPresent(s -> s.send(dpeReceipt));
-        }
+        return Optional.of(message);
     }
 
     public byte[] decrypt(Payload payload) {

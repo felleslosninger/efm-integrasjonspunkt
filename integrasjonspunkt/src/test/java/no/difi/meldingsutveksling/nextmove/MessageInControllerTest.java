@@ -25,6 +25,7 @@ import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -48,11 +49,16 @@ public class MessageInControllerTest {
     @MockBean
     private IntegrasjonspunktProperties props;
 
+    @MockBean
+    private NextMoveUtils nextMoveUtils;
+
     @Before
     public void setup() throws IOException {
+        String filedir = "target/uploadtest/";
         IntegrasjonspunktProperties.NextBEST nextBEST = new IntegrasjonspunktProperties.NextBEST();
-        nextBEST.setFiledir("target/uploadtest");
+        nextBEST.setFiledir(filedir);
         when(props.getNextbest()).thenReturn(nextBEST);
+        when(nextMoveUtils.getConversationFiledirPath(any())).thenReturn(filedir);
 
         ServiceRecord serviceRecord = new ServiceRecord();
         serviceRecord.setServiceIdentifier(DPO);
@@ -63,7 +69,7 @@ public class MessageInControllerTest {
         DpoConversationResource cr44 = DpoConversationResource.of("44", "1", "2");
 
         File foo = new File("src/test/resources/testfil.txt");
-        File targetFoo = new File("target/uploadtest/42/testfil.txt");
+        File targetFoo = new File("target/uploadtest/testfil.txt");
         targetFoo.getParentFile().mkdirs();
         FileUtils.copyFile(foo, targetFoo);
         cr42.addFileRef("testfil.txt");

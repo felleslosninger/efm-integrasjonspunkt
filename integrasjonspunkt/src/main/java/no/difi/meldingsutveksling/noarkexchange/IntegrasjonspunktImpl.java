@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import net.logstash.logback.marker.LogstashMarker;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCoreService;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -18,6 +19,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.xml.ws.BindingType;
+
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_INNSYN;
@@ -64,9 +68,13 @@ public class IntegrasjonspunktImpl implements SOAPport {
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
 
         String organisasjonsnummer = getCanReceiveMessageRequest.getReceiver().getOrgnr();
-
         GetCanReceiveMessageResponseType response = new GetCanReceiveMessageResponseType();
-        boolean certificateAvailable;
+
+        Predicate<String> personnrPredicate = Pattern.compile(String.format("\\d{%d}", 11)).asPredicate();
+        if (personnrPredicate.test(organisasjonsnummer) && !strategyFactory.hasFactory(ServiceIdentifier.DPI)) {
+            response.setResult(false);
+            return response;
+        }
 
         final ServiceRecord serviceRecord;
         try {
@@ -77,7 +85,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
             return response;
         }
 
-        certificateAvailable = adresseRegister.hasAdresseregisterCertificate(serviceRecord);
+        boolean certificateAvailable = adresseRegister.hasAdresseregisterCertificate(serviceRecord);
 
         final LogstashMarker marker = MarkerFactory.receiverMarker(organisasjonsnummer);
         boolean mshCanReceive = false;
@@ -108,6 +116,15 @@ public class IntegrasjonspunktImpl implements SOAPport {
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType request) {
         PutMessageRequestWrapper message = new PutMessageRequestWrapper(request);
+
+        ServiceRecord receiverRecord = serviceRegistryLookup.getServiceRecord(message.getRecieverPartyNumber());
+        if (PayloadUtil.isAppReceipt(message.getPayload()) &&
+                receiverRecord.getServiceIdentifier() != ServiceIdentifier.DPO) {
+            Audit.info(String.format("Message is AppReceipt, but receiver (%s) is not DPO. Discarding message.",
+                    message.getRecieverPartyNumber()), markerFrom(message));
+            return PutMessageResponseFactory.createOkResponse();
+        }
+
         if (!message.hasSenderPartyNumber()) {
             message.setSenderPartyNumber(properties.getOrg().getNumber());
         }
