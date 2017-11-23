@@ -1,11 +1,16 @@
 package no.difi.meldingsutveksling.receipt;
 
+import com.google.common.base.Strings;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import org.assertj.core.util.Lists;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -20,12 +25,18 @@ import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 public class ConversationService {
 
     private ConversationRepository repo;
+    private IntegrasjonspunktProperties props;
+    private NoarkClient mshClient;
 
     private static final List<ServiceIdentifier> POLLABLES = Lists.newArrayList(DPV, DPF);
 
     @Autowired
-    public ConversationService(ConversationRepository repo) {
+    public ConversationService(ConversationRepository repo,
+                               IntegrasjonspunktProperties props,
+                               @Qualifier("mshClient") ObjectProvider<NoarkClient> mshClient) {
         this.repo = repo;
+        this.props = props;
+        this.mshClient = mshClient.getIfAvailable();
     }
 
     public Optional<Conversation> registerStatus(String conversationId, MessageStatus status) {
@@ -46,7 +57,8 @@ public class ConversationService {
             conversation.addMessageStatus(status);
 
             if (GenericReceiptStatus.SENDT.toString().equals(status.getStatus()) &&
-                    POLLABLES.contains(conversation.getServiceIdentifier())) {
+                    POLLABLES.contains(conversation.getServiceIdentifier()) &&
+                    !conversation.isMsh()) {
                 conversation.setPollable(true);
             }
             return repo.save(conversation);
@@ -66,6 +78,12 @@ public class ConversationService {
             ms.setDescription("AppReceipt");
         }
         Conversation conversation = Conversation.of(message, ms);
+
+        if (!Strings.isNullOrEmpty(props.getMsh().getEndpointURL())
+                && mshClient.canRecieveMessage(message.getReceiver().getIdentifier())) {
+            conversation.setMsh(true);
+        }
+
         repo.save(conversation);
     }
 
