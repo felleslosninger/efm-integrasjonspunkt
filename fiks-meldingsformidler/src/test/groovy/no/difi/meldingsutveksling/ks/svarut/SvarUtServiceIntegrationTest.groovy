@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.ks.svarut
 
+import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.core.EDUCore
 import no.difi.meldingsutveksling.core.EDUCoreConverter
 import no.difi.meldingsutveksling.core.Receiver
@@ -78,6 +79,7 @@ class SvarUtServiceIntegrationTest {
         eduCore.payload = EDUCoreConverter.meldingTypeAsString(meldingType)
         eduCore.sender = new Sender(name: "Difi", identifier: "991825827")
         eduCore.receiver = new Receiver(name: "Lote", identifier: "1234")
+        eduCore.serviceIdentifier = ServiceIdentifier.DPF
         return eduCore
     }
 
