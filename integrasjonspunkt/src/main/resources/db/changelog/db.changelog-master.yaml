@@ -110,3 +110,22 @@ databaseChangeLog:
                   name: has_arkivmelding
                   type: boolean
                   valueBoolean: false
+  - changeSet:
+      id: 5
+      author: maw
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: conversation
+        - not:
+            - columnExists:
+                tableName: conversation
+                columnName: msh
+      changes:
+        - addColumn:
+            tableName: conversation
+            columns:
+              - column:
+                  name: msh
+                  type: boolean
+                  valueBoolean: false
