@@ -51,7 +51,7 @@ public class NextMoveQueue {
         inRepo = new DirectionalConversationResourceRepository(repo, INCOMING);
     }
 
-    public Optional<ConversationResource> enqueueEduDocument(EduDocument eduDocument) {
+    public Optional<ConversationResource> enqueueEduDocument(EduDocument eduDocument) throws IOException {
 
         if (!(eduDocument.getAny() instanceof Payload)) {
             log.error("Message attachement not instance of Payload.");
@@ -89,6 +89,7 @@ public class NextMoveQueue {
             inRepo.save(message);
         } catch (IOException e) {
             log.error("Could not write asic container to disc.", e);
+            throw e;
         }
         Conversation c = conversationService.registerConversation(message);
         conversationService.registerStatus(c, MessageStatus.of(NextmoveReceiptStatus.LEST_FRA_SERVICEBUS));

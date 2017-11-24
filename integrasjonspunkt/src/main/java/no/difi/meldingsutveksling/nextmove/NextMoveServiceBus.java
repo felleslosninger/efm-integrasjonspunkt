@@ -154,7 +154,7 @@ public class NextMoveServiceBus {
                 Optional<ConversationResource> cr = nextMoveQueue.enqueueEduDocument(eduDocument);
                 cr.ifPresent(this::sendReceipt);
                 service.deleteMessage(msg);
-            } catch (JAXBException | ServiceException e) {
+            } catch (JAXBException | ServiceException | IOException e) {
                 log.error("Failed to put message on local queue", e);
             }
         }

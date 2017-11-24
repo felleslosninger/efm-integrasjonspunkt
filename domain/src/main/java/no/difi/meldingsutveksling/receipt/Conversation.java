@@ -42,6 +42,7 @@ public class Conversation {
     @JsonIgnore
     private boolean pollable;
     private boolean finished;
+    private boolean msh;
     private ServiceIdentifier serviceIdentifier;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
