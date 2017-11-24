@@ -129,3 +129,21 @@ databaseChangeLog:
                   name: msh
                   type: boolean
                   valueBoolean: false
+  - changeSet:
+      id: 6
+      author: maw
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: conversation
+        - not:
+            - columnExists:
+                tableName: conversation
+                columnName: senderIdentifier
+      changes:
+        - addColumn:
+            tableName: conversation
+            columns:
+              - column:
+                  name: senderIdentifier
+                  type: varchar(255)
