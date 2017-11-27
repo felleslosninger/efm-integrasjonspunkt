@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import com.google.common.collect.Maps;
 import com.microsoft.windowsazure.Configuration;
 import com.microsoft.windowsazure.exception.ServiceException;
 import com.microsoft.windowsazure.services.servicebus.ServiceBusConfiguration;
@@ -164,6 +165,7 @@ public class NextMoveServiceBus {
 
         if (asList(DPE_INNSYN, DPE_DATA).contains(cr.getServiceIdentifier())) {
             DpeReceiptConversationResource dpeReceipt = DpeReceiptConversationResource.of(cr);
+            dpeReceipt.setFileRefs(Maps.newHashMap());
             try {
                 putMessage(dpeReceipt);
                 Audit.info(format("Message [id=%s, serviceIdentifier=%s] sent to service bus",
