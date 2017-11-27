@@ -34,6 +34,7 @@ public class Conversation {
     @GeneratedValue
     private Integer convId;
     private String conversationId;
+    private String senderIdentifier;
     private String receiverIdentifier;
     private String messageReference;
     private String messageTitle;
@@ -53,11 +54,13 @@ public class Conversation {
 
     private Conversation(String conversationId,
                          String messageReference,
+                         String senderIdentifier,
                          String receiverIdentifier,
                          String messageTitle,
                          ServiceIdentifier serviceIdentifier) {
         this.conversationId = conversationId;
         this.messageReference = messageReference;
+        this.senderIdentifier = senderIdentifier;
         this.receiverIdentifier = receiverIdentifier;
         this.messageTitle = messageTitle;
         this.messageStatuses = Lists.newArrayList();
@@ -67,12 +70,13 @@ public class Conversation {
 
     public static Conversation of(String conversationId,
                                   String messageReference,
+                                  String senderIdentifier,
                                   String receiverIdentifier,
                                   String messageTitle,
                                   ServiceIdentifier serviceIdentifier,
                                   MessageStatus... statuses) {
 
-        Conversation c = new Conversation(conversationId, messageReference, receiverIdentifier, messageTitle, serviceIdentifier);
+        Conversation c = new Conversation(conversationId, messageReference, senderIdentifier, receiverIdentifier, messageTitle, serviceIdentifier);
         if (statuses != null && statuses.length > 0) {
             Stream.of(statuses)
                     .peek(r -> r.setConversationId(conversationId))
@@ -82,7 +86,7 @@ public class Conversation {
     }
 
     public static Conversation of(ConversationResource cr, MessageStatus... statuses) {
-        Conversation c = new Conversation(cr.getConversationId(), cr.getConversationId(), cr.getReceiverId(),
+        Conversation c = new Conversation(cr.getConversationId(), cr.getConversationId(), cr.getSenderId(), cr.getReceiverId(),
                 "", cr.getServiceIdentifier());
         if (statuses != null && statuses.length > 0) {
             Stream.of(statuses)
@@ -105,7 +109,7 @@ public class Conversation {
         }
 
         Conversation c = new Conversation(eduCore.getId(), eduCore.getMessageReference(),
-                eduCore.getReceiver().getIdentifier(), msgTitle,
+                eduCore.getSender().getIdentifier(), eduCore.getReceiver().getIdentifier(), msgTitle,
                 eduCore.getServiceIdentifier() == DPE_INNSYN ? DPV : eduCore.getServiceIdentifier());
 
         if (statuses != null && statuses.length > 0) {

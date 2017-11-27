@@ -19,9 +19,10 @@ public class ConversationMarker {
 
     public static LogstashMarker markerFrom(Conversation conversation) {
         LogstashMarker conversationIdMarker = MarkerFactory.conversationIdMarker(conversation.getConversationId());
+        LogstashMarker senderMarker = MarkerFactory.senderMarker(conversation.getSenderIdentifier());
         LogstashMarker receiverMarker = MarkerFactory.receiverMarker(conversation.getReceiverIdentifier());
         LogstashMarker serviceIdentifierMarker = serviceIdentifierMarker(conversation.getServiceIdentifier());
-        return conversationIdMarker.and(receiverMarker).and(serviceIdentifierMarker);
+        return conversationIdMarker.and(senderMarker).and(receiverMarker).and(serviceIdentifierMarker);
     }
 
     public static LogstashMarker markerFrom(MessageStatus status) {
