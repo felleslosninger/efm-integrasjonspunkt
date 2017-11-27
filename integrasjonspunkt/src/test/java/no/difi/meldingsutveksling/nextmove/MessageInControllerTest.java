@@ -62,7 +62,7 @@ public class MessageInControllerTest {
 
         ServiceRecord serviceRecord = new ServiceRecord();
         serviceRecord.setServiceIdentifier(DPO);
-        when(sr.getServiceRecord("1")).thenReturn(serviceRecord);
+        when(sr.getServiceRecord("1", DPO)).thenReturn(Optional.of(serviceRecord));
 
         DpoConversationResource cr42 = DpoConversationResource.of("42", "2", "1");
         DpvConversationResource cr43 = DpvConversationResource.of("43", "2", "1");

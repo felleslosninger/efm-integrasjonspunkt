@@ -93,7 +93,8 @@ public class MessageOutControllerTest {
         ServiceRecord serviceRecord = new ServiceRecord();
         serviceRecord.setServiceIdentifier(DPO);
         serviceRecord.setDpeCapabilities(Lists.newArrayList());
-        when(sr.getServiceRecord("1")).thenReturn(serviceRecord);
+        when(sr.getServiceRecord("1", DPO)).thenReturn(Optional.of(serviceRecord));
+        when(sr.getServiceRecords("1")).thenReturn(Lists.newArrayList(serviceRecord));
         InfoRecord fooInfo = new InfoRecord("1", "foo", new EntityType("org", "org"));
         when(sr.getInfoRecord("1")).thenReturn(fooInfo);
         InfoRecord barInfo = new InfoRecord("2", "bar", new EntityType("org", "org"));

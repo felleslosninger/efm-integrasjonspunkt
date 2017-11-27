@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.core;
 
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.ServiceRecordObjectMother;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
@@ -16,6 +17,8 @@ import no.difi.meldingsutveksling.services.Adresseregister;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.ObjectProvider;
+
+import java.util.Optional;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -69,12 +72,14 @@ public class EDUCoreSenderTest {
         final Sender sender = new Sender();
         sender.setIdentifier(IDENTIFIER);
         eduCore.setSender(sender);
+        eduCore.setServiceIdentifier(ServiceIdentifier.DPV);
     }
 
 
     @Test
     public void givenServiceIdentifierIsDPVAndMshIsEnabledWhenSendingMessageThenShouldCheckMSH() {
-        when(serviceRegistryLookup.getServiceRecord(IDENTIFIER)).thenReturn(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER));
+        when(serviceRegistryLookup.getServiceRecord(IDENTIFIER, ServiceIdentifier.DPV))
+                .thenReturn(Optional.of(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER)));
         enableMsh();
 
         eduCoreSender.sendMessage(eduCore);
@@ -84,7 +89,8 @@ public class EDUCoreSenderTest {
 
     @Test
     public void givenServiceIdentifierIsDPVAndMshCanReceiveMessageWhenSendingMessageThenMshShouldBeUsed() {
-        when(serviceRegistryLookup.getServiceRecord(IDENTIFIER)).thenReturn(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER));
+        when(serviceRegistryLookup.getServiceRecord(IDENTIFIER, ServiceIdentifier.DPV))
+                .thenReturn(Optional.of(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER)));
         when(mshClient.canRecieveMessage(IDENTIFIER)).thenReturn(true);
         enableMsh();
 

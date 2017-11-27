@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 public class IdentifierRelayController {
 
@@ -19,12 +21,14 @@ public class IdentifierRelayController {
     @RequestMapping(value = "/servicerecord/{identifier}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getServiceRecord(@PathVariable("identifier") String identifier) {
         ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(identifier);
-        InfoRecord infoRecord = serviceRegistryLookup.getInfoRecord(identifier);
-        if (serviceRecord == null || serviceRecord == ServiceRecord.EMPTY || infoRecord == null) {
+
+        List<ServiceRecord> serviceRecords = serviceRegistryLookup.getServiceRecords(identifier);
+        if (serviceRecords.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok(SRResponseWrapper.of(infoRecord, serviceRecord));
+        InfoRecord infoRecord = serviceRegistryLookup.getInfoRecord(identifier);
+        return ResponseEntity.ok(SRResponseWrapper.of(infoRecord, serviceRecord, serviceRecords));
     }
 
 }
