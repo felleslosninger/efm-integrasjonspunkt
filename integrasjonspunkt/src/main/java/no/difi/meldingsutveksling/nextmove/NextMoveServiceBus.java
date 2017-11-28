@@ -134,7 +134,7 @@ public class NextMoveServiceBus {
 
         ServiceBusContract service = createContract();
         ArrayList<BrokeredMessage> messages = Lists.newArrayList();
-        while (true) {
+        for (int i=0; i<props.getNextbest().getServiceBus().getReadMaxMessages(); i++) {
             try {
                 BrokeredMessage msg = service.receiveQueueMessage(queuePath, opts).getValue();
                 if (msg == null || isNullOrEmpty(msg.getMessageId())) {

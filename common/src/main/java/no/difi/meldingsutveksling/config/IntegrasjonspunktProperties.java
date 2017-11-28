@@ -182,6 +182,7 @@ public class IntegrasjonspunktProperties {
             @NotNull
             private String namespace;
             private String receiptQueue;
+            private Integer readMaxMessages;
         }
 
     }
