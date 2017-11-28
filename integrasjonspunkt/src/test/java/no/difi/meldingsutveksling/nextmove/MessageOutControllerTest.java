@@ -93,7 +93,8 @@ public class MessageOutControllerTest {
         ServiceRecord serviceRecord = new ServiceRecord();
         serviceRecord.setServiceIdentifier(DPO);
         serviceRecord.setDpeCapabilities(Lists.newArrayList());
-        when(sr.getServiceRecord("1")).thenReturn(serviceRecord);
+        when(sr.getServiceRecord("1", DPO)).thenReturn(Optional.of(serviceRecord));
+        when(sr.getServiceRecords("1")).thenReturn(Lists.newArrayList(serviceRecord));
         InfoRecord fooInfo = new InfoRecord("1", "foo", new EntityType("org", "org"));
         when(sr.getInfoRecord("1")).thenReturn(fooInfo);
         InfoRecord barInfo = new InfoRecord("2", "bar", new EntityType("org", "org"));
@@ -104,7 +105,7 @@ public class MessageOutControllerTest {
         MessageStatus receiptSent = MessageStatus.of(GenericReceiptStatus.SENDT);
         MessageStatus receiptDelivered = MessageStatus.of(GenericReceiptStatus.LEVERT,
                 LocalDateTime.now().plusMinutes(1));
-        Conversation receiptConversation = Conversation.of("42", "42ref", "123", "sometitle", DPO,
+        Conversation receiptConversation = Conversation.of("42", "42ref", "321", "123", "sometitle", DPO,
                 receiptDelivered, receiptSent);
 
         DpoConversationResource cr42 = DpoConversationResource.of("42", "2", "1");

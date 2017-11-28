@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import com.google.common.collect.Maps;
 import com.microsoft.windowsazure.Configuration;
 import com.microsoft.windowsazure.exception.ServiceException;
 import com.microsoft.windowsazure.services.servicebus.ServiceBusConfiguration;
@@ -133,7 +134,7 @@ public class NextMoveServiceBus {
 
         ServiceBusContract service = createContract();
         ArrayList<BrokeredMessage> messages = Lists.newArrayList();
-        while (true) {
+        for (int i=0; i<props.getNextbest().getServiceBus().getReadMaxMessages(); i++) {
             try {
                 BrokeredMessage msg = service.receiveQueueMessage(queuePath, opts).getValue();
                 if (msg == null || isNullOrEmpty(msg.getMessageId())) {
@@ -154,7 +155,7 @@ public class NextMoveServiceBus {
                 Optional<ConversationResource> cr = nextMoveQueue.enqueueEduDocument(eduDocument);
                 cr.ifPresent(this::sendReceipt);
                 service.deleteMessage(msg);
-            } catch (JAXBException | ServiceException e) {
+            } catch (JAXBException | ServiceException | IOException e) {
                 log.error("Failed to put message on local queue", e);
             }
         }
@@ -164,6 +165,7 @@ public class NextMoveServiceBus {
 
         if (asList(DPE_INNSYN, DPE_DATA).contains(cr.getServiceIdentifier())) {
             DpeReceiptConversationResource dpeReceipt = DpeReceiptConversationResource.of(cr);
+            dpeReceipt.setFileRefs(Maps.newHashMap());
             try {
                 putMessage(dpeReceipt);
                 Audit.info(format("Message [id=%s, serviceIdentifier=%s] sent to service bus",

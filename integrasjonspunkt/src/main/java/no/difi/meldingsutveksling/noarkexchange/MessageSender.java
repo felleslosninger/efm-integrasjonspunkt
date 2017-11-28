@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.Avsender;
@@ -25,6 +26,7 @@ import org.springframework.context.ApplicationContextAware;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.util.Optional;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.core.EDUCoreMarker.markerFrom;
@@ -63,35 +65,28 @@ public class MessageSender implements ApplicationContextAware {
         this.serviceRegistryLookup = serviceRegistryLookup;
     }
 
-    private Avsender createAvsender(String identifier) throws MessageContextException {
-        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(identifier);
-        Certificate certificate;
-        try {
-            certificate = adresseregister.getCertificate(serviceRecord);
-        } catch (CertificateException e) {
-            throw new MessageContextException(e, StatusMessage.MISSING_SENDER_CERTIFICATE);
-        }
+    private Avsender createAvsender(String identifier, ServiceIdentifier serviceIdentifier) throws MessageContextException {
+        Certificate certificate = getCertificate(identifier, serviceIdentifier);
         PrivateKey privatNoekkel = keyInfo.loadPrivateKey();
-
         return Avsender.builder(new Organisasjonsnummer(identifier), new Noekkelpar(privatNoekkel, certificate)).build();
     }
 
-    private Mottaker createMottaker(String identifier) throws MessageContextException {
-        Certificate receiverCertificate;
-        try {
-            receiverCertificate = lookupCertificate(identifier);
-        } catch (CertificateException e) {
-            throw new MessageContextException(e, StatusMessage.MISSING_RECIEVER_CERTIFICATE);
-        }
-
-        return Mottaker.builder(new Organisasjonsnummer(identifier), receiverCertificate).build();
+    private Mottaker createMottaker(String identifier, ServiceIdentifier serviceIdentifier) throws MessageContextException {
+        return Mottaker.builder(new Organisasjonsnummer(identifier), getCertificate(identifier, serviceIdentifier)).build();
     }
 
-    private Certificate lookupCertificate(String orgnr) throws CertificateException {
-        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(orgnr);
-        Certificate certificate;
-        certificate = adresseregister.getCertificate(serviceRecord);
-        return certificate;
+    private Certificate getCertificate(String identifier, ServiceIdentifier serviceIdentifier) throws MessageContextException {
+        Optional<ServiceRecord> record = serviceRegistryLookup.getServiceRecord(identifier, serviceIdentifier);
+        ServiceRecord serviceRecord = record.orElseThrow(() -> new MessageContextException(StatusMessage.NO_MATCHING_SERVICEIDENTIFIER));
+
+        try {
+            return adresseregister.getCertificate(serviceRecord);
+        } catch (CertificateException e) {
+            if (properties.getOrg().getNumber().equals(identifier)) {
+                throw new MessageContextException(e, StatusMessage.MISSING_SENDER_CERTIFICATE);
+            }
+            throw new MessageContextException(e, StatusMessage.MISSING_RECIEVER_CERTIFICATE);
+        }
     }
 
     public PutMessageResponseType sendMessage(EDUCore message) {
@@ -144,8 +139,8 @@ public class MessageSender implements ApplicationContextAware {
         }
 
         MessageContext context = new MessageContext();
-        context.setAvsender(createAvsender(conversation.getSenderId()));
-        context.setMottaker(createMottaker(conversation.getReceiverId()));
+        context.setAvsender(createAvsender(conversation.getSenderId(), conversation.getServiceIdentifier()));
+        context.setMottaker(createMottaker(conversation.getReceiverId(), conversation.getServiceIdentifier()));
         context.setJpId("");
         context.setConversationId(conversation.getConversationId());
 
@@ -169,8 +164,8 @@ public class MessageSender implements ApplicationContextAware {
 
         Avsender avsender;
         final Mottaker mottaker;
-        avsender = createAvsender(message.getSender().getIdentifier());
-        mottaker = createMottaker(message.getReceiver().getIdentifier());
+        avsender = createAvsender(message.getSender().getIdentifier(), message.getServiceIdentifier());
+        mottaker = createMottaker(message.getReceiver().getIdentifier(), message.getServiceIdentifier());
 
         if (message.getMessageType() == EDUCore.MessageType.EDU) {
             messageContext.setJpId(message.getJournalpostId());

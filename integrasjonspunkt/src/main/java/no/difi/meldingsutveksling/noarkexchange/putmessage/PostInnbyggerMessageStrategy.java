@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreConverter;
@@ -21,6 +22,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static no.difi.meldingsutveksling.core.EDUCoreMarker.markerFrom;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createErrorResponse;
@@ -41,12 +43,15 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
 
     @Override
     public PutMessageResponseType send(final EDUCore request) {
-        final ServiceRecord serviceRecord = serviceRegistry.getServiceRecord(request.getReceiver().getIdentifier());
+        Optional<ServiceRecord> serviceRecord = serviceRegistry.getServiceRecord(request.getReceiver().getIdentifier(), ServiceIdentifier.DPI);
+        if (!serviceRecord.isPresent()) {
+            throw new MeldingsUtvekslingRuntimeException(String.format("Receiver %s does not have ServiceRecord of type DPI", request.getReceiver().getIdentifier()));
+        }
 
         MeldingsformidlerClient client = new MeldingsformidlerClient(config, keyStore);
         try {
             Audit.info(String.format("Sending message to DPI with conversation id %s", request.getId()), markerFrom(request));
-            client.sendMelding(new EDUCoreMeldingsformidlerRequest(config, request, serviceRecord));
+            client.sendMelding(new EDUCoreMeldingsformidlerRequest(config, request, serviceRecord.get()));
         } catch (MeldingsformidlerException e) {
             Audit.error("Failed to send message to DPI", markerFrom(request), e);
             return createErrorResponse(StatusMessage.UNABLE_TO_SEND_DPI);

@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.core;
 
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
@@ -55,14 +56,18 @@ public class EDUCoreSender {
     }
 
     public PutMessageResponseType sendMessage(EDUCore message) {
-        final ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(message.getReceiver().getIdentifier());
+        Optional<ServiceRecord> serviceRecord = serviceRegistryLookup.getServiceRecord(message.getReceiver().getIdentifier(), message.getServiceIdentifier());
+        if (!serviceRecord.isPresent()) {
+            throw new MeldingsUtvekslingRuntimeException(String.format("ServiceRecord of type %s not found for receiver %s",
+                    message.getServiceIdentifier(), message.getReceiver().getIdentifier()));
+        }
         PutMessageResponseType result;
         MessageStrategy strategy = null;
         final LogstashMarker marker = EDUCoreMarker.markerFrom(message);
-        if (adresseRegister.hasAdresseregisterCertificate(serviceRecord)) {
+        if (adresseRegister.hasAdresseregisterCertificate(serviceRecord.get())) {
             Audit.info("Receiver validated", marker);
 
-            final MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(serviceRecord);
+            final MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(serviceRecord.get());
             strategy = messageStrategyFactory.create(message.getPayload());
             result = strategy.send(message);
         } else if (!isNullOrEmpty(properties.getMsh().getEndpointURL())
@@ -72,9 +77,9 @@ public class EDUCoreSender {
 
             PutMessageRequestType putMessage = eduCoreFactory.createPutMessageFromCore(message);
             result = mshClient.sendEduMelding(putMessage);
-        } else if (asList(DPV, DPE_INNSYN).contains(serviceRecord.getServiceIdentifier())) {
+        } else if (asList(DPV, DPE_INNSYN).contains(serviceRecord.get().getServiceIdentifier())) {
             Audit.info("Send message to DPV", marker);
-            final MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(serviceRecord);
+            final MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(serviceRecord.get());
             strategy = messageStrategyFactory.create(message.getPayload());
             result = strategy.send(message);
         } else {

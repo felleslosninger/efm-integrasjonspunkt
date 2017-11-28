@@ -22,6 +22,7 @@ import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.assertj.core.util.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
@@ -32,6 +33,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.jms.core.JmsTemplate;
 
 import java.net.URISyntaxException;
+import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 
@@ -155,6 +157,8 @@ public class IntegrasjonspunktIntegrationTestConfig {
         when(sr.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPO);
         when(sr.getOrganisationNumber()).thenReturn("1337");
         when(srMock.getServiceRecord(anyString())).thenReturn(sr);
+        when(srMock.getServiceRecord(anyString(), any(ServiceIdentifier.class))).thenReturn(Optional.ofNullable(sr));
+        when(srMock.getServiceRecords(anyString())).thenReturn(Lists.newArrayList(sr));
 
         return srMock;
     }

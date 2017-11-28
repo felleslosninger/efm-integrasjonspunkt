@@ -26,6 +26,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
+import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
 
 @Component
 public class NextMoveQueue {
@@ -51,7 +52,7 @@ public class NextMoveQueue {
         inRepo = new DirectionalConversationResourceRepository(repo, INCOMING);
     }
 
-    public Optional<ConversationResource> enqueueEduDocument(EduDocument eduDocument) {
+    public Optional<ConversationResource> enqueueEduDocument(EduDocument eduDocument) throws IOException {
 
         if (!(eduDocument.getAny() instanceof Payload)) {
             log.error("Message attachement not instance of Payload.");
@@ -89,11 +90,12 @@ public class NextMoveQueue {
             inRepo.save(message);
         } catch (IOException e) {
             log.error("Could not write asic container to disc.", e);
+            throw e;
         }
         Conversation c = conversationService.registerConversation(message);
         conversationService.registerStatus(c, MessageStatus.of(NextmoveReceiptStatus.LEST_FRA_SERVICEBUS));
         Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] put on local queue",
-                message.getConversationId(), message.getServiceIdentifier()));
+                message.getConversationId(), message.getServiceIdentifier()), markerFrom(message));
         return Optional.of(message);
     }
 
