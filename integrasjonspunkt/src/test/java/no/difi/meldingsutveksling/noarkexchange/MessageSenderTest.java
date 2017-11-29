@@ -96,18 +96,6 @@ public class MessageSenderTest {
     }
 
     @Test
-    public void shouldThrowMessageContextExceptionWhenMissingSenderCertificate() throws CertificateException, MessageContextException {
-        expectedException.expect(MessageContextException.class);
-        expectedException.expect(new StatusMatches(StatusMessage.MISSING_SENDER_CERTIFICATE));
-        EDUCore request = new RequestBuilder().withSender().withReciever().withServiceIdentifier().build();
-
-        when(adresseregister.getCertificate(ServiceRecordObjectMother.createDPVServiceRecord(SENDER_PARTY_NUMBER)))
-                .thenThrow(new CertificateException("hello"));
-
-        messageSender.createMessageContext(request);
-    }
-
-    @Test
     public void messageContextShouldHaveConversationId() throws MessageContextException {
         EDUCore request = new RequestBuilder().withSender().withReciever().withConversationId().withJournalpostId().withServiceIdentifier().build();
 
