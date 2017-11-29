@@ -2,30 +2,17 @@ package no.difi.meldingsutveksling.domain;
 
 
 public class Avsender extends Aktor {
-	private Noekkelpar noekkelpar;
 
-	public Avsender(Organisasjonsnummer orgNummer, Noekkelpar noekkelpar) {
+	public Avsender(Organisasjonsnummer orgNummer) {
 		super(orgNummer);
-		this.setNoekkelpar(noekkelpar);
 	}
 
 	/**
 	 * @param organisasjonsnummer          Pakk
 	 *            Organisasjonsnummeret til avsender av brevet.
-	 * @param noekkelpar
-	 *            Avsenders nøkkelpar: signert virksomhetssertifikat og
-	 *            tilhørende privatnøkkel.
 	 */
-	public static Builder builder(Organisasjonsnummer organisasjonsnummer, Noekkelpar noekkelpar) {
-		return new Builder(organisasjonsnummer, noekkelpar);
-	}
-
-	public Noekkelpar getNoekkelpar() {
-		return noekkelpar;
-	}
-
-	private void setNoekkelpar(Noekkelpar noekkelpar) {
-		this.noekkelpar = noekkelpar;
+	public static Builder builder(Organisasjonsnummer organisasjonsnummer) {
+		return new Builder(organisasjonsnummer);
 	}
 
 	public final static class Builder {
@@ -33,8 +20,8 @@ public class Avsender extends Aktor {
 		private final Avsender target;
 		private boolean built = false;
 
-		private Builder(Organisasjonsnummer orgNummer, Noekkelpar noekkelpar) {
-			target = new Avsender(orgNummer, noekkelpar);
+		private Builder(Organisasjonsnummer orgNummer) {
+			target = new Avsender(orgNummer);
 		}
 
 		public Avsender build() {
