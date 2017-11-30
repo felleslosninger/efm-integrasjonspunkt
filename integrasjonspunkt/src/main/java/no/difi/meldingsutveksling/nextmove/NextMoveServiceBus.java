@@ -133,30 +133,34 @@ public class NextMoveServiceBus {
         opts.setReceiveMode(ReceiveMode.PEEK_LOCK);
 
         ServiceBusContract service = createContract();
-        ArrayList<BrokeredMessage> messages = Lists.newArrayList();
-        for (int i=0; i<props.getNextbest().getServiceBus().getReadMaxMessages(); i++) {
-            try {
-                BrokeredMessage msg = service.receiveQueueMessage(queuePath, opts).getValue();
-                if (msg == null || isNullOrEmpty(msg.getMessageId())) {
-                    break;
+        boolean messagesInQueue = true;
+        while (messagesInQueue) {
+            ArrayList<BrokeredMessage> messages = Lists.newArrayList();
+            for (int i=0; i<props.getNextbest().getServiceBus().getReadMaxMessages(); i++) {
+                try {
+                    BrokeredMessage msg = service.receiveQueueMessage(queuePath, opts).getValue();
+                    if (msg == null || isNullOrEmpty(msg.getMessageId())) {
+                        messagesInQueue = false;
+                        break;
+                    }
+                    log.debug(format("Received message on queue=%s with id=%s", queuePath, msg.getMessageId()));
+                    messages.add(msg);
+
+                } catch (ServiceException e) {
+                    log.error("Failed to fetch new message", e);
                 }
-                log.debug(format("Received message on queue=%s with id=%s", queuePath, msg.getMessageId()));
-                messages.add(msg);
-
-            } catch (ServiceException e) {
-                log.error("Failed to fetch new message", e);
             }
-        }
 
-        for (BrokeredMessage msg : messages) {
-            try {
-                Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-                EduDocument eduDocument = ((JAXBElement<EduDocument>) unmarshaller.unmarshal(msg.getBody())).getValue();
-                Optional<ConversationResource> cr = nextMoveQueue.enqueueEduDocument(eduDocument);
-                cr.ifPresent(this::sendReceipt);
-                service.deleteMessage(msg);
-            } catch (JAXBException | ServiceException | IOException e) {
-                log.error("Failed to put message on local queue", e);
+            for (BrokeredMessage msg : messages) {
+                try {
+                    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+                    EduDocument eduDocument = ((JAXBElement<EduDocument>) unmarshaller.unmarshal(msg.getBody())).getValue();
+                    Optional<ConversationResource> cr = nextMoveQueue.enqueueEduDocument(eduDocument);
+                    cr.ifPresent(this::sendReceipt);
+                    service.deleteMessage(msg);
+                } catch (JAXBException | ServiceException | IOException e) {
+                    log.error("Failed to put message on local queue", e);
+                }
             }
         }
     }
