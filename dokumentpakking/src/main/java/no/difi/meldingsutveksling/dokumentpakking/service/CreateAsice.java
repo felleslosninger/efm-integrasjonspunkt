@@ -34,7 +34,7 @@ public class CreateAsice {
                                Mottaker mottaker) throws IOException {
 
         Manifest manifest = manifestFactory.createManifest(avsender.getOrgNummer(), mottaker.getOrgNummer(),
-                forsendelse.get(0));
+                forsendelse.isEmpty() ? null : forsendelse.get(0));
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         AsicWriter asicWriter = AsicWriterFactory.newFactory()
                 .newContainer(bos)

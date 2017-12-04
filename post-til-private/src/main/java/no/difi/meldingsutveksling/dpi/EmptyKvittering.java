@@ -42,6 +42,6 @@ public class EmptyKvittering implements ExternalReceipt {
 
     @Override
     public Conversation createConversation() {
-        return Conversation.of("", "", "", "empty receipt", null);
+        return Conversation.of("", "", "", "", "empty receipt", null);
     }
 }
