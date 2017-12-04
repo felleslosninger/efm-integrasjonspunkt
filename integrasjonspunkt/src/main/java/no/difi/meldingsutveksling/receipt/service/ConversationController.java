@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.receipt.service;
 
 import com.google.common.collect.Lists;
 import io.swagger.annotations.*;
+import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationRepository;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
@@ -16,6 +17,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
 
 @RestController
 @Api
@@ -38,9 +41,9 @@ public class ConversationController {
 
         List<Conversation> conversations;
         if (finished.isPresent()) {
-            conversations = convoRepo.findByFinished(finished.get());
+            conversations = convoRepo.findByFinishedAndDirection(finished.get(), OUTGOING);
         } else {
-            conversations = Lists.newArrayList(convoRepo.findAll());
+            conversations = Lists.newArrayList(convoRepo.findByDirection(OUTGOING));
         }
         return conversations.stream().sorted((a, b) -> b.getLastUpdate().compareTo(a.getLastUpdate())).collect(Collectors.toList());
     }
@@ -54,7 +57,7 @@ public class ConversationController {
             @ApiParam(value = "Conversation id", required = true)
             @PathVariable("id") Integer id) {
 
-        Optional<Conversation> c = convoRepo.findByConvId(id);
+        Optional<Conversation> c = convoRepo.findByConvIdAndDirection(id, OUTGOING);
         if (!c.isPresent()) {
             return ResponseEntity.notFound().build();
         }
@@ -68,7 +71,7 @@ public class ConversationController {
             @ApiResponse(code = 200, message = "Success", response = Conversation[].class)
     })
     public List<Conversation> queuedConversations() {
-        return Lists.newArrayList(convoRepo.findByPollable(true));
+        return Lists.newArrayList(convoRepo.findByPollableAndDirection(true, OUTGOING));
     }
 
     @RequestMapping(value = "/statuses", method = RequestMethod.GET)
@@ -82,6 +85,7 @@ public class ConversationController {
             @ApiParam(value = "Get all statuses with given convId")
             @RequestParam(value = "convId", required = false) Integer convId) {
 
+        // TODO: Add direction on status
         List<MessageStatus> statuses;
         if (fromId != null) {
             if (convId != null) {

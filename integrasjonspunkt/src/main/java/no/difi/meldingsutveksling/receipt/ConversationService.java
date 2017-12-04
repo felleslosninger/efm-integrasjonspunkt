@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import org.assertj.core.util.Lists;
@@ -19,6 +21,7 @@ import java.util.Optional;
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPF;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
+import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 
 @Component
 @Slf4j
@@ -72,7 +75,13 @@ public class ConversationService {
         return repo.save(conversation);
     }
 
-    public void registerConversation(EDUCore message) {
+    public Conversation registerConversation(EDUCore message) {
+        Optional<Conversation> find = repo.findByConversationId(message.getId()).stream().findFirst();
+        if (find.isPresent()) {
+            log.warn(String.format("Conversation with id=%s already exists, not recreating", message.getId()));
+            return find.get();
+        }
+
         MessageStatus ms = MessageStatus.of(GenericReceiptStatus.OPPRETTET);
         if (message.getMessageType() == EDUCore.MessageType.APPRECEIPT) {
             ms.setDescription("AppReceipt");
@@ -84,7 +93,7 @@ public class ConversationService {
             conversation.setMsh(true);
         }
 
-        repo.save(conversation);
+        return repo.save(conversation);
     }
 
     public Conversation registerConversation(ConversationResource cr) {
@@ -95,6 +104,18 @@ public class ConversationService {
         }
         MessageStatus ms = MessageStatus.of(GenericReceiptStatus.OPPRETTET);
         Conversation c = Conversation.of(cr, ms);
+        return repo.save(c);
+    }
+
+    public Conversation registerConversation(EduDocument eduDocument) {
+        Optional<Conversation> find = repo.findByConversationId(eduDocument.getConversationId()).stream().findFirst();
+        if (find.isPresent()) {
+            log.warn(String.format("Conversation with id=%s already exists, not recreating", eduDocument.getConversationId()));
+            return find.get();
+        }
+
+        MessageStatus ms = MessageStatus.of(GenericReceiptStatus.OPPRETTET);
+        Conversation c = Conversation.of(eduDocument, ms);
         return repo.save(c);
     }
 
