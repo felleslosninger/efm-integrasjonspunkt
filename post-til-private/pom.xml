@@ -3,7 +3,7 @@
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>1.7.81-SNAPSHOT</version>
+        <version>1.7.80</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -73,7 +73,7 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>common</artifactId>
-            <version>1.7.81-SNAPSHOT</version>
+            <version>1.7.80</version>
         </dependency>
     </dependencies>
 
