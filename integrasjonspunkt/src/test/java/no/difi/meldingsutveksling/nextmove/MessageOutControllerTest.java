@@ -105,7 +105,7 @@ public class MessageOutControllerTest {
         MessageStatus receiptSent = MessageStatus.of(GenericReceiptStatus.SENDT);
         MessageStatus receiptDelivered = MessageStatus.of(GenericReceiptStatus.LEVERT,
                 LocalDateTime.now().plusMinutes(1));
-        Conversation receiptConversation = Conversation.of("42", "42ref", "321", "123", "sometitle", DPO,
+        Conversation receiptConversation = Conversation.of("42", "42ref", "321", "123", OUTGOING, "sometitle", DPO,
                 receiptDelivered, receiptSent);
 
         DpoConversationResource cr42 = DpoConversationResource.of("42", "2", "1");

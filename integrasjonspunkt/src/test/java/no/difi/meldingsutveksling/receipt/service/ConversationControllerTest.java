@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.receipt.service;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.receipt.*;
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -77,8 +76,8 @@ public class ConversationControllerTest {
         when(convoRepo.findAll()).thenReturn(asList(c1, c2));
         when(convoRepo.findByConvIdAndDirection(1, OUTGOING)).thenReturn(Optional.of(c1));
         when(convoRepo.findByConvIdAndDirection(2, OUTGOING)).thenReturn(Optional.of(c2));
-        when(convoRepo.findByPollable(true)).thenReturn(asList(c1));
-        when(convoRepo.findByPollable(false)).thenReturn(asList(c2));
+        when(convoRepo.findByPollableAndDirection(true, OUTGOING)).thenReturn(asList(c1));
+        when(convoRepo.findByPollableAndDirection(false, OUTGOING)).thenReturn(asList(c2));
 
         when(statRepo.findAll()).thenReturn(asList(cId1ms1, cId1ms2, cId2ms1, cId2ms2, cId2ms3));
         when(statRepo.findAllByConvId(1)).thenReturn(asList(cId1ms1, cId1ms2));
