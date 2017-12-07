@@ -12,7 +12,6 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +47,7 @@ public class EDUCoreSenderTest {
         featureToggle.setEnableReceipts(false);
         when(properties.getFeature()).thenReturn(featureToggle);
         final MessageStrategyFactory messageStrategyFactory = mock(MessageStrategyFactory.class);
-        when(strategyFactory.getFactory(any(ServiceRecord.class))).thenReturn(messageStrategyFactory);
+        when(strategyFactory.getFactory(any(ServiceIdentifier.class))).thenReturn(messageStrategyFactory);
         final MessageStrategy messageStrategy = mock(MessageStrategy.class);
         when(messageStrategyFactory.create(any(Object.class))).thenReturn(messageStrategy);
         final PutMessageResponseType response = PutMessageResponseFactory.createOkResponse();

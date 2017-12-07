@@ -9,7 +9,6 @@ import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -64,20 +63,15 @@ public class StrategyFactoryTest {
 
     @Test
     public void givenFiksServiceRecordShouldCreateFIKSMessageStrategyFactory() {
-        ServiceRecord fiksServiceRecord = new ServiceRecord(DPF, "112233445", "certificate", "http://localhost");
-
-        MessageStrategyFactory factory = strategyFactory.getFactory(fiksServiceRecord);
+        MessageStrategyFactory factory = strategyFactory.getFactory(DPF);
 
         assertThat(factory, instanceOf(FiksMessageStrategyFactory.class));
     }
 
     @Test
     public void givenEduServiceRecordShouldCreateEduMessageStrategyFactory() {
-        // given
-        ServiceRecord eduServiceRecord = new ServiceRecord(DPO, "12345678", "certificate", "http://localhost");
-
         // when
-        final MessageStrategyFactory factory = strategyFactory.getFactory(eduServiceRecord);
+        final MessageStrategyFactory factory = strategyFactory.getFactory(DPO);
         // then
 
         assertThat(factory, instanceOf(EduMessageStrategyFactory.class));
@@ -85,9 +79,7 @@ public class StrategyFactoryTest {
 
     @Test
     public void givenPostServiceRecordShouldCreatePostMessageStrategyFactory() {
-        ServiceRecord postServiceRecord = new ServiceRecord(DPV, "12346442", "certificate", "http://localhost");
-
-        final MessageStrategyFactory factory = strategyFactory.getFactory(postServiceRecord);
+        final MessageStrategyFactory factory = strategyFactory.getFactory(DPV);
 
         assertThat(factory, instanceOf(PostVirksomhetStrategyFactory.class));
     }
@@ -95,11 +87,6 @@ public class StrategyFactoryTest {
     @Test(expected = IllegalArgumentException.class)
     public void emptyServiceRecordThrowsException() {
         strategyFactory.getFactory(null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void serviceRecordWithoutServiceIdentifierThrowsError() {
-        strategyFactory.getFactory(new ServiceRecord(null, "1235465", "certificate", "http://localhost"));
     }
 
 }

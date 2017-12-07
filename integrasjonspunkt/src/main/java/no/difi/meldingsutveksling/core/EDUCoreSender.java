@@ -28,8 +28,7 @@ import java.util.Optional;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_INNSYN;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
+import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 
 @Component
 public class EDUCoreSender {
@@ -64,11 +63,11 @@ public class EDUCoreSender {
         PutMessageResponseType result;
         MessageStrategy strategy = null;
         final LogstashMarker marker = EDUCoreMarker.markerFrom(message);
-        if (adresseRegister.hasAdresseregisterCertificate(serviceRecord.get())) {
-            Audit.info("Receiver validated", marker);
-
-            final MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(serviceRecord.get());
+        if (asList(DPO, DPI, DPF).contains(message.getServiceIdentifier()) &&
+                this.strategyFactory.hasFactory(message.getServiceIdentifier())) {
+            final MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(message.getServiceIdentifier());
             strategy = messageStrategyFactory.create(message.getPayload());
+            Audit.info(String.format("Send message to %s", message.getServiceIdentifier()), marker);
             result = strategy.send(message);
         } else if (!isNullOrEmpty(properties.getMsh().getEndpointURL())
                 && mshClient.canRecieveMessage(message.getReceiver().getIdentifier())) {
@@ -77,15 +76,16 @@ public class EDUCoreSender {
 
             PutMessageRequestType putMessage = eduCoreFactory.createPutMessageFromCore(message);
             result = mshClient.sendEduMelding(putMessage);
-        } else if (asList(DPV, DPE_INNSYN).contains(serviceRecord.get().getServiceIdentifier())) {
-            Audit.info("Send message to DPV", marker);
-            final MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(serviceRecord.get());
-            strategy = messageStrategyFactory.create(message.getPayload());
-            result = strategy.send(message);
         } else {
-            Audit.error("Unable to send message: recipient does not have IP OR MSH is not configured OR service" +
-                    " identifier is not " + DPV.toString(), marker);
-            result = PutMessageResponseFactory.createErrorResponse(new MessageException(StatusMessage.UNABLE_TO_FIND_RECEIVER));
+            if (!this.strategyFactory.hasFactory(DPV)) {
+                Audit.error("Unable to send message: recipient does not have IP OR MSH is not configured OR service" +
+                        " identifier is not " + DPV.toString(), marker);
+                result = PutMessageResponseFactory.createErrorResponse(new MessageException(StatusMessage.UNABLE_TO_FIND_RECEIVER));
+            } else {
+                final MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(DPV);
+                strategy = messageStrategyFactory.create(message.getPayload());
+                result = strategy.send(message);
+            }
         }
 
         auditResult(result, message, Optional.ofNullable(strategy));
