@@ -12,7 +12,6 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.services.Adresseregister;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.ObjectProvider;
@@ -28,7 +27,6 @@ public class EDUCoreSenderTest {
     private ServiceRegistryLookup serviceRegistryLookup;
     private ConversationService conversationService;
     private StrategyFactory strategyFactory;
-    private Adresseregister adresseregister;
     private NoarkClient mshClient;
     private EDUCoreSender eduCoreSender;
     private String IDENTIFIER = "1234";
@@ -40,7 +38,6 @@ public class EDUCoreSenderTest {
         serviceRegistryLookup = mock(ServiceRegistryLookup.class);
         conversationService = mock(ConversationService.class);
         strategyFactory = mock(StrategyFactory.class);
-        adresseregister = mock(Adresseregister.class);
         mshClient = mock(NoarkClient.class);
 
         IntegrasjonspunktProperties.FeatureToggle featureToggle = new IntegrasjonspunktProperties.FeatureToggle();
@@ -56,8 +53,7 @@ public class EDUCoreSenderTest {
         ObjectProvider objectProvider = mock(ObjectProvider.class);
         when(objectProvider.getIfAvailable()).thenReturn(mshClient);
 
-        eduCoreSender = new EDUCoreSender(properties, serviceRegistryLookup, strategyFactory, adresseregister,
-                conversationService, objectProvider);
+        eduCoreSender = new EDUCoreSender(properties, serviceRegistryLookup, strategyFactory, conversationService, objectProvider);
         setupDefaultProperties();
         setupDefaultMessage();
     }
