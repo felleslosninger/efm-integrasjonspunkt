@@ -18,7 +18,6 @@ import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import no.difi.meldingsutveksling.services.Adresseregister;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -35,7 +34,6 @@ public class EDUCoreSender {
     private final IntegrasjonspunktProperties properties;
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final StrategyFactory strategyFactory;
-    private final Adresseregister adresseRegister;
     private final NoarkClient mshClient;
     private final ConversationService conversationService;
 
@@ -43,13 +41,11 @@ public class EDUCoreSender {
     EDUCoreSender(IntegrasjonspunktProperties properties,
                   ServiceRegistryLookup serviceRegistryLookup,
                   StrategyFactory strategyFactory,
-                  Adresseregister adresseregister,
                   ConversationService conversationService,
                   @Qualifier("mshClient") ObjectProvider<NoarkClient> mshClient) {
         this.properties = properties;
         this.serviceRegistryLookup = serviceRegistryLookup;
         this.strategyFactory = strategyFactory;
-        this.adresseRegister = adresseregister;
         this.conversationService = conversationService;
         this.mshClient = mshClient.getIfAvailable();
     }

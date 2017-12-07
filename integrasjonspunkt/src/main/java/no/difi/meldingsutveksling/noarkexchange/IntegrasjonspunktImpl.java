@@ -105,8 +105,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
             strategyFactoryAvailable = validServiceIdentifier;
         }
         if (!strategyFactoryAvailable && !mshCanReceive) {
-            Audit.error(String.format("CanReceive = false. Either feature toggle for %s is disabled, or MSH cannot receive",
-                    isDpv ? DPV : serviceRecord.getServiceIdentifier()), marker);
+            Audit.error("CanReceive = false. Either feature toggle for DPV is disabled, or MSH cannot receive", marker);
             response.setResult(false);
             return response;
         }
