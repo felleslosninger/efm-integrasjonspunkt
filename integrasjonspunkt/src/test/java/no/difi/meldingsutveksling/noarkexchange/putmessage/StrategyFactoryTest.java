@@ -84,7 +84,7 @@ public class StrategyFactoryTest {
         assertThat(factory, instanceOf(PostVirksomhetStrategyFactory.class));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NullPointerException.class)
     public void emptyServiceRecordThrowsException() {
         strategyFactory.getFactory(null);
     }

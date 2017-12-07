@@ -11,6 +11,7 @@ import org.apache.commons.lang.NotImplementedException;
 
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 
@@ -58,6 +59,7 @@ public class StrategyFactory {
      * @return factory to send messages corresponding to provided service record
      */
     public MessageStrategyFactory getFactory(ServiceIdentifier si) {
+        Objects.requireNonNull(si, "ServiceIdentifier cannot be null");
         final MessageStrategyFactory factory = factories.get(si);
         if (factory == null) {
             throw new NotImplementedException(String.format("Integrasjonspunkt has no message strategy matching service identifier matching %s", si));
