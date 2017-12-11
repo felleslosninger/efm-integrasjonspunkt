@@ -12,7 +12,6 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.kvittering.EduDocumentFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveQueue;
 import no.difi.meldingsutveksling.nextmove.NextMoveServiceBus;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
@@ -84,11 +83,11 @@ public class MessagePolling implements ApplicationContextAware {
     private NextMoveServiceBus nextMoveServiceBus;
 
     @Scheduled(fixedRateString = "${difi.move.nextbest.serviceBus.pollingrate}")
-    public void checkForNewNextBestMessages() throws NextMoveException {
-
-        if (properties.getNextbest().getServiceBus().isEnable()) {
+    public void checkForNewNextBestMessages() {
+        if (properties.getNextbest().getServiceBus().isEnable() &&
+                !properties.getNextmove().getServiceBus().isBatchRead()) {
             log.debug("Checking for new NextMove messages..");
-            nextMoveServiceBus.getAllMessages();
+            nextMoveServiceBus.getAllMessagesRest();
         }
     }
 

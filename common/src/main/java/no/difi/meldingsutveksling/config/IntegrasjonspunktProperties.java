@@ -57,6 +57,9 @@ public class IntegrasjonspunktProperties {
     private NextBEST nextbest;
 
     @Valid
+    private NextMove nextmove;
+
+    @Valid
     private Sign sign;
 
     /**
@@ -155,6 +158,19 @@ public class IntegrasjonspunktProperties {
         private String trust;
     }
 
+    @Data
+    public static class NextMove {
+
+        @Valid
+        private ServiceBus serviceBus;
+
+        @Data
+        @ToString(exclude = "sasToken")
+        public static class ServiceBus {
+            private boolean batchRead;
+        }
+    }
+
     /**
      * Settings for NextBEST
      */
@@ -184,7 +200,6 @@ public class IntegrasjonspunktProperties {
             private String receiptQueue;
             private Integer readMaxMessages;
         }
-
     }
 
     @Data
