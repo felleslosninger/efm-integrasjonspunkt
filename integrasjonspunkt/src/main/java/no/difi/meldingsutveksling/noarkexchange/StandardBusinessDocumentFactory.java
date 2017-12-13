@@ -39,7 +39,6 @@ import java.security.cert.X509Certificate;
 import java.util.*;
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.*;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_RECEIPT;
 import static no.difi.meldingsutveksling.core.EDUCoreMarker.markerFrom;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.payloadSizeMarker;
 
@@ -134,10 +133,10 @@ public class StandardBusinessDocumentFactory {
 
     private byte[] encryptArchive(Mottaker mottaker, Archive archive, ServiceIdentifier serviceIdentifier) {
 
-        Set<ServiceIdentifier> dpeIdentifiers = EnumSet.of(DPE_DATA, DPE_INNSYN, DPE_RECEIPT);
+        Set<ServiceIdentifier> standardEncryptionUsers = EnumSet.of(DPE_INNSYN, DPE_RECEIPT);
 
         CmsUtil cmsUtil;
-        if(dpeIdentifiers.contains(serviceIdentifier)){
+        if(standardEncryptionUsers.contains(serviceIdentifier)){
 
             cmsUtil = new CmsUtil(null);
         }else{
