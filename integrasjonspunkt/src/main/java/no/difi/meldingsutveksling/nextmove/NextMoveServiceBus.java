@@ -6,7 +6,9 @@ import com.microsoft.windowsazure.exception.ServiceException;
 import com.microsoft.windowsazure.services.servicebus.ServiceBusConfiguration;
 import com.microsoft.windowsazure.services.servicebus.ServiceBusContract;
 import com.microsoft.windowsazure.services.servicebus.ServiceBusService;
-import com.microsoft.windowsazure.services.servicebus.models.*;
+import com.microsoft.windowsazure.services.servicebus.models.BrokeredMessage;
+import com.microsoft.windowsazure.services.servicebus.models.ReceiveMessageOptions;
+import com.microsoft.windowsazure.services.servicebus.models.ReceiveMode;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
@@ -25,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.xml.bind.*;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -67,26 +68,6 @@ public class NextMoveServiceBus {
         this.messageSender = messageSender;
         this.nextMoveQueue = nextMoveQueue;
         this.jaxbContext = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, ConversationResource.class}, null);
-    }
-
-    @PostConstruct
-    private void init() throws ServiceException {
-
-        if (!props.getNextbest().getServiceBus().isEnable()) {
-            return;
-        }
-
-        // Create queue if it does not already exist
-        ServiceBusContract service = createContract();
-        queuePath = format("%s%s%s", NEXTMOVE_QUEUE_PREFIX,
-                props.getOrg().getNumber(),
-                props.getNextbest().getServiceBus().getMode());
-        ListQueuesResult queues = service.listQueues();
-        if (!queues.getItems().stream().anyMatch(i -> i.getPath().contains(queuePath))) {
-            log.info("Queue with id {} does not already exist, creating it..", queuePath);
-            QueueInfo qi = new QueueInfo(queuePath);
-            service.createQueue(qi);
-        }
     }
 
     public void putMessage(ConversationResource resource) throws NextMoveException {
