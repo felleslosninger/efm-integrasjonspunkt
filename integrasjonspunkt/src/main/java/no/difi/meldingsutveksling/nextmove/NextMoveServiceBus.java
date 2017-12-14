@@ -68,6 +68,9 @@ public class NextMoveServiceBus {
         this.messageSender = messageSender;
         this.nextMoveQueue = nextMoveQueue;
         this.jaxbContext = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, ConversationResource.class}, null);
+        queuePath = format("%s%s%s", NEXTMOVE_QUEUE_PREFIX,
+                props.getOrg().getNumber(),
+                props.getNextbest().getServiceBus().getMode());
     }
 
     public void putMessage(ConversationResource resource) throws NextMoveException {
