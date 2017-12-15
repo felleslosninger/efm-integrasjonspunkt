@@ -13,6 +13,7 @@ import org.springframework.boot.autoconfigure.solr.SolrAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.validation.Validator;
@@ -55,15 +56,19 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
 
             IntegrasjonspunktProperties.NextMove.ServiceBus serviceBusProps = context.getBean(IntegrasjonspunktProperties.class).getNextmove().getServiceBus();
             if (serviceBusProps.isBatchRead()) {
-                try {
-                    context.getBean(NextMoveServiceBus.class).getAllMessages();
-                } catch (ServiceBusException | InterruptedException e) {
-                    log.error("Error while fetching messages from service bus", e);
-                }
+                pollServiceBus(context);
             }
 
         } catch (SecurityException se) {
             logMissingJCE(se);
+        }
+    }
+
+    private static void pollServiceBus(ApplicationContext context) {
+        try {
+            context.getBean(NextMoveServiceBus.class).getAllMessagesBatch();
+        } catch (ServiceBusException e) {
+            log.error("Error while fetching messages from service bus", e);
         }
     }
 

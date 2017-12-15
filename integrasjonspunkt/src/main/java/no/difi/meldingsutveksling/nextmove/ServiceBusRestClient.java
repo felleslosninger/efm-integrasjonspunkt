@@ -35,6 +35,7 @@ import static java.util.Arrays.asList;
 public class ServiceBusRestClient {
 
     private static final String NEXTMOVE_QUEUE_PREFIX = "nextbestqueue";
+    private static final String AUTH_HEADER = "Authorization";
 
     private ServiceRegistryLookup sr;
     private IntegrasjonspunktProperties props;
@@ -59,7 +60,7 @@ public class ServiceBusRestClient {
 
         String auth = createAuthorizationHeader(resourceUri);
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", auth);
+        headers.add(AUTH_HEADER, auth);
         headers.add("BrokerProperties", "{}");
         HttpEntity<Object> httpEntity = new HttpEntity<>(message, headers);
 
@@ -77,7 +78,7 @@ public class ServiceBusRestClient {
 
         String auth = createAuthorizationHeader(resourceUri);
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", auth);
+        headers.add(AUTH_HEADER, auth);
         HttpEntity<Object> httpEntity = new HttpEntity<>(headers);
 
         URI uri = convertToUri(resourceUri);
@@ -102,7 +103,7 @@ public class ServiceBusRestClient {
             sbmBuilder.body(eduDocument);
             log.debug(format("Received message on queue=%s with conversationId=%s", localQueuePath, eduDocument.getConversationId()));
         } catch (JAXBException e) {
-            e.printStackTrace();
+            log.error(String.format("Error unmarshalling service bus message with id=%s", brokerProperties.get("MessageId")), e);
         }
 
         return Optional.of(sbmBuilder.build());
@@ -117,7 +118,7 @@ public class ServiceBusRestClient {
 
         String auth = createAuthorizationHeader(resourceUri);
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", auth);
+        headers.add(AUTH_HEADER, auth);
         HttpEntity<Object> httpEntity = new HttpEntity<>(headers);
 
         URI uri = convertToUri(resourceUri);
@@ -147,7 +148,7 @@ public class ServiceBusRestClient {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
 
-        int expiry = Math.round(Instant.now().plusSeconds(20).toEpochMilli() / 1000);
+        int expiry = Math.round(Instant.now().plusSeconds(20).toEpochMilli() / 1000f);
         String hashInput = urlEncoded+"\n"+expiry;
 
         byte[] bytes = Hashing.hmacSha256(getSasKey().getBytes(StandardCharsets.UTF_8))

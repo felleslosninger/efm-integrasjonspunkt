@@ -74,14 +74,18 @@ public class NextMoveServiceBus {
     }
 
     @PostConstruct
-    public void init() throws ServiceBusException, InterruptedException {
+    public void init() throws NextMoveException {
         if (props.getNextmove().getServiceBus().isBatchRead()) {
             String connectionString = String.format("Endpoint=sb://%s.servicebus.windows.net/;SharedAccessKeyName=%s;SharedAccessKey=%s",
                     props.getNextbest().getServiceBus().getNamespace(),
                     props.getNextbest().getServiceBus().getSasKeyName(),
                     serviceBusClient.getSasKey());
             ConnectionStringBuilder connectionStringBuilder = new ConnectionStringBuilder(connectionString, serviceBusClient.getLocalQueuePath());
-            this.messageReceiver = ClientFactory.createMessageReceiverFromConnectionStringBuilder(connectionStringBuilder, ReceiveMode.PEEKLOCK);
+            try {
+                this.messageReceiver = ClientFactory.createMessageReceiverFromConnectionStringBuilder(connectionStringBuilder, ReceiveMode.PEEKLOCK);
+            } catch (InterruptedException | ServiceBusException e) {
+                throw new NextMoveException(e);
+            }
         }
     }
 
@@ -143,7 +147,7 @@ public class NextMoveServiceBus {
         }
     }
 
-    public void getAllMessages() throws ServiceBusException, InterruptedException {
+    public void getAllMessagesBatch() throws ServiceBusException {
         CompletableFuture currentTask = new CompletableFuture();
         CompletableFuture.runAsync(() -> {
             while (!currentTask.isCancelled()) {
@@ -151,7 +155,7 @@ public class NextMoveServiceBus {
                     log.debug("Calling receiveBatch..");
                     Collection<IMessage> messages = messageReceiver.receiveBatch(100, Duration.ofSeconds(20));
                     if (messages != null && !messages.isEmpty()) {
-                        messages.forEach((m) -> {
+                        messages.forEach(m -> {
                             try {
                                 log.debug(format("Received message on queue=%s with id=%s", serviceBusClient.getLocalQueuePath(), m.getMessageId()));
                                 Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
