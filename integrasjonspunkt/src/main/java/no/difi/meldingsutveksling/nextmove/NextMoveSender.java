@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import javax.transaction.Transactional;
 import java.util.Optional;
 
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
@@ -34,6 +35,7 @@ public class NextMoveSender {
         this.outRepo = new DirectionalConversationResourceRepository(repo, OUTGOING);
     }
 
+    @Transactional
     public void send(ConversationResource cr) {
         Optional<ConversationStrategy> strategy = strategyFactory.getStrategy(cr);
         if (!strategy.isPresent()) {
