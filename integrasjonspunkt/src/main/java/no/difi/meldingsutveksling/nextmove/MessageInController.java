@@ -224,7 +224,9 @@ public class MessageInController {
             try {
                 isr = new InputStreamResource(new FileInputStream(file));
             } catch (FileNotFoundException e) {
-                log.error("Request file \"{}\" not found on server", filename, e);
+                Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing it from queue",
+                        filename, resource.get().getConversationId(), resource.get().getSenderId()), markerFrom(resource.get()), e);
+                repo.delete(resource.get());
                 return fileNotFoundErrorResponse(filename);
             }
 
@@ -280,7 +282,9 @@ public class MessageInController {
                 bytes = FileUtils.readFileToByteArray(file);
                 isr = new InputStreamResource(new ByteArrayInputStream(bytes));
             } catch (IOException e) {
-                log.error("Could not read file \"{}\"", filename, e);
+                Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing it from queue",
+                        filename, resource.get().getConversationId(), resource.get().getSenderId()), markerFrom(resource.get()), e);
+                repo.delete(resource.get());
                 return fileNotFoundErrorResponse(filename);
             }
 

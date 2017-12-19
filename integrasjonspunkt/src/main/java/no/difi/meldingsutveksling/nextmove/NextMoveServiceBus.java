@@ -1,11 +1,14 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import com.google.common.collect.Maps;
 import com.microsoft.windowsazure.Configuration;
 import com.microsoft.windowsazure.exception.ServiceException;
 import com.microsoft.windowsazure.services.servicebus.ServiceBusConfiguration;
 import com.microsoft.windowsazure.services.servicebus.ServiceBusContract;
 import com.microsoft.windowsazure.services.servicebus.ServiceBusService;
-import com.microsoft.windowsazure.services.servicebus.models.*;
+import com.microsoft.windowsazure.services.servicebus.models.BrokeredMessage;
+import com.microsoft.windowsazure.services.servicebus.models.ReceiveMessageOptions;
+import com.microsoft.windowsazure.services.servicebus.models.ReceiveMode;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
@@ -24,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.xml.bind.*;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -66,26 +68,9 @@ public class NextMoveServiceBus {
         this.messageSender = messageSender;
         this.nextMoveQueue = nextMoveQueue;
         this.jaxbContext = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, ConversationResource.class}, null);
-    }
-
-    @PostConstruct
-    private void init() throws ServiceException {
-
-        if (!props.getNextbest().getServiceBus().isEnable()) {
-            return;
-        }
-
-        // Create queue if it does not already exist
-        ServiceBusContract service = createContract();
         queuePath = format("%s%s%s", NEXTMOVE_QUEUE_PREFIX,
                 props.getOrg().getNumber(),
                 props.getNextbest().getServiceBus().getMode());
-        ListQueuesResult queues = service.listQueues();
-        if (!queues.getItems().stream().anyMatch(i -> i.getPath().contains(queuePath))) {
-            log.info("Queue with id {} does not already exist, creating it..", queuePath);
-            QueueInfo qi = new QueueInfo(queuePath);
-            service.createQueue(qi);
-        }
     }
 
     public void putMessage(ConversationResource resource) throws NextMoveException {
@@ -132,30 +117,34 @@ public class NextMoveServiceBus {
         opts.setReceiveMode(ReceiveMode.PEEK_LOCK);
 
         ServiceBusContract service = createContract();
-        ArrayList<BrokeredMessage> messages = Lists.newArrayList();
-        while (true) {
-            try {
-                BrokeredMessage msg = service.receiveQueueMessage(queuePath, opts).getValue();
-                if (msg == null || isNullOrEmpty(msg.getMessageId())) {
-                    break;
+        boolean messagesInQueue = true;
+        while (messagesInQueue) {
+            ArrayList<BrokeredMessage> messages = Lists.newArrayList();
+            for (int i=0; i<props.getNextbest().getServiceBus().getReadMaxMessages(); i++) {
+                try {
+                    BrokeredMessage msg = service.receiveQueueMessage(queuePath, opts).getValue();
+                    if (msg == null || isNullOrEmpty(msg.getMessageId())) {
+                        messagesInQueue = false;
+                        break;
+                    }
+                    log.debug(format("Received message on queue=%s with id=%s", queuePath, msg.getMessageId()));
+                    messages.add(msg);
+
+                } catch (ServiceException e) {
+                    log.error("Failed to fetch new message", e);
                 }
-                log.debug(format("Received message on queue=%s with id=%s", queuePath, msg.getMessageId()));
-                messages.add(msg);
-
-            } catch (ServiceException e) {
-                log.error("Failed to fetch new message", e);
             }
-        }
 
-        for (BrokeredMessage msg : messages) {
-            try {
-                Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-                EduDocument eduDocument = ((JAXBElement<EduDocument>) unmarshaller.unmarshal(msg.getBody())).getValue();
-                Optional<ConversationResource> cr = nextMoveQueue.enqueueEduDocument(eduDocument);
-                cr.ifPresent(this::sendReceipt);
-                service.deleteMessage(msg);
-            } catch (JAXBException | ServiceException e) {
-                log.error("Failed to put message on local queue", e);
+            for (BrokeredMessage msg : messages) {
+                try {
+                    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+                    EduDocument eduDocument = ((JAXBElement<EduDocument>) unmarshaller.unmarshal(msg.getBody())).getValue();
+                    Optional<ConversationResource> cr = nextMoveQueue.enqueueEduDocument(eduDocument);
+                    cr.ifPresent(this::sendReceipt);
+                    service.deleteMessage(msg);
+                } catch (JAXBException | ServiceException | IOException e) {
+                    log.error("Failed to put message on local queue", e);
+                }
             }
         }
     }
@@ -164,6 +153,7 @@ public class NextMoveServiceBus {
 
         if (asList(DPE_INNSYN, DPE_DATA).contains(cr.getServiceIdentifier())) {
             DpeReceiptConversationResource dpeReceipt = DpeReceiptConversationResource.of(cr);
+            dpeReceipt.setFileRefs(Maps.newHashMap());
             try {
                 putMessage(dpeReceipt);
                 Audit.info(format("Message [id=%s, serviceIdentifier=%s] sent to service bus",

@@ -5,6 +5,7 @@ import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
@@ -37,6 +38,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static java.lang.String.format;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
 /**
@@ -109,15 +111,14 @@ public class MessagePolling implements ApplicationContextAware {
 
     @Scheduled(fixedRate = 15000)
     public void checkForNewMessages() throws MessageException {
-
+        if (!properties.getFeature().isEnableDPO()) {
+            return;
+        }
         log.debug("Checking for new messages");
 
         if (serviceRecord == null) {
-            serviceRecord = serviceRegistryLookup.getServiceRecord(properties.getOrg().getNumber());
-        }
-
-        if (!properties.getFeature().isEnableDPO()) {
-            return;
+            serviceRecord = serviceRegistryLookup.getServiceRecord(properties.getOrg().getNumber(), DPO)
+                    .orElseThrow(() -> new MeldingsUtvekslingRuntimeException(String.format("DPO ServiceRecord not found for %s", properties.getOrg().getNumber())));
         }
 
         // TODO: if ServiceRegistry returns a ServiceRecord to something other than Altinn formidlingstjeneste this

@@ -19,13 +19,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.xml.ws.BindingType;
-
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import static java.util.Arrays.asList;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_INNSYN;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
+import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageMarker.markerFrom;
 
 /**
@@ -85,31 +83,34 @@ public class IntegrasjonspunktImpl implements SOAPport {
             return response;
         }
 
-        boolean certificateAvailable = adresseRegister.hasAdresseregisterCertificate(serviceRecord);
-
         final LogstashMarker marker = MarkerFactory.receiverMarker(organisasjonsnummer);
+        boolean validServiceIdentifier = false;
         boolean mshCanReceive = false;
         boolean isDpv = false;
-        if (certificateAvailable) {
+        if (asList(DPO, DPI, DPF).contains(serviceRecord.getServiceIdentifier()) &&
+                strategyFactory.hasFactory(serviceRecord.getServiceIdentifier())) {
+            validServiceIdentifier = true;
             Audit.info("CanReceive = true", marker);
         } else if (mshClient.canRecieveMessage(organisasjonsnummer)) {
             mshCanReceive = true;
             Audit.info("MSH canReceive = true", marker);
-        } else if (asList(DPV, DPE_INNSYN).contains(serviceRecord.getServiceIdentifier())) {
+        } else {
             isDpv = true;
         }
 
-        if (!mshCanReceive && !certificateAvailable && !isDpv) {
-            Audit.error("CanReceive = false", marker);
+        boolean strategyFactoryAvailable;
+        if (isDpv) {
+            strategyFactoryAvailable = strategyFactory.hasFactory(DPV);
+        } else {
+            strategyFactoryAvailable = validServiceIdentifier;
         }
-
-        boolean strategyFactoryAvailable = strategyFactory.hasFactory(serviceRecord.getServiceIdentifier());
         if (!strategyFactoryAvailable && !mshCanReceive) {
-            Audit.error(String.format("StrategyFactory for %s not found. Feature toggle might be disabled.",
-                    serviceRecord.getServiceIdentifier()), marker);
+            Audit.error("CanReceive = false. Either feature toggle for DPV is disabled, or MSH cannot receive", marker);
+            response.setResult(false);
+            return response;
         }
 
-        response.setResult(((certificateAvailable || isDpv ) && strategyFactoryAvailable) || mshCanReceive);
+        response.setResult(true);
         return response;
     }
 

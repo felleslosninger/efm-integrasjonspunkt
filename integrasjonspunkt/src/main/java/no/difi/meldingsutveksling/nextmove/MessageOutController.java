@@ -147,11 +147,19 @@ public class MessageOutController {
             return ResponseEntity.badRequest().body(ErrorResponse.builder().error("serviceIdentifier_not_present")
                     .errorDescription("Required String parameter \'serviceIdentifier\' is not present").build());
         }
-
         if (!strategyFactory.getEnabledServices().contains(cr.getServiceIdentifier())) {
             return ResponseEntity.badRequest().body(ErrorResponse.builder().error("serviceIdentifier_not_supported")
                     .errorDescription(String.format("serviceIdentifier '%s' not supported. Supported types: %s",
                             cr.getServiceIdentifier(), strategyFactory.getEnabledServices())).build());
+        }
+        List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiverId());
+        List<ServiceIdentifier> acceptableServiceIdentifiers = serviceRecords.stream()
+                .map(ServiceRecord::getServiceIdentifier)
+                .collect(Collectors.toList());
+        if (!acceptableServiceIdentifiers.contains(cr.getServiceIdentifier())) {
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().error("serviceIdentifier_not_acceptable")
+                    .errorDescription(String.format("ServiceIdentifier '%s' not acceptable by receiver. Acceptable types: %s",
+                            cr.getServiceIdentifier(), acceptableServiceIdentifiers)).build());
         }
 
         setDefaults(cr);
@@ -238,9 +246,11 @@ public class MessageOutController {
             }
         }
 
-        ServiceRecord receiverServiceRecord = sr.getServiceRecord(cr.getReceiverId());
-        if (receiverServiceRecord.getServiceIdentifier() == ServiceIdentifier.DPV &&
-                cr.getServiceIdentifier() == ServiceIdentifier.DPI) {
+        List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiverId());
+        boolean hasDpiRecord = serviceRecords.stream()
+                .map(ServiceRecord::getServiceIdentifier)
+                .anyMatch(si -> ServiceIdentifier.DPI == si);
+        if (cr.getServiceIdentifier() == ServiceIdentifier.DPI && !hasDpiRecord) {
             cr = DpvConversationResource.of((DpiConversationResource)cr);
         }
 
@@ -294,12 +304,12 @@ public class MessageOutController {
     public ResponseEntity getTypes(
             @ApiParam(value = "Identifier", required = true)
             @PathVariable(value = "identifier") String identifier) {
-        Optional<ServiceRecord> serviceRecord = Optional.ofNullable(sr.getServiceRecord(identifier));
-        if (serviceRecord.isPresent()) {
-            ArrayList<String> types = Lists.newArrayList();
-            types.add(serviceRecord.get().getServiceIdentifier().toString());
-            types.addAll(serviceRecord.get().getDpeCapabilities());
-            return ResponseEntity.ok(types);
+        List<ServiceRecord> serviceRecords = sr.getServiceRecords(identifier);
+        if (!serviceRecords.isEmpty()) {
+            return ResponseEntity.ok(serviceRecords.stream()
+                    .map(ServiceRecord::getServiceIdentifier)
+                    .map(ServiceIdentifier::toString)
+                    .collect(Collectors.toList()));
         }
         return ResponseEntity.notFound().build();
     }

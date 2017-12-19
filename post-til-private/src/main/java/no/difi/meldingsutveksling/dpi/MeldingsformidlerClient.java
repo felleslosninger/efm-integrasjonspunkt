@@ -178,7 +178,7 @@ public class MeldingsformidlerClient {
 
         @Override
         public Conversation createConversation() {
-            Conversation conv = Conversation.of(getId(), "unknown message reference", "unknown receiver", "unknown message title", ServiceIdentifier.DPI);
+            Conversation conv = Conversation.of(getId(), "unknown message reference", "unknown sender", "unknown receiver", "unknown message title", ServiceIdentifier.DPI);
             conv.setMessageStatuses(new ArrayList<>(1));
             return conv;
         }
