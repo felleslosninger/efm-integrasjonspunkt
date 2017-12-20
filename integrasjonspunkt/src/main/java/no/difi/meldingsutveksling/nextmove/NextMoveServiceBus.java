@@ -147,14 +147,15 @@ public class NextMoveServiceBus {
         }
     }
 
-    public void getAllMessagesBatch() throws ServiceBusException {
-        CompletableFuture currentTask = new CompletableFuture();
-        CompletableFuture.runAsync(() -> {
-            while (!currentTask.isCancelled()) {
+    public CompletableFuture getAllMessagesBatch() {
+        return CompletableFuture.runAsync(() -> {
+            boolean hasQueuedMessages = true;
+            while (hasQueuedMessages) {
                 try {
                     log.debug("Calling receiveBatch..");
                     Collection<IMessage> messages = messageReceiver.receiveBatch(100, Duration.ofSeconds(20));
                     if (messages != null && !messages.isEmpty()) {
+                        log.debug("Processing {} messages..", messages.size());
                         messages.forEach(m -> {
                             try {
                                 log.debug(format("Received message on queue=%s with id=%s", serviceBusClient.getLocalQueuePath(), m.getMessageId()));
@@ -167,10 +168,13 @@ public class NextMoveServiceBus {
                                 log.error("Failed to put message on local queue", e);
                             }
                         });
+                        log.debug("Done processing {} messages", messages.size());
+                    } else {
+                        log.debug("No more messages in queue");
+                        hasQueuedMessages = false;
                     }
                 } catch (InterruptedException | ServiceBusException e) {
                     log.error("Error while processing messages from service bus", e);
-                    currentTask.completeExceptionally(e);
                 }
             }
         });

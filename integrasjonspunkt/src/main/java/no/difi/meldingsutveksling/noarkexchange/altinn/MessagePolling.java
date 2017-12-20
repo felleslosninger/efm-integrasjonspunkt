@@ -35,6 +35,7 @@ import org.springframework.stereotype.Component;
 import javax.xml.bind.JAXBElement;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
@@ -82,12 +83,23 @@ public class MessagePolling implements ApplicationContextAware {
     @Autowired
     private NextMoveServiceBus nextMoveServiceBus;
 
+    private CompletableFuture batchRead;
+
     @Scheduled(fixedRateString = "${difi.move.nextbest.serviceBus.pollingrate}")
     public void checkForNewNextBestMessages() {
         if (properties.getNextbest().getServiceBus().isEnable() &&
                 !properties.getNextmove().getServiceBus().isBatchRead()) {
             log.debug("Checking for new NextMove messages..");
             nextMoveServiceBus.getAllMessagesRest();
+        }
+        if (properties.getNextbest().getServiceBus().isEnable() &&
+                properties.getNextmove().getServiceBus().isBatchRead()) {
+            if (this.batchRead == null || this.batchRead.isDone()) {
+                log.debug("Checking for new NextMove messages (batch)..");
+                this.batchRead = nextMoveServiceBus.getAllMessagesBatch();
+            } else {
+                log.debug("Batch still processing..");
+            }
         }
     }
 

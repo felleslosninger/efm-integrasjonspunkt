@@ -54,23 +54,23 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
                     .initializers(new SpringCloudProtocolResolver())
                     .run(args);
 
-            IntegrasjonspunktProperties.NextMove.ServiceBus serviceBusProps = context.getBean(IntegrasjonspunktProperties.class).getNextmove().getServiceBus();
-            if (serviceBusProps.isBatchRead()) {
-                pollServiceBus(context);
-            }
+//            IntegrasjonspunktProperties.NextMove.ServiceBus serviceBusProps = context.getBean(IntegrasjonspunktProperties.class).getNextmove().getServiceBus();
+//            if (serviceBusProps.isBatchRead()) {
+//                pollServiceBus(context);
+//            }
 
         } catch (SecurityException se) {
             logMissingJCE(se);
         }
     }
 
-    private static void pollServiceBus(ApplicationContext context) {
-        try {
-            context.getBean(NextMoveServiceBus.class).getAllMessagesBatch();
-        } catch (ServiceBusException e) {
-            log.error("Error while fetching messages from service bus", e);
-        }
-    }
+//    private static void pollServiceBus(ApplicationContext context) {
+//        try {
+//            context.getBean(NextMoveServiceBus.class).getAllMessagesBatch();
+//        } catch (ServiceBusException e) {
+//            log.error("Error while fetching messages from service bus", e);
+//        }
+//    }
 
     private static void logMissingJCE(Exception e) {
         System.out.println(MISSING_JCE_MESSAGE);
