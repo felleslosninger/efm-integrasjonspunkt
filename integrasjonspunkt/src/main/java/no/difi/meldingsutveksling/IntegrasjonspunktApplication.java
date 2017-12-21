@@ -1,10 +1,7 @@
 package no.difi.meldingsutveksling;
 
-import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import com.sun.xml.ws.transport.http.servlet.WSSpringServlet;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktPropertiesValidator;
-import no.difi.meldingsutveksling.nextmove.NextMoveServiceBus;
 import no.difi.move.common.config.SpringCloudProtocolResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,8 +10,6 @@ import org.springframework.boot.autoconfigure.solr.SolrAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.validation.Validator;
 

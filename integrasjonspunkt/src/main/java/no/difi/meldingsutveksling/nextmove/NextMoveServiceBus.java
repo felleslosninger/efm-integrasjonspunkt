@@ -181,9 +181,7 @@ public class NextMoveServiceBus {
     }
 
     private CompletableFuture sendReceiptAsync(ConversationResource cr) {
-        return CompletableFuture.runAsync(() -> {
-            sendReceipt(cr);
-        });
+        return CompletableFuture.runAsync(() -> sendReceipt(cr));
     }
 
     private void sendReceipt(ConversationResource cr) {
