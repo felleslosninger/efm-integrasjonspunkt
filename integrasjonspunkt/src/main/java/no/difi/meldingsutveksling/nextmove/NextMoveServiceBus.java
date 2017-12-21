@@ -162,7 +162,7 @@ public class NextMoveServiceBus {
                                 Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
                                 EduDocument eduDocument = unmarshaller.unmarshal(new StreamSource(new ByteArrayInputStream(m.getBody())), EduDocument.class).getValue();
                                 Optional<ConversationResource> cr = nextMoveQueue.enqueueEduDocument(eduDocument);
-                                cr.ifPresent(this::sendReceipt);
+                                cr.ifPresent(this::sendReceiptAsync);
                                 messageReceiver.completeAsync(m.getLockToken());
                             } catch (JAXBException | IOException e) {
                                 log.error("Failed to put message on local queue", e);
@@ -180,8 +180,13 @@ public class NextMoveServiceBus {
         });
     }
 
-    private void sendReceipt(ConversationResource cr) {
+    private CompletableFuture sendReceiptAsync(ConversationResource cr) {
+        return CompletableFuture.runAsync(() -> {
+            sendReceipt(cr);
+        });
+    }
 
+    private void sendReceipt(ConversationResource cr) {
         if (asList(DPE_INNSYN, DPE_DATA).contains(cr.getServiceIdentifier())) {
             DpeReceiptConversationResource dpeReceipt = DpeReceiptConversationResource.of(cr);
             dpeReceipt.setFileRefs(Maps.newHashMap());
