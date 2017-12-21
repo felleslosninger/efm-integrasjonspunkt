@@ -26,6 +26,8 @@ import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 @Entity
 @Data
 @Slf4j
+@Table(name = "conversation",
+    indexes = {@Index(columnList = "conversation_id")})
 public class Conversation {
 
     public static final Logger statusLogger = LoggerFactory.getLogger("STATUS");
@@ -33,6 +35,7 @@ public class Conversation {
     @Id
     @GeneratedValue
     private Integer convId;
+    @Column(name = "conversation_id")
     private String conversationId;
     private String senderIdentifier;
     private String receiverIdentifier;
