@@ -74,6 +74,7 @@ public class ConversationControllerTest {
         c2.setLastUpdate(NOW);
 
         when(convoRepo.findAll()).thenReturn(asList(c1, c2));
+        when(convoRepo.findByDirection(OUTGOING)).thenReturn(asList(c1, c2));
         when(convoRepo.findByConvIdAndDirection(1, OUTGOING)).thenReturn(Optional.of(c1));
         when(convoRepo.findByConvIdAndDirection(2, OUTGOING)).thenReturn(Optional.of(c2));
         when(convoRepo.findByPollable(true)).thenReturn(asList(c1));
