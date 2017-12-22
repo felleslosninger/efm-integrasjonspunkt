@@ -46,7 +46,6 @@ public class Conversation {
     private boolean pollable;
     private boolean finished;
     private boolean msh;
-    @JsonIgnore
     private ConversationDirection direction;
     private ServiceIdentifier serviceIdentifier;
 

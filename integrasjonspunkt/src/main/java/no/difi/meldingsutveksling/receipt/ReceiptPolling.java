@@ -4,7 +4,6 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dpi.DpiReceiptStatus;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static no.difi.meldingsutveksling.dpi.MeldingsformidlerClient.EMPTY_KVITTERING;
-import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
 import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 
 /**
@@ -48,7 +46,7 @@ public class ReceiptPolling {
             return;
         }
 
-        List<Conversation> conversations = conversationRepository.findByPollableAndDirection(true, OUTGOING);
+        List<Conversation> conversations = conversationRepository.findByPollable(true);
 
         conversations.forEach(c -> {
             if (serviceEnabled(c.getServiceIdentifier())) {

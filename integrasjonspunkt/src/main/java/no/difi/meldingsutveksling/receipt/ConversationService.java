@@ -21,7 +21,6 @@ import java.util.Optional;
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPF;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
-import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 
 @Component
 @Slf4j
@@ -59,7 +58,8 @@ public class ConversationService {
         if (!hasStatus) {
             conversation.addMessageStatus(status);
 
-            if (GenericReceiptStatus.SENDT.toString().equals(status.getStatus()) &&
+            if (conversation.getDirection() == ConversationDirection.OUTGOING &&
+                    GenericReceiptStatus.SENDT.toString().equals(status.getStatus()) &&
                     POLLABLES.contains(conversation.getServiceIdentifier()) &&
                     !conversation.isMsh()) {
                 conversation.setPollable(true);

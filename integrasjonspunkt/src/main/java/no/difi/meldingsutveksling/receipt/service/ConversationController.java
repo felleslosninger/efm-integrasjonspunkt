@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.receipt.service;
 
 import com.google.common.collect.Lists;
 import io.swagger.annotations.*;
-import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationRepository;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
@@ -71,7 +70,7 @@ public class ConversationController {
             @ApiResponse(code = 200, message = "Success", response = Conversation[].class)
     })
     public List<Conversation> queuedConversations() {
-        return Lists.newArrayList(convoRepo.findByPollableAndDirection(true, OUTGOING));
+        return Lists.newArrayList(convoRepo.findByPollable(true));
     }
 
     @RequestMapping(value = "/statuses", method = RequestMethod.GET)
