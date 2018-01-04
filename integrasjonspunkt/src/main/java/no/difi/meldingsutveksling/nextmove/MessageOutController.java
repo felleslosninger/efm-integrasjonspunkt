@@ -10,8 +10,6 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
-import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -163,7 +161,7 @@ public class MessageOutController {
         }
 
         setDefaults(cr);
-        outRepo.save(cr);
+        cr = outRepo.save(cr);
         conversationService.registerConversation(cr);
         log.info(markerFrom(cr), "Created new conversation resource [id={}, serviceIdentifier={}]",
                 cr.getConversationId(), cr.getServiceIdentifier());

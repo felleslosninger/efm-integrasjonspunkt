@@ -17,9 +17,7 @@ import no.difi.meldingsutveksling.nextmove.NextMoveQueue;
 import no.difi.meldingsutveksling.nextmove.NextMoveServiceBus;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
-import no.difi.meldingsutveksling.receipt.ConversationService;
-import no.difi.meldingsutveksling.receipt.DpoReceiptStatus;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.transport.Transport;
@@ -153,7 +151,9 @@ public class MessagePolling implements ApplicationContextAware {
                 if (!isKvittering(eduDocument)) {
                     sendReceipt(eduDocument.getMessageInfo());
                     log.debug(eduDocument.createLogstashMarkers(), "Delivery receipt sent");
+                    Conversation c = conversationService.registerConversation(eduDocument);
                     internalQueue.enqueueNoark(eduDocument);
+                    conversationService.registerStatus(c, MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_MOTTATT));
                 }
 
                 client.confirmDownload(request);

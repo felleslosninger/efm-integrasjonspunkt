@@ -4,10 +4,7 @@ import com.google.common.collect.Lists;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
-import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
-import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
@@ -27,7 +24,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.File;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -106,12 +102,6 @@ public class MessageOutControllerTest {
         InfoRecord bazInfo = new InfoRecord("3", "baz", new EntityType("org", "org"));
         when(sr.getInfoRecord("3")).thenReturn(bazInfo);
 
-        MessageStatus receiptSent = MessageStatus.of(GenericReceiptStatus.SENDT);
-        MessageStatus receiptDelivered = MessageStatus.of(GenericReceiptStatus.LEVERT,
-                LocalDateTime.now().plusMinutes(1));
-        Conversation receiptConversation = Conversation.of("42", "42ref", "321", "123", "sometitle", DPO,
-                receiptDelivered, receiptSent);
-
         DpoConversationResource cr42 = DpoConversationResource.of("42", "2", "1");
         DpvConversationResource cr43 = DpvConversationResource.of("43", "2", "1");
         DpoConversationResource cr44 = DpoConversationResource.of("44", "1", "2");
@@ -120,6 +110,7 @@ public class MessageOutControllerTest {
         when(dpoMock.send(cr42)).thenReturn(ResponseEntity.ok().build());
         when(strategyFactory.getStrategy(cr42)).thenReturn(Optional.of(dpoMock));
 
+        when(repo.save(Matchers.any(ConversationResource.class))).then(i -> i.getArgumentAt(0, ConversationResource.class));
         when(repo.findByConversationIdAndDirection("42", OUTGOING)).thenReturn(Optional.of(cr42));
         when(repo.findByConversationIdAndDirection("43", OUTGOING)).thenReturn(Optional.of(cr43));
         when(repo.findByConversationIdAndDirection("1337", OUTGOING)).thenReturn(Optional.empty());

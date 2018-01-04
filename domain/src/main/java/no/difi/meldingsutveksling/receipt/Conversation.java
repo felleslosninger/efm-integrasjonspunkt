@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.noarkexchange.PayloadException;
 import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
@@ -44,6 +46,7 @@ public class Conversation {
     private boolean pollable;
     private boolean finished;
     private boolean msh;
+    private ConversationDirection direction;
     private ServiceIdentifier serviceIdentifier;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
@@ -56,12 +59,14 @@ public class Conversation {
                          String messageReference,
                          String senderIdentifier,
                          String receiverIdentifier,
+                         ConversationDirection direction,
                          String messageTitle,
                          ServiceIdentifier serviceIdentifier) {
         this.conversationId = conversationId;
         this.messageReference = messageReference;
         this.senderIdentifier = senderIdentifier;
         this.receiverIdentifier = receiverIdentifier;
+        this.direction = direction;
         this.messageTitle = messageTitle;
         this.messageStatuses = Lists.newArrayList();
         this.serviceIdentifier = serviceIdentifier;
@@ -72,11 +77,12 @@ public class Conversation {
                                   String messageReference,
                                   String senderIdentifier,
                                   String receiverIdentifier,
+                                  ConversationDirection direction,
                                   String messageTitle,
                                   ServiceIdentifier serviceIdentifier,
                                   MessageStatus... statuses) {
 
-        Conversation c = new Conversation(conversationId, messageReference, senderIdentifier, receiverIdentifier, messageTitle, serviceIdentifier);
+        Conversation c = new Conversation(conversationId, messageReference, senderIdentifier, receiverIdentifier, direction, messageTitle, serviceIdentifier);
         if (statuses != null && statuses.length > 0) {
             Stream.of(statuses)
                     .peek(r -> r.setConversationId(conversationId))
@@ -87,14 +93,26 @@ public class Conversation {
 
     public static Conversation of(ConversationResource cr, MessageStatus... statuses) {
         Conversation c = new Conversation(cr.getConversationId(), cr.getConversationId(), cr.getSenderId(), cr.getReceiverId(),
-                "", cr.getServiceIdentifier());
+                cr.getDirection(), "", cr.getServiceIdentifier());
         if (statuses != null && statuses.length > 0) {
             Stream.of(statuses)
                     .peek(r -> r.setConversationId(cr.getConversationId()))
                     .forEach(c::addMessageStatus);
         }
         return c;
+    }
 
+    public static Conversation of(EduDocument eduDocument, MessageStatus... statuses) {
+        // Only used when receiving messages, and will for EduDocument always be DPO
+        Conversation c = new Conversation(eduDocument.getConversationId(), eduDocument.getConversationId(),
+                eduDocument.getSenderOrgNumber(), eduDocument.getReceiverOrgNumber(), ConversationDirection.INCOMING,
+               "", ServiceIdentifier.DPO);
+        if (statuses != null && statuses.length > 0) {
+            Stream.of(statuses)
+                    .peek(r -> r.setConversationId(eduDocument.getConversationId()))
+                    .forEach(c::addMessageStatus);
+        }
+        return c;
     }
 
     public static Conversation of(EDUCore eduCore, MessageStatus... statuses) {
@@ -109,8 +127,8 @@ public class Conversation {
         }
 
         Conversation c = new Conversation(eduCore.getId(), eduCore.getMessageReference(),
-                eduCore.getSender().getIdentifier(), eduCore.getReceiver().getIdentifier(), msgTitle,
-                eduCore.getServiceIdentifier() == DPE_INNSYN ? DPV : eduCore.getServiceIdentifier());
+                eduCore.getSender().getIdentifier(), eduCore.getReceiver().getIdentifier(), ConversationDirection.OUTGOING,
+                msgTitle, eduCore.getServiceIdentifier() == DPE_INNSYN ? DPV : eduCore.getServiceIdentifier());
 
         if (statuses != null && statuses.length > 0) {
             Stream.of(statuses)

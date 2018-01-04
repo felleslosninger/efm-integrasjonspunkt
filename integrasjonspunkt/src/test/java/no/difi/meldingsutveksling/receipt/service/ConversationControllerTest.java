@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
+import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -63,18 +64,19 @@ public class ConversationControllerTest {
         cId2ms3.setStatId(5);
         cId2ms3.setConvId(2);
 
-        Conversation c1 = Conversation.of(cId1, "foo", "24", "42", "foo", ServiceIdentifier.DPO, cId1ms1, cId1ms2);
+        Conversation c1 = Conversation.of(cId1, "foo", "24", "42", OUTGOING, "foo", ServiceIdentifier.DPO, cId1ms1, cId1ms2);
         c1.setConvId(1);
         c1.setPollable(true);
         c1.setLastUpdate(NOW_MINUS_5_MIN);
-        Conversation c2 = Conversation.of(cId2, "foo", "24", "42", "foo", ServiceIdentifier.DPO, cId2ms1, cId2ms2, cId2ms3);
+        Conversation c2 = Conversation.of(cId2, "foo", "24", "42", OUTGOING, "foo", ServiceIdentifier.DPO, cId2ms1, cId2ms2, cId2ms3);
         c2.setConvId(2);
         c2.setPollable(false);
         c2.setLastUpdate(NOW);
 
         when(convoRepo.findAll()).thenReturn(asList(c1, c2));
-        when(convoRepo.findByConvId(1)).thenReturn(Optional.of(c1));
-        when(convoRepo.findByConvId(2)).thenReturn(Optional.of(c2));
+        when(convoRepo.findByDirection(OUTGOING)).thenReturn(asList(c1, c2));
+        when(convoRepo.findByConvIdAndDirection(1, OUTGOING)).thenReturn(Optional.of(c1));
+        when(convoRepo.findByConvIdAndDirection(2, OUTGOING)).thenReturn(Optional.of(c2));
         when(convoRepo.findByPollable(true)).thenReturn(asList(c1));
         when(convoRepo.findByPollable(false)).thenReturn(asList(c2));
 
