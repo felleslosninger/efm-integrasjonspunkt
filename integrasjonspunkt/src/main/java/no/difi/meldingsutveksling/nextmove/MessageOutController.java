@@ -159,7 +159,7 @@ public class MessageOutController {
         }
 
         setDefaults(cr);
-        outRepo.save(cr);
+        cr = outRepo.save(cr);
         conversationService.registerConversation(cr);
         log.info(markerFrom(cr), "Created new conversation resource [id={}, serviceIdentifier={}]",
                 cr.getConversationId(), cr.getServiceIdentifier());

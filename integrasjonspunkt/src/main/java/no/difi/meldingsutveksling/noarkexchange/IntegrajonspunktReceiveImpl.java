@@ -176,6 +176,9 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
             AppReceiptType result = response.getResult();
             if (result.getType().equals(OK_TYPE)) {
                 Audit.info("Delivered archive", markerFrom(response));
+                Optional<Conversation> c = conversationService.registerStatus(inputDocument.getConversationId(),
+                        MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_LEVERT));
+                c.ifPresent(conversationService::markFinished);
                 sendReceiptOpen(inputDocument);
                 if (localNoark instanceof MailClient && eduCore.getMessageType() != EDUCore.MessageType.APPRECEIPT) {
                     // Need to send AppReceipt manually in case receiver is mail

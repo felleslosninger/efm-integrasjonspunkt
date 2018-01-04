@@ -10,12 +10,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
+import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
 
 @RestController
 @Api
@@ -28,7 +32,7 @@ public class ConversationController {
     private MessageStatusRepository statusRepo;
 
     @RequestMapping(value = "/conversations", method = RequestMethod.GET)
-    @ApiOperation(value = "Get all conversations", notes = "Gets a list of all conversations")
+    @ApiOperation(value = "Get all conversations", notes = "Gets a list of all outgoing conversations")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = Conversation[].class)
     })
@@ -38,10 +42,20 @@ public class ConversationController {
 
         List<Conversation> conversations;
         if (finished.isPresent()) {
-            conversations = convoRepo.findByFinished(finished.get());
+            conversations = convoRepo.findByFinishedAndDirection(finished.get(), OUTGOING);
         } else {
-            conversations = Lists.newArrayList(convoRepo.findAll());
+            conversations = Lists.newArrayList(convoRepo.findByDirection(OUTGOING));
         }
+        return conversations.stream().sorted((a, b) -> b.getLastUpdate().compareTo(a.getLastUpdate())).collect(Collectors.toList());
+    }
+
+    @RequestMapping(value = "/in/conversations", method = RequestMethod.GET)
+    @ApiOperation(value = "Get all conversations", notes = "Gets a list of all incoming conversations")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success", response = Conversation[].class)
+    })
+    public List<Conversation> incomingConversations() {
+        ArrayList<Conversation> conversations = Lists.newArrayList(convoRepo.findByDirection(INCOMING));
         return conversations.stream().sorted((a, b) -> b.getLastUpdate().compareTo(a.getLastUpdate())).collect(Collectors.toList());
     }
 
@@ -54,7 +68,7 @@ public class ConversationController {
             @ApiParam(value = "Conversation id", required = true)
             @PathVariable("id") Integer id) {
 
-        Optional<Conversation> c = convoRepo.findByConvId(id);
+        Optional<Conversation> c = convoRepo.findByConvIdAndDirection(id, OUTGOING);
         if (!c.isPresent()) {
             return ResponseEntity.notFound().build();
         }
