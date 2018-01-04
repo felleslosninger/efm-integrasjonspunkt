@@ -172,7 +172,9 @@ public class IntegrasjonspunktIntegrationTestConfig {
     @Bean
     @Primary
     public ConversationService conversationService() {
-        return mock(ConversationService.class);
+        ConversationService conversationService = mock(ConversationService.class);
+        when(conversationService.registerStatus(anyString(), any(MessageStatus.class))).thenReturn(Optional.empty());
+        return conversationService;
     }
 
     @Bean
