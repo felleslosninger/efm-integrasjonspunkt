@@ -84,7 +84,6 @@ public class ConversationController {
             @ApiParam(value = "Get all statuses with given convId")
             @RequestParam(value = "convId", required = false) Integer convId) {
 
-        // TODO: Add direction on status
         List<MessageStatus> statuses;
         if (fromId != null) {
             if (convId != null) {

@@ -30,6 +30,7 @@ public class ConversationService {
     private IntegrasjonspunktProperties props;
     private NoarkClient mshClient;
 
+    private static final String CONVERSATION_EXISTS = "Conversation with id=%s already exists, not recreating";
     private static final List<ServiceIdentifier> POLLABLES = Lists.newArrayList(DPV, DPF);
 
     @Autowired
@@ -78,7 +79,7 @@ public class ConversationService {
     public Conversation registerConversation(EDUCore message) {
         Optional<Conversation> find = repo.findByConversationId(message.getId()).stream().findFirst();
         if (find.isPresent()) {
-            log.warn(String.format("Conversation with id=%s already exists, not recreating", message.getId()));
+            log.warn(String.format(CONVERSATION_EXISTS, message.getId()));
             return find.get();
         }
 
@@ -99,7 +100,7 @@ public class ConversationService {
     public Conversation registerConversation(ConversationResource cr) {
         Optional<Conversation> find = repo.findByConversationId(cr.getConversationId()).stream().findFirst();
         if (find.isPresent()) {
-            log.warn(String.format("Conversation with id=%s already exists, not recreating", cr.getConversationId()));
+            log.warn(String.format(CONVERSATION_EXISTS, cr.getConversationId()));
             return find.get();
         }
         MessageStatus ms = MessageStatus.of(GenericReceiptStatus.OPPRETTET);
@@ -110,7 +111,7 @@ public class ConversationService {
     public Conversation registerConversation(EduDocument eduDocument) {
         Optional<Conversation> find = repo.findByConversationId(eduDocument.getConversationId()).stream().findFirst();
         if (find.isPresent()) {
-            log.warn(String.format("Conversation with id=%s already exists, not recreating", eduDocument.getConversationId()));
+            log.warn(String.format(CONVERSATION_EXISTS, eduDocument.getConversationId()));
             return find.get();
         }
 
