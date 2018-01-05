@@ -12,8 +12,6 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -32,18 +30,13 @@ public class DpvConversationStrategy implements ConversationStrategy {
     }
 
     @Override
-    public ResponseEntity send(ConversationResource conversationResource) {
+    public void send(ConversationResource conversationResource) throws NextMoveException {
         DpvConversationResource cr = (DpvConversationResource) conversationResource;
 
         PostVirksomhetStrategyFactory dpvFactory = PostVirksomhetStrategyFactory.newInstance(props, sr);
         CorrespondenceAgencyConfiguration config = dpvFactory.getConfig();
         InsertCorrespondenceV2 message;
-        try {
-            message = CorrespondenceAgencyMessageFactory.create(config, cr);
-        } catch (NextMoveException e) {
-            log.error("Failed to create CorrespondenceAgency message", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+        message = CorrespondenceAgencyMessageFactory.create(config, cr);
 
         CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(ConversationResourceMarkers.markerFrom(cr), config);
         final CorrespondenceRequest request = new CorrespondenceRequest.Builder()
@@ -52,11 +45,9 @@ public class DpvConversationStrategy implements ConversationStrategy {
                 .withPayload(message).build();
 
         if (client.sendCorrespondence(request) == null) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create Correspondence " +
-                    "Agency Request");
+            throw new NextMoveException("Failed to create Correspondence Agency Request");
         }
 
-        return ResponseEntity.ok().build();
     }
 
 }

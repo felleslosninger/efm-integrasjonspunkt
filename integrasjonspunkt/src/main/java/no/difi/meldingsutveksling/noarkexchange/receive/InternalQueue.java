@@ -13,7 +13,6 @@ import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.nextmove.NextMoveSender;
-import no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers;
 import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
@@ -106,6 +105,7 @@ public class InternalQueue {
             ConversationResource cr = unmarshaller.unmarshal(ss, ConversationResource.class).getValue();
             nextMoveSender.send(cr);
         } catch (Exception e) {
+            Audit.error("Failed to send message... queue will retry", e);
             throw new MeldingsUtvekslingRuntimeException(e);
         }
     }

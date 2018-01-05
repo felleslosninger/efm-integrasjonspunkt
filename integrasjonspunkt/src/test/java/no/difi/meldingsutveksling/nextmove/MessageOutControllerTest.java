@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -107,7 +106,6 @@ public class MessageOutControllerTest {
         DpoConversationResource cr44 = DpoConversationResource.of("44", "1", "2");
 
         DpoConversationStrategy dpoMock = mock(DpoConversationStrategy.class);
-        when(dpoMock.send(cr42)).thenReturn(ResponseEntity.ok().build());
         when(strategyFactory.getStrategy(cr42)).thenReturn(Optional.of(dpoMock));
 
         when(repo.save(Matchers.any(ConversationResource.class))).then(i -> i.getArgumentAt(0, ConversationResource.class));

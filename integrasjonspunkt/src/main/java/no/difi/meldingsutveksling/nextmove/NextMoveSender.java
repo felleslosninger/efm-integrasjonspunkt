@@ -5,8 +5,6 @@ import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
@@ -36,7 +34,7 @@ public class NextMoveSender {
     }
 
     @Transactional
-    public void send(ConversationResource cr) {
+    public void send(ConversationResource cr) throws NextMoveException {
         Optional<ConversationStrategy> strategy = strategyFactory.getStrategy(cr);
         if (!strategy.isPresent()) {
             String errorStr = String.format("Cannot send message - serviceIdentifier \"%s\" not supported",
@@ -44,11 +42,9 @@ public class NextMoveSender {
             log.error(markerFrom(cr), errorStr);
             throw new NextMoveRuntimeException(errorStr);
         }
-        ResponseEntity response = strategy.get().send(cr);
-        if (response.getStatusCode() == HttpStatus.OK) {
-            conversationService.registerStatus(cr.getConversationId(), MessageStatus.of(GenericReceiptStatus.SENDT));
-            outRepo.delete(cr);
-            nextMoveUtils.deleteFiles(cr);
-        }
+        strategy.get().send(cr);
+        conversationService.registerStatus(cr.getConversationId(), MessageStatus.of(GenericReceiptStatus.SENDT));
+        outRepo.delete(cr);
+        nextMoveUtils.deleteFiles(cr);
     }
 }

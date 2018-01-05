@@ -9,8 +9,6 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -36,7 +34,7 @@ public class DpoConversationStrategy implements ConversationStrategy {
     }
 
     @Override
-    public ResponseEntity send(ConversationResource cr) {
+    public void send(ConversationResource cr) throws NextMoveException {
         List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiverId());
         Optional<ServiceRecord> serviceRecord = serviceRecords.stream()
                 .filter(r -> DPO == r.getServiceIdentifier())
@@ -48,20 +46,17 @@ public class DpoConversationStrategy implements ConversationStrategy {
             String errorStr = String.format("Message is of type '%s', but receiver '%s' accepts types '%s'.",
                     DPO, cr.getReceiverId(), acceptableTypes);
             log.error(markerFrom(cr), errorStr);
-            return ResponseEntity.badRequest().body(ErrorResponse.builder().error("serviceIdentifier_not_acceptable")
-                    .errorDescription(errorStr).build());
+            throw new NextMoveException(errorStr);
         }
         try {
             messageSender.sendMessage(cr);
         } catch (MessageContextException e) {
             log.error("Send message failed.", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error during sending. Check logs");
+            throw new NextMoveException(e);
         }
         Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] sent to altinn",
                 cr.getConversationId(), cr.getServiceIdentifier()),
                 markerFrom(cr));
-
-        return ResponseEntity.ok().build();
     }
 
 }
