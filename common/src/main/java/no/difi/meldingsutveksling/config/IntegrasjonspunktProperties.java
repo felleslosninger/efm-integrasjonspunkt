@@ -1,17 +1,16 @@
 package no.difi.meldingsutveksling.config;
 
 import lombok.Data;
+import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.core.io.Resource;
 
 import javax.validation.Valid;
-import javax.validation.constraints.AssertFalse;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.net.URL;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Configurable properties for Integrasjonspunkt.
@@ -95,32 +94,22 @@ public class IntegrasjonspunktProperties {
          */
         @Valid
         @NotNull(message = "Certificate properties not set.")
-        private Keystore keystore;
+        @NestedConfigurationProperty
+        private KeyStoreProperties keystore;
     }
 
     @Data
+    @ToString(exclude = "password")
     public static class PostVirksomheter {
 
         private String username;
         private String password;
+        private URL endpointUrl;
         private String externalServiceCode;
         private String externalServiceEditionCode;
-        private Sms sms;
-        @Valid
-        private Email email;
-
-        @Data
-        public static class Email {
-            @Size(max=500)
-            private String varslingstekst;
-            private String emne;
-
-            @AssertFalse(message = "Both \"varslingstekst\" and \"emne\" must be set, if either has a value.")
-            public boolean isValidVarsling() {
-                return isNullOrEmpty(varslingstekst) ^ isNullOrEmpty(emne);
-            }
-
-        }
+        private boolean notifyEmail;
+        private boolean notifySms;
+        private String notificationText;
 
     }
 
@@ -135,7 +124,8 @@ public class IntegrasjonspunktProperties {
         private URL url;
         private String audience;
         private String clientId;
-        private Keystore keystore;
+        @NestedConfigurationProperty
+        private KeyStoreProperties keystore;
     }
 
     /**
@@ -152,6 +142,7 @@ public class IntegrasjonspunktProperties {
      * Mail settings for
      */
     @Data
+    @ToString(exclude = "password")
     public static class Mail {
 
         private String smtpHost;
@@ -178,6 +169,7 @@ public class IntegrasjonspunktProperties {
         private ServiceBus serviceBus;
 
         @Data
+        @ToString(exclude = "sasToken")
         public static class ServiceBus {
 
             private boolean enable;
@@ -189,11 +181,14 @@ public class IntegrasjonspunktProperties {
             private String mode;
             @NotNull
             private String namespace;
+            private String receiptQueue;
+            private Integer readMaxMessages;
         }
 
     }
 
     @Data
+    @ToString(exclude = "password")
     public static class NorskArkivstandardSystem {
 
         private String endpointURL;
@@ -214,28 +209,6 @@ public class IntegrasjonspunktProperties {
     public static class MessageServiceHandler {
 
         private String endpointURL;
-    }
-
-    @Data
-    public static class Keystore {
-
-        /**
-         * Keystore alias for key.
-         */
-        @NotNull
-        private String alias;
-        /**
-         * Path of jks file.
-         */
-
-        @NotNull
-        private Resource path;
-        /**
-         * Password of keystore and entry.
-         */
-        @NotNull
-        private String password;
-
     }
 
     @Data

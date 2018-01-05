@@ -3,18 +3,16 @@ package no.difi.meldingsutveksling.dpi;
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ExternalReceipt;
 import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 
-import java.time.LocalDateTime;
-
 public class EmptyKvittering implements ExternalReceipt {
 
     public static final String EMPTY = "empty";
-    private static final MessageStatus EMPTY_RECEIPT = MessageStatus.of(GenericReceiptStatus.ANNET.toString(),
-            LocalDateTime.now());
+    private static final MessageStatus EMPTY_RECEIPT = MessageStatus.of(GenericReceiptStatus.ANNET);
 
     @Override
     public void confirmReceipt() {
@@ -45,6 +43,6 @@ public class EmptyKvittering implements ExternalReceipt {
 
     @Override
     public Conversation createConversation() {
-        return Conversation.of("", "", "", "empty receipt", null);
+        return Conversation.of("", "", "", "", ConversationDirection.OUTGOING, "empty receipt", null);
     }
 }

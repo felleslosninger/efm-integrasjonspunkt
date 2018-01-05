@@ -4,7 +4,6 @@ import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import org.modelmapper.ModelMapper;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
@@ -13,8 +12,6 @@ public class PutMessageRequestMapper {
         no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType r =
                 new no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType();
 
-
-        JAXBContext jaxbContext = JAXBContext.newInstance(String.class);
 
         // alt 1. Not working because Payload is missing @XmlRootElement
 //        final Marshaller marshaller = jaxbContext.createMarshaller();

@@ -1,8 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
-import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.xml.transform.StringSource;
 import org.w3c.dom.Document;
@@ -23,8 +22,7 @@ import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-import static org.apache.commons.lang.StringEscapeUtils.unescapeHtml;
-
+@Slf4j
 public class PayloadUtil {
     public static final String APP_RECEIPT_INDICATOR = "AppReceipt";
     public static final String PAYLOAD_UNKNOWN_TYPE = "Payload is of unknown type cannot determine what type of message it is";
@@ -76,23 +74,18 @@ public class PayloadUtil {
         return r.getValue();
     }
 
-    public static String queryPayload(PutMessageRequestWrapper message, String xpath) throws PayloadException {
+    public static String queryPayload(Object payload, String xpath) throws PayloadException {
         String result;
-
-        if(message.getMessageType() != PutMessageRequestWrapper.MessageType.EDUMESSAGE){
-            return "";
-        }
 
         XPathFactory xPathFactory = XPathFactory.newInstance();
         XPath xPath = xPathFactory.newXPath();
         try {
             XPathExpression expression = xPath.compile(xpath);
             String doc;
-            if (message.getPayload() instanceof String) {
-                doc = (String) message.getPayload();
-                doc = unescapeHtml(doc);
+            if (payload instanceof String) {
+                doc = (String) payload;
             } else {
-                doc = ((Node) message.getPayload()).getFirstChild().getTextContent().trim();
+                doc = ((Node) payload).getFirstChild().getTextContent().trim();
             }
 
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -105,34 +98,13 @@ public class PayloadUtil {
         return result;
     }
 
-    public static Object unmarshallPayload(Object payload) throws JAXBException {
-        String p;
-        Object msg;
-
-        if (payload instanceof String) {
-            p = (String) payload;
-            p = StringEscapeUtils.unescapeHtml(p);
-        } else {
-            p = ((Node) payload).getFirstChild().getTextContent().trim();
+    public static String queryJpId(Object payload) {
+        try {
+            return queryPayload(payload, "/Melding/journpost/jpId");
+        } catch (PayloadException e) {
+            log.warn("Could not read jpId from payload", e);
+            return "";
         }
-
-        if (PayloadUtil.isAppReceipt(payload)) {
-            JAXBContext jaxbContext = JAXBContext.newInstance("no.difi.meldingsutveksling.noarkexchange.schema");
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            msg = unmarshaller.unmarshal(new StringSource(p), AppReceiptType.class).getValue();
-        } else {
-            JAXBContext jaxbContext = JAXBContext.newInstance(MeldingType.class);
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            msg = unmarshaller.unmarshal(new StringSource(p), MeldingType.class).getValue();
-        }
-        return msg;
     }
 
-    public static MeldingType unmarshallPayloadAsMeldingType(Object payload) throws JAXBException {
-        return (MeldingType) unmarshallPayload(payload);
-    }
-
-    public static AppReceiptType unmarshallPayloadAsAppReceiptType(Object payload) throws JAXBException {
-        return (AppReceiptType) unmarshallPayload(payload);
-    }
 }

@@ -1,13 +1,12 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.ServiceRecordObjectMother;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.Receiver;
 import no.difi.meldingsutveksling.core.Sender;
-import no.difi.meldingsutveksling.noarkexchange.schema.core.JournpostType;
-import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import org.hamcrest.Description;
@@ -19,20 +18,25 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.util.Optional;
 
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MessageSenderTest {
 
-    public static final String SENDER_PARTY_NUMBER = "910075918";
-    public static final String RECIEVER_PARTY_NUMBER = "910077473";
-    public static final String CONVERSATION_ID = "conversationId";
-    public static final String JOURNALPOST_ID = "journalpostid";
+    private static final String SENDER_PARTY_NUMBER = "910075918";
+    private static final String RECIEVER_PARTY_NUMBER = "910077473";
+    private static final String CONVERSATION_ID = "conversationId";
+    private static final String JOURNALPOST_ID = "journalpostid";
+    private static final ServiceIdentifier SERVICE_IDENTIFIER = DPV;
     private MessageSender messageSender;
 
     @Rule
@@ -52,16 +56,19 @@ public class MessageSenderTest {
 
     @Before
     public void setUp() {
+        IntegrasjonspunktProperties.Organization org = new IntegrasjonspunktProperties.Organization();
+        org.setNumber(SENDER_PARTY_NUMBER);
+        when(propertiesMock.getOrg()).thenReturn(org);
         messageSender = new MessageSender();
         messageSender.setProperties(propertiesMock);
         messageSender.setKeyInfo(integrasjonspunktNokkel);
         messageSender.setAdresseregister(adresseregister);
         messageSender.setServiceRegistryLookup(serviceRegistryLookup);
 
-        when(serviceRegistryLookup.getServiceRecord(SENDER_PARTY_NUMBER))
-                .thenReturn(ServiceRecordObjectMother.createDPVServiceRecord(SENDER_PARTY_NUMBER));
-        when(serviceRegistryLookup.getServiceRecord(RECIEVER_PARTY_NUMBER))
-                .thenReturn(ServiceRecordObjectMother.createDPVServiceRecord(RECIEVER_PARTY_NUMBER));
+        when(serviceRegistryLookup.getServiceRecord(SENDER_PARTY_NUMBER, DPV))
+                .thenReturn(Optional.of(ServiceRecordObjectMother.createDPVServiceRecord(SENDER_PARTY_NUMBER)));
+        when(serviceRegistryLookup.getServiceRecord(RECIEVER_PARTY_NUMBER, DPV))
+                .thenReturn(Optional.of(ServiceRecordObjectMother.createDPVServiceRecord(RECIEVER_PARTY_NUMBER)));
     }
 
     @Test
@@ -78,8 +85,10 @@ public class MessageSenderTest {
     public void shouldThrowMessageContextExceptionWhenMissingRecipientCertificate() throws MessageContextException, CertificateException {
         expectedException.expect(MessageContextException.class);
         expectedException.expect(new StatusMatches(StatusMessage.MISSING_RECIEVER_CERTIFICATE));
-        EDUCore request = new RequestBuilder().withSender().withReciever().build();
+        EDUCore request = new RequestBuilder().withSender().withReciever().withServiceIdentifier().build();
 
+        when(adresseregister.getCertificate(ServiceRecordObjectMother.createDPVServiceRecord(SENDER_PARTY_NUMBER)))
+                .thenReturn(Mockito.mock(Certificate.class));
         when(adresseregister.getCertificate(ServiceRecordObjectMother.createDPVServiceRecord(RECIEVER_PARTY_NUMBER)))
                 .thenThrow(new CertificateException("hello"));
 
@@ -87,20 +96,8 @@ public class MessageSenderTest {
     }
 
     @Test
-    public void shouldThrowMessageContextExceptionWhenMissingSenderCertificate() throws CertificateException, MessageContextException {
-        expectedException.expect(MessageContextException.class);
-        expectedException.expect(new StatusMatches(StatusMessage.MISSING_SENDER_CERTIFICATE));
-        EDUCore request = new RequestBuilder().withSender().withReciever().build();
-
-        when(adresseregister.getCertificate(ServiceRecordObjectMother.createDPVServiceRecord(SENDER_PARTY_NUMBER)))
-                .thenThrow(new CertificateException("hello"));
-
-        messageSender.createMessageContext(request);
-    }
-
-    @Test
     public void messageContextShouldHaveConversationId() throws MessageContextException {
-        EDUCore request = new RequestBuilder().withSender().withReciever().withConversationId().withJournalpostId().build();
+        EDUCore request = new RequestBuilder().withSender().withReciever().withConversationId().withJournalpostId().withServiceIdentifier().build();
 
         MessageContext context = messageSender.createMessageContext(request);
         Assert.assertEquals(CONVERSATION_ID, context.getConversationId());
@@ -108,7 +105,7 @@ public class MessageSenderTest {
 
     @Test
     public void messageContextShouldHaveJournalPostId() throws MessageContextException {
-        EDUCore request = new RequestBuilder().withSender().withReciever().withConversationId().withJournalpostId().build();
+        EDUCore request = new RequestBuilder().withSender().withReciever().withConversationId().withJournalpostId().withServiceIdentifier().build();
 
         when(request.getMessageType()).thenReturn(EDUCore.MessageType.EDU);
         MessageContext context = messageSender.createMessageContext(request);
@@ -117,7 +114,7 @@ public class MessageSenderTest {
 
     @Test
     public void messageContextShouldHaveEmptyJounalpostIdOnAppReceipt() throws MessageContextException {
-        EDUCore request = new RequestBuilder().withSender().withReciever().withConversationId().build();
+        EDUCore request = new RequestBuilder().withSender().withReciever().withConversationId().withServiceIdentifier().build();
 
         when(request.getMessageType()).thenReturn(EDUCore.MessageType.APPRECEIPT);
         MessageContext context = messageSender.createMessageContext(request);
@@ -150,10 +147,12 @@ public class MessageSenderTest {
         }
 
         public RequestBuilder withJournalpostId() {
-            when(request.getPayloadAsMeldingType()).thenReturn(mock(MeldingType.class));
-            when(request.getPayloadAsMeldingType().getJournpost()).thenReturn(mock(JournpostType.class));
-            when(request.getPayloadAsMeldingType().getJournpost().getJpId()).thenReturn(JOURNALPOST_ID);
             when(request.getJournalpostId()).thenReturn(JOURNALPOST_ID);
+            return this;
+        }
+
+        public RequestBuilder withServiceIdentifier() {
+            when(request.getServiceIdentifier()).thenReturn(SERVICE_IDENTIFIER);
             return this;
         }
 

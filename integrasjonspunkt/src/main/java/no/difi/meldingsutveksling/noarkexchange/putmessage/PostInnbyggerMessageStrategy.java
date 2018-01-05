@@ -1,7 +1,9 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.dpi.Document;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
@@ -20,6 +22,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static no.difi.meldingsutveksling.core.EDUCoreMarker.markerFrom;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createErrorResponse;
@@ -40,12 +43,15 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
 
     @Override
     public PutMessageResponseType send(final EDUCore request) {
-        final ServiceRecord serviceRecord = serviceRegistry.getServiceRecord(request.getReceiver().getIdentifier());
+        Optional<ServiceRecord> serviceRecord = serviceRegistry.getServiceRecord(request.getReceiver().getIdentifier(), ServiceIdentifier.DPI);
+        if (!serviceRecord.isPresent()) {
+            throw new MeldingsUtvekslingRuntimeException(String.format("Receiver %s does not have ServiceRecord of type DPI", request.getReceiver().getIdentifier()));
+        }
 
         MeldingsformidlerClient client = new MeldingsformidlerClient(config, keyStore);
         try {
             Audit.info(String.format("Sending message to DPI with conversation id %s", request.getId()), markerFrom(request));
-            client.sendMelding(new EDUCoreMeldingsformidlerRequest(config, request, serviceRecord));
+            client.sendMelding(new EDUCoreMeldingsformidlerRequest(config, request, serviceRecord.get()));
         } catch (MeldingsformidlerException e) {
             Audit.error("Failed to send message to DPI", markerFrom(request), e);
             return createErrorResponse(StatusMessage.UNABLE_TO_SEND_DPI);
@@ -54,21 +60,27 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
         return createOkResponse();
     }
 
+    @Override
+    public String serviceName() {
+        return "DPI";
+    }
+
     private static class EDUCoreMeldingsformidlerRequest implements MeldingsformidlerRequest {
         static final String KAN_VARSLES = "KAN_VARSLES";
         private final DigitalPostInnbyggerConfig config;
         private final EDUCore request;
+        private final MeldingType meldingType;
         private final ServiceRecord serviceRecord;
 
         EDUCoreMeldingsformidlerRequest(DigitalPostInnbyggerConfig config, EDUCore request, ServiceRecord serviceRecord) {
             this.config = config;
             this.request = request;
             this.serviceRecord = serviceRecord;
+            this.meldingType = EDUCoreConverter.payloadAsMeldingType(request.getPayload());
         }
 
         @Override
         public Document getDocument() {
-            final MeldingType meldingType = request.getPayloadAsMeldingType();
             final DokumentType dokumentType = meldingType.getJournpost().getDokument().get(0);
             final String tittel = getSubject();
             return createDocument(tittel, dokumentType);
@@ -80,7 +92,7 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
 
         @Override
         public List<Document> getAttachments() {
-            List<DokumentType> allFiles = request.getPayloadAsMeldingType().getJournpost().getDokument();
+            List<DokumentType> allFiles = meldingType.getJournpost().getDokument();
             List<Document> attachments = new ArrayList<>();
             for(int i = 1; i < allFiles.size(); i++) {
                 final DokumentType a = allFiles.get(i);
@@ -96,7 +108,7 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
 
         @Override
         public String getSubject() {
-            return request.getPayloadAsMeldingType().getJournpost().getJpOffinnhold();
+            return meldingType.getJournpost().getJpOffinnhold();
         }
 
         @Override

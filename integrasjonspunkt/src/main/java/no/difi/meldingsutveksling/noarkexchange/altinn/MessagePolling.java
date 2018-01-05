@@ -1,30 +1,27 @@
 package no.difi.meldingsutveksling.noarkexchange.altinn;
 
+import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.kvittering.EduDocumentFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveQueue;
 import no.difi.meldingsutveksling.nextmove.NextMoveServiceBus;
-import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
-import no.difi.meldingsutveksling.receipt.Conversation;
-import no.difi.meldingsutveksling.receipt.ConversationRepository;
-import no.difi.meldingsutveksling.receipt.DpoReceiptStatus;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +35,8 @@ import javax.xml.bind.JAXBElement;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static java.lang.String.format;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
 /**
@@ -45,9 +44,8 @@ import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom
  * downloaded forwarded to the Archive system.
  */
 @Component
+@Slf4j
 public class MessagePolling implements ApplicationContextAware {
-
-    private Logger logger = LoggerFactory.getLogger(MessagePolling.class);
 
     ApplicationContext context;
 
@@ -70,7 +68,7 @@ public class MessagePolling implements ApplicationContextAware {
     ServiceRegistryLookup serviceRegistryLookup;
 
     @Autowired
-    ConversationRepository conversationRepository;
+    ConversationService conversationService;
 
     @Autowired
     ObjectProvider<List<MessageDownloaderModule>> messageDownloaders;
@@ -83,13 +81,12 @@ public class MessagePolling implements ApplicationContextAware {
     @Autowired
     private NextMoveServiceBus nextMoveServiceBus;
 
-    @Scheduled(fixedRate = 5000L)
+    @Scheduled(fixedRateString = "${difi.move.nextbest.serviceBus.pollingrate}")
     public void checkForNewNextBestMessages() throws NextMoveException {
 
         if (properties.getNextbest().getServiceBus().isEnable()) {
-            logger.debug("Checking for new NextMove messages..");
-            List<EduDocument> messages = nextMoveServiceBus.getAllMessages();
-            messages.forEach(nextMoveQueue::enqueueEduDocument);
+            log.debug("Checking for new NextMove messages..");
+            nextMoveServiceBus.getAllMessages();
         }
     }
 
@@ -100,10 +97,10 @@ public class MessagePolling implements ApplicationContextAware {
             return;
         }
 
-        logger.debug("Checking for new FIKS messages");
+        log.debug("Checking for new FIKS messages");
         if (messageDownloaders.getIfAvailable() != null) {
             for (MessageDownloaderModule task : messageDownloaders.getObject()) {
-                logger.debug("performing enabled task");
+                log.debug("performing enabled task");
                 task.downloadFiles();
             }
         }
@@ -112,15 +109,14 @@ public class MessagePolling implements ApplicationContextAware {
 
     @Scheduled(fixedRate = 15000)
     public void checkForNewMessages() throws MessageException {
-
-        logger.debug("Checking for new messages");
-
-        if (serviceRecord == null) {
-            serviceRecord = serviceRegistryLookup.getServiceRecord(properties.getOrg().getNumber());
-        }
-
         if (!properties.getFeature().isEnableDPO()) {
             return;
+        }
+        log.debug("Checking for new messages");
+
+        if (serviceRecord == null) {
+            serviceRecord = serviceRegistryLookup.getServiceRecord(properties.getOrg().getNumber(), DPO)
+                    .orElseThrow(() -> new MeldingsUtvekslingRuntimeException(String.format("DPO ServiceRecord not found for %s", properties.getOrg().getNumber())));
         }
 
         // TODO: if ServiceRegistry returns a ServiceRecord to something other than Altinn formidlingstjeneste this
@@ -131,44 +127,47 @@ public class MessagePolling implements ApplicationContextAware {
         List<FileReference> fileReferences = client.availableFiles(properties.getOrg().getNumber());
 
         if (!fileReferences.isEmpty()) {
-            Audit.info("New message(s) detected");
+            log.debug("New message(s) detected");
         }
 
         for (FileReference reference : fileReferences) {
-            final DownloadRequest request = new DownloadRequest(reference.getValue(), properties.getOrg().getNumber());
-            EduDocument eduDocument = client.download(request);
+            try {
+                final DownloadRequest request = new DownloadRequest(reference.getValue(), properties.getOrg().getNumber());
+                log.debug(format("Downloading message with altinnId=%s", reference.getValue()));
+                EduDocument eduDocument = client.download(request);
+                Audit.info(format("Downloaded message with id=%s", eduDocument.getConversationId()), eduDocument.createLogstashMarkers());
 
-            if (isNextMove(eduDocument)) {
-                logger.info("NextBest Message received");
+                if (isNextMove(eduDocument)) {
+                    log.debug(format("NextMove message id=%s", eduDocument.getConversationId()));
+                    client.confirmDownload(request);
+                    if (!properties.getNoarkSystem().getEndpointURL().isEmpty()) {
+                        internalQueue.enqueueNoark(eduDocument);
+                    } else {
+                        nextMoveQueue.enqueueEduDocument(eduDocument);
+                    }
+                    continue;
+                }
+
+                if (!isKvittering(eduDocument)) {
+                    sendReceipt(eduDocument.getMessageInfo());
+                    log.debug(eduDocument.createLogstashMarkers(), "Delivery receipt sent");
+                    Conversation c = conversationService.registerConversation(eduDocument);
+                    internalQueue.enqueueNoark(eduDocument);
+                    conversationService.registerStatus(c, MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_MOTTATT));
+                }
+
                 client.confirmDownload(request);
-                Audit.info("Message downloaded", markerFrom(reference).and(eduDocument.createLogstashMarkers()));
-                nextMoveQueue.enqueueEduDocument(eduDocument);
-                continue;
-            }
+                log.debug(markerFrom(reference).and(eduDocument.createLogstashMarkers()), "Message confirmed downloaded");
 
-            if (!isKvittering(eduDocument)) {
-                sendReceipt(eduDocument.getMessageInfo());
-                Audit.info("Delivery receipt sent", eduDocument.createLogstashMarkers());
-                internalQueue.enqueueNoark(eduDocument);
-            }
-
-            client.confirmDownload(request);
-            Audit.info("Message downloaded", markerFrom(reference).and(eduDocument.createLogstashMarkers()));
-
-            if (isKvittering(eduDocument)) {
-                JAXBElement<Kvittering> jaxbKvit = (JAXBElement<Kvittering>) eduDocument.getAny();
-                Audit.info("Message is a receipt", eduDocument.createLogstashMarkers().and(getReceiptTypeMarker
-                        (jaxbKvit.getValue())));
-                MessageStatus status = statusFromKvittering(jaxbKvit.getValue());
-                Conversation conversation = conversationRepository.findByConversationId(eduDocument.getConversationId())
-                        .stream()
-                        .findFirst()
-                        .orElse(Conversation.of(eduDocument.getConversationId(),
-                                "unknown", eduDocument
-                                .getReceiverOrgNumber(),
-                                "unknown", ServiceIdentifier.DPO));
-                conversation.addMessageStatus(status);
-                conversationRepository.save(conversation);
+                if (isKvittering(eduDocument)) {
+                    JAXBElement<Kvittering> jaxbKvit = (JAXBElement<Kvittering>) eduDocument.getAny();
+                    Audit.info(format("Message id=%s is a receipt", eduDocument.getConversationId()),
+                            eduDocument.createLogstashMarkers().and(getReceiptTypeMarker(jaxbKvit.getValue())));
+                    MessageStatus status = statusFromKvittering(jaxbKvit.getValue());
+                    conversationService.registerStatus(eduDocument.getConversationId(), status);
+                }
+            } catch (Exception e) {
+                log.error(format("Error during Altinn message polling, message altinnId=%s", reference.getValue()), e);
             }
         }
     }
@@ -187,7 +186,7 @@ public class MessagePolling implements ApplicationContextAware {
     private MessageStatus statusFromKvittering(Kvittering kvittering) {
         DpoReceiptStatus status = DpoReceiptStatus.of(kvittering);
         LocalDateTime tidspunkt = kvittering.getTidspunkt().toGregorianCalendar().toZonedDateTime().toLocalDateTime();
-        return MessageStatus.of(status.toString(), tidspunkt);
+        return MessageStatus.of(status, tidspunkt);
     }
 
     private boolean isKvittering(EduDocument eduDocument) {

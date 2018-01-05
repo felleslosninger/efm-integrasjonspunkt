@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.core;
 
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
@@ -10,59 +11,59 @@ import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategy;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
-import no.difi.meldingsutveksling.noarkexchange.receive.EDUCoreConverter;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import no.difi.meldingsutveksling.receipt.Conversation;
-import no.difi.meldingsutveksling.receipt.ConversationRepository;
+import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import no.difi.meldingsutveksling.services.Adresseregister;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
+import static java.util.Arrays.asList;
+import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 
 @Component
 public class EDUCoreSender {
     private final IntegrasjonspunktProperties properties;
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final StrategyFactory strategyFactory;
-    private final Adresseregister adresseRegister;
     private final NoarkClient mshClient;
-    private final ConversationRepository conversationRepository;
+    private final ConversationService conversationService;
 
     @Autowired
     EDUCoreSender(IntegrasjonspunktProperties properties,
                   ServiceRegistryLookup serviceRegistryLookup,
                   StrategyFactory strategyFactory,
-                  Adresseregister adresseregister,
-                  ConversationRepository conversationRepository,
+                  ConversationService conversationService,
                   @Qualifier("mshClient") ObjectProvider<NoarkClient> mshClient) {
         this.properties = properties;
         this.serviceRegistryLookup = serviceRegistryLookup;
         this.strategyFactory = strategyFactory;
-        this.adresseRegister = adresseregister;
-        this.conversationRepository = conversationRepository;
+        this.conversationService = conversationService;
         this.mshClient = mshClient.getIfAvailable();
     }
 
     public PutMessageResponseType sendMessage(EDUCore message) {
-        final ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(message.getReceiver().getIdentifier());
+        Optional<ServiceRecord> serviceRecord = serviceRegistryLookup.getServiceRecord(message.getReceiver().getIdentifier(), message.getServiceIdentifier());
+        if (!serviceRecord.isPresent()) {
+            throw new MeldingsUtvekslingRuntimeException(String.format("ServiceRecord of type %s not found for receiver %s",
+                    message.getServiceIdentifier(), message.getReceiver().getIdentifier()));
+        }
         PutMessageResponseType result;
+        MessageStrategy strategy = null;
         final LogstashMarker marker = EDUCoreMarker.markerFrom(message);
-        if (adresseRegister.hasAdresseregisterCertificate(serviceRecord)) {
-            Audit.info("Receiver validated", marker);
-
-            final MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(serviceRecord);
-            MessageStrategy strategy = messageStrategyFactory.create(message.getPayload());
+        if (asList(DPO, DPI, DPF).contains(message.getServiceIdentifier()) &&
+                this.strategyFactory.hasFactory(message.getServiceIdentifier())) {
+            final MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(message.getServiceIdentifier());
+            strategy = messageStrategyFactory.create(message.getPayload());
+            Audit.info(String.format("Send message to %s", message.getServiceIdentifier()), marker);
             result = strategy.send(message);
         } else if (!isNullOrEmpty(properties.getMsh().getEndpointURL())
                 && mshClient.canRecieveMessage(message.getReceiver().getIdentifier())) {
@@ -70,21 +71,20 @@ public class EDUCoreSender {
             EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
 
             PutMessageRequestType putMessage = eduCoreFactory.createPutMessageFromCore(message);
-            EDUCoreConverter eduCoreConverter = new EDUCoreConverter();
-            putMessage.setPayload(eduCoreConverter.payloadAsString(message));
             result = mshClient.sendEduMelding(putMessage);
-        } else if (DPV.equals(serviceRecord.getServiceIdentifier())) {
-            Audit.info("Send message to DPV", marker);
-            final MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(serviceRecord);
-            MessageStrategy strategy = messageStrategyFactory.create(message.getPayload());
-            result = strategy.send(message);
         } else {
-            Audit.error("Unable to send message: recipient does not have IP OR MSH is not configured OR service" +
-                    " identifier is not " + DPV.toString(), marker);
-            result = PutMessageResponseFactory.createErrorResponse(new MessageException(StatusMessage.UNABLE_TO_FIND_RECEIVER));
+            if (!this.strategyFactory.hasFactory(DPV)) {
+                Audit.error("Unable to send message: recipient does not have IP OR MSH is not configured OR service" +
+                        " identifier is not " + DPV.toString(), marker);
+                result = PutMessageResponseFactory.createErrorResponse(new MessageException(StatusMessage.UNABLE_TO_FIND_RECEIVER));
+            } else {
+                final MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(DPV);
+                strategy = messageStrategyFactory.create(message.getPayload());
+                result = strategy.send(message);
+            }
         }
 
-        auditResult(result, message);
+        auditResult(result, message, Optional.ofNullable(strategy));
         createReceiptIfValidResult(result, message);
         return result;
     }
@@ -93,20 +93,20 @@ public class EDUCoreSender {
         if (properties.getFeature().isEnableReceipts() &&
                 message.getServiceIdentifier() != null &&
                 "OK".equals(result.getResult().getType())) {
-            MessageStatus status = MessageStatus.of(GenericReceiptStatus.SENDT.toString(), LocalDateTime.now());
+            MessageStatus ms = MessageStatus.of(GenericReceiptStatus.SENDT);
             if (message.getMessageType() == EDUCore.MessageType.APPRECEIPT) {
-                status.setDescription("AppReceipt");
+                ms.setDescription("AppReceipt");
             }
-            Conversation conversation = Conversation.of(message, status);
-            conversationRepository.save(conversation);
+            conversationService.registerStatus(message.getId(), ms);
         }
     }
 
-    private void auditResult(PutMessageResponseType result, EDUCore message) {
+    private void auditResult(PutMessageResponseType result, EDUCore message, Optional<MessageStrategy> strategy) {
+        String type = strategy.map(MessageStrategy::serviceName).orElse("MSH");
         if ("OK".equals(result.getResult().getType())) {
-            Audit.info("Message sent", EDUCoreMarker.markerFrom(message));
+            Audit.info(String.format("%s message sent", type), EDUCoreMarker.markerFrom(message));
         } else {
-            Audit.error("Message sending failed", EDUCoreMarker.markerFrom(message));
+            Audit.error(String.format("%s message sending failed", type), EDUCoreMarker.markerFrom(message));
         }
     }
 

@@ -19,7 +19,7 @@ public class MockConfiguration {
     public ServiceRegistryLookup serviceRegistryLookup() {
         def lookup = mock(ServiceRegistryLookup)
         def pem = this.getClass().getClassLoader().getResource("difi-cert-test.pem").text
-        when(lookup.getServiceRecord(Mockito.any(String))).thenReturn(new ServiceRecord(DPF, "123456789", pem, "http://localhost"))
+        when(lookup.getServiceRecord(Mockito.any(String), Mockito.eq(DPF))).thenReturn(Optional.of(new ServiceRecord(DPF, "123456789", pem, "http://localhost")))
         def infoRecord = new InfoRecord("123456789", "foo", new EntityType("Organisasjonsledd", "ORGL"))
         when(lookup.getInfoRecord(Mockito.any(String))).thenReturn(infoRecord)
         return lookup
@@ -27,6 +27,11 @@ public class MockConfiguration {
 
     @Bean(name = "localNoark")
     public NoarkClient noarkClient() {
+        return mock(NoarkClient)
+    }
+
+    @Bean(name = "fiksMailClient")
+    NoarkClient fiksMailCLient() {
         return mock(NoarkClient)
     }
 }

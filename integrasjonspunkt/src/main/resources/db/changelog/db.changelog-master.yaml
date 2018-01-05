@@ -72,3 +72,97 @@ databaseChangeLog:
                   constraints:
                     primaryKey: true
                     nullable: false
+  - changeSet:
+      id: 3
+      author: maw
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: conversation_resource
+        - not:
+            - columnExists:
+                tableName: conversation_resource
+                columnName: locked
+      changes:
+        - addColumn:
+            tableName: conversation_resource
+            columns:
+              - column:
+                  name: locked
+                  type: boolean
+                  valueBoolean: false
+  - changeSet:
+      id: 4
+      author: maw
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: conversation_resource
+        - not:
+            - columnExists:
+                tableName: conversation_resource
+                columnName: has_arkivmelding
+      changes:
+        - addColumn:
+            tableName: conversation_resource
+            columns:
+              - column:
+                  name: has_arkivmelding
+                  type: boolean
+                  valueBoolean: false
+  - changeSet:
+      id: 5
+      author: maw
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: conversation
+        - not:
+            - columnExists:
+                tableName: conversation
+                columnName: msh
+      changes:
+        - addColumn:
+            tableName: conversation
+            columns:
+              - column:
+                  name: msh
+                  type: boolean
+                  valueBoolean: false
+  - changeSet:
+      id: 6
+      author: maw
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: conversation
+        - not:
+            - columnExists:
+                tableName: conversation
+                columnName: senderIdentifier
+      changes:
+        - addColumn:
+            tableName: conversation
+            columns:
+              - column:
+                  name: senderIdentifier
+                  type: varchar(255)
+  - changeSet:
+      id: 7
+      author: maw
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: conversation
+        - not:
+            - columnExists:
+                tableName: conversation
+                columnName: direction
+      changes:
+        - addColumn:
+            tableName: conversation
+            columns:
+              - column:
+                  name: direction
+                  type: integer
+                  valueNumeric: 0

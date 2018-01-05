@@ -2,6 +2,8 @@ package no.difi.meldingsutveksling.dpi;
 
 import com.google.common.io.ByteStreams;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.config.KeyStoreProperties;
 import no.difi.meldingsutveksling.config.dpi.securitylevel.SecurityLevel;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress;
 import no.difi.sdp.client2.domain.Prioritet;
@@ -156,7 +158,7 @@ public class MeldingsformidlerClientMain {
 
     static DigitalPostInnbyggerConfig getDigitalPostInnbyggerConfig(String mpcId) {
         DigitalPostInnbyggerConfig config = new DigitalPostInnbyggerConfig();
-        DigitalPostInnbyggerConfig.Keystore keystoreValues = new DigitalPostInnbyggerConfig.Keystore();
+        KeyStoreProperties keystoreValues = new KeyStoreProperties();
         keystoreValues.setPassword(PASSWORD);
         keystoreValues.setAlias(CLIENT_ALIAS);
         config.setKeystore(keystoreValues);

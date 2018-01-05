@@ -39,8 +39,9 @@ public class SvarInnBeans {
 
     @Bean
     SvarInnService svarInnService(SvarInnClient svarInnClient, SvarInnFileDecryptor svarInnFileDecryptor,
-                                  SvarInnUnzipper svarInnUnzipper, @Qualifier("localNoark") NoarkClient localNoark) {
-        return new SvarInnService(svarInnClient, svarInnFileDecryptor, svarInnUnzipper, localNoark);
+                                  SvarInnUnzipper svarInnUnzipper, @Qualifier("localNoark") NoarkClient localNoark,
+                                  @Qualifier("fiksMailClient") NoarkClient mailClient, IntegrasjonspunktProperties properties) {
+        return new SvarInnService(svarInnClient, svarInnFileDecryptor, svarInnUnzipper, localNoark, mailClient, properties);
     }
 
 }

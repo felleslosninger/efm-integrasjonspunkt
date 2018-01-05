@@ -6,7 +6,7 @@ import no.difi.meldingsutveksling.core.EDUCoreFactory;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory;
-import no.difi.meldingsutveksling.noarkexchange.receive.EDUCoreConverter;
+import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
@@ -41,14 +41,20 @@ class FiksMessageStrategy implements MessageStrategy {
             Object oldPayload = request.getPayload();
             request.swapSenderAndReceiver();
             request.setMessageType(EDUCore.MessageType.APPRECEIPT);
-            EDUCoreConverter eduCoreConverter = new EDUCoreConverter();
-            request.setPayload(eduCoreConverter.appReceiptAsString(receipt));
+            request.setPayload(EDUCoreConverter.appReceiptAsString(receipt));
             PutMessageRequestType putMessage = EDUCoreFactory.createPutMessageFromCore(request);
             noarkClient.sendEduMelding(putMessage);
             request.setPayload(oldPayload);
+            request.setMessageType(EDUCore.MessageType.EDU);
+            request.swapSenderAndReceiver();
         }
 
 
         return PutMessageResponseFactory.createOkResponse();
+    }
+
+    @Override
+    public String serviceName() {
+        return "DPF";
     }
 }

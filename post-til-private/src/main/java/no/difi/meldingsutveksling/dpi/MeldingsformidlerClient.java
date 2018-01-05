@@ -4,6 +4,7 @@ import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
+import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ExternalReceipt;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
@@ -162,7 +163,7 @@ public class MeldingsformidlerClient {
 
         @Override
         public MessageStatus toMessageStatus() {
-            MessageStatus domainReceipt = MessageStatus.of(getReceiptType().toString(),
+            MessageStatus domainReceipt = MessageStatus.of(getReceiptType(),
                     LocalDateTime.ofInstant(eksternKvittering.getTidspunkt(), ZoneId.systemDefault()));
             domainReceipt.setRawReceipt(getRawReceipt());
             return domainReceipt;
@@ -178,7 +179,7 @@ public class MeldingsformidlerClient {
 
         @Override
         public Conversation createConversation() {
-            Conversation conv = Conversation.of(getId(), "unknown message reference", "unknown receiver", "unknown message title", ServiceIdentifier.DPI);
+            Conversation conv = Conversation.of(getId(), "unknown message reference", "unknown sender", "unknown receiver", ConversationDirection.OUTGOING, "unknown message title", ServiceIdentifier.DPI);
             conv.setMessageStatuses(new ArrayList<>(1));
             return conv;
         }

@@ -3,33 +3,46 @@ package no.difi.meldingsutveksling.nextmove;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.swagger.annotations.*;
+import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
+import no.difi.meldingsutveksling.receipt.ConversationService;
+import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
+import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.xml.sax.SAXException;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
+import javax.transaction.Transactional;
+import javax.xml.XMLConstants;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
 import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
@@ -39,6 +52,7 @@ import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMa
 public class MessageOutController {
 
     private static final Logger log = LoggerFactory.getLogger(MessageOutController.class);
+    private static final String ARKIVMELDING_FILE = "arkivmelding.xml";
 
     private DirectionalConversationResourceRepository outRepo;
     private DirectionalConversationResourceRepository inRepo;
@@ -57,6 +71,12 @@ public class MessageOutController {
 
     @Autowired
     private ConversationStrategyFactory strategyFactory;
+
+    @Autowired
+    private ConversationService conversationService;
+
+    @Autowired
+    private NextMoveUtils nextMoveUtils;
 
     @Autowired
     public MessageOutController(ConversationResourceRepository repo) {
@@ -123,23 +143,26 @@ public class MessageOutController {
             return ResponseEntity.badRequest().body(ErrorResponse.builder().error("serviceIdentifier_not_present")
                     .errorDescription("Required String parameter \'serviceIdentifier\' is not present").build());
         }
-
         if (!strategyFactory.getEnabledServices().contains(cr.getServiceIdentifier())) {
             return ResponseEntity.badRequest().body(ErrorResponse.builder().error("serviceIdentifier_not_supported")
                     .errorDescription(String.format("serviceIdentifier '%s' not supported. Supported types: %s",
                             cr.getServiceIdentifier(), strategyFactory.getEnabledServices())).build());
         }
-
-        ServiceRecord receiverServiceRecord = sr.getServiceRecord(cr.getReceiverId());
-        if (receiverServiceRecord.getServiceIdentifier() == DPV &&
-                cr.getServiceIdentifier() != DPV) {
-            return ResponseEntity.badRequest().body(ErrorResponse.builder().error("not_in_elma")
-                    .errorDescription("Receiver not found in ELMA, not creating message.").build());
+        List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiverId());
+        List<ServiceIdentifier> acceptableServiceIdentifiers = serviceRecords.stream()
+                .map(ServiceRecord::getServiceIdentifier)
+                .collect(Collectors.toList());
+        if (!acceptableServiceIdentifiers.contains(cr.getServiceIdentifier())) {
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().error("serviceIdentifier_not_acceptable")
+                    .errorDescription(String.format("ServiceIdentifier '%s' not acceptable by receiver. Acceptable types: %s",
+                            cr.getServiceIdentifier(), acceptableServiceIdentifiers)).build());
         }
 
         setDefaults(cr);
-        outRepo.save(cr);
-        log.info(markerFrom(cr), "Created new conversation resource with id={}", cr.getConversationId());
+        cr = outRepo.save(cr);
+        conversationService.registerConversation(cr);
+        log.info(markerFrom(cr), "Created new conversation resource [id={}, serviceIdentifier={}]",
+                cr.getConversationId(), cr.getServiceIdentifier());
 
         return ResponseEntity.ok(cr);
     }
@@ -163,6 +186,7 @@ public class MessageOutController {
             @ApiResponse(code = 404, message = "Not found", response = String.class),
             @ApiResponse(code = 500, message = "Internal error", response = String.class)
     })
+    @Transactional
     public ResponseEntity uploadFiles(
             @ApiParam(value = "Conversation id")
             @PathVariable("conversationId") String conversationId,
@@ -173,50 +197,111 @@ public class MessageOutController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error("not_found")
                     .errorDescription("No conversation with supplied id found").build());
         }
-        ConversationResource conversationResource = find.get();
+        ConversationResource cr = find.get();
+
+        Optional<String> arkivmeldingFile = request.getFileMap().values().stream()
+                .map(MultipartFile::getOriginalFilename)
+                .filter(ARKIVMELDING_FILE::equals)
+                .findFirst();
+        if (arkivmeldingFile.isPresent()) {
+            ResponseEntity arkivmeldingResponse = handleArkivmelding(request, cr);
+            if (arkivmeldingResponse.getStatusCode() != HttpStatus.OK) {
+                return arkivmeldingResponse;
+            }
+        }
 
         ArrayList<String> files = Lists.newArrayList(request.getFileNames());
+        // MOVE-414: temp fix until arkivmelding implementation
+        if (files.contains("hoveddokument")) {
+            Collections.swap(files, files.indexOf("hoveddokument"), 0);
+        }
         for (String f : files) {
             MultipartFile file = request.getFile(f);
-            log.trace(markerFrom(conversationResource), "Adding file \"{}\" ({}, {} bytes) to {}",
-                    file.getOriginalFilename(), file.getContentType(), file.getSize(), conversationResource.getConversationId());
+            log.trace(markerFrom(cr), "Adding file \"{}\" ({}, {} bytes) to {}",
+                    file.getOriginalFilename(), file.getContentType(), file.getSize(), cr.getConversationId());
 
-            String filedir = props.getNextbest().getFiledir();
-            if (!filedir.endsWith("/")) {
-                filedir = filedir+"/";
-            }
-            filedir = filedir+conversationId+"/";
+            String filedir = nextMoveUtils.getConversationFiledirPath(cr);
             File localFile = new File(filedir+file.getOriginalFilename());
             localFile.getParentFile().mkdirs();
 
             try (FileOutputStream os = new FileOutputStream(localFile);
                 BufferedOutputStream bos = new BufferedOutputStream(os)) {
-                bos.write(file.getBytes());
+                if (cr.getCustomProperties().containsKey("base64") && "true".equalsIgnoreCase(cr.getCustomProperties().get("base64"))) {
+                    bos.write(Base64.getDecoder().decode(new String(file.getBytes()).getBytes(StandardCharsets.UTF_8)));
+                } else {
+                    bos.write(file.getBytes());
+                }
 
-                if (!conversationResource.getFileRefs().values().contains(file.getOriginalFilename())) {
-                    conversationResource.addFileRef(file.getOriginalFilename());
+                if (!cr.getFileRefs().values().contains(file.getOriginalFilename())) {
+                    cr.addFileRef(file.getOriginalFilename());
                 }
             } catch (java.io.IOException e) {
-                log.error("Could not write file {f}", localFile, e);
+                log.error("Could not write file {}", localFile, e);
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                         ErrorResponse.builder().error("write_file_error").errorDescription("Could not write file").build());
             }
         }
 
-        Optional<ConversationStrategy> strategy = strategyFactory.getStrategy(conversationResource);
+        List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiverId());
+        boolean hasDpiRecord = serviceRecords.stream()
+                .map(ServiceRecord::getServiceIdentifier)
+                .anyMatch(si -> ServiceIdentifier.DPI == si);
+        if (cr.getServiceIdentifier() == ServiceIdentifier.DPI && !hasDpiRecord) {
+            cr = DpvConversationResource.of((DpiConversationResource)cr);
+        }
+
+        Optional<ConversationStrategy> strategy = strategyFactory.getStrategy(cr);
         if (!strategy.isPresent()) {
             String errorStr = String.format("Cannot send message - serviceIdentifier \"%s\" not supported",
-                    conversationResource.getServiceIdentifier());
-            log.error(markerFrom(conversationResource), errorStr);
+                    cr.getServiceIdentifier());
+            log.error(markerFrom(cr), errorStr);
             return ResponseEntity.badRequest().body(ErrorResponse.builder().error("serviceIdentifier_not_supported")
                     .errorDescription(errorStr).build());
         }
-        ResponseEntity response = strategy.get().send(conversationResource);
+        ResponseEntity response = strategy.get().send(cr);
         if (response.getStatusCode() == HttpStatus.OK) {
-            outRepo.delete(conversationResource);
+            conversationService.registerStatus(cr.getConversationId(), MessageStatus.of(GenericReceiptStatus.SENDT));
+            outRepo.delete(cr);
+            nextMoveUtils.deleteFiles(cr);
         }
         return response;
 
+    }
+
+    private ResponseEntity handleArkivmelding(MultipartHttpServletRequest request, ConversationResource cr) {
+        MultipartFile file = request.getFileMap().values().stream()
+                .filter(f -> ARKIVMELDING_FILE.equals(f.getOriginalFilename()))
+                .findFirst().get();
+        try {
+            validateArkivmelding(file.getInputStream());
+            cr.setArkivmelding(unmarshalArkivmelding(file.getInputStream()));
+            cr.setHasArkivmelding(true);
+        } catch (IOException e) {
+            log.error("Could not read file {}", file.getOriginalFilename(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    ErrorResponse.builder().error("read_file_error").errorDescription("Could not read file").build());
+        } catch (SAXException e) {
+            log.error("{} XML validation failed", file.getOriginalFilename(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    ErrorResponse.builder().error("xml_validation_error").errorDescription("arkivmelding.xml validation error: "+e.getLocalizedMessage()).build());
+        } catch (JAXBException e) {
+            log.error("Could not unmarshal {}", file.getOriginalFilename(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    ErrorResponse.builder().error("xml_unmarshal").errorDescription("arkivmelding.xml unmarshalling error: "+e.getLocalizedMessage()).build());
+        }
+
+        List<String> files = request.getFileMap().values().stream()
+                .map(MultipartFile::getOriginalFilename)
+                .collect(Collectors.toList());
+        List<String> amFiles = ArkivmeldingUtil.getFilenames(cr.getArkivmelding());
+        if (!files.containsAll(amFiles)) {
+            String filesString = amFiles.stream().collect(Collectors.joining(", "));
+            log.error("Arkivmelding: missing files from upload, expected [{}]", filesString);
+            return ResponseEntity.badRequest().body(
+                    ErrorResponse.builder().error("missing_files").errorDescription("missing files from upload: "+filesString).build());
+        }
+
+        return ResponseEntity.ok().build();
     }
 
     @RequestMapping(value = "/out/types/{identifier}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -228,12 +313,12 @@ public class MessageOutController {
     public ResponseEntity getTypes(
             @ApiParam(value = "Identifier", required = true)
             @PathVariable(value = "identifier") String identifier) {
-        Optional<ServiceRecord> serviceRecord = Optional.ofNullable(sr.getServiceRecord(identifier));
-        if (serviceRecord.isPresent()) {
-            ArrayList<String> types = Lists.newArrayList();
-            types.add(serviceRecord.get().getServiceIdentifier().toString());
-            types.addAll(serviceRecord.get().getDpeCapabilities());
-            return ResponseEntity.ok(types);
+        List<ServiceRecord> serviceRecords = sr.getServiceRecords(identifier);
+        if (!serviceRecords.isEmpty()) {
+            return ResponseEntity.ok(serviceRecords.stream()
+                    .map(ServiceRecord::getServiceIdentifier)
+                    .map(ServiceIdentifier::toString)
+                    .collect(Collectors.toList()));
         }
         return ResponseEntity.notFound().build();
     }
@@ -258,6 +343,27 @@ public class MessageOutController {
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error("not_found")
                 .errorDescription("Conversation with supplied id not found.").build());
+    }
+
+    private void validateArkivmelding(InputStream is) throws SAXException {
+        ClassPathResource md = new ClassPathResource("xsd/metadatakatalog.xsd");
+        ClassPathResource am = new ClassPathResource("xsd/arkivmelding.xsd");
+        SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        try {
+            Schema schema = factory.newSchema(new Source[]{
+                    new StreamSource(md.getInputStream()),
+                    new StreamSource(am.getInputStream())
+            });
+            schema.newValidator().validate(new StreamSource(is));
+        } catch (IOException e) {
+            log.error("Error reading xsd", e);
+        }
+    }
+
+    private Arkivmelding unmarshalArkivmelding(InputStream inputStream) throws JAXBException {
+        JAXBContext jaxbContext = JAXBContextFactory.createContext(new Class[]{Arkivmelding.class}, new HashMap());
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        return unmarshaller.unmarshal(new StreamSource(inputStream), Arkivmelding.class).getValue();
     }
 
 }

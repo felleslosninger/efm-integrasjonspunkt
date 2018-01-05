@@ -13,9 +13,13 @@ public class ManifestFactory {
 		
 		Avsender avsender = new Avsender(new Organisasjon(avsenderOrg));
 		Mottaker mottaker = new Mottaker(new Organisasjon(mottakerOrg));
-		HovedDokument hoveddokumentXml = new HovedDokument(hoveddokument.getFileName(), hoveddokument.getMimeType(), "Hoveddokument", "no");
-		
-		Manifest xmlManifest = new Manifest(mottaker, avsender, hoveddokumentXml);
+		Manifest xmlManifest;
+		if (hoveddokument != null) {
+			HovedDokument hoveddokumentXml = new HovedDokument(hoveddokument.getFileName(), hoveddokument.getMimeType(), "Hoveddokument", "no");
+			xmlManifest = new Manifest(mottaker, avsender, hoveddokumentXml);
+		} else {
+			xmlManifest = new Manifest(mottaker, avsender, null);
+		}
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		MarshalManifest.marshal(xmlManifest, os);
 		return new no.difi.meldingsutveksling.dokumentpakking.domain.Manifest(os.toByteArray());

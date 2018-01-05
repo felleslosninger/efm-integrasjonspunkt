@@ -9,13 +9,7 @@ import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.RSAESOAEPparams;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.cms.CMSAlgorithm;
-import org.bouncycastle.cms.CMSEnvelopedData;
-import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.CMSProcessableByteArray;
-import org.bouncycastle.cms.RecipientInformation;
-import org.bouncycastle.cms.RecipientInformationStore;
+import org.bouncycastle.cms.*;
 import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
@@ -37,24 +31,43 @@ public class CmsUtil {
     private final AlgorithmIdentifier keyEncryptionScheme;
 
     public CmsUtil() {
-        Security.addProvider(new BouncyCastleProvider());
+        if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
+            Security.addProvider(new BouncyCastleProvider());
+        }
 
         keyEncryptionScheme = rsaesOaepIdentifier();
         cmsEncryptionAlgorithm = CMSAlgorithm.AES256_CBC;
     }
 
+    public CmsUtil(AlgorithmIdentifier keyEncryptionScheme) {
+        if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
+            Security.addProvider(new BouncyCastleProvider());
+        }
+
+        this.keyEncryptionScheme = keyEncryptionScheme;
+        cmsEncryptionAlgorithm = CMSAlgorithm.AES256_CBC;
+    }
+
     private AlgorithmIdentifier rsaesOaepIdentifier() {
+
         AlgorithmIdentifier hash = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256, DERNull.INSTANCE);
         AlgorithmIdentifier mask = new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, hash);
         AlgorithmIdentifier p_source = new AlgorithmIdentifier(PKCSObjectIdentifiers.id_pSpecified, new DEROctetString(new byte[0]));
+
         ASN1Encodable parameters = new RSAESOAEPparams(hash, mask, p_source);
+
         return new AlgorithmIdentifier(PKCSObjectIdentifiers.id_RSAES_OAEP, parameters);
     }
 
     public byte[] createCMS(byte[] bytes, X509Certificate sertifikat) {
         try {
-            JceKeyTransRecipientInfoGenerator recipientInfoGenerator = new JceKeyTransRecipientInfoGenerator(sertifikat, keyEncryptionScheme)
-                    .setProvider(BouncyCastleProvider.PROVIDER_NAME);
+
+            JceKeyTransRecipientInfoGenerator recipientInfoGenerator;
+            if (keyEncryptionScheme == null){
+                recipientInfoGenerator = new JceKeyTransRecipientInfoGenerator(sertifikat);
+            } else {
+                recipientInfoGenerator = new JceKeyTransRecipientInfoGenerator(sertifikat, keyEncryptionScheme);
+            }
 
             CMSEnvelopedDataGenerator envelopedDataGenerator = new CMSEnvelopedDataGenerator();
             envelopedDataGenerator.addRecipientInfoGenerator(recipientInfoGenerator);

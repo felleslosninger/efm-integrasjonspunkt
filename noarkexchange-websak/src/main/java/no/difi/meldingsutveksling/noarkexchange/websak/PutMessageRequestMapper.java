@@ -4,7 +4,6 @@ import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import org.modelmapper.ModelMapper;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
@@ -12,9 +11,6 @@ public class PutMessageRequestMapper {
     public JAXBElement<no.difi.meldingsutveksling.noarkexchange.websak.schema.PutMessageRequestType> mapFrom(PutMessageRequestType domain) throws JAXBException {
         no.difi.meldingsutveksling.noarkexchange.websak.schema.PutMessageRequestType r =
                 new no.difi.meldingsutveksling.noarkexchange.websak.schema.PutMessageRequestType();
-
-
-        JAXBContext jaxbContext = JAXBContext.newInstance(String.class);
 
         // alt 1. Not working because Payload is missing @XmlRootElement
 //        final Marshaller marshaller = jaxbContext.createMarshaller();

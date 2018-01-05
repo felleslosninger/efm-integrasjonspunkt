@@ -30,7 +30,7 @@ public class DirectionalConversationResourceRepository {
     }
 
     public void delete(ConversationResource cr) {
-        repo.delete(cr);
+        repo.deleteByConversationId(cr.getConversationId());
     }
 
     public Optional<ConversationResource> findByConversationId(String cId) {

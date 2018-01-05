@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.common.base.MoreObjects;
 import lombok.Data;
+import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.xml.LocalDateTimeAdapter;
 
@@ -30,7 +31,8 @@ import java.util.Optional;
         @JsonSubTypes.Type(value = DpiConversationResource.class, name = "DPI"),
         @JsonSubTypes.Type(value = DpfConversationResource.class, name = "DPF"),
         @JsonSubTypes.Type(value = DpeInnsynConversationResource.class, name = "DPE_INNSYN"),
-        @JsonSubTypes.Type(value = DpeDataConversationResource.class, name = "DPE_DATA")
+        @JsonSubTypes.Type(value = DpeDataConversationResource.class, name = "DPE_DATA"),
+        @JsonSubTypes.Type(value = DpeReceiptConversationResource.class, name = "DPE_RECEIPT")
 })
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -39,7 +41,8 @@ import java.util.Optional;
         DpiConversationResource.class,
         DpfConversationResource.class,
         DpeInnsynConversationResource.class,
-        DpeDataConversationResource.class})
+        DpeDataConversationResource.class,
+        DpeReceiptConversationResource.class})
 public abstract class ConversationResource {
 
     @Id
@@ -61,6 +64,11 @@ public abstract class ConversationResource {
     private LocalDateTime lastUpdate;
     @JsonIgnore
     private ConversationDirection direction;
+    @XmlElement
+    @JsonIgnore
+    private boolean hasArkivmelding;
+    @JsonIgnore
+    private boolean locked;
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "fileid")
     @Column(name = "filename")
@@ -73,17 +81,21 @@ public abstract class ConversationResource {
     @CollectionTable(name = "props", joinColumns = @JoinColumn(name = "pids"))
     @XmlElement
     private Map<String, String> customProperties;
+    @JsonIgnore
+    @Transient
+    private Arkivmelding arkivmelding;
 
     ConversationResource() {}
 
     ConversationResource(String conversationId, String senderId, String receiverId, ServiceIdentifier serviceIdentifier,
-                         LocalDateTime lastUpdate, Map fileRefs){
+                         LocalDateTime lastUpdate, Map fileRefs, Map customProperties){
         this.conversationId = conversationId;
         this.senderId = senderId;
         this.receiverId = receiverId;
         this.serviceIdentifier = serviceIdentifier;
         this.lastUpdate = lastUpdate;
         this.fileRefs = fileRefs;
+        this.customProperties = customProperties;
     }
 
 
@@ -103,4 +115,5 @@ public abstract class ConversationResource {
                 .add("fileRefs", fileRefs)
                 .toString();
     }
+
 }

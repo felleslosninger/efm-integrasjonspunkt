@@ -3,7 +3,7 @@
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>1.7.63-SNAPSHOT</version>
+        <version>1.7.82-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -13,7 +13,7 @@
         <dependency>
             <groupId>no.difi.sdp</groupId>
             <artifactId>sikker-digital-post-klient-java</artifactId>
-            <version>3.1-MOVE</version>
+            <version>5.2.1</version>
         </dependency>
 
         <dependency>
@@ -54,11 +54,19 @@
             <artifactId>guava</artifactId>
             <version>19.0</version>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>eclipselink</artifactId>
+            <version>2.6.4</version>
+        </dependency>
+
     </dependencies>
 
 </project>

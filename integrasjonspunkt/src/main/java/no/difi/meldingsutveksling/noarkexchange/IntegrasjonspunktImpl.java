@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import net.logstash.logback.marker.LogstashMarker;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCoreService;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -18,8 +19,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.xml.ws.BindingType;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
+import static java.util.Arrays.asList;
+import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageMarker.markerFrom;
 
 /**
@@ -62,9 +66,13 @@ public class IntegrasjonspunktImpl implements SOAPport {
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
 
         String organisasjonsnummer = getCanReceiveMessageRequest.getReceiver().getOrgnr();
-
         GetCanReceiveMessageResponseType response = new GetCanReceiveMessageResponseType();
-        boolean certificateAvailable;
+
+        Predicate<String> personnrPredicate = Pattern.compile(String.format("\\d{%d}", 11)).asPredicate();
+        if (personnrPredicate.test(organisasjonsnummer) && !strategyFactory.hasFactory(ServiceIdentifier.DPI)) {
+            response.setResult(false);
+            return response;
+        }
 
         final ServiceRecord serviceRecord;
         try {
@@ -75,37 +83,49 @@ public class IntegrasjonspunktImpl implements SOAPport {
             return response;
         }
 
-        certificateAvailable = adresseRegister.hasAdresseregisterCertificate(serviceRecord);
-
         final LogstashMarker marker = MarkerFactory.receiverMarker(organisasjonsnummer);
+        boolean validServiceIdentifier = false;
         boolean mshCanReceive = false;
         boolean isDpv = false;
-        if (certificateAvailable) {
+        if (asList(DPO, DPI, DPF).contains(serviceRecord.getServiceIdentifier()) &&
+                strategyFactory.hasFactory(serviceRecord.getServiceIdentifier())) {
+            validServiceIdentifier = true;
             Audit.info("CanReceive = true", marker);
         } else if (mshClient.canRecieveMessage(organisasjonsnummer)) {
             mshCanReceive = true;
             Audit.info("MSH canReceive = true", marker);
-        } else if (DPV.equals(serviceRecord.getServiceIdentifier())) {
+        } else {
             isDpv = true;
         }
 
-        if (!mshCanReceive && !certificateAvailable && !isDpv) {
-            Audit.error("CanReceive = false", marker);
+        boolean strategyFactoryAvailable;
+        if (isDpv) {
+            strategyFactoryAvailable = strategyFactory.hasFactory(DPV);
+        } else {
+            strategyFactoryAvailable = validServiceIdentifier;
         }
-
-        boolean strategyFactoryAvailable = strategyFactory.hasFactory(serviceRecord.getServiceIdentifier());
         if (!strategyFactoryAvailable && !mshCanReceive) {
-            Audit.error(String.format("StrategyFactory for %s not found. Feature toggle might be disabled.",
-                    serviceRecord.getServiceIdentifier()), marker);
+            Audit.error("CanReceive = false. Either feature toggle for DPV is disabled, or MSH cannot receive", marker);
+            response.setResult(false);
+            return response;
         }
 
-        response.setResult(((certificateAvailable || isDpv ) && strategyFactoryAvailable) || mshCanReceive);
+        response.setResult(true);
         return response;
     }
 
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType request) {
         PutMessageRequestWrapper message = new PutMessageRequestWrapper(request);
+
+        ServiceRecord receiverRecord = serviceRegistryLookup.getServiceRecord(message.getRecieverPartyNumber());
+        if (PayloadUtil.isAppReceipt(message.getPayload()) &&
+                receiverRecord.getServiceIdentifier() != ServiceIdentifier.DPO) {
+            Audit.info(String.format("Message is AppReceipt, but receiver (%s) is not DPO. Discarding message.",
+                    message.getRecieverPartyNumber()), markerFrom(message));
+            return PutMessageResponseFactory.createOkResponse();
+        }
+
         if (!message.hasSenderPartyNumber()) {
             message.setSenderPartyNumber(properties.getOrg().getNumber());
         }

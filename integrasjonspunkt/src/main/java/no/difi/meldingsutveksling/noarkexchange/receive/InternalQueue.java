@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.noarkexchange.receive;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import no.difi.meldingsutveksling.core.EDUCoreMarker;
 import no.difi.meldingsutveksling.core.EDUCoreSender;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
@@ -14,6 +15,10 @@ import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
+import no.difi.meldingsutveksling.receipt.ConversationService;
+import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
+import no.difi.meldingsutveksling.receipt.MessageStatus;
+import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -60,11 +65,13 @@ public class InternalQueue {
     @Autowired
     private EDUCoreSender eduCoreSender;
 
+    @Autowired
+    private ConversationService conversationService;
+
     private static JAXBContext jaxbContextdomain;
     private static JAXBContext jaxbContext;
 
     private final DocumentConverter documentConverter = new DocumentConverter();
-    private final EDUCoreConverter eduCoreConverter = new EDUCoreConverter();
 
     @Autowired
     InternalQueue(ObjectProvider<IntegrajonspunktReceiveImpl> integrajonspunktReceive) {
@@ -73,8 +80,8 @@ public class InternalQueue {
 
     static {
         try {
-            jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class, Kvittering.class);
-            jaxbContextdomain = JAXBContext.newInstance(EduDocument.class, Payload.class, Kvittering.class);
+            jaxbContext = JAXBContextFactory.createContext(new Class[]{StandardBusinessDocument.class, Payload.class, Kvittering.class}, null);
+            jaxbContextdomain = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, Kvittering.class}, null);
         } catch (JAXBException e) {
             throw new RuntimeException("Could not start internal queue: Failed to create JAXBContext", e);
         }
@@ -87,12 +94,13 @@ public class InternalQueue {
             forwardToNoark(eduDocument);
         } catch (Exception e) {
             Audit.warn("Failed to forward message.. queue will retry", eduDocument.createLogstashMarkers());
+            throw e;
         }
     }
 
     @JmsListener(destination = EXTERNAL, containerFactory = "myJmsContainerFactory")
     public void externalListener(byte[] message, Session session) {
-        EDUCore request = eduCoreConverter.unmarshallFrom(message);
+        EDUCore request = EDUCoreConverter.unmarshallFrom(message);
         try {
             eduCoreSender.sendMessage(request);
         } catch (Exception e) {
@@ -106,19 +114,28 @@ public class InternalQueue {
      */
     @JmsListener(destination = DLQ)
     public void dlqListener(byte[] message, Session session) {
+        MessageStatus ms = MessageStatus.of(GenericReceiptStatus.FEIL);
+        String conversationId = "";
+        String errorMsg = "";
 
         try {
-            EDUCore request = eduCoreConverter.unmarshallFrom(message);
-            Audit.error("Failed to send message. Moved to DLQ", EDUCoreMarker.markerFrom(request));
+            EDUCore request = EDUCoreConverter.unmarshallFrom(message);
+            errorMsg = "Failed to send message. Moved to DLQ";
+            Audit.error(errorMsg, EDUCoreMarker.markerFrom(request));
+            conversationId = request.getId();
         } catch (Exception e) {
         }
 
         try {
             EduDocument eduDocument = documentConverter.unmarshallFrom(message);
-            Audit.error("Failed to forward message. Moved to DLQ.", eduDocument.createLogstashMarkers());
+            errorMsg = "Failed to forward message. Moved to DLQ.";
+            Audit.error(errorMsg, eduDocument.createLogstashMarkers());
+            conversationId = eduDocument.getConversationId();
         } catch (Exception e) {
         }
 
+        ms.setDescription(errorMsg);
+        conversationService.registerStatus(conversationId, ms);
     }
 
     /**
@@ -129,7 +146,7 @@ public class InternalQueue {
      */
     public void enqueueExternal(EDUCore request) {
         try {
-            jmsTemplate.convertAndSend(EXTERNAL, eduCoreConverter.marshallToBytes(request));
+            jmsTemplate.convertAndSend(EXTERNAL, EDUCoreConverter.marshallToBytes(request));
         } catch (Exception e) {
             Audit.error("Unable to send message", EDUCoreMarker.markerFrom(request), e);
             throw e;
@@ -168,15 +185,12 @@ public class InternalQueue {
     private void sendToNoarkSystem(StandardBusinessDocument standardBusinessDocument) {
         try {
             integrajonspunktReceive.forwardToNoarkSystem(standardBusinessDocument);
-        } catch (MessageException e) {
-            Audit.error("Failed delivering to archive (1)", markerFrom(new StandardBusinessDocumentWrapper
-                    (standardBusinessDocument)), e);
-            logger.error(markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)), e.getStatusMessage().getTechnicalMessage(), e);
         } catch (Exception e) {
-            Audit.error("Failed delivering to archive (2)", markerFrom(new StandardBusinessDocumentWrapper
-                    (standardBusinessDocument)), e);
-            logger.error("Failed delivering to archive", e);
-            throw e;
+            Audit.error("Failed delivering to archive", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)), e);
+            if (e instanceof MessageException) {
+                logger.error(markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)), ((MessageException)e).getStatusMessage().getTechnicalMessage(), e);
+            }
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
     }
 

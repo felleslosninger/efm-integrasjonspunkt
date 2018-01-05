@@ -33,80 +33,6 @@ import static org.mockito.Mockito.when;
  */
 public class CorrespondenceAgencyMessageFactoryTest {
 
-    private static String escapedXml = "&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;\n"
-            + "&lt;Melding xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.arkivverket.no/Noark4-1-WS-WD/types\"&gt;\n"
-            + "  &lt;journpost xmlns=\"\"&gt;\n"
-            + "    &lt;jpId&gt;210570&lt;/jpId&gt;\n"
-            + "    &lt;jpJaar&gt;2015&lt;/jpJaar&gt;\n"
-            + "    &lt;jpSeknr&gt;41&lt;/jpSeknr&gt;\n"
-            + "    &lt;jpJpostnr&gt;3&lt;/jpJpostnr&gt;\n"
-            + "    &lt;jpJdato&gt;0001-01-01&lt;/jpJdato&gt;\n"
-            + "    &lt;jpNdoktype&gt;U&lt;/jpNdoktype&gt;\n"
-            + "    &lt;jpDokdato&gt;2015-09-07&lt;/jpDokdato&gt;\n"
-            + "    &lt;jpStatus&gt;R&lt;/jpStatus&gt;\n"
-            + "    &lt;jpInnhold&gt;Test1&lt;/jpInnhold&gt;\n"
-            + "    &lt;jpForfdato /&gt;\n"
-            + "    &lt;jpTgkode&gt;U&lt;/jpTgkode&gt;\n"
-            + "    &lt;jpAgdato /&gt;\n"
-            + "    &lt;jpAntved /&gt;\n"
-            + "    &lt;jpSaar&gt;2015&lt;/jpSaar&gt;\n"
-            + "    &lt;jpSaseknr&gt;20&lt;/jpSaseknr&gt;\n"
-            + "    &lt;jpOffinnhold&gt;Test2&lt;/jpOffinnhold&gt;\n"
-            + "    &lt;jpTggruppnavn&gt;Alle&lt;/jpTggruppnavn&gt;\n"
-            + "    &lt;avsmot&gt;\n"
-            + "     &lt;amIhtype&gt;0&lt;/amIhtype&gt;\n"
-            + "      &lt;amNavn&gt;Saksbehandler Testbruker7&lt;/amNavn&gt;\n"
-            + "      &lt;amAdresse&gt;Postboks 8115 Dep.&lt;/amAdresse&gt;\n"
-            + "      &lt;amPostnr&gt;0032&lt;/amPostnr&gt;\n"
-            + "      &lt;amPoststed&gt;OSLO&lt;/amPoststed&gt;\n"
-            + "      &lt;amUtland&gt;Norge&lt;/amUtland&gt;\n"
-            + "      &lt;amEpostadr&gt;sa-user.test2@difi.no&lt;/amEpostadr&gt;\n"
-            + "    &lt;/avsmot&gt;\n"
-            + "    &lt;avsmot&gt;\n"
-            + "      &lt;amOrgnr&gt;974720760&lt;/amOrgnr&gt;\n"
-            + "      &lt;amIhtype&gt;1&lt;/amIhtype&gt;\n"
-            + "      &lt;amNavn&gt;EduTestOrg 1&lt;/amNavn&gt;\n"
-            + "    &lt;/avsmot&gt;\n"
-            + "    &lt;dokument&gt;\n"
-            + "      &lt;dlRnr&gt;1&lt;/dlRnr&gt;\n"
-            + "      &lt;dlType&gt;H&lt;/dlType&gt;\n"
-            + "      &lt;dbTittel&gt;Edu testdokument&lt;/dbTittel&gt;\n"
-            + "      &lt;dbStatus&gt;B&lt;/dbStatus&gt;\n"
-            + "      &lt;veVariant&gt;P&lt;/veVariant&gt;\n"
-            + "      &lt;veDokformat&gt;DOCX&lt;/veDokformat&gt;\n"
-            + "      &lt;fil&gt;\n"
-            + "        &lt;base64&gt;UEsDBBQABgAIANdTJ0cOVawXUAIAAHoQAAATAAgCW0NCAgPC93OnJQcj4NCiAgICAgICAgICAgz4NCiAgICAgICAgICAgIDx3OnBsYWNlaG9sZGVyPg0KICAgICAgICAgICAgICA8dzpkb2NQYXJ0IHc6dmFsPlcjEueG1sUEsBAi0AFAAAAACaHAgB3b3JkL19yZWxzL3NldHRpbmdzLnhtbC5yZWxzUEsFBgAAAAArACsAbwsAAFuIAgAAAA==&lt;/base64&gt;\n"
-            + "      &lt;/fil&gt;\n"
-            + "      &lt;veFilnavn&gt;Edu testdokument.DOCX&lt;/veFilnavn&gt;\n"
-            + "      &lt;veMimeType&gt;application/vnd.openxmlformats-officedocument.wordprocessingml.document&lt;/veMimeType&gt;\n"
-            + "    &lt;/dokument&gt;\n"
-            + "  &lt;/journpost&gt;\n"
-            + "  &lt;noarksak xmlns=\"\"&gt;\n"
-            + "    &lt;saId&gt;15/00020&lt;/saId&gt;\n"
-            + "    &lt;saSaar&gt;2015&lt;/saSaar&gt;\n"
-            + "    &lt;saSeknr&gt;20&lt;/saSeknr&gt;\n"
-            + "    &lt;saPapir&gt;0&lt;/saPapir&gt;\n"
-            + "    &lt;saDato&gt;2015-09-01&lt;/saDato&gt;\n"
-            + "    &lt;saTittel&gt;BEST/EDU testsak&lt;/saTittel&gt;\n"
-            + "    &lt;saStatus&gt;R&lt;/saStatus&gt;\n"
-            + "    &lt;saArkdel&gt;Sakarkiv 2013&lt;/saArkdel&gt;\n"
-            + "    &lt;saType&gt;Sak&lt;/saType&gt;\n"
-            + "    &lt;saJenhet&gt;Oslo&lt;/saJenhet&gt;\n"
-            + "    &lt;saTgkode&gt;U&lt;/saTgkode&gt;\n"
-            + "    &lt;saBevtid /&gt;\n"
-            + "    &lt;saKasskode&gt;B&lt;/saKasskode&gt;\n"
-            + "    &lt;saOfftittel&gt;BEST/EDU testsak&lt;/saOfftittel&gt;\n"
-            + "    &lt;saAdmkort&gt;202286&lt;/saAdmkort&gt;\n"
-            + "    &lt;saAdmbet&gt;Seksjon for test 1&lt;/saAdmbet&gt;\n"
-            + "    &lt;saAnsvinit&gt;difi\\sa-user-test2&lt;/saAnsvinit&gt;\n"
-            + "    &lt;saAnsvnavn&gt;Saksbehandler Testbruker7&lt;/saAnsvnavn&gt;\n"
-            + "    &lt;saTggruppnavn&gt;Alle&lt;/saTggruppnavn&gt;\n"
-            + "    &lt;sakspart&gt;\n"
-            + "      &lt;spId&gt;0&lt;/spId&gt;\n"
-            + "    &lt;/sakspart&gt;\n"
-            + "  &lt;/noarksak&gt;\n"
-            + "&lt;/Melding&gt;";
-
     private static String cdataTaggedXml = "<PutMessageRequest xmlns=\"http://www.arkivverket.no/Noark/Exchange/types\">\n"
             + "    <envelope conversationId=\"19c73be0-f4fa-4c86-bc84-a2dfd912f948\"\n"
             + "              contentNamespace=\"http://www.arkivverket.no/Noark4-1-WS-WD/types\" xmlns=\"\">\n"
@@ -171,6 +97,8 @@ public class CorrespondenceAgencyMessageFactoryTest {
 
         postConfig = mock(CorrespondenceAgencyConfiguration.class);
         when(postConfig.getSystemUserCode()).thenReturn("AAS_TEST");
+        when(postConfig.isNotifyEmail()).thenReturn(true);
+        when(postConfig.getSender()).thenReturn("foo");
 
         srMock = mock(ServiceRegistryLookup.class);
         InfoRecord infoRecord = new InfoRecord("910075918", "Fylkesmannen i Sogn og Fjordane", new EntityType("DPV", "DPV"));
@@ -182,13 +110,7 @@ public class CorrespondenceAgencyMessageFactoryTest {
     }
 
     @Test
-    public void testFactoryForEscapedXMLPutMessage() throws PayloadException, JAXBException {
-        EDUCore eduCore = eduCoreFactory.create(createPutMessageEscapedXml(escapedXml), "910075918");
-        assertFields(CorrespondenceAgencyMessageFactory.create(postConfig, eduCore));
-    }
-
-    @Test
-    public void testFactoryForEscapedXMLMXAMessage() throws PayloadException, JAXBException {
+    public void testFactoryForMXAMessage() throws PayloadException, JAXBException {
         EDUCore eduCore = eduCoreFactory.create(createMxaMessageEscapedXml(cdataTaggedMxaXml), "910075918");
         assertFields(CorrespondenceAgencyMessageFactory.create(postConfig, eduCore));
     }
@@ -211,9 +133,9 @@ public class CorrespondenceAgencyMessageFactoryTest {
         assertEquals("Edu testdokument.DOCX", c.getCorrespondence().getContent().getValue()
                 .getAttachments().getValue().getBinaryAttachments().getValue()
                 .getBinaryAttachmentV2().get(0).getFileName().getValue());
-        assertEquals("Administrasjon", c.getCorrespondence().getNotifications().getValue()
+        assertEquals("Du har mottatt en melding fra foo.", c.getCorrespondence().getNotifications().getValue()
                 .getNotification().get(0).getTextTokens().getValue()
-                .getTextToken().get(1).getTokenValue().getValue());
+                .getTextToken().get(0).getTokenValue().getValue());
     }
 
     private PutMessageRequestType createPutMessageEscapedXml(String payload) {

@@ -5,6 +5,7 @@ import com.google.common.base.Suppliers;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.jayway.jsonpath.Configuration;
@@ -12,6 +13,7 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.spi.json.GsonJsonProvider;
 import com.nimbusds.jose.proc.BadJWSException;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
@@ -25,13 +27,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.lang.invoke.MethodHandles;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+
+import static no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord.isServiceIdentifier;
 
 @Service
 public class ServiceRegistryLookup {
     private final RestClient client;
     private IntegrasjonspunktProperties properties;
     private final LoadingCache<Parameters, ServiceRecord> srCache;
+    private final LoadingCache<Parameters, List<ServiceRecord>> srsCache;
     private final LoadingCache<Parameters, InfoRecord> irCache;
     private final Supplier<String> sasTokenSupplier;
 
@@ -52,6 +60,16 @@ public class ServiceRegistryLookup {
                     @Override
                     public ServiceRecord load(Parameters key) throws Exception {
                         return loadServiceRecord(key);
+                    }
+                });
+
+        this.srsCache = CacheBuilder.newBuilder()
+                .maximumSize(100)
+                .expireAfterWrite(1, TimeUnit.MINUTES)
+                .build(new CacheLoader<Parameters, List<ServiceRecord>>() {
+                    @Override
+                    public List<ServiceRecord> load(Parameters key) throws Exception {
+                        return loadServiceRecords(key);
                     }
                 });
 
@@ -76,6 +94,17 @@ public class ServiceRegistryLookup {
         return srCache.getUnchecked(new Parameters(identifier, notification));
     }
 
+    public Optional<ServiceRecord> getServiceRecord(String identifier, ServiceIdentifier serviceIdentifier) {
+        Notification notification = properties.isVarslingsplikt()? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
+        List<ServiceRecord> serviceRecords = srsCache.getUnchecked(new Parameters(identifier, notification));
+        return serviceRecords.stream().filter(isServiceIdentifier(serviceIdentifier)).findFirst();
+    }
+
+    public List<ServiceRecord> getServiceRecords(String identifier) {
+        Notification notification = properties.isVarslingsplikt()? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
+        return srsCache.getUnchecked(new Parameters(identifier, notification));
+    }
+
     private ServiceRecord loadServiceRecord(Parameters parameters) {
         ServiceRecord serviceRecord = ServiceRecord.EMPTY;
         try {
@@ -83,9 +112,9 @@ public class ServiceRegistryLookup {
             final DocumentContext documentContext = JsonPath.parse(serviceRecords, jsonPathConfiguration());
             serviceRecord = documentContext.read("$.serviceRecord", ServiceRecord.class);
         } catch(HttpClientErrorException httpException) {
-            if (httpException.getStatusCode() == HttpStatus.NOT_FOUND) {
-                logger.warn("RestClient returned 404 NOT_FOUND when looking up service record with identifier {}",
-                        parameters, httpException);
+            if (Arrays.asList(HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED).contains(httpException.getStatusCode())) {
+                logger.warn("RestClient returned {} when looking up service record with identifier {}",
+                        httpException.getStatusCode(), parameters, httpException);
             } else {
                 throw new ServiceRegistryLookupException(String.format("RestClient threw exception when looking up service record with identifier %s", parameters), httpException);
             }
@@ -94,6 +123,26 @@ public class ServiceRegistryLookup {
             throw new ServiceRegistryLookupException("Bad signature in service record response", e);
         }
         return serviceRecord;
+    }
+
+    private List<ServiceRecord> loadServiceRecords(Parameters parameters) {
+        ServiceRecord[] serviceRecords = {};
+        try {
+            final String resource = client.getResource("identifier/" + parameters.getIdentifier(), parameters.getQuery());
+            final DocumentContext documentContext = JsonPath.parse(resource, jsonPathConfiguration());
+            serviceRecords = documentContext.read("$.serviceRecords", ServiceRecord[].class);
+        } catch(HttpClientErrorException httpException) {
+            if (Arrays.asList(HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED).contains(httpException.getStatusCode())) {
+                logger.warn("RestClient returned {} when looking up service record with identifier {}",
+                        httpException.getStatusCode(), parameters, httpException);
+            } else {
+                throw new ServiceRegistryLookupException(String.format("RestClient threw exception when looking up service record with identifier %s", parameters), httpException);
+            }
+        } catch (BadJWSException e) {
+            logger.error("Bad signature in service record response", e);
+            throw new ServiceRegistryLookupException("Bad signature in service record response", e);
+        }
+        return Lists.newArrayList(serviceRecords);
     }
 
     /**

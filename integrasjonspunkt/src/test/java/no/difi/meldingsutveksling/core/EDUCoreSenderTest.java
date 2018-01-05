@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.core;
 
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.ServiceRecordObjectMother;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
@@ -9,13 +10,13 @@ import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactor
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import no.difi.meldingsutveksling.receipt.ConversationRepository;
+import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import no.difi.meldingsutveksling.services.Adresseregister;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.ObjectProvider;
+
+import java.util.Optional;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -24,9 +25,8 @@ public class EDUCoreSenderTest {
 
     private IntegrasjonspunktProperties properties;
     private ServiceRegistryLookup serviceRegistryLookup;
-    private ConversationRepository conversationRepository;
+    private ConversationService conversationService;
     private StrategyFactory strategyFactory;
-    private Adresseregister adresseregister;
     private NoarkClient mshClient;
     private EDUCoreSender eduCoreSender;
     private String IDENTIFIER = "1234";
@@ -36,16 +36,15 @@ public class EDUCoreSenderTest {
     public void setup() {
         properties = mock(IntegrasjonspunktProperties.class);
         serviceRegistryLookup = mock(ServiceRegistryLookup.class);
-        conversationRepository = mock(ConversationRepository.class);
+        conversationService = mock(ConversationService.class);
         strategyFactory = mock(StrategyFactory.class);
-        adresseregister = mock(Adresseregister.class);
         mshClient = mock(NoarkClient.class);
 
         IntegrasjonspunktProperties.FeatureToggle featureToggle = new IntegrasjonspunktProperties.FeatureToggle();
         featureToggle.setEnableReceipts(false);
         when(properties.getFeature()).thenReturn(featureToggle);
         final MessageStrategyFactory messageStrategyFactory = mock(MessageStrategyFactory.class);
-        when(strategyFactory.getFactory(any(ServiceRecord.class))).thenReturn(messageStrategyFactory);
+        when(strategyFactory.getFactory(any(ServiceIdentifier.class))).thenReturn(messageStrategyFactory);
         final MessageStrategy messageStrategy = mock(MessageStrategy.class);
         when(messageStrategyFactory.create(any(Object.class))).thenReturn(messageStrategy);
         final PutMessageResponseType response = PutMessageResponseFactory.createOkResponse();
@@ -54,8 +53,7 @@ public class EDUCoreSenderTest {
         ObjectProvider objectProvider = mock(ObjectProvider.class);
         when(objectProvider.getIfAvailable()).thenReturn(mshClient);
 
-        eduCoreSender = new EDUCoreSender(properties, serviceRegistryLookup, strategyFactory, adresseregister,
-                conversationRepository, objectProvider);
+        eduCoreSender = new EDUCoreSender(properties, serviceRegistryLookup, strategyFactory, conversationService, objectProvider);
         setupDefaultProperties();
         setupDefaultMessage();
     }
@@ -69,12 +67,14 @@ public class EDUCoreSenderTest {
         final Sender sender = new Sender();
         sender.setIdentifier(IDENTIFIER);
         eduCore.setSender(sender);
+        eduCore.setServiceIdentifier(ServiceIdentifier.DPV);
     }
 
 
     @Test
     public void givenServiceIdentifierIsDPVAndMshIsEnabledWhenSendingMessageThenShouldCheckMSH() {
-        when(serviceRegistryLookup.getServiceRecord(IDENTIFIER)).thenReturn(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER));
+        when(serviceRegistryLookup.getServiceRecord(IDENTIFIER, ServiceIdentifier.DPV))
+                .thenReturn(Optional.of(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER)));
         enableMsh();
 
         eduCoreSender.sendMessage(eduCore);
@@ -84,7 +84,8 @@ public class EDUCoreSenderTest {
 
     @Test
     public void givenServiceIdentifierIsDPVAndMshCanReceiveMessageWhenSendingMessageThenMshShouldBeUsed() {
-        when(serviceRegistryLookup.getServiceRecord(IDENTIFIER)).thenReturn(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER));
+        when(serviceRegistryLookup.getServiceRecord(IDENTIFIER, ServiceIdentifier.DPV))
+                .thenReturn(Optional.of(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER)));
         when(mshClient.canRecieveMessage(IDENTIFIER)).thenReturn(true);
         enableMsh();
 

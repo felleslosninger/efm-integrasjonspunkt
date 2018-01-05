@@ -34,10 +34,10 @@ public class CorrespondenceAgencyClient {
      * Creates client to use Altinn Correspondence Agency
      * @param logstashMarker used when logging to keep track of message flow
      */
-    public CorrespondenceAgencyClient(LogstashMarker logstashMarker, CorrespondenceAgencyConfiguration config, String endpointUrl) {
+    public CorrespondenceAgencyClient(LogstashMarker logstashMarker, CorrespondenceAgencyConfiguration config) {
         this.logstashMarker = logstashMarker;
         this.config = config;
-        this.endpointUrl = endpointUrl;
+        this.endpointUrl = config.getEndpointUrl();
     }
 
     /**

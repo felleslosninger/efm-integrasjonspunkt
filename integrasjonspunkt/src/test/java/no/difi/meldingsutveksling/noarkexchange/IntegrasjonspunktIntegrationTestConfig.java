@@ -10,11 +10,9 @@ import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
-import no.difi.meldingsutveksling.noarkexchange.putmessage.KeystoreProvider;
+import no.difi.meldingsutveksling.KeystoreProvider;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
-import no.difi.meldingsutveksling.receipt.DpiReceiptService;
-import no.difi.meldingsutveksling.receipt.ReceiptPolling;
-import no.difi.meldingsutveksling.receipt.StatusStrategyFactory;
+import no.difi.meldingsutveksling.receipt.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
@@ -24,6 +22,7 @@ import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.assertj.core.util.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
@@ -34,6 +33,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.jms.core.JmsTemplate;
 
 import java.net.URISyntaxException;
+import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 
@@ -76,7 +76,6 @@ public class IntegrasjonspunktIntegrationTestConfig {
         return new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider, properties);
     }
 
-    // Mocks
     @Bean
     @Primary
     public TransportFactory transportFactory() {
@@ -158,6 +157,8 @@ public class IntegrasjonspunktIntegrationTestConfig {
         when(sr.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPO);
         when(sr.getOrganisationNumber()).thenReturn("1337");
         when(srMock.getServiceRecord(anyString())).thenReturn(sr);
+        when(srMock.getServiceRecord(anyString(), any(ServiceIdentifier.class))).thenReturn(Optional.ofNullable(sr));
+        when(srMock.getServiceRecords(anyString())).thenReturn(Lists.newArrayList(sr));
 
         return srMock;
     }
@@ -166,5 +167,19 @@ public class IntegrasjonspunktIntegrationTestConfig {
     @Primary
     public RestClient restClient() {
         return mock(RestClient.class);
+    }
+
+    @Bean
+    @Primary
+    public ConversationService conversationService() {
+        ConversationService conversationService = mock(ConversationService.class);
+        when(conversationService.registerStatus(anyString(), any(MessageStatus.class))).thenReturn(Optional.empty());
+        return conversationService;
+    }
+
+    @Bean
+    @Primary
+    public ConversationRepository conversationRepository() {
+        return mock(ConversationRepository.class);
     }
 }

@@ -11,8 +11,6 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.ptv.CorrespondenceRequest;
 import no.difi.meldingsutveksling.receipt.*;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,10 +29,7 @@ public class DpvStatusStrategy implements StatusStrategy {
     private IntegrasjonspunktProperties properties;
 
     @Autowired
-    private ServiceRegistryLookup serviceRegistryLookup;
-
-    @Autowired
-    private ConversationRepository conversationRepository;
+    private ConversationService conversationService;
 
     private static final String STATUS_CREATED = "Created";
     private static final String STATUS_READ = "Read";
@@ -47,11 +42,10 @@ public class DpvStatusStrategy implements StatusStrategy {
                 .withExternalServiceEditionCode(properties.getDpv().getExternalServiceEditionCode())
                 .withPassword(properties.getDpv().getPassword())
                 .withSystemUserCode(properties.getDpv().getUsername())
+                .withEndpointUrl(properties.getDpv().getEndpointUrl().toString())
                 .build();
 
-        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(conversation.getReceiverIdentifier());
-        final CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(markerFrom(conversation), config,
-                serviceRecord.getEndPointURL());
+        final CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(markerFrom(conversation), config);
         GetCorrespondenceStatusDetailsV2 receiptRequest = CorrespondenceAgencyMessageFactory.createReceiptRequest(conversation);
         final CorrespondenceRequest request = new CorrespondenceRequest.Builder().withUsername(config
                 .getSystemUserCode()).withPassword(config.getPassword()).withPayload(receiptRequest).build();
@@ -72,31 +66,26 @@ public class DpvStatusStrategy implements StatusStrategy {
             Optional<StatusChangeV2> createdStatus = statusChanges.stream()
                     .filter(s -> STATUS_CREATED.equals(s.getStatusType().value()))
                     .findFirst();
-            String levertStatus = GenericReceiptStatus.LEVERT.toString();
+            GenericReceiptStatus levertStatus = GenericReceiptStatus.LEVERT;
             boolean hasCreatedStatus = conversation.getMessageStatuses().stream()
-                    .anyMatch(r -> levertStatus.equals(r.getStatus()) );
+                    .anyMatch(r -> levertStatus.toString().equals(r.getStatus()) );
             if (!hasCreatedStatus && createdStatus.isPresent()) {
                 ZonedDateTime createdZoned = createdStatus.get().getStatusDate().toGregorianCalendar().toZonedDateTime();
-                MessageStatus receipt = MessageStatus.of(levertStatus, createdZoned.toLocalDateTime());
-                conversation.addMessageStatus(receipt);
-                conversationRepository.save(conversation);
+                MessageStatus status = MessageStatus.of(levertStatus, createdZoned.toLocalDateTime());
+                conversationService.registerStatus(conversation, status);
             }
 
             Optional<StatusChangeV2> readStatus = statusChanges.stream()
                     .filter(s -> STATUS_READ.equals(s.getStatusType().value()))
                     .findFirst();
-            String lestStatus = GenericReceiptStatus.LEST.toString();
+            GenericReceiptStatus lestStatus = GenericReceiptStatus.LEST;
             if (readStatus.isPresent()) {
                 ZonedDateTime readZoned = readStatus.get().getStatusDate().toGregorianCalendar().toZonedDateTime();
-                MessageStatus receipt = MessageStatus.of(lestStatus, readZoned.toLocalDateTime());
-                conversation.addMessageStatus(receipt);
-                conversation.setPollable(false);
-                conversation.setFinished(true);
-                conversationRepository.save(conversation);
+                MessageStatus status = MessageStatus.of(lestStatus, readZoned.toLocalDateTime());
+                conversation  = conversationService.registerStatus(conversation, status);
+                conversationService.markFinished(conversation);
             }
-
         }
-
     }
 
     @Override

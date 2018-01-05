@@ -34,4 +34,8 @@
         <appender-ref ref="stash"/>
     </root>
 
+    <logger name="STATUS" level="INFO" additivity="false">
+        <appender-ref ref="stash"/>
+    </logger>
+
 </configuration>

@@ -5,17 +5,16 @@ import no.difi.meldingsutveksling.ServiceRegistryTransportFactory;
 import no.difi.meldingsutveksling.auth.OidcTokenClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
+import no.difi.meldingsutveksling.lang.KeystoreProviderException;
+import no.difi.meldingsutveksling.mail.MailClient;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.FiksMessageStrategyFactory;
-import no.difi.meldingsutveksling.noarkexchange.putmessage.KeystoreProvider;
+import no.difi.meldingsutveksling.KeystoreProvider;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
-import no.difi.meldingsutveksling.receipt.ConversationRepository;
-import no.difi.meldingsutveksling.receipt.DpiReceiptService;
-import no.difi.meldingsutveksling.receipt.StatusStrategy;
-import no.difi.meldingsutveksling.receipt.StatusStrategyFactory;
+import no.difi.meldingsutveksling.receipt.*;
 import no.difi.meldingsutveksling.receipt.strategy.FiksStatusStrategy;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.services.Adresseregister;
@@ -30,6 +29,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 import java.util.List;
+import java.util.Optional;
 
 @Profile({"dev", "itest", "systest", "staging", "production"})
 @Configuration
@@ -68,7 +68,11 @@ public class IntegrasjonspunktBeans {
 
     @Bean
     public KeystoreProvider meldingsformidlerKeystoreProvider() throws MeldingsformidlerException {
-        return KeystoreProvider.from(properties);
+        try {
+            return KeystoreProvider.from(properties.getDpi().getKeystore());
+        }catch (KeystoreProviderException e){
+            throw new MeldingsformidlerException("Unable to create keystore for DPI", e);
+        }
     }
 
     @ConditionalOnProperty(name="difi.move.feature.enableDPF", havingValue = "true")
@@ -79,8 +83,8 @@ public class IntegrasjonspunktBeans {
 
     @ConditionalOnProperty(name="difi.move.feature.enableDPF", havingValue = "true")
     @Bean
-    public FiksStatusStrategy fiksConversationStrategy(SvarUtService svarUtService, ConversationRepository conversationRepository) {
-        return new FiksStatusStrategy(svarUtService, conversationRepository);
+    public FiksStatusStrategy fiksConversationStrategy(SvarUtService svarUtService, ConversationService conversationService) {
+        return new FiksStatusStrategy(svarUtService, conversationService);
     }
 
     @Bean
@@ -100,11 +104,13 @@ public class IntegrasjonspunktBeans {
         return strategyFactory;
     }
 
-
-
     @Bean
     public DpiReceiptService dpiReceiptService(IntegrasjonspunktProperties integrasjonspunktProperties, KeystoreProvider keystoreProvider) {
         return new DpiReceiptService(integrasjonspunktProperties, keystoreProvider);
     }
 
+    @Bean(name = "fiksMailClient")
+    public NoarkClient fiksMailClient(IntegrasjonspunktProperties properties) {
+        return new MailClient(properties, Optional.ofNullable(properties.getFiks().getInn().getMailSubject()));
+    }
 }

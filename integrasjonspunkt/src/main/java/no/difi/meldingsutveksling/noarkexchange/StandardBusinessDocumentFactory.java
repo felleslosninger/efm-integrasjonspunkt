@@ -2,9 +2,11 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.StandardBusinessDocumentConverter;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Archive;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateAsice;
@@ -16,9 +18,10 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
-import no.difi.meldingsutveksling.noarkexchange.receive.EDUCoreConverter;
+import no.difi.meldingsutveksling.nextmove.NextMoveUtils;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.apache.commons.io.FileUtils;
+import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,10 +36,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
+import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 import static no.difi.meldingsutveksling.core.EDUCoreMarker.markerFrom;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.payloadSizeMarker;
 
@@ -58,10 +60,13 @@ public class StandardBusinessDocumentFactory {
     @Autowired
     private IntegrasjonspunktProperties props;
 
+    @Autowired
+    private NextMoveUtils nextMoveUtils;
+
     static {
         try {
-            jaxbContext = JAXBContext.newInstance(StandardBusinessDocument.class, Payload.class, Kvittering.class);
-            jaxbContextdomain = JAXBContext.newInstance(EduDocument.class, Payload.class, Kvittering.class);
+            jaxbContext = JAXBContextFactory.createContext(new Class[]{StandardBusinessDocument.class, Payload.class, Kvittering.class}, null);
+            jaxbContextdomain = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, Kvittering.class}, null);
         } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException("Could not initialize " + StandardBusinessDocumentConverter.class, e);
         }
@@ -79,8 +84,7 @@ public class StandardBusinessDocumentFactory {
     }
 
     public EduDocument create(EDUCore shipment, String conversationId, Avsender avsender, Mottaker mottaker) throws MessageException {
-        EDUCoreConverter eduCoreConverter = new EDUCoreConverter();
-        byte[] marshalledShipment = eduCoreConverter.marshallToBytes(shipment);
+        byte[] marshalledShipment = EDUCoreConverter.marshallToBytes(shipment);
 
         BestEduMessage bestEduMessage = new BestEduMessage(marshalledShipment);
         LogstashMarker marker = markerFrom(shipment);
@@ -91,7 +95,7 @@ public class StandardBusinessDocumentFactory {
         } catch (IOException e) {
             throw new MessageException(e, StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT);
         }
-        Payload payload = new Payload(encryptArchive(mottaker, archive));
+        Payload payload = new Payload(encryptArchive(mottaker, archive, shipment.getServiceIdentifier()));
 
         return new CreateSBD().createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload, conversationId, DOCUMENT_TYPE_MELDING, shipment.getJournalpostId());
     }
@@ -101,11 +105,7 @@ public class StandardBusinessDocumentFactory {
         List<ByteArrayFile> attachements = new ArrayList<>();
 
         for (String filename : shipmentMeta.getFileRefs().values()) {
-            String filedir = props.getNextbest().getFiledir();
-            if (!filedir.endsWith("/")) {
-                filedir = filedir+"/";
-            }
-            filedir = filedir+shipmentMeta.getConversationId()+"/";
+            String filedir = nextMoveUtils.getConversationFiledirPath(shipmentMeta);
             File file = new File(filedir+filename);
 
             byte[] bytes;
@@ -124,16 +124,27 @@ public class StandardBusinessDocumentFactory {
         } catch (IOException e) {
             throw new MessageException(e, StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT);
         }
-        Payload payload = new Payload(encryptArchive(context.getMottaker(), archive), shipmentMeta);
+        Payload payload = new Payload(encryptArchive(context.getMottaker(), archive, shipmentMeta.getServiceIdentifier()), shipmentMeta);
 
         return new CreateSBD().createSBD(context.getAvsender().getOrgNummer(), context.getMottaker().getOrgNummer(),
                 payload, context.getConversationId(), StandardBusinessDocumentHeader.NEXTMOVE_TYPE,
                 context.getJournalPostId());
     }
 
-    private byte[] encryptArchive(Mottaker mottaker, Archive archive) {
-        return new CmsUtil().createCMS(archive.getBytes()
-                , (X509Certificate) mottaker.getSertifikat());
+    private byte[] encryptArchive(Mottaker mottaker, Archive archive, ServiceIdentifier serviceIdentifier) {
+
+        Set<ServiceIdentifier> standardEncryptionUsers = EnumSet.of(DPE_INNSYN, DPE_RECEIPT);
+
+        CmsUtil cmsUtil;
+        if(standardEncryptionUsers.contains(serviceIdentifier)){
+
+            cmsUtil = new CmsUtil(null);
+        }else{
+
+            cmsUtil = new CmsUtil();
+        }
+
+        return cmsUtil.createCMS(archive.getBytes(), (X509Certificate) mottaker.getSertifikat());
     }
 
     private Archive createAsicePackage(Avsender avsender, Mottaker mottaker, ByteArrayFile byteArrayFile) throws

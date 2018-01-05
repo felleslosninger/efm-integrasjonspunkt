@@ -1,13 +1,18 @@
 package no.difi.meldingsutveksling.core;
 
+import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.mxa.schema.domain.Message;
+import no.difi.meldingsutveksling.nextmove.DpoConversationResource;
+import no.difi.meldingsutveksling.noarkexchange.PayloadException;
+import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,8 +22,11 @@ import org.springframework.xml.transform.StringSource;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
 
-import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.unmarshallPayload;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
@@ -223,26 +231,27 @@ public class EDUCoreFactoryTest {
     @Test
     public void testUnmarshallPayload() throws JAXBException {
         EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
-        MeldingType meldingType = (MeldingType) unmarshallPayload(StringEscapeUtils.unescapeXml(escapedXml));
+        MeldingType meldingType = EDUCoreConverter.payloadAsMeldingType(StringEscapeUtils.unescapeXml(escapedXml));
         assertEquals("210570", meldingType.getJournpost().getJpId());
     }
 
     @Test
-    public void testCreateFromPutMessage() throws JAXBException {
+    public void testCreateFromPutMessage() throws JAXBException, PayloadException {
         EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
         PutMessageRequestType putMessage = createPutMessageCdataXml(cdataTaggedXml);
 
         EDUCore eduCore = eduCoreFactory.create(putMessage, "1234");
-        assertEquals("219816", eduCore.getPayloadAsMeldingType().getJournpost().getJpId());
+        assertEquals("219816", PayloadUtil.queryJpId(eduCore.getPayload()));
+
     }
 
     @Test
-    public void testCreateFromMXAMessage() throws JAXBException {
+    public void testCreateFromMXAMessage() throws JAXBException, PayloadException {
         Message message = createMxaMessageEscapedXml(cdataTaggedMxaXml);
         EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
 
         EDUCore eduCore = eduCoreFactory.create(message, "1234");
-        assertEquals("P1234-5-test", eduCore.getPayloadAsMeldingType().getJournpost().getJpId());
+        assertEquals("P1234-5-test", PayloadUtil.queryJpId(eduCore.getPayload()));
     }
 
     @Test
@@ -253,6 +262,29 @@ public class EDUCoreFactoryTest {
         EDUCore eduCore = eduCoreFactory.create(putMessage, "1234");
         PutMessageRequestType message = eduCoreFactory.createPutMessageFromCore(eduCore);
         assertEquals("19c73be0-f4fa-4c86-bc84-a2dfd912f948", message.getEnvelope().getConversationId());
+    }
+
+    @Test
+    public void testCreateEducoreFromArkivmelding() throws IOException, JAXBException {
+        String convId = "3380ed76-5d4c-43e7-aa70-8ed8d97e4835";
+        File arkivmeldingFile = new File("src/test/resources/arkivmelding_ok.xml");
+        File testZipFile = new File("src/test/resources/test.zip");
+        byte[] arkivmeldingBytes = FileUtils.readFileToByteArray(arkivmeldingFile);
+        byte[] zipBytes = FileUtils.readFileToByteArray(testZipFile);
+
+        JAXBContext jaxbContext = JAXBContext.newInstance(Arkivmelding.class);
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        Arkivmelding am = unmarshaller.unmarshal(new StreamSource(new ByteArrayInputStream(arkivmeldingBytes)), Arkivmelding.class).getValue();
+
+        DpoConversationResource cr = DpoConversationResource.of(convId, "123", "321");
+
+        EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
+        EDUCore eduCore = eduCoreFactory.create(cr, am, zipBytes);
+        MeldingType meldingType = EDUCoreConverter.payloadAsMeldingType(eduCore.getPayload());
+
+        assertEquals(convId, eduCore.getMessageReference());
+        assertEquals("Blah", meldingType.getNoarksak().getSaAdmkort());
+        assertEquals("test.pdf", meldingType.getJournpost().getDokument().get(0).getVeFilnavn());
     }
 
     private PutMessageRequestType createPutMessageCdataXml(String payload) throws JAXBException {

@@ -3,17 +3,16 @@ package no.difi.meldingsutveksling.nextmove;
 import com.google.common.collect.Lists;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
-import no.difi.meldingsutveksling.receipt.Conversation;
-import no.difi.meldingsutveksling.receipt.ConversationRepository;
-import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -23,7 +22,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDateTime;
+import java.io.File;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -50,6 +49,9 @@ public class MessageOutControllerTest {
     private ConversationResourceRepository repo;
 
     @MockBean
+    private ConversationService conversationService;
+
+    @MockBean
     private ConversationStrategyFactory strategyFactory;
 
     @MockBean
@@ -59,18 +61,20 @@ public class MessageOutControllerTest {
     private IntegrasjonspunktProperties props;
 
     @MockBean
-    private ConversationRepository crepo;
-
-    @MockBean
     private MessageSender messageSender;
 
     @MockBean
     private NextMoveServiceBus nextMoveServiceBus;
 
+    @MockBean
+    private NextMoveUtils nextMoveUtils;
+
     @Before
     public void setup() {
+        String filedir = "target/uploadtest/";
         IntegrasjonspunktProperties.NextBEST nextBEST = new IntegrasjonspunktProperties.NextBEST();
-        nextBEST.setFiledir("target/uploadtest");
+        nextBEST.setFiledir(filedir);
+        when(nextMoveUtils.getConversationFiledirPath(Matchers.any())).thenReturn(filedir);
         IntegrasjonspunktProperties.Organization org = new IntegrasjonspunktProperties.Organization();
         org.setNumber("3");
         when(props.getNextbest()).thenReturn(nextBEST);
@@ -85,20 +89,14 @@ public class MessageOutControllerTest {
         ServiceRecord serviceRecord = new ServiceRecord();
         serviceRecord.setServiceIdentifier(DPO);
         serviceRecord.setDpeCapabilities(Lists.newArrayList());
-        when(sr.getServiceRecord("1")).thenReturn(serviceRecord);
+        when(sr.getServiceRecord("1", DPO)).thenReturn(Optional.of(serviceRecord));
+        when(sr.getServiceRecords("1")).thenReturn(Lists.newArrayList(serviceRecord));
         InfoRecord fooInfo = new InfoRecord("1", "foo", new EntityType("org", "org"));
         when(sr.getInfoRecord("1")).thenReturn(fooInfo);
         InfoRecord barInfo = new InfoRecord("2", "bar", new EntityType("org", "org"));
         when(sr.getInfoRecord("2")).thenReturn(barInfo);
         InfoRecord bazInfo = new InfoRecord("3", "baz", new EntityType("org", "org"));
         when(sr.getInfoRecord("3")).thenReturn(bazInfo);
-
-        MessageStatus receiptSent = MessageStatus.of(GenericReceiptStatus.SENDT.toString(), LocalDateTime.now());
-        MessageStatus receiptDelivered = MessageStatus.of(GenericReceiptStatus.LEVERT.toString(),
-                LocalDateTime.now().plusMinutes(1));
-        Conversation receiptConversation = Conversation.of("42", "42ref", "123", "sometitle", DPO,
-                receiptDelivered, receiptSent);
-        when(crepo.findByConversationId("42")).thenReturn(asList(receiptConversation));
 
         DpoConversationResource cr42 = DpoConversationResource.of("42", "2", "1");
         DpvConversationResource cr43 = DpvConversationResource.of("43", "2", "1");
@@ -108,6 +106,7 @@ public class MessageOutControllerTest {
         when(dpoMock.send(cr42)).thenReturn(ResponseEntity.ok().build());
         when(strategyFactory.getStrategy(cr42)).thenReturn(Optional.of(dpoMock));
 
+        when(repo.save(Matchers.any(ConversationResource.class))).then(i -> i.getArgumentAt(0, ConversationResource.class));
         when(repo.findByConversationIdAndDirection("42", OUTGOING)).thenReturn(Optional.of(cr42));
         when(repo.findByConversationIdAndDirection("43", OUTGOING)).thenReturn(Optional.of(cr43));
         when(repo.findByConversationIdAndDirection("1337", OUTGOING)).thenReturn(Optional.empty());
@@ -233,6 +232,28 @@ public class MessageOutControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.fileRefs.*", hasSize(1)))
                 .andExpect(jsonPath("$.fileRefs.0", is("file.txt")));
+    }
+
+    @Test
+    public void arkivmeldingShouldValidate() throws Exception {
+        File arkivmelding = new File("src/test/resources/arkivmelding_ok.xml");
+        byte[] am_bytes = FileUtils.readFileToByteArray(arkivmelding);
+        MockMultipartFile data = new MockMultipartFile("data", "arkivmelding.xml", "application/xml", am_bytes);
+        MockMultipartFile testpdf = new MockMultipartFile("data2", "test.pdf", "application/pdf", "foo".getBytes());
+        mvc.perform(fileUpload("/out/messages/42")
+                .file(data)
+                .file(testpdf))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void arkivmeldingShouldFail() throws Exception {
+        File arkivmelding = new File("src/test/resources/arkivmelding_error.xml");
+        byte[] am_bytes = FileUtils.readFileToByteArray(arkivmelding);
+        MockMultipartFile data = new MockMultipartFile("data", "arkivmelding.xml", "application/xml", am_bytes);
+        mvc.perform(fileUpload("/out/messages/42")
+                .file(data))
+                .andExpect(status().is5xxServerError());
     }
 
     @Test

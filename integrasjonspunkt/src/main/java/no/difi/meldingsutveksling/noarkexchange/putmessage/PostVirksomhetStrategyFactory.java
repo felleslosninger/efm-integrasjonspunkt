@@ -28,21 +28,17 @@ public class PostVirksomhetStrategyFactory implements MessageStrategyFactory {
                 .withExternalServiceEditionCode(properties.getDpv().getExternalServiceEditionCode())
                 .withPassword(properties.getDpv().getPassword())
                 .withSystemUserCode(properties.getDpv().getUsername())
-                .withSender(infoRecord.getOrganizationName());
+                .withSender(infoRecord.getOrganizationName())
+                .withNotifyEmail(properties.getDpv().isNotifyEmail())
+                .withNotifySms(properties.getDpv().isNotifySms());
 
-        Optional<String> smsVarslingstekst = Optional.of(properties.getDpv()).map(IntegrasjonspunktProperties
-                .PostVirksomheter::getSms).map(IntegrasjonspunktProperties.Sms::getVarslingstekst);
-        if (smsVarslingstekst.isPresent() && !"".equals(smsVarslingstekst.get())) {
-            builder.withSmsText(smsVarslingstekst.get());
-        }
-
-        Optional<String> emailSubject = Optional.of(properties.getDpv()).map(IntegrasjonspunktProperties
-                .PostVirksomheter::getEmail).map(IntegrasjonspunktProperties.PostVirksomheter.Email::getEmne);
-        if (emailSubject.isPresent() && !"".equals(emailSubject.get())) {
-            builder.withEmailSubject(emailSubject.get()).withEmailBody(properties.getDpv().getEmail().getVarslingstekst());
-        }
+        Optional<String> notificationText = Optional.ofNullable(properties.getDpv())
+                .map(IntegrasjonspunktProperties.PostVirksomheter::getNotificationText);
+        notificationText.ifPresent(builder::withNotificationText);
 
         builder.withNextbestFiledir(properties.getNextbest().getFiledir());
+
+        builder.withEndpointUrl(properties.getDpv().getEndpointUrl().toString());
 
         CorrespondenceAgencyConfiguration config = builder.build();
         return new PostVirksomhetStrategyFactory(config, serviceRegistryLookup);
@@ -50,7 +46,7 @@ public class PostVirksomhetStrategyFactory implements MessageStrategyFactory {
 
     @Override
     public MessageStrategy create(Object payload) {
-        return new PostVirksomhetMessageStrategy(configuration, serviceRegistryLookup);
+        return new PostVirksomhetMessageStrategy(configuration);
     }
 
     @Override

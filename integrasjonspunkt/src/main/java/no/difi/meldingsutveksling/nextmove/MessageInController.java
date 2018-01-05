@@ -4,6 +4,12 @@ import com.google.common.collect.Lists;
 import io.swagger.annotations.*;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.receipt.Conversation;
+import no.difi.meldingsutveksling.receipt.ConversationService;
+import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
+import no.difi.meldingsutveksling.receipt.MessageStatus;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,15 +17,18 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import javax.transaction.Transactional;
+import java.io.*;
 import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
 
@@ -37,6 +46,12 @@ public class MessageInController {
 
     @Autowired
     private IntegrasjonspunktProperties props;
+
+    @Autowired
+    private ConversationService conversationService;
+
+    @Autowired
+    private NextMoveUtils nextMoveUtils;
 
     @Autowired
     public MessageInController(ConversationResourceRepository cRepo) {
@@ -112,18 +127,15 @@ public class MessageInController {
         return ResponseEntity.noContent().build();
     }
 
-    @RequestMapping(value = "/in/messages/pop", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Pop incoming queue", notes = "Gets the ASiC for the first message in queue, then removes " +
-            "the message from the queue")
+    @RequestMapping(value = "/in/messages/pop", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Unlock message", notes = "Unlock the queued message")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = InputStreamResource.class),
             @ApiResponse(code = 204, message = "No content", response = String.class)
     })
-    public ResponseEntity popIncomingMessages(
-            @ApiParam(value = "Service Identifier")
+    public ResponseEntity unlockMessage(
             @RequestParam(value = "serviceIdentifier", required = false) Optional<ServiceIdentifier> serviceIdentifier,
-            @RequestParam(value = "conversationId", required = false) Optional<String> conversationId)
-            throws FileNotFoundException {
+            @RequestParam(value = "conversationId", required = false) Optional<String> conversationId) {
 
         Optional<ConversationResource> resource;
         if (conversationId.isPresent()) {
@@ -136,18 +148,93 @@ public class MessageInController {
         }
 
         if (resource.isPresent()) {
-            String filedir = props.getNextbest().getFiledir();
-            if (!filedir.endsWith("/")) {
-                filedir = filedir+"/";
+            resource.get().setLocked(false);
+            repo.save(resource.get());
+            return ResponseEntity.ok().build();
+        }
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @RequestMapping(value = "/in/messages/pop", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Remove message", notes = "Delete the queued message")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success", response = InputStreamResource.class),
+            @ApiResponse(code = 204, message = "No content", response = String.class)
+    })
+    @Transactional
+    public ResponseEntity deleteMessage(
+            @RequestParam(value = "serviceIdentifier", required = false) Optional<ServiceIdentifier> serviceIdentifier,
+            @RequestParam(value = "conversationId", required = false) Optional<String> conversationId) {
+
+        Optional<ConversationResource> resource;
+        if (conversationId.isPresent()) {
+            resource = repo.findByConversationId(conversationId.get());
+        }
+        else if (serviceIdentifier.isPresent()) {
+            resource = repo.findFirstByServiceIdentifierOrderByLastUpdateAsc(serviceIdentifier.get());
+        } else {
+            resource = repo.findFirstByOrderByLastUpdateAsc();
+        }
+
+        if (resource.isPresent()) {
+            repo.delete(resource.get());
+            Optional<Conversation> c = conversationService.registerStatus(resource.get().getConversationId(),
+                    MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_LEVERT));
+            c.ifPresent(conversationService::markFinished);
+            Audit.info(format("Conversation with id=%s deleted from queue", resource.get().getConversationId()),
+                    markerFrom(resource.get()));
+            nextMoveUtils.deleteFiles(resource.get());
+            return ResponseEntity.ok().build();
+        }
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @RequestMapping(value = "/in/messages/pop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Read incoming queue", notes = "Gets the ASiC for the first message in the queue, then locks " +
+            "the message from further processing")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success", response = InputStreamResource.class),
+            @ApiResponse(code = 204, message = "No content", response = String.class)
+    })
+    public ResponseEntity readMessage(
+            @RequestParam(value = "serviceIdentifier", required = false) Optional<ServiceIdentifier> serviceIdentifier,
+            @RequestParam(value = "conversationId", required = false) Optional<String> conversationId) {
+
+        Optional<ConversationResource> resource;
+        if (conversationId.isPresent()) {
+            resource = repo.findByConversationId(conversationId.get());
+        }
+        else if (serviceIdentifier.isPresent()) {
+            resource = repo.findFirstByServiceIdentifierOrderByLastUpdateAsc(serviceIdentifier.get());
+        } else {
+            resource = repo.findFirstByOrderByLastUpdateAsc();
+        }
+
+        if (resource.isPresent()) {
+
+            if (resource.get().isLocked()) {
+                return lockedMessageErrorResponse();
             }
-            filedir = filedir+resource.get().getConversationId()+"/";
+
+            String filedir = nextMoveUtils.getConversationFiledirPath(resource.get());
             String filename = resource.get().getFileRefs().get(0);
             File file = new File(filedir+filename);
 
-            InputStreamResource isr = new InputStreamResource(new FileInputStream(file));
+            InputStreamResource isr = null;
+            try {
+                isr = new InputStreamResource(new FileInputStream(file));
+            } catch (FileNotFoundException e) {
+                Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing it from queue",
+                        filename, resource.get().getConversationId(), resource.get().getSenderId()), markerFrom(resource.get()), e);
+                repo.delete(resource.get());
+                return fileNotFoundErrorResponse(filename);
+            }
 
-            repo.delete(resource.get());
-            log.info(markerFrom(resource.get()), "Conversation with id={} popped from queue", resource.get().getConversationId());
+            resource.get().setLocked(true);
+            repo.save(resource.get());
+            log.info(markerFrom(resource.get()), "Conversation with id={} read from queue", resource.get().getConversationId());
 
             return ResponseEntity.ok()
                     .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME+filename)
@@ -158,4 +245,79 @@ public class MessageInController {
         return ResponseEntity.noContent().build();
     }
 
+    @RequestMapping(value = "/in/messages/pop", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Pop incoming queue", notes = "Gets the ASiC for the message in the queue, then removes the message")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success", response = InputStreamResource.class),
+            @ApiResponse(code = 204, message = "No content", response = String.class)
+    })
+    @Transactional
+    public ResponseEntity popMessage(
+            @ApiParam(value = "Service Identifier")
+            @RequestParam(value = "serviceIdentifier", required = false) Optional<ServiceIdentifier> serviceIdentifier,
+            @RequestParam(value = "conversationId", required = false) Optional<String> conversationId) {
+
+        Optional<ConversationResource> resource;
+        if (conversationId.isPresent()) {
+            resource = repo.findByConversationId(conversationId.get());
+        }
+        else if (serviceIdentifier.isPresent()) {
+            resource = repo.findFirstByServiceIdentifierOrderByLastUpdateAsc(serviceIdentifier.get());
+        } else {
+            resource = repo.findFirstByOrderByLastUpdateAsc();
+        }
+
+        if (resource.isPresent()) {
+
+            if (resource.get().isLocked()) {
+                return lockedMessageErrorResponse();
+            }
+
+            String filedir = nextMoveUtils.getConversationFiledirPath(resource.get());
+            String filename = resource.get().getFileRefs().get(0);
+            File file = new File(filedir+filename);
+            long fileLength = file.length();
+
+            InputStreamResource isr = null;
+            byte[] bytes;
+            try {
+                bytes = FileUtils.readFileToByteArray(file);
+                isr = new InputStreamResource(new ByteArrayInputStream(bytes));
+            } catch (IOException e) {
+                Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing it from queue",
+                        filename, resource.get().getConversationId(), resource.get().getSenderId()), markerFrom(resource.get()), e);
+                repo.delete(resource.get());
+                return fileNotFoundErrorResponse(filename);
+            }
+
+            repo.delete(resource.get());
+            Optional<Conversation> c = conversationService.registerStatus(resource.get().getConversationId(),
+                    MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_LEVERT));
+            c.ifPresent(conversationService::markFinished);
+            Audit.info(format("Conversation with id=%s popped from queue", resource.get().getConversationId()),
+                    markerFrom(resource.get()));
+            nextMoveUtils.deleteFiles(resource.get());
+
+            return ResponseEntity.ok()
+                    .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME+filename)
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .contentLength(fileLength)
+                    .body(isr);
+        }
+        return ResponseEntity.noContent().build();
+    }
+
+    private ResponseEntity fileNotFoundErrorResponse(String filename) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
+                .error("file_not_found")
+                .errorDescription(format("File %s not found on server", filename))
+                .build());
+    }
+
+    private ResponseEntity lockedMessageErrorResponse() {
+        return ResponseEntity.badRequest().body(ErrorResponse.builder()
+                .error("locked_message")
+                .errorDescription("Message is locked and cannot be processed. Delete or unlock the message")
+                .build());
+    }
 }

@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.Decryptor;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreFactory;
@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.kvittering.EduDocumentFactory;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.mail.MailClient;
+import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
@@ -18,13 +19,14 @@ import no.difi.meldingsutveksling.noarkexchange.schema.receive.CorrelationInform
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import no.difi.meldingsutveksling.receipt.Conversation;
-import no.difi.meldingsutveksling.receipt.ConversationRepository;
+import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
+import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -45,11 +47,12 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.BindingType;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
+import static no.difi.meldingsutveksling.noarkexchange.logging.PutMessageResponseMarkers.markerFrom;
 
 /**
  *
@@ -69,7 +72,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final IntegrasjonspunktProperties properties;
     private final IntegrasjonspunktNokkel keyInfo;
-    private final ConversationRepository conversationRepository;
+    private final ConversationService conversationService;
     private final MessageSender messageSender;
     private ApplicationContext context;
 
@@ -80,7 +83,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
                                        IntegrasjonspunktProperties properties,
                                        IntegrasjonspunktNokkel keyInfo,
                                        ServiceRegistryLookup serviceRegistryLookup,
-                                       ConversationRepository conversationRepository,
+                                       ConversationService conversationService,
                                        MessageSender messageSender) {
 
         this.transportFactory = transportFactory;
@@ -89,7 +92,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
         this.properties = properties;
         this.keyInfo = keyInfo;
         this.serviceRegistryLookup = serviceRegistryLookup;
-        this.conversationRepository = conversationRepository;
+        this.conversationService = conversationService;
         this.messageSender = messageSender;
     }
 
@@ -117,20 +120,22 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
             throw e;
         }
 
-        if (document.isReciept()) {
+        if (document.isReceipt()) {
             Audit.info("Messagetype Receipt", markerFrom(document));
             return new CorrelationInformation();
         }
 
-        // TODO: remove? or move to send leveringskvittering i internal queue?
         Payload payload = document.getPayload();
         byte[] decryptedAsicPackage = decrypt(payload);
         EDUCore eduDocument;
-        try {
+        if (document.isNextMove()) {
+            eduDocument = convertConversationToEducore(document);
+        } else {
             eduDocument = convertAsicEntrytoEduDocument(decryptedAsicPackage);
             if (PayloadUtil.isAppReceipt(eduDocument.getPayload())) {
                 Audit.info("AppReceipt extracted", markerFrom(document));
-                registerReceipt(eduDocument);
+                Optional<Conversation> c = conversationService.registerStatus(eduDocument.getId(), MessageStatus.of(GenericReceiptStatus.LEST));
+                c.ifPresent(conversationService::markFinished);
                 if (!properties.getFeature().isForwardReceivedAppReceipts()) {
                     Audit.info("AppReceipt forwarding disabled - will not deliver to archive");
                     return new CorrelationInformation();
@@ -138,29 +143,23 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
             } else {
                 Audit.info("EDU Document extracted", markerFrom(document));
             }
-
-        } catch (IOException | JAXBException e) {
-            Audit.error("Failed to extract EDUdocument", markerFrom(document), e);
-            throw new MessageException(e, StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
         }
 
         forwardToNoarkSystemAndSendReceipts(document, eduDocument);
         return new CorrelationInformation();
     }
 
-    private void registerReceipt(EDUCore eduCore) {
-        MessageStatus status = MessageStatus.of(GenericReceiptStatus.LEST.toString(), LocalDateTime.now());
-        Conversation c = conversationRepository.findByConversationId(eduCore.getId())
-                .stream()
-                .findFirst()
-                .orElse(Conversation.of(eduCore.getId(),
-                        eduCore.getMessageReference(),
-                        eduCore.getReceiver().getIdentifier(),
-                        eduCore.getMessageReference(),
-                        ServiceIdentifier.DPO));
-        c.addMessageStatus(status);
-        c.setFinished(true);
-        conversationRepository.save(c);
+    private EDUCore convertConversationToEducore(StandardBusinessDocumentWrapper doc) throws MessageException {
+        Payload payload = doc.getPayload();
+        byte[] decryptedAsicPackage = decrypt(payload);
+        Arkivmelding arkivmelding = convertAsicEntryToArkivmelding(decryptedAsicPackage);
+        ConversationResource cr = payload.getConversation();
+
+        EDUCore eduCore = new EDUCoreFactory(serviceRegistryLookup).create(cr, arkivmelding, decryptedAsicPackage);
+        Optional<Conversation> c = conversationService.registerStatus(eduCore.getId(), MessageStatus.of(GenericReceiptStatus.LEST));
+        c.ifPresent(conversationService::markFinished);
+
+        return eduCore;
     }
 
     public byte[] decrypt(Payload payload) {
@@ -177,6 +176,9 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
             AppReceiptType result = response.getResult();
             if (result.getType().equals(OK_TYPE)) {
                 Audit.info("Delivered archive", markerFrom(response));
+                Optional<Conversation> c = conversationService.registerStatus(inputDocument.getConversationId(),
+                        MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_LEVERT));
+                c.ifPresent(conversationService::markFinished);
                 sendReceiptOpen(inputDocument);
                 if (localNoark instanceof MailClient && eduCore.getMessageType() != EDUCore.MessageType.APPRECEIPT) {
                     // Need to send AppReceipt manually in case receiver is mail
@@ -203,16 +205,34 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
         t.send(context, receipt);
     }
 
-    public EDUCore convertAsicEntrytoEduDocument(byte[] bytes) throws MessageException, IOException, JAXBException {
+    public EDUCore convertAsicEntrytoEduDocument(byte[] bytes) throws MessageException {
         try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes))) {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
                 if ("best_edu.xml".equals(entry.getName())) {
-                    JAXBContext jaxbContext = JAXBContext.newInstance(EDUCore.class);
+                    JAXBContext jaxbContext = JAXBContextFactory.createContext(new Class[]{EDUCore.class}, null);
                     Unmarshaller unMarshaller = jaxbContext.createUnmarshaller();
                     return unMarshaller.unmarshal(new StreamSource(zipInputStream), EDUCore.class).getValue();
                 }
             }
+        } catch (IOException | JAXBException e) {
+            throw new MessageException(e, StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
+        }
+        throw new MessageException(StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
+    }
+
+    public Arkivmelding convertAsicEntryToArkivmelding(byte[] bytes) throws MessageException {
+        try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes))) {
+            ZipEntry entry;
+            while ((entry = zipInputStream.getNextEntry()) != null) {
+                if ("arkivmelding.xml".equals(entry.getName())) {
+                    JAXBContext jaxbContext = JAXBContextFactory.createContext(new Class[]{Arkivmelding.class}, null);
+                    Unmarshaller unMarshaller = jaxbContext.createUnmarshaller();
+                    return unMarshaller.unmarshal(new StreamSource(zipInputStream), Arkivmelding.class).getValue();
+                }
+            }
+        } catch (IOException | JAXBException e) {
+            throw new MessageException(e, StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
         }
         throw new MessageException(StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
     }
