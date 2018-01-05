@@ -9,15 +9,11 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.ptv.CorrespondenceRequest;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DpvConversationStrategy implements ConversationStrategy {
-
-    private static final Logger log = LoggerFactory.getLogger(DpvConversationStrategy.class);
 
     private IntegrasjonspunktProperties props;
     private ServiceRegistryLookup sr;
