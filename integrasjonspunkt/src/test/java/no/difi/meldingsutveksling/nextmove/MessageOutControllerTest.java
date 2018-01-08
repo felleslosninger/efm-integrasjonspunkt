@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import com.google.common.collect.Lists;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
+import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
@@ -17,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -69,6 +69,9 @@ public class MessageOutControllerTest {
     @MockBean
     private NextMoveUtils nextMoveUtils;
 
+    @MockBean
+    private InternalQueue internalQueue;
+
     @Before
     public void setup() {
         String filedir = "target/uploadtest/";
@@ -103,7 +106,6 @@ public class MessageOutControllerTest {
         DpoConversationResource cr44 = DpoConversationResource.of("44", "1", "2");
 
         DpoConversationStrategy dpoMock = mock(DpoConversationStrategy.class);
-        when(dpoMock.send(cr42)).thenReturn(ResponseEntity.ok().build());
         when(strategyFactory.getStrategy(cr42)).thenReturn(Optional.of(dpoMock));
 
         when(repo.save(Matchers.any(ConversationResource.class))).then(i -> i.getArgumentAt(0, ConversationResource.class));
