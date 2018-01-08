@@ -10,8 +10,6 @@ import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -42,7 +40,7 @@ public class DpiConversationStrategy implements ConversationStrategy {
     }
 
     @Override
-    public ResponseEntity send(ConversationResource conversationResource) {
+    public void send(ConversationResource conversationResource) throws NextMoveException {
 
         DpiConversationResource cr = (DpiConversationResource) conversationResource;
         List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiverId());
@@ -57,8 +55,7 @@ public class DpiConversationStrategy implements ConversationStrategy {
             String errorStr = String.format("Message is of type '%s', but receiver '%s' accepts types '%s'.",
                     DPI, cr.getReceiverId(), acceptableTypes);
             log.error(markerFrom(conversationResource), errorStr);
-            return ResponseEntity.badRequest().body(ErrorResponse.builder().error("serviceIdentifier_not_acceptable")
-                    .errorDescription(errorStr).build());
+            throw new NextMoveException(errorStr);
         }
 
         NextMoveDpiRequest request = new NextMoveDpiRequest(props, nextMoveUtils, cr, serviceRecord.get());
@@ -67,9 +64,7 @@ public class DpiConversationStrategy implements ConversationStrategy {
             client.sendMelding(request);
         } catch (MeldingsformidlerException e) {
             Audit.error("Failed to send message to DPI", markerFrom(cr), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send message to DPI");
+            throw new NextMoveException(e);
         }
-
-        return ResponseEntity.ok().build();
     }
 }
