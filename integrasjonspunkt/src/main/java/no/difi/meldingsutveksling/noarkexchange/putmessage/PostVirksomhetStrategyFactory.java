@@ -36,7 +36,7 @@ public class PostVirksomhetStrategyFactory implements MessageStrategyFactory {
                 .map(IntegrasjonspunktProperties.PostVirksomheter::getNotificationText);
         notificationText.ifPresent(builder::withNotificationText);
 
-        builder.withNextbestFiledir(properties.getNextbest().getFiledir());
+        builder.withNextmoveFiledir(properties.getNextmove().getFiledir());
 
         builder.withEndpointUrl(properties.getDpv().getEndpointUrl().toString());
 

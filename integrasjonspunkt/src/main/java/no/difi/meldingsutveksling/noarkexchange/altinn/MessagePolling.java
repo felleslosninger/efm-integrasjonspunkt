@@ -83,14 +83,14 @@ public class MessagePolling implements ApplicationContextAware {
 
     private CompletableFuture batchRead;
 
-    @Scheduled(fixedRateString = "${difi.move.nextbest.serviceBus.pollingrate}")
-    public void checkForNewNextBestMessages() {
-        if (properties.getNextbest().getServiceBus().isEnable() &&
+    @Scheduled(fixedRateString = "${difi.move.nextmove.serviceBus.pollingrate}")
+    public void checkForNewNextMoveMessages() {
+        if (properties.getNextmove().getServiceBus().isEnable() &&
                 !properties.getNextmove().getServiceBus().isBatchRead()) {
             log.debug("Checking for new NextMove messages..");
             nextMoveServiceBus.getAllMessagesRest();
         }
-        if (properties.getNextbest().getServiceBus().isEnable() &&
+        if (properties.getNextmove().getServiceBus().isEnable() &&
                 properties.getNextmove().getServiceBus().isBatchRead()) {
             if (this.batchRead == null || this.batchRead.isDone()) {
                 log.debug("Checking for new NextMove messages (batch)..");

@@ -10,7 +10,7 @@ public class CorrespondenceAgencyConfiguration {
     private boolean notifySms;
     private String notificationText;
     private String sender;
-    private String nextbestFiledir;
+    private String nextmoveFiledir;
     private String endpointUrl;
 
     private CorrespondenceAgencyConfiguration() {
@@ -48,8 +48,8 @@ public class CorrespondenceAgencyConfiguration {
         return sender;
     }
 
-    public String getNextbestFiledir() {
-        return nextbestFiledir;
+    public String getNextmoveFiledir() {
+        return nextmoveFiledir;
     }
 
     public String getEndpointUrl() {
@@ -104,8 +104,8 @@ public class CorrespondenceAgencyConfiguration {
             return this;
         }
 
-        public Builder withNextbestFiledir(String filedir) {
-            correspondenceAgencyConfiguration.nextbestFiledir = filedir;
+        public Builder withNextmoveFiledir(String filedir) {
+            correspondenceAgencyConfiguration.nextmoveFiledir = filedir;
             return this;
         }
 

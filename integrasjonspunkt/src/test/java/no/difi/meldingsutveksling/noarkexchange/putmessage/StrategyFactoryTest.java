@@ -36,9 +36,9 @@ public class StrategyFactoryTest {
         final IntegrasjonspunktProperties.Organization orgMock = mock(IntegrasjonspunktProperties.Organization.class);
         when(ptvMock.getEndpointUrl()).thenReturn(new URL("http://foo"));
         IntegrasjonspunktProperties.FeatureToggle featureMock = mock(IntegrasjonspunktProperties.FeatureToggle.class);
-        IntegrasjonspunktProperties.NextBEST nextBestMock = mock(IntegrasjonspunktProperties.NextBEST.class);
-        when(nextBestMock.getFiledir()).thenReturn("upload/");
-        when(properties.getNextbest()).thenReturn(nextBestMock);
+        IntegrasjonspunktProperties.NextMove nextMoveMock = mock(IntegrasjonspunktProperties.NextMove.class);
+        when(nextMoveMock.getFiledir()).thenReturn("upload/");
+        when(properties.getNextmove()).thenReturn(nextMoveMock);
         when(featureMock.isEnableDPO()).thenReturn(true);
         when(featureMock.isEnableDPI()).thenReturn(true);
         when(featureMock.isEnableDPV()).thenReturn(true);

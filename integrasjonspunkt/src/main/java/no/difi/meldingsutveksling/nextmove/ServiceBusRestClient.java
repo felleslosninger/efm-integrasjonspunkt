@@ -49,13 +49,13 @@ public class ServiceBusRestClient {
 
         this.localQueuePath = NEXTMOVE_QUEUE_PREFIX+
                 props.getOrg().getNumber()+
-                props.getNextbest().getServiceBus().getMode();
+                props.getNextmove().getServiceBus().getMode();
         this.jaxbContext = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, ConversationResource.class}, null);
     }
 
     public void sendMessage(byte[] message, String queuePath) {
         String resourceUri = format("https://%s.servicebus.windows.net/%s/messages",
-                props.getNextbest().getServiceBus().getNamespace(), queuePath);
+                props.getNextmove().getServiceBus().getNamespace(), queuePath);
         URI uri = convertToUri(resourceUri);
 
         String auth = createAuthorizationHeader(resourceUri);
@@ -73,7 +73,7 @@ public class ServiceBusRestClient {
 
     public Optional<ServiceBusMessage> receiveMessage() {
         String resourceUri = format("https://%s.servicebus.windows.net/%s/messages/head",
-                props.getNextbest().getServiceBus().getNamespace(),
+                props.getNextmove().getServiceBus().getNamespace(),
                 localQueuePath);
 
         String auth = createAuthorizationHeader(resourceUri);
@@ -111,7 +111,7 @@ public class ServiceBusRestClient {
 
     public void deleteMessage(ServiceBusMessage message) {
         String resourceUri = format("https://%s.servicebus.windows.net/%s/messages/%s/%s",
-                props.getNextbest().getServiceBus().getNamespace(),
+                props.getNextmove().getServiceBus().getNamespace(),
                 localQueuePath,
                 message.getMessageId(),
                 message.getLockToken());
@@ -165,7 +165,7 @@ public class ServiceBusRestClient {
                 urlEncoded,
                 signature,
                 expiry,
-                props.getNextbest().getServiceBus().getSasKeyName());
+                props.getNextmove().getServiceBus().getSasKeyName());
     }
 
     public String getLocalQueuePath() {
@@ -176,7 +176,7 @@ public class ServiceBusRestClient {
         if (props.getOidc().isEnable()) {
             return sr.getSasToken();
         } else {
-            return props.getNextbest().getServiceBus().getSasToken();
+            return props.getNextmove().getServiceBus().getSasToken();
         }
     }
 }

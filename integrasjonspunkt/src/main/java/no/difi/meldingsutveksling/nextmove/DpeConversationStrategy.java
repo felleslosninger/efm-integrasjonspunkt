@@ -29,7 +29,7 @@ public class DpeConversationStrategy implements ConversationStrategy {
     @Override
     public void send(ConversationResource conversationResource) throws NextMoveException {
 
-        if (!props.getNextbest().getServiceBus().isEnable()) {
+        if (!props.getNextmove().getServiceBus().isEnable()) {
             String errorString = format("Service Bus disabled, cannot send messages" +
                     " of types %s,%s", ServiceIdentifier.DPE_INNSYN.toString(), ServiceIdentifier.DPE_DATA.toString());
             log.error(markerFrom(conversationResource), errorString);

@@ -77,8 +77,8 @@ public class NextMoveServiceBus {
     public void init() throws NextMoveException {
         if (props.getNextmove().getServiceBus().isBatchRead()) {
             String connectionString = String.format("Endpoint=sb://%s.servicebus.windows.net/;SharedAccessKeyName=%s;SharedAccessKey=%s",
-                    props.getNextbest().getServiceBus().getNamespace(),
-                    props.getNextbest().getServiceBus().getSasKeyName(),
+                    props.getNextmove().getServiceBus().getNamespace(),
+                    props.getNextmove().getServiceBus().getSasKeyName(),
                     serviceBusClient.getSasKey());
             ConnectionStringBuilder connectionStringBuilder = new ConnectionStringBuilder(connectionString, serviceBusClient.getLocalQueuePath());
             try {
@@ -126,7 +126,7 @@ public class NextMoveServiceBus {
         boolean messagesInQueue = true;
         while (messagesInQueue) {
             ArrayList<ServiceBusMessage> messages = Lists.newArrayList();
-            for (int i=0; i<props.getNextbest().getServiceBus().getReadMaxMessages(); i++) {
+            for (int i=0; i<props.getNextmove().getServiceBus().getReadMaxMessages(); i++) {
                 Optional<ServiceBusMessage> msg = serviceBusClient.receiveMessage();
                 if (!msg.isPresent()) {
                     messagesInQueue = false;
@@ -200,10 +200,10 @@ public class NextMoveServiceBus {
     }
 
     private String receiptTarget() {
-        if (!isNullOrEmpty(props.getNextbest().getServiceBus().getReceiptQueue())) {
-            return props.getNextbest().getServiceBus().getReceiptQueue();
+        if (!isNullOrEmpty(props.getNextmove().getServiceBus().getReceiptQueue())) {
+            return props.getNextmove().getServiceBus().getReceiptQueue();
         }
-        if (INNSYN.fullname().equals(props.getNextbest().getServiceBus().getMode())) {
+        if (INNSYN.fullname().equals(props.getNextmove().getServiceBus().getMode())) {
             return DATA.fullname();
         }
         return INNSYN.fullname();

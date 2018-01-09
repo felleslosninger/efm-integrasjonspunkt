@@ -77,11 +77,11 @@ public class NextMoveQueue {
         }
 
         message.setFileRefs(Maps.newHashMap());
-        message.addFileRef(props.getNextbest().getAsicfile());
+        message.addFileRef(props.getNextmove().getAsicfile());
         contentFromAsic.forEach(message::addFileRef);
 
         String filedir = nextMoveUtils.getConversationFiledirPath(message);
-        File localFile = new File(filedir+props.getNextbest().getAsicfile());
+        File localFile = new File(filedir+props.getNextmove().getAsicfile());
         localFile.getParentFile().mkdirs();
 
         try (FileOutputStream os = new FileOutputStream(localFile);
