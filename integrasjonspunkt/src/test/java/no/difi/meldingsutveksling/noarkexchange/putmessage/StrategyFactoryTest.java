@@ -56,7 +56,7 @@ public class StrategyFactoryTest {
         final KeystoreProvider keystoreProvider = mock(KeystoreProvider.class);
         SvarUtService svarUtService = mock(SvarUtService.class);
         NoarkClient noarkClientMock = mock(NoarkClient.class);
-        strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider, properties);
+        strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider, properties, noarkClientMock);
         strategyFactory.registerMessageStrategyFactory(FiksMessageStrategyFactory.newInstance(svarUtService, noarkClientMock));
 
     }
