@@ -29,7 +29,7 @@ public class NtpSyncChecker {
         try {
             offset = client.getOffset();
         } catch (IOException e) {
-            log.error(String.format("Error connecting to NTP host %s", props.getNtpHost()));
+            log.error(String.format("Error connecting to NTP host %s", props.getNtpHost()), e);
         }
 
         String errorMsg = String.format("Offset from NTP host %s is %sms. An offset greater than 9s might lead to problems with OIDC. Consider readjusting the system clock.", props.getNtpHost(), offset);

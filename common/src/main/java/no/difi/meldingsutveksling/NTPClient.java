@@ -11,16 +11,16 @@ import java.net.UnknownHostException;
 @Slf4j
 public class NTPClient {
 
-    private NTPUDPClient ntpClient;
+    private NTPUDPClient client;
     private InetAddress host;
 
     public NTPClient(String host) throws UnknownHostException {
         this.host = InetAddress.getByName(host);
-        ntpClient = new NTPUDPClient();
+        client = new NTPUDPClient();
     }
 
     public long getOffset() throws IOException {
-        TimeInfo info = ntpClient.getTime(host);
+        TimeInfo info = client.getTime(host);
         info.computeDetails();
         return info.getOffset();
     }

@@ -71,7 +71,7 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
                 context.close();
             }
         } catch (IOException e) {
-            log.error("Error while syncing with NTP {}, continuing startup..", host);
+            log.error(String.format("Error while syncing with NTP %s, continuing startup..", host), e);
         }
     }
 
