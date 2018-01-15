@@ -15,7 +15,6 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.ptv.CorrespondenceRequest;
-import org.assertj.core.util.Strings;
 
 import static no.difi.meldingsutveksling.core.EDUCoreMarker.markerFrom;
 
