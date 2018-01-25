@@ -82,17 +82,19 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     @Override
     public String getMottakerPid() {
-        return cr.getReceiverId();
+        return cr.getReceiver().getReceiverId();
     }
 
     @Override
     public String getSubject() {
-        return cr.getTitle();
+//        return cr.getTitle();
+        // TODO: replace with hoveddokument title
+        return "";
     }
 
     @Override
     public String getSenderOrgnumber() {
-        return cr.getSenderId();
+        return cr.getSender().getSenderId();
     }
 
     @Override

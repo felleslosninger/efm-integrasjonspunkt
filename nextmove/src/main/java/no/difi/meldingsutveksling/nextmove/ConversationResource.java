@@ -4,10 +4,10 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.google.common.base.MoreObjects;
 import lombok.Data;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.config.dpi.securitylevel.SecurityLevel;
 import no.difi.meldingsutveksling.xml.LocalDateTimeAdapter;
 
 import javax.persistence.*;
@@ -50,14 +50,12 @@ public abstract class ConversationResource {
     private String conversationId;
     @XmlElement
     private ServiceIdentifier serviceIdentifier;
+    @Embedded
     @XmlElement
-    private String senderId;
+    private Sender sender;
+    @Embedded
     @XmlElement
-    private String senderName;
-    @XmlElement
-    private String receiverId;
-    @XmlElement
-    private String receiverName;
+    private Receiver receiver;
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     @XmlElement
     @XmlJavaTypeAdapter(LocalDateTimeAdapter.class)
@@ -69,6 +67,8 @@ public abstract class ConversationResource {
     private boolean hasArkivmelding;
     @JsonIgnore
     private boolean locked;
+    @XmlElement
+    private SecurityLevel securityLevel;
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "fileid")
     @Column(name = "filename")
@@ -87,33 +87,20 @@ public abstract class ConversationResource {
 
     ConversationResource() {}
 
-    ConversationResource(String conversationId, String senderId, String receiverId, ServiceIdentifier serviceIdentifier,
+    ConversationResource(String conversationId, Sender sender, Receiver receiver, ServiceIdentifier serviceIdentifier,
                          LocalDateTime lastUpdate, Map fileRefs, Map customProperties){
         this.conversationId = conversationId;
-        this.senderId = senderId;
-        this.receiverId = receiverId;
+        this.sender = sender;
+        this.receiver = receiver;
         this.serviceIdentifier = serviceIdentifier;
         this.lastUpdate = lastUpdate;
         this.fileRefs = fileRefs;
         this.customProperties = customProperties;
     }
 
-
-
     public void addFileRef(String fileRef) {
         Optional<Integer> max = this.fileRefs.keySet().stream().max(Integer::compare);
         this.fileRefs.put(max.isPresent() ? max.get()+1 : 0, fileRef);
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("conversationId", conversationId)
-                .add("receiverId", receiverId)
-                .add("serviceIdentifier", serviceIdentifier)
-                .add("lastUpdate", lastUpdate)
-                .add("fileRefs", fileRefs)
-                .toString();
     }
 
 }

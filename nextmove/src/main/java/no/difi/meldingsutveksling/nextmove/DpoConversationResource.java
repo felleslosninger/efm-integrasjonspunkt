@@ -17,11 +17,11 @@ public class DpoConversationResource extends ConversationResource {
 
     DpoConversationResource() {}
 
-    private DpoConversationResource(String conversationId, String senderId, String receiverId) {
-        super(conversationId, senderId, receiverId, ServiceIdentifier.DPO, LocalDateTime.now(), Maps.newHashMap(), Maps.newHashMap());
+    private DpoConversationResource(String conversationId, Sender sender, Receiver receiver) {
+        super(conversationId, sender, receiver, ServiceIdentifier.DPO, LocalDateTime.now(), Maps.newHashMap(), Maps.newHashMap());
     }
 
-    public static DpoConversationResource of(String conversationId, String senderId, String receiverId) {
-        return new DpoConversationResource(conversationId, senderId, receiverId);
+    public static DpoConversationResource of(String conversationId, Sender sender, Receiver receiver) {
+        return new DpoConversationResource(conversationId, sender, receiver);
     }
 }

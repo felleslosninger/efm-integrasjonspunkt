@@ -12,8 +12,8 @@ public class ConversationResourceMarkers {
     public static LogstashMarker markerFrom(ConversationResource resource) {
 
         final LogstashMarker conversationIdMarker = MarkerFactory.conversationIdMarker(resource.getConversationId());
-        final LogstashMarker senderIdMarker = MarkerFactory.senderMarker(resource.getSenderId());
-        final LogstashMarker receiverMarker = MarkerFactory.receiverMarker(resource.getReceiverId());
+        final LogstashMarker senderIdMarker = MarkerFactory.senderMarker(resource.getSender().getSenderId());
+        final LogstashMarker receiverMarker = MarkerFactory.receiverMarker(resource.getReceiver().getReceiverId());
         final LogstashMarker messagetypeIdMarker = MarkerFactory.messageTypeMarker(resource.getServiceIdentifier().toString());
         return conversationIdMarker.and(senderIdMarker).and(receiverMarker).and(messagetypeIdMarker);
     }

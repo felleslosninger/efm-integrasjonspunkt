@@ -138,7 +138,7 @@ public class EDUCoreFactory {
     }
 
     public EDUCore create(ConversationResource cr, Arkivmelding am, byte[] asic) {
-        EDUCore eduCore = createCommon(cr.getSenderId(), cr.getReceiverId());
+        EDUCore eduCore = createCommon(cr.getSender().getSenderId(), cr.getReceiver().getReceiverId());
         eduCore.setId(cr.getConversationId());
         eduCore.setMessageType(EDUCore.MessageType.EDU);
         eduCore.setMessageReference(cr.getConversationId());

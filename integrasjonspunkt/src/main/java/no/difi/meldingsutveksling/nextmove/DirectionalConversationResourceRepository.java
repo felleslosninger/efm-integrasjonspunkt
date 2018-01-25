@@ -38,7 +38,7 @@ public class DirectionalConversationResourceRepository {
     }
 
     public List<ConversationResource> findByServiceIdentifierAndSenderId(ServiceIdentifier serviceIdentifier, String senderId) {
-        return repo.findByServiceIdentifierAndSenderIdAndDirection(serviceIdentifier, senderId, direction);
+        return repo.findByServiceIdentifierAndSenderSenderIdAndDirection(serviceIdentifier, senderId, direction);
     }
 
     public List<ConversationResource> findByServiceIdentifier(ServiceIdentifier serviceIdentifier) {
@@ -46,7 +46,7 @@ public class DirectionalConversationResourceRepository {
     }
 
     public List<ConversationResource> findBySenderId(String senderId) {
-        return repo.findBySenderIdAndDirection(senderId, direction);
+        return repo.findBySenderSenderIdAndDirection(senderId, direction);
     }
 
     public Optional<ConversationResource> findFirstByOrderByLastUpdateAsc() {
@@ -58,10 +58,10 @@ public class DirectionalConversationResourceRepository {
     }
 
     public List<ConversationResource> findByReceiverIdAndServiceIdentifier(String receiverId, ServiceIdentifier serviceIdentifier) {
-        return repo.findByReceiverIdAndServiceIdentifierAndDirection(receiverId, serviceIdentifier, direction);
+        return repo.findByReceiverReceiverIdAndServiceIdentifierAndDirection(receiverId, serviceIdentifier, direction);
     }
 
     public List<ConversationResource> findByReceiverId(String receiverId) {
-        return repo.findByReceiverIdAndDirection(receiverId, direction);
+        return repo.findByReceiverReceiverIdAndDirection(receiverId, direction);
     }
 }

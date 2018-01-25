@@ -89,7 +89,7 @@ public class NextMoveServiceBus {
 
             msg = new BrokeredMessage(os.toByteArray());
 
-            String queue = NEXTMOVE_QUEUE_PREFIX + resource.getReceiverId();
+            String queue = NEXTMOVE_QUEUE_PREFIX + resource.getReceiver().getReceiverId();
             switch (resource.getServiceIdentifier()) {
                 case DPE_INNSYN:
                     queue = queue + INNSYN.fullname();

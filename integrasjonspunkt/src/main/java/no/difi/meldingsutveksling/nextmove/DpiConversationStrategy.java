@@ -43,7 +43,7 @@ public class DpiConversationStrategy implements ConversationStrategy {
     public void send(ConversationResource conversationResource) throws NextMoveException {
 
         DpiConversationResource cr = (DpiConversationResource) conversationResource;
-        List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiverId());
+        List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiver().getReceiverId());
         Optional<ServiceRecord> serviceRecord = serviceRecords.stream()
                 .filter(r -> DPI == r.getServiceIdentifier())
                 .findFirst();
@@ -53,7 +53,7 @@ public class DpiConversationStrategy implements ConversationStrategy {
                     .map(ServiceRecord::getServiceIdentifier)
                     .collect(Collectors.toList());
             String errorStr = String.format("Message is of type '%s', but receiver '%s' accepts types '%s'.",
-                    DPI, cr.getReceiverId(), acceptableTypes);
+                    DPI, cr.getReceiver().getReceiverId(), acceptableTypes);
             log.error(markerFrom(conversationResource), errorStr);
             throw new NextMoveException(errorStr);
         }

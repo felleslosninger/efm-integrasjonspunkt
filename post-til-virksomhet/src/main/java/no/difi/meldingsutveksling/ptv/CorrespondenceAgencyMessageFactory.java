@@ -88,7 +88,7 @@ public class CorrespondenceAgencyMessageFactory {
             attachmentExternalBEV2List.getBinaryAttachmentV2().add(binaryAttachmentV2);
         }
 
-        return create(config, cr.getConversationId(), cr.getReceiverId(), cr.getMessageTitle(),
+        return create(config, cr.getConversationId(), cr.getReceiver().getReceiverId(), cr.getMessageTitle(),
                 cr.getMessageContent(), attachmentExternalBEV2List);
     }
 

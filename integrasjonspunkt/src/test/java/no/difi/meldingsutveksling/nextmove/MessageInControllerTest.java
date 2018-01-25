@@ -67,9 +67,9 @@ public class MessageInControllerTest {
         serviceRecord.setServiceIdentifier(DPO);
         when(sr.getServiceRecord("1", DPO)).thenReturn(Optional.of(serviceRecord));
 
-        DpoConversationResource cr42 = DpoConversationResource.of("42", "2", "1");
-        DpvConversationResource cr43 = DpvConversationResource.of("43", "2", "1");
-        DpoConversationResource cr44 = DpoConversationResource.of("44", "1", "2");
+        DpoConversationResource cr42 = DpoConversationResource.of("42", Sender.of("2", "bar"), Receiver.of("1", "foo"));
+        DpvConversationResource cr43 = DpvConversationResource.of("43", Sender.of("2", "bar"), Receiver.of("1", "foo"));
+        DpoConversationResource cr44 = DpoConversationResource.of("44", Sender.of("1", "foo"), Receiver.of("2", "bar"));
 
         File foo = new File("src/test/resources/testfil.txt");
         File targetFoo = new File("target/uploadtest/testfil.txt");

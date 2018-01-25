@@ -77,6 +77,12 @@
         </dependency>
 
         <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>service-registry-client</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>no.difi.move-common</groupId>
             <artifactId>audit</artifactId>
         </dependency>

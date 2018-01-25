@@ -101,9 +101,9 @@ public class MessageOutControllerTest {
         InfoRecord bazInfo = new InfoRecord("3", "baz", new EntityType("org", "org"));
         when(sr.getInfoRecord("3")).thenReturn(bazInfo);
 
-        DpoConversationResource cr42 = DpoConversationResource.of("42", "2", "1");
-        DpvConversationResource cr43 = DpvConversationResource.of("43", "2", "1");
-        DpoConversationResource cr44 = DpoConversationResource.of("44", "1", "2");
+        DpoConversationResource cr42 = DpoConversationResource.of("42", Sender.of("2", "bar"), Receiver.of("1", "foo"));
+        DpvConversationResource cr43 = DpvConversationResource.of("43", Sender.of("2", "bar"), Receiver.of("1", "foo"));
+        DpoConversationResource cr44 = DpoConversationResource.of("44", Sender.of("1", "foo"), Receiver.of("2", "bar"));
 
         DpoConversationStrategy dpoMock = mock(DpoConversationStrategy.class);
         when(strategyFactory.getStrategy(cr42)).thenReturn(Optional.of(dpoMock));
@@ -113,13 +113,13 @@ public class MessageOutControllerTest {
         when(repo.findByConversationIdAndDirection("43", OUTGOING)).thenReturn(Optional.of(cr43));
         when(repo.findByConversationIdAndDirection("1337", OUTGOING)).thenReturn(Optional.empty());
         when(repo.findAll()).thenReturn(asList(cr42, cr43, cr44));
-        when(repo.findByReceiverIdAndDirection("1", OUTGOING)).thenReturn(asList(cr42, cr43));
-        when(repo.findByReceiverIdAndDirection("2", OUTGOING)).thenReturn(asList(cr44));
+        when(repo.findByReceiverReceiverIdAndDirection("1", OUTGOING)).thenReturn(asList(cr42, cr43));
+        when(repo.findByReceiverReceiverIdAndDirection("2", OUTGOING)).thenReturn(asList(cr44));
         when(repo.findByServiceIdentifierAndDirection(DPO, OUTGOING)).thenReturn(asList(cr42, cr44));
         when(repo.findByServiceIdentifierAndDirection(DPV, OUTGOING)).thenReturn(asList(cr43));
-        when(repo.findByReceiverIdAndServiceIdentifierAndDirection("1", DPO, OUTGOING)).thenReturn(asList(cr42));
-        when(repo.findByReceiverIdAndServiceIdentifierAndDirection("1", DPV, OUTGOING)).thenReturn(asList(cr43));
-        when(repo.findByReceiverIdAndServiceIdentifierAndDirection("2", DPO, OUTGOING)).thenReturn(asList(cr44));
+        when(repo.findByReceiverReceiverIdAndServiceIdentifierAndDirection("1", DPO, OUTGOING)).thenReturn(asList(cr42));
+        when(repo.findByReceiverReceiverIdAndServiceIdentifierAndDirection("1", DPV, OUTGOING)).thenReturn(asList(cr43));
+        when(repo.findByReceiverReceiverIdAndServiceIdentifierAndDirection("2", DPO, OUTGOING)).thenReturn(asList(cr44));
     }
 
     @Test

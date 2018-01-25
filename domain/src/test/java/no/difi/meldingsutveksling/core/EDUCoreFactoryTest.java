@@ -4,6 +4,8 @@ import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.mxa.schema.domain.Message;
 import no.difi.meldingsutveksling.nextmove.DpoConversationResource;
+import no.difi.meldingsutveksling.nextmove.Receiver;
+import no.difi.meldingsutveksling.nextmove.Sender;
 import no.difi.meldingsutveksling.noarkexchange.PayloadException;
 import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
@@ -276,7 +278,7 @@ public class EDUCoreFactoryTest {
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         Arkivmelding am = unmarshaller.unmarshal(new StreamSource(new ByteArrayInputStream(arkivmeldingBytes)), Arkivmelding.class).getValue();
 
-        DpoConversationResource cr = DpoConversationResource.of(convId, "123", "321");
+        DpoConversationResource cr = DpoConversationResource.of(convId, Sender.of("123", "foo"), Receiver.of("321", "bar"));
 
         EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
         EDUCore eduCore = eduCoreFactory.create(cr, am, zipBytes);

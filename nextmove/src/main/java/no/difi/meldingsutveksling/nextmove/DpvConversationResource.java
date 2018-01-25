@@ -18,21 +18,22 @@ public class DpvConversationResource extends ConversationResource {
 
     DpvConversationResource() {}
 
-    private DpvConversationResource(String conversationId, String senderId, String receiverId) {
-        super(conversationId, senderId, receiverId, ServiceIdentifier.DPV, LocalDateTime.now(), Maps.newHashMap(), Maps.newHashMap());
+    private DpvConversationResource(String conversationId, Sender sender, Receiver receiver) {
+        super(conversationId, sender, receiver, ServiceIdentifier.DPV, LocalDateTime.now(), Maps.newHashMap(), Maps.newHashMap());
     }
 
-    public static DpvConversationResource of(String conversationId, String senderId, String receiverId) {
-        return new DpvConversationResource(conversationId, senderId, receiverId);
+    public static DpvConversationResource of(String conversationId, Sender sender, Receiver receiver) {
+        return new DpvConversationResource(conversationId, sender, receiver);
     }
 
     public static DpvConversationResource of(DpiConversationResource dpi) {
-        DpvConversationResource dpv = of(dpi.getConversationId(), dpi.getSenderId(), dpi.getReceiverId());
-        dpv.setMessageContent(dpi.getTitle());
-        dpv.setMessageTitle(dpi.getTitle());
+        DpvConversationResource dpv = of(dpi.getConversationId(), dpi.getSender(), dpi.getReceiver());
+        // TODO: replace
+//        dpv.setMessageContent(dpi.getTitle());
+//        dpv.setMessageTitle(dpi.getTitle());
 
-        dpv.setSenderName(dpi.getSenderName());
-        dpv.setReceiverName(dpi.getReceiverName());
+        dpv.setSender(dpi.getSender());
+        dpv.setReceiver(dpi.getReceiver());
         dpv.setHasArkivmelding(dpi.isHasArkivmelding());
         dpv.setFileRefs(dpi.getFileRefs());
         dpv.setCustomProperties(dpi.getCustomProperties());

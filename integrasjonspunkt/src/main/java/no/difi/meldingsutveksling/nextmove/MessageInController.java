@@ -227,7 +227,7 @@ public class MessageInController {
                 isr = new InputStreamResource(new FileInputStream(file));
             } catch (FileNotFoundException e) {
                 Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing it from queue",
-                        filename, resource.get().getConversationId(), resource.get().getSenderId()), markerFrom(resource.get()), e);
+                        filename, resource.get().getConversationId(), resource.get().getSender().getSenderId()), markerFrom(resource.get()), e);
                 repo.delete(resource.get());
                 return fileNotFoundErrorResponse(filename);
             }
@@ -285,7 +285,7 @@ public class MessageInController {
                 isr = new InputStreamResource(new ByteArrayInputStream(bytes));
             } catch (IOException e) {
                 Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing it from queue",
-                        filename, resource.get().getConversationId(), resource.get().getSenderId()), markerFrom(resource.get()), e);
+                        filename, resource.get().getConversationId(), resource.get().getSender().getSenderId()), markerFrom(resource.get()), e);
                 repo.delete(resource.get());
                 return fileNotFoundErrorResponse(filename);
             }

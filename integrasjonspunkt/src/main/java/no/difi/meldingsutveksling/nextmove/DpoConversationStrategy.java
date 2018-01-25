@@ -35,7 +35,7 @@ public class DpoConversationStrategy implements ConversationStrategy {
 
     @Override
     public void send(ConversationResource cr) throws NextMoveException {
-        List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiverId());
+        List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiver().getReceiverId());
         Optional<ServiceRecord> serviceRecord = serviceRecords.stream()
                 .filter(r -> DPO == r.getServiceIdentifier())
                 .findFirst();
@@ -44,7 +44,7 @@ public class DpoConversationStrategy implements ConversationStrategy {
                     .map(ServiceRecord::getServiceIdentifier)
                     .collect(Collectors.toList());
             String errorStr = String.format("Message is of type '%s', but receiver '%s' accepts types '%s'.",
-                    DPO, cr.getReceiverId(), acceptableTypes);
+                    DPO, cr.getReceiver().getReceiverId(), acceptableTypes);
             log.error(markerFrom(cr), errorStr);
             throw new NextMoveException(errorStr);
         }

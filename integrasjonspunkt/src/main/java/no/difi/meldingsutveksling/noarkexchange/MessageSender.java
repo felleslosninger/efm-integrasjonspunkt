@@ -130,13 +130,13 @@ public class MessageSender implements ApplicationContextAware {
     }
 
     public MessageContext createMessageContext(ConversationResource conversation) throws MessageContextException {
-        if (isNullOrEmpty(conversation.getReceiverId())) {
+        if (isNullOrEmpty(conversation.getReceiver().getReceiverId())) {
             throw new MessageContextException(StatusMessage.MISSING_RECIEVER_ORGANIZATION_NUMBER);
         }
 
         MessageContext context = new MessageContext();
-        context.setAvsender(createAvsender(conversation.getSenderId()));
-        context.setMottaker(createMottaker(conversation.getReceiverId(), conversation.getServiceIdentifier()));
+        context.setAvsender(createAvsender(conversation.getSender().getSenderId()));
+        context.setMottaker(createMottaker(conversation.getReceiver().getReceiverId(), conversation.getServiceIdentifier()));
         context.setJpId("");
         context.setConversationId(conversation.getConversationId());
 

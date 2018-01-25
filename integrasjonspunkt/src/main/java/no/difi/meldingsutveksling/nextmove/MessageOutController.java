@@ -42,6 +42,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
 import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
@@ -58,27 +59,22 @@ public class MessageOutController {
 
     @Autowired
     private ServiceRegistryLookup sr;
-
     @Autowired
     private IntegrasjonspunktProperties props;
-
     @Autowired
     private MessageSender messageSender;
-
     @Autowired
     private NextMoveServiceBus nextMoveServiceBus;
-
     @Autowired
     private ConversationStrategyFactory strategyFactory;
-
     @Autowired
     private ConversationService conversationService;
-
     @Autowired
     private NextMoveUtils nextMoveUtils;
-
     @Autowired
     private InternalQueue internalQueue;
+    @Autowired
+    private ConversationResourceFactory crFactory;
 
     @Autowired
     public MessageOutController(ConversationResourceRepository repo) {
@@ -137,7 +133,7 @@ public class MessageOutController {
     public ResponseEntity createResource(
             @RequestBody ConversationResource cr) {
 
-        if (isNullOrEmpty(cr.getReceiverId())) {
+        if (cr.getReceiver() == null || isNullOrEmpty(cr.getReceiver().getReceiverId())) {
             return ResponseEntity.badRequest().body(ErrorResponse.builder().error("receiverId_not_present")
                     .errorDescription("Required String parameter \'receiverId\' is not present").build());
         }
@@ -150,7 +146,7 @@ public class MessageOutController {
                     .errorDescription(String.format("serviceIdentifier '%s' not supported. Supported types: %s",
                             cr.getServiceIdentifier(), strategyFactory.getEnabledServices())).build());
         }
-        List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiverId());
+        List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiver().getReceiverId());
         List<ServiceIdentifier> acceptableServiceIdentifiers = serviceRecords.stream()
                 .map(ServiceRecord::getServiceIdentifier)
                 .collect(Collectors.toList());
@@ -170,14 +166,29 @@ public class MessageOutController {
     }
 
     private void setDefaults(ConversationResource cr) {
-        cr.setSenderId(isNullOrEmpty(cr.getSenderId()) ? props.getOrg().getNumber() : cr.getSenderId());
-        InfoRecord senderInfo = sr.getInfoRecord(cr.getSenderId());
-        InfoRecord receiverInfo = sr.getInfoRecord(cr.getReceiverId());
-        cr.setSenderName(senderInfo.getOrganizationName());
-        cr.setReceiverName(receiverInfo.getOrganizationName());
+        InfoRecord senderInfo = sr.getInfoRecord(props.getOrg().getNumber());
+        if (cr.getSender() == null) {
+            cr.setSender(Sender.of(senderInfo.getIdentifier(), senderInfo.getOrganizationName()));
+        } else {
+            if (isNullOrEmpty(cr.getSender().getSenderId())) {
+                cr.getSender().setSenderId(senderInfo.getIdentifier());
+            }
+            if (isNullOrEmpty(cr.getSender().getSenderName())) {
+                cr.getSender().setSenderName(senderInfo.getOrganizationName());
+            }
+        }
+        if (isNullOrEmpty(cr.getReceiver().getReceiverName())) {
+            if (cr.getServiceIdentifier() == DPI) {
+                crFactory.create(cr);
+            } else {
+                InfoRecord receiverInfo = sr.getInfoRecord(cr.getReceiver().getReceiverId());
+                cr.getReceiver().setReceiverName(receiverInfo.getOrganizationName());
+            }
+        }
         cr.setLastUpdate(LocalDateTime.now());
         cr.setConversationId(isNullOrEmpty(cr.getConversationId()) ? UUID.randomUUID().toString() : cr.getConversationId());
         cr.setFileRefs(cr.getFileRefs() == null ? Maps.newHashMap() : cr.getFileRefs());
+        if (cr.getSecurityLevel() == null) { cr.setSecurityLevel(props.getNextbest().getSecurityLevel()); }
     }
 
     @RequestMapping(value = "/out/messages/{conversationId}", method = RequestMethod.POST)
@@ -244,11 +255,11 @@ public class MessageOutController {
             }
         }
 
-        List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiverId());
+        List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiver().getReceiverId());
         boolean hasDpiRecord = serviceRecords.stream()
                 .map(ServiceRecord::getServiceIdentifier)
-                .anyMatch(si -> ServiceIdentifier.DPI == si);
-        if (cr.getServiceIdentifier() == ServiceIdentifier.DPI && !hasDpiRecord) {
+                .anyMatch(si -> DPI == si);
+        if (cr.getServiceIdentifier() == DPI && !hasDpiRecord) {
             cr = DpvConversationResource.of((DpiConversationResource)cr);
         }
 

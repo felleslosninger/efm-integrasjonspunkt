@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.config;
 
 import lombok.Data;
 import lombok.ToString;
+import no.difi.meldingsutveksling.config.dpi.securitylevel.SecurityLevel;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.core.io.Resource;
@@ -169,6 +170,8 @@ public class IntegrasjonspunktProperties {
         private String asicfile;
         @Valid
         private ServiceBus serviceBus;
+        @Valid
+        private SecurityLevel securityLevel;
 
         @Data
         @ToString(exclude = "sasToken")

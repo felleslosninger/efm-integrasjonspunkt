@@ -92,7 +92,7 @@ public class Conversation {
     }
 
     public static Conversation of(ConversationResource cr, MessageStatus... statuses) {
-        Conversation c = new Conversation(cr.getConversationId(), cr.getConversationId(), cr.getSenderId(), cr.getReceiverId(),
+        Conversation c = new Conversation(cr.getConversationId(), cr.getConversationId(), cr.getSender().getSenderId(), cr.getReceiver().getReceiverId(),
                 cr.getDirection(), "", cr.getServiceIdentifier());
         if (statuses != null && statuses.length > 0) {
             Stream.of(statuses)
