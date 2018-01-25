@@ -12,7 +12,6 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.kvittering.EduDocumentFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveQueue;
 import no.difi.meldingsutveksling.nextmove.NextMoveServiceBus;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
@@ -34,6 +33,7 @@ import org.springframework.stereotype.Component;
 import javax.xml.bind.JAXBElement;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
@@ -81,12 +81,23 @@ public class MessagePolling implements ApplicationContextAware {
     @Autowired
     private NextMoveServiceBus nextMoveServiceBus;
 
-    @Scheduled(fixedRateString = "${difi.move.nextbest.serviceBus.pollingrate}")
-    public void checkForNewNextBestMessages() throws NextMoveException {
+    private CompletableFuture batchRead;
 
-        if (properties.getNextbest().getServiceBus().isEnable()) {
+    @Scheduled(fixedRateString = "${difi.move.nextmove.serviceBus.pollingrate}")
+    public void checkForNewNextMoveMessages() {
+        if (properties.getNextmove().getServiceBus().isEnable() &&
+                !properties.getNextmove().getServiceBus().isBatchRead()) {
             log.debug("Checking for new NextMove messages..");
-            nextMoveServiceBus.getAllMessages();
+            nextMoveServiceBus.getAllMessagesRest();
+        }
+        if (properties.getNextmove().getServiceBus().isEnable() &&
+                properties.getNextmove().getServiceBus().isBatchRead()) {
+            if (this.batchRead == null || this.batchRead.isDone()) {
+                log.debug("Checking for new NextMove messages (batch)..");
+                this.batchRead = nextMoveServiceBus.getAllMessagesBatch();
+            } else {
+                log.debug("Batch still processing..");
+            }
         }
     }
 

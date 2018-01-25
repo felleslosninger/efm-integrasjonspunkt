@@ -54,7 +54,7 @@ public class IntegrasjonspunktProperties {
     private Mail mail;
 
     @Valid
-    private NextBEST nextbest;
+    private NextMove nextmove;
 
     @Valid
     private Sign sign;
@@ -157,11 +157,8 @@ public class IntegrasjonspunktProperties {
         private String trust;
     }
 
-    /**
-     * Settings for NextBEST
-     */
     @Data
-    public static class NextBEST {
+    public static class NextMove {
 
         @NotNull
         private String filedir;
@@ -170,23 +167,24 @@ public class IntegrasjonspunktProperties {
         @Valid
         private ServiceBus serviceBus;
 
-        @Data
-        @ToString(exclude = "sasToken")
-        public static class ServiceBus {
+    }
 
-            private boolean enable;
-            @NotNull
-            private String sasKeyName;
-            @NotNull
-            private String sasToken;
-            @Pattern(regexp = "innsyn|data", flags = Pattern.Flag.CASE_INSENSITIVE)
-            private String mode;
-            @NotNull
-            private String namespace;
-            private String receiptQueue;
-            private Integer readMaxMessages;
-        }
+    @Data
+    @ToString(exclude = "sasToken")
+    public static class ServiceBus {
 
+        private boolean enable;
+        @NotNull
+        private String sasKeyName;
+        @NotNull
+        private String sasToken;
+        @Pattern(regexp = "innsyn|data", flags = Pattern.Flag.CASE_INSENSITIVE)
+        private String mode;
+        @NotNull
+        private String namespace;
+        private String receiptQueue;
+        private Integer readMaxMessages;
+        private boolean batchRead;
     }
 
     @Data
