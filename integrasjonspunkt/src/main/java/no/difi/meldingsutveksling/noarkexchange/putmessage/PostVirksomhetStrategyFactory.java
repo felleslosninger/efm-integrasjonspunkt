@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
@@ -12,14 +13,15 @@ import java.util.Optional;
 public class PostVirksomhetStrategyFactory implements MessageStrategyFactory {
 
     private final CorrespondenceAgencyConfiguration configuration;
-    private final ServiceRegistryLookup serviceRegistryLookup;
+    private final NoarkClient noarkClient;
 
-    private PostVirksomhetStrategyFactory(CorrespondenceAgencyConfiguration configuration, ServiceRegistryLookup serviceRegistryLookup) {
+    private PostVirksomhetStrategyFactory(CorrespondenceAgencyConfiguration configuration, NoarkClient noarkClient) {
         this.configuration = configuration;
-        this.serviceRegistryLookup = serviceRegistryLookup;
+        this.noarkClient = noarkClient;
     }
 
     public static PostVirksomhetStrategyFactory newInstance(IntegrasjonspunktProperties properties,
+                                                            NoarkClient noarkClient,
                                                             ServiceRegistryLookup serviceRegistryLookup) {
 
         InfoRecord infoRecord = serviceRegistryLookup.getInfoRecord(properties.getOrg().getNumber());
@@ -41,12 +43,12 @@ public class PostVirksomhetStrategyFactory implements MessageStrategyFactory {
         builder.withEndpointUrl(properties.getDpv().getEndpointUrl().toString());
 
         CorrespondenceAgencyConfiguration config = builder.build();
-        return new PostVirksomhetStrategyFactory(config, serviceRegistryLookup);
+        return new PostVirksomhetStrategyFactory(config, noarkClient);
     }
 
     @Override
     public MessageStrategy create(Object payload) {
-        return new PostVirksomhetMessageStrategy(configuration);
+        return new PostVirksomhetMessageStrategy(configuration, noarkClient);
     }
 
     @Override

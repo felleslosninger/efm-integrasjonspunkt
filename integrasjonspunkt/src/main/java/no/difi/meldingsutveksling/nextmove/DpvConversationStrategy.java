@@ -29,7 +29,7 @@ public class DpvConversationStrategy implements ConversationStrategy {
     public void send(ConversationResource conversationResource) throws NextMoveException {
         DpvConversationResource cr = (DpvConversationResource) conversationResource;
 
-        PostVirksomhetStrategyFactory dpvFactory = PostVirksomhetStrategyFactory.newInstance(props, sr);
+        PostVirksomhetStrategyFactory dpvFactory = PostVirksomhetStrategyFactory.newInstance(props, null, sr);
         CorrespondenceAgencyConfiguration config = dpvFactory.getConfig();
         InsertCorrespondenceV2 message;
         message = CorrespondenceAgencyMessageFactory.create(config, cr);
