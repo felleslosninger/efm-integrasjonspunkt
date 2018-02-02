@@ -111,7 +111,12 @@ public class OidcTokenClient {
                 .expirationTime(Date.from(ZonedDateTime.now(ZoneOffset.UTC).toInstant().plusSeconds(120)))
                 .build();
 
-        JWSSigner signer = new RSASSASigner(nokkel.loadPrivateKey());
+        RSASSASigner signer = new RSASSASigner(nokkel.loadPrivateKey());
+
+        if(nokkel.shouldLockProvider()) {
+            signer.getJCAContext().setProvider(nokkel.getKeyStore().getProvider());
+        }
+
         SignedJWT signedJWT = new SignedJWT(jwsHeader, claims);
         try {
             signedJWT.sign(signer);
