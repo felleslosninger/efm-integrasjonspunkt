@@ -333,4 +333,10 @@
       ]]></notes>
       <cve>CVE-2017-17485</cve>
    </suppress>
+   <suppress>
+      <notes><![CDATA[
+         CVE-2018-5968 was fixed, but still shows up as false positive for jackson-jaxrs and jackson-xc
+      ]]></notes>
+      <cve>CVE-2018-5968</cve>
+   </suppress>
 </suppressions>
