@@ -10,6 +10,7 @@ import java.util.Optional;
 @Profile("!test")
 public interface ConversationRepository  extends CrudRepository<Conversation, String> {
     Optional<Conversation> findByConvIdAndDirection(Integer convId, ConversationDirection direction);
+    List<Conversation> findByConversationIdAndDirection(String conversationId, ConversationDirection direction);
     List<Conversation> findByConversationId(String conversationId);
     List<Conversation> findByPollable(boolean pollable);
     List<Conversation> findByFinishedAndDirection(boolean finished, ConversationDirection direction);

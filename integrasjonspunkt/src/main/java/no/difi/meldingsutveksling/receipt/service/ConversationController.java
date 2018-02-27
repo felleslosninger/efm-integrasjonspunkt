@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationRepository;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatusRepository;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -65,14 +66,24 @@ public class ConversationController {
             @ApiResponse(code = 200, message = "Success", response = Conversation.class)
     })
     public ResponseEntity conversation(
-            @ApiParam(value = "Conversation id", required = true)
-            @PathVariable("id") Integer id) {
+            @ApiParam(value = "convId", required = true)
+            @PathVariable("id") String id,
+            @ApiParam(value = "Use conversationId for search")
+            @RequestParam(value = "useConversationId", required = false) boolean useConversationId) {
 
-        Optional<Conversation> c = convoRepo.findByConvIdAndDirection(id, OUTGOING);
+        Optional<Conversation> c;
+        if (useConversationId) {
+            c = convoRepo.findByConversationIdAndDirection(id, OUTGOING).stream().findFirst();
+        } else {
+            if (!StringUtils.isNumeric(id)) {
+                return ResponseEntity.badRequest().body("convId is not numeric");
+            }
+            c = convoRepo.findByConvIdAndDirection(Integer.valueOf(id), OUTGOING);
+        }
+
         if (!c.isPresent()) {
             return ResponseEntity.notFound().build();
         }
-
         return ResponseEntity.ok(c.get());
     }
 
