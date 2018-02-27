@@ -127,7 +127,7 @@ public class ConversationControllerTest {
 
     @Test
     public void conversationsWithNonNumericIdTest() throws Exception {
-        mvc.perform(get("/conversations/asd")
+        mvc.perform(get("/conversations/asd123")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
