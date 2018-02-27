@@ -14,6 +14,11 @@ import java.security.cert.X509Certificate;
  */
 public class IntegrasjonspunktNokkel {
 
+    private static final String ERR_MISSING_PRIVATE_KEY_OR_PASS = "Problem accessing PrivateKey with alias \"%s\" inadequate access or Password is wrong";
+    private static final String ERR_MISSING_PRIVATE_KEY = "No PrivateKey with alias \"%s\" found in the KeyStore";
+    private static final String ERR_MISSING_CERTIFICATE = "No Certificate with alias \"%s\" found in the KeyStore";
+    private static final String ERR_GENERAL = "Unexpected problem occurred when operating KeyStore";
+
     protected final KeyStoreProperties properties;
 
     protected KeyStore keyStore;
@@ -36,38 +41,56 @@ public class IntegrasjonspunktNokkel {
      */
     public PrivateKey loadPrivateKey() {
 
+        PrivateKey privateKey;
+
         char[] password = properties.getPassword().toCharArray();
 
         try {
-            return (PrivateKey) keyStore.getKey(properties.getAlias(), password);
+
+            privateKey = (PrivateKey) keyStore.getKey(properties.getAlias(), password);
+
+            if(privateKey == null){
+
+                throw new IllegalStateException(
+                        String.format(ERR_MISSING_PRIVATE_KEY, properties.getAlias())
+                );
+            }
 
         }catch (KeyStoreException | NoSuchAlgorithmException e) {
 
-            throw new IllegalStateException("Unexpected problem when operating KeyStore", e);
+            throw new IllegalStateException(ERR_GENERAL, e);
         }catch (UnrecoverableEntryException e){
 
             throw new IllegalStateException(
-                    String.format("No PrivateKey with alias \"%s\" found in the KeyStore or the provided Password is wrong", properties.getAlias())
+                    String.format(ERR_MISSING_PRIVATE_KEY_OR_PASS, properties.getAlias())
                     ,e
             );
 
         }
+
+        return privateKey;
     }
 
     public X509Certificate getX509Certificate() {
 
+        X509Certificate certificate;
+
         try {
-            if( !keyStore.containsAlias(properties.getAlias()) ){
+
+            certificate = (X509Certificate) keyStore.getCertificate(properties.getAlias());
+
+            if( certificate == null ){
                 throw new IllegalStateException(
-                        String.format("No Certificate with alias \"%s\" found in the KeyStore", properties.getAlias())
+                        String.format(ERR_MISSING_CERTIFICATE, properties.getAlias())
                 );
             }
 
-            return (X509Certificate) keyStore.getCertificate(properties.getAlias());
         }catch (KeyStoreException e){
 
-            throw new IllegalStateException("Unexpected problem when operating KeyStore", e);
+            throw new IllegalStateException(ERR_GENERAL, e);
         }
+
+        return certificate;
     }
 
     public KeyPair getKeyPair() {
