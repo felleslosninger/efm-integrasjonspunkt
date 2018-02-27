@@ -69,12 +69,13 @@ public class ConversationControllerTest {
         c1.setConvId(1);
         c1.setPollable(true);
         c1.setLastUpdate(NOW_MINUS_5_MIN);
-        Conversation c2 = Conversation.of(cId2, "foo", "24", "42", OUTGOING, "foo", ServiceIdentifier.DPO, cId2ms1, cId2ms2, cId2ms3);
+        Conversation c2 = Conversation.of(cId2, "foo", "24", "43", OUTGOING, "foo", ServiceIdentifier.DPO, cId2ms1, cId2ms2, cId2ms3);
         c2.setConvId(2);
         c2.setPollable(false);
         c2.setLastUpdate(NOW);
 
         when(convoRepo.findAll()).thenReturn(asList(c1, c2));
+        when(convoRepo.findByReceiverIdentifierAndDirection("43", OUTGOING)).thenReturn(singletonList(c2));
         when(convoRepo.findByDirection(OUTGOING)).thenReturn(asList(c1, c2));
         when(convoRepo.findByConvIdAndDirection(1, OUTGOING)).thenReturn(Optional.of(c1));
         when(convoRepo.findByConvIdAndDirection(2, OUTGOING)).thenReturn(Optional.of(c2));
@@ -96,6 +97,16 @@ public class ConversationControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[*].convId", containsInAnyOrder(1, 2)));
+    }
+
+    @Test
+    public void conversationsWithReceiverIdTest() throws Exception {
+        mvc.perform(get("/conversations")
+                .param("receiverIdentifier", "43")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].convId", is(2)));
     }
 
     @Test

@@ -14,6 +14,8 @@ public interface ConversationRepository  extends CrudRepository<Conversation, St
     List<Conversation> findByConversationId(String conversationId);
     List<Conversation> findByPollable(boolean pollable);
     List<Conversation> findByFinishedAndDirection(boolean finished, ConversationDirection direction);
+    List<Conversation> findByFinishedAndReceiverIdentifierAndDirection(boolean finished, String receiverIdentifier, ConversationDirection direction);
+    List<Conversation> findByReceiverIdentifierAndDirection(String receiverIdentifier, ConversationDirection direction);
     List<Conversation> findByDirection(ConversationDirection direction);
     Long countByPollable(boolean pollable);
 }

@@ -39,13 +39,23 @@ public class ConversationController {
     })
     public List<Conversation> conversations(
             @ApiParam(value = "Filter conversations based on finished status")
-            @RequestParam(value = "finished", required = false) Optional<Boolean> finished) {
+            @RequestParam(value = "finished", required = false) Optional<Boolean> finished,
+            @ApiParam(value = "Filter conversations based on receiver identifier")
+            @RequestParam(value = "receiverIdentifier", required = false) Optional<String> receiverIdentifier) {
 
         List<Conversation> conversations;
         if (finished.isPresent()) {
-            conversations = convoRepo.findByFinishedAndDirection(finished.get(), OUTGOING);
+            if (receiverIdentifier.isPresent()) {
+                conversations = convoRepo.findByFinishedAndReceiverIdentifierAndDirection(finished.get(), receiverIdentifier.get(), OUTGOING);
+            } else {
+                conversations = convoRepo.findByFinishedAndDirection(finished.get(), OUTGOING);
+            }
         } else {
-            conversations = Lists.newArrayList(convoRepo.findByDirection(OUTGOING));
+            if (receiverIdentifier.isPresent()) {
+                conversations = convoRepo.findByReceiverIdentifierAndDirection(receiverIdentifier.get(), OUTGOING);
+            } else {
+                conversations = convoRepo.findByDirection(OUTGOING);
+            }
         }
         return conversations.stream().sorted((a, b) -> b.getLastUpdate().compareTo(a.getLastUpdate())).collect(Collectors.toList());
     }
