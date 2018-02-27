@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.when;
@@ -77,8 +78,9 @@ public class ConversationControllerTest {
         when(convoRepo.findByDirection(OUTGOING)).thenReturn(asList(c1, c2));
         when(convoRepo.findByConvIdAndDirection(1, OUTGOING)).thenReturn(Optional.of(c1));
         when(convoRepo.findByConvIdAndDirection(2, OUTGOING)).thenReturn(Optional.of(c2));
-        when(convoRepo.findByPollable(true)).thenReturn(asList(c1));
-        when(convoRepo.findByPollable(false)).thenReturn(asList(c2));
+        when(convoRepo.findByConversationIdAndDirection("123", OUTGOING)).thenReturn(singletonList(c1));
+        when(convoRepo.findByPollable(true)).thenReturn(singletonList(c1));
+        when(convoRepo.findByPollable(false)).thenReturn(singletonList(c2));
 
         when(statRepo.findAll()).thenReturn(asList(cId1ms1, cId1ms2, cId2ms1, cId2ms2, cId2ms3));
         when(statRepo.findAllByConvId(1)).thenReturn(asList(cId1ms1, cId1ms2));
@@ -107,6 +109,27 @@ public class ConversationControllerTest {
                 .andExpect(jsonPath("$.messageReference", is("foo")))
                 .andExpect(jsonPath("$.messageTitle", is("foo")))
                 .andExpect(jsonPath("$.serviceIdentifier", is("DPO")));
+    }
+
+    @Test
+    public void conversationsWithConversationIdParamTest() throws Exception {
+        mvc.perform(get("/conversations/123")
+                .param("useConversationId", "true")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.convId", is(1)))
+                .andExpect(jsonPath("$.conversationId", is("123")))
+                .andExpect(jsonPath("$.receiverIdentifier", is("42")))
+                .andExpect(jsonPath("$.messageReference", is("foo")))
+                .andExpect(jsonPath("$.messageTitle", is("foo")))
+                .andExpect(jsonPath("$.serviceIdentifier", is("DPO")));
+    }
+
+    @Test
+    public void conversationsWithNonNumericIdTest() throws Exception {
+        mvc.perform(get("/conversations/asd")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
