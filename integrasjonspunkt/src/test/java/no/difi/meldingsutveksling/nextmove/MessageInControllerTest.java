@@ -58,9 +58,9 @@ public class MessageInControllerTest {
     @Before
     public void setup() throws IOException {
         String filedir = "target/uploadtest/";
-        IntegrasjonspunktProperties.NextBEST nextBEST = new IntegrasjonspunktProperties.NextBEST();
-        nextBEST.setFiledir(filedir);
-        when(props.getNextbest()).thenReturn(nextBEST);
+        IntegrasjonspunktProperties.NextMove nextMove = new IntegrasjonspunktProperties.NextMove();
+        nextMove.setFiledir(filedir);
+        when(props.getNextmove()).thenReturn(nextMove);
         when(nextMoveUtils.getConversationFiledirPath(any())).thenReturn(filedir);
 
         ServiceRecord serviceRecord = new ServiceRecord();

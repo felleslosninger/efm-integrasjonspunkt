@@ -75,12 +75,12 @@ public class MessageOutControllerTest {
     @Before
     public void setup() {
         String filedir = "target/uploadtest/";
-        IntegrasjonspunktProperties.NextBEST nextBEST = new IntegrasjonspunktProperties.NextBEST();
-        nextBEST.setFiledir(filedir);
+        IntegrasjonspunktProperties.NextMove nextMove = new IntegrasjonspunktProperties.NextMove();
+        nextMove.setFiledir(filedir);
         when(nextMoveUtils.getConversationFiledirPath(Matchers.any())).thenReturn(filedir);
         IntegrasjonspunktProperties.Organization org = new IntegrasjonspunktProperties.Organization();
         org.setNumber("3");
-        when(props.getNextbest()).thenReturn(nextBEST);
+        when(props.getNextmove()).thenReturn(nextMove);
         when(props.getOrg()).thenReturn(org);
 
         IntegrasjonspunktProperties.FeatureToggle featureToggle = new IntegrasjonspunktProperties.FeatureToggle();

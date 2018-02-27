@@ -43,6 +43,7 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
 import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
@@ -150,6 +151,11 @@ public class MessageOutController {
         List<ServiceIdentifier> acceptableServiceIdentifiers = serviceRecords.stream()
                 .map(ServiceRecord::getServiceIdentifier)
                 .collect(Collectors.toList());
+        if (cr.getServiceIdentifier() == DPI &&
+                !acceptableServiceIdentifiers.contains(DPI) &&
+                acceptableServiceIdentifiers.contains(DPV)) {
+            acceptableServiceIdentifiers.add(DPI);
+        }
         if (!acceptableServiceIdentifiers.contains(cr.getServiceIdentifier())) {
             return ResponseEntity.badRequest().body(ErrorResponse.builder().error("serviceIdentifier_not_acceptable")
                     .errorDescription(String.format("ServiceIdentifier '%s' not acceptable by receiver. Acceptable types: %s",
@@ -188,7 +194,7 @@ public class MessageOutController {
         cr.setLastUpdate(LocalDateTime.now());
         cr.setConversationId(isNullOrEmpty(cr.getConversationId()) ? UUID.randomUUID().toString() : cr.getConversationId());
         cr.setFileRefs(cr.getFileRefs() == null ? Maps.newHashMap() : cr.getFileRefs());
-        if (cr.getSecurityLevel() == null) { cr.setSecurityLevel(props.getNextbest().getSecurityLevel()); }
+        if (cr.getSecurityLevel() == null) { cr.setSecurityLevel(props.getNextmove().getSecurityLevel()); }
     }
 
     @RequestMapping(value = "/out/messages/{conversationId}", method = RequestMethod.POST)

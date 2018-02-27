@@ -64,7 +64,7 @@ public class CorrespondenceAgencyMessageFactory {
         BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
 
         for (String f : cr.getFileRefs().values()) {
-            String filedir = config.getNextbestFiledir();
+            String filedir = config.getNextmoveFiledir();
             if (!filedir.endsWith("/")) {
                 filedir = filedir + "/";
             }
