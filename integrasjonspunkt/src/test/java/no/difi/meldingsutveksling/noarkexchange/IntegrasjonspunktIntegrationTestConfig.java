@@ -73,7 +73,7 @@ public class IntegrasjonspunktIntegrationTestConfig {
 
     @Bean
     public StrategyFactory messageStrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup, KeystoreProvider keystoreProvider, SvarUtService svarUtService) {
-        return new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider, properties);
+        return new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider, properties, mock(NoarkClient.class));
     }
 
     @Bean
@@ -172,7 +172,9 @@ public class IntegrasjonspunktIntegrationTestConfig {
     @Bean
     @Primary
     public ConversationService conversationService() {
-        return mock(ConversationService.class);
+        ConversationService conversationService = mock(ConversationService.class);
+        when(conversationService.registerStatus(anyString(), any(MessageStatus.class))).thenReturn(Optional.empty());
+        return conversationService;
     }
 
     @Bean

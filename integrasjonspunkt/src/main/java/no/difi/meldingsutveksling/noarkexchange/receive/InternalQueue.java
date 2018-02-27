@@ -11,6 +11,8 @@ import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.nextmove.ConversationResource;
+import no.difi.meldingsutveksling.nextmove.NextMoveSender;
 import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
@@ -28,13 +30,14 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.jms.Session;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
+import javax.xml.bind.*;
+import javax.xml.namespace.QName;
+import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
+import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
 
 /**
  * The idea behind this queue is to avoid loosing messages before they are saved in Noark System.
@@ -50,6 +53,7 @@ public class InternalQueue {
 
     private static final String EXTERNAL = "external";
     private static final String NOARK = "noark";
+    private static final String NEXTMOVE = "nextmove";
     private static final String DLQ = "ActiveMQ.DLQ";
 
     private Logger logger = LoggerFactory.getLogger(InternalQueue.class);
@@ -68,8 +72,12 @@ public class InternalQueue {
     @Autowired
     private ConversationService conversationService;
 
+    @Autowired
+    private NextMoveSender nextMoveSender;
+
     private static JAXBContext jaxbContextdomain;
     private static JAXBContext jaxbContext;
+    private static JAXBContext jaxbContextNextmove;
 
     private final DocumentConverter documentConverter = new DocumentConverter();
 
@@ -82,8 +90,23 @@ public class InternalQueue {
         try {
             jaxbContext = JAXBContextFactory.createContext(new Class[]{StandardBusinessDocument.class, Payload.class, Kvittering.class}, null);
             jaxbContextdomain = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, Kvittering.class}, null);
+            jaxbContextNextmove = JAXBContextFactory.createContext(new Class[]{ConversationResource.class}, null);
         } catch (JAXBException e) {
             throw new RuntimeException("Could not start internal queue: Failed to create JAXBContext", e);
+        }
+    }
+
+    @JmsListener(destination = NEXTMOVE, containerFactory = "myJmsContainerFactory")
+    public void nextmoveListener(byte[] message, Session session) {
+        try {
+            ByteArrayInputStream bis = new ByteArrayInputStream(message);
+            StreamSource ss = new StreamSource(bis);
+            Unmarshaller unmarshaller = jaxbContextNextmove.createUnmarshaller();
+            ConversationResource cr = unmarshaller.unmarshal(ss, ConversationResource.class).getValue();
+            nextMoveSender.send(cr);
+        } catch (Exception e) {
+            Audit.error("Failed to send message... queue will retry", e);
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
     }
 
@@ -136,6 +159,18 @@ public class InternalQueue {
 
         ms.setDescription(errorMsg);
         conversationService.registerStatus(conversationId, ms);
+    }
+
+    public void enqueueNextmove(ConversationResource cr) {
+        try {
+            Marshaller marshaller = jaxbContextNextmove.createMarshaller();
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            marshaller.marshal(new JAXBElement<>(new QName("uri", "local"), ConversationResource.class, cr), bos);
+            jmsTemplate.convertAndSend(NEXTMOVE, bos.toByteArray());
+        } catch (JAXBException e) {
+            Audit.error("Unable to queue message", markerFrom(cr), e);
+            throw new MeldingsUtvekslingRuntimeException(e);
+        }
     }
 
     /**

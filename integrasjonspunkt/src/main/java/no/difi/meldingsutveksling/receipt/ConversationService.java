@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import org.assertj.core.util.Lists;
@@ -28,6 +30,7 @@ public class ConversationService {
     private IntegrasjonspunktProperties props;
     private NoarkClient mshClient;
 
+    private static final String CONVERSATION_EXISTS = "Conversation with id=%s already exists, not recreating";
     private static final List<ServiceIdentifier> POLLABLES = Lists.newArrayList(DPV, DPF);
 
     @Autowired
@@ -56,7 +59,8 @@ public class ConversationService {
         if (!hasStatus) {
             conversation.addMessageStatus(status);
 
-            if (GenericReceiptStatus.SENDT.toString().equals(status.getStatus()) &&
+            if (conversation.getDirection() == ConversationDirection.OUTGOING &&
+                    GenericReceiptStatus.SENDT.toString().equals(status.getStatus()) &&
                     POLLABLES.contains(conversation.getServiceIdentifier()) &&
                     !conversation.isMsh()) {
                 conversation.setPollable(true);
@@ -72,7 +76,13 @@ public class ConversationService {
         return repo.save(conversation);
     }
 
-    public void registerConversation(EDUCore message) {
+    public Conversation registerConversation(EDUCore message) {
+        Optional<Conversation> find = repo.findByConversationId(message.getId()).stream().findFirst();
+        if (find.isPresent()) {
+            log.warn(String.format(CONVERSATION_EXISTS, message.getId()));
+            return find.get();
+        }
+
         MessageStatus ms = MessageStatus.of(GenericReceiptStatus.OPPRETTET);
         if (message.getMessageType() == EDUCore.MessageType.APPRECEIPT) {
             ms.setDescription("AppReceipt");
@@ -84,17 +94,29 @@ public class ConversationService {
             conversation.setMsh(true);
         }
 
-        repo.save(conversation);
+        return repo.save(conversation);
     }
 
     public Conversation registerConversation(ConversationResource cr) {
         Optional<Conversation> find = repo.findByConversationId(cr.getConversationId()).stream().findFirst();
         if (find.isPresent()) {
-            log.warn(String.format("Conversation with id=%s already exists, not recreating", cr.getConversationId()));
+            log.warn(String.format(CONVERSATION_EXISTS, cr.getConversationId()));
             return find.get();
         }
         MessageStatus ms = MessageStatus.of(GenericReceiptStatus.OPPRETTET);
         Conversation c = Conversation.of(cr, ms);
+        return repo.save(c);
+    }
+
+    public Conversation registerConversation(EduDocument eduDocument) {
+        Optional<Conversation> find = repo.findByConversationId(eduDocument.getConversationId()).stream().findFirst();
+        if (find.isPresent()) {
+            log.warn(String.format(CONVERSATION_EXISTS, eduDocument.getConversationId()));
+            return find.get();
+        }
+
+        MessageStatus ms = MessageStatus.of(GenericReceiptStatus.OPPRETTET);
+        Conversation c = Conversation.of(eduDocument, ms);
         return repo.save(c);
     }
 

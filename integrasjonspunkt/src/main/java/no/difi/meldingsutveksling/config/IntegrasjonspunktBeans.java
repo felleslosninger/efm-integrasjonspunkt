@@ -95,9 +95,12 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public StrategyFactory messageStrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup, KeystoreProvider meldingsformidlerKeystoreProvider,
+    public StrategyFactory messageStrategyFactory(MessageSender messageSender,
+                                                  ServiceRegistryLookup serviceRegistryLookup,
+                                                  KeystoreProvider meldingsformidlerKeystoreProvider,
+                                                  @Qualifier("localNoark") ObjectProvider<NoarkClient> localNoark,
                                                   @SuppressWarnings("SpringJavaAutowiringInspection") ObjectProvider<List<MessageStrategyFactory>> messageStrategyFactory) {
-        final StrategyFactory strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, meldingsformidlerKeystoreProvider, properties);
+        final StrategyFactory strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, meldingsformidlerKeystoreProvider, properties, localNoark.getIfAvailable());
         if(messageStrategyFactory.getIfAvailable() != null) {
             messageStrategyFactory.getIfAvailable().forEach(strategyFactory::registerMessageStrategyFactory);
         }
@@ -114,3 +117,4 @@ public class IntegrasjonspunktBeans {
         return new MailClient(properties, Optional.ofNullable(properties.getFiks().getInn().getMailSubject()));
     }
 }
+

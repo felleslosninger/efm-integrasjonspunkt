@@ -77,23 +77,23 @@ public class NextMoveQueue {
         }
 
         message.setFileRefs(Maps.newHashMap());
-        message.addFileRef(props.getNextbest().getAsicfile());
+        message.addFileRef(props.getNextmove().getAsicfile());
         contentFromAsic.forEach(message::addFileRef);
 
         String filedir = nextMoveUtils.getConversationFiledirPath(message);
-        File localFile = new File(filedir+props.getNextbest().getAsicfile());
+        File localFile = new File(filedir+props.getNextmove().getAsicfile());
         localFile.getParentFile().mkdirs();
 
         try (FileOutputStream os = new FileOutputStream(localFile);
             BufferedOutputStream bos = new BufferedOutputStream(os)) {
             bos.write(decryptedAsicPackage);
-            inRepo.save(message);
+            message = inRepo.save(message);
         } catch (IOException e) {
             log.error("Could not write asic container to disc.", e);
             throw e;
         }
         Conversation c = conversationService.registerConversation(message);
-        conversationService.registerStatus(c, MessageStatus.of(NextmoveReceiptStatus.LEST_FRA_SERVICEBUS));
+        conversationService.registerStatus(c, MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_MOTTATT));
         Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] put on local queue",
                 message.getConversationId(), message.getServiceIdentifier()), markerFrom(message));
         return Optional.of(message);

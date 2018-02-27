@@ -5,9 +5,10 @@ import io.swagger.annotations.*;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
+import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
-import no.difi.meldingsutveksling.receipt.NextmoveReceiptStatus;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -178,8 +179,9 @@ public class MessageInController {
 
         if (resource.isPresent()) {
             repo.delete(resource.get());
-            conversationService.registerStatus(resource.get().getConversationId(),
-                    MessageStatus.of(NextmoveReceiptStatus.POPPET));
+            Optional<Conversation> c = conversationService.registerStatus(resource.get().getConversationId(),
+                    MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_LEVERT));
+            c.ifPresent(conversationService::markFinished);
             Audit.info(format("Conversation with id=%s deleted from queue", resource.get().getConversationId()),
                     markerFrom(resource.get()));
             nextMoveUtils.deleteFiles(resource.get());
@@ -289,8 +291,9 @@ public class MessageInController {
             }
 
             repo.delete(resource.get());
-            conversationService.registerStatus(resource.get().getConversationId(),
-                    MessageStatus.of(NextmoveReceiptStatus.POPPET));
+            Optional<Conversation> c = conversationService.registerStatus(resource.get().getConversationId(),
+                    MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_LEVERT));
+            c.ifPresent(conversationService::markFinished);
             Audit.info(format("Conversation with id=%s popped from queue", resource.get().getConversationId()),
                     markerFrom(resource.get()));
             nextMoveUtils.deleteFiles(resource.get());

@@ -6,16 +6,21 @@ import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationRepository;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatusRepository;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
+import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
 
 @RestController
 @Api
@@ -28,20 +33,40 @@ public class ConversationController {
     private MessageStatusRepository statusRepo;
 
     @RequestMapping(value = "/conversations", method = RequestMethod.GET)
-    @ApiOperation(value = "Get all conversations", notes = "Gets a list of all conversations")
+    @ApiOperation(value = "Get all conversations", notes = "Gets a list of all outgoing conversations")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = Conversation[].class)
     })
     public List<Conversation> conversations(
             @ApiParam(value = "Filter conversations based on finished status")
-            @RequestParam(value = "finished", required = false) Optional<Boolean> finished) {
+            @RequestParam(value = "finished", required = false) Optional<Boolean> finished,
+            @ApiParam(value = "Filter conversations based on receiver identifier")
+            @RequestParam(value = "receiverIdentifier", required = false) Optional<String> receiverIdentifier) {
 
         List<Conversation> conversations;
         if (finished.isPresent()) {
-            conversations = convoRepo.findByFinished(finished.get());
+            if (receiverIdentifier.isPresent()) {
+                conversations = convoRepo.findByFinishedAndReceiverIdentifierAndDirection(finished.get(), receiverIdentifier.get(), OUTGOING);
+            } else {
+                conversations = convoRepo.findByFinishedAndDirection(finished.get(), OUTGOING);
+            }
         } else {
-            conversations = Lists.newArrayList(convoRepo.findAll());
+            if (receiverIdentifier.isPresent()) {
+                conversations = convoRepo.findByReceiverIdentifierAndDirection(receiverIdentifier.get(), OUTGOING);
+            } else {
+                conversations = convoRepo.findByDirection(OUTGOING);
+            }
         }
+        return conversations.stream().sorted((a, b) -> b.getLastUpdate().compareTo(a.getLastUpdate())).collect(Collectors.toList());
+    }
+
+    @RequestMapping(value = "/in/conversations", method = RequestMethod.GET)
+    @ApiOperation(value = "Get all conversations", notes = "Gets a list of all incoming conversations")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success", response = Conversation[].class)
+    })
+    public List<Conversation> incomingConversations() {
+        ArrayList<Conversation> conversations = Lists.newArrayList(convoRepo.findByDirection(INCOMING));
         return conversations.stream().sorted((a, b) -> b.getLastUpdate().compareTo(a.getLastUpdate())).collect(Collectors.toList());
     }
 
@@ -51,14 +76,24 @@ public class ConversationController {
             @ApiResponse(code = 200, message = "Success", response = Conversation.class)
     })
     public ResponseEntity conversation(
-            @ApiParam(value = "Conversation id", required = true)
-            @PathVariable("id") Integer id) {
+            @ApiParam(value = "convId", required = true)
+            @PathVariable("id") String id,
+            @ApiParam(value = "Use conversationId for search")
+            @RequestParam(value = "useConversationId", required = false) boolean useConversationId) {
 
-        Optional<Conversation> c = convoRepo.findByConvId(id);
+        Optional<Conversation> c;
+        if (useConversationId) {
+            c = convoRepo.findByConversationIdAndDirection(id, OUTGOING).stream().findFirst();
+        } else {
+            if (!StringUtils.isNumeric(id)) {
+                return ResponseEntity.badRequest().body("convId is not numeric");
+            }
+            c = convoRepo.findByConvIdAndDirection(Integer.valueOf(id), OUTGOING);
+        }
+
         if (!c.isPresent()) {
             return ResponseEntity.notFound().build();
         }
-
         return ResponseEntity.ok(c.get());
     }
 

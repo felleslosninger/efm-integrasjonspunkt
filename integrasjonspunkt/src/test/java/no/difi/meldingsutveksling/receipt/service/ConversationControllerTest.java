@@ -17,6 +17,8 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -63,20 +65,23 @@ public class ConversationControllerTest {
         cId2ms3.setStatId(5);
         cId2ms3.setConvId(2);
 
-        Conversation c1 = Conversation.of(cId1, "foo", "24", "42", "foo", ServiceIdentifier.DPO, cId1ms1, cId1ms2);
+        Conversation c1 = Conversation.of(cId1, "foo", "24", "42", OUTGOING, "foo", ServiceIdentifier.DPO, cId1ms1, cId1ms2);
         c1.setConvId(1);
         c1.setPollable(true);
         c1.setLastUpdate(NOW_MINUS_5_MIN);
-        Conversation c2 = Conversation.of(cId2, "foo", "24", "42", "foo", ServiceIdentifier.DPO, cId2ms1, cId2ms2, cId2ms3);
+        Conversation c2 = Conversation.of(cId2, "foo", "24", "43", OUTGOING, "foo", ServiceIdentifier.DPO, cId2ms1, cId2ms2, cId2ms3);
         c2.setConvId(2);
         c2.setPollable(false);
         c2.setLastUpdate(NOW);
 
         when(convoRepo.findAll()).thenReturn(asList(c1, c2));
-        when(convoRepo.findByConvId(1)).thenReturn(Optional.of(c1));
-        when(convoRepo.findByConvId(2)).thenReturn(Optional.of(c2));
-        when(convoRepo.findByPollable(true)).thenReturn(asList(c1));
-        when(convoRepo.findByPollable(false)).thenReturn(asList(c2));
+        when(convoRepo.findByReceiverIdentifierAndDirection("43", OUTGOING)).thenReturn(singletonList(c2));
+        when(convoRepo.findByDirection(OUTGOING)).thenReturn(asList(c1, c2));
+        when(convoRepo.findByConvIdAndDirection(1, OUTGOING)).thenReturn(Optional.of(c1));
+        when(convoRepo.findByConvIdAndDirection(2, OUTGOING)).thenReturn(Optional.of(c2));
+        when(convoRepo.findByConversationIdAndDirection("123", OUTGOING)).thenReturn(singletonList(c1));
+        when(convoRepo.findByPollable(true)).thenReturn(singletonList(c1));
+        when(convoRepo.findByPollable(false)).thenReturn(singletonList(c2));
 
         when(statRepo.findAll()).thenReturn(asList(cId1ms1, cId1ms2, cId2ms1, cId2ms2, cId2ms3));
         when(statRepo.findAllByConvId(1)).thenReturn(asList(cId1ms1, cId1ms2));
@@ -95,6 +100,16 @@ public class ConversationControllerTest {
     }
 
     @Test
+    public void conversationsWithReceiverIdTest() throws Exception {
+        mvc.perform(get("/conversations")
+                .param("receiverIdentifier", "43")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].convId", is(2)));
+    }
+
+    @Test
     public void conversationsWithIdParamTest() throws Exception {
         mvc.perform(get("/conversations/1")
                 .accept(MediaType.APPLICATION_JSON))
@@ -105,6 +120,27 @@ public class ConversationControllerTest {
                 .andExpect(jsonPath("$.messageReference", is("foo")))
                 .andExpect(jsonPath("$.messageTitle", is("foo")))
                 .andExpect(jsonPath("$.serviceIdentifier", is("DPO")));
+    }
+
+    @Test
+    public void conversationsWithConversationIdParamTest() throws Exception {
+        mvc.perform(get("/conversations/123")
+                .param("useConversationId", "true")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.convId", is(1)))
+                .andExpect(jsonPath("$.conversationId", is("123")))
+                .andExpect(jsonPath("$.receiverIdentifier", is("42")))
+                .andExpect(jsonPath("$.messageReference", is("foo")))
+                .andExpect(jsonPath("$.messageTitle", is("foo")))
+                .andExpect(jsonPath("$.serviceIdentifier", is("DPO")));
+    }
+
+    @Test
+    public void conversationsWithNonNumericIdTest() throws Exception {
+        mvc.perform(get("/conversations/asd123")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

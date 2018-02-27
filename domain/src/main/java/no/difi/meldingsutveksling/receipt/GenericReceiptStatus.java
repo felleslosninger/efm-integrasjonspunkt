@@ -12,7 +12,9 @@ public enum GenericReceiptStatus implements ReceiptStatus {
     @XmlEnumValue("LEVERT")LEVERT("Levert"),
     @XmlEnumValue("LEST")LEST("Lest"),
     @XmlEnumValue("FEIL")FEIL("Feil"),
-    @XmlEnumValue("ANNET")ANNET("Annet");
+    @XmlEnumValue("ANNET")ANNET("Annet"),
+    @XmlEnumValue("INNKOMMENDE_MOTTATT")INNKOMMENDE_MOTTATT("INNKOMMENDE_MOTTATT"),
+    @XmlEnumValue("INNKOMMENDE_LEVERT")INNKOMMENDE_LEVERT("INNKOMMENDE_LEVERT");
 
     private final String status;
 

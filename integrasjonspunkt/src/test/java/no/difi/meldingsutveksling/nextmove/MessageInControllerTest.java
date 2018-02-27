@@ -1,7 +1,9 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
+import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.io.FileUtils;
@@ -26,6 +28,7 @@ import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -55,9 +58,9 @@ public class MessageInControllerTest {
     @Before
     public void setup() throws IOException {
         String filedir = "target/uploadtest/";
-        IntegrasjonspunktProperties.NextBEST nextBEST = new IntegrasjonspunktProperties.NextBEST();
-        nextBEST.setFiledir(filedir);
-        when(props.getNextbest()).thenReturn(nextBEST);
+        IntegrasjonspunktProperties.NextMove nextMove = new IntegrasjonspunktProperties.NextMove();
+        nextMove.setFiledir(filedir);
+        when(props.getNextmove()).thenReturn(nextMove);
         when(nextMoveUtils.getConversationFiledirPath(any())).thenReturn(filedir);
 
         ServiceRecord serviceRecord = new ServiceRecord();
@@ -82,6 +85,13 @@ public class MessageInControllerTest {
         when(repo.findByServiceIdentifierAndDirection(DPV, INCOMING)).thenReturn(asList(cr43));
         when(repo.findFirstByDirectionOrderByLastUpdateAsc(INCOMING)).thenReturn(Optional.of(cr42));
         when(repo.findFirstByServiceIdentifierAndDirectionOrderByLastUpdateAsc(DPO, INCOMING)).thenReturn(Optional.of(cr42));
+
+        Conversation c42 = Conversation.of(cr42);
+        Conversation c43 = Conversation.of(cr43);
+        Conversation c44 = Conversation.of(cr44);
+        when(conversationService.registerStatus(eq("42"), any(MessageStatus.class))).thenReturn(Optional.of(c42));
+        when(conversationService.registerStatus(eq("43"), any(MessageStatus.class))).thenReturn(Optional.of(c43));
+        when(conversationService.registerStatus(eq("44"), any(MessageStatus.class))).thenReturn(Optional.of(c44));
     }
 
     @Test

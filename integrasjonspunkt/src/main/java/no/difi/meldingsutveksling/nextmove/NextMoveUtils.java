@@ -21,7 +21,7 @@ public class NextMoveUtils {
     }
 
     public String getConversationFiledirPath(ConversationResource cr) {
-        String filedir = props.getNextbest().getFiledir();
+        String filedir = props.getNextmove().getFiledir();
         if (!filedir.endsWith("/")) {
             filedir = filedir+"/";
         }
