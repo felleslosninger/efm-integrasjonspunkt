@@ -70,6 +70,7 @@ public class MessageInControllerTest {
         DpoConversationResource cr42 = DpoConversationResource.of("42", "2", "1");
         DpvConversationResource cr43 = DpvConversationResource.of("43", "2", "1");
         DpoConversationResource cr44 = DpoConversationResource.of("44", "1", "2");
+        cr44.setLocked(true);
 
         File foo = new File("src/test/resources/testfil.txt");
         File targetFoo = new File("target/uploadtest/testfil.txt");
@@ -84,7 +85,10 @@ public class MessageInControllerTest {
         when(repo.findByServiceIdentifierAndDirection(DPO, INCOMING)).thenReturn(asList(cr42, cr44));
         when(repo.findByServiceIdentifierAndDirection(DPV, INCOMING)).thenReturn(asList(cr43));
         when(repo.findFirstByDirectionOrderByLastUpdateAsc(INCOMING)).thenReturn(Optional.of(cr42));
+        when(repo.findFirstByDirectionAndLockedOrderByLastUpdateAsc(INCOMING, false)).thenReturn(Optional.of(cr42));
         when(repo.findFirstByServiceIdentifierAndDirectionOrderByLastUpdateAsc(DPO, INCOMING)).thenReturn(Optional.of(cr42));
+        when(repo.findFirstByServiceIdentifierAndLockedAndDirectionOrderByLastUpdateAsc(DPO, false, INCOMING)).thenReturn(Optional.of(cr42));
+        when(repo.findFirstByDirectionAndLockedOrderByLastUpdateAsc(INCOMING, true)).thenReturn(Optional.of(cr44));
 
         Conversation c42 = Conversation.of(cr42);
         Conversation c43 = Conversation.of(cr43);
@@ -103,42 +107,8 @@ public class MessageInControllerTest {
     }
 
     @Test
-    public void readMessageShouldLock() throws Exception {
-        mvc.perform(post("/in/messages/pop")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().string("bar"));
-
-        mvc.perform(post("/in/messages/pop")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    public void unlockMessageShouldReturnOk() throws Exception {
-        mvc.perform(post("/in/messages/pop")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().string("bar"));
-
-        mvc.perform(post("/in/messages/pop")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-
-        mvc.perform(put("/in/messages/pop")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-
-        mvc.perform(post("/in/messages/pop")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().string("bar"));
-
-    }
-
-    @Test
-    public void deleteMessageShouldReturnOk() throws Exception {
-        mvc.perform(delete("/in/messages/pop")
+    public void deleteMessageShouldReturnError() throws Exception {
+        mvc.perform(get("/in/messages/delete")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 

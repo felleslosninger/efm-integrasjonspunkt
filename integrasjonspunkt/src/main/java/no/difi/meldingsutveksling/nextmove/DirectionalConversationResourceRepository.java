@@ -53,8 +53,16 @@ public class DirectionalConversationResourceRepository {
         return repo.findFirstByDirectionOrderByLastUpdateAsc(direction);
     }
 
+    public Optional<ConversationResource> findFirstByLockedOrderByLastUpdateAsc(boolean locked) {
+        return repo.findFirstByDirectionAndLockedOrderByLastUpdateAsc(direction, locked);
+    }
+
     public Optional<ConversationResource> findFirstByServiceIdentifierOrderByLastUpdateAsc(ServiceIdentifier serviceIdentifier) {
         return repo.findFirstByServiceIdentifierAndDirectionOrderByLastUpdateAsc(serviceIdentifier, direction);
+    }
+
+    public Optional<ConversationResource> findFirstByServiceIdentifierAndLockedOrderByLastUpdateAsc(ServiceIdentifier serviceIdentifier, boolean locked) {
+        return repo.findFirstByServiceIdentifierAndLockedAndDirectionOrderByLastUpdateAsc(serviceIdentifier, locked, direction);
     }
 
     public List<ConversationResource> findByReceiverIdAndServiceIdentifier(String receiverId, ServiceIdentifier serviceIdentifier) {

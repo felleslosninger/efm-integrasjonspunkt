@@ -20,7 +20,9 @@ public interface ConversationResourceRepository extends CrudRepository<Conversat
     List<ConversationResource> findBySenderIdAndDirection(String senderId, ConversationDirection direction);
     List<ConversationResource> findByServiceIdentifierAndSenderIdAndDirection(ServiceIdentifier serviceIdentifier, String senderId, ConversationDirection direction);
     Optional<ConversationResource> findFirstByDirectionOrderByLastUpdateAsc(ConversationDirection direction);
+    Optional<ConversationResource> findFirstByDirectionAndLockedOrderByLastUpdateAsc(ConversationDirection direction, boolean locked);
     Optional<ConversationResource> findFirstByServiceIdentifierAndDirectionOrderByLastUpdateAsc(ServiceIdentifier serviceIdentifier, ConversationDirection direction);
+    Optional<ConversationResource> findFirstByServiceIdentifierAndLockedAndDirectionOrderByLastUpdateAsc(ServiceIdentifier serviceIdentifier, boolean locked, ConversationDirection direction);
 
     Long countByDirection(ConversationDirection direction);
 }
