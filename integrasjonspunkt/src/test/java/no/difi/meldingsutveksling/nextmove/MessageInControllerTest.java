@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
@@ -60,6 +61,7 @@ public class MessageInControllerTest {
         String filedir = "target/uploadtest/";
         IntegrasjonspunktProperties.NextMove nextMove = new IntegrasjonspunktProperties.NextMove();
         nextMove.setFiledir(filedir);
+        nextMove.setLockTimeoutMinutes(5);
         when(props.getNextmove()).thenReturn(nextMove);
         when(nextMoveUtils.getConversationFiledirPath(any())).thenReturn(filedir);
 
@@ -70,7 +72,7 @@ public class MessageInControllerTest {
         DpoConversationResource cr42 = DpoConversationResource.of("42", "2", "1");
         DpvConversationResource cr43 = DpvConversationResource.of("43", "2", "1");
         DpoConversationResource cr44 = DpoConversationResource.of("44", "1", "2");
-        cr44.setLocked(true);
+        cr44.setLockTimeout(LocalDateTime.now().plusMinutes(5));
 
         File foo = new File("src/test/resources/testfil.txt");
         File targetFoo = new File("target/uploadtest/testfil.txt");
@@ -85,10 +87,10 @@ public class MessageInControllerTest {
         when(repo.findByServiceIdentifierAndDirection(DPO, INCOMING)).thenReturn(asList(cr42, cr44));
         when(repo.findByServiceIdentifierAndDirection(DPV, INCOMING)).thenReturn(asList(cr43));
         when(repo.findFirstByDirectionOrderByLastUpdateAsc(INCOMING)).thenReturn(Optional.of(cr42));
-        when(repo.findFirstByDirectionAndLockedOrderByLastUpdateAsc(INCOMING, false)).thenReturn(Optional.of(cr42));
+        when(repo.findFirstByDirectionAndLockTimeoutIsNullOrderByLastUpdateAsc(INCOMING)).thenReturn(Optional.of(cr42));
         when(repo.findFirstByServiceIdentifierAndDirectionOrderByLastUpdateAsc(DPO, INCOMING)).thenReturn(Optional.of(cr42));
-        when(repo.findFirstByServiceIdentifierAndLockedAndDirectionOrderByLastUpdateAsc(DPO, false, INCOMING)).thenReturn(Optional.of(cr42));
-        when(repo.findFirstByDirectionAndLockedOrderByLastUpdateAsc(INCOMING, true)).thenReturn(Optional.of(cr44));
+        when(repo.findFirstByServiceIdentifierAndDirectionAndLockTimeoutIsNullOrderByLastUpdateAsc(DPO, INCOMING)).thenReturn(Optional.of(cr42));
+        when(repo.findFirstByDirectionAndLockTimeoutIsNotNullOrderByLastUpdateAsc(INCOMING)).thenReturn(Optional.of(cr44));
 
         Conversation c42 = Conversation.of(cr42);
         Conversation c43 = Conversation.of(cr43);
@@ -120,7 +122,7 @@ public class MessageInControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .param("conversationId", "42"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(10)))
+                .andExpect(jsonPath("$.*", hasSize(11)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
                 .andExpect(jsonPath("$.senderId", is("2")))
                 .andExpect(jsonPath("$.receiverId", is("1")))
@@ -152,7 +154,7 @@ public class MessageInControllerTest {
     public void peekIncomingShouldReturnOk() throws Exception {
         mvc.perform(get("/in/messages/peek").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(10)))
+                .andExpect(jsonPath("$.*", hasSize(11)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
                 .andExpect(jsonPath("$.senderId", is("2")))
                 .andExpect(jsonPath("$.receiverId", is("1")))
@@ -165,7 +167,7 @@ public class MessageInControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .param("serviceIdentifier", "DPO"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(10)))
+                .andExpect(jsonPath("$.*", hasSize(11)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
                 .andExpect(jsonPath("$.senderId", is("2")))
                 .andExpect(jsonPath("$.receiverId", is("1")))

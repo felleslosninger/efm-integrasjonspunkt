@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.transaction.Transactional;
 import java.io.*;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -110,21 +111,23 @@ public class MessageInController {
             @ApiResponse(code = 200, message = "Success", response = ConversationResource.class),
             @ApiResponse(code = 204, message = "No content", response = String.class)
     })
+    @Transactional
     public ResponseEntity peekLockIncomingMessages(
             @ApiParam(value = "Service Identifier")
             @RequestParam(value = "serviceIdentifier", required = false) ServiceIdentifier serviceIdentifier) {
 
         Optional<ConversationResource> resource;
         if (serviceIdentifier == null) {
-            resource = repo.findFirstByLockedOrderByLastUpdateAsc(false);
+            resource = repo.findFirstByLockTimeoutIsNullOrderByLastUpdateAsc();
         } else {
-            resource = repo.findFirstByServiceIdentifierAndLockedOrderByLastUpdateAsc(serviceIdentifier, false);
+            resource = repo.findFirstByServiceIdentifierAndLockTimeoutIsNullOrderByLastUpdateAsc(serviceIdentifier);
         }
 
         if (resource.isPresent()) {
             ConversationResource cr = resource.get();
-            cr.setLocked(true);
+            cr.setLockTimeout(LocalDateTime.now().plusMinutes(props.getNextmove().getLockTimeoutMinutes()));
             repo.save(cr);
+            log.info(markerFrom(cr), "Conversation with id={} locked", cr.getConversationId());
             return ResponseEntity.ok(cr);
         }
         return ResponseEntity.noContent().build();
@@ -142,9 +145,9 @@ public class MessageInController {
 
         Optional<ConversationResource> resource;
         if (serviceIdentifier == null) {
-            resource = repo.findFirstByLockedOrderByLastUpdateAsc(false);
+            resource = repo.findFirstByLockTimeoutIsNullOrderByLastUpdateAsc();
         } else {
-            resource = repo.findFirstByServiceIdentifierAndLockedOrderByLastUpdateAsc(serviceIdentifier, false);
+            resource = repo.findFirstByServiceIdentifierAndLockTimeoutIsNullOrderByLastUpdateAsc(serviceIdentifier);
         }
 
         if (resource.isPresent()) {
@@ -159,6 +162,7 @@ public class MessageInController {
             @ApiResponse(code = 200, message = "Success", response = InputStreamResource.class),
             @ApiResponse(code = 204, message = "No content", response = String.class)
     })
+    @Transactional
     public ResponseEntity unlockMessage(
             @RequestParam(value = "serviceIdentifier", required = false) Optional<ServiceIdentifier> serviceIdentifier,
             @RequestParam(value = "conversationId", required = false) Optional<String> conversationId) {
@@ -168,15 +172,16 @@ public class MessageInController {
             resource = repo.findByConversationId(conversationId.get());
         }
         else if (serviceIdentifier.isPresent()) {
-            resource = repo.findFirstByServiceIdentifierAndLockedOrderByLastUpdateAsc(serviceIdentifier.get(), true);
+            resource = repo.findFirstByServiceIdentifierAndLockTimeoutIsNotNullOrderByLastUpdateAsc(serviceIdentifier.get());
         } else {
-            resource = repo.findFirstByLockedOrderByLastUpdateAsc(true);
+            resource = repo.findFirstByLockTimeoutIsNotNullOrderByLastUpdateAsc();
         }
 
         if (resource.isPresent()) {
             ConversationResource cr = resource.get();
-            cr.setLocked(false);
+            cr.setLockTimeout(null);
             repo.save(cr);
+            log.info(markerFrom(cr), "Conversation with id={} unlocked", cr.getConversationId());
             return ResponseEntity.ok().build();
         }
 
@@ -199,14 +204,14 @@ public class MessageInController {
             resource = repo.findByConversationId(conversationId.get());
         }
         else if (serviceIdentifier.isPresent()) {
-            resource = repo.findFirstByServiceIdentifierAndLockedOrderByLastUpdateAsc(serviceIdentifier.get(), true);
+            resource = repo.findFirstByServiceIdentifierAndLockTimeoutIsNotNullOrderByLastUpdateAsc(serviceIdentifier.get());
         } else {
-            resource = repo.findFirstByLockedOrderByLastUpdateAsc(true);
+            resource = repo.findFirstByLockTimeoutIsNotNullOrderByLastUpdateAsc();
         }
 
         if (resource.isPresent()) {
             ConversationResource cr = resource.get();
-            if (!cr.isLocked()) {
+            if (cr.getLockTimeout() == null) {
                 return ResponseEntity.badRequest().body(notLockedErrorResponse());
             }
             repo.delete(cr);
@@ -229,6 +234,7 @@ public class MessageInController {
             @ApiResponse(code = 200, message = "Success", response = InputStreamResource.class),
             @ApiResponse(code = 204, message = "No content", response = String.class)
     })
+    @Transactional
     public ResponseEntity readMessage(
             @RequestParam(value = "serviceIdentifier", required = false) Optional<ServiceIdentifier> serviceIdentifier,
             @RequestParam(value = "conversationId", required = false) Optional<String> conversationId) {
@@ -288,9 +294,9 @@ public class MessageInController {
             resource = repo.findByConversationId(conversationId.get());
         }
         else if (serviceIdentifier.isPresent()) {
-            resource = repo.findFirstByServiceIdentifierAndLockedOrderByLastUpdateAsc(serviceIdentifier.get(), false);
+            resource = repo.findFirstByServiceIdentifierAndLockTimeoutIsNullOrderByLastUpdateAsc(serviceIdentifier.get());
         } else {
-            resource = repo.findFirstByLockedOrderByLastUpdateAsc(false);
+            resource = repo.findFirstByLockTimeoutIsNullOrderByLastUpdateAsc();
         }
 
         if (resource.isPresent()) {

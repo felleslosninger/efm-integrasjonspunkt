@@ -166,3 +166,24 @@ databaseChangeLog:
                   name: direction
                   type: integer
                   valueNumeric: 0
+  - changeSet:
+      id: 8
+      author: maw
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: conversation_resource
+        - columnExists:
+            tableName: conversation_resource
+            columnName: locked
+      changes:
+        - dropColumn:
+            columnName: locked
+            tableName: conversation_resource
+        - addColumn:
+            tableName: conversation_resource
+            columns:
+              - column:
+                  name: lockTimeout
+                  type: date
+                  defaultValue: null
