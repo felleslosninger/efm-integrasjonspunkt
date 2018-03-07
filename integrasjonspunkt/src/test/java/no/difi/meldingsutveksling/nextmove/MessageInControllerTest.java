@@ -26,12 +26,12 @@ import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
@@ -151,13 +151,26 @@ public class MessageInControllerTest {
     }
 
     @Test
-    public void peekIncomingShouldReturnOk() throws Exception {
+    public void peekLockIncomingShouldReturnOk() throws Exception {
         mvc.perform(get("/in/messages/peek").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.*", hasSize(11)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
                 .andExpect(jsonPath("$.senderId", is("2")))
                 .andExpect(jsonPath("$.receiverId", is("1")))
+                .andExpect(jsonPath("$.lockTimeout", notNullValue()))
+                .andExpect(jsonPath("$.serviceIdentifier", is("DPO")));
+    }
+
+    @Test
+    public void peekIncomingShouldReturnOk() throws Exception {
+        mvc.perform(post("/in/messages/peek").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.*", hasSize(11)))
+                .andExpect(jsonPath("$.conversationId", is("42")))
+                .andExpect(jsonPath("$.senderId", is("2")))
+                .andExpect(jsonPath("$.receiverId", is("1")))
+                .andExpect(jsonPath("$.lockTimeout", nullValue()))
                 .andExpect(jsonPath("$.serviceIdentifier", is("DPO")));
     }
 

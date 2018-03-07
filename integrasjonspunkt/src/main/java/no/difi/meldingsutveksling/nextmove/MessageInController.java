@@ -340,13 +340,6 @@ public class MessageInController {
                 .build());
     }
 
-    private ResponseEntity lockedMessageErrorResponse() {
-        return ResponseEntity.badRequest().body(ErrorResponse.builder()
-                .error("locked_message")
-                .errorDescription("Message is locked and cannot be processed. Delete or unlock the message")
-                .build());
-    }
-
     private ResponseEntity notLockedErrorResponse() {
         return ResponseEntity.badRequest().body(ErrorResponse.builder()
                 .error("message not locked")
