@@ -228,8 +228,7 @@ public class MessageInController {
     }
 
     @RequestMapping(value = "/in/messages/pop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Read incoming queue", notes = "Gets the ASiC for the first message in the queue, then locks " +
-            "the message from further processing")
+    @ApiOperation(value = "Read incoming queue", notes = "Gets the ASiC for the first non locked message in the queue, unless conversationId is specified")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = InputStreamResource.class),
             @ApiResponse(code = 204, message = "No content", response = String.class)
@@ -244,9 +243,9 @@ public class MessageInController {
             resource = repo.findByConversationId(conversationId.get());
         }
         else if (serviceIdentifier.isPresent()) {
-            resource = repo.findFirstByServiceIdentifierOrderByLastUpdateAsc(serviceIdentifier.get());
+            resource = repo.findFirstByServiceIdentifierAndLockTimeoutIsNullOrderByLastUpdateAsc(serviceIdentifier.get());
         } else {
-            resource = repo.findFirstByOrderByLastUpdateAsc();
+            resource = repo.findFirstByLockTimeoutIsNullOrderByLastUpdateAsc();
         }
 
         if (resource.isPresent()) {
@@ -278,7 +277,7 @@ public class MessageInController {
 
     @RequestMapping(value = "/in/messages/pop", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Pop incoming queue", notes = "Gets the ASiC for the first non locked message in the queue, " +
-            "if conversationId is not specified, then removes it.")
+            "unless conversationId is specified, then removes it.")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = InputStreamResource.class),
             @ApiResponse(code = 204, message = "No content", response = String.class)
