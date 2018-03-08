@@ -5,6 +5,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedOutputStream;
@@ -12,8 +13,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-@Component
 @Slf4j
+@Component
+@ConditionalOnProperty(name = "difi.move.nextmove.useDbPersistence", havingValue = "false")
 public class FileMessagePersister implements MessagePersister {
 
     private IntegrasjonspunktProperties props;
