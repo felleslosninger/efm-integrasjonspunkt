@@ -5,11 +5,11 @@ import io.swagger.annotations.*;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,12 +51,12 @@ public class MessageInController {
     @Autowired
     private ConversationService conversationService;
 
-    @Autowired
-    private NextMoveUtils nextMoveUtils;
+    private MessagePersister messagePersister;
 
     @Autowired
-    public MessageInController(ConversationResourceRepository cRepo) {
-        repo = new DirectionalConversationResourceRepository(cRepo, INCOMING);
+    public MessageInController(ConversationResourceRepository cRepo, MessagePersister messagePersister) {
+        this.repo = new DirectionalConversationResourceRepository(cRepo, INCOMING);
+        this.messagePersister = messagePersister;
     }
 
     @RequestMapping(value = "/in/messages", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -220,7 +220,11 @@ public class MessageInController {
             c.ifPresent(conversationService::markFinished);
             Audit.info(format("Conversation with id=%s deleted from queue", cr.getConversationId()),
                     markerFrom(cr));
-            nextMoveUtils.deleteFiles(cr);
+            try {
+                messagePersister.delete(cr);
+            } catch (IOException e) {
+                log.error("Error deleting files from conversation with id={}", cr.getConversationId(),  e);
+            }
             return ResponseEntity.ok().build();
         }
 
@@ -250,14 +254,14 @@ public class MessageInController {
 
         if (resource.isPresent()) {
             ConversationResource cr = resource.get();
-            String filedir = nextMoveUtils.getConversationFiledirPath(cr);
             String filename = cr.getFileRefs().get(0);
-            File file = new File(filedir+filename);
 
-            InputStreamResource isr = null;
+            InputStreamResource isr;
+            byte[] bytes;
             try {
-                isr = new InputStreamResource(new FileInputStream(file));
-            } catch (FileNotFoundException e) {
+                bytes = messagePersister.read(cr, filename);
+                isr = new InputStreamResource(new ByteArrayInputStream(bytes));
+            } catch (IOException e) {
                 Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing it from queue",
                         filename, cr.getConversationId(), cr.getSenderId()), markerFrom(cr), e);
                 repo.delete(cr);
@@ -269,7 +273,7 @@ public class MessageInController {
             return ResponseEntity.ok()
                     .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME+filename)
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .contentLength(file.length())
+                    .contentLength(bytes.length)
                     .body(isr);
         }
         return ResponseEntity.noContent().build();
@@ -299,35 +303,37 @@ public class MessageInController {
         }
 
         if (resource.isPresent()) {
-            String filedir = nextMoveUtils.getConversationFiledirPath(resource.get());
-            String filename = resource.get().getFileRefs().get(0);
-            File file = new File(filedir+filename);
-            long fileLength = file.length();
+            ConversationResource cr = resource.get();
+            String filename = cr.getFileRefs().get(0);
 
-            InputStreamResource isr = null;
+            InputStreamResource isr;
             byte[] bytes;
             try {
-                bytes = FileUtils.readFileToByteArray(file);
+                bytes = messagePersister.read(cr, filename);
                 isr = new InputStreamResource(new ByteArrayInputStream(bytes));
             } catch (IOException e) {
                 Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing it from queue",
-                        filename, resource.get().getConversationId(), resource.get().getSenderId()), markerFrom(resource.get()), e);
-                repo.delete(resource.get());
+                        filename, cr.getConversationId(), cr.getSenderId()), markerFrom(cr), e);
+                repo.delete(cr);
                 return fileNotFoundErrorResponse(filename);
             }
 
-            repo.delete(resource.get());
-            Optional<Conversation> c = conversationService.registerStatus(resource.get().getConversationId(),
+            repo.delete(cr);
+            Optional<Conversation> c = conversationService.registerStatus(cr.getConversationId(),
                     MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_LEVERT));
             c.ifPresent(conversationService::markFinished);
-            Audit.info(format("Conversation with id=%s popped from queue", resource.get().getConversationId()),
-                    markerFrom(resource.get()));
-            nextMoveUtils.deleteFiles(resource.get());
+            Audit.info(format("Conversation with id=%s popped from queue", cr.getConversationId()),
+                    markerFrom(cr));
+            try {
+                messagePersister.delete(cr);
+            } catch (IOException e) {
+                log.error("Error deleting files from conversation with id={}", cr.getConversationId(),  e);
+            }
 
             return ResponseEntity.ok()
                     .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME+filename)
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .contentLength(fileLength)
+                    .contentLength(bytes.length)
                     .body(isr);
         }
         return ResponseEntity.noContent().build();

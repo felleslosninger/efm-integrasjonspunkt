@@ -10,6 +10,7 @@ import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import no.difi.meldingsutveksling.receipt.*;
@@ -44,12 +45,12 @@ public class NextMoveQueue {
     @Autowired
     private ConversationService conversationService;
 
-    @Autowired
-    private NextMoveUtils nextMoveUtils;
+    private MessagePersister messagePersister;
 
     @Autowired
-    public NextMoveQueue(ConversationResourceRepository repo) {
+    public NextMoveQueue(ConversationResourceRepository repo, MessagePersister messagePersister) {
         inRepo = new DirectionalConversationResourceRepository(repo, INCOMING);
+        this.messagePersister = messagePersister;
     }
 
     public Optional<ConversationResource> enqueueEduDocument(EduDocument eduDocument) throws IOException {
@@ -80,18 +81,9 @@ public class NextMoveQueue {
         message.addFileRef(props.getNextmove().getAsicfile());
         contentFromAsic.forEach(message::addFileRef);
 
-        String filedir = nextMoveUtils.getConversationFiledirPath(message);
-        File localFile = new File(filedir+props.getNextmove().getAsicfile());
-        localFile.getParentFile().mkdirs();
+        messagePersister.write(message, props.getNextmove().getAsicfile(), decryptedAsicPackage);
+        message = inRepo.save(message);
 
-        try (FileOutputStream os = new FileOutputStream(localFile);
-            BufferedOutputStream bos = new BufferedOutputStream(os)) {
-            bos.write(decryptedAsicPackage);
-            message = inRepo.save(message);
-        } catch (IOException e) {
-            log.error("Could not write asic container to disc.", e);
-            throw e;
-        }
         Conversation c = conversationService.registerConversation(message);
         conversationService.registerStatus(c, MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_MOTTATT));
         Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] put on local queue",
