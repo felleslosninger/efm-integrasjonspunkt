@@ -126,7 +126,7 @@ public class MessageOutControllerTest {
     public void getMessageShouldReturnOk() throws Exception {
         mvc.perform(get("/out/messages/42").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(10)))
+                .andExpect(jsonPath("$.*", hasSize(11)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
                 .andExpect(jsonPath("$.receiverId", is("1")))
                 .andExpect(jsonPath("$.serviceIdentifier", is("DPO")))
@@ -183,7 +183,7 @@ public class MessageOutControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(10)))
+                .andExpect(jsonPath("$.*", hasSize(11)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
                 .andExpect(jsonPath("$.receiverId", is("1")))
                 .andExpect(jsonPath("$.serviceIdentifier", is("DPO")))
