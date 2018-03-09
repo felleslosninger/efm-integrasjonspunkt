@@ -12,6 +12,8 @@ import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import javax.jms.ConnectionFactory;
 import javax.jms.Session;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 @Configuration
 @EnableJms
 @EnableConfigurationProperties(ActiveMQProperties.class)
@@ -20,7 +22,14 @@ public class JmsConfiguration {
 
     @Bean
     ConnectionFactory jmsConnectionFactory(ActiveMQProperties properties) {
-        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("vm://localhost");
+        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(properties.getBrokerUrl());
+        if (!isNullOrEmpty(properties.getUser())) {
+            connectionFactory.setUserName(properties.getUser());
+        }
+        if (!isNullOrEmpty(properties.getPassword())) {
+            connectionFactory.setPassword(properties.getPassword());
+        }
+
         RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
         redeliveryPolicy.setRedeliveryDelay(10000L);
         redeliveryPolicy.setMaximumRedeliveryDelay(1000*60*60);
