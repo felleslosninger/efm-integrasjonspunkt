@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.nextmove;
 
 import com.google.common.collect.Lists;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
@@ -27,6 +28,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static no.difi.meldingsutveksling.RegexMatcher.matchesRegex;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
@@ -67,7 +69,7 @@ public class MessageOutControllerTest {
     private NextMoveServiceBus nextMoveServiceBus;
 
     @MockBean
-    private NextMoveUtils nextMoveUtils;
+    private MessagePersister messagePersister;
 
     @MockBean
     private InternalQueue internalQueue;
@@ -77,7 +79,6 @@ public class MessageOutControllerTest {
         String filedir = "target/uploadtest/";
         IntegrasjonspunktProperties.NextMove nextMove = new IntegrasjonspunktProperties.NextMove();
         nextMove.setFiledir(filedir);
-        when(nextMoveUtils.getConversationFiledirPath(Matchers.any())).thenReturn(filedir);
         IntegrasjonspunktProperties.Organization org = new IntegrasjonspunktProperties.Organization();
         org.setNumber("3");
         when(props.getNextmove()).thenReturn(nextMove);
@@ -114,12 +115,12 @@ public class MessageOutControllerTest {
         when(repo.findByConversationIdAndDirection("1337", OUTGOING)).thenReturn(Optional.empty());
         when(repo.findAll()).thenReturn(asList(cr42, cr43, cr44));
         when(repo.findByReceiverIdAndDirection("1", OUTGOING)).thenReturn(asList(cr42, cr43));
-        when(repo.findByReceiverIdAndDirection("2", OUTGOING)).thenReturn(asList(cr44));
+        when(repo.findByReceiverIdAndDirection("2", OUTGOING)).thenReturn(singletonList(cr44));
         when(repo.findByServiceIdentifierAndDirection(DPO, OUTGOING)).thenReturn(asList(cr42, cr44));
-        when(repo.findByServiceIdentifierAndDirection(DPV, OUTGOING)).thenReturn(asList(cr43));
-        when(repo.findByReceiverIdAndServiceIdentifierAndDirection("1", DPO, OUTGOING)).thenReturn(asList(cr42));
-        when(repo.findByReceiverIdAndServiceIdentifierAndDirection("1", DPV, OUTGOING)).thenReturn(asList(cr43));
-        when(repo.findByReceiverIdAndServiceIdentifierAndDirection("2", DPO, OUTGOING)).thenReturn(asList(cr44));
+        when(repo.findByServiceIdentifierAndDirection(DPV, OUTGOING)).thenReturn(singletonList(cr43));
+        when(repo.findByReceiverIdAndServiceIdentifierAndDirection("1", DPO, OUTGOING)).thenReturn(singletonList(cr42));
+        when(repo.findByReceiverIdAndServiceIdentifierAndDirection("1", DPV, OUTGOING)).thenReturn(singletonList(cr43));
+        when(repo.findByReceiverIdAndServiceIdentifierAndDirection("2", DPO, OUTGOING)).thenReturn(singletonList(cr44));
     }
 
     @Test

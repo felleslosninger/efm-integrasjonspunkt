@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,16 +27,16 @@ public class DpiConversationStrategy implements ConversationStrategy {
     private IntegrasjonspunktProperties props;
     private ServiceRegistryLookup sr;
     private KeystoreProvider keystore;
-    private NextMoveUtils nextMoveUtils;
+    private MessagePersister messagePersister;
 
     @Autowired
     DpiConversationStrategy(IntegrasjonspunktProperties props,
                             ServiceRegistryLookup sr,
-                            NextMoveUtils nextMoveUtils,
+                            MessagePersister messagePersister,
                             KeystoreProvider keystore) {
         this.props = props;
         this.sr = sr;
-        this.nextMoveUtils = nextMoveUtils;
+        this.messagePersister = messagePersister;
         this.keystore = keystore;
     }
 
@@ -58,7 +59,7 @@ public class DpiConversationStrategy implements ConversationStrategy {
             throw new NextMoveException(errorStr);
         }
 
-        NextMoveDpiRequest request = new NextMoveDpiRequest(props, nextMoveUtils, cr, serviceRecord.get());
+        NextMoveDpiRequest request = new NextMoveDpiRequest(props, messagePersister, cr, serviceRecord.get());
         MeldingsformidlerClient client = new MeldingsformidlerClient(props.getDpi(), keystore.getKeyStore());
         try {
             client.sendMelding(request);

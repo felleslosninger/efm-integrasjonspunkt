@@ -18,9 +18,8 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
-import no.difi.meldingsutveksling.nextmove.NextMoveUtils;
+import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
-import org.apache.commons.io.FileUtils;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -33,12 +32,12 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
-import static no.difi.meldingsutveksling.ServiceIdentifier.*;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_INNSYN;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_RECEIPT;
 import static no.difi.meldingsutveksling.core.EDUCoreMarker.markerFrom;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.payloadSizeMarker;
 
@@ -61,7 +60,7 @@ public class StandardBusinessDocumentFactory {
     private IntegrasjonspunktProperties props;
 
     @Autowired
-    private NextMoveUtils nextMoveUtils;
+    private MessagePersister messagePersister;
 
     static {
         try {
@@ -105,14 +104,12 @@ public class StandardBusinessDocumentFactory {
         List<ByteArrayFile> attachements = new ArrayList<>();
 
         for (String filename : shipmentMeta.getFileRefs().values()) {
-            String filedir = nextMoveUtils.getConversationFiledirPath(shipmentMeta);
-            File file = new File(filedir+filename);
 
             byte[] bytes;
             try {
-                bytes = FileUtils.readFileToByteArray(file);
+                bytes = messagePersister.read(shipmentMeta, filename);
             } catch (IOException e) {
-                log.error("Could not read file \""+file.getName()+"\"", e);
+                log.error("Could not read file \""+filename+"\"", e);
                 throw new MessageException(e, StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT);
             }
             attachements.add(new NextMoveAttachement(bytes, filename));

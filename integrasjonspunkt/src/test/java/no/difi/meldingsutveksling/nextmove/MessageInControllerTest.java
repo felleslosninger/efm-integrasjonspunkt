@@ -1,12 +1,12 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,12 +17,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
@@ -54,7 +55,7 @@ public class MessageInControllerTest {
     private IntegrasjonspunktProperties props;
 
     @MockBean
-    private NextMoveUtils nextMoveUtils;
+    private MessagePersister messagePersister;
 
     @Before
     public void setup() throws IOException {
@@ -63,7 +64,6 @@ public class MessageInControllerTest {
         nextMove.setFiledir(filedir);
         nextMove.setLockTimeoutMinutes(5);
         when(props.getNextmove()).thenReturn(nextMove);
-        when(nextMoveUtils.getConversationFiledirPath(any())).thenReturn(filedir);
 
         ServiceRecord serviceRecord = new ServiceRecord();
         serviceRecord.setServiceIdentifier(DPO);
@@ -74,18 +74,15 @@ public class MessageInControllerTest {
         DpoConversationResource cr44 = DpoConversationResource.of("44", "1", "2");
         cr44.setLockTimeout(LocalDateTime.now().plusMinutes(5));
 
-        File foo = new File("src/test/resources/testfil.txt");
-        File targetFoo = new File("target/uploadtest/testfil.txt");
-        targetFoo.getParentFile().mkdirs();
-        FileUtils.copyFile(foo, targetFoo);
-        cr42.addFileRef("testfil.txt");
+        cr42.addFileRef("foo");
+        when(messagePersister.read(cr42, "foo")).thenReturn("bar".getBytes(UTF_8));
 
         when(repo.findByConversationIdAndDirection("42", INCOMING)).thenReturn(Optional.of(cr42));
         when(repo.findByConversationIdAndDirection("43", INCOMING)).thenReturn(Optional.of(cr43));
         when(repo.findByConversationIdAndDirection("1337", INCOMING)).thenReturn(Optional.empty());
         when(repo.findAllByDirection(INCOMING)).thenReturn(asList(cr42, cr43, cr44));
         when(repo.findByServiceIdentifierAndDirection(DPO, INCOMING)).thenReturn(asList(cr42, cr44));
-        when(repo.findByServiceIdentifierAndDirection(DPV, INCOMING)).thenReturn(asList(cr43));
+        when(repo.findByServiceIdentifierAndDirection(DPV, INCOMING)).thenReturn(singletonList(cr43));
         when(repo.findFirstByDirectionOrderByLastUpdateAsc(INCOMING)).thenReturn(Optional.of(cr42));
         when(repo.findFirstByDirectionAndLockTimeoutIsNullOrderByLastUpdateAsc(INCOMING)).thenReturn(Optional.of(cr42));
         when(repo.findFirstByServiceIdentifierAndDirectionOrderByLastUpdateAsc(DPO, INCOMING)).thenReturn(Optional.of(cr42));

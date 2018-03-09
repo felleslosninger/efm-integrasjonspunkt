@@ -5,11 +5,10 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.dpi.Document;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
+import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import org.apache.commons.io.FileUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -24,11 +23,14 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     private IntegrasjonspunktProperties props;
     private DpiConversationResource cr;
     private ServiceRecord serviceRecord;
-    private NextMoveUtils nextMoveUtils;
+    private MessagePersister messagePersister;
 
-    public NextMoveDpiRequest(IntegrasjonspunktProperties props, NextMoveUtils nextMoveUtils, DpiConversationResource cr, ServiceRecord serviceRecord) {
+    public NextMoveDpiRequest(IntegrasjonspunktProperties props,
+                              MessagePersister messagePersister,
+                              DpiConversationResource cr,
+                              ServiceRecord serviceRecord) {
         this.props = props;
-        this.nextMoveUtils = nextMoveUtils;
+        this.messagePersister = messagePersister;
         this.cr = cr;
         this.serviceRecord = serviceRecord;
     }
@@ -66,17 +68,11 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     }
 
     private byte[] getContent(String fileName) {
-        String filedir = nextMoveUtils.getConversationFiledirPath(this.cr);
-        File file = new File(filedir + fileName);
-
-        byte[] content;
         try {
-            content = FileUtils.readFileToByteArray(file);
+            return messagePersister.read(cr, fileName);
         } catch (IOException e) {
             throw new NextMoveRuntimeException(String.format("Could not read file \"%s\"", fileName), e);
         }
-
-        return content;
     }
 
 
