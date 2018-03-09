@@ -9,4 +9,5 @@ public interface NextMoveMessageEntryRepository extends CrudRepository<NextMoveM
 
     Optional<NextMoveMessageEntry> findByConversationIdAndFilename(String conversationId, String filename);
     List<NextMoveMessageEntry> findByConversationId(String conversationId);
+    void deleteByConversationId(String conversationId);
 }
