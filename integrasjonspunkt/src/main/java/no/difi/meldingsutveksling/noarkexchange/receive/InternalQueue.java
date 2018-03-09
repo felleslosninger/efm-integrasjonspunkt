@@ -1,10 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.core.EDUCore;
-import no.difi.meldingsutveksling.core.EDUCoreConverter;
-import no.difi.meldingsutveksling.core.EDUCoreMarker;
-import no.difi.meldingsutveksling.core.EDUCoreSender;
+import no.difi.meldingsutveksling.core.*;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
@@ -15,7 +12,11 @@ import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.nextmove.NextMoveSender;
 import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
+import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
+import no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
@@ -25,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
@@ -74,6 +76,10 @@ public class InternalQueue {
 
     @Autowired
     private NextMoveSender nextMoveSender;
+
+    @Autowired
+    @Qualifier("localNoark")
+    private NoarkClient noarkClient;
 
     private static JAXBContext jaxbContextdomain;
     private static JAXBContext jaxbContext;
@@ -146,6 +152,9 @@ public class InternalQueue {
             errorMsg = "Failed to send message. Moved to DLQ";
             Audit.error(errorMsg, EDUCoreMarker.markerFrom(request));
             conversationId = request.getId();
+            if (noarkClient != null) {
+                sendErrorAppReceipt(request);
+            }
         } catch (Exception e) {
         }
 
@@ -159,6 +168,25 @@ public class InternalQueue {
 
         ms.setDescription(errorMsg);
         conversationService.registerStatus(conversationId, ms);
+    }
+
+    private void sendErrorAppReceipt(EDUCore request) {
+        AppReceiptType receipt = new AppReceiptType();
+        receipt.setType("ERROR");
+        StatusMessageType statusMessageType = new StatusMessageType();
+        statusMessageType.setCode("ID");
+        statusMessageType.setText(String.format("Feilet ved sending til %s", request.getServiceIdentifier()));
+        receipt.getMessage().add(statusMessageType);
+
+        Object oldPayload = request.getPayload();
+        request.swapSenderAndReceiver();
+        request.setMessageType(EDUCore.MessageType.APPRECEIPT);
+        request.setPayload(EDUCoreConverter.appReceiptAsString(receipt));
+        PutMessageRequestType putMessage = EDUCoreFactory.createPutMessageFromCore(request);
+        noarkClient.sendEduMelding(putMessage);
+        request.setPayload(oldPayload);
+        request.setMessageType(EDUCore.MessageType.EDU);
+        request.swapSenderAndReceiver();
     }
 
     public void enqueueNextmove(ConversationResource cr) {
