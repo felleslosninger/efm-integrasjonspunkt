@@ -122,7 +122,7 @@ public class InternalQueue {
         try {
             forwardToNoark(eduDocument);
         } catch (Exception e) {
-            Audit.warn("Failed to forward message.. queue will retry", eduDocument.createLogstashMarkers());
+            Audit.warn("Failed to forward message.. queue will retry", eduDocument.createLogstashMarkers(), e);
             throw e;
         }
     }
@@ -133,7 +133,7 @@ public class InternalQueue {
         try {
             eduCoreSender.sendMessage(request);
         } catch (Exception e) {
-            Audit.warn("Failed to send message... queue will retry", EDUCoreMarker.markerFrom(request));
+            Audit.warn("Failed to send message... queue will retry", EDUCoreMarker.markerFrom(request), e);
             throw e;
         }
     }
