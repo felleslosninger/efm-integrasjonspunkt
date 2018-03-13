@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.receipt.service;
 
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Predicate;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.receipt.*;
 import org.hamcrest.Matchers;
@@ -74,7 +76,8 @@ public class ConversationControllerTest {
         c2.setPollable(false);
         c2.setLastUpdate(NOW);
 
-        when(convoRepo.findAll()).thenReturn(asList(c1, c2));
+        when(convoRepo.findAll(org.mockito.Matchers.any(Predicate.class), org.mockito.Matchers.any(OrderSpecifier.class)))
+                .thenReturn(asList(c1, c2));
         when(convoRepo.findByReceiverIdentifierAndDirection("43", OUTGOING)).thenReturn(singletonList(c2));
         when(convoRepo.findByDirection(OUTGOING)).thenReturn(asList(c1, c2));
         when(convoRepo.findByConvIdAndDirection(1, OUTGOING)).thenReturn(Optional.of(c1));
@@ -83,7 +86,8 @@ public class ConversationControllerTest {
         when(convoRepo.findByPollable(true)).thenReturn(singletonList(c1));
         when(convoRepo.findByPollable(false)).thenReturn(singletonList(c2));
 
-        when(statRepo.findAll()).thenReturn(asList(cId1ms1, cId1ms2, cId2ms1, cId2ms2, cId2ms3));
+        when(statRepo.findAll(org.mockito.Matchers.any(Predicate.class), org.mockito.Matchers.any(OrderSpecifier.class)))
+                .thenReturn(asList(cId1ms1, cId1ms2, cId2ms1, cId2ms2, cId2ms3));
         when(statRepo.findAllByConvId(1)).thenReturn(asList(cId1ms1, cId1ms2));
         when(statRepo.findByStatIdGreaterThanEqual(3)).thenReturn(asList(cId2ms1, cId2ms2, cId2ms3));
         when(statRepo.findAllByConvIdAndStatIdGreaterThanEqual(2, 4)).thenReturn(asList(cId2ms2, cId2ms3));
@@ -97,16 +101,6 @@ public class ConversationControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[*].convId", containsInAnyOrder(1, 2)));
-    }
-
-    @Test
-    public void conversationsWithReceiverIdTest() throws Exception {
-        mvc.perform(get("/conversations")
-                .param("receiverIdentifier", "43")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].convId", is(2)));
     }
 
     @Test
@@ -161,39 +155,6 @@ public class ConversationControllerTest {
                 .andExpect(jsonPath("$[*].convId", contains(1, 1, 2, 2, 2)));
     }
 
-    @Test
-    public void statusesWithConvIdParamTest() throws Exception {
-        mvc.perform(get("/statuses")
-                .param("convId", "1")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[*].convId", contains(1, 1)))
-                .andExpect(jsonPath("$[*].statId", containsInAnyOrder(1, 2)));
-    }
-
-    @Test
-    public void statusesWithFromIdParamTest() throws Exception {
-        mvc.perform(get("/statuses")
-                .param("fromId", "3")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(3)))
-                .andExpect(jsonPath("$[*].convId", contains(2, 2, 2)))
-                .andExpect(jsonPath("$[*].statId", containsInAnyOrder(3, 4, 5)));
-    }
-
-    @Test
-    public void statusesWithConvIdAndFromIdParamTest() throws Exception {
-        mvc.perform(get("/statuses")
-                .param("convId", "2")
-                .param("fromId", "4")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[*].convId", contains(2, 2)))
-                .andExpect(jsonPath("$[*].statId", containsInAnyOrder(4, 5)));
-    }
 
     @Test
     public void statusesPeekTest() throws Exception {
