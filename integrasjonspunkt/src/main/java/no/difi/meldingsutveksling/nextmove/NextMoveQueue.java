@@ -73,7 +73,8 @@ public class NextMoveQueue {
         ConversationResource message = ((Payload) eduDocument.getAny()).getConversation();
         if (ServiceIdentifier.DPE_RECEIPT.equals(message.getServiceIdentifier())) {
             log.debug(String.format("Message with id=%s is a receipt", message.getConversationId()));
-            conversationService.registerStatus(message.getConversationId(), MessageStatus.of(GenericReceiptStatus.LEVERT));
+            Optional<Conversation> c = conversationService.registerStatus(message.getConversationId(), MessageStatus.of(GenericReceiptStatus.LEVERT));
+            c.ifPresent(conversationService::markFinished);
             return Optional.empty();
         }
 
