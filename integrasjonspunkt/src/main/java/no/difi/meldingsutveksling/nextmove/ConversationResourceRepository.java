@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import org.springframework.data.repository.CrudRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,7 +21,13 @@ public interface ConversationResourceRepository extends CrudRepository<Conversat
     List<ConversationResource> findBySenderSenderIdAndDirection(String senderId, ConversationDirection direction);
     List<ConversationResource> findByServiceIdentifierAndSenderSenderIdAndDirection(ServiceIdentifier serviceIdentifier, String senderId, ConversationDirection direction);
     Optional<ConversationResource> findFirstByDirectionOrderByLastUpdateAsc(ConversationDirection direction);
+    Optional<ConversationResource> findFirstByDirectionAndLockTimeoutIsNullOrderByLastUpdateAsc(ConversationDirection direction);
+    Optional<ConversationResource> findFirstByDirectionAndLockTimeoutIsNotNullOrderByLastUpdateAsc(ConversationDirection direction);
     Optional<ConversationResource> findFirstByServiceIdentifierAndDirectionOrderByLastUpdateAsc(ServiceIdentifier serviceIdentifier, ConversationDirection direction);
+    Optional<ConversationResource> findFirstByServiceIdentifierAndDirectionAndLockTimeoutIsNullOrderByLastUpdateAsc(ServiceIdentifier serviceIdentifier, ConversationDirection direction);
+    Optional<ConversationResource> findFirstByServiceIdentifierAndDirectionAndLockTimeoutIsNotNullOrderByLastUpdateAsc(ServiceIdentifier serviceIdentifier, ConversationDirection direction);
+
+    List<ConversationResource> findByLockTimeoutLessThanEqual(LocalDateTime now);
 
     Long countByDirection(ConversationDirection direction);
 }

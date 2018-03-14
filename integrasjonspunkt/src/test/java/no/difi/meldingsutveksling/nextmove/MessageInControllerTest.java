@@ -1,12 +1,12 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,20 +17,22 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
@@ -53,15 +55,15 @@ public class MessageInControllerTest {
     private IntegrasjonspunktProperties props;
 
     @MockBean
-    private NextMoveUtils nextMoveUtils;
+    private MessagePersister messagePersister;
 
     @Before
     public void setup() throws IOException {
         String filedir = "target/uploadtest/";
         IntegrasjonspunktProperties.NextMove nextMove = new IntegrasjonspunktProperties.NextMove();
         nextMove.setFiledir(filedir);
+        nextMove.setLockTimeoutMinutes(5);
         when(props.getNextmove()).thenReturn(nextMove);
-        when(nextMoveUtils.getConversationFiledirPath(any())).thenReturn(filedir);
 
         ServiceRecord serviceRecord = new ServiceRecord();
         serviceRecord.setServiceIdentifier(DPO);
@@ -70,21 +72,22 @@ public class MessageInControllerTest {
         DpoConversationResource cr42 = DpoConversationResource.of("42", Sender.of("2", "bar"), Receiver.of("1", "foo"));
         DpvConversationResource cr43 = DpvConversationResource.of("43", Sender.of("2", "bar"), Receiver.of("1", "foo"));
         DpoConversationResource cr44 = DpoConversationResource.of("44", Sender.of("1", "foo"), Receiver.of("2", "bar"));
+        cr44.setLockTimeout(LocalDateTime.now().plusMinutes(5));
 
-        File foo = new File("src/test/resources/testfil.txt");
-        File targetFoo = new File("target/uploadtest/testfil.txt");
-        targetFoo.getParentFile().mkdirs();
-        FileUtils.copyFile(foo, targetFoo);
-        cr42.addFileRef("testfil.txt");
+        cr42.addFileRef("foo");
+        when(messagePersister.read(cr42, "foo")).thenReturn("bar".getBytes(UTF_8));
 
         when(repo.findByConversationIdAndDirection("42", INCOMING)).thenReturn(Optional.of(cr42));
         when(repo.findByConversationIdAndDirection("43", INCOMING)).thenReturn(Optional.of(cr43));
         when(repo.findByConversationIdAndDirection("1337", INCOMING)).thenReturn(Optional.empty());
         when(repo.findAllByDirection(INCOMING)).thenReturn(asList(cr42, cr43, cr44));
         when(repo.findByServiceIdentifierAndDirection(DPO, INCOMING)).thenReturn(asList(cr42, cr44));
-        when(repo.findByServiceIdentifierAndDirection(DPV, INCOMING)).thenReturn(asList(cr43));
+        when(repo.findByServiceIdentifierAndDirection(DPV, INCOMING)).thenReturn(singletonList(cr43));
         when(repo.findFirstByDirectionOrderByLastUpdateAsc(INCOMING)).thenReturn(Optional.of(cr42));
+        when(repo.findFirstByDirectionAndLockTimeoutIsNullOrderByLastUpdateAsc(INCOMING)).thenReturn(Optional.of(cr42));
         when(repo.findFirstByServiceIdentifierAndDirectionOrderByLastUpdateAsc(DPO, INCOMING)).thenReturn(Optional.of(cr42));
+        when(repo.findFirstByServiceIdentifierAndDirectionAndLockTimeoutIsNullOrderByLastUpdateAsc(DPO, INCOMING)).thenReturn(Optional.of(cr42));
+        when(repo.findFirstByDirectionAndLockTimeoutIsNotNullOrderByLastUpdateAsc(INCOMING)).thenReturn(Optional.of(cr44));
 
         Conversation c42 = Conversation.of(cr42);
         Conversation c43 = Conversation.of(cr43);
@@ -103,42 +106,8 @@ public class MessageInControllerTest {
     }
 
     @Test
-    public void readMessageShouldLock() throws Exception {
-        mvc.perform(post("/in/messages/pop")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().string("bar"));
-
-        mvc.perform(post("/in/messages/pop")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    public void unlockMessageShouldReturnOk() throws Exception {
-        mvc.perform(post("/in/messages/pop")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().string("bar"));
-
-        mvc.perform(post("/in/messages/pop")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-
-        mvc.perform(put("/in/messages/pop")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-
-        mvc.perform(post("/in/messages/pop")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().string("bar"));
-
-    }
-
-    @Test
-    public void deleteMessageShouldReturnOk() throws Exception {
-        mvc.perform(delete("/in/messages/pop")
+    public void deleteMessageShouldReturnError() throws Exception {
+        mvc.perform(get("/in/messages/delete")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
@@ -150,7 +119,7 @@ public class MessageInControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .param("conversationId", "42"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(10)))
+                .andExpect(jsonPath("$.*", hasSize(11)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
                 .andExpect(jsonPath("$.senderId", is("2")))
                 .andExpect(jsonPath("$.receiverId", is("1")))
@@ -179,13 +148,26 @@ public class MessageInControllerTest {
     }
 
     @Test
-    public void peekIncomingShouldReturnOk() throws Exception {
+    public void peekLockIncomingShouldReturnOk() throws Exception {
         mvc.perform(get("/in/messages/peek").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(10)))
+                .andExpect(jsonPath("$.*", hasSize(11)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
                 .andExpect(jsonPath("$.senderId", is("2")))
                 .andExpect(jsonPath("$.receiverId", is("1")))
+                .andExpect(jsonPath("$.lockTimeout", notNullValue()))
+                .andExpect(jsonPath("$.serviceIdentifier", is("DPO")));
+    }
+
+    @Test
+    public void peekIncomingShouldReturnOk() throws Exception {
+        mvc.perform(post("/in/messages/peek").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.*", hasSize(11)))
+                .andExpect(jsonPath("$.conversationId", is("42")))
+                .andExpect(jsonPath("$.senderId", is("2")))
+                .andExpect(jsonPath("$.receiverId", is("1")))
+                .andExpect(jsonPath("$.lockTimeout", nullValue()))
                 .andExpect(jsonPath("$.serviceIdentifier", is("DPO")));
     }
 
@@ -195,7 +177,7 @@ public class MessageInControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .param("serviceIdentifier", "DPO"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(10)))
+                .andExpect(jsonPath("$.*", hasSize(11)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
                 .andExpect(jsonPath("$.senderId", is("2")))
                 .andExpect(jsonPath("$.receiverId", is("1")))

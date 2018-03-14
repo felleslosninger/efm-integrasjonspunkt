@@ -69,6 +69,8 @@ public abstract class ConversationResource {
     private boolean locked;
     @XmlElement
     private SecurityLevel securityLevel;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private LocalDateTime lockTimeout;
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "fileid")
     @Column(name = "filename")

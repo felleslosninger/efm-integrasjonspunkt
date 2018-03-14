@@ -165,6 +165,8 @@ public class IntegrasjonspunktProperties {
         private String filedir;
         @NotNull
         private String asicfile;
+        @NotNull
+        private Integer lockTimeoutMinutes;
         @Valid
         private ServiceBus serviceBus;
         @Valid
