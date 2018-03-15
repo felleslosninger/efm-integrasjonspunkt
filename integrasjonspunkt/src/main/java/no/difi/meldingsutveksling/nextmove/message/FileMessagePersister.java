@@ -31,9 +31,15 @@ public class FileMessagePersister implements MessagePersister {
         File localFile = new File(filedir+filename);
         localFile.getParentFile().mkdirs();
 
+        if (props.getNextmove().getApplyZipHeaderPatch()){
+            BugFix610.applyPatch(message, cr.getConversationId());
+        }
+
         try (FileOutputStream os = new FileOutputStream(localFile);
              BufferedOutputStream bos = new BufferedOutputStream(os)) {
             bos.write(message);
+            bos.flush();
+            bos.close();
         } catch (IOException e) {
             log.error("Could not write asic container to disc.", e);
             throw e;

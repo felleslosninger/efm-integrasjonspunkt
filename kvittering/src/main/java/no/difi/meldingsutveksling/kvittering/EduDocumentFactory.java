@@ -15,7 +15,6 @@ import no.difi.meldingsutveksling.kvittering.xsd.ObjectFactory;
 import org.apache.xml.security.exceptions.XMLSecurityException;
 
 import javax.xml.xpath.XPathExpressionException;
-import java.security.KeyPair;
 
 import static no.difi.meldingsutveksling.kvittering.DocumentToDocumentConverter.toDomainDocument;
 import static no.difi.meldingsutveksling.kvittering.DocumentToDocumentConverter.toXMLDocument;

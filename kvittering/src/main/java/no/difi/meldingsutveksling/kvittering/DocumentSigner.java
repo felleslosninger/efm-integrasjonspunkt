@@ -17,7 +17,6 @@ import javax.xml.crypto.dsig.spec.TransformParameterSpec;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyException;
-import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.List;
