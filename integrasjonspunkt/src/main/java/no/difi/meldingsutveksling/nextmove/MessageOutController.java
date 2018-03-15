@@ -36,7 +36,8 @@ import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -248,12 +249,17 @@ public class MessageOutController {
             }
         }
 
-        List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiverId());
-        boolean hasDpiRecord = serviceRecords.stream()
-                .map(ServiceRecord::getServiceIdentifier)
-                .anyMatch(si -> DPI == si);
-        if (cr.getServiceIdentifier() == DPI && !hasDpiRecord) {
-            cr = DpvConversationResource.of((DpiConversationResource)cr);
+        if (cr.getServiceIdentifier() == DPI) {
+            List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiverId());
+            Optional<ServiceRecord> dpiServiceRecord = serviceRecords.stream()
+                    .filter(r -> r.getServiceIdentifier() == DPI)
+                    .findFirst();
+            if (dpiServiceRecord.isPresent() &&
+                    !dpiServiceRecord.get().isFysiskPost() &&
+                    isNullOrEmpty(dpiServiceRecord.get().getPostkasseAdresse()) &&
+                    !props.getDpi().isForcePrint()) {
+                cr = DpvConversationResource.of((DpiConversationResource)cr);
+            }
         }
 
         internalQueue.enqueueNextmove(cr);

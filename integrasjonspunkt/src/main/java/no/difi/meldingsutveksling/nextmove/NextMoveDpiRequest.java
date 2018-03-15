@@ -14,11 +14,13 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.MimeTypeExtensionMapper.getMimetype;
 
 public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     private static final String DEFAULT_EXT = "PDF";
+    private static final String MISSING_TXT = "Missing title";
 
     private IntegrasjonspunktProperties props;
     private DpiConversationResource cr;
@@ -38,8 +40,13 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     @Override
     public Document getDocument() {
         String primaryFileName = cr.getFileRefs().get(0);
-        return new Document(getContent(primaryFileName), getMime(getExtension(primaryFileName)), primaryFileName,
-                cr.getCustomProperties().getOrDefault(primaryFileName, "Missing title"));
+        String title;
+        if (cr.getCustomProperties() != null) {
+            title = cr.getCustomProperties().getOrDefault(primaryFileName, MISSING_TXT);
+        } else {
+            title = MISSING_TXT;
+        }
+        return new Document(getContent(primaryFileName), getMime(getExtension(primaryFileName)), primaryFileName, title);
     }
 
     @Override
@@ -47,8 +54,13 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
         final List<Document> docList = Lists.newArrayList();
         cr.getFileRefs().forEach((k, f) -> {
             if (k != 0) {
-                docList.add(new Document(getContent(f), getMime(getExtension(f)), f,
-                        cr.getCustomProperties().getOrDefault(f, "Missing title")));
+                String title;
+                if (cr.getCustomProperties() != null) {
+                    title = cr.getCustomProperties().getOrDefault(f, MISSING_TXT);
+                } else {
+                    title = MISSING_TXT;
+                }
+                docList.add(new Document(getContent(f), getMime(getExtension(f)), f, title));
             }
         });
 
@@ -142,7 +154,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     @Override
     public boolean isPrintProvider() {
-        return serviceRecord.isFysiskPost();
+        return serviceRecord.isFysiskPost() || (props.getDpi().isForcePrint() && isNullOrEmpty(serviceRecord.getPostkasseAdresse()));
     }
 
     @Override
