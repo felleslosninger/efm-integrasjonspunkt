@@ -77,8 +77,6 @@ public class InternalQueue {
     @Autowired
     private NextMoveSender nextMoveSender;
 
-    @Autowired
-    @Qualifier("localNoark")
     private NoarkClient noarkClient;
 
     private static JAXBContext jaxbContextdomain;
@@ -88,8 +86,10 @@ public class InternalQueue {
     private final DocumentConverter documentConverter = new DocumentConverter();
 
     @Autowired
-    InternalQueue(ObjectProvider<IntegrajonspunktReceiveImpl> integrajonspunktReceive) {
+    InternalQueue(ObjectProvider<IntegrajonspunktReceiveImpl> integrajonspunktReceive,
+                  @Qualifier("localNoark") ObjectProvider<NoarkClient> noarkClient) {
         this.integrajonspunktReceive = integrajonspunktReceive.getIfAvailable();
+        this.noarkClient = noarkClient.getIfAvailable();
     }
 
     static {
