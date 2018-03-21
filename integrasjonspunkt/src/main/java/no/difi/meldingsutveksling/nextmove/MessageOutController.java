@@ -7,6 +7,7 @@ import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
@@ -35,7 +36,8 @@ import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -77,15 +79,15 @@ public class MessageOutController {
     private ConversationService conversationService;
 
     @Autowired
-    private NextMoveUtils nextMoveUtils;
-
-    @Autowired
     private InternalQueue internalQueue;
 
+    private MessagePersister messagePersister;
+
     @Autowired
-    public MessageOutController(ConversationResourceRepository repo) {
-        outRepo = new DirectionalConversationResourceRepository(repo, OUTGOING);
-        inRepo = new DirectionalConversationResourceRepository(repo, INCOMING);
+    public MessageOutController(ConversationResourceRepository repo, MessagePersister messagePersister) {
+        this.outRepo = new DirectionalConversationResourceRepository(repo, OUTGOING);
+        this.inRepo = new DirectionalConversationResourceRepository(repo, INCOMING);
+        this.messagePersister = messagePersister;
     }
 
     @RequestMapping(value = "/out/messages", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -229,34 +231,35 @@ public class MessageOutController {
             log.trace(markerFrom(cr), "Adding file \"{}\" ({}, {} bytes) to {}",
                     file.getOriginalFilename(), file.getContentType(), file.getSize(), cr.getConversationId());
 
-            String filedir = nextMoveUtils.getConversationFiledirPath(cr);
-            File localFile = new File(filedir+file.getOriginalFilename());
-            localFile.getParentFile().mkdirs();
-
-            try (FileOutputStream os = new FileOutputStream(localFile);
-                BufferedOutputStream bos = new BufferedOutputStream(os)) {
+            try {
                 if (cr.getCustomProperties().containsKey("base64") && "true".equalsIgnoreCase(cr.getCustomProperties().get("base64"))) {
-                    bos.write(Base64.getDecoder().decode(new String(file.getBytes()).getBytes(StandardCharsets.UTF_8)));
+                    messagePersister.write(cr, file.getOriginalFilename(),
+                            Base64.getDecoder().decode(new String(file.getBytes()).getBytes(StandardCharsets.UTF_8)));
                 } else {
-                    bos.write(file.getBytes());
+                    messagePersister.write(cr, file.getOriginalFilename(), file.getBytes());
                 }
 
                 if (!cr.getFileRefs().values().contains(file.getOriginalFilename())) {
                     cr.addFileRef(file.getOriginalFilename());
                 }
             } catch (java.io.IOException e) {
-                log.error("Could not write file {}", localFile, e);
+                log.error("Could not persist file {}", file.getOriginalFilename(), e);
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                        ErrorResponse.builder().error("write_file_error").errorDescription("Could not write file").build());
+                        ErrorResponse.builder().error("persist_file_error").errorDescription("Could not persist file").build());
             }
         }
 
-        List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiverId());
-        boolean hasDpiRecord = serviceRecords.stream()
-                .map(ServiceRecord::getServiceIdentifier)
-                .anyMatch(si -> DPI == si);
-        if (cr.getServiceIdentifier() == DPI && !hasDpiRecord) {
-            cr = DpvConversationResource.of((DpiConversationResource)cr);
+        if (cr.getServiceIdentifier() == DPI) {
+            List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiverId());
+            Optional<ServiceRecord> dpiServiceRecord = serviceRecords.stream()
+                    .filter(r -> r.getServiceIdentifier() == DPI)
+                    .findFirst();
+            if (dpiServiceRecord.isPresent() &&
+                    !dpiServiceRecord.get().isFysiskPost() &&
+                    isNullOrEmpty(dpiServiceRecord.get().getPostkasseAdresse()) &&
+                    !props.getDpi().isForcePrint()) {
+                cr = DpvConversationResource.of((DpiConversationResource)cr);
+            }
         }
 
         internalQueue.enqueueNextmove(cr);

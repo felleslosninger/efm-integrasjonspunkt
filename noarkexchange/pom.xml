@@ -3,7 +3,7 @@
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>1.7.82</version>
+        <version>1.7.83</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>noarkexchange</artifactId>
@@ -38,7 +38,7 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>test-tools</artifactId>
-            <version>1.7.82</version>
+            <version>1.7.83</version>
             <scope>test</scope>
         </dependency>
         <dependency>

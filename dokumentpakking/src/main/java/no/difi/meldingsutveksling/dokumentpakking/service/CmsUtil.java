@@ -19,6 +19,7 @@ import org.bouncycastle.operator.OutputEncryptor;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.Security;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -87,6 +88,11 @@ public class CmsUtil {
     }
 
     public byte[] decryptCMS(byte[] encrypted, PrivateKey privateKey) {
+        return decryptCMS(encrypted, privateKey, null);
+    }
+
+    public byte[] decryptCMS(byte[] encrypted, PrivateKey privateKey, Provider provider) {
+
         try {
             CMSEnvelopedData cms;
 
@@ -96,8 +102,14 @@ public class CmsUtil {
             Iterator<?> it = c.iterator();
             byte[] unEncryptedData = null;
             if (it.hasNext()) {
-                RecipientInformation recipient = (RecipientInformation) it.next();
-                unEncryptedData = recipient.getContent(new JceKeyTransEnvelopedRecipient(privateKey));
+                JceKeyTransEnvelopedRecipient recipient = new JceKeyTransEnvelopedRecipient(privateKey);
+                if(provider != null){
+                    recipient.setProvider(provider);
+                }
+
+                RecipientInformation recipientInformation = (RecipientInformation) it.next();
+
+                unEncryptedData = recipientInformation.getContent(recipient);
             }
             if (it.hasNext()) {
                 throw new IllegalArgumentException("CMS-package has more than one recipient. Only one expected");

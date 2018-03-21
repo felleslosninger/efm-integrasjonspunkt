@@ -339,4 +339,11 @@
       ]]></notes>
       <cve>CVE-2018-5968</cve>
    </suppress>
+   <suppress>
+      <notes><![CDATA[
+         CVE-2017-8806 false positive, unused package
+      ]]></notes>
+      <cve>CVE-2017-8806</cve>
+   </suppress>
+
 </suppressions>

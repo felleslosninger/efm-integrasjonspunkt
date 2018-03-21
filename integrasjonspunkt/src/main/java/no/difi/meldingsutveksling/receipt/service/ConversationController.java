@@ -1,23 +1,18 @@
 package no.difi.meldingsutveksling.receipt.service;
 
 import com.google.common.collect.Lists;
+import com.querydsl.core.BooleanBuilder;
 import io.swagger.annotations.*;
-import no.difi.meldingsutveksling.receipt.Conversation;
-import no.difi.meldingsutveksling.receipt.ConversationRepository;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
-import no.difi.meldingsutveksling.receipt.MessageStatusRepository;
+import no.difi.meldingsutveksling.receipt.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
@@ -41,23 +36,19 @@ public class ConversationController {
             @ApiParam(value = "Filter conversations based on finished status")
             @RequestParam(value = "finished", required = false) Optional<Boolean> finished,
             @ApiParam(value = "Filter conversations based on receiver identifier")
-            @RequestParam(value = "receiverIdentifier", required = false) Optional<String> receiverIdentifier) {
+            @RequestParam(value = "receiverIdentifier", required = false) Optional<String> receiverIdentifier,
+            @ApiParam(value = "Filter conversations based on having given status")
+            @RequestParam(value = "status", required = false) Optional<String> status) {
 
-        List<Conversation> conversations;
-        if (finished.isPresent()) {
-            if (receiverIdentifier.isPresent()) {
-                conversations = convoRepo.findByFinishedAndReceiverIdentifierAndDirection(finished.get(), receiverIdentifier.get(), OUTGOING);
-            } else {
-                conversations = convoRepo.findByFinishedAndDirection(finished.get(), OUTGOING);
-            }
-        } else {
-            if (receiverIdentifier.isPresent()) {
-                conversations = convoRepo.findByReceiverIdentifierAndDirection(receiverIdentifier.get(), OUTGOING);
-            } else {
-                conversations = convoRepo.findByDirection(OUTGOING);
-            }
-        }
-        return conversations.stream().sorted((a, b) -> b.getLastUpdate().compareTo(a.getLastUpdate())).collect(Collectors.toList());
+        QConversation c = QConversation.conversation;
+        BooleanBuilder p = new BooleanBuilder();
+
+        p.and(c.direction.eq(OUTGOING));
+        finished.ifPresent(f -> p.and(c.finished.eq(f)));
+        receiverIdentifier.ifPresent(r -> p.and(c.receiverIdentifier.eq(r)));
+        status.ifPresent(s -> p.and(c.messageStatuses.any().status.equalsIgnoreCase(s)));
+
+        return Lists.newArrayList(convoRepo.findAll(p, c.lastUpdate.desc()));
     }
 
     @RequestMapping(value = "/in/conversations", method = RequestMethod.GET)
@@ -113,28 +104,18 @@ public class ConversationController {
     })
     public ResponseEntity statuses(
             @ApiParam(value = "Get all statuses with id equals to given value and higher")
-            @RequestParam(value = "fromId", required = false) Integer fromId,
+            @RequestParam(value = "fromId", required = false) Optional<Integer> fromId,
             @ApiParam(value = "Get all statuses with given convId")
-            @RequestParam(value = "convId", required = false) Integer convId) {
+            @RequestParam(value = "convId", required = false) Optional<Integer> convId) {
 
-        List<MessageStatus> statuses;
-        if (fromId != null) {
-            if (convId != null) {
-                statuses = statusRepo.findAllByConvIdAndStatIdGreaterThanEqual(convId, fromId);
-            } else {
-                statuses = statusRepo.findByStatIdGreaterThanEqual(fromId);
-            }
-        } else {
-            if (convId != null) {
-                statuses = statusRepo.findAllByConvId(convId);
-            } else {
-                statuses = Lists.newArrayList(statusRepo.findAll());
-            }
-        }
+        QMessageStatus ms = QMessageStatus.messageStatus;
+        BooleanBuilder p = new BooleanBuilder();
 
-        Stream<MessageStatus> s = StreamSupport.stream(statuses.spliterator(), false);
-        List<MessageStatus> sorted = s.sorted(Comparator.comparingInt(r -> r.getStatId())).collect(Collectors.toList());
-        return ResponseEntity.ok(sorted);
+        fromId.ifPresent(id -> p.and(ms.statId.goe(id)));
+        convId.ifPresent(id -> p.and(ms.convId.eq(id)));
+
+        return ResponseEntity.ok(statusRepo.findAll(p, ms.statId.asc()));
+
     }
 
     @RequestMapping(value = "/statuses/{id}", method = RequestMethod.GET)

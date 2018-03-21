@@ -164,6 +164,10 @@ public class IntegrasjonspunktProperties {
         private String filedir;
         @NotNull
         private String asicfile;
+        @NotNull
+        private Integer lockTimeoutMinutes;
+        @NotNull
+        private Boolean applyZipHeaderPatch = Boolean.FALSE;
         @Valid
         private ServiceBus serviceBus;
 

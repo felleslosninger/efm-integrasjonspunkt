@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers;
+import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PostVirksomhetStrategyFactory;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
@@ -17,12 +18,15 @@ public class DpvConversationStrategy implements ConversationStrategy {
 
     private IntegrasjonspunktProperties props;
     private ServiceRegistryLookup sr;
+    private MessagePersister messagePersister;
 
     @Autowired
     DpvConversationStrategy(IntegrasjonspunktProperties props,
-                            ServiceRegistryLookup sr) {
+                            ServiceRegistryLookup sr,
+                            MessagePersister messagePersister) {
         this.props = props;
         this.sr = sr;
+        this.messagePersister = messagePersister;
     }
 
     @Override
@@ -32,7 +36,7 @@ public class DpvConversationStrategy implements ConversationStrategy {
         PostVirksomhetStrategyFactory dpvFactory = PostVirksomhetStrategyFactory.newInstance(props, null, sr);
         CorrespondenceAgencyConfiguration config = dpvFactory.getConfig();
         InsertCorrespondenceV2 message;
-        message = CorrespondenceAgencyMessageFactory.create(config, cr);
+        message = CorrespondenceAgencyMessageFactory.create(config, cr, messagePersister);
 
         CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(ConversationResourceMarkers.markerFrom(cr), config);
         final CorrespondenceRequest request = new CorrespondenceRequest.Builder()

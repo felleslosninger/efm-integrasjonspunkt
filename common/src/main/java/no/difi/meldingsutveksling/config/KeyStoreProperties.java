@@ -37,4 +37,10 @@ public class KeyStoreProperties {
     @NotNull
     private String password = "";
 
+    /**
+     * True if the application should only use the Provider from the
+     * keyStore for crypto operations on the keys from the keystore.
+     */
+    private Boolean lockProvider = false;
+
 }

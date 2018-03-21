@@ -17,7 +17,13 @@ public class Decryptor {
      */
     public byte[] decrypt(byte[] input) {
         final CmsUtil cmsUtil = new CmsUtil();
-        return cmsUtil.decryptCMS(input, integrasjonspunktNokkel.loadPrivateKey());
+        return cmsUtil.decryptCMS(
+                input,
+                integrasjonspunktNokkel.loadPrivateKey(),
+                integrasjonspunktNokkel.shouldLockProvider() ?
+                        integrasjonspunktNokkel.getKeyStore().getProvider() :
+                        null
+        );
     }
 
 }

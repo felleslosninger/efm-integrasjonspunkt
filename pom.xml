@@ -5,7 +5,7 @@
     <groupId>no.difi.meldingsutveksling</groupId>
     <artifactId>parent-pom</artifactId>
     <packaging>pom</packaging>
-    <version>1.7.82</version>
+    <version>1.7.83</version>
     <name>Multiproject for meldingsutveksling</name>
 
     <scm>
@@ -40,7 +40,7 @@
         <!-- bug with logstash-logback-encoder in 1.1.7, wait for 1.1.8 http://jira.qos.ch/browse/LOGBACK-1158 -->
         <logback.version>1.1.6</logback.version>
         <mockito.version>1.10.19</mockito.version>
-        <move-common.version>1.0.23</move-common.version>
+        <move-common.version>1.0.24</move-common.version>
         <maven.javadoc.skip>true</maven.javadoc.skip>
     </properties>
 
@@ -109,6 +109,17 @@
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
                 <version>2.9.4</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.querydsl</groupId>
+                <artifactId>querydsl-jpa</artifactId>
+                <version>4.1.4</version>
+            </dependency>
+            <dependency>
+                <groupId>com.querydsl</groupId>
+                <artifactId>querydsl-apt</artifactId>
+                <version>4.1.4</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
