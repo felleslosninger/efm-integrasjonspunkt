@@ -107,16 +107,20 @@ public class IntegrasjonspunktNokkel {
 
     }
 
+    public boolean shouldLockProvider(){
+        return properties.getLockProvider();
+    }
 
     public KeyStore getKeyStore() {
         return keyStore;
     }
 
+
     public class MoveSignaturHelper extends SignatureHelper {
 
         public MoveSignaturHelper(KeyStore keyStore, String keyAlias, String keyPassword)  {
 
-            super(null);
+            super(properties.getLockProvider() ? keyStore.getProvider() : null);
             loadCertificate(keyStore, keyAlias, keyPassword);
         }
     }

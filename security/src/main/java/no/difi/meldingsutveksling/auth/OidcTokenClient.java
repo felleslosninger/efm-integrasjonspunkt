@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -111,7 +110,12 @@ public class OidcTokenClient {
                 .expirationTime(Date.from(ZonedDateTime.now(ZoneOffset.UTC).toInstant().plusSeconds(120)))
                 .build();
 
-        JWSSigner signer = new RSASSASigner(nokkel.loadPrivateKey());
+        RSASSASigner signer = new RSASSASigner(nokkel.loadPrivateKey());
+
+        if(nokkel.shouldLockProvider()) {
+            signer.getJCAContext().setProvider(nokkel.getKeyStore().getProvider());
+        }
+
         SignedJWT signedJWT = new SignedJWT(jwsHeader, claims);
         try {
             signedJWT.sign(signer);

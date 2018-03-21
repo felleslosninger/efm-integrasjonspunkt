@@ -196,7 +196,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
     }
 
     public void sendReceiptOpen(StandardBusinessDocumentWrapper inputDocument) {
-        EduDocument doc = EduDocumentFactory.createAapningskvittering(inputDocument.getMessageInfo(), keyInfo.getKeyPair());
+        EduDocument doc = EduDocumentFactory.createAapningskvittering(inputDocument.getMessageInfo(), keyInfo);
         sendReceipt(doc);
     }
 

@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextmove.message;
 
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -15,14 +16,22 @@ public class DBMessagePersister implements MessagePersister {
 
     private NextMoveMessageEntryRepository repo;
 
+    private IntegrasjonspunktProperties props;
+
     @Autowired
-    public DBMessagePersister(NextMoveMessageEntryRepository repo) {
+    public DBMessagePersister(NextMoveMessageEntryRepository repo, IntegrasjonspunktProperties props) {
         this.repo = repo;
+        this.props = props;
     }
 
     @Override
     @Transactional
     public void write(ConversationResource cr, String filename, byte[] message) throws IOException {
+
+        if (props.getNextmove().getApplyZipHeaderPatch()){
+            BugFix610.applyPatch(message, cr.getConversationId());
+        }
+
         NextMoveMessageEntry entry = NextMoveMessageEntry.of(cr.getConversationId(), filename, message);
         repo.save(entry);
     }
