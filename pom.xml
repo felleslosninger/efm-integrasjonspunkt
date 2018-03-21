@@ -5,7 +5,7 @@
     <groupId>no.difi.meldingsutveksling</groupId>
     <artifactId>parent-pom</artifactId>
     <packaging>pom</packaging>
-    <version>1.7.83-SNAPSHOT</version>
+    <version>1.7.84-SNAPSHOT</version>
     <name>Multiproject for meldingsutveksling</name>
 
     <scm>
