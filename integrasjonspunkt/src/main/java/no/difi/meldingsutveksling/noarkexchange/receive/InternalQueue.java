@@ -10,6 +10,7 @@ import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.nextmove.NextMoveSender;
+import no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers;
 import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
@@ -104,14 +105,11 @@ public class InternalQueue {
 
     @JmsListener(destination = NEXTMOVE, containerFactory = "myJmsContainerFactory")
     public void nextmoveListener(byte[] message, Session session) {
+        ConversationResource cr = unmarshalNextMoveMessage(message);
         try {
-            ByteArrayInputStream bis = new ByteArrayInputStream(message);
-            StreamSource ss = new StreamSource(bis);
-            Unmarshaller unmarshaller = jaxbContextNextmove.createUnmarshaller();
-            ConversationResource cr = unmarshaller.unmarshal(ss, ConversationResource.class).getValue();
             nextMoveSender.send(cr);
         } catch (Exception e) {
-            Audit.error("Failed to send message... queue will retry", e);
+            Audit.warn("Failed to send message... queue will retry", ConversationResourceMarkers.markerFrom(cr), e);
             throw new MeldingsUtvekslingRuntimeException(e);
         }
     }
@@ -166,8 +164,28 @@ public class InternalQueue {
         } catch (Exception e) {
         }
 
+        try {
+            ConversationResource cr = unmarshalNextMoveMessage(message);
+            errorMsg = "Failed to send message. Moved to DLQ";
+            Audit.error(errorMsg, ConversationResourceMarkers.markerFrom(cr));
+            conversationId = cr.getConversationId();
+        } catch (Exception e) {
+        }
+
         ms.setDescription(errorMsg);
         conversationService.registerStatus(conversationId, ms);
+    }
+
+    private ConversationResource unmarshalNextMoveMessage(byte[] message) {
+        try {
+            ByteArrayInputStream bis = new ByteArrayInputStream(message);
+            StreamSource ss = new StreamSource(bis);
+            Unmarshaller unmarshaller = jaxbContextNextmove.createUnmarshaller();
+            return unmarshaller.unmarshal(ss, ConversationResource.class).getValue();
+        } catch (JAXBException e) {
+            logger.error("Could not unmarshal nextmove message", e);
+            throw new MeldingsUtvekslingRuntimeException(e);
+        }
     }
 
     private void sendErrorAppReceipt(EDUCore request) {
