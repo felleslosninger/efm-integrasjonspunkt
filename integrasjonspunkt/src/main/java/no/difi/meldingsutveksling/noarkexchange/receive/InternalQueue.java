@@ -139,6 +139,7 @@ public class InternalQueue {
     /**
      * Log failed messages as errors
      */
+    @SuppressWarnings("squid:S1166")
     @JmsListener(destination = DLQ)
     public void dlqListener(byte[] message, Session session) {
         MessageStatus ms = MessageStatus.of(GenericReceiptStatus.FEIL);
