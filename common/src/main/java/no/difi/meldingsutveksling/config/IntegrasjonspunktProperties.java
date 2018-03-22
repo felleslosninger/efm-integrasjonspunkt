@@ -67,6 +67,7 @@ public class IntegrasjonspunktProperties {
     private boolean varslingsplikt = false;
 
     private String ntpHost;
+    private boolean disableNtpCheck;
 
     /**
      * Feature toggles.
