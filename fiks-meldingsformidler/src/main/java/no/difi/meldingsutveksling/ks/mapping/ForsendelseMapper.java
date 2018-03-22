@@ -52,8 +52,13 @@ public class ForsendelseMapper {
         final InfoRecord receiverInfo = serviceRegistry.getInfoRecord(eduCore.getReceiver().getIdentifier());
         builder.withMottaker(mottakerFrom(receiverInfo));
 
-        final InfoRecord senderInfo = serviceRegistry.getInfoRecord(eduCore.getSender().getIdentifier());
-        builder.withSvarSendesTil(mottakerFrom(senderInfo));
+        Optional<AvsmotType> avsender = getAvsender(meldingType);
+        if (avsender.isPresent()) {
+            builder.withSvarSendesTil(mottakerFrom(avsender.get()));
+        } else {
+            final InfoRecord senderInfo = serviceRegistry.getInfoRecord(eduCore.getSender().getIdentifier());
+            builder.withSvarSendesTil(mottakerFrom(senderInfo));
+        }
 
         builder.withMetadataFraAvleverendeSystem(metaDataFrom(meldingType));
 
@@ -74,16 +79,21 @@ public class ForsendelseMapper {
         metadata.withDokumentetsDato(journalDatoFrom(meldingType.getJournpost().getJpDokdato()));
         metadata.withTittel(meldingType.getJournpost().getJpOffinnhold());
 
-        Optional<AvsmotType> avsender = getAvsender(meldingType);
+        Optional<AvsmotType> avsender = getSaksbehandler(meldingType);
         avsender.map(a -> a.getAmNavn()).ifPresent(metadata::withSaksbehandler);
 
         return metadata.build();
     }
 
 
-    private Optional<AvsmotType> getAvsender(MeldingType meldingType) {
+    private Optional<AvsmotType> getSaksbehandler(MeldingType meldingType) {
         List<AvsmotType> avsmotlist = meldingType.getJournpost().getAvsmot();
         return avsmotlist.stream().filter(f -> "0".equals(f.getAmIhtype())).findFirst();
+    }
+
+    private Optional<AvsmotType> getAvsender(MeldingType meldingType) {
+        List<AvsmotType> avsmotlist = meldingType.getJournpost().getAvsmot();
+        return avsmotlist.stream().filter(f -> "1".equals(f.getAmIhtype())).findFirst();
     }
 
     private XMLGregorianCalendar journalDatoFrom(String jpDato) {
@@ -95,6 +105,19 @@ public class ForsendelseMapper {
         } catch (DatatypeConfigurationException e) {
             throw new ForsendelseMappingException("Unable to map date", e);
         }
+    }
+
+    private Mottaker mottakerFrom(AvsmotType avsmotType) {
+        Organisasjon.Builder<Void> mottaker = Organisasjon.builder();
+        mottaker.withOrgnr(avsmotType.getAmOrgnr());
+        mottaker.withNavn(avsmotType.getAmNavn());
+
+        mottaker.withAdresse1(avsmotType.getAmAdresse());
+        mottaker.withPostnr(avsmotType.getAmPostnr());
+        mottaker.withPoststed(avsmotType.getAmPoststed());
+        mottaker.withLand(avsmotType.getAmUtland());
+
+        return mottaker.build();
     }
 
     private Mottaker mottakerFrom(InfoRecord infoRecord) {
