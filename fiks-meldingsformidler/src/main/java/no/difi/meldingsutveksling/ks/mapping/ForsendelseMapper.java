@@ -97,20 +97,23 @@ public class ForsendelseMapper {
         }
     }
 
-    private Mottaker mottakerFrom(InfoRecord infoRecord) {
-        Organisasjon.Builder<Void> mottaker = Organisasjon.builder();
-        mottaker.withOrgnr(infoRecord.getIdentifier());
-        mottaker.withNavn(infoRecord.getOrganizationName());
+    private Adresse mottakerFrom(InfoRecord infoRecord) {
+        OrganisasjonDigitalAdresse.Builder<Void> orgAdr = OrganisasjonDigitalAdresse.builder();
+        orgAdr.withOrgnr(infoRecord.getIdentifier());
 
+        Adresse.Builder<Void> mottaker = Adresse.builder();
+        mottaker.withDigitalAdresse(orgAdr.build());
+
+        PostAdresse.Builder<Void> postAdr = PostAdresse.builder();
         if (infoRecord.getPostadresse() != null) {
-            mottaker.withAdresse1(infoRecord.getPostadresse().getAdresse());
-            mottaker.withPostnr(infoRecord.getPostadresse().getPostnummer());
-            mottaker.withPoststed(infoRecord.getPostadresse().getPoststed());
-            mottaker.withLand(infoRecord.getPostadresse().getLand());
+            postAdr.withAdresse1(infoRecord.getPostadresse().getAdresse());
+            postAdr.withPostnr(infoRecord.getPostadresse().getPostnummer());
+            postAdr.withPoststed(infoRecord.getPostadresse().getPoststed());
+            postAdr.withLand(infoRecord.getPostadresse().getLand());
         } else {
-            mottaker.withPostnr("0192");
-            mottaker.withPoststed("Oslo");
-            mottaker.withLand("Norge");
+            postAdr.withPostnr("0192");
+            postAdr.withPoststed("Oslo");
+            postAdr.withLand("Norge");
         }
         
         return mottaker.build();
