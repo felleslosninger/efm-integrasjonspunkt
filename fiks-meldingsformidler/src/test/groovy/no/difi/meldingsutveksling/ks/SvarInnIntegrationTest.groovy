@@ -10,6 +10,7 @@ import no.difi.meldingsutveksling.noarkexchange.NoarkClient
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType
+import no.difi.meldingsutveksling.receipt.ConversationService
 import org.hamcrest.Matchers
 import org.junit.Before
 import org.junit.Test
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
@@ -51,6 +53,9 @@ public class SvarInnIntegrationTest {
     @Autowired
     @Qualifier("localNoark")
     NoarkClient noarkClient
+
+    @MockBean
+    ConversationService conversationService;
 
     @Before
     public void setup() {
