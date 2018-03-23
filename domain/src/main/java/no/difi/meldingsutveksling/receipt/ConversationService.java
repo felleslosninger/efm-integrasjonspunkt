@@ -52,6 +52,7 @@ public class ConversationService {
         }
     }
 
+    @SuppressWarnings("squid:S2250")
     public Conversation registerStatus(Conversation conversation, MessageStatus status) {
         boolean hasStatus = conversation.getMessageStatuses().stream()
                 .map(MessageStatus::getStatus)
