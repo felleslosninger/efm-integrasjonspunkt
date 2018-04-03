@@ -57,6 +57,9 @@ public class MessageOutControllerTest {
     private ConversationStrategyFactory strategyFactory;
 
     @MockBean
+    private ConversationResourceFactory crResourceFactory;
+
+    @MockBean
     private ServiceRegistryLookup sr;
 
     @MockBean
@@ -127,9 +130,9 @@ public class MessageOutControllerTest {
     public void getMessageShouldReturnOk() throws Exception {
         mvc.perform(get("/out/messages/42").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(11)))
+                .andExpect(jsonPath("$.*", hasSize(10)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
-                .andExpect(jsonPath("$.receiverId", is("1")))
+                .andExpect(jsonPath("$.receiver.receiverId", is("1")))
                 .andExpect(jsonPath("$.serviceIdentifier", is("DPO")))
                 .andExpect(jsonPath("$.fileRefs.*", hasSize(0)));
     }
@@ -147,7 +150,7 @@ public class MessageOutControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[*].conversationId", containsInAnyOrder("42", "43")))
-                .andExpect(jsonPath("$[*].receiverId", containsInAnyOrder("1", "1")))
+                .andExpect(jsonPath("$[*].receiver.receiverId", containsInAnyOrder("1", "1")))
                 .andExpect(jsonPath("$[*].serviceIdentifier", containsInAnyOrder("DPO", "DPV")));
     }
 
@@ -159,7 +162,7 @@ public class MessageOutControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[*].conversationId", containsInAnyOrder("42", "44")))
-                .andExpect(jsonPath("$[*].receiverId", containsInAnyOrder("1", "2")))
+                .andExpect(jsonPath("$[*].receiver.receiverId", containsInAnyOrder("1", "2")))
                 .andExpect(jsonPath("$[*].serviceIdentifier", containsInAnyOrder("DPO", "DPO")));
     }
 
@@ -172,7 +175,7 @@ public class MessageOutControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].conversationId", is("43")))
-                .andExpect(jsonPath("$[0].receiverId", is("1")))
+                .andExpect(jsonPath("$[0].receiver.receiverId", is("1")))
                 .andExpect(jsonPath("$[0].serviceIdentifier", is("DPV")))
                 .andExpect(jsonPath("$[0].fileRefs.*", hasSize(0)));
     }
@@ -180,13 +183,13 @@ public class MessageOutControllerTest {
     @Test
     public void createResourceWithConversationIdShouldReturnExisting() throws Exception {
         mvc.perform(post("/out/messages")
-                .content("{\"receiverId\": 1, \"serviceIdentifier\": \"DPO\", \"conversationId\": \"42\"}")
+                .content("{ \"receiver\": {\"receiverId\": 1}, \"serviceIdentifier\": \"DPO\", \"conversationId\": \"42\"}")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(11)))
+                .andExpect(jsonPath("$.*", hasSize(10)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
-                .andExpect(jsonPath("$.receiverId", is("1")))
+                .andExpect(jsonPath("$.receiver.receiverId", is("1")))
                 .andExpect(jsonPath("$.serviceIdentifier", is("DPO")))
                 .andExpect(jsonPath("$.fileRefs.*", hasSize(0)));
     }
@@ -212,13 +215,13 @@ public class MessageOutControllerTest {
     @Test
     public void createResourceWithoutConversationIdShouldReturnOk() throws Exception {
         mvc.perform(post("/out/messages")
-                .content("{ \"receiverId\": 1, \"serviceIdentifier\": \"DPO\" }")
+                .content("{ \"receiver\": {\"receiverId\": 1}, \"serviceIdentifier\": \"DPO\" }")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.conversationId", matchesRegex("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}")))
-                .andExpect(jsonPath("$.receiverId", is("1")))
-                .andExpect(jsonPath("$.senderId", is("3")))
+                .andExpect(jsonPath("$.receiver.receiverId", is("1")))
+                .andExpect(jsonPath("$.sender.senderId", is("3")))
                 .andExpect(jsonPath("$.serviceIdentifier", is("DPO")));
     }
 
