@@ -2,6 +2,8 @@ package no.difi.meldingsutveksling.nextmove.message;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.DpoConversationResource;
+import no.difi.meldingsutveksling.nextmove.Receiver;
+import no.difi.meldingsutveksling.nextmove.Sender;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,7 +30,9 @@ public class BugFix610Test {
 
         messagePersister = new FileMessagePersister(props);
 
-        cr = DpoConversationResource.of("42", "2", "1");
+        Receiver receiver = Receiver.of("1", "foo");
+        Sender sender = Sender.of("2", "bar");
+        cr = DpoConversationResource.of("42", sender, receiver);
     }
 
     @Test
