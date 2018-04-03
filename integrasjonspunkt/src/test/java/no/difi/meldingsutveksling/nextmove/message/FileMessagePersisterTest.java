@@ -6,10 +6,12 @@ import no.difi.meldingsutveksling.nextmove.Receiver;
 import no.difi.meldingsutveksling.nextmove.Sender;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.util.Arrays;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 

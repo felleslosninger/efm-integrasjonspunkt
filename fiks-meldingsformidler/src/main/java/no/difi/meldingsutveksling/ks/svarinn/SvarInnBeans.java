@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.ks.svarinn;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
+import no.difi.meldingsutveksling.receipt.ConversationService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -38,10 +39,14 @@ public class SvarInnBeans {
     }
 
     @Bean
-    SvarInnService svarInnService(SvarInnClient svarInnClient, SvarInnFileDecryptor svarInnFileDecryptor,
-                                  SvarInnUnzipper svarInnUnzipper, @Qualifier("localNoark") NoarkClient localNoark,
-                                  @Qualifier("fiksMailClient") NoarkClient mailClient, IntegrasjonspunktProperties properties) {
-        return new SvarInnService(svarInnClient, svarInnFileDecryptor, svarInnUnzipper, localNoark, mailClient, properties);
+    SvarInnService svarInnService(SvarInnClient svarInnClient,
+                                  SvarInnFileDecryptor svarInnFileDecryptor,
+                                  SvarInnUnzipper svarInnUnzipper,
+                                  @Qualifier("localNoark") NoarkClient localNoark,
+                                  @Qualifier("fiksMailClient") NoarkClient mailClient,
+                                  ConversationService conversationService,
+                                  IntegrasjonspunktProperties properties) {
+        return new SvarInnService(svarInnClient, svarInnFileDecryptor, svarInnUnzipper, localNoark, mailClient, conversationService, properties);
     }
 
 }

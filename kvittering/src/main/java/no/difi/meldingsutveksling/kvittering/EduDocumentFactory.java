@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.kvittering;
 
 
+import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
@@ -14,7 +15,6 @@ import no.difi.meldingsutveksling.kvittering.xsd.ObjectFactory;
 import org.apache.xml.security.exceptions.XMLSecurityException;
 
 import javax.xml.xpath.XPathExpressionException;
-import java.security.KeyPair;
 
 import static no.difi.meldingsutveksling.kvittering.DocumentToDocumentConverter.toDomainDocument;
 import static no.difi.meldingsutveksling.kvittering.DocumentToDocumentConverter.toXMLDocument;
@@ -31,23 +31,23 @@ public class EduDocumentFactory {
     private EduDocumentFactory() {
     }
 
-    public static EduDocument createAapningskvittering(MessageInfo messageInfo, KeyPair keyPair) {
+    public static EduDocument createAapningskvittering(MessageInfo messageInfo, IntegrasjonspunktNokkel keyInfo) {
         Kvittering k = new Kvittering();
         k.setAapning(new Aapning());
         k.setTidspunkt(XMLTimeStamp.createTimeStamp());
-        return signAndWrapDocument(messageInfo, keyPair, k);
+        return signAndWrapDocument(messageInfo, keyInfo, k);
     }
 
-    public static EduDocument createLeveringsKvittering(MessageInfo messageInfo, KeyPair keyPair) {
+    public static EduDocument createLeveringsKvittering(MessageInfo messageInfo, IntegrasjonspunktNokkel keyInfo) {
         Kvittering k = new Kvittering();
         k.setLevering(new Levering());
         k.setTidspunkt(XMLTimeStamp.createTimeStamp());
         return signAndWrapDocument(messageInfo,
-                keyPair,
+                keyInfo,
                 k);
     }
 
-    private static EduDocument signAndWrapDocument(MessageInfo messageInfo, KeyPair keyPair, Kvittering kvittering) {
+    private static EduDocument signAndWrapDocument(MessageInfo messageInfo, IntegrasjonspunktNokkel keyInfo, Kvittering kvittering) {
 
         EduDocument unsignedReceipt = new EduDocument();
         StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader.Builder()
@@ -63,7 +63,7 @@ public class EduDocumentFactory {
         unsignedReceipt.setAny(new ObjectFactory().createKvittering(kvittering));
 
         org.w3c.dom.Document xmlDoc = toXMLDocument(unsignedReceipt);
-        org.w3c.dom.Document signedXmlDoc = DocumentSigner.sign(xmlDoc, keyPair);
+        org.w3c.dom.Document signedXmlDoc = DocumentSigner.sign(xmlDoc, keyInfo);
         try {
             if (!DocumentValidator.validate(signedXmlDoc)) {
                 throw new MeldingsUtvekslingRuntimeException("created non validating document");

@@ -17,15 +17,14 @@ import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import no.difi.meldingsutveksling.nextmove.DpvConversationResource;
 import no.difi.meldingsutveksling.nextmove.NextMoveException;
+import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.receipt.Conversation;
-import org.apache.commons.io.FileUtils;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-import java.io.File;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.GregorianCalendar;
@@ -58,22 +57,17 @@ public class CorrespondenceAgencyMessageFactory {
     private CorrespondenceAgencyMessageFactory() {
     }
 
-    public static InsertCorrespondenceV2 create(CorrespondenceAgencyConfiguration config, DpvConversationResource cr) throws NextMoveException {
+    public static InsertCorrespondenceV2 create(CorrespondenceAgencyConfiguration config,
+                                                DpvConversationResource cr,
+                                                MessagePersister persister) throws NextMoveException {
 
         no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory reporteeFactory = new no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory();
         BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
 
         for (String f : cr.getFileRefs().values()) {
-            String filedir = config.getNextmoveFiledir();
-            if (!filedir.endsWith("/")) {
-                filedir = filedir + "/";
-            }
-            filedir = filedir + cr.getConversationId() + "/";
-            File file = new File(filedir + f);
-
             byte[] bytes;
             try {
-                bytes = FileUtils.readFileToByteArray(file);
+                bytes = persister.read(cr, f);
             } catch (IOException e) {
                 throw new NextMoveException(String.format("Could not read file \"%s\"", f), e);
             }

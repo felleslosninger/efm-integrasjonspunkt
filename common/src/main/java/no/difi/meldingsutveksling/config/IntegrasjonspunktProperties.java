@@ -60,6 +60,12 @@ public class IntegrasjonspunktProperties {
     @Valid
     private Sign sign;
 
+    @Valid
+    private Ntp ntp;
+
+    @Valid
+    private Queue queue;
+
     /**
      * Use this parameter to indicate that the message are related to vedtak/messages that require the recipient to be
      * notified. This parameter is passed over to ServiceRegistry to determine where the message should be sent.
@@ -67,7 +73,18 @@ public class IntegrasjonspunktProperties {
      */
     private boolean varslingsplikt = false;
 
-    private String ntpHost;
+    @Data
+    public static class Ntp {
+        @NotNull
+        private String host;
+        private boolean disable;
+    }
+
+    @Data
+    public static class Queue {
+        @NotNull
+        private Integer maximumRetryHours;
+    }
 
     /**
      * Feature toggles.
@@ -167,6 +184,8 @@ public class IntegrasjonspunktProperties {
         private String asicfile;
         @NotNull
         private Integer lockTimeoutMinutes;
+        @NotNull
+        private Boolean applyZipHeaderPatch = Boolean.FALSE;
         @Valid
         private ServiceBus serviceBus;
         @Valid

@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.receipt.Conversation
 import no.difi.meldingsutveksling.receipt.ConversationService
 import no.difi.meldingsutveksling.receipt.MessageStatus
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -23,6 +24,7 @@ class FiksStatusStrategyTest {
 
     }
 
+    @Ignore
     @Test
     void "given message receipt with status read then conversation should be set non pollable"() {
         def messageReceipt = MessageStatus.of(DpfReceiptStatus.LEST)

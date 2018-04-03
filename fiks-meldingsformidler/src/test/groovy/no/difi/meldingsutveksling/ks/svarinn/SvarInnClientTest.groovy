@@ -1,12 +1,14 @@
 package no.difi.meldingsutveksling.ks.svarinn
 
 import no.difi.meldingsutveksling.ks.MockConfiguration
+import no.difi.meldingsutveksling.receipt.ConversationService
 import org.hamcrest.Matchers
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
@@ -31,6 +33,9 @@ public class SvarInnClientTest {
     @Autowired
     SvarInnClient client
     private server
+
+    @MockBean
+    ConversationService conversationService
 
     @Before
     public void setup() {

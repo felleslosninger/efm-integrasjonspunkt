@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.receipt;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -9,7 +10,6 @@ import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
-import org.assertj.core.util.Lists;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -52,6 +52,7 @@ public class ConversationService {
         }
     }
 
+    @SuppressWarnings("squid:S2250")
     public Conversation registerStatus(Conversation conversation, MessageStatus status) {
         boolean hasStatus = conversation.getMessageStatuses().stream()
                 .map(MessageStatus::getStatus)

@@ -30,6 +30,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import java.util.List;
 import java.util.Optional;
@@ -118,6 +119,13 @@ public class IntegrasjonspunktBeans {
     @Bean(name = "fiksMailClient")
     public NoarkClient fiksMailClient(IntegrasjonspunktProperties properties) {
         return new MailClient(properties, Optional.ofNullable(properties.getFiks().getInn().getMailSubject()));
+    }
+
+    @Bean
+    public ThreadPoolTaskScheduler taskScheduler() {
+        ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
+        taskScheduler.setPoolSize(10);
+        return taskScheduler;
     }
 }
 

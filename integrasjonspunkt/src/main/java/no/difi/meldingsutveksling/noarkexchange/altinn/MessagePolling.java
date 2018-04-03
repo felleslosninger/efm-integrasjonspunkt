@@ -210,7 +210,7 @@ public class MessagePolling implements ApplicationContextAware {
     }
 
     private void sendReceipt(MessageInfo messageInfo) {
-        EduDocument doc = EduDocumentFactory.createLeveringsKvittering(messageInfo, keyInfo.getKeyPair());
+        EduDocument doc = EduDocumentFactory.createLeveringsKvittering(messageInfo, keyInfo);
         Transport t = transportFactory.createTransport(doc);
         t.send(context, doc);
     }

@@ -38,6 +38,7 @@ public class IntegrasjonspunktNokkelTest_WindowsIT {
         KeyStoreProperties properties = new KeyStoreProperties();
         properties.setAlias(ALIAS);
         properties.setType("Windows-MY");
+        properties.setLockProvider(true);
 
         integrasjonspunktNokkel = new IntegrasjonspunktNokkel(properties);
     }
