@@ -16,26 +16,27 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 
 @Configuration
 @EnableJms
-@EnableConfigurationProperties(ActiveMQProperties.class)
+@EnableConfigurationProperties({ActiveMQProperties.class, IntegrasjonspunktProperties.class})
 public class JmsConfiguration {
 
 
     @Bean
-    ConnectionFactory jmsConnectionFactory(ActiveMQProperties properties) {
-        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(properties.getBrokerUrl());
-        if (!isNullOrEmpty(properties.getUser())) {
-            connectionFactory.setUserName(properties.getUser());
+    ConnectionFactory jmsConnectionFactory(ActiveMQProperties activeMQProps, IntegrasjonspunktProperties props) {
+        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(activeMQProps.getBrokerUrl());
+        if (!isNullOrEmpty(activeMQProps.getUser())) {
+            connectionFactory.setUserName(activeMQProps.getUser());
         }
-        if (!isNullOrEmpty(properties.getPassword())) {
-            connectionFactory.setPassword(properties.getPassword());
+        if (!isNullOrEmpty(activeMQProps.getPassword())) {
+            connectionFactory.setPassword(activeMQProps.getPassword());
         }
 
         RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
-        redeliveryPolicy.setRedeliveryDelay(10000L);
+        redeliveryPolicy.setRedeliveryDelay(20000L);
         redeliveryPolicy.setMaximumRedeliveryDelay(1000*60*60);
-        redeliveryPolicy.setInitialRedeliveryDelay(10000L);
+        redeliveryPolicy.setInitialRedeliveryDelay(20000L);
         redeliveryPolicy.setBackOffMultiplier(3.0);
-        redeliveryPolicy.setMaximumRedeliveries(30);
+        // 5 retries will happen within the first hour. After that, get max retries from properties (default 20).
+        redeliveryPolicy.setMaximumRedeliveries(5+props.getQueue().getMaximumRetryHours());
         redeliveryPolicy.setUseExponentialBackOff(true);
         connectionFactory.setRedeliveryPolicy(redeliveryPolicy);
         connectionFactory.setNonBlockingRedelivery(true);
