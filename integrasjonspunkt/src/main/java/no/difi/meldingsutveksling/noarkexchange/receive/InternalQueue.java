@@ -103,7 +103,7 @@ public class InternalQueue {
         }
     }
 
-    @JmsListener(destination = NEXTMOVE, containerFactory = "myJmsContainerFactory")
+    @JmsListener(destination = NEXTMOVE, containerFactory = "myJmsContainerFactory", concurrency = "100")
     public void nextmoveListener(byte[] message, Session session) {
         ConversationResource cr = unmarshalNextMoveMessage(message);
         try {

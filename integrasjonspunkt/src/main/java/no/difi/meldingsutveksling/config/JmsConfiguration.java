@@ -40,6 +40,8 @@ public class JmsConfiguration {
         connectionFactory.setRedeliveryPolicy(redeliveryPolicy);
         connectionFactory.setNonBlockingRedelivery(true);
 
+        connectionFactory.setUseAsyncSend(true);
+
         return connectionFactory;
     }
 
