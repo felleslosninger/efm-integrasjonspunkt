@@ -24,4 +24,12 @@ public enum SecurityLevel implements EnumMapping<Sikkerhetsnivaa> {
         return sikkerhetsnivaa;
     }
 
+    public static SecurityLevel fromExternal(Sikkerhetsnivaa sikkerhetsnivaa) {
+        for (int i=0; i<values().length; i++) {
+            if (values()[i].sikkerhetsnivaa.equals(sikkerhetsnivaa)) {
+                return values()[i];
+            }
+        }
+        return null;
+    }
 }

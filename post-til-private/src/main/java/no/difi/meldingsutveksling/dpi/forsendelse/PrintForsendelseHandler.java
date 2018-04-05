@@ -35,7 +35,7 @@ public class PrintForsendelseHandler extends ForsendelseBuilderHandler {
 
         KonvoluttAdresse kon = konvoluttAdresseHandler.handle(request);
         TekniskMottaker utskriftsleverandoer = new TekniskMottaker(Organisasjonsnummer.of(request.getOrgnrPostkasse()), Sertifikat.fraByteArray(request.getCertificate()));
-        final PrintSettings printSettings = config.getPrintSettings();
+        final PrintSettings printSettings = request.getPrintSettings();
         FysiskPost fysiskPost = FysiskPost.builder().adresse(kon)
                 .retur(printSettings.getReturnType().toExternal(),
                         returAdresseHandler.handle(request))

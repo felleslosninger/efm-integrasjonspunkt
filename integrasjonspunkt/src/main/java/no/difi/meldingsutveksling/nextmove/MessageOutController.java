@@ -8,6 +8,8 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
+import no.difi.meldingsutveksling.nextmove.validation.ConversationValidator;
+import no.difi.meldingsutveksling.nextmove.validation.ConversationValidatorFactory;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
@@ -76,6 +78,8 @@ public class MessageOutController {
     private InternalQueue internalQueue;
     @Autowired
     private ConversationResourceFactory crFactory;
+    @Autowired
+    private ConversationValidatorFactory validatorFactory;
 
     private MessagePersister messagePersister;
 
@@ -150,6 +154,7 @@ public class MessageOutController {
                     .errorDescription(String.format("serviceIdentifier '%s' not supported. Supported types: %s",
                             cr.getServiceIdentifier(), strategyFactory.getEnabledServices())).build());
         }
+
         List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiver().getReceiverId());
         List<ServiceIdentifier> acceptableServiceIdentifiers = serviceRecords.stream()
                 .map(ServiceRecord::getServiceIdentifier)
@@ -232,6 +237,21 @@ public class MessageOutController {
             }
         }
 
+        Optional<ConversationValidator> validator = validatorFactory.getValidator(cr.getServiceIdentifier());
+        if (validator.isPresent()) {
+            try {
+                validator.get().validate(cr);
+            } catch (NextMoveException e) {
+                log.error("Validation failed for conversation with id={}", cr.getConversationId(), e);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                        ErrorResponse.builder()
+                                .error("validation_error")
+                                .errorDescription(String.format("Validation failed: %s", e.getLocalizedMessage()))
+                                .build()
+                );
+            }
+        }
+
         ArrayList<String> files = Lists.newArrayList(request.getFileNames());
         // MOVE-414: temp fix until arkivmelding implementation
         if (files.contains("hoveddokument")) {
@@ -261,10 +281,8 @@ public class MessageOutController {
         }
 
         if (cr.getServiceIdentifier() == DPI) {
-            List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiver().getReceiverId());
-            Optional<ServiceRecord> dpiServiceRecord = serviceRecords.stream()
-                    .filter(r -> r.getServiceIdentifier() == DPI)
-                    .findFirst();
+            Optional<ServiceRecord> dpiServiceRecord = sr.getServiceRecord(cr.getReceiver().getReceiverId(),
+                    DPI, ((DpiConversationResource)cr).isMandatoryNotification());
             if (dpiServiceRecord.isPresent() &&
                     !dpiServiceRecord.get().isFysiskPost() &&
                     isNullOrEmpty(dpiServiceRecord.get().getPostkasseAdresse()) &&

@@ -1,7 +1,13 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import com.google.common.collect.Lists;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.config.dpi.InkType;
+import no.difi.meldingsutveksling.config.dpi.PrintSettings;
+import no.difi.meldingsutveksling.config.dpi.ReturnType;
+import no.difi.meldingsutveksling.config.dpi.ShippingType;
+import no.difi.meldingsutveksling.config.dpi.securitylevel.SecurityLevel;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.dpi.Document;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
@@ -11,12 +17,16 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.MimeTypeExtensionMapper.getMimetype;
 
+@Slf4j
 public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     private static final String DEFAULT_EXT = "PDF";
@@ -39,14 +49,30 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     @Override
     public Document getDocument() {
-        String primaryFileName = cr.getFileRefs().get(0);
-        String title;
-        if (cr.getCustomProperties() != null) {
-            title = cr.getCustomProperties().getOrDefault(primaryFileName, MISSING_TXT);
-        } else {
-            title = MISSING_TXT;
+        Optional<FileAttachement> hdo = cr.getFiles().stream().filter(FileAttachement::isHoveddokument).findFirst();
+        FileAttachement hd = hdo.orElseThrow(() -> new NextMoveRuntimeException("No 'hoveddokument' supplied in file attachments"));
+
+        if (isNullOrEmpty(hd.getFilnavn())) {
+            throw new NextMoveRuntimeException("'filnavn' missing for 'hoveddokument', aborting");
         }
-        return new Document(getContent(primaryFileName), getMime(getExtension(primaryFileName)), primaryFileName, title);
+
+        String title;
+        if (isNullOrEmpty(hd.getTittel())) {
+            log.warn("'Tittel' missing for 'hoveddokument', defaulting to {}", MISSING_TXT);
+            title = MISSING_TXT;
+        } else {
+            title = hd.getTittel();
+        }
+
+        String mime;
+        if (isNullOrEmpty(hd.getMimetype())) {
+            log.warn("'mimetype' missing for 'hoveddokument', mapping by extension..");
+            mime = getMime(getExtension(hd.getFilnavn()));
+        } else {
+            mime = hd.getMimetype();
+        }
+
+        return new Document(getContent(hd.getFilnavn()), mime, hd.getFilnavn(), title);
     }
 
     @Override
@@ -54,13 +80,30 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
         final List<Document> docList = Lists.newArrayList();
         cr.getFileRefs().forEach((k, f) -> {
             if (k != 0) {
-                String title;
-                if (cr.getCustomProperties() != null) {
-                    title = cr.getCustomProperties().getOrDefault(f, MISSING_TXT);
+                Optional<FileAttachement> fao = cr.getFiles().stream().filter(fa -> fa.getFilnavn().equals(f)).findFirst();
+                if (fao.isPresent()) {
+                    FileAttachement fa = fao.get();
+
+                    String mime;
+                    if (isNullOrEmpty(fa.getMimetype())) {
+                        log.warn("No mimetype set for file attachment {}, mapping mime based on extension", f);
+                        mime = getMime(getExtension(f));
+                    } else {
+                        mime = fa.getMimetype();
+                    }
+
+                    String title;
+                    if (isNullOrEmpty(fa.getTittel())) {
+                        log.warn("No 'tittel' set for file attachment {}, defaulting to {}", f, MISSING_TXT);
+                        title = MISSING_TXT;
+                    } else {
+                        title = fa.getTittel();
+                    }
+                    docList.add(new Document(getContent(f), mime, f, title));
                 } else {
-                    title = MISSING_TXT;
+                    log.warn("No file attachment entry for file {}, setting default values with title {}", f, MISSING_TXT);
+                    docList.add(new Document(getContent(f), getMime(getExtension(f)), f, MISSING_TXT));
                 }
-                docList.add(new Document(getContent(f), getMime(getExtension(f)), f, title));
             }
         });
 
@@ -95,9 +138,16 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     @Override
     public String getSubject() {
-//        return cr.getTitle();
-        // TODO: replace with hoveddokument title
-        return "";
+        if (cr.getDigitalPostInfo() != null && !isNullOrEmpty(cr.getDigitalPostInfo().getIkkeSensitivTittel())) {
+            // valider
+            return cr.getDigitalPostInfo().getIkkeSensitivTittel();
+        }
+
+        Optional<FileAttachement> hdo = cr.getFiles().stream()
+                .filter(FileAttachement::isHoveddokument)
+                .findFirst();
+        FileAttachement hd = hdo.orElseThrow(() -> new NextMoveRuntimeException("No 'hoveddokument' supplied in file attachments"));
+        return hd.getTittel();
     }
 
     @Override
@@ -136,12 +186,12 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     @Override
     public String getSmsVarslingstekst() {
-        return props.getDpi().getSms().getVarslingstekst();
+        return cr.getDigitalPostInfo().getVarsler().getSmsVarsel().getTekst();
     }
 
     @Override
     public String getEmailVarslingstekst() {
-        return props.getDpi().getEmail().getVarslingstekst();
+        return cr.getDigitalPostInfo().getVarsler().getEpostVarsel().getTekst();
     }
 
     @Override
@@ -167,5 +217,34 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     @Override
     public PostAddress getReturnAddress() {
         return serviceRecord.getReturnAddress();
+    }
+
+    @Override
+    public String getLanguage() {
+        return cr.getSpraak();
+    }
+
+    @Override
+    public PrintSettings getPrintSettings() {
+        return PrintSettings.builder()
+                .inkType(InkType.fromExternal(cr.getFysiskPostInfo().getUtskriftsfarge()))
+                .returnType(ReturnType.fromExternal(cr.getFysiskPostInfo().getRetur().getPostHaandtering()))
+                .shippingType(ShippingType.fromExternal(cr.getFysiskPostInfo().getPosttype()))
+                .build();
+    }
+
+    @Override
+    public SecurityLevel getSecurityLevel() {
+        return cr.getSecurityLevel();
+    }
+
+    @Override
+    public Date getVirkningsdato() {
+        return Date.from(cr.getDigitalPostInfo().getVirkningsdato().atStartOfDay(ZoneId.systemDefault()).toInstant());
+    }
+
+    @Override
+    public boolean getAapningskvittering() {
+        return cr.getDigitalPostInfo().getAapningskvittering();
     }
 }

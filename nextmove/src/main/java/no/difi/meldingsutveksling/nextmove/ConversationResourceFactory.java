@@ -12,6 +12,8 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Optional;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -37,7 +39,15 @@ public class ConversationResourceFactory {
 
     private void setDpiDefaults(DpiConversationResource cr) {
 
-        Optional<ServiceRecord> serviceRecord = sr.getServiceRecord(cr.getReceiver().getReceiverId(), DPI);
+        Optional<ServiceRecord> serviceRecord = sr.getServiceRecord(cr.getReceiver().getReceiverId(), DPI, cr.isMandatoryNotification());
+        if (!serviceRecord.isPresent()) {
+            throw new NextMoveRuntimeException(String.format("Could not find DPI servicerecord for receiver: %s", cr.getReceiver().getReceiverId()));
+        }
+
+        if (isNullOrEmpty(cr.getSpraak())) {
+            cr.setSpraak(props.getDpi().getLanguage());
+        }
+
         serviceRecord.map(ServiceRecord::getPostAddress)
                 .map(PostAddress::getName)
                 .ifPresent(n -> cr.getReceiver().setReceiverName(n));
@@ -57,6 +67,7 @@ public class ConversationResourceFactory {
                     .build();
             cr.setFysiskPostInfo(fysiskPostInfo);
         }
+
         if (!serviceRecord.get().isFysiskPost() && cr.getDigitalPostInfo() == null) {
             String emailTekst = props.getDpi().getEmail().getVarslingstekst();
             EpostVarsel epostVarsel = EpostVarsel.of(isNullOrEmpty(emailTekst) ? "" : emailTekst);
@@ -64,11 +75,15 @@ public class ConversationResourceFactory {
             SmsVarsel smsVarsel = SmsVarsel.of(isNullOrEmpty(smsTekst) ? "" : smsTekst);
             Varsler varsler = Varsler.of(epostVarsel, smsVarsel);
             DigitalPostInfo digitalPostInfo = DigitalPostInfo.builder()
-                    .language(props.getDpi().getLanguage())
                     .varsler(varsler)
+                    .virkningsdato(LocalDate.now())
+                    .virkningstidspunkt(LocalTime.now())
+                    .aapningskvittering(false)
+                    .ikkeSensitivTittel("")
                     .build();
             cr.setDigitalPostInfo(digitalPostInfo);
             cr.setFiles(Lists.newArrayList());
         }
+
     }
 }

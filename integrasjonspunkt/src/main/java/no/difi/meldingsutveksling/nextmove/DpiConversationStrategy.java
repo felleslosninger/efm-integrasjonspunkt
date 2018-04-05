@@ -44,7 +44,7 @@ public class DpiConversationStrategy implements ConversationStrategy {
     public void send(ConversationResource conversationResource) throws NextMoveException {
 
         DpiConversationResource cr = (DpiConversationResource) conversationResource;
-        List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiver().getReceiverId());
+        List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiver().getReceiverId(), cr.isMandatoryNotification());
         Optional<ServiceRecord> serviceRecord = serviceRecords.stream()
                 .filter(r -> DPI == r.getServiceIdentifier())
                 .findFirst();

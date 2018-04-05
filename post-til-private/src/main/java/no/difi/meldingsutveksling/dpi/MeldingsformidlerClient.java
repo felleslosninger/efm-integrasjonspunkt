@@ -14,11 +14,8 @@ import no.difi.sdp.client2.domain.*;
 import no.difi.sdp.client2.domain.exceptions.SendException;
 import no.difi.sdp.client2.domain.kvittering.ForretningsKvittering;
 import no.difi.sdp.client2.domain.kvittering.KvitteringForespoersel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 
-import java.lang.invoke.MethodHandles;
 import java.security.KeyStore;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -32,7 +29,6 @@ import static no.difi.meldingsutveksling.logging.MarkerFactory.conversationIdMar
 
 public class MeldingsformidlerClient {
 
-    static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     public static final EmptyKvittering EMPTY_KVITTERING = new EmptyKvittering();
     private final DigitalPostInnbyggerConfig config;
     private KeyStore keyStore;
@@ -53,7 +49,7 @@ public class MeldingsformidlerClient {
 
         Forsendelse forsendelse = forsendelseBuilder.konversasjonsId(request.getConversationId())
                 .mpcId(config.getMpcId())
-                .spraakkode(config.getLanguage())
+                .spraakkode(request.getLanguage())
                 .prioritet(config.getPriority()).build();
 
         SikkerDigitalPostKlient klient = createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer.of(request.getSenderOrgnumber()));

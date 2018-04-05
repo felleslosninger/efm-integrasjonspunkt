@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.config;
 import lombok.Data;
 import lombok.ToString;
 import no.difi.meldingsutveksling.config.dpi.securitylevel.SecurityLevel;
+import no.difi.meldingsutveksling.config.dpi.securitylevel.ValidSecurityLevel;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.core.io.Resource;
@@ -12,6 +13,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.net.URL;
+
+import static no.difi.meldingsutveksling.config.dpi.securitylevel.SecurityLevel.INVALID;
 
 /**
  * Configurable properties for Integrasjonspunkt.
@@ -189,6 +192,7 @@ public class IntegrasjonspunktProperties {
         @Valid
         private ServiceBus serviceBus;
         @Valid
+        @ValidSecurityLevel(message = "Gyldig verdi er 3 eller 4", invalidValues = INVALID)
         private SecurityLevel securityLevel;
 
     }

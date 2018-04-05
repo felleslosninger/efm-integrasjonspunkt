@@ -2,23 +2,20 @@ package no.difi.meldingsutveksling.dpi;
 
 import com.google.common.io.ByteStreams;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.KeyStoreProperties;
+import no.difi.meldingsutveksling.config.dpi.PrintSettings;
 import no.difi.meldingsutveksling.config.dpi.securitylevel.SecurityLevel;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress;
 import no.difi.sdp.client2.domain.Prioritet;
 import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -120,6 +117,31 @@ public class MeldingsformidlerClientMain {
             @Override
             public PostAddress getReturnAddress() {
                 return null;
+            }
+
+            @Override
+            public String getLanguage() {
+                return SPRAAK_KODE;
+            }
+
+            @Override
+            public PrintSettings getPrintSettings() {
+                return config.getPrintSettings();
+            }
+
+            @Override
+            public SecurityLevel getSecurityLevel() {
+                return config.getSecurityLevel();
+            }
+
+            @Override
+            public Date getVirkningsdato() {
+                return new Date();
+            }
+
+            @Override
+            public boolean getAapningskvittering() {
+                return false;
             }
 
             @Override

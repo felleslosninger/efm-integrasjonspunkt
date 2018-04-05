@@ -9,8 +9,6 @@ import no.difi.sdp.client2.domain.*;
 import no.difi.sdp.client2.domain.digital_post.DigitalPost;
 import no.digipost.api.representations.Organisasjonsnummer;
 
-import java.util.Date;
-
 public class DigitalForsendelseHandler extends ForsendelseBuilderHandler {
     private final SmsNotificationDigitalPostBuilderHandler smsNotificationHandler;
     private final EmailNotificationDigitalPostBuilderHandler emailNotificationHandler;
@@ -32,8 +30,9 @@ public class DigitalForsendelseHandler extends ForsendelseBuilderHandler {
 
         final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(request.getSenderOrgnumber());
         DigitalPost.Builder digitalPost = DigitalPost.builder(mottaker, request.getSubject())
-                .virkningsdato(new Date())
-                .sikkerhetsnivaa(config.getSecurityLevel().toExternal());
+                .virkningsdato(request.getVirkningsdato())
+                .aapningskvittering(request.getAapningskvittering())
+                .sikkerhetsnivaa(request.getSecurityLevel().toExternal());
         digitalPost = smsNotificationHandler.handle(request, digitalPost);
         digitalPost = emailNotificationHandler.handle(request, digitalPost);
         Avsender behandlingsansvarlig = Avsender.builder(aktoerOrganisasjonsnummer.forfremTilAvsender()).build();

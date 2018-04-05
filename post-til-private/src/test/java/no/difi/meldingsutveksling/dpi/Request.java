@@ -1,7 +1,10 @@
 package no.difi.meldingsutveksling.dpi;
 
+import no.difi.meldingsutveksling.config.dpi.PrintSettings;
+import no.difi.meldingsutveksling.config.dpi.securitylevel.SecurityLevel;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress;
 
+import java.util.Date;
 import java.util.List;
 
 public class Request implements MeldingsformidlerRequest {
@@ -92,6 +95,31 @@ public class Request implements MeldingsformidlerRequest {
     @Override
     public PostAddress getReturnAddress() {
         return null;
+    }
+
+    @Override
+    public String getLanguage() {
+        return null;
+    }
+
+    @Override
+    public PrintSettings getPrintSettings() {
+        return null;
+    }
+
+    @Override
+    public SecurityLevel getSecurityLevel() {
+        return null;
+    }
+
+    @Override
+    public Date getVirkningsdato() {
+        return null;
+    }
+
+    @Override
+    public boolean getAapningskvittering() {
+        return false;
     }
 
     Request withNotifiable(boolean notifiable) {

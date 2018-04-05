@@ -1,7 +1,10 @@
 package no.difi.meldingsutveksling.dpi;
 
+import no.difi.meldingsutveksling.config.dpi.PrintSettings;
+import no.difi.meldingsutveksling.config.dpi.securitylevel.SecurityLevel;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -110,4 +113,14 @@ public interface MeldingsformidlerRequest {
     PostAddress getPostAddress();
 
     PostAddress getReturnAddress();
+
+    String getLanguage();
+
+    PrintSettings getPrintSettings();
+
+    SecurityLevel getSecurityLevel();
+
+    Date getVirkningsdato();
+
+    boolean getAapningskvittering();
 }

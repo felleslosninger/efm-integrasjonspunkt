@@ -2,6 +2,8 @@ package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
+import no.difi.meldingsutveksling.config.dpi.PrintSettings;
+import no.difi.meldingsutveksling.config.dpi.securitylevel.SecurityLevel;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
@@ -21,6 +23,7 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import java.io.UnsupportedEncodingException;
 import java.security.KeyStore;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -178,6 +181,31 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
         @Override
         public PostAddress getReturnAddress() {
             return serviceRecord.getReturnAddress();
+        }
+
+        @Override
+        public String getLanguage() {
+            return config.getLanguage();
+        }
+
+        @Override
+        public PrintSettings getPrintSettings() {
+            return config.getPrintSettings();
+        }
+
+        @Override
+        public SecurityLevel getSecurityLevel() {
+            return config.getSecurityLevel();
+        }
+
+        @Override
+        public Date getVirkningsdato() {
+            return new Date();
+        }
+
+        @Override
+        public boolean getAapningskvittering() {
+            return true;
         }
 
 

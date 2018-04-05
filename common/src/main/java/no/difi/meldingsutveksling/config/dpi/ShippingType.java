@@ -15,4 +15,13 @@ public enum ShippingType implements EnumMapping<Posttype> {
     public Posttype toExternal() {
         return postType;
     }
+
+    public static ShippingType fromExternal(Posttype posttype) {
+        for (int i=0; i<values().length; i++) {
+            if (values()[i].postType.equals(posttype)) {
+                return values()[i];
+            }
+        }
+        return null;
+    }
 }

@@ -65,8 +65,6 @@ public abstract class ConversationResource {
     @XmlElement
     @JsonIgnore
     private boolean hasArkivmelding;
-    @JsonIgnore
-    private boolean locked;
     @XmlElement
     private SecurityLevel securityLevel;
     @JsonFormat(shape = JsonFormat.Shape.STRING)

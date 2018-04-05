@@ -100,11 +100,21 @@ public class ServiceRegistryLookup {
         return serviceRecords.stream().filter(isServiceIdentifier(serviceIdentifier)).findFirst();
     }
 
+    public Optional<ServiceRecord> getServiceRecord(String identifier, ServiceIdentifier serviceIdentifier, boolean mandatoryNotification) {
+        Notification notification = mandatoryNotification ? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
+        List<ServiceRecord> serviceRecords = srsCache.getUnchecked(new Parameters(identifier, notification));
+        return serviceRecords.stream().filter(isServiceIdentifier(serviceIdentifier)).findFirst();
+    }
+
     public List<ServiceRecord> getServiceRecords(String identifier) {
         Notification notification = properties.isVarslingsplikt()? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
         return srsCache.getUnchecked(new Parameters(identifier, notification));
     }
 
+    public List<ServiceRecord> getServiceRecords(String identifier, boolean mandatoryNotification) {
+        Notification notification = mandatoryNotification ? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
+        return srsCache.getUnchecked(new Parameters(identifier, notification));
+    }
     private ServiceRecord loadServiceRecord(Parameters parameters) {
         ServiceRecord serviceRecord = ServiceRecord.EMPTY;
         try {
