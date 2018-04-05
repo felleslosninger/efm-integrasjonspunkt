@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import com.google.common.collect.Lists;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
+import no.difi.meldingsutveksling.nextmove.validation.ConversationValidatorFactory;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
@@ -77,6 +78,9 @@ public class MessageOutControllerTest {
     @MockBean
     private InternalQueue internalQueue;
 
+    @MockBean
+    private ConversationValidatorFactory validatorFactory;
+
     @Before
     public void setup() {
         String filedir = "target/uploadtest/";
@@ -92,6 +96,8 @@ public class MessageOutControllerTest {
         featureToggle.setEnableDPE(true);
         when(props.getFeature()).thenReturn(featureToggle);
         when(strategyFactory.getEnabledServices()).thenReturn(Arrays.asList(DPO, DPV));
+
+        when(validatorFactory.getValidator(Matchers.any())).thenReturn(Optional.empty());
 
         ServiceRecord serviceRecord = new ServiceRecord();
         serviceRecord.setServiceIdentifier(DPO);
