@@ -202,7 +202,9 @@ public class MessageOutController {
         cr.setLastUpdate(LocalDateTime.now());
         cr.setConversationId(isNullOrEmpty(cr.getConversationId()) ? UUID.randomUUID().toString() : cr.getConversationId());
         cr.setFileRefs(cr.getFileRefs() == null ? Maps.newHashMap() : cr.getFileRefs());
-        if (cr.getSecurityLevel() == null) { cr.setSecurityLevel(props.getNextmove().getSecurityLevel()); }
+        if (cr.getSecurityLevel() == null) {
+            cr.setSecurityLevel(props.getNextmove().getSecurityLevel());
+        }
     }
 
     @RequestMapping(value = "/out/messages/{conversationId}", method = RequestMethod.POST)
@@ -237,20 +239,6 @@ public class MessageOutController {
             }
         }
 
-        Optional<ConversationValidator> validator = validatorFactory.getValidator(cr.getServiceIdentifier());
-        if (validator.isPresent()) {
-            try {
-                validator.get().validate(cr);
-            } catch (NextMoveException e) {
-                log.error("Validation failed for conversation with id={}", cr.getConversationId(), e);
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                        ErrorResponse.builder()
-                                .error("validation_error")
-                                .errorDescription(String.format("Validation failed: %s", e.getLocalizedMessage()))
-                                .build()
-                );
-            }
-        }
 
         ArrayList<String> files = Lists.newArrayList(request.getFileNames());
         // MOVE-414: temp fix until arkivmelding implementation
@@ -277,6 +265,21 @@ public class MessageOutController {
                 log.error("Could not persist file {}", file.getOriginalFilename(), e);
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                         ErrorResponse.builder().error("persist_file_error").errorDescription("Could not persist file").build());
+            }
+        }
+
+        Optional<ConversationValidator> validator = validatorFactory.getValidator(cr.getServiceIdentifier());
+        if (validator.isPresent()) {
+            try {
+                validator.get().validate(cr);
+            } catch (NextMoveException e) {
+                log.error("Validation failed for conversation with id={}", cr.getConversationId(), e);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                        ErrorResponse.builder()
+                                .error("validation_error")
+                                .errorDescription(String.format("Validation failed: %s", e.getLocalizedMessage()))
+                                .build()
+                );
             }
         }
 

@@ -21,6 +21,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -77,35 +78,30 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     @Override
     public List<Document> getAttachments() {
+        List<FileAttachement> files = cr.getFiles().stream().filter(f -> !f.isHoveddokument()).collect(Collectors.toList());
         final List<Document> docList = Lists.newArrayList();
-        cr.getFileRefs().forEach((k, f) -> {
-            if (k != 0) {
-                Optional<FileAttachement> fao = cr.getFiles().stream().filter(fa -> fa.getFilnavn().equals(f)).findFirst();
-                if (fao.isPresent()) {
-                    FileAttachement fa = fao.get();
-
-                    String mime;
-                    if (isNullOrEmpty(fa.getMimetype())) {
-                        log.warn("No mimetype set for file attachment {}, mapping mime based on extension", f);
-                        mime = getMime(getExtension(f));
-                    } else {
-                        mime = fa.getMimetype();
-                    }
-
-                    String title;
-                    if (isNullOrEmpty(fa.getTittel())) {
-                        log.warn("No 'tittel' set for file attachment {}, defaulting to {}", f, MISSING_TXT);
-                        title = MISSING_TXT;
-                    } else {
-                        title = fa.getTittel();
-                    }
-                    docList.add(new Document(getContent(f), mime, f, title));
-                } else {
-                    log.warn("No file attachment entry for file {}, setting default values with title {}", f, MISSING_TXT);
-                    docList.add(new Document(getContent(f), getMime(getExtension(f)), f, MISSING_TXT));
-                }
+        for (FileAttachement f : files) {
+            if (!cr.getFileRefs().values().contains(f.getFilnavn())) {
+                throw new NextMoveRuntimeException(String.format("Attachment %s has no supplied file", f.getFilnavn()));
             }
-        });
+
+            String mime;
+            if (isNullOrEmpty(f.getMimetype())) {
+                log.warn("No mimetype set for file attachment {}, mapping mime based on extension", f);
+                mime = getMime(getExtension(f.getFilnavn()));
+            } else {
+                mime = f.getMimetype();
+            }
+
+            String title;
+            if (isNullOrEmpty(f.getTittel())) {
+                log.warn("No 'tittel' set for file attachment {}, defaulting to {}", f, MISSING_TXT);
+                title = MISSING_TXT;
+            } else {
+                title = f.getTittel();
+            }
+            docList.add(new Document(getContent(f.getFilnavn()), mime, f.getFilnavn(), title));
+        }
 
         return docList;
     }

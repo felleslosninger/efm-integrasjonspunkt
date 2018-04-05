@@ -19,6 +19,13 @@ public class DpiConversationValidator implements ConversationValidator {
         }
         DpiConversationResource dpiCr = (DpiConversationResource) cr;
 
+        // Verify that all files have been supplied
+        for (FileAttachement f: dpiCr.getFiles()) {
+            if (!cr.getFileRefs().values().contains(f.getFilnavn())) {
+                throw new DpiValidationException(String.format("Attachment %s has no supplied file", f.getFilnavn()));
+            }
+        }
+
         // One file attachment must always be set to 'hoveddokument'
         if (dpiCr.getFiles().stream().noneMatch(FileAttachement::isHoveddokument)) {
             throw new DpiValidationException("No 'hoveddokument' supplied in file attachments, cannot continue");

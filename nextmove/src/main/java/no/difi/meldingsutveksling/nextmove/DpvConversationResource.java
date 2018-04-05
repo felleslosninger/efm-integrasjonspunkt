@@ -28,9 +28,9 @@ public class DpvConversationResource extends ConversationResource {
 
     public static DpvConversationResource of(DpiConversationResource dpi) {
         DpvConversationResource dpv = of(dpi.getConversationId(), dpi.getSender(), dpi.getReceiver());
-        // TODO: replace
-//        dpv.setMessageContent(dpi.getTitle());
-//        dpv.setMessageTitle(dpi.getTitle());
+
+        dpv.setMessageContent(dpi.getDigitalPostInfo().getIkkeSensitivTittel());
+        dpv.setMessageTitle(dpi.getDigitalPostInfo().getIkkeSensitivTittel());
 
         dpv.setSender(dpi.getSender());
         dpv.setReceiver(dpi.getReceiver());
