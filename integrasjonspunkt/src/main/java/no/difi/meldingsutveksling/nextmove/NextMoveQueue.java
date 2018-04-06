@@ -14,6 +14,7 @@ import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import no.difi.meldingsutveksling.receipt.*;
+import org.assertj.core.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,8 +70,16 @@ public class NextMoveQueue {
             log.error("Could not get contents from asic", e);
             throw new MeldingsUtvekslingRuntimeException("Could not get contents from asic", e);
         }
-
         ConversationResource message = ((Payload) eduDocument.getAny()).getConversation();
+
+        // temp fix for backwards compatability, MOVE-695
+        if (message.getSender() == null && !Strings.isNullOrEmpty(message.getSenderId())) {
+            message.setSender(Sender.of(message.getSenderId(), message.getSenderName()));
+        }
+        if (message.getReceiver() == null && !Strings.isNullOrEmpty(message.getReceiverId())) {
+            message.setReceiver(Receiver.of(message.getReceiverId(), message.getReceiverName()));
+        }
+
         if (ServiceIdentifier.DPE_RECEIPT.equals(message.getServiceIdentifier())) {
             log.debug(String.format("Message with id=%s is a receipt", message.getConversationId()));
             Optional<Conversation> c = conversationService.registerStatus(message.getConversationId(), MessageStatus.of(GenericReceiptStatus.LEVERT));

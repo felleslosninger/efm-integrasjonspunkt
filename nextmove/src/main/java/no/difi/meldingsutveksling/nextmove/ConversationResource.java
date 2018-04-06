@@ -56,6 +56,22 @@ public abstract class ConversationResource {
     @Embedded
     @XmlElement
     private Receiver receiver;
+    @XmlElement
+    @Column(insertable = false, updatable = false)
+    @JsonIgnore
+    private String senderId;
+    @XmlElement
+    @Column(insertable = false, updatable = false)
+    @JsonIgnore
+    private String senderName;
+    @XmlElement
+    @Column(insertable = false, updatable = false)
+    @JsonIgnore
+    private String receiverId;
+    @XmlElement
+    @Column(insertable = false, updatable = false)
+    @JsonIgnore
+    private String receiverName;
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     @XmlElement
     @XmlJavaTypeAdapter(LocalDateTimeAdapter.class)

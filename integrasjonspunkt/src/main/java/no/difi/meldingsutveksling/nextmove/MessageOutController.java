@@ -191,12 +191,20 @@ public class MessageOutController {
                 cr.getSender().setSenderName(senderInfo.getOrganizationName());
             }
         }
+
+        // FIXME: temp fix, see MOVE-695
+        cr.setSenderId(senderInfo.getIdentifier());
+        cr.setSenderName(senderInfo.getOrganizationName());
+
         if (isNullOrEmpty(cr.getReceiver().getReceiverName())) {
             if (cr.getServiceIdentifier() == DPI) {
                 crFactory.create(cr);
             } else {
                 InfoRecord receiverInfo = sr.getInfoRecord(cr.getReceiver().getReceiverId());
                 cr.getReceiver().setReceiverName(receiverInfo.getOrganizationName());
+                // FIXME: temp fix, see MOVE-695
+                cr.setReceiverId(cr.getReceiver().getReceiverId());
+                cr.setReceiverName(receiverInfo.getOrganizationName());
             }
         }
         cr.setLastUpdate(LocalDateTime.now());

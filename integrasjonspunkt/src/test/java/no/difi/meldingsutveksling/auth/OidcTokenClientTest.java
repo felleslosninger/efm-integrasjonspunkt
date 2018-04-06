@@ -51,7 +51,7 @@ public class OidcTokenClientTest {
         props.getOidc().setClientId("test_move");
         props.getOidc().setKeystore(new KeyStoreProperties());
         props.getOidc().getKeystore().setAlias("client_alias");
-        props.getOidc().getKeystore().setLockProvider(true);
+        props.getOidc().getKeystore().setLockProvider(false);
         props.getOidc().getKeystore().setPassword("changeit");
         props.getOidc().getKeystore().setPath(new FileSystemResource("src/test/resources/kontaktinfo-client-test.jks"));
 
