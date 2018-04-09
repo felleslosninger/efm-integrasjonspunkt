@@ -29,7 +29,7 @@ public class PostAddress {
     }
 
     public boolean isNorge() {
-        return (country == null || "".equals(country)) || Sets.newHashSet("NORGE", "NO", "NOR").contains(country.toUpperCase());
+        return (country == null || "".equals(country)) || Sets.newHashSet("NORGE", "NORWAY", "NO", "NOR").contains(country.toUpperCase());
     }
 
 }

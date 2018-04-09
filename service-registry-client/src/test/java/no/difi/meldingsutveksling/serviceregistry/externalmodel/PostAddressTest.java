@@ -28,6 +28,13 @@ public class PostAddressTest {
     }
 
     @Test
+    public void countryNorwayIsNorgeShouldBeTrue() {
+        PostAddress address = new PostAddress("", "", "", "", "norway");
+
+        assertThat(address.isNorge(), is(true));
+    }
+
+    @Test
     public void countryNullIsNorgeShouldBeTrue() {
         PostAddress address = new PostAddress("", "", "", "", null);
 
