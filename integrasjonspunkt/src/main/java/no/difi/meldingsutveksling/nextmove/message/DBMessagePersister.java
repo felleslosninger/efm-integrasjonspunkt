@@ -28,7 +28,7 @@ public class DBMessagePersister implements MessagePersister {
     @Transactional
     public void write(ConversationResource cr, String filename, byte[] message) throws IOException {
 
-        if (props.getNextmove().getApplyZipHeaderPatch()){
+        if (props.getNextmove().getApplyZipHeaderPatch() && props.getNextmove().getAsicfile().equals(filename)){
             BugFix610.applyPatch(message, cr.getConversationId());
         }
 
