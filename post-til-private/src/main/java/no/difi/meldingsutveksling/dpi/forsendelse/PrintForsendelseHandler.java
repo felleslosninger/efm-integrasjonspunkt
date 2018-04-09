@@ -33,12 +33,12 @@ public class PrintForsendelseHandler extends ForsendelseBuilderHandler {
             returAdresseHandler = new UtlandKonvoluttAdresseHandler();
         }
 
-        KonvoluttAdresse kon = konvoluttAdresseHandler.handle(request);
+        KonvoluttAdresse kon = konvoluttAdresseHandler.handle(request.getPostAddress());
         TekniskMottaker utskriftsleverandoer = new TekniskMottaker(Organisasjonsnummer.of(request.getOrgnrPostkasse()), Sertifikat.fraByteArray(request.getCertificate()));
         final PrintSettings printSettings = request.getPrintSettings();
         FysiskPost fysiskPost = FysiskPost.builder().adresse(kon)
                 .retur(printSettings.getReturnType().toExternal(),
-                        returAdresseHandler.handle(request))
+                        returAdresseHandler.handle(request.getReturnAddress()))
                 .sendesMed(printSettings.getShippingType().toExternal()).utskrift(printSettings.getInkType().toExternal(), utskriftsleverandoer).build();
 
         return Forsendelse.fysisk(avsender, fysiskPost, dokumentpakke);
