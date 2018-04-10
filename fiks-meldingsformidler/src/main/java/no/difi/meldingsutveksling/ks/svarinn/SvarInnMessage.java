@@ -64,17 +64,11 @@ public class SvarInnMessage {
     }
 
     private Sender createSender() {
-        final Sender sender = new Sender();
-        sender.setIdentifier(forsendelse.getSvarSendesTil().getOrgnr());
-        sender.setName(forsendelse.getSvarSendesTil().getNavn());
-        return sender;
+        return Sender.of(forsendelse.getSvarSendesTil().getOrgnr(), forsendelse.getSvarSendesTil().getNavn(), null);
     }
 
     private Receiver createReceiver() {
-        Receiver receiver = new Receiver();
-        receiver.setIdentifier(forsendelse.getMottaker().getOrgnr());
-        receiver.setName(forsendelse.getMottaker().getNavn());
-        return receiver;
+        return Receiver.of(forsendelse.getMottaker().getOrgnr(), forsendelse.getMottaker().getNavn(), null);
     }
 
     private NoarksakType createNoarkSak() {

@@ -7,12 +7,8 @@ public class EDUCoreMarkerTest {
     public void payloadIsStringShouldNotCastException() {
         final EDUCore message = new EDUCore();
         message.setMessageType(EDUCore.MessageType.EDU);
-        final Receiver receiver = new Receiver();
-        receiver.setIdentifier("123");
-        message.setReceiver(receiver);
-        final Sender sender = new Sender();
-        sender.setIdentifier("123");
-        message.setSender(sender);
+        message.setReceiver(Receiver.of("123", "foo", null));
+        message.setSender(Sender.of("123", "foo", null));
         message.setPayload("hello");
         EDUCoreMarker.markerFrom(message);
     }

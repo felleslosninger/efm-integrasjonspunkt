@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.core;
 
-import com.google.common.base.MoreObjects;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -13,36 +14,18 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Receiver", propOrder = {
         "identifier",
-        "name"
+        "name",
+        "ref"
 })
+@Data
+@AllArgsConstructor(staticName = "of")
 public class Receiver {
 
     @XmlAttribute(name = "identifier", required = true)
     private String identifier;
     @XmlAttribute(name = "name", required = true)
     private String name;
+    @XmlAttribute(name = "ref")
+    private String ref;
 
-    public String getIdentifier() {
-        return identifier;
-    }
-
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("identifier", identifier)
-                .add("name", name)
-                .toString();
-    }
 }
