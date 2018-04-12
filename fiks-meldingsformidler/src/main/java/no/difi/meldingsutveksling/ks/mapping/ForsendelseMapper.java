@@ -148,7 +148,8 @@ public class ForsendelseMapper {
             postAdr.withPoststed("Oslo");
             postAdr.withLand("Norge");
         }
-        
+        mottaker.withPostAdresse(postAdr.build());
+
         return mottaker.build();
     }
 
