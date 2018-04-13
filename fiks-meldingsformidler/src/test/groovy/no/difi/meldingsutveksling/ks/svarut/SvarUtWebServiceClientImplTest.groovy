@@ -61,7 +61,7 @@ class SvarUtWebServiceClientImplTest {
 
         SvarUtRequest request = new SvarUtRequest("http://localhost", forsendelseMedId)
 
-        SendForsendelseResponse response = SendForsendelseResponse.builder().withReturn("123").build()
+        SendForsendelseMedIdResponse response = SendForsendelseMedIdResponse.builder().withReturn("123").build()
 
         server.expect(anything()).andRespond(responseMatches(response))
         client.sendMessage(request)
