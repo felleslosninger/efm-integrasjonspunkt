@@ -54,7 +54,7 @@ public class ForsendelseMapper {
 
         Optional<AvsmotType> avsender = getAvsender(meldingType);
         if (avsender.isPresent()) {
-            builder.withSvarSendesTil(mottakerFrom(avsender.get()));
+            builder.withSvarSendesTil(mottakerFrom(avsender.get(), receiverInfo.getIdentifier()));
         } else {
             final InfoRecord senderInfo = serviceRegistry.getInfoRecord(eduCore.getSender().getIdentifier());
             builder.withSvarSendesTil(mottakerFrom(senderInfo));
@@ -107,35 +107,49 @@ public class ForsendelseMapper {
         }
     }
 
-    private Mottaker mottakerFrom(AvsmotType avsmotType) {
-        Organisasjon.Builder<Void> mottaker = Organisasjon.builder();
-        mottaker.withOrgnr(avsmotType.getAmOrgnr());
-        mottaker.withNavn(avsmotType.getAmNavn());
+    private Adresse mottakerFrom(AvsmotType avsmotType, String orgnr) {
+        Adresse.Builder<Void> mottaker = Adresse.builder();
 
-        mottaker.withAdresse1(avsmotType.getAmAdresse());
-        mottaker.withPostnr(avsmotType.getAmPostnr());
-        mottaker.withPoststed(avsmotType.getAmPoststed());
-        mottaker.withLand(avsmotType.getAmUtland());
+        OrganisasjonDigitalAdresse orgAdr = OrganisasjonDigitalAdresse.builder()
+                .withOrgnr(orgnr)
+                .build();
+        mottaker.withDigitalAdresse(orgAdr);
+
+        PostAdresse postAdr = PostAdresse.builder()
+                .withNavn(avsmotType.getAmNavn())
+                .withAdresse1(avsmotType.getAmAdresse())
+                .withPostnr(avsmotType.getAmPostnr())
+                .withPoststed(avsmotType.getAmPoststed())
+                .withLand(avsmotType.getAmUtland())
+                .build();
+        mottaker.withPostAdresse(postAdr);
 
         return mottaker.build();
     }
 
-    private Mottaker mottakerFrom(InfoRecord infoRecord) {
-        Organisasjon.Builder<Void> mottaker = Organisasjon.builder();
-        mottaker.withOrgnr(infoRecord.getIdentifier());
-        mottaker.withNavn(infoRecord.getOrganizationName());
+    private Adresse mottakerFrom(InfoRecord infoRecord) {
+        Adresse.Builder<Void> mottaker = Adresse.builder();
+
+        OrganisasjonDigitalAdresse orgAdr = OrganisasjonDigitalAdresse.builder()
+                .withOrgnr(infoRecord.getIdentifier())
+                .build();
+        mottaker.withDigitalAdresse(orgAdr);
+
+        PostAdresse.Builder<Void> postAdr = PostAdresse.builder()
+                .withNavn(infoRecord.getOrganizationName());
 
         if (infoRecord.getPostadresse() != null) {
-            mottaker.withAdresse1(infoRecord.getPostadresse().getAdresse());
-            mottaker.withPostnr(infoRecord.getPostadresse().getPostnummer());
-            mottaker.withPoststed(infoRecord.getPostadresse().getPoststed());
-            mottaker.withLand(infoRecord.getPostadresse().getLand());
+            postAdr.withAdresse1(infoRecord.getPostadresse().getAdresse());
+            postAdr.withPostnr(infoRecord.getPostadresse().getPostnummer());
+            postAdr.withPoststed(infoRecord.getPostadresse().getPoststed());
+            postAdr.withLand(infoRecord.getPostadresse().getLand());
         } else {
-            mottaker.withPostnr("0192");
-            mottaker.withPoststed("Oslo");
-            mottaker.withLand("Norge");
+            postAdr.withPostnr("0192");
+            postAdr.withPoststed("Oslo");
+            postAdr.withLand("Norge");
         }
-        
+        mottaker.withPostAdresse(postAdr.build());
+
         return mottaker.build();
     }
 

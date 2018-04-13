@@ -6,6 +6,7 @@ import lombok.ToString;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+import java.net.URL;
 
 @Data
 public class FiksConfig {
@@ -24,10 +25,9 @@ public class FiksConfig {
         @Valid()
         @Pattern(regexp = "^[a-zA-Z0-9\\-\\.øæåØÆÅ]{0,20}$")
         private String konverteringsKode;
-
         private String username;
-
         private String password;
+        private URL endpointUrl;
     }
 
     @Data
