@@ -42,7 +42,7 @@ class SvarUtServiceIntegrationTest {
     void setup() {
         server = MockWebServiceServer.createServer(client)
 
-        SendForsendelseResponse payload = SendForsendelseResponse.builder().withReturn("123").build()
+        SendForsendelseMedIdResponse payload = SendForsendelseMedIdResponse.builder().withReturn("123").build()
         JAXBContext context = JAXBContext.newInstance(payload.getClass())
         server.expect(anything()).andRespond(withPayload(new JAXBSource(context, payload)))
     }
