@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.ks.mapping;
 
+import com.google.common.base.Strings;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreConverter;
@@ -25,6 +27,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 public class ForsendelseMapper {
     private IntegrasjonspunktProperties properties;
     private ServiceRegistryLookup serviceRegistry;
@@ -34,35 +37,46 @@ public class ForsendelseMapper {
         this.serviceRegistry = serviceRegistry;
     }
 
-    public Forsendelse mapFrom(EDUCore eduCore, X509Certificate certificate) {
-        final Forsendelse.Builder<Void> builder = Forsendelse.builder();
-        builder.withEksternref(eduCore.getId());
-        builder.withKunDigitalLevering(true);
+    public SendForsendelseMedId mapFrom(EDUCore eduCore, X509Certificate certificate) {
+        final Forsendelse.Builder<Void> forsendelse = Forsendelse.builder();
+        forsendelse.withEksternref(eduCore.getId());
+        forsendelse.withKunDigitalLevering(true);
+        forsendelse.withSvarPaForsendelse(eduCore.getReceiver().getRef());
 
         final MeldingType meldingType = EDUCoreConverter.payloadAsMeldingType(eduCore.getPayload());
-        builder.withTittel(meldingType.getJournpost().getJpOffinnhold());
+        forsendelse.withTittel(meldingType.getJournpost().getJpOffinnhold());
 
         final FileTypeHandlerFactory fileTypeHandlerFactory = new FileTypeHandlerFactory(properties.getFiks(), certificate);
-        builder.withDokumenter(mapFrom(meldingType.getJournpost().getDokument(), fileTypeHandlerFactory));
+        forsendelse.withDokumenter(mapFrom(meldingType.getJournpost().getDokument(), fileTypeHandlerFactory));
 
-        builder.withKonteringskode(properties.getFiks().getUt().getKonverteringsKode());
-        builder.withKryptert(properties.getFiks().isKryptert());
-        builder.withAvgivendeSystem(properties.getNoarkSystem().getType());
+        forsendelse.withKonteringskode(properties.getFiks().getUt().getKonverteringsKode());
+        forsendelse.withKryptert(properties.getFiks().isKryptert());
+        forsendelse.withAvgivendeSystem(properties.getNoarkSystem().getType());
 
         final InfoRecord receiverInfo = serviceRegistry.getInfoRecord(eduCore.getReceiver().getIdentifier());
-        builder.withMottaker(mottakerFrom(receiverInfo));
+        forsendelse.withMottaker(mottakerFrom(receiverInfo));
 
         Optional<AvsmotType> avsender = getAvsender(meldingType);
         if (avsender.isPresent()) {
-            builder.withSvarSendesTil(mottakerFrom(avsender.get(), receiverInfo.getIdentifier()));
+            forsendelse.withSvarSendesTil(mottakerFrom(avsender.get(), receiverInfo.getIdentifier()));
         } else {
             final InfoRecord senderInfo = serviceRegistry.getInfoRecord(eduCore.getSender().getIdentifier());
-            builder.withSvarSendesTil(mottakerFrom(senderInfo));
+            forsendelse.withSvarSendesTil(mottakerFrom(senderInfo));
         }
 
-        builder.withMetadataFraAvleverendeSystem(metaDataFrom(meldingType));
+        forsendelse.withMetadataFraAvleverendeSystem(metaDataFrom(meldingType));
+        String senderRef;
+        if (Strings.isNullOrEmpty(eduCore.getSender().getRef())) {
+            log.warn("No envelope.sender.ref in message, using conversationId instead..");
+            senderRef = eduCore.getId();
+        } else {
+            senderRef = eduCore.getSender().getRef();
+        }
 
-        return builder.build();
+        return SendForsendelseMedId.builder()
+                .withForsendelse(forsendelse.build())
+                .withForsendelsesid(senderRef)
+                .build();
     }
 
     private NoarkMetadataFraAvleverendeSakssystem metaDataFrom(MeldingType meldingType) {

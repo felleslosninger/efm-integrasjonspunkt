@@ -34,7 +34,7 @@ class SvarUtServiceTest extends Specification {
     def "When sending a domain message it is converted to forsendelse before being sent to svar ut"() {
         given:
         domainMessage = new EDUCore(receiver: new Receiver(identifier: IDENTIFIER), serviceIdentifier: DPF)
-        def forsendelse = new Forsendelse()
+        def forsendelse = new SendForsendelseMedId()
         SvarUtRequest request = new SvarUtRequest("http://foo", forsendelse)
 
         when:

@@ -64,11 +64,11 @@ public class SvarInnMessage {
     }
 
     private Sender createSender() {
-        return Sender.of(forsendelse.getSvarSendesTil().getOrgnr(), forsendelse.getSvarSendesTil().getNavn(), null);
+        return Sender.of(forsendelse.getSvarSendesTil().getOrgnr(), forsendelse.getSvarSendesTil().getNavn(), forsendelse.getId());
     }
 
     private Receiver createReceiver() {
-        return Receiver.of(forsendelse.getMottaker().getOrgnr(), forsendelse.getMottaker().getNavn(), null);
+        return Receiver.of(forsendelse.getMottaker().getOrgnr(), forsendelse.getMottaker().getNavn(), forsendelse.getSvarPaForsendelse());
     }
 
     private NoarksakType createNoarkSak() {

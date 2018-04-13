@@ -54,8 +54,12 @@ class SvarUtWebServiceClientImplTest {
                 .withPrintkonfigurasjon(printkonfigurasjon)
                 .withKrevNiva4Innlogging(true)
                 .withKryptert(true).build()
+        def forsendelseMedId = SendForsendelseMedId.builder()
+                .withForsendelse(forsendelse)
+                .withForsendelsesid("123")
+                .build();
 
-        SvarUtRequest request = new SvarUtRequest("http://localhost", forsendelse)
+        SvarUtRequest request = new SvarUtRequest("http://localhost", forsendelseMedId)
 
         SendForsendelseResponse response = SendForsendelseResponse.builder().withReturn("123").build()
 

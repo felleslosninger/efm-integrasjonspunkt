@@ -14,6 +14,7 @@ public class Forsendelse {
     private String downloadUrl;
     private List<Map<String, String>> filmetadata;
     private SvarSendesTil svarSendesTil;
+    private String svarPaForsendelse;
     private Mottaker mottaker;
 
     @Data

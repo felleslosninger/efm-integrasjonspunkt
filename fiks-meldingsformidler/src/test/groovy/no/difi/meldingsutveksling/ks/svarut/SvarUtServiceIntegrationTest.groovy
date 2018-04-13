@@ -77,8 +77,8 @@ class SvarUtServiceIntegrationTest {
                         saSaar: "123")
         )
         eduCore.payload = EDUCoreConverter.meldingTypeAsString(meldingType)
-        eduCore.sender = new Sender(name: "Difi", identifier: "991825827")
-        eduCore.receiver = new Receiver(name: "Lote", identifier: "1234")
+        eduCore.sender = new Sender(name: "Difi", identifier: "991825827", ref: "123")
+        eduCore.receiver = new Receiver(name: "Lote", identifier: "1234", ref: "123")
         eduCore.serviceIdentifier = ServiceIdentifier.DPF
         return eduCore
     }
