@@ -127,11 +127,10 @@ public class MessageOutControllerTest {
     public void getMessageShouldReturnOk() throws Exception {
         mvc.perform(get("/out/messages/42").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(11)))
+                .andExpect(jsonPath("$.*", hasSize(10)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
                 .andExpect(jsonPath("$.receiverId", is("1")))
-                .andExpect(jsonPath("$.serviceIdentifier", is("DPO")))
-                .andExpect(jsonPath("$.fileRefs.*", hasSize(0)));
+                .andExpect(jsonPath("$.serviceIdentifier", is("DPO")));
     }
 
     @Test
@@ -173,8 +172,7 @@ public class MessageOutControllerTest {
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].conversationId", is("43")))
                 .andExpect(jsonPath("$[0].receiverId", is("1")))
-                .andExpect(jsonPath("$[0].serviceIdentifier", is("DPV")))
-                .andExpect(jsonPath("$[0].fileRefs.*", hasSize(0)));
+                .andExpect(jsonPath("$[0].serviceIdentifier", is("DPV")));
     }
 
     @Test
@@ -184,11 +182,10 @@ public class MessageOutControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(11)))
+                .andExpect(jsonPath("$.*", hasSize(10)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
                 .andExpect(jsonPath("$.receiverId", is("1")))
-                .andExpect(jsonPath("$.serviceIdentifier", is("DPO")))
-                .andExpect(jsonPath("$.fileRefs.*", hasSize(0)));
+                .andExpect(jsonPath("$.serviceIdentifier", is("DPO")));
     }
 
     @Test
@@ -228,13 +225,6 @@ public class MessageOutControllerTest {
         mvc.perform(fileUpload("/out/messages/42")
                 .file(data))
                 .andExpect(status().isOk());
-
-        // Check that file is added to the conversation resource
-        mvc.perform(get("/out/messages/42")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.fileRefs.*", hasSize(1)))
-                .andExpect(jsonPath("$.fileRefs.0", is("file.txt")));
     }
 
     @Test
