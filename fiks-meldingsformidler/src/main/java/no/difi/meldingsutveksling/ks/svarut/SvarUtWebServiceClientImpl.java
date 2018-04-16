@@ -7,9 +7,8 @@ import javax.xml.bind.JAXBElement;
 public class SvarUtWebServiceClientImpl extends WebServiceGatewaySupport implements SvarUtWebServiceClient {
     @Override
     public String sendMessage(SvarUtRequest request) {
-        final SendForsendelse sendForsendelse = SendForsendelse.builder().withForsendelse(request.getForsendelse()).build();
 
-        final JAXBElement<SendForsendelseResponse> response = (JAXBElement<SendForsendelseResponse>) getWebServiceTemplate().marshalSendAndReceive(request.getEndPointURL(), sendForsendelse);
+        final JAXBElement<SendForsendelseMedIdResponse> response = (JAXBElement<SendForsendelseMedIdResponse>) getWebServiceTemplate().marshalSendAndReceive(request.getEndPointURL(), request.getForsendelse());
 
         return response.getValue().getReturn();
     }

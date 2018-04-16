@@ -2,8 +2,8 @@ package no.difi.meldingsutveksling.ks.mapping;
 
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.ks.receipt.DpfReceiptStatus;
-import no.difi.meldingsutveksling.ks.svarut.Forsendelse;
 import no.difi.meldingsutveksling.ks.svarut.ForsendelseStatus;
+import no.difi.meldingsutveksling.ks.svarut.SendForsendelseMedId;
 
 import java.security.cert.X509Certificate;
 
@@ -16,7 +16,7 @@ public class FiksMapper {
         this.forsendelseStatusMapper = forsendelseStatusMapper;
     }
 
-    public Forsendelse mapFrom(EDUCore eduCore, X509Certificate certificate) {
+    public SendForsendelseMedId mapFrom(EDUCore eduCore, X509Certificate certificate) {
         return forsendelseMapper.mapFrom(eduCore, certificate);
     }
 

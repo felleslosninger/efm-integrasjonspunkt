@@ -5,9 +5,9 @@ import lombok.Data;
 @Data
 public class SvarUtRequest {
     private final String endPointURL;
-    private final Forsendelse forsendelse;
+    private final SendForsendelseMedId forsendelse;
 
-    public SvarUtRequest(String endPointURL, Forsendelse forsendelse) {
+    public SvarUtRequest(String endPointURL, SendForsendelseMedId forsendelse) {
         this.endPointURL = endPointURL;
         this.forsendelse = forsendelse;
     }

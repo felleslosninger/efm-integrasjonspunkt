@@ -22,7 +22,7 @@ public class EDUCoreMarker {
         final LogstashMarker idMarker = MarkerFactory.conversationIdMarker(message.getId());
         final LogstashMarker markers = idMarker.and(receiverMarker).and(senderMarker).and(messageTypeMarker);
 
-        if(message.hasPayload() && (message.getMessageType() != EDUCore.MessageType.APPRECEIPT)) {
+        if(message.getPayload() != null && (message.getMessageType() != EDUCore.MessageType.APPRECEIPT)) {
             try {
                 return MarkerFactory.journalPostIdMarker(JournalpostId.fromPayload(message.getPayload()).value()).and(markers);
             } catch (PayloadException e) {

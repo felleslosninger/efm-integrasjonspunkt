@@ -41,7 +41,7 @@ public class SvarUtService {
         final X509Certificate x509Certificate = toX509Certificate(serviceRecord.get().getPemCertificate());
 
 
-        final Forsendelse forsendelse = fiksMapper.mapFrom(message, x509Certificate);
+        final SendForsendelseMedId forsendelse = fiksMapper.mapFrom(message, x509Certificate);
         SvarUtRequest svarUtRequest = new SvarUtRequest(props.getFiks().getUt().getEndpointUrl().toString(), forsendelse);
         return client.sendMessage(svarUtRequest);
     }
