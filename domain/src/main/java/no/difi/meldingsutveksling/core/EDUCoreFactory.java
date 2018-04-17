@@ -45,7 +45,8 @@ public class EDUCoreFactory {
 
     public EDUCore create(PutMessageRequestType putMessageRequestType, String senderOrgNr) {
         PutMessageRequestWrapper requestWrapper = new PutMessageRequestWrapper(putMessageRequestType);
-        EDUCore eduCore = createCommon(senderOrgNr, requestWrapper.getRecieverPartyNumber());
+        EDUCore eduCore = createCommon(senderOrgNr, requestWrapper.getRecieverPartyNumber(),
+                requestWrapper.getEnvelope().getSender().getRef(), requestWrapper.getEnvelope().getReceiver().getRef());
 
         eduCore.setPayload(putMessageRequestType.getPayload());
         eduCore.setId(requestWrapper.getConversationId());
@@ -78,10 +79,12 @@ public class EDUCoreFactory {
         AddressType receiverAddressType = of.createAddressType();
         receiverAddressType.setOrgnr(message.getReceiver().getIdentifier());
         receiverAddressType.setName(message.getReceiver().getName());
+        receiverAddressType.setRef(message.getReceiver().getRef());
 
         AddressType senderAddressType = of.createAddressType();
         senderAddressType.setOrgnr(message.getSender().getIdentifier());
         senderAddressType.setName(message.getSender().getName());
+        senderAddressType.setRef(message.getSender().getRef());
 
         EnvelopeType envelopeType = of.createEnvelopeType();
         envelopeType.setConversationId(message.getId());
@@ -97,7 +100,7 @@ public class EDUCoreFactory {
     }
 
     public EDUCore create(Message message, String senderOrgNr) {
-        EDUCore eduCore = createCommon(senderOrgNr, message.getParticipantId());
+        EDUCore eduCore = createCommon(senderOrgNr, message.getParticipantId(), null, null);
 
         // IdProc is regarded as message id for MXA, but UUID is needed by e.g. DPI.
         String genId = UUID.randomUUID().toString();
@@ -138,7 +141,7 @@ public class EDUCoreFactory {
     }
 
     public EDUCore create(ConversationResource cr, Arkivmelding am, byte[] asic) {
-        EDUCore eduCore = createCommon(cr.getSender().getSenderId(), cr.getReceiver().getReceiverId());
+        EDUCore eduCore = createCommon(cr.getSender().getSenderId(), cr.getReceiver().getReceiverId(), null, null);
         eduCore.setId(cr.getConversationId());
         eduCore.setMessageType(EDUCore.MessageType.EDU);
         eduCore.setMessageReference(cr.getConversationId());
@@ -246,34 +249,20 @@ public class EDUCoreFactory {
     }
 
 
-    private EDUCore createCommon(String senderOrgNr, String receiverOrgNr) {
+    private EDUCore createCommon(String senderOrgNr, String receiverOrgNr, String senderRef, String receiverRef) {
 
         InfoRecord senderInfo = serviceRegistryLookup.getInfoRecord(senderOrgNr);
         InfoRecord receiverInfo = serviceRegistryLookup.getInfoRecord(receiverOrgNr);
 
         EDUCore eduCore = new EDUCore();
 
-        eduCore.setSender(createSender(senderInfo));
-        eduCore.setReceiver(createReceiver(receiverInfo));
+        eduCore.setSender(Sender.of(senderInfo.getIdentifier(), senderInfo.getOrganizationName(), senderRef));
+        eduCore.setReceiver(Receiver.of(receiverInfo.getIdentifier(), receiverInfo.getOrganizationName(), receiverRef));
 
         ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(receiverOrgNr);
         eduCore.setServiceIdentifier(serviceRecord.getServiceIdentifier());
 
         return eduCore;
-    }
-
-    private Sender createSender(InfoRecord senderInfo) {
-        Sender sender = new Sender();
-        sender.setIdentifier(senderInfo.getIdentifier());
-        sender.setName(senderInfo.getOrganizationName());
-        return sender;
-    }
-
-    private Receiver createReceiver(InfoRecord receiverInfo) {
-        Receiver receiver = new Receiver();
-        receiver.setIdentifier(receiverInfo.getIdentifier());
-        receiver.setName(receiverInfo.getOrganizationName());
-        return receiver;
     }
 
 }

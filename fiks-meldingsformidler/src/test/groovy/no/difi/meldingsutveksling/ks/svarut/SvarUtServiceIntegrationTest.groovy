@@ -42,7 +42,7 @@ class SvarUtServiceIntegrationTest {
     void setup() {
         server = MockWebServiceServer.createServer(client)
 
-        SendForsendelseResponse payload = SendForsendelseResponse.builder().withReturn("123").build()
+        SendForsendelseMedIdResponse payload = SendForsendelseMedIdResponse.builder().withReturn("123").build()
         JAXBContext context = JAXBContext.newInstance(payload.getClass())
         server.expect(anything()).andRespond(withPayload(new JAXBSource(context, payload)))
     }
@@ -77,8 +77,8 @@ class SvarUtServiceIntegrationTest {
                         saSaar: "123")
         )
         eduCore.payload = EDUCoreConverter.meldingTypeAsString(meldingType)
-        eduCore.sender = new Sender(name: "Difi", identifier: "991825827")
-        eduCore.receiver = new Receiver(name: "Lote", identifier: "1234")
+        eduCore.sender = new Sender(name: "Difi", identifier: "991825827", ref: "123")
+        eduCore.receiver = new Receiver(name: "Lote", identifier: "1234", ref: "123")
         eduCore.serviceIdentifier = ServiceIdentifier.DPF
         return eduCore
     }

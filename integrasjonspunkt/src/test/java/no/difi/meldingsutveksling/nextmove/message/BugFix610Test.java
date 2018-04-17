@@ -26,6 +26,7 @@ public class BugFix610Test {
         IntegrasjonspunktProperties.NextMove nextMoveProps = new IntegrasjonspunktProperties.NextMove();
         nextMoveProps.setFiledir("target/filepersister_testdir");
         nextMoveProps.setApplyZipHeaderPatch(true);
+        nextMoveProps.setAsicfile(FILE_NAME);
         props.setNextmove(nextMoveProps);
 
         messagePersister = new FileMessagePersister(props);

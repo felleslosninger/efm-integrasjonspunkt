@@ -60,13 +60,9 @@ public class EDUCoreSenderTest {
 
     private void setupDefaultMessage() {
         eduCore = new EDUCore();
-        final Receiver receiver = new Receiver();
-        receiver.setIdentifier(IDENTIFIER);
-        eduCore.setReceiver(receiver);
+        eduCore.setReceiver(Receiver.of(IDENTIFIER, null, null));
         eduCore.setMessageType(EDUCore.MessageType.EDU);
-        final Sender sender = new Sender();
-        sender.setIdentifier(IDENTIFIER);
-        eduCore.setSender(sender);
+        eduCore.setSender(Sender.of(IDENTIFIER, null, null));
         eduCore.setServiceIdentifier(ServiceIdentifier.DPV);
     }
 

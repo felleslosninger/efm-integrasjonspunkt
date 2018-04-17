@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.ks.svarut;
 
 import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.CertificateParserException;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.ks.mapping.FiksMapper;
 import no.difi.meldingsutveksling.ks.receipt.DpfReceiptStatus;
@@ -17,12 +18,17 @@ public class SvarUtService {
     private SvarUtWebServiceClient client;
     private ServiceRegistryLookup serviceRegistryLookup;
     private FiksMapper fiksMapper;
+    private IntegrasjonspunktProperties props;
     CertificateParser certificateParser;
 
-    public SvarUtService(SvarUtWebServiceClient svarUtClient, ServiceRegistryLookup serviceRegistryLookup, FiksMapper fiksMapper) {
+    public SvarUtService(SvarUtWebServiceClient svarUtClient,
+                         ServiceRegistryLookup serviceRegistryLookup,
+                         FiksMapper fiksMapper,
+                         IntegrasjonspunktProperties props) {
         this.client = svarUtClient;
         this.serviceRegistryLookup = serviceRegistryLookup;
         this.fiksMapper = fiksMapper;
+        this.props = props;
         certificateParser = new CertificateParser();
     }
 
@@ -35,8 +41,8 @@ public class SvarUtService {
         final X509Certificate x509Certificate = toX509Certificate(serviceRecord.get().getPemCertificate());
 
 
-        final Forsendelse forsendelse = fiksMapper.mapFrom(message, x509Certificate);
-        SvarUtRequest svarUtRequest = new SvarUtRequest(serviceRecord.get().getEndPointURL(), forsendelse);
+        final SendForsendelseMedId forsendelse = fiksMapper.mapFrom(message, x509Certificate);
+        SvarUtRequest svarUtRequest = new SvarUtRequest(props.getFiks().getUt().getEndpointUrl().toString(), forsendelse);
         return client.sendMessage(svarUtRequest);
     }
 
@@ -45,9 +51,9 @@ public class SvarUtService {
         if (!serviceRecord.isPresent()) {
             throw new SvarUtServiceException(String.format("No DPF ServiceRecord found for identifier %s", conversation.getReceiverIdentifier()));
         }
-        final String forsendelseId = client.getForsendelseId(serviceRecord.get().getEndPointURL(), conversation.getConversationId());
+        final String forsendelseId = client.getForsendelseId(props.getFiks().getUt().getEndpointUrl().toString(), conversation.getConversationId());
 
-        final ForsendelseStatus forsendelseStatus = client.getForsendelseStatus(serviceRecord.get().getEndPointURL(), forsendelseId);
+        final ForsendelseStatus forsendelseStatus = client.getForsendelseStatus(props.getFiks().getUt().getEndpointUrl().toString(), forsendelseId);
         final DpfReceiptStatus receiptStatus = fiksMapper.mapFrom(forsendelseStatus);
         return MessageStatus.of(receiptStatus);
     }

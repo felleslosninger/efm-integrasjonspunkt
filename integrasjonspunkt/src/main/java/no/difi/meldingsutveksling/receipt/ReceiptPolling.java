@@ -61,8 +61,8 @@ public class ReceiptPolling {
     @Scheduled(fixedRate = 10000)
     public void dpiReceiptsScheduledTask() {
         if (props.getFeature().isEnableReceipts() && props.getFeature().isEnableDPI()) {
-            final ExternalReceipt externalReceipt = dpiReceiptService.checkForReceipts();
-            if (externalReceipt != EMPTY_KVITTERING) {
+            ExternalReceipt externalReceipt = dpiReceiptService.checkForReceipts();
+            while (externalReceipt != EMPTY_KVITTERING) {
                 externalReceipt.auditLog();
                 final String id = externalReceipt.getId();
                 MessageStatus status = externalReceipt.toMessageStatus();
@@ -73,6 +73,7 @@ public class ReceiptPolling {
                 Audit.info("Updated receipt (DPI)", externalReceipt.logMarkers());
                 externalReceipt.confirmReceipt();
                 Audit.info("Confirmed receipt (DPI)", externalReceipt.logMarkers());
+                externalReceipt = dpiReceiptService.checkForReceipts();
             }
         }
     }

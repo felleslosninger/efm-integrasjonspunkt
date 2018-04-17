@@ -90,6 +90,7 @@ public abstract class ConversationResource {
     @Column(name = "filename")
     @CollectionTable(name = "filerefs", joinColumns = @JoinColumn(name = "ids"))
     @XmlElement
+    @JsonIgnore
     private Map<Integer, String> fileRefs;
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "propId")

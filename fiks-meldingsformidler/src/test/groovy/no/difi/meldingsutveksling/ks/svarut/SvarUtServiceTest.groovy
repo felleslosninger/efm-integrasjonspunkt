@@ -1,6 +1,8 @@
 package no.difi.meldingsutveksling.ks.svarut
 
 import no.difi.meldingsutveksling.CertificateParser
+import no.difi.meldingsutveksling.config.FiksConfig
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.core.EDUCore
 import no.difi.meldingsutveksling.core.Receiver
 import no.difi.meldingsutveksling.ks.mapping.FiksMapper
@@ -18,16 +20,22 @@ class SvarUtServiceTest extends Specification {
     def "setup"() {
 
         def serviceRegistry = Mock(ServiceRegistryLookup)
-        service = new SvarUtService(Mock(SvarUtWebServiceClient), serviceRegistry, Mock(FiksMapper))
+        def props = Mock(IntegrasjonspunktProperties)
+        service = new SvarUtService(Mock(SvarUtWebServiceClient), serviceRegistry, Mock(FiksMapper), props)
         service.certificateParser = Mock(CertificateParser)
         serviceRegistry.getServiceRecord(IDENTIFIER, DPF) >> Optional.of(new ServiceRecord(pemCertificate: "asdf"))
+        def fiksConfig = Mock(FiksConfig)
+        def svarUtConfig = Mock(FiksConfig.SvarUt)
+        svarUtConfig.endpointUrl >> new URL("http://foo")
+        fiksConfig.getUt() >> svarUtConfig
+        props.getFiks() >> fiksConfig
     }
 
     def "When sending a domain message it is converted to forsendelse before being sent to svar ut"() {
         given:
         domainMessage = new EDUCore(receiver: new Receiver(identifier: IDENTIFIER), serviceIdentifier: DPF)
-        def forsendelse = new Forsendelse()
-        SvarUtRequest request = new SvarUtRequest("", forsendelse)
+        def forsendelse = new SendForsendelseMedId()
+        SvarUtRequest request = new SvarUtRequest("http://foo", forsendelse)
 
         when:
         service.send(domainMessage)
