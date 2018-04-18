@@ -298,13 +298,21 @@ public class MessageOutController {
                     !dpiServiceRecord.get().isFysiskPost() &&
                     isNullOrEmpty(dpiServiceRecord.get().getPostkasseAdresse()) &&
                     !props.getDpi().isForcePrint()) {
-                cr = DpvConversationResource.of((DpiConversationResource)cr);
+                cr = convertDpiToDpv(cr);
             }
         }
 
         internalQueue.enqueueNextmove(cr);
         return ResponseEntity.ok().build();
 
+    }
+
+    private ConversationResource convertDpiToDpv(ConversationResource cr) {
+        DpvConversationResource dpv = DpvConversationResource.of((DpiConversationResource) cr);
+        // Update conversation to make it pollable for receipts
+        conversationService.setServiceIdentifier(cr.getConversationId(), ServiceIdentifier.DPV);
+        conversationService.setPollable(cr.getConversationId(), true);
+        return dpv;
     }
 
     private ResponseEntity handleArkivmelding(MultipartHttpServletRequest request, ConversationResource cr) {
