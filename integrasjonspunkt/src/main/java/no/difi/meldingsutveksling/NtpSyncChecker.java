@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -10,6 +11,7 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 
 @Component
+@ConditionalOnProperty(name = "difi.move.ntp.disable", havingValue = "false")
 @Slf4j
 public class NtpSyncChecker {
 
@@ -19,7 +21,7 @@ public class NtpSyncChecker {
     @Autowired
     NtpSyncChecker(IntegrasjonspunktProperties props) throws UnknownHostException {
         this.props = props;
-        client = new NTPClient(props.getNtpHost());
+        client = new NTPClient(props.getNtp().getHost());
     }
 
     @Scheduled(fixedRate = 1000*60*30)
@@ -29,10 +31,10 @@ public class NtpSyncChecker {
         try {
             offset = client.getOffset();
         } catch (IOException e) {
-            log.error(String.format("Error connecting to NTP host %s", props.getNtpHost()), e);
+            log.error(String.format("Error connecting to NTP host %s", props.getNtp().getHost()), e);
         }
 
-        String errorMsg = String.format("Offset from NTP host %s is %sms. An offset greater than 9s might lead to problems with OIDC. Consider readjusting the system clock.", props.getNtpHost(), offset);
+        String errorMsg = String.format("Offset from NTP host %s is %sms. An offset greater than 9s might lead to problems with OIDC. Consider readjusting the system clock.", props.getNtp().getHost(), offset);
         if (Math.abs(offset) > 9000) {
             log.error(errorMsg);
         } else if (Math.abs(offset) > 5000) {

@@ -10,12 +10,17 @@ import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.logging.PutMessageResponseMarkers;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
+import no.difi.meldingsutveksling.receipt.Conversation;
+import no.difi.meldingsutveksling.receipt.ConversationService;
+import no.difi.meldingsutveksling.receipt.MessageStatus;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 import static java.lang.String.format;
+import static no.difi.meldingsutveksling.receipt.GenericReceiptStatus.INNKOMMENDE_LEVERT;
+import static no.difi.meldingsutveksling.receipt.GenericReceiptStatus.INNKOMMENDE_MOTTATT;
 
 public class SvarInnService implements MessageDownloaderModule {
 
@@ -26,14 +31,21 @@ public class SvarInnService implements MessageDownloaderModule {
     private NoarkClient mailClient;
     private SvarInnFileFactory svarInnFileFactory;
     private IntegrasjonspunktProperties properties;
+    private ConversationService conversationService;
 
-    public SvarInnService(SvarInnClient svarInnClient, SvarInnFileDecryptor decryptor, SvarInnUnzipper unzipper,
-                          NoarkClient noarkClient, NoarkClient mailClient, IntegrasjonspunktProperties properties) {
+    public SvarInnService(SvarInnClient svarInnClient,
+                          SvarInnFileDecryptor decryptor,
+                          SvarInnUnzipper unzipper,
+                          NoarkClient noarkClient,
+                          NoarkClient mailClient,
+                          ConversationService conversationService,
+                          IntegrasjonspunktProperties properties) {
         this.svarInnClient = svarInnClient;
         this.decryptor = decryptor;
         this.unzipper = unzipper;
         this.noarkClient = noarkClient;
         this.mailClient = mailClient;
+        this.conversationService = conversationService;
         this.properties = properties;
         svarInnFileFactory = new SvarInnFileFactory();
     }
@@ -63,8 +75,11 @@ public class SvarInnService implements MessageDownloaderModule {
 
             final SvarInnMessage message = new SvarInnMessage(forsendelse, files);
             final EDUCore eduCore = message.toEduCore();
-            PutMessageRequestType putMessage = EDUCoreFactory.createPutMessageFromCore(eduCore);
 
+            Conversation c = conversationService.registerConversation(eduCore);
+            c = conversationService.registerStatus(c, MessageStatus.of(INNKOMMENDE_MOTTATT));
+
+            PutMessageRequestType putMessage = EDUCoreFactory.createPutMessageFromCore(eduCore);
             if (!validateRequiredFields(forsendelse, files)) {
                 checkAndSendMail(putMessage, forsendelse.getId());
                 continue;
@@ -73,10 +88,12 @@ public class SvarInnService implements MessageDownloaderModule {
             final PutMessageResponseType response = noarkClient.sendEduMelding(putMessage);
             if ("OK".equals(response.getResult().getType())) {
                 Audit.info("Message successfully forwarded");
+                conversationService.registerStatus(c, MessageStatus.of(INNKOMMENDE_LEVERT));
                 svarInnClient.confirmMessage(forsendelse.getId());
             } else if ("WARNING".equals(response.getResult().getType())) {
                 Audit.info(format("Archive system responded with warning for message with fiks-id %s",
                         forsendelse.getId()), PutMessageResponseMarkers.markerFrom(response));
+                conversationService.registerStatus(c, MessageStatus.of(INNKOMMENDE_LEVERT));
                 svarInnClient.confirmMessage(forsendelse.getId());
             } else {
                 Audit.error(format("Message with fiks-id %s failed", forsendelse.getId()), PutMessageResponseMarkers.markerFrom(response));

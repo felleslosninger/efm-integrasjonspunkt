@@ -59,7 +59,13 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
     }
 
     private static void checkNtpSync(ConfigurableApplicationContext context) {
-        String host = context.getBean(IntegrasjonspunktProperties.class).getNtpHost();
+        IntegrasjonspunktProperties props = context.getBean(IntegrasjonspunktProperties.class);
+        if (props.getNtp().isDisable()) {
+            log.debug("NTP Check disabled");
+            return;
+        }
+        String host = props.getNtp().getHost();
+        log.debug("Checking offset for NTP host {}", host);
         try {
             NTPClient client = new NTPClient(host);
             long offset = client.getOffset();

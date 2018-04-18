@@ -31,7 +31,7 @@ public class FileMessagePersister implements MessagePersister {
         File localFile = new File(filedir+filename);
         localFile.getParentFile().mkdirs();
 
-        if (props.getNextmove().getApplyZipHeaderPatch()){
+        if (props.getNextmove().getApplyZipHeaderPatch() && props.getNextmove().getAsicfile().equals(filename)){
             BugFix610.applyPatch(message, cr.getConversationId());
         }
 

@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.ks.mapping;
 
+import com.google.common.base.Strings;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreConverter;
@@ -25,6 +27,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 public class ForsendelseMapper {
     private IntegrasjonspunktProperties properties;
     private ServiceRegistryLookup serviceRegistry;
@@ -34,30 +37,46 @@ public class ForsendelseMapper {
         this.serviceRegistry = serviceRegistry;
     }
 
-    public Forsendelse mapFrom(EDUCore eduCore, X509Certificate certificate) {
-        final Forsendelse.Builder<Void> builder = Forsendelse.builder();
-        builder.withEksternref(eduCore.getId());
-        builder.withKunDigitalLevering(true);
+    public SendForsendelseMedId mapFrom(EDUCore eduCore, X509Certificate certificate) {
+        final Forsendelse.Builder<Void> forsendelse = Forsendelse.builder();
+        forsendelse.withEksternref(eduCore.getId());
+        forsendelse.withKunDigitalLevering(true);
+        forsendelse.withSvarPaForsendelse(eduCore.getReceiver().getRef());
 
         final MeldingType meldingType = EDUCoreConverter.payloadAsMeldingType(eduCore.getPayload());
-        builder.withTittel(meldingType.getJournpost().getJpOffinnhold());
+        forsendelse.withTittel(meldingType.getJournpost().getJpOffinnhold());
 
         final FileTypeHandlerFactory fileTypeHandlerFactory = new FileTypeHandlerFactory(properties.getFiks(), certificate);
-        builder.withDokumenter(mapFrom(meldingType.getJournpost().getDokument(), fileTypeHandlerFactory));
+        forsendelse.withDokumenter(mapFrom(meldingType.getJournpost().getDokument(), fileTypeHandlerFactory));
 
-        builder.withKonteringskode(properties.getFiks().getUt().getKonverteringsKode());
-        builder.withKryptert(properties.getFiks().isKryptert());
-        builder.withAvgivendeSystem(properties.getNoarkSystem().getType());
+        forsendelse.withKonteringskode(properties.getFiks().getUt().getKonverteringsKode());
+        forsendelse.withKryptert(properties.getFiks().isKryptert());
+        forsendelse.withAvgivendeSystem(properties.getNoarkSystem().getType());
 
         final InfoRecord receiverInfo = serviceRegistry.getInfoRecord(eduCore.getReceiver().getIdentifier());
-        builder.withMottaker(mottakerFrom(receiverInfo));
+        forsendelse.withMottaker(mottakerFrom(receiverInfo));
 
-        final InfoRecord senderInfo = serviceRegistry.getInfoRecord(eduCore.getSender().getIdentifier());
-        builder.withSvarSendesTil(mottakerFrom(senderInfo));
+        Optional<AvsmotType> avsender = getAvsender(meldingType);
+        if (avsender.isPresent()) {
+            forsendelse.withSvarSendesTil(mottakerFrom(avsender.get(), receiverInfo.getIdentifier()));
+        } else {
+            final InfoRecord senderInfo = serviceRegistry.getInfoRecord(eduCore.getSender().getIdentifier());
+            forsendelse.withSvarSendesTil(mottakerFrom(senderInfo));
+        }
 
-        builder.withMetadataFraAvleverendeSystem(metaDataFrom(meldingType));
+        forsendelse.withMetadataFraAvleverendeSystem(metaDataFrom(meldingType));
+        String senderRef;
+        if (Strings.isNullOrEmpty(eduCore.getSender().getRef())) {
+            log.warn("No envelope.sender.ref in message, using conversationId instead..");
+            senderRef = eduCore.getId();
+        } else {
+            senderRef = eduCore.getSender().getRef();
+        }
 
-        return builder.build();
+        return SendForsendelseMedId.builder()
+                .withForsendelse(forsendelse.build())
+                .withForsendelsesid(senderRef)
+                .build();
     }
 
     private NoarkMetadataFraAvleverendeSakssystem metaDataFrom(MeldingType meldingType) {
@@ -74,16 +93,21 @@ public class ForsendelseMapper {
         metadata.withDokumentetsDato(journalDatoFrom(meldingType.getJournpost().getJpDokdato()));
         metadata.withTittel(meldingType.getJournpost().getJpOffinnhold());
 
-        Optional<AvsmotType> avsender = getAvsender(meldingType);
+        Optional<AvsmotType> avsender = getSaksbehandler(meldingType);
         avsender.map(a -> a.getAmNavn()).ifPresent(metadata::withSaksbehandler);
 
         return metadata.build();
     }
 
 
-    private Optional<AvsmotType> getAvsender(MeldingType meldingType) {
+    private Optional<AvsmotType> getSaksbehandler(MeldingType meldingType) {
         List<AvsmotType> avsmotlist = meldingType.getJournpost().getAvsmot();
         return avsmotlist.stream().filter(f -> "0".equals(f.getAmIhtype())).findFirst();
+    }
+
+    private Optional<AvsmotType> getAvsender(MeldingType meldingType) {
+        List<AvsmotType> avsmotlist = meldingType.getJournpost().getAvsmot();
+        return avsmotlist.stream().filter(f -> "1".equals(f.getAmIhtype())).findFirst();
     }
 
     private XMLGregorianCalendar journalDatoFrom(String jpDato) {
@@ -97,22 +121,49 @@ public class ForsendelseMapper {
         }
     }
 
-    private Mottaker mottakerFrom(InfoRecord infoRecord) {
-        Organisasjon.Builder<Void> mottaker = Organisasjon.builder();
-        mottaker.withOrgnr(infoRecord.getIdentifier());
-        mottaker.withNavn(infoRecord.getOrganizationName());
+    private Adresse mottakerFrom(AvsmotType avsmotType, String orgnr) {
+        Adresse.Builder<Void> mottaker = Adresse.builder();
+
+        OrganisasjonDigitalAdresse orgAdr = OrganisasjonDigitalAdresse.builder()
+                .withOrgnr(orgnr)
+                .build();
+        mottaker.withDigitalAdresse(orgAdr);
+
+        PostAdresse postAdr = PostAdresse.builder()
+                .withNavn(avsmotType.getAmNavn())
+                .withAdresse1(avsmotType.getAmAdresse())
+                .withPostnr(avsmotType.getAmPostnr())
+                .withPoststed(avsmotType.getAmPoststed())
+                .withLand(avsmotType.getAmUtland())
+                .build();
+        mottaker.withPostAdresse(postAdr);
+
+        return mottaker.build();
+    }
+
+    private Adresse mottakerFrom(InfoRecord infoRecord) {
+        Adresse.Builder<Void> mottaker = Adresse.builder();
+
+        OrganisasjonDigitalAdresse orgAdr = OrganisasjonDigitalAdresse.builder()
+                .withOrgnr(infoRecord.getIdentifier())
+                .build();
+        mottaker.withDigitalAdresse(orgAdr);
+
+        PostAdresse.Builder<Void> postAdr = PostAdresse.builder()
+                .withNavn(infoRecord.getOrganizationName());
 
         if (infoRecord.getPostadresse() != null) {
-            mottaker.withAdresse1(infoRecord.getPostadresse().getAdresse());
-            mottaker.withPostnr(infoRecord.getPostadresse().getPostnummer());
-            mottaker.withPoststed(infoRecord.getPostadresse().getPoststed());
-            mottaker.withLand(infoRecord.getPostadresse().getLand());
+            postAdr.withAdresse1(infoRecord.getPostadresse().getAdresse());
+            postAdr.withPostnr(infoRecord.getPostadresse().getPostnummer());
+            postAdr.withPoststed(infoRecord.getPostadresse().getPoststed());
+            postAdr.withLand(infoRecord.getPostadresse().getLand());
         } else {
-            mottaker.withPostnr("0192");
-            mottaker.withPoststed("Oslo");
-            mottaker.withLand("Norge");
+            postAdr.withPostnr("0192");
+            postAdr.withPoststed("Oslo");
+            postAdr.withLand("Norge");
         }
-        
+        mottaker.withPostAdresse(postAdr.build());
+
         return mottaker.build();
     }
 

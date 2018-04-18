@@ -43,8 +43,7 @@ class SvarUtWebServiceClientImplTest {
 
         final Dokument dokument = Dokument.builder().withData(new DataHandler(new ByteArrayDataSource(data, "pdf"))).build()
 
-        final Mottaker mottaker = Organisasjon.builder().build()
-
+        final Adresse mottaker = Adresse.builder().build();
 
         final Printkonfigurasjon printkonfigurasjon = Printkonfigurasjon.builder().build()
         Forsendelse forsendelse = Forsendelse.builder()
@@ -55,10 +54,14 @@ class SvarUtWebServiceClientImplTest {
                 .withPrintkonfigurasjon(printkonfigurasjon)
                 .withKrevNiva4Innlogging(true)
                 .withKryptert(true).build()
+        def forsendelseMedId = SendForsendelseMedId.builder()
+                .withForsendelse(forsendelse)
+                .withForsendelsesid("123")
+                .build();
 
-        SvarUtRequest request = new SvarUtRequest("http://localhost", forsendelse)
+        SvarUtRequest request = new SvarUtRequest("http://localhost", forsendelseMedId)
 
-        SendForsendelseResponse response = SendForsendelseResponse.builder().withReturn("123").build()
+        SendForsendelseMedIdResponse response = SendForsendelseMedIdResponse.builder().withReturn("123").build()
 
         server.expect(anything()).andRespond(responseMatches(response))
         client.sendMessage(request)

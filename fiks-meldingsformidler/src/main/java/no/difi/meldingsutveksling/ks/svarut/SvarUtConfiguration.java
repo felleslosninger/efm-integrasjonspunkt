@@ -23,8 +23,11 @@ public class SvarUtConfiguration {
     }
 
     @Bean
-    public SvarUtService svarUtService(FiksMapper fiksMapper, SvarUtWebServiceClient svarUtClient, ServiceRegistryLookup serviceRegistryLookup) {
-        return new SvarUtService(svarUtClient, serviceRegistryLookup, fiksMapper);
+    public SvarUtService svarUtService(FiksMapper fiksMapper,
+                                       SvarUtWebServiceClient svarUtClient,
+                                       ServiceRegistryLookup serviceRegistryLookup,
+                                       IntegrasjonspunktProperties props) {
+        return new SvarUtService(svarUtClient, serviceRegistryLookup, fiksMapper, props);
     }
 
 }
