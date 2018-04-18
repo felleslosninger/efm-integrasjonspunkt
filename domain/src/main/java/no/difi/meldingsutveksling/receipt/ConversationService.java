@@ -121,4 +121,21 @@ public class ConversationService {
         return repo.save(c);
     }
 
+    public void setServiceIdentifier(String conversationId, ServiceIdentifier si) {
+        Optional<Conversation> find = repo.findByConversationId(conversationId).stream().findFirst();
+        if (find.isPresent()) {
+            Conversation c = find.get();
+            c.setServiceIdentifier(si);
+            repo.save(c);
+        }
+    }
+
+    public void setPollable(String conversationId, boolean pollable) {
+        Optional<Conversation> find = repo.findByConversationId(conversationId).stream().findFirst();
+        if (find.isPresent()) {
+            Conversation c = find.get();
+            c.setPollable(pollable);
+            repo.save(c);
+        }
+    }
 }
