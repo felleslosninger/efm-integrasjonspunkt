@@ -8,7 +8,7 @@ import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 import javax.xml.bind.annotation.*;
 
 /**
- * Internal mapping object for generic handling of e.g. BEST EDU and MXA formats.
+ * Internal mapping object for generic handling of e.g. BEST EDU format.
  */
 @Slf4j
 @XmlAccessorType(XmlAccessType.FIELD)

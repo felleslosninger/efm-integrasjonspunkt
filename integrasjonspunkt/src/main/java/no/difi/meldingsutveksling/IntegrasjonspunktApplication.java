@@ -31,7 +31,7 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
     @Bean
     public ServletRegistrationBean servletNoArk() {
         WSSpringServlet servlet = new WSSpringServlet();
-        ServletRegistrationBean reg = new ServletRegistrationBean(servlet, "/noarkExchange", "/receive", "/mxa");
+        ServletRegistrationBean reg = new ServletRegistrationBean(servlet, "/noarkExchange", "/receive");
         reg.setLoadOnStartup(1);
         return reg;
     }
