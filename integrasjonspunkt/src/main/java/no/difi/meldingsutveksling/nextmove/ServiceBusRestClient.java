@@ -41,6 +41,7 @@ public class ServiceBusRestClient {
     private IntegrasjonspunktProperties props;
     private String localQueuePath;
     private JAXBContext jaxbContext;
+    private RestTemplate restTemplate;
 
     public ServiceBusRestClient(ServiceRegistryLookup sr,
                                 IntegrasjonspunktProperties props) throws JAXBException {
@@ -51,6 +52,8 @@ public class ServiceBusRestClient {
                 props.getOrg().getNumber()+
                 props.getNextmove().getServiceBus().getMode();
         this.jaxbContext = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, ConversationResource.class}, null);
+        this.restTemplate = new RestTemplate();
+        this.restTemplate.setErrorHandler(new ServiceBusRestErrorHandler(sr));
     }
 
     public void sendMessage(byte[] message, String queuePath) {
@@ -64,7 +67,6 @@ public class ServiceBusRestClient {
         headers.add("BrokerProperties", "{}");
         HttpEntity<Object> httpEntity = new HttpEntity<>(message, headers);
 
-        RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.POST, httpEntity, String.class);
         if (!response.getStatusCode().is2xxSuccessful()) {
             log.error("{} got response {}, error sending message to service bus", resourceUri, response.getStatusCode().toString());
@@ -82,7 +84,6 @@ public class ServiceBusRestClient {
         HttpEntity<Object> httpEntity = new HttpEntity<>(headers);
 
         URI uri = convertToUri(resourceUri);
-        RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.POST, httpEntity, String.class);
         if (!asList(HttpStatus.OK, HttpStatus.CREATED).contains(response.getStatusCode())) {
             log.debug("{} got response {}, returning empty", resourceUri, response.getStatusCode().toString());
@@ -122,7 +123,6 @@ public class ServiceBusRestClient {
         HttpEntity<Object> httpEntity = new HttpEntity<>(headers);
 
         URI uri = convertToUri(resourceUri);
-        RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.DELETE, httpEntity, String.class);
         if (!response.getStatusCode().is2xxSuccessful()) {
             log.error("{} got response {}, message [conversationId={}] was not deleted",
@@ -174,7 +174,7 @@ public class ServiceBusRestClient {
 
     public String getSasKey() {
         if (props.getOidc().isEnable()) {
-            return sr.getSasToken();
+            return sr.getSasKey();
         } else {
             return props.getNextmove().getServiceBus().getSasToken();
         }
