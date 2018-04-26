@@ -3,8 +3,6 @@ package no.difi.meldingsutveksling.core;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.mxa.MessageMarker;
-import no.difi.meldingsutveksling.mxa.schema.domain.Message;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageMarker;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory;
@@ -14,8 +12,6 @@ import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  *
@@ -42,22 +38,6 @@ public class EDUCoreService {
         this.serviceRegistryLookup = serviceRegistryLookup;
         this.queue = queue;
         this.conversationService = conversationService;
-    }
-
-    public PutMessageResponseType queueMessage(Message msg) {
-        if (isNullOrEmpty(properties.getOrg().getNumber())) {
-            Audit.error("Senders orgnr missing", MessageMarker.markerFrom(msg));
-            throw new MeldingsUtvekslingRuntimeException("Missing senders orgnumber. Please configure orgnumber= in the integrasjonspunkt-local.properties");
-        }
-
-        if (isNullOrEmpty(msg.getParticipantId())) {
-            Audit.error("Receiver identifier missing", MessageMarker.markerFrom(msg));
-            throw new MeldingsUtvekslingRuntimeException("Missing receiver identifier.");
-        }
-
-        EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
-        EDUCore message = eduCoreFactory.create(msg, properties.getOrg().getNumber());
-        return queueMessage(message);
     }
 
     public PutMessageResponseType queueMessage(PutMessageRequestWrapper msg) {
