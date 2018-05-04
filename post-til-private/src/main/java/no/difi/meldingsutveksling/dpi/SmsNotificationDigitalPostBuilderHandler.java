@@ -5,6 +5,8 @@ import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.sdp.client2.domain.digital_post.DigitalPost;
 import no.difi.sdp.client2.domain.digital_post.SmsVarsel;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 public class SmsNotificationDigitalPostBuilderHandler extends DigitalPostBuilderHandler {
     public SmsNotificationDigitalPostBuilderHandler(DigitalPostInnbyggerConfig config) {
         super(config);
@@ -12,7 +14,9 @@ public class SmsNotificationDigitalPostBuilderHandler extends DigitalPostBuilder
 
     @Override
     public DigitalPost.Builder handle(MeldingsformidlerRequest request, DigitalPost.Builder builder) {
-        if (getConfig().isEnableSmsNotification() && request.isNotifiable()) {
+        if (getConfig().isEnableSmsNotification() &&
+                request.isNotifiable() &&
+                !isNullOrEmpty(request.getMobileNumber())) {
             final SmsVarsel varsel = createVarselEttereForvaltningsforskriften(request);
             builder.smsVarsel(varsel);
         }

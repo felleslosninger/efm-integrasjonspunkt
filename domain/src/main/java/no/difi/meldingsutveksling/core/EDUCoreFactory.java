@@ -5,7 +5,6 @@ import no.arkivverket.standarder.noark5.arkivmelding.*;
 import no.arkivverket.standarder.noark5.metadatakatalog.Avskrivningsmaate;
 import no.arkivverket.standarder.noark5.metadatakatalog.Journalposttype;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.mxa.schema.domain.Message;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.noarkexchange.PayloadException;
 import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
@@ -24,8 +23,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.Base64;
-import java.util.UUID;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -97,47 +94,6 @@ public class EDUCoreFactory {
         putMessageRequestType.setPayload(message.getPayload());
 
         return putMessageRequestType;
-    }
-
-    public EDUCore create(Message message, String senderOrgNr) {
-        EDUCore eduCore = createCommon(senderOrgNr, message.getParticipantId(), null, null);
-
-        // IdProc is regarded as message id for MXA, but UUID is needed by e.g. DPI.
-        String genId = UUID.randomUUID().toString();
-        eduCore.setId(genId);
-        eduCore.setMessageReference(message.getMessageReference());
-        eduCore.setMessageType(EDUCore.MessageType.EDU);
-
-        ObjectFactory of = new ObjectFactory();
-
-        JournpostType journpostType = of.createJournpostType();
-        journpostType.setJpInnhold(message.getContent().getMessageHeader());
-        journpostType.setJpOffinnhold(message.getContent().getMessageSummery());
-        journpostType.setJpId(message.getMessageReference());
-
-        message.getContent().getAttachments().getAttachment().forEach(a -> {
-            DokumentType dokumentType = of.createDokumentType();
-            dokumentType.setVeFilnavn(a.getFilename());
-            dokumentType.setVeMimeType(a.getMimeType());
-            dokumentType.setDbTittel(a.getName());
-            FilType filType = of.createFilType();
-            filType.setBase64(Base64.getDecoder().decode(a.getValue()));
-            dokumentType.setFil(filType);
-
-            journpostType.getDokument().add(dokumentType);
-        });
-
-        NoarksakType noarksakType = of.createNoarksakType();
-        noarksakType.setSaOfftittel(message.getContent().getMessageHeader());
-
-        MeldingType meldingType = of.createMeldingType();
-        meldingType.setJournpost(journpostType);
-        meldingType.setNoarksak(noarksakType);
-
-        String payload = EDUCoreConverter.meldingTypeAsString(meldingType);
-        eduCore.setPayload(payload);
-
-        return eduCore;
     }
 
     public EDUCore create(ConversationResource cr, Arkivmelding am, byte[] asic) {

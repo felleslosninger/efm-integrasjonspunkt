@@ -43,13 +43,22 @@ public class EmailNotificationDigitalPostBuilderHandlerTest {
     }
 
     @Test
-    public void notifiableAndFeatureEnabledShouldAdEpostVarsel() throws KeyStoreException {
+    public void notifiableAndFeatureEnabledWithEmailShouldAddEpostVarsel() throws KeyStoreException {
+        when(config.isEnableEmailNotification()).thenReturn(true);
+
+        EmailNotificationDigitalPostBuilderHandler handler = new EmailNotificationDigitalPostBuilderHandler(config);
+        builder = handler.handle(new Request().withNotifiable(true).withEmail("foo@foo.com"), builder);
+
+        verify(builder).epostVarsel(any(EpostVarsel.class));
+    }
+
+    @Test
+    public void notifiableAndFeatureEnabledWithoutEmailShouldNotAddEpostVarsel() throws KeyStoreException {
         when(config.isEnableEmailNotification()).thenReturn(true);
 
         EmailNotificationDigitalPostBuilderHandler handler = new EmailNotificationDigitalPostBuilderHandler(config);
         builder = handler.handle(new Request().withNotifiable(true), builder);
 
-        verify(builder).epostVarsel(any(EpostVarsel.class));
+        verify(builder, never()).epostVarsel(any(EpostVarsel.class));
     }
-
 }

@@ -8,7 +8,7 @@
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>1.7.84</version>
+        <version>1.7.85</version>
     </parent>
 
     <properties>
@@ -58,12 +58,6 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>nextmove</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>mxa</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 

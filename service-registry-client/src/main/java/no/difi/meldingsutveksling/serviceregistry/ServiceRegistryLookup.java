@@ -1,7 +1,5 @@
 package no.difi.meldingsutveksling.serviceregistry;
 
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -36,12 +34,13 @@ import static no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRe
 
 @Service
 public class ServiceRegistryLookup {
+
     private final RestClient client;
     private IntegrasjonspunktProperties properties;
+    private final LoadingCache<String, String> skCache;
     private final LoadingCache<Parameters, ServiceRecord> srCache;
     private final LoadingCache<Parameters, List<ServiceRecord>> srsCache;
     private final LoadingCache<Parameters, InfoRecord> irCache;
-    private final Supplier<String> sasTokenSupplier;
 
     private Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -51,7 +50,15 @@ public class ServiceRegistryLookup {
         this.client = client;
         this.properties = properties;
 
-        this.sasTokenSupplier = Suppliers.memoizeWithExpiration(loadSasToken(), 1, TimeUnit.MINUTES);
+        this.skCache = CacheBuilder.newBuilder()
+                .maximumSize(1)
+                .expireAfterWrite(1, TimeUnit.DAYS)
+                .build(new CacheLoader<String, String>() {
+                    @Override
+                    public String load(String key) throws Exception {
+                        return loadSasKey();
+                    }
+                });
 
         this.srCache = CacheBuilder.newBuilder()
                 .maximumSize(100)
@@ -170,24 +177,21 @@ public class ServiceRegistryLookup {
         return documentContext.read("$.serviceRecords.length()");
     }
 
-    /**
-     * Method to fetch SAS token from Service Registry.
-     * Token is cached with 1 minute timeout.
-     *
-     * @return SAS token
-     */
-    public String getSasToken() {
-        return sasTokenSupplier.get();
+    public String getSasKey() {
+        // Single entry, key does not matter
+        return skCache.getUnchecked("");
     }
 
-    private Supplier<String> loadSasToken() {
-        return () -> {
-            try {
-                return client.getResource("sastoken");
-            } catch (BadJWSException e) {
-                throw new ServiceRegistryLookupException("Bad signature in response from service registry", e);
-            }
-        };
+    public void invalidateSasKey() {
+        skCache.invalidateAll();
+    }
+
+    private String loadSasKey() {
+        try {
+            return client.getResource("sastoken");
+        } catch (BadJWSException e) {
+            throw new ServiceRegistryLookupException("Bad signature in response from service registry", e);
+        }
     }
 
     private Configuration jsonPathConfiguration() {

@@ -117,6 +117,15 @@ public class ServiceRegistryLookupTest {
         assertThat(serviceRecord.get(), is(dpo));
     }
 
+    @Test
+    public void testSasKeyCacheInvalidation() throws BadJWSException {
+        when(client.getResource("sastoken")).thenReturn("123").thenReturn("456");
+
+        assertThat(service.getSasKey(), is("123"));
+        service.invalidateSasKey();
+        assertThat(service.getSasKey(), is("456"));
+    }
+
     public static class SRContentBuilder {
         private Gson gson = new GsonBuilder().serializeNulls().create();
         private ServiceRecord serviceRecord;

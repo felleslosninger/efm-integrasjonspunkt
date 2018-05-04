@@ -5,7 +5,7 @@
     <groupId>no.difi.meldingsutveksling</groupId>
     <artifactId>parent-pom</artifactId>
     <packaging>pom</packaging>
-    <version>1.7.84</version>
+    <version>1.7.85</version>
     <name>Multiproject for meldingsutveksling</name>
 
     <scm>
@@ -51,7 +51,6 @@
         <module>noarkexchange-p360</module>
         <module>noarkexchange-ephorte</module>
         <module>noarkexchange-websak</module>
-        <module>mxa</module>
         <module>altinnexchange</module>
         <module>dokumentpakking</module>
         <module>integrasjonspunkt</module>
