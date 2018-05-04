@@ -41,11 +41,21 @@ public class SmsNotificationDigitalPostBuilderHandlerTest {
     }
 
     @Test
-    public void notifiableAndSmsFeatureEnabledShouldSetSmsVarsel() {
+    public void notifiableAndSmsFeatureEnabledWithoutNumberShouldNotSetSmsVarsel() {
         when(config.isEnableSmsNotification()).thenReturn(true);
 
         SmsNotificationDigitalPostBuilderHandler handler = new SmsNotificationDigitalPostBuilderHandler(config);
         handler.handle(new Request().withNotifiable(true), builder);
+
+        verify(builder, never()).smsVarsel(any(SmsVarsel.class));
+    }
+
+    @Test
+    public void notifiableAndSmsFeatureEnabledWithNumberShouldSetSmsVarsel() {
+        when(config.isEnableSmsNotification()).thenReturn(true);
+
+        SmsNotificationDigitalPostBuilderHandler handler = new SmsNotificationDigitalPostBuilderHandler(config);
+        handler.handle(new Request().withNotifiable(true).withMobileNumber("123"), builder);
 
         verify(builder).smsVarsel(any(SmsVarsel.class));
     }
