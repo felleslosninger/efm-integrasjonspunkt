@@ -14,7 +14,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.MimeTypeExtensionMapper.getMimetype;
 
 public class NextMoveDpiRequest implements MeldingsformidlerRequest {
@@ -154,7 +153,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     @Override
     public boolean isPrintProvider() {
-        return serviceRecord.isFysiskPost() || (props.getDpi().isForcePrint() && isNullOrEmpty(serviceRecord.getPostkasseAdresse()));
+        return serviceRecord.isFysiskPost();
     }
 
     @Override

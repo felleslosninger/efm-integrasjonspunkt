@@ -55,8 +55,6 @@ public class DigitalPostInnbyggerConfig {
     @NotNull
     private PrintSettings printSettings;
 
-    private boolean forcePrint;
-
     public PrintSettings getPrintSettings() {
         return printSettings;
     }
@@ -143,14 +141,6 @@ public class DigitalPostInnbyggerConfig {
 
     public void setEmail(Email email) {
         this.email = email;
-    }
-
-    public boolean isForcePrint() {
-        return forcePrint;
-    }
-
-    public void setForcePrint(boolean forcePrint) {
-        this.forcePrint = forcePrint;
     }
 
     public static class FeatureToggle {
