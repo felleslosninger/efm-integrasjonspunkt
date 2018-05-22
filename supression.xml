@@ -345,5 +345,23 @@
       ]]></notes>
       <cve>CVE-2017-8806</cve>
    </suppress>
+   <suppress>
+      <notes><![CDATA[
+        CVE-2018-1270 Upgraded to spring boot dependencies 1.5.13, waiting for further upgrades
+      ]]></notes>
+      <cve>CVE-2018-1270</cve>
+   </suppress>
+   <suppress>
+      <notes><![CDATA[
+        CVE-2002-0493 Upgraded to spring boot dependencies 1.5.13, waiting for further upgrades
+      ]]></notes>
+      <cve>CVE-2002-0493</cve>
+   </suppress>
+   <suppress>
+      <notes><![CDATA[
+        CVE-2016-3720 Upgraded to spring boot dependencies 1.5.13, waiting for further upgrades
+      ]]></notes>
+      <cve>CVE-2016-3720</cve>
+   </suppress>
 
 </suppressions>
