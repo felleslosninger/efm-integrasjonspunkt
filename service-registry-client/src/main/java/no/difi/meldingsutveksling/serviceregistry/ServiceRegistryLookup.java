@@ -11,44 +11,46 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.spi.json.GsonJsonProvider;
 import com.nimbusds.jose.proc.BadJWSException;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.Notification;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 
-import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord.isServiceIdentifier;
 
 @Service
+@Slf4j
 public class ServiceRegistryLookup {
 
     private final RestClient client;
     private IntegrasjonspunktProperties properties;
+    private SasKeyRepository sasKeyRepository;
     private final LoadingCache<String, String> skCache;
     private final LoadingCache<Parameters, ServiceRecord> srCache;
     private final LoadingCache<Parameters, List<ServiceRecord>> srsCache;
     private final LoadingCache<Parameters, InfoRecord> irCache;
 
-    private Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
-
     @Autowired
-    public ServiceRegistryLookup(RestClient client, IntegrasjonspunktProperties properties) {
+    public ServiceRegistryLookup(RestClient client,
+                                 IntegrasjonspunktProperties properties,
+                                 SasKeyRepository sasKeyRepository) {
         this.client = client;
         this.properties = properties;
+        this.sasKeyRepository = sasKeyRepository;
 
         this.skCache = CacheBuilder.newBuilder()
                 .maximumSize(1)
@@ -120,13 +122,13 @@ public class ServiceRegistryLookup {
             serviceRecord = documentContext.read("$.serviceRecord", ServiceRecord.class);
         } catch(HttpClientErrorException httpException) {
             if (Arrays.asList(HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED).contains(httpException.getStatusCode())) {
-                logger.warn("RestClient returned {} when looking up service record with identifier {}",
+                log.warn("RestClient returned {} when looking up service record with identifier {}",
                         httpException.getStatusCode(), parameters, httpException);
             } else {
                 throw new ServiceRegistryLookupException(String.format("RestClient threw exception when looking up service record with identifier %s", parameters), httpException);
             }
         } catch (BadJWSException e) {
-            logger.error("Bad signature in service record response", e);
+            log.error("Bad signature in service record response", e);
             throw new ServiceRegistryLookupException("Bad signature in service record response", e);
         }
         return serviceRecord;
@@ -140,13 +142,13 @@ public class ServiceRegistryLookup {
             serviceRecords = documentContext.read("$.serviceRecords", ServiceRecord[].class);
         } catch(HttpClientErrorException httpException) {
             if (Arrays.asList(HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED).contains(httpException.getStatusCode())) {
-                logger.warn("RestClient returned {} when looking up service record with identifier {}",
+                log.warn("RestClient returned {} when looking up service record with identifier {}",
                         httpException.getStatusCode(), parameters, httpException);
             } else {
                 throw new ServiceRegistryLookupException(String.format("RestClient threw exception when looking up service record with identifier %s", parameters), httpException);
             }
         } catch (BadJWSException e) {
-            logger.error("Bad signature in service record response", e);
+            log.error("Bad signature in service record response", e);
             throw new ServiceRegistryLookupException("Bad signature in service record response", e);
         }
         return Lists.newArrayList(serviceRecords);
@@ -179,19 +181,40 @@ public class ServiceRegistryLookup {
 
     public String getSasKey() {
         // Single entry, key does not matter
-        return skCache.getUnchecked("");
+        try {
+            return skCache.get("");
+        } catch (ExecutionException e) {
+            throw new ServiceRegistryLookupException("An error occured when fetching SAS key", e);
+        }
     }
 
     public void invalidateSasKey() {
         skCache.invalidateAll();
     }
 
-    private String loadSasKey() {
+    private String loadSasKey() throws SasKeyException {
         try {
-            return client.getResource("sastoken");
-        } catch (BadJWSException e) {
-            throw new ServiceRegistryLookupException("Bad signature in response from service registry", e);
+            String sasKey = client.getResource("sastoken");
+            // persist SAS key in case of ServiceRegistry down time
+            sasKeyRepository.deleteAll();
+            sasKeyRepository.save(SasKeyWrapper.of(sasKey));
+            return sasKey;
+        } catch (BadJWSException | RestClientException e) {
+            log.error("An error occured when fetching SAS key from ServiceRegistry. Checking for persisted key..", e);
         }
+
+        List<SasKeyWrapper> key = sasKeyRepository.findAll();
+        if (key.isEmpty()) {
+            throw new SasKeyException("No persisted SAS key found. Need to wait until connection with ServiceRegistry has been re-established..");
+        }
+        if (key.size() > 1) {
+            log.error("SAS key repository should only ever have one entry - deleting all entries..");
+            sasKeyRepository.deleteAll();
+            throw new SasKeyException("Multiple keys found in repository, waiting for retry");
+        }
+
+        log.info("Loading locally persisted SAS key");
+        return key.get(0).saskey;
     }
 
     private Configuration jsonPathConfiguration() {
