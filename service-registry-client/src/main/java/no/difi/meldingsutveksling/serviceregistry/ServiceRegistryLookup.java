@@ -200,11 +200,11 @@ public class ServiceRegistryLookup {
             sasKeyRepository.save(SasKeyWrapper.of(sasKey));
             return sasKey;
         } catch (BadJWSException | RestClientException e) {
-            log.warn("An error occured when fetching SAS key from ServiceRegistry. Checking for persisted key..");
+            log.error("An error occured when fetching SAS key from ServiceRegistry. Checking for persisted key..", e);
         }
 
         List<SasKeyWrapper> key = sasKeyRepository.findAll();
-        if (key.size() == 0) {
+        if (key.isEmpty()) {
             throw new SasKeyException("No persisted SAS key found. Need to wait until connection with ServiceRegistry has been re-established..");
         }
         if (key.size() > 1) {
