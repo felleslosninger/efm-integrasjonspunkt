@@ -20,7 +20,7 @@ public class DpeReceiptConversationResource extends ConversationResource {
     }
     public static DpeReceiptConversationResource of(ConversationResource cr) {
         DpeReceiptConversationResource dpeCr = new DpeReceiptConversationResource(cr.getConversationId(), cr.getReceiverId(), cr.getSenderId());
-        dpeCr.addFileRef(cr.getFileRefs().get(0));
+        dpeCr.setFileRefs(Maps.newHashMap());
         return dpeCr;
     }
 }

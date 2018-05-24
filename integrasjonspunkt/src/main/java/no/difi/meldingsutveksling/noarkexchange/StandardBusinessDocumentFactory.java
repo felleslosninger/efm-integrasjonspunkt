@@ -103,16 +103,18 @@ public class StandardBusinessDocumentFactory {
 
         List<ByteArrayFile> attachements = new ArrayList<>();
 
-        for (String filename : shipmentMeta.getFileRefs().values()) {
+        if (shipmentMeta.getFileRefs() != null) {
+            for (String filename : shipmentMeta.getFileRefs().values()) {
 
-            byte[] bytes;
-            try {
-                bytes = messagePersister.read(shipmentMeta, filename);
-            } catch (IOException e) {
-                log.error("Could not read file \""+filename+"\"", e);
-                throw new MessageException(e, StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT);
+                byte[] bytes;
+                try {
+                    bytes = messagePersister.read(shipmentMeta, filename);
+                } catch (IOException e) {
+                    log.error("Could not read file \""+filename+"\"", e);
+                    throw new MessageException(e, StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT);
+                }
+                attachements.add(new NextMoveAttachement(bytes, filename));
             }
-            attachements.add(new NextMoveAttachement(bytes, filename));
         }
 
         Archive archive;
