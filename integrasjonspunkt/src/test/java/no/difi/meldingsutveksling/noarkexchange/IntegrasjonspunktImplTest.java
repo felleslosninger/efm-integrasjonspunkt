@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import com.google.common.collect.Lists;
 import no.difi.meldingsutveksling.GetCanReceiveObjectMother;
 import no.difi.meldingsutveksling.PutMessageObjectMother;
 import no.difi.meldingsutveksling.ServiceIdentifier;
@@ -67,7 +68,7 @@ public class IntegrasjonspunktImplTest {
         when(serviceRegistryLookup.getInfoRecord(anyString())).thenReturn(infoRecord);
 
         ServiceRecord serviceRecord = ServiceRecordObjectMother.createDPVServiceRecord("1234");
-        ServiceRecordWrapper recordWrapper = ServiceRecordWrapper.of(serviceRecord, null);
+        ServiceRecordWrapper recordWrapper = ServiceRecordWrapper.of(serviceRecord, Lists.newArrayList());
         when(serviceRegistryLookup.getServiceRecord(anyString())).thenReturn(recordWrapper);
 
         when(propertiesMock.getFeature()).thenReturn(featureMock);
@@ -103,7 +104,7 @@ public class IntegrasjonspunktImplTest {
     @Test
     public void shouldBeAbleToReceiveWhenServiceIdentifierIsDPVAndMSHIsDisabled() {
         ServiceRecord serviceRecord = ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER);
-        ServiceRecordWrapper recordWrapper = ServiceRecordWrapper.of(serviceRecord, null);
+        ServiceRecordWrapper recordWrapper = ServiceRecordWrapper.of(serviceRecord, Lists.newArrayList());
         when(adresseregister.hasAdresseregisterCertificate(serviceRecord)).thenReturn(true);
         when(serviceRegistryLookup.getServiceRecord(IDENTIFIER)).thenReturn(recordWrapper);
         disableMsh();
@@ -116,7 +117,7 @@ public class IntegrasjonspunktImplTest {
 
     @Test
     public void shouldCheckWithMSHWhenServiceIdentifierIsDPVAndMSHEnabled() {
-        when(serviceRegistryLookup.getServiceRecord(IDENTIFIER)).thenReturn(ServiceRecordWrapper.of(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER), null));
+        when(serviceRegistryLookup.getServiceRecord(IDENTIFIER)).thenReturn(ServiceRecordWrapper.of(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER), Lists.newArrayList()));
         enableMsh();
         final GetCanReceiveMessageResponseType response = integrasjonspunkt.getCanReceiveMessage(GetCanReceiveObjectMother.createRequest(IDENTIFIER));
 
@@ -125,7 +126,7 @@ public class IntegrasjonspunktImplTest {
 
     @Test
     public void shouldBeAbleToReceiveWhenMSHDisabledAndServiceIdentifierIsDPV() {
-        when(serviceRegistryLookup.getServiceRecord(IDENTIFIER)).thenReturn(ServiceRecordWrapper.of(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER), null));
+        when(serviceRegistryLookup.getServiceRecord(IDENTIFIER)).thenReturn(ServiceRecordWrapper.of(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER), Lists.newArrayList()));
         disableMsh();
         final GetCanReceiveMessageResponseType result = integrasjonspunkt.getCanReceiveMessage(GetCanReceiveObjectMother.createRequest(IDENTIFIER));
 

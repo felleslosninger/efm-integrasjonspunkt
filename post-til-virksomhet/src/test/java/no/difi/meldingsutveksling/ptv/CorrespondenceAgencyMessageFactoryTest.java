@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.ptv;
 
+import com.google.common.collect.Lists;
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.core.EDUCore;
@@ -68,7 +69,7 @@ public class CorrespondenceAgencyMessageFactoryTest {
         srMock = mock(ServiceRegistryLookup.class);
         InfoRecord infoRecord = new InfoRecord("910075918", "Fylkesmannen i Sogn og Fjordane", new EntityType("DPV", "DPV"));
         ServiceRecord serviceRecord = new ServiceRecord(ServiceIdentifier.DPO, "1234", "pem123", "http://foo");
-        ServiceRecordWrapper recordWrapper = ServiceRecordWrapper.of(serviceRecord, null);
+        ServiceRecordWrapper recordWrapper = ServiceRecordWrapper.of(serviceRecord, Lists.newArrayList());
         when(srMock.getInfoRecord(any())).thenReturn(infoRecord);
         when(srMock.getServiceRecord(any())).thenReturn(recordWrapper);
 

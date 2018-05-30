@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
+import com.google.common.collect.Lists;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
@@ -61,7 +62,7 @@ public class AppConversationStrategyTest {
         receiverInfoRecord.setIdentifier("bar");
         when(srMock.getInfoRecord(SENDER_ORG_NR)).thenReturn(senderInfoRecord);
         when(srMock.getInfoRecord(RECEIVER_ORG_NR)).thenReturn(receiverInfoRecord);
-        ServiceRecordWrapper serviceRecord = ServiceRecordWrapper.of(new ServiceRecord(ServiceIdentifier.DPO, RECEIVER_ORG_NR, "pem123", "http://foo"), null);
+        ServiceRecordWrapper serviceRecord = ServiceRecordWrapper.of(new ServiceRecord(ServiceIdentifier.DPO, RECEIVER_ORG_NR, "pem123", "http://foo"), Lists.newArrayList());
         when(srMock.getServiceRecord(RECEIVER_ORG_NR)).thenReturn(serviceRecord);
 
         EDUCoreFactory eduCoreFactory = new EDUCoreFactory(srMock);
