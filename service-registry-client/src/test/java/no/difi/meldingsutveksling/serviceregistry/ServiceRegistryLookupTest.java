@@ -65,7 +65,7 @@ public class ServiceRegistryLookupTest {
         final String badOrgnr = "-100";
         when(client.getResource("identifier/" + badOrgnr, query)).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
 
-        final ServiceRecord serviceRecord = service.getServiceRecord(badOrgnr);
+        final ServiceRecord serviceRecord = service.getServiceRecord(badOrgnr).getServiceRecord();
 
         assertThat(serviceRecord, is(ServiceRecord.EMPTY));
     }
@@ -83,7 +83,7 @@ public class ServiceRegistryLookupTest {
         final String json = new SRContentBuilder().build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
-        final ServiceRecord serviceRecord = this.service.getServiceRecord(ORGNR);
+        final ServiceRecord serviceRecord = this.service.getServiceRecord(ORGNR).getServiceRecord();
 
         assertThat(serviceRecord, is(ServiceRecord.EMPTY));
     }
@@ -102,7 +102,7 @@ public class ServiceRegistryLookupTest {
         final String json = new SRContentBuilder().withServiceRecord(dpo).build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
-        final ServiceRecord serviceRecord = service.getServiceRecord(ORGNR);
+        final ServiceRecord serviceRecord = service.getServiceRecord(ORGNR).getServiceRecord();
 
         assertThat(serviceRecord, is(dpo));
     }

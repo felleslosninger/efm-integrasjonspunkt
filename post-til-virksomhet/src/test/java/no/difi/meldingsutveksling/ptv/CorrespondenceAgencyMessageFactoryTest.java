@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecordWrapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.xml.transform.StringSource;
@@ -67,8 +68,9 @@ public class CorrespondenceAgencyMessageFactoryTest {
         srMock = mock(ServiceRegistryLookup.class);
         InfoRecord infoRecord = new InfoRecord("910075918", "Fylkesmannen i Sogn og Fjordane", new EntityType("DPV", "DPV"));
         ServiceRecord serviceRecord = new ServiceRecord(ServiceIdentifier.DPO, "1234", "pem123", "http://foo");
+        ServiceRecordWrapper recordWrapper = ServiceRecordWrapper.of(serviceRecord, null);
         when(srMock.getInfoRecord(any())).thenReturn(infoRecord);
-        when(srMock.getServiceRecord(any())).thenReturn(serviceRecord);
+        when(srMock.getServiceRecord(any())).thenReturn(recordWrapper);
 
         eduCoreFactory = new EDUCoreFactory(srMock);
     }

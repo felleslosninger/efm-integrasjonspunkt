@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.serviceregistry;
 
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecordWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ public class IdentifierRelayController {
 
     @RequestMapping(value = "/servicerecord/{identifier}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getServiceRecord(@PathVariable("identifier") String identifier) {
-        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(identifier);
+        ServiceRecordWrapper serviceRecord = serviceRegistryLookup.getServiceRecord(identifier);
 
         List<ServiceRecord> serviceRecords = serviceRegistryLookup.getServiceRecords(identifier);
         if (serviceRecords.isEmpty()) {
@@ -28,7 +29,7 @@ public class IdentifierRelayController {
         }
 
         InfoRecord infoRecord = serviceRegistryLookup.getInfoRecord(identifier);
-        return ResponseEntity.ok(SRResponseWrapper.of(infoRecord, serviceRecord, serviceRecords));
+        return ResponseEntity.ok(SRResponseWrapper.of(infoRecord, serviceRecord.getFailedServiceIdentifiers(), serviceRecord.getServiceRecord(), serviceRecords));
     }
 
 }

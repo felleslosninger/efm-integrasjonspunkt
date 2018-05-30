@@ -14,7 +14,8 @@ public enum StatusMessage {
     UNABLE_TO_SEND_DPI("Klarte ikke sende post til digital post til innbygger", "Failed to send message to DPI Meldingsformidler", 11),
     UNABLE_TO_MARSHALL_CONVERSATION("Klarte ikke skrive melding til fil", "Unable to marshall conversation", 12),
     UNABLE_TO_EXTRACT_ARKIVMELDING("Teknisk feil: kan ikke behandle melding", "Unable to extract Arkivmelding", 13),
-    NO_MATCHING_SERVICEIDENTIFIER("Ingen passende serviceIdentifier for mottaker", "No matching serviceIdentifier for receiver", 14);
+    NO_MATCHING_SERVICEIDENTIFIER("Ingen passende serviceIdentifier for mottaker", "No matching serviceIdentifier for receiver", 14),
+    FAILED_SERVICEIDENTIFIERS("Service registry feilet et eller flere tjenesteoppslag", "Service registry failed lookup for one or more service identifiers", 15);
 
     private final String endUserMessage;
     private final String technicalMessage;
