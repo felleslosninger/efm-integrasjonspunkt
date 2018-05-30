@@ -54,8 +54,9 @@ public class ServiceRegistryLookupTest {
     @Before
     public void setup() {
         final IntegrasjonspunktProperties properties = mock(IntegrasjonspunktProperties.class);
+        SasKeyRepository sasKeyRepoMock = mock(SasKeyRepository.class);
         when(properties.isVarslingsplikt()).thenReturn(false);
-        service = new ServiceRegistryLookup(client, properties);
+        service = new ServiceRegistryLookup(client, properties, sasKeyRepoMock);
         query = Notification.NOT_OBLIGATED.createQuery();
     }
 

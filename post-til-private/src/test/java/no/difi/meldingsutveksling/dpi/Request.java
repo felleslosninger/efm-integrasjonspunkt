@@ -9,6 +9,8 @@ import java.util.List;
 
 public class Request implements MeldingsformidlerRequest {
     private boolean notifiable;
+    private String mobileNumber;
+    private String email;
 
     Request() {}
 
@@ -59,7 +61,7 @@ public class Request implements MeldingsformidlerRequest {
 
     @Override
     public String getEmailAddress() {
-        return null;
+        return email;
     }
 
     @Override
@@ -74,7 +76,7 @@ public class Request implements MeldingsformidlerRequest {
 
     @Override
     public String getMobileNumber() {
-        return null;
+        return mobileNumber;
     }
 
     @Override
@@ -124,6 +126,16 @@ public class Request implements MeldingsformidlerRequest {
 
     Request withNotifiable(boolean notifiable) {
         this.notifiable = notifiable;
+        return this;
+    }
+
+    Request withMobileNumber(String mobileNumber) {
+        this.mobileNumber = mobileNumber;
+        return this;
+    }
+
+    Request withEmail(String email) {
+        this.email = email;
         return this;
     }
 }

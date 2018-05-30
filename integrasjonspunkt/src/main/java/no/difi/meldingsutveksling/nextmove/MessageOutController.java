@@ -291,15 +291,12 @@ public class MessageOutController {
             }
         }
 
-        if (cr.getServiceIdentifier() == DPI) {
-            Optional<ServiceRecord> dpiServiceRecord = sr.getServiceRecord(cr.getReceiver().getReceiverId(),
-                    DPI, ((DpiConversationResource)cr).isMandatoryNotification());
-            if (dpiServiceRecord.isPresent() &&
-                    !dpiServiceRecord.get().isFysiskPost() &&
-                    isNullOrEmpty(dpiServiceRecord.get().getPostkasseAdresse()) &&
-                    !props.getDpi().isForcePrint()) {
-                cr = convertDpiToDpv(cr);
-            }
+        List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiverId());
+        boolean hasDpiRecord = serviceRecords.stream()
+                .map(ServiceRecord::getServiceIdentifier)
+                .anyMatch(si -> DPI == si);
+        if (cr.getServiceIdentifier() == DPI && !hasDpiRecord) {
+            cr = convertDpiToDpv(cr);
         }
 
         internalQueue.enqueueNextmove(cr);

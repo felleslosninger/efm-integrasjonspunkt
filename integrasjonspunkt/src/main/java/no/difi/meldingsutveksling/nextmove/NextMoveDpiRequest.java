@@ -24,7 +24,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.MimeTypeExtensionMapper.getMimetype;
 
 @Slf4j
@@ -202,7 +201,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     @Override
     public boolean isPrintProvider() {
-        return serviceRecord.isFysiskPost() || (props.getDpi().isForcePrint() && isNullOrEmpty(serviceRecord.getPostkasseAdresse()));
+        return serviceRecord.isFysiskPost();
     }
 
     @Override

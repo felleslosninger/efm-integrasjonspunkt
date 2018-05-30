@@ -22,7 +22,7 @@ public class DpeReceiptConversationResource extends ConversationResource {
         Receiver receiver = Receiver.of(cr.getSender().getSenderId(), cr.getSender().getSenderName());
         Sender sender = Sender.of(cr.getReceiver().getReceiverId(), cr.getReceiver().getReceiverName());
         DpeReceiptConversationResource dpeCr = new DpeReceiptConversationResource(cr.getConversationId(), sender, receiver);
-        dpeCr.addFileRef(cr.getFileRefs().get(0));
+        dpeCr.setFileRefs(Maps.newHashMap());
         return dpeCr;
     }
 }
