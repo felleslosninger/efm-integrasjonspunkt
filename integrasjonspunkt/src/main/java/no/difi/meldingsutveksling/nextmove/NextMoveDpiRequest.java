@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.MimeTypeExtensionMapper.getMimetype;
 
 @Slf4j
