@@ -61,16 +61,6 @@ public class ServiceRegistryLookupTest {
     }
 
     @Test
-    public void clientThrowsExceptionWithHttpStatusNotFoundShouldReturnsEmptyServiceRecord() throws BadJWSException {
-        final String badOrgnr = "-100";
-        when(client.getResource("identifier/" + badOrgnr, query)).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
-
-        final ServiceRecord serviceRecord = service.getServiceRecord(badOrgnr).getServiceRecord();
-
-        assertThat(serviceRecord, is(ServiceRecord.EMPTY));
-    }
-
-    @Test
     public void clientThrowsExceptionWithInternalServerErrorThenServiceShouldThrowServiceRegistryLookupException() throws BadJWSException {
         thrown.expect(UncheckedExecutionException.class);
         when(client.getResource(any(String.class))).thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
@@ -150,6 +140,7 @@ public class ServiceRegistryLookupTest {
                 content.put("serviceRecords", Lists.newArrayList(this.serviceRecord));
             }
             content.put("infoRecord", infoRecord);
+            content.put("failedServiceIdentifiers", Lists.newArrayList());
             return gson.toJson(content);
         }
 
