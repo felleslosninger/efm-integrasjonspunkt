@@ -61,16 +61,6 @@ public class ServiceRegistryLookupTest {
     }
 
     @Test
-    public void clientThrowsExceptionWithHttpStatusNotFoundShouldReturnsEmptyServiceRecord() throws BadJWSException {
-        final String badOrgnr = "-100";
-        when(client.getResource("identifier/" + badOrgnr, query)).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
-
-        final ServiceRecord serviceRecord = service.getServiceRecord(badOrgnr);
-
-        assertThat(serviceRecord, is(ServiceRecord.EMPTY));
-    }
-
-    @Test
     public void clientThrowsExceptionWithInternalServerErrorThenServiceShouldThrowServiceRegistryLookupException() throws BadJWSException {
         thrown.expect(UncheckedExecutionException.class);
         when(client.getResource(any(String.class))).thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
@@ -83,7 +73,7 @@ public class ServiceRegistryLookupTest {
         final String json = new SRContentBuilder().build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
-        final ServiceRecord serviceRecord = this.service.getServiceRecord(ORGNR);
+        final ServiceRecord serviceRecord = this.service.getServiceRecord(ORGNR).getServiceRecord();
 
         assertThat(serviceRecord, is(ServiceRecord.EMPTY));
     }
@@ -102,7 +92,7 @@ public class ServiceRegistryLookupTest {
         final String json = new SRContentBuilder().withServiceRecord(dpo).build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
-        final ServiceRecord serviceRecord = service.getServiceRecord(ORGNR);
+        final ServiceRecord serviceRecord = service.getServiceRecord(ORGNR).getServiceRecord();
 
         assertThat(serviceRecord, is(dpo));
     }
@@ -150,6 +140,7 @@ public class ServiceRegistryLookupTest {
                 content.put("serviceRecords", Lists.newArrayList(this.serviceRecord));
             }
             content.put("infoRecord", infoRecord);
+            content.put("failedServiceIdentifiers", Lists.newArrayList());
             return gson.toJson(content);
         }
 

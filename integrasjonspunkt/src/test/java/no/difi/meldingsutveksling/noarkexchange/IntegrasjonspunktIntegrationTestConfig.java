@@ -1,6 +1,8 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import com.google.common.collect.Lists;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.KeystoreProvider;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
@@ -10,7 +12,6 @@ import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
-import no.difi.meldingsutveksling.KeystoreProvider;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.receipt.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -18,11 +19,11 @@ import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecordWrapper;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.assertj.core.util.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
@@ -156,7 +157,8 @@ public class IntegrasjonspunktIntegrationTestConfig {
         ServiceRecord sr = mock(ServiceRecord.class);
         when(sr.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPO);
         when(sr.getOrganisationNumber()).thenReturn("1337");
-        when(srMock.getServiceRecord(anyString())).thenReturn(sr);
+        ServiceRecordWrapper recordWrapper = ServiceRecordWrapper.of(sr, Lists.newArrayList());
+        when(srMock.getServiceRecord(anyString())).thenReturn(recordWrapper);
         when(srMock.getServiceRecord(anyString(), any(ServiceIdentifier.class))).thenReturn(Optional.ofNullable(sr));
         when(srMock.getServiceRecords(anyString())).thenReturn(Lists.newArrayList(sr));
 

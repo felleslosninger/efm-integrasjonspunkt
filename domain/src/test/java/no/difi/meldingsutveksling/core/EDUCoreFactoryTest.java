@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.core;
 
+import com.google.common.collect.Lists;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.nextmove.DpoConversationResource;
@@ -13,6 +14,7 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecordWrapper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.junit.Before;
@@ -189,7 +191,7 @@ public class EDUCoreFactoryTest {
         serviceRegistryLookup = Mockito.mock(ServiceRegistryLookup.class);
 
         InfoRecord infoRecord = new InfoRecord("1234", "Foo", new EntityType("Organisasjonsledd", "ORGL"));
-        ServiceRecord serviceRecord = new ServiceRecord(ServiceIdentifier.DPO, "1234", "pem123", "http://foo");
+        ServiceRecordWrapper serviceRecord = ServiceRecordWrapper.of(new ServiceRecord(ServiceIdentifier.DPO, "1234", "pem123", "http://foo"), Lists.newArrayList());
         when(serviceRegistryLookup.getInfoRecord(anyString())).thenReturn(infoRecord);
         when(serviceRegistryLookup.getServiceRecord(anyString())).thenReturn(serviceRecord);
     }

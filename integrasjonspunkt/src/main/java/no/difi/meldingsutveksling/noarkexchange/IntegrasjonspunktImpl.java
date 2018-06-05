@@ -9,8 +9,9 @@ import no.difi.meldingsutveksling.logging.MarkerFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecordWrapper;
 import no.difi.meldingsutveksling.services.Adresseregister;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,7 +75,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
             return response;
         }
 
-        final ServiceRecord serviceRecord;
+        final ServiceRecordWrapper serviceRecord;
         try {
             serviceRecord = serviceRegistryLookup.getServiceRecord(organisasjonsnummer);
         } catch (Exception e) {
@@ -83,12 +84,19 @@ public class IntegrasjonspunktImpl implements SOAPport {
             return response;
         }
 
+        if (!serviceRecord.getFailedServiceIdentifiers().isEmpty()) {
+            String failed = StringUtils.join(serviceRecord.getFailedServiceIdentifiers(), ", ");
+            log.error("Service registry failed to look up one or more potential service identifiers - getCanReceive returning false (failed: {})", failed);
+            response.setResult(false);
+            return response;
+        }
+
         final LogstashMarker marker = MarkerFactory.receiverMarker(organisasjonsnummer);
         boolean validServiceIdentifier = false;
         boolean mshCanReceive = false;
         boolean isDpv = false;
-        if (asList(DPO, DPI, DPF).contains(serviceRecord.getServiceIdentifier()) &&
-                strategyFactory.hasFactory(serviceRecord.getServiceIdentifier())) {
+        if (asList(DPO, DPI, DPF).contains(serviceRecord.getServiceRecord().getServiceIdentifier()) &&
+                strategyFactory.hasFactory(serviceRecord.getServiceRecord().getServiceIdentifier())) {
             validServiceIdentifier = true;
             Audit.info("CanReceive = true", marker);
         } else if (mshClient.canRecieveMessage(organisasjonsnummer)) {
@@ -118,9 +126,16 @@ public class IntegrasjonspunktImpl implements SOAPport {
     public PutMessageResponseType putMessage(PutMessageRequestType request) {
         PutMessageRequestWrapper message = new PutMessageRequestWrapper(request);
 
-        ServiceRecord receiverRecord = serviceRegistryLookup.getServiceRecord(message.getRecieverPartyNumber());
+        ServiceRecordWrapper receiverRecord = serviceRegistryLookup.getServiceRecord(message.getRecieverPartyNumber());
+
+        if (!receiverRecord.getFailedServiceIdentifiers().isEmpty()) {
+            String failed = StringUtils.join(receiverRecord.getFailedServiceIdentifiers(), ", ");
+            log.error("Service registry failed to look up one or more potential service identifiers - getCanReceive returning false (failed: {})", failed);
+            return PutMessageResponseFactory.createErrorResponse(new MessageException(StatusMessage.FAILED_SERVICEIDENTIFIERS));
+        }
+
         if (PayloadUtil.isAppReceipt(message.getPayload()) &&
-                receiverRecord.getServiceIdentifier() != ServiceIdentifier.DPO) {
+                receiverRecord.getServiceRecord().getServiceIdentifier() != ServiceIdentifier.DPO) {
             Audit.info(String.format("Message is AppReceipt, but receiver (%s) is not DPO. Discarding message.",
                     message.getRecieverPartyNumber()), markerFrom(message));
             return PutMessageResponseFactory.createOkResponse();

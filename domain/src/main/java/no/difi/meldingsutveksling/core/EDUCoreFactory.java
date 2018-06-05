@@ -215,7 +215,7 @@ public class EDUCoreFactory {
         eduCore.setSender(Sender.of(senderInfo.getIdentifier(), senderInfo.getOrganizationName(), senderRef));
         eduCore.setReceiver(Receiver.of(receiverInfo.getIdentifier(), receiverInfo.getOrganizationName(), receiverRef));
 
-        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(receiverOrgNr);
+        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(receiverOrgNr).getServiceRecord();
         eduCore.setServiceIdentifier(serviceRecord.getServiceIdentifier());
 
         return eduCore;

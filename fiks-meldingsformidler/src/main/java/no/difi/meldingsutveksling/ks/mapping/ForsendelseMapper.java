@@ -40,7 +40,7 @@ public class ForsendelseMapper {
     public SendForsendelseMedId mapFrom(EDUCore eduCore, X509Certificate certificate) {
         final Forsendelse.Builder<Void> forsendelse = Forsendelse.builder();
         forsendelse.withEksternref(eduCore.getId());
-        forsendelse.withKunDigitalLevering(true);
+        forsendelse.withKunDigitalLevering(false);
         forsendelse.withSvarPaForsendelse(eduCore.getReceiver().getRef());
 
         final MeldingType meldingType = EDUCoreConverter.payloadAsMeldingType(eduCore.getPayload());

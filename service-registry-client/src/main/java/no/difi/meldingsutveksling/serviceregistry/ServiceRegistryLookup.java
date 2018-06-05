@@ -18,6 +18,7 @@ import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.Notification;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecordWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord.isServiceIdentifier;
 
@@ -40,7 +43,7 @@ public class ServiceRegistryLookup {
     private IntegrasjonspunktProperties properties;
     private SasKeyRepository sasKeyRepository;
     private final LoadingCache<String, String> skCache;
-    private final LoadingCache<Parameters, ServiceRecord> srCache;
+    private final LoadingCache<Parameters, ServiceRecordWrapper> srCache;
     private final LoadingCache<Parameters, List<ServiceRecord>> srsCache;
     private final LoadingCache<Parameters, InfoRecord> irCache;
 
@@ -65,9 +68,9 @@ public class ServiceRegistryLookup {
         this.srCache = CacheBuilder.newBuilder()
                 .maximumSize(100)
                 .expireAfterWrite(1, TimeUnit.MINUTES)
-                .build(new CacheLoader<Parameters, ServiceRecord>() {
+                .build(new CacheLoader<Parameters, ServiceRecordWrapper>() {
                     @Override
-                    public ServiceRecord load(Parameters key) throws Exception {
+                    public ServiceRecordWrapper load(Parameters key) throws Exception {
                         return loadServiceRecord(key);
                     }
                 });
@@ -98,7 +101,7 @@ public class ServiceRegistryLookup {
      * @param identifier of the receiver
      * @return a ServiceRecord if found. Otherwise an empty ServiceRecord is returned.
      */
-    public ServiceRecord getServiceRecord(String identifier) {
+    public ServiceRecordWrapper getServiceRecord(String identifier) {
         Notification notification = properties.isVarslingsplikt()? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
         return srCache.getUnchecked(new Parameters(identifier, notification));
     }
@@ -124,16 +127,20 @@ public class ServiceRegistryLookup {
         Notification notification = mandatoryNotification ? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
         return srsCache.getUnchecked(new Parameters(identifier, notification));
     }
-    private ServiceRecord loadServiceRecord(Parameters parameters) {
-        ServiceRecord serviceRecord = ServiceRecord.EMPTY;
+    private ServiceRecordWrapper loadServiceRecord(Parameters parameters) {
+        ServiceRecord serviceRecord;
+        ServiceRecordWrapper recordWrapper;
         try {
             final String serviceRecords = client.getResource("identifier/" + parameters.getIdentifier(), parameters.getQuery());
             final DocumentContext documentContext = JsonPath.parse(serviceRecords, jsonPathConfiguration());
             serviceRecord = documentContext.read("$.serviceRecord", ServiceRecord.class);
+            String[] failedServiceIdentifiers = documentContext.read("$.failedServiceIdentifiers", String[].class);
+            recordWrapper = ServiceRecordWrapper.of(serviceRecord, Stream.of(failedServiceIdentifiers).map(ServiceIdentifier::valueOf).collect(Collectors.toList()));
         } catch(HttpClientErrorException httpException) {
             if (Arrays.asList(HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED).contains(httpException.getStatusCode())) {
                 log.warn("RestClient returned {} when looking up service record with identifier {}",
                         httpException.getStatusCode(), parameters, httpException);
+                throw httpException;
             } else {
                 throw new ServiceRegistryLookupException(String.format("RestClient threw exception when looking up service record with identifier %s", parameters), httpException);
             }
@@ -141,7 +148,7 @@ public class ServiceRegistryLookup {
             log.error("Bad signature in service record response", e);
             throw new ServiceRegistryLookupException("Bad signature in service record response", e);
         }
-        return serviceRecord;
+        return recordWrapper;
     }
 
     private List<ServiceRecord> loadServiceRecords(Parameters parameters) {
@@ -183,10 +190,6 @@ public class ServiceRegistryLookup {
         }
         final DocumentContext documentContext = JsonPath.parse(infoRecordString, jsonPathConfiguration());
         return documentContext.read("$.infoRecord", InfoRecord.class);
-    }
-
-    private int getNumberOfServiceRecords(DocumentContext documentContext) {
-        return documentContext.read("$.serviceRecords.length()");
     }
 
     public String getSasKey() {
