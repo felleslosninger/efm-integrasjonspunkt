@@ -59,7 +59,7 @@ public class DpiConversationStrategy implements ConversationStrategy {
             throw new NextMoveException(errorStr);
         }
 
-        NextMoveDpiRequest request = new NextMoveDpiRequest(props, messagePersister, cr, serviceRecord.get());
+        NextMoveDpiRequest request = new NextMoveDpiRequest(messagePersister, cr, serviceRecord.get());
         MeldingsformidlerClient client = new MeldingsformidlerClient(props.getDpi(), keystore.getKeyStore());
         try {
             client.sendMelding(request);
