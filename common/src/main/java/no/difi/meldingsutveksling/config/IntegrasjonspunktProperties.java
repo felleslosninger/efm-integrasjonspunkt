@@ -70,7 +70,7 @@ public class IntegrasjonspunktProperties {
      * notified. This parameter is passed over to ServiceRegistry to determine where the message should be sent.
      * (See http://begrep.difi.no/SikkerDigitalPost/1.2.3/forretningslag/varsling for more information)
      */
-    private boolean varslingsplikt = false;
+    private boolean varslingsplikt = true;
 
     @Data
     public static class Ntp {
