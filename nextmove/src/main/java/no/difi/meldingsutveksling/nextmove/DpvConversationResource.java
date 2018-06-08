@@ -1,20 +1,40 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import lombok.Data;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.xml.LocalDateTimeAdapter;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
+import javax.persistence.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @DiscriminatorValue("DPV")
 @Data
 public class DpvConversationResource extends ConversationResource {
 
+    private boolean mandatoryNotification;
+    private String serviceEdition;
     private String messageTitle;
-    private String messageContent;
+    private String messageSummary;
+    private String messageBody;
+    private String languageCode;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    @XmlJavaTypeAdapter(LocalDateTimeAdapter.class)
+    private LocalDateTime visibleDateTime;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    @XmlJavaTypeAdapter(LocalDateTimeAdapter.class)
+    private LocalDateTime allowSystemDeleteDateTime;
+    private boolean allowForwarding;
+    private Notifications notifications;
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "conversation_id")
+    private List<FileAttachement> files;
 
     DpvConversationResource() {}
 
@@ -26,11 +46,8 @@ public class DpvConversationResource extends ConversationResource {
         return new DpvConversationResource(conversationId, sender, receiver);
     }
 
-    public static DpvConversationResource of(DpiConversationResource dpi) {
+    public static DpvConversationResource of(DpiConversationResource dpi, IntegrasjonspunktProperties props) {
         DpvConversationResource dpv = of(dpi.getConversationId(), dpi.getSender(), dpi.getReceiver());
-
-        dpv.setMessageContent(dpi.getDigitalPostInfo().getIkkeSensitivTittel());
-        dpv.setMessageTitle(dpi.getDigitalPostInfo().getIkkeSensitivTittel());
 
         dpv.setSender(dpi.getSender());
         dpv.setReceiver(dpi.getReceiver());
@@ -38,6 +55,18 @@ public class DpvConversationResource extends ConversationResource {
         dpv.setFileRefs(dpi.getFileRefs());
         dpv.setCustomProperties(dpi.getCustomProperties());
         dpv.setArkivmelding(dpi.getArkivmelding());
+
+        dpv.setServiceEdition("10");
+        if (!Strings.isNullOrEmpty(props.getDpv().getExternalServiceEditionCode())) {
+            dpv.setServiceEdition(props.getDpv().getExternalServiceEditionCode());
+        }
+        dpv.setMessageTitle(dpi.getDigitalPostInfo().getIkkeSensitivTittel());
+        dpv.setMessageSummary(dpi.getDigitalPostInfo().getIkkeSensitivTittel());
+        dpv.setMessageBody(dpi.getDigitalPostInfo().getIkkeSensitivTittel());
+        dpv.setLanguageCode("1044");
+        dpv.setVisibleDateTime(LocalDateTime.now());
+        dpv.setAllowSystemDeleteDateTime(LocalDateTime.now().plusMinutes(5));
+        dpv.setFiles(dpi.getFiles());
 
         return dpv;
     }

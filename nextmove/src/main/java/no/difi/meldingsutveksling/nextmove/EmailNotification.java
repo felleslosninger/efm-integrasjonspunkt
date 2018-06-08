@@ -12,9 +12,9 @@ import javax.persistence.Embeddable;
 @RequiredArgsConstructor(staticName = "of")
 @NoArgsConstructor
 @Embeddable
-public class SmsVarsel {
+public class EmailNotification {
 
     @NonNull
-    @Column(name = "sms_tekst")
-    private String tekst;
+    @Column(name = "email_text")
+    private String text;
 }

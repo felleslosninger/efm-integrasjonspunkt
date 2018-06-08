@@ -46,6 +46,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
@@ -197,7 +198,7 @@ public class MessageOutController {
         cr.setSenderName(senderInfo.getOrganizationName());
 
         if (isNullOrEmpty(cr.getReceiver().getReceiverName())) {
-            if (cr.getServiceIdentifier() == DPI) {
+            if (asList(DPI, DPV).contains(cr.getServiceIdentifier())) {
                 crFactory.create(cr);
             } else {
                 InfoRecord receiverInfo = sr.getInfoRecord(cr.getReceiver().getReceiverId());
@@ -305,7 +306,7 @@ public class MessageOutController {
     }
 
     private ConversationResource convertDpiToDpv(ConversationResource cr) {
-        DpvConversationResource dpv = DpvConversationResource.of((DpiConversationResource) cr);
+        DpvConversationResource dpv = DpvConversationResource.of((DpiConversationResource) cr, props);
         // Update conversation to make it pollable for receipts
         conversationService.setServiceIdentifier(cr.getConversationId(), ServiceIdentifier.DPV);
         conversationService.setPollable(cr.getConversationId(), true);

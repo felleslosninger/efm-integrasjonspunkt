@@ -2,11 +2,13 @@ package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.nextmove.DpvConversationResource;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 
@@ -25,25 +27,66 @@ public class PostVirksomhetStrategyFactory implements MessageStrategyFactory {
                                                             ServiceRegistryLookup serviceRegistryLookup) {
 
         InfoRecord infoRecord = serviceRegistryLookup.getInfoRecord(properties.getOrg().getNumber());
-        CorrespondenceAgencyConfiguration.Builder builder = new CorrespondenceAgencyConfiguration.Builder()
-                .withExternalServiceCode(properties.getDpv().getExternalServiceCode())
-                .withExternalServiceEditionCode(properties.getDpv().getExternalServiceEditionCode())
-                .withPassword(properties.getDpv().getPassword())
-                .withSystemUserCode(properties.getDpv().getUsername())
-                .withSender(infoRecord.getOrganizationName())
-                .withNotifyEmail(properties.getDpv().isNotifyEmail())
-                .withNotifySms(properties.getDpv().isNotifySms());
+        CorrespondenceAgencyConfiguration.CorrespondenceAgencyConfigurationBuilder builder = CorrespondenceAgencyConfiguration.builder()
+                .externalServiceCode(properties.getDpv().getExternalServiceCode())
+                .externalServiceEditionCode(properties.getDpv().getExternalServiceEditionCode())
+                .password(properties.getDpv().getPassword())
+                .systemUserCode(properties.getDpv().getUsername())
+                .sender(infoRecord.getOrganizationName())
+                .notifyEmail(properties.getDpv().isNotifyEmail())
+                .notifySms(properties.getDpv().isNotifySms());
 
         Optional<String> notificationText = Optional.ofNullable(properties.getDpv())
                 .map(IntegrasjonspunktProperties.PostVirksomheter::getNotificationText);
-        notificationText.ifPresent(builder::withNotificationText);
+        notificationText.ifPresent(builder::notificationText);
 
-        builder.withNextmoveFiledir(properties.getNextmove().getFiledir());
+        builder.nextmoveFiledir(properties.getNextmove().getFiledir());
 
-        builder.withEndpointUrl(properties.getDpv().getEndpointUrl().toString());
+        builder.endpointUrl(properties.getDpv().getEndpointUrl().toString());
 
         CorrespondenceAgencyConfiguration config = builder.build();
+
         return new PostVirksomhetStrategyFactory(config, noarkClient);
+    }
+
+    public static PostVirksomhetStrategyFactory newInstance(IntegrasjonspunktProperties properties,
+                                                            DpvConversationResource cr) {
+
+        CorrespondenceAgencyConfiguration.CorrespondenceAgencyConfigurationBuilder builder = CorrespondenceAgencyConfiguration.builder()
+                .externalServiceCode(properties.getDpv().getExternalServiceCode())
+                .externalServiceEditionCode(cr.getServiceEdition())
+                .password(properties.getDpv().getPassword())
+                .systemUserCode(properties.getDpv().getUsername())
+                .sender(cr.getReceiver().getReceiverName())
+                .languageCode(cr.getLanguageCode())
+                .allowForwarding(cr.isAllowForwarding())
+                .notifyEmail(properties.getDpv().isNotifyEmail())
+                .notifySms(properties.getDpv().isNotifySms());
+
+        if (cr.getVisibleDateTime() != null) {
+            builder.visibleDateTime(cr.getVisibleDateTime());
+        } else {
+            builder.visibleDateTime(LocalDateTime.now());
+        }
+
+        if (cr.getAllowSystemDeleteDateTime() != null) {
+            builder.allowSystemDeleteTime(cr.getAllowSystemDeleteDateTime());
+        } else {
+            builder.allowSystemDeleteTime(LocalDateTime.now().plusMinutes(5));
+        }
+
+        if (cr.getNotifications() != null) {
+            builder.emailText(cr.getNotifications().getEmailNotification().getText());
+            builder.smsText(cr.getNotifications().getSmsNotification().getText());
+        }
+
+        builder.nextmoveFiledir(properties.getNextmove().getFiledir());
+
+        builder.endpointUrl(properties.getDpv().getEndpointUrl().toString());
+
+        CorrespondenceAgencyConfiguration config = builder.build();
+
+        return new PostVirksomhetStrategyFactory(config, null);
     }
 
     @Override

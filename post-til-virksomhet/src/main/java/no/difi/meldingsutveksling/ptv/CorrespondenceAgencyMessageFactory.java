@@ -16,6 +16,7 @@ import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAtta
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import no.difi.meldingsutveksling.nextmove.DpvConversationResource;
+import no.difi.meldingsutveksling.nextmove.FileAttachement;
 import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
@@ -26,11 +27,9 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.IOException;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
@@ -72,10 +71,14 @@ public class CorrespondenceAgencyMessageFactory {
                 throw new NextMoveException(String.format("Could not read file \"%s\"", f), e);
             }
 
+            Optional<FileAttachement> fao = Optional.empty();
+            if (cr.getFiles() != null) {
+                fao = cr.getFiles().stream().filter(fa -> f.equals(fa.getFilnavn())).findAny();
+            }
             BinaryAttachmentV2 binaryAttachmentV2 = new BinaryAttachmentV2();
             binaryAttachmentV2.setFunctionType(AttachmentFunctionType.fromValue("Unspecified"));
             binaryAttachmentV2.setFileName(reporteeFactory.createBinaryAttachmentV2FileName(f));
-            binaryAttachmentV2.setName(reporteeFactory.createBinaryAttachmentV2Name(f));
+            binaryAttachmentV2.setName(reporteeFactory.createBinaryAttachmentV2Name(fao.map(FileAttachement::getTittel).orElse(f)));
             binaryAttachmentV2.setEncrypted(false);
             binaryAttachmentV2.setSendersReference(reporteeFactory.createBinaryAttachmentV2SendersReference("AttachmentReference_as123452"));
             binaryAttachmentV2.setData(reporteeFactory.createBinaryAttachmentV2Data(bytes));
@@ -83,7 +86,7 @@ public class CorrespondenceAgencyMessageFactory {
         }
 
         return create(config, cr.getConversationId(), cr.getReceiver().getReceiverId(), cr.getMessageTitle(),
-                cr.getMessageContent(), attachmentExternalBEV2List);
+                cr.getMessageSummary(), cr.getMessageBody(), attachmentExternalBEV2List);
     }
 
     public static InsertCorrespondenceV2 create(CorrespondenceAgencyConfiguration config, EDUCore edu) {
@@ -104,13 +107,14 @@ public class CorrespondenceAgencyMessageFactory {
         String title = meldingType.getJournpost().getJpInnhold();
         String content = meldingType.getJournpost().getJpOffinnhold();
 
-        return create(config, edu.getId(), edu.getReceiver().getIdentifier(), title, content, attachmentExternalBEV2List);
+        return create(config, edu.getId(), edu.getReceiver().getIdentifier(), title, title, content, attachmentExternalBEV2List);
     }
 
     public static InsertCorrespondenceV2 create(CorrespondenceAgencyConfiguration config,
                                                 String conversationId,
                                                 String receiverIdentifier,
                                                 String messageTitle,
+                                                String messageSummary,
                                                 String messageContent,
                                                 BinaryAttachmentExternalBEV2List attachments) {
 
@@ -123,25 +127,23 @@ public class CorrespondenceAgencyMessageFactory {
         // Service edition, default 10
         correspondence.setServiceEdition(getServiceEditionCode(config));
         // Should the user be allowed to forward the message from portal
-        correspondence.setAllowForwarding(objectFactory.createMyInsertCorrespondenceV2AllowForwarding(false));
+        correspondence.setAllowForwarding(objectFactory.createMyInsertCorrespondenceV2AllowForwarding(config.isAllowForwarding()));
         // Name of the message sender, always "Avsender"
         correspondence.setMessageSender(objectFactory.createMyInsertCorrespondenceV2MessageSender(config.getSender()));
         // The date and time the message should be visible in the Portal
-        correspondence.setVisibleDateTime(toXmlGregorianCalendar(ZonedDateTime.now()));
+        correspondence.setVisibleDateTime(getVisibleDateTime(config));
         correspondence.setDueDateTime(toXmlGregorianCalendar(ZonedDateTime.now().plusDays(7)));
 
         ExternalContentV2 externalContentV2 = new ExternalContentV2();
-        externalContentV2.setLanguageCode(objectFactory.createExternalContentV2LanguageCode("1044"));
+        externalContentV2.setLanguageCode(objectFactory.createExternalContentV2LanguageCode(getLanguageCode(config)));
         externalContentV2.setMessageTitle(objectFactory.createExternalContentV2MessageTitle(messageTitle));
-        externalContentV2.setMessageSummary(objectFactory.createExternalContentV2MessageSummary(messageTitle));
+        externalContentV2.setMessageSummary(objectFactory.createExternalContentV2MessageSummary(messageSummary));
         externalContentV2.setMessageBody(objectFactory.createExternalContentV2MessageBody(messageContent));
 
         // The date and time the message can be deleted by the user
         correspondence.setAllowSystemDeleteDateTime(
                 objectFactory.createMyInsertCorrespondenceV2AllowSystemDeleteDateTime(
-                        toXmlGregorianCalendar(getAllowSystemDeleteDateTime())));
-
-
+                        getAllowSystemDeleteDateTime(config)));
 
         AttachmentsV2 attachmentsV2 = new AttachmentsV2();
         attachmentsV2.setBinaryAttachments(objectFactory.createAttachmentsV2BinaryAttachments(attachments));
@@ -165,16 +167,37 @@ public class CorrespondenceAgencyMessageFactory {
         return myInsertCorrespondenceV2;
     }
 
+    private static XMLGregorianCalendar getVisibleDateTime(CorrespondenceAgencyConfiguration config) {
+        if (config.getVisibleDateTime() != null) {
+            return toXmlGregorianCalendar(config.getVisibleDateTime().atZone(ZoneId.systemDefault()));
+        }
+        return toXmlGregorianCalendar(ZonedDateTime.now());
+    }
+
+    private static XMLGregorianCalendar getAllowSystemDeleteDateTime(CorrespondenceAgencyConfiguration config) {
+        if (config.getAllowSystemDeleteTime() != null) {
+            return toXmlGregorianCalendar(config.getAllowSystemDeleteTime().atZone(ZoneId.systemDefault()));
+        }
+        return toXmlGregorianCalendar(ZonedDateTime.now().plusMinutes(5));
+    }
+
+
+    private static String getLanguageCode(CorrespondenceAgencyConfiguration config) {
+        if (!isNullOrEmpty(config.getLanguageCode())) {
+            return config.getLanguageCode();
+        }
+        return "1044";
+    }
+
     private static List<Notification2009> createNotifications(CorrespondenceAgencyConfiguration config) {
 
         List<Notification2009> notifications = Lists.newArrayList();
 
-        if (config.isNotifyEmail() && config.isNotifySms()) {
-            notifications.add(createNotification(config, TransportType.BOTH));
-        } else if (config.isNotifySms()) {
-            notifications.add(createNotification(config, TransportType.SMS));
-        } else if (config.isNotifyEmail()){
+        if (!isNullOrEmpty(config.getEmailText()) || config.isNotifyEmail()) {
             notifications.add(createNotification(config, TransportType.EMAIL));
+        }
+        if (!isNullOrEmpty(config.getSmsText()) || config.isNotifySms()) {
+            notifications.add(createNotification(config, TransportType.SMS));
         }
 
         return notifications;
@@ -188,30 +211,31 @@ public class CorrespondenceAgencyMessageFactory {
         // The date and time the notification should be sent
         notification.setShipmentDateTime(toXmlGregorianCalendar(ZonedDateTime.now().plusMinutes(5)));
         // Language code of the notification
-        notification.setLanguageCode(notificationFactory.createNotification2009LanguageCode("1044"));
+        notification.setLanguageCode(notificationFactory.createNotification2009LanguageCode(getLanguageCode(config)));
         // Notification type
         notification.setNotificationType(notificationFactory.createNotification2009NotificationType("VarselDPVMedRevarsel"));
-        notification.setTextTokens(notificationFactory.createNotification2009TextTokens(createTokens(config)));
+        notification.setTextTokens(notificationFactory.createNotification2009TextTokens(createTokens(config, type)));
         JAXBElement<ReceiverEndPointBEList> receiverEndpoints = createReceiverEndPoint(type);
         notification.setReceiverEndPoints(receiverEndpoints);
 
         return notification;
     }
 
-    private static TextTokenSubstitutionBEList createTokens(CorrespondenceAgencyConfiguration config) {
+    private static TextTokenSubstitutionBEList createTokens(CorrespondenceAgencyConfiguration config, TransportType type) {
 
         TextTokenSubstitutionBEList tokens = new TextTokenSubstitutionBEList();
-        if (!isNullOrEmpty(config.getNotificationText())) {
+
+        if (type.equals(TransportType.EMAIL) && !isNullOrEmpty(config.getEmailText())) {
+            tokens.getTextToken().add(createTextToken(1, config.getEmailText()));
+        } else if (type.equals(TransportType.SMS) && !isNullOrEmpty(config.getSmsText())) {
+            tokens.getTextToken().add(createTextToken(1, config.getSmsText()));
+        } else if (!isNullOrEmpty(config.getNotificationText())) {
             tokens.getTextToken().add(createTextToken(1, config.getNotificationText()));
         } else {
             tokens.getTextToken().add(createTextToken(1, String.format("Du har mottatt en melding fra %s.", config.getSender())));
         }
 
         return tokens;
-    }
-
-    private static ZonedDateTime getAllowSystemDeleteDateTime() {
-        return ZonedDateTime.now().plusMinutes(5);
     }
 
     public static GetCorrespondenceStatusDetailsV2 createReceiptRequest(Conversation conversation) {
@@ -233,15 +257,15 @@ public class CorrespondenceAgencyMessageFactory {
         return statusRequest;
     }
 
-    private static JAXBElement<String> getServiceCode(CorrespondenceAgencyConfiguration postConfig) {
-        String serviceCodeProp= postConfig.getExternalServiceCode();
+    private static JAXBElement<String> getServiceCode(CorrespondenceAgencyConfiguration config) {
+        String serviceCodeProp= config.getExternalServiceCode();
         String serviceCode= !isNullOrEmpty(serviceCodeProp) ? serviceCodeProp : "4255";
         ObjectFactory objectFactory = new ObjectFactory();
         return objectFactory.createMyInsertCorrespondenceV2ServiceCode(serviceCode);
     }
 
-    private static JAXBElement<String> getServiceEditionCode(CorrespondenceAgencyConfiguration postConfig) {
-        String serviceEditionProp = postConfig.getExternalServiceEditionCode();
+    private static JAXBElement<String> getServiceEditionCode(CorrespondenceAgencyConfiguration config) {
+        String serviceEditionProp = config.getExternalServiceEditionCode();
         String serviceEdition = !isNullOrEmpty(serviceEditionProp) ? serviceEditionProp : "10";
         ObjectFactory objectFactory = new ObjectFactory();
         return objectFactory.createMyInsertCorrespondenceV2ServiceEdition(serviceEdition);

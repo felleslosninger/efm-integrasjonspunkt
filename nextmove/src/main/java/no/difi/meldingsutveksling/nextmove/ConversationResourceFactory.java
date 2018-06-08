@@ -13,6 +13,7 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Optional;
 
@@ -35,11 +36,37 @@ public class ConversationResourceFactory {
             case DPF:
             case DPO:
             case DPV:
+                setDpvDefaults((DpvConversationResource)cr);
             case DPE_INNSYN:
             case DPE_RECEIPT:
             case DPE_DATA:
             default:
                 break;
+        }
+    }
+
+    private void setDpvDefaults(DpvConversationResource cr) {
+        if (isNullOrEmpty(cr.getServiceEdition())) {
+            cr.setServiceEdition("10");
+        }
+        if (isNullOrEmpty(cr.getLanguageCode())) {
+            cr.setLanguageCode("1044");
+        }
+        if (cr.getVisibleDateTime() == null) {
+            cr.setVisibleDateTime(LocalDateTime.now());
+        }
+        if (cr.getAllowSystemDeleteDateTime() == null) {
+            cr.setAllowSystemDeleteDateTime(LocalDateTime.now().plusMinutes(5));
+        }
+        if (cr.getNotifications() == null) {
+            String notificationText = isNullOrEmpty(props.getDpv().getNotificationText()) ? "" : props.getDpv().getNotificationText();
+            EmailNotification emailNotification = EmailNotification.of(notificationText);
+            SmsNotification smsNotification = SmsNotification.of(notificationText);
+            Notifications notifications = Notifications.of(emailNotification, smsNotification);
+            cr.setNotifications(notifications);
+        }
+        if (cr.getFiles() == null) {
+            cr.setFiles(Lists.newArrayList());
         }
     }
 
@@ -76,12 +103,12 @@ public class ConversationResourceFactory {
 
         if (!serviceRecord.get().isFysiskPost() && cr.getDigitalPostInfo() == null) {
             String emailTekst = props.getDpi().getEmail().getVarslingstekst();
-            EpostVarsel epostVarsel = EpostVarsel.of(isNullOrEmpty(emailTekst) ? "" : emailTekst);
+            EmailNotification emailNotification = EmailNotification.of(isNullOrEmpty(emailTekst) ? "" : emailTekst);
             String smsTekst = props.getDpi().getSms().getVarslingstekst();
-            SmsVarsel smsVarsel = SmsVarsel.of(isNullOrEmpty(smsTekst) ? "" : smsTekst);
-            Varsler varsler = Varsler.of(epostVarsel, smsVarsel);
+            SmsNotification smsNotification = SmsNotification.of(isNullOrEmpty(smsTekst) ? "" : smsTekst);
+            Notifications notifications = Notifications.of(emailNotification, smsNotification);
             DigitalPostInfo digitalPostInfo = DigitalPostInfo.builder()
-                    .varsler(varsler)
+                    .notifications(notifications)
                     .virkningsdato(LocalDate.now())
                     .virkningstidspunkt(LocalTime.now())
                     .aapningskvittering(false)

@@ -5,19 +5,16 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.persistence.Embedded;
 
 @Data
-@NoArgsConstructor
 @RequiredArgsConstructor(staticName = "of")
+@NoArgsConstructor
 @Embeddable
-public class Varsler {
+public class SmsNotification {
 
-    @Embedded
     @NonNull
-    private EpostVarsel epostVarsel;
-    @Embedded
-    @NonNull
-    private SmsVarsel smsVarsel;
+    @Column(name = "sms_text")
+    private String text;
 }

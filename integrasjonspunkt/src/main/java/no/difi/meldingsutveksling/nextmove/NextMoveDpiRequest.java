@@ -182,12 +182,12 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     @Override
     public String getSmsVarslingstekst() {
-        return cr.getDigitalPostInfo().getVarsler().getSmsVarsel().getTekst();
+        return cr.getDigitalPostInfo().getNotifications().getSmsNotification().getText();
     }
 
     @Override
     public String getEmailVarslingstekst() {
-        return cr.getDigitalPostInfo().getVarsler().getEpostVarsel().getTekst();
+        return cr.getDigitalPostInfo().getNotifications().getEmailNotification().getText();
     }
 
     @Override

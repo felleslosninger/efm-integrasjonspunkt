@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import no.difi.meldingsutveksling.nextmove.Varsler;
+import no.difi.meldingsutveksling.nextmove.Notifications;
 import no.difi.meldingsutveksling.xml.LocalDateAdapter;
 import no.difi.meldingsutveksling.xml.LocalTimeAdapter;
 
@@ -29,5 +29,5 @@ public class DigitalPostInfo {
     private LocalTime virkningstidspunkt;
     private Boolean aapningskvittering;
     private String ikkeSensitivTittel;
-    private Varsler varsler;
+    private Notifications notifications;
 }
