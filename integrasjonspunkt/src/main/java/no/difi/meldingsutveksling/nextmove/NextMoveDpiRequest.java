@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.nextmove;
 
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.dpi.InkType;
 import no.difi.meldingsutveksling.config.dpi.PrintSettings;
 import no.difi.meldingsutveksling.config.dpi.ReturnType;
@@ -33,16 +32,13 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     private static final String DEFAULT_EXT = "PDF";
     private static final String MISSING_TXT = "Missing title";
 
-    private IntegrasjonspunktProperties props;
     private DpiConversationResource cr;
     private ServiceRecord serviceRecord;
     private MessagePersister messagePersister;
 
-    public NextMoveDpiRequest(IntegrasjonspunktProperties props,
-                              MessagePersister messagePersister,
+    public NextMoveDpiRequest(MessagePersister messagePersister,
                               DpiConversationResource cr,
                               ServiceRecord serviceRecord) {
-        this.props = props;
         this.messagePersister = messagePersister;
         this.cr = cr;
         this.serviceRecord = serviceRecord;

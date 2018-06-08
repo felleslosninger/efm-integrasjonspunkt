@@ -33,10 +33,11 @@ public class ConversationResourceFactory {
             case DPI:
                 setDpiDefaults((DpiConversationResource)cr);
                 break;
-            case DPF:
-            case DPO:
             case DPV:
                 setDpvDefaults((DpvConversationResource)cr);
+                break;
+            case DPF:
+            case DPO:
             case DPE_INNSYN:
             case DPE_RECEIPT:
             case DPE_DATA:
