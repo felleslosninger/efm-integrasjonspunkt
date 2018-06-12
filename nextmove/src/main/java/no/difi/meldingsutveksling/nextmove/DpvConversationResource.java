@@ -60,10 +60,12 @@ public class DpvConversationResource extends ConversationResource {
         if (!Strings.isNullOrEmpty(props.getDpv().getExternalServiceEditionCode())) {
             dpv.setServiceEdition(props.getDpv().getExternalServiceEditionCode());
         }
+        dpv.setLanguageCode("1044");
+
         dpv.setMessageTitle(dpi.getDigitalPostInfo().getIkkeSensitivTittel());
         dpv.setMessageSummary(dpi.getDigitalPostInfo().getIkkeSensitivTittel());
         dpv.setMessageBody(dpi.getDigitalPostInfo().getIkkeSensitivTittel());
-        dpv.setLanguageCode("1044");
+
         dpv.setVisibleDateTime(LocalDateTime.now());
         dpv.setAllowSystemDeleteDateTime(LocalDateTime.now().plusMinutes(5));
         dpv.setFiles(dpi.getFiles());

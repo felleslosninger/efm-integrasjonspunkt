@@ -37,13 +37,19 @@ public class DpvStatusStrategy implements StatusStrategy {
     @Override
     public void checkStatus(Conversation conversation) {
 
-        CorrespondenceAgencyConfiguration config = CorrespondenceAgencyConfiguration.builder()
+        CorrespondenceAgencyConfiguration.CorrespondenceAgencyConfigurationBuilder builder = CorrespondenceAgencyConfiguration.builder()
                 .externalServiceCode(properties.getDpv().getExternalServiceCode())
-                .externalServiceEditionCode(properties.getDpv().getExternalServiceEditionCode())
                 .password(properties.getDpv().getPassword())
                 .systemUserCode(properties.getDpv().getUsername())
-                .endpointUrl(properties.getDpv().getEndpointUrl().toString())
-                .build();
+                .endpointUrl(properties.getDpv().getEndpointUrl().toString());
+
+        if (conversation.getCustomProperties() != null && conversation.getCustomProperties().containsKey("serviceEdition")) {
+            builder.externalServiceEditionCode(conversation.getCustomProperties().get("serviceEdition"));
+        } else {
+            builder.externalServiceEditionCode(properties.getDpv().getExternalServiceEditionCode());
+        }
+
+        CorrespondenceAgencyConfiguration config = builder.build();
 
         final CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(markerFrom(conversation), config);
         GetCorrespondenceStatusDetailsV2 receiptRequest = CorrespondenceAgencyMessageFactory.createReceiptRequest(conversation);

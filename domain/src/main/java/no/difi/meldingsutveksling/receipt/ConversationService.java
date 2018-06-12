@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.receipt;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -119,6 +120,20 @@ public class ConversationService {
         MessageStatus ms = MessageStatus.of(GenericReceiptStatus.OPPRETTET);
         Conversation c = Conversation.of(eduDocument, ms);
         return repo.save(c);
+    }
+
+    public Optional<Conversation> addCustomProperty(ConversationResource cr, String key, String value) {
+        Optional<Conversation> find = repo.findByConversationId(cr.getConversationId()).stream().findFirst();
+        if (find.isPresent()) {
+            Conversation c = find.get();
+            if (c.getCustomProperties() == null) {
+                c.setCustomProperties(Maps.newHashMap());
+            }
+            c.getCustomProperties().put(key, value);
+            return Optional.ofNullable(repo.save(c));
+        }
+        log.warn(format("Conversation with id=%s not found, cannot add property", cr.getConversationId()));
+        return Optional.empty();
     }
 
     public void setServiceIdentifier(String conversationId, ServiceIdentifier si) {

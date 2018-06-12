@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_INNSYN;
@@ -51,6 +52,11 @@ public class Conversation {
     private boolean msh;
     private ConversationDirection direction;
     private ServiceIdentifier serviceIdentifier;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @MapKeyColumn(name = "propId")
+    @Column(name = "prop")
+    @CollectionTable(name = "statusprops", joinColumns = @JoinColumn(name = "pids"))
+    private Map<String, String> customProperties;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "conv_id")

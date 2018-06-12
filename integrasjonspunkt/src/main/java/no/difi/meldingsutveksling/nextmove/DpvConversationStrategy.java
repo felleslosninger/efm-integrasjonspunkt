@@ -9,7 +9,7 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.ptv.CorrespondenceRequest;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.receipt.ConversationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,23 +17,26 @@ import org.springframework.stereotype.Component;
 public class DpvConversationStrategy implements ConversationStrategy {
 
     private IntegrasjonspunktProperties props;
-    private ServiceRegistryLookup sr;
     private MessagePersister messagePersister;
+    private ConversationService conversationService;
 
     @Autowired
     DpvConversationStrategy(IntegrasjonspunktProperties props,
-                            ServiceRegistryLookup sr,
-                            MessagePersister messagePersister) {
+                            MessagePersister messagePersister,
+                            ConversationService conversationService) {
         this.props = props;
-        this.sr = sr;
         this.messagePersister = messagePersister;
+        this.conversationService = conversationService;
     }
 
     @Override
     public void send(ConversationResource conversationResource) throws NextMoveException {
         DpvConversationResource cr = (DpvConversationResource) conversationResource;
 
-        PostVirksomhetStrategyFactory dpvFactory = PostVirksomhetStrategyFactory.newInstance(props, null, sr);
+        // Add serviceEdition to Conversation, needed by receipt polling task
+        conversationService.addCustomProperty(cr, "serviceEdition", cr.getServiceEdition());
+
+        PostVirksomhetStrategyFactory dpvFactory = PostVirksomhetStrategyFactory.newInstance(props, cr);
         CorrespondenceAgencyConfiguration config = dpvFactory.getConfig();
         InsertCorrespondenceV2 message;
         message = CorrespondenceAgencyMessageFactory.create(config, cr, messagePersister);
