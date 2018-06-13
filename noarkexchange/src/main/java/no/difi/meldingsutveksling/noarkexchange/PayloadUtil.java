@@ -128,23 +128,29 @@ public class PayloadUtil {
 
                 if (event.isStartElement()) {
                     StartElement start = event.asStartElement();
-                    if (start.getName().getLocalPart().equals("dokument")) {
-                        noarkDocument = new NoarkDocument();
-                    } else if (start.getName().getLocalPart().equals("veFilnavn")) {
-                        event = eventReader.nextEvent();
-                        if (noarkDocument != null) {
-                            noarkDocument.setFilename(event.asCharacters().getData());
-                        }
-                    } else if (start.getName().getLocalPart().equals("base64")) {
-                        event = eventReader.nextEvent();
-                        if (noarkDocument != null) {
-                            noarkDocument.setContent(event.asCharacters().getData().getBytes(StandardCharsets.UTF_8));
-                        }
+                    switch (start.getName().getLocalPart()) {
+                        case "dokument":
+                            noarkDocument = new NoarkDocument();
+                            break;
+                        case "veFilnavn":
+                            event = eventReader.nextEvent();
+                            if (noarkDocument != null) {
+                                noarkDocument.setFilename(event.asCharacters().getData());
+                            }
+                            break;
+                        case "base64":
+                            event = eventReader.nextEvent();
+                            if (noarkDocument != null) {
+                                noarkDocument.setContent(event.asCharacters().getData().getBytes(StandardCharsets.UTF_8));
+                            }
+                            break;
+                        default:
+                            break;
                     }
                 }
                 if (event.isEndElement()) {
                     EndElement end = event.asEndElement();
-                    if (end.getName().getLocalPart().equals("dokument") && noarkDocument != null) {
+                    if ("dokument".equals(end.getName().getLocalPart()) && noarkDocument != null) {
                         docs.add(noarkDocument);
                     }
                 }
