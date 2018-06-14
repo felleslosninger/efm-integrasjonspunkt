@@ -20,6 +20,7 @@ import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -63,21 +64,15 @@ public class NextMoveServiceBus {
                               StandardBusinessDocumentFactory sbdf,
                               MessageSender messageSender,
                               NextMoveQueue nextMoveQueue,
-                              ServiceBusRestClient serviceBusClient) throws JAXBException {
+                              ServiceBusRestClient serviceBusClient,
+                              @Lazy InternalQueue internalQueue) throws JAXBException {
         this.props = props;
         this.sbdf = sbdf;
         this.messageSender = messageSender;
         this.nextMoveQueue = nextMoveQueue;
         this.serviceBusClient = serviceBusClient;
-        this.jaxbContext = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, ConversationResource.class}, null);
-    }
-
-    /**
-     * Setter due to cyclic bean dependency.
-     */
-    @Autowired
-    public void setInternalQueue(InternalQueue internalQueue) {
         this.internalQueue = internalQueue;
+        this.jaxbContext = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, ConversationResource.class}, null);
     }
 
     @PostConstruct
