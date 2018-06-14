@@ -63,15 +63,21 @@ public class NextMoveServiceBus {
                               StandardBusinessDocumentFactory sbdf,
                               MessageSender messageSender,
                               NextMoveQueue nextMoveQueue,
-                              ServiceBusRestClient serviceBusClient,
-                              InternalQueue internalQueue) throws JAXBException {
+                              ServiceBusRestClient serviceBusClient) throws JAXBException {
         this.props = props;
         this.sbdf = sbdf;
         this.messageSender = messageSender;
         this.nextMoveQueue = nextMoveQueue;
         this.serviceBusClient = serviceBusClient;
-        this.internalQueue = internalQueue;
         this.jaxbContext = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, ConversationResource.class}, null);
+    }
+
+    /**
+     * Setter due to cyclic bean dependency.
+     */
+    @Autowired
+    public void setInternalQueue(InternalQueue internalQueue) {
+        this.internalQueue = internalQueue;
     }
 
     @PostConstruct
