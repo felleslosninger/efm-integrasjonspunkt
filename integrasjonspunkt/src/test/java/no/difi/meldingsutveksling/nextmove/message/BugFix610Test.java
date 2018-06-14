@@ -45,7 +45,7 @@ public class BugFix610Test {
 
         buffer.flush();
 
-        messagePersister.write(cr, FILE_NAME, buffer.toByteArray());
+        messagePersister.write(cr.getConversationId(), FILE_NAME, buffer.toByteArray());
         File resultFile = new File(props.getNextmove().getFiledir() + "/" + cr.getConversationId() + "/" + FILE_NAME);
 
         ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(resultFile));

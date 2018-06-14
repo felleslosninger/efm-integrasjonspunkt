@@ -2,8 +2,10 @@ package no.difi.meldingsutveksling.core;
 
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.*;
-import no.arkivverket.standarder.noark5.metadatakatalog.Avskrivningsmaate;
-import no.arkivverket.standarder.noark5.metadatakatalog.Journalposttype;
+import no.difi.meldingsutveksling.arkivmelding.AvskrivningsmaateMapper;
+import no.difi.meldingsutveksling.arkivmelding.JournalposttypeMapper;
+import no.difi.meldingsutveksling.arkivmelding.TilknyttetRegistreringSomMapper;
+import no.difi.meldingsutveksling.arkivmelding.VariantformatMapper;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.noarkexchange.PayloadException;
@@ -108,7 +110,7 @@ public class EDUCoreFactory {
         ObjectFactory of = new ObjectFactory();
         NoarksakType noarksakType = of.createNoarksakType();
         Saksmappe sm = (Saksmappe) am.getMappe().get(0);
-        ofNullable(sm.getSaksaar()).map(s -> s.toString()).ifPresent(noarksakType::setSaSaar);
+        ofNullable(sm.getSaksaar()).map(BigInteger::toString).ifPresent(noarksakType::setSaSaar);
         ofNullable(sm.getSakssekvensnummer()).map(BigInteger::toString).ifPresent(noarksakType::setSaSeknr);
         noarksakType.setSaAnsvinit(sm.getSaksansvarlig());
         noarksakType.setSaAdmkort(sm.getAdministrativEnhet());
@@ -123,7 +125,7 @@ public class EDUCoreFactory {
         ofNullable(jp.getJournalsekvensnummer()).map(BigInteger::toString).ifPresent(journpostType::setJpSeknr);
         ofNullable(jp.getJournalpostnummer()).map(BigInteger::toString).ifPresent(journpostType::setJpJpostnr);
         ofNullable(jp.getJournaldato()).map(XMLGregorianCalendar::toString).ifPresent(journpostType::setJpJdato);
-        ofNullable(jp.getJournalposttype()).map(Journalposttype::value).ifPresent(journpostType::setJpNdoktype);
+        ofNullable(jp.getJournalposttype()).map(JournalposttypeMapper::getNoarkType).ifPresent(journpostType::setJpNdoktype);
         ofNullable(jp.getDokumentetsDato()).map(XMLGregorianCalendar::toString).ifPresent(journpostType::setJpDokdato);
         ofNullable(sm.getSkjerming()).map(Skjerming::getSkjermingshjemmel).ifPresent(journpostType::setJpUoff);
 
@@ -141,7 +143,7 @@ public class EDUCoreFactory {
             avsmotType.setAmSbhinit(k.getSaksbehandler());
             if (!jp.getAvskrivning().isEmpty()) {
                 Avskrivning avs = jp.getAvskrivning().get(0);
-                ofNullable(avs.getAvskrivningsmaate()).map(Avskrivningsmaate::value).ifPresent(avsmotType::setAmAvskm);
+                ofNullable(avs.getAvskrivningsmaate()).map(AvskrivningsmaateMapper::getNoarkType).ifPresent(avsmotType::setAmAvskm);
                 ofNullable(avs.getAvskrivningsdato()).map(XMLGregorianCalendar::toString).ifPresent(avsmotType::setAmAvskdato);
                 avsmotType.setAmAvsavdok(avs.getReferanseAvskrivesAvJournalpost());
             }
@@ -174,12 +176,12 @@ public class EDUCoreFactory {
         dokumentType.setVeFilnavn(filename);
         dokumentType.setDbTittel(db.getTittel());
         dokumentType.setDlRnr(db.getDokumentnummer().toString());
-        dokumentType.setDlType(db.getTilknyttetRegistreringSom().value());
+        dokumentType.setDlType(TilknyttetRegistreringSomMapper.getNoarkType(db.getTilknyttetRegistreringSom()));
 
         String[] split = dobj.getReferanseDokumentfil().split(".");
         String ext = Stream.of(split).reduce((p, e) -> e).orElse("pdf");
         dokumentType.setVeMimeType(getMimetype(ext));
-        dokumentType.setVeVariant(dobj.getVariantformat().value());
+        dokumentType.setVeVariant(VariantformatMapper.getNoarkType(dobj.getVariantformat()));
 
         FilType filType = of.createFilType();
         try {

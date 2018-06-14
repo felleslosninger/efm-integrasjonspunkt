@@ -48,7 +48,7 @@ public class NextMoveSender {
         conversationService.registerStatus(cr.getConversationId(), MessageStatus.of(GenericReceiptStatus.SENDT));
         outRepo.delete(cr);
         try {
-            messagePersister.delete(cr);
+            messagePersister.delete(cr.getConversationId());
         } catch (IOException e) {
             log.error("Error deleting files from conversation with id={}", cr.getConversationId(),  e);
         }

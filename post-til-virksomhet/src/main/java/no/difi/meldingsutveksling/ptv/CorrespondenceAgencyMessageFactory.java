@@ -67,7 +67,7 @@ public class CorrespondenceAgencyMessageFactory {
         for (String f : cr.getFileRefs().values()) {
             byte[] bytes;
             try {
-                bytes = persister.read(cr, f);
+                bytes = persister.read(cr.getConversationId(), f);
             } catch (IOException e) {
                 throw new NextMoveException(String.format("Could not read file \"%s\"", f), e);
             }

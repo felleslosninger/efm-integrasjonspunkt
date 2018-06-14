@@ -36,7 +36,6 @@ public class DpvConversationResource extends ConversationResource {
         dpv.setHasArkivmelding(dpi.isHasArkivmelding());
         dpv.setFileRefs(dpi.getFileRefs());
         dpv.setCustomProperties(dpi.getCustomProperties());
-        dpv.setArkivmelding(dpi.getArkivmelding());
 
         return dpv;
     }

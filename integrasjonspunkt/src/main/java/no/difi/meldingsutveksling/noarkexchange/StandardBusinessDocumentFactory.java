@@ -108,7 +108,7 @@ public class StandardBusinessDocumentFactory {
 
                 byte[] bytes;
                 try {
-                    bytes = messagePersister.read(shipmentMeta, filename);
+                    bytes = messagePersister.read(shipmentMeta.getConversationId(), filename);
                 } catch (IOException e) {
                     log.error("Could not read file \""+filename+"\"", e);
                     throw new MessageException(e, StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT);

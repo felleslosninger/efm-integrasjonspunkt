@@ -82,7 +82,7 @@ public class NextMoveQueue {
         message.addFileRef(props.getNextmove().getAsicfile());
         contentFromAsic.forEach(message::addFileRef);
 
-        messagePersister.write(message, props.getNextmove().getAsicfile(), decryptedAsicPackage);
+        messagePersister.write(message.getConversationId(), props.getNextmove().getAsicfile(), decryptedAsicPackage);
         message = inRepo.save(message);
 
         Conversation c = conversationService.registerConversation(message);

@@ -233,10 +233,10 @@ public class MessageOutController {
 
             try {
                 if (cr.getCustomProperties().containsKey("base64") && "true".equalsIgnoreCase(cr.getCustomProperties().get("base64"))) {
-                    messagePersister.write(cr, file.getOriginalFilename(),
+                    messagePersister.write(cr.getConversationId(), file.getOriginalFilename(),
                             Base64.getDecoder().decode(new String(file.getBytes()).getBytes(StandardCharsets.UTF_8)));
                 } else {
-                    messagePersister.write(cr, file.getOriginalFilename(), file.getBytes());
+                    messagePersister.write(cr.getConversationId(), file.getOriginalFilename(), file.getBytes());
                 }
 
                 if (!cr.getFileRefs().values().contains(file.getOriginalFilename())) {
@@ -274,9 +274,10 @@ public class MessageOutController {
         MultipartFile file = request.getFileMap().values().stream()
                 .filter(f -> ARKIVMELDING_FILE.equals(f.getOriginalFilename()))
                 .findFirst().get();
+        Arkivmelding arkivmelding;
         try {
             validateArkivmelding(file.getInputStream());
-            cr.setArkivmelding(unmarshalArkivmelding(file.getInputStream()));
+            arkivmelding = unmarshalArkivmelding(file.getInputStream());
             cr.setHasArkivmelding(true);
         } catch (IOException e) {
             log.error("Could not read file {}", file.getOriginalFilename(), e);
@@ -295,7 +296,7 @@ public class MessageOutController {
         List<String> files = request.getFileMap().values().stream()
                 .map(MultipartFile::getOriginalFilename)
                 .collect(Collectors.toList());
-        List<String> amFiles = ArkivmeldingUtil.getFilenames(cr.getArkivmelding());
+        List<String> amFiles = ArkivmeldingUtil.getFilenames(arkivmelding);
         if (!files.containsAll(amFiles)) {
             String filesString = amFiles.stream().collect(Collectors.joining(", "));
             log.error("Arkivmelding: missing files from upload, expected [{}]", filesString);

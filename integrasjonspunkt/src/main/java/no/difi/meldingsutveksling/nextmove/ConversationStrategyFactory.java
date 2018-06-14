@@ -21,10 +21,12 @@ public class ConversationStrategyFactory {
                                        DpoConversationStrategy dpoStrat,
                                        DpeConversationStrategy dpeStrat,
                                        DpvConversationStrategy dpvStrat,
-                                       DpiConversationStrategy dpiStrat) {
+                                       DpiConversationStrategy dpiStrat,
+                                       DpaConversationStrategy dpaStrat) {
         strategies = Maps.newEnumMap(ServiceIdentifier.class);
         if (props.getFeature().isEnableDPO()) {
             strategies.put(ServiceIdentifier.DPO, dpoStrat);
+            strategies.put(ServiceIdentifier.DPA, dpaStrat);
         }
         if (props.getFeature().isEnableDPV()) {
             strategies.put(ServiceIdentifier.DPV, dpvStrat);

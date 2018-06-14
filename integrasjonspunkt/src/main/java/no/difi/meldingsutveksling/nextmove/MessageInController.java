@@ -221,7 +221,7 @@ public class MessageInController {
             Audit.info(format("Conversation with id=%s deleted from queue", cr.getConversationId()),
                     markerFrom(cr));
             try {
-                messagePersister.delete(cr);
+                messagePersister.delete(cr.getConversationId());
             } catch (IOException e) {
                 log.error("Error deleting files from conversation with id={}", cr.getConversationId(),  e);
             }
@@ -259,7 +259,7 @@ public class MessageInController {
             InputStreamResource isr;
             byte[] bytes;
             try {
-                bytes = messagePersister.read(cr, filename);
+                bytes = messagePersister.read(cr.getConversationId(), filename);
                 isr = new InputStreamResource(new ByteArrayInputStream(bytes));
             } catch (IOException e) {
                 Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing it from queue",
@@ -309,7 +309,7 @@ public class MessageInController {
             InputStreamResource isr;
             byte[] bytes;
             try {
-                bytes = messagePersister.read(cr, filename);
+                bytes = messagePersister.read(cr.getConversationId(), filename);
                 isr = new InputStreamResource(new ByteArrayInputStream(bytes));
             } catch (IOException e) {
                 Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing it from queue",
@@ -325,7 +325,7 @@ public class MessageInController {
             Audit.info(format("Conversation with id=%s popped from queue", cr.getConversationId()),
                     markerFrom(cr));
             try {
-                messagePersister.delete(cr);
+                messagePersister.delete(cr.getConversationId());
             } catch (IOException e) {
                 log.error("Error deleting files from conversation with id={}", cr.getConversationId(),  e);
             }

@@ -6,6 +6,10 @@ import no.arkivverket.standarder.noark5.arkivmelding.Dokumentbeskrivelse;
 import no.arkivverket.standarder.noark5.arkivmelding.Journalpost;
 import no.arkivverket.standarder.noark5.arkivmelding.Saksmappe;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 
 public class ArkivmeldingUtil {
@@ -34,5 +38,13 @@ public class ArkivmeldingUtil {
                 .forEach(filenames::add);
 
         return filenames;
+    }
+
+    public static byte[] marshalArkivmelding(Arkivmelding am) throws JAXBException {
+        JAXBContext jaxbContext = JAXBContext.newInstance(Arkivmelding.class);
+        Marshaller marshaller = jaxbContext.createMarshaller();
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        marshaller.marshal(am, bos);
+        return bos.toByteArray();
     }
 }

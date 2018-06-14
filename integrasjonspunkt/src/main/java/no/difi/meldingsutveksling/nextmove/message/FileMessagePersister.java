@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.nextmove.message;
 
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -26,13 +25,13 @@ public class FileMessagePersister implements MessagePersister {
     }
 
     @Override
-    public void write(ConversationResource cr, String filename, byte[] message) throws IOException {
-        String filedir = getConversationFiledirPath(cr);
+    public void write(String conversationId, String filename, byte[] message) throws IOException {
+        String filedir = getConversationFiledirPath(conversationId);
         File localFile = new File(filedir+filename);
         localFile.getParentFile().mkdirs();
 
         if (props.getNextmove().getApplyZipHeaderPatch() && props.getNextmove().getAsicfile().equals(filename)){
-            BugFix610.applyPatch(message, cr.getConversationId());
+            BugFix610.applyPatch(message, conversationId);
         }
 
         try (FileOutputStream os = new FileOutputStream(localFile);
@@ -47,23 +46,23 @@ public class FileMessagePersister implements MessagePersister {
     }
 
     @Override
-    public byte[] read(ConversationResource cr, String filename) throws IOException {
-        String filedir = getConversationFiledirPath(cr);
+    public byte[] read(String conversationId, String filename) throws IOException {
+        String filedir = getConversationFiledirPath(conversationId);
         File file = new File(filedir+filename);
         return FileUtils.readFileToByteArray(file);
     }
 
     @Override
-    public void delete(ConversationResource cr) throws IOException {
-        File dir = new File(getConversationFiledirPath(cr));
+    public void delete(String conversationId) throws IOException {
+        File dir = new File(getConversationFiledirPath(conversationId));
         FileUtils.deleteDirectory(dir);
     }
 
-    private String getConversationFiledirPath(ConversationResource cr) {
+    private String getConversationFiledirPath(String conversationId) {
         String filedir = props.getNextmove().getFiledir();
         if (!filedir.endsWith("/")) {
             filedir = filedir+"/";
         }
-        return filedir+cr.getConversationId()+"/";
+        return filedir+conversationId+"/";
     }
 }

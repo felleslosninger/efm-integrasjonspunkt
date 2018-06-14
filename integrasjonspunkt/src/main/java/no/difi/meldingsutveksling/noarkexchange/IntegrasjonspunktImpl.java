@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.noarkexchange;
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.core.EDUCoreService;
+import no.difi.meldingsutveksling.core.PutMessageService;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.logging.MarkerFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
@@ -55,7 +55,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
     private Adresseregister adresseRegister;
 
     @Autowired
-    private EDUCoreService coreService;
+    private PutMessageService putMessageService;
 
     @Autowired
     private ServiceRegistryLookup serviceRegistryLookup;
@@ -95,7 +95,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
         boolean validServiceIdentifier = false;
         boolean mshCanReceive = false;
         boolean isDpv = false;
-        if (asList(DPO, DPI, DPF).contains(serviceRecord.getServiceRecord().getServiceIdentifier()) &&
+        if (asList(DPO, DPA, DPI, DPF).contains(serviceRecord.getServiceRecord().getServiceIdentifier()) &&
                 strategyFactory.hasFactory(serviceRecord.getServiceRecord().getServiceIdentifier())) {
             validServiceIdentifier = true;
             Audit.info("CanReceive = true", marker);
@@ -135,7 +135,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
         }
 
         if (PayloadUtil.isAppReceipt(message.getPayload()) &&
-                receiverRecord.getServiceRecord().getServiceIdentifier() != ServiceIdentifier.DPO) {
+                !asList(DPO, DPA).contains(receiverRecord.getServiceRecord().getServiceIdentifier())) {
             Audit.info(String.format("Message is AppReceipt, but receiver (%s) is not DPO. Discarding message.",
                     message.getRecieverPartyNumber()), markerFrom(message));
             return PutMessageResponseFactory.createOkResponse();
@@ -156,7 +156,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
             }
         }
 
-        return coreService.queueMessage(message);
+        return putMessageService.queueMessage(message, receiverRecord.getServiceRecord());
     }
 
     public void setMshClient(NoarkClient mshClient) {
@@ -171,12 +171,12 @@ public class IntegrasjonspunktImpl implements SOAPport {
         this.adresseRegister = adresseRegister;
     }
 
-    public EDUCoreService getCoreService() {
-        return coreService;
+    public PutMessageService getPutMessageService() {
+        return putMessageService;
     }
 
-    void setCoreService(EDUCoreService coreService) {
-        this.coreService = coreService;
+    void setPutMessageService(PutMessageService putMessageService) {
+        this.putMessageService = putMessageService;
     }
 
 }

@@ -14,19 +14,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPA;
 import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
 
 @Component
 @Slf4j
-public class DpoConversationStrategy implements ConversationStrategy {
+public class DpaConversationStrategy implements ConversationStrategy {
 
     private ServiceRegistryLookup sr;
     private MessageSender messageSender;
 
     @Autowired
-    DpoConversationStrategy(ServiceRegistryLookup sr,
-                            MessageSender messageSender) {
+    DpaConversationStrategy(ServiceRegistryLookup sr, MessageSender messageSender) {
         this.sr = sr;
         this.messageSender = messageSender;
     }
@@ -35,14 +34,14 @@ public class DpoConversationStrategy implements ConversationStrategy {
     public void send(ConversationResource cr) throws NextMoveException {
         List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiverId());
         Optional<ServiceRecord> serviceRecord = serviceRecords.stream()
-                .filter(r -> DPO == r.getServiceIdentifier())
+                .filter(r -> DPA == r.getServiceIdentifier())
                 .findFirst();
         if (!serviceRecord.isPresent()) {
             List<ServiceIdentifier> acceptableTypes = serviceRecords.stream()
                     .map(ServiceRecord::getServiceIdentifier)
                     .collect(Collectors.toList());
             String errorStr = String.format("Message is of type '%s', but receiver '%s' accepts types '%s'.",
-                    DPO, cr.getReceiverId(), acceptableTypes);
+                    DPA, cr.getReceiverId(), acceptableTypes);
             log.error(markerFrom(cr), errorStr);
             throw new NextMoveException(errorStr);
         }
@@ -56,5 +55,4 @@ public class DpoConversationStrategy implements ConversationStrategy {
                 cr.getConversationId(), cr.getServiceIdentifier()),
                 markerFrom(cr));
     }
-
 }
