@@ -26,6 +26,7 @@ import java.util.Optional;
         visible = true)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = DpoConversationResource.class, name = "DPO"),
+        @JsonSubTypes.Type(value = DpaConversationResource.class, name = "DPA"),
         @JsonSubTypes.Type(value = DpvConversationResource.class, name = "DPV"),
         @JsonSubTypes.Type(value = DpiConversationResource.class, name = "DPI"),
         @JsonSubTypes.Type(value = DpfConversationResource.class, name = "DPF"),
@@ -36,6 +37,7 @@ import java.util.Optional;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlSeeAlso({DpoConversationResource.class,
+        DpaConversationResource.class,
         DpvConversationResource.class,
         DpiConversationResource.class,
         DpfConversationResource.class,

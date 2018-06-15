@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.serviceregistry.externalmodel;
 import lombok.Data;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -44,8 +45,8 @@ public class ServiceRecord {
         this.returnAddress = PostAddress.EMPTY;
     }
 
-    public static Predicate<ServiceRecord> isServiceIdentifier(ServiceIdentifier identifier) {
-        return s -> s != null && s.getServiceIdentifier().equals(identifier);
+    public static Predicate<ServiceRecord> isServiceIdentifier(ServiceIdentifier... identifier) {
+        return s -> s != null && Arrays.asList(identifier).contains(s.getServiceIdentifier());
     }
 
 }

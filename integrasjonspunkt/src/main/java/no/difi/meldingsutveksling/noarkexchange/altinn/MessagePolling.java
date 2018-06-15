@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPA;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
@@ -126,8 +128,10 @@ public class MessagePolling implements ApplicationContextAware {
         log.debug("Checking for new messages");
 
         if (serviceRecord == null) {
-            serviceRecord = serviceRegistryLookup.getServiceRecord(properties.getOrg().getNumber(), DPO)
-                    .orElseThrow(() -> new MeldingsUtvekslingRuntimeException(String.format("DPO ServiceRecord not found for %s", properties.getOrg().getNumber())));
+            serviceRecord = serviceRegistryLookup.getServiceRecords(properties.getOrg().getNumber()).stream()
+                    .filter(r -> asList(DPO, DPA).contains(r.getServiceIdentifier()))
+                    .findFirst()
+                    .orElseThrow(() -> new MeldingsUtvekslingRuntimeException(String.format("DPO/DPA ServiceRecord not found for %s", properties.getOrg().getNumber())));
         }
 
         // TODO: if ServiceRegistry returns a ServiceRecord to something other than Altinn formidlingstjeneste this
