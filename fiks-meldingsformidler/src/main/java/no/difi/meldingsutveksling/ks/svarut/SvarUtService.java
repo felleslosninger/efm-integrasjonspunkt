@@ -47,12 +47,7 @@ public class SvarUtService {
     }
 
     public MessageStatus getMessageReceipt(final Conversation conversation) {
-        Optional<ServiceRecord> serviceRecord = serviceRegistryLookup.getServiceRecord(conversation.getReceiverIdentifier(), conversation.getServiceIdentifier());
-        if (!serviceRecord.isPresent()) {
-            throw new SvarUtServiceException(String.format("No DPF ServiceRecord found for identifier %s", conversation.getReceiverIdentifier()));
-        }
         final String forsendelseId = client.getForsendelseId(props.getFiks().getUt().getEndpointUrl().toString(), conversation.getConversationId());
-
         final ForsendelseStatus forsendelseStatus = client.getForsendelseStatus(props.getFiks().getUt().getEndpointUrl().toString(), forsendelseId);
         final DpfReceiptStatus receiptStatus = fiksMapper.mapFrom(forsendelseStatus);
         return MessageStatus.of(receiptStatus);
