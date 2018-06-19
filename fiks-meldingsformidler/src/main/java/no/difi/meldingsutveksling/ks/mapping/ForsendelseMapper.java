@@ -40,7 +40,7 @@ public class ForsendelseMapper {
     public SendForsendelseMedId mapFrom(EDUCore eduCore, X509Certificate certificate) {
         final Forsendelse.Builder<Void> forsendelse = Forsendelse.builder();
         forsendelse.withEksternref(eduCore.getId());
-        forsendelse.withKunDigitalLevering(true);
+        forsendelse.withKunDigitalLevering(false);
         forsendelse.withSvarPaForsendelse(eduCore.getReceiver().getRef());
 
         final MeldingType meldingType = EDUCoreConverter.payloadAsMeldingType(eduCore.getPayload());
@@ -52,6 +52,11 @@ public class ForsendelseMapper {
         forsendelse.withKonteringskode(properties.getFiks().getUt().getKonverteringsKode());
         forsendelse.withKryptert(properties.getFiks().isKryptert());
         forsendelse.withAvgivendeSystem(properties.getNoarkSystem().getType());
+
+        forsendelse.withPrintkonfigurasjon(Printkonfigurasjon.builder()
+                .withTosidig(true)
+                .withFargePrint(false)
+                .withBrevtype(Brevtype.BPOST).build());
 
         final InfoRecord receiverInfo = serviceRegistry.getInfoRecord(eduCore.getReceiver().getIdentifier());
         forsendelse.withMottaker(mottakerFrom(receiverInfo));

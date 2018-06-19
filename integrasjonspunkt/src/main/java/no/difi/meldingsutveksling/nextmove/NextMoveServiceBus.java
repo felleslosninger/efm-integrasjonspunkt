@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.microsoft.azure.servicebus.ClientFactory;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageReceiver;
@@ -12,15 +11,16 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
-import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.MessageContext;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory;
+import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -42,7 +42,6 @@ import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_DATA;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_INNSYN;
 import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.DATA;
 import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.INNSYN;
-import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
 
 @Component
 public class NextMoveServiceBus {
@@ -58,18 +57,21 @@ public class NextMoveServiceBus {
     private JAXBContext jaxbContext;
     private ServiceBusRestClient serviceBusClient;
     private IMessageReceiver messageReceiver;
+    private InternalQueue internalQueue;
 
     @Autowired
     public NextMoveServiceBus(IntegrasjonspunktProperties props,
                               StandardBusinessDocumentFactory sbdf,
                               MessageSender messageSender,
                               NextMoveQueue nextMoveQueue,
-                              ServiceBusRestClient serviceBusClient) throws JAXBException {
+                              ServiceBusRestClient serviceBusClient,
+                              @Lazy InternalQueue internalQueue) throws JAXBException {
         this.props = props;
         this.sbdf = sbdf;
         this.messageSender = messageSender;
         this.nextMoveQueue = nextMoveQueue;
         this.serviceBusClient = serviceBusClient;
+        this.internalQueue = internalQueue;
         this.jaxbContext = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, ConversationResource.class}, null);
     }
 
@@ -187,15 +189,7 @@ public class NextMoveServiceBus {
     private void sendReceipt(ConversationResource cr) {
         if (asList(DPE_INNSYN, DPE_DATA).contains(cr.getServiceIdentifier())) {
             DpeReceiptConversationResource dpeReceipt = DpeReceiptConversationResource.of(cr);
-            dpeReceipt.setFileRefs(Maps.newHashMap());
-            try {
-                putMessage(dpeReceipt);
-                Audit.info(format("Message [id=%s, serviceIdentifier=%s] sent to service bus",
-                        dpeReceipt.getConversationId(), dpeReceipt.getServiceIdentifier()),
-                        markerFrom(dpeReceipt));
-            } catch (NextMoveException e) {
-                log.error("Send receipt for message [id={}] failed", dpeReceipt.getConversationId(), e);
-            }
+            internalQueue.enqueueNextmove(dpeReceipt);
         }
     }
 

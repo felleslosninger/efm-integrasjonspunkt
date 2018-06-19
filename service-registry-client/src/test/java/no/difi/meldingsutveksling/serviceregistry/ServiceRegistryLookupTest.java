@@ -54,19 +54,10 @@ public class ServiceRegistryLookupTest {
     @Before
     public void setup() {
         final IntegrasjonspunktProperties properties = mock(IntegrasjonspunktProperties.class);
+        SasKeyRepository sasKeyRepoMock = mock(SasKeyRepository.class);
         when(properties.isVarslingsplikt()).thenReturn(false);
-        service = new ServiceRegistryLookup(client, properties);
+        service = new ServiceRegistryLookup(client, properties, sasKeyRepoMock);
         query = Notification.NOT_OBLIGATED.createQuery();
-    }
-
-    @Test
-    public void clientThrowsExceptionWithHttpStatusNotFoundShouldReturnsEmptyServiceRecord() throws BadJWSException {
-        final String badOrgnr = "-100";
-        when(client.getResource("identifier/" + badOrgnr, query)).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
-
-        final ServiceRecord serviceRecord = service.getServiceRecord(badOrgnr);
-
-        assertThat(serviceRecord, is(ServiceRecord.EMPTY));
     }
 
     @Test
@@ -82,7 +73,7 @@ public class ServiceRegistryLookupTest {
         final String json = new SRContentBuilder().build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
-        final ServiceRecord serviceRecord = this.service.getServiceRecord(ORGNR);
+        final ServiceRecord serviceRecord = this.service.getServiceRecord(ORGNR).getServiceRecord();
 
         assertThat(serviceRecord, is(ServiceRecord.EMPTY));
     }
@@ -101,7 +92,7 @@ public class ServiceRegistryLookupTest {
         final String json = new SRContentBuilder().withServiceRecord(dpo).build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
-        final ServiceRecord serviceRecord = service.getServiceRecord(ORGNR);
+        final ServiceRecord serviceRecord = service.getServiceRecord(ORGNR).getServiceRecord();
 
         assertThat(serviceRecord, is(dpo));
     }
@@ -149,6 +140,7 @@ public class ServiceRegistryLookupTest {
                 content.put("serviceRecords", Lists.newArrayList(this.serviceRecord));
             }
             content.put("infoRecord", infoRecord);
+            content.put("failedServiceIdentifiers", Lists.newArrayList());
             return gson.toJson(content);
         }
 
