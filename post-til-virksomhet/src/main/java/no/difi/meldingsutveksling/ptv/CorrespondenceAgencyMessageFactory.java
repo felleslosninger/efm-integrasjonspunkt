@@ -14,11 +14,13 @@ import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespon
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentExternalBEV2List;
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentV2;
 import no.difi.meldingsutveksling.core.EDUCore;
-import no.difi.meldingsutveksling.core.EDUCoreConverter;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.nextmove.DpvConversationResource;
 import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
-import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
+import no.difi.meldingsutveksling.noarkexchange.NoarkDocument;
+import no.difi.meldingsutveksling.noarkexchange.PayloadException;
+import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 import no.difi.meldingsutveksling.receipt.Conversation;
 
 import javax.xml.bind.JAXBElement;
@@ -27,10 +29,7 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.IOException;
 import java.time.ZonedDateTime;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
@@ -90,21 +89,27 @@ public class CorrespondenceAgencyMessageFactory {
 
         no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory reporteeFactory = new no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory();
         BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
-        MeldingType meldingType = EDUCoreConverter.payloadAsMeldingType(edu.getPayload());
-        meldingType.getJournpost().getDokument().forEach(d -> {
-            BinaryAttachmentV2 binaryAttachmentV2 = new BinaryAttachmentV2();
-            binaryAttachmentV2.setFunctionType(AttachmentFunctionType.fromValue("Unspecified"));
-            binaryAttachmentV2.setFileName(reporteeFactory.createBinaryAttachmentV2FileName(d.getVeFilnavn()));
-            binaryAttachmentV2.setName(reporteeFactory.createBinaryAttachmentV2Name(d.getVeFilnavn()));
-            binaryAttachmentV2.setEncrypted(false);
-            binaryAttachmentV2.setSendersReference(reporteeFactory.createBinaryAttachmentV2SendersReference("AttachmentReference_as123452"));
-            binaryAttachmentV2.setData(reporteeFactory.createBinaryAttachmentV2Data(d.getFil().getBase64()));
-            attachmentExternalBEV2List.getBinaryAttachmentV2().add(binaryAttachmentV2);
-        });
-        String title = meldingType.getJournpost().getJpInnhold();
-        String content = meldingType.getJournpost().getJpOffinnhold();
+        try {
+            List<NoarkDocument> noarkDocuments = PayloadUtil.parsePayloadForDocuments(edu.getPayload());
+            noarkDocuments.forEach(d -> {
+                BinaryAttachmentV2 binaryAttachmentV2 = new BinaryAttachmentV2();
+                binaryAttachmentV2.setFunctionType(AttachmentFunctionType.fromValue("Unspecified"));
+                binaryAttachmentV2.setFileName(reporteeFactory.createBinaryAttachmentV2FileName(d.getFilename()));
+                binaryAttachmentV2.setName(reporteeFactory.createBinaryAttachmentV2Name(d.getFilename()));
+                binaryAttachmentV2.setEncrypted(false);
+                binaryAttachmentV2.setSendersReference(reporteeFactory.createBinaryAttachmentV2SendersReference("AttachmentReference_as123452"));
+                binaryAttachmentV2.setData(reporteeFactory.createBinaryAttachmentV2Data(Base64.getDecoder().decode(d.getContent())));
+                attachmentExternalBEV2List.getBinaryAttachmentV2().add(binaryAttachmentV2);
+            });
 
-        return create(config, edu.getId(), edu.getReceiver().getIdentifier(), title, content, attachmentExternalBEV2List);
+            String title = PayloadUtil.queryPayload(edu.getPayload(), "Melding/journpost/jpInnhold");
+            String content = PayloadUtil.queryPayload(edu.getPayload(), "Melding/journpost/jpOffinnhold");
+
+            return create(config, edu.getId(), edu.getReceiver().getIdentifier(), title, content, attachmentExternalBEV2List);
+        } catch (PayloadException e) {
+            throw new MeldingsUtvekslingRuntimeException("Error querying payload for Dokument", e);
+        }
+
     }
 
     public static InsertCorrespondenceV2 create(CorrespondenceAgencyConfiguration config,
