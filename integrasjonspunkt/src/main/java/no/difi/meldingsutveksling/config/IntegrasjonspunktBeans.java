@@ -14,6 +14,7 @@ import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.FiksMessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
+import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.DpiReceiptService;
 import no.difi.meldingsutveksling.receipt.StatusStrategy;
@@ -29,6 +30,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
@@ -102,9 +104,10 @@ public class IntegrasjonspunktBeans {
     public StrategyFactory messageStrategyFactory(MessageSender messageSender,
                                                   ServiceRegistryLookup serviceRegistryLookup,
                                                   KeystoreProvider meldingsformidlerKeystoreProvider,
+                                                  @Lazy InternalQueue internalQueue,
                                                   @Qualifier("localNoark") ObjectProvider<NoarkClient> localNoark,
                                                   @SuppressWarnings("SpringJavaAutowiringInspection") ObjectProvider<List<MessageStrategyFactory>> messageStrategyFactory) {
-        final StrategyFactory strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, meldingsformidlerKeystoreProvider, properties, localNoark.getIfAvailable());
+        final StrategyFactory strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, meldingsformidlerKeystoreProvider, properties, localNoark.getIfAvailable(), internalQueue);
         if(messageStrategyFactory.getIfAvailable() != null) {
             messageStrategyFactory.getIfAvailable().forEach(strategyFactory::registerMessageStrategyFactory);
         }

@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.noarkexchange.putmessage;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
+import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
@@ -14,15 +15,20 @@ public class PostVirksomhetStrategyFactory implements MessageStrategyFactory {
 
     private final CorrespondenceAgencyConfiguration configuration;
     private final NoarkClient noarkClient;
+    private final InternalQueue internalQueue;
 
-    private PostVirksomhetStrategyFactory(CorrespondenceAgencyConfiguration configuration, NoarkClient noarkClient) {
+    private PostVirksomhetStrategyFactory(CorrespondenceAgencyConfiguration configuration,
+                                          NoarkClient noarkClient,
+                                          InternalQueue internalQueue) {
         this.configuration = configuration;
         this.noarkClient = noarkClient;
+        this.internalQueue = internalQueue;
     }
 
     public static PostVirksomhetStrategyFactory newInstance(IntegrasjonspunktProperties properties,
                                                             NoarkClient noarkClient,
-                                                            ServiceRegistryLookup serviceRegistryLookup) {
+                                                            ServiceRegistryLookup serviceRegistryLookup,
+                                                            InternalQueue internalQueue) {
 
         InfoRecord infoRecord = serviceRegistryLookup.getInfoRecord(properties.getOrg().getNumber());
         CorrespondenceAgencyConfiguration.Builder builder = new CorrespondenceAgencyConfiguration.Builder()
@@ -43,12 +49,12 @@ public class PostVirksomhetStrategyFactory implements MessageStrategyFactory {
         builder.withEndpointUrl(properties.getDpv().getEndpointUrl().toString());
 
         CorrespondenceAgencyConfiguration config = builder.build();
-        return new PostVirksomhetStrategyFactory(config, noarkClient);
+        return new PostVirksomhetStrategyFactory(config, noarkClient, internalQueue);
     }
 
     @Override
     public MessageStrategy create(Object payload) {
-        return new PostVirksomhetMessageStrategy(configuration, noarkClient);
+        return new PostVirksomhetMessageStrategy(configuration, noarkClient, internalQueue);
     }
 
     @Override
