@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Optional;
 
+import static java.lang.String.format;
 import static no.difi.meldingsutveksling.dpi.MeldingsformidlerClient.EMPTY_KVITTERING;
 import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 
@@ -51,8 +52,12 @@ public class ReceiptPolling {
         conversations.forEach(c -> {
             if (serviceEnabled(c.getServiceIdentifier())) {
                 log.debug(markerFrom(c), "Checking status, conversationId={}", c.getConversationId());
-                StatusStrategy strategy = statusStrategyFactory.getFactory(c);
-                strategy.checkStatus(c);
+                try {
+                    StatusStrategy strategy = statusStrategyFactory.getFactory(c);
+                    strategy.checkStatus(c);
+                } catch (Exception e) {
+                    log.error(format("Exception during receipt polling, conversationId=%s", c.getConversationId()), e);
+                }
             }
         });
 
