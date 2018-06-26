@@ -15,6 +15,19 @@
         <!-- encoder is required -->
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <customFields>{"appname":"${project.artifactId}","buildinfo.version":"${project.version}","buildinfo.lastcommit":"${buildNumber}","orgnr":"${orgnr}"}</customFields>
+            <fieldNames>
+                <!-- Ignore message and stackTrace field here due to possible sensitive data (personal identity number), replaced in pattern below. -->
+                <message>[ignore]</message>
+                <stackTrace>[ignore]</stackTrace>
+            </fieldNames>
+            <provider class="net.logstash.logback.composite.loggingevent.LoggingEventPatternJsonProvider">
+                <pattern>
+                    {
+                    "message": "%replace(%msg){'[0-9]{11}','**********'}",
+                    "stack_trace": "%replace(%ex{full}){'[0-9]{11}','**********'}"
+                    }
+                </pattern>
+            </provider>
         </encoder>
         <if condition='property("ssl").contains("true")'>
             <then>

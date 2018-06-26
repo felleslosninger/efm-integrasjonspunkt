@@ -113,6 +113,11 @@ public class ForsendelseMapper {
         forsendelse.withKryptert(properties.getFiks().isKryptert());
         forsendelse.withAvgivendeSystem(properties.getNoarkSystem().getType());
 
+        forsendelse.withPrintkonfigurasjon(Printkonfigurasjon.builder()
+                .withTosidig(true)
+                .withFargePrint(false)
+                .withBrevtype(Brevtype.BPOST).build());
+
         final InfoRecord receiverInfo = serviceRegistry.getInfoRecord(eduCore.getReceiver().getIdentifier());
         forsendelse.withMottaker(mottakerFrom(receiverInfo));
 

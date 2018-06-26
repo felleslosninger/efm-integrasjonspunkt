@@ -11,10 +11,7 @@ import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.nextmove.NextMoveSender;
 import no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers;
-import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
-import no.difi.meldingsutveksling.noarkexchange.MessageException;
-import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
-import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
+import no.difi.meldingsutveksling.noarkexchange.*;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType;
@@ -57,6 +54,7 @@ public class InternalQueue {
     private static final String EXTERNAL = "external";
     private static final String NOARK = "noark";
     private static final String NEXTMOVE = "nextmove";
+    private static final String PUTMSG = "putmessage";
     private static final String DLQ = "ActiveMQ.DLQ";
 
     private Logger logger = LoggerFactory.getLogger(InternalQueue.class);
@@ -96,7 +94,7 @@ public class InternalQueue {
     static {
         try {
             jaxbContext = JAXBContextFactory.createContext(new Class[]{StandardBusinessDocument.class, Payload.class, Kvittering.class}, null);
-            jaxbContextdomain = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, Kvittering.class}, null);
+            jaxbContextdomain = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, Kvittering.class, PutMessageRequestType.class}, null);
             jaxbContextNextmove = JAXBContextFactory.createContext(new Class[]{ConversationResource.class}, null);
         } catch (JAXBException e) {
             throw new RuntimeException("Could not start internal queue: Failed to create JAXBContext", e);
@@ -121,6 +119,17 @@ public class InternalQueue {
             forwardToNoark(eduDocument);
         } catch (Exception e) {
             Audit.warn("Failed to forward message.. queue will retry", eduDocument.createLogstashMarkers(), e);
+            throw e;
+        }
+    }
+
+    @JmsListener(destination = PUTMSG, containerFactory = "myJmsContainerFactory")
+    public void putMessageListener(byte[] message, Session session) {
+        PutMessageRequestType putMessage = unmarshalPutMessage(message);
+        try {
+            noarkClient.sendEduMelding(putMessage);
+        } catch (Exception e) {
+            Audit.warn("Failed to forward message.. queue will retry", PutMessageMarker.markerFrom(new PutMessageRequestWrapper(putMessage)), e);
             throw e;
         }
     }
@@ -189,6 +198,18 @@ public class InternalQueue {
         }
     }
 
+    private PutMessageRequestType unmarshalPutMessage(byte[] message) {
+        ByteArrayInputStream bis = new ByteArrayInputStream(message);
+        StreamSource ss = new StreamSource(bis);
+        try {
+            Unmarshaller unmarshaller = jaxbContextdomain.createUnmarshaller();
+            return unmarshaller.unmarshal(ss, PutMessageRequestType.class).getValue();
+        } catch (JAXBException e) {
+            logger.error("Could not unmarshal putmessage", e);
+            throw new MeldingsUtvekslingRuntimeException(e);
+        }
+    }
+
     private void sendErrorAppReceipt(EDUCore request) {
         AppReceiptType receipt = new AppReceiptType();
         receipt.setType("ERROR");
@@ -242,6 +263,18 @@ public class InternalQueue {
      */
     public void enqueueNoark(EduDocument eduDocument) {
         jmsTemplate.convertAndSend(NOARK, documentConverter.marshallToBytes(eduDocument));
+    }
+
+    public void enqueuePutMessage(PutMessageRequestType putMessage) {
+        try {
+            Marshaller marshaller = jaxbContextdomain.createMarshaller();
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            marshaller.marshal(new JAXBElement<>(new QName("uri", "local"), PutMessageRequestType.class, putMessage), bos);
+            jmsTemplate.convertAndSend(PUTMSG, bos.toByteArray());
+        } catch (JAXBException e) {
+            Audit.error("Unable to queue putmessage", PutMessageMarker.markerFrom(new PutMessageRequestWrapper(putMessage)), e);
+            throw new MeldingsUtvekslingRuntimeException(e);
+        }
     }
 
     public void forwardToNoark(EduDocument eduDocument) {
