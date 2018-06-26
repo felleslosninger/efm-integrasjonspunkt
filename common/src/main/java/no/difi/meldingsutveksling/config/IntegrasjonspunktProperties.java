@@ -203,6 +203,8 @@ public class IntegrasjonspunktProperties {
         private String mode;
         @NotNull
         private String namespace;
+        @NotNull
+        private String host;
         private String receiptQueue;
         private Integer readMaxMessages;
         private boolean batchRead;
