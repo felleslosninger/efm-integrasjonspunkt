@@ -5,14 +5,21 @@ import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.arkivverket.standarder.noark5.arkivmelding.Dokumentbeskrivelse;
 import no.arkivverket.standarder.noark5.arkivmelding.Journalpost;
 import no.arkivverket.standarder.noark5.arkivmelding.Saksmappe;
+import org.eclipse.persistence.jaxb.JAXBContextFactory;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
 
 public class ArkivmeldingUtil {
+
+    public static final String ARKIVMELDING_XML = "arkivmelding.xml";
 
     private ArkivmeldingUtil() {
     }
@@ -46,5 +53,11 @@ public class ArkivmeldingUtil {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         marshaller.marshal(am, bos);
         return bos.toByteArray();
+    }
+
+    public static Arkivmelding unmarshalArkivmelding(InputStream inputStream) throws JAXBException {
+        JAXBContext jaxbContext = JAXBContextFactory.createContext(new Class[]{Arkivmelding.class}, new HashMap());
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        return unmarshaller.unmarshal(new StreamSource(inputStream), Arkivmelding.class).getValue();
     }
 }

@@ -9,6 +9,7 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,9 +38,9 @@ public class ArkivmeldingFactory {
 
     @Autowired
     public ArkivmeldingFactory(IntegrasjonspunktProperties props,
-                               MessagePersister persister) {
+                               ObjectProvider<MessagePersister> persister) {
         this.props = props;
-        this.persister = persister;
+        this.persister = persister.getIfUnique();
     }
 
     public Arkivmelding createArkivmeldingAndWriteFiles(PutMessageRequestWrapper putMessage) {

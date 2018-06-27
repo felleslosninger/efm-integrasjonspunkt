@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.ptv.CorrespondenceRequest;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,11 +26,11 @@ public class DpvConversationStrategy implements ConversationStrategy {
     @Autowired
     DpvConversationStrategy(IntegrasjonspunktProperties props,
                             ServiceRegistryLookup sr,
-                            MessagePersister messagePersister,
+                            ObjectProvider<MessagePersister> messagePersister,
                             InternalQueue internalQueue) {
         this.props = props;
         this.sr = sr;
-        this.messagePersister = messagePersister;
+        this.messagePersister = messagePersister.getIfUnique();
         this.internalQueue = internalQueue;
     }
 

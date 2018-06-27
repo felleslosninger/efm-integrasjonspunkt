@@ -5,6 +5,7 @@ import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,11 +28,11 @@ public class NextMoveSender {
     @Autowired
     public NextMoveSender(ConversationStrategyFactory strategyFactory,
                           ConversationService conversationService,
-                          MessagePersister messagePersister,
+                          ObjectProvider<MessagePersister> messagePersister,
                           ConversationResourceRepository repo) {
         this.strategyFactory = strategyFactory;
         this.conversationService = conversationService;
-        this.messagePersister = messagePersister;
+        this.messagePersister = messagePersister.getIfUnique();
         this.outRepo = new DirectionalConversationResourceRepository(repo, OUTGOING);
     }
 

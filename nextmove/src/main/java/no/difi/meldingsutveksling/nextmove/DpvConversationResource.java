@@ -33,7 +33,6 @@ public class DpvConversationResource extends ConversationResource {
 
         dpv.setSenderName(dpi.getSenderName());
         dpv.setReceiverName(dpi.getReceiverName());
-        dpv.setHasArkivmelding(dpi.isHasArkivmelding());
         dpv.setFileRefs(dpi.getFileRefs());
         dpv.setCustomProperties(dpi.getCustomProperties());
 

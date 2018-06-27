@@ -19,6 +19,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +28,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPA;
+import static no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil.ARKIVMELDING_XML;
 
 /**
  *
@@ -52,7 +54,8 @@ public class PutMessageService {
             InternalQueue queue,
             ConversationService conversationService,
             ArkivmeldingFactory arkivmeldingFactory,
-            ConversationResourceRepository crRepo, MessagePersister persister) {
+            ConversationResourceRepository crRepo,
+            ObjectProvider<MessagePersister> persister) {
         this.properties = properties;
         this.coreSender = coreSender;
         this.serviceRegistryLookup = serviceRegistryLookup;
@@ -60,7 +63,7 @@ public class PutMessageService {
         this.conversationService = conversationService;
         this.arkivmeldingFactory = arkivmeldingFactory;
         this.crRepo = new DirectionalConversationResourceRepository(crRepo, ConversationDirection.OUTGOING);
-        this.persister = persister;
+        this.persister = persister.getIfUnique();
     }
 
     public PutMessageResponseType queueMessage(PutMessageRequestWrapper msg, ServiceRecord serviceRecord) {
@@ -82,15 +85,15 @@ public class PutMessageService {
                     msg.getRecieverPartyNumber());
 
             Arkivmelding arkivmelding = arkivmeldingFactory.createArkivmeldingAndWriteFiles(msg);
-            cr.setHasArkivmelding(true);
+            cr.setArkivmelding(arkivmelding);
 
             List<String> files = ArkivmeldingUtil.getFilenames(arkivmelding);
             files.forEach(cr::addFileRef);
 
             try {
                 byte[] amBytes = ArkivmeldingUtil.marshalArkivmelding(arkivmelding);
-                persister.write(cr.getConversationId(), "arkivmelding.xml", amBytes);
-                cr.addFileRef("arkivmelding.xml");
+                persister.write(cr.getConversationId(), ARKIVMELDING_XML, amBytes);
+                cr.addFileRef(ARKIVMELDING_XML);
             } catch (JAXBException | IOException e) {
                 throw new MeldingsUtvekslingRuntimeException("Could not marshal and save arkivmelding", e);
             }

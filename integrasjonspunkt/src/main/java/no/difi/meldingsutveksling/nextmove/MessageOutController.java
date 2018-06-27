@@ -7,6 +7,8 @@ import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.nextmove.convert.ConversationResourceConverter;
+import no.difi.meldingsutveksling.nextmove.convert.DpaNotImplementedException;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
@@ -14,9 +16,9 @@ import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
@@ -29,9 +31,7 @@ import org.xml.sax.SAXException;
 
 import javax.transaction.Transactional;
 import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
@@ -44,8 +44,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
+import static no.difi.meldingsutveksling.ServiceIdentifier.*;
+import static no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil.ARKIVMELDING_XML;
+import static no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil.unmarshalArkivmelding;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
 import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
@@ -55,7 +56,6 @@ import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMa
 public class MessageOutController {
 
     private static final Logger log = LoggerFactory.getLogger(MessageOutController.class);
-    private static final String ARKIVMELDING_FILE = "arkivmelding.xml";
 
     private DirectionalConversationResourceRepository outRepo;
     private DirectionalConversationResourceRepository inRepo;
@@ -79,15 +79,19 @@ public class MessageOutController {
     private ConversationService conversationService;
 
     @Autowired
+    private ConversationResourceConverter crConverter;
+
+    @Autowired
     private InternalQueue internalQueue;
 
     private MessagePersister messagePersister;
 
     @Autowired
-    public MessageOutController(ConversationResourceRepository repo, MessagePersister messagePersister) {
+    public MessageOutController(ConversationResourceRepository repo,
+                                ObjectProvider<MessagePersister> messagePersister) {
         this.outRepo = new DirectionalConversationResourceRepository(repo, OUTGOING);
         this.inRepo = new DirectionalConversationResourceRepository(repo, INCOMING);
-        this.messagePersister = messagePersister;
+        this.messagePersister = messagePersister.getIfUnique();
     }
 
     @RequestMapping(value = "/out/messages", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -149,7 +153,8 @@ public class MessageOutController {
             return ResponseEntity.badRequest().body(ErrorResponse.builder().error("serviceIdentifier_not_present")
                     .errorDescription("Required String parameter \'serviceIdentifier\' is not present").build());
         }
-        if (!strategyFactory.getEnabledServices().contains(cr.getServiceIdentifier())) {
+        if (cr.getServiceIdentifier() != DPA &&
+                !strategyFactory.getEnabledServices().contains(cr.getServiceIdentifier())) {
             return ResponseEntity.badRequest().body(ErrorResponse.builder().error("serviceIdentifier_not_supported")
                     .errorDescription(String.format("serviceIdentifier '%s' not supported. Supported types: %s",
                             cr.getServiceIdentifier(), strategyFactory.getEnabledServices())).build());
@@ -163,7 +168,7 @@ public class MessageOutController {
                 acceptableServiceIdentifiers.contains(DPV)) {
             acceptableServiceIdentifiers.add(DPI);
         }
-        if (!acceptableServiceIdentifiers.contains(cr.getServiceIdentifier())) {
+        if (cr.getServiceIdentifier() != DPA && !acceptableServiceIdentifiers.contains(cr.getServiceIdentifier())) {
             return ResponseEntity.badRequest().body(ErrorResponse.builder().error("serviceIdentifier_not_acceptable")
                     .errorDescription(String.format("ServiceIdentifier '%s' not acceptable by receiver. Acceptable types: %s",
                             cr.getServiceIdentifier(), acceptableServiceIdentifiers)).build());
@@ -212,7 +217,7 @@ public class MessageOutController {
 
         Optional<String> arkivmeldingFile = request.getFileMap().values().stream()
                 .map(MultipartFile::getOriginalFilename)
-                .filter(ARKIVMELDING_FILE::equals)
+                .filter(ARKIVMELDING_XML::equals)
                 .findFirst();
         if (arkivmeldingFile.isPresent()) {
             ResponseEntity arkivmeldingResponse = handleArkivmelding(request, cr);
@@ -254,7 +259,16 @@ public class MessageOutController {
                 .map(ServiceRecord::getServiceIdentifier)
                 .anyMatch(si -> DPI == si);
         if (cr.getServiceIdentifier() == DPI && !hasDpiRecord) {
-            cr = convertDpiToDpv(cr);
+            cr = crConverter.convertDpiToDpv(cr);
+        }
+        if (cr.getServiceIdentifier() == DPA) {
+            try {
+                cr = crConverter.convertDpa(cr);
+            } catch (DpaNotImplementedException e) {
+                log.error("Could not convert DPA message", e);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                        ErrorResponse.builder().error("dpa_not_implemented").errorDescription(e.getMessage()).build());
+            }
         }
 
         internalQueue.enqueueNextmove(cr);
@@ -262,23 +276,15 @@ public class MessageOutController {
 
     }
 
-    private ConversationResource convertDpiToDpv(ConversationResource cr) {
-        DpvConversationResource dpv = DpvConversationResource.of((DpiConversationResource) cr);
-        // Update conversation to make it pollable for receipts
-        conversationService.setServiceIdentifier(cr.getConversationId(), ServiceIdentifier.DPV);
-        conversationService.setPollable(cr.getConversationId(), true);
-        return dpv;
-    }
-
     private ResponseEntity handleArkivmelding(MultipartHttpServletRequest request, ConversationResource cr) {
         MultipartFile file = request.getFileMap().values().stream()
-                .filter(f -> ARKIVMELDING_FILE.equals(f.getOriginalFilename()))
+                .filter(f -> ARKIVMELDING_XML.equals(f.getOriginalFilename()))
                 .findFirst().get();
         Arkivmelding arkivmelding;
         try {
             validateArkivmelding(file.getInputStream());
             arkivmelding = unmarshalArkivmelding(file.getInputStream());
-            cr.setHasArkivmelding(true);
+            cr.setArkivmelding(arkivmelding);
         } catch (IOException e) {
             log.error("Could not read file {}", file.getOriginalFilename(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
@@ -361,12 +367,6 @@ public class MessageOutController {
         } catch (IOException e) {
             log.error("Error reading xsd", e);
         }
-    }
-
-    private Arkivmelding unmarshalArkivmelding(InputStream inputStream) throws JAXBException {
-        JAXBContext jaxbContext = JAXBContextFactory.createContext(new Class[]{Arkivmelding.class}, new HashMap());
-        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-        return unmarshaller.unmarshal(new StreamSource(inputStream), Arkivmelding.class).getValue();
     }
 
 }
