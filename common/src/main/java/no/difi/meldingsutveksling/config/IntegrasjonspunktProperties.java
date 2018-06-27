@@ -245,6 +245,7 @@ public class IntegrasjonspunktProperties {
         private boolean enableReceipts;
         private boolean forwardReceivedAppReceipts;
         private boolean returnOkOnEmptyPayload;
+        private boolean dumpDlqMessages;
 
         /**
          * Service toggles

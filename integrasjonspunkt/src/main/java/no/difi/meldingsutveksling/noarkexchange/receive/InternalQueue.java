@@ -33,8 +33,7 @@ import javax.jms.Session;
 import javax.xml.bind.*;
 import javax.xml.namespace.QName;
 import javax.xml.transform.stream.StreamSource;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.*;
 
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
@@ -163,6 +162,9 @@ public class InternalQueue {
             if (noarkClient != null) {
                 sendErrorAppReceipt(request);
             }
+            if (properties.getFeature().isDumpDlqMessages()) {
+                writeMessageToDisk(request);
+            }
         } catch (Exception e) {
         }
 
@@ -184,6 +186,19 @@ public class InternalQueue {
 
         ms.setDescription(errorMsg);
         conversationService.registerStatus(conversationId, ms);
+    }
+
+    private void writeMessageToDisk(EDUCore request) {
+        PutMessageRequestType putMessage = EDUCoreFactory.createPutMessageFromCore(request);
+        try {
+            Marshaller marshaller = jaxbContextdomain.createMarshaller();
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            marshaller.marshal(new JAXBElement<>(new QName("uri", "local"), PutMessageRequestType.class, putMessage), bos);
+            FileOutputStream fos = new FileOutputStream(new File("failed_messages/" + request.getId() + "_failed.xml"));
+            bos.writeTo(fos);
+        } catch (JAXBException | IOException e) {
+            logger.error("Failed writing message to disk", e);
+        }
     }
 
     private ConversationResource unmarshalNextMoveMessage(byte[] message) {
