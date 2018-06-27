@@ -194,14 +194,10 @@ public class InternalQueue {
             Marshaller marshaller = jaxbContextdomain.createMarshaller();
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             marshaller.marshal(new JAXBElement<>(new QName("uri", "local"), PutMessageRequestType.class, putMessage), bos);
-            try {
-                FileOutputStream fos = new FileOutputStream(new File("failed_messages/" + request.getId() + "_failed.xml"));
-                bos.writeTo(fos);
-            } catch (IOException e) {
-                logger.error("Error writing failed message to disk", e);
-            }
-        } catch (JAXBException e) {
-            logger.error("Failed marshalling message", e);
+            FileOutputStream fos = new FileOutputStream(new File("failed_messages/" + request.getId() + "_failed.xml"));
+            bos.writeTo(fos);
+        } catch (JAXBException | IOException e) {
+            logger.error("Failed writing message to disk", e);
         }
     }
 
