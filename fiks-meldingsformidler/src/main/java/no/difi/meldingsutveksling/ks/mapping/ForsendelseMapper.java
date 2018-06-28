@@ -60,16 +60,16 @@ public class ForsendelseMapper {
         Forsendelse.Builder<Void> forsendelse = Forsendelse.builder();
         forsendelse.withEksternref(cr.getConversationId());
         forsendelse.withKunDigitalLevering(false);
-        forsendelse.withSvarPaForsendelse(""); // FIXME
+        forsendelse.withSvarPaForsendelse(""); // FIXME: receiver.ref
 
         Arkivmelding am = cr.getArkivmelding();
         Saksmappe sm = (Saksmappe) am.getMappe().get(0);
         Journalpost jp = (Journalpost)  sm.getBasisregistrering().get(0);
         forsendelse.withTittel(jp.getOffentligTittel());
 
-        forsendelse.withKonteringskode(properties.getFiks().getUt().getKonverteringsKode()); // FIXME: konvertering -> kontering?
+        forsendelse.withKonteringskode(properties.getFiks().getUt().getKonverteringsKode());
         forsendelse.withKryptert(properties.getFiks().isKryptert());
-        forsendelse.withAvgivendeSystem(properties.getNoarkSystem().getType()); // FIXME: nextmove?
+        forsendelse.withAvgivendeSystem(properties.getNoarkSystem().getType());
 
         final InfoRecord receiverInfo = serviceRegistry.getInfoRecord(cr.getReceiverId());
         forsendelse.withMottaker(mottakerFrom(receiverInfo));
@@ -181,7 +181,7 @@ public class ForsendelseMapper {
         metadata.withTittel(meldingType.getJournpost().getJpOffinnhold());
 
         Optional<AvsmotType> avsender = getSaksbehandler(meldingType);
-        avsender.map(a -> a.getAmNavn()).ifPresent(metadata::withSaksbehandler);
+        avsender.map(AvsmotType::getAmNavn).ifPresent(metadata::withSaksbehandler);
 
         return metadata.build();
     }
@@ -282,7 +282,7 @@ public class ForsendelseMapper {
                 db.getDokumentobjekt().forEach(dbo -> {
                     String f = dbo.getReferanseDokumentfil();
                     try {
-                        byte[] bytes = persister.read(cr, f);
+                        byte[] bytes = persister.read(cr.getConversationId(), f);
                         String[] split = dbo.getReferanseDokumentfil().split(".");
                         String ext = Stream.of(split).reduce((p, e) -> e).orElse("pdf");
                         String mimetype = MimeTypeExtensionMapper.getMimetype(ext);

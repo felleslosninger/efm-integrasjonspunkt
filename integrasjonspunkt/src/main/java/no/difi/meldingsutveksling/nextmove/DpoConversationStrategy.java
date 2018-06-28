@@ -1,51 +1,27 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.MessageContextException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
 
 @Component
 @Slf4j
 public class DpoConversationStrategy implements ConversationStrategy {
 
-    private ServiceRegistryLookup sr;
     private MessageSender messageSender;
 
     @Autowired
-    DpoConversationStrategy(ServiceRegistryLookup sr,
-                            MessageSender messageSender) {
-        this.sr = sr;
+    DpoConversationStrategy(MessageSender messageSender) {
         this.messageSender = messageSender;
     }
 
     @Override
     public void send(ConversationResource cr) throws NextMoveException {
-        List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiverId());
-        Optional<ServiceRecord> serviceRecord = serviceRecords.stream()
-                .filter(r -> DPO == r.getServiceIdentifier())
-                .findFirst();
-        if (!serviceRecord.isPresent()) {
-            List<ServiceIdentifier> acceptableTypes = serviceRecords.stream()
-                    .map(ServiceRecord::getServiceIdentifier)
-                    .collect(Collectors.toList());
-            String errorStr = String.format("Message is of type '%s', but receiver '%s' accepts types '%s'.",
-                    DPO, cr.getReceiverId(), acceptableTypes);
-            log.error(markerFrom(cr), errorStr);
-            throw new NextMoveException(errorStr);
-        }
         try {
             messageSender.sendMessage(cr);
         } catch (MessageContextException e) {

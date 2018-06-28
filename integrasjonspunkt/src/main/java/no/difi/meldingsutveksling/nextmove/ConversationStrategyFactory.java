@@ -22,17 +22,19 @@ public class ConversationStrategyFactory {
                                        DpeConversationStrategy dpeStrat,
                                        DpvConversationStrategy dpvStrat,
                                        DpiConversationStrategy dpiStrat,
-                                       DpaConversationStrategy dpaStrat) {
+                                       DpfConversationStrategy dpfStrat) {
         strategies = Maps.newEnumMap(ServiceIdentifier.class);
         if (props.getFeature().isEnableDPO()) {
             strategies.put(ServiceIdentifier.DPO, dpoStrat);
-            strategies.put(ServiceIdentifier.DPA, dpaStrat);
         }
         if (props.getFeature().isEnableDPV()) {
             strategies.put(ServiceIdentifier.DPV, dpvStrat);
         }
         if (props.getFeature().isEnableDPI()) {
             strategies.put(ServiceIdentifier.DPI, dpiStrat);
+        }
+        if (props.getFeature().isEnableDPF()) {
+            strategies.put(ServiceIdentifier.DPF, dpfStrat);
         }
         if (props.getFeature().isEnableDPE()) {
             strategies.put(ServiceIdentifier.DPE_INNSYN, dpeStrat);

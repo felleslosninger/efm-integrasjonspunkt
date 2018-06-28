@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.ks.mapping.FiksMapper;
 import no.difi.meldingsutveksling.ks.receipt.DpfReceiptStatus;
+import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -13,6 +14,8 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 
 import java.security.cert.X509Certificate;
 import java.util.Optional;
+
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPF;
 
 public class SvarUtService {
     private SvarUtWebServiceClient client;
@@ -39,9 +42,19 @@ public class SvarUtService {
         }
 
         final X509Certificate x509Certificate = toX509Certificate(serviceRecord.get().getPemCertificate());
-
-
         final SendForsendelseMedId forsendelse = fiksMapper.mapFrom(message, x509Certificate);
+        SvarUtRequest svarUtRequest = new SvarUtRequest(props.getFiks().getUt().getEndpointUrl().toString(), forsendelse);
+        return client.sendMessage(svarUtRequest);
+    }
+
+    public String send(ConversationResource cr) {
+        Optional<ServiceRecord> serviceRecord = serviceRegistryLookup.getServiceRecord(cr.getReceiverId(), DPF);
+        if (!serviceRecord.isPresent()) {
+            throw new SvarUtServiceException(String.format("No DPF ServiceRecord found for identifier %s", cr.getReceiverId()));
+        }
+
+        final X509Certificate x509Certificate = toX509Certificate(serviceRecord.get().getPemCertificate());
+        final SendForsendelseMedId forsendelse = fiksMapper.mapFrom(cr, x509Certificate);
         SvarUtRequest svarUtRequest = new SvarUtRequest(props.getFiks().getUt().getEndpointUrl().toString(), forsendelse);
         return client.sendMessage(svarUtRequest);
     }
