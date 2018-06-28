@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.nextmove.convert;
 import com.google.common.collect.Maps;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
-import no.difi.meldingsutveksling.nextmove.DpiConversationResource;
 import no.difi.meldingsutveksling.nextmove.DpvConversationResource;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -37,17 +36,17 @@ public class ConversationResourceConverter {
     }
 
     public ConversationResource convertDpiToDpv(ConversationResource cr) {
-        DpvConversationResource dpv = DpvConversationResource.of((DpiConversationResource) cr);
-        // Update conversation to make it pollable for receipts
-        conversationService.setServiceIdentifier(cr.getConversationId(), ServiceIdentifier.DPV);
-        conversationService.setPollable(cr.getConversationId(), true);
+        DpvConversationResource dpv = DpvConversationResource.of(cr);
+        conversationService.changeServiceIdentifier(cr.getConversationId(), ServiceIdentifier.DPV);
         return dpv;
     }
 
     public ConversationResource convertDpa(ConversationResource cr) throws DpaNotImplementedException {
         ServiceRecord sr = srLookup.getServiceRecord(cr.getReceiverId()).getServiceRecord();
         if (dpaConverters.containsKey(sr.getServiceIdentifier())) {
-            return dpaConverters.get(sr.getServiceIdentifier()).convert(cr);
+            ConversationResource targetCr = dpaConverters.get(sr.getServiceIdentifier()).convert(cr);
+            conversationService.changeServiceIdentifier(targetCr.getConversationId(), sr.getServiceIdentifier());
+            return targetCr;
         }
         throw new DpaNotImplementedException(format("DPA converter not implemented for service identifier %s", sr.getServiceIdentifier()));
     }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.Maps;
 import lombok.Data;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.ServiceIdentifier;
@@ -87,15 +88,38 @@ public abstract class ConversationResource {
 
     ConversationResource() {}
 
-    ConversationResource(String conversationId, String senderId, String receiverId, ServiceIdentifier serviceIdentifier,
-                         LocalDateTime lastUpdate, Map fileRefs, Map customProperties){
+    ConversationResource(String conversationId,
+                         String senderId,
+                         String senderName,
+                         String receiverId,
+                         String receiverName,
+                         ServiceIdentifier serviceIdentifier,
+                         LocalDateTime lastUpdate,
+                         Map fileRefs,
+                         Map customProperties){
         this.conversationId = conversationId;
         this.senderId = senderId;
+        this.senderName = senderName;
         this.receiverId = receiverId;
+        this.receiverName = receiverName;
         this.serviceIdentifier = serviceIdentifier;
         this.lastUpdate = lastUpdate;
         this.fileRefs = fileRefs;
         this.customProperties = customProperties;
+    }
+
+    ConversationResource(String conversationId,
+                         String senderId,
+                         String receiverId,
+                         ServiceIdentifier serviceIdentifier) {
+        this.conversationId = conversationId;
+        this.senderId = senderId;
+        this.receiverId = receiverId;
+        this.serviceIdentifier = serviceIdentifier;
+
+        this.lastUpdate = LocalDateTime.now();
+        this.fileRefs = Maps.newHashMap();
+        this.customProperties = Maps.newHashMap();
     }
 
 
