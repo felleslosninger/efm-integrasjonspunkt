@@ -35,7 +35,7 @@ public class DpoConversationResource extends ConversationResource {
     }
 
     public static DpoConversationResource of(ConversationResource cr) {
-        DpoConversationResource dpo = new DpoConversationResource(cr.getConversationId(),
+        return new DpoConversationResource(cr.getConversationId(),
                 cr.getSenderId(),
                 cr.getSenderName(),
                 cr.getReceiverId(),
@@ -43,7 +43,5 @@ public class DpoConversationResource extends ConversationResource {
                 cr.getLastUpdate(),
                 cr.getFileRefs(),
                 cr.getCustomProperties());
-
-        return dpo;
     }
 }

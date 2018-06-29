@@ -31,7 +31,7 @@ public class DpiConversationResource extends ConversationResource {
     }
 
     public static DpiConversationResource of(ConversationResource cr) {
-        DpiConversationResource dpi = new DpiConversationResource(cr.getConversationId(),
+        return new DpiConversationResource(cr.getConversationId(),
                 cr.getSenderId(),
                 cr.getSenderName(),
                 cr.getReceiverId(),
@@ -39,7 +39,5 @@ public class DpiConversationResource extends ConversationResource {
                 cr.getLastUpdate(),
                 cr.getFileRefs(),
                 cr.getCustomProperties());
-
-        return dpi;
     }
 }

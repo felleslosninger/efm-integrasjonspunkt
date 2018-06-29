@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreConverter;
+import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.ks.mapping.edu.FileTypeHandler;
 import no.difi.meldingsutveksling.ks.mapping.edu.FileTypeHandlerFactory;
@@ -84,7 +85,7 @@ public class ForsendelseMapper {
         }
 
         forsendelse.withMetadataFraAvleverendeSystem(metaDataFrom(sm));
-        forsendelse.withDokumenter(mapArkivmeldingDokumenter(cr, jp.getDokumentbeskrivelseAndDokumentobjekt()));
+        forsendelse.withDokumenter(mapArkivmeldingDokumenter(cr, jp.getDokumentbeskrivelseAndDokumentobjekt(), certificate));
         String senderRef;
         if (!isNullOrEmpty(am.getMeldingId())) {
             senderRef = am.getMeldingId();
@@ -273,7 +274,7 @@ public class ForsendelseMapper {
         return mottaker.build();
     }
 
-    private List<Dokument> mapArkivmeldingDokumenter(ConversationResource cr, List<Object> docs) {
+    private List<Dokument> mapArkivmeldingDokumenter(ConversationResource cr, List<Object> docs, X509Certificate certificate) {
         List<Dokument> dokumenter = Lists.newArrayList();
 
         for (Object d : docs) {
@@ -286,7 +287,8 @@ public class ForsendelseMapper {
                         String[] split = dbo.getReferanseDokumentfil().split(".");
                         String ext = Stream.of(split).reduce((p, e) -> e).orElse("pdf");
                         String mimetype = MimeTypeExtensionMapper.getMimetype(ext);
-                        final DataHandler dataHandler = new DataHandler(new ByteArrayDataSource(new ByteArrayInputStream(bytes), mimetype));
+                        byte[] encrypted = new CmsUtil().createCMS(bytes, certificate);
+                        final DataHandler dataHandler = new DataHandler(new ByteArrayDataSource(new ByteArrayInputStream(encrypted), mimetype));
                         Dokument dokument = Dokument.builder()
                                 .withData(dataHandler)
                                 .withFilnavn(f)
@@ -294,7 +296,7 @@ public class ForsendelseMapper {
                                 .build();
                         dokumenter.add(dokument);
                     } catch (IOException e) {
-                        throw new MeldingsUtvekslingRuntimeException(String.format("Could not load file %s", f));
+                        throw new MeldingsUtvekslingRuntimeException(String.format("Could not load file %s", f), e);
                     }
                 });
             }
