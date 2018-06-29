@@ -9,6 +9,9 @@ public class VariantformatMapper {
 
     private static final HashBiMap<String, Variantformat> mapper = HashBiMap.create();
 
+    private VariantformatMapper() {
+    }
+
     static {
         mapper.put("P", Variantformat.PRODUKSJONSFORMAT);
         mapper.put("A", Variantformat.ARKIVFORMAT);

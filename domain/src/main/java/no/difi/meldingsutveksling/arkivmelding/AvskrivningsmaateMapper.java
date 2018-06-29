@@ -9,6 +9,9 @@ public class AvskrivningsmaateMapper {
 
     private static final HashBiMap<String, Avskrivningsmaate> mapper = HashBiMap.create();
 
+    private AvskrivningsmaateMapper() {
+    }
+
     static {
         mapper.put("BU", Avskrivningsmaate.BESVART_MED_BREV);
         // TODO: potential wrong mapping

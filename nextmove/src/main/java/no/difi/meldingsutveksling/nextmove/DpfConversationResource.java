@@ -36,7 +36,7 @@ public class DpfConversationResource extends ConversationResource {
     }
 
     public static DpfConversationResource of(ConversationResource cr) {
-        DpfConversationResource dpf = new DpfConversationResource(cr.getConversationId(),
+        return new DpfConversationResource(cr.getConversationId(),
                 cr.getSenderId(),
                 cr.getSenderName(),
                 cr.getReceiverId(),
@@ -44,8 +44,5 @@ public class DpfConversationResource extends ConversationResource {
                 cr.getLastUpdate(),
                 cr.getFileRefs(),
                 cr.getCustomProperties());
-
-
-        return dpf;
     }
 }

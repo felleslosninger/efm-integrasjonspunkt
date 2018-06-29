@@ -9,6 +9,9 @@ public class JournalposttypeMapper {
 
     private static final HashBiMap<String, Journalposttype> mapper = HashBiMap.create();
 
+    private JournalposttypeMapper() {
+    }
+
     static {
         mapper.put("I", Journalposttype.INNGÅENDE_DOKUMENT);
         mapper.put("U", Journalposttype.UTGÅENDE_DOKUMENT);

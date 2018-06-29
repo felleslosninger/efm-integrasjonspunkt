@@ -32,14 +32,11 @@ import static java.util.Optional.ofNullable;
 @Component
 public class ArkivmeldingFactory {
 
-    private IntegrasjonspunktProperties props;
-
     private MessagePersister persister;
 
     @Autowired
     public ArkivmeldingFactory(IntegrasjonspunktProperties props,
                                ObjectProvider<MessagePersister> persister) {
-        this.props = props;
         this.persister = persister.getIfUnique();
     }
 

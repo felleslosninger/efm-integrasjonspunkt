@@ -9,6 +9,9 @@ public class TilknyttetRegistreringSomMapper {
 
     private static final HashBiMap<String, TilknyttetRegistreringSom> mapper = HashBiMap.create();
 
+    private TilknyttetRegistreringSomMapper() {
+    }
+
     static {
         mapper.put("H", TilknyttetRegistreringSom.HOVEDDOKUMENT);
         mapper.put("V", TilknyttetRegistreringSom.VEDLEGG);

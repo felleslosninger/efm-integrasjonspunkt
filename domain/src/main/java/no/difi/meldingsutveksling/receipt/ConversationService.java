@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.receipt;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -15,8 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPF;
@@ -31,7 +31,7 @@ public class ConversationService {
     private NoarkClient mshClient;
 
     private static final String CONVERSATION_EXISTS = "Conversation with id=%s already exists, not recreating";
-    private static final List<ServiceIdentifier> POLLABLES = Lists.newArrayList(DPV, DPF);
+    private static final Set<ServiceIdentifier> POLLABLES = Sets.newHashSet(DPV, DPF);
 
     @Autowired
     public ConversationService(ConversationRepository repo,
