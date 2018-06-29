@@ -6,9 +6,11 @@ import no.arkivverket.standarder.noark5.arkivmelding.Saksmappe;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.nextmove.DpiConversationResource;
+import org.springframework.stereotype.Component;
 
 import static no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil.ARKIVMELDING_XML;
 
+@Component
 public class DpiArkivmeldingConverter implements ArkivmeldingConverter {
 
     @Override

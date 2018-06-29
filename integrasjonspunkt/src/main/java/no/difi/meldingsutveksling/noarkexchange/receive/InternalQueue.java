@@ -289,7 +289,7 @@ public class InternalQueue {
                     (JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument>) jaxbContext.createUnmarshaller().unmarshal(new ByteArrayInputStream(tmp));
 
             final StandardBusinessDocument standardBusinessDocument = toDocument.getValue();
-            Audit.info("SBD extracted", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));
+            logger.debug("SBD extracted", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));
             sendToNoarkSystem(standardBusinessDocument);
         } catch (JAXBException e) {
             Audit.error("Failed to unserialize SBD");

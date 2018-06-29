@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.nextmove;
 
 import com.google.common.collect.Lists;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.nextmove.convert.ConversationResourceConverter;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
@@ -74,6 +75,9 @@ public class MessageOutControllerTest {
     @MockBean
     private InternalQueue internalQueue;
 
+    @MockBean
+    private ConversationResourceConverter converter;
+
     @Before
     public void setup() {
         String filedir = "target/uploadtest/";
@@ -127,7 +131,6 @@ public class MessageOutControllerTest {
     public void getMessageShouldReturnOk() throws Exception {
         mvc.perform(get("/out/messages/42").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(10)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
                 .andExpect(jsonPath("$.receiverId", is("1")))
                 .andExpect(jsonPath("$.serviceIdentifier", is("DPO")));
@@ -182,7 +185,6 @@ public class MessageOutControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(10)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
                 .andExpect(jsonPath("$.receiverId", is("1")))
                 .andExpect(jsonPath("$.serviceIdentifier", is("DPO")));

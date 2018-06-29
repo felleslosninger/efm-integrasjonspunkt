@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.noarkexchange.altinn;
+package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.IntegrasjonspunktApplication;
 import no.difi.meldingsutveksling.core.EDUCore;
@@ -6,7 +6,6 @@ import no.difi.meldingsutveksling.core.Receiver;
 import no.difi.meldingsutveksling.core.Sender;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
-import no.difi.meldingsutveksling.noarkexchange.*;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
@@ -20,7 +19,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.xml.bind.JAXBException;
-import java.io.IOException;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -44,7 +42,7 @@ public class IntegrasjonspunktReceiveImplIntegrationTest {
     IntegrajonspunktReceiveImpl integrajonspunktReceiveSpy;
 
     @Before
-    public void setUp() throws JAXBException, IOException, MessageException {
+    public void setUp() throws MessageException {
         AppReceiptType appReceiptTypeMock = mock(AppReceiptType.class);
         when(appReceiptTypeMock.getType()).thenReturn("OK");
         PutMessageResponseType putMessageResponseTypeMock = mock(PutMessageResponseType.class);

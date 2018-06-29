@@ -1,9 +1,9 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.Decryptor;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
-import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreFactory;
@@ -60,6 +60,7 @@ import static no.difi.meldingsutveksling.noarkexchange.logging.PutMessageRespons
  *
  */
 @Component("recieveService")
+@Slf4j
 @WebService(portName = "ReceivePort", serviceName = "receive", targetNamespace = "", endpointInterface = "no.difi.meldingsutveksling.noarkexchange.schema.receive.SOAReceivePort")
 @BindingType("http://schemas.xmlsoap.org/wsdl/soap/http")
 public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationContextAware {
@@ -116,14 +117,14 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
 
         try {
             adresseregisterService.validateCertificates(document);
-            Audit.info("Certificates validated", markerFrom(document));
+            log.debug("Certificates validated", markerFrom(document));
         } catch (MessageException e) {
             Audit.error(e.getMessage(), markerFrom(document), e);
             throw e;
         }
 
         if (document.isReceipt()) {
-            Audit.info("Messagetype Receipt", markerFrom(document));
+            log.debug("Messagetype Receipt", markerFrom(document));
             return new CorrelationInformation();
         }
 
@@ -164,12 +165,12 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
         return eduCore;
     }
 
-    public byte[] decrypt(Payload payload) {
+    byte[] decrypt(Payload payload) {
         byte[] cmsEncZip = DatatypeConverter.parseBase64Binary(payload.getContent());
         return new Decryptor(keyInfo).decrypt(cmsEncZip);
     }
 
-    public void forwardToNoarkSystemAndSendReceipts(StandardBusinessDocumentWrapper inputDocument, EDUCore eduCore) {
+    void forwardToNoarkSystemAndSendReceipts(StandardBusinessDocumentWrapper inputDocument, EDUCore eduCore) {
         PutMessageRequestType putMessage = new EDUCoreFactory(serviceRegistryLookup).createPutMessageFromCore(eduCore);
         PutMessageResponseType response = localNoark.sendEduMelding(putMessage);
         if (response == null || response.getResult() == null) {
@@ -197,7 +198,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
 
     }
 
-    public void sendReceiptOpen(StandardBusinessDocumentWrapper inputDocument) {
+    void sendReceiptOpen(StandardBusinessDocumentWrapper inputDocument) {
         EduDocument doc = EduDocumentFactory.createAapningskvittering(inputDocument.getMessageInfo(), keyInfo);
         sendReceipt(doc);
     }

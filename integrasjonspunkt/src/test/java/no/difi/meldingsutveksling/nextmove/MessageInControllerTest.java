@@ -119,7 +119,6 @@ public class MessageInControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .param("conversationId", "42"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(10)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
                 .andExpect(jsonPath("$.senderId", is("2")))
                 .andExpect(jsonPath("$.receiverId", is("1")))
@@ -151,7 +150,6 @@ public class MessageInControllerTest {
     public void peekLockIncomingShouldReturnOk() throws Exception {
         mvc.perform(get("/in/messages/peek").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(10)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
                 .andExpect(jsonPath("$.senderId", is("2")))
                 .andExpect(jsonPath("$.receiverId", is("1")))
@@ -163,7 +161,6 @@ public class MessageInControllerTest {
     public void peekIncomingShouldReturnOk() throws Exception {
         mvc.perform(post("/in/messages/peek").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(10)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
                 .andExpect(jsonPath("$.senderId", is("2")))
                 .andExpect(jsonPath("$.receiverId", is("1")))
@@ -177,7 +174,6 @@ public class MessageInControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .param("serviceIdentifier", "DPO"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(10)))
                 .andExpect(jsonPath("$.conversationId", is("42")))
                 .andExpect(jsonPath("$.senderId", is("2")))
                 .andExpect(jsonPath("$.receiverId", is("1")))

@@ -35,10 +35,12 @@ public class NextMoveSender {
     public NextMoveSender(ConversationStrategyFactory strategyFactory,
                           ConversationService conversationService,
                           ObjectProvider<MessagePersister> messagePersister,
+                          ServiceRegistryLookup sr,
                           ConversationResourceRepository repo) {
         this.strategyFactory = strategyFactory;
         this.conversationService = conversationService;
         this.messagePersister = messagePersister.getIfUnique();
+        this.sr = sr;
         this.outRepo = new DirectionalConversationResourceRepository(repo, OUTGOING);
     }
 

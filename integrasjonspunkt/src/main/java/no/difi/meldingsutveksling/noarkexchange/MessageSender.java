@@ -117,7 +117,7 @@ public class MessageSender implements ApplicationContextAware {
         EduDocument edu;
         try {
             edu = standardBusinessDocumentFactory.create(conversation, messageContext);
-            log.info("EduMessage created from ConversationResource");
+            log.debug("EduMessage created from ConversationResource");
         } catch (MessageException e) {
             log.error("Failed creating EduMessage from ConversationResource", e);
             return;
@@ -126,7 +126,7 @@ public class MessageSender implements ApplicationContextAware {
         Transport t = transportFactory.createTransport(edu);
         t.send(context, edu);
 
-        log.info("ConversationResource sent");
+        log.debug("ConversationResource sent");
     }
 
     public MessageContext createMessageContext(ConversationResource conversation) throws MessageContextException {
