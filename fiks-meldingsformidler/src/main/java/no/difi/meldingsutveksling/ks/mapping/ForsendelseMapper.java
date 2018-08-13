@@ -22,10 +22,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 public class ForsendelseMapper {
@@ -76,6 +73,13 @@ public class ForsendelseMapper {
             senderRef = eduCore.getId();
         } else {
             senderRef = eduCore.getSender().getRef();
+            log.debug("sender.ref={}, validating", senderRef);
+            try {
+                UUID.fromString(senderRef);
+            } catch (IllegalArgumentException e) {
+                log.warn("sender.ref={} is not valid UUID, using conversationId={} as forsendelsesId", senderRef, eduCore.getId());
+                senderRef = eduCore.getId();
+            }
         }
 
         return SendForsendelseMedId.builder()
