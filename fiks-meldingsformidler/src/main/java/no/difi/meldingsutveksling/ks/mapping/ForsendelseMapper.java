@@ -77,7 +77,7 @@ public class ForsendelseMapper {
             try {
                 UUID.fromString(senderRef);
             } catch (IllegalArgumentException e) {
-                log.warn("sender.ref={} is not valid UUID, using conversationId={} as forsendelsesId", senderRef, eduCore.getId());
+                log.warn("sender.ref={} is not valid UUID, using conversationId={} as forsendelsesId", senderRef, eduCore.getId(), e);
                 senderRef = eduCore.getId();
             }
         }
