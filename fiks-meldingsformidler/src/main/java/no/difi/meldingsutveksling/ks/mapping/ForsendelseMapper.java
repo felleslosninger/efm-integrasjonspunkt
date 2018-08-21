@@ -38,7 +38,16 @@ public class ForsendelseMapper {
         final Forsendelse.Builder<Void> forsendelse = Forsendelse.builder();
         forsendelse.withEksternref(eduCore.getId());
         forsendelse.withKunDigitalLevering(false);
-        forsendelse.withSvarPaForsendelse(eduCore.getReceiver().getRef());
+        String receiverRef = eduCore.getReceiver().getRef();
+        if (!Strings.isNullOrEmpty(receiverRef)) {
+            try {
+                UUID.fromString(receiverRef);
+            } catch (IllegalArgumentException e) {
+                log.warn("receiver.ref={} is not valid UUID, setting blank value", receiverRef, e);
+                receiverRef = null;
+            }
+        }
+        forsendelse.withSvarPaForsendelse(receiverRef);
 
         final MeldingType meldingType = EDUCoreConverter.payloadAsMeldingType(eduCore.getPayload());
         forsendelse.withTittel(meldingType.getJournpost().getJpOffinnhold());
