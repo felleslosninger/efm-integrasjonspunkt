@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.ptv.CorrespondenceRequest;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -26,7 +27,7 @@ public class DpvConversationStrategy implements ConversationStrategy {
     DpvConversationStrategy(IntegrasjonspunktProperties props,
                             ServiceRegistryLookup sr,
                             MessagePersister messagePersister,
-                            InternalQueue internalQueue) {
+                            @Lazy InternalQueue internalQueue) {
         this.props = props;
         this.sr = sr;
         this.messagePersister = messagePersister;
