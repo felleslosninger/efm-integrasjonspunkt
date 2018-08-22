@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
@@ -45,6 +46,9 @@ public class NextMoveSender {
             throw new NextMoveRuntimeException(errorStr);
         }
         strategy.get().send(cr);
+        if (cr.getServiceIdentifier() == ServiceIdentifier.DPE_RECEIPT) {
+            return;
+        }
         conversationService.registerStatus(cr.getConversationId(), MessageStatus.of(GenericReceiptStatus.SENDT));
         outRepo.delete(cr);
         try {
