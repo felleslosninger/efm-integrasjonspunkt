@@ -5,12 +5,14 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PostVirksomhetStrategyFactory;
+import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.ptv.CorrespondenceRequest;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -19,21 +21,24 @@ public class DpvConversationStrategy implements ConversationStrategy {
     private IntegrasjonspunktProperties props;
     private ServiceRegistryLookup sr;
     private MessagePersister messagePersister;
+    private InternalQueue internalQueue;
 
     @Autowired
     DpvConversationStrategy(IntegrasjonspunktProperties props,
                             ServiceRegistryLookup sr,
-                            MessagePersister messagePersister) {
+                            MessagePersister messagePersister,
+                            @Lazy InternalQueue internalQueue) {
         this.props = props;
         this.sr = sr;
         this.messagePersister = messagePersister;
+        this.internalQueue = internalQueue;
     }
 
     @Override
     public void send(ConversationResource conversationResource) throws NextMoveException {
         DpvConversationResource cr = (DpvConversationResource) conversationResource;
 
-        PostVirksomhetStrategyFactory dpvFactory = PostVirksomhetStrategyFactory.newInstance(props, null, sr);
+        PostVirksomhetStrategyFactory dpvFactory = PostVirksomhetStrategyFactory.newInstance(props, null, sr, internalQueue);
         CorrespondenceAgencyConfiguration config = dpvFactory.getConfig();
         InsertCorrespondenceV2 message;
         message = CorrespondenceAgencyMessageFactory.create(config, cr, messagePersister);

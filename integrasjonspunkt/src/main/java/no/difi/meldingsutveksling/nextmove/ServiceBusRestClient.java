@@ -57,8 +57,10 @@ public class ServiceBusRestClient {
     }
 
     public void sendMessage(byte[] message, String queuePath) {
-        String resourceUri = format("https://%s.servicebus.windows.net/%s/messages",
-                props.getNextmove().getServiceBus().getNamespace(), queuePath);
+        String resourceUri = format("https://%s.%s/%s/messages",
+                props.getNextmove().getServiceBus().getNamespace(),
+                props.getNextmove().getServiceBus().getHost(),
+                queuePath);
         URI uri = convertToUri(resourceUri);
 
         String auth = createAuthorizationHeader(resourceUri);
@@ -74,8 +76,9 @@ public class ServiceBusRestClient {
     }
 
     public Optional<ServiceBusMessage> receiveMessage() {
-        String resourceUri = format("https://%s.servicebus.windows.net/%s/messages/head",
+        String resourceUri = format("https://%s.%s/%s/messages/head",
                 props.getNextmove().getServiceBus().getNamespace(),
+                props.getNextmove().getServiceBus().getHost(),
                 localQueuePath);
 
         String auth = createAuthorizationHeader(resourceUri);
@@ -111,8 +114,9 @@ public class ServiceBusRestClient {
     }
 
     public void deleteMessage(ServiceBusMessage message) {
-        String resourceUri = format("https://%s.servicebus.windows.net/%s/messages/%s/%s",
+        String resourceUri = format("https://%s.%s/%s/messages/%s/%s",
                 props.getNextmove().getServiceBus().getNamespace(),
+                props.getNextmove().getServiceBus().getHost(),
                 localQueuePath,
                 message.getMessageId(),
                 message.getLockToken());

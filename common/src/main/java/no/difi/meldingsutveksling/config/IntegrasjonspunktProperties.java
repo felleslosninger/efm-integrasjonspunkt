@@ -203,6 +203,8 @@ public class IntegrasjonspunktProperties {
         private String mode;
         @NotNull
         private String namespace;
+        @NotNull
+        private String host;
         private String receiptQueue;
         private Integer readMaxMessages;
         private boolean batchRead;
@@ -243,6 +245,7 @@ public class IntegrasjonspunktProperties {
         private boolean enableReceipts;
         private boolean forwardReceivedAppReceipts;
         private boolean returnOkOnEmptyPayload;
+        private boolean dumpDlqMessages;
 
         /**
          * Service toggles

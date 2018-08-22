@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.core.EDUCoreFactory;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
+import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
@@ -22,10 +23,14 @@ public class PostVirksomhetMessageStrategy implements MessageStrategy {
 
     private final CorrespondenceAgencyConfiguration config;
     private final NoarkClient noarkClient;
+    private final InternalQueue internalQueue;
 
-    public PostVirksomhetMessageStrategy(CorrespondenceAgencyConfiguration config, NoarkClient noarkClient) {
+    public PostVirksomhetMessageStrategy(CorrespondenceAgencyConfiguration config,
+                                         NoarkClient noarkClient,
+                                         InternalQueue internalQueue) {
         this.config = config;
         this.noarkClient = noarkClient;
+        this.internalQueue = internalQueue;
     }
 
     @Override
@@ -55,7 +60,7 @@ public class PostVirksomhetMessageStrategy implements MessageStrategy {
             message.setMessageType(EDUCore.MessageType.APPRECEIPT);
             message.setPayload(EDUCoreConverter.appReceiptAsString(receipt));
             PutMessageRequestType putMessage = EDUCoreFactory.createPutMessageFromCore(message);
-            noarkClient.sendEduMelding(putMessage);
+            internalQueue.enqueuePutMessage(putMessage);
             message.setPayload(oldPayload);
             message.setMessageType(EDUCore.MessageType.EDU);
             message.swapSenderAndReceiver();

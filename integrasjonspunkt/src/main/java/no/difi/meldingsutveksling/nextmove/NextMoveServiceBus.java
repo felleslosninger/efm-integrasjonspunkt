@@ -78,8 +78,9 @@ public class NextMoveServiceBus {
     @PostConstruct
     public void init() throws NextMoveException {
         if (props.getNextmove().getServiceBus().isBatchRead()) {
-            String connectionString = String.format("Endpoint=sb://%s.servicebus.windows.net/;SharedAccessKeyName=%s;SharedAccessKey=%s",
+            String connectionString = String.format("Endpoint=sb://%s.%s/;SharedAccessKeyName=%s;SharedAccessKey=%s",
                     props.getNextmove().getServiceBus().getNamespace(),
+                    props.getNextmove().getServiceBus().getHost(),
                     props.getNextmove().getServiceBus().getSasKeyName(),
                     serviceBusClient.getSasKey());
             ConnectionStringBuilder connectionStringBuilder = new ConnectionStringBuilder(connectionString, serviceBusClient.getLocalQueuePath());

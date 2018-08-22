@@ -22,10 +22,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 public class ForsendelseMapper {
@@ -41,7 +38,16 @@ public class ForsendelseMapper {
         final Forsendelse.Builder<Void> forsendelse = Forsendelse.builder();
         forsendelse.withEksternref(eduCore.getId());
         forsendelse.withKunDigitalLevering(false);
-        forsendelse.withSvarPaForsendelse(eduCore.getReceiver().getRef());
+        String receiverRef = eduCore.getReceiver().getRef();
+        if (!Strings.isNullOrEmpty(receiverRef)) {
+            try {
+                UUID.fromString(receiverRef);
+            } catch (IllegalArgumentException e) {
+                log.warn("receiver.ref={} is not valid UUID, setting blank value", receiverRef, e);
+                receiverRef = null;
+            }
+        }
+        forsendelse.withSvarPaForsendelse(receiverRef);
 
         final MeldingType meldingType = EDUCoreConverter.payloadAsMeldingType(eduCore.getPayload());
         forsendelse.withTittel(meldingType.getJournpost().getJpOffinnhold());
@@ -63,7 +69,7 @@ public class ForsendelseMapper {
 
         Optional<AvsmotType> avsender = getAvsender(meldingType);
         if (avsender.isPresent()) {
-            forsendelse.withSvarSendesTil(mottakerFrom(avsender.get(), receiverInfo.getIdentifier()));
+            forsendelse.withSvarSendesTil(mottakerFrom(avsender.get(), eduCore.getSender().getIdentifier()));
         } else {
             final InfoRecord senderInfo = serviceRegistry.getInfoRecord(eduCore.getSender().getIdentifier());
             forsendelse.withSvarSendesTil(mottakerFrom(senderInfo));
@@ -76,6 +82,13 @@ public class ForsendelseMapper {
             senderRef = eduCore.getId();
         } else {
             senderRef = eduCore.getSender().getRef();
+            log.debug("sender.ref={}, validating", senderRef);
+            try {
+                UUID.fromString(senderRef);
+            } catch (IllegalArgumentException e) {
+                log.warn("sender.ref={} is not valid UUID, using conversationId={} as forsendelsesId", senderRef, eduCore.getId(), e);
+                senderRef = eduCore.getId();
+            }
         }
 
         return SendForsendelseMedId.builder()
@@ -98,21 +111,16 @@ public class ForsendelseMapper {
         metadata.withDokumentetsDato(journalDatoFrom(meldingType.getJournpost().getJpDokdato()));
         metadata.withTittel(meldingType.getJournpost().getJpOffinnhold());
 
-        Optional<AvsmotType> avsender = getSaksbehandler(meldingType);
+        Optional<AvsmotType> avsender = getAvsender(meldingType);
         avsender.map(a -> a.getAmNavn()).ifPresent(metadata::withSaksbehandler);
 
         return metadata.build();
     }
 
 
-    private Optional<AvsmotType> getSaksbehandler(MeldingType meldingType) {
-        List<AvsmotType> avsmotlist = meldingType.getJournpost().getAvsmot();
-        return avsmotlist.stream().filter(f -> "0".equals(f.getAmIhtype())).findFirst();
-    }
-
     private Optional<AvsmotType> getAvsender(MeldingType meldingType) {
         List<AvsmotType> avsmotlist = meldingType.getJournpost().getAvsmot();
-        return avsmotlist.stream().filter(f -> "1".equals(f.getAmIhtype())).findFirst();
+        return avsmotlist.stream().filter(f -> "0".equals(f.getAmIhtype())).findFirst();
     }
 
     private XMLGregorianCalendar journalDatoFrom(String jpDato) {

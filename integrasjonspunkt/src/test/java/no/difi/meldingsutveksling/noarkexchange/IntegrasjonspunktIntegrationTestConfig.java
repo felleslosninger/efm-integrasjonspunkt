@@ -13,6 +13,7 @@ import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
+import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
@@ -73,8 +74,12 @@ public class IntegrasjonspunktIntegrationTestConfig {
     }
 
     @Bean
-    public StrategyFactory messageStrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup, KeystoreProvider keystoreProvider, SvarUtService svarUtService) {
-        return new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider, properties, mock(NoarkClient.class));
+    public StrategyFactory messageStrategyFactory(MessageSender messageSender,
+                                                  ServiceRegistryLookup serviceRegistryLookup,
+                                                  KeystoreProvider keystoreProvider,
+                                                  SvarUtService svarUtService,
+                                                  InternalQueue internalQueue) {
+        return new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider, properties, mock(NoarkClient.class), internalQueue);
     }
 
     @Bean

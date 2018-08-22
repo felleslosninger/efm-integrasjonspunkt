@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
+import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.apache.commons.lang.NotImplementedException;
 
@@ -23,7 +24,12 @@ public class StrategyFactory {
 
     private final Map<ServiceIdentifier, MessageStrategyFactory> factories;
 
-    public StrategyFactory(MessageSender messageSender, ServiceRegistryLookup serviceRegistryLookup, KeystoreProvider keystoreProvider, IntegrasjonspunktProperties properties, NoarkClient noarkClient) {
+    public StrategyFactory(MessageSender messageSender,
+                           ServiceRegistryLookup serviceRegistryLookup,
+                           KeystoreProvider keystoreProvider,
+                           IntegrasjonspunktProperties properties,
+                           NoarkClient noarkClient,
+                           InternalQueue internalQueue) {
         MessageStrategyFactory postInnbyggerStrategyFactory;
         try {
             postInnbyggerStrategyFactory = PostInnbyggerStrategyFactory.newInstance(messageSender.getProperties(), serviceRegistryLookup, keystoreProvider);
@@ -39,8 +45,8 @@ public class StrategyFactory {
             factories.put(DPI, postInnbyggerStrategyFactory);
         }
         if (properties.getFeature().isEnableDPV()) {
-            factories.put(DPV, PostVirksomhetStrategyFactory.newInstance(messageSender.getProperties(), noarkClient, serviceRegistryLookup));
-            factories.put(DPE_INNSYN, PostVirksomhetStrategyFactory.newInstance(messageSender.getProperties(), noarkClient, serviceRegistryLookup));
+            factories.put(DPV, PostVirksomhetStrategyFactory.newInstance(messageSender.getProperties(), noarkClient, serviceRegistryLookup, internalQueue));
+            factories.put(DPE_INNSYN, PostVirksomhetStrategyFactory.newInstance(messageSender.getProperties(), noarkClient, serviceRegistryLookup, internalQueue));
         }
     }
 
