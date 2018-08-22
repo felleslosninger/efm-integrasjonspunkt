@@ -69,7 +69,7 @@ public class ForsendelseMapper {
 
         Optional<AvsmotType> avsender = getAvsender(meldingType);
         if (avsender.isPresent()) {
-            forsendelse.withSvarSendesTil(mottakerFrom(avsender.get(), receiverInfo.getIdentifier()));
+            forsendelse.withSvarSendesTil(mottakerFrom(avsender.get(), eduCore.getSender().getIdentifier()));
         } else {
             final InfoRecord senderInfo = serviceRegistry.getInfoRecord(eduCore.getSender().getIdentifier());
             forsendelse.withSvarSendesTil(mottakerFrom(senderInfo));
@@ -111,21 +111,16 @@ public class ForsendelseMapper {
         metadata.withDokumentetsDato(journalDatoFrom(meldingType.getJournpost().getJpDokdato()));
         metadata.withTittel(meldingType.getJournpost().getJpOffinnhold());
 
-        Optional<AvsmotType> avsender = getSaksbehandler(meldingType);
+        Optional<AvsmotType> avsender = getAvsender(meldingType);
         avsender.map(a -> a.getAmNavn()).ifPresent(metadata::withSaksbehandler);
 
         return metadata.build();
     }
 
 
-    private Optional<AvsmotType> getSaksbehandler(MeldingType meldingType) {
-        List<AvsmotType> avsmotlist = meldingType.getJournpost().getAvsmot();
-        return avsmotlist.stream().filter(f -> "0".equals(f.getAmIhtype())).findFirst();
-    }
-
     private Optional<AvsmotType> getAvsender(MeldingType meldingType) {
         List<AvsmotType> avsmotlist = meldingType.getJournpost().getAvsmot();
-        return avsmotlist.stream().filter(f -> "1".equals(f.getAmIhtype())).findFirst();
+        return avsmotlist.stream().filter(f -> "0".equals(f.getAmIhtype())).findFirst();
     }
 
     private XMLGregorianCalendar journalDatoFrom(String jpDato) {
