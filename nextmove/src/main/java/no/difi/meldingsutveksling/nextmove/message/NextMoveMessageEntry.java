@@ -16,7 +16,7 @@ public class NextMoveMessageEntry {
     @Id
     @Column(name = "entry_id")
     @GeneratedValue
-    private String entryId;
+    private Integer entryId;
 
     @Column(name = "conversation_id")
     @NonNull
