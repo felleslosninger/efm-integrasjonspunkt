@@ -187,3 +187,18 @@ databaseChangeLog:
                   name: lockTimeout
                   type: date
                   defaultValue: null
+  - changeSet:
+      id: 9
+      author: maw
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: next_move_message_entry
+        - columnExists:
+            tableName: next_move_message_entry
+            columnName: entry_id
+      changes:
+        - modifyDataType:
+            columnName: entry_id
+            tableName: next_move_message_entry
+            newDataType: int
