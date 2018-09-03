@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NonNull;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.Receiver;
 import no.difi.meldingsutveksling.core.Sender;
@@ -14,12 +15,16 @@ import no.difi.meldingsutveksling.noarkexchange.schema.core.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 @Data
 public class SvarInnMessage {
     @NonNull
     Forsendelse forsendelse;
     @NonNull
     List<SvarInnFile> svarInnFiles;
+    @NonNull
+    IntegrasjonspunktProperties properties;
 
     private PayloadConverter<MeldingType> payloadConverter = new PayloadConverterImpl<>(MeldingType.class,
             "http://www.arkivverket.no/Noark4-1-WS-WD/types", "Melding");
@@ -64,6 +69,9 @@ public class SvarInnMessage {
     }
 
     private Sender createSender() {
+        if (isNullOrEmpty(forsendelse.getSvarSendesTil().getOrgnr()) && !isNullOrEmpty(properties.getFiks().getInn().getFallbackSenderOrgNr())) {
+            return Sender.of(properties.getFiks().getInn().getFallbackSenderOrgNr(), forsendelse.getSvarSendesTil().getNavn(), forsendelse.getId());
+        }
         return Sender.of(forsendelse.getSvarSendesTil().getOrgnr(), forsendelse.getSvarSendesTil().getNavn(), forsendelse.getId());
     }
 
@@ -92,7 +100,7 @@ public class SvarInnMessage {
         journpostType.setJpSeknr(metadata.getJournalsekvensnummer());
         journpostType.setJpJpostnr(metadata.getJournalpostnummer());
         journpostType.setJpOffinnhold(metadata.getTittel());
-        journpostType.setJpInnhold(metadata.getTittel());
+        journpostType.setJpInnhold(isNullOrEmpty(metadata.getTittel()) ? "Dokumentet mangler tittel" : metadata.getTittel());
         journpostType.setJpJdato(metadata.getJournaldato());
         journpostType.getAvsmot().add(createSaksbehandlerAvsender(metadata));
         journpostType.getAvsmot().add(createAvsender());

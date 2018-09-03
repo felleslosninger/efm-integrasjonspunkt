@@ -73,7 +73,7 @@ public class SvarInnService implements MessageDownloaderModule {
             // create SvarInnFile with unzipped file and correct mimetype
             final List<SvarInnFile> files = svarInnFileFactory.createFiles(forsendelse.getFilmetadata(), unzippedFile);
 
-            final SvarInnMessage message = new SvarInnMessage(forsendelse, files);
+            final SvarInnMessage message = new SvarInnMessage(forsendelse, files, properties);
             final EDUCore eduCore = message.toEduCore();
 
             Conversation c = conversationService.registerConversation(eduCore);
