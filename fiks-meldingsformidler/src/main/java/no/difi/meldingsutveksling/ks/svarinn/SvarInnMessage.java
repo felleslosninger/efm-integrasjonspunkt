@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.ks.svarinn;
 
-import com.google.common.base.Strings;
 import lombok.Data;
 import lombok.NonNull;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;

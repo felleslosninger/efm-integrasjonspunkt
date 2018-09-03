@@ -4,6 +4,7 @@ import no.difi.meldingsutveksling.config.FiksConfig
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.noarkexchange.schema.core.AvsmotType
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.springframework.http.MediaType
@@ -96,6 +97,19 @@ class SvarInnMessageTest {
         def core = message.toEduCore()
 
         assert properties.getFiks().inn.fallbackSenderOrgNr == core?.sender?.identifier
+    }
+
+    @Test
+    void givenMissingTitleShouldReplaceWithFallbackPlaceholderTitle() {
+        Forsendelse forsendelse = createForsendelse()
+        forsendelse.metadataFraAvleverendeSystem.tittel = ""
+
+        byte[] content = [1, 2, 3, 4]
+        def files = [new SvarInnFile("fil1.txt", MediaType.TEXT_PLAIN, content)]
+        SvarInnMessage message = new SvarInnMessage(forsendelse, files, properties)
+        def core = message.toEduCore()
+
+        assert ((String) core.payload).contains("<jpInnhold>Dokumentet mangler tittel</jpInnhold>") == true
     }
 
 
