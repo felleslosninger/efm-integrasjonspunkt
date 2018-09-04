@@ -67,13 +67,8 @@ public class ForsendelseMapper {
         final InfoRecord receiverInfo = serviceRegistry.getInfoRecord(eduCore.getReceiver().getIdentifier());
         forsendelse.withMottaker(mottakerFrom(receiverInfo));
 
-        Optional<AvsmotType> avsender = getAvsender(meldingType);
-        if (avsender.isPresent()) {
-            forsendelse.withSvarSendesTil(mottakerFrom(avsender.get(), eduCore.getSender().getIdentifier()));
-        } else {
-            final InfoRecord senderInfo = serviceRegistry.getInfoRecord(eduCore.getSender().getIdentifier());
-            forsendelse.withSvarSendesTil(mottakerFrom(senderInfo));
-        }
+        final InfoRecord senderInfo = serviceRegistry.getInfoRecord(eduCore.getSender().getIdentifier());
+        forsendelse.withSvarSendesTil(mottakerFrom(senderInfo));
 
         forsendelse.withMetadataFraAvleverendeSystem(metaDataFrom(meldingType));
         String senderRef;

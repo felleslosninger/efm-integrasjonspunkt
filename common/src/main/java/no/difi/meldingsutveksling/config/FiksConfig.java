@@ -39,5 +39,6 @@ public class FiksConfig {
         private String password;
         private boolean mailOnError;
         private String mailSubject;
+        private String fallbackSenderOrgNr;
     }
 }

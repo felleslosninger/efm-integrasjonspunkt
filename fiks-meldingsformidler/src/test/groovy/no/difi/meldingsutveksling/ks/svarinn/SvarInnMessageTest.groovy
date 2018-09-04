@@ -1,7 +1,10 @@
 package no.difi.meldingsutveksling.ks.svarinn
 
+import no.difi.meldingsutveksling.config.FiksConfig
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.noarkexchange.schema.core.AvsmotType
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.springframework.http.MediaType
@@ -20,6 +23,7 @@ class SvarInnMessageTest {
     private String journaltittel
     private String saksbehandler
     private String journaldato
+    private IntegrasjonspunktProperties properties
 
 
 
@@ -36,6 +40,13 @@ class SvarInnMessageTest {
         journaltittel = "journaltittel"
         saksbehandler = "En Saksbehandler"
         journaldato = "1441922400000"
+
+        properties = new IntegrasjonspunktProperties()
+        FiksConfig.SvarInn fcsi = new FiksConfig.SvarInn()
+        fcsi.setFallbackSenderOrgNr("123456785")
+        FiksConfig fix = new FiksConfig()
+        fix.setInn(fcsi)
+        properties.setFiks(fix)
     }
 
     @Test
@@ -43,7 +54,7 @@ class SvarInnMessageTest {
         final Forsendelse forsendelse = createForsendelse()
         byte[] content = [1, 2, 3, 4]
         def files = [new SvarInnFile("fil1.txt", MediaType.TEXT_PLAIN, content)]
-        SvarInnMessage message = new SvarInnMessage(forsendelse, files)
+        SvarInnMessage message = new SvarInnMessage(forsendelse, files, properties)
 
         def core = message.toEduCore()
 
@@ -74,6 +85,33 @@ class SvarInnMessageTest {
         assert forsendelse.mottaker.orgnr == core?.receiver?.identifier
 
     }
+
+
+    @Test
+    void givenMissingOrgNrShouldReplaceWithFallbackOrgNr() {
+        Forsendelse forsendelse = createForsendelse()
+        forsendelse.svarSendesTil.orgnr = ""
+        byte[] content = [1, 2, 3, 4]
+        def files = [new SvarInnFile("fil1.txt", MediaType.TEXT_PLAIN, content)]
+        SvarInnMessage message = new SvarInnMessage(forsendelse, files, properties)
+        def core = message.toEduCore()
+
+        assert properties.getFiks().inn.fallbackSenderOrgNr == core?.sender?.identifier
+    }
+
+    @Test
+    void givenMissingTitleShouldReplaceWithFallbackPlaceholderTitle() {
+        Forsendelse forsendelse = createForsendelse()
+        forsendelse.metadataFraAvleverendeSystem.tittel = ""
+
+        byte[] content = [1, 2, 3, 4]
+        def files = [new SvarInnFile("fil1.txt", MediaType.TEXT_PLAIN, content)]
+        SvarInnMessage message = new SvarInnMessage(forsendelse, files, properties)
+        def core = message.toEduCore()
+
+        assert ((String) core.payload).contains("<jpInnhold>Dokumentet mangler tittel</jpInnhold>") == true
+    }
+
 
     private AvsmotType getAvsender(MeldingType meldingType) {
         List<AvsmotType> avsmotlist = meldingType.getJournpost().getAvsmot();
