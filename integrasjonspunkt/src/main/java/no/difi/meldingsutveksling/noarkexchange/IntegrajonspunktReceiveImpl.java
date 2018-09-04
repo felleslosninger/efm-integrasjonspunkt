@@ -5,6 +5,7 @@ import no.difi.meldingsutveksling.Decryptor;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import no.difi.meldingsutveksling.core.EDUCoreFactory;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
@@ -140,6 +141,9 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
                     Audit.info("AppReceipt forwarding disabled - will not deliver to archive");
                     return new CorrelationInformation();
                 }
+                // Marshall back and forth to avoid missing xml tag issues
+                AppReceiptType appReceipt = EDUCoreConverter.payloadAsAppReceipt(eduDocument.getPayload());
+                eduDocument.setPayload(EDUCoreConverter.appReceiptAsString(appReceipt));
             } else {
                 Audit.info("EDU Document extracted", markerFrom(document));
             }
