@@ -7,11 +7,13 @@ import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.ks.mapping.FiksMapper;
 import no.difi.meldingsutveksling.ks.receipt.DpfReceiptStatus;
 import no.difi.meldingsutveksling.receipt.Conversation;
+import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 
 import java.security.cert.X509Certificate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public class SvarUtService {
@@ -48,9 +50,13 @@ public class SvarUtService {
 
     public MessageStatus getMessageReceipt(final Conversation conversation) {
         final String forsendelseId = client.getForsendelseId(props.getFiks().getUt().getEndpointUrl().toString(), conversation.getConversationId());
-        final ForsendelseStatus forsendelseStatus = client.getForsendelseStatus(props.getFiks().getUt().getEndpointUrl().toString(), forsendelseId);
-        final DpfReceiptStatus receiptStatus = fiksMapper.mapFrom(forsendelseStatus);
-        return MessageStatus.of(receiptStatus);
+        if (forsendelseId != null) {
+            final ForsendelseStatus forsendelseStatus = client.getForsendelseStatus(props.getFiks().getUt().getEndpointUrl().toString(), forsendelseId);
+            final DpfReceiptStatus receiptStatus = fiksMapper.mapFrom(forsendelseStatus);
+            return MessageStatus.of(receiptStatus);
+        } else {
+            return MessageStatus.of(GenericReceiptStatus.FEIL, LocalDateTime.now(), "forsendelseId finnes ikke i SvarUt.");
+        }
     }
 
     private X509Certificate toX509Certificate(String pemCertificate) {
