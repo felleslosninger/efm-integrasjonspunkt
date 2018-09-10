@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -22,11 +21,9 @@ import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory
 class AppReceiptMessageStrategy implements MessageStrategy {
 
     private final MessageSender messageSender;
-    private final IntegrasjonspunktProperties properties;
 
-    public AppReceiptMessageStrategy(MessageSender messageSender, IntegrasjonspunktProperties properties) {
+    public AppReceiptMessageStrategy(MessageSender messageSender) {
         this.messageSender = messageSender;
-        this.properties = properties;
     }
 
     @Override
