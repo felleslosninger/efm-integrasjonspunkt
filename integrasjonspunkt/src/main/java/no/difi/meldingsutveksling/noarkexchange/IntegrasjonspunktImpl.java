@@ -23,6 +23,7 @@ import javax.xml.ws.BindingType;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageMarker.markerFrom;
@@ -125,6 +126,18 @@ public class IntegrasjonspunktImpl implements SOAPport {
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType request) {
         PutMessageRequestWrapper message = new PutMessageRequestWrapper(request);
+        if (PayloadUtil.isAppReceipt(message.getPayload())) {
+            if ("p360".equalsIgnoreCase(properties.getNoarkSystem().getType())) {
+                message.swapSenderAndReceiver();
+            }
+
+            if (!isNullOrEmpty(properties.getFiks().getInn().getFallbackSenderOrgNr()) &&
+                    message.getRecieverPartyNumber().equals(properties.getFiks().getInn().getFallbackSenderOrgNr())) {
+                Audit.info(String.format("Message is AppReceipt, but receiver (%s) is the configured fallback sender organization number. Discarding message.",
+                        message.getRecieverPartyNumber()), markerFrom(message));
+                return PutMessageResponseFactory.createOkResponse();
+            }
+        }
 
         ServiceRecordWrapper receiverRecord = serviceRegistryLookup.getServiceRecord(message.getRecieverPartyNumber());
 

@@ -33,18 +33,18 @@ class AppReceiptMessageStrategy implements MessageStrategy {
     public PutMessageResponseType send(EDUCore request) {
         Audit.info("Received AppReceipt", markerFrom(request));
         AppReceiptType receipt = EDUCoreConverter.payloadAsAppReceipt(request.getPayload());
+
         if (asList("OK", "WARNING", "ERROR").contains(receipt.getType())) {
-            if ("p360".equalsIgnoreCase(properties.getNoarkSystem().getType())) {
-                request.swapSenderAndReceiver();
-            }
             messageSender.sendMessage(request);
         }
+
         if ("OK".equals(receipt.getType())) {
             Audit.info("AppReceipt sent to "+ request.getReceiver().getIdentifier(), markerFrom(request));
         } else if (asList("ERROR", "WARNING").contains(receipt.getType())) {
             final MessageException me = new MessageException(StatusMessage.APP_RECEIPT_CONTAINS_ERROR);
             Audit.warn(me.getStatusMessage().getTechnicalMessage(), markerFrom(request));
         }
+
         return createOkResponse();
     }
 
