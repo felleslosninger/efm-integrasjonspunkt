@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
@@ -18,7 +17,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -215,8 +213,7 @@ public class BestEDUStrategyTest {
     public void shouldHandleP360StylePayload() {
 
         MessageSender messageSender = Mockito.mock(MessageSender.class);
-        EduMessageStrategyFactory strategyFactory = new EduMessageStrategyFactory(messageSender,
-                mock(IntegrasjonspunktProperties.class));
+        EduMessageStrategyFactory strategyFactory = new EduMessageStrategyFactory(messageSender);
         EDUCore request = new EDUCore();
         request.setPayload(p360Style);
         MessageStrategy messageStrategy = strategyFactory.create(request.getPayload());
@@ -229,8 +226,7 @@ public class BestEDUStrategyTest {
     @Test
     public void testShouldHandleEPhortePaload() throws ParserConfigurationException {
         MessageSender messageSenderMock = Mockito.mock(MessageSender.class);
-        EduMessageStrategyFactory strategyFactory = new EduMessageStrategyFactory(messageSenderMock,
-                mock(IntegrasjonspunktProperties.class));
+        EduMessageStrategyFactory strategyFactory = new EduMessageStrategyFactory(messageSenderMock);
         Document document;
         try {
             DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
