@@ -16,6 +16,7 @@ public class Forsendelse {
     private SvarSendesTil svarSendesTil;
     private String svarPaForsendelse;
     private Mottaker mottaker;
+    private String tittel;
 
     @Data
     public static class Mottaker {
