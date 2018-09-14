@@ -38,7 +38,7 @@ public final class EduMessageStrategyFactory implements MessageStrategyFactory {
     public MessageStrategy create(Object payload) {
         if (isAppReceipt(payload)) {
             Audit.info("Messagetype AppReceipt");
-            return new AppReceiptMessageStrategy(messageSender, properties);
+            return new AppReceiptMessageStrategy(messageSender);
         }
         if (isMeldingTypePayload(payload)) {
             Audit.info("Messagetype EDU");
