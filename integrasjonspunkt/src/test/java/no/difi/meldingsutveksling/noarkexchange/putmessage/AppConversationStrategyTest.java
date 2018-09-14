@@ -50,7 +50,7 @@ public class AppConversationStrategyTest {
      */
     @Test
     public void appReceiptsShouldBeReturnedToSender() {
-        AppReceiptMessageStrategy strategy = new AppReceiptMessageStrategy(messageSender, properties);
+        AppReceiptMessageStrategy strategy = new AppReceiptMessageStrategy(messageSender);
         PutMessageRequestType request = createPutMessageRequestType();
 
         ServiceRegistryLookup srMock = mock(ServiceRegistryLookup.class);
