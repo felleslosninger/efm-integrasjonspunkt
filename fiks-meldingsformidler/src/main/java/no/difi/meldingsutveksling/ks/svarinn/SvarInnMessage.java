@@ -62,6 +62,7 @@ public class SvarInnMessage {
         // The payload util doesn't correctly handle payloads that are MeldingType.
         // And I am afraid of fixing that bug might lead to trouble in the archive system.
         eduCore.setPayload(payloadConverter.marshallToString(meldingType));
+        eduCore.setId(forsendelse.getId());
         eduCore.setSender(createSender());
         eduCore.setReceiver(createReceiver());
         eduCore.setServiceIdentifier(ServiceIdentifier.DPF);
@@ -85,7 +86,7 @@ public class SvarInnMessage {
         final Forsendelse.MetadataFraAvleverendeSystem metadata = forsendelse.getMetadataFraAvleverendeSystem();
         noarksakType.setSaSeknr(String.valueOf(metadata.getSakssekvensnummer()));
         noarksakType.setSaSaar(String.valueOf(metadata.getSaksaar()));
-        noarksakType.setSaTittel(metadata.getTittel());
+        noarksakType.setSaTittel(getForsendelseTittel());
         return noarksakType;
     }
 
@@ -99,12 +100,22 @@ public class SvarInnMessage {
         journpostType.setJpJaar(metadata.getJournalaar());
         journpostType.setJpSeknr(metadata.getJournalsekvensnummer());
         journpostType.setJpJpostnr(metadata.getJournalpostnummer());
-        journpostType.setJpOffinnhold(metadata.getTittel());
-        journpostType.setJpInnhold(isNullOrEmpty(metadata.getTittel()) ? "Dokumentet mangler tittel" : metadata.getTittel());
+        journpostType.setJpOffinnhold(getForsendelseTittel());
+        journpostType.setJpInnhold(getForsendelseTittel());
         journpostType.setJpJdato(metadata.getJournaldato());
         journpostType.getAvsmot().add(createSaksbehandlerAvsender(metadata));
         journpostType.getAvsmot().add(createAvsender());
         return journpostType;
+    }
+
+    private String getForsendelseTittel() {
+        if (!isNullOrEmpty(forsendelse.getMetadataFraAvleverendeSystem().getTittel())) {
+            return forsendelse.getMetadataFraAvleverendeSystem().getTittel();
+        }
+        if (!isNullOrEmpty(forsendelse.getTittel())) {
+            return forsendelse.getTittel();
+        }
+        return "Dokumentet mangler tittel";
     }
 
     private AvsmotType createAvsender() {
