@@ -57,6 +57,7 @@ public class ForsendelseMapper {
 
         forsendelse.withKonteringskode(properties.getFiks().getUt().getKonverteringsKode());
         forsendelse.withKryptert(properties.getFiks().isKryptert());
+        forsendelse.withKrevNiva4Innlogging(properties.getFiks().getUt().isNivaa4());
         forsendelse.withAvgivendeSystem(properties.getNoarkSystem().getType());
 
         forsendelse.withPrintkonfigurasjon(Printkonfigurasjon.builder()
