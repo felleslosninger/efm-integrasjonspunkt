@@ -30,6 +30,7 @@ import java.util.zip.ZipInputStream;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Optional.ofNullable;
 import static no.difi.meldingsutveksling.MimeTypeExtensionMapper.getMimetype;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPF;
 
 @Slf4j
 public class EDUCoreFactory {
@@ -211,12 +212,12 @@ public class EDUCoreFactory {
         InfoRecord receiverInfo = serviceRegistryLookup.getInfoRecord(receiverOrgNr);
 
         EDUCore eduCore = new EDUCore();
-
-        eduCore.setSender(Sender.of(senderInfo.getIdentifier(), senderInfo.getOrganizationName(), senderRef));
-        eduCore.setReceiver(Receiver.of(receiverInfo.getIdentifier(), receiverInfo.getOrganizationName(), receiverRef));
-
         ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(receiverOrgNr).getServiceRecord();
         eduCore.setServiceIdentifier(serviceRecord.getServiceIdentifier());
+
+        eduCore.setSender(Sender.of(senderInfo.getIdentifier(), senderInfo.getOrganizationName(), serviceRecord.getServiceIdentifier() == DPF ? senderRef : null));
+        eduCore.setReceiver(Receiver.of(receiverInfo.getIdentifier(), receiverInfo.getOrganizationName(), serviceRecord.getServiceIdentifier() == DPF ? receiverRef : null));
+
 
         return eduCore;
     }
