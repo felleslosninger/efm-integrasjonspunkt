@@ -57,6 +57,7 @@ public class ForsendelseMapper {
 
         forsendelse.withKonteringskode(properties.getFiks().getUt().getKonverteringsKode());
         forsendelse.withKryptert(properties.getFiks().isKryptert());
+        forsendelse.withKrevNiva4Innlogging(properties.getFiks().getUt().isNivaa4());
         forsendelse.withAvgivendeSystem(properties.getNoarkSystem().getType());
 
         forsendelse.withPrintkonfigurasjon(Printkonfigurasjon.builder()
@@ -67,13 +68,8 @@ public class ForsendelseMapper {
         final InfoRecord receiverInfo = serviceRegistry.getInfoRecord(eduCore.getReceiver().getIdentifier());
         forsendelse.withMottaker(mottakerFrom(receiverInfo));
 
-        Optional<AvsmotType> avsender = getAvsender(meldingType);
-        if (avsender.isPresent()) {
-            forsendelse.withSvarSendesTil(mottakerFrom(avsender.get(), eduCore.getSender().getIdentifier()));
-        } else {
-            final InfoRecord senderInfo = serviceRegistry.getInfoRecord(eduCore.getSender().getIdentifier());
-            forsendelse.withSvarSendesTil(mottakerFrom(senderInfo));
-        }
+        final InfoRecord senderInfo = serviceRegistry.getInfoRecord(eduCore.getSender().getIdentifier());
+        forsendelse.withSvarSendesTil(mottakerFrom(senderInfo));
 
         forsendelse.withMetadataFraAvleverendeSystem(metaDataFrom(meldingType));
         String senderRef;

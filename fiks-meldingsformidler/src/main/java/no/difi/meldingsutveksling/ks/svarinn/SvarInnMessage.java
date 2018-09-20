@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NonNull;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.Receiver;
 import no.difi.meldingsutveksling.core.Sender;
@@ -14,12 +15,16 @@ import no.difi.meldingsutveksling.noarkexchange.schema.core.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 @Data
 public class SvarInnMessage {
     @NonNull
     Forsendelse forsendelse;
     @NonNull
     List<SvarInnFile> svarInnFiles;
+    @NonNull
+    IntegrasjonspunktProperties properties;
 
     private PayloadConverter<MeldingType> payloadConverter = new PayloadConverterImpl<>(MeldingType.class,
             "http://www.arkivverket.no/Noark4-1-WS-WD/types", "Melding");
@@ -57,6 +62,7 @@ public class SvarInnMessage {
         // The payload util doesn't correctly handle payloads that are MeldingType.
         // And I am afraid of fixing that bug might lead to trouble in the archive system.
         eduCore.setPayload(payloadConverter.marshallToString(meldingType));
+        eduCore.setId(forsendelse.getId());
         eduCore.setSender(createSender());
         eduCore.setReceiver(createReceiver());
         eduCore.setServiceIdentifier(ServiceIdentifier.DPF);
@@ -64,6 +70,9 @@ public class SvarInnMessage {
     }
 
     private Sender createSender() {
+        if (isNullOrEmpty(forsendelse.getSvarSendesTil().getOrgnr()) && !isNullOrEmpty(properties.getFiks().getInn().getFallbackSenderOrgNr())) {
+            return Sender.of(properties.getFiks().getInn().getFallbackSenderOrgNr(), forsendelse.getSvarSendesTil().getNavn(), forsendelse.getId());
+        }
         return Sender.of(forsendelse.getSvarSendesTil().getOrgnr(), forsendelse.getSvarSendesTil().getNavn(), forsendelse.getId());
     }
 
@@ -77,7 +86,7 @@ public class SvarInnMessage {
         final Forsendelse.MetadataFraAvleverendeSystem metadata = forsendelse.getMetadataFraAvleverendeSystem();
         noarksakType.setSaSeknr(String.valueOf(metadata.getSakssekvensnummer()));
         noarksakType.setSaSaar(String.valueOf(metadata.getSaksaar()));
-        noarksakType.setSaTittel(metadata.getTittel());
+        noarksakType.setSaTittel(getForsendelseTittel());
         return noarksakType;
     }
 
@@ -91,12 +100,22 @@ public class SvarInnMessage {
         journpostType.setJpJaar(metadata.getJournalaar());
         journpostType.setJpSeknr(metadata.getJournalsekvensnummer());
         journpostType.setJpJpostnr(metadata.getJournalpostnummer());
-        journpostType.setJpOffinnhold(metadata.getTittel());
-        journpostType.setJpInnhold(metadata.getTittel());
+        journpostType.setJpOffinnhold(getForsendelseTittel());
+        journpostType.setJpInnhold(getForsendelseTittel());
         journpostType.setJpJdato(metadata.getJournaldato());
         journpostType.getAvsmot().add(createSaksbehandlerAvsender(metadata));
         journpostType.getAvsmot().add(createAvsender());
         return journpostType;
+    }
+
+    private String getForsendelseTittel() {
+        if (!isNullOrEmpty(forsendelse.getMetadataFraAvleverendeSystem().getTittel())) {
+            return forsendelse.getMetadataFraAvleverendeSystem().getTittel();
+        }
+        if (!isNullOrEmpty(forsendelse.getTittel())) {
+            return forsendelse.getTittel();
+        }
+        return "Dokumentet mangler tittel";
     }
 
     private AvsmotType createAvsender() {

@@ -73,14 +73,14 @@ public class SvarInnService implements MessageDownloaderModule {
             // create SvarInnFile with unzipped file and correct mimetype
             final List<SvarInnFile> files = svarInnFileFactory.createFiles(forsendelse.getFilmetadata(), unzippedFile);
 
-            final SvarInnMessage message = new SvarInnMessage(forsendelse, files);
+            final SvarInnMessage message = new SvarInnMessage(forsendelse, files, properties);
             final EDUCore eduCore = message.toEduCore();
 
             Conversation c = conversationService.registerConversation(eduCore);
             c = conversationService.registerStatus(c, MessageStatus.of(INNKOMMENDE_MOTTATT));
 
             PutMessageRequestType putMessage = EDUCoreFactory.createPutMessageFromCore(eduCore);
-            if (!validateRequiredFields(forsendelse, files)) {
+            if (!validateRequiredFields(forsendelse, eduCore, files)) {
                 checkAndSendMail(putMessage, forsendelse.getId());
                 continue;
             }
@@ -110,15 +110,12 @@ public class SvarInnService implements MessageDownloaderModule {
         }
     }
 
-    private boolean validateRequiredFields(Forsendelse forsendelse, List<SvarInnFile> files) {
-        Forsendelse.MetadataFraAvleverendeSystem metadata = forsendelse.getMetadataFraAvleverendeSystem();
-
+    private boolean validateRequiredFields(Forsendelse forsendelse, EDUCore eduCore, List<SvarInnFile> files) {
         SvarInnFieldValidator validator = SvarInnFieldValidator.validator()
-                .addField(metadata.getTittel(), "jpInnhold")
                 .addField(forsendelse.getMottaker().getOrgnr(), "receiver: orgnr")
-                .addField(forsendelse.getSvarSendesTil().getOrgnr(), "sender: orgnr")
+                .addField(eduCore.getSender().getIdentifier(), "sender: orgnr")
                 .addField(forsendelse.getSvarSendesTil().getNavn(), "sender: name");
-        files.stream().forEach(f ->
+        files.forEach(f ->
             validator.addField(f.getMediaType().toString(), "veDokformat") // veDokformat
             .addField(f.getFilnavn(), "dbTittel") // dbTittel
         );

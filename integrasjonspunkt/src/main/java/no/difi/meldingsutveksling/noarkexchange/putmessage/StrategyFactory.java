@@ -39,7 +39,7 @@ public class StrategyFactory {
 
         factories = new EnumMap<>(ServiceIdentifier.class);
         if (properties.getFeature().isEnableDPO()) {
-            factories.put(DPO, EduMessageStrategyFactory.newInstance(messageSender, properties));
+            factories.put(DPO, EduMessageStrategyFactory.newInstance(messageSender));
         }
         if (properties.getFeature().isEnableDPI()) {
             factories.put(DPI, postInnbyggerStrategyFactory);

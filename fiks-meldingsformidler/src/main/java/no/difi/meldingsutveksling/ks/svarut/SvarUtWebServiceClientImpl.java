@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.ks.svarut;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
 
 import javax.xml.bind.JAXBElement;
+import java.util.List;
 
 public class SvarUtWebServiceClientImpl extends WebServiceGatewaySupport implements SvarUtWebServiceClient {
     @Override
@@ -24,7 +25,12 @@ public class SvarUtWebServiceClientImpl extends WebServiceGatewaySupport impleme
                 (JAXBElement<RetrieveForsendelseIdByEksternRefResponse>)
                         getWebServiceTemplate().marshalSendAndReceive(uri,
                                 objectFactory.createRetrieveForsendelseIdByEksternRef(request));
-        return response.getValue().getReturn().get(0);
+        List<String> responseReturn = response.getValue().getReturn();
+        if (responseReturn == null || responseReturn.isEmpty()) {
+            return null;
+        } else {
+            return responseReturn.get(0);
+        }
     }
 
     @Override

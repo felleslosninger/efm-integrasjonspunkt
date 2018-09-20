@@ -110,7 +110,7 @@ public class EduMessageStrategyFactoryTest {
     public void createContxt() {
         properties = mock(IntegrasjonspunktProperties.class);
         messageSender = mock(MessageSender.class);
-        eduMessageStrategyFactory = EduMessageStrategyFactory.newInstance(messageSender, properties);
+        eduMessageStrategyFactory = EduMessageStrategyFactory.newInstance(messageSender);
     }
 
     @Test
@@ -128,7 +128,7 @@ public class EduMessageStrategyFactoryTest {
 
     @Test
     public void testShouldCreateAppReceiptStrategy() {
-        assertTrue(eduMessageStrategyFactory.newInstance(messageSender, properties).create(appReceiptPayload) instanceof AppReceiptMessageStrategy);
+        assertTrue(eduMessageStrategyFactory.newInstance(messageSender).create(appReceiptPayload) instanceof AppReceiptMessageStrategy);
         assertEquals(AppReceiptMessageStrategy.class, eduMessageStrategyFactory.create(appReceiptPayload).getClass());
     }
 
