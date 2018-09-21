@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.serviceregistry;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -141,6 +142,7 @@ public class ServiceRegistryLookupTest {
             }
             content.put("infoRecord", infoRecord);
             content.put("failedServiceIdentifiers", Lists.newArrayList());
+            content.put("securitylevels", Maps.newHashMap());
             return gson.toJson(content);
         }
 
