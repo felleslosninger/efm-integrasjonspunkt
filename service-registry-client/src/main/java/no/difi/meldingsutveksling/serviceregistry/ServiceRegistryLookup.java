@@ -9,7 +9,9 @@ import com.google.gson.GsonBuilder;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.TypeRef;
 import com.jayway.jsonpath.spi.json.GsonJsonProvider;
+import com.jayway.jsonpath.spi.mapper.GsonMappingProvider;
 import com.nimbusds.jose.proc.BadJWSException;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
@@ -25,9 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -125,7 +125,8 @@ public class ServiceRegistryLookup {
             final DocumentContext documentContext = JsonPath.parse(serviceRecords, jsonPathConfiguration());
             serviceRecord = documentContext.read("$.serviceRecord", ServiceRecord.class);
             String[] failedServiceIdentifiers = documentContext.read("$.failedServiceIdentifiers", String[].class);
-            recordWrapper = ServiceRecordWrapper.of(serviceRecord, Stream.of(failedServiceIdentifiers).map(ServiceIdentifier::valueOf).collect(Collectors.toList()));
+            Map<ServiceIdentifier, Integer> securitylevels = documentContext.read("$.securitylevels", new TypeRef<Map<ServiceIdentifier, Integer>>() {});
+            recordWrapper = ServiceRecordWrapper.of(serviceRecord, Stream.of(failedServiceIdentifiers).map(ServiceIdentifier::valueOf).collect(Collectors.toList()), securitylevels);
         } catch(HttpClientErrorException httpException) {
             if (Arrays.asList(HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED).contains(httpException.getStatusCode())) {
                 log.warn("RestClient returned {} when looking up service record with identifier {}",
@@ -222,6 +223,6 @@ public class ServiceRegistryLookup {
 
     private Configuration jsonPathConfiguration() {
         final Gson gson = new GsonBuilder().serializeNulls().create();
-        return Configuration.defaultConfiguration().jsonProvider(new GsonJsonProvider(gson));
+        return Configuration.defaultConfiguration().jsonProvider(new GsonJsonProvider(gson)).mappingProvider(new GsonMappingProvider());
     }
 }
