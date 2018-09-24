@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.KeystoreProvider;
 import no.difi.meldingsutveksling.ServiceIdentifier;
@@ -162,7 +163,7 @@ public class IntegrasjonspunktIntegrationTestConfig {
         ServiceRecord sr = mock(ServiceRecord.class);
         when(sr.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPO);
         when(sr.getOrganisationNumber()).thenReturn("1337");
-        ServiceRecordWrapper recordWrapper = ServiceRecordWrapper.of(sr, Lists.newArrayList());
+        ServiceRecordWrapper recordWrapper = ServiceRecordWrapper.of(sr, Lists.newArrayList(), Maps.newHashMap());
         when(srMock.getServiceRecord(anyString())).thenReturn(recordWrapper);
         when(srMock.getServiceRecord(anyString(), any(ServiceIdentifier.class))).thenReturn(Optional.ofNullable(sr));
         when(srMock.getServiceRecords(anyString())).thenReturn(Lists.newArrayList(sr));

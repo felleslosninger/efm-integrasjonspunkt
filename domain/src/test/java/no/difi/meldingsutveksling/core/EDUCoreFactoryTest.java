@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.core;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.nextmove.DpoConversationResource;
@@ -189,7 +190,7 @@ public class EDUCoreFactoryTest {
         serviceRegistryLookup = Mockito.mock(ServiceRegistryLookup.class);
 
         InfoRecord infoRecord = new InfoRecord("1234", "Foo", new EntityType("Organisasjonsledd", "ORGL"));
-        ServiceRecordWrapper serviceRecord = ServiceRecordWrapper.of(new ServiceRecord(ServiceIdentifier.DPO, "1234", "pem123", "http://foo"), Lists.newArrayList());
+        ServiceRecordWrapper serviceRecord = ServiceRecordWrapper.of(new ServiceRecord(ServiceIdentifier.DPO, "1234", "pem123", "http://foo"), Lists.newArrayList(), Maps.newHashMap());
         when(serviceRegistryLookup.getInfoRecord(anyString())).thenReturn(infoRecord);
         when(serviceRegistryLookup.getServiceRecord(anyString())).thenReturn(serviceRecord);
     }
