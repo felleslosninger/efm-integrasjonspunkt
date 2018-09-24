@@ -27,7 +27,6 @@ public class FiksConfig {
         private String konverteringsKode;
         private String username;
         private String password;
-        private boolean nivaa4;
         private URL endpointUrl;
     }
 

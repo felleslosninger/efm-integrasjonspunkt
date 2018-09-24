@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.ks.mapping;
 
 import com.google.common.base.Strings;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreConverter;
@@ -13,6 +14,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecordWrapper;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -55,9 +57,14 @@ public class ForsendelseMapper {
         final FileTypeHandlerFactory fileTypeHandlerFactory = new FileTypeHandlerFactory(properties.getFiks(), certificate);
         forsendelse.withDokumenter(mapFrom(meldingType.getJournpost().getDokument(), fileTypeHandlerFactory));
 
+        ServiceRecordWrapper serviceRecord = serviceRegistry.getServiceRecord(eduCore.getReceiver().getIdentifier());
+        Integer dpfSecurityLevel = serviceRecord.getSecuritylevels().get(ServiceIdentifier.DPF);
+        if (dpfSecurityLevel != null && dpfSecurityLevel == 4) {
+            forsendelse.withKrevNiva4Innlogging(true);
+        }
+
         forsendelse.withKonteringskode(properties.getFiks().getUt().getKonverteringsKode());
         forsendelse.withKryptert(properties.getFiks().isKryptert());
-        forsendelse.withKrevNiva4Innlogging(properties.getFiks().getUt().isNivaa4());
         forsendelse.withAvgivendeSystem(properties.getNoarkSystem().getType());
 
         forsendelse.withPrintkonfigurasjon(Printkonfigurasjon.builder()
