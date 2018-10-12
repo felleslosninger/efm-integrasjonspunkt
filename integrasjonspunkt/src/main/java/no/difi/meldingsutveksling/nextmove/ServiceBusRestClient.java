@@ -9,8 +9,12 @@ import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.springframework.http.*;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.xml.transform.StringSource;
@@ -52,7 +56,16 @@ public class ServiceBusRestClient {
                 props.getOrg().getNumber()+
                 props.getNextmove().getServiceBus().getMode();
         this.jaxbContext = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, ConversationResource.class}, null);
-        this.restTemplate = new RestTemplate();
+
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectTimeout(props.getNextmove().getServiceBus().getConnectTimeout())
+                .setConnectionRequestTimeout(props.getNextmove().getServiceBus().getConnectTimeout())
+                .setSocketTimeout(props.getNextmove().getServiceBus().getConnectTimeout())
+                .build();
+        CloseableHttpClient httpClient = HttpClientBuilder.create()
+                .setDefaultRequestConfig(requestConfig)
+                .build();
+        this.restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory(httpClient));
         this.restTemplate.setErrorHandler(new ServiceBusRestErrorHandler(sr));
     }
 
@@ -87,6 +100,7 @@ public class ServiceBusRestClient {
         HttpEntity<Object> httpEntity = new HttpEntity<>(headers);
 
         URI uri = convertToUri(resourceUri);
+        log.debug("Calling {}", resourceUri);
         ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.POST, httpEntity, String.class);
         if (!asList(HttpStatus.OK, HttpStatus.CREATED).contains(response.getStatusCode())) {
             log.debug("{} got response {}, returning empty", resourceUri, response.getStatusCode().toString());

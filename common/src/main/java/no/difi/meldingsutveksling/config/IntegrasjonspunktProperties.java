@@ -208,6 +208,7 @@ public class IntegrasjonspunktProperties {
         private String receiptQueue;
         private Integer readMaxMessages;
         private boolean batchRead;
+        private Integer connectTimeout;
     }
 
     @Data
