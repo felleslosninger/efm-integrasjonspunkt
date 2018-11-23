@@ -10,6 +10,7 @@ import no.difi.meldingsutveksling.noarkexchange.PayloadException;
 import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
+import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.*;
@@ -18,6 +19,7 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.io.IOUtils;
+import org.springframework.stereotype.Component;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.ByteArrayInputStream;
@@ -33,6 +35,7 @@ import static no.difi.meldingsutveksling.MimeTypeExtensionMapper.getMimetype;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPF;
 
 @Slf4j
+@Component
 public class EDUCoreFactory {
 
     private ServiceRegistryLookup serviceRegistryLookup;
@@ -68,6 +71,14 @@ public class EDUCoreFactory {
             }
         }
 
+        return eduCore;
+    }
+
+    public EDUCore create(AppReceiptType appReceiptType, String conversationId, String senderOrgnr, String receiverOrgnr) {
+        EDUCore eduCore = createCommon(senderOrgnr, receiverOrgnr, null, null);
+        eduCore.setId(conversationId);
+        eduCore.setPayload(EDUCoreConverter.appReceiptAsString(appReceiptType));
+        eduCore.setMessageType(EDUCore.MessageType.APPRECEIPT);
         return eduCore;
     }
 

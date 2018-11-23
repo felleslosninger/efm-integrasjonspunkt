@@ -36,18 +36,21 @@ public class EDUCoreSender {
     private final StrategyFactory strategyFactory;
     private final NoarkClient mshClient;
     private final ConversationService conversationService;
+    private final EDUCoreFactory eduCoreFactory;
 
     @Autowired
     EDUCoreSender(IntegrasjonspunktProperties properties,
                   ServiceRegistryLookup serviceRegistryLookup,
                   StrategyFactory strategyFactory,
                   ConversationService conversationService,
-                  @Qualifier("mshClient") ObjectProvider<NoarkClient> mshClient) {
+                  @Qualifier("mshClient") ObjectProvider<NoarkClient> mshClient,
+                  EDUCoreFactory eduCoreFactory) {
         this.properties = properties;
         this.serviceRegistryLookup = serviceRegistryLookup;
         this.strategyFactory = strategyFactory;
         this.conversationService = conversationService;
         this.mshClient = mshClient.getIfAvailable();
+        this.eduCoreFactory = eduCoreFactory;
     }
 
     public PutMessageResponseType sendMessage(EDUCore message) {
@@ -68,9 +71,8 @@ public class EDUCoreSender {
         } else if (!isNullOrEmpty(properties.getMsh().getEndpointURL())
                 && mshClient.canRecieveMessage(message.getReceiver().getIdentifier())) {
             Audit.info("Send message to MSH", marker);
-            EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
 
-            PutMessageRequestType putMessage = eduCoreFactory.createPutMessageFromCore(message);
+            PutMessageRequestType putMessage = EDUCoreFactory.createPutMessageFromCore(message);
             result = mshClient.sendEduMelding(putMessage);
         } else {
             if (!this.strategyFactory.hasFactory(DPV)) {

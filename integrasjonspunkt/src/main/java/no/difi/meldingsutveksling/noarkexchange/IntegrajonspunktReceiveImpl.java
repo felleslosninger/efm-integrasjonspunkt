@@ -75,6 +75,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
     private final IntegrasjonspunktNokkel keyInfo;
     private final ConversationService conversationService;
     private final MessageSender messageSender;
+    private final EDUCoreFactory eduCoreFactory;
     private ApplicationContext context;
 
     @Autowired
@@ -85,7 +86,8 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
                                        IntegrasjonspunktNokkel keyInfo,
                                        ServiceRegistryLookup serviceRegistryLookup,
                                        ConversationService conversationService,
-                                       MessageSender messageSender) {
+                                       MessageSender messageSender,
+                                       EDUCoreFactory eduCoreFactory) {
 
         this.transportFactory = transportFactory;
         this.localNoark = localNoark.getIfAvailable();
@@ -95,6 +97,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
         this.serviceRegistryLookup = serviceRegistryLookup;
         this.conversationService = conversationService;
         this.messageSender = messageSender;
+        this.eduCoreFactory = eduCoreFactory;
     }
 
     @Override
@@ -159,7 +162,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
         Arkivmelding arkivmelding = convertAsicEntryToArkivmelding(decryptedAsicPackage);
         ConversationResource cr = payload.getConversation();
 
-        EDUCore eduCore = new EDUCoreFactory(serviceRegistryLookup).create(cr, arkivmelding, decryptedAsicPackage);
+        EDUCore eduCore = eduCoreFactory.create(cr, arkivmelding, decryptedAsicPackage);
         Optional<Conversation> c = conversationService.registerStatus(eduCore.getId(), MessageStatus.of(GenericReceiptStatus.LEST));
         c.ifPresent(conversationService::markFinished);
 
@@ -172,7 +175,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
     }
 
     public void forwardToNoarkSystemAndSendReceipts(StandardBusinessDocumentWrapper inputDocument, EDUCore eduCore) {
-        PutMessageRequestType putMessage = new EDUCoreFactory(serviceRegistryLookup).createPutMessageFromCore(eduCore);
+        PutMessageRequestType putMessage = eduCoreFactory.createPutMessageFromCore(eduCore);
         PutMessageResponseType response = localNoark.sendEduMelding(putMessage);
         if (response == null || response.getResult() == null) {
             Audit.info("Empty response from archive", markerFrom(inputDocument));
