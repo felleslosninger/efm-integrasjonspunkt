@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.core;
 
+import lombok.Data;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
  * @author Nikolai Luthman <nikolai dot luthman at inmeta dot no>
  */
 @Component
+@Data
 public class EDUCoreService {
 
     private final IntegrasjonspunktProperties properties;
@@ -25,7 +27,7 @@ public class EDUCoreService {
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final InternalQueue queue;
     private final ConversationService conversationService;
-    private final EDUCoreFactory eduCoreFactory;
+    private EDUCoreFactory eduCoreFactory;
 
     @Autowired
     public EDUCoreService(
