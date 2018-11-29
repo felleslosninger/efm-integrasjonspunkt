@@ -20,6 +20,7 @@ import java.util.Optional;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPF;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 
 @Component
@@ -31,7 +32,7 @@ public class ConversationService {
     private NoarkClient mshClient;
 
     private static final String CONVERSATION_EXISTS = "Conversation with id=%s already exists, not recreating";
-    private static final List<ServiceIdentifier> POLLABLES = Lists.newArrayList(DPV, DPF);
+    private static final List<ServiceIdentifier> POLLABLES = Lists.newArrayList(DPV, DPF, DPO);
 
     @Autowired
     public ConversationService(ConversationRepository repo,
