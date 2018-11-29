@@ -1,8 +1,5 @@
 package no.difi.meldingsutveksling.spring;
 
-import java.io.IOException;
-import java.util.Optional;
-import java.util.Properties;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
@@ -14,6 +11,10 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
+
+import java.io.IOException;
+import java.util.Optional;
+import java.util.Properties;
 
 /**
  *

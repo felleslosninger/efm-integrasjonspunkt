@@ -70,7 +70,6 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
     private final TransportFactory transportFactory;
     private NoarkClient localNoark;
     private final Adresseregister adresseregisterService;
-    private final ServiceRegistryLookup serviceRegistryLookup;
     private final IntegrasjonspunktProperties properties;
     private final IntegrasjonspunktNokkel keyInfo;
     private final ConversationService conversationService;
@@ -84,7 +83,6 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
                                        Adresseregister adresseregisterService,
                                        IntegrasjonspunktProperties properties,
                                        IntegrasjonspunktNokkel keyInfo,
-                                       ServiceRegistryLookup serviceRegistryLookup,
                                        ConversationService conversationService,
                                        MessageSender messageSender,
                                        EDUCoreFactory eduCoreFactory) {
@@ -94,7 +92,6 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
         this.adresseregisterService = adresseregisterService;
         this.properties = properties;
         this.keyInfo = keyInfo;
-        this.serviceRegistryLookup = serviceRegistryLookup;
         this.conversationService = conversationService;
         this.messageSender = messageSender;
         this.eduCoreFactory = eduCoreFactory;
