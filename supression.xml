@@ -363,5 +363,12 @@
       ]]></notes>
       <cve>CVE-2016-3720</cve>
    </suppress>
+   <suppress>
+      <notes><![CDATA[
+        CVE-2016-7048 Not affected
+      ]]></notes>
+      <cve>CVE-2016-7048</cve>
+   </suppress>
+
 
 </suppressions>
