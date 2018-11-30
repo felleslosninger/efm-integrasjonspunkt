@@ -29,7 +29,6 @@ public class EDUCoreSenderTest {
     private StrategyFactory strategyFactory;
     private NoarkClient mshClient;
     private EDUCoreSender eduCoreSender;
-    private EDUCoreFactory eduCoreFactory;
     private String IDENTIFIER = "1234";
     private EDUCore eduCore;
 
@@ -40,7 +39,6 @@ public class EDUCoreSenderTest {
         conversationService = mock(ConversationService.class);
         strategyFactory = mock(StrategyFactory.class);
         mshClient = mock(NoarkClient.class);
-        eduCoreFactory = mock(EDUCoreFactory.class);
 
         IntegrasjonspunktProperties.FeatureToggle featureToggle = new IntegrasjonspunktProperties.FeatureToggle();
         featureToggle.setEnableReceipts(false);
@@ -55,7 +53,7 @@ public class EDUCoreSenderTest {
         ObjectProvider objectProvider = mock(ObjectProvider.class);
         when(objectProvider.getIfAvailable()).thenReturn(mshClient);
 
-        eduCoreSender = new EDUCoreSender(properties, serviceRegistryLookup, strategyFactory, conversationService, objectProvider, eduCoreFactory);
+        eduCoreSender = new EDUCoreSender(properties, serviceRegistryLookup, strategyFactory, conversationService, objectProvider);
         setupDefaultProperties();
         setupDefaultMessage();
     }
