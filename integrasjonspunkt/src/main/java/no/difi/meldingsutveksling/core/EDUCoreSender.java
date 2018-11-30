@@ -36,21 +36,18 @@ public class EDUCoreSender {
     private final StrategyFactory strategyFactory;
     private final NoarkClient mshClient;
     private final ConversationService conversationService;
-    private final EDUCoreFactory eduCoreFactory;
 
     @Autowired
     EDUCoreSender(IntegrasjonspunktProperties properties,
                   ServiceRegistryLookup serviceRegistryLookup,
                   StrategyFactory strategyFactory,
                   ConversationService conversationService,
-                  @Qualifier("mshClient") ObjectProvider<NoarkClient> mshClient,
-                  EDUCoreFactory eduCoreFactory) {
+                  @Qualifier("mshClient") ObjectProvider<NoarkClient> mshClient) {
         this.properties = properties;
         this.serviceRegistryLookup = serviceRegistryLookup;
         this.strategyFactory = strategyFactory;
         this.conversationService = conversationService;
         this.mshClient = mshClient.getIfAvailable();
-        this.eduCoreFactory = eduCoreFactory;
     }
 
     public PutMessageResponseType sendMessage(EDUCore message) {
