@@ -77,6 +77,8 @@ public class InternalQueue {
 
     private NoarkClient noarkClient;
 
+    private EDUCoreFactory eduCoreFactory;
+
     private static JAXBContext jaxbContextdomain;
     private static JAXBContext jaxbContext;
     private static JAXBContext jaxbContextNextmove;
@@ -85,9 +87,11 @@ public class InternalQueue {
 
     @Autowired
     InternalQueue(ObjectProvider<IntegrajonspunktReceiveImpl> integrajonspunktReceive,
-                  @Qualifier("localNoark") ObjectProvider<NoarkClient> noarkClient) {
+                  @Qualifier("localNoark") ObjectProvider<NoarkClient> noarkClient,
+                  EDUCoreFactory eduCoreFactory) {
         this.integrajonspunktReceive = integrajonspunktReceive.getIfAvailable();
         this.noarkClient = noarkClient.getIfAvailable();
+        this.eduCoreFactory = eduCoreFactory;
     }
 
     static {
@@ -173,6 +177,7 @@ public class InternalQueue {
             errorMsg = "Failed to forward message. Moved to DLQ.";
             Audit.error(errorMsg, eduDocument.createLogstashMarkers());
             conversationId = eduDocument.getConversationId();
+            sendErrorAppReceipt(eduDocument);
         } catch (Exception e) {
         }
 
@@ -242,6 +247,21 @@ public class InternalQueue {
         request.setPayload(oldPayload);
         request.setMessageType(EDUCore.MessageType.EDU);
         request.swapSenderAndReceiver();
+    }
+
+    private void sendErrorAppReceipt(EduDocument eduDocument) {
+        AppReceiptType receipt = new AppReceiptType();
+        receipt.setType("ERROR");
+        StatusMessageType statusMessageType = new StatusMessageType();
+        statusMessageType.setCode("ID");
+        statusMessageType.setText(String.format("Feilet under mottak hos %s", eduDocument.getReceiverOrgNumber()));
+        receipt.getMessage().add(statusMessageType);
+
+        EDUCore eduCore = eduCoreFactory.create(receipt,
+                eduDocument.getConversationId(),
+                eduDocument.getReceiverOrgNumber(),
+                eduDocument.getSenderOrgNumber());
+        enqueueExternal(eduCore);
     }
 
     public void enqueueNextmove(ConversationResource cr) {
