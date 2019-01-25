@@ -85,24 +85,24 @@ public class IntegrasjonspunktImpl implements SOAPport {
             return response;
         }
 
+        final LogstashMarker receiverMarker = MarkerFactory.receiverMarker(organisasjonsnummer);
         if (!serviceRecord.getFailedServiceIdentifiers().isEmpty()) {
             String failed = StringUtils.join(serviceRecord.getFailedServiceIdentifiers(), ", ");
-            log.error("Service registry failed to look up one or more potential service identifiers - getCanReceive returning false (failed: {})", failed);
+            log.error(receiverMarker, "Service registry failed to look up one or more potential service identifiers - getCanReceive returning false (failed: {})", failed);
             response.setResult(false);
             return response;
         }
 
-        final LogstashMarker marker = MarkerFactory.receiverMarker(organisasjonsnummer);
         boolean validServiceIdentifier = false;
         boolean mshCanReceive = false;
         boolean isDpv = false;
         if (asList(DPO, DPI, DPF).contains(serviceRecord.getServiceRecord().getServiceIdentifier()) &&
                 strategyFactory.hasFactory(serviceRecord.getServiceRecord().getServiceIdentifier())) {
             validServiceIdentifier = true;
-            Audit.info("CanReceive = true", marker);
+            Audit.info("CanReceive = true", receiverMarker);
         } else if (mshClient.canRecieveMessage(organisasjonsnummer)) {
             mshCanReceive = true;
-            Audit.info("MSH canReceive = true", marker);
+            Audit.info("MSH canReceive = true", receiverMarker);
         } else {
             isDpv = true;
         }
@@ -114,7 +114,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
             strategyFactoryAvailable = validServiceIdentifier;
         }
         if (!strategyFactoryAvailable && !mshCanReceive) {
-            Audit.error("CanReceive = false. Either feature toggle for DPV is disabled, or MSH cannot receive", marker);
+            Audit.error("CanReceive = false. Either feature toggle for DPV is disabled, or MSH cannot receive", receiverMarker);
             response.setResult(false);
             return response;
         }

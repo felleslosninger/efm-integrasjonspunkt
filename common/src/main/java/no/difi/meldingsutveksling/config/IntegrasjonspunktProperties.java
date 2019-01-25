@@ -65,12 +65,21 @@ public class IntegrasjonspunktProperties {
     @Valid
     private Queue queue;
 
+    @Valid
+    private Status status;
+
     /**
      * Use this parameter to indicate that the message are related to vedtak/messages that require the recipient to be
      * notified. This parameter is passed over to ServiceRegistry to determine where the message should be sent.
      * (See http://begrep.difi.no/SikkerDigitalPost/1.2.3/forretningslag/varsling for more information)
      */
     private boolean varslingsplikt = true;
+
+    @Data
+    public static class Status {
+        @NotNull
+        private Integer messageTimeoutHours;
+    }
 
     @Data
     public static class Ntp {

@@ -5,7 +5,7 @@
     <groupId>no.difi.meldingsutveksling</groupId>
     <artifactId>parent-pom</artifactId>
     <packaging>pom</packaging>
-    <version>1.7.93</version>
+    <version>1.7.94</version>
     <name>Multiproject for meldingsutveksling</name>
 
     <scm>
@@ -40,7 +40,7 @@
         <!-- bug with logstash-logback-encoder in 1.1.7, wait for 1.1.8 http://jira.qos.ch/browse/LOGBACK-1158 -->
         <logback.version>1.1.6</logback.version>
         <mockito.version>1.10.19</mockito.version>
-        <move-common.version>1.0.24</move-common.version>
+        <move-common.version>1.0.26</move-common.version>
         <maven.javadoc.skip>true</maven.javadoc.skip>
     </properties>
 
@@ -159,7 +159,7 @@
                 </plugin>
 
                 <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
                     <artifactId>sonar-maven-plugin</artifactId>
                     <version>3.0.2</version>
 
@@ -238,7 +238,7 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
+                <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
             </plugin>
             <plugin>

@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.core;
 
+import lombok.Data;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
  * @author Nikolai Luthman <nikolai dot luthman at inmeta dot no>
  */
 @Component
+@Data
 public class EDUCoreService {
 
     private final IntegrasjonspunktProperties properties;
@@ -25,6 +27,7 @@ public class EDUCoreService {
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final InternalQueue queue;
     private final ConversationService conversationService;
+    private EDUCoreFactory eduCoreFactory;
 
     @Autowired
     public EDUCoreService(
@@ -32,12 +35,14 @@ public class EDUCoreService {
             EDUCoreSender coreSender,
             ServiceRegistryLookup serviceRegistryLookup,
             InternalQueue queue,
-            ConversationService conversationService) {
+            ConversationService conversationService,
+            EDUCoreFactory eduCoreFactory) {
         this.properties = properties;
         this.coreSender = coreSender;
         this.serviceRegistryLookup = serviceRegistryLookup;
         this.queue = queue;
         this.conversationService = conversationService;
+        this.eduCoreFactory = eduCoreFactory;
     }
 
     public PutMessageResponseType queueMessage(PutMessageRequestWrapper msg) {
@@ -53,7 +58,6 @@ public class EDUCoreService {
             throw new MeldingsUtvekslingRuntimeException("Missing receivers orgnumber.");
         }
 
-        EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
         EDUCore message = eduCoreFactory.create(msg.getRequest(), msg.getSenderPartynumber());
         return queueMessage(message);
     }

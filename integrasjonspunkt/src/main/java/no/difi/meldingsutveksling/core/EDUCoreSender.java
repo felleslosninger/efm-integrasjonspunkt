@@ -68,9 +68,8 @@ public class EDUCoreSender {
         } else if (!isNullOrEmpty(properties.getMsh().getEndpointURL())
                 && mshClient.canRecieveMessage(message.getReceiver().getIdentifier())) {
             Audit.info("Send message to MSH", marker);
-            EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
 
-            PutMessageRequestType putMessage = eduCoreFactory.createPutMessageFromCore(message);
+            PutMessageRequestType putMessage = EDUCoreFactory.createPutMessageFromCore(message);
             result = mshClient.sendEduMelding(putMessage);
         } else {
             if (!this.strategyFactory.hasFactory(DPV)) {

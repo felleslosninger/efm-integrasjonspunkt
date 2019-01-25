@@ -23,7 +23,6 @@ import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
@@ -70,11 +69,11 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
     private final TransportFactory transportFactory;
     private NoarkClient localNoark;
     private final Adresseregister adresseregisterService;
-    private final ServiceRegistryLookup serviceRegistryLookup;
     private final IntegrasjonspunktProperties properties;
     private final IntegrasjonspunktNokkel keyInfo;
     private final ConversationService conversationService;
     private final MessageSender messageSender;
+    private final EDUCoreFactory eduCoreFactory;
     private ApplicationContext context;
 
     @Autowired
@@ -83,18 +82,18 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
                                        Adresseregister adresseregisterService,
                                        IntegrasjonspunktProperties properties,
                                        IntegrasjonspunktNokkel keyInfo,
-                                       ServiceRegistryLookup serviceRegistryLookup,
                                        ConversationService conversationService,
-                                       MessageSender messageSender) {
+                                       MessageSender messageSender,
+                                       EDUCoreFactory eduCoreFactory) {
 
         this.transportFactory = transportFactory;
         this.localNoark = localNoark.getIfAvailable();
         this.adresseregisterService = adresseregisterService;
         this.properties = properties;
         this.keyInfo = keyInfo;
-        this.serviceRegistryLookup = serviceRegistryLookup;
         this.conversationService = conversationService;
         this.messageSender = messageSender;
+        this.eduCoreFactory = eduCoreFactory;
     }
 
     @Override
@@ -159,7 +158,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
         Arkivmelding arkivmelding = convertAsicEntryToArkivmelding(decryptedAsicPackage);
         ConversationResource cr = payload.getConversation();
 
-        EDUCore eduCore = new EDUCoreFactory(serviceRegistryLookup).create(cr, arkivmelding, decryptedAsicPackage);
+        EDUCore eduCore = eduCoreFactory.create(cr, arkivmelding, decryptedAsicPackage);
         Optional<Conversation> c = conversationService.registerStatus(eduCore.getId(), MessageStatus.of(GenericReceiptStatus.LEST));
         c.ifPresent(conversationService::markFinished);
 
@@ -172,7 +171,7 @@ public class IntegrajonspunktReceiveImpl implements SOAReceivePort, ApplicationC
     }
 
     public void forwardToNoarkSystemAndSendReceipts(StandardBusinessDocumentWrapper inputDocument, EDUCore eduCore) {
-        PutMessageRequestType putMessage = new EDUCoreFactory(serviceRegistryLookup).createPutMessageFromCore(eduCore);
+        PutMessageRequestType putMessage = eduCoreFactory.createPutMessageFromCore(eduCore);
         PutMessageResponseType response = localNoark.sendEduMelding(putMessage);
         if (response == null || response.getResult() == null) {
             Audit.info("Empty response from archive", markerFrom(inputDocument));
