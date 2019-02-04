@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling;
 import com.sun.xml.ws.transport.http.servlet.WSSpringServlet;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktPropertiesValidator;
+import no.difi.meldingsutveksling.spring.IntegrasjonspunktLocalPropertyEnvironmentPostProcessor;
 import no.difi.move.common.config.SpringCloudProtocolResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +51,7 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
 
             ConfigurableApplicationContext context = new SpringApplicationBuilder(IntegrasjonspunktApplication.class)
                     .initializers(new SpringCloudProtocolResolver())
+                    .listeners(new IntegrasjonspunktLocalPropertyEnvironmentPostProcessor())
                     .run(args);
             checkNtpSync(context);
 
