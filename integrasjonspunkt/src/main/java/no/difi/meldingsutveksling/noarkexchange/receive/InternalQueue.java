@@ -39,7 +39,7 @@ import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom
 import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
 
 /**
- * The idea behind this queue is to avoid loosing messages before they are saved in Noark System.
+ * The idea behind this queue is to avoid losing messages before they are saved in Noark System.
  *
  * The way it works is that any exceptions that happens in after a message is put on the queue is re-sent to the JMS listener. If
  * the application is restarted the message is also resent.
