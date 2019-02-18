@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Optional;
 
 @Component
@@ -37,12 +38,22 @@ public class DBMessagePersister implements MessagePersister {
     }
 
     @Override
+    public void writeStream(ConversationResource cr, String filename, InputStream stream) throws IOException {
+
+    }
+
+    @Override
     public byte[] read(ConversationResource cr, String filename) throws IOException {
         Optional<NextMoveMessageEntry> entry = repo.findByConversationIdAndFilename(cr.getConversationId(), filename);
         if (entry.isPresent()) {
             return entry.get().getContent();
         }
         throw new IOException(String.format("File \'%s\' for conversation with id=%s not found in repository", filename, cr.getConversationId()));
+    }
+
+    @Override
+    public InputStream readStream(ConversationResource cr, String filename) throws IOException {
+        return null;
     }
 
     @Override

@@ -236,7 +236,7 @@ public class MessageOutController {
                     messagePersister.write(cr, file.getOriginalFilename(),
                             Base64.getDecoder().decode(new String(file.getBytes()).getBytes(StandardCharsets.UTF_8)));
                 } else {
-                    messagePersister.write(cr, file.getOriginalFilename(), file.getBytes());
+                    messagePersister.writeStream(cr, file.getOriginalFilename(), file.getInputStream());
                 }
 
                 if (!cr.getFileRefs().values().contains(file.getOriginalFilename())) {

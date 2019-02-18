@@ -2,14 +2,14 @@ package no.difi.meldingsutveksling.nextmove.message;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.DpoConversationResource;
+import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
-import java.io.*;
-import java.util.Arrays;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -20,7 +20,7 @@ public class FileMessagePersisterTest {
     private FileMessagePersister messagePersister;
 
     @Before
-    public void setup() throws IOException {
+    public void setup() {
         props = new IntegrasjonspunktProperties();
         IntegrasjonspunktProperties.NextMove nextMoveProps = new IntegrasjonspunktProperties.NextMove();
         nextMoveProps.setFiledir("target/filepersister_testdir");
@@ -46,5 +46,22 @@ public class FileMessagePersisterTest {
         Assert.assertFalse(crDir.exists());
     }
 
+    @Test
+    public void testFileMessagePersisterStream() throws Exception {
+        String filename = "foo";
+        byte[] content = "bar".getBytes(UTF_8);
+        ByteArrayInputStream bis = new ByteArrayInputStream(content);
 
+        messagePersister.writeStream(cr, filename, bis);
+        InputStream inputStream = messagePersister.readStream(cr, filename);
+
+        byte[] bytes = IOUtils.toByteArray(inputStream);
+        Assert.assertArrayEquals(content, bytes);
+
+        inputStream.close();
+
+        messagePersister.delete(cr);
+        File crDir = new File(props.getNextmove().getFiledir() + "/" + cr.getConversationId());
+        Assert.assertFalse(crDir.exists());
+    }
 }
