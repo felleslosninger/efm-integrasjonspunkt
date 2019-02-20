@@ -27,6 +27,7 @@ public class NextMoveMessageEntry {
     private String filename;
 
     @Lob
+    @Column(name ="content_blob")
     @NonNull
     private Blob contentBlob;
 }
