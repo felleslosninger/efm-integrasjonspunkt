@@ -6,6 +6,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import javax.persistence.*;
+import java.sql.Blob;
 
 @Entity
 @RequiredArgsConstructor(staticName = "of")
@@ -27,5 +28,5 @@ public class NextMoveMessageEntry {
 
     @Lob
     @NonNull
-    private byte[] content;
+    private Blob contentBlob;
 }
