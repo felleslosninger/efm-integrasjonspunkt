@@ -151,7 +151,7 @@ public class MessagePolling implements ApplicationContextAware {
                 if (isNextMove(eduDocument)) {
                     log.debug(format("NextMove message id=%s", eduDocument.getConversationId()));
                     client.confirmDownload(request);
-                    if (!properties.getNoarkSystem().getEndpointURL().isEmpty()) {
+                    if (properties.getNoarkSystem().isEnable() && !properties.getNoarkSystem().getEndpointURL().isEmpty()) {
                         internalQueue.enqueueNoark(eduDocument);
                     } else {
                         nextMoveQueue.enqueueEduDocument(eduDocument);

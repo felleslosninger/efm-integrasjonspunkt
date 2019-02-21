@@ -1,7 +1,9 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.StandardBusinessDocumentConverter;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -22,19 +24,18 @@ import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.security.cert.X509Certificate;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_INNSYN;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_RECEIPT;
@@ -45,9 +46,8 @@ import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.payloadSiz
  * Factory class for StandardBusinessDocument instances
  */
 @Component
+@Slf4j
 public class StandardBusinessDocumentFactory {
-
-    Logger log = LoggerFactory.getLogger(StandardBusinessDocumentFactory.class);
 
     public static final String DOCUMENT_TYPE_MELDING = "melding";
     private static JAXBContext jaxbContextdomain;
@@ -59,7 +59,6 @@ public class StandardBusinessDocumentFactory {
     @Autowired
     private IntegrasjonspunktProperties props;
 
-    @Autowired
     private MessagePersister messagePersister;
 
     static {
@@ -71,11 +70,9 @@ public class StandardBusinessDocumentFactory {
         }
     }
 
-    public StandardBusinessDocumentFactory() {
-    }
-
-    public StandardBusinessDocumentFactory(IntegrasjonspunktNokkel integrasjonspunktNokkel) {
+    public StandardBusinessDocumentFactory(IntegrasjonspunktNokkel integrasjonspunktNokkel, ObjectProvider<MessagePersister> messagePersister) {
         this.integrasjonspunktNokkel = integrasjonspunktNokkel;
+        this.messagePersister = messagePersister.getIfUnique();
     }
 
     public EduDocument create(EDUCore sender, Avsender avsender, Mottaker mottaker) throws MessageException {
@@ -100,9 +97,7 @@ public class StandardBusinessDocumentFactory {
     }
 
     public EduDocument create(ConversationResource shipmentMeta, MessageContext context) throws MessageException {
-
-        List<ByteArrayFile> attachements = new ArrayList<>();
-
+        List<StreamedFile> attachements = new ArrayList<>();
         if (shipmentMeta.getFileRefs() != null) {
             for (String filename : shipmentMeta.getFileRefs().values()) {
 
@@ -113,21 +108,69 @@ public class StandardBusinessDocumentFactory {
                     log.error("Could not read file \""+filename+"\"", e);
                     throw new MessageException(e, StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT);
                 }
-                attachements.add(new NextMoveAttachement(bytes, filename));
+                ByteArrayInputStream bos = new ByteArrayInputStream(bytes);
+
+                String ext = Stream.of(filename.split(".")).reduce((p, e) -> e).orElse("pdf");
+                attachements.add(new NextMoveStreamedFile(filename, bos, MimeTypeExtensionMapper.getMimetype(ext)));
             }
         }
 
-        Archive archive;
+        PipedOutputStream archiveOutputStream = new PipedOutputStream();
+        CompletableFuture.runAsync(() -> {
+            try {
+                createAsicePackage(context.getAvsender(), context.getMottaker(), attachements, archiveOutputStream);
+                archiveOutputStream.close();
+            } catch (IOException e) {
+                throw new MeldingsUtvekslingRuntimeException(StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT.getTechnicalMessage(), e);
+            }
+        });
+        PipedInputStream archiveInputStream;
         try {
-            archive = createAsicePackage(context.getAvsender(), context.getMottaker(), attachements);
+            archiveInputStream = new PipedInputStream(archiveOutputStream);
         } catch (IOException e) {
-            throw new MessageException(e, StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT);
+            String errorMsg = "Error creating PipedInputStream from ASiC";
+            log.error(errorMsg);
+            throw new MeldingsUtvekslingRuntimeException(errorMsg, e);
         }
-        Payload payload = new Payload(encryptArchive(context.getMottaker(), archive, shipmentMeta.getServiceIdentifier()), shipmentMeta);
+        PipedOutputStream encryptedOutputStream = new PipedOutputStream();
+        CompletableFuture.runAsync(() -> {
+            encryptArchive(context.getMottaker(), shipmentMeta.getServiceIdentifier(), archiveInputStream, encryptedOutputStream);
+            try {
+                encryptedOutputStream.close();
+            } catch (IOException e) {
+                log.error("Error closing stream");
+                throw new RuntimeException("ugh");
+            }
+        });
+
+        PipedInputStream encryptedInputStream;
+        try {
+            encryptedInputStream = new PipedInputStream(encryptedOutputStream);
+        } catch (IOException e) {
+            String errorMsg = "Error creating PipedInputStream from encrypted ASiC";
+            log.error(errorMsg);
+            throw new MeldingsUtvekslingRuntimeException(errorMsg, e);
+        }
+        Payload payload = new Payload(encryptedInputStream, shipmentMeta);
 
         return new CreateSBD().createSBD(context.getAvsender().getOrgNummer(), context.getMottaker().getOrgNummer(),
                 payload, context.getConversationId(), StandardBusinessDocumentHeader.NEXTMOVE_TYPE,
                 context.getJournalPostId());
+    }
+
+    private void encryptArchive(Mottaker mottaker, ServiceIdentifier serviceIdentifier, InputStream archive, OutputStream encrypted) {
+        Set<ServiceIdentifier> standardEncryptionUsers = EnumSet.of(DPE_INNSYN, DPE_RECEIPT);
+
+        CmsUtil cmsUtil;
+        if(standardEncryptionUsers.contains(serviceIdentifier)){
+
+            cmsUtil = new CmsUtil(null);
+        }else{
+
+            cmsUtil = new CmsUtil();
+        }
+
+        cmsUtil.createCMSStreamed(archive, encrypted, (X509Certificate) mottaker.getSertifikat());
     }
 
     private byte[] encryptArchive(Mottaker mottaker, Archive archive, ServiceIdentifier serviceIdentifier) {
@@ -151,9 +194,9 @@ public class StandardBusinessDocumentFactory {
         return new CreateAsice().createAsice(byteArrayFile, integrasjonspunktNokkel.getSignatureHelper(), avsender, mottaker);
     }
 
-    private Archive createAsicePackage(Avsender avsender, Mottaker mottaker, List<ByteArrayFile> byteArrayFile) throws
+    private void createAsicePackage(Avsender avsender, Mottaker mottaker, List<StreamedFile> streamedFiles, OutputStream archive) throws
             IOException {
-        return new CreateAsice().createAsice(byteArrayFile, integrasjonspunktNokkel.getSignatureHelper(), avsender, mottaker);
+        new CreateAsice().createAsiceStreamed(streamedFiles, archive, integrasjonspunktNokkel.getSignatureHelper(), avsender, mottaker);
     }
 
     public static EduDocument create(StandardBusinessDocument fromDocument) {

@@ -13,17 +13,20 @@ import no.difi.meldingsutveksling.shipping.ws.AltinnReasonFactory;
 import no.difi.meldingsutveksling.shipping.ws.AltinnWsException;
 import no.difi.meldingsutveksling.shipping.ws.ManifestBuilder;
 import no.difi.meldingsutveksling.shipping.ws.RecipientBuilder;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.activation.DataHandler;
+import javax.activation.FileDataSource;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.soap.MTOMFeature;
 import javax.xml.ws.soap.SOAPBinding;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,12 +39,22 @@ public class AltinnWsClient {
             "formidlingstjeneste. Reason: {}";
     private static final String CANNOT_DOWNLOAD_FILE = "Cannot download file";
     private static final String CANNOT_CONFIRM_DOWNLOAD = "Cannot confirm download";
+
     private final AltinnWsConfiguration configuration;
+    private final IBrokerServiceExternalBasicStreamed streamingService;
 
     private static final Logger log = LoggerFactory.getLogger(AltinnWsClient.class);
 
     public AltinnWsClient(AltinnWsConfiguration altinnWsConfiguration) {
         this.configuration = altinnWsConfiguration;
+
+        BrokerServiceExternalBasicStreamedSF brokerServiceExternalBasicStreamedSF;
+        brokerServiceExternalBasicStreamedSF = new BrokerServiceExternalBasicStreamedSF(configuration.getStreamingServiceUrl());
+        streamingService = brokerServiceExternalBasicStreamedSF.getBasicHttpBindingIBrokerServiceExternalBasicStreamed(new MTOMFeature(true));
+        BindingProvider bp = (BindingProvider) streamingService;
+        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, configuration.getStreamingServiceUrl().toString());
+        SOAPBinding binding = (SOAPBinding) bp.getBinding();
+        binding.setMTOMEnabled(true);
     }
 
     public void send(UploadRequest request) {
@@ -59,16 +72,19 @@ public class AltinnWsClient {
         BindingProvider bp = (BindingProvider) streamingService;
         bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, configuration.getStreamingServiceUrl().toString());
 
+        TmpFile tmpFile = TmpFile.create();
         try {
             StreamedPayloadBasicBE parameters = new StreamedPayloadBasicBE();
 
             AltinnPackage altinnPackage = AltinnPackage.from(request);
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            OutputStream outputStream = tmpFile.getOutputStream();
             altinnPackage.write(outputStream);
-            parameters.setDataStream(outputStream.toByteArray());
+            parameters.setDataStream(new DataHandler(new FileDataSource(tmpFile.getFile())));
 
             ReceiptExternalStreamedBE receiptAltinn = streamingService.uploadFileStreamedBasic(parameters, FILE_NAME, senderReference, request.getSender(), configuration.getPassword(), configuration.getUsername());
             Audit.info("Message uploaded to altinn", markerFrom(receiptAltinn).and(request.getMarkers()));
+            outputStream.close();
+            tmpFile.delete();
         } catch (IBrokerServiceExternalBasicStreamedUploadFileStreamedBasicAltinnFaultFaultFaultMessage e) {
             Audit.error("Message failed to upload to altinn", request.getMarkers(), e);
             throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, AltinnReasonFactory.from(e), e);
@@ -123,18 +139,14 @@ public class AltinnWsClient {
 
 
     public EduDocument download(DownloadRequest request) {
-        BrokerServiceExternalBasicStreamedSF brokerServiceExternalBasicStreamedSF;
-        brokerServiceExternalBasicStreamedSF = new BrokerServiceExternalBasicStreamedSF(configuration.getStreamingServiceUrl());
-        IBrokerServiceExternalBasicStreamed streamingService = brokerServiceExternalBasicStreamedSF.getBasicHttpBindingIBrokerServiceExternalBasicStreamed(new MTOMFeature(true));
-        BindingProvider bp = (BindingProvider) streamingService;
-        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, configuration.getStreamingServiceUrl().toString());
-        SOAPBinding binding = (SOAPBinding) bp.getBinding();
-        binding.setMTOMEnabled(true);
-
-        byte[] message;
         try {
-            message = streamingService.downloadFileStreamedBasic(configuration.getUsername(), configuration.getPassword(), request.getFileReference(), request.getReciever());
-            AltinnPackage altinnPackage = AltinnPackage.from(new ByteArrayInputStream(message));
+            DataHandler dh = streamingService.downloadFileStreamedBasic(configuration.getUsername(), configuration.getPassword(), request.getFileReference(), request.getReciever());
+            // TODO: rewrite this when Altinn fixes zip
+            TmpFile tmpFile = TmpFile.create();
+            File file = tmpFile.getFile();
+            FileUtils.copyInputStreamToFile(dh.getInputStream(), file);
+            AltinnPackage altinnPackage = AltinnPackage.from(file);
+
             return altinnPackage.getEduDocument();
 
         } catch (IBrokerServiceExternalBasicStreamedDownloadFileStreamedBasicAltinnFaultFaultFaultMessage e) {

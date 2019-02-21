@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.dokumentpakking.service;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import org.apache.commons.io.IOUtils;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERNull;
@@ -18,6 +19,8 @@ import org.bouncycastle.operator.OutputEncryptor;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.Security;
@@ -60,6 +63,35 @@ public class CmsUtil {
         return new AlgorithmIdentifier(PKCSObjectIdentifiers.id_RSAES_OAEP, parameters);
     }
 
+    public void createCMSStreamed(InputStream inputStream, OutputStream outputStream, X509Certificate sertifikat) {
+        try {
+
+            JceKeyTransRecipientInfoGenerator recipientInfoGenerator;
+            if (keyEncryptionScheme == null){
+                recipientInfoGenerator = new JceKeyTransRecipientInfoGenerator(sertifikat);
+            } else {
+                recipientInfoGenerator = new JceKeyTransRecipientInfoGenerator(sertifikat, keyEncryptionScheme);
+            }
+
+            CMSEnvelopedDataGenerator envelopedDataGenerator = new CMSEnvelopedDataGenerator();
+            envelopedDataGenerator.addRecipientInfoGenerator(recipientInfoGenerator);
+
+            CMSEnvelopedDataStreamGenerator cmsEnvelopedDataStreamGenerator = new CMSEnvelopedDataStreamGenerator();
+            cmsEnvelopedDataStreamGenerator.addRecipientInfoGenerator(recipientInfoGenerator);
+
+            OutputEncryptor contentEncryptor = new JceCMSContentEncryptorBuilder(cmsEncryptionAlgorithm).build();
+            OutputStream open = cmsEnvelopedDataStreamGenerator.open(outputStream, contentEncryptor);
+            IOUtils.copyLarge(inputStream, open);
+            open.close();
+        } catch (CertificateEncodingException e) {
+            throw new MeldingsUtvekslingRuntimeException("Feil med mottakers sertifikat", e);
+        } catch (CMSException e) {
+            throw new MeldingsUtvekslingRuntimeException("Kunne ikke generere Cryptographic Message Syntax for dokumentpakke", e);
+        } catch (IOException e) {
+            throw new MeldingsUtvekslingRuntimeException(e);
+        }
+    }
+
     public byte[] createCMS(byte[] bytes, X509Certificate sertifikat) {
         try {
 
@@ -89,6 +121,35 @@ public class CmsUtil {
 
     public byte[] decryptCMS(byte[] encrypted, PrivateKey privateKey) {
         return decryptCMS(encrypted, privateKey, null);
+    }
+
+    public InputStream decryptCMSStreamed(InputStream encrypted, PrivateKey privateKey) {
+        return decryptCMSStreamed(encrypted, privateKey, null);
+    }
+
+    public InputStream decryptCMSStreamed(InputStream encrypted, PrivateKey privateKey, Provider provider) {
+
+        try {
+            CMSEnvelopedData cms;
+
+            cms = new CMSEnvelopedData(encrypted);
+            RecipientInformationStore recipients = cms.getRecipientInfos();
+            Collection<?> c = recipients.getRecipients();
+            Iterator<?> it = c.iterator();
+            if (it.hasNext()) {
+                JceKeyTransEnvelopedRecipient recipient = new JceKeyTransEnvelopedRecipient(privateKey);
+                if(provider != null){
+                    recipient.setProvider(provider);
+                }
+
+                RecipientInformation recipientInformation = (RecipientInformation) it.next();
+
+                return recipientInformation.getContentStream(recipient).getContentStream();
+            }
+            throw new MeldingsUtvekslingRuntimeException("No recipients in CMS package.");
+        } catch (CMSException | IOException e) {
+            throw new MeldingsUtvekslingRuntimeException(e);
+        }
     }
 
     public byte[] decryptCMS(byte[] encrypted, PrivateKey privateKey, Provider provider) {

@@ -65,4 +65,5 @@ public class MimeTypeExtensionMapper {
 
         return MediaType.APPLICATION_PDF_VALUE;
     }
+
 }

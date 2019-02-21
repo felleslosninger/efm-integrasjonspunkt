@@ -19,13 +19,12 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
-import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.math.BigInteger;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 /**
@@ -93,6 +92,32 @@ public class AltinnPackage {
         zipOutputStream.finish();
         zipOutputStream.flush();
         zipOutputStream.close();
+    }
+
+    public static AltinnPackage from(File f) throws IOException, JAXBException {
+        ZipFile zipFile = new ZipFile(f);
+        Unmarshaller unmarshaller = ctx.createUnmarshaller();
+
+        BrokerServiceManifest manifest = null;
+        BrokerServiceRecipientList recipientList = null;
+        EduDocument eduDocument = null;
+
+        Enumeration<? extends ZipEntry> entries = zipFile.entries();
+        while (entries.hasMoreElements()) {
+            ZipEntry zipEntry = entries.nextElement();
+            if (zipEntry.getName().equals("manifest.xml")) {
+                manifest = (BrokerServiceManifest) unmarshaller.unmarshal(zipFile.getInputStream(zipEntry));
+            } else if (zipEntry.getName().equals("recipients.xml")) {
+                recipientList = (BrokerServiceRecipientList) unmarshaller.unmarshal(zipFile.getInputStream(zipEntry));
+            } else if (zipEntry.getName().equals("content.xml")) {
+                Source source = new StreamSource(zipFile.getInputStream(zipEntry));
+                eduDocument = unmarshaller.unmarshal(source, EduDocument.class).getValue();
+            } else if (zipEntry.getName().equals("asic.zip")) {
+                zipFile.getInputStream(zipEntry);
+            }
+        }
+
+        return new AltinnPackage(manifest, recipientList, eduDocument);
     }
 
     public static AltinnPackage from(InputStream inputStream) throws IOException, JAXBException {
