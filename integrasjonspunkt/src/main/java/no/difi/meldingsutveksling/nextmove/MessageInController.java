@@ -290,7 +290,7 @@ public class MessageInController {
     public ResponseEntity popMessage(
             @ApiParam(value = "Service Identifier")
             @RequestParam(value = "serviceIdentifier", required = false) Optional<ServiceIdentifier> serviceIdentifier,
-            @RequestParam(value = "conversationId", required = false) Optional<String> conversationId) {
+            @RequestParam(value = "conversationId", required = false) Optional<String> conversationId) throws IOException {
 
         Optional<ConversationResource> resource;
         if (conversationId.isPresent()) {
@@ -334,7 +334,7 @@ public class MessageInController {
                     .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME+filename)
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .contentLength(bytes.length)
-                    .body(isr);
+                    .body(messagePersister.readStream(cr,filename));
         }
         return ResponseEntity.noContent().build();
     }

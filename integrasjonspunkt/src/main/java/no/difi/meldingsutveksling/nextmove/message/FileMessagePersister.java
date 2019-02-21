@@ -4,14 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+
+import java.io.*;
 
 @Slf4j
 @Component
@@ -38,10 +37,23 @@ public class FileMessagePersister implements MessagePersister {
         try (FileOutputStream os = new FileOutputStream(localFile);
              BufferedOutputStream bos = new BufferedOutputStream(os)) {
             bos.write(message);
-            bos.flush();
-            bos.close();
         } catch (IOException e) {
-            log.error("Could not write asic container to disc.", e);
+            log.error("Could not write asic container to disk.", e);
+            throw e;
+        }
+    }
+
+    @Override
+    public void writeStream(ConversationResource cr, String filename, InputStream inputStream) throws IOException {
+        String filedir = getConversationFiledirPath(cr);
+        File localFile = new File(filedir+filename);
+        localFile.getParentFile().mkdirs();
+
+        try (FileOutputStream os = new FileOutputStream(localFile);
+            BufferedOutputStream bos = new BufferedOutputStream(os)) {
+            IOUtils.copy(inputStream,bos);
+        } catch (IOException e) {
+            log.error("Could not write asic container to disk.", e);
             throw e;
         }
     }
@@ -51,6 +63,13 @@ public class FileMessagePersister implements MessagePersister {
         String filedir = getConversationFiledirPath(cr);
         File file = new File(filedir+filename);
         return FileUtils.readFileToByteArray(file);
+    }
+
+    @Override
+    public InputStream readStream(ConversationResource cr, String filename) throws IOException {
+        String filedir = getConversationFiledirPath(cr);
+        File file = new File(filedir+filename);
+        return new FileInputStream(file);
     }
 
     @Override
