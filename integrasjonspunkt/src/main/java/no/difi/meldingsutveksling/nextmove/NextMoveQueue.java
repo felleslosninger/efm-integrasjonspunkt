@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.Decryptor;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
@@ -61,16 +62,23 @@ public class NextMoveQueue {
                     ""+Payload.class);
         }
 
-        byte[] decryptedAsicPackage = decrypt((Payload)eduDocument.getAny());
-        List<String> contentFromAsic;
-        try {
-            contentFromAsic = getContentFromAsic(decryptedAsicPackage);
-        } catch (MessageException e) {
-            log.error("Could not get contents from asic", e);
-            throw new MeldingsUtvekslingRuntimeException("Could not get contents from asic", e);
-        }
+        Payload payload = (Payload) eduDocument.getAny();
+        ConversationResource message = (payload).getConversation();
 
-        ConversationResource message = ((Payload) eduDocument.getAny()).getConversation();
+//        CmsUtil cmsUtil = new CmsUtil();
+//        Optional<InputStream> asicInputStream = messagePersister.readStream(message, "asic.zip");
+//        InputStream decryptedAsic = cmsUtil.decryptCMSStreamed(asicInputStream, keyInfo.loadPrivateKey());
+//        messagePersister.writeStream(message, "asic-decrypted.zip", decryptedAsic);
+
+//        byte[] decryptedAsicPackage = decrypt(payload);
+//        List<String> contentFromAsic;
+//        try {
+//            contentFromAsic = getContentFromAsic(decryptedAsicPackage);
+//        } catch (MessageException e) {
+//            log.error("Could not get contents from asic", e);
+//            throw new MeldingsUtvekslingRuntimeException("Could not get contents from asic", e);
+//        }
+
         if (ServiceIdentifier.DPE_RECEIPT.equals(message.getServiceIdentifier())) {
             log.debug(String.format("Message with id=%s is a receipt", message.getConversationId()));
             Optional<Conversation> c = conversationService.registerStatus(message.getConversationId(), MessageStatus.of(GenericReceiptStatus.LEVERT));
@@ -78,11 +86,11 @@ public class NextMoveQueue {
             return Optional.empty();
         }
 
-        message.setFileRefs(Maps.newHashMap());
-        message.addFileRef(props.getNextmove().getAsicfile());
-        contentFromAsic.forEach(message::addFileRef);
+//        message.setFileRefs(Maps.newHashMap());
+//        message.addFileRef(props.getNextmove().getAsicfile());
+//        contentFromAsic.forEach(message::addFileRef);
 
-        messagePersister.write(message, props.getNextmove().getAsicfile(), decryptedAsicPackage);
+//        messagePersister.write(message, props.getNextmove().getAsicfile(), decryptedAsicPackage);
         message = inRepo.save(message);
 
         Conversation c = conversationService.registerConversation(message);

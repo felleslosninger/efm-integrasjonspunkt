@@ -1,16 +1,21 @@
 package no.difi.meldingsutveksling;
 
+import lombok.extern.slf4j.Slf4j;
 import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceManifest;
 import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceRecipientList;
 import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
+import no.difi.meldingsutveksling.nextmove.DpoConversationResource;
+import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.shipping.sftp.BrokerServiceManifestBuilder;
 import no.difi.meldingsutveksling.shipping.sftp.ExternalServiceBuilder;
 import no.difi.meldingsutveksling.shipping.sftp.RecipientBuilder;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
+import org.apache.commons.io.IOUtils;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 
 import javax.xml.bind.JAXBContext;
@@ -27,11 +32,14 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
+
 /**
  * Represents an Altinn package to be used with the formidlingstjeneste SFTP channel.
  * <p/>
  * Has factory methods of writing/reading from to zip files via input/output streams.
  */
+@Slf4j
 public class AltinnPackage {
     private static JAXBContext ctx;
     private final BrokerServiceManifest manifest;
@@ -89,18 +97,27 @@ public class AltinnPackage {
         marshallObject(objectFactory.createStandardBusinessDocument(eduDocument), zipOutputStream);
         zipOutputStream.closeEntry();
 
+        if (eduDocument.getAny() instanceof Payload) {
+            Payload payload = (Payload) eduDocument.getAny();
+            if (payload.getInputStream() != null) {
+                zipOutputStream.putNextEntry(new ZipEntry(ASIC_FILE));
+                IOUtils.copy(payload.getInputStream(), zipOutputStream);
+                zipOutputStream.closeEntry();
+            }
+        }
+
         zipOutputStream.finish();
-        zipOutputStream.flush();
-        zipOutputStream.close();
     }
 
-    public static AltinnPackage from(File f) throws IOException, JAXBException {
+    public static AltinnPackage from(File f, MessagePersister messagePersister) throws IOException, JAXBException {
         ZipFile zipFile = new ZipFile(f);
         Unmarshaller unmarshaller = ctx.createUnmarshaller();
 
         BrokerServiceManifest manifest = null;
         BrokerServiceRecipientList recipientList = null;
         EduDocument eduDocument = null;
+        InputStream asicInputStream = null;
+        long asicSize = 0;
 
         Enumeration<? extends ZipEntry> entries = zipFile.entries();
         while (entries.hasMoreElements()) {
@@ -112,11 +129,22 @@ public class AltinnPackage {
             } else if (zipEntry.getName().equals("content.xml")) {
                 Source source = new StreamSource(zipFile.getInputStream(zipEntry));
                 eduDocument = unmarshaller.unmarshal(source, EduDocument.class).getValue();
-            } else if (zipEntry.getName().equals("asic.zip")) {
-                zipFile.getInputStream(zipEntry);
+            } else if (zipEntry.getName().equals(ASIC_FILE)) {
+                asicInputStream = zipFile.getInputStream(zipEntry);
+                asicSize = zipEntry.getSize();
             }
         }
 
+        if (eduDocument == null) {
+            throw new MeldingsUtvekslingRuntimeException("Altinn zip does not contain BestEdu document, cannot proceed");
+        }
+        if (asicInputStream != null) {
+            DpoConversationResource cr = DpoConversationResource.of(eduDocument.getConversationId(),
+                    eduDocument.getSenderOrgNumber(),
+                    eduDocument.getReceiverOrgNumber());
+            messagePersister.writeStream(cr, ASIC_FILE, asicInputStream, asicSize);
+        }
+        zipFile.close();
         return new AltinnPackage(manifest, recipientList, eduDocument);
     }
 

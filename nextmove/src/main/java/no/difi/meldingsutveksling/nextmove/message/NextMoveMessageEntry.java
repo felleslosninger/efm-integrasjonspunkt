@@ -23,11 +23,16 @@ public class NextMoveMessageEntry {
     @NonNull
     private String conversationId;
 
+    @Column(name = "filename")
     @NonNull
     private String filename;
 
     @Lob
-    @Column(name ="content_blob")
+    @Column(name ="content")
     @NonNull
-    private Blob contentBlob;
+    private Blob content;
+
+    @Column(name = "size")
+    @NonNull
+    private long size;
 }

@@ -189,8 +189,6 @@ public class IntegrasjonspunktProperties {
         @NotNull
         private String filedir;
         @NotNull
-        private String asicfile;
-        @NotNull
         private Integer lockTimeoutMinutes;
         @NotNull
         private Boolean applyZipHeaderPatch = Boolean.FALSE;

@@ -20,6 +20,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
+import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
@@ -96,34 +97,31 @@ public class StandardBusinessDocumentFactory {
         return new CreateSBD().createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload, conversationId, DOCUMENT_TYPE_MELDING, shipment.getJournalpostId());
     }
 
-    public EduDocument create(ConversationResource shipmentMeta, MessageContext context) throws MessageException {
+    public EduDocument create(ConversationResource cr, MessageContext context) throws MessageException {
         List<StreamedFile> attachements = new ArrayList<>();
-        if (shipmentMeta.getFileRefs() != null) {
-            for (String filename : shipmentMeta.getFileRefs().values()) {
-
-                byte[] bytes;
-                try {
-                    bytes = messagePersister.read(shipmentMeta, filename);
-                } catch (IOException e) {
-                    log.error("Could not read file \""+filename+"\"", e);
-                    throw new MessageException(e, StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT);
-                }
-                ByteArrayInputStream bos = new ByteArrayInputStream(bytes);
-
+        if (cr.getFileRefs() != null) {
+            for (String filename : cr.getFileRefs().values()) {
+                FileEntryStream fileEntryStream = messagePersister.readStream(cr, filename);
                 String ext = Stream.of(filename.split(".")).reduce((p, e) -> e).orElse("pdf");
-                attachements.add(new NextMoveStreamedFile(filename, bos, MimeTypeExtensionMapper.getMimetype(ext)));
+                attachements.add(new NextMoveStreamedFile(filename, fileEntryStream.getInputStream(), MimeTypeExtensionMapper.getMimetype(ext)));
             }
         }
 
         PipedOutputStream archiveOutputStream = new PipedOutputStream();
         CompletableFuture.runAsync(() -> {
+            log.debug("Starting thread: create asic");
             try {
                 createAsicePackage(context.getAvsender(), context.getMottaker(), attachements, archiveOutputStream);
+                for (StreamedFile a : attachements) {
+                    a.getInputStream().close();
+                }
                 archiveOutputStream.close();
             } catch (IOException e) {
                 throw new MeldingsUtvekslingRuntimeException(StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT.getTechnicalMessage(), e);
             }
+            log.debug("Thread finished: create asic");
         });
+
         PipedInputStream archiveInputStream;
         try {
             archiveInputStream = new PipedInputStream(archiveOutputStream);
@@ -134,13 +132,14 @@ public class StandardBusinessDocumentFactory {
         }
         PipedOutputStream encryptedOutputStream = new PipedOutputStream();
         CompletableFuture.runAsync(() -> {
-            encryptArchive(context.getMottaker(), shipmentMeta.getServiceIdentifier(), archiveInputStream, encryptedOutputStream);
+            log.debug("Starting thread: encrypt archive");
+            encryptArchive(context.getMottaker(), cr.getServiceIdentifier(), archiveInputStream, encryptedOutputStream);
             try {
                 encryptedOutputStream.close();
             } catch (IOException e) {
-                log.error("Error closing stream");
-                throw new RuntimeException("ugh");
+                log.error("Error closing encryption stream");
             }
+            log.debug("Thread finished: encrypt archive");
         });
 
         PipedInputStream encryptedInputStream;
@@ -151,7 +150,7 @@ public class StandardBusinessDocumentFactory {
             log.error(errorMsg);
             throw new MeldingsUtvekslingRuntimeException(errorMsg, e);
         }
-        Payload payload = new Payload(encryptedInputStream, shipmentMeta);
+        Payload payload = new Payload(encryptedInputStream, cr);
 
         return new CreateSBD().createSBD(context.getAvsender().getOrgNummer(), context.getMottaker().getOrgNummer(),
                 payload, context.getConversationId(), StandardBusinessDocumentHeader.NEXTMOVE_TYPE,

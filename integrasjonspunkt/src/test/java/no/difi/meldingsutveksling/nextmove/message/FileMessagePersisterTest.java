@@ -9,7 +9,6 @@ import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.InputStream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -52,13 +51,13 @@ public class FileMessagePersisterTest {
         byte[] content = "bar".getBytes(UTF_8);
         ByteArrayInputStream bis = new ByteArrayInputStream(content);
 
-        messagePersister.writeStream(cr, filename, bis);
-        InputStream inputStream = messagePersister.readStream(cr, filename);
+        messagePersister.writeStream(cr, filename, bis, content.length);
+        FileEntryStream fileEntry = messagePersister.readStream(cr, filename);
 
-        byte[] bytes = IOUtils.toByteArray(inputStream);
+        byte[] bytes = IOUtils.toByteArray(fileEntry.getInputStream());
         Assert.assertArrayEquals(content, bytes);
 
-        inputStream.close();
+        fileEntry.getInputStream().close();
 
         messagePersister.delete(cr);
         File crDir = new File(props.getNextmove().getFiledir() + "/" + cr.getConversationId());

@@ -11,12 +11,15 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.Optional;
+
+import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 
 @Slf4j
 @Component
@@ -39,21 +42,21 @@ public class DBMessagePersister implements MessagePersister {
     public void write(ConversationResource cr, String filename, byte[] message) throws IOException {
         LobHelper lobHelper = em.unwrap(Session.class).getLobHelper();
         Blob contentBlob = lobHelper.createBlob(message);
-        if (props.getNextmove().getApplyZipHeaderPatch() && props.getNextmove().getAsicfile().equals(filename)) {
+        if (props.getNextmove().getApplyZipHeaderPatch() && ASIC_FILE.equals(filename)) {
             BugFix610.applyPatch(message, cr.getConversationId());
         }
 
-        NextMoveMessageEntry entry = NextMoveMessageEntry.of(cr.getConversationId(), filename, contentBlob);
+        NextMoveMessageEntry entry = NextMoveMessageEntry.of(cr.getConversationId(), filename, contentBlob, message.length);
         repo.save(entry);
     }
 
     @Override
     @Transactional
-    public void writeStream(ConversationResource cr, String filename, InputStream stream) throws IOException {
+    public void writeStream(ConversationResource cr, String filename, InputStream stream, long size) throws IOException {
         LobHelper lobHelper = em.unwrap(Session.class).getLobHelper();
         Blob contentBlob = lobHelper.createBlob(stream, stream.available());
 
-        NextMoveMessageEntry entry = NextMoveMessageEntry.of(cr.getConversationId(), filename, contentBlob);
+        NextMoveMessageEntry entry = NextMoveMessageEntry.of(cr.getConversationId(), filename, contentBlob, size);
         repo.save(entry);
 
     }
@@ -63,7 +66,7 @@ public class DBMessagePersister implements MessagePersister {
         Optional<NextMoveMessageEntry> entry = repo.findByConversationIdAndFilename(cr.getConversationId(), filename);
         if (entry.isPresent()) {
             try {
-                return IOUtils.toByteArray(entry.get().getContentBlob().getBinaryStream());
+                return IOUtils.toByteArray(entry.get().getContent().getBinaryStream());
             } catch (SQLException e) {
                 throw new IOException("Error reading data stream from database", e);
 
@@ -74,17 +77,16 @@ public class DBMessagePersister implements MessagePersister {
     }
 
     @Override
-    public InputStream readStream(ConversationResource cr, String filename) throws IOException {
+    public FileEntryStream readStream(ConversationResource cr, String filename) throws PersistenceException {
         Optional<NextMoveMessageEntry> entry = repo.findByConversationIdAndFilename(cr.getConversationId(), filename);
         if (entry.isPresent()) {
             try {
-                return entry.get().getContentBlob().getBinaryStream();
+                return FileEntryStream.of(entry.get().getContent().getBinaryStream(), entry.get().getSize());
             } catch (SQLException e) {
-                throw new IOException("Error reading data stream from database", e);
+                throw new PersistenceException("Error reading data stream from database", e);
             }
         }
-        throw new IOException(String.format("File \'%s\' for conversation with id=%s not found in repository", filename, cr.getConversationId()));
-
+        throw new PersistenceException(String.format("Entry for conversationId=%s, filename=%s not found in database", cr.getConversationId(), filename));
     }
 
     @Override

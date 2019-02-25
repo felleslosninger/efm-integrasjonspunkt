@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextmove.message;
 
+import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.DpoConversationResource;
 import org.junit.Assert;
@@ -12,8 +13,6 @@ import java.util.zip.ZipInputStream;
 
 public class BugFix610Test {
 
-    private final static String FILE_NAME = "bar";
-
     private IntegrasjonspunktProperties props;
     private DpoConversationResource cr;
     private FileMessagePersister messagePersister;
@@ -24,7 +23,6 @@ public class BugFix610Test {
         IntegrasjonspunktProperties.NextMove nextMoveProps = new IntegrasjonspunktProperties.NextMove();
         nextMoveProps.setFiledir("target/filepersister_testdir");
         nextMoveProps.setApplyZipHeaderPatch(true);
-        nextMoveProps.setAsicfile(FILE_NAME);
         props.setNextmove(nextMoveProps);
 
         messagePersister = new FileMessagePersister(props);
@@ -45,8 +43,8 @@ public class BugFix610Test {
 
         buffer.flush();
 
-        messagePersister.write(cr, FILE_NAME, buffer.toByteArray());
-        File resultFile = new File(props.getNextmove().getFiledir() + "/" + cr.getConversationId() + "/" + FILE_NAME);
+        messagePersister.write(cr, NextMoveConsts.ASIC_FILE, buffer.toByteArray());
+        File resultFile = new File(props.getNextmove().getFiledir() + "/" + cr.getConversationId() + "/" + NextMoveConsts.ASIC_FILE);
 
         ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(resultFile));
         ZipEntry zipEntry = zipInputStream.getNextEntry();

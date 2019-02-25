@@ -70,5 +70,10 @@
         <groupId>no.difi.move-common</groupId>
         <artifactId>audit</artifactId>
     </dependency>
+    <dependency>
+        <groupId>com.sun.xml.ws</groupId>
+        <artifactId>jaxws-rt</artifactId>
+        <version>2.3.2</version>
+    </dependency>
 </dependencies>
 </project>

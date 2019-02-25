@@ -9,8 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-
+import javax.persistence.PersistenceException;
 import java.io.*;
+
+import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 
 @Slf4j
 @Component
@@ -30,7 +32,7 @@ public class FileMessagePersister implements MessagePersister {
         File localFile = new File(filedir+filename);
         localFile.getParentFile().mkdirs();
 
-        if (props.getNextmove().getApplyZipHeaderPatch() && props.getNextmove().getAsicfile().equals(filename)){
+        if (props.getNextmove().getApplyZipHeaderPatch() && ASIC_FILE.equals(filename)){
             BugFix610.applyPatch(message, cr.getConversationId());
         }
 
@@ -44,7 +46,7 @@ public class FileMessagePersister implements MessagePersister {
     }
 
     @Override
-    public void writeStream(ConversationResource cr, String filename, InputStream inputStream) throws IOException {
+    public void writeStream(ConversationResource cr, String filename, InputStream inputStream, long size) throws IOException {
         String filedir = getConversationFiledirPath(cr);
         File localFile = new File(filedir+filename);
         localFile.getParentFile().mkdirs();
@@ -66,10 +68,15 @@ public class FileMessagePersister implements MessagePersister {
     }
 
     @Override
-    public InputStream readStream(ConversationResource cr, String filename) throws IOException {
+    public FileEntryStream readStream(ConversationResource cr, String filename) throws PersistenceException {
         String filedir = getConversationFiledirPath(cr);
         File file = new File(filedir+filename);
-        return new FileInputStream(file);
+        try {
+            BufferedInputStream fis = new BufferedInputStream(new FileInputStream(file));
+            return FileEntryStream.of(fis, file.length());
+        } catch (FileNotFoundException e) {
+            throw new PersistenceException(String.format("File \"%s\" not found for conversationId \"%s\"", filename, cr.getConversationId()));
+        }
     }
 
     @Override

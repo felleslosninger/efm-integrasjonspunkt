@@ -17,8 +17,10 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.xml.sax.SAXException;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
@@ -49,6 +52,8 @@ import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
 import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
 @Api
@@ -83,14 +88,14 @@ public class MessageOutController {
 
     private MessagePersister messagePersister;
 
-    @Autowired
-    public MessageOutController(ConversationResourceRepository repo, MessagePersister messagePersister) {
+    public MessageOutController(ConversationResourceRepository repo,
+                                ObjectProvider<MessagePersister> messagePersister) {
         this.outRepo = new DirectionalConversationResourceRepository(repo, OUTGOING);
         this.inRepo = new DirectionalConversationResourceRepository(repo, INCOMING);
-        this.messagePersister = messagePersister;
+        this.messagePersister = messagePersister.getIfUnique();
     }
 
-    @RequestMapping(value = "/out/messages", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/out/messages", method = GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get all outgoing messages")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = ConversationResource[].class)
@@ -117,7 +122,7 @@ public class MessageOutController {
         return ResponseEntity.ok(resources);
     }
 
-    @RequestMapping(value = "/out/messages/{conversationId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/out/messages/{conversationId}", method = GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Find message", notes = "Find message with given conversation id")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = ConversationResource.class)
@@ -132,7 +137,7 @@ public class MessageOutController {
         return ResponseEntity.notFound().build();
     }
 
-    @RequestMapping(value = "/out/messages", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/out/messages", method = POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Create conversation", notes = "Create a new conversation with the given values")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = ConversationResource.class),
@@ -189,7 +194,49 @@ public class MessageOutController {
         cr.setFileRefs(cr.getFileRefs() == null ? Maps.newHashMap() : cr.getFileRefs());
     }
 
-    @RequestMapping(value = "/out/messages/{conversationId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/out/messages/upload", method = POST)
+    public ResponseEntity uploadFile(
+            @RequestParam("conversationId") String conversationId,
+            @RequestParam("filename") String filename,
+            HttpServletRequest request) {
+        Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String header = headerNames.nextElement();
+            System.out.println("Header: "+header+", val="+request.getHeader(header));
+        }
+        Optional<ConversationResource> find = outRepo.findByConversationId(conversationId);
+        if (!find.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+        ConversationResource cr = find.get();
+        if (!cr.getFileRefs().values().contains(filename)) {
+            cr.addFileRef(filename);
+        }
+
+        try {
+            messagePersister.writeStream(cr, filename,
+                    request.getInputStream(),
+                    Long.valueOf(request.getHeader(HttpHeaders.CONTENT_LENGTH)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        outRepo.save(cr);
+        log.info("File \"{}\" added to conversation resource [id={}, serviceIdentifier={}]", filename, cr.getConversationId(), cr.getServiceIdentifier());
+        return ResponseEntity.ok().build();
+    }
+
+    @RequestMapping(value = "/out/messages/send", method = GET)
+    public ResponseEntity send(@RequestParam("conversationId") String conversationId) {
+        Optional<ConversationResource> find = outRepo.findByConversationId(conversationId);
+        if (!find.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+        ConversationResource cr = find.get();
+        internalQueue.enqueueNextmove(cr);
+        return ResponseEntity.ok().build();
+    }
+
+    @RequestMapping(value = "/out/messages/{conversationId}", method = POST)
     @ApiOperation(value = "Upload files and send", notes = "Upload files to a conversation and send")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = String.class),
@@ -222,6 +269,7 @@ public class MessageOutController {
         }
 
         ArrayList<String> files = Lists.newArrayList(request.getFileNames());
+
         // MOVE-414: temp fix until arkivmelding implementation
         if (files.contains("hoveddokument")) {
             Collections.swap(files, files.indexOf("hoveddokument"), 0);
@@ -236,7 +284,7 @@ public class MessageOutController {
                     messagePersister.write(cr, file.getOriginalFilename(),
                             Base64.getDecoder().decode(new String(file.getBytes()).getBytes(StandardCharsets.UTF_8)));
                 } else {
-                    messagePersister.writeStream(cr, file.getOriginalFilename(), file.getInputStream());
+                    messagePersister.writeStream(cr, file.getOriginalFilename(), file.getInputStream(), file.getSize());
                 }
 
                 if (!cr.getFileRefs().values().contains(file.getOriginalFilename())) {
@@ -306,7 +354,7 @@ public class MessageOutController {
         return ResponseEntity.ok().build();
     }
 
-    @RequestMapping(value = "/out/types/{identifier}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/out/types/{identifier}", method = GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Supported message types", notes = "Get a list of supported message types for this endpoint")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = String[].class),
@@ -325,7 +373,7 @@ public class MessageOutController {
         return ResponseEntity.notFound().build();
     }
 
-    @RequestMapping(value = "/out/types/{serviceIdentifier}/prototype", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/out/types/{serviceIdentifier}/prototype", method = GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Prototypes", hidden = true)
     public ResponseEntity getPrototype(
             @PathVariable("serviceIdentifier") ServiceIdentifier serviceIdentifier,
@@ -333,7 +381,7 @@ public class MessageOutController {
         throw new UnsupportedOperationException();
     }
 
-    @RequestMapping(value = "/transferqueue/{conversationId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/transferqueue/{conversationId}", method = GET)
     @ApiOperation(value = "Transfer conversation between queue (internal use)", hidden = true)
     @ResponseBody
     public ResponseEntity transferQueue(@PathVariable("conversationId") String conversationId) {

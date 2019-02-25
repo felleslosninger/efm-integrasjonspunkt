@@ -27,8 +27,8 @@ public class AltinnTransport implements Transport {
     @Override
     public void send(ApplicationContext context, final EduDocument eduDocument) {
         AltinnWsClient client = new AltinnWsClient(AltinnWsConfiguration.fromConfiguration(serviceRecord, context));
-        UploadRequest request1 = new AltinnWsRequest(eduDocument);
+        UploadRequest request = new AltinnWsRequest(eduDocument);
 
-        client.send(request1);
+        client.send(request);
     }
 }

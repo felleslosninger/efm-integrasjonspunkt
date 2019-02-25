@@ -2,9 +2,12 @@ package no.difi.meldingsutveksling.nextmove;
 
 import com.google.common.collect.Lists;
 import io.swagger.annotations.*;
+import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
@@ -12,7 +15,7 @@ import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,14 +25,17 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
 
@@ -43,20 +49,22 @@ public class MessageInController {
     private static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
     private static final String HEADER_FILENAME = "attachement; filename=";
 
-    private DirectionalConversationResourceRepository repo;
-
-    @Autowired
     private IntegrasjonspunktProperties props;
-
-    @Autowired
     private ConversationService conversationService;
-
+    private DirectionalConversationResourceRepository repo;
     private MessagePersister messagePersister;
+    private IntegrasjonspunktNokkel keyInfo;
 
-    @Autowired
-    public MessageInController(ConversationResourceRepository cRepo, MessagePersister messagePersister) {
+    public MessageInController(IntegrasjonspunktProperties props,
+                               ConversationService conversationService,
+                               ConversationResourceRepository cRepo,
+                               ObjectProvider<MessagePersister> messagePersister,
+                               IntegrasjonspunktNokkel keyInfo) {
+        this.props = props;
+        this.conversationService = conversationService;
         this.repo = new DirectionalConversationResourceRepository(cRepo, INCOMING);
-        this.messagePersister = messagePersister;
+        this.messagePersister = messagePersister.getIfUnique();
+        this.keyInfo = keyInfo;
     }
 
     @RequestMapping(value = "/in/messages", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -214,72 +222,26 @@ public class MessageInController {
             if (cr.getLockTimeout() == null) {
                 return ResponseEntity.badRequest().body(notLockedErrorResponse());
             }
-            repo.delete(cr);
-            Optional<Conversation> c = conversationService.registerStatus(cr.getConversationId(),
-                    MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_LEVERT));
-            c.ifPresent(conversationService::markFinished);
-            Audit.info(format("Conversation with id=%s deleted from queue", cr.getConversationId()),
-                    markerFrom(cr));
+
             try {
                 messagePersister.delete(cr);
             } catch (IOException e) {
                 log.error("Error deleting files from conversation with id={}", cr.getConversationId(),  e);
             }
+
+            repo.delete(cr);
+            Optional<Conversation> c = conversationService.registerStatus(cr.getConversationId(),
+                    MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_LEVERT));
+            c.ifPresent(conversationService::markFinished);
+            Audit.info(format("Conversation with id=%s popped from queue", cr.getConversationId()),
+                    markerFrom(cr));
             return ResponseEntity.ok().build();
         }
 
         return ResponseEntity.noContent().build();
     }
 
-    @RequestMapping(value = "/in/messages/pop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Read incoming queue", notes = "Gets the ASiC for the first non locked message in the queue, unless conversationId is specified")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "Success", response = InputStreamResource.class),
-            @ApiResponse(code = 204, message = "No content", response = String.class)
-    })
-    @Transactional
-    public ResponseEntity readMessage(
-            @RequestParam(value = "serviceIdentifier", required = false) Optional<ServiceIdentifier> serviceIdentifier,
-            @RequestParam(value = "conversationId", required = false) Optional<String> conversationId) {
-
-        Optional<ConversationResource> resource;
-        if (conversationId.isPresent()) {
-            resource = repo.findByConversationId(conversationId.get());
-        }
-        else if (serviceIdentifier.isPresent()) {
-            resource = repo.findFirstByServiceIdentifierAndLockTimeoutIsNullOrderByLastUpdateAsc(serviceIdentifier.get());
-        } else {
-            resource = repo.findFirstByLockTimeoutIsNullOrderByLastUpdateAsc();
-        }
-
-        if (resource.isPresent()) {
-            ConversationResource cr = resource.get();
-            String filename = cr.getFileRefs().get(0);
-
-            InputStreamResource isr;
-            byte[] bytes;
-            try {
-                bytes = messagePersister.read(cr, filename);
-                isr = new InputStreamResource(new ByteArrayInputStream(bytes));
-            } catch (IOException e) {
-                Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing it from queue",
-                        filename, cr.getConversationId(), cr.getSenderId()), markerFrom(cr), e);
-                repo.delete(cr);
-                return fileNotFoundErrorResponse(filename);
-            }
-
-            log.info(markerFrom(cr), "Conversation with id={} read from queue", cr.getConversationId());
-
-            return ResponseEntity.ok()
-                    .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME+filename)
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .contentLength(bytes.length)
-                    .body(isr);
-        }
-        return ResponseEntity.noContent().build();
-    }
-
-    @RequestMapping(value = "/in/messages/pop", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/in/messages/pop", method = RequestMethod.GET)
     @ApiOperation(value = "Pop incoming queue", notes = "Gets the ASiC for the first non locked message in the queue, " +
             "unless conversationId is specified, then removes it.")
     @ApiResponses({
@@ -306,35 +268,25 @@ public class MessageInController {
             ConversationResource cr = resource.get();
             String filename = cr.getFileRefs().get(0);
 
-            InputStreamResource isr;
-            byte[] bytes;
+            FileEntryStream fileEntry;
             try {
-                bytes = messagePersister.read(cr, filename);
-                isr = new InputStreamResource(new ByteArrayInputStream(bytes));
-            } catch (IOException e) {
-                Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing it from queue",
+                fileEntry = messagePersister.readStream(cr, ASIC_FILE);
+            } catch (PersistenceException e) {
+                Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing message from queue",
                         filename, cr.getConversationId(), cr.getSenderId()), markerFrom(cr), e);
                 repo.delete(cr);
                 return fileNotFoundErrorResponse(filename);
             }
 
-            repo.delete(cr);
-            Optional<Conversation> c = conversationService.registerStatus(cr.getConversationId(),
-                    MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_LEVERT));
-            c.ifPresent(conversationService::markFinished);
-            Audit.info(format("Conversation with id=%s popped from queue", cr.getConversationId()),
-                    markerFrom(cr));
-            try {
-                messagePersister.delete(cr);
-            } catch (IOException e) {
-                log.error("Error deleting files from conversation with id={}", cr.getConversationId(),  e);
-            }
+            CmsUtil cmsUtil = new CmsUtil();
+            InputStream decryptedAsic = cmsUtil.decryptCMSStreamed(fileEntry.getInputStream(), keyInfo.loadPrivateKey());
+            fileEntry.getInputStream().close();
 
             return ResponseEntity.ok()
-                    .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME+filename)
+                    .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME+ASIC_FILE)
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .contentLength(bytes.length)
-                    .body(messagePersister.readStream(cr,filename));
+                    .contentLength(fileEntry.getSize())
+                    .body(new InputStreamResource(decryptedAsic));
         }
         return ResponseEntity.noContent().build();
     }

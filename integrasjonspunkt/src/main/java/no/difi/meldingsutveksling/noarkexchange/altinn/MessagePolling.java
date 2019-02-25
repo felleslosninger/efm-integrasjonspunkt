@@ -14,6 +14,7 @@ import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.NextMoveQueue;
 import no.difi.meldingsutveksling.nextmove.NextMoveServiceBus;
+import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.*;
@@ -51,37 +52,32 @@ public class MessagePolling implements ApplicationContextAware {
 
     @Autowired
     IntegrasjonspunktProperties properties;
-
     @Autowired
     InternalQueue internalQueue;
-
     @Autowired
     IntegrasjonspunktNokkel keyInfo;
-
     @Autowired
     TransportFactory transportFactory;
-
     @Autowired
     private JmsTemplate jmsTemplate;
-
     @Autowired
     ServiceRegistryLookup serviceRegistryLookup;
-
     @Autowired
     ConversationService conversationService;
-
     @Autowired
     ObjectProvider<List<MessageDownloaderModule>> messageDownloaders;
-
     @Autowired
     private NextMoveQueue nextMoveQueue;
-
-    private ServiceRecord serviceRecord;
-
     @Autowired
     private NextMoveServiceBus nextMoveServiceBus;
 
+    private MessagePersister messagePersister;
+    private ServiceRecord serviceRecord;
     private CompletableFuture batchRead;
+
+    public MessagePolling(ObjectProvider<MessagePersister> messagePersister) {
+        this.messagePersister = messagePersister.getIfUnique();
+    }
 
     @Scheduled(fixedRateString = "${difi.move.nextmove.serviceBus.pollingrate}")
     public void checkForNewNextMoveMessages() {
@@ -145,7 +141,7 @@ public class MessagePolling implements ApplicationContextAware {
             try {
                 final DownloadRequest request = new DownloadRequest(reference.getValue(), properties.getOrg().getNumber());
                 log.debug(format("Downloading message with altinnId=%s", reference.getValue()));
-                EduDocument eduDocument = client.download(request);
+                EduDocument eduDocument = client.download(request, messagePersister);
                 Audit.info(format("Downloaded message with id=%s", eduDocument.getConversationId()), eduDocument.createLogstashMarkers());
 
                 if (isNextMove(eduDocument)) {
