@@ -4,6 +4,7 @@ import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.KeystoreProvider;
 import no.difi.meldingsutveksling.ServiceRegistryTransportFactory;
 import no.difi.meldingsutveksling.auth.OidcTokenClient;
+import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.lang.KeystoreProviderException;
@@ -76,18 +77,18 @@ public class IntegrasjonspunktBeans {
     public KeystoreProvider meldingsformidlerKeystoreProvider() throws MeldingsformidlerException {
         try {
             return KeystoreProvider.from(properties.getDpi().getKeystore());
-        }catch (KeystoreProviderException e){
+        } catch (KeystoreProviderException e) {
             throw new MeldingsformidlerException("Unable to create keystore for DPI", e);
         }
     }
 
-    @ConditionalOnProperty(name="difi.move.feature.enableDPF", havingValue = "true")
+    @ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
     @Bean
     public FiksMessageStrategyFactory fiksMessageStrategyFactory(SvarUtService svarUtService, @Qualifier("localNoark") NoarkClient localNoark) {
         return FiksMessageStrategyFactory.newInstance(svarUtService, localNoark);
     }
 
-    @ConditionalOnProperty(name="difi.move.feature.enableDPF", havingValue = "true")
+    @ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
     @Bean
     public FiksStatusStrategy fiksConversationStrategy(SvarUtService svarUtService, ConversationService conversationService) {
         return new FiksStatusStrategy(svarUtService, conversationService);
@@ -108,7 +109,7 @@ public class IntegrasjonspunktBeans {
                                                   @Qualifier("localNoark") ObjectProvider<NoarkClient> localNoark,
                                                   @SuppressWarnings("SpringJavaAutowiringInspection") ObjectProvider<List<MessageStrategyFactory>> messageStrategyFactory) {
         final StrategyFactory strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, meldingsformidlerKeystoreProvider, properties, localNoark.getIfAvailable(), internalQueue);
-        if(messageStrategyFactory.getIfAvailable() != null) {
+        if (messageStrategyFactory.getIfAvailable() != null) {
             messageStrategyFactory.getIfAvailable().forEach(strategyFactory::registerMessageStrategyFactory);
         }
         return strategyFactory;
@@ -129,6 +130,11 @@ public class IntegrasjonspunktBeans {
         ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
         taskScheduler.setPoolSize(10);
         return taskScheduler;
+    }
+
+    @Bean
+    public CmsUtil cmsUtil() {
+        return new CmsUtil();
     }
 }
 

@@ -20,8 +20,8 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -49,30 +49,32 @@ public class MessageInController {
     private static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
     private static final String HEADER_FILENAME = "attachement; filename=";
 
-    private IntegrasjonspunktProperties props;
-    private ConversationService conversationService;
-    private DirectionalConversationResourceRepository repo;
-    private MessagePersister messagePersister;
-    private IntegrasjonspunktNokkel keyInfo;
+    private final IntegrasjonspunktProperties props;
+    private final ConversationService conversationService;
+    private final DirectionalConversationResourceRepository repo;
+    private final MessagePersister messagePersister;
+    private final IntegrasjonspunktNokkel keyInfo;
+    private final CmsUtil cmsUtil;
 
     public MessageInController(IntegrasjonspunktProperties props,
                                ConversationService conversationService,
                                ConversationResourceRepository cRepo,
                                ObjectProvider<MessagePersister> messagePersister,
-                               IntegrasjonspunktNokkel keyInfo) {
+                               IntegrasjonspunktNokkel keyInfo, CmsUtil cmsUtil) {
         this.props = props;
         this.conversationService = conversationService;
         this.repo = new DirectionalConversationResourceRepository(cRepo, INCOMING);
         this.messagePersister = messagePersister.getIfUnique();
         this.keyInfo = keyInfo;
+        this.cmsUtil = cmsUtil;
     }
 
-    @RequestMapping(value = "/in/messages", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/in/messages", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get all incoming messages")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = ConversationResource[].class),
             @ApiResponse(code = 404, message = "Not found", response = String.class),
-            @ApiResponse(code = 204, message = "No countent", response = String.class)
+            @ApiResponse(code = 204, message = "No content", response = String.class)
     })
     public ResponseEntity getIncomingMessages(
             @ApiParam(value = "Service Identifier")
@@ -113,7 +115,7 @@ public class MessageInController {
         return ResponseEntity.ok(resources);
     }
 
-    @RequestMapping(value = "/in/messages/peek", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/in/messages/peek", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Peek and lock incoming queue", notes = "Gets the first message in the incoming queue, then locks the message")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = ConversationResource.class),
@@ -141,7 +143,7 @@ public class MessageInController {
         return ResponseEntity.noContent().build();
     }
 
-    @RequestMapping(value = "/in/messages/peek", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/in/messages/peek", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Peek incoming queue", notes = "Gets the first message in the incoming queue")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = ConversationResource.class),
@@ -164,7 +166,7 @@ public class MessageInController {
         return ResponseEntity.noContent().build();
     }
 
-    @RequestMapping(value = "/in/messages/unlock", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/in/messages/unlock", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Unlock message", notes = "Unlock the first queued locked message")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = InputStreamResource.class),
@@ -172,18 +174,10 @@ public class MessageInController {
     })
     @Transactional
     public ResponseEntity unlockMessage(
-            @RequestParam(value = "serviceIdentifier", required = false) Optional<ServiceIdentifier> serviceIdentifier,
-            @RequestParam(value = "conversationId", required = false) Optional<String> conversationId) {
+            @RequestParam(value = "serviceIdentifier", required = false) ServiceIdentifier serviceIdentifier,
+            @RequestParam(value = "conversationId", required = false) String conversationId) {
 
-        Optional<ConversationResource> resource;
-        if (conversationId.isPresent()) {
-            resource = repo.findByConversationId(conversationId.get());
-        }
-        else if (serviceIdentifier.isPresent()) {
-            resource = repo.findFirstByServiceIdentifierAndLockTimeoutIsNotNullOrderByLastUpdateAsc(serviceIdentifier.get());
-        } else {
-            resource = repo.findFirstByLockTimeoutIsNotNullOrderByLastUpdateAsc();
-        }
+        Optional<ConversationResource> resource = getConversationResourceForDelete(serviceIdentifier, conversationId);
 
         if (resource.isPresent()) {
             ConversationResource cr = resource.get();
@@ -196,7 +190,7 @@ public class MessageInController {
         return ResponseEntity.noContent().build();
     }
 
-    @RequestMapping(value = "/in/messages/delete", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/in/messages/delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Remove message", notes = "Delete the first queued locked message")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = InputStreamResource.class),
@@ -204,18 +198,10 @@ public class MessageInController {
     })
     @Transactional
     public ResponseEntity deleteMessage(
-            @RequestParam(value = "serviceIdentifier", required = false) Optional<ServiceIdentifier> serviceIdentifier,
-            @RequestParam(value = "conversationId", required = false) Optional<String> conversationId) {
+            @RequestParam(value = "serviceIdentifier", required = false) ServiceIdentifier serviceIdentifier,
+            @RequestParam(value = "conversationId", required = false) String conversationId) {
 
-        Optional<ConversationResource> resource;
-        if (conversationId.isPresent()) {
-            resource = repo.findByConversationId(conversationId.get());
-        }
-        else if (serviceIdentifier.isPresent()) {
-            resource = repo.findFirstByServiceIdentifierAndLockTimeoutIsNotNullOrderByLastUpdateAsc(serviceIdentifier.get());
-        } else {
-            resource = repo.findFirstByLockTimeoutIsNotNullOrderByLastUpdateAsc();
-        }
+        Optional<ConversationResource> resource = getConversationResourceForDelete(serviceIdentifier, conversationId);
 
         if (resource.isPresent()) {
             ConversationResource cr = resource.get();
@@ -226,7 +212,7 @@ public class MessageInController {
             try {
                 messagePersister.delete(cr);
             } catch (IOException e) {
-                log.error("Error deleting files from conversation with id={}", cr.getConversationId(),  e);
+                log.error("Error deleting files from conversation with id={}", cr.getConversationId(), e);
             }
 
             repo.delete(cr);
@@ -241,7 +227,7 @@ public class MessageInController {
         return ResponseEntity.noContent().build();
     }
 
-    @RequestMapping(value = "/in/messages/pop", method = RequestMethod.GET)
+    @GetMapping(value = "/in/messages/pop")
     @ApiOperation(value = "Pop incoming queue", notes = "Gets the ASiC for the first non locked message in the queue, " +
             "unless conversationId is specified, then removes it.")
     @ApiResponses({
@@ -251,18 +237,10 @@ public class MessageInController {
     @Transactional
     public ResponseEntity popMessage(
             @ApiParam(value = "Service Identifier")
-            @RequestParam(value = "serviceIdentifier", required = false) Optional<ServiceIdentifier> serviceIdentifier,
-            @RequestParam(value = "conversationId", required = false) Optional<String> conversationId) throws IOException {
+            @RequestParam(value = "serviceIdentifier", required = false) ServiceIdentifier serviceIdentifier,
+            @RequestParam(value = "conversationId", required = false) String conversationId) throws IOException {
 
-        Optional<ConversationResource> resource;
-        if (conversationId.isPresent()) {
-            resource = repo.findByConversationId(conversationId.get());
-        }
-        else if (serviceIdentifier.isPresent()) {
-            resource = repo.findFirstByServiceIdentifierAndLockTimeoutIsNullOrderByLastUpdateAsc(serviceIdentifier.get());
-        } else {
-            resource = repo.findFirstByLockTimeoutIsNullOrderByLastUpdateAsc();
-        }
+        Optional<ConversationResource> resource = getConversationResource(serviceIdentifier, conversationId);
 
         if (resource.isPresent()) {
             ConversationResource cr = resource.get();
@@ -278,17 +256,40 @@ public class MessageInController {
                 return fileNotFoundErrorResponse(filename);
             }
 
-            CmsUtil cmsUtil = new CmsUtil();
             InputStream decryptedAsic = cmsUtil.decryptCMSStreamed(fileEntry.getInputStream(), keyInfo.loadPrivateKey());
             fileEntry.getInputStream().close();
 
             return ResponseEntity.ok()
-                    .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME+ASIC_FILE)
+                    .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME + ASIC_FILE)
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .contentLength(fileEntry.getSize())
                     .body(new InputStreamResource(decryptedAsic));
         }
         return ResponseEntity.noContent().build();
+    }
+
+    private Optional<ConversationResource> getConversationResource(ServiceIdentifier serviceIdentifier, String conversationId) {
+        if (conversationId != null) {
+            return repo.findByConversationId(conversationId);
+        }
+
+        if (serviceIdentifier != null) {
+            return repo.findFirstByServiceIdentifierAndLockTimeoutIsNullOrderByLastUpdateAsc(serviceIdentifier);
+        }
+
+        return repo.findFirstByLockTimeoutIsNullOrderByLastUpdateAsc();
+    }
+
+    private Optional<ConversationResource> getConversationResourceForDelete(ServiceIdentifier serviceIdentifier, String conversationId) {
+        if (conversationId != null) {
+            return repo.findByConversationId(conversationId);
+        }
+
+        if (serviceIdentifier != null) {
+            return repo.findFirstByServiceIdentifierAndLockTimeoutIsNotNullOrderByLastUpdateAsc(serviceIdentifier);
+        }
+
+        return repo.findFirstByLockTimeoutIsNotNullOrderByLastUpdateAsc();
     }
 
     private ResponseEntity fileNotFoundErrorResponse(String filename) {
@@ -304,5 +305,4 @@ public class MessageInController {
                 .errorDescription("Message is not locked and can thus not be deleted")
                 .build());
     }
-
 }

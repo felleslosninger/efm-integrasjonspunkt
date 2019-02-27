@@ -89,7 +89,7 @@ public abstract class ConversationResource {
     ConversationResource() {}
 
     ConversationResource(String conversationId, String senderId, String receiverId, ServiceIdentifier serviceIdentifier,
-                         LocalDateTime lastUpdate, Map fileRefs, Map customProperties){
+                         LocalDateTime lastUpdate, Map<Integer, String> fileRefs, Map<String, String> customProperties){
         this.conversationId = conversationId;
         this.senderId = senderId;
         this.receiverId = receiverId;

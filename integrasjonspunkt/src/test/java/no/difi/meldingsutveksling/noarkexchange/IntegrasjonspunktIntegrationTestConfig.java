@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.KeystoreProvider;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
@@ -189,5 +190,10 @@ public class IntegrasjonspunktIntegrationTestConfig {
     @Primary
     public ConversationRepository conversationRepository() {
         return mock(ConversationRepository.class);
+    }
+
+    @Bean
+    public CmsUtil cmsUtil() {
+        return new CmsUtil();
     }
 }
