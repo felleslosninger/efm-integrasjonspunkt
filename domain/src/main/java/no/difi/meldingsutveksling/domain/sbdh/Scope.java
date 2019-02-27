@@ -8,14 +8,10 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlType;
 
 
 /**
@@ -54,7 +50,7 @@ public class Scope {
     @XmlElement(name = "Identifier")
     protected String identifier;
     @XmlElementRef(name = "ScopeInformation", namespace = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader", type = JAXBElement.class, required = false)
-    protected List<JAXBElement<?>> scopeInformation;
+    protected List<CorrelationInformation> scopeInformation;
 
     /**
      * Gets the value of the type property.
@@ -152,11 +148,15 @@ public class Scope {
      * 
      * 
      */
-    public List<JAXBElement<?>> getScopeInformation() {
+    public List<CorrelationInformation> getScopeInformation() {
         if (scopeInformation == null) {
-            scopeInformation = new ArrayList<JAXBElement<?>>();
+            scopeInformation = new ArrayList<>();
         }
         return this.scopeInformation;
+    }
+
+    public void setScopeInformation(List<CorrelationInformation> scopeInformation) {
+        this.scopeInformation = scopeInformation;
     }
 
 }

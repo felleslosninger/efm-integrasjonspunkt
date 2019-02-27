@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
+import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,7 +20,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 
 import static org.mockito.Mockito.*;
@@ -73,11 +78,19 @@ public class IntegrasjonspunktReceiveImplIntegrationTest {
 
     @Test
     public void receiveMessageTest() throws JAXBException {
-        EduDocument eduDocument = SBDFileReader.readSBD("1466595652965.xml");
+        EduDocument eduDocument = readSBD("1466595652965.xml");
 
         internalQueue.forwardToNoark(eduDocument);
 
         verify(integrajonspunktReceiveSpy).forwardToNoarkSystemAndSendReceipts(any(StandardBusinessDocumentWrapper.class), any(EDUCore.class));
+    }
+
+    public static EduDocument readSBD(String filename) throws JAXBException {
+        JAXBElement<StandardBusinessDocument> fromDocument;
+        JAXBContext ctx = JAXBContext.newInstance(StandardBusinessDocument.class);
+        Unmarshaller unmarshaller = ctx.createUnmarshaller();
+        fromDocument = unmarshaller.unmarshal(new StreamSource(IntegrasjonspunktReceiveImplIntegrationTest.class.getClassLoader().getResourceAsStream(filename)), StandardBusinessDocument.class);
+        return StandardBusinessDocumentFactory.create(fromDocument.getValue());
     }
 
 }
