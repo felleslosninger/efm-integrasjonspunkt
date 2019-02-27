@@ -1,6 +1,9 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
+import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
@@ -10,6 +13,7 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -17,7 +21,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -42,20 +48,16 @@ public class MessageInControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
-    private ConversationResourceRepository repo;
+    @MockBean private ConversationResourceRepository repo;
+    @MockBean private ConversationService conversationService;
+    @MockBean private ServiceRegistryLookup sr;
+    @MockBean private IntegrasjonspunktProperties props;
+    @MockBean private MessagePersister messagePersister;
+    @MockBean private IntegrasjonspunktNokkel keyInfo;
+    @MockBean private CmsUtil cmsUtil;
 
-    @MockBean
-    private ConversationService conversationService;
-
-    @MockBean
-    private ServiceRegistryLookup sr;
-
-    @MockBean
-    private IntegrasjonspunktProperties props;
-
-    @MockBean
-    private MessagePersister messagePersister;
+    @Mock private FileEntryStream fileEntryMock;
+    @Mock private InputStream fileEntryInputStreamMock;
 
     @Before
     public void setup() throws IOException {
@@ -95,6 +97,11 @@ public class MessageInControllerTest {
         when(conversationService.registerStatus(eq("42"), any(MessageStatus.class))).thenReturn(Optional.of(c42));
         when(conversationService.registerStatus(eq("43"), any(MessageStatus.class))).thenReturn(Optional.of(c43));
         when(conversationService.registerStatus(eq("44"), any(MessageStatus.class))).thenReturn(Optional.of(c44));
+
+        when(messagePersister.readStream(any(), any())).thenReturn(fileEntryMock);
+        when(cmsUtil.decryptCMSStreamed(any(), any())).thenReturn(new ByteArrayInputStream("asicContent".getBytes()));
+        when(fileEntryMock.getInputStream()).thenReturn(fileEntryInputStreamMock);
+        when(fileEntryMock.getSize()).thenReturn(42L);
     }
 
     @Test
@@ -102,7 +109,7 @@ public class MessageInControllerTest {
         mvc.perform(get("/in/messages/pop")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().string("bar"));
+                .andExpect(content().string("asicContent"));
     }
 
     @Test
