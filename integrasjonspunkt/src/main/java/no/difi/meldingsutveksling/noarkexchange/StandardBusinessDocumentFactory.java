@@ -5,7 +5,6 @@ import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.StandardBusinessDocumentConverter;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreConverter;
@@ -13,25 +12,17 @@ import no.difi.meldingsutveksling.dokumentpakking.domain.Archive;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateAsice;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateSBD;
-import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.*;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
-import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
-import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
-import org.eclipse.persistence.jaxb.JAXBContextFactory;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
 import java.io.*;
 import java.security.cert.X509Certificate;
 import java.util.*;
@@ -51,9 +42,6 @@ import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.payloadSiz
 public class StandardBusinessDocumentFactory {
 
     public static final String DOCUMENT_TYPE_MELDING = "melding";
-    private static JAXBContext jaxbContextdomain;
-    private static JAXBContext jaxbContext;
-
     @Autowired
     private IntegrasjonspunktNokkel integrasjonspunktNokkel;
 
@@ -61,15 +49,6 @@ public class StandardBusinessDocumentFactory {
     private IntegrasjonspunktProperties props;
 
     private MessagePersister messagePersister;
-
-    static {
-        try {
-            jaxbContext = JAXBContextFactory.createContext(new Class[]{StandardBusinessDocument.class, Payload.class, Kvittering.class}, null);
-            jaxbContextdomain = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, Kvittering.class}, null);
-        } catch (JAXBException e) {
-            throw new MeldingsUtvekslingRuntimeException("Could not initialize " + StandardBusinessDocumentConverter.class, e);
-        }
-    }
 
     public StandardBusinessDocumentFactory(IntegrasjonspunktNokkel integrasjonspunktNokkel, ObjectProvider<MessagePersister> messagePersister) {
         this.integrasjonspunktNokkel = integrasjonspunktNokkel;
@@ -198,26 +177,4 @@ public class StandardBusinessDocumentFactory {
         new CreateAsice().createAsiceStreamed(streamedFiles, archive, integrasjonspunktNokkel.getSignatureHelper(), avsender, mottaker);
     }
 
-    public static EduDocument create(StandardBusinessDocument fromDocument) {
-        ModelMapper mapper = new ModelMapper();
-        return mapper.map(fromDocument, EduDocument.class);
-    }
-
-    public static StandardBusinessDocument create(EduDocument fromDocument) {
-        try {
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            JAXBElement<EduDocument> d = new no.difi.meldingsutveksling.domain.sbdh.ObjectFactory().createStandardBusinessDocument(fromDocument);
-
-            jaxbContextdomain.createMarshaller().marshal(d, os);
-            byte[] tmp = os.toByteArray();
-
-            JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument> toDocument
-                    = (JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument>)
-                    jaxbContext.createUnmarshaller().unmarshal(new ByteArrayInputStream(tmp));
-
-            return toDocument.getValue();
-        } catch (JAXBException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

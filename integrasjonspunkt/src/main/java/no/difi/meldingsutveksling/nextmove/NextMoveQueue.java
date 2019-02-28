@@ -1,13 +1,11 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import no.difi.meldingsutveksling.Decryptor;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
-import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
+import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.logging.Audit;

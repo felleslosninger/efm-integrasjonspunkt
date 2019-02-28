@@ -2,8 +2,8 @@ package no.difi.meldingsutveksling.services;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
-import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import no.difi.meldingsutveksling.noarkexchange.TestConstants;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -35,14 +35,14 @@ public class AdresseregisterTest {
     private ServiceRegistryLookup serviceRegistryLookup;
 
     @Mock
-    private StandardBusinessDocumentWrapper documentWrapper;
+    private EduDocument sbdMock;
     private String emptyCertificate = "";
 
     @Before
     public void setup() {
         adresseregister = new Adresseregister(serviceRegistryLookup);
-        when(documentWrapper.getSenderOrgNumber()).thenReturn(SENDER_PARTY_NUMBER);
-        when(documentWrapper.getReceiverOrgNumber()).thenReturn(RECIEVER_PARTY_NUMBER);
+        when(sbdMock.getSenderOrgNumber()).thenReturn(SENDER_PARTY_NUMBER);
+        when(sbdMock.getReceiverOrgNumber()).thenReturn(RECIEVER_PARTY_NUMBER);
         when(serviceRegistryLookup.getServiceRecord(RECIEVER_PARTY_NUMBER)).thenReturn(ServiceRecordWrapper.of(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"), Lists.newArrayList(), Maps.newHashMap()));
         when(serviceRegistryLookup.getServiceRecord(SENDER_PARTY_NUMBER)).thenReturn(ServiceRecordWrapper.of(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"), Lists.newArrayList(), Maps.newHashMap()));
     }
@@ -54,7 +54,7 @@ public class AdresseregisterTest {
         when(serviceRegistryLookup.getServiceRecord(SENDER_PARTY_NUMBER)).thenReturn(ServiceRecordWrapper.of(new ServiceRecord(null, SENDER_PARTY_NUMBER, emptyCertificate, "http://localhost:123"), Lists.newArrayList(), Maps.newHashMap()));
 
 
-        adresseregister.validateCertificates(documentWrapper);
+        adresseregister.validateCertificates(sbdMock);
 
     }
 
@@ -64,12 +64,12 @@ public class AdresseregisterTest {
         expectedException.expect(new StatusMatches(StatusMessage.MISSING_RECIEVER_CERTIFICATE));
         when(serviceRegistryLookup.getServiceRecord(RECIEVER_PARTY_NUMBER)).thenReturn(ServiceRecordWrapper.of(new ServiceRecord(null, RECIEVER_PARTY_NUMBER, emptyCertificate, "http://localhost:123"), Lists.newArrayList(), Maps.newHashMap()));
 
-        adresseregister.validateCertificates(documentWrapper);
+        adresseregister.validateCertificates(sbdMock);
     }
 
     @Test
     public void certificatesAreValid() throws MessageException {
-        adresseregister.validateCertificates(documentWrapper);
+        adresseregister.validateCertificates(sbdMock);
         when(serviceRegistryLookup.getServiceRecord(RECIEVER_PARTY_NUMBER)).thenReturn(ServiceRecordWrapper.of(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"), Lists.newArrayList(), Maps.newHashMap()));
     }
 

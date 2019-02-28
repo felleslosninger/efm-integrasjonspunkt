@@ -9,9 +9,16 @@
 package no.difi.meldingsutveksling.domain.sbdh;
 
 import net.logstash.logback.marker.LogstashMarker;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
+import no.difi.meldingsutveksling.domain.Payload;
+import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.*;
 import java.util.List;
 
@@ -37,7 +44,7 @@ import java.util.List;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Document", propOrder = {
+@XmlType(name = "StandardBusinessDocument", propOrder = {
     "standardBusinessDocumentHeader",
     "any"
 })
@@ -128,8 +135,44 @@ public class EduDocument {
         return new Scope();
     }
 
-    private String getMessageType() {
+    public String getMessageType() {
         return getStandardBusinessDocumentHeader().getDocumentIdentification().getType();
+    }
+
+    public String getDocumentId() {
+        return getStandardBusinessDocumentHeader().getDocumentIdentification().getInstanceIdentifier();
+    }
+
+    public boolean isReceipt() {
+        return getStandardBusinessDocumentHeader().getDocumentIdentification().getType().equalsIgnoreCase(StandardBusinessDocumentHeader.KVITTERING_TYPE);
+    }
+
+    public boolean isNextMove() {
+        return StandardBusinessDocumentHeader.NEXTMOVE_TYPE.equalsIgnoreCase(getStandardBusinessDocumentHeader().getDocumentIdentification().getType());
+    }
+
+    public Payload getPayload() {
+        if (getAny() instanceof Payload) {
+            return (Payload) getAny();
+        } else if (getAny() instanceof Node) {
+            return unmarshallAnyElement(getAny());
+        } else {
+            throw new MeldingsUtvekslingRuntimeException("Could not cast any element " + getAny() + " from " + EduDocument.class + " to " + Payload.class);
+        }
+    }
+
+    private Payload unmarshallAnyElement(Object any) {
+        JAXBContext jaxbContextP;
+        Unmarshaller unMarshallerP;
+        Payload payload;
+        try {
+            jaxbContextP = JAXBContextFactory.createContext(new Class[]{Payload.class}, null);
+            unMarshallerP = jaxbContextP.createUnmarshaller();
+            payload = unMarshallerP.unmarshal((org.w3c.dom.Node) any, Payload.class).getValue();
+        } catch (JAXBException e) {
+            throw new MeldingsUtvekslingRuntimeException(e);
+        }
+        return payload;
     }
 
     public LogstashMarker createLogstashMarkers() {

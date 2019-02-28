@@ -76,25 +76,6 @@
                             <verbose>true</verbose>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>integrasjonspunktReceive-exec</id>
-                        <goals>
-                            <goal>wsimport</goal>
-                        </goals>
-                        <configuration>
-                            <genJWS>true</genJWS>
-                            <packageName>no.difi.meldingsutveksling.noarkexchange.schema.receive</packageName>
-                            <wsdlFiles>
-                                <wsdlFile>${basedir}/src/wsdl/IntegrasjonspunktReceive.wsdl
-                                </wsdlFile>
-                            </wsdlFiles>
-                            <vmArgs>
-                                <vmArg>-Djavax.xml.accessExternalDTD=all</vmArg>
-                                <vmArg>-Djavax.xml.accessExternalSchema=all</vmArg>
-                            </vmArgs>
-                            <verbose>true</verbose>
-                        </configuration>
-                    </execution>
                 </executions>
 
             </plugin>

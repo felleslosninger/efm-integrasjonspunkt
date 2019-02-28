@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.dokumentpakking.xml;
+package no.difi.meldingsutveksling.domain;
 
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import org.apache.commons.codec.binary.Base64;

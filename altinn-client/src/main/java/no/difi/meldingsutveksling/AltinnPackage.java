@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling;
 import lombok.extern.slf4j.Slf4j;
 import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceManifest;
 import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceRecipientList;
-import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
+import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;

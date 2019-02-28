@@ -49,7 +49,6 @@ import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom
 public class MessagePolling implements ApplicationContextAware {
 
     ApplicationContext context;
-
     @Autowired
     IntegrasjonspunktProperties properties;
     @Autowired

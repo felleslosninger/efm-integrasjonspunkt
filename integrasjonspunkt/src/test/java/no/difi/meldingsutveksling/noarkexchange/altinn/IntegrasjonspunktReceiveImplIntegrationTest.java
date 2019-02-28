@@ -4,14 +4,15 @@ import no.difi.meldingsutveksling.IntegrasjonspunktApplication;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.Receiver;
 import no.difi.meldingsutveksling.core.Sender;
-import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
+import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
-import no.difi.meldingsutveksling.noarkexchange.*;
+import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
+import no.difi.meldingsutveksling.noarkexchange.MessageException;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,7 +22,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
@@ -72,7 +72,7 @@ public class IntegrasjonspunktReceiveImplIntegrationTest {
         when(requestMock.getReceiver()).thenReturn(receiverMock);
 
         doReturn(requestMock).when(integrajonspunktReceiveSpy).convertAsicEntrytoEduDocument(any(byte[].class));
-        doNothing().when(integrajonspunktReceiveSpy).sendReceiptOpen(any(StandardBusinessDocumentWrapper.class));
+        doNothing().when(integrajonspunktReceiveSpy).sendReceiptOpen(any(EduDocument.class));
         internalQueue.setIntegrajonspunktReceiveImpl(integrajonspunktReceiveSpy);
     }
 
@@ -82,15 +82,13 @@ public class IntegrasjonspunktReceiveImplIntegrationTest {
 
         internalQueue.forwardToNoark(eduDocument);
 
-        verify(integrajonspunktReceiveSpy).forwardToNoarkSystemAndSendReceipts(any(StandardBusinessDocumentWrapper.class), any(EDUCore.class));
+        verify(integrajonspunktReceiveSpy).forwardToNoarkSystemAndSendReceipts(any(EduDocument.class), any(EDUCore.class));
     }
 
-    public static EduDocument readSBD(String filename) throws JAXBException {
-        JAXBElement<StandardBusinessDocument> fromDocument;
-        JAXBContext ctx = JAXBContext.newInstance(StandardBusinessDocument.class);
+    private static EduDocument readSBD(String filename) throws JAXBException {
+        JAXBContext ctx = JAXBContext.newInstance(EduDocument.class);
         Unmarshaller unmarshaller = ctx.createUnmarshaller();
-        fromDocument = unmarshaller.unmarshal(new StreamSource(IntegrasjonspunktReceiveImplIntegrationTest.class.getClassLoader().getResourceAsStream(filename)), StandardBusinessDocument.class);
-        return StandardBusinessDocumentFactory.create(fromDocument.getValue());
+        return unmarshaller.unmarshal(new StreamSource(IntegrasjonspunktReceiveImplIntegrationTest.class.getClassLoader().getResourceAsStream(filename)), EduDocument.class).getValue();
     }
 
 }

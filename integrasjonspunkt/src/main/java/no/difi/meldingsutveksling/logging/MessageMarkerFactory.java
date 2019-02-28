@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.logging;
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.FileReference;
-import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
+import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import org.apache.commons.io.FileUtils;
 
 import static no.difi.meldingsutveksling.logging.MarkerFactory.*;
@@ -39,16 +39,16 @@ public class MessageMarkerFactory {
      * Creates LogstashMarker with conversation id from the
      * StandardBusinessDocument that will appear in the logs when used.
      *
-     * @param documentWrapper wrapper around StandardBusinessDocument
+     * @param sbd StandardBusinessDocument
      * @return LogstashMarker
      */
-    public static LogstashMarker markerFrom(StandardBusinessDocumentWrapper documentWrapper) {
-        LogstashMarker messageTypeMarker = MarkerFactory.messageTypeMarker(documentWrapper.getMessageType());
-        LogstashMarker journalPostIdMarker = journalPostIdMarker(documentWrapper.getJournalPostId());
-        LogstashMarker documentIdMarker = Markers.append(DOCUMENT_ID, documentWrapper.getDocumentId());
-        LogstashMarker conversationIdMarker = conversationIdMarker(documentWrapper.getConversationId());
-        final LogstashMarker receiverMarker = receiverMarker(documentWrapper.getReceiverOrgNumber());
-        final LogstashMarker senderMarker = senderMarker(documentWrapper.getSenderOrgNumber());
+    public static LogstashMarker markerFrom(EduDocument sbd) {
+        LogstashMarker messageTypeMarker = MarkerFactory.messageTypeMarker(sbd.getMessageType());
+        LogstashMarker journalPostIdMarker = journalPostIdMarker(sbd.getJournalPostId());
+        LogstashMarker documentIdMarker = Markers.append(DOCUMENT_ID, sbd.getDocumentId());
+        LogstashMarker conversationIdMarker = conversationIdMarker(sbd.getConversationId());
+        final LogstashMarker receiverMarker = receiverMarker(sbd.getReceiverOrgNumber());
+        final LogstashMarker senderMarker = senderMarker(sbd.getSenderOrgNumber());
         return documentIdMarker.and(journalPostIdMarker).and(conversationIdMarker).and(senderMarker).and(receiverMarker).and(messageTypeMarker);
     }
 

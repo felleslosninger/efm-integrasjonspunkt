@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
-import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
+import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;

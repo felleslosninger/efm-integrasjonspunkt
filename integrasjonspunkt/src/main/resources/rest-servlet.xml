@@ -24,10 +24,5 @@
             <ws:service bean="#noarkExchangeService"/>
         </wss:service>
     </wss:binding>
-    <wss:binding url="/receive">
-        <wss:service>
-            <ws:service bean="#recieveService"/>
-        </wss:service>
-    </wss:binding>
 
 </beans>

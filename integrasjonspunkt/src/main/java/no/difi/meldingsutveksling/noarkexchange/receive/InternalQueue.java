@@ -2,10 +2,9 @@ package no.difi.meldingsutveksling.noarkexchange.receive;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.*;
-import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
-import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
@@ -15,7 +14,6 @@ import no.difi.meldingsutveksling.noarkexchange.*;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType;
-import no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
@@ -79,7 +77,6 @@ public class InternalQueue {
 
     private EDUCoreFactory eduCoreFactory;
 
-    private static JAXBContext jaxbContextdomain;
     private static JAXBContext jaxbContext;
     private static JAXBContext jaxbContextNextmove;
 
@@ -96,8 +93,7 @@ public class InternalQueue {
 
     static {
         try {
-            jaxbContext = JAXBContextFactory.createContext(new Class[]{StandardBusinessDocument.class, Payload.class, Kvittering.class}, null);
-            jaxbContextdomain = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, Kvittering.class, PutMessageRequestType.class}, null);
+            jaxbContext = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, Kvittering.class, PutMessageRequestType.class}, null);
             jaxbContextNextmove = JAXBContextFactory.createContext(new Class[]{ConversationResource.class}, null);
         } catch (JAXBException e) {
             throw new RuntimeException("Could not start internal queue: Failed to create JAXBContext", e);
@@ -196,7 +192,7 @@ public class InternalQueue {
     private void writeMessageToDisk(EDUCore request) {
         PutMessageRequestType putMessage = EDUCoreFactory.createPutMessageFromCore(request);
         try {
-            Marshaller marshaller = jaxbContextdomain.createMarshaller();
+            Marshaller marshaller = jaxbContext.createMarshaller();
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             marshaller.marshal(new JAXBElement<>(new QName("uri", "local"), PutMessageRequestType.class, putMessage), bos);
             FileOutputStream fos = new FileOutputStream(new File("failed_messages/" + request.getId() + "_failed.xml"));
@@ -222,7 +218,7 @@ public class InternalQueue {
         ByteArrayInputStream bis = new ByteArrayInputStream(message);
         StreamSource ss = new StreamSource(bis);
         try {
-            Unmarshaller unmarshaller = jaxbContextdomain.createUnmarshaller();
+            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             return unmarshaller.unmarshal(ss, PutMessageRequestType.class).getValue();
         } catch (JAXBException e) {
             logger.error("Could not unmarshal putmessage", e);
@@ -302,7 +298,7 @@ public class InternalQueue {
 
     public void enqueuePutMessage(PutMessageRequestType putMessage) {
         try {
-            Marshaller marshaller = jaxbContextdomain.createMarshaller();
+            Marshaller marshaller = jaxbContext.createMarshaller();
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             marshaller.marshal(new JAXBElement<>(new QName("uri", "local"), PutMessageRequestType.class, putMessage), bos);
             jmsTemplate.convertAndSend(PUTMSG, bos.toByteArray());
@@ -314,31 +310,20 @@ public class InternalQueue {
 
     public void forwardToNoark(EduDocument eduDocument) {
         try {
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            JAXBElement<EduDocument> d = new ObjectFactory().createStandardBusinessDocument(eduDocument);
-
-            jaxbContextdomain.createMarshaller().marshal(d, os);
-            byte[] tmp = os.toByteArray();
-
-            JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument> toDocument =
-                    (JAXBElement<no.difi.meldingsutveksling.noarkexchange.schema.receive.StandardBusinessDocument>) jaxbContext.createUnmarshaller().unmarshal(new ByteArrayInputStream(tmp));
-
-            final StandardBusinessDocument standardBusinessDocument = toDocument.getValue();
-            Audit.info("SBD extracted", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)));
-            sendToNoarkSystem(standardBusinessDocument);
-        } catch (JAXBException e) {
+            sendToNoarkSystem(eduDocument);
+        } catch (Exception e) {
             Audit.error("Failed to unserialize SBD");
             throw new MeldingsUtvekslingRuntimeException("Could not forward document to archive system", e);
         }
     }
 
-    private void sendToNoarkSystem(StandardBusinessDocument standardBusinessDocument) {
+    private void sendToNoarkSystem(EduDocument standardBusinessDocument) {
         try {
             integrajonspunktReceive.forwardToNoarkSystem(standardBusinessDocument);
         } catch (Exception e) {
-            Audit.error("Failed delivering to archive", markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)), e);
+            Audit.error("Failed delivering to archive", markerFrom(standardBusinessDocument), e);
             if (e instanceof MessageException) {
-                logger.error(markerFrom(new StandardBusinessDocumentWrapper(standardBusinessDocument)), ((MessageException)e).getStatusMessage().getTechnicalMessage(), e);
+                logger.error(markerFrom(standardBusinessDocument), ((MessageException)e).getStatusMessage().getTechnicalMessage(), e);
             }
             throw new MeldingsUtvekslingRuntimeException(e);
         }

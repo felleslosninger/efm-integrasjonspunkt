@@ -86,7 +86,7 @@ public class AltinnWsClient {
                     Audit.error("Message failed to upload to altinn", request.getMarkers(), e);
                     throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, e);
                 }
-                log.info("Thread finished: write altinn zip");
+                log.debug("Thread finished: write altinn zip");
             });
 
             PipedInputStream pis = new PipedInputStream(pos);
