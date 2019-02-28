@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.core.EDUCore;
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.noarkexchange.PayloadException;
@@ -105,14 +105,14 @@ public class Conversation {
         return c;
     }
 
-    public static Conversation of(EduDocument eduDocument, MessageStatus... statuses) {
-        // Only used when receiving messages, and will for EduDocument always be DPO
-        Conversation c = new Conversation(eduDocument.getConversationId(), eduDocument.getConversationId(),
-                eduDocument.getSenderOrgNumber(), eduDocument.getReceiverOrgNumber(), ConversationDirection.INCOMING,
+    public static Conversation of(StandardBusinessDocument sbd, MessageStatus... statuses) {
+        // Only used when receiving messages, and will for StandardBusinessDocument always be DPO
+        Conversation c = new Conversation(sbd.getConversationId(), sbd.getConversationId(),
+                sbd.getSenderOrgNumber(), sbd.getReceiverOrgNumber(), ConversationDirection.INCOMING,
                "", ServiceIdentifier.DPO);
         if (statuses != null && statuses.length > 0) {
             Stream.of(statuses)
-                    .peek(r -> r.setConversationId(eduDocument.getConversationId()))
+                    .peek(r -> r.setConversationId(sbd.getConversationId()))
                     .forEach(c::addMessageStatus);
         }
         return c;

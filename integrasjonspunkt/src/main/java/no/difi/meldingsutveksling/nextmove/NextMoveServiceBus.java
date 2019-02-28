@@ -9,7 +9,7 @@ import com.microsoft.azure.servicebus.primitives.ConnectionStringBuilder;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.Payload;
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.noarkexchange.MessageContext;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
@@ -72,7 +72,7 @@ public class NextMoveServiceBus {
         this.nextMoveQueue = nextMoveQueue;
         this.serviceBusClient = serviceBusClient;
         this.internalQueue = internalQueue;
-        this.jaxbContext = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, ConversationResource.class}, null);
+        this.jaxbContext = JAXBContextFactory.createContext(new Class[]{StandardBusinessDocument.class, Payload.class, ConversationResource.class}, null);
     }
 
     @PostConstruct
@@ -95,13 +95,13 @@ public class NextMoveServiceBus {
     public void putMessage(ConversationResource resource) throws NextMoveException {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             MessageContext context = messageSender.createMessageContext(resource);
-            EduDocument eduDocument = sbdf.create(resource, context);
+            StandardBusinessDocument sbd = sbdf.create(resource, context);
 
             Marshaller marshaller = jaxbContext.createMarshaller();
 
             ObjectFactory of = new ObjectFactory();
-            JAXBElement<EduDocument> sbd = of.createStandardBusinessDocument(eduDocument);
-            marshaller.marshal(sbd, os);
+            JAXBElement<StandardBusinessDocument> sbdJaxb = of.createStandardBusinessDocument(sbd);
+            marshaller.marshal(sbdJaxb, os);
 
             String queue = NEXTMOVE_QUEUE_PREFIX + resource.getReceiverId();
             switch (resource.getServiceIdentifier()) {
@@ -140,7 +140,7 @@ public class NextMoveServiceBus {
 
             for (ServiceBusMessage msg : messages) {
                 try {
-                    Optional<ConversationResource> cr = nextMoveQueue.enqueueEduDocument(msg.getBody());
+                    Optional<ConversationResource> cr = nextMoveQueue.enqueueSBD(msg.getBody());
                     cr.ifPresent(this::sendReceipt);
                     serviceBusClient.deleteMessage(msg);
                 } catch (IOException e) {
@@ -163,8 +163,8 @@ public class NextMoveServiceBus {
                             try {
                                 log.debug(format("Received message on queue=%s with id=%s", serviceBusClient.getLocalQueuePath(), m.getMessageId()));
                                 Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-                                EduDocument eduDocument = unmarshaller.unmarshal(new StreamSource(new ByteArrayInputStream(m.getBody())), EduDocument.class).getValue();
-                                Optional<ConversationResource> cr = nextMoveQueue.enqueueEduDocument(eduDocument);
+                                StandardBusinessDocument sbd = unmarshaller.unmarshal(new StreamSource(new ByteArrayInputStream(m.getBody())), StandardBusinessDocument.class).getValue();
+                                Optional<ConversationResource> cr = nextMoveQueue.enqueueSBD(sbd);
                                 cr.ifPresent(this::sendReceiptAsync);
                                 messageReceiver.completeAsync(m.getLockToken());
                             } catch (JAXBException | IOException e) {

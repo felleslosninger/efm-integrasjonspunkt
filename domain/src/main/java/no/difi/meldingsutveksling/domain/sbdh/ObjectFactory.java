@@ -61,11 +61,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link EduDocument }
+     * Create an instance of {@link StandardBusinessDocument }
      * 
      */
-    public EduDocument createStandardBusinessDocument() {
-        return new EduDocument();
+    public StandardBusinessDocument createStandardBusinessDocument() {
+        return new StandardBusinessDocument();
     }
 
     /**
@@ -185,12 +185,12 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link EduDocument }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link StandardBusinessDocument }{@code >}}
      * 
      */
     @XmlElementDecl(namespace = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader", name = "StandardBusinessDocument")
-    public JAXBElement<EduDocument> createStandardBusinessDocument(EduDocument value) {
-        return new JAXBElement<>(_StandardBusinessDocument_QNAME, EduDocument.class, null, value);
+    public JAXBElement<StandardBusinessDocument> createStandardBusinessDocument(StandardBusinessDocument value) {
+        return new JAXBElement<>(_StandardBusinessDocument_QNAME, StandardBusinessDocument.class, null, value);
     }
 
 }

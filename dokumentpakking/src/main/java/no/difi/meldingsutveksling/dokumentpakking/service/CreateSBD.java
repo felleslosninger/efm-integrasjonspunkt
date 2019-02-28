@@ -20,8 +20,8 @@ public class CreateSBD {
 	public static final String HEADER_VERSION = "1.0";
 	public static final String TYPE_VERSION = "1.0";
 
-    public EduDocument createSBD(Organisasjonsnummer avsender, Organisasjonsnummer mottaker, Object payload, String conversationId, String type, String journalPostId) {
-		EduDocument doc = new EduDocument();
+    public StandardBusinessDocument createSBD(Organisasjonsnummer avsender, Organisasjonsnummer mottaker, Object payload, String conversationId, String type, String journalPostId) {
+		StandardBusinessDocument doc = new StandardBusinessDocument();
 		doc.setStandardBusinessDocumentHeader(createHeader(avsender, mottaker, conversationId, type, journalPostId));
 		doc.setAny(payload);
 		return doc;

@@ -11,7 +11,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.sbdh.BusinessScope;
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
@@ -71,30 +71,30 @@ public class PutMessageSteps {
         when(integrasjonspunktNokkel.getSignatureHelper()).thenReturn(mock(SignatureHelper.class));
         StandardBusinessDocumentFactory documentFactory = mock(StandardBusinessDocumentFactory.class);
 
-        EduDocument eduDocument = createStandardBusinessDocument();
+        StandardBusinessDocument sbd = createStandardBusinessDocument();
 
-        when(documentFactory.create(any(EDUCore.class), any(no.difi.meldingsutveksling.domain.Avsender.class), any(Mottaker.class))).thenReturn(eduDocument);
+        when(documentFactory.create(any(EDUCore.class), any(no.difi.meldingsutveksling.domain.Avsender.class), any(Mottaker.class))).thenReturn(sbd);
         messageSender.setStandardBusinessDocumentFactory(documentFactory);
         messageSender.setKeyInfo(integrasjonspunktNokkel);
         messageSender.setProperties(mock(IntegrasjonspunktProperties.class));
 
         TransportFactory transportFactory = mock(TransportFactory.class);
         transport = mock(Transport.class);
-        when(transportFactory.createTransport(any(EduDocument.class))).thenReturn(transport);
+        when(transportFactory.createTransport(any(StandardBusinessDocument.class))).thenReturn(transport);
         messageSender.setTransportFactory(transportFactory);
         integrasjonspunkt.setAdresseRegister(adresseregister);
     }
 
-    private EduDocument createStandardBusinessDocument() {
-        EduDocument eduDocument = new EduDocument();
+    private StandardBusinessDocument createStandardBusinessDocument() {
+        StandardBusinessDocument sbd = new StandardBusinessDocument();
         StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader();
         BusinessScope scope = new BusinessScope();
         ArrayList<Scope> scopes = new ArrayList<>();
         scopes.add(new Scope());
         scope.setScope(scopes);
         header.setBusinessScope(scope);
-        eduDocument.setStandardBusinessDocumentHeader(header);
-        return eduDocument;
+        sbd.setStandardBusinessDocumentHeader(header);
+        return sbd;
     }
 
     @Given("^en kvittering$")
@@ -121,7 +121,7 @@ public class PutMessageSteps {
 
     @Then("^kvitteringen sendes ikke videre til transport$")
     public void kvitteringen_sendes_ikke_videre() {
-        verify(transport, never()).send(any(ApplicationContext.class), any(EduDocument.class));
+        verify(transport, never()).send(any(ApplicationContext.class), any(StandardBusinessDocument.class));
     }
 
     @Given("^en velformet melding fra (.+)$")
@@ -141,7 +141,7 @@ public class PutMessageSteps {
 
     @Then("^skal melding bli videresendt$")
     public void skal_melding_bli_videresendt() throws Throwable {
-        verify(transport).send(any(ApplicationContext.class), any(EduDocument.class));
+        verify(transport).send(any(ApplicationContext.class), any(StandardBusinessDocument.class));
     }
 
     @When("^integrasjonspunktet mottar meldingen$")

@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
@@ -110,15 +110,15 @@ public class ConversationService {
         return repo.save(c);
     }
 
-    public Conversation registerConversation(EduDocument eduDocument) {
-        Optional<Conversation> find = repo.findByConversationId(eduDocument.getConversationId()).stream().findFirst();
+    public Conversation registerConversation(StandardBusinessDocument sbd) {
+        Optional<Conversation> find = repo.findByConversationId(sbd.getConversationId()).stream().findFirst();
         if (find.isPresent()) {
-            log.warn(String.format(CONVERSATION_EXISTS, eduDocument.getConversationId()));
+            log.warn(String.format(CONVERSATION_EXISTS, sbd.getConversationId()));
             return find.get();
         }
 
         MessageStatus ms = MessageStatus.of(GenericReceiptStatus.OPPRETTET);
-        Conversation c = Conversation.of(eduDocument, ms);
+        Conversation c = Conversation.of(sbd, ms);
         return repo.save(c);
     }
 

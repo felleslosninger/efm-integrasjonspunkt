@@ -9,8 +9,8 @@ import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import no.difi.meldingsutveksling.core.EDUCoreFactory;
 import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.CorrelationInformation;
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
-import no.difi.meldingsutveksling.kvittering.EduDocumentFactory;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.mail.MailClient;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
@@ -87,7 +87,7 @@ public class IntegrajonspunktReceiveImpl {
         this.eduCoreFactory = eduCoreFactory;
     }
 
-    public CorrelationInformation forwardToNoarkSystem(EduDocument sbd) throws MessageException {
+    public CorrelationInformation forwardToNoarkSystem(StandardBusinessDocument sbd) throws MessageException {
         try {
             adresseregisterService.validateCertificates(sbd);
             Audit.info("Certificates validated", markerFrom(sbd));
@@ -103,32 +103,32 @@ public class IntegrajonspunktReceiveImpl {
 
         Payload payload = sbd.getPayload();
         byte[] decryptedAsicPackage = decrypt(payload);
-        EDUCore eduDocument;
+        EDUCore eduCore;
         if (sbd.isNextMove()) {
-            eduDocument = convertConversationToEducore(sbd);
+            eduCore = convertConversationToEducore(sbd);
         } else {
-            eduDocument = convertAsicEntrytoEduDocument(decryptedAsicPackage);
-            if (PayloadUtil.isAppReceipt(eduDocument.getPayload())) {
+            eduCore = convertAsicEntrytoEduCore(decryptedAsicPackage);
+            if (PayloadUtil.isAppReceipt(eduCore.getPayload())) {
                 Audit.info("AppReceipt extracted", markerFrom(sbd));
-                Optional<Conversation> c = conversationService.registerStatus(eduDocument.getId(), MessageStatus.of(GenericReceiptStatus.LEST));
+                Optional<Conversation> c = conversationService.registerStatus(eduCore.getId(), MessageStatus.of(GenericReceiptStatus.LEST));
                 c.ifPresent(conversationService::markFinished);
                 if (!properties.getFeature().isForwardReceivedAppReceipts()) {
                     Audit.info("AppReceipt forwarding disabled - will not deliver to archive");
                     return new CorrelationInformation();
                 }
                 // Marshall back and forth to avoid missing xml tag issues
-                AppReceiptType appReceipt = EDUCoreConverter.payloadAsAppReceipt(eduDocument.getPayload());
-                eduDocument.setPayload(EDUCoreConverter.appReceiptAsString(appReceipt));
+                AppReceiptType appReceipt = EDUCoreConverter.payloadAsAppReceipt(eduCore.getPayload());
+                eduCore.setPayload(EDUCoreConverter.appReceiptAsString(appReceipt));
             } else {
                 Audit.info("EDU Document extracted", markerFrom(sbd));
             }
         }
 
-        forwardToNoarkSystemAndSendReceipts(sbd, eduDocument);
+        forwardToNoarkSystemAndSendReceipts(sbd, eduCore);
         return new CorrelationInformation();
     }
 
-    private EDUCore convertConversationToEducore(EduDocument sbd) throws MessageException {
+    private EDUCore convertConversationToEducore(StandardBusinessDocument sbd) throws MessageException {
         Payload payload = sbd.getPayload();
         byte[] decryptedAsicPackage = decrypt(payload);
         Arkivmelding arkivmelding = convertAsicEntryToArkivmelding(decryptedAsicPackage);
@@ -146,7 +146,7 @@ public class IntegrajonspunktReceiveImpl {
         return new Decryptor(keyInfo).decrypt(cmsEncZip);
     }
 
-    public void forwardToNoarkSystemAndSendReceipts(EduDocument inputDocument, EDUCore eduCore) {
+    public void forwardToNoarkSystemAndSendReceipts(StandardBusinessDocument inputDocument, EDUCore eduCore) {
         PutMessageRequestType putMessage = eduCoreFactory.createPutMessageFromCore(eduCore);
         PutMessageResponseType response = localNoark.sendEduMelding(putMessage);
         if (response == null || response.getResult() == null) {
@@ -174,17 +174,17 @@ public class IntegrajonspunktReceiveImpl {
 
     }
 
-    public void sendReceiptOpen(EduDocument inputDocument) {
-        EduDocument doc = EduDocumentFactory.createAapningskvittering(inputDocument.getMessageInfo(), keyInfo);
+    public void sendReceiptOpen(StandardBusinessDocument inputDocument) {
+        StandardBusinessDocument doc = SBDReceiptFactory.createAapningskvittering(inputDocument.getMessageInfo(), keyInfo);
         sendReceipt(doc);
     }
 
-    private void sendReceipt(EduDocument receipt) {
+    private void sendReceipt(StandardBusinessDocument receipt) {
         Transport t = transportFactory.createTransport(receipt);
         t.send(context, receipt);
     }
 
-    public EDUCore convertAsicEntrytoEduDocument(byte[] bytes) throws MessageException {
+    public EDUCore convertAsicEntrytoEduCore(byte[] bytes) throws MessageException {
         try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes))) {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {

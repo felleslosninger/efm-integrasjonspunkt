@@ -7,9 +7,9 @@ import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
-import no.difi.meldingsutveksling.kvittering.EduDocumentFactory;
+import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.NextMoveQueue;
@@ -140,37 +140,37 @@ public class MessagePolling implements ApplicationContextAware {
             try {
                 final DownloadRequest request = new DownloadRequest(reference.getValue(), properties.getOrg().getNumber());
                 log.debug(format("Downloading message with altinnId=%s", reference.getValue()));
-                EduDocument eduDocument = client.download(request, messagePersister);
-                Audit.info(format("Downloaded message with id=%s", eduDocument.getConversationId()), eduDocument.createLogstashMarkers());
+                StandardBusinessDocument sbd = client.download(request, messagePersister);
+                Audit.info(format("Downloaded message with id=%s", sbd.getConversationId()), sbd.createLogstashMarkers());
 
-                if (isNextMove(eduDocument)) {
-                    log.debug(format("NextMove message id=%s", eduDocument.getConversationId()));
+                if (isNextMove(sbd)) {
+                    log.debug(format("NextMove message id=%s", sbd.getConversationId()));
                     client.confirmDownload(request);
                     if (properties.getNoarkSystem().isEnable() && !properties.getNoarkSystem().getEndpointURL().isEmpty()) {
-                        internalQueue.enqueueNoark(eduDocument);
+                        internalQueue.enqueueNoark(sbd);
                     } else {
-                        nextMoveQueue.enqueueEduDocument(eduDocument);
+                        nextMoveQueue.enqueueSBD(sbd);
                     }
                     continue;
                 }
 
-                if (!isKvittering(eduDocument)) {
-                    sendReceipt(eduDocument.getMessageInfo());
-                    log.debug(eduDocument.createLogstashMarkers(), "Delivery receipt sent");
-                    Conversation c = conversationService.registerConversation(eduDocument);
-                    internalQueue.enqueueNoark(eduDocument);
+                if (!isKvittering(sbd)) {
+                    sendReceipt(sbd.getMessageInfo());
+                    log.debug(sbd.createLogstashMarkers(), "Delivery receipt sent");
+                    Conversation c = conversationService.registerConversation(sbd);
+                    internalQueue.enqueueNoark(sbd);
                     conversationService.registerStatus(c, MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_MOTTATT));
                 }
 
                 client.confirmDownload(request);
-                log.debug(markerFrom(reference).and(eduDocument.createLogstashMarkers()), "Message confirmed downloaded");
+                log.debug(markerFrom(reference).and(sbd.createLogstashMarkers()), "Message confirmed downloaded");
 
-                if (isKvittering(eduDocument)) {
-                    JAXBElement<Kvittering> jaxbKvit = (JAXBElement<Kvittering>) eduDocument.getAny();
-                    Audit.info(format("Message id=%s is a receipt", eduDocument.getConversationId()),
-                            eduDocument.createLogstashMarkers().and(getReceiptTypeMarker(jaxbKvit.getValue())));
+                if (isKvittering(sbd)) {
+                    JAXBElement<Kvittering> jaxbKvit = (JAXBElement<Kvittering>) sbd.getAny();
+                    Audit.info(format("Message id=%s is a receipt", sbd.getConversationId()),
+                            sbd.createLogstashMarkers().and(getReceiptTypeMarker(jaxbKvit.getValue())));
                     MessageStatus status = statusFromKvittering(jaxbKvit.getValue());
-                    conversationService.registerStatus(eduDocument.getConversationId(), status);
+                    conversationService.registerStatus(sbd.getConversationId(), status);
                 }
             } catch (Exception e) {
                 log.error(format("Error during Altinn message polling, message altinnId=%s", reference.getValue()), e);
@@ -195,17 +195,17 @@ public class MessagePolling implements ApplicationContextAware {
         return MessageStatus.of(status, tidspunkt);
     }
 
-    private boolean isKvittering(EduDocument eduDocument) {
-        return eduDocument.getStandardBusinessDocumentHeader().getDocumentIdentification().getType().equalsIgnoreCase(StandardBusinessDocumentHeader.KVITTERING_TYPE);
+    private boolean isKvittering(StandardBusinessDocument sbd) {
+        return sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getType().equalsIgnoreCase(StandardBusinessDocumentHeader.KVITTERING_TYPE);
     }
 
-    private boolean isNextMove(EduDocument eduDocument) {
-        return eduDocument.getStandardBusinessDocumentHeader().getDocumentIdentification().getType()
+    private boolean isNextMove(StandardBusinessDocument sbd) {
+        return sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getType()
                 .equalsIgnoreCase(StandardBusinessDocumentHeader.NEXTMOVE_TYPE);
     }
 
     private void sendReceipt(MessageInfo messageInfo) {
-        EduDocument doc = EduDocumentFactory.createLeveringsKvittering(messageInfo, keyInfo);
+        StandardBusinessDocument doc = SBDReceiptFactory.createLeveringsKvittering(messageInfo, keyInfo);
         Transport t = transportFactory.createTransport(doc);
         t.send(context, doc);
     }

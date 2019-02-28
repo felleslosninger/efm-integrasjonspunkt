@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling;
 
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import org.slf4j.Marker;
 
@@ -28,8 +28,8 @@ class MockRequest implements UploadRequest {
         }
 
         @Override
-        public EduDocument getPayload() {
-        return new EduDocument();
+        public StandardBusinessDocument getPayload() {
+        return new StandardBusinessDocument();
     }
 
     @Override

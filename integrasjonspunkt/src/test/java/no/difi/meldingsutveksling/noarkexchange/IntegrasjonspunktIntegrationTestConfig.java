@@ -10,7 +10,7 @@ import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Mottaker;
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
@@ -89,8 +89,8 @@ public class IntegrasjonspunktIntegrationTestConfig {
     public TransportFactory transportFactory() {
         TransportFactory transportFactoryMock = mock(TransportFactory.class);
         Transport transportMock = mock(Transport.class);
-        doNothing().when(transportMock).send(any(ApplicationContext.class), any(EduDocument.class));
-        when(transportFactoryMock.createTransport(any(EduDocument.class))).thenReturn(transportMock);
+        doNothing().when(transportMock).send(any(ApplicationContext.class), any(StandardBusinessDocument.class));
+        when(transportFactoryMock.createTransport(any(StandardBusinessDocument.class))).thenReturn(transportMock);
         return transportFactoryMock;
     }
 
@@ -147,7 +147,7 @@ public class IntegrasjonspunktIntegrationTestConfig {
     @Primary
     public StandardBusinessDocumentFactory standardBusinessDocumentFactory() throws MessageException {
         StandardBusinessDocumentFactory sbdfMock = mock(StandardBusinessDocumentFactory.class);
-        when(sbdfMock.create(any(EDUCore.class), anyString(), any(Avsender.class), any(Mottaker.class))).thenReturn(mock(EduDocument.class));
+        when(sbdfMock.create(any(EDUCore.class), anyString(), any(Avsender.class), any(Mottaker.class))).thenReturn(mock(StandardBusinessDocument.class));
         return sbdfMock;
     }
 

@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -55,7 +55,7 @@ public class ServiceBusRestClient {
         this.localQueuePath = NEXTMOVE_QUEUE_PREFIX+
                 props.getOrg().getNumber()+
                 props.getNextmove().getServiceBus().getMode();
-        this.jaxbContext = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, ConversationResource.class}, null);
+        this.jaxbContext = JAXBContextFactory.createContext(new Class[]{StandardBusinessDocument.class, Payload.class, ConversationResource.class}, null);
 
         RequestConfig requestConfig = RequestConfig.custom()
                 .setConnectTimeout(props.getNextmove().getServiceBus().getConnectTimeout())
@@ -117,9 +117,9 @@ public class ServiceBusRestClient {
 
         try {
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            EduDocument eduDocument = unmarshaller.unmarshal(new StringSource(response.getBody()), EduDocument.class).getValue();
-            sbmBuilder.body(eduDocument);
-            log.debug(format("Received message on queue=%s with conversationId=%s", localQueuePath, eduDocument.getConversationId()));
+            StandardBusinessDocument sbd = unmarshaller.unmarshal(new StringSource(response.getBody()), StandardBusinessDocument.class).getValue();
+            sbmBuilder.body(sbd);
+            log.debug(format("Received message on queue=%s with conversationId=%s", localQueuePath, sbd.getConversationId()));
         } catch (JAXBException e) {
             log.error(String.format("Error unmarshalling service bus message with id=%s", brokerProperties.get("MessageId")), e);
         }

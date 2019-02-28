@@ -7,7 +7,7 @@ import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
@@ -95,12 +95,12 @@ public class MessageSender implements ApplicationContextAware {
             return createErrorResponse(e);
         }
 
-        EduDocument edu;
+        StandardBusinessDocument edu;
         try {
             edu = standardBusinessDocumentFactory.create(message, messageContext.getConversationId(), messageContext.getAvsender(), messageContext.getMottaker());
-            Audit.info("EDUdocument created", markerFrom(message));
+            Audit.info("StandardBusinessDocument created", markerFrom(message));
         } catch (MessageException e) {
-            Audit.error("Failed to create EDUdocument", markerFrom(message), e);
+            Audit.error("Failed to create StandardBusinessDocument", markerFrom(message), e);
             log.error(markerFrom(message), e.getStatusMessage().getTechnicalMessage(), e);
             return createErrorResponse(e);
         }
@@ -114,7 +114,7 @@ public class MessageSender implements ApplicationContextAware {
     public void sendMessage(ConversationResource conversation) throws MessageContextException {
         MessageContext messageContext = createMessageContext(conversation);
 
-        EduDocument edu;
+        StandardBusinessDocument edu;
         try {
             edu = standardBusinessDocumentFactory.create(conversation, messageContext);
             log.info("EduMessage created from ConversationResource");

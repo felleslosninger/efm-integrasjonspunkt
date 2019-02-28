@@ -5,7 +5,7 @@ import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceMan
 import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceRecipientList;
 import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.nextmove.DpoConversationResource;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
@@ -44,21 +44,21 @@ public class AltinnPackage {
     private static JAXBContext ctx;
     private final BrokerServiceManifest manifest;
     private final BrokerServiceRecipientList recipient;
-    private final EduDocument eduDocument;
+    private final StandardBusinessDocument sbd;
 
     static {
         try {
             ctx = JAXBContextFactory.createContext(new Class[]{BrokerServiceManifest.class,
-                    BrokerServiceRecipientList.class, EduDocument.class, Payload.class, Kvittering.class}, new HashMap());
+                    BrokerServiceRecipientList.class, StandardBusinessDocument.class, Payload.class, Kvittering.class}, new HashMap());
         } catch (JAXBException e) {
             throw new RuntimeException("Could not create JAXBContext", e);
         }
     }
 
-    private AltinnPackage(BrokerServiceManifest manifest, BrokerServiceRecipientList recipient, EduDocument eduDocument) {
+    private AltinnPackage(BrokerServiceManifest manifest, BrokerServiceRecipientList recipient, StandardBusinessDocument sbd) {
         this.manifest = manifest;
         this.recipient = recipient;
-        this.eduDocument = eduDocument;
+        this.sbd = sbd;
     }
 
     public static AltinnPackage from(UploadRequest document) {
@@ -94,11 +94,11 @@ public class AltinnPackage {
 
         zipOutputStream.putNextEntry(new ZipEntry("content.xml"));
         no.difi.meldingsutveksling.domain.sbdh.ObjectFactory objectFactory = new no.difi.meldingsutveksling.domain.sbdh.ObjectFactory();
-        marshallObject(objectFactory.createStandardBusinessDocument(eduDocument), zipOutputStream);
+        marshallObject(objectFactory.createStandardBusinessDocument(sbd), zipOutputStream);
         zipOutputStream.closeEntry();
 
-        if (eduDocument.getAny() instanceof Payload) {
-            Payload payload = (Payload) eduDocument.getAny();
+        if (sbd.getAny() instanceof Payload) {
+            Payload payload = (Payload) sbd.getAny();
             if (payload.getInputStream() != null) {
                 zipOutputStream.putNextEntry(new ZipEntry(ASIC_FILE));
                 IOUtils.copy(payload.getInputStream(), zipOutputStream);
@@ -115,7 +115,7 @@ public class AltinnPackage {
 
         BrokerServiceManifest manifest = null;
         BrokerServiceRecipientList recipientList = null;
-        EduDocument eduDocument = null;
+        StandardBusinessDocument sbd = null;
         InputStream asicInputStream = null;
         long asicSize = 0;
 
@@ -128,24 +128,24 @@ public class AltinnPackage {
                 recipientList = (BrokerServiceRecipientList) unmarshaller.unmarshal(zipFile.getInputStream(zipEntry));
             } else if (zipEntry.getName().equals("content.xml")) {
                 Source source = new StreamSource(zipFile.getInputStream(zipEntry));
-                eduDocument = unmarshaller.unmarshal(source, EduDocument.class).getValue();
+                sbd = unmarshaller.unmarshal(source, StandardBusinessDocument.class).getValue();
             } else if (zipEntry.getName().equals(ASIC_FILE)) {
                 asicInputStream = zipFile.getInputStream(zipEntry);
                 asicSize = zipEntry.getSize();
             }
         }
 
-        if (eduDocument == null) {
+        if (sbd == null) {
             throw new MeldingsUtvekslingRuntimeException("Altinn zip does not contain BestEdu document, cannot proceed");
         }
         if (asicInputStream != null) {
-            DpoConversationResource cr = DpoConversationResource.of(eduDocument.getConversationId(),
-                    eduDocument.getSenderOrgNumber(),
-                    eduDocument.getReceiverOrgNumber());
+            DpoConversationResource cr = DpoConversationResource.of(sbd.getConversationId(),
+                    sbd.getSenderOrgNumber(),
+                    sbd.getReceiverOrgNumber());
             messagePersister.writeStream(cr, ASIC_FILE, asicInputStream, asicSize);
         }
         zipFile.close();
-        return new AltinnPackage(manifest, recipientList, eduDocument);
+        return new AltinnPackage(manifest, recipientList, sbd);
     }
 
     public static AltinnPackage from(InputStream inputStream) throws IOException, JAXBException {
@@ -162,7 +162,7 @@ public class AltinnPackage {
         ArchiveEntry zipEntry;
         BrokerServiceManifest manifest = null;
         BrokerServiceRecipientList recipientList = null;
-        EduDocument eduDocument = null;
+        StandardBusinessDocument sbd = null;
 
         while ((zipEntry = zipInputStream.getNextEntry()) != null) {
             if (zipEntry.getName().equals("manifest.xml")) {
@@ -171,10 +171,10 @@ public class AltinnPackage {
                 recipientList = (BrokerServiceRecipientList) unmarshaller.unmarshal(inputStreamProxy);
             } else if (zipEntry.getName().equals("content.xml")) {
                 Source source = new StreamSource(inputStreamProxy);
-                eduDocument = unmarshaller.unmarshal(source, EduDocument.class).getValue();
+                sbd = unmarshaller.unmarshal(source, StandardBusinessDocument.class).getValue();
             }
         }
-        return new AltinnPackage(manifest, recipientList, eduDocument);
+        return new AltinnPackage(manifest, recipientList, sbd);
     }
 
     private void marshallObject(Object object, OutputStream outputStream) {
@@ -188,7 +188,7 @@ public class AltinnPackage {
 
     }
 
-    public EduDocument getEduDocument() {
-        return eduDocument;
+    public StandardBusinessDocument getSbd() {
+        return sbd;
     }
 }

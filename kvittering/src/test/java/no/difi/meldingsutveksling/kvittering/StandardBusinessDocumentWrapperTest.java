@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.kvittering;
 
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.domain.MessageInfo;
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.w3c.dom.Document;
@@ -42,9 +42,9 @@ public class StandardBusinessDocumentWrapperTest {
         Mockito.when(integrasjonspunktNokkel.getKeyStore()).thenReturn(keyStore);
         Mockito.when(integrasjonspunktNokkel.shouldLockProvider()).thenReturn(false);
 
-        EduDocument beforeConversion = EduDocumentFactory.createAapningskvittering(new MessageInfo(RECEIVER, SENDER, "", "", KVITTERING_TYPE), integrasjonspunktNokkel);
+        StandardBusinessDocument beforeConversion = SBDReceiptFactory.createAapningskvittering(new MessageInfo(RECEIVER, SENDER, "", "", KVITTERING_TYPE), integrasjonspunktNokkel);
         Document xmlDocVersion = DocumentToDocumentConverter.toXMLDocument(beforeConversion);
-        EduDocument afterConversion = DocumentToDocumentConverter.toDomainDocument(xmlDocVersion);
+        StandardBusinessDocument afterConversion = DocumentToDocumentConverter.toDomainDocument(xmlDocVersion);
 
         assertEquals(beforeConversion.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue(),
                 afterConversion.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue());

@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling;
 
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import org.slf4j.Marker;
 
@@ -9,21 +9,21 @@ import static no.difi.meldingsutveksling.domain.Organisasjonsnummer.fromIso6523;
 
 public class AltinnWsRequest implements UploadRequest {
 
-    private EduDocument eduDocument;
+    private StandardBusinessDocument sbd;
 
-    public AltinnWsRequest(EduDocument eduDocument) {
-        this.eduDocument = eduDocument;
+    public AltinnWsRequest(StandardBusinessDocument sbd) {
+        this.sbd = sbd;
     }
 
     @Override
         public String getSender() {
-            Organisasjonsnummer orgNumberSender = fromIso6523(eduDocument.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue());
+            Organisasjonsnummer orgNumberSender = fromIso6523(sbd.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue());
             return orgNumberSender.toString();
         }
 
         @Override
         public String getReceiver() {
-            Organisasjonsnummer orgNumberReceiver = fromIso6523(eduDocument.getStandardBusinessDocumentHeader().getReceiver().get(0).getIdentifier().getValue());
+            Organisasjonsnummer orgNumberReceiver = fromIso6523(sbd.getStandardBusinessDocumentHeader().getReceiver().get(0).getIdentifier().getValue());
             return orgNumberReceiver.toString();
         }
 
@@ -33,16 +33,16 @@ public class AltinnWsRequest implements UploadRequest {
         }
 
         @Override
-        public EduDocument getPayload() {
-            return eduDocument;
+        public StandardBusinessDocument getPayload() {
+            return sbd;
         }
 
         /**
-         * Delegates creation of logstash markers to EduDocument
+         * Delegates creation of logstash markers to StandardBusinessDocument
          * @return Logstash markers to identify a EduMessage
          */
         @Override
         public Marker getMarkers() {
-            return eduDocument.createLogstashMarkers();
+            return sbd.createLogstashMarkers();
         }
 }

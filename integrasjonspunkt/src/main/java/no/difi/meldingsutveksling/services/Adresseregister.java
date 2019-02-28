@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.services;
 
 import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.CertificateParserException;
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -32,7 +32,7 @@ public class Adresseregister {
         this.serviceRegistryLookup = serviceRegistryLookup;
     }
 
-    public void validateCertificates(EduDocument sbd) throws MessageException {
+    public void validateCertificates(StandardBusinessDocument sbd) throws MessageException {
         ServiceRecord receiverServiceRecord = serviceRegistryLookup.getServiceRecord(sbd.getReceiverOrgNumber()).getServiceRecord();
         try {
             getCertificate(receiverServiceRecord);

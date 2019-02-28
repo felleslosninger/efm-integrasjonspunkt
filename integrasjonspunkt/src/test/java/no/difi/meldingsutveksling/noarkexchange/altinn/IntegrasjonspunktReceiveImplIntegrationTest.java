@@ -5,7 +5,7 @@ import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.Receiver;
 import no.difi.meldingsutveksling.core.Sender;
 import no.difi.meldingsutveksling.domain.Payload;
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
@@ -71,24 +71,24 @@ public class IntegrasjonspunktReceiveImplIntegrationTest {
         when(requestMock.getSender()).thenReturn(senderMock);
         when(requestMock.getReceiver()).thenReturn(receiverMock);
 
-        doReturn(requestMock).when(integrajonspunktReceiveSpy).convertAsicEntrytoEduDocument(any(byte[].class));
-        doNothing().when(integrajonspunktReceiveSpy).sendReceiptOpen(any(EduDocument.class));
+        doReturn(requestMock).when(integrajonspunktReceiveSpy).convertAsicEntrytoEduCore(any(byte[].class));
+        doNothing().when(integrajonspunktReceiveSpy).sendReceiptOpen(any(StandardBusinessDocument.class));
         internalQueue.setIntegrajonspunktReceiveImpl(integrajonspunktReceiveSpy);
     }
 
     @Test
     public void receiveMessageTest() throws JAXBException {
-        EduDocument eduDocument = readSBD("1466595652965.xml");
+        StandardBusinessDocument sbd = readSBD("1466595652965.xml");
 
-        internalQueue.forwardToNoark(eduDocument);
+        internalQueue.forwardToNoark(sbd);
 
-        verify(integrajonspunktReceiveSpy).forwardToNoarkSystemAndSendReceipts(any(EduDocument.class), any(EDUCore.class));
+        verify(integrajonspunktReceiveSpy).forwardToNoarkSystemAndSendReceipts(any(StandardBusinessDocument.class), any(EDUCore.class));
     }
 
-    private static EduDocument readSBD(String filename) throws JAXBException {
-        JAXBContext ctx = JAXBContext.newInstance(EduDocument.class);
+    private static StandardBusinessDocument readSBD(String filename) throws JAXBException {
+        JAXBContext ctx = JAXBContext.newInstance(StandardBusinessDocument.class);
         Unmarshaller unmarshaller = ctx.createUnmarshaller();
-        return unmarshaller.unmarshal(new StreamSource(IntegrasjonspunktReceiveImplIntegrationTest.class.getClassLoader().getResourceAsStream(filename)), EduDocument.class).getValue();
+        return unmarshaller.unmarshal(new StreamSource(IntegrasjonspunktReceiveImplIntegrationTest.class.getClassLoader().getResourceAsStream(filename)), StandardBusinessDocument.class).getValue();
     }
 
 }

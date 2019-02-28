@@ -7,7 +7,7 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
@@ -15,6 +15,7 @@ import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import no.difi.meldingsutveksling.receipt.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,33 +35,29 @@ public class NextMoveQueue {
     private static final Logger log = LoggerFactory.getLogger(NextMoveQueue.class);
 
     private DirectionalConversationResourceRepository inRepo;
-
-    @Autowired
     private IntegrasjonspunktNokkel keyInfo;
-
-    @Autowired
     private IntegrasjonspunktProperties props;
-
-    @Autowired
     private ConversationService conversationService;
-
     private MessagePersister messagePersister;
 
     @Autowired
-    public NextMoveQueue(ConversationResourceRepository repo, MessagePersister messagePersister) {
+    public NextMoveQueue(ConversationResourceRepository repo, IntegrasjonspunktNokkel keyInfo, IntegrasjonspunktProperties props, ConversationService conversationService, ObjectProvider<MessagePersister> messagePersister) {
         inRepo = new DirectionalConversationResourceRepository(repo, INCOMING);
-        this.messagePersister = messagePersister;
+        this.keyInfo = keyInfo;
+        this.props = props;
+        this.conversationService = conversationService;
+        this.messagePersister = messagePersister.getIfUnique();
     }
 
-    public Optional<ConversationResource> enqueueEduDocument(EduDocument eduDocument) throws IOException {
+    public Optional<ConversationResource> enqueueSBD(StandardBusinessDocument sbd) throws IOException {
 
-        if (!(eduDocument.getAny() instanceof Payload)) {
+        if (!(sbd.getAny() instanceof Payload)) {
             log.error("Message attachement not instance of Payload.");
-            throw new MeldingsUtvekslingRuntimeException("Message attachement ("+eduDocument.getAny()+") not instance of " +
+            throw new MeldingsUtvekslingRuntimeException("Message attachement ("+ sbd.getAny()+") not instance of " +
                     ""+Payload.class);
         }
 
-        Payload payload = (Payload) eduDocument.getAny();
+        Payload payload = (Payload) sbd.getAny();
         ConversationResource message = (payload).getConversation();
 
 //        CmsUtil cmsUtil = new CmsUtil();

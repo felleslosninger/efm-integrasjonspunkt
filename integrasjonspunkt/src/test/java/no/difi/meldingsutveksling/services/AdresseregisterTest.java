@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.services;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import no.difi.meldingsutveksling.noarkexchange.TestConstants;
@@ -35,7 +35,7 @@ public class AdresseregisterTest {
     private ServiceRegistryLookup serviceRegistryLookup;
 
     @Mock
-    private EduDocument sbdMock;
+    private StandardBusinessDocument sbdMock;
     private String emptyCertificate = "";
 
     @Before

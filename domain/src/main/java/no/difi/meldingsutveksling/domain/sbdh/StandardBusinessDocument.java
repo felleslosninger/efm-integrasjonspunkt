@@ -48,7 +48,7 @@ import java.util.List;
     "standardBusinessDocumentHeader",
     "any"
 })
-public class EduDocument {
+public class StandardBusinessDocument {
 
     @XmlElement(name = "StandardBusinessDocumentHeader")
     private StandardBusinessDocumentHeader standardBusinessDocumentHeader;
@@ -157,7 +157,7 @@ public class EduDocument {
         } else if (getAny() instanceof Node) {
             return unmarshallAnyElement(getAny());
         } else {
-            throw new MeldingsUtvekslingRuntimeException("Could not cast any element " + getAny() + " from " + EduDocument.class + " to " + Payload.class);
+            throw new MeldingsUtvekslingRuntimeException("Could not cast any element " + getAny() + " from " + StandardBusinessDocument.class + " to " + Payload.class);
         }
     }
 

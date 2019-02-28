@@ -6,7 +6,7 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.XMLTimeStamp;
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.kvittering.xsd.Aapning;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
@@ -26,19 +26,19 @@ import static no.difi.meldingsutveksling.kvittering.DocumentToDocumentConverter.
  *
  * @author Glenn bech
  */
-public class EduDocumentFactory {
+public class SBDReceiptFactory {
 
-    private EduDocumentFactory() {
+    private SBDReceiptFactory() {
     }
 
-    public static EduDocument createAapningskvittering(MessageInfo messageInfo, IntegrasjonspunktNokkel keyInfo) {
+    public static StandardBusinessDocument createAapningskvittering(MessageInfo messageInfo, IntegrasjonspunktNokkel keyInfo) {
         Kvittering k = new Kvittering();
         k.setAapning(new Aapning());
         k.setTidspunkt(XMLTimeStamp.createTimeStamp());
         return signAndWrapDocument(messageInfo, keyInfo, k);
     }
 
-    public static EduDocument createLeveringsKvittering(MessageInfo messageInfo, IntegrasjonspunktNokkel keyInfo) {
+    public static StandardBusinessDocument createLeveringsKvittering(MessageInfo messageInfo, IntegrasjonspunktNokkel keyInfo) {
         Kvittering k = new Kvittering();
         k.setLevering(new Levering());
         k.setTidspunkt(XMLTimeStamp.createTimeStamp());
@@ -47,9 +47,9 @@ public class EduDocumentFactory {
                 k);
     }
 
-    private static EduDocument signAndWrapDocument(MessageInfo messageInfo, IntegrasjonspunktNokkel keyInfo, Kvittering kvittering) {
+    private static StandardBusinessDocument signAndWrapDocument(MessageInfo messageInfo, IntegrasjonspunktNokkel keyInfo, Kvittering kvittering) {
 
-        EduDocument unsignedReceipt = new EduDocument();
+        StandardBusinessDocument unsignedReceipt = new StandardBusinessDocument();
         StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader.Builder()
                 // sender of the receipt is the receiver of the message
                 .from(new Organisasjonsnummer(messageInfo.getReceiverOrgNumber()))

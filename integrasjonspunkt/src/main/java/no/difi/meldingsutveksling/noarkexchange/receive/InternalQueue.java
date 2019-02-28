@@ -4,7 +4,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.*;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Payload;
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
@@ -93,7 +93,7 @@ public class InternalQueue {
 
     static {
         try {
-            jaxbContext = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, Kvittering.class, PutMessageRequestType.class}, null);
+            jaxbContext = JAXBContextFactory.createContext(new Class[]{StandardBusinessDocument.class, Payload.class, Kvittering.class, PutMessageRequestType.class}, null);
             jaxbContextNextmove = JAXBContextFactory.createContext(new Class[]{ConversationResource.class}, null);
         } catch (JAXBException e) {
             throw new RuntimeException("Could not start internal queue: Failed to create JAXBContext", e);
@@ -113,11 +113,11 @@ public class InternalQueue {
 
     @JmsListener(destination = NOARK, containerFactory = "myJmsContainerFactory")
     public void noarkListener(byte[] message, Session session) {
-        EduDocument eduDocument = documentConverter.unmarshallFrom(message);
+        StandardBusinessDocument sbd = documentConverter.unmarshallFrom(message);
         try {
-            forwardToNoark(eduDocument);
+            forwardToNoark(sbd);
         } catch (Exception e) {
-            Audit.warn("Failed to forward message.. queue will retry", eduDocument.createLogstashMarkers(), e);
+            Audit.warn("Failed to forward message.. queue will retry", sbd.createLogstashMarkers(), e);
             throw e;
         }
     }
@@ -169,11 +169,11 @@ public class InternalQueue {
         }
 
         try {
-            EduDocument eduDocument = documentConverter.unmarshallFrom(message);
+            StandardBusinessDocument sbd = documentConverter.unmarshallFrom(message);
             errorMsg = "Failed to forward message. Moved to DLQ.";
-            Audit.error(errorMsg, eduDocument.createLogstashMarkers());
-            conversationId = eduDocument.getConversationId();
-            sendErrorAppReceipt(eduDocument);
+            Audit.error(errorMsg, sbd.createLogstashMarkers());
+            conversationId = sbd.getConversationId();
+            sendErrorAppReceipt(sbd);
         } catch (Exception e) {
         }
 
@@ -245,18 +245,18 @@ public class InternalQueue {
         request.swapSenderAndReceiver();
     }
 
-    private void sendErrorAppReceipt(EduDocument eduDocument) {
+    private void sendErrorAppReceipt(StandardBusinessDocument sbd) {
         AppReceiptType receipt = new AppReceiptType();
         receipt.setType("ERROR");
         StatusMessageType statusMessageType = new StatusMessageType();
         statusMessageType.setCode("ID");
-        statusMessageType.setText(String.format("Feilet under mottak hos %s", eduDocument.getReceiverOrgNumber()));
+        statusMessageType.setText(String.format("Feilet under mottak hos %s", sbd.getReceiverOrgNumber()));
         receipt.getMessage().add(statusMessageType);
 
         EDUCore eduCore = eduCoreFactory.create(receipt,
-                eduDocument.getConversationId(),
-                eduDocument.getReceiverOrgNumber(),
-                eduDocument.getSenderOrgNumber());
+                sbd.getConversationId(),
+                sbd.getReceiverOrgNumber(),
+                sbd.getSenderOrgNumber());
         enqueueExternal(eduCore);
     }
 
@@ -290,10 +290,10 @@ public class InternalQueue {
     /**
      * Places the input parameter on the NOARK queue. The NOARK queue sends messages from external sender to NOARK server.
      *
-     * @param eduDocument the eduDocument as received by IntegrasjonspunktReceiveImpl from an external source
+     * @param sbd the sbd as received by IntegrasjonspunktReceiveImpl from an external source
      */
-    public void enqueueNoark(EduDocument eduDocument) {
-        jmsTemplate.convertAndSend(NOARK, documentConverter.marshallToBytes(eduDocument));
+    public void enqueueNoark(StandardBusinessDocument sbd) {
+        jmsTemplate.convertAndSend(NOARK, documentConverter.marshallToBytes(sbd));
     }
 
     public void enqueuePutMessage(PutMessageRequestType putMessage) {
@@ -308,16 +308,16 @@ public class InternalQueue {
         }
     }
 
-    public void forwardToNoark(EduDocument eduDocument) {
+    public void forwardToNoark(StandardBusinessDocument sbd) {
         try {
-            sendToNoarkSystem(eduDocument);
+            sendToNoarkSystem(sbd);
         } catch (Exception e) {
             Audit.error("Failed to unserialize SBD");
             throw new MeldingsUtvekslingRuntimeException("Could not forward document to archive system", e);
         }
     }
 
-    private void sendToNoarkSystem(EduDocument standardBusinessDocument) {
+    private void sendToNoarkSystem(StandardBusinessDocument standardBusinessDocument) {
         try {
             integrajonspunktReceive.forwardToNoarkSystem(standardBusinessDocument);
         } catch (Exception e) {

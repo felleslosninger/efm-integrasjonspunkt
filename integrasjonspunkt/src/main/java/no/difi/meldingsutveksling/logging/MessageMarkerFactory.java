@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.logging;
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.FileReference;
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.apache.commons.io.FileUtils;
 
 import static no.difi.meldingsutveksling.logging.MarkerFactory.*;
@@ -42,7 +42,7 @@ public class MessageMarkerFactory {
      * @param sbd StandardBusinessDocument
      * @return LogstashMarker
      */
-    public static LogstashMarker markerFrom(EduDocument sbd) {
+    public static LogstashMarker markerFrom(StandardBusinessDocument sbd) {
         LogstashMarker messageTypeMarker = MarkerFactory.messageTypeMarker(sbd.getMessageType());
         LogstashMarker journalPostIdMarker = journalPostIdMarker(sbd.getJournalPostId());
         LogstashMarker documentIdMarker = Markers.append(DOCUMENT_ID, sbd.getDocumentId());

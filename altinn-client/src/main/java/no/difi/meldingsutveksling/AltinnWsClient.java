@@ -8,7 +8,7 @@ import no.difi.meldingsutveksling.altinn.mock.brokerbasic.*;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.ObjectFactory;
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.*;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
@@ -160,7 +160,7 @@ public class AltinnWsClient {
     }
 
 
-    public EduDocument download(DownloadRequest request, MessagePersister messagePersister) {
+    public StandardBusinessDocument download(DownloadRequest request, MessagePersister messagePersister) {
         try {
             DataHandler dh = streamingService.downloadFileStreamedBasic(configuration.getUsername(), configuration.getPassword(), request.getFileReference(), request.getReciever());
             // TODO: rewrite this when Altinn fixes zip
@@ -170,7 +170,7 @@ public class AltinnWsClient {
             AltinnPackage altinnPackage = AltinnPackage.from(file, messagePersister);
 
             tmpFile.delete();
-            return altinnPackage.getEduDocument();
+            return altinnPackage.getSbd();
 
         } catch (IBrokerServiceExternalBasicStreamedDownloadFileStreamedBasicAltinnFaultFaultFaultMessage e) {
             throw new AltinnWsException(CANNOT_DOWNLOAD_FILE, AltinnReasonFactory.from(e), e);

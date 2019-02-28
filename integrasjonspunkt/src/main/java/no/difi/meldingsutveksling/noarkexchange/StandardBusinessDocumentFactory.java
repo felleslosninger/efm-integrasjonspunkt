@@ -13,7 +13,7 @@ import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateAsice;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateSBD;
 import no.difi.meldingsutveksling.domain.*;
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
@@ -55,11 +55,11 @@ public class StandardBusinessDocumentFactory {
         this.messagePersister = messagePersister.getIfUnique();
     }
 
-    public EduDocument create(EDUCore sender, Avsender avsender, Mottaker mottaker) throws MessageException {
+    public StandardBusinessDocument create(EDUCore sender, Avsender avsender, Mottaker mottaker) throws MessageException {
         return create(sender, UUID.randomUUID().toString(), avsender, mottaker);
     }
 
-    public EduDocument create(EDUCore shipment, String conversationId, Avsender avsender, Mottaker mottaker) throws MessageException {
+    public StandardBusinessDocument create(EDUCore shipment, String conversationId, Avsender avsender, Mottaker mottaker) throws MessageException {
         byte[] marshalledShipment = EDUCoreConverter.marshallToBytes(shipment);
 
         BestEduMessage bestEduMessage = new BestEduMessage(marshalledShipment);
@@ -76,7 +76,7 @@ public class StandardBusinessDocumentFactory {
         return new CreateSBD().createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload, conversationId, DOCUMENT_TYPE_MELDING, shipment.getJournalpostId());
     }
 
-    public EduDocument create(ConversationResource cr, MessageContext context) throws MessageException {
+    public StandardBusinessDocument create(ConversationResource cr, MessageContext context) throws MessageException {
         List<StreamedFile> attachements = new ArrayList<>();
         if (cr.getFileRefs() != null) {
             for (String filename : cr.getFileRefs().values()) {

@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.transport;
 
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.springframework.context.ApplicationContext;
 
 /**
@@ -15,8 +15,8 @@ import org.springframework.context.ApplicationContext;
 public interface Transport {
 
     /**
-     * @param eduDocument An eduDocument with a payload consisting of an CMS encrypted ASIC package
+     * @param sbd An sbd with a payload consisting of an CMS encrypted ASIC package
      */
-    void send(ApplicationContext context, EduDocument eduDocument);
+    void send(ApplicationContext context, StandardBusinessDocument sbd);
 
 }
