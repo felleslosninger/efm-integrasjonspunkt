@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.nextmove;
 
 import com.google.common.collect.Lists;
 import io.swagger.annotations.*;
+import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -238,34 +239,35 @@ public class MessageInController {
     public ResponseEntity popMessage(
             @ApiParam(value = "Service Identifier")
             @RequestParam(value = "serviceIdentifier", required = false) ServiceIdentifier serviceIdentifier,
-            @RequestParam(value = "conversationId", required = false) String conversationId) throws IOException {
+            @RequestParam(value = "conversationId", required = false) String conversationId) {
 
-        Optional<ConversationResource> resource = getConversationResource(serviceIdentifier, conversationId);
+        return getConversationResource(serviceIdentifier, conversationId)
+                .map(this::popMessage)
+                .orElse(ResponseEntity.noContent().build());
+    }
 
-        if (resource.isPresent()) {
-            ConversationResource cr = resource.get();
-            String filename = cr.getFileRefs().get(0);
+    @SneakyThrows
+    private ResponseEntity popMessage(ConversationResource cr) {
+        String filename = cr.getFileRefs().get(0);
 
-            FileEntryStream fileEntry;
-            try {
-                fileEntry = messagePersister.readStream(cr, ASIC_FILE);
-            } catch (PersistenceException e) {
-                Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing message from queue",
-                        filename, cr.getConversationId(), cr.getSenderId()), markerFrom(cr), e);
-                repo.delete(cr);
-                return fileNotFoundErrorResponse(filename);
-            }
-
-            InputStream decryptedAsic = cmsUtil.decryptCMSStreamed(fileEntry.getInputStream(), keyInfo.loadPrivateKey());
-            fileEntry.getInputStream().close();
-
-            return ResponseEntity.ok()
-                    .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME + ASIC_FILE)
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .contentLength(fileEntry.getSize())
-                    .body(new InputStreamResource(decryptedAsic));
+        FileEntryStream fileEntry;
+        try {
+            fileEntry = messagePersister.readStream(cr, ASIC_FILE);
+        } catch (PersistenceException e) {
+            Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing message from queue",
+                    filename, cr.getConversationId(), cr.getSenderId()), markerFrom(cr), e);
+            repo.delete(cr);
+            return fileNotFoundErrorResponse(filename);
         }
-        return ResponseEntity.noContent().build();
+
+        InputStream decryptedAsic = cmsUtil.decryptCMSStreamed(fileEntry.getInputStream(), keyInfo.loadPrivateKey());
+        fileEntry.getInputStream().close();
+
+        return ResponseEntity.ok()
+                .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME + ASIC_FILE)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .contentLength(fileEntry.getSize())
+                .body(new InputStreamResource(decryptedAsic));
     }
 
     private Optional<ConversationResource> getConversationResource(ServiceIdentifier serviceIdentifier, String conversationId) {

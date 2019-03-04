@@ -8,17 +8,21 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Data;
+
+import javax.persistence.*;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 
 /**
  * <p>Java class for Scope complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="Scope">
  *   &lt;complexContent>
@@ -31,17 +35,24 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Scope", propOrder = {
-    "type",
-    "instanceIdentifier",
-    "identifier",
-    "scopeInformation"
+        "type",
+        "instanceIdentifier",
+        "identifier",
+        "scopeInformation"
 })
+@Data
+@Entity
+@Table(name = "scope")
 public class Scope {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @JsonIgnore
+    @XmlTransient
+    private Long id;
 
     @XmlElement(name = "Type", required = true)
     protected String type;
@@ -49,114 +60,42 @@ public class Scope {
     protected String instanceIdentifier;
     @XmlElement(name = "Identifier")
     protected String identifier;
-    @XmlElementRef(name = "ScopeInformation", namespace = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader", type = JAXBElement.class, required = false)
-    protected List<CorrelationInformation> scopeInformation;
-
-    /**
-     * Gets the value of the type property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getType() {
-        return type;
-    }
-
-    /**
-     * Sets the value of the type property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setType(String value) {
-        this.type = value;
-    }
-
-    /**
-     * Gets the value of the instanceIdentifier property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getInstanceIdentifier() {
-        return instanceIdentifier;
-    }
-
-    /**
-     * Sets the value of the instanceIdentifier property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setInstanceIdentifier(String value) {
-        this.instanceIdentifier = value;
-    }
-
-    /**
-     * Gets the value of the identifier property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getIdentifier() {
-        return identifier;
-    }
-
-    /**
-     * Sets the value of the identifier property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setIdentifier(String value) {
-        this.identifier = value;
-    }
+    @XmlElement(name = "ScopeInformation")
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "scope_id", nullable = false)
+    protected Set<CorrelationInformation> scopeInformation;
 
     /**
      * Gets the value of the scopeInformation property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the scopeInformation property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getScopeInformation().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link JAXBElement }{@code <}{@link BusinessService }{@code >}
      * {@link JAXBElement }{@code <}{@link CorrelationInformation }{@code >}
      * {@link JAXBElement }{@code <}{@link Object }{@code >}
-     * 
-     * 
      */
-    public List<CorrelationInformation> getScopeInformation() {
+    public Set<CorrelationInformation> getScopeInformation() {
         if (scopeInformation == null) {
-            scopeInformation = new ArrayList<>();
+            scopeInformation = new HashSet<>();
         }
         return this.scopeInformation;
     }
 
-    public void setScopeInformation(List<CorrelationInformation> scopeInformation) {
-        this.scopeInformation = scopeInformation;
+    public Scope addScopeInformation(CorrelationInformation correlationInformation) {
+        getScopeInformation().add(correlationInformation);
+        return this;
     }
-
 }

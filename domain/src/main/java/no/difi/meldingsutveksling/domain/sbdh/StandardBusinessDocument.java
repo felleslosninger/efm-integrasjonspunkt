@@ -8,14 +8,16 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Data;
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.Payload;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import javax.persistence.*;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -25,9 +27,9 @@ import java.util.List;
 
 /**
  * <p>Java class for StandardBusinessDocument complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="StandardBusinessDocument">
  *   &lt;complexContent>
@@ -40,87 +42,52 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "StandardBusinessDocument", propOrder = {
-    "standardBusinessDocumentHeader",
-    "any"
+        "standardBusinessDocumentHeader",
+        "any"
 })
+@Data
+@Entity
+@Table(name = "document")
 public class StandardBusinessDocument {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @JsonIgnore
+    @XmlTransient
+    private Long id;
+
     @XmlElement(name = "StandardBusinessDocumentHeader")
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private StandardBusinessDocumentHeader standardBusinessDocumentHeader;
+
     @XmlAnyElement(lax = true)
+    @Transient // TODO should not be transient in the end
     protected Object any;
 
-    /**
-     * Gets the value of the standardBusinessDocumentHeader property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link StandardBusinessDocumentHeader }
-     *     
-     */
-    public StandardBusinessDocumentHeader getStandardBusinessDocumentHeader() {
-        return standardBusinessDocumentHeader;
-    }
-
-    /**
-     * Sets the value of the standardBusinessDocumentHeader property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link StandardBusinessDocumentHeader }
-     *     
-     */
-    public void setStandardBusinessDocumentHeader(StandardBusinessDocumentHeader value) {
-        this.standardBusinessDocumentHeader = value;
-    }
-
-    /**
-     * Gets the value of the any property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Element }
-     *     {@link Object }
-     *     
-     */
-    public Object getAny() {
-        return any;
-    }
-
-    /**
-     * Sets the value of the any property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Element }
-     *     {@link Object }
-     *     
-     */
-    public void setAny(Object value) {
-        this.any = value;
-    }
-
+    @JsonIgnore
     public MessageInfo getMessageInfo() {
         return new MessageInfo(getReceiverOrgNumber(), getSenderOrgNumber(), getJournalPostId(), getConversationId(), getMessageType());
     }
 
+    @JsonIgnore
     public String getSenderOrgNumber() {
-        return getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue().split(":")[1];
+        return getStandardBusinessDocumentHeader().getSender().iterator().next().getIdentifier().getValue().split(":")[1];
     }
 
+    @JsonIgnore
     public String getReceiverOrgNumber() {
-        return getStandardBusinessDocumentHeader().getReceiver().get(0).getIdentifier().getValue().split(":")[1];
+        return getStandardBusinessDocumentHeader().getReceiver().iterator().next().getIdentifier().getValue().split(":")[1];
     }
 
+    @JsonIgnore
     public final String getJournalPostId() {
         return findScope(ScopeType.JOURNALPOST_ID).getInstanceIdentifier();
     }
 
+    @JsonIgnore
     public String getConversationId() {
         return findScope(ScopeType.CONVERSATION_ID).getInstanceIdentifier();
     }
@@ -135,22 +102,27 @@ public class StandardBusinessDocument {
         return new Scope();
     }
 
+    @JsonIgnore
     public String getMessageType() {
         return getStandardBusinessDocumentHeader().getDocumentIdentification().getType();
     }
 
+    @JsonIgnore
     public String getDocumentId() {
         return getStandardBusinessDocumentHeader().getDocumentIdentification().getInstanceIdentifier();
     }
 
+    @JsonIgnore
     public boolean isReceipt() {
         return getStandardBusinessDocumentHeader().getDocumentIdentification().getType().equalsIgnoreCase(StandardBusinessDocumentHeader.KVITTERING_TYPE);
     }
 
+    @JsonIgnore
     public boolean isNextMove() {
         return StandardBusinessDocumentHeader.NEXTMOVE_TYPE.equalsIgnoreCase(getStandardBusinessDocumentHeader().getDocumentIdentification().getType());
     }
 
+    @JsonIgnore
     public Payload getPayload() {
         if (getAny() instanceof Payload) {
             return (Payload) getAny();

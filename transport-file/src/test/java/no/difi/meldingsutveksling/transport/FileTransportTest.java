@@ -17,7 +17,7 @@ public class FileTransportTest {
         JAXBContext c = JAXBContext.newInstance("no.difi.meldingsutveksling.noarkexchange.schema.receive");
         Unmarshaller unm = c.createUnmarshaller();
         StandardBusinessDocument doc = unm.unmarshal(new StreamSource(FileTransport.class.getClassLoader().getResourceAsStream("sbdV2.xml")), StandardBusinessDocument.class).getValue();
-        System.out.println(doc.getStandardBusinessDocumentHeader().getReceiver().get(0).getIdentifier().getValue());
+        System.out.println(doc.getStandardBusinessDocumentHeader().getReceiver().iterator().next().getIdentifier().getValue());
 
         t.send(null, doc);
     }

@@ -18,7 +18,6 @@ import static no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHea
 import static org.junit.Assert.assertEquals;
 
 
-
 /**
  * @author Glenn Bech
  */
@@ -46,8 +45,8 @@ public class StandardBusinessDocumentWrapperTest {
         Document xmlDocVersion = DocumentToDocumentConverter.toXMLDocument(beforeConversion);
         StandardBusinessDocument afterConversion = DocumentToDocumentConverter.toDomainDocument(xmlDocVersion);
 
-        assertEquals(beforeConversion.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue(),
-                afterConversion.getStandardBusinessDocumentHeader().getSender().get(0).getIdentifier().getValue());
+        assertEquals(beforeConversion.getStandardBusinessDocumentHeader().getSender().iterator().next().getIdentifier().getValue(),
+                afterConversion.getStandardBusinessDocumentHeader().getSender().iterator().next().getIdentifier().getValue());
     }
 
 }

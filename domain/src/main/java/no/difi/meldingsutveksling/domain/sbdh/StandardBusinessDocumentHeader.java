@@ -8,15 +8,18 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Data;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
-import no.difi.meldingsutveksling.domain.XMLTimeStamp;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
-import java.util.*;
+import javax.persistence.*;
+import javax.xml.bind.annotation.*;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 
 /**
@@ -50,6 +53,9 @@ import java.util.*;
         "manifest",
         "businessScope"
 })
+@Data
+@Entity
+@Table(name = "header")
 public class StandardBusinessDocumentHeader {
 
     public enum DocumentType {KVITTERING, MELDING}
@@ -61,38 +67,31 @@ public class StandardBusinessDocumentHeader {
     public static final String MELDING_VERSION = "urn:no:difi:meldingsutveksling:1.0";
     public static final String NEXTMOVE_TYPE = "nextmove";
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @JsonIgnore
+    @XmlTransient
+    private Long id;
+
     @XmlElement(name = "HeaderVersion", required = true)
     protected String headerVersion;
     @XmlElement(name = "Sender", required = true)
-    protected List<Partner> sender;
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "header_id", nullable = false)
+    protected Set<Sender> sender;
     @XmlElement(name = "Receiver", required = true)
-    protected List<Partner> receiver;
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "header_id", nullable = false)
+    protected Set<Receiver> receiver;
     @XmlElement(name = "DocumentIdentification", required = true)
+    @Embedded
     protected DocumentIdentification documentIdentification;
     @XmlElement(name = "Manifest")
+    @Embedded
     protected Manifest manifest;
     @XmlElement(name = "BusinessScope")
+    @Embedded
     protected BusinessScope businessScope;
-
-    /**
-     * Gets the value of the headerVersion property.
-     *
-     * @return possible object is
-     * {@link String }
-     */
-    public String getHeaderVersion() {
-        return headerVersion;
-    }
-
-    /**
-     * Sets the value of the headerVersion property.
-     *
-     * @param value allowed object is
-     *              {@link String }
-     */
-    public void setHeaderVersion(String value) {
-        this.headerVersion = value;
-    }
 
     /**
      * Gets the value of the sender property.
@@ -114,11 +113,16 @@ public class StandardBusinessDocumentHeader {
      * Objects of the following type(s) are allowed in the list
      * {@link Partner }
      */
-    public List<Partner> getSender() {
+    public Set<Sender> getSender() {
         if (sender == null) {
-            sender = new ArrayList<>();
+            sender = new HashSet<>();
         }
         return this.sender;
+    }
+
+    public StandardBusinessDocumentHeader addSender(Sender partner) {
+        getSender().add(partner);
+        return this;
     }
 
     /**
@@ -141,95 +145,31 @@ public class StandardBusinessDocumentHeader {
      * Objects of the following type(s) are allowed in the list
      * {@link Partner }
      */
-    public List<Partner> getReceiver() {
+    public Set<Receiver> getReceiver() {
         if (receiver == null) {
-            receiver = new ArrayList<>();
+            receiver = new HashSet<>();
         }
         return this.receiver;
     }
 
+    public StandardBusinessDocumentHeader addReceiver(Receiver partner) {
+        getReceiver().add(partner);
+        return this;
+    }
+
+    @JsonIgnore
     public String getReceiverOrganisationNumber() {
 
         if (receiver.size() != 1) {
             throw new MeldingsUtvekslingRuntimeException(String.valueOf(receiver.size()));
         }
-        Partner partner = receiver.get(0);
+        Partner partner = receiver.iterator().next();
         PartnerIdentification identifier = partner.getIdentifier();
         if (identifier == null) {
             throw new MeldingsUtvekslingRuntimeException();
         }
         return identifier.getValue();
     }
-
-
-    /**
-     * Gets the value of the documentIdentification property.
-     *
-     * @return possible object is
-     * {@link DocumentIdentification }
-     */
-    public DocumentIdentification getDocumentIdentification() {
-        return documentIdentification;
-    }
-
-    /**
-     * Sets the value of the documentIdentification property.
-     *
-     * @param value allowed object is
-     *              {@link DocumentIdentification }
-     */
-    public void setDocumentIdentification(DocumentIdentification value) {
-        this.documentIdentification = value;
-    }
-
-    /**
-     * Gets the value of the manifest property.
-     *
-     * @return possible object is
-     * {@link Manifest }
-     */
-    public Manifest getManifest() {
-        return manifest;
-    }
-
-    /**
-     * Sets the value of the manifest property.
-     *
-     * @param value allowed object is
-     *              {@link Manifest }
-     */
-    public void setManifest(Manifest value) {
-        this.manifest = value;
-    }
-
-    /**
-     * Gets the value of the businessScope property.
-     *
-     * @return possible object is
-     * {@link BusinessScope }
-     */
-    public BusinessScope getBusinessScope() {
-        return businessScope;
-    }
-
-    /**
-     * Sets the value of the businessScope property.
-     *
-     * @param value allowed object is
-     *              {@link BusinessScope }
-     */
-    public void setBusinessScope(BusinessScope value) {
-        this.businessScope = value;
-    }
-
-    public void setSender(List<Partner> sender) {
-        this.sender = sender;
-    }
-
-    public void setReceiver(List<Partner> receiver) {
-        this.receiver = receiver;
-    }
-
 
     public static class Builder {
 
@@ -270,69 +210,73 @@ public class StandardBusinessDocumentHeader {
         }
 
         public StandardBusinessDocumentHeader build() {
+            return new StandardBusinessDocumentHeader()
+                    .setHeaderVersion(HEADER_VERSION)
+                    .addSender(createSender(avsender))
+                    .addReceiver(createReciever(mottaker))
+                    .setBusinessScope(createBusinessScope(fromConversationId(conversationId), fromJournalPostId(journalPostId)))
+                    .setDocumentIdentification(createDocumentIdentification(documentType));
+        }
+
+        private Sender createSender(Organisasjonsnummer orgNummer) {
+            Sender sender = new Sender();
+            sender.setIdentifier(new PartnerIdentification()
+                    .setValue(orgNummer.asIso6523())
+                    .setAuthority(orgNummer.asIso6523()));
+            return sender;
+        }
+
+        private Receiver createReciever(Organisasjonsnummer orgNummer) {
+            Receiver sender = new Receiver();
+            sender.setIdentifier(new PartnerIdentification()
+                    .setValue(orgNummer.asIso6523())
+                    .setAuthority(orgNummer.asIso6523()));
+            return sender;
+        }
+
+        private DocumentIdentification createDocumentIdentification(DocumentType documentType) {
             if (documentType == null) {
                 throw new MeldingsUtvekslingRuntimeException("DocumentType must be set");
             }
-            StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader();
-            header.setHeaderVersion(HEADER_VERSION);
-            header.getSender().add(createPartner(avsender));
-            header.getReceiver().add(createPartner(mottaker));
-            header.setBusinessScope(createBusinessScope(fromConversationId(conversationId), fromJournalPostId(journalPostId)));
-            if (documentType == DocumentType.KVITTERING) {
-                header.setDocumentIdentification(createDocumentIdentification(KVITTERING_TYPE, KVITTERING_VERSION));
-            } else if (documentType == DocumentType.MELDING) {
-                header.setDocumentIdentification(createDocumentIdentification(MELDING_TYPE, MELDING_VERSION));
-            }
-            return header;
-        }
 
-        private Partner createPartner(Organisasjonsnummer orgNummer) {
-            Partner partner = new Partner();
-            PartnerIdentification partnerIdentification = new PartnerIdentification();
-            partnerIdentification.setValue(orgNummer.asIso6523());
-            partnerIdentification.setAuthority(orgNummer.asIso6523());
-            partner.setIdentifier(partnerIdentification);
-            return partner;
+            switch (documentType) {
+                case KVITTERING:
+                    return createDocumentIdentification(KVITTERING_TYPE, KVITTERING_VERSION);
+                case MELDING:
+                    return createDocumentIdentification(MELDING_TYPE, MELDING_VERSION);
+                default:
+                    throw new MeldingsUtvekslingRuntimeException(String.format("Unsupported DocumentType: %s", documentType.name()));
+            }
         }
 
         private DocumentIdentification createDocumentIdentification(String type, String version) {
-            DocumentIdentification documentIdentification = new DocumentIdentification();
-
-            GregorianCalendar gCal = new GregorianCalendar();
-            gCal.setTime(new Date());
-            documentIdentification.setCreationDateAndTime(XMLTimeStamp.createTimeStamp());
-            documentIdentification.setStandard(STANDARD_IDENTIFIER);
-            documentIdentification.setType(type);
-            documentIdentification.setTypeVersion(version);
-            documentIdentification.setInstanceIdentifier(UUID.randomUUID().toString());
-            return documentIdentification;
+            return new DocumentIdentification()
+                    .setCreationDateAndTime(ZonedDateTime.now())
+                    .setStandard(STANDARD_IDENTIFIER)
+                    .setType(type)
+                    .setTypeVersion(version)
+                    .setInstanceIdentifier(UUID.randomUUID().toString());
         }
 
         private BusinessScope createBusinessScope(Scope... scopes) {
-            BusinessScope bScope = new BusinessScope();
-            bScope.setScope(Arrays.asList(scopes));
-            return bScope;
+            return new BusinessScope()
+                    .setScope(Arrays.asList(scopes));
         }
 
         private Scope fromJournalPostId(String journalPostId) {
-            Scope scope = createDefaultScope();
-            scope.setType(TYPE_JOURNALPOST_ID);
-            scope.setInstanceIdentifier(journalPostId);
-            return scope;
+            return createDefaultScope()
+                    .setType(TYPE_JOURNALPOST_ID)
+                    .setInstanceIdentifier(journalPostId);
         }
 
         private Scope fromConversationId(String conversationId) {
-            Scope scope = createDefaultScope();
-            scope.setType(TYPE_CONVERSATIONID);
-            scope.setInstanceIdentifier(conversationId);
-            return scope;
+            return createDefaultScope()
+                    .setType(TYPE_CONVERSATIONID)
+                    .setInstanceIdentifier(conversationId);
         }
 
         private Scope createDefaultScope() {
-            Scope scope = new Scope();
-            scope.setIdentifier(STANDARD_IDENTIFIER);
-            return scope;
+            return new Scope().setIdentifier(STANDARD_IDENTIFIER);
         }
-
     }
 }

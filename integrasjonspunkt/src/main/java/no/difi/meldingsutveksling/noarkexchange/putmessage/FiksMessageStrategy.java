@@ -1,17 +1,17 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
+import com.google.common.base.Strings;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import no.difi.meldingsutveksling.core.EDUCoreFactory;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory;
-import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType;
-import org.assertj.core.util.Strings;
 
 class FiksMessageStrategy implements MessageStrategy {
     private SvarUtService svarUtService;
