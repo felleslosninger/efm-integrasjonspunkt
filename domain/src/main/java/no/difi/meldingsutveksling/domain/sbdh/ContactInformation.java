@@ -50,7 +50,7 @@ import javax.xml.bind.annotation.*;
 public class ContactInformation {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue
     @JsonIgnore
     @XmlTransient
     private Long id;

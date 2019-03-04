@@ -10,6 +10,7 @@ package no.difi.meldingsutveksling.domain.sbdh;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import org.hibernate.annotations.DiscriminatorOptions;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.*;
@@ -44,12 +45,12 @@ import java.util.Set;
 @Entity
 @Table(name = "partner")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name="type",
-        discriminatorType = DiscriminatorType.INTEGER)
+@DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorOptions(force = true)
 public class Partner {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue
     @JsonIgnore
     @XmlTransient
     private Long id;

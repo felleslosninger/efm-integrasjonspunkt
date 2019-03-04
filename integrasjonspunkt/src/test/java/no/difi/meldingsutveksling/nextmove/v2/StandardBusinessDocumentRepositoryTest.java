@@ -26,6 +26,8 @@ public class StandardBusinessDocumentRepositoryTest {
     public void test() {
         StandardBusinessDocument document = getDocument();
         entityManager.getEntityManager().persist(document);
+        entityManager.flush();
+        entityManager.clear();
 
         StandardBusinessDocument result = repository.findOne(document.getId());
 

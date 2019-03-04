@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import org.hibernate.annotations.DiscriminatorOptions;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.*;
@@ -68,7 +69,7 @@ public class StandardBusinessDocumentHeader {
     public static final String NEXTMOVE_TYPE = "nextmove";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue
     @JsonIgnore
     @XmlTransient
     private Long id;
@@ -93,26 +94,10 @@ public class StandardBusinessDocumentHeader {
     @Embedded
     protected BusinessScope businessScope;
 
-    /**
-     * Gets the value of the sender property.
-     * <p>
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the sender property.
-     * <p>
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getSender().add(newItem);
-     * </pre>
-     * <p>
-     * <p>
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link Partner }
-     */
+    public void setSender(Set<Sender> sender) {
+        this.sender = sender;
+    }
+
     public Set<Sender> getSender() {
         if (sender == null) {
             sender = new HashSet<>();
@@ -125,26 +110,6 @@ public class StandardBusinessDocumentHeader {
         return this;
     }
 
-    /**
-     * Gets the value of the receiver property.
-     * <p>
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the receiver property.
-     * <p>
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getReceiver().add(newItem);
-     * </pre>
-     * <p>
-     * <p>
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link Partner }
-     */
     public Set<Receiver> getReceiver() {
         if (receiver == null) {
             receiver = new HashSet<>();

@@ -54,7 +54,7 @@ import java.util.List;
 public class StandardBusinessDocument {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue
     @JsonIgnore
     @XmlTransient
     private Long id;

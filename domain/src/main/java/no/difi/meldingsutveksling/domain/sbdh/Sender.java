@@ -5,7 +5,7 @@ import javax.persistence.Entity;
 import java.util.Set;
 
 @Entity
-@DiscriminatorValue("1")
+@DiscriminatorValue("sender")
 public class Sender extends Partner {
 
     @Override

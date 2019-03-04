@@ -49,7 +49,7 @@ import java.util.Set;
 public class Scope {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue
     @JsonIgnore
     @XmlTransient
     private Long id;
