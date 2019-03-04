@@ -8,6 +8,8 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
+import lombok.Data;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -16,9 +18,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for BusinessService complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="BusinessService">
  *   &lt;complexContent>
@@ -31,67 +33,17 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "BusinessService", propOrder = {
-    "businessServiceName",
-    "serviceTransaction"
+        "businessServiceName",
+        "serviceTransaction"
 })
+@Data
 public class BusinessService {
 
     @XmlElement(name = "BusinessServiceName")
     protected String businessServiceName;
     @XmlElement(name = "ServiceTransaction")
     protected ServiceTransaction serviceTransaction;
-
-    /**
-     * Gets the value of the businessServiceName property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getBusinessServiceName() {
-        return businessServiceName;
-    }
-
-    /**
-     * Sets the value of the businessServiceName property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setBusinessServiceName(String value) {
-        this.businessServiceName = value;
-    }
-
-    /**
-     * Gets the value of the serviceTransaction property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ServiceTransaction }
-     *     
-     */
-    public ServiceTransaction getServiceTransaction() {
-        return serviceTransaction;
-    }
-
-    /**
-     * Sets the value of the serviceTransaction property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ServiceTransaction }
-     *     
-     */
-    public void setServiceTransaction(ServiceTransaction value) {
-        this.serviceTransaction = value;
-    }
-
 }

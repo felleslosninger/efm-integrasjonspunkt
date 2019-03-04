@@ -8,19 +8,20 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.datatype.XMLGregorianCalendar;
+import lombok.Data;
+import no.difi.meldingsutveksling.xml.ZonedDateTimeAdapter;
+
+import javax.persistence.Embeddable;
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.time.ZonedDateTime;
 
 
 /**
  * <p>Java class for DocumentIdentification complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="DocumentIdentification">
  *   &lt;complexContent>
@@ -37,18 +38,18 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "DocumentIdentification", propOrder = {
-    "standard",
-    "typeVersion",
-    "instanceIdentifier",
-    "type",
-    "multipleType",
-    "creationDateAndTime"
+        "standard",
+        "typeVersion",
+        "instanceIdentifier",
+        "type",
+        "multipleType",
+        "creationDateAndTime"
 })
+@Data
+@Embeddable
 public class DocumentIdentification {
 
     @XmlElement(name = "Standard", required = true)
@@ -63,150 +64,6 @@ public class DocumentIdentification {
     protected Boolean multipleType;
     @XmlElement(name = "CreationDateAndTime", required = true)
     @XmlSchemaType(name = "dateTime")
-    protected XMLGregorianCalendar creationDateAndTime;
-
-    /**
-     * Gets the value of the standard property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getStandard() {
-        return standard;
-    }
-
-    /**
-     * Sets the value of the standard property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setStandard(String value) {
-        this.standard = value;
-    }
-
-    /**
-     * Gets the value of the typeVersion property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getTypeVersion() {
-        return typeVersion;
-    }
-
-    /**
-     * Sets the value of the typeVersion property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setTypeVersion(String value) {
-        this.typeVersion = value;
-    }
-
-    /**
-     * Gets the value of the instanceIdentifier property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getInstanceIdentifier() {
-        return instanceIdentifier;
-    }
-
-    /**
-     * Sets the value of the instanceIdentifier property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setInstanceIdentifier(String value) {
-        this.instanceIdentifier = value;
-    }
-
-    /**
-     * Gets the value of the type property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getType() {
-        return type;
-    }
-
-    /**
-     * Sets the value of the type property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setType(String value) {
-        this.type = value;
-    }
-
-    /**
-     * Gets the value of the multipleType property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Boolean }
-     *     
-     */
-    public Boolean isMultipleType() {
-        return multipleType;
-    }
-
-    /**
-     * Sets the value of the multipleType property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Boolean }
-     *     
-     */
-    public void setMultipleType(Boolean value) {
-        this.multipleType = value;
-    }
-
-    /**
-     * Gets the value of the creationDateAndTime property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link XMLGregorianCalendar }
-     *     
-     */
-    public XMLGregorianCalendar getCreationDateAndTime() {
-        return creationDateAndTime;
-    }
-
-    /**
-     * Sets the value of the creationDateAndTime property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link XMLGregorianCalendar }
-     *     
-     */
-    public void setCreationDateAndTime(XMLGregorianCalendar value) {
-        this.creationDateAndTime = value;
-    }
-
+    @XmlJavaTypeAdapter(ZonedDateTimeAdapter.class)
+    protected ZonedDateTime creationDateAndTime;
 }

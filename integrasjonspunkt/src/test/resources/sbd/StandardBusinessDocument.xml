@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<StandardBusinessDocument xmlns="http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader">
+    <StandardBusinessDocumentHeader>
+        <HeaderVersion>1.0</HeaderVersion>
+        <Sender>
+            <Identifier Authority="iso6523-actorid-upis">9908:910077473</Identifier>
+        </Sender>
+        <Receiver>
+            <Identifier Authority="iso6523-actorid-upis">9908:910075918</Identifier>
+        </Receiver>
+        <DocumentIdentification>
+            <Standard>urn:no:difi:meldingsutveksling:2.0</Standard>
+            <TypeVersion>2.0</TypeVersion>
+            <InstanceIdentifier>ff88849c-e281-4809-8555-7cd54952b916</InstanceIdentifier>
+            <Type>digitaPost/noark5json</Type>
+            <CreationDateAndTime>2016-04-11T15:29:58.753+02:00</CreationDateAndTime>
+        </DocumentIdentification>
+        <BusinessScope>
+            <Scope>
+                <Type>ConversationId</Type>
+                <InstanceIdentifier>37efbd4c-413d-4e2c-bbc5-257ef4a65a45</InstanceIdentifier>
+                <Identifier>urn:no:difi:meldingsutveksling:2.0</Identifier>
+                <ScopeInformation>
+                    <ExpectedResponseDateTime>2003-05-10T00:31:52Z</ExpectedResponseDateTime>
+                </ScopeInformation>
+            </Scope>
+        </BusinessScope>
+    </StandardBusinessDocumentHeader>
+</StandardBusinessDocument>
