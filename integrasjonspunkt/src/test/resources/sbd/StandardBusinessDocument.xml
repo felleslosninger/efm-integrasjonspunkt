@@ -1,29 +1,34 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<StandardBusinessDocument xmlns="http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader">
-    <StandardBusinessDocumentHeader>
-        <HeaderVersion>1.0</HeaderVersion>
-        <Sender>
-            <Identifier Authority="iso6523-actorid-upis">9908:910077473</Identifier>
-        </Sender>
-        <Receiver>
-            <Identifier Authority="iso6523-actorid-upis">9908:910075918</Identifier>
-        </Receiver>
-        <DocumentIdentification>
-            <Standard>urn:no:difi:meldingsutveksling:2.0</Standard>
-            <TypeVersion>2.0</TypeVersion>
-            <InstanceIdentifier>ff88849c-e281-4809-8555-7cd54952b916</InstanceIdentifier>
-            <Type>digitaPost/noark5json</Type>
-            <CreationDateAndTime>2016-04-11T15:29:58.753+02:00</CreationDateAndTime>
-        </DocumentIdentification>
-        <BusinessScope>
-            <Scope>
-                <Type>ConversationId</Type>
-                <InstanceIdentifier>37efbd4c-413d-4e2c-bbc5-257ef4a65a45</InstanceIdentifier>
-                <Identifier>urn:no:difi:meldingsutveksling:2.0</Identifier>
-                <ScopeInformation>
-                    <ExpectedResponseDateTime>2003-05-10T00:31:52Z</ExpectedResponseDateTime>
-                </ScopeInformation>
-            </Scope>
-        </BusinessScope>
-    </StandardBusinessDocumentHeader>
-</StandardBusinessDocument>
+<?xml version="1.0" encoding="UTF-8"?>
+<ns2:StandardBusinessDocument
+        xmlns:ns2="http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader" xmlns:ns3="urn:no:difi:meldingsutveksling:2.0">
+    <ns2:StandardBusinessDocumentHeader>
+        <ns2:HeaderVersion>1.0</ns2:HeaderVersion>
+        <ns2:Sender>
+            <ns2:Identifier Authority="iso6523-actorid-upis">9908:910077473</ns2:Identifier>
+        </ns2:Sender>
+        <ns2:Receiver>
+            <ns2:Identifier Authority="iso6523-actorid-upis">9908:910075918</ns2:Identifier>
+        </ns2:Receiver>
+        <ns2:DocumentIdentification>
+            <ns2:Standard>urn:no:difi:meldingsutveksling:2.0</ns2:Standard>
+            <ns2:TypeVersion>2.0</ns2:TypeVersion>
+            <ns2:InstanceIdentifier>ff88849c-e281-4809-8555-7cd54952b916</ns2:InstanceIdentifier>
+            <ns2:Type>digitaPost/noark5json</ns2:Type>
+            <ns2:CreationDateAndTime>2016-04-11T15:29:58.753+02:00</ns2:CreationDateAndTime>
+        </ns2:DocumentIdentification>
+        <ns2:BusinessScope>
+            <ns2:Scope>
+                <ns2:Type>ConversationId</ns2:Type>
+                <ns2:InstanceIdentifier>37efbd4c-413d-4e2c-bbc5-257ef4a65a45</ns2:InstanceIdentifier>
+                <ns2:Identifier>urn:no:difi:meldingsutveksling:2.0</ns2:Identifier>
+                <ns2:ScopeInformation>
+                    <ns2:ExpectedResponseDateTime>2003-05-10T00:31:52Z</ns2:ExpectedResponseDateTime>
+                </ns2:ScopeInformation>
+            </ns2:Scope>
+        </ns2:BusinessScope>
+    </ns2:StandardBusinessDocumentHeader>
+    <ns3:dpo>
+        <securityLevel>3</securityLevel>
+        <dpoField>foo</dpoField>
+    </ns3:dpo>
+</ns2:StandardBusinessDocument>

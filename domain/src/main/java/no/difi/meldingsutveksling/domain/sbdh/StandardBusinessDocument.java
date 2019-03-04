@@ -8,12 +8,17 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.Payload;
+import no.difi.meldingsutveksling.nextmove.NextMoveMessageDeserializer;
+import no.difi.meldingsutveksling.nextmove.NextMoveMessageSerializer;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.w3c.dom.Node;
 
@@ -51,6 +56,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "document")
+@JsonSerialize(using = NextMoveMessageSerializer.class)
 public class StandardBusinessDocument {
 
     @Id
@@ -65,6 +71,8 @@ public class StandardBusinessDocument {
 
     @XmlAnyElement(lax = true)
     @Transient // TODO should not be transient in the end
+    @JsonDeserialize(using = NextMoveMessageDeserializer.class)
+    @JsonAlias({"dpo", "dpv"})
     protected Object any;
 
     @JsonIgnore

@@ -38,5 +38,9 @@
 	            }
         	}
         ]
+    },
+    "dpo": {
+      "securityLevel": "3",
+      "dpoField": "foo"
     }
 }
