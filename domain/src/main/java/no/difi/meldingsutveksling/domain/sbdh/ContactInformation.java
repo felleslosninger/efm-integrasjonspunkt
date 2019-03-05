@@ -11,7 +11,11 @@ package no.difi.meldingsutveksling.domain.sbdh;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.*;
 
 
@@ -56,13 +60,18 @@ public class ContactInformation {
     private Long id;
 
     @XmlElement(name = "Contact", required = true)
+    @NotNull
     protected String contact;
+
     @XmlElement(name = "EmailAddress")
     protected String emailAddress;
+
     @XmlElement(name = "FaxNumber")
     protected String faxNumber;
+
     @XmlElement(name = "TelephoneNumber")
     protected String telephoneNumber;
+
     @XmlElement(name = "ContactTypeIdentifier")
     protected String contactTypeIdentifier;
 }

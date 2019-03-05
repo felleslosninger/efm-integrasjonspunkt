@@ -39,6 +39,7 @@ public class PartnerIdentification {
 
     @XmlValue
     protected String value;
+
     @XmlAttribute(name = "Authority")
     protected String authority;
 }

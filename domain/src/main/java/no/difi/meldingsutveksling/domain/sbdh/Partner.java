@@ -13,6 +13,8 @@ import lombok.Data;
 import org.hibernate.annotations.DiscriminatorOptions;
 
 import javax.persistence.*;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -57,6 +59,8 @@ public class Partner {
 
     @XmlElement(name = "Identifier", required = true)
     @Embedded
+    @NotNull
+    @Valid
     protected PartnerIdentification identifier;
 
     @XmlElement(name = "ContactInformation")

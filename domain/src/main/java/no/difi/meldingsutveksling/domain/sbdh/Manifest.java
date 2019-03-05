@@ -9,8 +9,10 @@
 package no.difi.meldingsutveksling.domain.sbdh;
 
 import lombok.Data;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -50,9 +52,11 @@ public class Manifest {
     @XmlElement(name = "NumberOfItems", required = true)
     @Transient
     protected BigInteger numberOfItems;
+
     @XmlElement(name = "ManifestItem", required = true)
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "header_id", nullable = false)
+    @NotEmpty
     protected Set<ManifestItem> manifestItem;
 
     /**

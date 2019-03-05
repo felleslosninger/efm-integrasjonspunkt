@@ -11,7 +11,11 @@ package no.difi.meldingsutveksling.domain.sbdh;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.*;
 
 
@@ -54,12 +58,17 @@ public class ManifestItem {
     private Long id;
 
     @XmlElement(name = "MimeTypeQualifierCode", required = true)
+    @NotNull
     protected String mimeTypeQualifierCode;
+
     @XmlElement(name = "UniformResourceIdentifier", required = true)
     @XmlSchemaType(name = "anyURI")
+    @NotNull
     protected String uniformResourceIdentifier;
+
     @XmlElement(name = "Description")
     protected String description;
+
     @XmlElement(name = "LanguageCode")
     protected String languageCode;
 }

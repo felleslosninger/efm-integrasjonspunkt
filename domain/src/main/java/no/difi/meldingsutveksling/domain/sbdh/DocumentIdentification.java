@@ -12,6 +12,7 @@ import lombok.Data;
 import no.difi.meldingsutveksling.xml.ZonedDateTimeAdapter;
 
 import javax.persistence.Embeddable;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.time.ZonedDateTime;
@@ -53,17 +54,27 @@ import java.time.ZonedDateTime;
 public class DocumentIdentification {
 
     @XmlElement(name = "Standard", required = true)
+    @NotNull
     protected String standard;
+
     @XmlElement(name = "TypeVersion", required = true)
+    @NotNull
     protected String typeVersion;
+
     @XmlElement(name = "InstanceIdentifier", required = true)
+    @NotNull
     protected String instanceIdentifier;
+
     @XmlElement(name = "Type", required = true)
+    @NotNull
     protected String type;
+
     @XmlElement(name = "MultipleType")
     protected Boolean multipleType;
+
     @XmlElement(name = "CreationDateAndTime", required = true)
     @XmlSchemaType(name = "dateTime")
     @XmlJavaTypeAdapter(ZonedDateTimeAdapter.class)
+    @NotNull
     protected ZonedDateTime creationDateAndTime;
 }

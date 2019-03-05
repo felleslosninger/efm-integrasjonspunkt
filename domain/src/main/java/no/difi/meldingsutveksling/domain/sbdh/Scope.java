@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.*;
 import java.util.HashSet;
@@ -55,11 +56,16 @@ public class Scope {
     private Long id;
 
     @XmlElement(name = "Type", required = true)
+    @NotNull
     protected String type;
+
     @XmlElement(name = "InstanceIdentifier", required = true)
+    @NotNull
     protected String instanceIdentifier;
+
     @XmlElement(name = "Identifier")
     protected String identifier;
+
     @XmlElement(name = "ScopeInformation")
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "scope_id", nullable = false)

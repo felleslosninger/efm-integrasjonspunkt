@@ -13,8 +13,11 @@ import lombok.Data;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import org.hibernate.annotations.DiscriminatorOptions;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.*;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -75,23 +78,35 @@ public class StandardBusinessDocumentHeader {
     private Long id;
 
     @XmlElement(name = "HeaderVersion", required = true)
+    @NotNull
     protected String headerVersion;
+
     @XmlElement(name = "Sender", required = true)
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "header_id", nullable = false)
+    @NotEmpty
     protected Set<Sender> sender;
+
     @XmlElement(name = "Receiver", required = true)
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "header_id", nullable = false)
+    @NotEmpty
     protected Set<Receiver> receiver;
+
     @XmlElement(name = "DocumentIdentification", required = true)
     @Embedded
+    @NotNull
+    @Valid
     protected DocumentIdentification documentIdentification;
+
     @XmlElement(name = "Manifest")
     @Embedded
+    @Valid
     protected Manifest manifest;
+
     @XmlElement(name = "BusinessScope")
     @Embedded
+    @Valid
     protected BusinessScope businessScope;
 
     public void setSender(Set<Sender> sender) {
