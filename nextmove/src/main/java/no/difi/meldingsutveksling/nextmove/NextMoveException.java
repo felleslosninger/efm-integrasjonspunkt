@@ -6,7 +6,7 @@ public class NextMoveException extends Exception {
         super(e);
     }
 
-    NextMoveException(String s) {
+    public NextMoveException(String s) {
         super(s);
     }
 

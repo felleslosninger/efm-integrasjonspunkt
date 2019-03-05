@@ -8,14 +8,14 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 import java.io.IOException;
 
-public class NextMoveMessageDeserializer extends StdDeserializer<NextMoveMessage> {
+public class NextMoveMessageDeserializer extends StdDeserializer<BusinessMessage> {
 
     protected NextMoveMessageDeserializer() {
-        super(NextMoveMessage.class);
+        super(BusinessMessage.class);
     }
 
     @Override
-    public NextMoveMessage deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+    public BusinessMessage deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
         TreeNode node = p.readValueAsTree();
         if ("dpo".equals(p.currentName())) {
             return p.getCodec().treeToValue(node, DpoMessage.class);

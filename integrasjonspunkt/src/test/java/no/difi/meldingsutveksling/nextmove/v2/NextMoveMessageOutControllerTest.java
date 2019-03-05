@@ -1,15 +1,17 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
-import org.junit.Ignore;
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+
+import java.nio.charset.StandardCharsets;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -17,8 +19,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(NextMoveMessageOutController.class)
-@Import(RestResponseStatusExceptionResolver.class)
-@Ignore
 public class NextMoveMessageOutControllerTest {
 
     @Autowired
@@ -33,7 +33,18 @@ public class NextMoveMessageOutControllerTest {
                 .content("{}")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(content().json("{}"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(content().json("{}"));
+    }
+
+    @Test
+    public void createResource() throws Exception {
+        String inputJson = IOUtils.toString(this.getClass().getResourceAsStream("/sbd/StandardBusinessDocument.json"), StandardCharsets.UTF_8);
+        mvc.perform(post("/api/message/out")
+                .content(inputJson)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(MockMvcResultHandlers.print());
     }
 }

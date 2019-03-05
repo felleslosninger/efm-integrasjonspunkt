@@ -8,6 +8,7 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import no.difi.meldingsutveksling.xml.ZonedDateTimeAdapter;
 
@@ -75,6 +76,7 @@ public class DocumentIdentification {
     @XmlElement(name = "CreationDateAndTime", required = true)
     @XmlSchemaType(name = "dateTime")
     @XmlJavaTypeAdapter(ZonedDateTimeAdapter.class)
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     @NotNull
     protected ZonedDateTime creationDateAndTime;
 }

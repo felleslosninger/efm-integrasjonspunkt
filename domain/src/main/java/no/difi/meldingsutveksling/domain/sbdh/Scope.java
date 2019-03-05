@@ -60,7 +60,6 @@ public class Scope {
     protected String type;
 
     @XmlElement(name = "InstanceIdentifier", required = true)
-    @NotNull
     protected String instanceIdentifier;
 
     @XmlElement(name = "Identifier")

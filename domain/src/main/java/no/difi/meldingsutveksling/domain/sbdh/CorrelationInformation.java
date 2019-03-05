@@ -8,6 +8,7 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import no.difi.meldingsutveksling.xml.ZonedDateTimeAdapter;
@@ -65,5 +66,6 @@ public class CorrelationInformation {
     @XmlElement(name = "ExpectedResponseDateTime")
     @XmlSchemaType(name = "dateTime")
     @XmlJavaTypeAdapter(ZonedDateTimeAdapter.class)
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     protected ZonedDateTime expectedResponseDateTime;
 }

@@ -5,7 +5,9 @@ import org.springframework.data.querydsl.QueryDslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface StandardBusinessDocumentRepository extends PagingAndSortingRepository<StandardBusinessDocument, Long>, QueryDslPredicateExecutor<StandardBusinessDocument> {
-
+    List<StandardBusinessDocument> findAll();
 }

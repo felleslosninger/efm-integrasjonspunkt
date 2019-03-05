@@ -29,6 +29,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.*;
 import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -94,22 +95,27 @@ public class StandardBusinessDocument {
 
     @JsonIgnore
     public final String getJournalPostId() {
-        return findScope(ScopeType.JOURNALPOST_ID).getInstanceIdentifier();
+        return findScope(ScopeType.JOURNALPOST_ID).orElseThrow(MeldingsUtvekslingRuntimeException::new).getInstanceIdentifier();
     }
 
     @JsonIgnore
     public String getConversationId() {
-        return findScope(ScopeType.CONVERSATION_ID).getInstanceIdentifier();
+        return findScope(ScopeType.CONVERSATION_ID).orElseThrow(MeldingsUtvekslingRuntimeException::new).getInstanceIdentifier();
     }
 
-    private Scope findScope(ScopeType scopeType) {
+    @JsonIgnore
+    public Optional<Scope> getConversationScope() {
+        return findScope(ScopeType.CONVERSATION_ID);
+    }
+
+    private Optional<Scope> findScope(ScopeType scopeType) {
         final List<Scope> scopes = getStandardBusinessDocumentHeader().getBusinessScope().getScope();
         for (Scope scope : scopes) {
-            if (scopeType.name().equals(scope.getType())) {
-                return scope;
+            if (scopeType.toString().equals(scope.getType())) {
+                return Optional.of(scope);
             }
         }
-        return new Scope();
+        return Optional.empty();
     }
 
     @JsonIgnore
