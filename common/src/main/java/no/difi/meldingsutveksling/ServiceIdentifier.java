@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Arrays;
 
 @XmlType
 @XmlEnum(String.class)
@@ -25,5 +26,14 @@ public enum ServiceIdentifier {
     private final String fullname;
     private final String standard;
 
+    public static ServiceIdentifier safeValueOf(String s) {
+        if (s == null) {
+            return UNKNOWN;
+        }
 
+        return Arrays.stream(ServiceIdentifier.values())
+                .filter(p -> p.name().equals(s))
+                .findAny()
+                .orElse(UNKNOWN);
+    }
 }

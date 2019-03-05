@@ -11,6 +11,9 @@ package no.difi.meldingsutveksling.domain.sbdh;
 import lombok.Data;
 
 import javax.persistence.*;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -47,6 +50,9 @@ public class BusinessScope {
     @XmlElement(name = "Scope")
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "header_id", nullable = false)
+    @Size(min = 1, max = 1)
+    @NotNull
+    @Valid
     protected List<Scope> scope;
 
     /**

@@ -1,1 +1,2 @@
 no.difi.meldingsutveksling.validation.EnabledServiceValidator
+no.difi.meldingsutveksling.validation.ReceiverAcceptableServiceIdentifierValidator

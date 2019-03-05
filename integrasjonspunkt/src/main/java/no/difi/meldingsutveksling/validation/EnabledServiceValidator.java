@@ -26,7 +26,7 @@ public class EnabledServiceValidator implements ConstraintValidator<EnabledServi
         }
 
         try {
-                if (strategyFactory.getEnabledServices().contains(ServiceIdentifier.valueOf(s))) {
+            if (strategyFactory.getEnabledServices().contains(ServiceIdentifier.valueOf(s))) {
                 return true;
             }
         } catch (Exception e) {

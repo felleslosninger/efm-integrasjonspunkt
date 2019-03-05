@@ -12,12 +12,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
-import org.hibernate.annotations.DiscriminatorOptions;
+import no.difi.meldingsutveksling.validation.ReceiverAcceptableServiceIdentifier;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.*;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -60,6 +61,7 @@ import java.util.UUID;
 @Data
 @Entity
 @Table(name = "header")
+@ReceiverAcceptableServiceIdentifier
 public class StandardBusinessDocumentHeader {
 
     public enum DocumentType {KVITTERING, MELDING}
@@ -85,12 +87,14 @@ public class StandardBusinessDocumentHeader {
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "header_id", nullable = false)
     @NotEmpty
+    @Size(min = 1, max = 1)
     protected Set<Sender> sender;
 
     @XmlElement(name = "Receiver", required = true)
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "header_id", nullable = false)
     @NotEmpty
+    @Size(min = 1, max = 1)
     protected Set<Receiver> receiver;
 
     @XmlElement(name = "DocumentIdentification", required = true)
@@ -106,6 +110,7 @@ public class StandardBusinessDocumentHeader {
 
     @XmlElement(name = "BusinessScope")
     @Embedded
+    @NotNull
     @Valid
     protected BusinessScope businessScope;
 
