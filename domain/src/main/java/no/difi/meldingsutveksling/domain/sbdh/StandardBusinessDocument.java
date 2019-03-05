@@ -17,6 +17,7 @@ import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.Payload;
+import no.difi.meldingsutveksling.nextmove.BusinessMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessageDeserializer;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessageSerializer;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
@@ -77,7 +78,7 @@ public class StandardBusinessDocument {
     @XmlAnyElement(lax = true)
     @JsonDeserialize(using = NextMoveMessageDeserializer.class)
     @JsonAlias({"dpo", "dpv"})
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = BusinessMessage.class)
     protected Object any;
 
     @JsonIgnore
