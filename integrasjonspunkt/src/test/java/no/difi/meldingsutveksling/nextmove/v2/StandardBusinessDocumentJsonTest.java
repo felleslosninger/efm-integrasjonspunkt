@@ -53,7 +53,7 @@ public class StandardBusinessDocumentJsonTest {
                                 .setCreationDateAndTime(ZonedDateTime.parse("2016-04-11T15:29:58.753+02:00"))
                                 .setInstanceIdentifier("ff88849c-e281-4809-8555-7cd54952b916")
                                 .setStandard("urn:no:difi:meldingsutveksling:2.0")
-                                .setType("digitaPost/noark5json")
+                                .setType("DPO")
                                 .setTypeVersion("2.0")
                         )
                         .setHeaderVersion("1.0")

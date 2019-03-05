@@ -23,6 +23,7 @@ import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.w3c.dom.Node;
 
 import javax.persistence.*;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -69,6 +70,7 @@ public class StandardBusinessDocument {
     @XmlElement(name = "StandardBusinessDocumentHeader")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @NotNull
+    @Valid
     private StandardBusinessDocumentHeader standardBusinessDocumentHeader;
 
     @XmlAnyElement(lax = true)
