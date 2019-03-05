@@ -75,9 +75,9 @@ public class StandardBusinessDocument {
     private StandardBusinessDocumentHeader standardBusinessDocumentHeader;
 
     @XmlAnyElement(lax = true)
-    @Transient // TODO should not be transient in the end
     @JsonDeserialize(using = NextMoveMessageDeserializer.class)
     @JsonAlias({"dpo", "dpv"})
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     protected Object any;
 
     @JsonIgnore
