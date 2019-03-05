@@ -10,6 +10,7 @@ package no.difi.meldingsutveksling.domain.sbdh;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import no.difi.meldingsutveksling.validation.EnabledService;
 import no.difi.meldingsutveksling.xml.ZonedDateTimeAdapter;
 
 import javax.persistence.Embeddable;
@@ -68,6 +69,7 @@ public class DocumentIdentification {
 
     @XmlElement(name = "Type", required = true)
     @NotNull
+    @EnabledService
     protected String type;
 
     @XmlElement(name = "MultipleType")

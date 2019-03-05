@@ -13,7 +13,7 @@
             <ns2:Standard>urn:no:difi:meldingsutveksling:2.0</ns2:Standard>
             <ns2:TypeVersion>2.0</ns2:TypeVersion>
             <ns2:InstanceIdentifier>ff88849c-e281-4809-8555-7cd54952b916</ns2:InstanceIdentifier>
-            <ns2:Type>digitaPost/noark5json</ns2:Type>
+            <ns2:Type>DPO</ns2:Type>
             <ns2:CreationDateAndTime>2016-04-11T15:29:58.753+02:00</ns2:CreationDateAndTime>
         </ns2:DocumentIdentification>
         <ns2:BusinessScope>
