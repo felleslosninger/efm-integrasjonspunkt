@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlTransient;
-import java.util.Map;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -23,14 +23,9 @@ public abstract class BusinessMessage {
     @XmlTransient
     private Long id;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @MapKeyColumn(name = "fileid")
-    @Column(name = "file")
-    @CollectionTable(
-            name = "nextmove_files",
-            joinColumns = @JoinColumn(name = "id")
-    )
-    private Map<String, String> files;
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "message_id", nullable = false)
+    private Set<BusinessMessageFile> files;
 
     private String securityLevel;
 

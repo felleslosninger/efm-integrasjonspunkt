@@ -80,7 +80,7 @@ public class StandardBusinessDocumentFactory {
         List<StreamedFile> attachements = new ArrayList<>();
         if (cr.getFileRefs() != null) {
             for (String filename : cr.getFileRefs().values()) {
-                FileEntryStream fileEntryStream = messagePersister.readStream(cr, filename);
+                FileEntryStream fileEntryStream = messagePersister.readStream(cr.getConversationId(), filename);
                 String ext = Stream.of(filename.split(".")).reduce((p, e) -> e).orElse("pdf");
                 attachements.add(new NextMoveStreamedFile(filename, fileEntryStream.getInputStream(), MimeTypeExtensionMapper.getMimetype(ext)));
             }

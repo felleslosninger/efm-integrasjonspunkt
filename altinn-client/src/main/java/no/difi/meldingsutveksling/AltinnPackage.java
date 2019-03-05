@@ -3,11 +3,10 @@ package no.difi.meldingsutveksling;
 import lombok.extern.slf4j.Slf4j;
 import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceManifest;
 import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceRecipientList;
-import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
-import no.difi.meldingsutveksling.nextmove.DpoConversationResource;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.shipping.sftp.BrokerServiceManifestBuilder;
@@ -139,10 +138,7 @@ public class AltinnPackage {
             throw new MeldingsUtvekslingRuntimeException("Altinn zip does not contain BestEdu document, cannot proceed");
         }
         if (asicInputStream != null) {
-            DpoConversationResource cr = DpoConversationResource.of(sbd.getConversationId(),
-                    sbd.getSenderOrgNumber(),
-                    sbd.getReceiverOrgNumber());
-            messagePersister.writeStream(cr, ASIC_FILE, asicInputStream, asicSize);
+            messagePersister.writeStream(sbd.getConversationId(), ASIC_FILE, asicInputStream, asicSize);
         }
         zipFile.close();
         return new AltinnPackage(manifest, recipientList, sbd);

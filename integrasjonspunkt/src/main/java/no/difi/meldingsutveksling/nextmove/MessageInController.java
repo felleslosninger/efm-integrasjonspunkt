@@ -252,7 +252,7 @@ public class MessageInController {
 
         FileEntryStream fileEntry;
         try {
-            fileEntry = messagePersister.readStream(cr, ASIC_FILE);
+            fileEntry = messagePersister.readStream(cr.getConversationId(), ASIC_FILE);
         } catch (PersistenceException e) {
             Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing message from queue",
                     filename, cr.getConversationId(), cr.getSenderId()), markerFrom(cr), e);
