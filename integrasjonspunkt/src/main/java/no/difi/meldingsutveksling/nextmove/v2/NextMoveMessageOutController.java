@@ -7,16 +7,18 @@ import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.exceptions.HttpStatusCodeException;
 import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
-import org.springframework.http.ResponseEntity;
+import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
+import java.util.Locale;
 
 @RestController
 @Validated
@@ -29,6 +31,7 @@ public class NextMoveMessageOutController {
     private final StandardBusinessDocumentRepository sbdRepo;
     private final NextMoveMessageRepository messageRepo;
     private final NextMoveMessageService messageService;
+    private final MessageSource messageSource;
 
     @PostMapping
     @ApiOperation(value = "Create message", notes = "Create a new messagee with the given values")
@@ -67,13 +70,19 @@ public class NextMoveMessageOutController {
             @ApiResponse(code = 400, message = "Bad request", response = String.class)
     })
     @Transactional
-    public ResponseEntity getMessage(
-            @PathVariable("conversationId") String conversationId) {
-        Optional<NextMoveMessage> message = messageRepo.findByConversationId(conversationId);
-        if (message.isPresent()) {
-            return ResponseEntity.ok(message.get().getSbd());
-        }
-        return ResponseEntity.notFound().build();
+    public StandardBusinessDocument getMessage(Locale locale,
+                                               @PathVariable("conversationId") String conversationId) {
+
+        return messageRepo.findByConversationId(conversationId)
+                .map(NextMoveMessage::getSbd)
+                .orElseThrow(() -> new HttpStatusCodeException(
+                                HttpStatus.NOT_FOUND,
+                                messageSource.getMessage(
+                                        "no.difi.meldingsutveksling.nextmove.message.notFound",
+                                        new Object[]{"conversationId", conversationId},
+                                        locale)
+                        )
+                );
     }
 
 }
