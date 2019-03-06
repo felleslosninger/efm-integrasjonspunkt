@@ -8,12 +8,12 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import no.difi.meldingsutveksling.nextmove.AbstractEntity;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.*;
@@ -46,16 +46,12 @@ import javax.xml.bind.annotation.*;
         "description",
         "languageCode"
 })
-@Data
+@Getter
+@Setter
+@ToString
 @Entity
 @Table(name = "manifest_item")
-public class ManifestItem {
-
-    @Id
-    @GeneratedValue
-    @JsonIgnore
-    @XmlTransient
-    private Long id;
+public class ManifestItem extends AbstractEntity<Long> {
 
     @XmlElement(name = "MimeTypeQualifierCode", required = true)
     @NotNull

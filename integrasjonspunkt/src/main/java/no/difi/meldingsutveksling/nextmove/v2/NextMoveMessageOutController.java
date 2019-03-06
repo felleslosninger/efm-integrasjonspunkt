@@ -1,19 +1,18 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
-import com.google.common.collect.Sets;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.exceptions.HttpStatusCodeException;
+import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
-import org.springframework.context.MessageSource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -22,10 +21,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-
 
 @RestController
 @Validated
@@ -39,8 +40,8 @@ public class NextMoveMessageOutController {
     private final NextMoveMessageRepository messageRepo;
     private final NextMoveMessageService messageService;
     private final MessagePersister messagePersister;
-    private final MessageSource messageSource;
     private final InternalQueue internalQueue;
+
 
     @PostMapping
     @ApiOperation(value = "Create message", notes = "Create a new messagee with the given values")
@@ -50,7 +51,7 @@ public class NextMoveMessageOutController {
     })
     @Transactional
     public StandardBusinessDocument createMessage(
-            @Valid @RequestBody StandardBusinessDocument sbd) throws NextMoveException {
+            @Valid @RequestBody StandardBusinessDocument sbd) {
 
         sbd = messageService.setDefaults(sbd);
         NextMoveMessage message = NextMoveMessage.of(sbd.getConversationId(), sbd.getReceiverOrgNumber(), sbd);
@@ -59,7 +60,6 @@ public class NextMoveMessageOutController {
         return sbd;
     }
 
-
     @GetMapping
     @ApiOperation(value = "Get all messages", notes = "Returns all queued messages")
     @ApiResponses({
@@ -67,8 +67,10 @@ public class NextMoveMessageOutController {
             @ApiResponse(code = 400, message = "Bad request", response = String.class)
     })
     @Transactional
-    public List<StandardBusinessDocument> getAllMessages() {
-        return sbdRepo.findAll();
+    public Page<StandardBusinessDocument> getMessages(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+        return sbdRepo.findAll(new PageRequest(page, size));
     }
 
 
@@ -79,19 +81,10 @@ public class NextMoveMessageOutController {
             @ApiResponse(code = 400, message = "Bad request", response = String.class)
     })
     @Transactional
-    public StandardBusinessDocument getMessage(Locale locale,
-                                               @PathVariable("conversationId") String conversationId) {
-
+    public StandardBusinessDocument getMessage(@PathVariable("conversationId") String conversationId) {
         return messageRepo.findByConversationId(conversationId)
                 .map(NextMoveMessage::getSbd)
-                .orElseThrow(() -> new HttpStatusCodeException(
-                                HttpStatus.NOT_FOUND,
-                                messageSource.getMessage(
-                                        "no.difi.meldingsutveksling.nextmove.message.notFound",
-                                        new Object[]{"conversationId", conversationId},
-                                        locale)
-                        )
-                );
+                .orElseThrow(() -> new ConversationNotFoundException(conversationId));
     }
 
 
@@ -111,19 +104,14 @@ public class NextMoveMessageOutController {
             @RequestParam(value = "mimetype", required = false) String mimetype,
             @ApiParam(value = "File title")
             @RequestParam(value = "title", required = false) String title,
-            @ApiParam(value = "Flag for primary odcument")
+            @ApiParam(value = "Flag for primary document")
             @RequestParam(value = "primaryDocument", required = false, defaultValue = "false") boolean primaryDocument,
             HttpServletRequest request) throws NextMoveException {
 
-        Optional<NextMoveMessage> find = messageRepo.findByConversationId(conversationId);
-        if (!find.isPresent()) {
-            return ResponseEntity.notFound().build();
-        }
-        NextMoveMessage message = find.get();
-        Set<BusinessMessageFile> files = message.getFiles();
-        if (files == null) {
-            files = Sets.newHashSet();
-        }
+        NextMoveMessage message = messageRepo.findByConversationId(conversationId)
+                .orElseThrow(() -> new ConversationNotFoundException(conversationId));
+
+        Set<BusinessMessageFile> files = Optional.ofNullable(message.getFiles()).orElseGet(HashSet::new);
 
         if (primaryDocument && files.stream().anyMatch(BusinessMessageFile::getPrimaryDocument)) {
             return ResponseEntity.badRequest().body("Messages can only contain one primary document");
@@ -151,7 +139,6 @@ public class NextMoveMessageOutController {
 
         return ResponseEntity.ok().build();
     }
-
 
     @PostMapping("/{conversationId}")
     @ApiOperation(value = "Send message", notes = "Send the message with supplied conversationId")

@@ -73,7 +73,7 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
                 String errorStr = String.format("Startup failed. Offset from NTP host %s was more than 5 seconds (%sms). Adjust local clock and try again.", host, offset);
                 log.error(errorStr);
                 String stars = "\n**************************\n";
-                System.out.println(stars+errorStr+stars);
+                System.out.println(stars + errorStr + stars);
                 context.close();
             }
         } catch (IOException e) {

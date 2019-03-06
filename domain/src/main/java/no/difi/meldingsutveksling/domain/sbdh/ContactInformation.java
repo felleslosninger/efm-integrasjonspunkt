@@ -8,15 +8,18 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import no.difi.meldingsutveksling.nextmove.AbstractEntity;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
 
 
 /**
@@ -48,16 +51,12 @@ import javax.xml.bind.annotation.*;
         "telephoneNumber",
         "contactTypeIdentifier"
 })
-@Data
+@Getter
+@Setter
+@ToString
 @Entity
 @Table(name = "contact_information")
-public class ContactInformation {
-
-    @Id
-    @GeneratedValue
-    @JsonIgnore
-    @XmlTransient
-    private Long id;
+public class ContactInformation extends AbstractEntity<Long> {
 
     @XmlElement(name = "Contact", required = true)
     @NotNull

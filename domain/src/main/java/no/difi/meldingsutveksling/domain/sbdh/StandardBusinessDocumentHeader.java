@@ -9,9 +9,12 @@
 package no.difi.meldingsutveksling.domain.sbdh;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.nextmove.AbstractEntity;
 import no.difi.meldingsutveksling.validation.ReceiverAcceptableServiceIdentifier;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -19,7 +22,10 @@ import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -58,11 +64,13 @@ import java.util.UUID;
         "manifest",
         "businessScope"
 })
-@Data
+@Getter
+@Setter
+@ToString
 @Entity
 @Table(name = "header")
 @ReceiverAcceptableServiceIdentifier
-public class StandardBusinessDocumentHeader {
+public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
 
     public enum DocumentType {KVITTERING, MELDING}
 
@@ -72,12 +80,6 @@ public class StandardBusinessDocumentHeader {
     public static final String MELDING_TYPE = "melding";
     public static final String MELDING_VERSION = "urn:no:difi:meldingsutveksling:1.0";
     public static final String NEXTMOVE_TYPE = "nextmove";
-
-    @Id
-    @GeneratedValue
-    @JsonIgnore
-    @XmlTransient
-    private Long id;
 
     @XmlElement(name = "HeaderVersion", required = true)
     @NotNull

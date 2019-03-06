@@ -1,6 +1,8 @@
 package no.difi.meldingsutveksling.config;
 
+import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.exceptions.HttpStatusCodeException;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
@@ -10,7 +12,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component
+@RequiredArgsConstructor
 public class IntegrasjonspunktHandlerExceptionResolver extends DefaultHandlerExceptionResolver {
+
+    private final MessageSource messageSource;
 
     @Override
     protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
@@ -31,7 +36,8 @@ public class IntegrasjonspunktHandlerExceptionResolver extends DefaultHandlerExc
 
     protected ModelAndView handleHttpStatusCodeException(HttpStatusCodeException ex,
                                                          HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
-        response.sendError(ex.getStatusCode().value(), ex.getMessage());
+        response.sendError(ex.getStatusCode().value(),
+                messageSource.getMessage(ex.getMessage(), ex.getArgs(), request.getLocale()));
         return new ModelAndView();
     }
 }

@@ -1,21 +1,15 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 
 @Entity
-@Data
+@Getter
+@Setter
+@ToString
 @Builder
-public class BusinessMessageFile {
-
-    @Id
-    @GeneratedValue
-    @JsonIgnore
-    private String id;
+public class BusinessMessageFile extends AbstractEntity<Long> {
 
     @NonNull
     private String identifier;
