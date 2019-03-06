@@ -10,6 +10,7 @@ import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
+import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -39,6 +40,7 @@ public class NextMoveMessageOutController {
     private final NextMoveMessageService messageService;
     private final MessagePersister messagePersister;
     private final MessageSource messageSource;
+    private final InternalQueue internalQueue;
 
     @PostMapping
     @ApiOperation(value = "Create message", notes = "Create a new messagee with the given values")
@@ -93,7 +95,7 @@ public class NextMoveMessageOutController {
     }
 
 
-    @PostMapping("/{conversationId}")
+    @PostMapping("/{conversationId}/upload")
     @ApiOperation(value = "Upload file", notes = "Upload a file to the message with supplied conversationId")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
@@ -147,6 +149,19 @@ public class NextMoveMessageOutController {
         files.add(bmfBuilder.build());
         messageRepo.save(message);
 
+        return ResponseEntity.ok().build();
+    }
+
+
+    @PostMapping("/{conversationId}")
+    @ApiOperation(value = "Send message", notes = "Send the message with supplied conversationId")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
+            @ApiResponse(code = 400, message = "Bad request", response = String.class)
+    })
+    @Transactional
+    public ResponseEntity sendMessage(@PathVariable("conversationId") String conversationId) {
+        messageRepo.findByConversationId(conversationId);
         return ResponseEntity.ok().build();
     }
 

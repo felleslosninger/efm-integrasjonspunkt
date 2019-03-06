@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.*;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
@@ -8,6 +9,8 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
+import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.NextMoveSender;
 import no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers;
 import no.difi.meldingsutveksling.noarkexchange.*;
@@ -51,6 +54,7 @@ public class InternalQueue {
     private static final String EXTERNAL = "external";
     private static final String NOARK = "noark";
     private static final String NEXTMOVE = "nextmove";
+    private static final String NEXTMOVE_2 = "nextmove_2";
     private static final String PUTMSG = "putmessage";
     private static final String DLQ = "ActiveMQ.DLQ";
 
@@ -108,6 +112,16 @@ public class InternalQueue {
         } catch (Exception e) {
             Audit.warn("Failed to send message... queue will retry", ConversationResourceMarkers.markerFrom(cr), e);
             throw new MeldingsUtvekslingRuntimeException(e);
+        }
+    }
+
+    @JmsListener(destination = NEXTMOVE_2, containerFactory = "myJmsContainerFactory", concurrency = "100")
+    public void nextMove2Listener(byte[] message, Session session) {
+        ObjectMapper om = new ObjectMapper();
+        try {
+            om.readValue(message, NextMoveMessage.class);
+        } catch (IOException e) {
+            throw new NextMoveRuntimeException("Unable to unmarshall NextMove message from queue", e);
         }
     }
 
@@ -270,6 +284,17 @@ public class InternalQueue {
             Audit.error("Unable to queue message", markerFrom(cr), e);
             throw new MeldingsUtvekslingRuntimeException(e);
         }
+    }
+
+    public void enqueueNextMove2(NextMoveMessage msg) {
+        ObjectMapper om = new ObjectMapper();
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            om.writeValue(bos, msg);
+            jmsTemplate.convertAndSend(NEXTMOVE_2, bos.toByteArray());
+        } catch (IOException e) {
+            throw new NextMoveRuntimeException(String.format("Unable to marshall NextMove message with id=%s", msg.getConversationId()), e);
+        }
+
     }
 
     /**
