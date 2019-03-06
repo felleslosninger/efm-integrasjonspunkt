@@ -8,13 +8,18 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import no.difi.meldingsutveksling.nextmove.AbstractEntity;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -44,16 +49,12 @@ import java.util.Set;
         "identifier",
         "scopeInformation"
 })
-@Data
+@Getter
+@Setter
+@ToString
 @Entity
 @Table(name = "scope")
-public class Scope {
-
-    @Id
-    @GeneratedValue
-    @JsonIgnore
-    @XmlTransient
-    private Long id;
+public class Scope extends AbstractEntity<Long> {
 
     @XmlElement(name = "Type", required = true)
     @NotNull

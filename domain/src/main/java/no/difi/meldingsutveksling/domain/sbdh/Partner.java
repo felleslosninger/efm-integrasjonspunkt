@@ -8,14 +8,19 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import no.difi.meldingsutveksling.nextmove.AbstractEntity;
 import org.hibernate.annotations.DiscriminatorOptions;
 
 import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -43,19 +48,15 @@ import java.util.Set;
         "identifier",
         "contactInformation"
 })
-@Data
+@Getter
+@Setter
+@ToString
 @Entity
 @Table(name = "partner")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING)
 @DiscriminatorOptions(force = true)
-public class Partner {
-
-    @Id
-    @GeneratedValue
-    @JsonIgnore
-    @XmlTransient
-    private Long id;
+public class Partner extends AbstractEntity<Long> {
 
     @XmlElement(name = "Identifier", required = true)
     @Embedded

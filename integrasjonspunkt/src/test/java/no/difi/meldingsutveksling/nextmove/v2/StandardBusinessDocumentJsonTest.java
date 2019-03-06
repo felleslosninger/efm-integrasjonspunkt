@@ -33,7 +33,8 @@ public class StandardBusinessDocumentJsonTest {
 
     @Test
     public void testDeserialize() throws Exception {
-        assertThat(json.read("/sbd/StandardBusinessDocument.json")).isEqualTo(getDocument());
+        assertThat(json.read("/sbd/StandardBusinessDocument.json").getObject().toString())
+                .isEqualTo(getDocument().toString());
     }
 
     private StandardBusinessDocument getDocument() {

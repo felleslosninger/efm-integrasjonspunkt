@@ -1,0 +1,33 @@
+package no.difi.meldingsutveksling.nextmove;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
+import javax.xml.bind.annotation.XmlTransient;
+
+@MappedSuperclass
+public abstract class AbstractEntity<I> {
+
+    @Id
+    @GeneratedValue
+    @JsonIgnore
+    @XmlTransient
+    @Getter
+    private I id;
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(getClass().isInstance(o))) return false;
+        AbstractEntity<I> entity = (AbstractEntity<I>) o;
+        return id != null && id.equals(entity.id);
+    }
+
+    @Override
+    public final int hashCode() {
+        return 31;
+    }
+}

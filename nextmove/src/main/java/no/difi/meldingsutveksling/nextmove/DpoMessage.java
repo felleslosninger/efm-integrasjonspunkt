@@ -1,14 +1,14 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@Data
+@Getter
+@Setter
+@ToString
 @Entity
 @DiscriminatorValue("dpo")
 @AllArgsConstructor

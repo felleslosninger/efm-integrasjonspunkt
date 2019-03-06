@@ -48,7 +48,7 @@ public class StandardBusinessDocumentJaxbTest {
         StandardBusinessDocument document = unmarshaller.unmarshal(new StreamSource(
                         getClass().getResourceAsStream("/sbd/StandardBusinessDocument.xml")),
                 StandardBusinessDocument.class).getValue();
-        assertThat(document).isEqualTo(getDocument());
+        assertThat(document.toString()).isEqualTo(getDocument().toString());
     }
 
     private StandardBusinessDocument getDocument() {

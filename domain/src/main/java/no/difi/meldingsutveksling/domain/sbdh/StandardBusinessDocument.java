@@ -12,11 +12,14 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.Payload;
+import no.difi.meldingsutveksling.nextmove.AbstractEntity;
 import no.difi.meldingsutveksling.nextmove.BusinessMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessageDeserializer;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessageSerializer;
@@ -56,17 +59,13 @@ import java.util.Optional;
         "standardBusinessDocumentHeader",
         "any"
 })
-@Data
+@Getter
+@Setter
+@ToString
 @Entity
 @Table(name = "document")
 @JsonSerialize(using = NextMoveMessageSerializer.class)
-public class StandardBusinessDocument {
-
-    @Id
-    @GeneratedValue
-    @JsonIgnore
-    @XmlTransient
-    private Long id;
+public class StandardBusinessDocument extends AbstractEntity<Long> {
 
     @XmlElement(name = "StandardBusinessDocumentHeader")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)

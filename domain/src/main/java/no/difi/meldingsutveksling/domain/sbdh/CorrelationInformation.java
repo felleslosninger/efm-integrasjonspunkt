@@ -9,11 +9,14 @@
 package no.difi.meldingsutveksling.domain.sbdh;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import no.difi.meldingsutveksling.nextmove.AbstractEntity;
 import no.difi.meldingsutveksling.xml.ZonedDateTimeAdapter;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.time.ZonedDateTime;
@@ -44,16 +47,12 @@ import java.time.ZonedDateTime;
         "requestingDocumentInstanceIdentifier",
         "expectedResponseDateTime"
 })
-@Data
+@Getter
+@Setter
+@ToString
 @Entity
 @Table(name = "correlation_information")
-public class CorrelationInformation {
-
-    @Id
-    @GeneratedValue
-    @JsonIgnore
-    @XmlTransient
-    private Long id;
+public class CorrelationInformation extends AbstractEntity<Long> {
 
     @XmlElement(name = "RequestingDocumentCreationDateTime")
     @XmlSchemaType(name = "dateTime")
