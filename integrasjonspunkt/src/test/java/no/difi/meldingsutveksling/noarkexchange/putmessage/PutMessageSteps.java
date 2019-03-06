@@ -11,8 +11,8 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.sbdh.BusinessScope;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
@@ -35,7 +35,6 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.cert.CertificateException;
-import java.util.ArrayList;
 
 import static org.mockito.Mockito.*;
 
@@ -88,10 +87,7 @@ public class PutMessageSteps {
     private StandardBusinessDocument createStandardBusinessDocument() {
         StandardBusinessDocument sbd = new StandardBusinessDocument();
         StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader();
-        BusinessScope scope = new BusinessScope();
-        ArrayList<Scope> scopes = new ArrayList<>();
-        scopes.add(new Scope());
-        scope.setScope(scopes);
+        BusinessScope scope = new BusinessScope().addScope(new Scope());
         header.setBusinessScope(scope);
         sbd.setStandardBusinessDocumentHeader(header);
         return sbd;

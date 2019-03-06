@@ -245,7 +245,7 @@ public class StandardBusinessDocumentHeader {
 
         private BusinessScope createBusinessScope(Scope... scopes) {
             return new BusinessScope()
-                    .setScope(Arrays.asList(scopes));
+                    .setScope(new HashSet<>(Arrays.asList(scopes)));
         }
 
         private Scope fromJournalPostId(String journalPostId) {

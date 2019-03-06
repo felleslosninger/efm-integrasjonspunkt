@@ -18,8 +18,9 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 
 /**
@@ -53,7 +54,7 @@ public class BusinessScope {
     @Size(min = 1, max = 1)
     @NotNull
     @Valid
-    protected List<Scope> scope;
+    protected Set<Scope> scope;
 
     /**
      * Gets the value of the scope property.
@@ -75,15 +76,20 @@ public class BusinessScope {
      * Objects of the following type(s) are allowed in the list
      * {@link Scope }
      */
-    public List<Scope> getScope() {
+    public Set<Scope> getScope() {
         if (scope == null) {
-            scope = new ArrayList<>();
+            scope = new HashSet<>();
         }
         return this.scope;
     }
 
     public BusinessScope addScope(Scope scope) {
         getScope().add(scope);
+        return this;
+    }
+
+    public BusinessScope addScopes(Scope... scopes) {
+        getScope().addAll(Arrays.asList(scopes));
         return this;
     }
 

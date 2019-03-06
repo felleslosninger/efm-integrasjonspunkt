@@ -30,7 +30,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.*;
-import java.util.List;
 import java.util.Optional;
 
 
@@ -112,13 +111,11 @@ public class StandardBusinessDocument {
     }
 
     private Optional<Scope> findScope(ScopeType scopeType) {
-        final List<Scope> scopes = getStandardBusinessDocumentHeader().getBusinessScope().getScope();
-        for (Scope scope : scopes) {
-            if (scopeType.toString().equals(scope.getType())) {
-                return Optional.of(scope);
-            }
-        }
-        return Optional.empty();
+        return getStandardBusinessDocumentHeader().getBusinessScope()
+                .getScope()
+                .stream()
+                .filter(scope -> scopeType.toString().equals(scope.getType()))
+                .findAny();
     }
 
     @JsonIgnore

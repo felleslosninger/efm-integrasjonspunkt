@@ -4,7 +4,6 @@ import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.UUID;
 
 import static no.difi.meldingsutveksling.dokumentpakking.service.ScopeFactory.fromConversationId;
@@ -60,6 +59,6 @@ public class CreateSBD {
     }
 
     private BusinessScope createBusinessScope(Scope... scopes) {
-        return new BusinessScope().setScope(Arrays.asList(scopes));
+        return new BusinessScope().addScopes(scopes);
     }
 }
