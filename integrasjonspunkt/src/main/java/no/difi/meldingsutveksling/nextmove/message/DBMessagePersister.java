@@ -52,11 +52,11 @@ public class DBMessagePersister implements MessagePersister {
 
     @Override
     @Transactional
-    public void writeStream(ConversationResource cr, String filename, InputStream stream, long size) throws IOException {
+    public void writeStream(String conversationId, String filename, InputStream stream, long size) throws IOException {
         LobHelper lobHelper = em.unwrap(Session.class).getLobHelper();
         Blob contentBlob = lobHelper.createBlob(stream, stream.available());
 
-        NextMoveMessageEntry entry = NextMoveMessageEntry.of(cr.getConversationId(), filename, contentBlob, size);
+        NextMoveMessageEntry entry = NextMoveMessageEntry.of(conversationId, filename, contentBlob, size);
         repo.save(entry);
 
     }
@@ -77,8 +77,8 @@ public class DBMessagePersister implements MessagePersister {
     }
 
     @Override
-    public FileEntryStream readStream(ConversationResource cr, String filename) throws PersistenceException {
-        Optional<NextMoveMessageEntry> entry = repo.findByConversationIdAndFilename(cr.getConversationId(), filename);
+    public FileEntryStream readStream(String conversationId, String filename) throws PersistenceException {
+        Optional<NextMoveMessageEntry> entry = repo.findByConversationIdAndFilename(conversationId, filename);
         if (entry.isPresent()) {
             try {
                 return FileEntryStream.of(entry.get().getContent().getBinaryStream(), entry.get().getSize());
@@ -86,7 +86,7 @@ public class DBMessagePersister implements MessagePersister {
                 throw new PersistenceException("Error reading data stream from database", e);
             }
         }
-        throw new PersistenceException(String.format("Entry for conversationId=%s, filename=%s not found in database", cr.getConversationId(), filename));
+        throw new PersistenceException(String.format("Entry for conversationId=%s, filename=%s not found in database", conversationId, filename));
     }
 
     @Override

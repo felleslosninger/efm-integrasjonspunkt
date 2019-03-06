@@ -9,11 +9,11 @@ import java.io.InputStream;
 public interface MessagePersister {
 
     void write(ConversationResource cr, String filename, byte[] message) throws IOException;
-    void writeStream(ConversationResource cr, String filename, InputStream stream, long size) throws IOException;
+    void writeStream(String conversationId, String filename, InputStream stream, long size) throws IOException;
 
 
     byte[] read(ConversationResource cr, String filename) throws IOException;
-    FileEntryStream readStream(ConversationResource cr, String filename) throws PersistenceException;
+    FileEntryStream readStream(String conversationId, String filename) throws PersistenceException;
 
 
     void delete(ConversationResource cr) throws IOException;

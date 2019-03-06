@@ -51,8 +51,8 @@ public class FileMessagePersisterTest {
         byte[] content = "bar".getBytes(UTF_8);
         ByteArrayInputStream bis = new ByteArrayInputStream(content);
 
-        messagePersister.writeStream(cr, filename, bis, content.length);
-        FileEntryStream fileEntry = messagePersister.readStream(cr, filename);
+        messagePersister.writeStream(cr.getConversationId(), filename, bis, content.length);
+        FileEntryStream fileEntry = messagePersister.readStream(cr.getConversationId(), filename);
 
         byte[] bytes = IOUtils.toByteArray(fileEntry.getInputStream());
         Assert.assertArrayEquals(content, bytes);

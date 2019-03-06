@@ -214,7 +214,7 @@ public class MessageOutController {
         }
 
         try {
-            messagePersister.writeStream(cr, filename,
+            messagePersister.writeStream(cr.getConversationId(), filename,
                     request.getInputStream(),
                     Long.valueOf(request.getHeader(HttpHeaders.CONTENT_LENGTH)));
         } catch (IOException e) {
@@ -284,7 +284,7 @@ public class MessageOutController {
                     messagePersister.write(cr, file.getOriginalFilename(),
                             Base64.getDecoder().decode(new String(file.getBytes()).getBytes(StandardCharsets.UTF_8)));
                 } else {
-                    messagePersister.writeStream(cr, file.getOriginalFilename(), file.getInputStream(), file.getSize());
+                    messagePersister.writeStream(cr.getConversationId(), file.getOriginalFilename(), file.getInputStream(), file.getSize());
                 }
 
                 if (!cr.getFileRefs().values().contains(file.getOriginalFilename())) {
