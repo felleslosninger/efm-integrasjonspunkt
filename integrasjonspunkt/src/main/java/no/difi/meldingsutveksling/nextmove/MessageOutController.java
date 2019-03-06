@@ -51,7 +51,7 @@ import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
-import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
+import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 

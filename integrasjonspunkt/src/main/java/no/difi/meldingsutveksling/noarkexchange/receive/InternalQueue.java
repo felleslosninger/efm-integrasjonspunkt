@@ -12,7 +12,7 @@ import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.NextMoveSender;
-import no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers;
+import no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers;
 import no.difi.meldingsutveksling.noarkexchange.*;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
@@ -37,7 +37,7 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
-import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
+import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
 
 /**
  * The idea behind this queue is to avoid loosing messages before they are saved in Noark System.
@@ -110,7 +110,7 @@ public class InternalQueue {
         try {
             nextMoveSender.send(cr);
         } catch (Exception e) {
-            Audit.warn("Failed to send message... queue will retry", ConversationResourceMarkers.markerFrom(cr), e);
+            Audit.warn("Failed to send message... queue will retry", NextMoveMessageMarkers.markerFrom(cr), e);
             throw new MeldingsUtvekslingRuntimeException(e);
         }
     }
@@ -119,7 +119,8 @@ public class InternalQueue {
     public void nextMove2Listener(byte[] message, Session session) {
         ObjectMapper om = new ObjectMapper();
         try {
-            om.readValue(message, NextMoveMessage.class);
+            NextMoveMessage nextMoveMessage = om.readValue(message, NextMoveMessage.class);
+
         } catch (IOException e) {
             throw new NextMoveRuntimeException("Unable to unmarshall NextMove message from queue", e);
         }
@@ -194,7 +195,7 @@ public class InternalQueue {
         try {
             ConversationResource cr = unmarshalNextMoveMessage(message);
             errorMsg = "Failed to send message. Moved to DLQ";
-            Audit.error(errorMsg, ConversationResourceMarkers.markerFrom(cr));
+            Audit.error(errorMsg, NextMoveMessageMarkers.markerFrom(cr));
             conversationId = cr.getConversationId();
         } catch (Exception e) {
         }

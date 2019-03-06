@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.lang.String.format;
-import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
+import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
 
 @Component
 public class DpeConversationStrategy implements ConversationStrategy {

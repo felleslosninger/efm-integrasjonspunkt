@@ -38,7 +38,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
-import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
+import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
 
 @RestController
 @Api

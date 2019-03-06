@@ -19,8 +19,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
+import static no.difi.meldingsutveksling.ServiceIdentifier.UNKNOWN;
 
 public class ReceiverAcceptableServiceIdentifierValidator implements ConstraintValidator<ReceiverAcceptableServiceIdentifier, StandardBusinessDocumentHeader> {
 
@@ -43,12 +42,6 @@ public class ReceiverAcceptableServiceIdentifierValidator implements ConstraintV
         ServiceIdentifier serviceIdentifier = getServiceIdentifier(header);
         Set<ServiceIdentifier> acceptableServiceIdentifiers = new HashSet<>(getAcceptableServiceIdentifiers(header));
 
-        if (serviceIdentifier == DPI &&
-                !acceptableServiceIdentifiers.contains(DPI) &&
-                acceptableServiceIdentifiers.contains(DPV)) {
-            acceptableServiceIdentifiers.add(DPI);
-        }
-
         if (acceptableServiceIdentifiers.contains(serviceIdentifier)) {
             return true;
         }
@@ -70,7 +63,7 @@ public class ReceiverAcceptableServiceIdentifierValidator implements ConstraintV
             return ServiceIdentifier.UNKNOWN;
         }
 
-        return ServiceIdentifier.safeValueOf(documentIdentification.getType());
+        return ServiceIdentifier.safeValueOf(documentIdentification.getType()).orElse(UNKNOWN);
     }
 
     private List<ServiceIdentifier> getAcceptableServiceIdentifiers(StandardBusinessDocumentHeader header) {

@@ -46,4 +46,8 @@ public class ConversationStrategyFactory {
     public Optional<ConversationStrategy> getStrategy(ConversationResource conversationResource) {
         return Optional.ofNullable(strategies.get(conversationResource.getServiceIdentifier()));
     }
+
+    public Optional<ConversationStrategy> getStrategy(NextMoveMessage nextMoveMessage) {
+        return Optional.ofNullable(strategies.get(nextMoveMessage.getServiceIdentifier()));
+    }
 }

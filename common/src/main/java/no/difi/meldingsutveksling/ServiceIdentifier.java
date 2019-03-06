@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling;
 
+import com.google.common.base.Strings;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -7,6 +8,7 @@ import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 import java.util.Arrays;
+import java.util.Optional;
 
 @XmlType
 @XmlEnum(String.class)
@@ -21,19 +23,18 @@ public enum ServiceIdentifier {
     @XmlEnumValue("DPE_INNSYN") DPE_INNSYN("DPE_innsyn", null),
     @XmlEnumValue("DPE_DATA") DPE_DATA("DPE_data", null),
     @XmlEnumValue("DPE_RECEIPT") DPE_RECEIPT("DPE_RECEIPT", null),
-    UNKNOWN("ukjent", null);
+    UNKNOWN("UNKNOWN", null);
 
     private final String fullname;
     private final String standard;
 
-    public static ServiceIdentifier safeValueOf(String s) {
-        if (s == null) {
-            return UNKNOWN;
+    public static Optional<ServiceIdentifier> safeValueOf(String s) {
+        if (Strings.isNullOrEmpty(s)) {
+            return Optional.empty();
         }
 
         return Arrays.stream(ServiceIdentifier.values())
-                .filter(p -> p.name().equals(s))
-                .findAny()
-                .orElse(UNKNOWN);
+                .filter(p -> p.name().equals(s.toUpperCase()))
+                .findAny();
     }
 }

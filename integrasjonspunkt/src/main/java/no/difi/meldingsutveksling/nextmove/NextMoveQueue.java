@@ -27,7 +27,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
-import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
+import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
 
 @Component
 public class NextMoveQueue {

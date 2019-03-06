@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 
 import javax.persistence.*;
@@ -26,12 +27,21 @@ public class NextMoveMessage {
     @NonNull
     private String receiverIdentifier;
     @NonNull
+    private String senderIdentifier;
+    @NonNull
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private StandardBusinessDocument sbd;
 
     @JsonIgnore
     public Set<BusinessMessageFile> getFiles() throws NextMoveException {
         return getBusinessMessage().getFiles();
+    }
+
+    @JsonIgnore
+    public ServiceIdentifier getServiceIdentifier() {
+        String diType = sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getType();
+        return ServiceIdentifier.safeValueOf(diType).orElseThrow(() ->
+                new NextMoveRuntimeException(String.format("Could not create ServiceIdentifier from documentIdentification.type=%s for message with id=%s", diType, getConversationId())));
     }
 
     private BusinessMessage getBusinessMessage() throws NextMoveException {

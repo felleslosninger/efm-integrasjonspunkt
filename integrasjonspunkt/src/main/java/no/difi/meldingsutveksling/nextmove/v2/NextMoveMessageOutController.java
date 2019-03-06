@@ -54,7 +54,7 @@ public class NextMoveMessageOutController {
             @Valid @RequestBody StandardBusinessDocument sbd) {
 
         sbd = messageService.setDefaults(sbd);
-        NextMoveMessage message = NextMoveMessage.of(sbd.getConversationId(), sbd.getReceiverOrgNumber(), sbd);
+        NextMoveMessage message = NextMoveMessage.of(sbd.getConversationId(), sbd.getReceiverOrgNumber(), sbd.getSenderOrgNumber(), sbd);
         messageRepo.save(message);
 
         return sbd;
@@ -91,8 +91,8 @@ public class NextMoveMessageOutController {
     @PostMapping("/{conversationId}/upload")
     @ApiOperation(value = "Upload file", notes = "Upload a file to the message with supplied conversationId")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
-            @ApiResponse(code = 400, message = "Bad request", response = String.class)
+            @ApiResponse(code = 200, message = "Success"),
+            @ApiResponse(code = 400, message = "Bad request")
     })
     @Transactional
     public ResponseEntity uploadFile(
@@ -148,7 +148,9 @@ public class NextMoveMessageOutController {
     })
     @Transactional
     public ResponseEntity sendMessage(@PathVariable("conversationId") String conversationId) {
-        messageRepo.findByConversationId(conversationId);
+        NextMoveMessage message = messageRepo.findByConversationId(conversationId)
+                .orElseThrow(() -> new ConversationNotFoundException(conversationId));
+        internalQueue.enqueueNextMove2(message);
         return ResponseEntity.ok().build();
     }
 

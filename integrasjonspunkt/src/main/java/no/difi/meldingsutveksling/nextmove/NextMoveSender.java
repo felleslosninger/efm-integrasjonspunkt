@@ -3,10 +3,11 @@ package no.difi.meldingsutveksling.nextmove;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
+import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageRepository;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
@@ -14,7 +15,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
-import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
+import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
 
 @Component
 @Slf4j
@@ -23,17 +24,31 @@ public class NextMoveSender {
     private ConversationStrategyFactory strategyFactory;
     private ConversationService conversationService;
     private MessagePersister messagePersister;
+    private NextMoveMessageRepository messageRepo;
     private DirectionalConversationResourceRepository outRepo;
 
-    @Autowired
     public NextMoveSender(ConversationStrategyFactory strategyFactory,
                           ConversationService conversationService,
-                          MessagePersister messagePersister,
-                          ConversationResourceRepository repo) {
+                          ObjectProvider<MessagePersister> messagePersister,
+                          NextMoveMessageRepository messageRepo, ConversationResourceRepository repo) {
         this.strategyFactory = strategyFactory;
         this.conversationService = conversationService;
-        this.messagePersister = messagePersister;
+        this.messagePersister = messagePersister.getIfUnique();
+        this.messageRepo = messageRepo;
         this.outRepo = new DirectionalConversationResourceRepository(repo, OUTGOING);
+    }
+
+    @Transactional
+    public void send(NextMoveMessage msg) {
+        Optional<ConversationStrategy> strategy = strategyFactory.getStrategy(msg);
+        if (!strategy.isPresent()) {
+            String errorStr = String.format("Cannot send message - serviceIdentifier \"%s\" not supported",
+                    msg.getServiceIdentifier());
+            log.error(markerFrom(msg), errorStr);
+            throw new NextMoveRuntimeException(errorStr);
+        }
+
+        // TODO send message
     }
 
     @Transactional
