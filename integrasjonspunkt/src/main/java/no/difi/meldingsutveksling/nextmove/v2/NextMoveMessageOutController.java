@@ -4,7 +4,9 @@ import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.exceptions.ConversationAlreadyExistsException;
 import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
+import no.difi.meldingsutveksling.exceptions.MultiplePrimaryDocumentsNotAllowedException;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
@@ -13,7 +15,6 @@ import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +27,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.base.Strings.emptyToNull;
 
 @RestController
 @Validated
@@ -52,6 +53,12 @@ public class NextMoveMessageOutController {
     @Transactional
     public StandardBusinessDocument createMessage(
             @Valid @RequestBody StandardBusinessDocument sbd) {
+
+        sbd.getOptionalConversationId()
+                .flatMap(messageRepo::findByConversationId)
+                .map(p -> {
+                    throw new ConversationAlreadyExistsException(p.getConversationId());
+                });
 
         sbd = messageService.setDefaults(sbd);
         NextMoveMessage message = NextMoveMessage.of(sbd.getConversationId(), sbd.getReceiverOrgNumber(), sbd.getSenderOrgNumber(), sbd);
@@ -95,7 +102,7 @@ public class NextMoveMessageOutController {
             @ApiResponse(code = 400, message = "Bad request")
     })
     @Transactional
-    public ResponseEntity uploadFile(
+    public void uploadFile(
             @ApiParam(value = "ConversationId", required = true)
             @PathVariable("conversationId") String conversationId,
             @ApiParam(value = "File name", required = true)
@@ -114,7 +121,7 @@ public class NextMoveMessageOutController {
         Set<BusinessMessageFile> files = Optional.ofNullable(message.getFiles()).orElseGet(HashSet::new);
 
         if (primaryDocument && files.stream().anyMatch(BusinessMessageFile::getPrimaryDocument)) {
-            return ResponseEntity.badRequest().body("Messages can only contain one primary document");
+            throw new MultiplePrimaryDocumentsNotAllowedException();
         }
 
         try {
@@ -124,20 +131,14 @@ public class NextMoveMessageOutController {
             throw new NextMoveException(String.format("Could not persist file \"%s\"", filename), e);
         }
 
-        BusinessMessageFile.BusinessMessageFileBuilder bmfBuilder = BusinessMessageFile.builder()
-                .identifier(UUID.randomUUID().toString())
-                .filename(filename)
-                .primaryDocument(primaryDocument);
-        if (!isNullOrEmpty(mimetype)) {
-            bmfBuilder.mimetype(mimetype);
-        }
-        if (!isNullOrEmpty(title)) {
-            bmfBuilder.title(title);
-        }
-        files.add(bmfBuilder.build());
-        messageRepo.save(message);
+        files.add(new BusinessMessageFile()
+                .setIdentifier(UUID.randomUUID().toString())
+                .setFilename(filename)
+                .setPrimaryDocument(primaryDocument)
+                .setMimetype(emptyToNull(mimetype))
+                .setTitle(emptyToNull(title)));
 
-        return ResponseEntity.ok().build();
+        messageRepo.save(message);
     }
 
     @PostMapping("/{conversationId}")
@@ -147,11 +148,10 @@ public class NextMoveMessageOutController {
             @ApiResponse(code = 400, message = "Bad request", response = String.class)
     })
     @Transactional
-    public ResponseEntity sendMessage(@PathVariable("conversationId") String conversationId) {
+    public void sendMessage(@PathVariable("conversationId") String conversationId) {
         NextMoveMessage message = messageRepo.findByConversationId(conversationId)
                 .orElseThrow(() -> new ConversationNotFoundException(conversationId));
         internalQueue.enqueueNextMove2(message);
-        return ResponseEntity.ok().build();
     }
 
 }

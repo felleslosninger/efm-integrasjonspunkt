@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.config;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.exceptions.HttpStatusCodeException;
 import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
@@ -10,6 +11,7 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 
 @Component
 @RequiredArgsConstructor
@@ -37,7 +39,15 @@ public class IntegrasjonspunktHandlerExceptionResolver extends DefaultHandlerExc
     protected ModelAndView handleHttpStatusCodeException(HttpStatusCodeException ex,
                                                          HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
         response.sendError(ex.getStatusCode().value(),
-                messageSource.getMessage(ex.getMessage(), ex.getArgs(), request.getLocale()));
+                getMessage(ex, request));
         return new ModelAndView();
+    }
+
+    private String getMessage(HttpStatusCodeException ex, HttpServletRequest request) {
+        try {
+            return messageSource.getMessage(ex.getMessage(), ex.getArgs(), request.getLocale());
+        } catch (NoSuchMessageException e) {
+            return String.format("--%s-- %s", ex.getMessage(), Arrays.toString(ex.getArgs()));
+        }
     }
 }
