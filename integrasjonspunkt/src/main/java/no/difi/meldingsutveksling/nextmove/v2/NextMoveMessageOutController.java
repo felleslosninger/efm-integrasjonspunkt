@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
+import no.difi.meldingsutveksling.validation.AcceptableMimeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
@@ -42,7 +43,6 @@ public class NextMoveMessageOutController {
     private final NextMoveMessageService messageService;
     private final MessagePersister messagePersister;
     private final InternalQueue internalQueue;
-
 
     @PostMapping
     @ApiOperation(value = "Create message", notes = "Create a new messagee with the given values")
@@ -108,7 +108,8 @@ public class NextMoveMessageOutController {
             @ApiParam(value = "File name", required = true)
             @RequestParam("filename") String filename,
             @ApiParam(value = "Mimetype")
-            @RequestParam(value = "mimetype", required = false) String mimetype,
+            @RequestParam(value = "mimetype", required = false)
+            @AcceptableMimeType String mimetype,
             @ApiParam(value = "File title")
             @RequestParam(value = "title", required = false) String title,
             @ApiParam(value = "Flag for primary document")
@@ -153,5 +154,4 @@ public class NextMoveMessageOutController {
                 .orElseThrow(() -> new ConversationNotFoundException(conversationId));
         internalQueue.enqueueNextMove2(message);
     }
-
 }
