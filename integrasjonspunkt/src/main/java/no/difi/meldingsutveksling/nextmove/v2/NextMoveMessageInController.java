@@ -9,12 +9,17 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
+import no.difi.meldingsutveksling.exceptions.ConversationNotLockedException;
 import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
 import no.difi.meldingsutveksling.exceptions.NotContentException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
+import no.difi.meldingsutveksling.receipt.Conversation;
+import no.difi.meldingsutveksling.receipt.ConversationService;
+import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
+import no.difi.meldingsutveksling.receipt.MessageStatus;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,7 +33,9 @@ import javax.transaction.Transactional;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 
+import static java.lang.String.format;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
 
@@ -44,6 +51,7 @@ public class NextMoveMessageInController {
     private static final String HEADER_FILENAME = "attachement; filename=";
 
     private final IntegrasjonspunktProperties props;
+    private final ConversationService conversationService;
     private final NextMoveMessageInRepository messageRepo;
     private final MessagePersister messagePersister;
     private final IntegrasjonspunktNokkel keyInfo;
@@ -117,10 +125,10 @@ public class NextMoveMessageInController {
     }
 
     @DeleteMapping(value = "pop/{conversationId}")
-    @ApiOperation(value = "Remove message", notes = "Delete the first queued locked message")
+    @ApiOperation(value = "Remove message", notes = "Delete message")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
-            @ApiResponse(code = 204, message = "No content", response = String.class)
+            @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })
     @Transactional
     public StandardBusinessDocument deleteMessage(
@@ -128,7 +136,25 @@ public class NextMoveMessageInController {
             @PathVariable("conversationId") String conversationId) {
         NextMoveInMessage message = messageRepo.findByConversationId(conversationId)
                 .orElseThrow(() -> new ConversationNotFoundException(conversationId));
+
+        if (message.getLockTimeout() == null) {
+            throw new ConversationNotLockedException(conversationId);
+        }
+
+        try {
+            messagePersister.delete(conversationId);
+        } catch (IOException e) {
+            log.error("Error deleting files from conversation with id={}", conversationId, e);
+        }
+
         messageRepo.delete(message);
+
+        Optional<Conversation> c = conversationService.registerStatus(conversationId,
+                MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_LEVERT));
+        c.ifPresent(conversationService::markFinished);
+        Audit.info(format("Conversation with id=%s popped from queue", conversationId),
+                markerFrom(message));
+
         return message.getSbd();
     }
 }
