@@ -5,10 +5,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
 import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
+import no.difi.meldingsutveksling.exceptions.NotContentException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
@@ -25,6 +27,7 @@ import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.ZonedDateTime;
 
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
@@ -40,6 +43,7 @@ public class NextMoveMessageInController {
     private static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
     private static final String HEADER_FILENAME = "attachement; filename=";
 
+    private final IntegrasjonspunktProperties props;
     private final NextMoveMessageInRepository messageRepo;
     private final MessagePersister messagePersister;
     private final IntegrasjonspunktNokkel keyInfo;
@@ -68,7 +72,14 @@ public class NextMoveMessageInController {
     })
     @Transactional
     public StandardBusinessDocument peek() {
-        return null;
+        NextMoveInMessage message = messageRepo.findFirstByLockTimeoutIsNullOrderByLastUpdateAsc()
+                .orElseThrow(NotContentException::new);
+
+        messageRepo.save(message.setLockTimeout(ZonedDateTime.now()
+                .plusMinutes(props.getNextmove().getLockTimeoutMinutes())));
+
+        log.info(markerFrom(message), "Conversation with id={} locked", message.getConversationId());
+        return message.getSbd();
     }
 
     @PostMapping(value = "pop/{conversationId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
@@ -112,7 +123,6 @@ public class NextMoveMessageInController {
             @ApiResponse(code = 204, message = "No content", response = String.class)
     })
     @Transactional
-    @ResponseStatus
     public StandardBusinessDocument deleteMessage(
             @ApiParam(value = "ConversationId", required = true)
             @PathVariable("conversationId") String conversationId) {

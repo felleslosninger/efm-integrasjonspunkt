@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.hibernate.annotations.DiscriminatorOptions;
 
 import javax.persistence.*;
+import java.time.ZonedDateTime;
 import java.util.Set;
 
 @Entity
@@ -31,6 +33,14 @@ public class NextMoveMessage {
     private String receiverIdentifier;
     @NonNull
     private String senderIdentifier;
+
+    @Version
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private ZonedDateTime lastUpdated;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private ZonedDateTime lockTimeout;
+
     @NonNull
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private StandardBusinessDocument sbd;
