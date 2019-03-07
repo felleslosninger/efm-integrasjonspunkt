@@ -96,12 +96,21 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
 
     @JsonIgnore
     public final String getJournalPostId() {
-        return findScope(ScopeType.JOURNALPOST_ID).orElseThrow(MeldingsUtvekslingRuntimeException::new).getInstanceIdentifier();
+        return findScope(ScopeType.JOURNALPOST_ID)
+                .map(Scope::getInstanceIdentifier)
+                .orElseThrow(MeldingsUtvekslingRuntimeException::new);
     }
 
     @JsonIgnore
     public String getConversationId() {
-        return findScope(ScopeType.CONVERSATION_ID).orElseThrow(MeldingsUtvekslingRuntimeException::new).getInstanceIdentifier();
+        return getOptionalConversationId()
+                .orElseThrow(MeldingsUtvekslingRuntimeException::new);
+    }
+
+    @JsonIgnore
+    public Optional<String> getOptionalConversationId() {
+        return findScope(ScopeType.CONVERSATION_ID)
+                .map(Scope::getInstanceIdentifier);
     }
 
     @JsonIgnore

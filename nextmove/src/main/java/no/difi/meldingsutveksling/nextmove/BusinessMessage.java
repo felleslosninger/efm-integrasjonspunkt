@@ -20,5 +20,4 @@ public abstract class BusinessMessage extends AbstractEntity<Long> {
     private Set<BusinessMessageFile> files;
 
     private String securityLevel;
-
 }

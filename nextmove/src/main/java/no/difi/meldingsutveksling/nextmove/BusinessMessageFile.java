@@ -8,7 +8,6 @@ import javax.persistence.Entity;
 @Getter
 @Setter
 @ToString
-@Builder
 public class BusinessMessageFile extends AbstractEntity<Long> {
 
     @NonNull

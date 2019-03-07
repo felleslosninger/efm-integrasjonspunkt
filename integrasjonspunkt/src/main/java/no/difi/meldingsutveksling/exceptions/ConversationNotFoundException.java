@@ -6,7 +6,7 @@ public class ConversationNotFoundException extends HttpStatusCodeException {
 
     public ConversationNotFoundException(String conversationId) {
         super(HttpStatus.NOT_FOUND,
-                "no.difi.meldingsutveksling.nextmove.message.notFound",
+                ConversationNotFoundException.class.getName(),
                 "conversationId", conversationId);
     }
 }
