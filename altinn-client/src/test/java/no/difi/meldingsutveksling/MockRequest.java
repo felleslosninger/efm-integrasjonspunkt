@@ -4,6 +4,8 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import org.slf4j.Marker;
 
+import java.io.InputStream;
+
 class MockRequest implements UploadRequest {
 
     private final String reference;
@@ -13,23 +15,28 @@ class MockRequest implements UploadRequest {
     }
 
     @Override
-        public String getSender() {
+    public String getSender() {
         return "910075918";
     }
 
-        @Override
-        public String getReceiver() {
+    @Override
+    public String getReceiver() {
         return "910077473";
     }
 
-        @Override
-        public String getSenderReference() {
-            return reference;
-        }
+    @Override
+    public String getSenderReference() {
+        return reference;
+    }
 
-        @Override
-        public StandardBusinessDocument getPayload() {
+    @Override
+    public StandardBusinessDocument getPayload() {
         return new StandardBusinessDocument();
+    }
+
+    @Override
+    public InputStream getAsicInputStream() {
+        return null;
     }
 
     @Override

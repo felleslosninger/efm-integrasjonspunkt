@@ -3,6 +3,8 @@ package no.difi.meldingsutveksling.transport;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.springframework.context.ApplicationContext;
 
+import java.io.InputStream;
+
 /**
  * Defines a transport. The responsibility of a transport is to receive an SBD ducument and transfer it over some transportation
  * mechanism; oxalis, Altinn, Dropbox or whatever.
@@ -19,4 +21,9 @@ public interface Transport {
      */
     void send(ApplicationContext context, StandardBusinessDocument sbd);
 
+    /**
+     * @param sbd An sbd with a payload consisting of metadata only
+     * @param is InputStream pointing to the encrypted ASiC package
+     */
+    void send(ApplicationContext context, StandardBusinessDocument sbd, InputStream is);
 }

@@ -59,4 +59,31 @@ public class DpoConversationStrategy implements ConversationStrategy {
                 markerFrom(cr));
     }
 
+    @Override
+    public void send(NextMoveMessage message) throws NextMoveException {
+        List<ServiceRecord> serviceRecords = sr.getServiceRecords(message.getReceiverIdentifier());
+        Optional<ServiceRecord> serviceRecord = serviceRecords.stream()
+                .filter(r -> DPO == r.getServiceIdentifier())
+                .findFirst();
+        if (!serviceRecord.isPresent()) {
+            List<ServiceIdentifier> acceptableTypes = serviceRecords.stream()
+                    .map(ServiceRecord::getServiceIdentifier)
+                    .collect(Collectors.toList());
+            String errorStr = String.format("Message is of type '%s', but receiver '%s' accepts types '%s'.",
+                    DPO, message.getReceiverIdentifier(), acceptableTypes);
+            log.error(markerFrom(message), errorStr);
+            throw new NextMoveException(errorStr);
+        }
+
+        try {
+            messageSender.sendMessage(message);
+        } catch (MessageContextException e) {
+            log.error("Send message failed.", e);
+            throw new NextMoveException(e);
+        }
+        Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] sent to altinn",
+                message.getConversationId(), message.getServiceIdentifier()),
+                markerFrom(message));
+    }
+
 }

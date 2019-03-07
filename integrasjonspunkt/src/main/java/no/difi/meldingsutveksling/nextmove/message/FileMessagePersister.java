@@ -80,8 +80,8 @@ public class FileMessagePersister implements MessagePersister {
     }
 
     @Override
-    public void delete(ConversationResource cr) throws IOException {
-        File dir = new File(getConversationFiledirPath(cr.getConversationId()));
+    public void delete(String conversationId) throws IOException {
+        File dir = new File(getConversationFiledirPath(conversationId));
         FileUtils.deleteDirectory(dir);
     }
 

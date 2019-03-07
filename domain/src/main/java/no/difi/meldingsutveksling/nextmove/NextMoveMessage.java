@@ -32,6 +32,10 @@ public class NextMoveMessage {
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private StandardBusinessDocument sbd;
 
+    public static NextMoveMessage of(StandardBusinessDocument sbd) {
+        return new NextMoveMessage(sbd.getConversationId(), sbd.getReceiverOrgNumber(), sbd.getSenderOrgNumber(), sbd);
+    }
+
     @JsonIgnore
     public Set<BusinessMessageFile> getFiles() throws NextMoveException {
         return getBusinessMessage().getFiles();

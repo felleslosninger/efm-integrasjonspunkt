@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceManifest;
 import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceRecipientList;
@@ -7,6 +8,7 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
+import no.difi.meldingsutveksling.nextmove.BusinessMessage;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.shipping.sftp.BrokerServiceManifestBuilder;
@@ -44,6 +46,7 @@ public class AltinnPackage {
     private final BrokerServiceManifest manifest;
     private final BrokerServiceRecipientList recipient;
     private final StandardBusinessDocument sbd;
+    private final InputStream asicInputStream;
 
     static {
         try {
@@ -54,10 +57,11 @@ public class AltinnPackage {
         }
     }
 
-    private AltinnPackage(BrokerServiceManifest manifest, BrokerServiceRecipientList recipient, StandardBusinessDocument sbd) {
+    private AltinnPackage(BrokerServiceManifest manifest, BrokerServiceRecipientList recipient, StandardBusinessDocument sbd, InputStream asicInputStream) {
         this.manifest = manifest;
         this.recipient = recipient;
         this.sbd = sbd;
+        this.asicInputStream = asicInputStream;
     }
 
     public static AltinnPackage from(UploadRequest document) {
@@ -71,7 +75,7 @@ public class AltinnPackage {
                         .build());
 
         RecipientBuilder recipient = new RecipientBuilder(document.getReceiver());
-        return new AltinnPackage(manifest.build(), recipient.build(), document.getPayload());
+        return new AltinnPackage(manifest.build(), recipient.build(), document.getPayload(), document.getAsicInputStream());
     }
 
     /**
@@ -91,18 +95,30 @@ public class AltinnPackage {
         marshallObject(recipient, zipOutputStream);
         zipOutputStream.closeEntry();
 
-        zipOutputStream.putNextEntry(new ZipEntry("content.xml"));
-        no.difi.meldingsutveksling.domain.sbdh.ObjectFactory objectFactory = new no.difi.meldingsutveksling.domain.sbdh.ObjectFactory();
-        marshallObject(objectFactory.createStandardBusinessDocument(sbd), zipOutputStream);
-        zipOutputStream.closeEntry();
 
         if (sbd.getAny() instanceof Payload) {
+            zipOutputStream.putNextEntry(new ZipEntry("content.xml"));
+            no.difi.meldingsutveksling.domain.sbdh.ObjectFactory objectFactory = new no.difi.meldingsutveksling.domain.sbdh.ObjectFactory();
+            marshallObject(objectFactory.createStandardBusinessDocument(sbd), zipOutputStream);
+            zipOutputStream.closeEntry();
+
             Payload payload = (Payload) sbd.getAny();
             if (payload.getInputStream() != null) {
                 zipOutputStream.putNextEntry(new ZipEntry(ASIC_FILE));
                 IOUtils.copy(payload.getInputStream(), zipOutputStream);
                 zipOutputStream.closeEntry();
             }
+        }
+
+        if (sbd.getAny() instanceof BusinessMessage) {
+            zipOutputStream.putNextEntry(new ZipEntry("sbd.json"));
+            ObjectMapper om = new ObjectMapper();
+            om.writeValue(zipOutputStream, sbd);
+            zipOutputStream.closeEntry();
+
+            zipOutputStream.putNextEntry(new ZipEntry(ASIC_FILE));
+            IOUtils.copy(this.asicInputStream, zipOutputStream);
+            zipOutputStream.closeEntry();
         }
 
         zipOutputStream.finish();
@@ -125,6 +141,9 @@ public class AltinnPackage {
                 manifest = (BrokerServiceManifest) unmarshaller.unmarshal(zipFile.getInputStream(zipEntry));
             } else if (zipEntry.getName().equals("recipients.xml")) {
                 recipientList = (BrokerServiceRecipientList) unmarshaller.unmarshal(zipFile.getInputStream(zipEntry));
+            } else if (zipEntry.getName().equals("sbd.json")) {
+                ObjectMapper om = new ObjectMapper();
+                sbd = om.readValue(zipFile.getInputStream(zipEntry), StandardBusinessDocument.class);
             } else if (zipEntry.getName().equals("content.xml")) {
                 Source source = new StreamSource(zipFile.getInputStream(zipEntry));
                 sbd = unmarshaller.unmarshal(source, StandardBusinessDocument.class).getValue();
@@ -141,7 +160,7 @@ public class AltinnPackage {
             messagePersister.writeStream(sbd.getConversationId(), ASIC_FILE, asicInputStream, asicSize);
         }
         zipFile.close();
-        return new AltinnPackage(manifest, recipientList, sbd);
+        return new AltinnPackage(manifest, recipientList, sbd, null);
     }
 
     public static AltinnPackage from(InputStream inputStream) throws IOException, JAXBException {
@@ -170,7 +189,7 @@ public class AltinnPackage {
                 sbd = unmarshaller.unmarshal(source, StandardBusinessDocument.class).getValue();
             }
         }
-        return new AltinnPackage(manifest, recipientList, sbd);
+        return new AltinnPackage(manifest, recipientList, sbd, null);
     }
 
     private void marshallObject(Object object, OutputStream outputStream) {

@@ -10,7 +10,7 @@ import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -29,14 +29,13 @@ public class DpiConversationStrategy implements ConversationStrategy {
     private KeystoreProvider keystore;
     private MessagePersister messagePersister;
 
-    @Autowired
     DpiConversationStrategy(IntegrasjonspunktProperties props,
                             ServiceRegistryLookup sr,
-                            MessagePersister messagePersister,
+                            ObjectProvider<MessagePersister> messagePersister,
                             KeystoreProvider keystore) {
         this.props = props;
         this.sr = sr;
-        this.messagePersister = messagePersister;
+        this.messagePersister = messagePersister.getIfUnique();
         this.keystore = keystore;
     }
 
@@ -67,5 +66,10 @@ public class DpiConversationStrategy implements ConversationStrategy {
             Audit.error("Failed to send message to DPI", markerFrom(cr), e);
             throw new NextMoveException(e);
         }
+    }
+
+    @Override
+    public void send(NextMoveMessage message) throws NextMoveException {
+
     }
 }

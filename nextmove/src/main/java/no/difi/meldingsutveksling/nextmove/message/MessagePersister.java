@@ -16,5 +16,5 @@ public interface MessagePersister {
     FileEntryStream readStream(String conversationId, String filename) throws PersistenceException;
 
 
-    void delete(ConversationResource cr) throws IOException;
+    void delete(String conversationId) throws IOException;
 }

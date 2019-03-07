@@ -5,14 +5,22 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import org.slf4j.Marker;
 
+import java.io.InputStream;
+
 import static no.difi.meldingsutveksling.domain.Organisasjonsnummer.fromIso6523;
 
 public class AltinnWsRequest implements UploadRequest {
 
     private StandardBusinessDocument sbd;
+    private InputStream asicInputStream;
 
     public AltinnWsRequest(StandardBusinessDocument sbd) {
         this.sbd = sbd;
+    }
+
+    public AltinnWsRequest(StandardBusinessDocument sbd, InputStream is) {
+        this.sbd = sbd;
+        this.asicInputStream = is;
     }
 
     @Override
@@ -35,6 +43,11 @@ public class AltinnWsRequest implements UploadRequest {
     @Override
     public StandardBusinessDocument getPayload() {
         return sbd;
+    }
+
+    @Override
+    public InputStream getAsicInputStream() {
+        return this.asicInputStream;
     }
 
     /**

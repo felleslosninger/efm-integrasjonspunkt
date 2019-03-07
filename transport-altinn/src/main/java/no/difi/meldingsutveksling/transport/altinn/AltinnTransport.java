@@ -9,6 +9,8 @@ import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.transport.Transport;
 import org.springframework.context.ApplicationContext;
 
+import java.io.InputStream;
+
 /**
  * Transport implementation for Altinn message service.
  */
@@ -31,4 +33,17 @@ public class AltinnTransport implements Transport {
 
         client.send(request);
     }
+
+    /**
+     * @param sbd                  An sbd with a payload consisting of metadata only
+     * @param asicInputStream      InputStream pointing to the encrypted ASiC package
+     */
+    @Override
+    public void send(ApplicationContext context, StandardBusinessDocument sbd, InputStream asicInputStream) {
+        AltinnWsClient client = new AltinnWsClient(AltinnWsConfiguration.fromConfiguration(serviceRecord, context));
+        UploadRequest request = new AltinnWsRequest(sbd, asicInputStream);
+
+        client.send(request);
+    }
+
 }

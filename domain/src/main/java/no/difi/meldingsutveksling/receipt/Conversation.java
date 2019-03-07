@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
+import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.noarkexchange.PayloadException;
 import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 import org.slf4j.Logger;
@@ -100,6 +101,18 @@ public class Conversation {
         if (statuses != null && statuses.length > 0) {
             Stream.of(statuses)
                     .peek(r -> r.setConversationId(cr.getConversationId()))
+                    .forEach(c::addMessageStatus);
+        }
+        return c;
+    }
+
+    public static Conversation of(NextMoveMessage msg, MessageStatus... statuses) {
+        // TODO: fix after direction impl
+        Conversation c = new Conversation(msg.getConversationId(), msg.getConversationId(), msg.getSenderIdentifier(), msg.getReceiverIdentifier(),
+                ConversationDirection.INCOMING, "", msg.getServiceIdentifier());
+        if (statuses != null && statuses.length > 0) {
+            Stream.of(statuses)
+                    .peek(r -> r.setConversationId(msg.getConversationId()))
                     .forEach(c::addMessageStatus);
         }
         return c;

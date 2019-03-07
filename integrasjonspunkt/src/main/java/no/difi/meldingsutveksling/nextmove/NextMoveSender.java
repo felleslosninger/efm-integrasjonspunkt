@@ -39,7 +39,7 @@ public class NextMoveSender {
     }
 
     @Transactional
-    public void send(NextMoveMessage msg) {
+    public void send(NextMoveMessage msg) throws NextMoveException {
         Optional<ConversationStrategy> strategy = strategyFactory.getStrategy(msg);
         if (!strategy.isPresent()) {
             String errorStr = String.format("Cannot send message - serviceIdentifier \"%s\" not supported",
@@ -48,7 +48,18 @@ public class NextMoveSender {
             throw new NextMoveRuntimeException(errorStr);
         }
 
-        // TODO send message
+        strategy.get().send(msg);
+        if (msg.getServiceIdentifier() == ServiceIdentifier.DPE_RECEIPT) {
+            return;
+        }
+
+        conversationService.registerStatus(msg.getConversationId(), MessageStatus.of(GenericReceiptStatus.SENDT));
+        messageRepo.delete(msg);
+        try {
+            messagePersister.delete(msg.getConversationId());
+        } catch (IOException e) {
+            log.error("Error deleting files from conversation with id={}", msg.getConversationId(),  e);
+        }
     }
 
     @Transactional
@@ -67,7 +78,7 @@ public class NextMoveSender {
         conversationService.registerStatus(cr.getConversationId(), MessageStatus.of(GenericReceiptStatus.SENDT));
         outRepo.delete(cr);
         try {
-            messagePersister.delete(cr);
+            messagePersister.delete(cr.getConversationId());
         } catch (IOException e) {
             log.error("Error deleting files from conversation with id={}", cr.getConversationId(),  e);
         }

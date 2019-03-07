@@ -10,6 +10,7 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.ptv.CorrespondenceRequest;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -25,11 +26,11 @@ public class DpvConversationStrategy implements ConversationStrategy {
     @Autowired
     DpvConversationStrategy(IntegrasjonspunktProperties props,
                             ServiceRegistryLookup sr,
-                            MessagePersister messagePersister,
+                            ObjectProvider<MessagePersister> messagePersister,
                             @Lazy InternalQueue internalQueue) {
         this.props = props;
         this.sr = sr;
-        this.messagePersister = messagePersister;
+        this.messagePersister = messagePersister.getIfUnique();
         this.internalQueue = internalQueue;
     }
 
@@ -51,6 +52,11 @@ public class DpvConversationStrategy implements ConversationStrategy {
         if (client.sendCorrespondence(request) == null) {
             throw new NextMoveException("Failed to create Correspondence Agency Request");
         }
+
+    }
+
+    @Override
+    public void send(NextMoveMessage message) throws NextMoveException {
 
     }
 

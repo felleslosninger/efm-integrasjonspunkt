@@ -54,7 +54,7 @@ public class NextMoveMessageOutController {
             @Valid @RequestBody StandardBusinessDocument sbd) {
 
         sbd = messageService.setDefaults(sbd);
-        NextMoveMessage message = NextMoveMessage.of(sbd.getConversationId(), sbd.getReceiverOrgNumber(), sbd.getSenderOrgNumber(), sbd);
+        NextMoveMessage message = NextMoveMessage.of(sbd);
         messageRepo.save(message);
 
         return sbd;

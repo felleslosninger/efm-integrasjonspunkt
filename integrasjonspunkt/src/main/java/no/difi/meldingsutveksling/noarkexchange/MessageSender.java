@@ -9,7 +9,10 @@ import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.nextmove.AsicHandler;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
+import no.difi.meldingsutveksling.nextmove.NextMoveException;
+import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -22,6 +25,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+import java.io.InputStream;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.Optional;
@@ -36,34 +40,31 @@ public class MessageSender implements ApplicationContextAware {
     private static final Logger log = LoggerFactory.getLogger(MessageSender.class);
 
     private TransportFactory transportFactory;
-
     private Adresseregister adresseregister;
-
     private IntegrasjonspunktProperties properties;
-
     private ApplicationContext context;
-
     private IntegrasjonspunktNokkel keyInfo;
-
     private StandardBusinessDocumentFactory standardBusinessDocumentFactory;
-
     private ServiceRegistryLookup serviceRegistryLookup;
+    private AsicHandler asicHandler;
 
     public MessageSender() {
     }
 
     public MessageSender(TransportFactory transportFactory, Adresseregister adresseregister,
                          IntegrasjonspunktProperties properties, IntegrasjonspunktNokkel keyInfo,
-                         StandardBusinessDocumentFactory standardBusinessDocumentFactory, ServiceRegistryLookup serviceRegistryLookup) {
+                         StandardBusinessDocumentFactory standardBusinessDocumentFactory,
+                         ServiceRegistryLookup serviceRegistryLookup, AsicHandler asicHandler) {
         this.transportFactory = transportFactory;
         this.adresseregister = adresseregister;
         this.properties = properties;
         this.keyInfo = keyInfo;
         this.standardBusinessDocumentFactory = standardBusinessDocumentFactory;
         this.serviceRegistryLookup = serviceRegistryLookup;
+        this.asicHandler = asicHandler;
     }
 
-    private Avsender createAvsender(String identifier) throws MessageContextException {
+    private Avsender createAvsender(String identifier) {
         return Avsender.builder(new Organisasjonsnummer(identifier)).build();
     }
 
@@ -111,6 +112,15 @@ public class MessageSender implements ApplicationContextAware {
         return createOkResponse();
     }
 
+
+    public void sendMessage(NextMoveMessage message) throws MessageContextException, NextMoveException {
+        MessageContext context = createMessageContext(message);
+        InputStream is = asicHandler.createEncryptedAsic(message, context);
+        Transport transport = transportFactory.createTransport(message.getSbd());
+        transport.send(this.context, message.getSbd(), is);
+    }
+
+
     public void sendMessage(ConversationResource conversation) throws MessageContextException {
         MessageContext messageContext = createMessageContext(conversation);
 
@@ -127,6 +137,14 @@ public class MessageSender implements ApplicationContextAware {
         t.send(context, edu);
 
         log.info("ConversationResource sent");
+    }
+
+    public MessageContext createMessageContext(NextMoveMessage message) throws MessageContextException {
+        MessageContext context = new MessageContext();
+        context.setAvsender(createAvsender(message.getSenderIdentifier()));
+        context.setMottaker(createMottaker(message.getReceiverIdentifier(), message.getServiceIdentifier()));
+        context.setConversationId(message.getConversationId());
+        return context;
     }
 
     public MessageContext createMessageContext(ConversationResource conversation) throws MessageContextException {

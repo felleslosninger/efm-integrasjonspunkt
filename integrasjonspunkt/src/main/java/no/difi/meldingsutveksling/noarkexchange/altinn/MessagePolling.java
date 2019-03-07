@@ -149,7 +149,7 @@ public class MessagePolling implements ApplicationContextAware {
                     if (properties.getNoarkSystem().isEnable() && !properties.getNoarkSystem().getEndpointURL().isEmpty()) {
                         internalQueue.enqueueNoark(sbd);
                     } else {
-                        nextMoveQueue.enqueueSBD(sbd);
+                        nextMoveQueue.enqueueSBDFromNMM(sbd);
                     }
                     continue;
                 }

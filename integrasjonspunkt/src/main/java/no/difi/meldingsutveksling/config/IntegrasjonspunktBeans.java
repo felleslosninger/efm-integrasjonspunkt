@@ -3,12 +3,12 @@ package no.difi.meldingsutveksling.config;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.KeystoreProvider;
 import no.difi.meldingsutveksling.ServiceRegistryTransportFactory;
-import no.difi.meldingsutveksling.auth.OidcTokenClient;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.lang.KeystoreProviderException;
 import no.difi.meldingsutveksling.mail.MailClient;
+import no.difi.meldingsutveksling.nextmove.AsicHandler;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory;
@@ -25,7 +25,6 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -33,7 +32,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Profile;
-import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import java.util.List;
@@ -44,14 +42,8 @@ import java.util.Optional;
 @EnableConfigurationProperties({IntegrasjonspunktProperties.class})
 public class IntegrasjonspunktBeans {
 
-    @Autowired
-    private IntegrasjonspunktProperties properties;
-
-    @Autowired
-    private OidcTokenClient oidcClient;
-
     @Bean
-    public AltinnFormidlingsTjenestenConfig altinnConfig() {
+    public AltinnFormidlingsTjenestenConfig altinnConfig(IntegrasjonspunktProperties properties) {
         return properties.getDpo();
     }
 
@@ -61,21 +53,24 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public IntegrasjonspunktNokkel integrasjonspunktNokkel() {
+    public IntegrasjonspunktNokkel integrasjonspunktNokkel(IntegrasjonspunktProperties properties) {
         return new IntegrasjonspunktNokkel(properties.getOrg().getKeystore());
     }
 
     @Bean
-    public MessageSender messageSender(TransportFactory transportFactory, Adresseregister adresseregister,
+    public MessageSender messageSender(TransportFactory transportFactory,
+                                       Adresseregister adresseregister,
                                        IntegrasjonspunktNokkel integrasjonspunktNokkel,
+                                       IntegrasjonspunktProperties properties,
                                        StandardBusinessDocumentFactory standardBusinessDocumentFactory,
-                                       ServiceRegistryLookup serviceRegistryLookup) {
+                                       ServiceRegistryLookup serviceRegistryLookup,
+                                       AsicHandler asicHandler) {
         return new MessageSender(transportFactory, adresseregister, properties, integrasjonspunktNokkel,
-                standardBusinessDocumentFactory, serviceRegistryLookup);
+                standardBusinessDocumentFactory, serviceRegistryLookup, asicHandler);
     }
 
     @Bean
-    public KeystoreProvider meldingsformidlerKeystoreProvider() throws MeldingsformidlerException {
+    public KeystoreProvider meldingsformidlerKeystoreProvider(IntegrasjonspunktProperties properties) throws MeldingsformidlerException {
         try {
             return KeystoreProvider.from(properties.getDpi().getKeystore());
         } catch (KeystoreProviderException e) {
@@ -108,7 +103,8 @@ public class IntegrasjonspunktBeans {
                                                   KeystoreProvider meldingsformidlerKeystoreProvider,
                                                   @Lazy InternalQueue internalQueue,
                                                   @Qualifier("localNoark") ObjectProvider<NoarkClient> localNoark,
-                                                  @SuppressWarnings("SpringJavaAutowiringInspection") ObjectProvider<List<MessageStrategyFactory>> messageStrategyFactory) {
+                                                  @SuppressWarnings("SpringJavaAutowiringInspection") ObjectProvider<List<MessageStrategyFactory>> messageStrategyFactory,
+                                                  IntegrasjonspunktProperties properties) {
         final StrategyFactory strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, meldingsformidlerKeystoreProvider, properties, localNoark.getIfAvailable(), internalQueue);
         if (messageStrategyFactory.getIfAvailable() != null) {
             messageStrategyFactory.getIfAvailable().forEach(strategyFactory::registerMessageStrategyFactory);

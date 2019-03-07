@@ -14,6 +14,7 @@ import javax.xml.bind.Marshaller;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 
 /**
  * Oxalis implementation of the trasnport interface. Uses the oxalis outbound module to transmit the SBD
@@ -37,6 +38,18 @@ public class FileTransport implements Transport {
         } catch (FileNotFoundException e) {
             throw new MeldingsUtvekslingRuntimeException();
         }
+    }
+
+    /**
+     * Not currently in use.
+     *
+     * @param context
+     * @param sbd     An sbd with a payload consisting of metadata only
+     * @param is      InputStream pointing to the encrypted ASiC package
+     */
+    @Override
+    public void send(ApplicationContext context, StandardBusinessDocument sbd, InputStream is) {
+
     }
 
     private String createFilename() {

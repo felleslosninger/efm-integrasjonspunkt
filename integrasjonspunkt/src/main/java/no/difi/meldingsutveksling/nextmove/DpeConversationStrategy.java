@@ -41,4 +41,9 @@ public class DpeConversationStrategy implements ConversationStrategy {
                 markerFrom(conversationResource));
     }
 
+    @Override
+    public void send(NextMoveMessage message) throws NextMoveException {
+
+    }
+
 }

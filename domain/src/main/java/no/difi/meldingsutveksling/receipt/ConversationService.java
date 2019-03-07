@@ -9,6 +9,7 @@ import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
+import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,6 +98,17 @@ public class ConversationService {
         }
 
         return repo.save(conversation);
+    }
+
+    public Conversation registerConversation(NextMoveMessage msg) {
+        Optional<Conversation> find = repo.findByConversationId(msg.getConversationId()).stream().findFirst();
+        if (find.isPresent()) {
+            log.warn(String.format(CONVERSATION_EXISTS, msg.getConversationId()));
+            return find.get();
+        }
+        MessageStatus ms = MessageStatus.of(GenericReceiptStatus.OPPRETTET);
+        Conversation c = Conversation.of(msg, ms);
+        return repo.save(c);
     }
 
     public Conversation registerConversation(ConversationResource cr) {

@@ -13,6 +13,7 @@ import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
+import no.difi.meldingsutveksling.nextmove.AsicHandler;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
@@ -59,9 +60,10 @@ public class IntegrasjonspunktIntegrationTestConfig {
     public MessageSender messageSender(TransportFactory transportFactory, Adresseregister adresseregister,
                                        IntegrasjonspunktNokkel integrasjonspunktNokkel,
                                        StandardBusinessDocumentFactory standardBusinessDocumentFactory,
-                                       ServiceRegistryLookup serviceRegistryLookup) {
+                                       ServiceRegistryLookup serviceRegistryLookup,
+                                       AsicHandler asicHandler) {
         return new MessageSender(transportFactory, adresseregister, properties, integrasjonspunktNokkel,
-                standardBusinessDocumentFactory, serviceRegistryLookup);
+                standardBusinessDocumentFactory, serviceRegistryLookup, asicHandler);
     }
 
     @Bean

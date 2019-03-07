@@ -40,7 +40,7 @@ public class FileMessagePersisterTest {
         byte[] read = messagePersister.read(cr, filename);
         Assert.assertArrayEquals(content, read);
 
-        messagePersister.delete(cr);
+        messagePersister.delete(cr.getConversationId());
         File crDir = new File(props.getNextmove().getFiledir() + "/" + cr.getConversationId());
         Assert.assertFalse(crDir.exists());
     }
@@ -59,7 +59,7 @@ public class FileMessagePersisterTest {
 
         fileEntry.getInputStream().close();
 
-        messagePersister.delete(cr);
+        messagePersister.delete(cr.getConversationId());
         File crDir = new File(props.getNextmove().getFiledir() + "/" + cr.getConversationId());
         Assert.assertFalse(crDir.exists());
     }

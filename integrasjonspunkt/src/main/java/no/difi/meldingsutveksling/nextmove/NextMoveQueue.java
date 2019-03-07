@@ -4,23 +4,23 @@ import com.google.common.collect.Lists;
 import no.difi.meldingsutveksling.Decryptor;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
+import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageRepository;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
-import no.difi.meldingsutveksling.receipt.*;
+import no.difi.meldingsutveksling.receipt.Conversation;
+import no.difi.meldingsutveksling.receipt.ConversationService;
+import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
+import no.difi.meldingsutveksling.receipt.MessageStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.xml.bind.DatatypeConverter;
-import java.io.*;
+import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.zip.ZipEntry;
@@ -36,63 +36,72 @@ public class NextMoveQueue {
 
     private DirectionalConversationResourceRepository inRepo;
     private IntegrasjonspunktNokkel keyInfo;
-    private IntegrasjonspunktProperties props;
     private ConversationService conversationService;
-    private MessagePersister messagePersister;
+    private NextMoveMessageRepository messageRepo;
 
-    @Autowired
-    public NextMoveQueue(ConversationResourceRepository repo, IntegrasjonspunktNokkel keyInfo, IntegrasjonspunktProperties props, ConversationService conversationService, ObjectProvider<MessagePersister> messagePersister) {
+    public NextMoveQueue(ConversationResourceRepository repo,
+                         IntegrasjonspunktNokkel keyInfo,
+                         ConversationService conversationService,
+                         NextMoveMessageRepository messageRepo) {
         inRepo = new DirectionalConversationResourceRepository(repo, INCOMING);
         this.keyInfo = keyInfo;
-        this.props = props;
         this.conversationService = conversationService;
-        this.messagePersister = messagePersister.getIfUnique();
+        this.messageRepo = messageRepo;
     }
 
-    public Optional<ConversationResource> enqueueSBD(StandardBusinessDocument sbd) throws IOException {
+    public Optional<NextMoveMessage> enqueueSBDFromNMM(StandardBusinessDocument sbd) {
+        if (sbd.getAny() instanceof BusinessMessage) {
+            NextMoveMessage message = NextMoveMessage.of(sbd);
 
-        if (!(sbd.getAny() instanceof Payload)) {
-            log.error("Message attachement not instance of Payload.");
-            throw new MeldingsUtvekslingRuntimeException("Message attachement ("+ sbd.getAny()+") not instance of " +
-                    ""+Payload.class);
+            if (ServiceIdentifier.DPE_RECEIPT.equals(message.getServiceIdentifier())) {
+                handleDpeReceipt(message.getConversationId());
+                return Optional.empty();
+            }
+
+            messageRepo.save(message);
+
+            Conversation c = conversationService.registerConversation(message);
+            conversationService.registerStatus(c, MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_MOTTATT));
+            Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] put on local queue",
+                    message.getConversationId(), message.getServiceIdentifier()), markerFrom(message));
+            return Optional.of(message);
+
+        } else {
+            String errorMsg = String.format("SBD payload not of known types: %s, %s", Payload.class.getName(), BusinessMessage.class.getName());
+            log.error(errorMsg);
+            throw new MeldingsUtvekslingRuntimeException(errorMsg);
         }
+    }
 
-        Payload payload = (Payload) sbd.getAny();
-        ConversationResource message = (payload).getConversation();
+    public Optional<ConversationResource> enqueueSBDFromCR(StandardBusinessDocument sbd) {
+        if (sbd.getAny() instanceof Payload) {
+            Payload payload = (Payload) sbd.getAny();
+            ConversationResource message = (payload).getConversation();
 
-//        CmsUtil cmsUtil = new CmsUtil();
-//        Optional<InputStream> asicInputStream = messagePersister.readStream(message, "asic.zip");
-//        InputStream decryptedAsic = cmsUtil.decryptCMSStreamed(asicInputStream, keyInfo.loadPrivateKey());
-//        messagePersister.writeStream(message, "asic-decrypted.zip", decryptedAsic);
+            if (ServiceIdentifier.DPE_RECEIPT.equals(message.getServiceIdentifier())) {
+                handleDpeReceipt(message.getConversationId());
+                return Optional.empty();
+            }
 
-//        byte[] decryptedAsicPackage = decrypt(payload);
-//        List<String> contentFromAsic;
-//        try {
-//            contentFromAsic = getContentFromAsic(decryptedAsicPackage);
-//        } catch (MessageException e) {
-//            log.error("Could not get contents from asic", e);
-//            throw new MeldingsUtvekslingRuntimeException("Could not get contents from asic", e);
-//        }
+            message = inRepo.save(message);
 
-        if (ServiceIdentifier.DPE_RECEIPT.equals(message.getServiceIdentifier())) {
-            log.debug(String.format("Message with id=%s is a receipt", message.getConversationId()));
-            Optional<Conversation> c = conversationService.registerStatus(message.getConversationId(), MessageStatus.of(GenericReceiptStatus.LEVERT));
-            c.ifPresent(conversationService::markFinished);
-            return Optional.empty();
+            Conversation c = conversationService.registerConversation(message);
+            conversationService.registerStatus(c, MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_MOTTATT));
+            Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] put on local queue",
+                    message.getConversationId(), message.getServiceIdentifier()), markerFrom(message));
+            return Optional.of(message);
+
+        } else {
+            String errorMsg = String.format("SBD payload not of known types: %s, %s", Payload.class.getName(), BusinessMessage.class.getName());
+            log.error(errorMsg);
+            throw new MeldingsUtvekslingRuntimeException(errorMsg);
         }
+    }
 
-//        message.setFileRefs(Maps.newHashMap());
-//        message.addFileRef(props.getNextmove().getAsicfile());
-//        contentFromAsic.forEach(message::addFileRef);
-
-//        messagePersister.write(message, props.getNextmove().getAsicfile(), decryptedAsicPackage);
-        message = inRepo.save(message);
-
-        Conversation c = conversationService.registerConversation(message);
-        conversationService.registerStatus(c, MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_MOTTATT));
-        Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] put on local queue",
-                message.getConversationId(), message.getServiceIdentifier()), markerFrom(message));
-        return Optional.of(message);
+    private void handleDpeReceipt(String conversationId) {
+        log.debug(String.format("Message with id=%s is a receipt", conversationId));
+        Optional<Conversation> c = conversationService.registerStatus(conversationId, MessageStatus.of(GenericReceiptStatus.LEVERT));
+        c.ifPresent(conversationService::markFinished);
     }
 
     public byte[] decrypt(Payload payload) {

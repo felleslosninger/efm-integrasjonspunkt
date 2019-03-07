@@ -211,7 +211,7 @@ public class MessageInController {
             }
 
             try {
-                messagePersister.delete(cr);
+                messagePersister.delete(cr.getConversationId());
             } catch (IOException e) {
                 log.error("Error deleting files from conversation with id={}", cr.getConversationId(), e);
             }

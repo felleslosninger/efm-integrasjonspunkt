@@ -91,7 +91,7 @@ public class DBMessagePersister implements MessagePersister {
 
     @Override
     @Transactional
-    public void delete(ConversationResource cr) throws IOException {
-        repo.deleteByConversationId(cr.getConversationId());
+    public void delete(String conversationId) throws IOException {
+        repo.deleteByConversationId(conversationId);
     }
 }

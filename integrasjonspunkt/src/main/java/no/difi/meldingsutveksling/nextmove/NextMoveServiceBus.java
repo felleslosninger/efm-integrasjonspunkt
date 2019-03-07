@@ -139,13 +139,10 @@ public class NextMoveServiceBus {
             }
 
             for (ServiceBusMessage msg : messages) {
-                try {
-                    Optional<ConversationResource> cr = nextMoveQueue.enqueueSBD(msg.getBody());
-                    cr.ifPresent(this::sendReceipt);
-                    serviceBusClient.deleteMessage(msg);
-                } catch (IOException e) {
-                    log.error("Failed to put message on local queue", e);
-                }
+                Optional<ConversationResource> cr = nextMoveQueue.enqueueSBDFromCR(msg.getBody());
+                // TODO: Handle both SBD (old) and new wrapper with asic
+                cr.ifPresent(this::sendReceipt);
+                serviceBusClient.deleteMessage(msg);
             }
         }
     }
@@ -164,10 +161,11 @@ public class NextMoveServiceBus {
                                 log.debug(format("Received message on queue=%s with id=%s", serviceBusClient.getLocalQueuePath(), m.getMessageId()));
                                 Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
                                 StandardBusinessDocument sbd = unmarshaller.unmarshal(new StreamSource(new ByteArrayInputStream(m.getBody())), StandardBusinessDocument.class).getValue();
-                                Optional<ConversationResource> cr = nextMoveQueue.enqueueSBD(sbd);
+                                // TODO: Handle both SBD (old) and new wrapper with asic
+                                Optional<ConversationResource> cr = nextMoveQueue.enqueueSBDFromCR(sbd);
                                 cr.ifPresent(this::sendReceiptAsync);
                                 messageReceiver.completeAsync(m.getLockToken());
-                            } catch (JAXBException | IOException e) {
+                            } catch (JAXBException e) {
                                 log.error("Failed to put message on local queue", e);
                             }
                         });
