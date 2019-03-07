@@ -39,7 +39,7 @@ import static com.google.common.base.Strings.emptyToNull;
 public class NextMoveMessageOutController {
 
     private final StandardBusinessDocumentRepository sbdRepo;
-    private final NextMoveMessageRepository messageRepo;
+    private final NextMoveMessageOutRepository messageRepo;
     private final NextMoveMessageService messageService;
     private final MessagePersister messagePersister;
     private final InternalQueue internalQueue;
@@ -77,12 +77,12 @@ public class NextMoveMessageOutController {
     public Page<StandardBusinessDocument> getMessages(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
-        return sbdRepo.findAll(new PageRequest(page, size));
+        return messageRepo.findAll(new PageRequest(page, size)).map(NextMoveMessage::getSbd);
     }
 
 
     @GetMapping("/{conversationId}")
-    @ApiOperation(value = "Get all messages", notes = "Returns all queued messages")
+    @ApiOperation(value = "Get message", notes = "Returns message with given conversationId")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
             @ApiResponse(code = 400, message = "Bad request", response = String.class)

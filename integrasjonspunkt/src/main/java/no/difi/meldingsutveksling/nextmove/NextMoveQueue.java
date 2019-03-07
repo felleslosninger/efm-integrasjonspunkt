@@ -8,7 +8,7 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageRepository;
+import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import no.difi.meldingsutveksling.receipt.Conversation;
@@ -37,12 +37,12 @@ public class NextMoveQueue {
     private DirectionalConversationResourceRepository inRepo;
     private IntegrasjonspunktNokkel keyInfo;
     private ConversationService conversationService;
-    private NextMoveMessageRepository messageRepo;
+    private NextMoveMessageInRepository messageRepo;
 
     public NextMoveQueue(ConversationResourceRepository repo,
                          IntegrasjonspunktNokkel keyInfo,
                          ConversationService conversationService,
-                         NextMoveMessageRepository messageRepo) {
+                         NextMoveMessageInRepository messageRepo) {
         inRepo = new DirectionalConversationResourceRepository(repo, INCOMING);
         this.keyInfo = keyInfo;
         this.conversationService = conversationService;

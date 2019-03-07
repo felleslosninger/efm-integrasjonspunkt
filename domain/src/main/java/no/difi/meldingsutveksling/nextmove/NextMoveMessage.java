@@ -7,11 +7,14 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import org.hibernate.annotations.DiscriminatorOptions;
 
 import javax.persistence.*;
 import java.util.Set;
 
 @Entity
+@DiscriminatorColumn(name = "direction")
+@DiscriminatorOptions(force = true)
 @Data
 @RequiredArgsConstructor(staticName = "of")
 @NoArgsConstructor
