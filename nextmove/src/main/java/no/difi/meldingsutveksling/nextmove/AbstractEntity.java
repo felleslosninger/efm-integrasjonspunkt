@@ -7,9 +7,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.xml.bind.annotation.XmlTransient;
+import java.io.Serializable;
 
 @MappedSuperclass
-public abstract class AbstractEntity<I> {
+public abstract class AbstractEntity<I> implements Serializable {
 
     @Id
     @GeneratedValue

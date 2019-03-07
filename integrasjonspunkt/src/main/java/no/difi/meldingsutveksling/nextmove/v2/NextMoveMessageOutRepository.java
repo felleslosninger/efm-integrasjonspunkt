@@ -10,6 +10,8 @@ import java.util.Optional;
 
 public interface NextMoveMessageOutRepository extends PagingAndSortingRepository<NextMoveOutMessage, Long>, QueryDslPredicateExecutor<NextMoveOutMessage> {
     List<NextMoveOutMessage> findAll();
+
     Optional<NextMoveOutMessage> findByConversationId(String conversationId);
+
     void save(NextMoveMessage msg);
 }

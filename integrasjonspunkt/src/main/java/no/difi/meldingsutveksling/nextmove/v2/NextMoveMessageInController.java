@@ -1,0 +1,124 @@
+package no.difi.meldingsutveksling.nextmove.v2;
+
+import io.swagger.annotations.*;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
+import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
+import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
+import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
+import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import javax.persistence.PersistenceException;
+import javax.transaction.Transactional;
+import java.io.IOException;
+import java.io.InputStream;
+
+import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
+import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
+
+@RestController
+@Validated
+@Api
+@RequestMapping("/api/message/in")
+@Slf4j
+@RequiredArgsConstructor
+public class NextMoveMessageInController {
+
+    private static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
+    private static final String HEADER_FILENAME = "attachement; filename=";
+
+    private final NextMoveMessageInRepository messageRepo;
+    private final MessagePersister messagePersister;
+    private final IntegrasjonspunktNokkel keyInfo;
+    private final CmsUtil cmsUtil;
+
+    @GetMapping
+    @ApiOperation(value = "Get all incoming messages")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument[].class),
+            @ApiResponse(code = 404, message = "Not found", response = String.class),
+            @ApiResponse(code = 204, message = "No content", response = String.class)
+    })
+    @Transactional
+    public Page<StandardBusinessDocument> getMessages(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+        return messageRepo.findAll(new PageRequest(page, size))
+                .map(NextMoveInMessage::getSbd);
+    }
+
+    @GetMapping(value = "peek")
+    @ApiOperation(value = "Peek and lock incoming queue", notes = "Gets the first message in the incoming queue, then locks the message")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
+            @ApiResponse(code = 204, message = "No content", response = String.class)
+    })
+    @Transactional
+    public StandardBusinessDocument peek() {
+        return null;
+    }
+
+    @PostMapping(value = "pop/{conversationId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @ApiOperation(value = "Pop incoming queue", notes = "Gets the ASiC for the first non locked message in the queue, " +
+            "unless conversationId is specified, then removes it.")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success", response = InputStreamResource.class),
+            @ApiResponse(code = 204, message = "No content", response = String.class)
+    })
+    @Transactional
+    @SneakyThrows(IOException.class)
+    public ResponseEntity popMessage(
+            @ApiParam(value = "ConversationId", required = true)
+            @PathVariable("conversationId") String conversationId) {
+
+        NextMoveInMessage message = messageRepo.findByConversationId(conversationId)
+                .orElseThrow(() -> new ConversationNotFoundException(conversationId));
+
+        FileEntryStream fileEntry;
+        try {
+            fileEntry = messagePersister.readStream(conversationId, ASIC_FILE);
+        } catch (PersistenceException e) {
+            Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing message from queue",
+                    ASIC_FILE, message.getConversationId(), message.getSenderIdentifier()), markerFrom(message), e);
+            throw new FileNotFoundException(ASIC_FILE);
+        }
+
+        try (InputStream inputStream = fileEntry.getInputStream()) {
+            return ResponseEntity.ok()
+                    .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME + ASIC_FILE)
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .contentLength(fileEntry.getSize())
+                    .body(new InputStreamResource(cmsUtil.decryptCMSStreamed(inputStream, keyInfo.loadPrivateKey())));
+        }
+    }
+
+    @DeleteMapping(value = "pop/{conversationId}")
+    @ApiOperation(value = "Remove message", notes = "Delete the first queued locked message")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
+            @ApiResponse(code = 204, message = "No content", response = String.class)
+    })
+    @Transactional
+    @ResponseStatus
+    public StandardBusinessDocument deleteMessage(
+            @ApiParam(value = "ConversationId", required = true)
+            @PathVariable("conversationId") String conversationId) {
+        NextMoveInMessage message = messageRepo.findByConversationId(conversationId)
+                .orElseThrow(() -> new ConversationNotFoundException(conversationId));
+        messageRepo.delete(message);
+        return message.getSbd();
+    }
+}

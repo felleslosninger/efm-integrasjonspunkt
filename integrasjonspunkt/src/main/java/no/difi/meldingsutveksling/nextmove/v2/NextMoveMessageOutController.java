@@ -38,7 +38,6 @@ import static com.google.common.base.Strings.emptyToNull;
 @RequiredArgsConstructor
 public class NextMoveMessageOutController {
 
-    private final StandardBusinessDocumentRepository sbdRepo;
     private final NextMoveMessageOutRepository messageRepo;
     private final NextMoveMessageService messageService;
     private final MessagePersister messagePersister;
@@ -60,9 +59,7 @@ public class NextMoveMessageOutController {
                     throw new ConversationAlreadyExistsException(p.getConversationId());
                 });
 
-        sbd = messageService.setDefaults(sbd);
-        NextMoveMessage message = NextMoveMessage.of(sbd);
-        messageRepo.save(message);
+        messageRepo.save(NextMoveMessage.of(messageService.setDefaults(sbd)));
 
         return sbd;
     }
@@ -79,7 +76,6 @@ public class NextMoveMessageOutController {
             @RequestParam(name = "size", defaultValue = "10") int size) {
         return messageRepo.findAll(new PageRequest(page, size)).map(NextMoveMessage::getSbd);
     }
-
 
     @GetMapping("/{conversationId}")
     @ApiOperation(value = "Get message", notes = "Returns message with given conversationId")
