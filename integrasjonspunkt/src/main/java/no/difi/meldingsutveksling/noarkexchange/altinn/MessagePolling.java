@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
+import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
@@ -149,7 +150,7 @@ public class MessagePolling implements ApplicationContextAware {
                     if (properties.getNoarkSystem().isEnable() && !properties.getNoarkSystem().getEndpointURL().isEmpty()) {
                         internalQueue.enqueueNoark(sbd);
                     } else {
-                        nextMoveQueue.enqueueSBDFromNMM(sbd);
+                        nextMoveQueue.enqueue(sbd);
                     }
                     continue;
                 }
@@ -200,8 +201,12 @@ public class MessagePolling implements ApplicationContextAware {
     }
 
     private boolean isNextMove(StandardBusinessDocument sbd) {
-        return sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getStandard()
-                .equalsIgnoreCase(StandardBusinessDocumentHeader.NEXTMOVE_STANDARD);
+        return sbd.getConversationScope()
+                .map(Scope::getIdentifier)
+                .filter(s -> s.equals(StandardBusinessDocumentHeader.NEXTMOVE_STANDARD))
+                .isPresent();
+//        return sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getStandard()
+//                .equalsIgnoreCase(StandardBusinessDocumentHeader.NEXTMOVE_STANDARD);
     }
 
     private void sendReceipt(MessageInfo messageInfo) {

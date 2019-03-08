@@ -24,6 +24,9 @@ public class NextMoveMessageSerializer extends StdSerializer<StandardBusinessDoc
         } else if (value.getAny() instanceof DpvMessage) {
             gen.writeFieldName("dpv");
             gen.writeObject(value.getAny());
+        } else if (value.getAny() instanceof DpeMessage) {
+            gen.writeFieldName("dpe");
+            gen.writeObject(value.getAny());
         }
         gen.writeEndObject();
     }

@@ -8,7 +8,7 @@ import java.io.InputStream;
 
 public interface MessagePersister {
 
-    void write(ConversationResource cr, String filename, byte[] message) throws IOException;
+    void write(String conversationId, String filename, byte[] message) throws IOException;
     void writeStream(String conversationId, String filename, InputStream stream, long size) throws IOException;
 
 

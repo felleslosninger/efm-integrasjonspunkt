@@ -32,7 +32,7 @@ public class StrategyFactory {
                            InternalQueue internalQueue) {
         MessageStrategyFactory postInnbyggerStrategyFactory;
         try {
-            postInnbyggerStrategyFactory = PostInnbyggerStrategyFactory.newInstance(messageSender.getProperties(), serviceRegistryLookup, keystoreProvider);
+            postInnbyggerStrategyFactory = PostInnbyggerStrategyFactory.newInstance(properties, serviceRegistryLookup, keystoreProvider);
         } catch (MeldingsformidlerException e) {
             throw new MeldingsUtvekslingRuntimeException("Unable to create client for sikker digital post", e);
         }
@@ -45,8 +45,8 @@ public class StrategyFactory {
             factories.put(DPI, postInnbyggerStrategyFactory);
         }
         if (properties.getFeature().isEnableDPV()) {
-            factories.put(DPV, PostVirksomhetStrategyFactory.newInstance(messageSender.getProperties(), noarkClient, serviceRegistryLookup, internalQueue));
-            factories.put(DPE_INNSYN, PostVirksomhetStrategyFactory.newInstance(messageSender.getProperties(), noarkClient, serviceRegistryLookup, internalQueue));
+            factories.put(DPV, PostVirksomhetStrategyFactory.newInstance(properties, noarkClient, serviceRegistryLookup, internalQueue));
+            factories.put(DPE_INNSYN, PostVirksomhetStrategyFactory.newInstance(properties, noarkClient, serviceRegistryLookup, internalQueue));
         }
     }
 

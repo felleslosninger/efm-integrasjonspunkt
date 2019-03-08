@@ -35,7 +35,7 @@ public class FileMessagePersisterTest {
         String filename = "foo";
         byte[] content = "bar".getBytes(UTF_8);
 
-        messagePersister.write(cr, filename, content);
+        messagePersister.write(cr.getConversationId(), filename, content);
 
         byte[] read = messagePersister.read(cr, filename);
         Assert.assertArrayEquals(content, read);

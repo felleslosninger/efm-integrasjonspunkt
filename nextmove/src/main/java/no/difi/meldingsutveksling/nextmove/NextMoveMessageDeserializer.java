@@ -23,6 +23,9 @@ public class NextMoveMessageDeserializer extends StdDeserializer<BusinessMessage
         if ("dpv".equals(p.currentName())) {
             return p.getCodec().treeToValue(node, DpvMessage.class);
         }
+        if ("dpe".equals(p.currentName())) {
+            return p.getCodec().treeToValue(node, DpeMessage.class);
+        }
         return null;
     }
 }

@@ -62,4 +62,5 @@ public class MessageContext {
     public AbstractCollection<ErrorStatus> getErrors() {
         return errors;
     }
+
 }

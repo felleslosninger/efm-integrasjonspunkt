@@ -75,7 +75,7 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
 
     @XmlAnyElement(lax = true)
     @JsonDeserialize(using = NextMoveMessageDeserializer.class)
-    @JsonAlias({"dpo", "dpv"})
+    @JsonAlias({"dpo", "dpv", "dpe", "dpe"})
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = BusinessMessage.class)
     protected Object any;
 
@@ -122,7 +122,7 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
         return getStandardBusinessDocumentHeader().getBusinessScope()
                 .getScope()
                 .stream()
-                .filter(scope -> scopeType.toString().equals(scope.getType()))
+                .filter(scope -> scopeType.toString().equals(scope.getType()) || scopeType.name().equals(scope.getType()))
                 .findAny();
     }
 

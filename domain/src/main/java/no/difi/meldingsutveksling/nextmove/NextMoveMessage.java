@@ -47,7 +47,7 @@ public class NextMoveMessage {
     }
 
     @JsonIgnore
-    public Set<BusinessMessageFile> getFiles() throws NextMoveException {
+    public Set<BusinessMessageFile> getFiles() {
         return getBusinessMessage().getFiles();
     }
 
@@ -58,12 +58,12 @@ public class NextMoveMessage {
                 new NextMoveRuntimeException(String.format("Could not create ServiceIdentifier from documentIdentification.type=%s for message with id=%s", diType, getConversationId())));
     }
 
-    private BusinessMessage getBusinessMessage() throws NextMoveException {
+    private BusinessMessage getBusinessMessage() {
         if (getSbd().getAny() == null) {
-            throw new NextMoveException("SBD missing BusinessMessage");
+            throw new NextMoveRuntimeException("SBD missing BusinessMessage");
         }
         if (!(getSbd().getAny() instanceof BusinessMessage)) {
-            throw new NextMoveException("SBD.any not instance of BusinessMessage");
+            throw new NextMoveRuntimeException("SBD.any not instance of BusinessMessage");
         }
         return (BusinessMessage) getSbd().getAny();
     }

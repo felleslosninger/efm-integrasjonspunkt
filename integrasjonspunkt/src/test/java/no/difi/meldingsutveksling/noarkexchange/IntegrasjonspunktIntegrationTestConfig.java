@@ -57,13 +57,17 @@ public class IntegrasjonspunktIntegrationTestConfig {
     private IntegrasjonspunktProperties properties;
 
     @Bean
-    public MessageSender messageSender(TransportFactory transportFactory, Adresseregister adresseregister,
-                                       IntegrasjonspunktNokkel integrasjonspunktNokkel,
+    public MessageSender messageSender(TransportFactory transportFactory,
                                        StandardBusinessDocumentFactory standardBusinessDocumentFactory,
-                                       ServiceRegistryLookup serviceRegistryLookup,
-                                       AsicHandler asicHandler) {
-        return new MessageSender(transportFactory, adresseregister, properties, integrasjonspunktNokkel,
-                standardBusinessDocumentFactory, serviceRegistryLookup, asicHandler);
+                                       AsicHandler asicHandler,
+                                       MessageContextFactory messageContextFactory) {
+        return new MessageSender(transportFactory, standardBusinessDocumentFactory, asicHandler, messageContextFactory);
+    }
+
+    @Bean
+    public MessageContextFactory messageContextFactory(Adresseregister adresseregister,
+                                                       ServiceRegistryLookup serviceRegistryLookup) {
+        return new MessageContextFactory(properties, adresseregister, serviceRegistryLookup);
     }
 
     @Bean

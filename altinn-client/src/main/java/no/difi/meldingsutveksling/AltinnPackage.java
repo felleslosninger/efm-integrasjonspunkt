@@ -121,9 +121,11 @@ public class AltinnPackage {
             om.writeValue(zipOutputStream, sbd);
             zipOutputStream.closeEntry();
 
-            zipOutputStream.putNextEntry(new ZipEntry(ASIC_FILE));
-            IOUtils.copy(this.asicInputStream, zipOutputStream);
-            zipOutputStream.closeEntry();
+            if (this.asicInputStream != null) {
+                zipOutputStream.putNextEntry(new ZipEntry(ASIC_FILE));
+                IOUtils.copy(this.asicInputStream, zipOutputStream);
+                zipOutputStream.closeEntry();
+            }
         }
 
         zipOutputStream.finish();

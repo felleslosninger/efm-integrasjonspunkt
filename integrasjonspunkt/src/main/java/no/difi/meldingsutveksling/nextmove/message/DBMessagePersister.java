@@ -39,14 +39,14 @@ public class DBMessagePersister implements MessagePersister {
 
     @Override
     @Transactional
-    public void write(ConversationResource cr, String filename, byte[] message) throws IOException {
+    public void write(String conversationId, String filename, byte[] message) throws IOException {
         LobHelper lobHelper = em.unwrap(Session.class).getLobHelper();
         Blob contentBlob = lobHelper.createBlob(message);
         if (props.getNextmove().getApplyZipHeaderPatch() && ASIC_FILE.equals(filename)) {
-            BugFix610.applyPatch(message, cr.getConversationId());
+            BugFix610.applyPatch(message, conversationId);
         }
 
-        NextMoveMessageEntry entry = NextMoveMessageEntry.of(cr.getConversationId(), filename, contentBlob, message.length);
+        NextMoveMessageEntry entry = NextMoveMessageEntry.of(conversationId, filename, contentBlob, message.length);
         repo.save(entry);
     }
 

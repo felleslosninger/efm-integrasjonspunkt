@@ -46,7 +46,6 @@ public class StrategyFactoryTest {
         when(properties.getFeature()).thenReturn(featureMock);
         when(dpic.getKeystore()).thenReturn(keystore);
         when(dpic.getFeature()).thenReturn(new DigitalPostInnbyggerConfig.FeatureToggle());
-        when(messageSender.getProperties()).thenReturn(properties);
         when(properties.getDpv()).thenReturn(ptvMock);
         when(properties.getDpi()).thenReturn(dpic);
         when(properties.getOrg()).thenReturn(orgMock);

@@ -57,6 +57,8 @@ public class AsicHandler {
 
     public InputStream createEncryptedAsic(NextMoveMessage msg, MessageContext messageContext) throws NextMoveException {
 
+        if (msg.getFiles() == null || msg.getFiles().isEmpty()) return null;
+
         List<StreamedFile> attachements = new ArrayList<>();
         msg.getFiles().forEach(f -> {
             FileEntryStream fes = messagePersister.readStream(msg.getConversationId(), f.getFilename());

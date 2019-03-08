@@ -20,10 +20,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.security.cert.X509Certificate;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -99,11 +97,6 @@ public class StandardBusinessDocumentFactory {
     private Archive createAsicePackage(Avsender avsender, Mottaker mottaker, ByteArrayFile byteArrayFile) throws
             IOException {
         return new CreateAsice().createAsice(byteArrayFile, integrasjonspunktNokkel.getSignatureHelper(), avsender, mottaker);
-    }
-
-    private void createAsicePackage(Avsender avsender, Mottaker mottaker, List<StreamedFile> streamedFiles, OutputStream archive) throws
-            IOException {
-        new CreateAsice().createAsiceStreamed(streamedFiles, archive, integrasjonspunktNokkel.getSignatureHelper(), avsender, mottaker);
     }
 
 }

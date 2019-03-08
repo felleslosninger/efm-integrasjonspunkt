@@ -58,18 +58,6 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public MessageSender messageSender(TransportFactory transportFactory,
-                                       Adresseregister adresseregister,
-                                       IntegrasjonspunktNokkel integrasjonspunktNokkel,
-                                       IntegrasjonspunktProperties properties,
-                                       StandardBusinessDocumentFactory standardBusinessDocumentFactory,
-                                       ServiceRegistryLookup serviceRegistryLookup,
-                                       AsicHandler asicHandler) {
-        return new MessageSender(transportFactory, adresseregister, properties, integrasjonspunktNokkel,
-                standardBusinessDocumentFactory, serviceRegistryLookup, asicHandler);
-    }
-
-    @Bean
     public KeystoreProvider meldingsformidlerKeystoreProvider(IntegrasjonspunktProperties properties) throws MeldingsformidlerException {
         try {
             return KeystoreProvider.from(properties.getDpi().getKeystore());

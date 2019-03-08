@@ -1,12 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
-import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
-import no.difi.meldingsutveksling.domain.Avsender;
-import no.difi.meldingsutveksling.domain.Mottaker;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.AsicHandler;
@@ -14,9 +8,6 @@ import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.slf4j.Logger;
@@ -24,72 +15,39 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.util.Optional;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.core.EDUCoreMarker.markerFrom;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createErrorResponse;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createOkResponse;
 
+@Component
 public class MessageSender implements ApplicationContextAware {
 
     private static final Logger log = LoggerFactory.getLogger(MessageSender.class);
 
     private TransportFactory transportFactory;
-    private Adresseregister adresseregister;
-    private IntegrasjonspunktProperties properties;
     private ApplicationContext context;
-    private IntegrasjonspunktNokkel keyInfo;
     private StandardBusinessDocumentFactory standardBusinessDocumentFactory;
-    private ServiceRegistryLookup serviceRegistryLookup;
     private AsicHandler asicHandler;
+    private MessageContextFactory messageContextFactory;
 
-    public MessageSender() {
-    }
-
-    public MessageSender(TransportFactory transportFactory, Adresseregister adresseregister,
-                         IntegrasjonspunktProperties properties, IntegrasjonspunktNokkel keyInfo,
+    public MessageSender(TransportFactory transportFactory,
                          StandardBusinessDocumentFactory standardBusinessDocumentFactory,
-                         ServiceRegistryLookup serviceRegistryLookup, AsicHandler asicHandler) {
+                         AsicHandler asicHandler,
+                         MessageContextFactory messageContextFactory) {
         this.transportFactory = transportFactory;
-        this.adresseregister = adresseregister;
-        this.properties = properties;
-        this.keyInfo = keyInfo;
         this.standardBusinessDocumentFactory = standardBusinessDocumentFactory;
-        this.serviceRegistryLookup = serviceRegistryLookup;
         this.asicHandler = asicHandler;
-    }
-
-    private Avsender createAvsender(String identifier) {
-        return Avsender.builder(new Organisasjonsnummer(identifier)).build();
-    }
-
-    private Mottaker createMottaker(String identifier, ServiceIdentifier serviceIdentifier) throws MessageContextException {
-        return Mottaker.builder(new Organisasjonsnummer(identifier), getCertificate(identifier, serviceIdentifier)).build();
-    }
-
-    private Certificate getCertificate(String identifier, ServiceIdentifier serviceIdentifier) throws MessageContextException {
-        Optional<ServiceRecord> record = serviceRegistryLookup.getServiceRecord(identifier, serviceIdentifier);
-        ServiceRecord serviceRecord = record.orElseThrow(() -> new MessageContextException(StatusMessage.NO_MATCHING_SERVICEIDENTIFIER));
-
-        try {
-            return adresseregister.getCertificate(serviceRecord);
-        } catch (CertificateException e) {
-            if (properties.getOrg().getNumber().equals(identifier)) {
-                throw new MessageContextException(e, StatusMessage.MISSING_SENDER_CERTIFICATE);
-            }
-            throw new MessageContextException(e, StatusMessage.MISSING_RECIEVER_CERTIFICATE);
-        }
+        this.messageContextFactory = messageContextFactory;
     }
 
     public PutMessageResponseType sendMessage(EDUCore message) {
         MessageContext messageContext;
         try {
-            messageContext = createMessageContext(message);
+            messageContext = messageContextFactory.from(message);
             Audit.info("Required metadata validated", markerFrom(message));
         } catch (MessageContextException e) {
             log.error(markerFrom(message), e.getStatusMessage().getTechnicalMessage(), e);
@@ -114,7 +72,7 @@ public class MessageSender implements ApplicationContextAware {
 
 
     public void sendMessage(NextMoveMessage message) throws MessageContextException, NextMoveException {
-        MessageContext context = createMessageContext(message);
+        MessageContext context = messageContextFactory.from(message);
         InputStream is = asicHandler.createEncryptedAsic(message, context);
         Transport transport = transportFactory.createTransport(message.getSbd());
         transport.send(this.context, message.getSbd(), is);
@@ -122,7 +80,7 @@ public class MessageSender implements ApplicationContextAware {
 
 
     public void sendMessage(ConversationResource conversation) throws MessageContextException {
-        MessageContext messageContext = createMessageContext(conversation);
+        MessageContext messageContext = messageContextFactory.from(conversation);
 
         StandardBusinessDocument edu;
         try {
@@ -137,103 +95,6 @@ public class MessageSender implements ApplicationContextAware {
         t.send(context, edu);
 
         log.info("ConversationResource sent");
-    }
-
-    public MessageContext createMessageContext(NextMoveMessage message) throws MessageContextException {
-        MessageContext context = new MessageContext();
-        context.setAvsender(createAvsender(message.getSenderIdentifier()));
-        context.setMottaker(createMottaker(message.getReceiverIdentifier(), message.getServiceIdentifier()));
-        context.setJpId("");
-        context.setConversationId(message.getConversationId());
-        return context;
-    }
-
-    public MessageContext createMessageContext(ConversationResource conversation) throws MessageContextException {
-        if (isNullOrEmpty(conversation.getReceiverId())) {
-            throw new MessageContextException(StatusMessage.MISSING_RECIEVER_ORGANIZATION_NUMBER);
-        }
-
-        MessageContext context = new MessageContext();
-        context.setAvsender(createAvsender(conversation.getSenderId()));
-        context.setMottaker(createMottaker(conversation.getReceiverId(), conversation.getServiceIdentifier()));
-        context.setJpId("");
-        context.setConversationId(conversation.getConversationId());
-
-        return context;
-    }
-
-    /**
-     * Creates MessageContext to contain data needed to send a message such as sender/recipient party numbers and certificates
-     *
-     * The context also contains error statuses if the message request has validation errors.
-     *
-     * @param message that contains sender, receiver and journalpost id
-     * @return MessageContext containing data about the shipment
-     */
-    protected MessageContext createMessageContext(EDUCore message) throws MessageContextException {
-        if (isNullOrEmpty(message.getReceiver().getIdentifier())) {
-            throw new MessageContextException(StatusMessage.MISSING_RECIEVER_ORGANIZATION_NUMBER);
-        }
-
-        MessageContext messageContext = new MessageContext();
-
-        Avsender avsender;
-        final Mottaker mottaker;
-        avsender = createAvsender(message.getSender().getIdentifier());
-        mottaker = createMottaker(message.getReceiver().getIdentifier(), message.getServiceIdentifier());
-
-        if (message.getMessageType() == EDUCore.MessageType.EDU) {
-            messageContext.setJpId(message.getJournalpostId());
-        } else {
-            messageContext.setJpId("");
-        }
-
-        String converationId = message.getId();
-
-        messageContext.setMottaker(mottaker);
-        messageContext.setAvsender(avsender);
-        messageContext.setConversationId(converationId);
-        return messageContext;
-    }
-
-    public void setAdresseregister(Adresseregister adresseregister) {
-        this.adresseregister = adresseregister;
-    }
-
-    public IntegrasjonspunktProperties getProperties() {
-        return properties;
-    }
-
-    public void setProperties(IntegrasjonspunktProperties properties) {
-        this.properties = properties;
-    }
-
-    public IntegrasjonspunktNokkel getKeyInfo() {
-        return keyInfo;
-    }
-
-    public void setKeyInfo(IntegrasjonspunktNokkel keyInfo) {
-        this.keyInfo = keyInfo;
-    }
-
-    public void setTransportFactory(TransportFactory transportFactory) {
-        this.transportFactory = transportFactory;
-    }
-
-    public void setStandardBusinessDocumentFactory(StandardBusinessDocumentFactory standardBusinessDocumentFactory) {
-        this.standardBusinessDocumentFactory = standardBusinessDocumentFactory;
-    }
-
-    public StandardBusinessDocumentFactory getStandardBusinessDocumentFactory() {
-        return standardBusinessDocumentFactory;
-    }
-
-    public ServiceRegistryLookup getServiceRegistryLookup() {
-        return serviceRegistryLookup;
-    }
-
-    public void setServiceRegistryLookup(ServiceRegistryLookup serviceRegistryLookup) {
-        this.serviceRegistryLookup = serviceRegistryLookup;
     }
 
     @Override

@@ -5,23 +5,19 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayload;
+import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayloadConverter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.xml.transform.StringSource;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -44,18 +40,19 @@ public class ServiceBusRestClient {
     private ServiceRegistryLookup sr;
     private IntegrasjonspunktProperties props;
     private String localQueuePath;
-    private JAXBContext jaxbContext;
     private RestTemplate restTemplate;
+    private ServiceBusPayloadConverter payloadConverter;
 
     public ServiceBusRestClient(ServiceRegistryLookup sr,
-                                IntegrasjonspunktProperties props) throws JAXBException {
+                                IntegrasjonspunktProperties props,
+                                ServiceBusPayloadConverter payloadConverter) {
         this.sr = sr;
         this.props = props;
 
         this.localQueuePath = NEXTMOVE_QUEUE_PREFIX+
                 props.getOrg().getNumber()+
                 props.getNextmove().getServiceBus().getMode();
-        this.jaxbContext = JAXBContextFactory.createContext(new Class[]{StandardBusinessDocument.class, Payload.class, ConversationResource.class}, null);
+        this.payloadConverter = payloadConverter;
 
         RequestConfig requestConfig = RequestConfig.custom()
                 .setConnectTimeout(props.getNextmove().getServiceBus().getConnectTimeout())
@@ -111,20 +108,21 @@ public class ServiceBusRestClient {
         String brokerPropertiesJson = response.getHeaders().getFirst("BrokerProperties");
         JsonParser jsonParser = new JsonParser();
         JsonObject brokerProperties = jsonParser.parse(brokerPropertiesJson).getAsJsonObject();
+        String messageId = brokerProperties.get("MessageId").getAsString();
         sbmBuilder.lockToken(brokerProperties.get("LockToken").getAsString())
-                .messageId(brokerProperties.get("MessageId").getAsString())
+                .messageId(messageId)
                 .sequenceNumber(brokerProperties.get("SequenceNumber").getAsString());
 
         try {
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            StandardBusinessDocument sbd = unmarshaller.unmarshal(new StringSource(response.getBody()), StandardBusinessDocument.class).getValue();
-            sbmBuilder.body(sbd);
-            log.debug(format("Received message on queue=%s with conversationId=%s", localQueuePath, sbd.getConversationId()));
+            ServiceBusPayload payload = payloadConverter.convert(response.getBody(), messageId);
+            sbmBuilder.payload(payload);
+            log.debug(format("Received message on queue=%s with conversationId=%s", localQueuePath, payload.getSbd().getConversationId()));
+            return Optional.of(sbmBuilder.build());
         } catch (JAXBException e) {
-            log.error(String.format("Error unmarshalling service bus message with id=%s", brokerProperties.get("MessageId")), e);
+            log.error(String.format("Error creating old format from message id=%s", messageId), e);
         }
 
-        return Optional.of(sbmBuilder.build());
+        return Optional.empty();
     }
 
     public void deleteMessage(ServiceBusMessage message) {
@@ -145,7 +143,7 @@ public class ServiceBusRestClient {
         if (!response.getStatusCode().is2xxSuccessful()) {
             log.error("{} got response {}, message [conversationId={}] was not deleted",
                     resourceUri, response.getStatusCode().toString(),
-                    message.getBody().getConversationId());
+                    message.getPayload().getSbd().getConversationId());
         }
     }
 

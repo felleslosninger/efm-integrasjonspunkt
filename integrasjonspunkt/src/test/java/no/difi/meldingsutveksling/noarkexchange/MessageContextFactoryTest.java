@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.ServiceRecordObjectMother;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -30,40 +29,33 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MessageSenderTest {
+public class MessageContextFactoryTest {
 
     private static final String SENDER_PARTY_NUMBER = "910075918";
     private static final String RECIEVER_PARTY_NUMBER = "910077473";
     private static final String CONVERSATION_ID = "conversationId";
     private static final String JOURNALPOST_ID = "journalpostid";
     private static final ServiceIdentifier SERVICE_IDENTIFIER = DPV;
-    private MessageSender messageSender;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
     @Mock
     private Adresseregister adresseregister;
-
     @Mock
     private IntegrasjonspunktProperties propertiesMock;
-
-    @Mock
-    private IntegrasjonspunktNokkel integrasjonspunktNokkel;
-
     @Mock
     private ServiceRegistryLookup serviceRegistryLookup;
+
+    private MessageContextFactory messageContextFactory;
 
     @Before
     public void setUp() {
         IntegrasjonspunktProperties.Organization org = new IntegrasjonspunktProperties.Organization();
         org.setNumber(SENDER_PARTY_NUMBER);
         when(propertiesMock.getOrg()).thenReturn(org);
-        messageSender = new MessageSender();
-        messageSender.setProperties(propertiesMock);
-        messageSender.setKeyInfo(integrasjonspunktNokkel);
-        messageSender.setAdresseregister(adresseregister);
-        messageSender.setServiceRegistryLookup(serviceRegistryLookup);
+
+        messageContextFactory = new MessageContextFactory(propertiesMock, adresseregister, serviceRegistryLookup);
 
         when(serviceRegistryLookup.getServiceRecord(SENDER_PARTY_NUMBER, DPV))
                 .thenReturn(Optional.of(ServiceRecordObjectMother.createDPVServiceRecord(SENDER_PARTY_NUMBER)));
@@ -78,7 +70,7 @@ public class MessageSenderTest {
         EDUCore request = new RequestBuilder().withSender().build();
         when(request.getReceiver().getIdentifier()).thenReturn("");
 
-        messageSender.createMessageContext(request);
+        messageContextFactory.from(request);
     }
 
     @Test
@@ -92,14 +84,14 @@ public class MessageSenderTest {
         when(adresseregister.getCertificate(ServiceRecordObjectMother.createDPVServiceRecord(RECIEVER_PARTY_NUMBER)))
                 .thenThrow(new CertificateException("hello"));
 
-        messageSender.createMessageContext(request);
+        messageContextFactory.from(request);
     }
 
     @Test
     public void messageContextShouldHaveConversationId() throws MessageContextException {
         EDUCore request = new RequestBuilder().withSender().withReciever().withConversationId().withJournalpostId().withServiceIdentifier().build();
 
-        MessageContext context = messageSender.createMessageContext(request);
+        MessageContext context = messageContextFactory.from(request);
         Assert.assertEquals(CONVERSATION_ID, context.getConversationId());
     }
 
@@ -108,7 +100,7 @@ public class MessageSenderTest {
         EDUCore request = new RequestBuilder().withSender().withReciever().withConversationId().withJournalpostId().withServiceIdentifier().build();
 
         when(request.getMessageType()).thenReturn(EDUCore.MessageType.EDU);
-        MessageContext context = messageSender.createMessageContext(request);
+        MessageContext context = messageContextFactory.from(request);
         Assert.assertEquals(JOURNALPOST_ID, context.getJournalPostId());
     }
 
@@ -117,7 +109,7 @@ public class MessageSenderTest {
         EDUCore request = new RequestBuilder().withSender().withReciever().withConversationId().withServiceIdentifier().build();
 
         when(request.getMessageType()).thenReturn(EDUCore.MessageType.APPRECEIPT);
-        MessageContext context = messageSender.createMessageContext(request);
+        MessageContext context = messageContextFactory.from(request);
         Assert.assertEquals("", context.getJournalPostId());
     }
 

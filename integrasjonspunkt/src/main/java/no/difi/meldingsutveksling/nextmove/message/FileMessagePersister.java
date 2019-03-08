@@ -27,13 +27,13 @@ public class FileMessagePersister implements MessagePersister {
     }
 
     @Override
-    public void write(ConversationResource cr, String filename, byte[] message) throws IOException {
-        String filedir = getConversationFiledirPath(cr.getConversationId());
+    public void write(String conversationId, String filename, byte[] message) throws IOException {
+        String filedir = getConversationFiledirPath(conversationId);
         File localFile = new File(filedir+filename);
         localFile.getParentFile().mkdirs();
 
         if (props.getNextmove().getApplyZipHeaderPatch() && ASIC_FILE.equals(filename)){
-            BugFix610.applyPatch(message, cr.getConversationId());
+            BugFix610.applyPatch(message, conversationId);
         }
 
         try (FileOutputStream os = new FileOutputStream(localFile);

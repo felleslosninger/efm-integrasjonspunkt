@@ -281,7 +281,7 @@ public class MessageOutController {
 
             try {
                 if (cr.getCustomProperties().containsKey("base64") && "true".equalsIgnoreCase(cr.getCustomProperties().get("base64"))) {
-                    messagePersister.write(cr, file.getOriginalFilename(),
+                    messagePersister.write(cr.getConversationId(), file.getOriginalFilename(),
                             Base64.getDecoder().decode(new String(file.getBytes()).getBytes(StandardCharsets.UTF_8)));
                 } else {
                     messagePersister.writeStream(cr.getConversationId(), file.getOriginalFilename(), file.getInputStream(), file.getSize());

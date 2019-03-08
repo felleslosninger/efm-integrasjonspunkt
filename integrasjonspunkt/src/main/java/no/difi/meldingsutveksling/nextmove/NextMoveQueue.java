@@ -49,7 +49,7 @@ public class NextMoveQueue {
         this.messageRepo = messageRepo;
     }
 
-    public Optional<NextMoveMessage> enqueueSBDFromNMM(StandardBusinessDocument sbd) {
+    public Optional<NextMoveMessage> enqueue(StandardBusinessDocument sbd) {
         if (sbd.getAny() instanceof BusinessMessage) {
             NextMoveInMessage message = NextMoveInMessage.of(sbd);
 
@@ -58,7 +58,8 @@ public class NextMoveQueue {
                 return Optional.empty();
             }
 
-            messageRepo.save(message);
+            messageRepo.findByConversationId(sbd.getConversationId())
+                    .orElseGet(() -> messageRepo.save(message));
 
             Conversation c = conversationService.registerConversation(message);
             conversationService.registerStatus(c, MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_MOTTATT));
