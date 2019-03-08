@@ -18,7 +18,6 @@ public class NextMoveInMessage extends NextMoveMessage {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private ZonedDateTime lockTimeout;
 
-
     public NextMoveInMessage(String conversationId, String receiverIdentifier, String senderIdentifier, StandardBusinessDocument sbd) {
         super(conversationId, receiverIdentifier, senderIdentifier, sbd);
     }
