@@ -128,7 +128,7 @@ public class MessagePolling implements ApplicationContextAware {
         // TODO: if ServiceRegistry returns a ServiceRecord to something other than Altinn formidlingstjeneste this
         // will fail
         AltinnWsConfiguration configuration = AltinnWsConfiguration.fromConfiguration(serviceRecord, context);
-        AltinnWsClient client = new AltinnWsClient(configuration);
+        AltinnWsClient client = new AltinnWsClient(configuration, context);
 
         List<FileReference> fileReferences = client.availableFiles(properties.getOrg().getNumber());
 
@@ -200,8 +200,8 @@ public class MessagePolling implements ApplicationContextAware {
     }
 
     private boolean isNextMove(StandardBusinessDocument sbd) {
-        return sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getType()
-                .equalsIgnoreCase(StandardBusinessDocumentHeader.NEXTMOVE_TYPE);
+        return sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getStandard()
+                .equalsIgnoreCase(StandardBusinessDocumentHeader.NEXTMOVE_STANDARD);
     }
 
     private void sendReceipt(MessageInfo messageInfo) {

@@ -143,6 +143,7 @@ public class MessageSender implements ApplicationContextAware {
         MessageContext context = new MessageContext();
         context.setAvsender(createAvsender(message.getSenderIdentifier()));
         context.setMottaker(createMottaker(message.getReceiverIdentifier(), message.getServiceIdentifier()));
+        context.setJpId("");
         context.setConversationId(message.getConversationId());
         return context;
     }

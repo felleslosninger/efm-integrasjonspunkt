@@ -19,6 +19,7 @@ import no.difi.meldingsutveksling.shipping.ws.RecipientBuilder;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 
 import javax.activation.DataHandler;
 import javax.xml.bind.JAXBElement;
@@ -47,11 +48,13 @@ public class AltinnWsClient {
 
     private final AltinnWsConfiguration configuration;
     private final IBrokerServiceExternalBasicStreamed streamingService;
+    private ApplicationContext context;
 
     private static final Logger log = LoggerFactory.getLogger(AltinnWsClient.class);
 
-    public AltinnWsClient(AltinnWsConfiguration altinnWsConfiguration) {
+    public AltinnWsClient(AltinnWsConfiguration altinnWsConfiguration, ApplicationContext context) {
         this.configuration = altinnWsConfiguration;
+        this.context = context;
 
         BrokerServiceExternalBasicStreamedSF brokerServiceExternalBasicStreamedSF;
         brokerServiceExternalBasicStreamedSF = new BrokerServiceExternalBasicStreamedSF(configuration.getStreamingServiceUrl());
@@ -79,7 +82,7 @@ public class AltinnWsClient {
             CompletableFuture.runAsync(() -> {
                 log.debug("Starting thread: write altinn zip");
                 try {
-                    altinnPackage.write(pos);
+                    altinnPackage.write(pos, context);
                     pos.flush();
                     pos.close();
                 } catch (IOException e) {
@@ -167,7 +170,7 @@ public class AltinnWsClient {
             TmpFile tmpFile = TmpFile.create();
             File file = tmpFile.getFile();
             FileUtils.copyInputStreamToFile(dh.getInputStream(), file);
-            AltinnPackage altinnPackage = AltinnPackage.from(file, messagePersister);
+            AltinnPackage altinnPackage = AltinnPackage.from(file, messagePersister, context);
 
             tmpFile.delete();
             return altinnPackage.getSbd();

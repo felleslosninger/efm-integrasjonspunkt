@@ -54,7 +54,7 @@ public class NextMoveSender {
         }
 
         conversationService.registerStatus(msg.getConversationId(), MessageStatus.of(GenericReceiptStatus.SENDT));
-        messageRepo.delete(msg);
+        messageRepo.deleteByConversationId(msg.getConversationId());
         try {
             messagePersister.delete(msg.getConversationId());
         } catch (IOException e) {

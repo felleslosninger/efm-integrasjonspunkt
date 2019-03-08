@@ -13,10 +13,11 @@ import javax.persistence.*;
 import java.util.Set;
 
 @Entity
-@DiscriminatorColumn(name = "direction")
+@DiscriminatorColumn(name = "direction", discriminatorType = DiscriminatorType.STRING)
 @DiscriminatorOptions(force = true)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Data
-@RequiredArgsConstructor(staticName = "of")
+@RequiredArgsConstructor
 @NoArgsConstructor
 public class NextMoveMessage {
 

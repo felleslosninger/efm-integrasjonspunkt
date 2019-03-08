@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceManifest;
@@ -18,11 +19,9 @@ import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
+import org.springframework.context.ApplicationContext;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.*;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
@@ -57,7 +56,10 @@ public class AltinnPackage {
         }
     }
 
-    private AltinnPackage(BrokerServiceManifest manifest, BrokerServiceRecipientList recipient, StandardBusinessDocument sbd, InputStream asicInputStream) {
+    private AltinnPackage(BrokerServiceManifest manifest,
+                          BrokerServiceRecipientList recipient,
+                          StandardBusinessDocument sbd,
+                          InputStream asicInputStream) {
         this.manifest = manifest;
         this.recipient = recipient;
         this.sbd = sbd;
@@ -84,7 +86,7 @@ public class AltinnPackage {
      * @param outputStream where the Zip file is written
      * @throws IOException
      */
-    public void write(OutputStream outputStream) throws IOException {
+    public void write(OutputStream outputStream, ApplicationContext context) throws IOException {
         ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);
 
         zipOutputStream.putNextEntry(new ZipEntry("manifest.xml"));
@@ -96,23 +98,26 @@ public class AltinnPackage {
         zipOutputStream.closeEntry();
 
 
-        if (sbd.getAny() instanceof Payload) {
+        if (sbd.getAny() instanceof Payload || sbd.getAny() instanceof JAXBElement) {
             zipOutputStream.putNextEntry(new ZipEntry("content.xml"));
             no.difi.meldingsutveksling.domain.sbdh.ObjectFactory objectFactory = new no.difi.meldingsutveksling.domain.sbdh.ObjectFactory();
             marshallObject(objectFactory.createStandardBusinessDocument(sbd), zipOutputStream);
             zipOutputStream.closeEntry();
 
-            Payload payload = (Payload) sbd.getAny();
-            if (payload.getInputStream() != null) {
-                zipOutputStream.putNextEntry(new ZipEntry(ASIC_FILE));
-                IOUtils.copy(payload.getInputStream(), zipOutputStream);
-                zipOutputStream.closeEntry();
+            if (sbd.getAny() instanceof Payload) {
+                Payload payload = (Payload) sbd.getAny();
+                if (payload.getInputStream() != null) {
+                    zipOutputStream.putNextEntry(new ZipEntry(ASIC_FILE));
+                    IOUtils.copy(payload.getInputStream(), zipOutputStream);
+                    zipOutputStream.closeEntry();
+                }
             }
         }
 
         if (sbd.getAny() instanceof BusinessMessage) {
             zipOutputStream.putNextEntry(new ZipEntry("sbd.json"));
-            ObjectMapper om = new ObjectMapper();
+            ObjectMapper om = context.getBean(ObjectMapper.class);
+            om.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
             om.writeValue(zipOutputStream, sbd);
             zipOutputStream.closeEntry();
 
@@ -124,7 +129,7 @@ public class AltinnPackage {
         zipOutputStream.finish();
     }
 
-    public static AltinnPackage from(File f, MessagePersister messagePersister) throws IOException, JAXBException {
+    public static AltinnPackage from(File f, MessagePersister messagePersister, ApplicationContext context) throws IOException, JAXBException {
         ZipFile zipFile = new ZipFile(f);
         Unmarshaller unmarshaller = ctx.createUnmarshaller();
 
@@ -142,7 +147,8 @@ public class AltinnPackage {
             } else if (zipEntry.getName().equals("recipients.xml")) {
                 recipientList = (BrokerServiceRecipientList) unmarshaller.unmarshal(zipFile.getInputStream(zipEntry));
             } else if (zipEntry.getName().equals("sbd.json")) {
-                ObjectMapper om = new ObjectMapper();
+                ObjectMapper om = context.getBean(ObjectMapper.class);
+                om.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
                 sbd = om.readValue(zipFile.getInputStream(zipEntry), StandardBusinessDocument.class);
             } else if (zipEntry.getName().equals("content.xml")) {
                 Source source = new StreamSource(zipFile.getInputStream(zipEntry));

@@ -51,7 +51,7 @@ public class NextMoveQueue {
 
     public Optional<NextMoveMessage> enqueueSBDFromNMM(StandardBusinessDocument sbd) {
         if (sbd.getAny() instanceof BusinessMessage) {
-            NextMoveMessage message = NextMoveMessage.of(sbd);
+            NextMoveInMessage message = NextMoveInMessage.of(sbd);
 
             if (ServiceIdentifier.DPE_RECEIPT.equals(message.getServiceIdentifier())) {
                 handleDpeReceipt(message.getConversationId());

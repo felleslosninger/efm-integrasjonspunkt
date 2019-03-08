@@ -105,7 +105,7 @@ public class SFtpClient {
         public void upload(AltinnPackage altinnPackage) {
             try {
                 OutputStream outputStream = sftp.put("test.zip"); // filename generator
-                altinnPackage.write(outputStream);
+                altinnPackage.write(outputStream, null);
                 sftp.quit();
             } catch (SftpException | IOException e) {
                 e.printStackTrace();

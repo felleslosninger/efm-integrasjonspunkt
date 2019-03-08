@@ -8,11 +8,7 @@ import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.nextmove.ConversationResource;
-import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
-import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
-import no.difi.meldingsutveksling.nextmove.NextMoveSender;
-import no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers;
+import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.noarkexchange.*;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
@@ -77,6 +73,9 @@ public class InternalQueue {
     @Autowired
     private NextMoveSender nextMoveSender;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     private NoarkClient noarkClient;
 
     private EDUCoreFactory eduCoreFactory;
@@ -117,12 +116,16 @@ public class InternalQueue {
 
     @JmsListener(destination = NEXTMOVE_2, containerFactory = "myJmsContainerFactory", concurrency = "100")
     public void nextMove2Listener(byte[] message, Session session) {
-        ObjectMapper om = new ObjectMapper();
+        NextMoveMessage nextMoveMessage;
         try {
-            NextMoveMessage nextMoveMessage = om.readValue(message, NextMoveMessage.class);
-
+            nextMoveMessage = objectMapper.readValue(message, NextMoveMessage.class);
         } catch (IOException e) {
             throw new NextMoveRuntimeException("Unable to unmarshall NextMove message from queue", e);
+        }
+        try {
+            nextMoveSender.send(nextMoveMessage);
+        } catch (NextMoveException e) {
+            throw new NextMoveRuntimeException("Unable to send NextMove message", e);
         }
     }
 
@@ -288,9 +291,8 @@ public class InternalQueue {
     }
 
     public void enqueueNextMove2(NextMoveMessage msg) {
-        ObjectMapper om = new ObjectMapper();
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            om.writeValue(bos, msg);
+            objectMapper.writeValue(bos, msg);
             jmsTemplate.convertAndSend(NEXTMOVE_2, bos.toByteArray());
         } catch (IOException e) {
             throw new NextMoveRuntimeException(String.format("Unable to marshall NextMove message with id=%s", msg.getConversationId()), e);

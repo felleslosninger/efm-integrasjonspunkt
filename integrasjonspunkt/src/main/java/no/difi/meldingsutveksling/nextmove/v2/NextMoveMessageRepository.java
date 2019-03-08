@@ -8,4 +8,6 @@ import java.util.Optional;
 
 public interface NextMoveMessageRepository extends PagingAndSortingRepository<NextMoveMessage, Long>, QueryDslPredicateExecutor<NextMoveMessage> {
     Optional<NextMoveMessage> findByConversationId(String conversationId);
+
+    void deleteByConversationId(String conversationId);
 }

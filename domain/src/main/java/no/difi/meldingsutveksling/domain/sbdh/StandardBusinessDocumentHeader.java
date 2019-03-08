@@ -80,6 +80,7 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
     public static final String MELDING_TYPE = "melding";
     public static final String MELDING_VERSION = "urn:no:difi:meldingsutveksling:1.0";
     public static final String NEXTMOVE_TYPE = "nextmove";
+    public static final String NEXTMOVE_STANDARD = "urn:no:difi:meldingsutveksling:2.0";
 
     @XmlElement(name = "HeaderVersion", required = true)
     @NotNull
@@ -161,9 +162,6 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
     public static class Builder {
 
         private static final String HEADER_VERSION = "1.0";
-
-        private static final String TYPE_JOURNALPOST_ID = "JOURNALPOST_ID";
-        private static final String TYPE_CONVERSATIONID = "CONVERSATION_ID";
 
         private Organisasjonsnummer avsender;
         private Organisasjonsnummer mottaker;
@@ -252,13 +250,13 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
 
         private Scope fromJournalPostId(String journalPostId) {
             return createDefaultScope()
-                    .setType(TYPE_JOURNALPOST_ID)
+                    .setType(ScopeType.JOURNALPOST_ID.toString())
                     .setInstanceIdentifier(journalPostId);
         }
 
         private Scope fromConversationId(String conversationId) {
             return createDefaultScope()
-                    .setType(TYPE_CONVERSATIONID)
+                    .setType(ScopeType.CONVERSATION_ID.toString())
                     .setInstanceIdentifier(conversationId);
         }
 

@@ -71,7 +71,7 @@ public class NextMoveMessageInController {
         return null;
     }
 
-    @PostMapping(value = "pop/{conversationId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @GetMapping(value = "pop/{conversationId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @ApiOperation(value = "Pop incoming queue", notes = "Gets the ASiC for the first non locked message in the queue, " +
             "unless conversationId is specified, then removes it.")
     @ApiResponses({

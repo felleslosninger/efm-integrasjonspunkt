@@ -98,7 +98,7 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
     public final String getJournalPostId() {
         return findScope(ScopeType.JOURNALPOST_ID)
                 .map(Scope::getInstanceIdentifier)
-                .orElseThrow(MeldingsUtvekslingRuntimeException::new);
+                .orElse("");
     }
 
     @JsonIgnore

@@ -28,7 +28,7 @@ public class AltinnTransport implements Transport {
      */
     @Override
     public void send(ApplicationContext context, final StandardBusinessDocument sbd) {
-        AltinnWsClient client = new AltinnWsClient(AltinnWsConfiguration.fromConfiguration(serviceRecord, context));
+        AltinnWsClient client = new AltinnWsClient(AltinnWsConfiguration.fromConfiguration(serviceRecord, context), context);
         UploadRequest request = new AltinnWsRequest(sbd);
 
         client.send(request);
@@ -40,7 +40,7 @@ public class AltinnTransport implements Transport {
      */
     @Override
     public void send(ApplicationContext context, StandardBusinessDocument sbd, InputStream asicInputStream) {
-        AltinnWsClient client = new AltinnWsClient(AltinnWsConfiguration.fromConfiguration(serviceRecord, context));
+        AltinnWsClient client = new AltinnWsClient(AltinnWsConfiguration.fromConfiguration(serviceRecord, context), context);
         UploadRequest request = new AltinnWsRequest(sbd, asicInputStream);
 
         client.send(request);

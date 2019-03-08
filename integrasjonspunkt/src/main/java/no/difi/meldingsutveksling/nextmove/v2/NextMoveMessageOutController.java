@@ -10,6 +10,7 @@ import no.difi.meldingsutveksling.exceptions.MultiplePrimaryDocumentsNotAllowedE
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.validation.AcceptableMimeType;
@@ -59,7 +60,7 @@ public class NextMoveMessageOutController {
                     throw new ConversationAlreadyExistsException(p.getConversationId());
                 });
 
-        messageRepo.save(NextMoveMessage.of(messageService.setDefaults(sbd)));
+        messageRepo.save(NextMoveOutMessage.of(messageService.setDefaults(sbd)));
 
         return sbd;
     }
@@ -112,7 +113,7 @@ public class NextMoveMessageOutController {
             @RequestParam(value = "primaryDocument", required = false, defaultValue = "false") boolean primaryDocument,
             HttpServletRequest request) throws NextMoveException {
 
-        NextMoveMessage message = messageRepo.findByConversationId(conversationId)
+        NextMoveOutMessage message = messageRepo.findByConversationId(conversationId)
                 .orElseThrow(() -> new ConversationNotFoundException(conversationId));
 
         Set<BusinessMessageFile> files = Optional.ofNullable(message.getFiles()).orElseGet(HashSet::new);
