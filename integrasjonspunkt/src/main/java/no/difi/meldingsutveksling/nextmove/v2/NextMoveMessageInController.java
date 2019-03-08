@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.nextmove.v2;
 
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -16,7 +15,6 @@ import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
-import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
@@ -31,9 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
 import java.io.IOException;
-import java.io.InputStream;
 import java.time.ZonedDateTime;
-import java.util.Optional;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
@@ -98,7 +94,6 @@ public class NextMoveMessageInController {
             @ApiResponse(code = 204, message = "No content", response = String.class)
     })
     @Transactional
-    @SneakyThrows(IOException.class)
     public ResponseEntity popMessage(
             @ApiParam(value = "ConversationId", required = true)
             @PathVariable("conversationId") String conversationId) {
@@ -106,21 +101,20 @@ public class NextMoveMessageInController {
         NextMoveInMessage message = messageRepo.findByConversationId(conversationId)
                 .orElseThrow(() -> new ConversationNotFoundException(conversationId));
 
-        FileEntryStream fileEntry;
-        try {
-            fileEntry = messagePersister.readStream(conversationId, ASIC_FILE);
-        } catch (PersistenceException e) {
-            Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing message from queue",
-                    ASIC_FILE, message.getConversationId(), message.getSenderIdentifier()), markerFrom(message), e);
-            throw new FileNotFoundException(ASIC_FILE);
+        if (message.getLockTimeout() != null) {
+            throw new ConversationNotLockedException(conversationId);
         }
 
-        try (InputStream inputStream = fileEntry.getInputStream()) {
+        try (FileEntryStream fileEntry = messagePersister.readStream(conversationId, ASIC_FILE)) {
             return ResponseEntity.ok()
                     .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME + ASIC_FILE)
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .contentLength(fileEntry.getSize())
-                    .body(new InputStreamResource(cmsUtil.decryptCMSStreamed(inputStream, keyInfo.loadPrivateKey())));
+                    .body(new InputStreamResource(cmsUtil.decryptCMSStreamed(fileEntry.getInputStream(), keyInfo.loadPrivateKey())));
+        } catch (PersistenceException | IOException e) {
+            Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing message from queue",
+                    ASIC_FILE, message.getConversationId(), message.getSenderIdentifier()), markerFrom(message), e);
+            throw new FileNotFoundException(ASIC_FILE);
         }
     }
 
@@ -149,9 +143,10 @@ public class NextMoveMessageInController {
 
         messageRepo.delete(message);
 
-        Optional<Conversation> c = conversationService.registerStatus(conversationId,
-                MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_LEVERT));
-        c.ifPresent(conversationService::markFinished);
+        conversationService.registerStatus(conversationId,
+                MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_LEVERT))
+                .ifPresent(conversationService::markFinished);
+
         Audit.info(format("Conversation with id=%s popped from queue", conversationId),
                 markerFrom(message));
 

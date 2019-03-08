@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 public class ConversationNotLockedException extends HttpStatusCodeException {
 
     public ConversationNotLockedException(String conversationId) {
-        super(HttpStatus.NOT_FOUND,
+        super(HttpStatus.BAD_REQUEST,
                 ConversationNotLockedException.class.getName(),
                 "conversationId", conversationId);
     }
