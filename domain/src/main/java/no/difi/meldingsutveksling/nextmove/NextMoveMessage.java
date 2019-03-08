@@ -2,10 +2,7 @@ package no.difi.meldingsutveksling.nextmove;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.hibernate.annotations.DiscriminatorOptions;
@@ -13,6 +10,7 @@ import org.hibernate.annotations.DiscriminatorOptions;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.Set;
 
 @Entity
@@ -25,6 +23,7 @@ public class NextMoveMessage {
 
     @Id
     @GeneratedValue
+    @Setter(AccessLevel.PRIVATE)
     private Long id;
 
     @Column(unique = true)
@@ -35,9 +34,10 @@ public class NextMoveMessage {
     @NonNull
     private String senderIdentifier;
 
-//    @Version
+    @Version
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private LocalDateTime lastUpdated;
+    @Setter(AccessLevel.PRIVATE)
+    private Date lastUpdated;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private ZonedDateTime lockTimeout;
