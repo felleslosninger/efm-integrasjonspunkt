@@ -13,7 +13,7 @@ public interface NextMoveMessageInRepository extends PagingAndSortingRepository<
 
     Optional<NextMoveInMessage> findByConversationId(String conversationId);
 
-    Optional<NextMoveInMessage> findFirstByLockTimeoutIsNullOrderByLastUpdateAsc();
+    Optional<NextMoveInMessage> findFirstByLockTimeoutIsNullOrderByLastUpdatedAsc();
 
     void save(NextMoveMessage message);
 }

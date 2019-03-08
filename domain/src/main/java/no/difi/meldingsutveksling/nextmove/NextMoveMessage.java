@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.hibernate.annotations.DiscriminatorOptions;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Set;
 
@@ -34,9 +35,9 @@ public class NextMoveMessage {
     @NonNull
     private String senderIdentifier;
 
-    @Version
+//    @Version
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private ZonedDateTime lastUpdated;
+    private LocalDateTime lastUpdated;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private ZonedDateTime lockTimeout;

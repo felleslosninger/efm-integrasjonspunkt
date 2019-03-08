@@ -76,7 +76,7 @@ public class NextMoveMessageInController {
     })
     @Transactional
     public StandardBusinessDocument peek() {
-        NextMoveInMessage message = messageRepo.findFirstByLockTimeoutIsNullOrderByLastUpdateAsc()
+        NextMoveInMessage message = messageRepo.findFirstByLockTimeoutIsNullOrderByLastUpdatedAsc()
                 .orElseThrow(NotContentException::new);
 
         messageRepo.save(message.setLockTimeout(ZonedDateTime.now()
