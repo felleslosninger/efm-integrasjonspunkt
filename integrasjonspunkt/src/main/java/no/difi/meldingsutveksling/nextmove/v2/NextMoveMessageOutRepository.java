@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
-import com.querydsl.core.types.dsl.SimpleExpression;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.QNextMoveOutMessage;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
@@ -17,9 +16,6 @@ public interface NextMoveMessageOutRepository extends PagingAndSortingRepository
 
     @Override
     default void customize(QuerydslBindings bindings, QNextMoveOutMessage root) {
-        bindings.bind(root.senderIdentifier).first(SimpleExpression::eq);
-        bindings.bind(root.receiverIdentifier).first(SimpleExpression::eq);
-        bindings.bind(root.conversationId).first(SimpleExpression::eq);
         bindings.excluding(root.sbd);
     }
 }
