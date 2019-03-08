@@ -11,4 +11,7 @@ public interface NextMoveMessageInRepository extends PagingAndSortingRepository<
     List<NextMoveInMessage> findAll();
 
     Optional<NextMoveInMessage> findByConversationId(String conversationId);
+
+    Optional<NextMoveInMessage> findFirstByLockTimeoutIsNullOrderByLastUpdatedAsc();
+
 }
