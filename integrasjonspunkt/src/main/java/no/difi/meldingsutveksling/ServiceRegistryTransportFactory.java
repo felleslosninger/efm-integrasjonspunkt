@@ -20,6 +20,7 @@ public class ServiceRegistryTransportFactory implements TransportFactory {
 
     /**
      * Creates instance of factory with needed dependency to determine the transport to create
+     *
      * @param serviceRegistryLookup service to lookup service record
      */
     public ServiceRegistryTransportFactory(ServiceRegistryLookup serviceRegistryLookup) {
@@ -34,7 +35,6 @@ public class ServiceRegistryTransportFactory implements TransportFactory {
         Optional<Transport> transport = serviceRecord.filter(isServiceIdentifier(DPO)).map(AltinnTransport::new);
         return transport.orElseThrow(() -> new RuntimeException("Failed to create transport"));
     }
-
 
 
 }

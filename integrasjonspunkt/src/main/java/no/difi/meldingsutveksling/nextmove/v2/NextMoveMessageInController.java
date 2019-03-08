@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
+import com.querydsl.core.types.Predicate;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,9 @@ import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -62,9 +65,9 @@ public class NextMoveMessageInController {
     })
     @Transactional
     public Page<StandardBusinessDocument> getMessages(
-            @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "10") int size) {
-        return messageRepo.findAll(new PageRequest(page, size))
+            @QuerydslPredicate(root = NextMoveInMessage.class) Predicate predicate,
+            @PageableDefault Pageable pageable) {
+        return messageRepo.findAll(predicate, pageable)
                 .map(NextMoveInMessage::getSbd);
     }
 

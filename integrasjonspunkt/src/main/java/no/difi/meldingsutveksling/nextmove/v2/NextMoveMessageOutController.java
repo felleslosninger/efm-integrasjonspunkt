@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
+import com.querydsl.core.types.Predicate;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,9 @@ import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.validation.AcceptableMimeType;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -73,9 +76,10 @@ public class NextMoveMessageOutController {
     })
     @Transactional
     public Page<StandardBusinessDocument> getMessages(
-            @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "10") int size) {
-        return messageRepo.findAll(new PageRequest(page, size)).map(NextMoveMessage::getSbd);
+            @QuerydslPredicate(root = NextMoveOutMessage.class) Predicate predicate,
+            @PageableDefault Pageable pageable) {
+        return messageRepo.findAll(predicate, pageable)
+                .map(NextMoveMessage::getSbd);
     }
 
     @GetMapping("/{conversationId}")
