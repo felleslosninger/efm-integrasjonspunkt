@@ -2,8 +2,10 @@ package no.difi.meldingsutveksling.nextmove;
 
 import lombok.*;
 
-import javax.persistence.*;
-import java.util.Set;
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.Entity;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 
 @Getter
 @Setter
@@ -14,10 +16,6 @@ import java.util.Set;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "type")
 public abstract class BusinessMessage extends AbstractEntity<Long> {
-
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "message_id", nullable = false)
-    private Set<BusinessMessageFile> files;
 
     private String securityLevel;
 }

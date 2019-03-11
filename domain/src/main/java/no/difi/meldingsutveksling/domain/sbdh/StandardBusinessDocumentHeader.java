@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.nextmove.AbstractEntity;
@@ -31,6 +32,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 
 /**
@@ -72,8 +75,10 @@ import java.util.UUID;
 @ReceiverAcceptableServiceIdentifier
 public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
 
-    public enum DocumentType {KVITTERING, MELDING}
+    public enum DocumentType {KVITTERING, MELDING, DPE_RECEIPT}
 
+    public static final String VERSION_1 = "1.0";
+    public static final String VERSION_2 = "2.0";
     public static final String STANDARD_IDENTIFIER = "urn:no:difi:meldingsutveksling:1.0";
     public static final String KVITTERING_TYPE = "kvittering";
     public static final String KVITTERING_VERSION = "urn:no:difi:meldingsutveksling:1.0";
@@ -195,12 +200,16 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
         }
 
         public StandardBusinessDocumentHeader build() {
-            return new StandardBusinessDocumentHeader()
+            StandardBusinessDocumentHeader sbdh = new StandardBusinessDocumentHeader()
                     .setHeaderVersion(HEADER_VERSION)
                     .addSender(createSender(avsender))
                     .addReceiver(createReciever(mottaker))
-                    .setBusinessScope(createBusinessScope(fromConversationId(conversationId), fromJournalPostId(journalPostId)))
+                    .setBusinessScope(createBusinessScope(fromConversationId(conversationId)))
                     .setDocumentIdentification(createDocumentIdentification(documentType));
+            if (!isNullOrEmpty(journalPostId)) {
+                sbdh.getBusinessScope().getScope().add(fromJournalPostId(journalPostId));
+            }
+            return sbdh;
         }
 
         private Sender createSender(Organisasjonsnummer orgNummer) {
@@ -229,9 +238,20 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
                     return createDocumentIdentification(KVITTERING_TYPE, KVITTERING_VERSION);
                 case MELDING:
                     return createDocumentIdentification(MELDING_TYPE, MELDING_VERSION);
+                case DPE_RECEIPT:
+                    return createDocumentIdentification(ServiceIdentifier.DPE_RECEIPT.name(), NEXTMOVE_STANDARD, VERSION_2);
                 default:
                     throw new MeldingsUtvekslingRuntimeException(String.format("Unsupported DocumentType: %s", documentType.name()));
             }
+        }
+
+        private DocumentIdentification createDocumentIdentification(String type, String standard, String version) {
+            return new DocumentIdentification()
+                    .setCreationDateAndTime(ZonedDateTime.now())
+                    .setStandard(standard)
+                    .setType(type)
+                    .setTypeVersion(version)
+                    .setInstanceIdentifier(UUID.randomUUID().toString());
         }
 
         private DocumentIdentification createDocumentIdentification(String type, String version) {

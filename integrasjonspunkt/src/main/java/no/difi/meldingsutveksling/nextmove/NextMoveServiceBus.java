@@ -2,22 +2,23 @@ package no.difi.meldingsutveksling.nextmove;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.microsoft.azure.servicebus.ClientFactory;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageReceiver;
 import com.microsoft.azure.servicebus.ReceiveMode;
 import com.microsoft.azure.servicebus.primitives.ConnectionStringBuilder;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.Payload;
-import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayload;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayloadConverter;
-import no.difi.meldingsutveksling.noarkexchange.*;
+import no.difi.meldingsutveksling.noarkexchange.MessageContext;
+import no.difi.meldingsutveksling.noarkexchange.MessageContextException;
+import no.difi.meldingsutveksling.noarkexchange.MessageContextFactory;
+import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
@@ -29,9 +30,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -158,39 +157,6 @@ public class NextMoveServiceBus {
         return queue;
     }
 
-    public void putMessage(ConversationResource resource) throws NextMoveException {
-        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-            MessageContext context = messageContextFactory.from(resource);
-            StandardBusinessDocument sbd = sbdf.create(resource, context);
-
-            Marshaller marshaller = jaxbContext.createMarshaller();
-
-            ObjectFactory of = new ObjectFactory();
-            JAXBElement<StandardBusinessDocument> sbdJaxb = of.createStandardBusinessDocument(sbd);
-            marshaller.marshal(sbdJaxb, os);
-
-            String queue = NEXTMOVE_QUEUE_PREFIX + resource.getReceiverId();
-            switch (resource.getServiceIdentifier()) {
-                case DPE_INNSYN:
-                    queue = queue + INNSYN.fullname();
-                    break;
-                case DPE_DATA:
-                    queue = queue + DATA.fullname();
-                    break;
-                case DPE_RECEIPT:
-                    queue = queue + receiptTarget();
-                    break;
-                default:
-                    throw new NextMoveException("ServiceBus has no queue for ServiceIdentifier=" + resource.getServiceIdentifier());
-            }
-            serviceBusClient.sendMessage(os.toByteArray(), queue);
-
-        } catch (JAXBException | IOException | MessageException e) {
-            log.error("Could not send conversation resource", e);
-            throw new NextMoveException("Caught exception during message sending:", e);
-        }
-    }
-
     public void getAllMessagesRest() {
         boolean messagesInQueue = true;
         while (messagesInQueue) {
@@ -235,7 +201,7 @@ public class NextMoveServiceBus {
                                 log.debug(format("Received message on queue=%s with id=%s", serviceBusClient.getLocalQueuePath(), m.getMessageId()));
                                 ServiceBusPayload payload = payloadConverter.convert(m.getBody(), m.getMessageId());
                                 if (payload.getAsic() != null) {
-                                    messagePersister.write(payload.getSbd().getConversationId(), ASIC_FILE, payload.getAsic());
+                                    messagePersister.write(payload.getSbd().getConversationId(), ASIC_FILE, Base64.getDecoder().decode(payload.getAsic()));
                                 }
                                 Optional<NextMoveMessage> message = nextMoveQueue.enqueue(payload.getSbd());
                                 message.ifPresent(this::sendReceiptAsync);
@@ -262,12 +228,8 @@ public class NextMoveServiceBus {
 
     private void sendReceipt(NextMoveMessage message) {
         if (asList(DPE_INNSYN, DPE_DATA).contains(message.getServiceIdentifier())) {
-            // TODO Better solution to receipt - SBDReceiptFactory?
-            message.getSbd().getStandardBusinessDocumentHeader().getDocumentIdentification().setType(ServiceIdentifier.DPE_RECEIPT.name());
-            message.setReceiverIdentifier(message.getSbd().getSenderOrgNumber());
-            message.setSenderIdentifier(message.getSbd().getReceiverOrgNumber());
-            message.getFiles().retainAll(Sets.newHashSet());
-            internalQueue.enqueueNextMove2(message);
+            StandardBusinessDocument sbdReceipt = SBDReceiptFactory.createDpeReceiptFrom(message.getSbd());
+            internalQueue.enqueueNextMove2(NextMoveMessage.of(sbdReceipt));
         }
     }
 

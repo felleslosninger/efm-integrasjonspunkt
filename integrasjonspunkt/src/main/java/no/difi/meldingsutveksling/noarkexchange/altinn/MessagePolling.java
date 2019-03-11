@@ -126,8 +126,6 @@ public class MessagePolling implements ApplicationContextAware {
                     .orElseThrow(() -> new MeldingsUtvekslingRuntimeException(String.format("DPO ServiceRecord not found for %s", properties.getOrg().getNumber())));
         }
 
-        // TODO: if ServiceRegistry returns a ServiceRecord to something other than Altinn formidlingstjeneste this
-        // will fail
         AltinnWsConfiguration configuration = AltinnWsConfiguration.fromConfiguration(serviceRecord, context);
         AltinnWsClient client = new AltinnWsClient(configuration, context);
 

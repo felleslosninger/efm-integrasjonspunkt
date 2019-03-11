@@ -121,7 +121,7 @@ public class NextMoveMessageInController {
         }
     }
 
-    @DeleteMapping(value = "pop/{conversationId}")
+    @DeleteMapping(value = "/{conversationId}")
     @ApiOperation(value = "Remove message", notes = "Delete message")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),

@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.logging.Audit;
 import org.slf4j.Logger;
@@ -28,17 +27,7 @@ public class DpeConversationStrategy implements ConversationStrategy {
 
     @Override
     public void send(ConversationResource conversationResource) throws NextMoveException {
-
-        if (!props.getNextmove().getServiceBus().isEnable()) {
-            String errorString = format("Service Bus disabled, cannot send messages" +
-                    " of types %s,%s", ServiceIdentifier.DPE_INNSYN.toString(), ServiceIdentifier.DPE_DATA.toString());
-            log.error(markerFrom(conversationResource), errorString);
-            throw new NextMoveException(errorString);
-        }
-        serviceBus.putMessage(conversationResource);
-        Audit.info(format("Message [id=%s, serviceIdentifier=%s] sent to service bus",
-                conversationResource.getConversationId(), conversationResource.getServiceIdentifier()),
-                markerFrom(conversationResource));
+        throw new UnsupportedOperationException("ConversationResource no longer in use");
     }
 
     @Override
