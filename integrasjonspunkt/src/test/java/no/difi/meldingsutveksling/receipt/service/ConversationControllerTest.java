@@ -10,6 +10,7 @@ import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -27,10 +28,10 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(ConversationController.class)
@@ -77,15 +78,17 @@ public class ConversationControllerTest {
         c2.setPollable(false);
         c2.setLastUpdate(NOW);
 
-        when(convoRepo.findAll(org.mockito.Matchers.any(Predicate.class), org.mockito.Matchers.any(Pageable.class)))
+        when(convoRepo.findAll(ArgumentMatchers.any(Predicate.class), ArgumentMatchers.any(Pageable.class)))
+                .thenReturn(new PageImpl<>(asList(c1, c2)));
+        when(convoRepo.findAll(isNull(), ArgumentMatchers.any(Pageable.class)))
                 .thenReturn(new PageImpl<>(asList(c1, c2)));
         when(convoRepo.findByReceiverIdentifierAndDirection("43", OUTGOING)).thenReturn(singletonList(c2));
         when(convoRepo.findByDirection(OUTGOING)).thenReturn(asList(c1, c2));
         when(convoRepo.findByConvIdAndDirection(1, OUTGOING)).thenReturn(Optional.of(c1));
         when(convoRepo.findByConvIdAndDirection(2, OUTGOING)).thenReturn(Optional.of(c2));
         when(convoRepo.findByConversationIdAndDirection("123", OUTGOING)).thenReturn(singletonList(c1));
-        when(convoRepo.findByPollable(org.mockito.Matchers.eq(true), org.mockito.Matchers.any(Pageable.class))).thenReturn(new PageImpl<>(singletonList(c1)));
-        when(convoRepo.findByPollable(org.mockito.Matchers.eq(false), org.mockito.Matchers.any(Pageable.class))).thenReturn(new PageImpl<>(singletonList(c2)));
+        when(convoRepo.findByPollable(ArgumentMatchers.eq(true), ArgumentMatchers.any(Pageable.class))).thenReturn(new PageImpl<>(singletonList(c1)));
+        when(convoRepo.findByPollable(ArgumentMatchers.eq(false), ArgumentMatchers.any(Pageable.class))).thenReturn(new PageImpl<>(singletonList(c2)));
     }
 
     @Test

@@ -14,7 +14,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -34,6 +34,7 @@ import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -109,7 +110,7 @@ public class MessageOutControllerTest {
         DpoConversationStrategy dpoMock = mock(DpoConversationStrategy.class);
         when(strategyFactory.getStrategy(cr42)).thenReturn(Optional.of(dpoMock));
 
-        when(repo.save(Matchers.any(ConversationResource.class))).then(i -> i.getArgumentAt(0, ConversationResource.class));
+        when(repo.save(ArgumentMatchers.any(ConversationResource.class))).then(returnsFirstArg());
         when(repo.findByConversationIdAndDirection("42", OUTGOING)).thenReturn(Optional.of(cr42));
         when(repo.findByConversationIdAndDirection("43", OUTGOING)).thenReturn(Optional.of(cr43));
         when(repo.findByConversationIdAndDirection("1337", OUTGOING)).thenReturn(Optional.empty());

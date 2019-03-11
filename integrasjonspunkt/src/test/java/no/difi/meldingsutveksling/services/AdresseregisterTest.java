@@ -17,7 +17,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.mockito.Mockito.when;
 
@@ -31,7 +31,7 @@ public class AdresseregisterTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    @Mock
+    @Mock(lenient = true)
     private ServiceRegistryLookup serviceRegistryLookup;
 
     @Mock

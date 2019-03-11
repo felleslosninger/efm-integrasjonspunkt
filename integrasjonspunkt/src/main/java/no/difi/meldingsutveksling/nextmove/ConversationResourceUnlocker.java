@@ -1,9 +1,8 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -11,16 +10,11 @@ import java.util.List;
 
 import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
 
-@Component
 @Slf4j
+@RequiredArgsConstructor
 public class ConversationResourceUnlocker {
 
-    private ConversationResourceRepository repo;
-
-    @Autowired
-    public ConversationResourceUnlocker(ConversationResourceRepository repo) {
-        this.repo = repo;
-    }
+    private final ConversationResourceRepository repo;
 
     @Scheduled(fixedRate = 5000)
     @Transactional

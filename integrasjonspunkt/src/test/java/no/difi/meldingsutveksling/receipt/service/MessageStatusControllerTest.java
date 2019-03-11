@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.receipt.MessageStatusRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -62,7 +63,9 @@ public class MessageStatusControllerTest {
         cId2ms3.setConversationId("321");
 
 
-        when(statRepo.findAll(org.mockito.Matchers.any(Predicate.class), org.mockito.Matchers.any(Pageable.class)))
+        when(statRepo.findAll(ArgumentMatchers.any(Predicate.class), ArgumentMatchers.any(Pageable.class)))
+                .thenReturn(new PageImpl<>(asList(cId1ms1, cId1ms2, cId2ms1, cId2ms2, cId2ms3)));
+        when(statRepo.findAll(ArgumentMatchers.isNull(), ArgumentMatchers.any(Pageable.class)))
                 .thenReturn(new PageImpl<>(asList(cId1ms1, cId1ms2, cId2ms1, cId2ms2, cId2ms3)));
         when(statRepo.findAllByConvId(1)).thenReturn(asList(cId1ms1, cId1ms2));
         when(statRepo.findByStatIdGreaterThanEqual(3)).thenReturn(asList(cId2ms1, cId2ms2, cId2ms3));

@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.altinn;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
@@ -45,39 +46,25 @@ import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom
  * MessagePolling periodically checks Altinn Formidlingstjeneste for new messages. If new messages are discovered they are
  * downloaded forwarded to the Archive system.
  */
-@Component
 @Slf4j
+@RequiredArgsConstructor
 public class MessagePolling implements ApplicationContextAware {
 
-    ApplicationContext context;
-    @Autowired
-    IntegrasjonspunktProperties properties;
-    @Autowired
-    InternalQueue internalQueue;
-    @Autowired
-    IntegrasjonspunktNokkel keyInfo;
-    @Autowired
-    TransportFactory transportFactory;
-    @Autowired
-    private JmsTemplate jmsTemplate;
-    @Autowired
-    ServiceRegistryLookup serviceRegistryLookup;
-    @Autowired
-    ConversationService conversationService;
-    @Autowired
-    ObjectProvider<List<MessageDownloaderModule>> messageDownloaders;
-    @Autowired
-    private NextMoveQueue nextMoveQueue;
-    @Autowired
-    private NextMoveServiceBus nextMoveServiceBus;
+    private ApplicationContext context;
 
-    private MessagePersister messagePersister;
+    private final IntegrasjonspunktProperties properties;
+    private final InternalQueue internalQueue;
+    private final IntegrasjonspunktNokkel keyInfo;
+    private final TransportFactory transportFactory;
+    private final ServiceRegistryLookup serviceRegistryLookup;
+    private final ConversationService conversationService;
+    private final ObjectProvider<List<MessageDownloaderModule>> messageDownloaders;
+    private final NextMoveQueue nextMoveQueue;
+    private final NextMoveServiceBus nextMoveServiceBus;
+    private final MessagePersister messagePersister;
+
     private ServiceRecord serviceRecord;
     private CompletableFuture batchRead;
-
-    public MessagePolling(ObjectProvider<MessagePersister> messagePersister) {
-        this.messagePersister = messagePersister.getIfUnique();
-    }
 
     @Scheduled(fixedRateString = "${difi.move.nextmove.serviceBus.pollingrate}")
     public void checkForNewNextMoveMessages() {
