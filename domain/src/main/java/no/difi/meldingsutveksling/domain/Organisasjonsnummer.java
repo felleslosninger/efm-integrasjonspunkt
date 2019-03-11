@@ -41,6 +41,10 @@ public class Organisasjonsnummer {
 		return orgNummer;
 	}
 
+	public static Organisasjonsnummer from(final String orgnr) {
+		return new Organisasjonsnummer(orgnr);
+	}
+
 	public static Organisasjonsnummer fromIso6523(final String iso6523Orgnr) {
 		Matcher matcher = ISO6523_PATTERN.matcher(iso6523Orgnr);
 		if (!matcher.matches()) {

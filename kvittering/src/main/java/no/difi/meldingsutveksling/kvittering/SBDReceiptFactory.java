@@ -47,6 +47,19 @@ public class SBDReceiptFactory {
                 k);
     }
 
+    public static StandardBusinessDocument createDpeReceiptFrom(StandardBusinessDocument sbd) {
+        StandardBusinessDocument receipt = new StandardBusinessDocument();
+        StandardBusinessDocumentHeader sbdh = new StandardBusinessDocumentHeader.Builder()
+                .from(Organisasjonsnummer.from(sbd.getReceiverOrgNumber()))
+                .to(Organisasjonsnummer.from(sbd.getSenderOrgNumber()))
+                .relatedToConversationId(sbd.getConversationId())
+                .type(StandardBusinessDocumentHeader.DocumentType.DPE_RECEIPT)
+                .build();
+        receipt.setStandardBusinessDocumentHeader(sbdh);
+        receipt.setAny(sbd.getAny());
+        return receipt;
+    }
+
     private static StandardBusinessDocument signAndWrapDocument(MessageInfo messageInfo, IntegrasjonspunktNokkel keyInfo, Kvittering kvittering) {
 
         StandardBusinessDocument unsignedReceipt = new StandardBusinessDocument();

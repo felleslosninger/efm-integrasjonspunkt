@@ -52,6 +52,7 @@ public class CorrespondenceAgencyClient {
         Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
         String contextPath = "no.altinn.services.serviceengine.correspondence._2009._10";
         marshaller.setContextPath(contextPath);
+        marshaller.setMtomEnabled(true);
         template.setMarshaller(marshaller);
         template.setUnmarshaller(marshaller);
         ClientInterceptor[] interceptors = new ClientInterceptor[2];

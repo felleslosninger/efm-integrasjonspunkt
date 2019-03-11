@@ -14,6 +14,7 @@ import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
+import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.validation.AcceptableMimeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -46,6 +47,7 @@ public class NextMoveMessageOutController {
     private final NextMoveMessageService messageService;
     private final MessagePersister messagePersister;
     private final InternalQueue internalQueue;
+    private final ConversationService conversationService;
 
     @PostMapping
     @ApiOperation(value = "Create message", notes = "Create a new messagee with the given values")
@@ -63,7 +65,9 @@ public class NextMoveMessageOutController {
                     throw new ConversationAlreadyExistsException(p.getConversationId());
                 });
 
-        messageRepo.save(NextMoveOutMessage.of(messageService.setDefaults(sbd)));
+        NextMoveOutMessage message = NextMoveOutMessage.of(messageService.setDefaults(sbd));
+        messageRepo.save(message);
+        conversationService.registerConversation(message);
 
         return sbd;
     }

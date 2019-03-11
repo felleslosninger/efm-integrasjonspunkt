@@ -78,7 +78,7 @@ public class AsicHandler {
     private InputStream archiveAndEncryptAttachments(List<StreamedFile> att, MessageContext ctx, ServiceIdentifier si) {
         PipedOutputStream archiveOutputStream = new PipedOutputStream();
         CompletableFuture.runAsync(() -> {
-            log.debug("Starting thread: create asic");
+            log.trace("Starting thread: create asic");
             try {
                 new CreateAsice().createAsiceStreamed(att, archiveOutputStream, keyHelper.getSignatureHelper(),
                         ctx.getAvsender(), ctx.getMottaker());
@@ -89,7 +89,7 @@ public class AsicHandler {
             } catch (IOException e) {
                 throw new MeldingsUtvekslingRuntimeException(StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT.getTechnicalMessage(), e);
             }
-            log.debug("Thread finished: create asic");
+            log.trace("Thread finished: create asic");
         });
 
         PipedInputStream archiveInputStream;
