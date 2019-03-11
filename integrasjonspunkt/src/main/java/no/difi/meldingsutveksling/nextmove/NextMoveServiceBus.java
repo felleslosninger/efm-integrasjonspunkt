@@ -192,7 +192,7 @@ public class NextMoveServiceBus {
             boolean hasQueuedMessages = true;
             while (hasQueuedMessages) {
                 try {
-                    log.debug("Calling receiveBatch..");
+                    log.trace("Calling receiveBatch..");
                     Collection<IMessage> messages = messageReceiver.receiveBatch(100, Duration.ofSeconds(10));
                     if (messages != null && !messages.isEmpty()) {
                         log.debug("Processing {} messages..", messages.size());
@@ -212,7 +212,7 @@ public class NextMoveServiceBus {
                         });
                         log.debug("Done processing {} messages", messages.size());
                     } else {
-                        log.debug("No messages in queue, cancelling batch");
+                        log.trace("No messages in queue, cancelling batch");
                         hasQueuedMessages = false;
                     }
                 } catch (InterruptedException | ServiceBusException e) {

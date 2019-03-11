@@ -36,28 +36,25 @@ public class DpvConversationStrategy implements ConversationStrategy {
 
     @Override
     public void send(ConversationResource conversationResource) throws NextMoveException {
-        DpvConversationResource cr = (DpvConversationResource) conversationResource;
-
-        PostVirksomhetStrategyFactory dpvFactory = PostVirksomhetStrategyFactory.newInstance(props, null, sr, internalQueue);
-        CorrespondenceAgencyConfiguration config = dpvFactory.getConfig();
-        InsertCorrespondenceV2 message;
-        message = CorrespondenceAgencyMessageFactory.create(config, cr, messagePersister);
-
-        CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(NextMoveMessageMarkers.markerFrom(cr), config);
-        final CorrespondenceRequest request = new CorrespondenceRequest.Builder()
-                .withUsername(config.getSystemUserCode())
-                .withPassword(config.getPassword())
-                .withPayload(message).build();
-
-        if (client.sendCorrespondence(request) == null) {
-            throw new NextMoveException("Failed to create Correspondence Agency Request");
-        }
-
+        throw new UnsupportedOperationException("ConversationResource no longer in use");
     }
 
     @Override
     public void send(NextMoveMessage message) throws NextMoveException {
 
+        PostVirksomhetStrategyFactory dpvFactory = PostVirksomhetStrategyFactory.newInstance(props, null, sr, internalQueue);
+        CorrespondenceAgencyConfiguration config = dpvFactory.getConfig();
+        InsertCorrespondenceV2 insertCorrespondenceV2 = CorrespondenceAgencyMessageFactory.create(config, message, messagePersister);
+
+        CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(NextMoveMessageMarkers.markerFrom(message), config);
+        final CorrespondenceRequest request = new CorrespondenceRequest.Builder()
+                .withUsername(config.getSystemUserCode())
+                .withPassword(config.getPassword())
+                .withPayload(insertCorrespondenceV2).build();
+
+        if (client.sendCorrespondence(request) == null) {
+            throw new NextMoveException("Failed to create Correspondence Agency Request");
+        }
     }
 
 }

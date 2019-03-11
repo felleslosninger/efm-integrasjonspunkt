@@ -13,21 +13,25 @@ import no.altinn.services.serviceengine.correspondence._2009._10.GetCorresponden
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentExternalBEV2List;
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentV2;
+import no.difi.meldingsutveksling.InputStreamDataSource;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.nextmove.DpvConversationResource;
-import no.difi.meldingsutveksling.nextmove.NextMoveException;
+import no.difi.meldingsutveksling.nextmove.DpvMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
+import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.NoarkDocument;
 import no.difi.meldingsutveksling.noarkexchange.PayloadException;
 import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 import no.difi.meldingsutveksling.receipt.Conversation;
 
+import javax.activation.DataHandler;
+import javax.mail.util.ByteArrayDataSource;
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.*;
 
@@ -57,33 +61,34 @@ public class CorrespondenceAgencyMessageFactory {
     }
 
     public static InsertCorrespondenceV2 create(CorrespondenceAgencyConfiguration config,
-                                                DpvConversationResource cr,
-                                                MessagePersister persister) throws NextMoveException {
-
+                                                NextMoveMessage message,
+                                                MessagePersister messagePersister) {
         no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory reporteeFactory = new no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory();
         BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
 
-        for (String f : cr.getFileRefs().values()) {
-            byte[] bytes;
-            try {
-                bytes = persister.read(cr, f);
-            } catch (IOException e) {
-                throw new NextMoveException(String.format("Could not read file \"%s\"", f), e);
-            }
-
-            BinaryAttachmentV2 binaryAttachmentV2 = new BinaryAttachmentV2();
-            binaryAttachmentV2.setFunctionType(AttachmentFunctionType.fromValue("Unspecified"));
-            binaryAttachmentV2.setFileName(reporteeFactory.createBinaryAttachmentV2FileName(f));
-            binaryAttachmentV2.setName(reporteeFactory.createBinaryAttachmentV2Name(f));
-            binaryAttachmentV2.setEncrypted(false);
-            binaryAttachmentV2.setSendersReference(reporteeFactory.createBinaryAttachmentV2SendersReference("AttachmentReference_as123452"));
-            binaryAttachmentV2.setData(reporteeFactory.createBinaryAttachmentV2Data(bytes));
-            attachmentExternalBEV2List.getBinaryAttachmentV2().add(binaryAttachmentV2);
+        if (!(message.getBusinessMessage() instanceof DpvMessage)) {
+            throw new NextMoveRuntimeException("StandardBusinessDocument.any not instance of DpvMessage, aborting");
         }
 
-        return create(config, cr.getConversationId(), cr.getReceiverId(), cr.getMessageTitle(),
-                cr.getMessageContent(), attachmentExternalBEV2List);
+        message.getFiles().forEach(f -> {
+            FileEntryStream fileEntry = messagePersister.readStream(message.getConversationId(), f.getFilename());
+            BinaryAttachmentV2 binaryAttachmentV2 = new BinaryAttachmentV2();
+            binaryAttachmentV2.setFunctionType(AttachmentFunctionType.fromValue("Unspecified"));
+            binaryAttachmentV2.setFileName(reporteeFactory.createBinaryAttachmentV2FileName(f.getFilename()));
+            binaryAttachmentV2.setName(reporteeFactory.createBinaryAttachmentV2Name(f.getFilename()));
+            binaryAttachmentV2.setEncrypted(false);
+            binaryAttachmentV2.setSendersReference(reporteeFactory.createBinaryAttachmentV2SendersReference("AttachmentReference_as123452"));
+            binaryAttachmentV2.setData(reporteeFactory.createBinaryAttachmentV2Data(new DataHandler(InputStreamDataSource.of(fileEntry.getInputStream()))));
+            attachmentExternalBEV2List.getBinaryAttachmentV2().add(binaryAttachmentV2);
+        });
+
+        DpvMessage dpvMessage = (DpvMessage) message.getBusinessMessage();
+        return create(config, message.getConversationId(), message.getReceiverIdentifier(),
+                dpvMessage.getTitle(),
+                dpvMessage.getContent(),
+                attachmentExternalBEV2List);
     }
+
 
     public static InsertCorrespondenceV2 create(CorrespondenceAgencyConfiguration config, EDUCore edu) {
 
@@ -98,7 +103,8 @@ public class CorrespondenceAgencyMessageFactory {
                 binaryAttachmentV2.setName(reporteeFactory.createBinaryAttachmentV2Name(d.getFilename()));
                 binaryAttachmentV2.setEncrypted(false);
                 binaryAttachmentV2.setSendersReference(reporteeFactory.createBinaryAttachmentV2SendersReference("AttachmentReference_as123452"));
-                binaryAttachmentV2.setData(reporteeFactory.createBinaryAttachmentV2Data(Base64.getDecoder().decode(d.getContent())));
+                DataHandler dataHandler = new DataHandler(new ByteArrayDataSource(Base64.getDecoder().decode(d.getContent()), "application/octet-stream"));
+                binaryAttachmentV2.setData(reporteeFactory.createBinaryAttachmentV2Data(dataHandler));
                 attachmentExternalBEV2List.getBinaryAttachmentV2().add(binaryAttachmentV2);
             });
 

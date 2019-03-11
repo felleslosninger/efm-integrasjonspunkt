@@ -15,5 +15,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NoArgsConstructor
 @XmlRootElement(name = "dpv", namespace = "urn:no:difi:meldingsutveksling:2.0")
 public class DpvMessage extends BusinessMessage {
-    private String dpvField;
+    private String title;
+    private String content;
 }

@@ -14,6 +14,8 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.activation.DataHandler;
+import javax.mail.util.ByteArrayDataSource;
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -72,7 +74,8 @@ public class CorrespondenceAgencyClientTest {
 
         try {
             byte[] data = FileUtils.readFileToByteArray(new File("src/test/resources/test_data"));
-            binaryAttachmentV2.setData(reporteeFactory.createBinaryAttachmentV2Data(data));
+            DataHandler dataHandler = new DataHandler(new ByteArrayDataSource(data, "application/octet-stream"));
+            binaryAttachmentV2.setData(reporteeFactory.createBinaryAttachmentV2Data(dataHandler));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

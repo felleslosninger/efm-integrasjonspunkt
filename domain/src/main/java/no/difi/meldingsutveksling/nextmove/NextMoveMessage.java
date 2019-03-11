@@ -60,7 +60,7 @@ public class NextMoveMessage {
                 new NextMoveRuntimeException(String.format("Could not create ServiceIdentifier from documentIdentification.type=%s for message with id=%s", diType, getConversationId())));
     }
 
-    private BusinessMessage getBusinessMessage() {
+    public BusinessMessage getBusinessMessage() {
         if (getSbd().getAny() == null) {
             throw new NextMoveRuntimeException("SBD missing BusinessMessage");
         }
