@@ -137,16 +137,6 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
     }
 
     @JsonIgnore
-    public boolean isReceipt() {
-        return getStandardBusinessDocumentHeader().getDocumentIdentification().getType().equalsIgnoreCase(StandardBusinessDocumentHeader.KVITTERING_TYPE);
-    }
-
-    @JsonIgnore
-    public boolean isNextMove() {
-        return StandardBusinessDocumentHeader.NEXTMOVE_TYPE.equalsIgnoreCase(getStandardBusinessDocumentHeader().getDocumentIdentification().getType());
-    }
-
-    @JsonIgnore
     public Payload getPayload() {
         if (getAny() instanceof Payload) {
             return (Payload) getAny();

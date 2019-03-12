@@ -44,6 +44,8 @@ import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isNextMove;
+import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isReceipt;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 import static no.difi.meldingsutveksling.noarkexchange.logging.PutMessageResponseMarkers.markerFrom;
 
@@ -96,7 +98,7 @@ public class IntegrajonspunktReceiveImpl {
             throw e;
         }
 
-        if (sbd.isReceipt()) {
+        if (isReceipt(sbd)) {
             Audit.info("Messagetype Receipt", markerFrom(sbd));
             return new CorrelationInformation();
         }
@@ -104,7 +106,7 @@ public class IntegrajonspunktReceiveImpl {
         Payload payload = sbd.getPayload();
         byte[] decryptedAsicPackage = decrypt(payload);
         EDUCore eduCore;
-        if (sbd.isNextMove()) {
+        if (isNextMove(sbd)) {
             eduCore = convertConversationToEducore(sbd);
         } else {
             eduCore = convertAsicEntrytoEduCore(decryptedAsicPackage);

@@ -79,13 +79,20 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
 
     public static final String VERSION_1 = "1.0";
     public static final String VERSION_2 = "2.0";
-    public static final String STANDARD_IDENTIFIER = "urn:no:difi:meldingsutveksling:1.0";
+    public static final String STANDARD_LEGACY = "urn:no:difi:meldingsutveksling:1.0";
     public static final String KVITTERING_TYPE = "kvittering";
     public static final String KVITTERING_VERSION = "urn:no:difi:meldingsutveksling:1.0";
     public static final String MELDING_TYPE = "melding";
     public static final String MELDING_VERSION = "urn:no:difi:meldingsutveksling:1.0";
+
     public static final String NEXTMOVE_TYPE = "nextmove";
-    public static final String NEXTMOVE_STANDARD = "urn:no:difi:meldingsutveksling:2.0";
+    public static final String STANDARD_NEXTMOVE = "urn:no:difi:meldingsutveksling:2.0";
+    public static final String STANDARD_BESTEDU = "urn:no:difi:profile:eformidling:ver1.0";
+    public static final String STANDARD_DPO = "urn:no:difi:profile:eformidling:ver2.0";
+    public static final String STANDARD_DPV = "urn:no:difi:profile:eformidling:ver2.0";
+    public static final String STANDARD_DPI = "urn:no:difi:profile:digitalpost:ver1.0";
+    public static final String STANDARD_DPE_DATA = "urn:no:difi:profile:einnsyn-journalpost:ver1.0";
+    public static final String STANDARD_DPE_INNSYN = "urn:no:difi:profile:einnsyn-innsynskrav:ver1.0";
 
     @XmlElement(name = "HeaderVersion", required = true)
     @NotNull
@@ -239,7 +246,7 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
                 case MELDING:
                     return createDocumentIdentification(MELDING_TYPE, MELDING_VERSION);
                 case DPE_RECEIPT:
-                    return createDocumentIdentification(ServiceIdentifier.DPE_RECEIPT.name(), NEXTMOVE_STANDARD, VERSION_2);
+                    return createDocumentIdentification(ServiceIdentifier.DPE_RECEIPT.name(), STANDARD_NEXTMOVE, VERSION_2);
                 default:
                     throw new MeldingsUtvekslingRuntimeException(String.format("Unsupported DocumentType: %s", documentType.name()));
             }
@@ -257,7 +264,7 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
         private DocumentIdentification createDocumentIdentification(String type, String version) {
             return new DocumentIdentification()
                     .setCreationDateAndTime(ZonedDateTime.now())
-                    .setStandard(STANDARD_IDENTIFIER)
+                    .setStandard(STANDARD_LEGACY)
                     .setType(type)
                     .setTypeVersion(version)
                     .setInstanceIdentifier(UUID.randomUUID().toString());
@@ -281,7 +288,7 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
         }
 
         private Scope createDefaultScope() {
-            return new Scope().setIdentifier(STANDARD_IDENTIFIER);
+            return new Scope().setIdentifier(STANDARD_LEGACY);
         }
     }
 }

@@ -8,9 +8,7 @@ import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
-import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -26,12 +24,9 @@ import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 
 import javax.xml.bind.JAXBElement;
 import java.time.LocalDateTime;
@@ -40,6 +35,8 @@ import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
+import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isReceipt;
+import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isNextMove;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
 /**
@@ -140,7 +137,7 @@ public class MessagePolling implements ApplicationContextAware {
                     continue;
                 }
 
-                if (!isKvittering(sbd)) {
+                if (!isReceipt(sbd)) {
                     sendReceipt(sbd.getMessageInfo());
                     log.debug(sbd.createLogstashMarkers(), "Delivery receipt sent");
                     Conversation c = conversationService.registerConversation(sbd);
@@ -151,7 +148,7 @@ public class MessagePolling implements ApplicationContextAware {
                 client.confirmDownload(request);
                 log.debug(markerFrom(reference).and(sbd.createLogstashMarkers()), "Message confirmed downloaded");
 
-                if (isKvittering(sbd)) {
+                if (isReceipt(sbd)) {
                     JAXBElement<Kvittering> jaxbKvit = (JAXBElement<Kvittering>) sbd.getAny();
                     Audit.info(format("Message id=%s is a receipt", sbd.getConversationId()),
                             sbd.createLogstashMarkers().and(getReceiptTypeMarker(jaxbKvit.getValue())));
@@ -179,19 +176,6 @@ public class MessagePolling implements ApplicationContextAware {
         DpoReceiptStatus status = DpoReceiptStatus.of(kvittering);
         LocalDateTime tidspunkt = kvittering.getTidspunkt().toGregorianCalendar().toZonedDateTime().toLocalDateTime();
         return MessageStatus.of(status, tidspunkt);
-    }
-
-    private boolean isKvittering(StandardBusinessDocument sbd) {
-        return sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getType().equalsIgnoreCase(StandardBusinessDocumentHeader.KVITTERING_TYPE);
-    }
-
-    private boolean isNextMove(StandardBusinessDocument sbd) {
-        return sbd.getConversationScope()
-                .map(Scope::getIdentifier)
-                .filter(s -> s.equals(StandardBusinessDocumentHeader.NEXTMOVE_STANDARD))
-                .isPresent();
-//        return sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getStandard()
-//                .equalsIgnoreCase(StandardBusinessDocumentHeader.NEXTMOVE_STANDARD);
     }
 
     private void sendReceipt(MessageInfo messageInfo) {

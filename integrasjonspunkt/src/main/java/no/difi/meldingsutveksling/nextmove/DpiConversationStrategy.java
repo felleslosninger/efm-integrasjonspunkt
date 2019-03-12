@@ -41,9 +41,13 @@ public class DpiConversationStrategy implements ConversationStrategy {
 
     @Override
     public void send(ConversationResource conversationResource) throws NextMoveException {
+        throw new UnsupportedOperationException("ConversationResource no longer in use");
+    }
 
-        DpiConversationResource cr = (DpiConversationResource) conversationResource;
-        List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiverId());
+    @Override
+    public void send(NextMoveMessage message) throws NextMoveException {
+        // TODO add servicerecord to NextMoveMessage?
+        List<ServiceRecord> serviceRecords = sr.getServiceRecords(message.getReceiverIdentifier());
         Optional<ServiceRecord> serviceRecord = serviceRecords.stream()
                 .filter(r -> DPI == r.getServiceIdentifier())
                 .findFirst();
@@ -53,23 +57,18 @@ public class DpiConversationStrategy implements ConversationStrategy {
                     .map(ServiceRecord::getServiceIdentifier)
                     .collect(Collectors.toList());
             String errorStr = String.format("Message is of type '%s', but receiver '%s' accepts types '%s'.",
-                    DPI, cr.getReceiverId(), acceptableTypes);
-            log.error(markerFrom(conversationResource), errorStr);
+                    DPI, message.getReceiverIdentifier(), acceptableTypes);
+            log.error(markerFrom(message), errorStr);
             throw new NextMoveException(errorStr);
         }
 
-        NextMoveDpiRequest request = new NextMoveDpiRequest(props, messagePersister, cr, serviceRecord.get());
+        NextMoveDpiRequest request = new NextMoveDpiRequest(props, messagePersister, message, serviceRecord.get());
         MeldingsformidlerClient client = new MeldingsformidlerClient(props.getDpi(), keystore.getKeyStore());
         try {
             client.sendMelding(request);
         } catch (MeldingsformidlerException e) {
-            Audit.error("Failed to send message to DPI", markerFrom(cr), e);
+            Audit.error("Failed to send message to DPI", markerFrom(message), e);
             throw new NextMoveException(e);
         }
-    }
-
-    @Override
-    public void send(NextMoveMessage message) throws NextMoveException {
-
     }
 }

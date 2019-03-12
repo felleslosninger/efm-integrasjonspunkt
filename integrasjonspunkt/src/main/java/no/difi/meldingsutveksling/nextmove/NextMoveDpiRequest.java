@@ -14,6 +14,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.MimeTypeExtensionMapper.getMimetype;
 
 public class NextMoveDpiRequest implements MeldingsformidlerRequest {
@@ -22,45 +23,38 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     private static final String MISSING_TXT = "Missing title";
 
     private IntegrasjonspunktProperties props;
-    private DpiConversationResource cr;
+    private NextMoveMessage message;
     private ServiceRecord serviceRecord;
     private MessagePersister messagePersister;
 
     public NextMoveDpiRequest(IntegrasjonspunktProperties props,
                               MessagePersister messagePersister,
-                              DpiConversationResource cr,
+                              NextMoveMessage message,
                               ServiceRecord serviceRecord) {
         this.props = props;
         this.messagePersister = messagePersister;
-        this.cr = cr;
+        this.message = message;
         this.serviceRecord = serviceRecord;
     }
 
     @Override
     public Document getDocument() {
-        String primaryFileName = cr.getFileRefs().get(0);
-        String title;
-        if (cr.getCustomProperties() != null) {
-            title = cr.getCustomProperties().getOrDefault(primaryFileName, MISSING_TXT);
-        } else {
-            title = MISSING_TXT;
-        }
-        return new Document(getContent(primaryFileName), getMime(getExtension(primaryFileName)), primaryFileName, title);
+        BusinessMessageFile primary = message.getFiles().stream()
+                .filter(BusinessMessageFile::getPrimaryDocument)
+                .findFirst()
+                .orElseThrow(() -> new NextMoveRuntimeException("No primary documents found, aborting send"));
+
+        String title = isNullOrEmpty(primary.getTitle()) ? MISSING_TXT : primary.getTitle();
+        return new Document(getContent(primary.getIdentifier()), primary.getMimetype(), primary.getFilename(), title);
     }
 
     @Override
     public List<Document> getAttachments() {
         final List<Document> docList = Lists.newArrayList();
-        cr.getFileRefs().forEach((k, f) -> {
-            if (k != 0) {
-                String title;
-                if (cr.getCustomProperties() != null) {
-                    title = cr.getCustomProperties().getOrDefault(f, MISSING_TXT);
-                } else {
-                    title = MISSING_TXT;
-                }
-                docList.add(new Document(getContent(f), getMime(getExtension(f)), f, title));
-            }
+
+        message.getFiles().stream().filter(f -> !f.getPrimaryDocument()).forEach(f -> {
+            String title = isNullOrEmpty(f.getTitle()) ? MISSING_TXT : f.getTitle();
+            docList.add(new Document(getContent(f.getIdentifier()), f.getMimetype(), f.getFilename(), title));
         });
 
         return docList;
@@ -80,7 +74,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     private byte[] getContent(String fileName) {
         try {
-            return messagePersister.read(cr.getConversationId(), fileName);
+            return messagePersister.read(message.getConversationId(), fileName);
         } catch (IOException e) {
             throw new NextMoveRuntimeException(String.format("Could not read file \"%s\"", fileName), e);
         }
@@ -89,22 +83,26 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     @Override
     public String getMottakerPid() {
-        return cr.getReceiverId();
+        return message.getReceiverIdentifier();
     }
 
     @Override
     public String getSubject() {
-        return cr.getTitle();
+        if (!(message.getBusinessMessage() instanceof DpiMessage)) {
+            throw new NextMoveRuntimeException("BusinessMessage not instance of DpiMessage");
+        }
+        DpiMessage dpiMessage = (DpiMessage) message.getBusinessMessage();
+        return dpiMessage.getTitle();
     }
 
     @Override
     public String getSenderOrgnumber() {
-        return cr.getSenderId();
+        return message.getSenderIdentifier();
     }
 
     @Override
     public String getConversationId() {
-        return cr.getConversationId();
+        return message.getConversationId();
     }
 
     @Override
@@ -133,11 +131,13 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     @Override
     public String getSmsVarslingstekst() {
+        // TODO get from businessmessage
         return props.getDpi().getSms().getVarslingstekst();
     }
 
     @Override
     public String getEmailVarslingstekst() {
+        // TODO get from businessmessage
         return props.getDpi().getEmail().getVarslingstekst();
     }
 

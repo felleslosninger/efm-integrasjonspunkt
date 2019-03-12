@@ -13,7 +13,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @DiscriminatorValue("dpv")
 @AllArgsConstructor
 @NoArgsConstructor
-@XmlRootElement(name = "dpv", namespace = "urn:no:difi:meldingsutveksling:2.0")
+@XmlRootElement(name = "dpv", namespace = "urn:no:difi:profile:eformidling:ver2.0")
 public class DpvMessage extends BusinessMessage {
     private String title;
     private String content;
