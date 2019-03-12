@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.nextmove.message;
 
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.LobHelper;
 import org.hibernate.Session;
@@ -62,8 +61,8 @@ public class DBMessagePersister implements MessagePersister {
     }
 
     @Override
-    public byte[] read(ConversationResource cr, String filename) throws IOException {
-        Optional<NextMoveMessageEntry> entry = repo.findByConversationIdAndFilename(cr.getConversationId(), filename);
+    public byte[] read(String conversationId, String filename) throws IOException {
+        Optional<NextMoveMessageEntry> entry = repo.findByConversationIdAndFilename(conversationId, filename);
         if (entry.isPresent()) {
             try {
                 return IOUtils.toByteArray(entry.get().getContent().getBinaryStream());
@@ -73,7 +72,7 @@ public class DBMessagePersister implements MessagePersister {
             }
 
         }
-        throw new IOException(String.format("File \'%s\' for conversation with id=%s not found in repository", filename, cr.getConversationId()));
+        throw new IOException(String.format("File \'%s\' for conversation with id=%s not found in repository", filename, conversationId));
     }
 
     @Override

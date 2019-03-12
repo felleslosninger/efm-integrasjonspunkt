@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.nextmove.message;
 
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,8 +60,8 @@ public class FileMessagePersister implements MessagePersister {
     }
 
     @Override
-    public byte[] read(ConversationResource cr, String filename) throws IOException {
-        String filedir = getConversationFiledirPath(cr.getConversationId());
+    public byte[] read(String conversationId, String filename) throws IOException {
+        String filedir = getConversationFiledirPath(conversationId);
         File file = new File(filedir+filename);
         return FileUtils.readFileToByteArray(file);
     }

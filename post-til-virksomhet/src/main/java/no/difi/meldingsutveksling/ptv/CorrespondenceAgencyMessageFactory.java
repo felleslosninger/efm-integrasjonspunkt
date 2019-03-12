@@ -71,7 +71,7 @@ public class CorrespondenceAgencyMessageFactory {
         }
 
         message.getFiles().forEach(f -> {
-            FileEntryStream fileEntry = messagePersister.readStream(message.getConversationId(), f.getFilename());
+            FileEntryStream fileEntry = messagePersister.readStream(message.getConversationId(), f.getIdentifier());
             BinaryAttachmentV2 binaryAttachmentV2 = new BinaryAttachmentV2();
             binaryAttachmentV2.setFunctionType(AttachmentFunctionType.fromValue("Unspecified"));
             binaryAttachmentV2.setFileName(reporteeFactory.createBinaryAttachmentV2FileName(f.getFilename()));

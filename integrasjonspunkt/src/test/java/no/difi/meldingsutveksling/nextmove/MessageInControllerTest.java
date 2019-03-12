@@ -77,7 +77,7 @@ public class MessageInControllerTest {
         cr44.setLockTimeout(LocalDateTime.now().plusMinutes(5));
 
         cr42.addFileRef("foo");
-        when(messagePersister.read(cr42, "foo")).thenReturn("bar".getBytes(UTF_8));
+        when(messagePersister.read(cr42.getConversationId(), "foo")).thenReturn("bar".getBytes(UTF_8));
 
         when(repo.findByConversationIdAndDirection("42", INCOMING)).thenReturn(Optional.of(cr42));
         when(repo.findByConversationIdAndDirection("43", INCOMING)).thenReturn(Optional.of(cr43));

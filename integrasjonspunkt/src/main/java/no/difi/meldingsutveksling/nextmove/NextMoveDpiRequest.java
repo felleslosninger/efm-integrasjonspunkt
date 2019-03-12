@@ -80,7 +80,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     private byte[] getContent(String fileName) {
         try {
-            return messagePersister.read(cr, fileName);
+            return messagePersister.read(cr.getConversationId(), fileName);
         } catch (IOException e) {
             throw new NextMoveRuntimeException(String.format("Could not read file \"%s\"", fileName), e);
         }

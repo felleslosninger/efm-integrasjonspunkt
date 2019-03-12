@@ -130,19 +130,20 @@ public class NextMoveMessageOutController {
             throw new MultiplePrimaryDocumentsNotAllowedException();
         }
 
+        BusinessMessageFile file = new BusinessMessageFile()
+                .setIdentifier(UUID.randomUUID().toString())
+                .setFilename(filename)
+                .setPrimaryDocument(primaryDocument)
+                .setMimetype(emptyToNull(mimetype))
+                .setTitle(emptyToNull(title));
         try {
-            messagePersister.writeStream(conversationId, filename, request.getInputStream(),
+            messagePersister.writeStream(conversationId, file.getIdentifier(), request.getInputStream(),
                     Long.valueOf(request.getHeader(HttpHeaders.CONTENT_LENGTH)));
         } catch (IOException e) {
             throw new NextMoveException(String.format("Could not persist file \"%s\"", filename), e);
         }
 
-        files.add(new BusinessMessageFile()
-                .setIdentifier(UUID.randomUUID().toString())
-                .setFilename(filename)
-                .setPrimaryDocument(primaryDocument)
-                .setMimetype(emptyToNull(mimetype))
-                .setTitle(emptyToNull(title)));
+        files.add(file);
 
         messageRepo.save(message);
     }

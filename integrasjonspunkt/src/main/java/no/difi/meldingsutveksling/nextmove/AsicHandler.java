@@ -61,7 +61,7 @@ public class AsicHandler {
 
         List<StreamedFile> attachements = new ArrayList<>();
         msg.getFiles().forEach(f -> {
-            FileEntryStream fes = messagePersister.readStream(msg.getConversationId(), f.getFilename());
+            FileEntryStream fes = messagePersister.readStream(msg.getConversationId(), f.getIdentifier());
             String mimetype;
             if (Strings.isNullOrEmpty(f.getMimetype())) {
                 String ext = Stream.of(f.getFilename().split(".")).reduce((p, e) -> e).orElse("pdf");
