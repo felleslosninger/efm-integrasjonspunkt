@@ -75,7 +75,7 @@ public class MessageStatusControllerTest {
 
     @Test
     public void statusesTest() throws Exception {
-        mvc.perform(get("/statuses")
+        mvc.perform(get("/api/statuses")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(5)))
@@ -85,7 +85,7 @@ public class MessageStatusControllerTest {
 
     @Test
     public void statusesPeekTest() throws Exception {
-        mvc.perform(get("/statuses/peek")
+        mvc.perform(get("/api/statuses/peek")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.convId", is(2)))

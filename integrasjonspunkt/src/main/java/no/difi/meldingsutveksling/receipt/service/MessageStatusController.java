@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Api
 @RequiredArgsConstructor
-@RequestMapping("/statuses")
+@RequestMapping("/api/statuses")
 public class MessageStatusController {
 
     private final MessageStatusRepository statusRepo;

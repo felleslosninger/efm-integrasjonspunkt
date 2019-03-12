@@ -93,7 +93,7 @@ public class ConversationControllerTest {
 
     @Test
     public void conversationsTest() throws Exception {
-        mvc.perform(get("/conversations")
+        mvc.perform(get("/api/conversations")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
@@ -102,7 +102,7 @@ public class ConversationControllerTest {
 
     @Test
     public void conversationsWithIdParamTest() throws Exception {
-        mvc.perform(get("/conversations/1")
+        mvc.perform(get("/api/conversations/1")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.convId", is(1)))
@@ -115,7 +115,7 @@ public class ConversationControllerTest {
 
     @Test
     public void conversationsWithConversationIdParamTest() throws Exception {
-        mvc.perform(get("/conversations/conversationId/123")
+        mvc.perform(get("/api/conversations/conversationId/123")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.convId", is(1)))
@@ -128,14 +128,14 @@ public class ConversationControllerTest {
 
     @Test
     public void conversationsWithNonNumericIdTest() throws Exception {
-        mvc.perform(get("/conversations/asd123")
+        mvc.perform(get("/api/conversations/asd123")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     public void conversationsQueueTest() throws Exception {
-        mvc.perform(get("/conversations/queue")
+        mvc.perform(get("/api/conversations/queue")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))

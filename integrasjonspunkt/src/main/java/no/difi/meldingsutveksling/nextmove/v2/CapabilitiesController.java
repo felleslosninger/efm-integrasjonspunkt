@@ -1,9 +1,6 @@
-package no.difi.meldingsutveksling.receipt.service;
+package no.difi.meldingsutveksling.nextmove.v2;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -23,7 +20,7 @@ import java.util.stream.Collectors;
 @RestController
 @Api
 @RequiredArgsConstructor
-@RequestMapping("/capabilities")
+@RequestMapping("/api/capabilities")
 @Validated
 public class CapabilitiesController {
 
@@ -34,7 +31,8 @@ public class CapabilitiesController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = String[].class)
     })
-    public List<String> capabilities(@PathVariable
+    public List<String> capabilities(@ApiParam(value = "receiverid", required = true)
+                                     @PathVariable
                                      @NotNull
                                      @Digits(integer = 9, fraction = 0)
                                      @Length(min = 9, max = 9)
