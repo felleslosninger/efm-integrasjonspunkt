@@ -8,10 +8,8 @@ import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.lang.KeystoreProviderException;
 import no.difi.meldingsutveksling.mail.MailClient;
-import no.difi.meldingsutveksling.nextmove.AsicHandler;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
-import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.FiksMessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
@@ -22,8 +20,9 @@ import no.difi.meldingsutveksling.receipt.StatusStrategy;
 import no.difi.meldingsutveksling.receipt.StatusStrategyFactory;
 import no.difi.meldingsutveksling.receipt.strategy.FiksStatusStrategy;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.services.Adresseregister;
+import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.transport.TransportFactory;
+import no.difi.move.common.oauth.JWTDecoder;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -33,11 +32,20 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.security.PublicKey;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.util.List;
 import java.util.Optional;
 
-@Profile({"dev", "itest", "systest", "staging", "production"})
+@Profile({"dev", "itest", "cucumber", "systest", "staging", "production"})
 @Configuration
 @EnableConfigurationProperties({IntegrasjonspunktProperties.class})
 public class IntegrasjonspunktBeans {
@@ -118,8 +126,25 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
+    public JWTDecoder jwtDecoder() throws CertificateException {
+        return new JWTDecoder();
+    }
+
+    @Bean
     public CmsUtil cmsUtil() {
         return new CmsUtil();
+    }
+
+    @Bean
+    public PublicKey publicKey(IntegrasjonspunktProperties props) throws CertificateException, IOException {
+        return CertificateFactory.getInstance("X.509")
+                .generateCertificate(props.getSign().getCertificate().getInputStream())
+                .getPublicKey();
+    }
+
+    @Bean
+    public RestClient restClient(IntegrasjonspunktProperties props, RestOperations restTemplate, JWTDecoder cmsUtil, PublicKey publicKey) throws MalformedURLException, URISyntaxException {
+        return new RestClient(props, restTemplate, cmsUtil, publicKey, new URL(props.getServiceregistryEndpoint()).toURI());
     }
 }
 

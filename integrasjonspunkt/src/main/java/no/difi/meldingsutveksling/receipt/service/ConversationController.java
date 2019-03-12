@@ -21,7 +21,7 @@ import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING
 @RestController
 @Api
 @RequiredArgsConstructor
-@RequestMapping("/conversations")
+@RequestMapping("/api/conversations")
 public class ConversationController {
 
     private final ConversationRepository convoRepo;

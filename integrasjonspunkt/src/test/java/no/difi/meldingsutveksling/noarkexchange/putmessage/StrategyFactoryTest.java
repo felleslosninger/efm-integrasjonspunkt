@@ -19,7 +19,7 @@ import java.net.URL;
 import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -50,8 +50,7 @@ public class StrategyFactoryTest {
         when(properties.getDpi()).thenReturn(dpic);
         when(properties.getOrg()).thenReturn(orgMock);
         final ServiceRegistryLookup serviceRegistryLookup = mock(ServiceRegistryLookup.class);
-        when(serviceRegistryLookup.getInfoRecord(anyString())).thenReturn(mock(InfoRecord.class));
-
+        when(serviceRegistryLookup.getInfoRecord(any())).thenReturn(mock(InfoRecord.class));
 
         final KeystoreProvider keystoreProvider = mock(KeystoreProvider.class);
         SvarUtService svarUtService = mock(SvarUtService.class);

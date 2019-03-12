@@ -18,7 +18,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -40,11 +40,11 @@ public class MessageContextFactoryTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    @Mock
+    @Mock(lenient = true)
     private Adresseregister adresseregister;
     @Mock
     private IntegrasjonspunktProperties propertiesMock;
-    @Mock
+    @Mock(lenient = true)
     private ServiceRegistryLookup serviceRegistryLookup;
 
     private MessageContextFactory messageContextFactory;
