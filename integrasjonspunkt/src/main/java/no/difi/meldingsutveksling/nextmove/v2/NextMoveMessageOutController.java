@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,7 +32,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 import static com.google.common.base.Strings.emptyToNull;
 
@@ -100,7 +100,7 @@ public class NextMoveMessageOutController {
     }
 
 
-    @PostMapping("/{conversationId}/upload")
+    @PostMapping(value = "/{conversationId}/upload", consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @ApiOperation(value = "Upload file", notes = "Upload a file to the message with supplied conversationId")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success"),
@@ -131,7 +131,7 @@ public class NextMoveMessageOutController {
         }
 
         BusinessMessageFile file = new BusinessMessageFile()
-                .setIdentifier(UUID.randomUUID().toString())
+                .setIdentifier(conversationId + "-" + (files.size() + 1))
                 .setFilename(filename)
                 .setPrimaryDocument(primaryDocument)
                 .setMimetype(emptyToNull(mimetype))

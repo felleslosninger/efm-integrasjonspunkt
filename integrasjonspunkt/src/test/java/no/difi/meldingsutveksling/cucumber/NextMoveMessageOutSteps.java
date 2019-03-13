@@ -3,13 +3,11 @@ package no.difi.meldingsutveksling.cucumber;
 import cucumber.api.java.en.Given;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
-import org.springframework.security.util.InMemoryResource;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
@@ -17,11 +15,7 @@ import static org.assertj.core.api.Java6Assertions.assertThat;
 public class NextMoveMessageOutSteps {
 
     private final TestRestTemplate testRestTemplate;
-
-    @LocalServerPort
-    private int localServerPort;
-
-    private StandardBusinessDocument sbd;
+    private final Holder<StandardBusinessDocument> standardBusinessDocumentHolder;
 
     @Given("^I POST the following message:$")
     public void iPostTheFollowingMessage(String body) {
@@ -36,30 +30,47 @@ public class NextMoveMessageOutSteps {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        this.sbd = response.getBody();
+        standardBusinessDocumentHolder.set(response.getBody());
     }
 
     @Given("^I upload a file named \"([^\"]+)\" with mimetype \"([^\"]+)\" and title \"([^\"]+)\" with the following body:$")
     public void iUploadAFileToTheMessage(String filename, String mimetype, String title, String body) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        uploadFile(filename, mimetype, title, body, false);
+    }
 
-        MultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
-        bodyMap.add("file", new InMemoryResource(body));
+    @Given("^I upload a primary document named \"([^\"]+)\" with mimetype \"([^\"]+)\" with the following body:$")
+    public void iUploadAPrimaryDocument(String filename, String mimetype, String body) {
+        uploadFile(filename, mimetype, null, body, true);
+    }
+
+    private void uploadFile(String filename, String mimetype, String title, String body, boolean primaryDocument) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+        Map<String, String> uriVariables = new HashMap<>();
+        uriVariables.put("conversationId", standardBusinessDocumentHolder.get().getConversationId());
+        uriVariables.put("filename", filename);
+        uriVariables.put("mimetype", mimetype);
+        uriVariables.put("title", title);
+        uriVariables.put("primaryDocument", Boolean.toString(primaryDocument));
 
         ResponseEntity<Void> response = testRestTemplate.exchange(
-                UriComponentsBuilder.fromUriString("http://localhost:" + localServerPort)
-                        .path("/api/message/out/")
-                        .pathSegment(sbd.getConversationId())
-                        .pathSegment("upload")
-                        .queryParam("filename", filename)
-                        .queryParam("mimetype", mimetype)
-                        .queryParam("title", title)
-                        .build()
-                        .toUri(),
+                "/api/message/out/{conversationId}/upload?filename={filename}&mimetype={mimetype}&title={title}",
                 HttpMethod.POST,
-                new HttpEntity<>(bodyMap, headers),
-                Void.class);
+                new HttpEntity<>(body, headers),
+                Void.class,
+                uriVariables);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Given("^I send the message$")
+    public void iSendTheMessage() {
+        ResponseEntity<Void> response = testRestTemplate.exchange(
+                "/api/message/out/{conversationId}",
+                HttpMethod.POST, new HttpEntity(null),
+                Void.class,
+                standardBusinessDocumentHolder.get().getConversationId());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }

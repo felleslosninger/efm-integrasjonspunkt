@@ -72,8 +72,8 @@ public class MessageSender implements ApplicationContextAware {
 
 
     public void sendMessage(NextMoveMessage message) throws MessageContextException, NextMoveException {
-        MessageContext context = messageContextFactory.from(message);
-        InputStream is = asicHandler.createEncryptedAsic(message, context);
+        MessageContext messageContext = messageContextFactory.from(message);
+        InputStream is = asicHandler.createEncryptedAsic(message, messageContext);
         Transport transport = transportFactory.createTransport(message.getSbd());
         transport.send(this.context, message.getSbd(), is);
     }

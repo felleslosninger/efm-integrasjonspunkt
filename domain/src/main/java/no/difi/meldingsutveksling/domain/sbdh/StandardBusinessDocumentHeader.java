@@ -16,6 +16,7 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.nextmove.AbstractEntity;
+import no.difi.meldingsutveksling.nextmove.BusinessMessage;
 import no.difi.meldingsutveksling.validation.ReceiverAcceptableServiceIdentifier;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -119,8 +120,8 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
     protected DocumentIdentification documentIdentification;
 
     @XmlElement(name = "Manifest")
-    @Embedded
     @Valid
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     protected Manifest manifest;
 
     @XmlElement(name = "BusinessScope")

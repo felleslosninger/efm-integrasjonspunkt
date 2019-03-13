@@ -1,6 +1,10 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.annotations.NaturalId;
 
 import javax.persistence.Entity;
 

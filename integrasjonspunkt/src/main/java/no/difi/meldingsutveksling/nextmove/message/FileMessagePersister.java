@@ -28,10 +28,10 @@ public class FileMessagePersister implements MessagePersister {
     @Override
     public void write(String conversationId, String filename, byte[] message) throws IOException {
         String filedir = getConversationFiledirPath(conversationId);
-        File localFile = new File(filedir+filename);
+        File localFile = new File(filedir + filename);
         localFile.getParentFile().mkdirs();
 
-        if (props.getNextmove().getApplyZipHeaderPatch() && ASIC_FILE.equals(filename)){
+        if (props.getNextmove().getApplyZipHeaderPatch() && ASIC_FILE.equals(filename)) {
             BugFix610.applyPatch(message, conversationId);
         }
 
@@ -47,29 +47,38 @@ public class FileMessagePersister implements MessagePersister {
     @Override
     public void writeStream(String conversationId, String filename, InputStream inputStream, long size) throws IOException {
         String filedir = getConversationFiledirPath(conversationId);
-        File localFile = new File(filedir+filename);
+        File localFile = new File(filedir + filename);
         localFile.getParentFile().mkdirs();
 
         try (FileOutputStream os = new FileOutputStream(localFile);
-            BufferedOutputStream bos = new BufferedOutputStream(os)) {
-            IOUtils.copy(inputStream,bos);
+             BufferedOutputStream bos = new BufferedOutputStream(os)) {
+            int bytes = IOUtils.copy(inputStream, bos);
+            log.debug("Storing {}: {}", filename, humanReadableByteCount(bytes));
         } catch (IOException e) {
             log.error("Could not write asic container to disk.", e);
             throw e;
         }
     }
 
+    private String humanReadableByteCount(int bytes) {
+        int unit = 1000;
+        if (bytes < unit) return bytes + " B";
+        int exp = (int) (Math.log(bytes) / Math.log(unit));
+        String pre = "kMGTPE".charAt(exp - 1) + "";
+        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+    }
+
     @Override
     public byte[] read(String conversationId, String filename) throws IOException {
         String filedir = getConversationFiledirPath(conversationId);
-        File file = new File(filedir+filename);
+        File file = new File(filedir + filename);
         return FileUtils.readFileToByteArray(file);
     }
 
     @Override
     public FileEntryStream readStream(String conversationId, String filename) throws PersistenceException {
         String filedir = getConversationFiledirPath(conversationId);
-        File file = new File(filedir+filename);
+        File file = new File(filedir + filename);
         try {
             BufferedInputStream fis = new BufferedInputStream(new FileInputStream(file));
             return FileEntryStream.of(fis, file.length());
@@ -87,8 +96,8 @@ public class FileMessagePersister implements MessagePersister {
     private String getConversationFiledirPath(String conversationId) {
         String filedir = props.getNextmove().getFiledir();
         if (!filedir.endsWith("/")) {
-            filedir = filedir+"/";
+            filedir = filedir + "/";
         }
-        return filedir+conversationId+"/";
+        return filedir + conversationId + "/";
     }
 }

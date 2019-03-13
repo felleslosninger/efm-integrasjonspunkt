@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.nextmove;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.common.collect.Sets;
 import lombok.*;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -10,6 +9,7 @@ import org.hibernate.annotations.DiscriminatorOptions;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -49,7 +49,7 @@ public class NextMoveMessage {
 
     public static NextMoveMessage of(StandardBusinessDocument sbd) {
         NextMoveMessage message = new NextMoveMessage(sbd.getConversationId(), sbd.getReceiverOrgNumber(), sbd.getSenderOrgNumber(), sbd);
-        message.setFiles(Sets.newHashSet());
+        message.setFiles(new HashSet<>());
         return message;
     }
 

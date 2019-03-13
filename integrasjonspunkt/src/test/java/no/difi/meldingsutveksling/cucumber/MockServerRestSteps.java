@@ -17,6 +17,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.ConnectException;
 
+import static org.springframework.test.web.client.ExpectedCount.manyTimes;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
@@ -52,7 +53,7 @@ public class MockServerRestSteps {
     @Given("^a \"([^\"]*)\" request to \"([^\"]*)\" will respond with status \"(\\d+)\" and the following \"([^\"]*)\"$")
     public void aRequestToWillRespondWithStatusAndTheFollowing(String method, String url, int statusCode, String contentType, String body) {
         this.responseActions = getServer(url)
-                .expect(requestTo(url))
+                .expect(manyTimes(), requestTo(url))
                 .andExpect(method(HttpMethod.valueOf(method)));
 
         responseActions
@@ -64,7 +65,7 @@ public class MockServerRestSteps {
     @And("^a \"([^\"]*)\" request to \"([^\"]*)\" will respond with status \"([^\"]*)\" and the following \"([^\"]*)\" in \"([^\"]*)\"$")
     public void aRequestToWillRespondWithStatusAndTheFollowingIn(String method, String url, int statusCode, String contentType, String path) {
         this.responseActions = getServer(url)
-                .expect(requestTo(url))
+                .expect(manyTimes(), requestTo(url))
                 .andExpect(method(HttpMethod.valueOf(method)));
 
         responseActions
@@ -77,7 +78,7 @@ public class MockServerRestSteps {
     @Given("^a \"([^\"]*)\" request to \"([^\"]*)\" will respond with connection refused$")
     public void aRequestToWillRespondWithNoConnectionRefused(String method, String url) {
         this.responseActions = getServer(url)
-                .expect(requestTo(url))
+                .expect(manyTimes(), requestTo(url))
                 .andExpect(method(HttpMethod.valueOf(method)));
 
         responseActions

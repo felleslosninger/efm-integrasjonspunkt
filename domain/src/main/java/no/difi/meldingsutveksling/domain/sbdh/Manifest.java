@@ -8,16 +8,18 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import no.difi.meldingsutveksling.nextmove.AbstractEntity;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -45,19 +47,27 @@ import java.util.Set;
         "numberOfItems",
         "manifestItem"
 })
-@Data
-@Embeddable
-public class Manifest {
+@Getter
+@Setter
+@ToString
+@Entity
+@Table(name = "manifest")
+public class Manifest extends AbstractEntity<Long> {
 
     @XmlElement(name = "NumberOfItems", required = true)
     @Transient
-    protected BigInteger numberOfItems;
+    protected Long numberOfItems;
 
     @XmlElement(name = "ManifestItem", required = true)
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "header_id", nullable = false)
     @NotEmpty
     protected Set<ManifestItem> manifestItem;
+
+    @JsonProperty
+    public Long getNumberOfItems() {
+        return numberOfItems != null ? numberOfItems : getManifestItem().size();
+    }
 
     /**
      * Gets the value of the manifestItem property.
