@@ -27,6 +27,9 @@ jacoco.exec
 /integrasjonspunkt/receipt.mv.db
 /integrasjonspunkt/receipt.trace.db
 
+*/activemq-data/*
+/activemq-data/*
+
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
@@ -137,3 +140,4 @@ integrasjonspunkt-logs/*.log
 
 # Overrides (files for tests)
 !/fiks-meldingsformidler/src/test/resources/somdalen.jks
+*.db
