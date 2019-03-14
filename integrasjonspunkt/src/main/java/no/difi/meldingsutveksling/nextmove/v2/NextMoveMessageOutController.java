@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import static com.google.common.base.Strings.emptyToNull;
 
@@ -131,7 +132,7 @@ public class NextMoveMessageOutController {
         }
 
         BusinessMessageFile file = new BusinessMessageFile()
-                .setIdentifier(conversationId + "-" + (files.size() + 1))
+                .setIdentifier(UUID.randomUUID().toString())
                 .setFilename(filename)
                 .setPrimaryDocument(primaryDocument)
                 .setMimetype(emptyToNull(mimetype))

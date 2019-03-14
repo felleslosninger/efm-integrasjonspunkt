@@ -1,11 +1,15 @@
 package no.difi.meldingsutveksling;
 
+import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnWsClientFactory;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import no.difi.meldingsutveksling.transport.altinn.AltinnTransport;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 import java.util.Optional;
 
@@ -15,26 +19,18 @@ import static no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRe
 /**
  * Used to create transport based on service registry lookup.
  */
+@RequiredArgsConstructor
 public class ServiceRegistryTransportFactory implements TransportFactory {
-    private ServiceRegistryLookup serviceRegistryLookup;
 
-    /**
-     * Creates instance of factory with needed dependency to determine the transport to create
-     *
-     * @param serviceRegistryLookup service to lookup service record
-     */
-    public ServiceRegistryTransportFactory(ServiceRegistryLookup serviceRegistryLookup) {
-        this.serviceRegistryLookup = serviceRegistryLookup;
-    }
+    private final ServiceRegistryLookup serviceRegistryLookup;
+    private final AltinnWsClientFactory altinnWsClientFactory;
 
     @Override
     public Transport createTransport(StandardBusinessDocument message) {
-
-        Optional<ServiceRecord> serviceRecord = Optional.of(serviceRegistryLookup.getServiceRecord(message.getReceiverOrgNumber()).getServiceRecord());
-
-        Optional<Transport> transport = serviceRecord.filter(isServiceIdentifier(DPO)).map(AltinnTransport::new);
-        return transport.orElseThrow(() -> new RuntimeException("Failed to create transport"));
+        return Optional.of(serviceRegistryLookup.getServiceRecord(message.getReceiverOrgNumber()).getServiceRecord())
+                .filter(isServiceIdentifier(DPO))
+                .map(altinnWsClientFactory::getAltinnWsClient)
+                .map(AltinnTransport::new)
+                .orElseThrow(() -> new RuntimeException("Failed to create transport"));
     }
-
-
 }

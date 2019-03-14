@@ -5,17 +5,18 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import no.difi.meldingsutveksling.nextmove.ServiceBusRestClient;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import org.springframework.boot.test.web.client.MockServerRestTemplateCustomizer;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.ResponseActions;
+import org.springframework.test.web.client.response.DefaultResponseCreator;
 import org.springframework.web.client.RestTemplate;
-
-import java.net.ConnectException;
 
 import static org.springframework.test.web.client.ExpectedCount.manyTimes;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
@@ -27,7 +28,9 @@ public class MockServerRestSteps {
 
     private final MockServerRestTemplateCustomizer mockServerRestTemplateCustomizer;
     private final RestClient restClient;
+    private final ServiceBusRestClient serviceBusRestClient;
 
+    private DefaultResponseCreator responseCreator;
     private ResponseActions responseActions;
 
     @Before
@@ -35,6 +38,7 @@ public class MockServerRestSteps {
     public void before() {
         mockServerRestTemplateCustomizer.getServers().values().forEach(MockRestServiceServer::reset);
         mockServerRestTemplateCustomizer.customize((RestTemplate) restClient.getRestTemplate());
+        mockServerRestTemplateCustomizer.customize(serviceBusRestClient.getRestTemplate());
     }
 
     private MockRestServiceServer getServer(String url) {
@@ -43,9 +47,9 @@ public class MockServerRestSteps {
 
     @SuppressWarnings("squid:S1172")
     private RestTemplate getRestTemplate(String url) {
-//        if (url.startsWith("http://localhost:9092")) {
-//            return actuatorClient.getRestTemplate();
-//        }
+        if (url.startsWith(serviceBusRestClient.getBase())) {
+            return serviceBusRestClient.getRestTemplate();
+        }
 
         return (RestTemplate) restClient.getRestTemplate();
     }
@@ -62,6 +66,34 @@ public class MockServerRestSteps {
                         .body(body));
     }
 
+    @Given("^a \"([^\"]*)\" request to \"([^\"]*)\" will respond with status \"(\\d+)\"$")
+    public void aRequestToWillRespondWithStatus(String method, String url, int statusCode) {
+        this.responseActions = getServer(url)
+                .expect(manyTimes(), requestTo(url))
+                .andExpect(method(HttpMethod.valueOf(method)));
+
+        this.responseCreator = withStatus(HttpStatus.valueOf(statusCode));
+        responseActions.andRespond(responseCreator);
+    }
+
+    @And("^the header \"([^\"]*)\"=\"([^\"]*)\"$")
+    public void andTheHeader(String name, String value) {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add(name, value);
+
+        responseActions
+                .andRespond(responseCreator
+                        .headers(httpHeaders));
+    }
+
+    @And("^the following \"([^\"]*)\"$")
+    public void andTheFollowing(String contentType, String body) {
+        responseActions
+                .andRespond(responseCreator
+                        .contentType(MediaType.parseMediaType(contentType))
+                        .body(body));
+    }
+
     @And("^a \"([^\"]*)\" request to \"([^\"]*)\" will respond with status \"([^\"]*)\" and the following \"([^\"]*)\" in \"([^\"]*)\"$")
     public void aRequestToWillRespondWithStatusAndTheFollowingIn(String method, String url, int statusCode, String contentType, String path) {
         this.responseActions = getServer(url)
@@ -74,16 +106,4 @@ public class MockServerRestSteps {
                         .body(new ClassPathResource(path)));
     }
 
-
-    @Given("^a \"([^\"]*)\" request to \"([^\"]*)\" will respond with connection refused$")
-    public void aRequestToWillRespondWithNoConnectionRefused(String method, String url) {
-        this.responseActions = getServer(url)
-                .expect(manyTimes(), requestTo(url))
-                .andExpect(method(HttpMethod.valueOf(method)));
-
-        responseActions
-                .andRespond(request -> {
-                    throw new ConnectException("Connection refused: connect");
-                });
-    }
 }

@@ -8,9 +8,10 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.asic.AsicReader;
 import no.difi.asic.AsicReaderFactory;
+import no.difi.meldingsutveksling.AltinnWsClient;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.transport.Transport;
+import no.difi.meldingsutveksling.shipping.UploadRequest;
 import org.apache.commons.io.IOUtils;
 
 import java.io.ByteArrayInputStream;
@@ -28,43 +29,40 @@ import static org.mockito.BDDMockito.willAnswer;
 @Slf4j
 public class TransportSteps {
 
-    private final Transport transport;
+    private final AltinnWsClient altinnWsClient;
     private final CmsUtil cmsUtil;
-    private final Holder<TransportInput> transportInputHolder;
+    private final Holder<UploadRequest> uploadRequestHolder;
     private final Holder<StandardBusinessDocument> standardBusinessDocumentHolder;
     private final Holder<AsicInfo> asicInfoHolder;
     private final CucumberKeyStore cucumberKeyStore;
 
     @Before
     public void before() {
-        transportInputHolder.reset();
+        uploadRequestHolder.reset();
         standardBusinessDocumentHolder.reset();
         asicInfoHolder.reset();
 
         willAnswer(invocation -> {
-            transportInputHolder.set(new TransportInput(
-                    invocation.getArgument(1),
-                    invocation.getArgument(2)
-            ));
+            uploadRequestHolder.set(invocation.getArgument(0));
             return null;
-        }).given(transport).send(any(), any(), any());
+        }).given(altinnWsClient).send(any());
     }
 
-    @Then("^a message with the same SBD is transported to C3$")
-    public void aMessageWithTheSameSBDIsTransportedToC3() {
+    @Then("^a message with the same SBD is sent to Altinn$")
+    public void aMessageWithTheSameSBDIsSentToAltinn() {
         await().atMost(10, SECONDS)
                 .pollInterval(1, SECONDS)
-                .until(transportInputHolder::isPresent);
+                .until(uploadRequestHolder::isPresent);
 
         StandardBusinessDocument document = standardBusinessDocumentHolder.get();
-        TransportInput transportInput = transportInputHolder.get();
+        UploadRequest uploadRequest = uploadRequestHolder.get();
 
-        assertThat(transportInput.getSbd().toString()).isEqualTo(document.toString());
+        assertThat(uploadRequest.getPayload().toString()).isEqualTo(document.toString());
     }
 
-    @Then("^the transported ASIC contains the following files:$")
+    @Then("^the sent ASIC contains the following files:$")
     @SneakyThrows
-    public void theTransportedASICContains(DataTable expectedTable) {
+    public void theSentASICContains(DataTable expectedTable) {
         AsicInfo asicInfo = asicInfoHolder.getOrCalculate(this::getAsicInfo);
 
         List<List<String>> actualList = new ArrayList<>();
@@ -86,11 +84,11 @@ public class TransportSteps {
 
     @SneakyThrows
     private AsicInfo getAsicInfo() {
-        TransportInput transportInput = transportInputHolder.get();
-        String receiverOrgNumber = transportInput.getSbd().getReceiverOrgNumber();
+        UploadRequest uploadRequest = uploadRequestHolder.get();
+        String receiverOrgNumber = uploadRequest.getPayload().getReceiverOrgNumber();
         PrivateKey privateKey = cucumberKeyStore.getPrivateKey(receiverOrgNumber);
 
-        byte[] bytes = IOUtils.toByteArray(transportInput.getInputStream());
+        byte[] bytes = IOUtils.toByteArray(uploadRequest.getAsicInputStream());
         byte[] asic = cmsUtil.decryptCMS(bytes, privateKey);
 
         Map<String, String> fileMap = new HashMap<>();

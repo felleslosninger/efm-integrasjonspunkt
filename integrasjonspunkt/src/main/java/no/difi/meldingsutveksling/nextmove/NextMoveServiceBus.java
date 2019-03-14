@@ -136,7 +136,6 @@ public class NextMoveServiceBus {
         } catch (IOException e) {
             throw new NextMoveException("Error creating servicebus payload", e);
         }
-
     }
 
     private String getQueue(NextMoveMessage message) throws NextMoveException {
@@ -186,6 +185,7 @@ public class NextMoveServiceBus {
             }
         }
     }
+
 
     public CompletableFuture getAllMessagesBatch() {
         return CompletableFuture.runAsync(() -> {

@@ -35,8 +35,8 @@ import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
-import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isReceipt;
 import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isNextMove;
+import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isReceipt;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
 /**
@@ -59,6 +59,7 @@ public class MessagePolling implements ApplicationContextAware {
     private final NextMoveQueue nextMoveQueue;
     private final NextMoveServiceBus nextMoveServiceBus;
     private final MessagePersister messagePersister;
+    private final AltinnWsClientFactory altinnWsClientFactory;
 
     private ServiceRecord serviceRecord;
     private CompletableFuture batchRead;
@@ -110,8 +111,7 @@ public class MessagePolling implements ApplicationContextAware {
                     .orElseThrow(() -> new MeldingsUtvekslingRuntimeException(String.format("DPO ServiceRecord not found for %s", properties.getOrg().getNumber())));
         }
 
-        AltinnWsConfiguration configuration = AltinnWsConfiguration.fromConfiguration(serviceRecord, context);
-        AltinnWsClient client = new AltinnWsClient(configuration, context);
+        AltinnWsClient client = altinnWsClientFactory.getAltinnWsClient(serviceRecord);
 
         List<FileReference> fileReferences = client.availableFiles(properties.getOrg().getNumber());
 

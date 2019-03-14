@@ -64,8 +64,8 @@ Feature: Sending a Next Move DPO message
     Before the law sits a gatekeeper.
     """
     And I send the message
-    Then a message with the same SBD is transported to C3
-    And the transported ASIC contains the following files:
+    Then a message with the same SBD is sent to Altinn
+    And the sent ASIC contains the following files:
       | filename           |
       | manifest.xml       |
       | before_the_law.txt |
