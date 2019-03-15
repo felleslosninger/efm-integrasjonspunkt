@@ -4,7 +4,7 @@ import com.querydsl.core.types.Predicate;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.exceptions.MessageStatusNotFoundException;
-import no.difi.meldingsutveksling.exceptions.NotContentException;
+import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatusRepository;
 import org.springframework.data.domain.Page;
@@ -59,6 +59,6 @@ public class MessageStatusController {
     })
     public MessageStatus statusPeek() {
         return statusRepo.findFirstByOrderByLastUpdateAsc()
-                .orElseThrow(NotContentException::new);
+                .orElseThrow(NoContentException::new);
     }
 }

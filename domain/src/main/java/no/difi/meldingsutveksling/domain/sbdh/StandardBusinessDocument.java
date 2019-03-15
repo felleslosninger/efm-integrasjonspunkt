@@ -16,13 +16,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.logstash.logback.marker.LogstashMarker;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.Payload;
-import no.difi.meldingsutveksling.nextmove.AbstractEntity;
-import no.difi.meldingsutveksling.nextmove.BusinessMessage;
-import no.difi.meldingsutveksling.nextmove.NextMoveMessageDeserializer;
-import no.difi.meldingsutveksling.nextmove.NextMoveMessageSerializer;
+import no.difi.meldingsutveksling.nextmove.*;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.w3c.dom.Node;
 
@@ -124,6 +122,13 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
                 .stream()
                 .filter(scope -> scopeType.toString().equals(scope.getType()) || scopeType.name().equals(scope.getType()))
                 .findAny();
+    }
+
+    @JsonIgnore
+    public ServiceIdentifier getServiceIdentifier() {
+        String diType = getStandardBusinessDocumentHeader().getDocumentIdentification().getType();
+        return ServiceIdentifier.safeValueOf(diType).orElseThrow(() ->
+                new NextMoveRuntimeException(String.format("Could not create ServiceIdentifier from documentIdentification.type=%s for message with id=%s", diType, getConversationId())));
     }
 
     @JsonIgnore

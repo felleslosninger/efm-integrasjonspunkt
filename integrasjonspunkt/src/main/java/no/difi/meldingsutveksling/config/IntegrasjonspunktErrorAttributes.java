@@ -1,7 +1,8 @@
 package no.difi.meldingsutveksling.config;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.web.DefaultErrorAttributes;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
@@ -13,7 +14,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-@RequiredArgsConstructor
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class IntegrasjonspunktErrorAttributes extends DefaultErrorAttributes {
 
     @Override

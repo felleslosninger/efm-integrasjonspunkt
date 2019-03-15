@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -33,6 +32,8 @@ public class NextMoveMessage {
     private String receiverIdentifier;
     @NonNull
     private String senderIdentifier;
+    @NonNull
+    private ServiceIdentifier serviceIdentifier;
 
     @Version
     @JsonFormat(shape = JsonFormat.Shape.STRING)
@@ -48,16 +49,14 @@ public class NextMoveMessage {
     private StandardBusinessDocument sbd;
 
     public static NextMoveMessage of(StandardBusinessDocument sbd) {
-        NextMoveMessage message = new NextMoveMessage(sbd.getConversationId(), sbd.getReceiverOrgNumber(), sbd.getSenderOrgNumber(), sbd);
+        NextMoveMessage message = new NextMoveMessage(
+                sbd.getConversationId(),
+                sbd.getReceiverOrgNumber(),
+                sbd.getSenderOrgNumber(),
+                sbd.getServiceIdentifier(),
+                sbd);
         message.setFiles(new HashSet<>());
         return message;
-    }
-
-    @JsonIgnore
-    public ServiceIdentifier getServiceIdentifier() {
-        String diType = sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getType();
-        return ServiceIdentifier.safeValueOf(diType).orElseThrow(() ->
-                new NextMoveRuntimeException(String.format("Could not create ServiceIdentifier from documentIdentification.type=%s for message with id=%s", diType, getConversationId())));
     }
 
     public BusinessMessage getBusinessMessage() {

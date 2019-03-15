@@ -100,7 +100,6 @@ public class NextMoveMessageOutController {
                 .orElseThrow(() -> new ConversationNotFoundException(conversationId));
     }
 
-
     @PostMapping(value = "/{conversationId}/upload", consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @ApiOperation(value = "Upload file", notes = "Upload a file to the message with supplied conversationId")
     @ApiResponses({
