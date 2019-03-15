@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import com.google.common.hash.Hashing;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
@@ -37,11 +38,13 @@ public class ServiceBusRestClient {
     private static final String NEXTMOVE_QUEUE_PREFIX = "nextbestqueue";
     private static final String AUTH_HEADER = "Authorization";
 
-    private ServiceRegistryLookup sr;
-    private IntegrasjonspunktProperties props;
-    private String localQueuePath;
-    private RestTemplate restTemplate;
-    private ServiceBusPayloadConverter payloadConverter;
+    private final ServiceRegistryLookup sr;
+    private final IntegrasjonspunktProperties props;
+    @Getter
+    private final String localQueuePath;
+    @Getter
+    private final RestTemplate restTemplate;
+    private final ServiceBusPayloadConverter payloadConverter;
 
     public ServiceBusRestClient(ServiceRegistryLookup sr,
                                 IntegrasjonspunktProperties props,
@@ -49,8 +52,8 @@ public class ServiceBusRestClient {
         this.sr = sr;
         this.props = props;
 
-        this.localQueuePath = NEXTMOVE_QUEUE_PREFIX+
-                props.getOrg().getNumber()+
+        this.localQueuePath = NEXTMOVE_QUEUE_PREFIX +
+                props.getOrg().getNumber() +
                 props.getNextmove().getServiceBus().getMode();
         this.payloadConverter = payloadConverter;
 
@@ -66,10 +69,15 @@ public class ServiceBusRestClient {
         this.restTemplate.setErrorHandler(new ServiceBusRestErrorHandler(sr));
     }
 
-    public void sendMessage(byte[] message, String queuePath) {
-        String resourceUri = format("https://%s.%s/%s/messages",
+    public String getBase() {
+        return format("https://%s.%s",
                 props.getNextmove().getServiceBus().getNamespace(),
-                props.getNextmove().getServiceBus().getHost(),
+                props.getNextmove().getServiceBus().getHost());
+    }
+
+    public void sendMessage(byte[] message, String queuePath) {
+        String resourceUri = format("%s/%s/messages",
+                getBase(),
                 queuePath);
         URI uri = convertToUri(resourceUri);
 
@@ -86,9 +94,8 @@ public class ServiceBusRestClient {
     }
 
     public Optional<ServiceBusMessage> receiveMessage() {
-        String resourceUri = format("https://%s.%s/%s/messages/head",
-                props.getNextmove().getServiceBus().getNamespace(),
-                props.getNextmove().getServiceBus().getHost(),
+        String resourceUri = format("%s/%s/messages/head",
+                getBase(),
                 localQueuePath);
 
         String auth = createAuthorizationHeader(resourceUri);
@@ -126,9 +133,8 @@ public class ServiceBusRestClient {
     }
 
     public void deleteMessage(ServiceBusMessage message) {
-        String resourceUri = format("https://%s.%s/%s/messages/%s/%s",
-                props.getNextmove().getServiceBus().getNamespace(),
-                props.getNextmove().getServiceBus().getHost(),
+        String resourceUri = format("%s/%s/messages/%s/%s",
+                getBase(),
                 localQueuePath,
                 message.getMessageId(),
                 message.getLockToken());
@@ -165,7 +171,7 @@ public class ServiceBusRestClient {
         }
 
         int expiry = Math.round(Instant.now().plusSeconds(20).toEpochMilli() / 1000f);
-        String hashInput = urlEncoded+"\n"+expiry;
+        String hashInput = urlEncoded + "\n" + expiry;
 
         byte[] bytes = Hashing.hmacSha256(getSasKey().getBytes(StandardCharsets.UTF_8))
                 .hashBytes(hashInput.getBytes(StandardCharsets.UTF_8)).asBytes();
@@ -182,10 +188,6 @@ public class ServiceBusRestClient {
                 signature,
                 expiry,
                 props.getNextmove().getServiceBus().getSasKeyName());
-    }
-
-    public String getLocalQueuePath() {
-        return this.localQueuePath;
     }
 
     public String getSasKey() {

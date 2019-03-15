@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import java.util.Arrays;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -37,7 +36,7 @@ public class EnabledServiceValidator implements ConstraintValidator<EnabledServi
         context.buildConstraintViolationWithTemplate(
                 String.format("%s %s",
                         context.getDefaultConstraintMessageTemplate(),
-                        Arrays.stream(ServiceIdentifier.values())
+                        strategyFactory.getEnabledServices().stream()
                                 .map(Enum::name)
                                 .collect(Collectors.joining(", "))
                 )

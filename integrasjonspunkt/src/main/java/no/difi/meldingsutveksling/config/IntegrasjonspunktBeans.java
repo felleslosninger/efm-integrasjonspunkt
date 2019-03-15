@@ -10,6 +10,7 @@ import no.difi.meldingsutveksling.lang.KeystoreProviderException;
 import no.difi.meldingsutveksling.mail.MailClient;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
+import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnWsClientFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.FiksMessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
@@ -33,7 +34,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.client.RestOperations;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -56,8 +56,8 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public TransportFactory serviceRegistryTransportFactory(ServiceRegistryLookup serviceRegistryLookup) {
-        return new ServiceRegistryTransportFactory(serviceRegistryLookup);
+    public TransportFactory serviceRegistryTransportFactory(ServiceRegistryLookup serviceRegistryLookup, AltinnWsClientFactory altinnWsClientFactory) {
+        return new ServiceRegistryTransportFactory(serviceRegistryLookup, altinnWsClientFactory);
     }
 
     @Bean

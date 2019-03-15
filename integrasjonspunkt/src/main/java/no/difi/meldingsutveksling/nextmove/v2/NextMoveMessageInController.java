@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
-import com.querydsl.core.types.Predicate;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +10,6 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
 import no.difi.meldingsutveksling.exceptions.ConversationNotLockedException;
 import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
-import no.difi.meldingsutveksling.exceptions.NotContentException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
@@ -22,7 +20,6 @@ import no.difi.meldingsutveksling.receipt.MessageStatus;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
+import javax.validation.Valid;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 
@@ -47,7 +45,7 @@ import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerF
 public class NextMoveMessageInController {
 
     private static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
-    private static final String HEADER_FILENAME = "attachement; filename=";
+    private static final String HEADER_FILENAME = "attachment; filename=";
 
     private final IntegrasjonspunktProperties props;
     private final ConversationService conversationService;
@@ -64,11 +62,10 @@ public class NextMoveMessageInController {
             @ApiResponse(code = 204, message = "No content", response = String.class)
     })
     @Transactional
-    public Page<StandardBusinessDocument> getMessages(
-            @QuerydslPredicate(root = NextMoveInMessage.class) Predicate predicate,
+    public Page<StandardBusinessDocument> findMessages(
+            @Valid NextMoveInMessageQueryInput input,
             @PageableDefault Pageable pageable) {
-        return messageRepo.findAll(predicate, pageable)
-                .map(NextMoveInMessage::getSbd);
+        return messageRepo.find(input, pageable);
     }
 
     @GetMapping(value = "peek")
@@ -78,9 +75,8 @@ public class NextMoveMessageInController {
             @ApiResponse(code = 204, message = "No content", response = String.class)
     })
     @Transactional
-    public StandardBusinessDocument peek() {
-        NextMoveInMessage message = messageRepo.findFirstByLockTimeoutIsNullOrderByLastUpdatedAsc()
-                .orElseThrow(NotContentException::new);
+    public StandardBusinessDocument peek(@Valid NextMoveInMessageQueryInput input) {
+        NextMoveInMessage message = messageRepo.peek(input);
 
         messageRepo.save(message.setLockTimeout(ZonedDateTime.now()
                 .plusMinutes(props.getNextmove().getLockTimeoutMinutes())));

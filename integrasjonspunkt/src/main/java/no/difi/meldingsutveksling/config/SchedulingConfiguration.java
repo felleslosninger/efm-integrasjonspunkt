@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.nextmove.ConversationResourceUnlocker;
 import no.difi.meldingsutveksling.nextmove.NextMoveQueue;
 import no.difi.meldingsutveksling.nextmove.NextMoveServiceBus;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
+import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnWsClientFactory;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
@@ -42,7 +43,8 @@ public class SchedulingConfiguration {
                                          ObjectProvider<List<MessageDownloaderModule>> messageDownloaders,
                                          NextMoveQueue nextMoveQueue,
                                          NextMoveServiceBus nextMoveServiceBus,
-                                         ObjectProvider<MessagePersister> messagePersister) {
+                                         ObjectProvider<MessagePersister> messagePersister,
+                                         AltinnWsClientFactory altinnWsClientFactory) {
         return new MessagePolling(
                 properties,
                 internalQueue,
@@ -53,6 +55,7 @@ public class SchedulingConfiguration {
                 messageDownloaders,
                 nextMoveQueue,
                 nextMoveServiceBus,
-                messagePersister.getIfUnique());
+                messagePersister.getIfUnique(),
+                altinnWsClientFactory);
     }
 }

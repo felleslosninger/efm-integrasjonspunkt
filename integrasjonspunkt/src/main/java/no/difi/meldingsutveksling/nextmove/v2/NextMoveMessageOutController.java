@@ -38,6 +38,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.UUID;
 
 import static com.google.common.base.Strings.emptyToNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -109,7 +110,6 @@ public class NextMoveMessageOutController {
                 .orElseThrow(() -> new ConversationNotFoundException(conversationId));
     }
 
-
     @PostMapping(value = "/{conversationId}/upload", consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @ApiOperation(value = "Upload file", notes = "Upload a file to the message with supplied conversationId")
     @ApiResponses({
@@ -148,7 +148,7 @@ public class NextMoveMessageOutController {
         }
 
         BusinessMessageFile file = new BusinessMessageFile()
-                .setIdentifier(conversationId + "-" + (files.size() + 1))
+                .setIdentifier(UUID.randomUUID().toString())
                 .setFilename(filename)
                 .setPrimaryDocument(primaryDocument)
                 .setTitle(emptyToNull(title));
