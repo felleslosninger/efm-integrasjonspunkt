@@ -5,10 +5,10 @@ import no.difi.meldingsutveksling.ks.svarut.ForsendelseStatus;
 
 import java.util.EnumMap;
 
-public class ForsendelseStatusMapper {
-    private EnumMap<ForsendelseStatus, DpfReceiptStatus> mapping;
+public class FiksStatusMapper {
+    private static EnumMap<ForsendelseStatus, DpfReceiptStatus> mapping;
 
-    public ForsendelseStatusMapper() {
+    public FiksStatusMapper() {
         mapping = new EnumMap<>(ForsendelseStatus.class);
         mapping.put(ForsendelseStatus.LEST, DpfReceiptStatus.LEST);
         mapping.put(ForsendelseStatus.MOTTATT, DpfReceiptStatus.MOTTATT);
@@ -25,7 +25,7 @@ public class ForsendelseStatusMapper {
         mapping.put(ForsendelseStatus.KLAR_FOR_MOTTAK, DpfReceiptStatus.KLAR_FOR_MOTTAK);
     }
 
-    public DpfReceiptStatus mapFrom(ForsendelseStatus forsendelseStatus) {
+    public static DpfReceiptStatus mapFrom(ForsendelseStatus forsendelseStatus) {
         return mapping.get(forsendelseStatus);
     }
 }

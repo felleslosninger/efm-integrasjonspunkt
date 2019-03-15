@@ -4,9 +4,12 @@ import com.querydsl.core.types.Predicate;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.ConversationAlreadyExistsException;
 import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
+import no.difi.meldingsutveksling.exceptions.MissingFileTitleException;
 import no.difi.meldingsutveksling.exceptions.MultiplePrimaryDocumentsNotAllowedException;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveException;
@@ -30,10 +33,17 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Strings.emptyToNull;
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Arrays.asList;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 
 @RestController
 @Validated
@@ -67,7 +77,7 @@ public class NextMoveMessageOutController {
 
         NextMoveOutMessage message = NextMoveOutMessage.of(messageService.setDefaults(sbd));
         messageRepo.save(message);
-        conversationService.registerConversation(message);
+        conversationService.registerConversation(sbd);
 
         return sbd;
     }
@@ -130,12 +140,25 @@ public class NextMoveMessageOutController {
             throw new MultiplePrimaryDocumentsNotAllowedException();
         }
 
+        List<ServiceIdentifier> requiredTitleCapabilities = asList(DPV, DPI);
+        if (requiredTitleCapabilities.contains(message.getServiceIdentifier()) && isNullOrEmpty(title)) {
+            throw new MissingFileTitleException(requiredTitleCapabilities.stream()
+                    .map(ServiceIdentifier::toString)
+                    .collect(Collectors.joining(",")));
+        }
+
         BusinessMessageFile file = new BusinessMessageFile()
                 .setIdentifier(conversationId + "-" + (files.size() + 1))
                 .setFilename(filename)
                 .setPrimaryDocument(primaryDocument)
-                .setMimetype(emptyToNull(mimetype))
                 .setTitle(emptyToNull(title));
+        if (isNullOrEmpty(mimetype)) {
+            String ext = Stream.of(filename.split(".")).reduce((a, b) -> b).orElse("pdf");
+            file.setMimetype(MimeTypeExtensionMapper.getMimetype(ext));
+        } else {
+            file.setMimetype(mimetype);
+        }
+
         try {
             messagePersister.writeStream(conversationId, file.getIdentifier(), request.getInputStream(),
                     Long.valueOf(request.getHeader(HttpHeaders.CONTENT_LENGTH)));
@@ -158,6 +181,7 @@ public class NextMoveMessageOutController {
     public void sendMessage(@PathVariable("conversationId") String conversationId) {
         NextMoveMessage message = messageRepo.findByConversationId(conversationId)
                 .orElseThrow(() -> new ConversationNotFoundException(conversationId));
+        messageService.validate(message);
         internalQueue.enqueueNextMove2(message);
     }
 }

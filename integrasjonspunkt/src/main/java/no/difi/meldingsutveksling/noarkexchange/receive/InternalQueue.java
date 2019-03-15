@@ -345,13 +345,13 @@ public class InternalQueue {
         }
     }
 
-    private void sendToNoarkSystem(StandardBusinessDocument standardBusinessDocument) {
+    private void sendToNoarkSystem(StandardBusinessDocument sbd) {
         try {
-            integrajonspunktReceive.forwardToNoarkSystem(standardBusinessDocument);
+            integrajonspunktReceive.forwardToNoarkSystem(sbd);
         } catch (Exception e) {
-            Audit.error("Failed delivering to archive", markerFrom(standardBusinessDocument), e);
+            Audit.error("Failed delivering to archive", markerFrom(sbd), e);
             if (e instanceof MessageException) {
-                logger.error(markerFrom(standardBusinessDocument), ((MessageException)e).getStatusMessage().getTechnicalMessage(), e);
+                logger.error(markerFrom(sbd), ((MessageException)e).getStatusMessage().getTechnicalMessage(), e);
             }
             throw new MeldingsUtvekslingRuntimeException(e);
         }

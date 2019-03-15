@@ -61,7 +61,7 @@ public class NextMoveQueue {
             messageRepo.findByConversationId(sbd.getConversationId())
                     .orElseGet(() -> messageRepo.save(message));
 
-            Conversation c = conversationService.registerConversation(message);
+            Conversation c = conversationService.registerConversation(sbd);
             conversationService.registerStatus(c, MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_MOTTATT));
             Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] put on local queue",
                     message.getConversationId(), message.getServiceIdentifier()), markerFrom(message));

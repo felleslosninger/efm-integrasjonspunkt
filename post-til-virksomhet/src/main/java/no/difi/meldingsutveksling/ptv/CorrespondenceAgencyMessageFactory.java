@@ -75,7 +75,7 @@ public class CorrespondenceAgencyMessageFactory {
             BinaryAttachmentV2 binaryAttachmentV2 = new BinaryAttachmentV2();
             binaryAttachmentV2.setFunctionType(AttachmentFunctionType.fromValue("Unspecified"));
             binaryAttachmentV2.setFileName(reporteeFactory.createBinaryAttachmentV2FileName(f.getFilename()));
-            binaryAttachmentV2.setName(reporteeFactory.createBinaryAttachmentV2Name(f.getFilename()));
+            binaryAttachmentV2.setName(reporteeFactory.createBinaryAttachmentV2Name(f.getTitle()));
             binaryAttachmentV2.setEncrypted(false);
             binaryAttachmentV2.setSendersReference(reporteeFactory.createBinaryAttachmentV2SendersReference("AttachmentReference_as123452"));
             binaryAttachmentV2.setData(reporteeFactory.createBinaryAttachmentV2Data(new DataHandler(InputStreamDataSource.of(fileEntry.getInputStream()))));

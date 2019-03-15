@@ -5,12 +5,12 @@ import no.difi.meldingsutveksling.ks.svarut.ForsendelseStatus
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class ForsendelseStatusMapperTest extends Specification {
+class FiksStatusMapperTest extends Specification {
 
     @Unroll
     "given ForsendelseStatus.#forsendelsestatus should map to ReceiptStatus.#receiptStatus"() {
         given:
-        def mapper = new ForsendelseStatusMapper()
+        def mapper = new FiksStatusMapper()
 
         expect:
         mapper.mapFrom(forsendelsestatus) == receiptStatus

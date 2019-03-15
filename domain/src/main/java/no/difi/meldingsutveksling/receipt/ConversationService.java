@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.receipt;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -9,20 +9,17 @@ import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
-import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static java.lang.String.format;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPF;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
+import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 
 @Component
 @Slf4j
@@ -33,7 +30,7 @@ public class ConversationService {
     private NoarkClient mshClient;
 
     private static final String CONVERSATION_EXISTS = "Conversation with id=%s already exists, not recreating";
-    private static final List<ServiceIdentifier> POLLABLES = Lists.newArrayList(DPV, DPF, DPO);
+    private static final Set<ServiceIdentifier> POLLABLES = Sets.newHashSet(DPV, DPF, DPO);
 
     @Autowired
     public ConversationService(ConversationRepository repo,
@@ -100,17 +97,7 @@ public class ConversationService {
         return repo.save(conversation);
     }
 
-    public Conversation registerConversation(NextMoveMessage msg) {
-        Optional<Conversation> find = repo.findByConversationId(msg.getConversationId()).stream().findFirst();
-        if (find.isPresent()) {
-            log.warn(String.format(CONVERSATION_EXISTS, msg.getConversationId()));
-            return find.get();
-        }
-        MessageStatus ms = MessageStatus.of(GenericReceiptStatus.OPPRETTET);
-        Conversation c = Conversation.of(msg, ms);
-        return repo.save(c);
-    }
-
+    // TODO remove together with ConversationResource controllers/repo
     public Conversation registerConversation(ConversationResource cr) {
         Optional<Conversation> find = repo.findByConversationId(cr.getConversationId()).stream().findFirst();
         if (find.isPresent()) {
@@ -139,16 +126,9 @@ public class ConversationService {
         if (find.isPresent()) {
             Conversation c = find.get();
             c.setServiceIdentifier(si);
+            c.setPollable(POLLABLES.contains(si));
             repo.save(c);
         }
     }
 
-    public void setPollable(String conversationId, boolean pollable) {
-        Optional<Conversation> find = repo.findByConversationId(conversationId).stream().findFirst();
-        if (find.isPresent()) {
-            Conversation c = find.get();
-            c.setPollable(pollable);
-            repo.save(c);
-        }
-    }
 }

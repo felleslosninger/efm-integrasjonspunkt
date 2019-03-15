@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import io.swagger.annotations.*;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingException;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
@@ -248,7 +249,7 @@ public class MessageOutController {
     public ResponseEntity uploadFiles(
             @ApiParam(value = "Conversation id")
             @PathVariable("conversationId") String conversationId,
-            MultipartHttpServletRequest request) {
+            MultipartHttpServletRequest request) throws ArkivmeldingException {
 
         Optional<ConversationResource> find = outRepo.findByConversationId(conversationId);
         if (!find.isPresent()) {
@@ -314,11 +315,10 @@ public class MessageOutController {
         DpvConversationResource dpv = DpvConversationResource.of((DpiConversationResource) cr);
         // Update conversation to make it pollable for receipts
         conversationService.setServiceIdentifier(cr.getConversationId(), ServiceIdentifier.DPV);
-        conversationService.setPollable(cr.getConversationId(), true);
         return dpv;
     }
 
-    private ResponseEntity handleArkivmelding(MultipartHttpServletRequest request, ConversationResource cr) {
+    private ResponseEntity handleArkivmelding(MultipartHttpServletRequest request, ConversationResource cr) throws ArkivmeldingException {
         MultipartFile file = request.getFileMap().values().stream()
                 .filter(f -> ARKIVMELDING_FILE.equals(f.getOriginalFilename()))
                 .findFirst().get();
