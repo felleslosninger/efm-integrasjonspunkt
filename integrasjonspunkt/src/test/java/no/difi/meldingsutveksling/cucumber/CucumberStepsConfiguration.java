@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.shipping.UploadRequest;
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
 import org.springframework.boot.test.context.SpringBootContextLoader;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.test.web.client.MockServerRestTemplateCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,12 +42,18 @@ public class CucumberStepsConfiguration {
 
     @Configuration
     @Profile("cucumber")
+    @SpyBean(IntegrasjonspunktProperties.class)
     public static class SpringConfiguration {
 
         @Bean
         @Primary
         public TaskScheduler poolScheduler() {
             return new NoopTaskScheduler();
+        }
+
+        @Bean
+        public AsicParser asicParser() {
+            return new AsicParser();
         }
 
         @Bean
@@ -79,11 +86,6 @@ public class CucumberStepsConfiguration {
 
         @Bean
         public Holder<Message> messageHolder() {
-            return new Holder<>();
-        }
-
-        @Bean
-        public Holder<AsicInfo> asicInfoHolder() {
             return new Holder<>();
         }
 

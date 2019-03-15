@@ -6,17 +6,19 @@ import cucumber.api.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.asic.AsicReader;
-import no.difi.asic.AsicReaderFactory;
 import no.difi.meldingsutveksling.AltinnWsClient;
+import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
+import no.difi.meldingsutveksling.domain.ByteArrayFile;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import org.apache.commons.io.IOUtils;
 
 import java.io.ByteArrayInputStream;
 import java.security.PrivateKey;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -33,14 +35,16 @@ public class TransportSteps {
     private final CmsUtil cmsUtil;
     private final Holder<UploadRequest> uploadRequestHolder;
     private final Holder<StandardBusinessDocument> standardBusinessDocumentHolder;
-    private final Holder<AsicInfo> asicInfoHolder;
+    private final Holder<Message> messageHolder;
     private final CucumberKeyStore cucumberKeyStore;
+    private final AsicParser asicParser;
+    private final IntegrasjonspunktNokkel keyInfo;
 
     @Before
     public void before() {
         uploadRequestHolder.reset();
         standardBusinessDocumentHolder.reset();
-        asicInfoHolder.reset();
+        messageHolder.reset();
 
         willAnswer(invocation -> {
             uploadRequestHolder.set(invocation.getArgument(0));
@@ -63,11 +67,12 @@ public class TransportSteps {
     @Then("^the sent ASIC contains the following files:$")
     @SneakyThrows
     public void theSentASICContains(DataTable expectedTable) {
-        AsicInfo asicInfo = asicInfoHolder.getOrCalculate(this::getAsicInfo);
+        Message message = messageHolder.getOrCalculate(this::getMessage);
 
         List<List<String>> actualList = new ArrayList<>();
         actualList.add(Collections.singletonList("filename"));
-        actualList.addAll(asicInfo.getFilenames().stream()
+        actualList.addAll(message.getAttachments().stream()
+                .map(ByteArrayFile::getFileName)
                 .map(Collections::singletonList)
                 .collect(Collectors.toList())
         );
@@ -78,12 +83,13 @@ public class TransportSteps {
 
     @Then("^the content of the ASIC file named \"([^\"]*)\" is:$")
     public void theContentOfTheASICFileNamedIs(String filename, String expectedContent) {
-        AsicInfo asicInfo = asicInfoHolder.getOrCalculate(this::getAsicInfo);
-        assertThat(asicInfo.getContent(filename)).isEqualToIgnoringWhitespace(expectedContent);
+        Message message = messageHolder.getOrCalculate(this::getMessage);
+        assertThat(new String(message.getAttachement(filename).getBytes()))
+                .isEqualToIgnoringWhitespace(expectedContent);
     }
 
     @SneakyThrows
-    private AsicInfo getAsicInfo() {
+    private Message getMessage() {
         UploadRequest uploadRequest = uploadRequestHolder.get();
         String receiverOrgNumber = uploadRequest.getPayload().getReceiverOrgNumber();
         PrivateKey privateKey = cucumberKeyStore.getPrivateKey(receiverOrgNumber);
@@ -91,21 +97,8 @@ public class TransportSteps {
         byte[] bytes = IOUtils.toByteArray(uploadRequest.getAsicInputStream());
         byte[] asic = cmsUtil.decryptCMS(bytes, privateKey);
 
-        Map<String, String> fileMap = new HashMap<>();
-
-        try (AsicReader asicReader = AsicReaderFactory.newFactory().open(new ByteArrayInputStream(asic))) {
-            for (; ; ) {
-                String filename = asicReader.getNextFile();
-
-                if (filename == null) {
-                    break;
-                }
-
-                String content = new String(IOUtils.toByteArray(asicReader.inputStream()));
-                fileMap.put(filename, content);
-            }
-        }
-
-        return new AsicInfo(fileMap);
+        return new Message(keyInfo)
+                .setSbd(uploadRequest.getPayload())
+                .attachments(asicParser.parse(new ByteArrayInputStream(asic)));
     }
 }

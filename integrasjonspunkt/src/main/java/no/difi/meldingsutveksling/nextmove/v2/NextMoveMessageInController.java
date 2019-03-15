@@ -85,7 +85,7 @@ public class NextMoveMessageInController {
         return message.getSbd();
     }
 
-    @GetMapping(value = "pop/{conversationId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @GetMapping(value = "pop/{conversationId}")
     @ApiOperation(value = "Pop incoming queue", notes = "Gets the ASiC for the first non locked message in the queue, " +
             "unless conversationId is specified, then removes it.")
     @ApiResponses({
@@ -93,14 +93,14 @@ public class NextMoveMessageInController {
             @ApiResponse(code = 204, message = "No content", response = String.class)
     })
     @Transactional
-    public ResponseEntity popMessage(
+    public ResponseEntity<InputStreamResource> popMessage(
             @ApiParam(value = "ConversationId", required = true)
             @PathVariable("conversationId") String conversationId) {
 
         NextMoveInMessage message = messageRepo.findByConversationId(conversationId)
                 .orElseThrow(() -> new ConversationNotFoundException(conversationId));
 
-        if (message.getLockTimeout() != null) {
+        if (message.getLockTimeout() == null) {
             throw new ConversationNotLockedException(conversationId);
         }
 
@@ -108,7 +108,7 @@ public class NextMoveMessageInController {
             return ResponseEntity.ok()
                     .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME + ASIC_FILE)
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .contentLength(fileEntry.getSize())
+//                    .contentLength(fileEntry.getSize())
                     .body(new InputStreamResource(cmsUtil.decryptCMSStreamed(fileEntry.getInputStream(), keyInfo.loadPrivateKey())));
         } catch (PersistenceException | IOException e) {
             Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing message from queue",

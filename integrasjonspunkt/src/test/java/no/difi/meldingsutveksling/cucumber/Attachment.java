@@ -1,12 +1,12 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import lombok.Value;
+import lombok.Data;
 import no.difi.meldingsutveksling.domain.ByteArrayFile;
 
-@Value
+@Data
 class Attachment implements ByteArrayFile {
 
-    private final String fileName;
-    private final String mimeType;
-    private final byte[] bytes;
+    private String fileName;
+    private String mimeType;
+    private byte[] bytes;
 }
