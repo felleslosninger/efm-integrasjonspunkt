@@ -17,6 +17,7 @@ public class MimeTypeExtensionMapper {
         mimeTypeMap.put("application/pdf", "pdf");
         mimeTypeMap.put("text/html", "html");
         mimeTypeMap.put("text/plain", "txt");
+        mimeTypeMap.put("text/xml", "xml");
         mimeTypeMap.put("application/msword", "doc");
         mimeTypeMap.put("application/vnd.openxmlformats-officedocument.wordprocessingml.document", "docx");
         mimeTypeMap.put("application/vnd.ms-excel", "xls");

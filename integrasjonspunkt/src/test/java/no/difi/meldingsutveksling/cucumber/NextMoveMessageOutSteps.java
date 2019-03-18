@@ -54,24 +54,25 @@ public class NextMoveMessageOutSteps {
         uriVariables.put("title", title);
         uriVariables.put("primaryDocument", Boolean.toString(primaryDocument));
 
-        ResponseEntity<Void> response = testRestTemplate.exchange(
+        ResponseEntity<String> response = testRestTemplate.exchange(
                 "/api/message/out/{conversationId}/upload?filename={filename}&mimetype={mimetype}&title={title}",
                 HttpMethod.POST,
                 new HttpEntity<>(body, headers),
-                Void.class,
+                String.class,
                 uriVariables);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getStatusCode())
+                .isEqualTo(HttpStatus.OK);
     }
 
     @Given("^I send the message$")
     public void iSendTheMessage() {
-        ResponseEntity<Void> response = testRestTemplate.exchange(
+        ResponseEntity<String> response = testRestTemplate.exchange(
                 "/api/message/out/{conversationId}",
                 HttpMethod.POST, new HttpEntity(null),
-                Void.class,
+                String.class,
                 standardBusinessDocumentHolder.get().getConversationId());
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getStatusCode())
+                .isEqualTo(HttpStatus.OK);
     }
 }

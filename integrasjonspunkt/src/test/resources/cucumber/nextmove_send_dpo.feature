@@ -18,7 +18,7 @@ Feature: Sending a Next Move DPO message
                             }
                         ],
                         "identifier": "urn:no:difi:meldingsutveksling:2.0",
-                        "instanceIdentifier": "37efbd4c-413d-4e2c-bbc5-257ef4a65a45",
+                        "instanceIdentifier": "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
                         "type": "ConversationId"
                     }
                 ]
@@ -54,22 +54,98 @@ Feature: Sending a Next Move DPO message
         }
     }
     """
-    And I upload a primary document named "primary.html" with mimetype "text/html" with the following body:
+    And I upload a primary document named "arkivmelding.xml" with mimetype "text/xml" with the following body:
     """
-    <h1>Primary document</h1>
-    <p>This is the content of the primary document.</p>
+    <?xml version="1.0" encoding="utf-8"?>
+    <arkivmelding xmlns="http://www.arkivverket.no/standarder/noark5/arkivmelding" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.arkivverket.no/standarder/noark5/arkivmelding arkivmelding.xsd">
+        <system>LandLord</system>
+        <meldingId>3380ed76-5d4c-43e7-aa70-8ed8d97e4835</meldingId>
+        <tidspunkt>2017-05-23T12:46:00</tidspunkt>
+        <antallFiler>1</antallFiler>
+
+        <mappe xsi:type="saksmappe">
+            <systemID>43fbe161-7aac-4c9f-a888-d8167aab4144</systemID>
+            <tittel>Nye lysrør Hauketo Skole</tittel>
+            <opprettetDato>2017-06-01T10:10:12.000+01:00</opprettetDato>
+            <opprettetAv/>
+            <klassifikasjon>
+                <referanseKlassifikasjonssystem>Funksjoner</referanseKlassifikasjonssystem>
+                <klasseID>vedlikehold av skole</klasseID>
+                <tittel>vedlikehold av skole</tittel>
+                <opprettetDato>2017-05-23T21:56:12.000+01:00</opprettetDato>
+                <opprettetAv>Knut Hansen</opprettetAv>
+            </klassifikasjon>
+            <klassifikasjon>
+                <referanseKlassifikasjonssystem>Objekter</referanseKlassifikasjonssystem>
+                <klasseID>20500</klasseID>
+                <tittel>Hauketo Skole</tittel>
+                <opprettetDato>2017-05-23T21:56:12.000+01:00</opprettetDato>
+                <opprettetAv>Knut Hansen</opprettetAv>
+            </klassifikasjon>
+            <basisregistrering xsi:type="journalpost">
+                <systemID>430a6710-a3d4-4863-8bd0-5eb1021bee45</systemID>
+                <opprettetDato>2012-02-17T21:56:12.000+01:00</opprettetDato>
+                <opprettetAv>LandLord</opprettetAv>
+                <arkivertDato>2012-02-17T21:56:12.000+01:00</arkivertDato>
+                <arkivertAv>LandLord</arkivertAv>
+                <referanseForelderMappe>43fbe161-7aac-4c9f-a888-d8167aab4144</referanseForelderMappe>
+                <dokumentbeskrivelse>
+                    <systemID>3e518e5b-a361-42c7-8668-bcbb9eecf18d</systemID>
+                    <dokumenttype>Bestilling</dokumenttype>
+                    <dokumentstatus>Dokumentet er ferdigstilt</dokumentstatus>
+                    <tittel>Bestilling - nye lysrør</tittel>
+                    <opprettetDato>2012-02-17T21:56:12.000+01:00</opprettetDato>
+                    <opprettetAv>Landlord</opprettetAv>
+                    <tilknyttetRegistreringSom>Hoveddokument</tilknyttetRegistreringSom>
+                    <dokumentnummer>1</dokumentnummer>
+                    <tilknyttetDato>2012-02-17T21:56:12.000+01:00</tilknyttetDato>
+                    <tilknyttetAv>Landlord</tilknyttetAv>
+                    <dokumentobjekt>
+                        <versjonsnummer>1</versjonsnummer>
+                        <variantformat>Produksjonsformat</variantformat>
+                        <opprettetDato>2012-02-17T21:56:12.000+01:00</opprettetDato>
+                        <opprettetAv>Landlord</opprettetAv>
+                        <referanseDokumentfil>test.txt</referanseDokumentfil>
+                    </dokumentobjekt>
+                </dokumentbeskrivelse>
+                <tittel>Nye lysrør</tittel>
+                <offentligTittel>Nye lysrør</offentligTittel>
+
+                <virksomhetsspesifikkeMetadata>
+                    <forvaltningsnummer>20050</forvaltningsnummer>
+                    <objektnavn>Hauketo Skole</objektnavn>
+                    <eiendom>200501</eiendom>
+                    <bygning>2005001</bygning>
+                    <bestillingtype>Materiell, elektro</bestillingtype>
+                    <rammeavtale>K-123123-elektriker</rammeavtale>
+                </virksomhetsspesifikkeMetadata>
+
+                <journalposttype>Utgående dokument</journalposttype>
+                <journalstatus>Journalført</journalstatus>
+                <journaldato>2017-05-23</journaldato>
+                <korrespondansepart>
+                    <korrespondanseparttype>Mottaker</korrespondanseparttype>
+                    <korrespondansepartNavn>elektrikeren AS, Veien 100, Oslo</korrespondansepartNavn>
+                </korrespondansepart>
+            </basisregistrering>
+            <saksdato>2017-06-01</saksdato>
+            <administrativEnhet>Blah</administrativEnhet>
+            <saksansvarlig>KNUTKÅRE</saksansvarlig>
+            <saksstatus>Avsluttet</saksstatus>
+        </mappe>
+    </arkivmelding>
     """
-    And I upload a file named "before_the_law.txt" with mimetype "text/plain" and title "Before the law" with the following body:
+    And I upload a file named "test.txt" with mimetype "text/plain" and title "Test" with the following body:
     """
-    Before the law sits a gatekeeper.
+    Testing 1 2 3
     """
     And I send the message
     Then a message with the same SBD is sent to Altinn
     And the sent ASIC contains the following files:
-      | filename           |
-      | manifest.xml       |
-      | primary.html       |
-      | before_the_law.txt |
+      | filename         |
+      | manifest.xml     |
+      | arkivmelding.xml |
+      | test.txt         |
     And the content of the ASIC file named "manifest.xml" is:
     """
     <?xml version="1.0" encoding="UTF-8"?>
@@ -80,17 +156,93 @@ Feature: Sending a Next Move DPO message
        <avsender>
           <organisasjon authority="iso6523-actorid-upis">9908:910077473</organisasjon>
        </avsender>
-       <hoveddokument href="primary.html" mime="text/html">
+       <hoveddokument href="arkivmelding.xml" mime="text/xml">
           <tittel lang="no">Hoveddokument</tittel>
        </hoveddokument>
     </manifest>
     """
-    And the content of the ASIC file named "primary.html" is:
+    And the content of the ASIC file named "arkivmelding.xml" is:
     """
-    <h1>Primary document</h1>
-    <p>This is the content of the primary document.</p>
+    <?xml version="1.0" encoding="utf-8"?>
+    <arkivmelding xmlns="http://www.arkivverket.no/standarder/noark5/arkivmelding" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.arkivverket.no/standarder/noark5/arkivmelding arkivmelding.xsd">
+        <system>LandLord</system>
+        <meldingId>3380ed76-5d4c-43e7-aa70-8ed8d97e4835</meldingId>
+        <tidspunkt>2017-05-23T12:46:00</tidspunkt>
+        <antallFiler>1</antallFiler>
+
+        <mappe xsi:type="saksmappe">
+            <systemID>43fbe161-7aac-4c9f-a888-d8167aab4144</systemID>
+            <tittel>Nye lysrør Hauketo Skole</tittel>
+            <opprettetDato>2017-06-01T10:10:12.000+01:00</opprettetDato>
+            <opprettetAv/>
+            <klassifikasjon>
+                <referanseKlassifikasjonssystem>Funksjoner</referanseKlassifikasjonssystem>
+                <klasseID>vedlikehold av skole</klasseID>
+                <tittel>vedlikehold av skole</tittel>
+                <opprettetDato>2017-05-23T21:56:12.000+01:00</opprettetDato>
+                <opprettetAv>Knut Hansen</opprettetAv>
+            </klassifikasjon>
+            <klassifikasjon>
+                <referanseKlassifikasjonssystem>Objekter</referanseKlassifikasjonssystem>
+                <klasseID>20500</klasseID>
+                <tittel>Hauketo Skole</tittel>
+                <opprettetDato>2017-05-23T21:56:12.000+01:00</opprettetDato>
+                <opprettetAv>Knut Hansen</opprettetAv>
+            </klassifikasjon>
+            <basisregistrering xsi:type="journalpost">
+                <systemID>430a6710-a3d4-4863-8bd0-5eb1021bee45</systemID>
+                <opprettetDato>2012-02-17T21:56:12.000+01:00</opprettetDato>
+                <opprettetAv>LandLord</opprettetAv>
+                <arkivertDato>2012-02-17T21:56:12.000+01:00</arkivertDato>
+                <arkivertAv>LandLord</arkivertAv>
+                <referanseForelderMappe>43fbe161-7aac-4c9f-a888-d8167aab4144</referanseForelderMappe>
+                <dokumentbeskrivelse>
+                    <systemID>3e518e5b-a361-42c7-8668-bcbb9eecf18d</systemID>
+                    <dokumenttype>Bestilling</dokumenttype>
+                    <dokumentstatus>Dokumentet er ferdigstilt</dokumentstatus>
+                    <tittel>Bestilling - nye lysrør</tittel>
+                    <opprettetDato>2012-02-17T21:56:12.000+01:00</opprettetDato>
+                    <opprettetAv>Landlord</opprettetAv>
+                    <tilknyttetRegistreringSom>Hoveddokument</tilknyttetRegistreringSom>
+                    <dokumentnummer>1</dokumentnummer>
+                    <tilknyttetDato>2012-02-17T21:56:12.000+01:00</tilknyttetDato>
+                    <tilknyttetAv>Landlord</tilknyttetAv>
+                    <dokumentobjekt>
+                        <versjonsnummer>1</versjonsnummer>
+                        <variantformat>Produksjonsformat</variantformat>
+                        <opprettetDato>2012-02-17T21:56:12.000+01:00</opprettetDato>
+                        <opprettetAv>Landlord</opprettetAv>
+                        <referanseDokumentfil>test.txt</referanseDokumentfil>
+                    </dokumentobjekt>
+                </dokumentbeskrivelse>
+                <tittel>Nye lysrør</tittel>
+                <offentligTittel>Nye lysrør</offentligTittel>
+
+                <virksomhetsspesifikkeMetadata>
+                    <forvaltningsnummer>20050</forvaltningsnummer>
+                    <objektnavn>Hauketo Skole</objektnavn>
+                    <eiendom>200501</eiendom>
+                    <bygning>2005001</bygning>
+                    <bestillingtype>Materiell, elektro</bestillingtype>
+                    <rammeavtale>K-123123-elektriker</rammeavtale>
+                </virksomhetsspesifikkeMetadata>
+
+                <journalposttype>Utgående dokument</journalposttype>
+                <journalstatus>Journalført</journalstatus>
+                <journaldato>2017-05-23</journaldato>
+                <korrespondansepart>
+                    <korrespondanseparttype>Mottaker</korrespondanseparttype>
+                    <korrespondansepartNavn>elektrikeren AS, Veien 100, Oslo</korrespondansepartNavn>
+                </korrespondansepart>
+            </basisregistrering>
+            <saksdato>2017-06-01</saksdato>
+            <administrativEnhet>Blah</administrativEnhet>
+            <saksansvarlig>KNUTKÅRE</saksansvarlig>
+            <saksstatus>Avsluttet</saksstatus>
+        </mappe>
+    </arkivmelding>
     """
-    And the content of the ASIC file named "before_the_law.txt" is:
+    And the content of the ASIC file named "test.txt" is:
     """
-    Before the law sits a gatekeeper.
+    Testing 1 2 3
     """
