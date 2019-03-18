@@ -74,13 +74,13 @@ public class IntegrasjonspunktBeans {
         }
     }
 
-    @ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
+    @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
     @Bean
     public FiksMessageStrategyFactory fiksMessageStrategyFactory(SvarUtService svarUtService, @Qualifier("localNoark") NoarkClient localNoark) {
         return FiksMessageStrategyFactory.newInstance(svarUtService, localNoark);
     }
 
-    @ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
+    @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
     @Bean
     public FiksStatusStrategy fiksConversationStrategy(SvarUtService svarUtService, ConversationService conversationService) {
         return new FiksStatusStrategy(svarUtService, conversationService);

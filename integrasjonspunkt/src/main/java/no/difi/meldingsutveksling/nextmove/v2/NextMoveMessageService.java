@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
 import javax.xml.bind.JAXBException;
@@ -26,6 +27,10 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 public class NextMoveMessageService {
 
     private MessagePersister messagePersister;
+
+    public NextMoveMessageService(ObjectProvider<MessagePersister> messagePersister) {
+        this.messagePersister = messagePersister.getIfUnique();
+    }
 
     StandardBusinessDocument setDefaults(StandardBusinessDocument sbd) {
         sbd.getConversationScope().ifPresent(s -> {

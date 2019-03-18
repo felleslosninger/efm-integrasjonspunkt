@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 
-@ConditionalOnProperty(name="difi.move.feature.enableDPF", havingValue = "true")
+@ConditionalOnProperty(name="difi.move.feature.enableDPO", havingValue = "true")
 @Configuration
 @EnableConfigurationProperties({IntegrasjonspunktProperties.class})
 public class SvarUtConfiguration {
