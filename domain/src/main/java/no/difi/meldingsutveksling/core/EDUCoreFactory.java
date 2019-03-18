@@ -7,7 +7,7 @@ import no.difi.meldingsutveksling.domain.arkivmelding.AvskrivningsmaateMapper;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalposttypeMapper;
 import no.difi.meldingsutveksling.domain.arkivmelding.TilknyttetRegistreringSomMapper;
 import no.difi.meldingsutveksling.domain.arkivmelding.VariantformatMapper;
-import no.difi.meldingsutveksling.nextmove.ConversationResource;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.noarkexchange.PayloadException;
 import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
@@ -110,29 +110,33 @@ public class EDUCoreFactory {
         return putMessageRequestType;
     }
 
-    public EDUCore create(ConversationResource cr, Arkivmelding am, byte[] asic) {
-        EDUCore eduCore = createCommon(cr.getSenderId(), cr.getReceiverId(), null, null);
-        eduCore.setId(cr.getConversationId());
+    public EDUCore create(StandardBusinessDocument sbd, Arkivmelding am, byte[] asic) {
+        // TODO fix refs from SBD
+        EDUCore eduCore = createCommon(sbd.getSenderOrgNumber(), sbd.getReceiverOrgNumber(), null, null);
+        eduCore.setId(sbd.getConversationId());
         eduCore.setMessageType(EDUCore.MessageType.EDU);
-        eduCore.setMessageReference(cr.getConversationId());
+        eduCore.setMessageReference(sbd.getConversationId());
 
-        if (am.getMappe().isEmpty() || !(am.getMappe().get(0) instanceof Saksmappe)) {
-            throw new MeldingsUtvekslingRuntimeException(String.format("Mappe in Arkivmelding %s not instance of Saksmappe", cr.getConversationId()));
-        }
+        Saksmappe sm = am.getMappe().stream()
+                .filter(Saksmappe.class::isInstance)
+                .map(Saksmappe.class::cast)
+                .findFirst()
+                .orElseThrow(() -> new MeldingsUtvekslingRuntimeException("No \"Saksmappe\" found in Arkivmelding"));
+        Journalpost jp = sm.getBasisregistrering().stream()
+                .filter(Journalpost.class::isInstance)
+                .map(Journalpost.class::cast)
+                .findFirst()
+                .orElseThrow(() -> new MeldingsUtvekslingRuntimeException("No \"Journalpost\" found in Arkivmelding"));
+
         ObjectFactory of = new ObjectFactory();
         NoarksakType noarksakType = of.createNoarksakType();
-        Saksmappe sm = (Saksmappe) am.getMappe().get(0);
         ofNullable(sm.getSaksaar()).map(BigInteger::toString).ifPresent(noarksakType::setSaSaar);
         ofNullable(sm.getSakssekvensnummer()).map(BigInteger::toString).ifPresent(noarksakType::setSaSeknr);
         noarksakType.setSaAnsvinit(sm.getSaksansvarlig());
         noarksakType.setSaAdmkort(sm.getAdministrativEnhet());
         noarksakType.setSaOfftittel(sm.getOffentligTittel());
 
-        if (!(sm.getBasisregistrering().get(0) instanceof Journalpost)) {
-            throw new MeldingsUtvekslingRuntimeException(String.format("Basisregistrering in Arkivmelding %s not instance of Journalpost", cr.getConversationId()));
-        }
         JournpostType journpostType = of.createJournpostType();
-        Journalpost jp = (Journalpost)  sm.getBasisregistrering().get(0);
         ofNullable(jp.getJournalaar()).map(BigInteger::toString).ifPresent(journpostType::setJpJaar);
         ofNullable(jp.getJournalsekvensnummer()).map(BigInteger::toString).ifPresent(journpostType::setJpSeknr);
         ofNullable(jp.getJournalpostnummer()).map(BigInteger::toString).ifPresent(journpostType::setJpJpostnr);
@@ -164,13 +168,12 @@ public class EDUCoreFactory {
         });
 
         jp.getDokumentbeskrivelseAndDokumentobjekt().stream()
-                .filter(d -> d instanceof Dokumentbeskrivelse)
-                .forEach(b -> {
-                    Dokumentbeskrivelse db = (Dokumentbeskrivelse) b;
-                    db.getDokumentobjekt().forEach(dobj ->
+                .filter(Dokumentbeskrivelse.class::isInstance)
+                .map(Dokumentbeskrivelse.class::cast)
+                .forEach(db -> db.getDokumentobjekt().forEach(dobj ->
                         journpostType.getDokument().add(createDokumentType(db, dobj, asic))
-                    );
-                });
+                    )
+                );
 
         MeldingType meldingType = of.createMeldingType();
         meldingType.setJournpost(journpostType);
