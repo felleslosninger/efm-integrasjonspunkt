@@ -11,6 +11,10 @@ public class Holder<T> {
         return t.get();
     }
 
+    T pop() {
+        return t.getAndSet(null);
+    }
+
     void set(T in) {
         t.set(in);
     }

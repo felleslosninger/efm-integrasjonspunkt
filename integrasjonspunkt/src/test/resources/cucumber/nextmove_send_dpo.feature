@@ -68,8 +68,8 @@ Feature: Sending a Next Move DPO message
     And the sent ASIC contains the following files:
       | filename           |
       | manifest.xml       |
-      | before_the_law.txt |
       | primary.html       |
+      | before_the_law.txt |
     And the content of the ASIC file named "manifest.xml" is:
     """
     <?xml version="1.0" encoding="UTF-8"?>

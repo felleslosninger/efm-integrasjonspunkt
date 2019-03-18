@@ -51,7 +51,7 @@ Feature: Receiving a Next Move DPO message
         }
     }
     """
-    And appends a file named "primary,html" with mimetype="text/html":
+    And appends a file named "primary.html" with mimetype="text/html":
     """
     <h1>Primary document</h1>
     <p>This is the content of the primary document.</p>
@@ -61,9 +61,21 @@ Feature: Receiving a Next Move DPO message
     Before the law sits a gatekeeper.
     """
     And Altinn sends the message
-#    Given a "GET" request to "http://localhost:9099/identifier/987464291?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/987464291.json"
-#    And a "GET" request to "http://localhost:9099/identifier/910075918?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
+    And the application checks for new Next Move DPO messages
 
   Scenario: As a user I want to receive a DPO message
 
-#    And the application checks for new Next Move DPO messages
+    Given I peek and lock a message
+    And I pop the locked message
+    And I remove the message
+    Then the received SBD matches the incoming SBD:
+    And I have an ASIC that contains a file named "primary.html" with mimetype="text/html":
+    """
+    <h1>Primary document</h1>
+    <p>This is the content of the primary document.</p>
+    """
+    And I have an ASIC that contains a file named "before_the_law.txt" with mimetype="text/plain":
+    """
+    Before the law sits a gatekeeper.
+    """
+
