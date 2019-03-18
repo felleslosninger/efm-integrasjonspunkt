@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
 import com.google.common.collect.Lists;
-import lombok.RequiredArgsConstructor;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.ServiceIdentifier;
@@ -25,7 +24,6 @@ import java.util.stream.Collectors;
 import static com.google.common.base.Strings.isNullOrEmpty;
 
 @Component
-@RequiredArgsConstructor
 public class NextMoveMessageService {
 
     private final MessagePersister messagePersister;

@@ -1,6 +1,8 @@
 package no.difi.meldingsutveksling.config;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
@@ -32,6 +34,9 @@ public class IntegrasjonspunktProperties {
 
     @Valid
     private AltinnFormidlingsTjenestenConfig dpo;
+
+    @Valid
+    private ElmaConfig elma;
 
     @Valid
     private PostVirksomheter dpv;
@@ -269,8 +274,17 @@ public class IntegrasjonspunktProperties {
 
     @Data
     public static class Sms {
-        @Size(max=160)
+        @Size(max = 160)
         private String varslingstekst;
     }
+
+    @Data
+    @NoArgsConstructor
+    public static class ElmaConfig {
+
+        @NonNull
+        private String url;
+    }
+
 
 }
