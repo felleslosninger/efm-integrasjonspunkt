@@ -24,6 +24,11 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import no.difi.move.common.oauth.JWTDecoder;
+import no.difi.vefa.peppol.common.lang.PeppolLoadingException;
+import no.difi.vefa.peppol.lookup.LookupClient;
+import no.difi.vefa.peppol.lookup.LookupClientBuilder;
+import no.difi.vefa.peppol.lookup.locator.StaticLocator;
+import no.difi.vefa.peppol.security.util.EmptyCertificateValidator;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -49,6 +54,14 @@ import java.util.Optional;
 @Configuration
 @EnableConfigurationProperties({IntegrasjonspunktProperties.class})
 public class IntegrasjonspunktBeans {
+
+    @Bean
+    public LookupClient getElmaLookupClient(IntegrasjonspunktProperties properties) throws PeppolLoadingException {
+        return LookupClientBuilder.forTest()
+                .locator(new StaticLocator(properties.getElma().getUrl()))
+                .certificateValidator(EmptyCertificateValidator.INSTANCE)
+                .build();
+    }
 
     @Bean
     public AltinnFormidlingsTjenestenConfig altinnConfig(IntegrasjonspunktProperties properties) {

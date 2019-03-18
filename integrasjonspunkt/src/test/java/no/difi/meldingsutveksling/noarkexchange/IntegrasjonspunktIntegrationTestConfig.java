@@ -27,6 +27,7 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecordWra
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
+import no.difi.vefa.peppol.lookup.LookupClient;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -44,7 +45,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * CorrespondenceAgencyConfiguration class used for integration tests.
- *
+ * <p>
  * Contains mock overrides for all integration tests running with the profile "test". The test profile also has property files
  * located in src/test/resources/properties.
  */
@@ -52,6 +53,11 @@ import static org.mockito.Mockito.*;
 @Configuration
 @EnableConfigurationProperties({IntegrasjonspunktProperties.class})
 public class IntegrasjonspunktIntegrationTestConfig {
+
+    @Bean
+    public LookupClient getElmaLookupClient() {
+        return mock(LookupClient.class);
+    }
 
     @Autowired
     private IntegrasjonspunktProperties properties;

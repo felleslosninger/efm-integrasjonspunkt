@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.cucumber;
 
 import cucumber.api.java.Before;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.AltinnWsClient;
 import no.difi.meldingsutveksling.IntegrasjonspunktApplication;
@@ -8,6 +9,8 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnWsClientFactory;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
+import no.difi.vefa.peppol.common.model.DocumentTypeIdentifier;
+import no.difi.vefa.peppol.lookup.LookupClient;
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
 import org.springframework.boot.test.context.SpringBootContextLoader;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,6 +25,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.client.UnorderedRequestExpectationManager;
+
+import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -44,6 +49,16 @@ public class CucumberStepsConfiguration {
     @Profile("cucumber")
     @SpyBean(IntegrasjonspunktProperties.class)
     public static class SpringConfiguration {
+
+        @Bean
+        @Primary
+        @SneakyThrows
+        public LookupClient lookupClient() {
+            LookupClient mock = mock(LookupClient.class);
+            given(mock.getDocumentIdentifiers(any()))
+                    .willReturn(Collections.singletonList(DocumentTypeIdentifier.of("urn:no:difi:meldingsutveksling:2.0")));
+            return mock;
+        }
 
         @Bean
         @Primary
@@ -97,5 +112,6 @@ public class CucumberStepsConfiguration {
 
     @Before
     public void before() {
+        // Do not remove!
     }
 }
