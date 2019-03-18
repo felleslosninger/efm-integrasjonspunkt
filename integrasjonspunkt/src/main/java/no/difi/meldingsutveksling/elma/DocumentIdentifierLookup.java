@@ -22,8 +22,8 @@ public class DocumentIdentifierLookup {
 
     public DocumentIdentifierLookup(LookupClient lookupClient) {
         this.cache = CacheBuilder.newBuilder()
-                .maximumSize(100)
-                .expireAfterWrite(1, TimeUnit.MINUTES)
+                .maximumSize(1000)
+                .expireAfterWrite(1, TimeUnit.HOURS)
                 .build(new CacheLoader<ParticipantIdentifier, List<DocumentTypeIdentifier>>() {
                     @Override
                     public List<DocumentTypeIdentifier> load(ParticipantIdentifier key) throws Exception {
