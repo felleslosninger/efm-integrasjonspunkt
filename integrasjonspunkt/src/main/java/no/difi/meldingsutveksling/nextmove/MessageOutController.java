@@ -313,8 +313,6 @@ public class MessageOutController {
 
     }
 
-
-
     private ConversationResource convertDpiToDpv(ConversationResource cr) {
         DpvConversationResource dpv = DpvConversationResource.of((DpiConversationResource) cr);
         // Update conversation to make it pollable for receipts

@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.nextmove.v2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.querydsl.core.types.Predicate;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
@@ -213,10 +214,11 @@ public class NextMoveMessageOutController {
         // Checks if ConversationId exists already, abort if found
         Optional<NextMoveOutMessage> find = messageRepo.findByConversationId(sbd.getConversationId());
         if (find.isPresent()) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.badRequest().build();
         }
-        NextMoveOutMessage message = NextMoveOutMessage.of(sbd);
+        NextMoveOutMessage message = NextMoveOutMessage.of(messageService.setDefaults(sbd));
         ArrayList<String> files = Lists.newArrayList(request.getFileNames());
+        message.setFiles(Sets.newHashSet());
 
         // Checks that file size isn't over 5MB. abort if above 5MB
         for (String f : files) {
@@ -234,7 +236,6 @@ public class NextMoveMessageOutController {
                     file.getOriginalFilename(), file.getContentType(), file.getSize(), message.getConversationId());
 
             try {
-                messagePersister.writeStream(message.getConversationId(), file.getOriginalFilename(), file.getInputStream(), file.getSize());
                 BusinessMessageFile businessMessageFile = new BusinessMessageFile()
                         .setIdentifier(UUID.randomUUID().toString())
                         .setFilename(file.getOriginalFilename())
@@ -242,12 +243,13 @@ public class NextMoveMessageOutController {
                         .setMimetype(getMimetype(Stream.of(file.getOriginalFilename()
                                 .split("."))
                                 .reduce((a, b) -> b)
-                                .orElse("pdf")))
-                        .setTitle(emptyToNull(request.getLocalName())); //dette rett ?
+                                .orElse("pdf")));
+                messagePersister.writeStream(message.getConversationId(), businessMessageFile.getIdentifier(), file.getInputStream(), file.getSize());
 
                 // checks if file reference is found, adds if not found
                 if (!message.getFiles().contains(file.getOriginalFilename())) {
                     message.getFiles().add(businessMessageFile);
+
                 }
             } catch (java.io.IOException e) {
                 log.error("Could not persist file {}", file.getOriginalFilename(), e);
@@ -255,7 +257,6 @@ public class NextMoveMessageOutController {
                         ErrorResponse.builder().error("persist_file_error").errorDescription("Could not persist file").build());
             }
         }
-
         internalQueue.enqueueNextMove2(message);
         return ResponseEntity.ok().build();
     }
