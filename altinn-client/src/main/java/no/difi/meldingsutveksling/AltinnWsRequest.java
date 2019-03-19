@@ -11,14 +11,17 @@ import static no.difi.meldingsutveksling.domain.Organisasjonsnummer.fromIso6523;
 
 public class AltinnWsRequest implements UploadRequest {
 
-    private StandardBusinessDocument sbd;
+    private final String senderReference;
+    private final StandardBusinessDocument sbd;
     private InputStream asicInputStream;
 
-    public AltinnWsRequest(StandardBusinessDocument sbd) {
+    public AltinnWsRequest(String senderReference, StandardBusinessDocument sbd) {
+        this.senderReference = senderReference;
         this.sbd = sbd;
     }
 
-    public AltinnWsRequest(StandardBusinessDocument sbd, InputStream is) {
+    public AltinnWsRequest(String senderReference, StandardBusinessDocument sbd, InputStream is) {
+        this.senderReference = senderReference;
         this.sbd = sbd;
         this.asicInputStream = is;
     }
@@ -37,7 +40,7 @@ public class AltinnWsRequest implements UploadRequest {
 
     @Override
     public String getSenderReference() {
-        return String.valueOf(Math.random() * 3000);
+        return senderReference;
     }
 
     @Override

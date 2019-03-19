@@ -2,14 +2,10 @@ package no.difi.meldingsutveksling;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnWsClientFactory;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import no.difi.meldingsutveksling.transport.altinn.AltinnTransport;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 
 import java.util.Optional;
 
@@ -24,13 +20,14 @@ public class ServiceRegistryTransportFactory implements TransportFactory {
 
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final AltinnWsClientFactory altinnWsClientFactory;
+    private final SenderReferenceGenerator senderReferenceGenerator;
 
     @Override
     public Transport createTransport(StandardBusinessDocument message) {
         return Optional.of(serviceRegistryLookup.getServiceRecord(message.getReceiverOrgNumber()).getServiceRecord())
                 .filter(isServiceIdentifier(DPO))
                 .map(altinnWsClientFactory::getAltinnWsClient)
-                .map(AltinnTransport::new)
+                .map(client -> new AltinnTransport(client, senderReferenceGenerator))
                 .orElseThrow(() -> new RuntimeException("Failed to create transport"));
     }
 }

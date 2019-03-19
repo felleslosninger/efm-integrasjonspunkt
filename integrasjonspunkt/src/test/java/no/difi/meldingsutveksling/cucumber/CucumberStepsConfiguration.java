@@ -3,17 +3,18 @@ package no.difi.meldingsutveksling.cucumber;
 import cucumber.api.java.Before;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.AltinnWsClient;
-import no.difi.meldingsutveksling.IntegrasjonspunktApplication;
+import no.difi.meldingsutveksling.*;
+import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasic;
+import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExternalBasicStreamed;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnWsClientFactory;
-import no.difi.meldingsutveksling.shipping.UploadRequest;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.vefa.peppol.common.model.DocumentTypeIdentifier;
 import no.difi.vefa.peppol.lookup.LookupClient;
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
 import org.springframework.boot.test.context.SpringBootContextLoader;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.test.web.client.MockServerRestTemplateCustomizer;
 import org.springframework.context.annotation.Bean;
@@ -52,6 +53,12 @@ public class CucumberStepsConfiguration {
 
         @Bean
         @Primary
+        public SenderReferenceGenerator senderReferenceGenerator() {
+            return () -> "19efbd4c-413d-4e2c-bbc5-257ef4a65b38";
+        }
+
+        @Bean
+        @Primary
         @SneakyThrows
         public LookupClient lookupClient() {
             LookupClient mock = mock(LookupClient.class);
@@ -72,16 +79,22 @@ public class CucumberStepsConfiguration {
         }
 
         @Bean
-        public AltinnWsClient altinnWsClient() {
-            return mock(AltinnWsClient.class);
-        }
-
-        @Bean
         @Primary
-        public AltinnWsClientFactory altinnWsClientFactory(AltinnWsClient altinnWsClient) {
-            AltinnWsClientFactory factory = mock(AltinnWsClientFactory.class);
-            given(factory.getAltinnWsClient(any())).willReturn(altinnWsClient);
-            return factory;
+        public AltinnWsClientFactory altinnWsClientFactory(
+                IBrokerServiceExternalBasic iBrokerServiceExternalBasic,
+                IBrokerServiceExternalBasicStreamed iBrokerServiceExternalBasicStreamed
+        ) {
+            return new AltinnWsClientFactory() {
+                @Override
+                public AltinnWsClient getAltinnWsClient(ServiceRecord serviceRecord) {
+                    AltinnWsConfiguration configuration = AltinnWsConfiguration.fromConfiguration(serviceRecord, getApplicationContext());
+                    return new AltinnWsClient(
+                            iBrokerServiceExternalBasic,
+                            iBrokerServiceExternalBasicStreamed,
+                            configuration,
+                            getApplicationContext());
+                }
+            };
         }
 
         @Bean
@@ -95,7 +108,7 @@ public class CucumberStepsConfiguration {
         }
 
         @Bean
-        public Holder<UploadRequest> uploadRequestHolder() {
+        public Holder<ZipContent> zipContentHolder() {
             return new Holder<>();
         }
 
@@ -110,8 +123,13 @@ public class CucumberStepsConfiguration {
         }
     }
 
+    @MockBean
+    public IBrokerServiceExternalBasic iBrokerServiceExternalBasic;
+
+    @MockBean
+    public IBrokerServiceExternalBasicStreamed iBrokerServiceExternalBasicStreamed;
+
     @Before
     public void before() {
-        // Do not remove!
     }
 }

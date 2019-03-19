@@ -140,7 +140,112 @@ Feature: Sending a Next Move DPO message
     Testing 1 2 3
     """
     And I send the message
-    Then a message with the same SBD is sent to Altinn
+    Then an upload to Altinn is initiated with:
+    """
+    <?xml version="1.0" encoding="UTF-8"?>
+    <BrokerServiceInitiation
+        xmlns="http://schemas.altinn.no/services/ServiceEngine/Broker/2015/06"
+        xmlns:altinn1="http://www.altinn.no/services/2009/10"
+        xmlns:altinn2="http://www.altinn.no/services/ServiceEngine/Broker/2015/06"
+        xmlns:altinn3="http://www.altinn.no/services/common/fault/2009/10"
+        xmlns:altinn4="http://schemas.altinn.no/services/serviceEntity/2015/06" xmlns:ms="http://schemas.microsoft.com/2003/10/Serialization/">
+        <Manifest>
+            <ExternalServiceCode>4192</ExternalServiceCode>
+            <ExternalServiceEditionCode>270815</ExternalServiceEditionCode>
+            <ArrayOfFile>
+                <File>
+                    <FileName>sbd.zip</FileName>
+                </File>
+            </ArrayOfFile>
+            <Reportee>910077473</Reportee>
+            <SendersReference>19efbd4c-413d-4e2c-bbc5-257ef4a65b38</SendersReference>
+        </Manifest>
+        <RecipientList>
+            <Recipient>
+                <PartyNumber>910075918</PartyNumber>
+            </Recipient>
+        </RecipientList>
+    </BrokerServiceInitiation>
+    """
+    And the sent Altinn ZIP contains the following files:
+      | filename       |
+      | manifest.xml   |
+      | recipients.xml |
+      | sbd.json       |
+      | asic.zip       |
+    And the content of the Altinn ZIP file named "manifest.xml" is:
+    """
+    <?xml version="1.0" encoding="UTF-8"?>
+    <ns0:BrokerServiceManifest xmlns:ns0="http://schema.altinn.no/services/ServiceEngine/Broker/2015/06">
+       <ns0:ExternalServiceCode>v3888</ns0:ExternalServiceCode>
+       <ns0:ExternalServiceEditionCode>70515</ns0:ExternalServiceEditionCode>
+       <ns0:SendersReference>19efbd4c-413d-4e2c-bbc5-257ef4a65b38</ns0:SendersReference>
+       <ns0:Reportee>910077473</ns0:Reportee>
+       <ns0:FileList>
+          <ns0:File>
+             <ns0:FileName>content.xml</ns0:FileName>
+          </ns0:File>
+       </ns0:FileList>
+    </ns0:BrokerServiceManifest>
+    """
+    And the content of the Altinn ZIP file named "recipients.xml" is:
+    """
+    <?xml version="1.0" encoding="UTF-8"?>
+    <ns0:BrokerServiceRecipientList xmlns:ns0="http://schema.altinn.no/services/ServiceEngine/Broker/2015/06">
+       <ns0:Recipient>
+          <ns0:PartyNumber>910075918</ns0:PartyNumber>
+       </ns0:Recipient>
+    </ns0:BrokerServiceRecipientList>
+    """
+    And the JSON content of the Altinn ZIP file named "sbd.json" is:
+    """
+    {
+        "standardBusinessDocumentHeader": {
+            "businessScope": {
+                "scope": [
+                    {
+                        "scopeInformation": [
+                            {
+                                "expectedResponseDateTime": "2019-05-10T00:31:52Z"
+                            }
+                        ],
+                        "identifier": "urn:no:difi:meldingsutveksling:2.0",
+                        "instanceIdentifier": "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
+                        "type": "ConversationId"
+                    }
+                ]
+            },
+            "documentIdentification": {
+                "creationDateAndTime": "2019-04-11T15:29:58.753+02:00",
+                "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
+                "standard": "urn:no:difi:meldingsutveksling:2.0",
+                "type": "DPO",
+                "typeVersion": "2.0"
+            },
+            "headerVersion": "1.0",
+            "receiver": [
+                {
+                    "identifier": {
+                        "authority": "iso6523-actorid-upis",
+                        "value": "9908:910075918"
+                    }
+                }
+            ],
+            "sender": [
+                {
+                    "identifier": {
+                        "authority": "iso6523-actorid-upis",
+                        "value": "9908:910077473"
+                    }
+                }
+            ]
+        },
+        "dpo": {
+          "securityLevel": "3",
+          "dpoField": "foo"
+        }
+    }
+    """
     And the sent ASIC contains the following files:
       | filename         |
       | manifest.xml     |

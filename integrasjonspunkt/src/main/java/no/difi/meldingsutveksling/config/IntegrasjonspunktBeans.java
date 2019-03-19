@@ -1,8 +1,6 @@
 package no.difi.meldingsutveksling.config;
 
-import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
-import no.difi.meldingsutveksling.KeystoreProvider;
-import no.difi.meldingsutveksling.ServiceRegistryTransportFactory;
+import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
@@ -10,7 +8,6 @@ import no.difi.meldingsutveksling.lang.KeystoreProviderException;
 import no.difi.meldingsutveksling.mail.MailClient;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
-import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnWsClientFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.FiksMessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
@@ -69,8 +66,8 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public TransportFactory serviceRegistryTransportFactory(ServiceRegistryLookup serviceRegistryLookup, AltinnWsClientFactory altinnWsClientFactory) {
-        return new ServiceRegistryTransportFactory(serviceRegistryLookup, altinnWsClientFactory);
+    public TransportFactory serviceRegistryTransportFactory(ServiceRegistryLookup serviceRegistryLookup, AltinnWsClientFactory altinnWsClientFactory, SenderReferenceGenerator senderReferenceGenerator) {
+        return new ServiceRegistryTransportFactory(serviceRegistryLookup, altinnWsClientFactory, senderReferenceGenerator);
     }
 
     @Bean

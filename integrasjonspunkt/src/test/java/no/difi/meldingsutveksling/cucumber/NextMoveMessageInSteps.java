@@ -8,29 +8,30 @@ import cucumber.api.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.AltinnWsClient;
-import no.difi.meldingsutveksling.FileReference;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceAvailableFile;
+import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceAvailableFileList;
+import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasic;
+import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExternalBasicStreamed;
 import no.difi.meldingsutveksling.domain.ByteArrayFile;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
-import org.mockito.stubbing.Answer;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 
+import javax.activation.DataHandler;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -38,10 +39,11 @@ public class NextMoveMessageInSteps {
 
     private final TestRestTemplate testRestTemplate;
     private final MessagePolling messagePolling;
-    private final AltinnWsClient altinnWsClientMock;
+    private final IBrokerServiceExternalBasic iBrokerServiceExternalBasic;
+    private final IBrokerServiceExternalBasicStreamed iBrokerServiceExternalBasicStreamed;
     private final ObjectMapper objectMapper;
+    private final AltinnZipFactory altinnZipFactory;
     private final AsicParser asicParser;
-    private final IntegrasjonspunktNokkel keyInfo;
 
     private JacksonTester<StandardBusinessDocument> json;
 
@@ -57,7 +59,7 @@ public class NextMoveMessageInSteps {
 
     @And("^Altinn prepares a message with the following SBD:$")
     public void altinnPreparesAMessageWithTheFollowingSBD(String body) throws IOException {
-        altinnMessage = new Message(keyInfo)
+        altinnMessage = new Message()
                 .setSbd(objectMapper.readValue(body, StandardBusinessDocument.class));
     }
 
@@ -70,15 +72,24 @@ public class NextMoveMessageInSteps {
     }
 
     @And("^Altinn sends the message$")
+    @SneakyThrows
     public void altinnSendsTheMessage() {
-        given(altinnWsClientMock.availableFiles(any())).willReturn(
-                Collections.singletonList(new FileReference("testMessage", 1)));
-        given(altinnWsClientMock.download(any(), any())).willAnswer((Answer<StandardBusinessDocument>) invocation -> {
-            StandardBusinessDocument sbd = altinnMessage.getSbd();
-            MessagePersister messagePersister = invocation.getArgument(1);
-            messagePersister.write(sbd.getConversationId(), ASIC_FILE, altinnMessage.getAsic());
-            return sbd;
-        });
+        BrokerServiceAvailableFileList filesBasic = new BrokerServiceAvailableFileList();
+        BrokerServiceAvailableFile file = new BrokerServiceAvailableFile();
+        file.setFileReference("testMessage");
+        file.setReceiptID(1);
+        filesBasic.getBrokerServiceAvailableFile().add(file);
+
+        given(iBrokerServiceExternalBasic.getAvailableFilesBasic(any(), any(), any()))
+                .willReturn(filesBasic);
+
+        DataHandler dh = mock(DataHandler.class);
+        given(dh.getInputStream()).willReturn(
+                altinnZipFactory.createAltinnZip(altinnMessage)
+        );
+
+        given(iBrokerServiceExternalBasicStreamed.downloadFileStreamedBasic(any(), any(), any(), any()))
+                .willReturn(dh);
     }
 
     @Given("^the application checks for new Next Move DPO messages$")
@@ -94,7 +105,7 @@ public class NextMoveMessageInSteps {
                 null,
                 StandardBusinessDocument.class);
 
-        receivedMessage = new Message(keyInfo)
+        receivedMessage = new Message()
                 .setSbd(response.getBody());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);

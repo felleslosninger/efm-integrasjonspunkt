@@ -7,7 +7,7 @@ import no.difi.meldingsutveksling.nextmove.ConversationResourceUnlocker;
 import no.difi.meldingsutveksling.nextmove.NextMoveQueue;
 import no.difi.meldingsutveksling.nextmove.NextMoveServiceBus;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
-import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnWsClientFactory;
+import no.difi.meldingsutveksling.AltinnWsClientFactory;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
