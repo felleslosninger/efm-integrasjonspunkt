@@ -53,6 +53,7 @@ import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
 import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
+//import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -275,27 +276,28 @@ public class MessageOutController {
         if (files.contains("hoveddokument")) {
             Collections.swap(files, files.indexOf("hoveddokument"), 0);
         }
+
         for (String f : files) {
             MultipartFile file = request.getFile(f);
             log.trace(markerFrom(cr), "Adding file \"{}\" ({}, {} bytes) to {}",
                     file.getOriginalFilename(), file.getContentType(), file.getSize(), cr.getConversationId());
 
-            try {
-                if (cr.getCustomProperties().containsKey("base64") && "true".equalsIgnoreCase(cr.getCustomProperties().get("base64"))) {
-                    messagePersister.write(cr.getConversationId(), file.getOriginalFilename(),
-                            Base64.getDecoder().decode(new String(file.getBytes()).getBytes(StandardCharsets.UTF_8)));
-                } else {
-                    messagePersister.writeStream(cr.getConversationId(), file.getOriginalFilename(), file.getInputStream(), file.getSize());
-                }
+                try {
+                    if (cr.getCustomProperties().containsKey("base64") && "true".equalsIgnoreCase(cr.getCustomProperties().get("base64"))) {
+                        messagePersister.write(cr.getConversationId(), file.getOriginalFilename(),
+                                Base64.getDecoder().decode(new String(file.getBytes()).getBytes(StandardCharsets.UTF_8)));
+                    } else {
+                        messagePersister.writeStream(cr.getConversationId(), file.getOriginalFilename(), file.getInputStream(), file.getSize());
+                    }
 
-                if (!cr.getFileRefs().values().contains(file.getOriginalFilename())) {
-                    cr.addFileRef(file.getOriginalFilename());
+                    if (!cr.getFileRefs().values().contains(file.getOriginalFilename())) {
+                        cr.addFileRef(file.getOriginalFilename());
+                    }
+                } catch (java.io.IOException e) {
+                    log.error("Could not persist file {}", file.getOriginalFilename(), e);
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                            ErrorResponse.builder().error("persist_file_error").errorDescription("Could not persist file").build());
                 }
-            } catch (java.io.IOException e) {
-                log.error("Could not persist file {}", file.getOriginalFilename(), e);
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                        ErrorResponse.builder().error("persist_file_error").errorDescription("Could not persist file").build());
-            }
         }
 
         List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiverId());
@@ -310,6 +312,8 @@ public class MessageOutController {
         return ResponseEntity.ok().build();
 
     }
+
+
 
     private ConversationResource convertDpiToDpv(ConversationResource cr) {
         DpvConversationResource dpv = DpvConversationResource.of((DpiConversationResource) cr);
