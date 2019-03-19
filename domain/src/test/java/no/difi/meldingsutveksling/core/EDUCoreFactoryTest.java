@@ -4,7 +4,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.nextmove.DpoConversationResource;
+import no.difi.meldingsutveksling.domain.sbdh.*;
+import no.difi.meldingsutveksling.domain.sbdh.Receiver;
+import no.difi.meldingsutveksling.domain.sbdh.Sender;
+import no.difi.meldingsutveksling.nextmove.DpoMessage;
 import no.difi.meldingsutveksling.noarkexchange.PayloadException;
 import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
@@ -28,6 +31,7 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.time.ZonedDateTime;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
@@ -224,7 +228,7 @@ public class EDUCoreFactoryTest {
 
     @Test
     public void testCreateEducoreFromArkivmelding() throws IOException, JAXBException {
-        String convId = "3380ed76-5d4c-43e7-aa70-8ed8d97e4835";
+        String convId = "37efbd4c-413d-4e2c-bbc5-257ef4a65a45";
         File arkivmeldingFile = new File("src/test/resources/arkivmelding_ok.xml");
         File testZipFile = new File("src/test/resources/test.zip");
         byte[] arkivmeldingBytes = FileUtils.readFileToByteArray(arkivmeldingFile);
@@ -234,10 +238,9 @@ public class EDUCoreFactoryTest {
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         Arkivmelding am = unmarshaller.unmarshal(new StreamSource(new ByteArrayInputStream(arkivmeldingBytes)), Arkivmelding.class).getValue();
 
-        DpoConversationResource cr = DpoConversationResource.of(convId, "123", "321");
-
+        StandardBusinessDocument sbd = getDocument();
         EDUCoreFactory eduCoreFactory = new EDUCoreFactory(serviceRegistryLookup);
-        EDUCore eduCore = eduCoreFactory.create(cr, am, zipBytes);
+        EDUCore eduCore = eduCoreFactory.create(sbd, am, zipBytes);
         MeldingType meldingType = EDUCoreConverter.payloadAsMeldingType(eduCore.getPayload());
 
         assertEquals(convId, eduCore.getMessageReference());
@@ -248,5 +251,44 @@ public class EDUCoreFactoryTest {
     private PutMessageRequestType createPutMessageCdataXml(String payload) throws JAXBException {
         Unmarshaller unmarshaller = putMessageJaxbContext.createUnmarshaller();
         return unmarshaller.unmarshal(new StringSource((payload)), PutMessageRequestType.class).getValue();
+    }
+
+    private StandardBusinessDocument getDocument() {
+        return new StandardBusinessDocument()
+                .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
+                        .setBusinessScope(new BusinessScope()
+                                .addScope(new Scope()
+                                        .addScopeInformation(new CorrelationInformation()
+                                                .setExpectedResponseDateTime(ZonedDateTime.parse("2003-05-10T00:31:52Z"))
+                                        )
+                                        .setIdentifier("urn:no:difi:meldingsutveksling:2.0")
+                                        .setInstanceIdentifier("37efbd4c-413d-4e2c-bbc5-257ef4a65a45")
+                                        .setType("ConversationId")
+                                )
+                        )
+                        .setDocumentIdentification(new DocumentIdentification()
+                                .setCreationDateAndTime(ZonedDateTime.parse("2016-04-11T15:29:58.753+02:00"))
+                                .setInstanceIdentifier("ff88849c-e281-4809-8555-7cd54952b916")
+                                .setStandard("urn:no:difi:meldingsutveksling:2.0")
+                                .setType("DPO")
+                                .setTypeVersion("2.0")
+                        )
+                        .setHeaderVersion("1.0")
+                        .addReceiver(new Receiver()
+                                .setIdentifier(new PartnerIdentification()
+                                        .setAuthority("iso6523-actorid-upis")
+                                        .setValue("9908:910075918")
+                                )
+                        )
+                        .addSender(new Sender()
+                                .setIdentifier(new PartnerIdentification()
+                                        .setAuthority("iso6523-actorid-upis")
+                                        .setValue("9908:910077473")
+                                )
+                        )
+                )
+                .setAny(new DpoMessage()
+                        .setDpoField("foo")
+                        .setSecurityLevel("3"));
     }
 }
