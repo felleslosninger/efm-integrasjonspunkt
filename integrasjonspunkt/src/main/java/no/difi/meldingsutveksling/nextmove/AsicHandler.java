@@ -25,6 +25,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_INNSYN;
@@ -59,23 +60,31 @@ public class AsicHandler {
 
         if (msg.getFiles() == null || msg.getFiles().isEmpty()) return null;
 
-        List<StreamedFile> attachements = new ArrayList<>();
-        msg.getFiles().forEach(f -> {
-            FileEntryStream fes = messagePersister.readStream(msg.getConversationId(), f.getIdentifier());
-            String mimetype;
-            if (Strings.isNullOrEmpty(f.getMimetype())) {
-                String ext = Stream.of(f.getFilename().split(".")).reduce((p, e) -> e).orElse("pdf");
-                mimetype = MimeTypeExtensionMapper.getMimetype(ext);
-            } else {
-                mimetype = f.getMimetype();
-            }
-            attachements.add(new NextMoveStreamedFile(f.getFilename(), fes.getInputStream(), mimetype));
-        });
+        List<NextMoveStreamedFile> attachements = msg.getFiles().stream()
+                .sorted((a, b) -> {
+                    if (a.getPrimaryDocument()) return -1;
+                    if (b.getPrimaryDocument()) return 1;
+                    return a.getFilename().compareTo(b.getFilename());
+                }).map(f -> {
+                    FileEntryStream fes = messagePersister.readStream(msg.getConversationId(), f.getIdentifier());
+                    return new NextMoveStreamedFile(f.getFilename(), fes.getInputStream(), getMimetype(f));
+                }).collect(Collectors.toList());
 
         return archiveAndEncryptAttachments(attachements, messageContext, msg.getServiceIdentifier());
     }
 
-    private InputStream archiveAndEncryptAttachments(List<StreamedFile> att, MessageContext ctx, ServiceIdentifier si) {
+    private String getMimetype(BusinessMessageFile f) {
+        String mimetype;
+        if (Strings.isNullOrEmpty(f.getMimetype())) {
+            String ext = Stream.of(f.getFilename().split(".")).reduce((p, e) -> e).orElse("pdf");
+            mimetype = MimeTypeExtensionMapper.getMimetype(ext);
+        } else {
+            mimetype = f.getMimetype();
+        }
+        return mimetype;
+    }
+
+    private InputStream archiveAndEncryptAttachments(List<? extends StreamedFile> att, MessageContext ctx, ServiceIdentifier si) {
         PipedOutputStream archiveOutputStream = new PipedOutputStream();
         CompletableFuture.runAsync(() -> {
             log.trace("Starting thread: create asic");
@@ -128,10 +137,10 @@ public class AsicHandler {
         Set<ServiceIdentifier> standardEncryptionUsers = EnumSet.of(DPE_INNSYN, DPE_RECEIPT);
 
         CmsUtil cmsUtil;
-        if(standardEncryptionUsers.contains(serviceIdentifier)){
+        if (standardEncryptionUsers.contains(serviceIdentifier)) {
 
             cmsUtil = new CmsUtil(null);
-        }else{
+        } else {
 
             cmsUtil = new CmsUtil();
         }

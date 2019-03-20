@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.ks.svarut;
 
+import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.CertificateParserException;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingException;
@@ -20,23 +21,13 @@ import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 public class SvarUtService {
-    private SvarUtWebServiceClient client;
-    private ServiceRegistryLookup serviceRegistryLookup;
-    private FiksMapper fiksMapper;
-    private IntegrasjonspunktProperties props;
-    CertificateParser certificateParser;
-
-    public SvarUtService(SvarUtWebServiceClient svarUtClient,
-                         ServiceRegistryLookup serviceRegistryLookup,
-                         FiksMapper fiksMapper,
-                         IntegrasjonspunktProperties props) {
-        this.client = svarUtClient;
-        this.serviceRegistryLookup = serviceRegistryLookup;
-        this.fiksMapper = fiksMapper;
-        this.props = props;
-        certificateParser = new CertificateParser();
-    }
+    private final SvarUtWebServiceClient client;
+    private final ServiceRegistryLookup serviceRegistryLookup;
+    private final FiksMapper fiksMapper;
+    private final IntegrasjonspunktProperties props;
+    private final CertificateParser certificateParser;
 
     public String send(EDUCore message) {
         Optional<ServiceRecord> serviceRecord = serviceRegistryLookup.getServiceRecord(message.getReceiver().getIdentifier(), message.getServiceIdentifier());

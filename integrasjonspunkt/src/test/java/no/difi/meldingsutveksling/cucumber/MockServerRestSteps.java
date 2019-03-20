@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.cucumber;
 
+import cucumber.api.java.After;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
@@ -39,6 +40,11 @@ public class MockServerRestSteps {
         mockServerRestTemplateCustomizer.getServers().values().forEach(MockRestServiceServer::reset);
         mockServerRestTemplateCustomizer.customize((RestTemplate) restClient.getRestTemplate());
         mockServerRestTemplateCustomizer.customize(serviceBusRestClient.getRestTemplate());
+    }
+
+    @After
+    public void after() {
+        mockServerRestTemplateCustomizer.getServers().forEach((restTemplate, server) -> server.reset());
     }
 
     private MockRestServiceServer getServer(String url) {

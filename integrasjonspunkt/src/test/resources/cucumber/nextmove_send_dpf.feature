@@ -1,10 +1,11 @@
-Feature: Sending a Next Move DPO message
+@New
+Feature: Sending a Next Move DPF message
 
   Background:
     Given a "GET" request to "http://localhost:9099/identifier/987464291?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/987464291.json"
-    And a "GET" request to "http://localhost:9099/identifier/910075918?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
+    And a "GET" request to "http://localhost:9099/identifier/910075918?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918_DPF.json"
 
-  Scenario: As a user I want to send a DPO message
+  Scenario: As a user I want to send a DPF message
     Given I POST the following message:
     """
     {

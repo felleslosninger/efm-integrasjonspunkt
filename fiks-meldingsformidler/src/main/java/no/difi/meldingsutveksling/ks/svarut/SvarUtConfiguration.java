@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.ks.svarut;
 
+import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.ks.mapping.FiksMapper;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -9,7 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 
-@ConditionalOnProperty(name="difi.move.feature.enableDPO", havingValue = "true")
+@ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
 @Configuration
 @EnableConfigurationProperties({IntegrasjonspunktProperties.class})
 public class SvarUtConfiguration {
@@ -18,8 +19,8 @@ public class SvarUtConfiguration {
     public SvarUtService svarUtService(FiksMapper fiksMapper,
                                        SvarUtWebServiceClient svarUtClient,
                                        ServiceRegistryLookup serviceRegistryLookup,
-                                       IntegrasjonspunktProperties props) {
-        return new SvarUtService(svarUtClient, serviceRegistryLookup, fiksMapper, props);
+                                       IntegrasjonspunktProperties props,
+                                       CertificateParser certificateParser) {
+        return new SvarUtService(svarUtClient, serviceRegistryLookup, fiksMapper, props, certificateParser);
     }
-
 }

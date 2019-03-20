@@ -108,7 +108,6 @@ public class NextMoveMessageInController {
             return ResponseEntity.ok()
                     .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME + ASIC_FILE)
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
-//                    .contentLength(fileEntry.getSize())
                     .body(new InputStreamResource(cmsUtil.decryptCMSStreamed(fileEntry.getInputStream(), keyInfo.loadPrivateKey())));
         } catch (PersistenceException | IOException e) {
             Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing message from queue",

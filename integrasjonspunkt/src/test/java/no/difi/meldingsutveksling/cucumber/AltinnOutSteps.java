@@ -16,6 +16,7 @@ import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.StreamedPayloadBasi
 import no.difi.meldingsutveksling.domain.ByteArrayFile;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContentAssert;
@@ -35,7 +36,7 @@ import static org.mockito.Mockito.*;
 
 @RequiredArgsConstructor
 @Slf4j
-public class TransportSteps {
+public class AltinnOutSteps {
 
     private static final String PREFIX_MAPPER = "com.sun.xml.bind.namespacePrefixMapper";
 
@@ -53,6 +54,7 @@ public class TransportSteps {
     @Before
     @SneakyThrows
     public void before() {
+        Mockito.reset(iBrokerServiceExternalBasic, iBrokerServiceExternalBasicStreamed);
         JacksonTester.initFields(this, objectMapper);
 
         standardBusinessDocumentHolder.reset();
@@ -128,29 +130,5 @@ public class TransportSteps {
         String jsonString = new String(zipContent.getFile(filename).getBytes());
         new JsonContentAssert(StandardBusinessDocument.class, jsonString)
                 .isEqualToJson(expectedContent);
-    }
-
-    @Then("^the sent ASIC contains the following files:$")
-    @SneakyThrows
-    public void theSentASICContains(DataTable expectedTable) {
-        Message message = messageHolder.get();
-
-        List<List<String>> actualList = new ArrayList<>();
-        actualList.add(Collections.singletonList("filename"));
-        actualList.addAll(message.getAttachments().stream()
-                .map(ByteArrayFile::getFileName)
-                .map(Collections::singletonList)
-                .collect(Collectors.toList())
-        );
-
-        DataTable actualTable = DataTable.create(actualList);
-        expectedTable.diff(actualTable);
-    }
-
-    @Then("^the content of the ASIC file named \"([^\"]*)\" is:$")
-    public void theContentOfTheASICFileNamedIs(String filename, String expectedContent) {
-        Message message = messageHolder.get();
-        assertThat(new String(message.getAttachement(filename).getBytes()))
-                .isEqualToIgnoringWhitespace(expectedContent);
     }
 }
