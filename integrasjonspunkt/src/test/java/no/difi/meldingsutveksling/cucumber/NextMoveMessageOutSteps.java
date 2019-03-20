@@ -1,10 +1,15 @@
 package no.difi.meldingsutveksling.cucumber;
 
+import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.nextmove.v2.ContentDisposition;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +21,53 @@ public class NextMoveMessageOutSteps {
 
     private final TestRestTemplate testRestTemplate;
     private final Holder<StandardBusinessDocument> standardBusinessDocumentHolder;
+
+    private MultiValueMap<String, HttpEntity<?>> multipart;
+
+    @Before
+    public void before() {
+        multipart = null;
+    }
+
+    @Given("^I prepare a multipart request$")
+    public void iPrepareAMultipartRequest() {
+        multipart = new LinkedMultiValueMap<>();
+    }
+
+    @Given("^I add a part named \"([^\"]+)\" with content type \"([^\"]+)\" and body:$")
+    @SneakyThrows
+    public void iAddAMultipart(String name, String contentType, String body) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.valueOf(contentType));
+        headers.setContentDispositionFormData(name, null);
+        multipart.add(name, new HttpEntity<>(body, headers));
+    }
+
+    @Given("^I add a part named \"([^\"]+)\" and filename \"([^\"]+)\" with content type \"([^\"]+)\" and body:$")
+    @SneakyThrows
+    public void iAddAMultipartFile(String name, String filename, String contentType, String body) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.valueOf(contentType));
+        headers.setContentDispositionFormData(name, filename);
+//        headers.setContentLength(body.length());
+        multipart.add(name, new HttpEntity<>(body, headers));
+    }
+
+    @Given("^I post the multipart request$")
+    public void iPostTheMultipartRequest() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        ResponseEntity<StandardBusinessDocument> response = testRestTemplate.exchange(
+                "/api/message/out",
+                HttpMethod.POST,
+                new HttpEntity<>(multipart, headers),
+                StandardBusinessDocument.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        standardBusinessDocumentHolder.set(response.getBody());
+    }
 
     @Given("^I POST the following message:$")
     public void iPostTheFollowingMessage(String body) {
@@ -35,27 +87,22 @@ public class NextMoveMessageOutSteps {
 
     @Given("^I upload a file named \"([^\"]+)\" with mimetype \"([^\"]+)\" and title \"([^\"]+)\" with the following body:$")
     public void iUploadAFileToTheMessage(String filename, String mimetype, String title, String body) {
-        uploadFile(filename, mimetype, title, body, false);
-    }
-
-    @Given("^I upload a primary document named \"([^\"]+)\" with mimetype \"([^\"]+)\" with the following body:$")
-    public void iUploadAPrimaryDocument(String filename, String mimetype, String body) {
-        uploadFile(filename, mimetype, null, body, true);
-    }
-
-    private void uploadFile(String filename, String mimetype, String title, String body, boolean primaryDocument) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentType(MediaType.valueOf(mimetype));
+        headers.set(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.builder()
+                .type("inline")
+                .name(title)
+                .filename(filename)
+                .build()
+                .toString()
+        );
 
         Map<String, String> uriVariables = new HashMap<>();
         uriVariables.put("conversationId", standardBusinessDocumentHolder.get().getConversationId());
-        uriVariables.put("filename", filename);
-        uriVariables.put("mimetype", mimetype);
         uriVariables.put("title", title);
-        uriVariables.put("primaryDocument", Boolean.toString(primaryDocument));
 
         ResponseEntity<String> response = testRestTemplate.exchange(
-                "/api/message/out/{conversationId}/upload?filename={filename}&mimetype={mimetype}&title={title}",
+                "/api/message/out/{conversationId}/upload?title={title}",
                 HttpMethod.POST,
                 new HttpEntity<>(body, headers),
                 String.class,

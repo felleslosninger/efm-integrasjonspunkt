@@ -33,7 +33,7 @@ public class CreateAsice {
         return createAsice(singletonList(forsendelse), signatureHelper, avsender, mottaker);
     }
 
-    public void createAsiceStreamed(List<StreamedFile> files, OutputStream archive, SignatureHelper signatureHelper, Avsender avsender,
+    public void createAsiceStreamed(List<? extends StreamedFile> files, OutputStream archive, SignatureHelper signatureHelper, Avsender avsender,
                                     Mottaker mottaker) throws IOException {
 
         Manifest manifest = manifestFactory.createManifest(avsender.getOrgNummer(), mottaker.getOrgNummer(),

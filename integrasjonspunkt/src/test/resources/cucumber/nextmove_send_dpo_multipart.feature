@@ -1,11 +1,13 @@
-Feature: Sending a Next Move DPO message
+Feature: Sending a Next Move DPO multipart/form message
 
   Background:
     Given a "GET" request to "http://localhost:9099/identifier/987464291?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/987464291.json"
     And a "GET" request to "http://localhost:9099/identifier/910075918?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
 
-  Scenario: As a user I want to send a DPO message
-    Given I POST the following message:
+  Scenario: As a user I want to send a DPO multipart/form message
+
+    Given I prepare a multipart request
+    And I add a part named "sbd" with content type "application/json" and body:
     """
     {
         "standardBusinessDocumentHeader": {
@@ -18,7 +20,7 @@ Feature: Sending a Next Move DPO message
                             }
                         ],
                         "identifier": "urn:no:difi:meldingsutveksling:2.0",
-                        "instanceIdentifier": "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
+                        "instanceIdentifier": "37efbd4c-413d-4e2c-bbc5-257ef4a65a57",
                         "type": "ConversationId"
                     }
                 ]
@@ -54,7 +56,7 @@ Feature: Sending a Next Move DPO message
         }
     }
     """
-    And I upload a file named "arkivmelding.xml" with mimetype "text/xml" and title "Arkivmelding" with the following body:
+    And I add a part named "Min flotte arkivmelding" and filename "arkivmelding.xml" with content type "text/xml" and body:
     """
     <?xml version="1.0" encoding="utf-8"?>
     <arkivmelding xmlns="http://www.arkivverket.no/standarder/noark5/arkivmelding" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.arkivverket.no/standarder/noark5/arkivmelding arkivmelding.xsd">
@@ -135,11 +137,11 @@ Feature: Sending a Next Move DPO message
         </mappe>
     </arkivmelding>
     """
-    And I upload a file named "test.txt" with mimetype "text/plain" and title "Test" with the following body:
+    And I add a part named "Test fil" and filename "test.txt" with content type "text/plain" and body:
     """
     Testing 1 2 3
     """
-    And I send the message
+    And I post the multipart request
     Then an upload to Altinn is initiated with:
     """
     <?xml version="1.0" encoding="UTF-8"?>
@@ -210,7 +212,7 @@ Feature: Sending a Next Move DPO message
                             }
                         ],
                         "identifier": "urn:no:difi:meldingsutveksling:2.0",
-                        "instanceIdentifier": "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
+                        "instanceIdentifier": "37efbd4c-413d-4e2c-bbc5-257ef4a65a57",
                         "type": "ConversationId"
                     }
                 ]

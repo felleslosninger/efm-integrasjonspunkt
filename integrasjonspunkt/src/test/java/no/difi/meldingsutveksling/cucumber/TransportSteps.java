@@ -16,6 +16,7 @@ import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.StreamedPayloadBasi
 import no.difi.meldingsutveksling.domain.ByteArrayFile;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContentAssert;
@@ -53,6 +54,7 @@ public class TransportSteps {
     @Before
     @SneakyThrows
     public void before() {
+        Mockito.reset(iBrokerServiceExternalBasic, iBrokerServiceExternalBasicStreamed);
         JacksonTester.initFields(this, objectMapper);
 
         standardBusinessDocumentHolder.reset();
