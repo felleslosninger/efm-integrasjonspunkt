@@ -8,9 +8,11 @@ import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternal
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExternalBasicStreamed;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.vefa.peppol.common.model.DocumentTypeIdentifier;
 import no.difi.vefa.peppol.lookup.LookupClient;
+import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
 import org.springframework.boot.test.context.SpringBootContextLoader;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -128,6 +130,9 @@ public class CucumberStepsConfiguration {
 
     @MockBean
     public IBrokerServiceExternalBasicStreamed iBrokerServiceExternalBasicStreamed;
+
+    @MockBean
+    public SvarUtWebServiceClient svarUtClient;
 
     @Before
     public void before() {

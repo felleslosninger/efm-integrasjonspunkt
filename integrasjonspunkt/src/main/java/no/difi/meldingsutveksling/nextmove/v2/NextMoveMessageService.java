@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
-import com.google.common.collect.Lists;
 import com.querydsl.core.types.Predicate;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
@@ -183,12 +182,11 @@ public class NextMoveMessageService {
             Set<String> messageFiles = message.getFiles().stream()
                     .map(BusinessMessageFile::getFilename)
                     .collect(Collectors.toSet());
-            List<String> missingFiles = Lists.newArrayList();
-            arkivmeldingFiles.forEach(f -> {
-                if (!messageFiles.contains(f)) {
-                    missingFiles.add(f);
-                }
-            });
+
+            List<String> missingFiles = arkivmeldingFiles.stream()
+                    .filter(p -> !messageFiles.contains(p))
+                    .collect(Collectors.toList());
+
             if (!missingFiles.isEmpty()) {
                 throw new MissingArkivmeldingFileException(String.join(",", missingFiles));
             }

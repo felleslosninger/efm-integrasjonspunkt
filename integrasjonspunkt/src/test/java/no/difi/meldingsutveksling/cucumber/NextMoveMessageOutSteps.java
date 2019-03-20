@@ -49,7 +49,6 @@ public class NextMoveMessageOutSteps {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.valueOf(contentType));
         headers.setContentDispositionFormData(name, filename);
-//        headers.setContentLength(body.length());
         multipart.add(name, new HttpEntity<>(body, headers));
     }
 

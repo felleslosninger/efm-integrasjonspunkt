@@ -12,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,7 +38,7 @@ public class ReceiverAcceptableServiceIdentifierValidator implements ConstraintV
         }
 
         ServiceIdentifier serviceIdentifier = getServiceIdentifier(header);
-        Set<ServiceIdentifier> acceptableServiceIdentifiers = new HashSet<>(getAcceptableServiceIdentifiers(header));
+        Set<ServiceIdentifier> acceptableServiceIdentifiers = getAcceptableServiceIdentifiers(header);
 
         if (acceptableServiceIdentifiers.contains(serviceIdentifier)) {
             return true;
@@ -66,29 +64,35 @@ public class ReceiverAcceptableServiceIdentifierValidator implements ConstraintV
         return ServiceIdentifier.safeValueOf(documentIdentification.getType()).orElse(UNKNOWN);
     }
 
-    private List<ServiceIdentifier> getAcceptableServiceIdentifiers(StandardBusinessDocumentHeader header) {
+    private Set<ServiceIdentifier> getAcceptableServiceIdentifiers(StandardBusinessDocumentHeader header) {
         if (header.getReceiver() == null || header.getReceiver().size() != 1) {
-            return Collections.emptyList();
+            return Collections.emptySet();
         }
 
         Receiver receiver = header.getReceiver().iterator().next();
         PartnerIdentification identifier = receiver.getIdentifier();
 
         if (identifier == null || identifier.getValue() == null) {
-            return Collections.emptyList();
+            return Collections.emptySet();
         }
 
         Matcher matcher = PARTNER_IDENTIFIER_PATTERN.matcher(identifier.getValue());
 
         if (!matcher.matches()) {
-            return Collections.emptyList();
+            return Collections.emptySet();
         }
 
         String orgnr = matcher.group(1);
 
-        return sr.getServiceRecords(orgnr)
+        Set<ServiceIdentifier> identifiers = sr.getServiceRecords(orgnr)
                 .stream()
                 .map(ServiceRecord::getServiceIdentifier)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
+
+        if (identifiers.contains(ServiceIdentifier.DPF)) {
+            identifiers.add(ServiceIdentifier.DPO);
+        }
+
+        return identifiers;
     }
 }
