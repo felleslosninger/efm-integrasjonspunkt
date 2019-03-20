@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.ks
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
+import no.difi.meldingsutveksling.ks.mapping.FiksMapper
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnBeans
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService
@@ -10,7 +11,6 @@ import no.difi.meldingsutveksling.noarkexchange.NoarkClient
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType
-import no.difi.meldingsutveksling.receipt.ConversationService
 import org.hamcrest.Matchers
 import org.junit.Before
 import org.junit.Test
@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
@@ -33,7 +32,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 @RunWith(SpringJUnit4ClassRunner)
 @SpringBootTest
-@ContextConfiguration(classes = [SvarInnBeans, SvarUtWebServiceBeans, SvarUtConfiguration, MockConfiguration])
+@ContextConfiguration(classes = [SvarInnBeans, SvarUtWebServiceBeans, SvarUtConfiguration, MockConfiguration, FiksMapper])
 @EnableConfigurationProperties(IntegrasjonspunktProperties)
 public class SvarInnIntegrationTest {
 
@@ -54,9 +53,6 @@ public class SvarInnIntegrationTest {
     @Qualifier("localNoark")
     NoarkClient noarkClient
 
-    @MockBean
-    ConversationService conversationService;
-
     @Before
     public void setup() {
         server = MockRestServiceServer.bindTo(restTemplate).build()
@@ -69,11 +65,10 @@ public class SvarInnIntegrationTest {
     public void receiveMessageFromFiks() {
         byte[] zipFile = getClass().getResource("/somdalen-dokumenter-ae68b33d.zip").getBytes()
         server.expect(requestTo(Matchers.containsString("/svarinn/forsendelse/"))).andRespond(withSuccess(zipFile, SvarInnClient.APPLICATION_ZIP))
-        server.expect(requestTo(Matchers.endsWith("svarinn/kvitterMottak/forsendelse/${forsendelseId}"))).andRespond(withSuccess())
 
-        svarInnService.downloadFiles()
+        def files = svarInnService.downloadFiles()
 
-        verify(noarkClient).sendEduMelding(Mockito.any(PutMessageRequestType));
+        assert files.size() == 1
         server.verify()
     }
 

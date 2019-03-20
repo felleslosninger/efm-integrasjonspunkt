@@ -38,7 +38,7 @@ public class SvarInnMessage {
     private PayloadConverter<MeldingType> payloadConverter = new PayloadConverterImpl<>(MeldingType.class,
             "http://www.arkivverket.no/Noark4-1-WS-WD/types", "Melding");
 
-    Arkivmelding toArkivmelding() {
+    public Arkivmelding toArkivmelding() {
         no.arkivverket.standarder.noark5.arkivmelding.ObjectFactory of = new no.arkivverket.standarder.noark5.arkivmelding.ObjectFactory();
 
         Journalpost journalpost = of.createJournalpost();
@@ -76,7 +76,7 @@ public class SvarInnMessage {
         return arkivmelding;
     }
 
-    EDUCore toEduCore() {
+    public EDUCore toEduCore() {
         ObjectFactory objectFactory = new ObjectFactory();
 
         final MeldingType meldingType = objectFactory.createMeldingType();
