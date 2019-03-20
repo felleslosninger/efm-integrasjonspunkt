@@ -32,6 +32,7 @@
                     <bindingIncludes>
                         <include>bindings.xml</include>
                     </bindingIncludes>
+                    <generateDirectory>${project.build.directory}/generated-sources</generateDirectory>
                     <strict>true</strict>
                     <extension>true</extension>
                     <verbose>true</verbose>
