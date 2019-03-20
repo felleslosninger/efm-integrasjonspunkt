@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.domain.arkivmelding;
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.*;
 import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
+import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
@@ -13,15 +14,8 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.GregorianCalendar;
 import java.util.Optional;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -68,30 +62,13 @@ public class ArkivmeldingFactory {
         sm.setSkjerming(skjerming);
 
         // expecting date in format yyyy-MM-dd
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         Optional<String> jpDato = ofNullable(mt.getJournpost().getJpJdato());
         if (jpDato.isPresent()) {
-            LocalDate localDate = LocalDate.parse(jpDato.get(), formatter);
-            GregorianCalendar gcal = GregorianCalendar.from(localDate.atStartOfDay(ZoneId.systemDefault()));
-            XMLGregorianCalendar xgcal = null;
-            try {
-                xgcal = DatatypeFactory.newInstance().newXMLGregorianCalendar(gcal);
-            } catch (DatatypeConfigurationException e) {
-                log.error("Could not convert JpJdato in message {}", putMessage.getConversationId(), e);
-            }
-            ofNullable(xgcal).ifPresent(jp::setJournaldato);
+            jp.setJournaldato(ArkivmeldingUtil.stringAsXmlGregorianCalendar(mt.getJournpost().getJpJdato()));
         }
         Optional<String> jpDokdato = ofNullable(mt.getJournpost().getJpDokdato());
         if (jpDokdato.isPresent()) {
-            LocalDate localDate = LocalDate.parse(jpDokdato.get(), formatter);
-            GregorianCalendar gcal = GregorianCalendar.from(localDate.atStartOfDay(ZoneId.systemDefault()));
-            XMLGregorianCalendar xgcal = null;
-            try {
-                xgcal = DatatypeFactory.newInstance().newXMLGregorianCalendar(gcal);
-            } catch (DatatypeConfigurationException e) {
-                log.error("Could not convert JpJdato in message {}", putMessage.getConversationId(), e);
-            }
-            ofNullable(xgcal).ifPresent(jp::setDokumentetsDato);
+            jp.setDokumentetsDato(ArkivmeldingUtil.stringAsXmlGregorianCalendar(mt.getJournpost().getJpDokdato()));
         }
 
         mt.getJournpost().getAvsmot().forEach(a -> {
@@ -111,15 +88,7 @@ public class ArkivmeldingFactory {
             ofNullable(a.getAmAvskm()).filter(s -> !s.isEmpty()).map(AvskrivningsmaateMapper::getArkivmeldingType).ifPresent(avs::setAvskrivningsmaate);
             ofNullable(a.getAmAvsavdok()).ifPresent(avs::setReferanseAvskrivesAvJournalpost);
             if (!isNullOrEmpty(a.getAmAvskdato())) {
-                LocalDate localDate = LocalDate.parse(a.getAmAvskdato(), formatter);
-                GregorianCalendar gcal = GregorianCalendar.from(localDate.atStartOfDay(ZoneId.systemDefault()));
-                XMLGregorianCalendar xgcal = null;
-                try {
-                    xgcal = DatatypeFactory.newInstance().newXMLGregorianCalendar(gcal);
-                } catch (DatatypeConfigurationException e) {
-                    log.error("Could not convert AmAvskdato in message {}", putMessage.getConversationId(), e);
-                }
-                ofNullable(xgcal).ifPresent(avs::setAvskrivningsdato);
+                avs.setAvskrivningsdato(ArkivmeldingUtil.stringAsXmlGregorianCalendar(a.getAmAvskdato()));
             }
 
             jp.getAvskrivning().add(avs);

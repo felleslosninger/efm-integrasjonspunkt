@@ -74,31 +74,50 @@ public class SvarInnService implements MessageDownloaderModule {
             final List<SvarInnFile> files = svarInnFileFactory.createFiles(forsendelse.getFilmetadata(), unzippedFile);
 
             final SvarInnMessage message = new SvarInnMessage(forsendelse, files, properties);
-            final EDUCore eduCore = message.toEduCore();
 
-            Conversation c = conversationService.registerConversation(eduCore);
-            c = conversationService.registerStatus(c, MessageStatus.of(INNKOMMENDE_MOTTATT));
-
-            PutMessageRequestType putMessage = EDUCoreFactory.createPutMessageFromCore(eduCore);
-            if (!validateRequiredFields(forsendelse, eduCore, files)) {
-                checkAndSendMail(putMessage, forsendelse.getId());
-                continue;
-            }
-
-            final PutMessageResponseType response = noarkClient.sendEduMelding(putMessage);
-            if ("OK".equals(response.getResult().getType())) {
-                Audit.info("Message successfully forwarded");
-                conversationService.registerStatus(c, MessageStatus.of(INNKOMMENDE_LEVERT));
-                svarInnClient.confirmMessage(forsendelse.getId());
-            } else if ("WARNING".equals(response.getResult().getType())) {
-                Audit.info(format("Archive system responded with warning for message with fiks-id %s",
-                        forsendelse.getId()), PutMessageResponseMarkers.markerFrom(response));
-                conversationService.registerStatus(c, MessageStatus.of(INNKOMMENDE_LEVERT));
-                svarInnClient.confirmMessage(forsendelse.getId());
+            if (properties.getNoarkSystem().isEnable() && !properties.getNoarkSystem().getEndpointURL().isEmpty()) {
+                createAndForwardEduCore(message);
             } else {
-                Audit.error(format("Message with fiks-id %s failed", forsendelse.getId()), PutMessageResponseMarkers.markerFrom(response));
-                checkAndSendMail(putMessage, forsendelse.getId());
+                createAndForwardNextMove(message);
             }
+        }
+    }
+
+    private void createAndForwardNextMove(SvarInnMessage message) {
+        // 1. lag arkivmelding
+        // 2. lag SBD
+        // 3. asic med arkivmelding og filer
+        // 4. persistere asic og nextmovemessage
+        throw new UnsupportedOperationException();
+    }
+
+    private void createAndForwardEduCore(SvarInnMessage message) {
+        Forsendelse forsendelse = message.getForsendelse();
+        List<SvarInnFile> files = message.getSvarInnFiles();
+        final EDUCore eduCore = message.toEduCore();
+
+        Conversation c = conversationService.registerConversation(eduCore);
+        c = conversationService.registerStatus(c, MessageStatus.of(INNKOMMENDE_MOTTATT));
+
+        PutMessageRequestType putMessage = EDUCoreFactory.createPutMessageFromCore(eduCore);
+        if (!validateRequiredFields(forsendelse, eduCore, files)) {
+            checkAndSendMail(putMessage, forsendelse.getId());
+            return;
+        }
+
+        final PutMessageResponseType response = noarkClient.sendEduMelding(putMessage);
+        if ("OK".equals(response.getResult().getType())) {
+            Audit.info("Message successfully forwarded");
+            conversationService.registerStatus(c, MessageStatus.of(INNKOMMENDE_LEVERT));
+            svarInnClient.confirmMessage(forsendelse.getId());
+        } else if ("WARNING".equals(response.getResult().getType())) {
+            Audit.info(format("Archive system responded with warning for message with fiks-id %s",
+                    forsendelse.getId()), PutMessageResponseMarkers.markerFrom(response));
+            conversationService.registerStatus(c, MessageStatus.of(INNKOMMENDE_LEVERT));
+            svarInnClient.confirmMessage(forsendelse.getId());
+        } else {
+            Audit.error(format("Message with fiks-id %s failed", forsendelse.getId()), PutMessageResponseMarkers.markerFrom(response));
+            checkAndSendMail(putMessage, forsendelse.getId());
         }
     }
 

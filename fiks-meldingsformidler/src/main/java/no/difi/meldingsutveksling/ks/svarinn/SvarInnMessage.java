@@ -2,16 +2,25 @@ package no.difi.meldingsutveksling.ks.svarinn;
 
 import lombok.Data;
 import lombok.NonNull;
+import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
+import no.arkivverket.standarder.noark5.arkivmelding.Journalpost;
+import no.arkivverket.standarder.noark5.arkivmelding.Korrespondansepart;
+import no.arkivverket.standarder.noark5.arkivmelding.Saksmappe;
+import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.Receiver;
 import no.difi.meldingsutveksling.core.Sender;
+import no.difi.meldingsutveksling.domain.arkivmelding.JournalposttypeMapper;
+import no.difi.meldingsutveksling.domain.arkivmelding.JournalstatusMapper;
 import no.difi.meldingsutveksling.noarkexchange.receive.PayloadConverter;
 import no.difi.meldingsutveksling.noarkexchange.receive.PayloadConverterImpl;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.*;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,6 +37,44 @@ public class SvarInnMessage {
 
     private PayloadConverter<MeldingType> payloadConverter = new PayloadConverterImpl<>(MeldingType.class,
             "http://www.arkivverket.no/Noark4-1-WS-WD/types", "Melding");
+
+    Arkivmelding toArkivmelding() {
+        no.arkivverket.standarder.noark5.arkivmelding.ObjectFactory of = new no.arkivverket.standarder.noark5.arkivmelding.ObjectFactory();
+
+        Journalpost journalpost = of.createJournalpost();
+        journalpost.setOffentligTittel(forsendelse.getTittel());
+
+        Korrespondansepart avsender = of.createKorrespondansepart();
+        avsender.setKorrespondanseparttype(Korrespondanseparttype.AVSENDER);
+        Forsendelse.SvarSendesTil sst = forsendelse.getSvarSendesTil();
+        avsender.setKorrespondansepartNavn(sst.getNavn());
+        avsender.getPostadresse().add(sst.getAdresse1());
+        avsender.setPostnummer(sst.getPostnr());
+        avsender.setPoststed(sst.getPoststed());
+        avsender.setLand(sst.getLand());
+        journalpost.getKorrespondansepart().add(avsender);
+
+        Saksmappe saksmappe = of.createSaksmappe();
+        Forsendelse.MetadataFraAvleverendeSystem metadata = forsendelse.getMetadataFraAvleverendeSystem();
+        saksmappe.setSakssekvensnummer(BigInteger.valueOf(metadata.getSakssekvensnummer()));
+        saksmappe.setSaksaar(BigInteger.valueOf(metadata.getSaksaar()));
+        saksmappe.setSaksansvarlig(metadata.getSaksBehandler());
+
+        journalpost.setJournalaar(BigInteger.valueOf(Long.valueOf(metadata.getJournalaar())));
+        journalpost.setJournalsekvensnummer(BigInteger.valueOf(Long.valueOf(metadata.getJournalsekvensnummer())));
+        journalpost.setJournalpostnummer(BigInteger.valueOf(Long.valueOf(metadata.getJournalpostnummer())));
+        journalpost.setJournalposttype(JournalposttypeMapper.getArkivmeldingType(metadata.getJournalposttype()));
+        journalpost.setJournalstatus(JournalstatusMapper.getArkivmeldingType(metadata.getJournalstatus()));
+        journalpost.setJournaldato(ArkivmeldingUtil.stringAsXmlGregorianCalendar(metadata.getJournaldato()));
+        journalpost.setDokumentetsDato(ArkivmeldingUtil.stringAsXmlGregorianCalendar(metadata.getDokumentetsDato()));
+        journalpost.setOffentligTittel(metadata.getTittel());
+
+        saksmappe.getBasisregistrering().add(journalpost);
+        Arkivmelding arkivmelding = of.createArkivmelding();
+        arkivmelding.getMappe().add(saksmappe);
+
+        return arkivmelding;
+    }
 
     EDUCore toEduCore() {
         ObjectFactory objectFactory = new ObjectFactory();
