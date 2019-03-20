@@ -1,5 +1,8 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.querydsl.core.types.Predicate;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
@@ -11,10 +14,7 @@ import no.difi.meldingsutveksling.exceptions.ConversationAlreadyExistsException;
 import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MissingFileTitleException;
 import no.difi.meldingsutveksling.exceptions.MultiplePrimaryDocumentsNotAllowedException;
-import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
-import no.difi.meldingsutveksling.nextmove.NextMoveException;
-import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
-import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
@@ -24,9 +24,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
@@ -39,8 +43,10 @@ import java.util.stream.Stream;
 import static com.google.common.base.Strings.emptyToNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
+import static no.difi.meldingsutveksling.MimeTypeExtensionMapper.getMimetype;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
+import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
 
 @RestController
 @Validated
@@ -55,6 +61,7 @@ public class NextMoveMessageOutController {
     private final MessagePersister messagePersister;
     private final InternalQueue internalQueue;
     private final ConversationService conversationService;
+    private final ObjectMapper om;
 
     @PostMapping
     @ApiOperation(value = "Create message", notes = "Create a new messagee with the given values")
@@ -179,5 +186,78 @@ public class NextMoveMessageOutController {
                 .orElseThrow(() -> new ConversationNotFoundException(conversationId));
         messageService.validate(message);
         internalQueue.enqueueNextMove2(message);
+    }
+
+    @RequestMapping(value = "/multipart", method = RequestMethod.POST)
+    public ResponseEntity uploadFilesMultipart(
+            MultipartHttpServletRequest request) {
+
+        String key;
+        String json;
+        key = request.getParameterNames().nextElement();
+        json = request.getParameter(key);
+        StandardBusinessDocument sbd;
+        try {
+            //cancel if the request is not multipart
+            if (request.getParameterMap().keySet().size() != 1) {
+                return ResponseEntity.badRequest().build();
+            }
+            // reads and validates standard business message (SBD)
+            sbd = om.readValue(json, StandardBusinessDocument.class);
+
+        } catch (IOException e) {
+            log.error("Error occured while validating SBD", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    ErrorResponse.builder().error("validate_sbd_error").errorDescription("Could not validate sbd/file").build());
+        }
+
+        // Checks if ConversationId exists already, abort if found
+        Optional<NextMoveOutMessage> find = messageRepo.findByConversationId(sbd.getConversationId());
+        if (find.isPresent()) {
+            return ResponseEntity.badRequest().build();
+        }
+        NextMoveOutMessage message = NextMoveOutMessage.of(messageService.setDefaults(sbd));
+        ArrayList<String> files = Lists.newArrayList(request.getFileNames());
+        message.setFiles(Sets.newHashSet());
+
+        // Checks that file size isn't over 5MB. abort if above 5MB
+        for (String f : files) {
+            MultipartFile file = request.getFile(f);
+            long size5Mb = 5 * 1024 * 1024;
+
+            if (file.getSize() > size5Mb) {
+                return ResponseEntity.badRequest().build();
+            }
+        }
+
+        for (String f : files) {
+            MultipartFile file = request.getFile(f);
+            log.trace(markerFrom(message), "Adding file \"{}\" ({}, {} bytes) to {}",
+                    file.getOriginalFilename(), file.getContentType(), file.getSize(), message.getConversationId());
+
+            try {
+                BusinessMessageFile businessMessageFile = new BusinessMessageFile()
+                        .setIdentifier(UUID.randomUUID().toString())
+                        .setFilename(file.getOriginalFilename())
+                        .setPrimaryDocument("primary".equals(file.getName()))
+                        .setMimetype(getMimetype(Stream.of(file.getOriginalFilename()
+                                .split("."))
+                                .reduce((a, b) -> b)
+                                .orElse("pdf")));
+                messagePersister.writeStream(message.getConversationId(), businessMessageFile.getIdentifier(), file.getInputStream(), file.getSize());
+
+                // checks if file reference is found, adds if not found
+                if (!message.getFiles().contains(file.getOriginalFilename())) {
+                    message.getFiles().add(businessMessageFile);
+
+                }
+            } catch (java.io.IOException e) {
+                log.error("Could not persist file {}", file.getOriginalFilename(), e);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                        ErrorResponse.builder().error("persist_file_error").errorDescription("Could not persist file").build());
+            }
+        }
+        internalQueue.enqueueNextMove2(message);
+        return ResponseEntity.ok().build();
     }
 }
