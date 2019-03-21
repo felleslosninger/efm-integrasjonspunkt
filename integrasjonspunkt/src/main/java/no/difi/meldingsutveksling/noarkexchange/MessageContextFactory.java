@@ -43,6 +43,15 @@ public class MessageContextFactory {
         return context;
     }
 
+    public MessageContext from(String senderOrgnr, String receiverOrgnr, String conversationId, Certificate certificate) throws MessageContextException {
+        MessageContext context = new MessageContext();
+        context.setAvsender(createAvsender(senderOrgnr));
+        context.setMottaker(createMottaker(receiverOrgnr, certificate));
+        context.setJpId("");
+        context.setConversationId(conversationId);
+        return context;
+    }
+
     public MessageContext from(ConversationResource conversation) throws MessageContextException {
         if (isNullOrEmpty(conversation.getReceiverId())) {
             throw new MessageContextException(StatusMessage.MISSING_RECIEVER_ORGANIZATION_NUMBER);
@@ -90,6 +99,10 @@ public class MessageContextFactory {
 
     private Mottaker createMottaker(String identifier, ServiceIdentifier serviceIdentifier) throws MessageContextException {
         return Mottaker.builder(new Organisasjonsnummer(identifier), getCertificate(identifier, serviceIdentifier)).build();
+    }
+
+    private Mottaker createMottaker(String identifier, Certificate certificate) {
+        return Mottaker.builder(new Organisasjonsnummer(identifier), certificate).build();
     }
 
     private Certificate getCertificate(String identifier, ServiceIdentifier serviceIdentifier) throws MessageContextException {

@@ -8,7 +8,7 @@ import java.util.EnumMap;
 public class FiksStatusMapper {
     private static EnumMap<ForsendelseStatus, DpfReceiptStatus> mapping;
 
-    public FiksStatusMapper() {
+    static {
         mapping = new EnumMap<>(ForsendelseStatus.class);
         mapping.put(ForsendelseStatus.LEST, DpfReceiptStatus.LEST);
         mapping.put(ForsendelseStatus.MOTTATT, DpfReceiptStatus.MOTTATT);
@@ -23,6 +23,9 @@ public class FiksStatusMapper {
         mapping.put(ForsendelseStatus.SENDT_SDP, DpfReceiptStatus.SENDT_SDP);
         mapping.put(ForsendelseStatus.VARSLET, DpfReceiptStatus.VARSLET);
         mapping.put(ForsendelseStatus.KLAR_FOR_MOTTAK, DpfReceiptStatus.KLAR_FOR_MOTTAK);
+    }
+
+    private FiksStatusMapper() {
     }
 
     public static DpfReceiptStatus mapFrom(ForsendelseStatus forsendelseStatus) {

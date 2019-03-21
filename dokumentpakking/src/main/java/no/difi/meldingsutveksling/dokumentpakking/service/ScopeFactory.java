@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.dokumentpakking.service;
 
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 
@@ -18,6 +19,15 @@ public class ScopeFactory {
         Scope scope = createDefaultScope();
         scope.setType(ScopeType.CONVERSATION_ID.toString());
         scope.setInstanceIdentifier(conversationId);
+        return scope;
+    }
+
+    public static Scope fromConversationId(String conversationId, ServiceIdentifier serviceIdentifier) {
+        Scope scope = new Scope();
+        scope.setIdentifier(serviceIdentifier.getStandard());
+        scope.setType(ScopeType.CONVERSATION_ID.toString());
+        scope.setInstanceIdentifier(conversationId);
+        // TODO add scopeInformation.expectedResponseDateTime
         return scope;
     }
 

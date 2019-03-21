@@ -3,11 +3,9 @@ package no.difi.meldingsutveksling.config;
 import no.difi.meldingsutveksling.AltinnWsClientFactory;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
-import no.difi.meldingsutveksling.nextmove.ConversationResourceRepository;
-import no.difi.meldingsutveksling.nextmove.ConversationResourceUnlocker;
-import no.difi.meldingsutveksling.nextmove.NextMoveQueue;
-import no.difi.meldingsutveksling.nextmove.NextMoveServiceBus;
+import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
+import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
 import no.difi.meldingsutveksling.noarkexchange.MessageContextFactory;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
@@ -48,7 +46,9 @@ public class SchedulingConfiguration {
                                          SvarInnService svarInnService,
                                          @Qualifier("localNoark") NoarkClient noarkClient,
                                          @Qualifier("fiksMailClient") NoarkClient mailClient,
-                                         MessageContextFactory messageContextFactory) {
+                                         MessageContextFactory messageContextFactory,
+                                         AsicHandler asicHandler,
+                                         NextMoveMessageInRepository messageRepo) {
         return new MessagePolling(
                 properties,
                 internalQueue,
@@ -63,6 +63,8 @@ public class SchedulingConfiguration {
                 svarInnService,
                 noarkClient,
                 mailClient,
-                messageContextFactory);
+                messageContextFactory,
+                asicHandler,
+                messageRepo);
     }
 }

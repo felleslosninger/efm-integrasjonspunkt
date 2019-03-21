@@ -65,8 +65,8 @@ public class SvarInnMessage {
         journalpost.setJournalpostnummer(BigInteger.valueOf(Long.valueOf(metadata.getJournalpostnummer())));
         journalpost.setJournalposttype(JournalposttypeMapper.getArkivmeldingType(metadata.getJournalposttype()));
         journalpost.setJournalstatus(JournalstatusMapper.getArkivmeldingType(metadata.getJournalstatus()));
-        journalpost.setJournaldato(ArkivmeldingUtil.stringAsXmlGregorianCalendar(metadata.getJournaldato()));
-        journalpost.setDokumentetsDato(ArkivmeldingUtil.stringAsXmlGregorianCalendar(metadata.getDokumentetsDato()));
+        journalpost.setJournaldato(ArkivmeldingUtil.epochMilliAsXmlGregorianCalendar(metadata.getJournaldato()));
+        journalpost.setDokumentetsDato(ArkivmeldingUtil.epochMilliAsXmlGregorianCalendar(metadata.getDokumentetsDato()));
         journalpost.setOffentligTittel(metadata.getTittel());
 
         saksmappe.getBasisregistrering().add(journalpost);

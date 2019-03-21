@@ -1,26 +1,30 @@
 package no.difi.meldingsutveksling.noarkexchange.altinn;
 
+import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
+import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.*;
+import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreFactory;
+import no.difi.meldingsutveksling.dokumentpakking.service.CreateSBD;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
+import no.difi.meldingsutveksling.domain.NextMoveStreamedFile;
+import no.difi.meldingsutveksling.domain.StreamedFile;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.ks.svarinn.*;
 import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.nextmove.NextMoveQueue;
-import no.difi.meldingsutveksling.nextmove.NextMoveServiceBus;
+import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
-import no.difi.meldingsutveksling.noarkexchange.MessageContextFactory;
-import no.difi.meldingsutveksling.noarkexchange.MessageException;
-import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
+import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
+import no.difi.meldingsutveksling.noarkexchange.*;
 import no.difi.meldingsutveksling.noarkexchange.logging.PutMessageResponseMarkers;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
@@ -33,9 +37,14 @@ import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -73,6 +82,8 @@ public class MessagePolling implements ApplicationContextAware {
     private final NoarkClient noarkClient;
     private final NoarkClient mailClient;
     private final MessageContextFactory messageContextFactory;
+    private final AsicHandler asicHandler;
+    private final NextMoveMessageInRepository messageRepo;
 
     private ServiceRecord serviceRecord;
     private CompletableFuture batchRead;
@@ -176,11 +187,49 @@ public class MessagePolling implements ApplicationContextAware {
     }
 
     private void createAndForwardNextMove(SvarInnMessage message) {
-        // 1. lag arkivmelding
-        // 2. lag SBD
-        // 3. asic med arkivmelding og filer
-        // 4. persistere asic og nextmovemessage
-        throw new UnsupportedOperationException();
+        MessageContext context;
+        try {
+            context = messageContextFactory.from(message.getForsendelse().getSvarSendesTil().getOrgnr(),
+                    message.getForsendelse().getMottaker().getOrgnr(),
+                    message.getForsendelse().getId(),
+                    keyInfo.getX509Certificate());
+        } catch (MessageContextException e) {
+            log.error("Could not create message context", e);
+            return;
+        }
+        StandardBusinessDocument sbd = new CreateSBD().createNextMoveSBD(
+                context.getAvsender().getOrgNummer(),
+                context.getMottaker().getOrgNummer(),
+                context.getConversationId(),
+                ServiceIdentifier.DPO,
+                new DpoMessage());
+        NextMoveInMessage nextMoveMessage = NextMoveInMessage.of(sbd);
+
+        Arkivmelding arkivmelding = message.toArkivmelding();
+        byte[] arkivmeldingBytes;
+        try {
+            arkivmeldingBytes = ArkivmeldingUtil.marshalArkivmelding(arkivmelding);
+        } catch (JAXBException e) {
+            log.error("Error marshalling arkivmelding", e);
+            return;
+        }
+
+        List<StreamedFile> files = Lists.newArrayList();
+        ByteArrayInputStream arkivmeldingStream = new ByteArrayInputStream(arkivmeldingBytes);
+        files.add(new NextMoveStreamedFile(NextMoveConsts.ARKIVMELDING_FILE, arkivmeldingStream, MediaType.APPLICATION_XML_VALUE));
+        message.getSvarInnFiles().forEach(f -> files.add(new NextMoveStreamedFile(f.getFilnavn(),
+                new ByteArrayInputStream(f.getContents()),
+                f.getMediaType().getType())));
+
+        InputStream asicStream = asicHandler.archiveAndEncryptAttachments(files, context, ServiceIdentifier.DPO);
+        try {
+            messagePersister.writeStream(nextMoveMessage.getConversationId(), NextMoveConsts.ASIC_FILE, asicStream, -1);
+        } catch (IOException e) {
+            log.error("Error writing ASiC", e);
+        }
+
+        messageRepo.save(nextMoveMessage);
+        svarInnService.confirmMessage(message.getForsendelse().getId());
     }
 
     private void createAndForwardEduCore(SvarInnMessage message) {

@@ -84,7 +84,7 @@ public class AsicHandler {
         return mimetype;
     }
 
-    private InputStream archiveAndEncryptAttachments(List<? extends StreamedFile> att, MessageContext ctx, ServiceIdentifier si) {
+    public InputStream archiveAndEncryptAttachments(List<? extends StreamedFile> att, MessageContext ctx, ServiceIdentifier si) {
         PipedOutputStream archiveOutputStream = new PipedOutputStream();
         CompletableFuture.runAsync(() -> {
             log.trace("Starting thread: create asic");
