@@ -8,28 +8,22 @@ import com.microsoft.azure.servicebus.IMessageReceiver;
 import com.microsoft.azure.servicebus.ReceiveMode;
 import com.microsoft.azure.servicebus.primitives.ConnectionStringBuilder;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
-import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
+import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayload;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayloadConverter;
 import no.difi.meldingsutveksling.noarkexchange.MessageContext;
 import no.difi.meldingsutveksling.noarkexchange.MessageContextException;
 import no.difi.meldingsutveksling.noarkexchange.MessageContextFactory;
-import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import org.apache.commons.io.IOUtils;
-import org.eclipse.persistence.jaxb.JAXBContextFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -51,46 +45,41 @@ import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.DATA;
 import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.INNSYN;
 
 @Component
+@Slf4j
 public class NextMoveServiceBus {
-
-    private static final Logger log = LoggerFactory.getLogger(NextMoveServiceBus.class);
 
     private static final String NEXTMOVE_QUEUE_PREFIX = "nextbestqueue";
 
-    private IntegrasjonspunktProperties props;
-    private StandardBusinessDocumentFactory sbdf;
-    private NextMoveQueue nextMoveQueue;
-    private JAXBContext jaxbContext;
-    private ServiceBusRestClient serviceBusClient;
+    private final IntegrasjonspunktProperties props;
+    private final NextMoveQueue nextMoveQueue;
+    private final ServiceBusRestClient serviceBusClient;
+    private final ObjectMapper om;
+    private final MessageContextFactory messageContextFactory;
+    private final AsicHandler asicHandler;
+    private final InternalQueue internalQueue;
+    private final CryptoMessagePersister cryptoMessagePersister;
+    private final ServiceBusPayloadConverter payloadConverter;
+
     private IMessageReceiver messageReceiver;
-    private ObjectMapper om;
-    private MessageContextFactory messageContextFactory;
-    private AsicHandler asicHandler;
-    private InternalQueue internalQueue;
-    private MessagePersister messagePersister;
-    private ServiceBusPayloadConverter payloadConverter;
 
     public NextMoveServiceBus(IntegrasjonspunktProperties props,
-                              StandardBusinessDocumentFactory sbdf,
                               NextMoveQueue nextMoveQueue,
                               ServiceBusRestClient serviceBusClient,
                               ObjectMapper om,
                               MessageContextFactory messageContextFactory,
                               AsicHandler asicHandler,
                               @Lazy InternalQueue internalQueue,
-                              ObjectProvider<MessagePersister> messagePersister,
-                              ServiceBusPayloadConverter payloadConverter) throws JAXBException {
+                              CryptoMessagePersister cryptoMessagePersister,
+                              ServiceBusPayloadConverter payloadConverter) {
         this.props = props;
-        this.sbdf = sbdf;
         this.nextMoveQueue = nextMoveQueue;
         this.serviceBusClient = serviceBusClient;
         this.om = om;
         this.messageContextFactory = messageContextFactory;
         this.asicHandler = asicHandler;
         this.internalQueue = internalQueue;
-        this.messagePersister = messagePersister.getIfUnique();
+        this.cryptoMessagePersister = cryptoMessagePersister;
         this.payloadConverter = payloadConverter;
-        this.jaxbContext = JAXBContextFactory.createContext(new Class[]{StandardBusinessDocument.class, Payload.class, ConversationResource.class}, null);
     }
 
     @PostConstruct
@@ -160,7 +149,7 @@ public class NextMoveServiceBus {
         boolean messagesInQueue = true;
         while (messagesInQueue) {
             ArrayList<ServiceBusMessage> messages = Lists.newArrayList();
-            for (int i=0; i<props.getNextmove().getServiceBus().getReadMaxMessages(); i++) {
+            for (int i = 0; i < props.getNextmove().getServiceBus().getReadMaxMessages(); i++) {
                 Optional<ServiceBusMessage> msg = serviceBusClient.receiveMessage();
                 if (!msg.isPresent()) {
                     messagesInQueue = false;
@@ -172,7 +161,7 @@ public class NextMoveServiceBus {
             for (ServiceBusMessage msg : messages) {
                 if (msg.getPayload().getAsic() != null) {
                     try {
-                        messagePersister.write(msg.getPayload().getSbd().getConversationId(),
+                        cryptoMessagePersister.write(msg.getPayload().getSbd().getConversationId(),
                                 ASIC_FILE,
                                 Base64.getDecoder().decode(msg.getPayload().getAsic()));
                     } catch (IOException e) {
@@ -201,7 +190,7 @@ public class NextMoveServiceBus {
                                 log.debug(format("Received message on queue=%s with id=%s", serviceBusClient.getLocalQueuePath(), m.getMessageId()));
                                 ServiceBusPayload payload = payloadConverter.convert(m.getBody(), m.getMessageId());
                                 if (payload.getAsic() != null) {
-                                    messagePersister.write(payload.getSbd().getConversationId(), ASIC_FILE, Base64.getDecoder().decode(payload.getAsic()));
+                                    cryptoMessagePersister.write(payload.getSbd().getConversationId(), ASIC_FILE, Base64.getDecoder().decode(payload.getAsic()));
                                 }
                                 Optional<NextMoveMessage> message = nextMoveQueue.enqueue(payload.getSbd());
                                 message.ifPresent(this::sendReceiptAsync);

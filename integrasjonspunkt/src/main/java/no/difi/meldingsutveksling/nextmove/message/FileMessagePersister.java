@@ -76,7 +76,7 @@ public class FileMessagePersister implements MessagePersister {
     }
 
     @Override
-    public FileEntryStream readStream(String conversationId, String filename) throws PersistenceException {
+    public FileEntryStream readStream(String conversationId, String filename) {
         String filedir = getConversationFiledirPath(conversationId);
         File file = new File(filedir + filename);
         try {

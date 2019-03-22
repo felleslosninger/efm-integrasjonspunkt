@@ -16,11 +16,12 @@ import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAtta
 import no.difi.meldingsutveksling.InputStreamDataSource;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.DpvMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
+import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
-import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.NoarkDocument;
 import no.difi.meldingsutveksling.noarkexchange.PayloadException;
 import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
@@ -42,7 +43,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
  */
 public class CorrespondenceAgencyMessageFactory {
 
-    private static final Map<Integer, String> serviceEditionMapping= new HashMap<>();
+    private static final Map<Integer, String> serviceEditionMapping = new HashMap<>();
 
     static {
         serviceEditionMapping.put(1, "Plan, bygg og geodata");
@@ -62,7 +63,7 @@ public class CorrespondenceAgencyMessageFactory {
 
     public static InsertCorrespondenceV2 create(CorrespondenceAgencyConfiguration config,
                                                 NextMoveMessage message,
-                                                MessagePersister messagePersister) {
+                                                CryptoMessagePersister cryptoMessagePersister) {
         no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory reporteeFactory = new no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory();
         BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
 
@@ -70,8 +71,8 @@ public class CorrespondenceAgencyMessageFactory {
             throw new NextMoveRuntimeException("StandardBusinessDocument.any not instance of DpvMessage, aborting");
         }
 
-        message.getFiles().forEach(f -> {
-            FileEntryStream fileEntry = messagePersister.readStream(message.getConversationId(), f.getIdentifier());
+        for (BusinessMessageFile f : message.getFiles()) {
+            FileEntryStream fileEntry = cryptoMessagePersister.readStream(message.getConversationId(), f.getIdentifier());
             BinaryAttachmentV2 binaryAttachmentV2 = new BinaryAttachmentV2();
             binaryAttachmentV2.setFunctionType(AttachmentFunctionType.fromValue("Unspecified"));
             binaryAttachmentV2.setFileName(reporteeFactory.createBinaryAttachmentV2FileName(f.getFilename()));
@@ -80,7 +81,7 @@ public class CorrespondenceAgencyMessageFactory {
             binaryAttachmentV2.setSendersReference(reporteeFactory.createBinaryAttachmentV2SendersReference("AttachmentReference_as123452"));
             binaryAttachmentV2.setData(reporteeFactory.createBinaryAttachmentV2Data(new DataHandler(InputStreamDataSource.of(fileEntry.getInputStream()))));
             attachmentExternalBEV2List.getBinaryAttachmentV2().add(binaryAttachmentV2);
-        });
+        }
 
         DpvMessage dpvMessage = (DpvMessage) message.getBusinessMessage();
         return create(config, message.getConversationId(), message.getReceiverIdentifier(),
@@ -153,7 +154,6 @@ public class CorrespondenceAgencyMessageFactory {
                         toXmlGregorianCalendar(getAllowSystemDeleteDateTime())));
 
 
-
         AttachmentsV2 attachmentsV2 = new AttachmentsV2();
         attachmentsV2.setBinaryAttachments(objectFactory.createAttachmentsV2BinaryAttachments(attachments));
         externalContentV2.setAttachments(objectFactory.createExternalContentV2Attachments(attachmentsV2));
@@ -184,7 +184,7 @@ public class CorrespondenceAgencyMessageFactory {
             notifications.add(createNotification(config, TransportType.BOTH));
         } else if (config.isNotifySms()) {
             notifications.add(createNotification(config, TransportType.SMS));
-        } else if (config.isNotifyEmail()){
+        } else if (config.isNotifyEmail()) {
             notifications.add(createNotification(config, TransportType.EMAIL));
         }
 
@@ -245,8 +245,8 @@ public class CorrespondenceAgencyMessageFactory {
     }
 
     private static JAXBElement<String> getServiceCode(CorrespondenceAgencyConfiguration postConfig) {
-        String serviceCodeProp= postConfig.getExternalServiceCode();
-        String serviceCode= !isNullOrEmpty(serviceCodeProp) ? serviceCodeProp : "4255";
+        String serviceCodeProp = postConfig.getExternalServiceCode();
+        String serviceCode = !isNullOrEmpty(serviceCodeProp) ? serviceCodeProp : "4255";
         ObjectFactory objectFactory = new ObjectFactory();
         return objectFactory.createMyInsertCorrespondenceV2ServiceCode(serviceCode);
     }
@@ -280,7 +280,7 @@ public class CorrespondenceAgencyMessageFactory {
         try {
             return DatatypeFactory.newInstance().newXMLGregorianCalendar(GregorianCalendar.from(date));
         } catch (DatatypeConfigurationException e) {
-            throw new RuntimeException("Could not convert ZonedDateTime(value="+date+") to " + XMLGregorianCalendar.class, e);
+            throw new RuntimeException("Could not convert ZonedDateTime(value=" + date + ") to " + XMLGregorianCalendar.class, e);
         }
     }
 

@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.nextmove;
 
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
+import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.PostVirksomhetStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
@@ -10,7 +10,6 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.ptv.CorrespondenceRequest;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -18,19 +17,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class DpvConversationStrategy implements ConversationStrategy {
 
-    private IntegrasjonspunktProperties props;
-    private ServiceRegistryLookup sr;
-    private MessagePersister messagePersister;
-    private InternalQueue internalQueue;
+    private final IntegrasjonspunktProperties props;
+    private final ServiceRegistryLookup sr;
+    private final CryptoMessagePersister cryptoMessagePersister;
+    private final InternalQueue internalQueue;
 
     @Autowired
     DpvConversationStrategy(IntegrasjonspunktProperties props,
                             ServiceRegistryLookup sr,
-                            ObjectProvider<MessagePersister> messagePersister,
+                            CryptoMessagePersister cryptoMessagePersister,
                             @Lazy InternalQueue internalQueue) {
         this.props = props;
         this.sr = sr;
-        this.messagePersister = messagePersister.getIfUnique();
+        this.cryptoMessagePersister = cryptoMessagePersister;
         this.internalQueue = internalQueue;
     }
 
@@ -44,7 +43,7 @@ public class DpvConversationStrategy implements ConversationStrategy {
 
         PostVirksomhetStrategyFactory dpvFactory = PostVirksomhetStrategyFactory.newInstance(props, null, sr, internalQueue);
         CorrespondenceAgencyConfiguration config = dpvFactory.getConfig();
-        InsertCorrespondenceV2 insertCorrespondenceV2 = CorrespondenceAgencyMessageFactory.create(config, message, messagePersister);
+        InsertCorrespondenceV2 insertCorrespondenceV2 = CorrespondenceAgencyMessageFactory.create(config, message, cryptoMessagePersister);
 
         CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(NextMoveMessageMarkers.markerFrom(message), config);
         final CorrespondenceRequest request = new CorrespondenceRequest.Builder()

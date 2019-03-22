@@ -1,11 +1,11 @@
 package no.difi.meldingsutveksling.nextmove.message;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.LobHelper;
 import org.hibernate.Session;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -16,25 +16,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Blob;
 import java.sql.SQLException;
-import java.util.Optional;
 
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "difi.move.nextmove.useDbPersistence", havingValue = "true")
+@RequiredArgsConstructor
 public class DBMessagePersister implements MessagePersister {
 
-    private NextMoveMessageEntryRepository repo;
-    private IntegrasjonspunktProperties props;
-    private EntityManager em;
-
-    @Autowired
-    public DBMessagePersister(NextMoveMessageEntryRepository repo, IntegrasjonspunktProperties props, EntityManager em) {
-        this.repo = repo;
-        this.props = props;
-        this.em = em;
-    }
+    private final NextMoveMessageEntryRepository repo;
+    private final IntegrasjonspunktProperties props;
+    private final EntityManager em;
 
     @Override
     @Transactional
@@ -57,40 +50,35 @@ public class DBMessagePersister implements MessagePersister {
 
         NextMoveMessageEntry entry = NextMoveMessageEntry.of(conversationId, filename, contentBlob, size);
         repo.save(entry);
-
     }
 
     @Override
     public byte[] read(String conversationId, String filename) throws IOException {
-        Optional<NextMoveMessageEntry> entry = repo.findByConversationIdAndFilename(conversationId, filename);
-        if (entry.isPresent()) {
-            try {
-                return IOUtils.toByteArray(entry.get().getContent().getBinaryStream());
-            } catch (SQLException e) {
-                throw new IOException("Error reading data stream from database", e);
+        NextMoveMessageEntry entry = repo.findByConversationIdAndFilename(conversationId, filename)
+                .orElseThrow(() -> new IOException(String.format("File \'%s\' for conversation with id=%s not found in repository", filename, conversationId)));
 
-            }
-
+        try {
+            return IOUtils.toByteArray(entry.getContent().getBinaryStream());
+        } catch (SQLException e) {
+            throw new IOException("Error reading data stream from database", e);
         }
-        throw new IOException(String.format("File \'%s\' for conversation with id=%s not found in repository", filename, conversationId));
     }
 
     @Override
-    public FileEntryStream readStream(String conversationId, String filename) throws PersistenceException {
-        Optional<NextMoveMessageEntry> entry = repo.findByConversationIdAndFilename(conversationId, filename);
-        if (entry.isPresent()) {
-            try {
-                return FileEntryStream.of(entry.get().getContent().getBinaryStream(), entry.get().getSize());
-            } catch (SQLException e) {
-                throw new PersistenceException("Error reading data stream from database", e);
-            }
+    public FileEntryStream readStream(String conversationId, String filename) {
+        NextMoveMessageEntry entry = repo.findByConversationIdAndFilename(conversationId, filename)
+                .orElseThrow(() -> new PersistenceException(String.format("Entry for conversationId=%s, filename=%s not found in database", conversationId, filename)));
+
+        try {
+            return FileEntryStream.of(entry.getContent().getBinaryStream(), entry.getSize());
+        } catch (SQLException e) {
+            throw new PersistenceException("Error reading data stream from database", e);
         }
-        throw new PersistenceException(String.format("Entry for conversationId=%s, filename=%s not found in database", conversationId, filename));
     }
 
     @Override
     @Transactional
-    public void delete(String conversationId) throws IOException {
+    public void delete(String conversationId) {
         repo.deleteByConversationId(conversationId);
     }
 }

@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingException;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
@@ -8,8 +10,6 @@ import no.difi.meldingsutveksling.noarkexchange.MessageContextException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -22,21 +22,13 @@ import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
 
 @Component
+@RequiredArgsConstructor
+@Slf4j
 public class DpoConversationStrategy implements ConversationStrategy {
 
-    private static final Logger log = LoggerFactory.getLogger(DpoConversationStrategy.class);
-
-    private ServiceRegistryLookup sr;
-    private MessageSender messageSender;
-    private SvarUtService svarUtService;
-
-    DpoConversationStrategy(ServiceRegistryLookup sr,
-                            MessageSender messageSender,
-                            SvarUtService svarUtService) {
-        this.sr = sr;
-        this.messageSender = messageSender;
-        this.svarUtService = svarUtService;
-    }
+    private final ServiceRegistryLookup sr;
+    private final MessageSender messageSender;
+    private final SvarUtService svarUtService;
 
     @Override
     public void send(ConversationResource cr) throws NextMoveException {

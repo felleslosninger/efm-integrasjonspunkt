@@ -33,16 +33,14 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
-import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
 
 /**
  * The idea behind this queue is to avoid loosing messages before they are saved in Noark System.
- *
+ * <p>
  * The way it works is that any exceptions that happens in after a message is put on the queue is re-sent to the JMS listener. If
  * the application is restarted the message is also resent.
- *
+ * <p>
  * The JMS listener has the responsibility is to forward the message to the archive system.
- *
  */
 @Component
 public class InternalQueue {
@@ -50,7 +48,6 @@ public class InternalQueue {
     private static final String EXTERNAL = "external";
     private static final String NOARK = "noark";
     private static final String NEXTMOVE = "nextmove";
-    private static final String NEXTMOVE_2 = "nextmove_2";
     private static final String PUTMSG = "putmessage";
     private static final String DLQ = "ActiveMQ.DLQ";
 
@@ -104,17 +101,6 @@ public class InternalQueue {
     }
 
     @JmsListener(destination = NEXTMOVE, containerFactory = "myJmsContainerFactory", concurrency = "100")
-    public void nextmoveListener(byte[] message, Session session) {
-        ConversationResource cr = unmarshalNextMoveMessage(message);
-        try {
-            nextMoveSender.send(cr);
-        } catch (Exception e) {
-            Audit.warn("Failed to send message... queue will retry", NextMoveMessageMarkers.markerFrom(cr), e);
-            throw new MeldingsUtvekslingRuntimeException(e);
-        }
-    }
-
-    @JmsListener(destination = NEXTMOVE_2, containerFactory = "myJmsContainerFactory", concurrency = "100")
     public void nextMove2Listener(byte[] message, Session session) {
         NextMoveMessage nextMoveMessage;
         try {
@@ -278,26 +264,13 @@ public class InternalQueue {
         enqueueExternal(eduCore);
     }
 
-    public void enqueueNextmove(ConversationResource cr) {
-        try {
-            Marshaller marshaller = jaxbContextNextmove.createMarshaller();
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            marshaller.marshal(new JAXBElement<>(new QName("uri", "local"), ConversationResource.class, cr), bos);
-            jmsTemplate.convertAndSend(NEXTMOVE, bos.toByteArray());
-        } catch (JAXBException e) {
-            Audit.error("Unable to queue message", markerFrom(cr), e);
-            throw new MeldingsUtvekslingRuntimeException(e);
-        }
-    }
-
     public void enqueueNextMove2(NextMoveMessage msg) {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             objectMapper.writeValue(bos, msg);
-            jmsTemplate.convertAndSend(NEXTMOVE_2, bos.toByteArray());
+            jmsTemplate.convertAndSend(NEXTMOVE, bos.toByteArray());
         } catch (IOException e) {
             throw new NextMoveRuntimeException(String.format("Unable to marshall NextMove message with id=%s", msg.getConversationId()), e);
         }
-
     }
 
     /**
@@ -351,7 +324,7 @@ public class InternalQueue {
         } catch (Exception e) {
             Audit.error("Failed delivering to archive", markerFrom(sbd), e);
             if (e instanceof MessageException) {
-                logger.error(markerFrom(sbd), ((MessageException)e).getStatusMessage().getTechnicalMessage(), e);
+                logger.error(markerFrom(sbd), ((MessageException) e).getStatusMessage().getTechnicalMessage(), e);
             }
             throw new MeldingsUtvekslingRuntimeException(e);
         }

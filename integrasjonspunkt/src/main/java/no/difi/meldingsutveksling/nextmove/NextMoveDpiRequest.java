@@ -1,11 +1,12 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import com.google.common.collect.Lists;
+import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.dpi.Document;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
-import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
+import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 
@@ -17,25 +18,16 @@ import java.util.stream.Stream;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.MimeTypeExtensionMapper.getMimetype;
 
+@RequiredArgsConstructor
 public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     private static final String DEFAULT_EXT = "PDF";
     private static final String MISSING_TXT = "Missing title";
 
-    private IntegrasjonspunktProperties props;
-    private NextMoveMessage message;
-    private ServiceRecord serviceRecord;
-    private MessagePersister messagePersister;
-
-    public NextMoveDpiRequest(IntegrasjonspunktProperties props,
-                              MessagePersister messagePersister,
-                              NextMoveMessage message,
-                              ServiceRecord serviceRecord) {
-        this.props = props;
-        this.messagePersister = messagePersister;
-        this.message = message;
-        this.serviceRecord = serviceRecord;
-    }
+    private final IntegrasjonspunktProperties props;
+    private final NextMoveMessage message;
+    private final ServiceRecord serviceRecord;
+    private final CryptoMessagePersister cryptoMessagePersister;
 
     @Override
     public Document getDocument() {
@@ -74,7 +66,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     private byte[] getContent(String fileName) {
         try {
-            return messagePersister.read(message.getConversationId(), fileName);
+            return cryptoMessagePersister.read(message.getConversationId(), fileName);
         } catch (IOException e) {
             throw new NextMoveRuntimeException(String.format("Could not read file \"%s\"", fileName), e);
         }

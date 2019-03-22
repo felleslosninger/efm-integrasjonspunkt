@@ -1,17 +1,15 @@
 package no.difi.meldingsutveksling.domain.arkivmelding;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.*;
 import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
+import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -24,15 +22,10 @@ import static java.util.Optional.ofNullable;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class ArkivmeldingFactory {
 
-    private MessagePersister persister;
-
-    @Autowired
-    public ArkivmeldingFactory(IntegrasjonspunktProperties props,
-                               ObjectProvider<MessagePersister> persister) {
-        this.persister = persister.getIfUnique();
-    }
+    private final CryptoMessagePersister cryptoMessagePersister;
 
     public Arkivmelding createArkivmeldingAndWriteFiles(PutMessageRequestWrapper putMessage) {
         MeldingType mt = EDUCoreConverter.payloadAsMeldingType(putMessage.getPayload());
@@ -112,7 +105,7 @@ public class ArkivmeldingFactory {
             try {
                 writeDokument(putMessage.getConversationId(), d.getVeFilnavn(), d.getFil().getBase64());
             } catch (IOException e) {
-                log.error("Could not write file {} from message {}", d.getVeFilnavn(),  putMessage.getConversationId());
+                log.error("Could not write file {} from message {}", d.getVeFilnavn(), putMessage.getConversationId());
                 throw new MeldingsUtvekslingRuntimeException(e);
             }
         });
@@ -123,6 +116,6 @@ public class ArkivmeldingFactory {
     }
 
     private void writeDokument(String convId, String filename, byte[] content) throws IOException {
-        persister.write(convId, filename, content);
+        cryptoMessagePersister.write(convId, filename, content);
     }
 }

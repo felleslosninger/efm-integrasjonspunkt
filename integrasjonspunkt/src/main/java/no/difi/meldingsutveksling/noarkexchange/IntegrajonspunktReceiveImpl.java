@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.Decryptor;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
@@ -27,8 +28,6 @@ import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
@@ -54,11 +53,12 @@ import static no.difi.meldingsutveksling.noarkexchange.logging.PutMessageRespons
  *
  */
 @Component("recieveService")
+@Slf4j
 public class IntegrajonspunktReceiveImpl {
 
     private static final String OKEY_TYPE = "OK";
     private static final String OK_TYPE = OKEY_TYPE;
-    private static final Logger logger = LoggerFactory.getLogger(IntegrasjonspunktImpl.class);
+
     private final TransportFactory transportFactory;
     private NoarkClient localNoark;
     private final Adresseregister adresseregisterService;
@@ -68,6 +68,7 @@ public class IntegrajonspunktReceiveImpl {
     private final MessageSender messageSender;
     private final EDUCoreFactory eduCoreFactory;
     private final MessagePersister messagePersister;
+
     private ApplicationContext context;
 
     public IntegrajonspunktReceiveImpl(ApplicationContext context,
@@ -156,7 +157,7 @@ public class IntegrajonspunktReceiveImpl {
     }
 
     public void forwardToNoarkSystemAndSendReceipts(StandardBusinessDocument sbd, EDUCore eduCore) {
-        PutMessageRequestType putMessage = eduCoreFactory.createPutMessageFromCore(eduCore);
+        PutMessageRequestType putMessage = EDUCoreFactory.createPutMessageFromCore(eduCore);
         PutMessageResponseType response = localNoark.sendEduMelding(putMessage);
         if (response == null || response.getResult() == null) {
             Audit.info("Empty response from archive", markerFrom(sbd));
@@ -179,12 +180,12 @@ public class IntegrajonspunktReceiveImpl {
                     try {
                         messagePersister.delete(sbd.getConversationId());
                     } catch (IOException e) {
-                        logger.error(String.format("Unable to delete files for conversation with id=%s", sbd.getConversationId()), e);
+                        log.error(String.format("Unable to delete files for conversation with id=%s", sbd.getConversationId()), e);
                     }
                 }
             } else {
                 Audit.error("Unexpected response from archive", markerFrom(response));
-                logger.error(">>> archivesystem: " + response.getResult().getMessage().get(0).getText());
+                log.error(">>> archivesystem: " + response.getResult().getMessage().get(0).getText());
             }
         }
 

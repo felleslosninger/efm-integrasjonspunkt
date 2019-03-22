@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
 import com.querydsl.core.types.Predicate;
+import lombok.RequiredArgsConstructor;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.NextMoveConsts;
@@ -12,10 +13,9 @@ import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
-import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
+import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -38,19 +38,13 @@ import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 
 @Component
+@RequiredArgsConstructor
 public class NextMoveMessageService {
 
-    private final MessagePersister messagePersister;
+    private final CryptoMessagePersister cryptoMessagePersister;
     private final NextMoveMessageOutRepository messageRepo;
     private final InternalQueue internalQueue;
     private final ConversationService conversationService;
-
-    public NextMoveMessageService(ObjectProvider<MessagePersister> messagePersister, NextMoveMessageOutRepository messageRepo, InternalQueue internalQueue, ConversationService conversationService) {
-        this.messagePersister = messagePersister.getIfUnique();
-        this.messageRepo = messageRepo;
-        this.internalQueue = internalQueue;
-        this.conversationService = conversationService;
-    }
 
     NextMoveOutMessage getMessage(String conversationId) {
         return messageRepo.findByConversationId(conversationId)
@@ -123,7 +117,7 @@ public class NextMoveMessageService {
                 .setPrimaryDocument(primaryDocument);
 
         try {
-            messagePersister.writeStream(message.getConversationId(), file.getIdentifier(), inputStream, size);
+            cryptoMessagePersister.writeStream(message.getConversationId(), file.getIdentifier(), inputStream, size);
         } catch (IOException e) {
             throw new MessagePersistException(filename);
         }
@@ -164,7 +158,7 @@ public class NextMoveMessageService {
                     .findAny()
                     .orElseThrow(MissingArkivmeldingException::new);
 
-            InputStream is = messagePersister.readStream(message.getConversationId(), arkivmeldingFile.getIdentifier()).getInputStream();
+            InputStream is = cryptoMessagePersister.readStream(message.getConversationId(), arkivmeldingFile.getIdentifier()).getInputStream();
             Arkivmelding arkivmelding;
             try {
                 arkivmelding = ArkivmeldingUtil.unmarshalArkivmelding(is);

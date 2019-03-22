@@ -1,17 +1,15 @@
 package no.difi.meldingsutveksling.nextmove.message;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Value;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-@Data
-@AllArgsConstructor(staticName = "of")
+@Value(staticConstructor = "of")
 public class FileEntryStream implements AutoCloseable {
 
-    private InputStream inputStream;
-    private long size;
+    private final InputStream inputStream;
+    private final long size;
 
     @Override
     public void close() throws IOException {

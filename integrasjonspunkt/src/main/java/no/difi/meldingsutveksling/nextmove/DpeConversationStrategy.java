@@ -1,29 +1,19 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.logging.Audit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
 
 @Component
+@RequiredArgsConstructor
+@Slf4j
 public class DpeConversationStrategy implements ConversationStrategy {
 
-    private static final Logger log = LoggerFactory.getLogger(DpeConversationStrategy.class);
-
-    private IntegrasjonspunktProperties props;
-    private NextMoveServiceBus serviceBus;
-
-    @Autowired
-    DpeConversationStrategy(IntegrasjonspunktProperties props,
-                            NextMoveServiceBus serviceBus) {
-        this.props = props;
-        this.serviceBus = serviceBus;
-    }
+    private final NextMoveServiceBus serviceBus;
 
     @Override
     public void send(ConversationResource conversationResource) throws NextMoveException {

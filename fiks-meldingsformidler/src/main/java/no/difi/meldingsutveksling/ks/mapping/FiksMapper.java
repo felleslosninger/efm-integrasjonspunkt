@@ -19,7 +19,7 @@ import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
-import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
+import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.AvsmotType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
@@ -57,17 +57,18 @@ public class FiksMapper {
 
     private final IntegrasjonspunktProperties properties;
     private final ServiceRegistryLookup serviceRegistry;
-    private final MessagePersister messagePersister;
+    private final CryptoMessagePersister cryptoMessagePersister;
     private final UUIDGenerator uuidGenerator;
     private final ObjectProvider<CmsUtil> cmsUtilProvider;
 
     public FiksMapper(IntegrasjonspunktProperties properties,
                       ServiceRegistryLookup serviceRegistry,
-                      ObjectProvider<MessagePersister> messagePersister,
-                      UUIDGenerator uuidGenerator, ObjectProvider<CmsUtil> cmsUtilProvider) {
+                      CryptoMessagePersister cryptoMessagePersister,
+                      UUIDGenerator uuidGenerator,
+                      ObjectProvider<CmsUtil> cmsUtilProvider) {
         this.properties = properties;
         this.serviceRegistry = serviceRegistry;
-        this.messagePersister = messagePersister.getIfUnique();
+        this.cryptoMessagePersister = cryptoMessagePersister;
         this.uuidGenerator = uuidGenerator;
         this.cmsUtilProvider = cmsUtilProvider;
     }
@@ -155,7 +156,7 @@ public class FiksMapper {
 
     private Arkivmelding getArkivmelding(NextMoveMessage message) throws NextMoveException {
         String arkivmeldingIdentifier = getArkivmeldingIdentifier(message);
-        InputStream is = messagePersister.readStream(message.getConversationId(), arkivmeldingIdentifier).getInputStream();
+        InputStream is = cryptoMessagePersister.readStream(message.getConversationId(), arkivmeldingIdentifier).getInputStream();
 
         try {
             return ArkivmeldingUtil.unmarshalArkivmelding(is);
@@ -256,7 +257,7 @@ public class FiksMapper {
     }
 
     private Dokument getDocument(String conversationId, BusinessMessageFile file, X509Certificate cert) {
-        InputStream is = messagePersister.readStream(conversationId, file.getIdentifier()).getInputStream();
+        InputStream is = cryptoMessagePersister.readStream(conversationId, file.getIdentifier()).getInputStream();
 
         return Dokument.builder()
                 .withData(getDataHandler(cert, is))

@@ -11,11 +11,10 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.NextMoveStreamedFile;
 import no.difi.meldingsutveksling.domain.StreamedFile;
+import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
-import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.MessageContext;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
@@ -35,19 +34,19 @@ import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_RECEIPT;
 @Slf4j
 public class AsicHandler {
 
-    private MessagePersister messagePersister;
-    private IntegrasjonspunktNokkel keyHelper;
+    private final IntegrasjonspunktNokkel keyHelper;
+    private final CryptoMessagePersister cryptoMessagePersister;
 
-    public AsicHandler(ObjectProvider<MessagePersister> messagePersister, IntegrasjonspunktNokkel keyHelper) {
-        this.messagePersister = messagePersister.getIfUnique();
+    public AsicHandler(IntegrasjonspunktNokkel keyHelper, CryptoMessagePersister cryptoMessagePersister) {
         this.keyHelper = keyHelper;
+        this.cryptoMessagePersister = cryptoMessagePersister;
     }
 
     public InputStream createEncryptedAsic(ConversationResource cr, MessageContext messageContext) {
         List<StreamedFile> attachements = new ArrayList<>();
         if (cr.getFileRefs() != null) {
             for (String filename : cr.getFileRefs().values()) {
-                FileEntryStream fileEntryStream = messagePersister.readStream(cr.getConversationId(), filename);
+                FileEntryStream fileEntryStream = cryptoMessagePersister.readStream(cr.getConversationId(), filename);
                 String ext = Stream.of(filename.split(".")).reduce((p, e) -> e).orElse("pdf");
                 attachements.add(new NextMoveStreamedFile(filename, fileEntryStream.getInputStream(), MimeTypeExtensionMapper.getMimetype(ext)));
             }
@@ -56,7 +55,7 @@ public class AsicHandler {
         return archiveAndEncryptAttachments(attachements, messageContext, cr.getServiceIdentifier());
     }
 
-    public InputStream createEncryptedAsic(NextMoveMessage msg, MessageContext messageContext) throws NextMoveException {
+    public InputStream createEncryptedAsic(NextMoveMessage msg, MessageContext messageContext) {
 
         if (msg.getFiles() == null || msg.getFiles().isEmpty()) return null;
 
@@ -66,7 +65,7 @@ public class AsicHandler {
                     if (b.getPrimaryDocument()) return 1;
                     return a.getFilename().compareTo(b.getFilename());
                 }).map(f -> {
-                    FileEntryStream fes = messagePersister.readStream(msg.getConversationId(), f.getIdentifier());
+                    FileEntryStream fes = cryptoMessagePersister.readStream(msg.getConversationId(), f.getIdentifier());
                     return new NextMoveStreamedFile(f.getFilename(), fes.getInputStream(), getMimetype(f));
                 }).collect(Collectors.toList());
 

@@ -3,9 +3,7 @@ package no.difi.meldingsutveksling.nextmove.v2;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
 import no.difi.meldingsutveksling.exceptions.ConversationNotLockedException;
@@ -13,7 +11,6 @@ import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
-import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
@@ -50,9 +47,7 @@ public class NextMoveMessageInController {
     private final IntegrasjonspunktProperties props;
     private final ConversationService conversationService;
     private final NextMoveMessageInRepository messageRepo;
-    private final MessagePersister messagePersister;
-    private final IntegrasjonspunktNokkel keyInfo;
-    private final CmsUtil cmsUtil;
+    private final CryptoMessagePersisterImpl cryptoMessagePersister;
 
     @GetMapping
     @ApiOperation(value = "Get all incoming messages")
@@ -104,12 +99,13 @@ public class NextMoveMessageInController {
             throw new ConversationNotLockedException(conversationId);
         }
 
-        try (FileEntryStream fileEntry = messagePersister.readStream(conversationId, ASIC_FILE)) {
+        try {
+            FileEntryStream fileEntry = cryptoMessagePersister.readStream(conversationId, ASIC_FILE);
             return ResponseEntity.ok()
                     .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME + ASIC_FILE)
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .body(new InputStreamResource(cmsUtil.decryptCMSStreamed(fileEntry.getInputStream(), keyInfo.loadPrivateKey())));
-        } catch (PersistenceException | IOException e) {
+                    .body(new InputStreamResource(fileEntry.getInputStream()));
+        } catch (PersistenceException e) {
             Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing message from queue",
                     ASIC_FILE, message.getConversationId(), message.getSenderIdentifier()), markerFrom(message), e);
             throw new FileNotFoundException(ASIC_FILE);
@@ -134,7 +130,7 @@ public class NextMoveMessageInController {
         }
 
         try {
-            messagePersister.delete(conversationId);
+            cryptoMessagePersister.delete(conversationId);
         } catch (IOException e) {
             log.error("Error deleting files from conversation with id={}", conversationId, e);
         }

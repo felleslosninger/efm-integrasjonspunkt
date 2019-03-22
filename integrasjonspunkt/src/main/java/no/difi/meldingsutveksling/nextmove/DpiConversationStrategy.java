@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.KeystoreProvider;
 import no.difi.meldingsutveksling.ServiceIdentifier;
@@ -7,10 +8,9 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
+import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -22,22 +22,13 @@ import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerF
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class DpiConversationStrategy implements ConversationStrategy {
 
-    private IntegrasjonspunktProperties props;
-    private ServiceRegistryLookup sr;
-    private KeystoreProvider keystore;
-    private MessagePersister messagePersister;
-
-    DpiConversationStrategy(IntegrasjonspunktProperties props,
-                            ServiceRegistryLookup sr,
-                            ObjectProvider<MessagePersister> messagePersister,
-                            KeystoreProvider keystore) {
-        this.props = props;
-        this.sr = sr;
-        this.messagePersister = messagePersister.getIfUnique();
-        this.keystore = keystore;
-    }
+    private final IntegrasjonspunktProperties props;
+    private final ServiceRegistryLookup sr;
+    private final KeystoreProvider keystore;
+    private final CryptoMessagePersister cryptoMessagePersister;
 
     @Override
     public void send(ConversationResource conversationResource) throws NextMoveException {
@@ -62,7 +53,7 @@ public class DpiConversationStrategy implements ConversationStrategy {
             throw new NextMoveException(errorStr);
         }
 
-        NextMoveDpiRequest request = new NextMoveDpiRequest(props, messagePersister, message, serviceRecord.get());
+        NextMoveDpiRequest request = new NextMoveDpiRequest(props, message, serviceRecord.get(), cryptoMessagePersister);
         MeldingsformidlerClient client = new MeldingsformidlerClient(props.getDpi(), keystore.getKeyStore());
         try {
             client.sendMelding(request);
