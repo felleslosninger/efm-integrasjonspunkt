@@ -178,7 +178,7 @@ Feature: Sending a Next Move DPO message
        <ns0:Reportee>910077473</ns0:Reportee>
        <ns0:FileList>
           <ns0:File>
-             <ns0:FileName>content.xml</ns0:FileName>
+             <ns0:FileName>sbd.json</ns0:FileName>
           </ns0:File>
        </ns0:FileList>
     </ns0:BrokerServiceManifest>

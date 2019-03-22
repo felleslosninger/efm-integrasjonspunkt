@@ -32,6 +32,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import static no.difi.meldingsutveksling.NextMoveConsts.ALTINN_SBD_FILE;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 
 /**
@@ -67,17 +68,27 @@ public class AltinnPackage {
     }
 
     public static AltinnPackage from(UploadRequest document) {
-        BrokerServiceManifestBuilder manifest = new BrokerServiceManifestBuilder();
-        manifest.withSender(document.getSender());
-        manifest.withSenderReference(document.getSenderReference());
-        manifest.withExternalService(
-                new ExternalServiceBuilder()
-                        .withExternalServiceCode("v3888")
-                        .withExternalServiceEditionCode(new BigInteger("070515"))
-                        .build());
+        BrokerServiceManifest manifest = new BrokerServiceManifestBuilder()
+                .withSender(document.getSender())
+                .withSenderReference(document.getSenderReference())
+                .withExternalService(
+                        new ExternalServiceBuilder()
+                                .withExternalServiceCode("v3888")
+                                .withExternalServiceEditionCode(new BigInteger("070515"))
+                                .build())
+                .withFileName(getFileName(document))
+                .build();
 
-        RecipientBuilder recipient = new RecipientBuilder(document.getReceiver());
-        return new AltinnPackage(manifest.build(), recipient.build(), document.getPayload(), document.getAsicInputStream());
+        BrokerServiceRecipientList recipient = new RecipientBuilder(document.getReceiver()).build();
+        return new AltinnPackage(manifest, recipient, document.getPayload(), document.getAsicInputStream());
+    }
+
+    private static String getFileName(UploadRequest document) {
+        if (document.getPayload().getAny() instanceof BusinessMessage) {
+            return ALTINN_SBD_FILE;
+        }
+
+        return "content.xml";
     }
 
     /**
@@ -115,7 +126,7 @@ public class AltinnPackage {
         }
 
         if (sbd.getAny() instanceof BusinessMessage) {
-            zipOutputStream.putNextEntry(new ZipEntry("sbd.json"));
+            zipOutputStream.putNextEntry(new ZipEntry(ALTINN_SBD_FILE));
             ObjectMapper om = context.getBean(ObjectMapper.class);
             om.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
             om.writeValue(zipOutputStream, sbd);
@@ -148,7 +159,7 @@ public class AltinnPackage {
                 manifest = (BrokerServiceManifest) unmarshaller.unmarshal(zipFile.getInputStream(zipEntry));
             } else if (zipEntry.getName().equals("recipients.xml")) {
                 recipientList = (BrokerServiceRecipientList) unmarshaller.unmarshal(zipFile.getInputStream(zipEntry));
-            } else if (zipEntry.getName().equals("sbd.json")) {
+            } else if (zipEntry.getName().equals(ALTINN_SBD_FILE)) {
                 ObjectMapper om = context.getBean(ObjectMapper.class);
                 om.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
                 sbd = om.readValue(zipFile.getInputStream(zipEntry), StandardBusinessDocument.class);

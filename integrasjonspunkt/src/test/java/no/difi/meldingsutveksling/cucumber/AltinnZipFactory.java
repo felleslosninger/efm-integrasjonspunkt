@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static no.difi.meldingsutveksling.NextMoveConsts.ALTINN_SBD_FILE;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 
 @Component
@@ -21,10 +22,10 @@ public class AltinnZipFactory {
     private final AsicFactory asicFactory;
 
     @SneakyThrows
-    public InputStream createAltinnZip(Message message) {
+    InputStream createAltinnZip(Message message) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ZipOutputStream out = new ZipOutputStream(bos);
-        out.putNextEntry(new ZipEntry("sbd.json"));
+        out.putNextEntry(new ZipEntry(ALTINN_SBD_FILE));
         out.write(objectMapper.writeValueAsString(message.getSbd()).getBytes());
         out.closeEntry();
 
@@ -37,5 +38,4 @@ public class AltinnZipFactory {
 
         return new ByteArrayInputStream(bos.toByteArray());
     }
-
 }
