@@ -53,7 +53,7 @@ public class DBMessagePersister implements MessagePersister {
     @Transactional
     public void writeStream(String conversationId, String filename, InputStream stream, long size) throws IOException {
         LobHelper lobHelper = em.unwrap(Session.class).getLobHelper();
-        Blob contentBlob = lobHelper.createBlob(stream, stream.available());
+        Blob contentBlob = lobHelper.createBlob(stream, size);
 
         NextMoveMessageEntry entry = NextMoveMessageEntry.of(conversationId, filename, contentBlob, size);
         repo.save(entry);

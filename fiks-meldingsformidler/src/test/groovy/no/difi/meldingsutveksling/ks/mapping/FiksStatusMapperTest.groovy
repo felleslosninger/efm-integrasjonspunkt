@@ -10,10 +10,9 @@ class FiksStatusMapperTest extends Specification {
     @Unroll
     "given ForsendelseStatus.#forsendelsestatus should map to ReceiptStatus.#receiptStatus"() {
         given:
-        def mapper = new FiksStatusMapper()
 
         expect:
-        mapper.mapFrom(forsendelsestatus) == receiptStatus
+        FiksStatusMapper.mapFrom(forsendelsestatus) == receiptStatus
         where:
         forsendelsestatus                  | receiptStatus
         ForsendelseStatus.LEST             | DpfReceiptStatus.LEST
