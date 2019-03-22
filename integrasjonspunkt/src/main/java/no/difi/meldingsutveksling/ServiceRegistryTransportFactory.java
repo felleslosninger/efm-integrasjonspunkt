@@ -20,14 +20,14 @@ public class ServiceRegistryTransportFactory implements TransportFactory {
 
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final AltinnWsClientFactory altinnWsClientFactory;
-    private final SenderReferenceGenerator senderReferenceGenerator;
+    private final UUIDGenerator uuidGenerator;
 
     @Override
     public Transport createTransport(StandardBusinessDocument message) {
         return Optional.of(serviceRegistryLookup.getServiceRecord(message.getReceiverOrgNumber()).getServiceRecord())
                 .filter(isServiceIdentifier(DPO))
                 .map(altinnWsClientFactory::getAltinnWsClient)
-                .map(client -> new AltinnTransport(client, senderReferenceGenerator))
+                .map(client -> new AltinnTransport(client, uuidGenerator))
                 .orElseThrow(() -> new RuntimeException("Failed to create transport"));
     }
 }

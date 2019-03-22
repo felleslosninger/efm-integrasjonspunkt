@@ -5,8 +5,8 @@ import org.springframework.stereotype.Component;
 import java.util.UUID;
 
 @Component
-public class UUIDSenderReferenceGenerator implements SenderReferenceGenerator {
-    @Override
+public class UUIDGenerator {
+
     public String generate() {
         return UUID.randomUUID().toString();
     }

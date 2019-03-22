@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.cucumber;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.api.DataTable;
+import cucumber.api.java.After;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.Then;
 import lombok.RequiredArgsConstructor;
@@ -13,24 +14,23 @@ import no.difi.meldingsutveksling.altinn.mock.brokerbasic.ObjectFactory;
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExternalBasicStreamed;
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.ReceiptExternalStreamedBE;
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.StreamedPayloadBasicBE;
-import no.difi.meldingsutveksling.domain.ByteArrayFile;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContentAssert;
-import org.springframework.xml.transform.StringResult;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -38,28 +38,30 @@ import static org.mockito.Mockito.*;
 @Slf4j
 public class AltinnOutSteps {
 
-    private static final String PREFIX_MAPPER = "com.sun.xml.bind.namespacePrefixMapper";
-
     private final IBrokerServiceExternalBasic iBrokerServiceExternalBasic;
     private final IBrokerServiceExternalBasicStreamed iBrokerServiceExternalBasicStreamed;
     private final Holder<StandardBusinessDocument> standardBusinessDocumentHolder;
     private final Holder<ZipContent> zipContentHolder;
     private final Holder<Message> messageHolder;
+    private final XMLMarshaller xmlMarshaller;
     private final AltinnZipParser altinnZipParser;
     private final AltinnZipContentParser altinnZipContentParser;
     private final ObjectMapper objectMapper;
 
     private JacksonTester<StandardBusinessDocument> json;
 
-    @Before
-    @SneakyThrows
-    public void before() {
+    @After
+    public void after() {
         Mockito.reset(iBrokerServiceExternalBasic, iBrokerServiceExternalBasicStreamed);
-        JacksonTester.initFields(this, objectMapper);
-
         standardBusinessDocumentHolder.reset();
         messageHolder.reset();
         zipContentHolder.reset();
+    }
+
+    @Before
+    @SneakyThrows
+    public void before() {
+        JacksonTester.initFields(this, objectMapper);
 
         doAnswer((Answer<ReceiptExternalStreamedBE>) invocation -> {
             StreamedPayloadBasicBE parameters = invocation.getArgument(0);
@@ -86,22 +88,22 @@ public class AltinnOutSteps {
         verify(iBrokerServiceExternalBasic, timeout(5000).times(1))
                 .initiateBrokerServiceBasic(any(), any(), captor.capture());
 
-        JAXBContext context = JAXBContext.newInstance(BrokerServiceInitiation.class);
-        Marshaller marshaller = context.createMarshaller();
-        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-        marshaller.setProperty(PREFIX_MAPPER, new DefaultNamespacePrefixMapper());
+        await().atMost(5, SECONDS)
+                .pollInterval(100, MILLISECONDS)
+                .until(zipContentHolder::isPresent);
 
-        StringResult result = new StringResult();
-        marshaller.marshal(
-                new ObjectFactory().createBrokerServiceInitiation(captor.getValue()),
-                result);
+        String result = xmlMarshaller.masrshall(
+                new ObjectFactory().createBrokerServiceInitiation(captor.getValue()));
 
-        assertThat(result.toString()).isXmlEqualTo(body);
+        assertThat(result).isXmlEqualTo(body);
     }
 
     @Then("^the sent Altinn ZIP contains the following files:$")
     @SneakyThrows
     public void theSentAltinnZipContains(DataTable expectedTable) {
+        verify(iBrokerServiceExternalBasicStreamed, timeout(5000).times(1))
+                .uploadFileStreamedBasic(any(), any(), any(), any(), any(), any());
+
         ZipContent zipContent = zipContentHolder.get();
 
         List<List<String>> actualList = new ArrayList<>();

@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.cucumber;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import cucumber.api.java.After;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.And;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,10 @@ public class AltinnInSteps {
     @Before
     public void before() {
         JacksonTester.initFields(this, objectMapper);
+    }
+
+    @After
+    public void after() {
         altinnMessage = null;
     }
 

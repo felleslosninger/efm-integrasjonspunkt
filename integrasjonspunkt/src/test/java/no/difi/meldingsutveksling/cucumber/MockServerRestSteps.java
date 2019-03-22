@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.ResponseActions;
+import org.springframework.test.web.client.UnorderedRequestExpectationManager;
 import org.springframework.test.web.client.response.DefaultResponseCreator;
 import org.springframework.web.client.RestTemplate;
 
@@ -27,24 +28,24 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 @RequiredArgsConstructor
 public class MockServerRestSteps {
 
-    private final MockServerRestTemplateCustomizer mockServerRestTemplateCustomizer;
     private final RestClient restClient;
     private final ServiceBusRestClient serviceBusRestClient;
 
+    private MockServerRestTemplateCustomizer mockServerRestTemplateCustomizer;
     private DefaultResponseCreator responseCreator;
     private ResponseActions responseActions;
 
     @Before
     @SneakyThrows
     public void before() {
-        mockServerRestTemplateCustomizer.getServers().values().forEach(MockRestServiceServer::reset);
+        mockServerRestTemplateCustomizer = new MockServerRestTemplateCustomizer(UnorderedRequestExpectationManager.class);
         mockServerRestTemplateCustomizer.customize((RestTemplate) restClient.getRestTemplate());
         mockServerRestTemplateCustomizer.customize(serviceBusRestClient.getRestTemplate());
     }
 
     @After
     public void after() {
-        mockServerRestTemplateCustomizer.getServers().forEach((restTemplate, server) -> server.reset());
+        mockServerRestTemplateCustomizer = null;
     }
 
     private MockRestServiceServer getServer(String url) {

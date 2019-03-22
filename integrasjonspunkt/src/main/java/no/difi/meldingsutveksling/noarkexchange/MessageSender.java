@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -10,8 +12,6 @@ import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -24,25 +24,16 @@ import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory.createOkResponse;
 
 @Component
+@RequiredArgsConstructor
+@Slf4j
 public class MessageSender implements ApplicationContextAware {
 
-    private static final Logger log = LoggerFactory.getLogger(MessageSender.class);
+    private final TransportFactory transportFactory;
+    private final StandardBusinessDocumentFactory standardBusinessDocumentFactory;
+    private final AsicHandler asicHandler;
+    private final MessageContextFactory messageContextFactory;
 
-    private TransportFactory transportFactory;
     private ApplicationContext context;
-    private StandardBusinessDocumentFactory standardBusinessDocumentFactory;
-    private AsicHandler asicHandler;
-    private MessageContextFactory messageContextFactory;
-
-    public MessageSender(TransportFactory transportFactory,
-                         StandardBusinessDocumentFactory standardBusinessDocumentFactory,
-                         AsicHandler asicHandler,
-                         MessageContextFactory messageContextFactory) {
-        this.transportFactory = transportFactory;
-        this.standardBusinessDocumentFactory = standardBusinessDocumentFactory;
-        this.asicHandler = asicHandler;
-        this.messageContextFactory = messageContextFactory;
-    }
 
     public PutMessageResponseType sendMessage(EDUCore message) {
         MessageContext messageContext;

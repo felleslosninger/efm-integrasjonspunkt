@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.cucumber;
 
+import cucumber.api.java.After;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +27,13 @@ public class NextMoveMessageOutSteps {
 
     @Before
     public void before() {
+    }
+
+    @After
+    public void after() {
         multipart = null;
     }
+
 
     @Given("^I prepare a multipart request$")
     public void iPrepareAMultipartRequest() {

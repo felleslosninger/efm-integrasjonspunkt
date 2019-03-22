@@ -38,7 +38,7 @@ public class AsicSteps {
     @Then("^the content of the ASIC file named \"([^\"]*)\" is:$")
     public void theContentOfTheASICFileNamedIs(String filename, String expectedContent) {
         Message message = messageHolder.get();
-        assertThat(new String(message.getAttachement(filename).getBytes()))
+        assertThat(new String(message.getAttachment(filename).getBytes()))
                 .isEqualToIgnoringWhitespace(expectedContent);
     }
 

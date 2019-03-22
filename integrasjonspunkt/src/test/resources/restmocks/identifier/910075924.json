@@ -1,0 +1,38 @@
+{
+  "infoRecord": {
+    "identifier": "910075924",
+    "organizationName": "TEST - C4",
+    "postadresse": null,
+    "entityType": {
+      "name": "ORGL"
+    }
+  },
+  "serviceRecord": {
+    "organisationNumber": "910075924",
+    "serviceIdentifier": "DPF",
+    "pemCertificate": "-----BEGIN CERTIFICATE-----\nMIICuDCCAaCgAwIBAgIEXJSg4TANBgkqhkiG9w0BAQsFADAeMRwwGgYDVQQDDBNE\nSUZJIHRlc3QgOTEwMDc1OTI0MB4XDTE5MDMyMjA4NDYyNVoXDTIwMDMyMTA4NDYy\nNVowHjEcMBoGA1UEAwwTRElGSSB0ZXN0IDkxMDA3NTkyNDCCASIwDQYJKoZIhvcN\nAQEBBQADggEPADCCAQoCggEBALTQ7sTZY1V+B1eYDlWequTYzilT35XHSLe8n3lu\nzSrTwJ4QAUujR3Q3n0sw5Wvw8vu4hBo0fKKt6JYHUrcwLfAMoWIdAKcu3ALEPi09\nPDbDxPM2VvpWeU2vZfEgrETuSzZsqdwDXzP6LyqbnGRb2nKnNWDg7HtzsxAnE+LA\nW5x6fmhhNDulF/EdyJNxLm0KprRHHxa0hoTLjwd+Dg3W3RmA8mc4ob/RkICWHYZW\n5MIoX4PlNKXnymPX8BffVtOw8u9KNwdmQijreREjQ+4AgfuvASCtKWeuNb4pnI+n\npNCoLYDdLFnHhbB99NtG/uP+8A7belYHEwI7VcsEn+0PzgcCAwEAATANBgkqhkiG\n9w0BAQsFAAOCAQEAPgysZYyhK2NlS+VLsSIu2Zok2xka7HElmUhC4X+2PNZriDW6\nySUrzE414U2eJUlfoHNLiunOHuDhQzS1fSZgBm9dqXxFdWTm6w7FylADTrmcPqSr\n12016gGqWHMwfjAo2kcx3jFEgTi4vhZ1gqRJjrw6i/Q3xJRouc5h7TO4lUxhk76N\nTU+rG9adcmVxqwJa2P7VD5VO2zAyJerEXoirzkU7DuLCZLCdaLFJy9t8coVMeCx3\nuSivJIValIWJTSCjxuxRWG6jDTY46QmxI7QU5vA2Ee6M2q7+Wno7kl/a/86Hn34U\nkmF3fGjLiwWZwgy7axqPhXwz4YoJsAPflJZpkw==\n-----END CERTIFICATE-----\n",
+    "dpeCapabilities": [
+      "DPE_INNSYN"
+    ],
+    "serviceCode": "4192",
+    "serviceEditionCode": "270815",
+    "endPointURL": "http://localhost:1234"
+  },
+  "serviceRecords": [
+    {
+      "organisationNumber": "910075924",
+      "serviceIdentifier": "DPF",
+      "pemCertificate": "-----BEGIN CERTIFICATE-----\nMIICuDCCAaCgAwIBAgIEXJSg4TANBgkqhkiG9w0BAQsFADAeMRwwGgYDVQQDDBNE\nSUZJIHRlc3QgOTEwMDc1OTI0MB4XDTE5MDMyMjA4NDYyNVoXDTIwMDMyMTA4NDYy\nNVowHjEcMBoGA1UEAwwTRElGSSB0ZXN0IDkxMDA3NTkyNDCCASIwDQYJKoZIhvcN\nAQEBBQADggEPADCCAQoCggEBALTQ7sTZY1V+B1eYDlWequTYzilT35XHSLe8n3lu\nzSrTwJ4QAUujR3Q3n0sw5Wvw8vu4hBo0fKKt6JYHUrcwLfAMoWIdAKcu3ALEPi09\nPDbDxPM2VvpWeU2vZfEgrETuSzZsqdwDXzP6LyqbnGRb2nKnNWDg7HtzsxAnE+LA\nW5x6fmhhNDulF/EdyJNxLm0KprRHHxa0hoTLjwd+Dg3W3RmA8mc4ob/RkICWHYZW\n5MIoX4PlNKXnymPX8BffVtOw8u9KNwdmQijreREjQ+4AgfuvASCtKWeuNb4pnI+n\npNCoLYDdLFnHhbB99NtG/uP+8A7belYHEwI7VcsEn+0PzgcCAwEAATANBgkqhkiG\n9w0BAQsFAAOCAQEAPgysZYyhK2NlS+VLsSIu2Zok2xka7HElmUhC4X+2PNZriDW6\nySUrzE414U2eJUlfoHNLiunOHuDhQzS1fSZgBm9dqXxFdWTm6w7FylADTrmcPqSr\n12016gGqWHMwfjAo2kcx3jFEgTi4vhZ1gqRJjrw6i/Q3xJRouc5h7TO4lUxhk76N\nTU+rG9adcmVxqwJa2P7VD5VO2zAyJerEXoirzkU7DuLCZLCdaLFJy9t8coVMeCx3\nuSivJIValIWJTSCjxuxRWG6jDTY46QmxI7QU5vA2Ee6M2q7+Wno7kl/a/86Hn34U\nkmF3fGjLiwWZwgy7axqPhXwz4YoJsAPflJZpkw==\n-----END CERTIFICATE-----\n",
+      "dpeCapabilities": [
+        "DPE_INNSYN"
+      ],
+      "serviceCode": "4192",
+      "serviceEditionCode": "270815",
+      "endPointURL": "http://localhost:1234"
+    }
+  ],
+  "failedServiceIdentifiers": [],
+  "securitylevels": {
+    "DPF": 3
+  }
+}

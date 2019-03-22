@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.cucumber;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import cucumber.api.java.After;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
@@ -38,6 +39,10 @@ public class NextMoveMessageInSteps {
     @Before
     public void before() {
         JacksonTester.initFields(this, objectMapper);
+    }
+
+    @After
+    public void after() {
         receivedMessage = null;
     }
 
@@ -94,7 +99,7 @@ public class NextMoveMessageInSteps {
 
     @And("^I have an ASIC that contains a file named \"([^\"]*)\" with mimetype=\"([^\"]*)\":$")
     public void iHaveAnASICThatContainsAFileNamedWithMimetype(String filename, String mimetype, String body) throws Throwable {
-        ByteArrayFile attachement = receivedMessage.getAttachement(filename);
+        ByteArrayFile attachement = receivedMessage.getAttachment(filename);
         assertThat(attachement.getMimeType()).isEqualTo(mimetype);
         assertThat(new String(attachement.getBytes())).isEqualTo(body);
     }

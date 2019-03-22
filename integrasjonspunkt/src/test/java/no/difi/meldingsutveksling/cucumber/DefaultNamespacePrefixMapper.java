@@ -9,7 +9,7 @@ public class DefaultNamespacePrefixMapper extends NamespacePrefixMapper {
 
     private Map<String, String> namespaceMap = new HashMap<>();
 
-    public DefaultNamespacePrefixMapper() {
+    DefaultNamespacePrefixMapper() {
         namespaceMap.put("http://www.w3.org/2001/XMLSchema-instance", "xsi");
         namespaceMap.put("http://www.altinn.no/services/2009/10", "altinn1");
         namespaceMap.put("http://www.altinn.no/services/ServiceEngine/Broker/2015/06", "altinn2");

@@ -28,12 +28,10 @@ import no.difi.vefa.peppol.lookup.locator.StaticLocator;
 import no.difi.vefa.peppol.security.util.EmptyCertificateValidator;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.*;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.client.RestOperations;
 
@@ -66,8 +64,8 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public TransportFactory serviceRegistryTransportFactory(ServiceRegistryLookup serviceRegistryLookup, AltinnWsClientFactory altinnWsClientFactory, SenderReferenceGenerator senderReferenceGenerator) {
-        return new ServiceRegistryTransportFactory(serviceRegistryLookup, altinnWsClientFactory, senderReferenceGenerator);
+    public TransportFactory serviceRegistryTransportFactory(ServiceRegistryLookup serviceRegistryLookup, AltinnWsClientFactory altinnWsClientFactory, UUIDGenerator uuidGenerator) {
+        return new ServiceRegistryTransportFactory(serviceRegistryLookup, altinnWsClientFactory, uuidGenerator);
     }
 
     @Bean
@@ -141,6 +139,7 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
+    @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public CmsUtil cmsUtil() {
         return new CmsUtil();
     }

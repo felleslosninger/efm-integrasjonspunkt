@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.cucumber;
 
+import cucumber.api.java.After;
 import cucumber.api.java.Before;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -9,16 +10,17 @@ import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExter
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceClient;
+import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import no.difi.vefa.peppol.common.model.DocumentTypeIdentifier;
 import no.difi.vefa.peppol.lookup.LookupClient;
-import org.mockito.Mockito;
+import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
 import org.springframework.boot.test.context.SpringBootContextLoader;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.boot.test.web.client.MockServerRestTemplateCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -27,13 +29,9 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.web.client.UnorderedRequestExpectationManager;
 
-import java.util.Collections;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
 @ContextConfiguration(classes = {
         IntegrasjonspunktApplication.class,
@@ -55,22 +53,6 @@ public class CucumberStepsConfiguration {
 
         @Bean
         @Primary
-        public SenderReferenceGenerator senderReferenceGenerator() {
-            return () -> "19efbd4c-413d-4e2c-bbc5-257ef4a65b38";
-        }
-
-        @Bean
-        @Primary
-        @SneakyThrows
-        public LookupClient lookupClient() {
-            LookupClient mock = mock(LookupClient.class);
-            given(mock.getDocumentIdentifiers(any()))
-                    .willReturn(Collections.singletonList(DocumentTypeIdentifier.of("urn:no:difi:meldingsutveksling:2.0")));
-            return mock;
-        }
-
-        @Bean
-        @Primary
         public TaskScheduler poolScheduler() {
             return new NoopTaskScheduler();
         }
@@ -80,6 +62,7 @@ public class CucumberStepsConfiguration {
             return new AsicParser();
         }
 
+        @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
         @Bean
         @Primary
         public AltinnWsClientFactory altinnWsClientFactory(
@@ -118,23 +101,32 @@ public class CucumberStepsConfiguration {
         public Holder<Message> messageHolder() {
             return new Holder<>();
         }
-
-        @Bean
-        public MockServerRestTemplateCustomizer mockServerRestTemplateCustomizer() {
-            return new MockServerRestTemplateCustomizer(UnorderedRequestExpectationManager.class);
-        }
     }
 
-    @MockBean
-    public IBrokerServiceExternalBasic iBrokerServiceExternalBasic;
+    @Rule
+    private final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    @MockBean
-    public IBrokerServiceExternalBasicStreamed iBrokerServiceExternalBasicStreamed;
+    @MockBean public IBrokerServiceExternalBasic iBrokerServiceExternalBasic;
+    @MockBean public IBrokerServiceExternalBasicStreamed iBrokerServiceExternalBasicStreamed;
+    @MockBean public SvarUtWebServiceClient svarUtClient;
+    @MockBean public UUIDGenerator uuidGenerator;
+    @MockBean public LookupClient lookupClient;
+    @MockBean public InternalQueue internalQueue;
 
-    @MockBean
-    public SvarUtWebServiceClient svarUtClient;
+    @Autowired
+    private IntegrasjonspunktProperties propertiesSpy;
 
     @Before
+    @SneakyThrows
     public void before() {
+        temporaryFolder.create();
+        IntegrasjonspunktProperties.NextMove nextMoveSpy = spy(propertiesSpy.getNextmove());
+        doReturn(nextMoveSpy).when(propertiesSpy).getNextmove();
+        doReturn(temporaryFolder.getRoot().getAbsolutePath()).when(nextMoveSpy).getFiledir();
+    }
+
+    @After
+    public void after() {
+        temporaryFolder.delete();
     }
 }

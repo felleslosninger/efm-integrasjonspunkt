@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.ks.svarut;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.CertificateParserException;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingException;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
@@ -19,7 +20,6 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 
 import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 public class SvarUtService {
@@ -30,35 +30,39 @@ public class SvarUtService {
     private final CertificateParser certificateParser;
 
     public String send(EDUCore message) {
-        Optional<ServiceRecord> serviceRecord = serviceRegistryLookup.getServiceRecord(message.getReceiver().getIdentifier(), message.getServiceIdentifier());
-        if (!serviceRecord.isPresent()) {
-            throw new SvarUtServiceException(String.format("No DPF ServiceRecord found for identifier %s", message.getReceiver().getIdentifier()));
-        }
+        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(message.getReceiver().getIdentifier(), message.getServiceIdentifier())
+                .orElseThrow(() -> new SvarUtServiceException(String.format("No DPF ServiceRecord found for identifier %s", message.getReceiver().getIdentifier())));
 
-        final X509Certificate x509Certificate = toX509Certificate(serviceRecord.get().getPemCertificate());
-
-
+        final X509Certificate x509Certificate = toX509Certificate(serviceRecord.getPemCertificate());
         final SendForsendelseMedId forsendelse = fiksMapper.mapFrom(message, x509Certificate);
-        SvarUtRequest svarUtRequest = new SvarUtRequest(props.getFiks().getUt().getEndpointUrl().toString(), forsendelse);
+        SvarUtRequest svarUtRequest = new SvarUtRequest(getFiksUtUrl(), forsendelse);
         return client.sendMessage(svarUtRequest);
     }
 
     public String send(NextMoveMessage message) throws NextMoveException, ArkivmeldingException {
-        Optional<ServiceRecord> serviceRecord = serviceRegistryLookup.getServiceRecord(message.getReceiverIdentifier(), message.getServiceIdentifier());
-        if (!serviceRecord.isPresent()) {
-            throw new SvarUtServiceException(String.format("No DPF ServiceRecord found for identifier %s", message.getReceiverIdentifier()));
-        }
+        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(message.getReceiverIdentifier(), ServiceIdentifier.DPF)
+                .orElseThrow(() -> new SvarUtServiceException(String.format("No DPF ServiceRecord found for identifier %s", message.getReceiverIdentifier())));
 
-        final X509Certificate x509Certificate = toX509Certificate(serviceRecord.get().getPemCertificate());
-        SendForsendelseMedId forsendelse = fiksMapper.mapFrom(message, x509Certificate);
-        SvarUtRequest svarUtRequest = new SvarUtRequest(props.getFiks().getUt().getEndpointUrl().toString(), forsendelse);
+        SvarUtRequest svarUtRequest = new SvarUtRequest(
+                getFiksUtUrl(),
+                getForsendelse(message, serviceRecord));
+
         return client.sendMessage(svarUtRequest);
     }
 
+    private String getFiksUtUrl() {
+        return props.getFiks().getUt().getEndpointUrl().toString();
+    }
+
+    private SendForsendelseMedId getForsendelse(NextMoveMessage message, ServiceRecord serviceRecord) throws NextMoveException, ArkivmeldingException {
+        final X509Certificate x509Certificate = toX509Certificate(serviceRecord.getPemCertificate());
+        return fiksMapper.mapFrom(message, x509Certificate);
+    }
+
     public MessageStatus getMessageReceipt(final Conversation conversation) {
-        final String forsendelseId = client.getForsendelseId(props.getFiks().getUt().getEndpointUrl().toString(), conversation.getConversationId());
+        final String forsendelseId = client.getForsendelseId(getFiksUtUrl(), conversation.getConversationId());
         if (forsendelseId != null) {
-            final ForsendelseStatus forsendelseStatus = client.getForsendelseStatus(props.getFiks().getUt().getEndpointUrl().toString(), forsendelseId);
+            final ForsendelseStatus forsendelseStatus = client.getForsendelseStatus(getFiksUtUrl(), forsendelseId);
             final DpfReceiptStatus receiptStatus = FiksStatusMapper.mapFrom(forsendelseStatus);
             return MessageStatus.of(receiptStatus);
         } else {

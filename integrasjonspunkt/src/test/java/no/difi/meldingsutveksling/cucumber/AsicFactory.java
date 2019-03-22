@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Archive;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateAsice;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 public class AsicFactory {
 
     private final IntegrasjonspunktNokkel keyInfo;
+    private final ObjectProvider<CmsUtil> cmsUtilProvider;
 
     @SneakyThrows
     byte[] getAsic(Message message) {
@@ -22,6 +24,6 @@ public class AsicFactory {
                         message.getAvsender(),
                         message.getMottaker());
 
-        return new CmsUtil().createCMS(asice.getBytes(), keyInfo.getX509Certificate());
+        return cmsUtilProvider.getIfAvailable().createCMS(asice.getBytes(), keyInfo.getX509Certificate());
     }
 }

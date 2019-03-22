@@ -11,6 +11,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 /**
  * Used to map domain FileTypeHandler to
@@ -18,8 +19,8 @@ import java.util.function.Function;
 public class FileTypeHandler implements Handler<Dokument.Builder> {
     private final DokumentType domainDocument;
     private X509Certificate certificate;
-    private static final Function<byte[], byte[]> noop = b -> b;
-    private final Function<byte[], byte[]> encrypt = b -> new CmsUtil().createCMS(b, certificate);
+    private static final UnaryOperator<byte[]> noop = b -> b;
+    private final UnaryOperator<byte[]> encrypt = b -> new CmsUtil().createCMS(b, certificate);
     private Function<byte[], byte[]> transform = noop;
 
     public FileTypeHandler(DokumentType domainDocument) {

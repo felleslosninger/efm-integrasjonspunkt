@@ -144,13 +144,8 @@ Feature: Sending a Next Move DPO multipart/form message
     And I post the multipart request
     Then an upload to Altinn is initiated with:
     """
-    <?xml version="1.0" encoding="UTF-8"?>
-    <BrokerServiceInitiation
-        xmlns="http://schemas.altinn.no/services/ServiceEngine/Broker/2015/06"
-        xmlns:altinn1="http://www.altinn.no/services/2009/10"
-        xmlns:altinn2="http://www.altinn.no/services/ServiceEngine/Broker/2015/06"
-        xmlns:altinn3="http://www.altinn.no/services/common/fault/2009/10"
-        xmlns:altinn4="http://schemas.altinn.no/services/serviceEntity/2015/06" xmlns:ms="http://schemas.microsoft.com/2003/10/Serialization/">
+    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <BrokerServiceInitiation xmlns="http://schemas.altinn.no/services/ServiceEngine/Broker/2015/06" xmlns:ms="http://schemas.microsoft.com/2003/10/Serialization/" xmlns:altinn3="http://www.altinn.no/services/common/fault/2009/10" xmlns:altinn2="http://www.altinn.no/services/ServiceEngine/Broker/2015/06" xmlns:altinn1="http://www.altinn.no/services/2009/10" xmlns:altinn4="http://schemas.altinn.no/services/serviceEntity/2015/06">
         <Manifest>
             <ExternalServiceCode>4192</ExternalServiceCode>
             <ExternalServiceEditionCode>270815</ExternalServiceEditionCode>

@@ -27,7 +27,7 @@ public class Message {
         return this;
     }
 
-    ByteArrayFile getAttachement(String filename) {
+    ByteArrayFile getAttachment(String filename) {
         return attachments.stream()
                 .filter(p -> p.getFileName().equals(filename))
                 .findAny()

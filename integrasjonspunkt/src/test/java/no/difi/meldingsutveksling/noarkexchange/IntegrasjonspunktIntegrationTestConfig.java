@@ -30,12 +30,10 @@ import no.difi.meldingsutveksling.transport.TransportFactory;
 import no.difi.vefa.peppol.lookup.LookupClient;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.*;
 import org.springframework.jms.core.JmsTemplate;
 
 import java.net.URISyntaxException;
@@ -205,6 +203,7 @@ public class IntegrasjonspunktIntegrationTestConfig {
     }
 
     @Bean
+    @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public CmsUtil cmsUtil() {
         return new CmsUtil();
     }

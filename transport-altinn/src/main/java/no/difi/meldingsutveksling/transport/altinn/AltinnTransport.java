@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.transport.altinn;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.AltinnWsClient;
 import no.difi.meldingsutveksling.AltinnWsRequest;
-import no.difi.meldingsutveksling.SenderReferenceGenerator;
+import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.transport.Transport;
@@ -18,7 +18,7 @@ import java.io.InputStream;
 public class AltinnTransport implements Transport {
 
     private final AltinnWsClient client;
-    private final SenderReferenceGenerator senderReferenceGenerator;
+    private final UUIDGenerator uuidGenerator;
 
     /**
      * @param context a configuration object given by the integrasjonspunkt
@@ -26,7 +26,7 @@ public class AltinnTransport implements Transport {
      */
     @Override
     public void send(ApplicationContext context, final StandardBusinessDocument sbd) {
-        UploadRequest request = new AltinnWsRequest(senderReferenceGenerator.generate(), sbd);
+        UploadRequest request = new AltinnWsRequest(uuidGenerator.generate(), sbd);
         client.send(request);
     }
 
@@ -36,7 +36,7 @@ public class AltinnTransport implements Transport {
      */
     @Override
     public void send(ApplicationContext context, StandardBusinessDocument sbd, InputStream asicInputStream) {
-        UploadRequest request = new AltinnWsRequest(senderReferenceGenerator.generate(), sbd, asicInputStream);
+        UploadRequest request = new AltinnWsRequest(uuidGenerator.generate(), sbd, asicInputStream);
         client.send(request);
     }
 }
