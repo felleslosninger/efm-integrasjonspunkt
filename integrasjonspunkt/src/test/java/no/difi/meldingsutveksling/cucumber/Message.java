@@ -15,6 +15,7 @@ import java.util.List;
 public class Message {
 
     private StandardBusinessDocument sbd;
+    private String body;
     private List<ByteArrayFile> attachments = new ArrayList<>();
 
     Message attachment(Attachment attachment) {

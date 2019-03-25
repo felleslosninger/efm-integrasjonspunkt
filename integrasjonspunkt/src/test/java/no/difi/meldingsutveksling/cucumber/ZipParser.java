@@ -9,7 +9,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 @Component
-class AltinnZipParser {
+class ZipParser {
 
     @SneakyThrows
     ZipContent parse(InputStream is) {

@@ -8,7 +8,6 @@ import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasic;
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExternalBasicStreamed;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceClient;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -30,6 +29,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
@@ -50,6 +53,12 @@ public class CucumberStepsConfiguration {
     @Profile("cucumber")
     @SpyBean(IntegrasjonspunktProperties.class)
     public static class SpringConfiguration {
+
+        @Bean
+        @Primary
+        public Clock clock() {
+            return Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), ZoneId.of("Europe/Oslo"));
+        }
 
         @Bean
         @Primary
@@ -88,17 +97,17 @@ public class CucumberStepsConfiguration {
         }
 
         @Bean
-        public Holder<StandardBusinessDocument> standardBusinessDocumentHolder() {
-            return new Holder<>();
-        }
-
-        @Bean
         public Holder<ZipContent> zipContentHolder() {
             return new Holder<>();
         }
 
         @Bean
-        public Holder<Message> messageHolder() {
+        public Holder<Message> messageInHolder() {
+            return new Holder<>();
+        }
+
+        @Bean
+        public Holder<Message> messageOutHolder() {
             return new Holder<>();
         }
     }
@@ -123,6 +132,9 @@ public class CucumberStepsConfiguration {
         IntegrasjonspunktProperties.NextMove nextMoveSpy = spy(propertiesSpy.getNextmove());
         doReturn(nextMoveSpy).when(propertiesSpy).getNextmove();
         doReturn(temporaryFolder.getRoot().getAbsolutePath()).when(nextMoveSpy).getFiledir();
+
+        IntegrasjonspunktProperties.FeatureToggle featureToggleSpy = spy(propertiesSpy.getFeature());
+        doReturn(featureToggleSpy).when(propertiesSpy).getFeature();
     }
 
     @After

@@ -6,6 +6,8 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.nextmove.ServiceBusRestClient;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import org.springframework.boot.test.web.client.MockServerRestTemplateCustomizer;
@@ -30,6 +32,8 @@ public class MockServerRestSteps {
 
     private final RestClient restClient;
     private final ServiceBusRestClient serviceBusRestClient;
+    private final SvarInnClient svarInnClient;
+    private final IntegrasjonspunktProperties properties;
 
     private MockServerRestTemplateCustomizer mockServerRestTemplateCustomizer;
     private DefaultResponseCreator responseCreator;
@@ -41,6 +45,7 @@ public class MockServerRestSteps {
         mockServerRestTemplateCustomizer = new MockServerRestTemplateCustomizer(UnorderedRequestExpectationManager.class);
         mockServerRestTemplateCustomizer.customize((RestTemplate) restClient.getRestTemplate());
         mockServerRestTemplateCustomizer.customize(serviceBusRestClient.getRestTemplate());
+        mockServerRestTemplateCustomizer.customize(svarInnClient.getRestTemplate());
     }
 
     @After
@@ -56,6 +61,8 @@ public class MockServerRestSteps {
     private RestTemplate getRestTemplate(String url) {
         if (url.startsWith(serviceBusRestClient.getBase())) {
             return serviceBusRestClient.getRestTemplate();
+        } else if (url.startsWith("/mottaker") || url.startsWith("/kvitterMottak")) {
+            return svarInnClient.getRestTemplate();
         }
 
         return (RestTemplate) restClient.getRestTemplate();
@@ -95,6 +102,13 @@ public class MockServerRestSteps {
 
     @And("^the following \"([^\"]*)\"$")
     public void andTheFollowing(String contentType, String body) {
+        responseActions
+                .andRespond(responseCreator
+                        .contentType(MediaType.parseMediaType(contentType))
+                        .body(body));
+    }
+
+    void andTheFollowing(String contentType, byte[] body) {
         responseActions
                 .andRespond(responseCreator
                         .contentType(MediaType.parseMediaType(contentType))

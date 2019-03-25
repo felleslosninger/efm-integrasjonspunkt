@@ -14,4 +14,9 @@ public class MessagePollingSteps {
     public void theApplicationChecksForNewNextMoveDPOMessages() throws MessageException {
         messagePolling.checkForNewMessages();
     }
+
+    @Given("^the application checks for new Next Move DPF messages$")
+    public void theApplicationChecksForNewNextMoveDPFMessages() {
+        messagePolling.checkForFiksMessages();
+    }
 }

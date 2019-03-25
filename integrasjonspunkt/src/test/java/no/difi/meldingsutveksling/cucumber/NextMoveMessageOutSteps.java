@@ -21,7 +21,7 @@ import static org.assertj.core.api.Java6Assertions.assertThat;
 public class NextMoveMessageOutSteps {
 
     private final TestRestTemplate testRestTemplate;
-    private final Holder<StandardBusinessDocument> standardBusinessDocumentHolder;
+    private final Holder<Message> messageOutHolder;
 
     private MultiValueMap<String, HttpEntity<?>> multipart;
 
@@ -31,6 +31,7 @@ public class NextMoveMessageOutSteps {
 
     @After
     public void after() {
+        messageOutHolder.reset();
         multipart = null;
     }
 
@@ -71,7 +72,8 @@ public class NextMoveMessageOutSteps {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        standardBusinessDocumentHolder.set(response.getBody());
+        messageOutHolder.getOrCalculate(Message::new)
+                .setSbd(response.getBody());
     }
 
     @Given("^I POST the following message:$")
@@ -87,7 +89,8 @@ public class NextMoveMessageOutSteps {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        standardBusinessDocumentHolder.set(response.getBody());
+        messageOutHolder.getOrCalculate(Message::new)
+                .setSbd(response.getBody());
     }
 
     @Given("^I upload a file named \"([^\"]+)\" with mimetype \"([^\"]+)\" and title \"([^\"]+)\" with the following body:$")
@@ -103,7 +106,7 @@ public class NextMoveMessageOutSteps {
         );
 
         Map<String, String> uriVariables = new HashMap<>();
-        uriVariables.put("conversationId", standardBusinessDocumentHolder.get().getConversationId());
+        uriVariables.put("conversationId", messageOutHolder.get().getSbd().getConversationId());
         uriVariables.put("title", title);
 
         ResponseEntity<String> response = testRestTemplate.exchange(
@@ -123,7 +126,7 @@ public class NextMoveMessageOutSteps {
                 "/api/message/out/{conversationId}",
                 HttpMethod.POST, new HttpEntity(null),
                 String.class,
-                standardBusinessDocumentHolder.get().getConversationId());
+                messageOutHolder.get().getSbd().getConversationId());
         assertThat(response.getStatusCode())
                 .isEqualTo(HttpStatus.OK);
     }

@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
@@ -34,19 +35,15 @@ import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.payloadSiz
  * Factory class for StandardBusinessDocument instances
  */
 @Component
+@RequiredArgsConstructor
 @Slf4j
 public class StandardBusinessDocumentFactory {
 
-    public static final String DOCUMENT_TYPE_MELDING = "melding";
+    private static final String DOCUMENT_TYPE_MELDING = "melding";
 
-    private IntegrasjonspunktNokkel integrasjonspunktNokkel;
-    private AsicHandler asicHandler;
-
-    public StandardBusinessDocumentFactory(IntegrasjonspunktNokkel integrasjonspunktNokkel,
-                                           AsicHandler asicHandler) {
-        this.integrasjonspunktNokkel = integrasjonspunktNokkel;
-        this.asicHandler = asicHandler;
-    }
+    private final IntegrasjonspunktNokkel integrasjonspunktNokkel;
+    private final AsicHandler asicHandler;
+    private final CreateSBD createSBD;
 
     public StandardBusinessDocument create(EDUCore sender, Avsender avsender, Mottaker mottaker) throws MessageException {
         return create(sender, UUID.randomUUID().toString(), avsender, mottaker);
@@ -66,14 +63,14 @@ public class StandardBusinessDocumentFactory {
         }
         Payload payload = new Payload(encryptArchive(mottaker, archive, shipment.getServiceIdentifier()));
 
-        return new CreateSBD().createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload, conversationId, DOCUMENT_TYPE_MELDING, shipment.getJournalpostId());
+        return createSBD.createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload, conversationId, DOCUMENT_TYPE_MELDING, shipment.getJournalpostId());
     }
 
     public StandardBusinessDocument create(ConversationResource cr, MessageContext context) throws MessageException {
         InputStream is = asicHandler.createEncryptedAsic(cr, context);
         Payload payload = new Payload(is, cr);
 
-        return new CreateSBD().createSBD(context.getAvsender().getOrgNummer(), context.getMottaker().getOrgNummer(),
+        return createSBD.createSBD(context.getAvsender().getOrgNummer(), context.getMottaker().getOrgNummer(),
                 payload, context.getConversationId(), StandardBusinessDocumentHeader.NEXTMOVE_TYPE,
                 context.getJournalPostId());
     }

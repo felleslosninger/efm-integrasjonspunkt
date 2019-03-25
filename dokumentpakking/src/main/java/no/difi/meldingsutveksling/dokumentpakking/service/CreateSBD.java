@@ -1,21 +1,29 @@
 package no.difi.meldingsutveksling.dokumentpakking.service;
 
+import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.*;
+import org.springframework.stereotype.Component;
 
+import java.time.Clock;
 import java.time.ZonedDateTime;
-import java.util.UUID;
 
 import static no.difi.meldingsutveksling.dokumentpakking.service.ScopeFactory.fromConversationId;
 import static no.difi.meldingsutveksling.dokumentpakking.service.ScopeFactory.fromJournalPostId;
 
+@Component
+@RequiredArgsConstructor
 public class CreateSBD {
     private static final String STANDARD = "urn:no:difi:meldingsutveksling:1.0";
     private static final String HEADER_VERSION = "1.0";
     private static final String TYPE_VERSION_1 = "1.0";
     private static final String TYPE_VERSION_2 = "2.0";
     private static final String DPO_MELDING_DOCTYPE = "urn:no:difi:eFormidling:xsd::Melding##urn:www.difi.no:eFormidling:melding:2.0 ";
+
+    private final UUIDGenerator uuidGenerator;
+    private final Clock clock;
 
     public StandardBusinessDocument createSBD(Organisasjonsnummer avsender, Organisasjonsnummer mottaker, Object payload, String conversationId, String type, String journalPostId) {
         return new StandardBusinessDocument()
@@ -69,20 +77,20 @@ public class CreateSBD {
 
     private DocumentIdentification createDocumentIdentification(ServiceIdentifier serviceIdentifier, String docType) {
         return new DocumentIdentification()
-                .setCreationDateAndTime(ZonedDateTime.now())
+                .setCreationDateAndTime(ZonedDateTime.now(clock))
                 .setStandard(docType)
                 .setType(serviceIdentifier.getFullname())
                 .setTypeVersion(TYPE_VERSION_2)
-                .setInstanceIdentifier(UUID.randomUUID().toString());
+                .setInstanceIdentifier(uuidGenerator.generate());
     }
 
     private DocumentIdentification createDocumentIdentification(String type) {
         return new DocumentIdentification()
-                .setCreationDateAndTime(ZonedDateTime.now())
+                .setCreationDateAndTime(ZonedDateTime.now(clock))
                 .setStandard(STANDARD)
                 .setType(type)
                 .setTypeVersion(TYPE_VERSION_1)
-                .setInstanceIdentifier(UUID.randomUUID().toString());
+                .setInstanceIdentifier(uuidGenerator.generate());
     }
 
     private BusinessScope createBusinessScope(Scope... scopes) {

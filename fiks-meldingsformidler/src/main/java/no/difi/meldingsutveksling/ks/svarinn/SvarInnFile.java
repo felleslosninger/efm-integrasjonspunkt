@@ -1,19 +1,19 @@
 package no.difi.meldingsutveksling.ks.svarinn;
 
 
-import lombok.Data;
 import lombok.NonNull;
+import lombok.Value;
 import org.springframework.http.MediaType;
 
 /**
  * Represents a file downloaded from SvarInn: contents in bytes along with MediaType as returned by Http client.
  */
-@Data
+@Value
 public class SvarInnFile {
     @NonNull
-    private String filnavn;
+    private final String filnavn;
     @NonNull
-    private MediaType mediaType;
+    private final MediaType mediaType;
     @NonNull
-    private byte[] contents;
+    private final byte[] contents;
 }

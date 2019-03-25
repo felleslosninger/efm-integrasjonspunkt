@@ -30,7 +30,7 @@ public class NextMoveMessageInSteps {
     private final TestRestTemplate testRestTemplate;
     private final ObjectMapper objectMapper;
     private final AsicParser asicParser;
-    private final Holder<StandardBusinessDocument> standardBusinessDocumentHolder;
+    private final Holder<Message> messageInHolder;
 
     private JacksonTester<StandardBusinessDocument> json;
 
@@ -91,9 +91,15 @@ public class NextMoveMessageInSteps {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
+    @Then("^the converted SBD is:$")
+    public void theReceivedSBDMatchesTheIncomingSBD(String expectedSBD) throws IOException {
+        assertThat(json.write(receivedMessage.getSbd()))
+                .isEqualToJson(expectedSBD);
+    }
+
     @Then("^the received SBD matches the incoming SBD:$")
     public void theReceivedSBDMatchesTheIncomingSBD() throws IOException {
-        assertThat(json.write(standardBusinessDocumentHolder.get()))
+        assertThat(json.write(messageInHolder.get().getSbd()))
                 .isEqualToJson(json.write(receivedMessage.getSbd()).getJson());
     }
 
@@ -101,6 +107,11 @@ public class NextMoveMessageInSteps {
     public void iHaveAnASICThatContainsAFileNamedWithMimetype(String filename, String mimetype, String body) throws Throwable {
         ByteArrayFile attachement = receivedMessage.getAttachment(filename);
         assertThat(attachement.getMimeType()).isEqualTo(mimetype);
-        assertThat(new String(attachement.getBytes())).isEqualTo(body);
+
+        if (MediaType.APPLICATION_XML_VALUE.equals(mimetype)) {
+            assertThat(new String(attachement.getBytes())).isXmlEqualTo(body);
+        } else {
+            assertThat(new String(attachement.getBytes())).isEqualTo(body);
+        }
     }
 }

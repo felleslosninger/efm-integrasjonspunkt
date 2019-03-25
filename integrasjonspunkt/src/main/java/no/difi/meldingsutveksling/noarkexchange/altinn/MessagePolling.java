@@ -84,6 +84,7 @@ public class MessagePolling implements ApplicationContextAware {
     private final MessageContextFactory messageContextFactory;
     private final AsicHandler asicHandler;
     private final NextMoveMessageInRepository messageRepo;
+    private final CreateSBD createSBD;
 
     private ServiceRecord serviceRecord;
     private CompletableFuture batchRead;
@@ -197,7 +198,7 @@ public class MessagePolling implements ApplicationContextAware {
             log.error("Could not create message context", e);
             return;
         }
-        StandardBusinessDocument sbd = new CreateSBD().createNextMoveSBD(
+        StandardBusinessDocument sbd = createSBD.createNextMoveSBD(
                 context.getAvsender().getOrgNummer(),
                 context.getMottaker().getOrgNummer(),
                 context.getConversationId(),
@@ -219,7 +220,7 @@ public class MessagePolling implements ApplicationContextAware {
         files.add(new NextMoveStreamedFile(NextMoveConsts.ARKIVMELDING_FILE, arkivmeldingStream, MediaType.APPLICATION_XML_VALUE));
         message.getSvarInnFiles().forEach(f -> files.add(new NextMoveStreamedFile(f.getFilnavn(),
                 new ByteArrayInputStream(f.getContents()),
-                f.getMediaType().getType())));
+                f.getMediaType().toString())));
 
         InputStream asicStream = asicHandler.archiveAndEncryptAttachments(files, context, ServiceIdentifier.DPO);
         try {

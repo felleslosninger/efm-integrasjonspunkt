@@ -16,12 +16,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RequiredArgsConstructor
 public class AsicSteps {
 
-    private final Holder<Message> messageHolder;
+    private final Holder<Message> messageOutHolder;
 
     @Then("^the sent ASIC contains the following files:$")
     @SneakyThrows
     public void theSentASICContains(DataTable expectedTable) {
-        Message message = messageHolder.get();
+        Message message = messageOutHolder.get();
 
         List<List<String>> actualList = new ArrayList<>();
         actualList.add(Collections.singletonList("filename"));
@@ -37,7 +37,7 @@ public class AsicSteps {
 
     @Then("^the content of the ASIC file named \"([^\"]*)\" is:$")
     public void theContentOfTheASICFileNamedIs(String filename, String expectedContent) {
-        Message message = messageHolder.get();
+        Message message = messageOutHolder.get();
         assertThat(new String(message.getAttachment(filename).getBytes()))
                 .isEqualToIgnoringWhitespace(expectedContent);
     }

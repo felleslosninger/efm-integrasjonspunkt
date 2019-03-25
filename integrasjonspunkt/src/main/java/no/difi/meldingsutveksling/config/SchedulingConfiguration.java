@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.config;
 
 import no.difi.meldingsutveksling.AltinnWsClientFactory;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.dokumentpakking.service.CreateSBD;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
@@ -48,7 +49,8 @@ public class SchedulingConfiguration {
                                          @Qualifier("fiksMailClient") NoarkClient mailClient,
                                          MessageContextFactory messageContextFactory,
                                          AsicHandler asicHandler,
-                                         NextMoveMessageInRepository messageRepo) {
+                                         NextMoveMessageInRepository messageRepo,
+                                         CreateSBD createSBD) {
         return new MessagePolling(
                 properties,
                 internalQueue,
@@ -65,6 +67,7 @@ public class SchedulingConfiguration {
                 mailClient,
                 messageContextFactory,
                 asicHandler,
-                messageRepo);
+                messageRepo,
+                createSBD);
     }
 }
