@@ -35,7 +35,6 @@ public class NextMoveMessageOutSteps {
         multipart = null;
     }
 
-
     @Given("^I prepare a multipart request$")
     public void iPrepareAMultipartRequest() {
         multipart = new LinkedMultiValueMap<>();

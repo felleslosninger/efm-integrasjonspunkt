@@ -16,7 +16,7 @@ public class DpeConversationStrategy implements ConversationStrategy {
     private final NextMoveServiceBus serviceBus;
 
     @Override
-    public void send(ConversationResource conversationResource) throws NextMoveException {
+    public void send(ConversationResource conversationResource) {
         throw new UnsupportedOperationException("ConversationResource no longer in use");
     }
 
@@ -27,5 +27,4 @@ public class DpeConversationStrategy implements ConversationStrategy {
                 message.getConversationId(), message.getServiceIdentifier()),
                 markerFrom(message));
     }
-
 }

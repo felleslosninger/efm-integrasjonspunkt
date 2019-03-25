@@ -43,23 +43,23 @@ public class AsicHandler {
     }
 
     public InputStream createEncryptedAsic(ConversationResource cr, MessageContext messageContext) {
-        List<StreamedFile> attachements = new ArrayList<>();
+        List<StreamedFile> attachments = new ArrayList<>();
         if (cr.getFileRefs() != null) {
             for (String filename : cr.getFileRefs().values()) {
                 FileEntryStream fileEntryStream = cryptoMessagePersister.readStream(cr.getConversationId(), filename);
                 String ext = Stream.of(filename.split(".")).reduce((p, e) -> e).orElse("pdf");
-                attachements.add(new NextMoveStreamedFile(filename, fileEntryStream.getInputStream(), MimeTypeExtensionMapper.getMimetype(ext)));
+                attachments.add(new NextMoveStreamedFile(filename, fileEntryStream.getInputStream(), MimeTypeExtensionMapper.getMimetype(ext)));
             }
         }
 
-        return archiveAndEncryptAttachments(attachements, messageContext, cr.getServiceIdentifier());
+        return archiveAndEncryptAttachments(attachments, messageContext, cr.getServiceIdentifier());
     }
 
     public InputStream createEncryptedAsic(NextMoveMessage msg, MessageContext messageContext) {
 
         if (msg.getFiles() == null || msg.getFiles().isEmpty()) return null;
 
-        List<NextMoveStreamedFile> attachements = msg.getFiles().stream()
+        List<NextMoveStreamedFile> attachments = msg.getFiles().stream()
                 .sorted((a, b) -> {
                     if (a.getPrimaryDocument()) return -1;
                     if (b.getPrimaryDocument()) return 1;
@@ -69,7 +69,7 @@ public class AsicHandler {
                     return new NextMoveStreamedFile(f.getFilename(), fes.getInputStream(), getMimetype(f));
                 }).collect(Collectors.toList());
 
-        return archiveAndEncryptAttachments(attachements, messageContext, msg.getServiceIdentifier());
+        return archiveAndEncryptAttachments(attachments, messageContext, msg.getServiceIdentifier());
     }
 
     private String getMimetype(BusinessMessageFile f) {

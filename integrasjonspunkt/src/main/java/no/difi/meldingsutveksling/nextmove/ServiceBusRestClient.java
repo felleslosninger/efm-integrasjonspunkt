@@ -10,13 +10,8 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayload;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayloadConverter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.http.*;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import javax.xml.bind.JAXBException;
 import java.io.UnsupportedEncodingException;
@@ -31,8 +26,8 @@ import java.util.Optional;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 
-@Component
 @Slf4j
+@Component
 public class ServiceBusRestClient {
 
     private static final String NEXTMOVE_QUEUE_PREFIX = "nextbestqueue";
@@ -40,33 +35,20 @@ public class ServiceBusRestClient {
 
     private final ServiceRegistryLookup sr;
     private final IntegrasjonspunktProperties props;
+    private final ServiceBusPayloadConverter payloadConverter;
+    @Getter
+    private final ServiceBusRestTemplate restTemplate;
     @Getter
     private final String localQueuePath;
-    @Getter
-    private final RestTemplate restTemplate;
-    private final ServiceBusPayloadConverter payloadConverter;
 
-    public ServiceBusRestClient(ServiceRegistryLookup sr,
-                                IntegrasjonspunktProperties props,
-                                ServiceBusPayloadConverter payloadConverter) {
+    public ServiceBusRestClient(ServiceRegistryLookup sr, IntegrasjonspunktProperties props, ServiceBusPayloadConverter payloadConverter, ServiceBusRestTemplate restTemplate) {
         this.sr = sr;
         this.props = props;
-
+        this.payloadConverter = payloadConverter;
+        this.restTemplate = restTemplate;
         this.localQueuePath = NEXTMOVE_QUEUE_PREFIX +
                 props.getOrg().getNumber() +
                 props.getNextmove().getServiceBus().getMode();
-        this.payloadConverter = payloadConverter;
-
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectTimeout(props.getNextmove().getServiceBus().getConnectTimeout())
-                .setConnectionRequestTimeout(props.getNextmove().getServiceBus().getConnectTimeout())
-                .setSocketTimeout(props.getNextmove().getServiceBus().getConnectTimeout())
-                .build();
-        CloseableHttpClient httpClient = HttpClientBuilder.create()
-                .setDefaultRequestConfig(requestConfig)
-                .build();
-        this.restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory(httpClient));
-        this.restTemplate.setErrorHandler(new ServiceBusRestErrorHandler(sr));
     }
 
     public String getBase() {

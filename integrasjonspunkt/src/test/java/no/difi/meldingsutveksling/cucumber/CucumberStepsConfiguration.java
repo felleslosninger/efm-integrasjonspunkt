@@ -9,6 +9,7 @@ import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternal
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExternalBasicStreamed;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceClient;
+import no.difi.meldingsutveksling.nextmove.ServiceBusRestTemplate;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.vefa.peppol.lookup.LookupClient;
@@ -107,7 +108,17 @@ public class CucumberStepsConfiguration {
         }
 
         @Bean
+        public Holder<Message> messageReceivedHolder() {
+            return new Holder<>();
+        }
+
+        @Bean
         public Holder<Message> messageOutHolder() {
+            return new Holder<>();
+        }
+
+        @Bean
+        public Holder<Message> messageSentHolder() {
             return new Holder<>();
         }
     }
@@ -121,6 +132,7 @@ public class CucumberStepsConfiguration {
     @MockBean public UUIDGenerator uuidGenerator;
     @MockBean public LookupClient lookupClient;
     @MockBean public InternalQueue internalQueue;
+    @MockBean public ServiceBusRestTemplate serviceBusRestTemplate;
 
     @Autowired
     private IntegrasjonspunktProperties propertiesSpy;

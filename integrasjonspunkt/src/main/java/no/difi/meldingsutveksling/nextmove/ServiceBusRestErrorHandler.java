@@ -1,21 +1,21 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 
 import java.io.IOException;
 
+@Component
 @Slf4j
+@RequiredArgsConstructor
 public class ServiceBusRestErrorHandler extends DefaultResponseErrorHandler {
 
-    private ServiceRegistryLookup srLookup;
-
-    public ServiceBusRestErrorHandler(ServiceRegistryLookup srLookup) {
-        this.srLookup = srLookup;
-    }
+    private final ServiceRegistryLookup srLookup;
 
     /**
      * This default implementation throws a {@link HttpClientErrorException} if the response status code

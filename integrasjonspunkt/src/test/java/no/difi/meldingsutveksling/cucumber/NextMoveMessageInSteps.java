@@ -31,10 +31,10 @@ public class NextMoveMessageInSteps {
     private final ObjectMapper objectMapper;
     private final AsicParser asicParser;
     private final Holder<Message> messageInHolder;
+    private final Holder<Message> messageReceivedHolder;
 
     private JacksonTester<StandardBusinessDocument> json;
 
-    private Message receivedMessage;
 
     @Before
     public void before() {
@@ -43,7 +43,7 @@ public class NextMoveMessageInSteps {
 
     @After
     public void after() {
-        receivedMessage = null;
+        messageReceivedHolder.reset();
     }
 
     @Given("^I peek and lock a message$")
@@ -54,8 +54,8 @@ public class NextMoveMessageInSteps {
                 null,
                 StandardBusinessDocument.class);
 
-        receivedMessage = new Message()
-                .setSbd(response.getBody());
+        messageReceivedHolder.set(new Message()
+                .setSbd(response.getBody()));
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
@@ -67,7 +67,7 @@ public class NextMoveMessageInSteps {
                 .setAccept(Arrays.asList(MediaType.APPLICATION_OCTET_STREAM, MediaType.ALL));
 
         ResponseExtractor<Void> responseExtractor = response -> {
-            receivedMessage.attachments(asicParser.parse(response.getBody()));
+            messageReceivedHolder.get().attachments(asicParser.parse(response.getBody()));
             return null;
         };
 
@@ -75,7 +75,7 @@ public class NextMoveMessageInSteps {
                 "/api/message/in/pop/{conversationId}",
                 HttpMethod.GET,
                 requestCallback, responseExtractor,
-                Collections.singletonMap("conversationId", receivedMessage.getSbd().getConversationId())
+                Collections.singletonMap("conversationId", messageReceivedHolder.get().getSbd().getConversationId())
         );
     }
 
@@ -86,26 +86,26 @@ public class NextMoveMessageInSteps {
                 HttpMethod.DELETE,
                 new HttpEntity<>(null),
                 StandardBusinessDocument.class,
-                Collections.singletonMap("conversationId", receivedMessage.getSbd().getConversationId())
+                Collections.singletonMap("conversationId", messageReceivedHolder.get().getSbd().getConversationId())
         );
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Then("^the converted SBD is:$")
     public void theReceivedSBDMatchesTheIncomingSBD(String expectedSBD) throws IOException {
-        assertThat(json.write(receivedMessage.getSbd()))
+        assertThat(json.write(messageReceivedHolder.get().getSbd()))
                 .isEqualToJson(expectedSBD);
     }
 
     @Then("^the received SBD matches the incoming SBD:$")
     public void theReceivedSBDMatchesTheIncomingSBD() throws IOException {
         assertThat(json.write(messageInHolder.get().getSbd()))
-                .isEqualToJson(json.write(receivedMessage.getSbd()).getJson());
+                .isEqualToJson(json.write(messageReceivedHolder.get().getSbd()).getJson());
     }
 
     @And("^I have an ASIC that contains a file named \"([^\"]*)\" with mimetype=\"([^\"]*)\":$")
     public void iHaveAnASICThatContainsAFileNamedWithMimetype(String filename, String mimetype, String body) throws Throwable {
-        ByteArrayFile attachement = receivedMessage.getAttachment(filename);
+        ByteArrayFile attachement = messageReceivedHolder.get().getAttachment(filename);
         assertThat(attachement.getMimeType()).isEqualTo(mimetype);
 
         if (MediaType.APPLICATION_XML_VALUE.equals(mimetype)) {

@@ -41,7 +41,7 @@ public class AltinnOutSteps {
     private final IBrokerServiceExternalBasic iBrokerServiceExternalBasic;
     private final IBrokerServiceExternalBasicStreamed iBrokerServiceExternalBasicStreamed;
     private final Holder<ZipContent> zipContentHolder;
-    private final Holder<Message> messageOutHolder;
+    private final Holder<Message> messageSentHolder;
     private final XMLMarshaller xmlMarshaller;
     private final ZipParser zipParser;
     private final AltinnZipContentParser altinnZipContentParser;
@@ -52,7 +52,7 @@ public class AltinnOutSteps {
     @After
     public void after() {
         Mockito.reset(iBrokerServiceExternalBasic, iBrokerServiceExternalBasicStreamed);
-        messageOutHolder.reset();
+        messageSentHolder.reset();
         zipContentHolder.reset();
     }
 
@@ -66,7 +66,7 @@ public class AltinnOutSteps {
             InputStream inputStream = parameters.getDataStream().getInputStream();
             ZipContent zipContent = zipParser.parse(inputStream);
             zipContentHolder.set(zipContent);
-            messageOutHolder.set(altinnZipContentParser.parse(zipContent));
+            messageSentHolder.set(altinnZipContentParser.parse(zipContent));
 
             ObjectFactory objectFactory = new ObjectFactory();
             ReceiptExternalStreamedBE receiptAltinn = new ReceiptExternalStreamedBE();

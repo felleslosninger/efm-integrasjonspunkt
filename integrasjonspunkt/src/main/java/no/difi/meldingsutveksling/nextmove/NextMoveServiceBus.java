@@ -100,15 +100,20 @@ public class NextMoveServiceBus {
     }
 
     public void putMessage(NextMoveMessage message) throws NextMoveException {
-        MessageContext messageContext;
-        try {
-            messageContext = messageContextFactory.from(message);
-        } catch (MessageContextException e) {
-            throw new NextMoveException("Could not create message context", e);
+        ServiceBusPayload payload = ServiceBusPayload.of(message.getSbd(), getAsicBytes(message));
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            om.writeValue(bos, payload);
+            String queue = getQueue(message);
+            serviceBusClient.sendMessage(bos.toByteArray(), queue);
+        } catch (IOException e) {
+            throw new NextMoveException("Error creating servicebus payload", e);
         }
+    }
+
+    private byte[] getAsicBytes(NextMoveMessage message) throws NextMoveException {
         byte[] asicBytes = null;
         try {
-            InputStream encryptedAsic = asicHandler.createEncryptedAsic(message, messageContext);
+            InputStream encryptedAsic = asicHandler.createEncryptedAsic(message, getMessageContext(message));
             if (encryptedAsic != null) {
                 asicBytes = Base64.getEncoder()
                         .encode(IOUtils.toByteArray(encryptedAsic));
@@ -116,14 +121,14 @@ public class NextMoveServiceBus {
         } catch (IOException e) {
             throw new NextMoveException("Unable to read encrypted asic", e);
         }
+        return asicBytes;
+    }
 
-        ServiceBusPayload payload = ServiceBusPayload.of(message.getSbd(), asicBytes);
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            om.writeValue(bos, payload);
-            String queue = getQueue(message);
-            serviceBusClient.sendMessage(bos.toByteArray(), queue);
-        } catch (IOException e) {
-            throw new NextMoveException("Error creating servicebus payload", e);
+    private MessageContext getMessageContext(NextMoveMessage message) throws NextMoveException {
+        try {
+            return messageContextFactory.from(message);
+        } catch (MessageContextException e) {
+            throw new NextMoveException("Could not create message context", e);
         }
     }
 

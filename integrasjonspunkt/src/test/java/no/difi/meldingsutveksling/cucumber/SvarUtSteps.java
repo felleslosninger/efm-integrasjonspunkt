@@ -25,12 +25,11 @@ public class SvarUtSteps {
     private final SvarUtWebServiceClient client;
     private final XMLMarshaller xmlMarshaller;
     private final SvarUtDataParser svarUtDataParser;
-
-    private Message sentMessage;
+    private final Holder<Message> messageSentHolder;
 
     @After
     public void after() {
-        sentMessage = null;
+        messageSentHolder.reset();
     }
 
     @Then("^an upload to Fiks is initiated with:$")
@@ -42,7 +41,7 @@ public class SvarUtSteps {
 
         SvarUtRequest svarUtRequest = captor.getValue();
 
-        sentMessage = svarUtDataParser.parse(svarUtRequest);
+        messageSentHolder.set(svarUtDataParser.parse(svarUtRequest));
 
         SendForsendelseMedId sendForsendelseMedId = svarUtRequest.getForsendelse();
         sendForsendelseMedId.getForsendelse().getDokumenter()
@@ -51,11 +50,5 @@ public class SvarUtSteps {
         String result = xmlMarshaller.masrshall(
                 new ObjectFactory().createSendForsendelseMedId(sendForsendelseMedId));
         assertThat(result).isXmlEqualTo(body);
-    }
-
-    @Then("^the decrypted content of the Fiks document data entry for the file named \"([^\"]*)\" is:$")
-    public void theContentOfTheASICFileNamedIs(String filename, String expectedContent) {
-        assertThat(new String(sentMessage.getAttachment(filename).getBytes()))
-                .isEqualToIgnoringWhitespace(expectedContent);
     }
 }
