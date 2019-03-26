@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.ks
 
+import no.difi.meldingsutveksling.CertificateParser
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.ks.mapping.FiksMapper
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService
@@ -12,11 +13,17 @@ import org.springframework.context.annotation.Configuration
 class FiksTestConfiguration {
 
     @Bean
+    CertificateParser certificateParser() {
+        return new CertificateParser()
+    }
+
+    @Bean
     SvarUtService svarUtService(SvarUtWebServiceClient svarUtWebServiceClient,
                                 ServiceRegistryLookup serviceRegistryLookup,
                                 FiksMapper forsendelseMapper,
-                                IntegrasjonspunktProperties props) {
-        return new SvarUtService(svarUtWebServiceClient, serviceRegistryLookup, forsendelseMapper, props)
+                                IntegrasjonspunktProperties props,
+                                CertificateParser certificateParser) {
+        return new SvarUtService(svarUtWebServiceClient, serviceRegistryLookup, forsendelseMapper, props, certificateParser)
     }
 
 }

@@ -37,6 +37,9 @@ import org.springframework.context.annotation.*;
 import org.springframework.jms.core.JmsTemplate;
 
 import java.net.URISyntaxException;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
@@ -206,5 +209,21 @@ public class IntegrasjonspunktIntegrationTestConfig {
     @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public CmsUtil cmsUtil() {
         return new CmsUtil();
+    }
+
+    @Bean
+    @Primary
+    public Clock clock() {
+        return Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), ZoneId.of("Europe/Oslo"));
+    }
+
+    @Bean
+    public NoarkClient noarkClient() {
+        return mock(NoarkClient.class);
+    }
+
+    @Bean
+    public NoarkClient mailClient() {
+        return mock(NoarkClient.class);
     }
 }

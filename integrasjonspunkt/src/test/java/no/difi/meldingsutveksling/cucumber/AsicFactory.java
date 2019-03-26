@@ -7,9 +7,11 @@ import no.difi.meldingsutveksling.dokumentpakking.domain.Archive;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateAsice;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
+@Profile("cucumber")
 @RequiredArgsConstructor
 public class AsicFactory {
 

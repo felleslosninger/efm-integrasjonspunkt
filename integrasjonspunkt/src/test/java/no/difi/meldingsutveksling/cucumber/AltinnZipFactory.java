@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.cucumber;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
@@ -15,6 +16,7 @@ import static no.difi.meldingsutveksling.NextMoveConsts.ALTINN_SBD_FILE;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 
 @Component
+@Profile("cucumber")
 @RequiredArgsConstructor
 public class AltinnZipFactory {
 

@@ -1,9 +1,7 @@
 Feature: Sending a Next Move DPE message
 
   Background:
-#    Given a "GET" request to "http://localhost:9099/identifier/987464291?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/987464291.json"
     Given a "GET" request to "http://localhost:9099/identifier/910075935?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075935.json"
-#    And a "GET" request to "http://localhost:9099/identifier/910077473?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
 
   Scenario: As a user I want to send a DPE message
     Given I POST the following message:
@@ -107,9 +105,9 @@ Feature: Sending a Next Move DPE message
     }
     """
     And the sent ASIC contains the following files:
-      | filename         |
-      | manifest.xml     |
-      | test.txt         |
+      | filename     |
+      | manifest.xml |
+      | test.txt     |
     And the content of the ASIC file named "manifest.xml" is:
     """
     <?xml version="1.0" encoding="UTF-8"?>

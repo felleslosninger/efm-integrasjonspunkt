@@ -20,7 +20,10 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  * Mock overrides are configured in {@link IntegrasjonspunktIntegrationTestConfig}.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = IntegrasjonspunktApplication.class, webEnvironment = RANDOM_PORT, properties = {"app.local.properties.enable=false"})
+@SpringBootTest(classes = {
+        IntegrasjonspunktApplication.class,
+        IntegrasjonspunktIntegrationTestConfig.class
+}, webEnvironment = RANDOM_PORT, properties = {"app.local.properties.enable=false"})
 @ActiveProfiles("test")
 public class IntegrasjonspunktImplIntegrationTest {
 

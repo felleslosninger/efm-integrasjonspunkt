@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.cucumber;
 
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
+import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -19,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @RequiredArgsConstructor
-public class ServiceBusSteps {
+public class ServiceBusOutSteps {
 
     private final ServiceBusRestTemplate serviceBusRestTemplate;
     private final ServiceBusMessageParser serviceBusMessageParser;

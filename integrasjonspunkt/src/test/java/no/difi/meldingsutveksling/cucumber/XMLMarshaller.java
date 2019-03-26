@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.cucumber;
 
 import lombok.SneakyThrows;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.xml.transform.StringResult;
 
@@ -9,6 +10,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
 
 @Component
+@Profile("cucumber")
 public class XMLMarshaller {
 
     private static final String PREFIX_MAPPER = "com.sun.xml.bind.namespacePrefixMapper";

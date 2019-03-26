@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayload;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
@@ -13,6 +14,7 @@ import java.util.Base64;
 import java.util.List;
 
 @Component
+@Profile("cucumber")
 @RequiredArgsConstructor
 public class ServiceBusMessageParser {
 

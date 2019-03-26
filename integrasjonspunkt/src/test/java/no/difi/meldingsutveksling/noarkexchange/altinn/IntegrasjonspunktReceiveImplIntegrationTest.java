@@ -1,12 +1,14 @@
 package no.difi.meldingsutveksling.noarkexchange.altinn;
 
 import no.difi.meldingsutveksling.IntegrasjonspunktApplication;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.Receiver;
 import no.difi.meldingsutveksling.core.Sender;
 import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
+import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktIntegrationTestConfig;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
@@ -18,6 +20,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -26,17 +34,23 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 /**
  * Integration test for {@link IntegrajonspunktReceiveImpl} (via {@link InternalQueue}).
- *
+ * <p>
  * Mock overrides are configured in {@link no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktIntegrationTestConfig}
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = IntegrasjonspunktApplication.class, webEnvironment = RANDOM_PORT, properties = {"app.local.properties.enable=false"})
+@SpringBootTest(classes = {
+        IntegrasjonspunktApplication.class,
+        IntegrasjonspunktIntegrationTestConfig.class
+}, webEnvironment = RANDOM_PORT, properties = {"app.local.properties.enable=false"})
 @ActiveProfiles("test")
 public class IntegrasjonspunktReceiveImplIntegrationTest {
 

@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.ks.svarut.OrganisasjonDigitalAdresse;
 import no.difi.meldingsutveksling.ks.svarut.SendForsendelseMedId;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtRequest;
 import org.apache.commons.io.IOUtils;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.security.PrivateKey;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
+@Profile("cucumber")
 @RequiredArgsConstructor
 public class SvarUtDataParser {
 

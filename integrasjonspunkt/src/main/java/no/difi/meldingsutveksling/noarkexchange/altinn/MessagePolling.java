@@ -126,7 +126,7 @@ public class MessagePolling implements ApplicationContextAware {
     }
 
     @Scheduled(fixedRate = 15000)
-    public void checkForNewMessages() throws MessageException {
+    public void checkForNewMessages() {
         if (!properties.getFeature().isEnableDPO()) {
             return;
         }

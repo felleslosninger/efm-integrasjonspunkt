@@ -464,7 +464,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.16.10</version>
+            <version>${lombok.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>

@@ -20,6 +20,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartRequest;
+import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
@@ -50,9 +51,8 @@ public class NextMoveMessageOutController {
     })
     @Transactional
     public StandardBusinessDocument createAndSendMessage(
-            @RequestPart("sbd") @NotNull @Valid StandardBusinessDocument sbd,
+            @RequestParam("sbd") @NotNull @Valid StandardBusinessDocument sbd,
             MultipartRequest multipartRequest) {
-
         List<MultipartFile> files = multipartRequest.getMultiFileMap().values().stream()
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
