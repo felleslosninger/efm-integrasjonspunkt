@@ -22,6 +22,6 @@ public class MessagePollingSteps {
 
     @And("^the application checks for new Next Move DPE messages$")
     public void theApplicationChecksForNewNextMoveDPEMessages() {
-        messagePolling.checkForNewMessages();
+        messagePolling.checkForNewNextMoveMessages();
     }
 }

@@ -3,6 +3,9 @@ package no.difi.meldingsutveksling.cucumber;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +25,8 @@ public class AltinnZipFactory {
 
     private final ObjectMapper objectMapper;
     private final AsicFactory asicFactory;
+    private final IntegrasjonspunktNokkel keyInfo;
+    private final ObjectProvider<CmsUtil> cmsUtilProvider;
 
     @SneakyThrows
     InputStream createAltinnZip(Message message) {
@@ -33,7 +38,10 @@ public class AltinnZipFactory {
 
         out.putNextEntry(new ZipEntry(ASIC_FILE));
 
-        out.write(asicFactory.getAsic(message));
+        byte[] asic = asicFactory.getAsic(message);
+        byte[] encryptedAsic = cmsUtilProvider.getIfAvailable().createCMS(asic, keyInfo.getX509Certificate());
+
+        out.write(encryptedAsic);
         out.closeEntry();
 
         out.close();
