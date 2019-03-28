@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 
+import java.time.Clock;
 import java.util.Optional;
 
 
@@ -16,19 +17,22 @@ public class PostVirksomhetStrategyFactory implements MessageStrategyFactory {
     private final CorrespondenceAgencyConfiguration configuration;
     private final NoarkClient noarkClient;
     private final InternalQueue internalQueue;
+    private final Clock clock;
 
     private PostVirksomhetStrategyFactory(CorrespondenceAgencyConfiguration configuration,
                                           NoarkClient noarkClient,
-                                          InternalQueue internalQueue) {
+                                          InternalQueue internalQueue, Clock clock) {
         this.configuration = configuration;
         this.noarkClient = noarkClient;
         this.internalQueue = internalQueue;
+        this.clock = clock;
     }
 
     public static PostVirksomhetStrategyFactory newInstance(IntegrasjonspunktProperties properties,
                                                             NoarkClient noarkClient,
                                                             ServiceRegistryLookup serviceRegistryLookup,
-                                                            InternalQueue internalQueue) {
+                                                            InternalQueue internalQueue,
+                                                            Clock clock) {
 
         InfoRecord infoRecord = serviceRegistryLookup.getInfoRecord(properties.getOrg().getNumber());
         CorrespondenceAgencyConfiguration.Builder builder = new CorrespondenceAgencyConfiguration.Builder()
@@ -49,12 +53,12 @@ public class PostVirksomhetStrategyFactory implements MessageStrategyFactory {
         builder.withEndpointUrl(properties.getDpv().getEndpointUrl().toString());
 
         CorrespondenceAgencyConfiguration config = builder.build();
-        return new PostVirksomhetStrategyFactory(config, noarkClient, internalQueue);
+        return new PostVirksomhetStrategyFactory(config, noarkClient, internalQueue, clock);
     }
 
     @Override
     public MessageStrategy create(Object payload) {
-        return new PostVirksomhetMessageStrategy(configuration, noarkClient, internalQueue);
+        return new PostVirksomhetMessageStrategy(configuration, clock, noarkClient, internalQueue);
     }
 
     @Override

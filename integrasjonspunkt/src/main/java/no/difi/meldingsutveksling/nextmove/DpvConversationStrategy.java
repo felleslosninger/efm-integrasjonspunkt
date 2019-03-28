@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+import java.time.Clock;
+
 @Component
 public class DpvConversationStrategy implements ConversationStrategy {
 
@@ -21,31 +23,36 @@ public class DpvConversationStrategy implements ConversationStrategy {
     private final ServiceRegistryLookup sr;
     private final CryptoMessagePersister cryptoMessagePersister;
     private final InternalQueue internalQueue;
+    private final CorrespondenceAgencyClientProvider correspondenceAgencyClientProvider;
+    private final Clock clock;
 
     @Autowired
     DpvConversationStrategy(IntegrasjonspunktProperties props,
                             ServiceRegistryLookup sr,
                             CryptoMessagePersister cryptoMessagePersister,
-                            @Lazy InternalQueue internalQueue) {
+                            @Lazy InternalQueue internalQueue,
+                            CorrespondenceAgencyClientProvider correspondenceAgencyClientProvider, Clock clock) {
         this.props = props;
         this.sr = sr;
         this.cryptoMessagePersister = cryptoMessagePersister;
         this.internalQueue = internalQueue;
+        this.correspondenceAgencyClientProvider = correspondenceAgencyClientProvider;
+        this.clock = clock;
     }
 
     @Override
-    public void send(ConversationResource conversationResource) throws NextMoveException {
+    public void send(ConversationResource conversationResource) {
         throw new UnsupportedOperationException("ConversationResource no longer in use");
     }
 
     @Override
     public void send(NextMoveMessage message) throws NextMoveException {
 
-        PostVirksomhetStrategyFactory dpvFactory = PostVirksomhetStrategyFactory.newInstance(props, null, sr, internalQueue);
+        PostVirksomhetStrategyFactory dpvFactory = PostVirksomhetStrategyFactory.newInstance(props, null, sr, internalQueue, clock);
         CorrespondenceAgencyConfiguration config = dpvFactory.getConfig();
-        InsertCorrespondenceV2 insertCorrespondenceV2 = CorrespondenceAgencyMessageFactory.create(config, message, cryptoMessagePersister);
+        InsertCorrespondenceV2 insertCorrespondenceV2 = CorrespondenceAgencyMessageFactory.create(config, message, cryptoMessagePersister, clock);
 
-        CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(NextMoveMessageMarkers.markerFrom(message), config);
+        CorrespondenceAgencyClient client = correspondenceAgencyClientProvider.getClient(NextMoveMessageMarkers.markerFrom(message), config);
         final CorrespondenceRequest request = new CorrespondenceRequest.Builder()
                 .withUsername(config.getSystemUserCode())
                 .withPassword(config.getPassword())

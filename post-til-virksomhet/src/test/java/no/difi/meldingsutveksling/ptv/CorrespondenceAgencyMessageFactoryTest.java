@@ -22,6 +22,7 @@ import org.springframework.xml.transform.StringSource;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import java.time.Clock;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -57,6 +58,7 @@ public class CorrespondenceAgencyMessageFactoryTest {
     private CorrespondenceAgencyConfiguration postConfig;
     private ServiceRegistryLookup srMock;
     private EDUCoreFactory eduCoreFactory;
+    private Clock clock = Clock.systemDefaultZone();
 
     @Before
     public void initializeJaxb() throws JAXBException {
@@ -80,7 +82,7 @@ public class CorrespondenceAgencyMessageFactoryTest {
     @Test
     public void testFactoryForCDataXML() throws PayloadException, JAXBException {
         EDUCore eduCore = eduCoreFactory.create(createPutMessageCdataXml(cdataTaggedXml), "910075918");
-        assertFields(CorrespondenceAgencyMessageFactory.create(postConfig, eduCore));
+        assertFields(CorrespondenceAgencyMessageFactory.create(postConfig, clock, eduCore));
     }
 
     private void assertFields(InsertCorrespondenceV2 c) {

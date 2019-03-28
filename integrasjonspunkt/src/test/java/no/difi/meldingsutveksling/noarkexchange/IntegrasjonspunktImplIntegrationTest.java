@@ -16,7 +16,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 /**
  * Integration test class for {@link IntegrasjonspunktImpl}.
- *
+ * <p>
  * Mock overrides are configured in {@link IntegrasjonspunktIntegrationTestConfig}.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -32,7 +32,7 @@ public class IntegrasjonspunktImplIntegrationTest {
 
     @Test
     public void sendMessageTest() {
-        String orgNr= "1337";
+        String orgNr = "1337";
         PutMessageRequestType request = PutMessageObjectMother.createMessageRequestType(orgNr);
         request.getEnvelope().getReceiver().setOrgnr(orgNr);
         PutMessageResponseType response = integrasjonspunkt.putMessage(request);

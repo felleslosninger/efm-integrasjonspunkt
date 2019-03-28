@@ -17,25 +17,29 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.ptv.CorrespondenceRequest;
 
+import java.time.Clock;
+
 import static no.difi.meldingsutveksling.core.EDUCoreMarker.markerFrom;
 
 public class PostVirksomhetMessageStrategy implements MessageStrategy {
 
     private final CorrespondenceAgencyConfiguration config;
+    private final Clock clock;
     private final NoarkClient noarkClient;
     private final InternalQueue internalQueue;
 
     public PostVirksomhetMessageStrategy(CorrespondenceAgencyConfiguration config,
-                                         NoarkClient noarkClient,
+                                         Clock clock, NoarkClient noarkClient,
                                          InternalQueue internalQueue) {
         this.config = config;
+        this.clock = clock;
         this.noarkClient = noarkClient;
         this.internalQueue = internalQueue;
     }
 
     @Override
     public PutMessageResponseType send(EDUCore message) {
-        final InsertCorrespondenceV2 correspondence = CorrespondenceAgencyMessageFactory.create(config, message);
+        final InsertCorrespondenceV2 correspondence = CorrespondenceAgencyMessageFactory.create(config, clock, message);
         CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(markerFrom(message), config);
         final CorrespondenceRequest request = new CorrespondenceRequest.Builder()
                 .withUsername(config.getSystemUserCode())

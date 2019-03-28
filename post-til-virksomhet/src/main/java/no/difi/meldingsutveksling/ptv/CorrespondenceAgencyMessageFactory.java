@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.ptv;
 
 import com.google.common.collect.Lists;
+import lombok.SneakyThrows;
 import no.altinn.schemas.serviceengine.formsengine._2009._10.TransportType;
 import no.altinn.schemas.services.serviceengine.correspondence._2010._10.AttachmentsV2;
 import no.altinn.schemas.services.serviceengine.correspondence._2010._10.ExternalContentV2;
@@ -33,6 +34,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
+import java.time.Clock;
 import java.time.ZonedDateTime;
 import java.util.*;
 
@@ -61,9 +63,11 @@ public class CorrespondenceAgencyMessageFactory {
     private CorrespondenceAgencyMessageFactory() {
     }
 
+    @SneakyThrows
     public static InsertCorrespondenceV2 create(CorrespondenceAgencyConfiguration config,
                                                 NextMoveMessage message,
-                                                CryptoMessagePersister cryptoMessagePersister) {
+                                                CryptoMessagePersister cryptoMessagePersister,
+                                                Clock clock) {
         no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory reporteeFactory = new no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory();
         BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
 
@@ -84,14 +88,14 @@ public class CorrespondenceAgencyMessageFactory {
         }
 
         DpvMessage dpvMessage = (DpvMessage) message.getBusinessMessage();
-        return create(config, message.getConversationId(), message.getReceiverIdentifier(),
+        return create(config, clock, message.getConversationId(), message.getReceiverIdentifier(),
                 dpvMessage.getTitle(),
                 dpvMessage.getContent(),
                 attachmentExternalBEV2List);
     }
 
 
-    public static InsertCorrespondenceV2 create(CorrespondenceAgencyConfiguration config, EDUCore edu) {
+    public static InsertCorrespondenceV2 create(CorrespondenceAgencyConfiguration config, Clock clock, EDUCore edu) {
 
         no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory reporteeFactory = new no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory();
         BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
@@ -112,7 +116,7 @@ public class CorrespondenceAgencyMessageFactory {
             String title = PayloadUtil.queryPayload(edu.getPayload(), "Melding/journpost/jpInnhold");
             String content = PayloadUtil.queryPayload(edu.getPayload(), "Melding/journpost/jpOffinnhold");
 
-            return create(config, edu.getId(), edu.getReceiver().getIdentifier(), title, content, attachmentExternalBEV2List);
+            return create(config, clock, edu.getId(), edu.getReceiver().getIdentifier(), title, content, attachmentExternalBEV2List);
         } catch (PayloadException e) {
             throw new MeldingsUtvekslingRuntimeException("Error querying payload for Dokument", e);
         }
@@ -120,6 +124,7 @@ public class CorrespondenceAgencyMessageFactory {
     }
 
     public static InsertCorrespondenceV2 create(CorrespondenceAgencyConfiguration config,
+                                                Clock clock,
                                                 String conversationId,
                                                 String receiverIdentifier,
                                                 String messageTitle,
@@ -139,8 +144,8 @@ public class CorrespondenceAgencyMessageFactory {
         // Name of the message sender, always "Avsender"
         correspondence.setMessageSender(objectFactory.createMyInsertCorrespondenceV2MessageSender(config.getSender()));
         // The date and time the message should be visible in the Portal
-        correspondence.setVisibleDateTime(toXmlGregorianCalendar(ZonedDateTime.now()));
-        correspondence.setDueDateTime(toXmlGregorianCalendar(ZonedDateTime.now().plusDays(7)));
+        correspondence.setVisibleDateTime(toXmlGregorianCalendar(ZonedDateTime.now(clock)));
+        correspondence.setDueDateTime(toXmlGregorianCalendar(ZonedDateTime.now(clock).plusDays(7)));
 
         ExternalContentV2 externalContentV2 = new ExternalContentV2();
         externalContentV2.setLanguageCode(objectFactory.createExternalContentV2LanguageCode("1044"));
@@ -151,7 +156,7 @@ public class CorrespondenceAgencyMessageFactory {
         // The date and time the message can be deleted by the user
         correspondence.setAllowSystemDeleteDateTime(
                 objectFactory.createMyInsertCorrespondenceV2AllowSystemDeleteDateTime(
-                        toXmlGregorianCalendar(getAllowSystemDeleteDateTime())));
+                        toXmlGregorianCalendar(getAllowSystemDeleteDateTime(clock))));
 
 
         AttachmentsV2 attachmentsV2 = new AttachmentsV2();
@@ -159,7 +164,7 @@ public class CorrespondenceAgencyMessageFactory {
         externalContentV2.setAttachments(objectFactory.createExternalContentV2Attachments(attachmentsV2));
         correspondence.setContent(objectFactory.createMyInsertCorrespondenceV2Content(externalContentV2));
 
-        List<Notification2009> notificationList = createNotifications(config);
+        List<Notification2009> notificationList = createNotifications(config, clock);
 
         NotificationBEList notifications = new NotificationBEList();
         List<Notification2009> notification = notifications.getNotification();
@@ -176,28 +181,28 @@ public class CorrespondenceAgencyMessageFactory {
         return myInsertCorrespondenceV2;
     }
 
-    private static List<Notification2009> createNotifications(CorrespondenceAgencyConfiguration config) {
+    private static List<Notification2009> createNotifications(CorrespondenceAgencyConfiguration config, Clock clock) {
 
         List<Notification2009> notifications = Lists.newArrayList();
 
         if (config.isNotifyEmail() && config.isNotifySms()) {
-            notifications.add(createNotification(config, TransportType.BOTH));
+            notifications.add(createNotification(config, TransportType.BOTH, clock));
         } else if (config.isNotifySms()) {
-            notifications.add(createNotification(config, TransportType.SMS));
+            notifications.add(createNotification(config, TransportType.SMS, clock));
         } else if (config.isNotifyEmail()) {
-            notifications.add(createNotification(config, TransportType.EMAIL));
+            notifications.add(createNotification(config, TransportType.EMAIL, clock));
         }
 
         return notifications;
     }
 
-    private static Notification2009 createNotification(CorrespondenceAgencyConfiguration config, TransportType type) {
+    private static Notification2009 createNotification(CorrespondenceAgencyConfiguration config, TransportType type, Clock clock) {
 
         Notification2009 notification = new Notification2009();
         no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory notificationFactory = new no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory();
         notification.setFromAddress(notificationFactory.createNotification2009FromAddress("no-reply@altinn.no"));
         // The date and time the notification should be sent
-        notification.setShipmentDateTime(toXmlGregorianCalendar(ZonedDateTime.now().plusMinutes(5)));
+        notification.setShipmentDateTime(toXmlGregorianCalendar(ZonedDateTime.now(clock).plusMinutes(5)));
         // Language code of the notification
         notification.setLanguageCode(notificationFactory.createNotification2009LanguageCode("1044"));
         // Notification type
@@ -221,8 +226,8 @@ public class CorrespondenceAgencyMessageFactory {
         return tokens;
     }
 
-    private static ZonedDateTime getAllowSystemDeleteDateTime() {
-        return ZonedDateTime.now().plusMinutes(5);
+    private static ZonedDateTime getAllowSystemDeleteDateTime(Clock clock) {
+        return ZonedDateTime.now(clock).plusMinutes(5);
     }
 
     public static GetCorrespondenceStatusDetailsV2 createReceiptRequest(Conversation conversation) {

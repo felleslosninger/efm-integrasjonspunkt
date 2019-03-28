@@ -14,9 +14,11 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.nextmove.AsicHandler;
+import no.difi.meldingsutveksling.nextmove.CorrespondenceAgencyClientProvider;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
+import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.receipt.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
@@ -92,9 +94,8 @@ public class IntegrasjonspunktIntegrationTestConfig {
     public StrategyFactory messageStrategyFactory(MessageSender messageSender,
                                                   ServiceRegistryLookup serviceRegistryLookup,
                                                   KeystoreProvider keystoreProvider,
-                                                  SvarUtService svarUtService,
-                                                  InternalQueue internalQueue) {
-        return new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider, properties, mock(NoarkClient.class), internalQueue);
+                                                  InternalQueue internalQueue, Clock clock) {
+        return new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider, properties, mock(NoarkClient.class), internalQueue, clock);
     }
 
     @Bean
@@ -225,5 +226,10 @@ public class IntegrasjonspunktIntegrationTestConfig {
     @Bean
     public NoarkClient mailClient() {
         return mock(NoarkClient.class);
+    }
+
+    @Bean
+    public CorrespondenceAgencyClientProvider correspondenceAgencyClientProvider() {
+        return CorrespondenceAgencyClient::new;
     }
 }

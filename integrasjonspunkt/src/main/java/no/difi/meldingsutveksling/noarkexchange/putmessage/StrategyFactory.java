@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.apache.commons.lang.NotImplementedException;
 
+import java.time.Clock;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
@@ -29,7 +30,8 @@ public class StrategyFactory {
                            KeystoreProvider keystoreProvider,
                            IntegrasjonspunktProperties properties,
                            NoarkClient noarkClient,
-                           InternalQueue internalQueue) {
+                           InternalQueue internalQueue,
+                           Clock clock) {
         MessageStrategyFactory postInnbyggerStrategyFactory;
         try {
             postInnbyggerStrategyFactory = PostInnbyggerStrategyFactory.newInstance(properties, serviceRegistryLookup, keystoreProvider);
@@ -45,8 +47,8 @@ public class StrategyFactory {
             factories.put(DPI, postInnbyggerStrategyFactory);
         }
         if (properties.getFeature().isEnableDPV()) {
-            factories.put(DPV, PostVirksomhetStrategyFactory.newInstance(properties, noarkClient, serviceRegistryLookup, internalQueue));
-            factories.put(DPE_INNSYN, PostVirksomhetStrategyFactory.newInstance(properties, noarkClient, serviceRegistryLookup, internalQueue));
+            factories.put(DPV, PostVirksomhetStrategyFactory.newInstance(properties, noarkClient, serviceRegistryLookup, internalQueue, clock));
+            factories.put(DPE_INNSYN, PostVirksomhetStrategyFactory.newInstance(properties, noarkClient, serviceRegistryLookup, internalQueue, clock));
         }
     }
 

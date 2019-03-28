@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Clock;
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
@@ -56,9 +57,9 @@ public class StrategyFactoryTest {
         SvarUtService svarUtService = mock(SvarUtService.class);
         NoarkClient noarkClientMock = mock(NoarkClient.class);
         InternalQueue internalQueue = mock(InternalQueue.class);
-        strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider, properties, noarkClientMock, internalQueue);
+        Clock clock = Clock.systemDefaultZone();
+        strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider, properties, noarkClientMock, internalQueue, clock);
         strategyFactory.registerMessageStrategyFactory(FiksMessageStrategyFactory.newInstance(svarUtService, noarkClientMock));
-
     }
 
     @Test

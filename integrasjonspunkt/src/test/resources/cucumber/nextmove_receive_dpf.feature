@@ -1,8 +1,7 @@
 Feature: Receiving a Next Move DPF message
 
   Background:
-    Given the DPF feature is enabled
-    And Fiks prepares a message with the following body:
+    Given Fiks prepares a message with the following body:
     """
     [
       {

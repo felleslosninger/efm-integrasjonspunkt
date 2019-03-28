@@ -1,17 +1,18 @@
 package no.difi.meldingsutveksling.receipt.strategy;
 
+import lombok.RequiredArgsConstructor;
 import no.altinn.schemas.services.serviceengine.correspondence._2014._10.StatusChangeV2;
 import no.altinn.schemas.services.serviceengine.correspondence._2014._10.StatusV2;
 import no.altinn.services.serviceengine.correspondence._2009._10.GetCorrespondenceStatusDetailsV2;
 import no.altinn.services.serviceengine.correspondence._2009._10.GetCorrespondenceStatusDetailsV2Response;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.nextmove.CorrespondenceAgencyClientProvider;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.ptv.CorrespondenceRequest;
 import no.difi.meldingsutveksling.receipt.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
@@ -21,18 +22,16 @@ import java.util.Optional;
 import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 
 @Component
+@RequiredArgsConstructor
 public class DpvStatusStrategy implements StatusStrategy {
 
     private static final ServiceIdentifier serviceIdentifier = ServiceIdentifier.DPV;
-
-    @Autowired
-    private IntegrasjonspunktProperties properties;
-
-    @Autowired
-    private ConversationService conversationService;
-
     private static final String STATUS_CREATED = "Created";
     private static final String STATUS_READ = "Read";
+
+    private final IntegrasjonspunktProperties properties;
+    private final ConversationService conversationService;
+    private final CorrespondenceAgencyClientProvider correspondenceAgencyClientProvider;
 
     @Override
     public void checkStatus(Conversation conversation) {
@@ -45,7 +44,7 @@ public class DpvStatusStrategy implements StatusStrategy {
                 .withEndpointUrl(properties.getDpv().getEndpointUrl().toString())
                 .build();
 
-        final CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(markerFrom(conversation), config);
+        final CorrespondenceAgencyClient client = correspondenceAgencyClientProvider.getClient(markerFrom(conversation), config);
         GetCorrespondenceStatusDetailsV2 receiptRequest = CorrespondenceAgencyMessageFactory.createReceiptRequest(conversation);
         final CorrespondenceRequest request = new CorrespondenceRequest.Builder().withUsername(config
                 .getSystemUserCode()).withPassword(config.getPassword()).withPayload(receiptRequest).build();
@@ -68,7 +67,7 @@ public class DpvStatusStrategy implements StatusStrategy {
                     .findFirst();
             GenericReceiptStatus levertStatus = GenericReceiptStatus.LEVERT;
             boolean hasCreatedStatus = conversation.getMessageStatuses().stream()
-                    .anyMatch(r -> levertStatus.toString().equals(r.getStatus()) );
+                    .anyMatch(r -> levertStatus.toString().equals(r.getStatus()));
             if (!hasCreatedStatus && createdStatus.isPresent()) {
                 ZonedDateTime createdZoned = createdStatus.get().getStatusDate().toGregorianCalendar().toZonedDateTime();
                 MessageStatus status = MessageStatus.of(levertStatus, createdZoned.toLocalDateTime());
@@ -82,7 +81,7 @@ public class DpvStatusStrategy implements StatusStrategy {
             if (readStatus.isPresent()) {
                 ZonedDateTime readZoned = readStatus.get().getStatusDate().toGregorianCalendar().toZonedDateTime();
                 MessageStatus status = MessageStatus.of(lestStatus, readZoned.toLocalDateTime());
-                conversation  = conversationService.registerStatus(conversation, status);
+                conversation = conversationService.registerStatus(conversation, status);
                 conversationService.markFinished(conversation);
             }
         }
