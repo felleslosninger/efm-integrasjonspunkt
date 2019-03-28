@@ -8,6 +8,8 @@ import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
+import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
+import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import org.junit.Before;
@@ -15,7 +17,6 @@ import org.junit.Test;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.Clock;
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
@@ -30,6 +31,8 @@ public class StrategyFactoryTest {
 
     @Before
     public void setup() throws MalformedURLException {
+        final CorrespondenceAgencyClient client = mock(CorrespondenceAgencyClient.class);
+        final CorrespondenceAgencyMessageFactory correspondenceAgencyMessageFactory = mock(CorrespondenceAgencyMessageFactory.class);
         final MessageSender messageSender = mock(MessageSender.class);
         final IntegrasjonspunktProperties properties = mock(IntegrasjonspunktProperties.class);
         final IntegrasjonspunktProperties.PostVirksomheter ptvMock = mock(IntegrasjonspunktProperties.PostVirksomheter.class);
@@ -57,8 +60,7 @@ public class StrategyFactoryTest {
         SvarUtService svarUtService = mock(SvarUtService.class);
         NoarkClient noarkClientMock = mock(NoarkClient.class);
         InternalQueue internalQueue = mock(InternalQueue.class);
-        Clock clock = Clock.systemDefaultZone();
-        strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider, properties, noarkClientMock, internalQueue, clock);
+        strategyFactory = new StrategyFactory(client, correspondenceAgencyMessageFactory, messageSender, serviceRegistryLookup, keystoreProvider, properties, noarkClientMock, internalQueue);
         strategyFactory.registerMessageStrategyFactory(FiksMessageStrategyFactory.newInstance(svarUtService, noarkClientMock));
     }
 

@@ -1,8 +1,6 @@
 package no.difi.meldingsutveksling.ptv;
 
 import lombok.SneakyThrows;
-import net.logstash.logback.marker.LogstashMarker;
-import no.difi.webservice.support.SoapFaultInterceptorLogger;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -10,6 +8,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.HTTP;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+import org.springframework.stereotype.Component;
 import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
@@ -30,19 +29,17 @@ import java.util.Map;
 /**
  * Used to send messages to Altinn InsertCorrespondence. InsertCorrespondence is used to send information to private companies.
  */
+@Component
 public class CorrespondenceAgencyClient extends WebServiceGatewaySupport {
 
-    private final LogstashMarker logstashMarker;
     private final String endpointUrl;
 
     /**
      * Creates client to use Altinn Correspondence Agency
      */
-    public CorrespondenceAgencyClient(LogstashMarker logstashMarker, CorrespondenceAgencyConfiguration config) {
+    public CorrespondenceAgencyClient(CorrespondenceAgencyConfiguration config) {
         super(getFactory());
-        this.logstashMarker = logstashMarker;
         this.endpointUrl = config.getEndpointUrl();
-
         Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
         String contextPath = "no.altinn.services.serviceengine.correspondence._2009._10";
         marshaller.setContextPath(contextPath);
@@ -68,7 +65,7 @@ public class CorrespondenceAgencyClient extends WebServiceGatewaySupport {
     private List<ClientInterceptor> getInterceptors(CorrespondenceAgencyConfiguration config) {
         List<ClientInterceptor> interceptors = new ArrayList<>();
         interceptors.add(createSecurityInterceptors(config.getSystemUserCode(), config.getPassword()));
-        interceptors.add(SoapFaultInterceptorLogger.withLogMarkers(logstashMarker));
+        interceptors.add(new SoapFaultInterceptorLogger());
         interceptors.addAll(getAdditionalInterceptors());
         return interceptors;
     }
@@ -132,17 +129,16 @@ public class CorrespondenceAgencyClient extends WebServiceGatewaySupport {
     /**
      * Sends correspondence to Altinn Insert Correspondence
      *
-     * @param request containing the message along with sender/receiver
      * @return response if successful
      */
-    public Object sendCorrespondence(CorrespondenceRequest request) {
+    public Object sendCorrespondence(Object payload) {
         final String soapAction = "http://www.altinn.no/services/ServiceEngine/Correspondence/2009/10/ICorrespondenceAgencyExternal/InsertCorrespondenceV2";
-        return getWebServiceTemplate().marshalSendAndReceive(this.endpointUrl, request.getCorrespondence(), getActionCallback(soapAction));
+        return getWebServiceTemplate().marshalSendAndReceive(this.endpointUrl, payload, getActionCallback(soapAction));
     }
 
-    public Object sendStatusRequest(CorrespondenceRequest request) {
+    public Object sendStatusRequest(Object payload) {
         final String soapAction = "http://www.altinn.no/services/ServiceEngine/Correspondence/2009/10/ICorrespondenceAgencyExternal/GetCorrespondenceStatusDetailsV2";
-        return getWebServiceTemplate().marshalSendAndReceive(this.endpointUrl, request.getCorrespondence(), getActionCallback(soapAction));
+        return getWebServiceTemplate().marshalSendAndReceive(this.endpointUrl, payload, getActionCallback(soapAction));
     }
 
     @SneakyThrows(URISyntaxException.class)

@@ -6,7 +6,6 @@ import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.lang.KeystoreProviderException;
 import no.difi.meldingsutveksling.mail.MailClient;
-import no.difi.meldingsutveksling.nextmove.CorrespondenceAgencyClientProvider;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.FiksMessageStrategyFactory;
@@ -14,6 +13,8 @@ import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactor
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
+import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
+import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.DpiReceiptService;
 import no.difi.meldingsutveksling.receipt.StatusStrategy;
@@ -105,15 +106,17 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public StrategyFactory messageStrategyFactory(MessageSender messageSender,
-                                                  ServiceRegistryLookup serviceRegistryLookup,
-                                                  KeystoreProvider meldingsformidlerKeystoreProvider,
-                                                  @Lazy InternalQueue internalQueue,
-                                                  @Qualifier("localNoark") ObjectProvider<NoarkClient> localNoark,
-                                                  @SuppressWarnings("SpringJavaAutowiringInspection") ObjectProvider<List<MessageStrategyFactory>> messageStrategyFactory,
-                                                  IntegrasjonspunktProperties properties,
-                                                  Clock clock) {
-        final StrategyFactory strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, meldingsformidlerKeystoreProvider, properties, localNoark.getIfAvailable(), internalQueue, clock);
+    public StrategyFactory messageStrategyFactory(
+            CorrespondenceAgencyClient client,
+            CorrespondenceAgencyMessageFactory correspondenceAgencyMessageFactory,
+            MessageSender messageSender,
+            ServiceRegistryLookup serviceRegistryLookup,
+            KeystoreProvider meldingsformidlerKeystoreProvider,
+            @Lazy InternalQueue internalQueue,
+            @Qualifier("localNoark") ObjectProvider<NoarkClient> localNoark,
+            @SuppressWarnings("SpringJavaAutowiringInspection") ObjectProvider<List<MessageStrategyFactory>> messageStrategyFactory,
+            IntegrasjonspunktProperties properties) {
+        final StrategyFactory strategyFactory = new StrategyFactory(client, correspondenceAgencyMessageFactory, messageSender, serviceRegistryLookup, meldingsformidlerKeystoreProvider, properties, localNoark.getIfAvailable(), internalQueue);
         if (messageStrategyFactory.getIfAvailable() != null) {
             messageStrategyFactory.getIfAvailable().forEach(strategyFactory::registerMessageStrategyFactory);
         }
@@ -166,8 +169,19 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public CorrespondenceAgencyClientProvider correspondenceAgencyClientProvider() {
-        return CorrespondenceAgencyClient::new;
+    public CorrespondenceAgencyConfiguration correspondenceAgencyConfiguration(IntegrasjonspunktProperties properties) {
+        return new CorrespondenceAgencyConfiguration()
+                .setExternalServiceCode(properties.getDpv().getExternalServiceCode())
+                .setExternalServiceEditionCode(properties.getDpv().getExternalServiceEditionCode())
+                .setPassword(properties.getDpv().getPassword())
+                .setSystemUserCode(properties.getDpv().getUsername())
+                .setNotifyEmail(properties.getDpv().isNotifyEmail())
+                .setNotifySms(properties.getDpv().isNotifySms())
+                .setNotificationText(Optional.ofNullable(properties.getDpv())
+                        .map(IntegrasjonspunktProperties.PostVirksomheter::getNotificationText)
+                        .orElse(null))
+                .setNextmoveFiledir(properties.getNextmove().getFiledir())
+                .setEndpointUrl(properties.getDpv().getEndpointUrl().toString());
     }
 }
 

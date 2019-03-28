@@ -8,10 +8,11 @@ import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
+import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
+import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.apache.commons.lang.NotImplementedException;
 
-import java.time.Clock;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
@@ -25,13 +26,15 @@ public class StrategyFactory {
 
     private final Map<ServiceIdentifier, MessageStrategyFactory> factories;
 
-    public StrategyFactory(MessageSender messageSender,
-                           ServiceRegistryLookup serviceRegistryLookup,
-                           KeystoreProvider keystoreProvider,
-                           IntegrasjonspunktProperties properties,
-                           NoarkClient noarkClient,
-                           InternalQueue internalQueue,
-                           Clock clock) {
+    public StrategyFactory(
+            CorrespondenceAgencyClient client,
+            CorrespondenceAgencyMessageFactory correspondenceAgencyMessageFactory,
+            MessageSender messageSender,
+            ServiceRegistryLookup serviceRegistryLookup,
+            KeystoreProvider keystoreProvider,
+            IntegrasjonspunktProperties properties,
+            NoarkClient noarkClient,
+            InternalQueue internalQueue) {
         MessageStrategyFactory postInnbyggerStrategyFactory;
         try {
             postInnbyggerStrategyFactory = PostInnbyggerStrategyFactory.newInstance(properties, serviceRegistryLookup, keystoreProvider);
@@ -47,13 +50,14 @@ public class StrategyFactory {
             factories.put(DPI, postInnbyggerStrategyFactory);
         }
         if (properties.getFeature().isEnableDPV()) {
-            factories.put(DPV, PostVirksomhetStrategyFactory.newInstance(properties, noarkClient, serviceRegistryLookup, internalQueue, clock));
-            factories.put(DPE_INNSYN, PostVirksomhetStrategyFactory.newInstance(properties, noarkClient, serviceRegistryLookup, internalQueue, clock));
+            factories.put(DPV, PostVirksomhetStrategyFactory.newInstance(correspondenceAgencyMessageFactory, client, noarkClient, internalQueue));
+            factories.put(DPE_INNSYN, PostVirksomhetStrategyFactory.newInstance(correspondenceAgencyMessageFactory, client, noarkClient, internalQueue));
         }
     }
 
     /**
      * Used with feature toggling to enable new message strategies
+     *
      * @param messageStrategyFactory an implementation/instance of a MessageStrategyFactory
      */
     public void registerMessageStrategyFactory(MessageStrategyFactory messageStrategyFactory) {

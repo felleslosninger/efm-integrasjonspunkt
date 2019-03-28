@@ -11,14 +11,14 @@ import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.nextmove.AsicHandler;
-import no.difi.meldingsutveksling.nextmove.CorrespondenceAgencyClientProvider;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
+import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
+import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.receipt.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
@@ -81,7 +81,7 @@ public class IntegrasjonspunktIntegrationTestConfig {
 
     @Bean
     @Primary
-    public KeystoreProvider meldingsformidlerKeystoreProvider() throws MeldingsformidlerException {
+    public KeystoreProvider meldingsformidlerKeystoreProvider() {
         return mock(KeystoreProvider.class);
     }
 
@@ -91,11 +91,14 @@ public class IntegrasjonspunktIntegrationTestConfig {
     }
 
     @Bean
-    public StrategyFactory messageStrategyFactory(MessageSender messageSender,
-                                                  ServiceRegistryLookup serviceRegistryLookup,
-                                                  KeystoreProvider keystoreProvider,
-                                                  InternalQueue internalQueue, Clock clock) {
-        return new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider, properties, mock(NoarkClient.class), internalQueue, clock);
+    public StrategyFactory messageStrategyFactory(
+            CorrespondenceAgencyClient client,
+            CorrespondenceAgencyMessageFactory correspondenceAgencyMessageFactory,
+            MessageSender messageSender,
+            ServiceRegistryLookup serviceRegistryLookup,
+            KeystoreProvider keystoreProvider,
+            InternalQueue internalQueue) {
+        return new StrategyFactory(client, correspondenceAgencyMessageFactory, messageSender, serviceRegistryLookup, keystoreProvider, properties, mock(NoarkClient.class), internalQueue);
     }
 
     @Bean
@@ -229,7 +232,18 @@ public class IntegrasjonspunktIntegrationTestConfig {
     }
 
     @Bean
-    public CorrespondenceAgencyClientProvider correspondenceAgencyClientProvider() {
-        return CorrespondenceAgencyClient::new;
+    public CorrespondenceAgencyConfiguration correspondenceAgencyConfiguration(IntegrasjonspunktProperties properties) {
+        return new CorrespondenceAgencyConfiguration()
+                .setExternalServiceCode(properties.getDpv().getExternalServiceCode())
+                .setExternalServiceEditionCode(properties.getDpv().getExternalServiceEditionCode())
+                .setPassword(properties.getDpv().getPassword())
+                .setSystemUserCode(properties.getDpv().getUsername())
+                .setNotifyEmail(properties.getDpv().isNotifyEmail())
+                .setNotifySms(properties.getDpv().isNotifySms())
+                .setNotificationText(Optional.ofNullable(properties.getDpv())
+                        .map(IntegrasjonspunktProperties.PostVirksomheter::getNotificationText)
+                        .orElse(null))
+                .setNextmoveFiledir(properties.getNextmove().getFiledir())
+                .setEndpointUrl(properties.getDpv().getEndpointUrl().toString());
     }
 }

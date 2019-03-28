@@ -4,16 +4,12 @@ import cucumber.api.java.After;
 import cucumber.api.java.Before;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasic;
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExternalBasicStreamed;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceClient;
-import no.difi.meldingsutveksling.logging.MarkerFactory;
-import no.difi.meldingsutveksling.nextmove.CorrespondenceAgencyClientProvider;
 import no.difi.meldingsutveksling.nextmove.ServiceBusRestTemplate;
-import no.difi.meldingsutveksling.noarkexchange.putmessage.PostVirksomhetStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
@@ -27,7 +23,10 @@ import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebCl
 import org.springframework.boot.test.context.SpringBootContextLoader;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -65,16 +64,10 @@ public class CucumberStepsConfiguration {
 
         @Bean
         @Primary
-        public CorrespondenceAgencyClientProvider correspondenceAgencyClientProvider(CorrespondenceAgencyClient correspondenceAgencyClient) {
-            return (logstashMarker, config) -> correspondenceAgencyClient;
-        }
-
-        @Bean
         public CorrespondenceAgencyClient correspondenceAgencyClient(
-                LogstashMarker logstashMarker,
                 CorrespondenceAgencyConfiguration config,
                 RequestCaptureClientInterceptor requestCaptureClientInterceptor) {
-            return new CorrespondenceAgencyClient(logstashMarker, config) {
+            return new CorrespondenceAgencyClient(config) {
 
                 @Override
                 protected List<ClientInterceptor> getAdditionalInterceptors() {
@@ -93,20 +86,6 @@ public class CucumberStepsConfiguration {
         @Bean
         public RequestCaptureClientInterceptor requestCaptureClientInterceptor(Holder<List<String>> webServicePayloadHolder) {
             return new RequestCaptureClientInterceptor(webServicePayloadHolder);
-        }
-
-        @Bean
-        public LogstashMarker logstashMarker() {
-            return MarkerFactory.conversationIdMarker("test");
-        }
-
-        @Bean
-        public CorrespondenceAgencyConfiguration CorrespondenceAgencyConfiguration(IntegrasjonspunktProperties props,
-                                                                                   ServiceRegistryLookup sr,
-                                                                                   @Lazy InternalQueue internalQueue,
-                                                                                   Clock clock) {
-            PostVirksomhetStrategyFactory dpvFactory = PostVirksomhetStrategyFactory.newInstance(props, null, sr, internalQueue, clock);
-            return dpvFactory.getConfig();
         }
 
         /**
