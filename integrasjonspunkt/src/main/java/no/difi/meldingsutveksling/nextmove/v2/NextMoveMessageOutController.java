@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 @RestController
 @Validated
 @Api
-@RequestMapping("/api/message/out")
+@RequestMapping("/api/messages/out")
 @Slf4j
 @RequiredArgsConstructor
 public class NextMoveMessageOutController {
@@ -111,7 +111,7 @@ public class NextMoveMessageOutController {
         return messageService.getMessage(conversationId).getSbd();
     }
 
-    @PostMapping(value = "/{conversationId}/upload")
+    @PutMapping(value = "/{conversationId}")
     @ApiOperation(value = "Upload file", notes = "Upload a file to the message with supplied conversationId")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success"),

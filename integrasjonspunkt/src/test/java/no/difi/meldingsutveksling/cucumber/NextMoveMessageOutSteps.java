@@ -67,7 +67,7 @@ public class NextMoveMessageOutSteps {
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
         ResponseEntity<String> response = testRestTemplate.exchange(
-                "/api/message/out",
+                "/api/messages/out",
                 HttpMethod.POST,
                 new HttpEntity<>(multipart, headers),
                 String.class);
@@ -86,7 +86,7 @@ public class NextMoveMessageOutSteps {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         ResponseEntity<String> response = testRestTemplate.exchange(
-                "/api/message/out",
+                "/api/messages/out",
                 HttpMethod.POST,
                 new HttpEntity<>(body, headers),
                 String.class);
@@ -116,8 +116,8 @@ public class NextMoveMessageOutSteps {
         uriVariables.put("title", title);
 
         ResponseEntity<String> response = testRestTemplate.exchange(
-                "/api/message/out/{conversationId}/upload?title={title}",
-                HttpMethod.POST,
+                "/api/messages/out/{conversationId}?title={title}",
+                HttpMethod.PUT,
                 new HttpEntity<>(body, headers),
                 String.class,
                 uriVariables);
@@ -130,7 +130,7 @@ public class NextMoveMessageOutSteps {
     @Given("^I send the message$")
     public void iSendTheMessage() {
         ResponseEntity<String> response = testRestTemplate.exchange(
-                "/api/message/out/{conversationId}",
+                "/api/messages/out/{conversationId}",
                 HttpMethod.POST, new HttpEntity(null),
                 String.class,
                 messageOutHolder.get().getSbd().getConversationId());
