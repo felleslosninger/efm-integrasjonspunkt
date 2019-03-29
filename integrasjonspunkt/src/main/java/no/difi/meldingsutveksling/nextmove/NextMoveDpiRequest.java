@@ -80,11 +80,13 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     @Override
     public String getSubject() {
-        if (!(message.getBusinessMessage() instanceof DpiMessage)) {
-            throw new NextMoveRuntimeException("BusinessMessage not instance of DpiMessage");
+        if (message.getBusinessMessage() instanceof DpiDigitalMessage) {
+            return((DpiDigitalMessage) message.getBusinessMessage()).getNonSensitiveTitle();
         }
-        DpiMessage dpiMessage = (DpiMessage) message.getBusinessMessage();
-        return dpiMessage.getTitle();
+        if (message.getBusinessMessage() instanceof DpiPrintMessage) {
+            return null;
+        }
+        throw new NextMoveRuntimeException(String.format("BusinessMessage not instance of either %s or %s", DpiDigitalMessage.class.getName(), DpiPrintMessage.class.getName()));
     }
 
     @Override
@@ -145,7 +147,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     @Override
     public boolean isPrintProvider() {
-        return serviceRecord.isFysiskPost();
+        return message.getBusinessMessage() instanceof DpiPrintMessage;
     }
 
     @Override

@@ -27,10 +27,13 @@ public class NextMoveMessageSerializer extends StdSerializer<StandardBusinessDoc
         } else if (value.getAny() instanceof DpeMessage) {
             gen.writeFieldName("dpe");
             gen.writeObject(value.getAny());
-        } else if (value.getAny() instanceof DpiMessage) {
-            gen.writeFieldName("dpi");
+        } else if (value.getAny() instanceof DpiDigitalMessage) {
+            gen.writeFieldName("dpi_digital");
             gen.writeObject(value.getAny());
-        }
+        } else if (value.getAny() instanceof DpiPrintMessage) {
+        gen.writeFieldName("dpi_print");
+        gen.writeObject(value.getAny());
+    }
         gen.writeEndObject();
     }
 }
