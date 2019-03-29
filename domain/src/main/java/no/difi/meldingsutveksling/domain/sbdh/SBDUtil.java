@@ -32,7 +32,7 @@ public class SBDUtil {
     }
 
     public static boolean isExpired(StandardBusinessDocumentHeader header) {
-        ZonedDateTime zonedDateTime = header.getExpectedResponseTimeDate();
+        ZonedDateTime zonedDateTime = header.getExpectedResponseDateTime();
         ZonedDateTime now = ZonedDateTime.now();
         if (zonedDateTime.isAfter(now) || now.equals(zonedDateTime)) {
             return true;
