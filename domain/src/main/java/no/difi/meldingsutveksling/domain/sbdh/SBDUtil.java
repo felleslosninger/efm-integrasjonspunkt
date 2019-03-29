@@ -1,9 +1,12 @@
 package no.difi.meldingsutveksling.domain.sbdh;
 
 import com.google.common.collect.Sets;
+import lombok.extern.slf4j.Slf4j;
 
+import java.time.ZonedDateTime;
 import java.util.Set;
 
+@Slf4j
 public class SBDUtil {
 
     private static Set<String> NEXTMOVE_STANDARDS = Sets.newHashSet(
@@ -26,5 +29,16 @@ public class SBDUtil {
     public static boolean isReceipt(StandardBusinessDocument sbd) {
         // TODO add nextmove receipt doc types
         return sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getType().equalsIgnoreCase(StandardBusinessDocumentHeader.KVITTERING_TYPE);
+    }
+
+    public static boolean isExpired(StandardBusinessDocumentHeader header) {
+        ZonedDateTime zonedDateTime = header.getExpectedResponseTimeDate();
+        ZonedDateTime now = ZonedDateTime.now();
+        if (zonedDateTime.isAfter(now) || now.equals(zonedDateTime)) {
+            return true;
+        }
+        else {
+            log.error("ExpectedResponseDateTime is expired. Message will not be handled further. Please resend...");
+            return false;}
     }
 }

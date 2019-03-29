@@ -16,7 +16,7 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.nextmove.AbstractEntity;
-import no.difi.meldingsutveksling.nextmove.BusinessMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.validation.ReceiverAcceptableDocumentIdentifier;
 import no.difi.meldingsutveksling.validation.ReceiverAcceptableServiceIdentifier;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -294,4 +294,16 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
             return new Scope().setIdentifier(STANDARD_LEGACY);
         }
     }
+
+    public ZonedDateTime getExpectedResponseTimeDate() {
+        Set<Scope> scope = this.getBusinessScope().getScope();
+        ZonedDateTime zonedDateTime = scope.stream().flatMap(s-> s.getScopeInformation()
+                .stream())
+                .map(CorrelationInformation::getExpectedResponseDateTime)
+                .findFirst()
+                .orElseThrow(() -> new NextMoveRuntimeException("No ExpectedResponseDateTime found"));
+
+        return zonedDateTime;
+    }
+
 }
