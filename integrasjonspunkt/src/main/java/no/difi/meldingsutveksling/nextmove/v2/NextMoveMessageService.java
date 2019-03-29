@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.nextmove.v2;
 
 import com.querydsl.core.types.Predicate;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.NextMoveConsts;
@@ -9,10 +10,12 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingException;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
@@ -36,7 +39,9 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
+import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isExpired;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class NextMoveMessageService {
@@ -151,6 +156,11 @@ public class NextMoveMessageService {
             throw new MissingFileException();
         }
 
+        StandardBusinessDocumentHeader header = message.getSbd().getStandardBusinessDocumentHeader();
+        if (isExpired(header)) {
+            String string = String.format("ExpectedResponseDateTime (%s) is after current time. Message will not be handled further. Please resend...", header.getExpectedResponseDateTime());
+            new NextMoveRuntimeException(string);
+        }
         if (ServiceIdentifier.DPO == message.getServiceIdentifier()) {
             // Arkivmelding must exist for DPO
             BusinessMessageFile arkivmeldingFile = message.getFiles().stream()
@@ -190,4 +200,6 @@ public class NextMoveMessageService {
     private String createConversationId() {
         return UUID.randomUUID().toString();
     }
+
+
 }

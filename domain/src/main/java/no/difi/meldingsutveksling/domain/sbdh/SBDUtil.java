@@ -34,11 +34,12 @@ public class SBDUtil {
     public static boolean isExpired(StandardBusinessDocumentHeader header) {
         ZonedDateTime zonedDateTime = header.getExpectedResponseDateTime();
         ZonedDateTime now = ZonedDateTime.now();
-        if (zonedDateTime.isAfter(now) || now.equals(zonedDateTime)) {
+        if (now.isAfter(zonedDateTime)) {
+            log.error("ExpectedResponseDateTime is expired. Message will not be handled further. Please resend...");
             return true;
         }
         else {
-            log.error("ExpectedResponseDateTime is expired. Message will not be handled further. Please resend...");
-            return false;}
+            return false;
+        }
     }
 }

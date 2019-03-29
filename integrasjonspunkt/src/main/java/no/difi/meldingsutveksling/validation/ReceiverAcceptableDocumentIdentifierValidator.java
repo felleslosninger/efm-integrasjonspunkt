@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.List;
-import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isExpired;
 
 @Slf4j
 public class ReceiverAcceptableDocumentIdentifierValidator implements ConstraintValidator<ReceiverAcceptableDocumentIdentifier, StandardBusinessDocumentHeader> {
@@ -37,12 +36,6 @@ public class ReceiverAcceptableDocumentIdentifierValidator implements Constraint
         if (participantIdentifier == null) {
             return true;
         }
-
-        if (!isExpired(header)) {
-            return false;
-        }
-
-   // header.getBusinessscope()
         DocumentTypeIdentifier standard = getStandard(header);
 
         List<DocumentTypeIdentifier> acceptedDocumentIdentifiers = documentIdentifierLookup.getDocumentIdentifiers(participantIdentifier);
