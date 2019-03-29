@@ -91,7 +91,8 @@ public class ReceiptPolling {
                 return props.getFeature().isEnableDPV();
             case DPF:
                 return props.getFeature().isEnableDPF();
-            case DPI:
+            case DPI_DIGITAL:
+            case DPI_PRINT:
                 return props.getFeature().isEnableDPI();
             default:
                 return false;

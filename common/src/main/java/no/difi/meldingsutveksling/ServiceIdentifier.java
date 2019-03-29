@@ -18,7 +18,8 @@ public enum ServiceIdentifier {
 
     @XmlEnumValue("DPO") DPO("DPO", "urn:no:difi:meldingsutveksling:2.0"),
     @XmlEnumValue("DPV") DPV("DPV", null),
-    @XmlEnumValue("DPI") DPI("DPI", null),
+    @XmlEnumValue("DPI_DIGITAL") DPI_DIGITAL("DPI_DIGITAL", null),
+    @XmlEnumValue("DPI_PRINT") DPI_PRINT("DPI_PRINT", null),
     @XmlEnumValue("DPF") DPF("DPF", null),
     @XmlEnumValue("DPE_INNSYN") DPE_INNSYN("DPE_innsyn", null),
     @XmlEnumValue("DPE_DATA") DPE_DATA("DPE_data", null),

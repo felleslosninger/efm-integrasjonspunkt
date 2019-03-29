@@ -71,7 +71,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
         GetCanReceiveMessageResponseType response = new GetCanReceiveMessageResponseType();
 
         Predicate<String> personnrPredicate = Pattern.compile(String.format("\\d{%d}", 11)).asPredicate();
-        if (personnrPredicate.test(organisasjonsnummer) && !strategyFactory.hasFactory(ServiceIdentifier.DPI)) {
+        if (personnrPredicate.test(organisasjonsnummer) && !strategyFactory.hasFactory(ServiceIdentifier.DPI_DIGITAL)) {
             response.setResult(false);
             return response;
         }
@@ -96,7 +96,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
         boolean validServiceIdentifier = false;
         boolean mshCanReceive = false;
         boolean isDpv = false;
-        if (asList(DPO, DPI, DPF).contains(serviceRecord.getServiceRecord().getServiceIdentifier()) &&
+        if (asList(DPO, DPI_DIGITAL, DPI_PRINT, DPF).contains(serviceRecord.getServiceRecord().getServiceIdentifier()) &&
                 strategyFactory.hasFactory(serviceRecord.getServiceRecord().getServiceIdentifier())) {
             validServiceIdentifier = true;
             Audit.info("CanReceive = true", receiverMarker);

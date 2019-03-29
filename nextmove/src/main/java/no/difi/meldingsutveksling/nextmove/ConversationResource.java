@@ -28,7 +28,7 @@ import java.util.Optional;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = DpoConversationResource.class, name = "DPO"),
         @JsonSubTypes.Type(value = DpvConversationResource.class, name = "DPV"),
-        @JsonSubTypes.Type(value = DpiConversationResource.class, name = "DPI"),
+        @JsonSubTypes.Type(value = DpiConversationResource.class, name = "DPI_DIGITAL"),
         @JsonSubTypes.Type(value = DpfConversationResource.class, name = "DPF"),
         @JsonSubTypes.Type(value = DpeInnsynConversationResource.class, name = "DPE_INNSYN"),
         @JsonSubTypes.Type(value = DpeDataConversationResource.class, name = "DPE_DATA"),

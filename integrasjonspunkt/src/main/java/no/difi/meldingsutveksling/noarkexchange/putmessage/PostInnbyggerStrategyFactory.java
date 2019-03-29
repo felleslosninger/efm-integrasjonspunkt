@@ -26,7 +26,7 @@ public class PostInnbyggerStrategyFactory implements MessageStrategyFactory {
 
     @Override
     public ServiceIdentifier getServiceIdentifier() {
-        return ServiceIdentifier.DPI;
+        return ServiceIdentifier.DPI_DIGITAL;
     }
 
     public static MessageStrategyFactory newInstance(IntegrasjonspunktProperties properties, ServiceRegistryLookup serviceRegistryLookup, KeystoreProvider keystoreProvider) throws MeldingsformidlerException {

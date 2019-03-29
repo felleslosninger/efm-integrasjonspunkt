@@ -34,7 +34,8 @@ import java.util.stream.Stream;
 import static com.google.common.base.Strings.emptyToNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPI_DIGITAL;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPI_PRINT;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 
 @Component
@@ -102,7 +103,7 @@ public class NextMoveMessageService {
             throw new MultiplePrimaryDocumentsNotAllowedException();
         }
 
-        List<ServiceIdentifier> requiredTitleCapabilities = asList(DPV, DPI);
+        List<ServiceIdentifier> requiredTitleCapabilities = asList(DPV, DPI_DIGITAL, DPI_PRINT);
         if (requiredTitleCapabilities.contains(message.getServiceIdentifier()) && isNullOrEmpty(title)) {
             throw new MissingFileTitleException(requiredTitleCapabilities.stream()
                     .map(ServiceIdentifier::toString)

@@ -8,7 +8,7 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 @Entity
-@DiscriminatorValue("DPI")
+@DiscriminatorValue("DPI_DIGITAL")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

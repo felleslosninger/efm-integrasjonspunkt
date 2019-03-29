@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreConverter;
@@ -43,7 +42,7 @@ public class PostInnbyggerMessageStrategy implements MessageStrategy {
 
     @Override
     public PutMessageResponseType send(final EDUCore request) {
-        Optional<ServiceRecord> serviceRecord = serviceRegistry.getServiceRecord(request.getReceiver().getIdentifier(), ServiceIdentifier.DPI);
+        Optional<ServiceRecord> serviceRecord = serviceRegistry.getServiceRecord(request.getReceiver().getIdentifier(), request.getServiceIdentifier());
         if (!serviceRecord.isPresent()) {
             throw new MeldingsUtvekslingRuntimeException(String.format("Receiver %s does not have ServiceRecord of type DPI", request.getReceiver().getIdentifier()));
         }

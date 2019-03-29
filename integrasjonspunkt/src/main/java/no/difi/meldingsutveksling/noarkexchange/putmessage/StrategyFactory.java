@@ -42,7 +42,8 @@ public class StrategyFactory {
             factories.put(DPO, EduMessageStrategyFactory.newInstance(messageSender));
         }
         if (properties.getFeature().isEnableDPI()) {
-            factories.put(DPI, postInnbyggerStrategyFactory);
+            factories.put(DPI_DIGITAL, postInnbyggerStrategyFactory);
+            factories.put(DPI_PRINT, postInnbyggerStrategyFactory);
         }
         if (properties.getFeature().isEnableDPV()) {
             factories.put(DPV, PostVirksomhetStrategyFactory.newInstance(properties, noarkClient, serviceRegistryLookup, internalQueue));

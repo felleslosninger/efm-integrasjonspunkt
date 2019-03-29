@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
 import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
 
 @Component
@@ -37,10 +36,9 @@ public class DpiConversationStrategy implements ConversationStrategy {
 
     @Override
     public void send(NextMoveMessage message) throws NextMoveException {
-        // TODO add servicerecord to NextMoveMessage?
         List<ServiceRecord> serviceRecords = sr.getServiceRecords(message.getReceiverIdentifier());
         Optional<ServiceRecord> serviceRecord = serviceRecords.stream()
-                .filter(r -> DPI == r.getServiceIdentifier())
+                .filter(r -> message.getServiceIdentifier() == r.getServiceIdentifier())
                 .findFirst();
 
         if (!serviceRecord.isPresent()) {
@@ -48,7 +46,7 @@ public class DpiConversationStrategy implements ConversationStrategy {
                     .map(ServiceRecord::getServiceIdentifier)
                     .collect(Collectors.toList());
             String errorStr = String.format("Message is of type '%s', but receiver '%s' accepts types '%s'.",
-                    DPI, message.getReceiverIdentifier(), acceptableTypes);
+                    message.getServiceIdentifier(), message.getReceiverIdentifier(), acceptableTypes);
             log.error(markerFrom(message), errorStr);
             throw new NextMoveException(errorStr);
         }

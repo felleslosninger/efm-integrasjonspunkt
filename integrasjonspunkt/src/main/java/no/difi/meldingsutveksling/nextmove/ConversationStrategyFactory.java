@@ -30,7 +30,8 @@ public class ConversationStrategyFactory {
             strategies.put(ServiceIdentifier.DPV, dpvStrat);
         }
         if (props.getFeature().isEnableDPI()) {
-            strategies.put(ServiceIdentifier.DPI, dpiStrat);
+            strategies.put(ServiceIdentifier.DPI_DIGITAL, dpiStrat);
+            strategies.put(ServiceIdentifier.DPI_PRINT, dpiStrat);
         }
         if (props.getFeature().isEnableDPE()) {
             strategies.put(ServiceIdentifier.DPE_INNSYN, dpeStrat);

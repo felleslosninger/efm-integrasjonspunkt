@@ -1,11 +1,7 @@
 package no.difi.meldingsutveksling.dpi;
 
 import net.logstash.logback.marker.LogstashMarker;
-import net.logstash.logback.marker.Markers;
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
-import no.difi.meldingsutveksling.nextmove.ConversationDirection;
-import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ExternalReceipt;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.sdp.client2.KlientKonfigurasjon;
@@ -22,7 +18,6 @@ import java.lang.invoke.MethodHandles;
 import java.security.KeyStore;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -116,7 +111,6 @@ public class MeldingsformidlerClient {
         private ForretningsKvittering eksternKvittering;
         private Consumer<ForretningsKvittering> callback;
         private String rawReceipt;
-        private final ServiceIdentifier serviceIdentifier = ServiceIdentifier.DPI;
 
         public Kvittering() {
    /* This is empty because we need an instance of Kvittering before we have all the values provided for Kvittering.
@@ -158,7 +152,7 @@ public class MeldingsformidlerClient {
 
         @Override
         public LogstashMarker logMarkers() {
-            return conversationIdMarker(getId()).and(Markers.append("serviceIdentifier", serviceIdentifier));
+            return conversationIdMarker(getId());
         }
 
         @Override
@@ -175,13 +169,6 @@ public class MeldingsformidlerClient {
         @Override
         public void auditLog() {
             getReceiptType().invokeLoggerMethod(logMarkers());
-        }
-
-        @Override
-        public Conversation createConversation() {
-            Conversation conv = Conversation.of(getId(), "unknown message reference", "unknown sender", "unknown receiver", ConversationDirection.OUTGOING, "unknown message title", ServiceIdentifier.DPI);
-            conv.setMessageStatuses(new ArrayList<>(1));
-            return conv;
         }
 
         public DpiReceiptStatus getReceiptType() {

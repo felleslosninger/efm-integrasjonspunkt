@@ -59,7 +59,7 @@ public class EDUCoreSender {
         PutMessageResponseType result;
         MessageStrategy strategy = null;
         final LogstashMarker marker = EDUCoreMarker.markerFrom(message);
-        if (asList(DPO, DPI, DPF).contains(message.getServiceIdentifier()) &&
+        if (asList(DPO, DPI_DIGITAL, DPI_PRINT, DPF).contains(message.getServiceIdentifier()) &&
                 this.strategyFactory.hasFactory(message.getServiceIdentifier())) {
             final MessageStrategyFactory messageStrategyFactory = this.strategyFactory.getFactory(message.getServiceIdentifier());
             strategy = messageStrategyFactory.create(message.getPayload());

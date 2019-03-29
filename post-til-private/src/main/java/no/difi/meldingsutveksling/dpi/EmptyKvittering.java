@@ -41,8 +41,4 @@ public class EmptyKvittering implements ExternalReceipt {
         Audit.info("Got empty receipt", logMarkers());
     }
 
-    @Override
-    public Conversation createConversation() {
-        return Conversation.of("", "", "", "", ConversationDirection.OUTGOING, "empty receipt", null);
-    }
 }
