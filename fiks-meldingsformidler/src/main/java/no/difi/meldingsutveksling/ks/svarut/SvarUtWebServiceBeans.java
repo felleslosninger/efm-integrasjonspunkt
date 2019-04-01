@@ -49,7 +49,7 @@ public class SvarUtWebServiceBeans {
     }
 
     @Bean
-    public SvarUtWebServiceClientImpl svarUtClient(Jaxb2Marshaller marshaller, IntegrasjonspunktProperties properties, AxiomSoapMessageFactory svarUtMessageFactory, AbstractHttpWebServiceMessageSender svarUtMessageSender) {
+    public SvarUtWebServiceClientImpl svarUtClient(Jaxb2Marshaller marshaller, AxiomSoapMessageFactory svarUtMessageFactory, AbstractHttpWebServiceMessageSender svarUtMessageSender) {
         SvarUtWebServiceClientImpl client = new SvarUtWebServiceClientImpl();
         client.setDefaultUri("http://localhost:8080");
         client.setMarshaller(marshaller);
