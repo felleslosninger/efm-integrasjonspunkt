@@ -2,30 +2,63 @@ package no.difi.meldingsutveksling.ks.svarinn;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor
+@Slf4j
 public class SvarInnClient {
-    public static final MediaType APPLICATION_ZIP = MediaType.parseMediaType("application/zip;charset=UTF-8");
 
     @Getter
     private final RestTemplate restTemplate;
 
-    public List<Forsendelse> checkForNewMessages() {
+    List<Forsendelse> checkForNewMessages() {
         return Arrays.asList(restTemplate.getForObject("/mottaker/hentNyeForsendelser", Forsendelse[].class));
     }
 
-    public SvarInnFile downloadFile(String url) {
-        final ResponseEntity<byte[]> forEntity = restTemplate.getForEntity(url, byte[].class);
-        return new SvarInnFile("dokumenter.zip", forEntity.getHeaders().getContentType(), forEntity.getBody());
+    @SneakyThrows
+    InputStream downloadZipFile(Forsendelse forsendelse) {
+        final PipedOutputStream source = new PipedOutputStream();
+        PipedInputStream sink = new PipedInputStream(source);
+
+        CompletableFuture.runAsync(() ->
+                restTemplate.execute(forsendelse.getDownloadUrl(), HttpMethod.GET, null, response -> {
+                    int bytes = IOUtils.copy(response.getBody(), source);
+                    try {
+                        source.flush();
+                        source.close();
+                    } catch (IOException e) {
+                        throw new SvarInnForsendelseException("Couldn't close PipedOutputStream", e);
+                    }
+                    log.info("File for forsendelse {} was downloaded ({} bytes)", forsendelse.getId(), bytes);
+                    return null;
+                })
+        ).exceptionally(ex -> {
+            try {
+                source.flush();
+                source.close();
+                sink.close();
+            } catch (IOException e) {
+                throw new SvarInnForsendelseException("Couldn't close PipedOutputStream", e);
+            }
+            return null;
+        });
+
+        return sink;
     }
 
-    public void confirmMessage(String forsendelseId) {
+    void confirmMessage(String forsendelseId) {
         restTemplate.postForLocation("/kvitterMottak/forsendelse/{forsendelseId}", null, forsendelseId);
     }
 }

@@ -24,10 +24,10 @@ public class DpvConversationStrategy implements ConversationStrategy {
     @Override
     public void send(NextMoveMessage message) throws NextMoveException {
 
-        InsertCorrespondenceV2 insertCorrespondenceV2 = correspondenceAgencyMessageFactory.create(message);
+        InsertCorrespondenceV2 correspondence = correspondenceAgencyMessageFactory.create(message);
 
         Object response = withLogstashMarker(markerFrom(message))
-                .execute(() -> client.sendCorrespondence(insertCorrespondenceV2));
+                .execute(() -> client.sendCorrespondence(correspondence));
 
         if (response == null) {
             throw new NextMoveException("Failed to create Correspondence Agency Request");

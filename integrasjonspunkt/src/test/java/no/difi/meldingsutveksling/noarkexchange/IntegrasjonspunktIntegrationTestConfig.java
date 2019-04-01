@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.ks.svarinn.SvarInnFileDecryptor;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.nextmove.AsicHandler;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
@@ -222,12 +223,12 @@ public class IntegrasjonspunktIntegrationTestConfig {
     }
 
     @Bean
-    public NoarkClient noarkClient() {
+    public NoarkClient localNoark() {
         return mock(NoarkClient.class);
     }
 
     @Bean
-    public NoarkClient mailClient() {
+    public NoarkClient fiksMailClient() {
         return mock(NoarkClient.class);
     }
 
@@ -245,5 +246,10 @@ public class IntegrasjonspunktIntegrationTestConfig {
                         .orElse(null))
                 .setNextmoveFiledir(properties.getNextmove().getFiledir())
                 .setEndpointUrl(properties.getDpv().getEndpointUrl().toString());
+    }
+
+    @Bean
+    public SvarInnFileDecryptor svarInnFileDecryptor(IntegrasjonspunktProperties properties) {
+        return mock(SvarInnFileDecryptor.class);
     }
 }

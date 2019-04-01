@@ -272,6 +272,7 @@ public class FiksMapper {
             log.trace("Starting thread: encrypt attachment for FIKS forsendelse");
             cmsUtilProvider.getIfAvailable().createCMSStreamed(is, pos, cert);
             try {
+                pos.flush();
                 pos.close();
             } catch (IOException e) {
                 throw new NextMoveRuntimeException("Error closing attachment encryption output stream", e);
@@ -362,21 +363,6 @@ public class FiksMapper {
                         .withPostnr(kp.getPostnummer())
                         .withPoststed(kp.getPoststed())
                         .withLand(kp.getLand())
-                        .build())
-                .build();
-    }
-
-    private Adresse mottakerFrom(AvsmotType avsmotType, String orgnr) {
-        return Adresse.builder()
-                .withDigitalAdresse(OrganisasjonDigitalAdresse.builder()
-                        .withOrgnr(orgnr)
-                        .build())
-                .withPostAdresse(PostAdresse.builder()
-                        .withNavn(avsmotType.getAmNavn())
-                        .withAdresse1(avsmotType.getAmAdresse())
-                        .withPostnr(avsmotType.getAmPostnr())
-                        .withPoststed(avsmotType.getAmPoststed())
-                        .withLand(avsmotType.getAmUtland())
                         .build())
                 .build();
     }

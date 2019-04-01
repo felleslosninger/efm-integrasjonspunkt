@@ -4,7 +4,6 @@ import no.difi.meldingsutveksling.UUIDGenerator
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.ks.mapping.FiksMapper
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnBeans
-import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConfiguration
 import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceBeans
@@ -51,6 +50,7 @@ class SvarInnIntegrationTest {
 
     @Autowired
     SvarInnService svarInnService
+
     @Autowired
     RestTemplate restTemplate
 
@@ -76,20 +76,24 @@ class SvarInnIntegrationTest {
     @Test
     public void receiveMessageFromFiks() {
         byte[] zipFile = getClass().getResource("/somdalen-dokumenter-ae68b33d.zip").getBytes()
-        server.expect(requestTo(Matchers.containsString("/svarinn/forsendelse/"))).andRespond(withSuccess(zipFile, SvarInnClient.APPLICATION_ZIP))
+        server.expect(requestTo(Matchers.containsString("/svarinn/forsendelse/"))).andRespond(withSuccess(zipFile, MediaType.valueOf("application/zip;charset=UTF-8")))
 
-        def files = svarInnService.downloadFiles()
+        def forsendelser = svarInnService.getForsendelser()
+        def attachments = svarInnService.getAttachments(forsendelser.get(0))
 
-        assert files.size() == 1
+        assert attachments.count() == 1
         server.verify()
     }
 
     @Test
     public void downloadedEmptyZipFile() {
         byte[] emptyZipFile = getClass().getResource("/empty_encrypted_svarinnfiles.zip").getBytes()
-        server.expect(requestTo(Matchers.containsString("/svarinn/forsendelse/"))).andRespond(withSuccess(emptyZipFile, SvarInnClient.APPLICATION_ZIP))
+        server.expect(requestTo(Matchers.containsString("/svarinn/forsendelse/"))).andRespond(withSuccess(emptyZipFile, MediaType.valueOf("application/zip;charset=UTF-8")))
 
-        svarInnService.downloadFiles()
+        def forsendelser = svarInnService.getForsendelser()
+        def attachments = svarInnService.getAttachments(forsendelser.get(0))
+
+        attachments.forEach { it -> it.inputStream.bytes }
         verify(noarkClient, never()).sendEduMelding(Mockito.any(PutMessageRequestType))
     }
 }

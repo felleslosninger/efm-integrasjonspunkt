@@ -1,68 +1,88 @@
 package no.difi.meldingsutveksling.ks.svarinn;
 
-import com.google.common.collect.Sets;
-import net.logstash.logback.marker.Markers;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.logging.Audit;
 
-import java.io.IOException;
+import java.io.InputStream;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import static java.lang.String.format;
 
+@RequiredArgsConstructor
 public class SvarInnService {
 
-    private SvarInnClient svarInnClient;
-    private SvarInnFileDecryptor decryptor;
-    private SvarInnUnzipper unzipper;
-    private SvarInnFileFactory svarInnFileFactory;
-    private IntegrasjonspunktProperties properties;
+    private final SvarInnClient svarInnClient;
+    private final SvarInnFileDecryptor decryptor;
 
-    public SvarInnService(SvarInnClient svarInnClient,
-                          SvarInnFileDecryptor decryptor,
-                          SvarInnUnzipper unzipper,
-                          IntegrasjonspunktProperties properties) {
-        this.svarInnClient = svarInnClient;
-        this.decryptor = decryptor;
-        this.unzipper = unzipper;
-        this.properties = properties;
-        svarInnFileFactory = new SvarInnFileFactory();
+    public Stream<SvarInnStreamedFile> getAttachments(Forsendelse forsendelse) {
+        InputStream encrypted = svarInnClient.downloadZipFile(forsendelse);
+        InputStream decrypted = decryptor.decryptCMSStreamed(encrypted);
+        return unzip(forsendelse, decrypted);
     }
 
-    public Set<SvarInnMessage> downloadFiles() {
-        final List<Forsendelse> forsendelses = svarInnClient.checkForNewMessages();
-        if (!forsendelses.isEmpty()) {
-            Audit.info(format("%d new messages in FIKS", forsendelses.size()));
-        }
-        Set<SvarInnMessage> messages = Sets.newHashSet();
-        for(Forsendelse forsendelse : forsendelses) {
-            Audit.info(format("Downloading message with fiks-id %s", forsendelse.getId()), Markers.append("fiks-id", forsendelse.getId()));
-            final SvarInnFile svarInnFile = svarInnClient.downloadFile(forsendelse.getDownloadUrl());
-            final byte[] decrypt = decryptor.decrypt(svarInnFile.getContents());
-            final Map<String, byte[]> unzippedFile;
-            try {
-                unzippedFile = unzipper.unzip(decrypt);
-            } catch (IOException e) {
-                throw new SvarInnForsendelseException("Unable to unzip file", e);
-            }
-            if (unzippedFile.values().isEmpty()) {
-                Audit.error("Zipfile is empty: skipping message", Markers.append("fiks-id", forsendelse.getId()));
-                continue;
-            }
-            // create SvarInnFile with unzipped file and correct mimetype
-            final List<SvarInnFile> files = svarInnFileFactory.createFiles(forsendelse.getFilmetadata(), unzippedFile);
+    private Stream<SvarInnStreamedFile> unzip(Forsendelse forsendelse, InputStream decrypted) {
+        Map<String, String> mimeTypeMap = forsendelse.getFilmetadata()
+                .stream()
+                .collect(Collectors.toMap(p -> p.get("filnavn"), p -> p.get("mimetype")));
 
-            final SvarInnMessage message = new SvarInnMessage(forsendelse, files, properties);
-            messages.add(message);
-        }
+        Iterator<SvarInnStreamedFile> sourceIterator = new Iterator<SvarInnStreamedFile>() {
 
-        return messages;
+            private final ZipInputStream stream = new ZipInputStream(decrypted);
+            private ZipEntry entry;
+
+            @Override
+            @SneakyThrows
+            public boolean hasNext() {
+                if (entry == null) {
+                    entry = stream.getNextEntry();
+                }
+
+                if (entry == null) {
+                    stream.close();
+                    return false;
+                }
+
+                return true;
+            }
+
+            @Override
+            public SvarInnStreamedFile next() {
+                if (hasNext()) {
+                    SvarInnStreamedFile file = SvarInnStreamedFile.of(
+                            entry.getName(),
+                            stream,
+                            mimeTypeMap.get(entry.getName()));
+                    entry = null;
+                    return file;
+                }
+
+                throw new NoSuchElementException();
+            }
+        };
+
+        Iterable<SvarInnStreamedFile> iterable = () -> sourceIterator;
+        return StreamSupport.stream(iterable.spliterator(), false);
+    }
+
+    public List<Forsendelse> getForsendelser() {
+        final List<Forsendelse> forsendelser = svarInnClient.checkForNewMessages();
+
+        if (!forsendelser.isEmpty()) {
+            Audit.info(format("%d new messages in FIKS", forsendelser.size()));
+        }
+        return forsendelser;
     }
 
     public void confirmMessage(String forsendelsesId) {
         svarInnClient.confirmMessage(forsendelsesId);
     }
-
 }

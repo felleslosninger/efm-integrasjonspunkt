@@ -41,7 +41,7 @@ public class SvarInnSteps {
         );
 
         mockServerRestSteps.andTheFollowing(
-                MediaType.APPLICATION_JSON_VALUE,
+                MediaType.APPLICATION_OCTET_STREAM_VALUE,
                 svarInnZipFactory.createSvarInnZip(messageInHolder.get())
         );
 
