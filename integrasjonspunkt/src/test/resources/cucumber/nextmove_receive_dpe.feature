@@ -63,7 +63,7 @@ Feature: Receiving a Next Move DPE message
     Before the law sits a gatekeeper.
     """
     And the ServiceBus has the message available
-    And the application checks for new Next Move DPE messages
+    And the application checks for new DPE messages
 
   Scenario: As a user I want to receive a DPE message
 

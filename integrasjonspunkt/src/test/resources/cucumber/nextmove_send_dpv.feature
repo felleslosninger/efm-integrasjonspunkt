@@ -159,10 +159,10 @@ Feature: Sending a Next Move DPV message
         </altinn9:Correspondence>
     </altinn9:InsertCorrespondenceV2>
     """
-    And the sent ASIC contains the following files:
+    And the sent message contains the following files:
       | filename     |
       | test.txt     |
-    And the content of the ASIC file named "test.txt" is:
+    And the content of the file named "test.txt" is:
     """
     Testing 1 2 3
     """

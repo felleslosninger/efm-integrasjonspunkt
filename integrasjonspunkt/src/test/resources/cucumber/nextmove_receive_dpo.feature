@@ -61,7 +61,7 @@ Feature: Receiving a Next Move DPO message
     Before the law sits a gatekeeper.
     """
     And Altinn sends the message
-    And the application checks for new Next Move DPO messages
+    And the application checks for new DPO messages
 
   Scenario: As a user I want to receive a DPO message
 

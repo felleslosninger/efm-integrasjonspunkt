@@ -96,7 +96,7 @@ Feature: Receiving a Next Move DPF message
     Before the law sits a gatekeeper.
     """
     And Fiks has the message available
-    And the application checks for new Next Move DPF messages
+    And the application checks for new DPF messages
 
   Scenario: As a user I want to receive a DPF message
 

@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.cucumber;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.test.client.MockWebServiceServer;
@@ -9,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
+@Profile("cucumber")
 public class MockWebServiceServerCustomizer {
 
     private final Map<WebServiceTemplate, MockWebServiceServer> servers = new ConcurrentHashMap<>();

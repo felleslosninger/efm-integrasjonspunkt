@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.cucumber;
 
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.marker.Markers;
@@ -11,6 +12,9 @@ import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExter
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceClientImpl;
 import no.difi.meldingsutveksling.nextmove.ServiceBusRestTemplate;
+import no.difi.meldingsutveksling.noark.NoarkClientFactory;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClientSettings;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
@@ -47,6 +51,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
@@ -65,7 +70,38 @@ public class CucumberStepsConfiguration {
 
     @Configuration
     @Profile("cucumber")
+    @RequiredArgsConstructor
     public static class SpringConfiguration {
+
+        @Bean
+        @Primary
+        public IntegrasjonspunktProperties properties(IntegrasjonspunktProperties properties) {
+            IntegrasjonspunktProperties spy = spy(properties);
+            given(spy.getNoarkSystem()).willReturn(spy(properties.getNoarkSystem()));
+            return spy;
+        }
+
+        @Bean
+        public CachingWebServiceTemplateFactory cachingWebServiceTemplateFactory(
+                RequestCaptureClientInterceptor requestCaptureClientInterceptor
+        ) {
+            return new CachingWebServiceTemplateFactory(requestCaptureClientInterceptor);
+        }
+
+        @Primary
+        @Bean(name = "localNoark")
+        public NoarkClient localNoark(CachingWebServiceTemplateFactory cachingWebServiceTemplateFactory,
+                                      IntegrasjonspunktProperties properties) {
+            NoarkClientSettings clientSettings = spy(new NoarkClientSettings(
+                    properties.getNoarkSystem().getEndpointURL(),
+                    properties.getNoarkSystem().getUsername(),
+                    properties.getNoarkSystem().getPassword(),
+                    properties.getNoarkSystem().getDomain()));
+
+            given(clientSettings.createTemplateFactory()).willReturn(cachingWebServiceTemplateFactory);
+
+            return new NoarkClientFactory(clientSettings).from(properties);
+        }
 
         @Bean
         @Primary

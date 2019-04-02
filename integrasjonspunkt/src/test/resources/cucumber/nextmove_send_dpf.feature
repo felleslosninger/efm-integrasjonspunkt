@@ -215,7 +215,7 @@ Feature: Sending a Next Move DPF message
         <forsendelsesid>45efbd4c-413d-4e2c-bbc5-257ef4a65a91</forsendelsesid>
     </ns2:sendForsendelseMedId>
     """
-    And the content of the ASIC file named "test.txt" is:
+    And the content of the file named "test.txt" is:
     """
     Testing 1 2 3
     """

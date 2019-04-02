@@ -14,13 +14,13 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RequiredArgsConstructor
-public class AsicSteps {
+public class MessageOutSteps {
 
     private final Holder<Message> messageSentHolder;
 
-    @Then("^the sent ASIC contains the following files:$")
+    @Then("^the sent message contains the following files:$")
     @SneakyThrows
-    public void theSentASICContains(DataTable expectedTable) {
+    public void theSentMessageContainsTheFollowingFiles(DataTable expectedTable) {
         Message message = messageSentHolder.get();
 
         List<List<String>> actualList = new ArrayList<>();
@@ -35,11 +35,17 @@ public class AsicSteps {
         expectedTable.diff(actualTable);
     }
 
-    @Then("^the content of the ASIC file named \"([^\"]*)\" is:$")
-    public void theContentOfTheASICFileNamedIs(String filename, String expectedContent) {
+    @Then("^the content of the file named \"([^\"]*)\" is:$")
+    public void theContentOfTheFileNamedIs(String filename, String expectedContent) {
         Message message = messageSentHolder.get();
         assertThat(new String(message.getAttachment(filename).getBytes()))
                 .isEqualToIgnoringWhitespace(expectedContent);
     }
 
+    @Then("^the XML payload of the message is:$")
+    public void theXmlPayloadOfTheMessageIs(String expectedPayload) {
+        Message message = messageSentHolder.get();
+        assertThat(message.getBody())
+                .isXmlEqualTo(expectedPayload);
+    }
 }

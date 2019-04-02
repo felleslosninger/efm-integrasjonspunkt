@@ -241,12 +241,12 @@ Feature: Sending a Next Move DPO message
         }
     }
     """
-    And the sent ASIC contains the following files:
+    And the sent message contains the following files:
       | filename         |
       | manifest.xml     |
       | arkivmelding.xml |
       | test.txt         |
-    And the content of the ASIC file named "manifest.xml" is:
+    And the content of the file named "manifest.xml" is:
     """
     <?xml version="1.0" encoding="UTF-8"?>
     <manifest>
@@ -261,7 +261,7 @@ Feature: Sending a Next Move DPO message
        </hoveddokument>
     </manifest>
     """
-    And the content of the ASIC file named "arkivmelding.xml" is:
+    And the content of the file named "arkivmelding.xml" is:
     """
     <?xml version="1.0" encoding="utf-8"?>
     <arkivmelding xmlns="http://www.arkivverket.no/standarder/noark5/arkivmelding" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.arkivverket.no/standarder/noark5/arkivmelding arkivmelding.xsd">
@@ -342,7 +342,7 @@ Feature: Sending a Next Move DPO message
         </mappe>
     </arkivmelding>
     """
-    And the content of the ASIC file named "test.txt" is:
+    And the content of the file named "test.txt" is:
     """
     Testing 1 2 3
     """

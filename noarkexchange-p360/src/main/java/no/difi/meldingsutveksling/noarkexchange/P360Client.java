@@ -24,8 +24,9 @@ import static no.difi.meldingsutveksling.logging.MarkerFactory.receiverMarker;
 public class P360Client implements NoarkClient {
 
     private static final String SOAP_ACTION = "http://www.arkivverket.no/Noark/Exchange/IEDUImport/PutMessage";
+
     private final WebServiceTemplateFactory templateFactory;
-    private NoarkClientSettings settings;
+    private final NoarkClientSettings settings;
 
     public P360Client(NoarkClientSettings settings) {
         this.settings = settings;

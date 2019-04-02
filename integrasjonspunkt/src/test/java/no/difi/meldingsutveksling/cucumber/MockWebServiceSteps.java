@@ -28,15 +28,15 @@ public class MockWebServiceSteps {
     private final MockWebServiceServerCustomizer mockWebServiceServerCustomizer;
     private final CorrespondenceAgencyClient correspondenceAgencyClient;
     private final SvarUtWebServiceClientImpl svarUtWebServiceClient;
+    private final CachingWebServiceTemplateFactory cachingWebServiceTemplateFactory;
     private final Holder<List<String>> webServicePayloadHolder;
-    private final XMLMarshaller xmlMarshaller;
-    private final Holder<Message> messageSentHolder;
 
     @Before
     @SneakyThrows
     public void before() {
         mockWebServiceServerCustomizer.customize(correspondenceAgencyClient.getWebServiceTemplate());
         mockWebServiceServerCustomizer.customize(svarUtWebServiceClient.getWebServiceTemplate());
+        mockWebServiceServerCustomizer.customize(cachingWebServiceTemplateFactory.getWebServiceTemplate());
     }
 
     @After
@@ -52,37 +52,11 @@ public class MockWebServiceSteps {
     private WebServiceTemplate getWebServiceTemplate(String url) {
         if (url.startsWith("http://localhost:9876")) {
             return correspondenceAgencyClient.getWebServiceTemplate();
+        } else if (url.startsWith("http://localhost:8088/testExchangeBinding")) {
+            return cachingWebServiceTemplateFactory.getWebServiceTemplate();
         }
 
         return svarUtWebServiceClient.getWebServiceTemplate();
-    }
-
-    @Then("^the CorrespondenceAgencyClient is called with the following payload:$")
-    public void theCorrespondenceAgencyClientIsCalledWithTheFollowingPayload(String expectedPayload) {
-        List<String> payloads = webServicePayloadHolder.get();
-        String actualPayload = payloads.get(0);
-        assertThat(actualPayload).isXmlEqualTo(expectedPayload);
-
-        InsertCorrespondenceV2 in = xmlMarshaller.unmarshall(actualPayload, InsertCorrespondenceV2.class);
-
-        List<Attachment> attachments = in.getCorrespondence()
-                .getContent().getValue()
-                .getAttachments().getValue()
-                .getBinaryAttachments().getValue()
-                .getBinaryAttachmentV2()
-                .stream()
-                .map(p -> new Attachment()
-                        .setFileName(p.getFileName().getValue())
-                        .setBytes(getBytes(p))
-                ).collect(Collectors.toList());
-
-        messageSentHolder.set(new Message()
-                .attachments(attachments));
-    }
-
-    @SneakyThrows
-    private byte[] getBytes(BinaryAttachmentV2 p) {
-        return IOUtils.toByteArray(p.getData().getValue().getInputStream());
     }
 
     @And("^a SOAP request to \"([^\"]*)\" will respond with the following payload:$")

@@ -10,17 +10,17 @@ public class MessagePollingSteps {
 
     private final MessagePolling messagePolling;
 
-    @Given("^the application checks for new Next Move DPO messages$")
+    @Given("^the application checks for new DPO messages$")
     public void theApplicationChecksForNewNextMoveDPOMessages() {
         messagePolling.checkForNewMessages();
     }
 
-    @Given("^the application checks for new Next Move DPF messages$")
+    @Given("^the application checks for new DPF messages$")
     public void theApplicationChecksForNewNextMoveDPFMessages() {
         messagePolling.checkForFiksMessages();
     }
 
-    @And("^the application checks for new Next Move DPE messages$")
+    @And("^the application checks for new DPE messages$")
     public void theApplicationChecksForNewNextMoveDPEMessages() {
         messagePolling.checkForNewNextMoveMessages();
     }
