@@ -110,8 +110,14 @@ public class ForsendelseMapper {
         metadata.withJournalpostnummer(Integer.valueOf(meldingType.getJournpost().getJpJpostnr()));
         metadata.withJournalposttype(meldingType.getJournpost().getJpNdoktype());
         metadata.withJournalstatus(meldingType.getJournpost().getJpStatus());
-        metadata.withJournaldato(journalDatoFrom(meldingType.getJournpost().getJpJdato()));
-        metadata.withDokumentetsDato(journalDatoFrom(meldingType.getJournpost().getJpDokdato()));
+        String jpJdato = meldingType.getJournpost().getJpJdato();
+        if (!Strings.isNullOrEmpty(jpJdato)) {
+            metadata.withJournaldato(journalDatoFrom(jpJdato));
+        }
+        String jpDokdato = meldingType.getJournpost().getJpDokdato();
+        if (!Strings.isNullOrEmpty(jpDokdato)) {
+            metadata.withDokumentetsDato(journalDatoFrom(jpDokdato));
+        }
         metadata.withTittel(meldingType.getJournpost().getJpOffinnhold());
 
         Optional<AvsmotType> avsender = getAvsender(meldingType);
