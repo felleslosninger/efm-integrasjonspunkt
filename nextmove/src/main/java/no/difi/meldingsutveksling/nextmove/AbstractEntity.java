@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
 
 @MappedSuperclass
-public abstract class AbstractEntity<I> implements Serializable {
+public abstract class AbstractEntity<I extends Serializable> implements Serializable {
 
     @Id
     @GeneratedValue
@@ -23,7 +23,7 @@ public abstract class AbstractEntity<I> implements Serializable {
     public final boolean equals(Object o) {
         if (this == o) return true;
         if (!(getClass().isInstance(o))) return false;
-        AbstractEntity<I> entity = (AbstractEntity<I>) o;
+        AbstractEntity entity = getClass().cast(o);
         return id != null && id.equals(entity.id);
     }
 
