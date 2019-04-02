@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import no.difi.meldingsutveksling.ApplicationContextHolder;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.KeystoreProvider;
 import no.difi.meldingsutveksling.ServiceIdentifier;
@@ -70,8 +71,9 @@ public class IntegrasjonspunktIntegrationTestConfig {
     public MessageSender messageSender(TransportFactory transportFactory,
                                        StandardBusinessDocumentFactory standardBusinessDocumentFactory,
                                        AsicHandler asicHandler,
-                                       MessageContextFactory messageContextFactory) {
-        return new MessageSender(transportFactory, standardBusinessDocumentFactory, asicHandler, messageContextFactory);
+                                       MessageContextFactory messageContextFactory,
+                                       ApplicationContextHolder applicationContextHolder) {
+        return new MessageSender(transportFactory, standardBusinessDocumentFactory, asicHandler, messageContextFactory, applicationContextHolder);
     }
 
     @Bean

@@ -63,11 +63,6 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public AltinnFormidlingsTjenestenConfig altinnConfig(IntegrasjonspunktProperties properties) {
-        return properties.getDpo();
-    }
-
-    @Bean
     public TransportFactory serviceRegistryTransportFactory(ServiceRegistryLookup serviceRegistryLookup, AltinnWsClientFactory altinnWsClientFactory, UUIDGenerator uuidGenerator) {
         return new ServiceRegistryTransportFactory(serviceRegistryLookup, altinnWsClientFactory, uuidGenerator);
     }

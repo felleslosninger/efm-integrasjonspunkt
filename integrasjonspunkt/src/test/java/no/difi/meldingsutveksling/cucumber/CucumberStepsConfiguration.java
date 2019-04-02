@@ -182,17 +182,18 @@ public class CucumberStepsConfiguration {
         @Primary
         public AltinnWsClientFactory altinnWsClientFactory(
                 IBrokerServiceExternalBasic iBrokerServiceExternalBasic,
-                IBrokerServiceExternalBasicStreamed iBrokerServiceExternalBasicStreamed
+                IBrokerServiceExternalBasicStreamed iBrokerServiceExternalBasicStreamed,
+                ApplicationContextHolder applicationContextHolder,
+                AltinnWsConfigurationFactory altinnWsConfigurationFactory
         ) {
-            return new AltinnWsClientFactory() {
+            return new AltinnWsClientFactory(applicationContextHolder, altinnWsConfigurationFactory) {
                 @Override
                 public AltinnWsClient getAltinnWsClient(ServiceRecord serviceRecord) {
-                    AltinnWsConfiguration configuration = AltinnWsConfiguration.fromConfiguration(serviceRecord, getApplicationContext());
                     return new AltinnWsClient(
                             iBrokerServiceExternalBasic,
                             iBrokerServiceExternalBasicStreamed,
-                            configuration,
-                            getApplicationContext());
+                            altinnWsConfigurationFactory.fromServiceRecord(serviceRecord),
+                            applicationContextHolder.getApplicationContext());
                 }
             };
         }

@@ -1,15 +1,12 @@
 package no.difi.meldingsutveksling;
 
 import com.sun.xml.ws.developer.JAXWSProperties;
-import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceExternalBasicSF;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasic;
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.BrokerServiceExternalBasicStreamedSF;
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExternalBasicStreamed;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
 import javax.xml.ws.BindingProvider;
@@ -17,23 +14,19 @@ import javax.xml.ws.soap.MTOMFeature;
 import javax.xml.ws.soap.SOAPBinding;
 
 @Component
-public class AltinnWsClientFactory implements ApplicationContextAware {
+@RequiredArgsConstructor
+public class AltinnWsClientFactory {
 
-    @Getter
-    private ApplicationContext applicationContext;
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
-    }
+    private final ApplicationContextHolder applicationContextHolder;
+    private final AltinnWsConfigurationFactory altinnWsConfigurationFactory;
 
     public AltinnWsClient getAltinnWsClient(ServiceRecord serviceRecord) {
-        AltinnWsConfiguration configuration = AltinnWsConfiguration.fromConfiguration(serviceRecord, applicationContext);
+        AltinnWsConfiguration configuration = altinnWsConfigurationFactory.fromServiceRecord(serviceRecord);
         return new AltinnWsClient(
                 getBrokerServiceExternalBasicSF(configuration),
                 getBrokerServiceExternalBasicStreamedSF(configuration),
                 configuration,
-                applicationContext);
+                applicationContextHolder.getApplicationContext());
     }
 
     private IBrokerServiceExternalBasic getBrokerServiceExternalBasicSF(AltinnWsConfiguration configuration) {

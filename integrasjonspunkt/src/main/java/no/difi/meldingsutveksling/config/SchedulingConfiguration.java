@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.config;
 
 import no.difi.meldingsutveksling.AltinnWsClientFactory;
+import no.difi.meldingsutveksling.ApplicationContextHolder;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
 import no.difi.meldingsutveksling.nextmove.ConversationResourceRepository;
@@ -47,7 +48,8 @@ public class SchedulingConfiguration {
             AltinnWsClientFactory altinnWsClientFactory,
             SvarInnService svarInnService,
             SvarInnEduCoreForwarder svarInnEduCoreForwarder,
-            SvarInnNextMoveForwarder svarInnNextMoveForwarder) {
+            SvarInnNextMoveForwarder svarInnNextMoveForwarder,
+            ApplicationContextHolder applicationContextHolder) {
         return new MessagePolling(
                 properties,
                 internalQueue,
@@ -61,6 +63,7 @@ public class SchedulingConfiguration {
                 altinnWsClientFactory,
                 svarInnService,
                 svarInnEduCoreForwarder,
-                svarInnNextMoveForwarder);
+                svarInnNextMoveForwarder,
+                applicationContextHolder);
     }
 }

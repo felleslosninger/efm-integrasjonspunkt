@@ -2,19 +2,16 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.ApplicationContextHolder;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.AsicHandler;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
-import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
@@ -26,14 +23,13 @@ import static no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class MessageSender implements ApplicationContextAware {
+public class MessageSender {
 
     private final TransportFactory transportFactory;
     private final StandardBusinessDocumentFactory standardBusinessDocumentFactory;
     private final AsicHandler asicHandler;
     private final MessageContextFactory messageContextFactory;
-
-    private ApplicationContext context;
+    private final ApplicationContextHolder applicationContextHolder;
 
     public PutMessageResponseType sendMessage(EDUCore message) {
         MessageContext messageContext;
@@ -56,17 +52,17 @@ public class MessageSender implements ApplicationContextAware {
         }
 
         Transport t = transportFactory.createTransport(edu);
-        t.send(context, edu);
+        t.send(applicationContextHolder.getApplicationContext(), edu);
 
         return createOkResponse();
     }
 
 
-    public void sendMessage(NextMoveMessage message) throws MessageContextException, NextMoveException {
+    public void sendMessage(NextMoveMessage message) throws MessageContextException {
         MessageContext messageContext = messageContextFactory.from(message);
         InputStream is = asicHandler.createEncryptedAsic(message, messageContext);
         Transport transport = transportFactory.createTransport(message.getSbd());
-        transport.send(this.context, message.getSbd(), is);
+        transport.send(applicationContextHolder.getApplicationContext(), message.getSbd(), is);
     }
 
 
@@ -83,14 +79,8 @@ public class MessageSender implements ApplicationContextAware {
         }
 
         Transport t = transportFactory.createTransport(edu);
-        t.send(context, edu);
+        t.send(applicationContextHolder.getApplicationContext(), edu);
 
         log.info("ConversationResource sent");
     }
-
-    @Override
-    public void setApplicationContext(ApplicationContext ac) throws BeansException {
-        this.context = ac;
-    }
-
 }

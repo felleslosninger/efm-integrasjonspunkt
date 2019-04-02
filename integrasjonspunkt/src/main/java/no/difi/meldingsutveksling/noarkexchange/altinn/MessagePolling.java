@@ -23,8 +23,6 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import javax.xml.bind.JAXBElement;
@@ -45,9 +43,7 @@ import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom
  */
 @Slf4j
 @RequiredArgsConstructor
-public class MessagePolling implements ApplicationContextAware {
-
-    private ApplicationContext context;
+public class MessagePolling {
 
     private final IntegrasjonspunktProperties properties;
     private final InternalQueue internalQueue;
@@ -62,6 +58,7 @@ public class MessagePolling implements ApplicationContextAware {
     private final SvarInnService svarInnService;
     private final SvarInnEduCoreForwarder svarInnEduCoreForwarder;
     private final SvarInnNextMoveForwarder svarInnNextMoveForwarder;
+    private final ApplicationContextHolder applicationContextHolder;
 
     private ServiceRecord serviceRecord;
     private CompletableFuture batchRead;
@@ -187,11 +184,6 @@ public class MessagePolling implements ApplicationContextAware {
     private void sendReceipt(MessageInfo messageInfo) {
         StandardBusinessDocument doc = SBDReceiptFactory.createLeveringsKvittering(messageInfo, keyInfo);
         Transport t = transportFactory.createTransport(doc);
-        t.send(context, doc);
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext ac) {
-        this.context = ac;
+        t.send(applicationContextHolder.getApplicationContext(), doc);
     }
 }
