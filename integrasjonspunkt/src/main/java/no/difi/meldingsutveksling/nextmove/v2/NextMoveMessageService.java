@@ -15,6 +15,7 @@ import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -25,6 +26,7 @@ import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -83,11 +85,33 @@ public class NextMoveMessageService {
     }
 
     private void setDpiDefaults(StandardBusinessDocument sbd) {
+        Optional<ServiceRecord> serviceRecord = sr.getServiceRecord(sbd.getReceiverIdentifier(), DPI_PRINT);
+        ServiceRecord record = serviceRecord.orElseThrow(() -> new NextMoveRuntimeException(String.format("No service record of type %s found for receiver", DPI_PRINT.toString())));
         DpiPrintMessage dpiMessage = (DpiPrintMessage) sbd.getAny();
         if (dpiMessage.getReceiver() == null) {
             dpiMessage.setReceiver(new PostAddress());
         }
 
+        setReceiverDefaults(dpiMessage.getReceiver(), record.getPostAddress());
+        setReceiverDefaults(dpiMessage.getMailReturn().getReceiver(), record.getReturnAddress());
+    }
+
+    private void setReceiverDefaults(PostAddress receiver, no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress srReceiver) {
+        if (isNullOrEmpty(receiver.getName())) {
+            receiver.setName(srReceiver.getName());
+        }
+        if (isNullOrEmpty(receiver.getAddressLine1())) {
+            receiver.setAddressLine1(srReceiver.getStreet());
+        }
+        if (isNullOrEmpty(receiver.getPostalCode())) {
+            receiver.setPostalCode(srReceiver.getPostalCode());
+        }
+        if (isNullOrEmpty(receiver.getPostalArea())) {
+            receiver.setPostalArea(srReceiver.getPostalArea());
+        }
+        if (isNullOrEmpty(receiver.getCountry())) {
+            receiver.setCountryCode(srReceiver.getCountry());
+        }
     }
 
     void addFile(NextMoveOutMessage message, MultipartFile file) {
