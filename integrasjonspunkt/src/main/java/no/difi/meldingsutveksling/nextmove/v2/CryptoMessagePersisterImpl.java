@@ -38,6 +38,7 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
             log.trace("Starting thread: encrypt attachment");
             cmsUtilProvider.getIfAvailable().createCMSStreamed(stream, pos, keyInfo.getX509Certificate());
             try {
+                pos.flush();
                 pos.close();
             } catch (IOException e) {
                 throw new NextMoveRuntimeException("Error closing attachment encryption output stream", e);

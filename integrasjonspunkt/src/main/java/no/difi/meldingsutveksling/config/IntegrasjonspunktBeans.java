@@ -12,6 +12,9 @@ import no.difi.meldingsutveksling.noarkexchange.putmessage.FiksMessageStrategyFa
 import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
+import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
+import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
+import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.DpiReceiptService;
 import no.difi.meldingsutveksling.receipt.StatusStrategy;
@@ -60,11 +63,6 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public AltinnFormidlingsTjenestenConfig altinnConfig(IntegrasjonspunktProperties properties) {
-        return properties.getDpo();
-    }
-
-    @Bean
     public TransportFactory serviceRegistryTransportFactory(ServiceRegistryLookup serviceRegistryLookup, AltinnWsClientFactory altinnWsClientFactory, UUIDGenerator uuidGenerator) {
         return new ServiceRegistryTransportFactory(serviceRegistryLookup, altinnWsClientFactory, uuidGenerator);
     }
@@ -103,13 +101,15 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public StrategyFactory messageStrategyFactory(MessageSender messageSender,
-                                                  ServiceRegistryLookup serviceRegistryLookup,
-                                                  @Lazy InternalQueue internalQueue,
-                                                  @Qualifier("localNoark") ObjectProvider<NoarkClient> localNoark,
-                                                  @SuppressWarnings("SpringJavaAutowiringInspection") ObjectProvider<List<MessageStrategyFactory>> messageStrategyFactory,
-                                                  IntegrasjonspunktProperties properties) {
-        final StrategyFactory strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, properties, localNoark.getIfAvailable(), internalQueue);
+    public StrategyFactory messageStrategyFactory(
+            CorrespondenceAgencyClient client,
+            CorrespondenceAgencyMessageFactory correspondenceAgencyMessageFactory,
+            MessageSender messageSender,
+            @Lazy InternalQueue internalQueue,
+            @Qualifier("localNoark") ObjectProvider<NoarkClient> localNoark,
+            @SuppressWarnings("SpringJavaAutowiringInspection") ObjectProvider<List<MessageStrategyFactory>> messageStrategyFactory,
+            IntegrasjonspunktProperties properties) {
+        final StrategyFactory strategyFactory = new StrategyFactory(client, correspondenceAgencyMessageFactory, messageSender, properties, localNoark.getIfAvailable(), internalQueue);
         if (messageStrategyFactory.getIfAvailable() != null) {
             messageStrategyFactory.getIfAvailable().forEach(strategyFactory::registerMessageStrategyFactory);
         }
@@ -159,6 +159,22 @@ public class IntegrasjonspunktBeans {
     @Bean
     public Clock clock() {
         return Clock.systemDefaultZone();
+    }
+
+    @Bean
+    public CorrespondenceAgencyConfiguration correspondenceAgencyConfiguration(IntegrasjonspunktProperties properties) {
+        return new CorrespondenceAgencyConfiguration()
+                .setExternalServiceCode(properties.getDpv().getExternalServiceCode())
+                .setExternalServiceEditionCode(properties.getDpv().getExternalServiceEditionCode())
+                .setPassword(properties.getDpv().getPassword())
+                .setSystemUserCode(properties.getDpv().getUsername())
+                .setNotifyEmail(properties.getDpv().isNotifyEmail())
+                .setNotifySms(properties.getDpv().isNotifySms())
+                .setNotificationText(Optional.ofNullable(properties.getDpv())
+                        .map(IntegrasjonspunktProperties.PostVirksomheter::getNotificationText)
+                        .orElse(null))
+                .setNextmoveFiledir(properties.getNextmove().getFiledir())
+                .setEndpointUrl(properties.getDpv().getEndpointUrl().toString());
     }
 }
 

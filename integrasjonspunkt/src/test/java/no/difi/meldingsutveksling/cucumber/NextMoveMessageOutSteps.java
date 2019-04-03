@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.cucumber;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
@@ -12,16 +13,18 @@ import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RequiredArgsConstructor
 public class NextMoveMessageOutSteps {
 
     private final TestRestTemplate testRestTemplate;
     private final Holder<Message> messageOutHolder;
+    private final ObjectMapper objectMapper;
 
     private MultiValueMap<String, HttpEntity<?>> multipart;
 
@@ -59,37 +62,41 @@ public class NextMoveMessageOutSteps {
     }
 
     @Given("^I post the multipart request$")
-    public void iPostTheMultipartRequest() {
+    public void iPostTheMultipartRequest() throws IOException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-        ResponseEntity<StandardBusinessDocument> response = testRestTemplate.exchange(
-                "/api/message/out",
+        ResponseEntity<String> response = testRestTemplate.exchange(
+                "/api/messages/out",
                 HttpMethod.POST,
                 new HttpEntity<>(multipart, headers),
-                StandardBusinessDocument.class);
+                String.class);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getStatusCode())
+                .withFailMessage(response.toString())
+                .isEqualTo(HttpStatus.OK);
 
         messageOutHolder.getOrCalculate(Message::new)
-                .setSbd(response.getBody());
+                .setSbd(objectMapper.readValue(response.getBody(), StandardBusinessDocument.class));
     }
 
     @Given("^I POST the following message:$")
-    public void iPostTheFollowingMessage(String body) {
+    public void iPostTheFollowingMessage(String body) throws IOException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        ResponseEntity<StandardBusinessDocument> response = testRestTemplate.exchange(
-                "/api/message/out",
+        ResponseEntity<String> response = testRestTemplate.exchange(
+                "/api/messages/out",
                 HttpMethod.POST,
                 new HttpEntity<>(body, headers),
-                StandardBusinessDocument.class);
+                String.class);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getStatusCode())
+                .withFailMessage(response.toString())
+                .isEqualTo(HttpStatus.OK);
 
         messageOutHolder.getOrCalculate(Message::new)
-                .setSbd(response.getBody());
+                .setSbd(objectMapper.readValue(response.getBody(), StandardBusinessDocument.class));
     }
 
     @Given("^I upload a file named \"([^\"]+)\" with mimetype \"([^\"]+)\" and title \"([^\"]+)\" with the following body:$")
@@ -109,24 +116,26 @@ public class NextMoveMessageOutSteps {
         uriVariables.put("title", title);
 
         ResponseEntity<String> response = testRestTemplate.exchange(
-                "/api/message/out/{conversationId}/upload?title={title}",
-                HttpMethod.POST,
+                "/api/messages/out/{conversationId}?title={title}",
+                HttpMethod.PUT,
                 new HttpEntity<>(body, headers),
                 String.class,
                 uriVariables);
 
         assertThat(response.getStatusCode())
+                .withFailMessage(response.toString())
                 .isEqualTo(HttpStatus.OK);
     }
 
     @Given("^I send the message$")
     public void iSendTheMessage() {
         ResponseEntity<String> response = testRestTemplate.exchange(
-                "/api/message/out/{conversationId}",
+                "/api/messages/out/{conversationId}",
                 HttpMethod.POST, new HttpEntity(null),
                 String.class,
                 messageOutHolder.get().getSbd().getConversationId());
         assertThat(response.getStatusCode())
+                .withFailMessage(response.toString())
                 .isEqualTo(HttpStatus.OK);
     }
 }

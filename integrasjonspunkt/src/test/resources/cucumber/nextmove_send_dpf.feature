@@ -4,6 +4,13 @@ Feature: Sending a Next Move DPF message
     Given a "GET" request to "http://localhost:9099/identifier/987464291?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/987464291.json"
     And a "GET" request to "http://localhost:9099/identifier/910075924?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075924.json"
     And a "GET" request to "http://localhost:9099/identifier/910077473?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
+    And a SOAP request to "https://test.svarut.ks.no/tjenester/forsendelseservice/ForsendelsesServiceV9" will respond with the following payload:
+    """
+    <ser:sendForsendelseMedIdResponse xmlns:ser="http://www.ks.no/svarut/servicesV9">
+       <!--Optional:-->
+       <return>?</return>
+    </ser:sendForsendelseMedIdResponse>
+    """
 
   Scenario: As a user I want to send a DPF message
     Given I POST the following message:
@@ -144,11 +151,12 @@ Feature: Sending a Next Move DPF message
     Then an upload to Fiks is initiated with:
     """
     <?xml version="1.0" encoding="UTF-8"?>
-    <ns2:sendForsendelseMedId xmlns:ns2="http://www.ks.no/svarut/servicesV9">
+    <ns2:sendForsendelseMedId xmlns:ns2="http://www.ks.no/svarut/servicesV9"
+                              xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope">
         <forsendelse>
             <avgivendeSystem>p360</avgivendeSystem>
             <dokumenter>
-                <data>PCEtLWVuY3J5cHRlZCBjb250ZW50LS0+</data>
+                <data><!--encrypted content--></data>
                 <ekskluderesFraPrint>false</ekskluderesFraPrint>
                 <filnavn>test.txt</filnavn>
                 <mimetype>text/plain</mimetype>
@@ -170,8 +178,8 @@ Feature: Sending a Next Move DPF message
                 <tittel>Nye lysrør</tittel>
             </metadataFraAvleverendeSystem>
             <mottaker>
-                <digitalAdresse
-                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="ns2:organisasjonDigitalAdresse">
+                <digitalAdresse xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                xsi:type="ns2:organisasjonDigitalAdresse">
                     <orgnr>910075924</orgnr>
                 </digitalAdresse>
                 <postAdresse>
@@ -186,15 +194,13 @@ Feature: Sending a Next Move DPF message
                 <fargePrint>false</fargePrint>
                 <tosidig>true</tosidig>
             </printkonfigurasjon>
-            <signaturtype
-                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
-            <signeringUtloper
-                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+            <signaturtype xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+            <signeringUtloper xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
             <svarPaForsendelse>19efbd4c-413d-4e2c-bbc5-257ef4a65b38</svarPaForsendelse>
             <svarPaForsendelseLink>false</svarPaForsendelseLink>
             <svarSendesTil>
-                <digitalAdresse
-                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="ns2:organisasjonDigitalAdresse">
+                <digitalAdresse xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                xsi:type="ns2:organisasjonDigitalAdresse">
                     <orgnr>910077473</orgnr>
                 </digitalAdresse>
                 <postAdresse>
@@ -209,7 +215,7 @@ Feature: Sending a Next Move DPF message
         <forsendelsesid>45efbd4c-413d-4e2c-bbc5-257ef4a65a91</forsendelsesid>
     </ns2:sendForsendelseMedId>
     """
-    And the content of the ASIC file named "test.txt" is:
+    And the content of the file named "test.txt" is:
     """
     Testing 1 2 3
     """

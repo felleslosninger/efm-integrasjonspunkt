@@ -52,7 +52,7 @@ public class AsicHandler {
             }
         }
 
-        return archiveAndEncryptAttachments(attachments, messageContext, cr.getServiceIdentifier());
+        return archiveAndEncryptAttachments(attachments.get(0), attachments.stream(), messageContext, cr.getServiceIdentifier());
     }
 
     public InputStream createEncryptedAsic(NextMoveMessage msg, MessageContext messageContext) {
@@ -69,7 +69,7 @@ public class AsicHandler {
                     return new NextMoveStreamedFile(f.getFilename(), fes.getInputStream(), getMimetype(f));
                 }).collect(Collectors.toList());
 
-        return archiveAndEncryptAttachments(attachments, messageContext, msg.getServiceIdentifier());
+        return archiveAndEncryptAttachments(attachments.get(0), attachments.stream(), messageContext, msg.getServiceIdentifier());
     }
 
     private String getMimetype(BusinessMessageFile f) {
@@ -83,23 +83,8 @@ public class AsicHandler {
         return mimetype;
     }
 
-    public InputStream archiveAndEncryptAttachments(List<? extends StreamedFile> att, MessageContext ctx, ServiceIdentifier si) {
+    public InputStream archiveAndEncryptAttachments(StreamedFile mainAttachment, Stream<? extends StreamedFile> att, MessageContext ctx, ServiceIdentifier si) {
         PipedOutputStream archiveOutputStream = new PipedOutputStream();
-        CompletableFuture.runAsync(() -> {
-            log.trace("Starting thread: create asic");
-            try {
-                new CreateAsice().createAsiceStreamed(att, archiveOutputStream, keyHelper.getSignatureHelper(),
-                        ctx.getAvsender(), ctx.getMottaker());
-                for (StreamedFile a : att) {
-                    a.getInputStream().close();
-                }
-                archiveOutputStream.close();
-            } catch (IOException e) {
-                throw new MeldingsUtvekslingRuntimeException(StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT.getTechnicalMessage(), e);
-            }
-            log.trace("Thread finished: create asic");
-        });
-
         PipedInputStream archiveInputStream;
         try {
             archiveInputStream = new PipedInputStream(archiveOutputStream);
@@ -108,18 +93,22 @@ public class AsicHandler {
             log.error(errorMsg);
             throw new MeldingsUtvekslingRuntimeException(errorMsg, e);
         }
-        PipedOutputStream encryptedOutputStream = new PipedOutputStream();
+
         CompletableFuture.runAsync(() -> {
-            log.debug("Starting thread: encrypt archive");
-            encryptArchive(ctx.getMottaker(), si, archiveInputStream, encryptedOutputStream);
+            log.trace("Starting thread: create asic");
             try {
-                encryptedOutputStream.close();
+                new CreateAsice().createAsiceStreamed(mainAttachment, att, archiveOutputStream, keyHelper.getSignatureHelper(),
+                        ctx.getAvsender(), ctx.getMottaker());
+
+                archiveOutputStream.flush();
+                archiveOutputStream.close();
             } catch (IOException e) {
-                log.error("Error closing encryption stream");
+                throw new MeldingsUtvekslingRuntimeException(StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT.getTechnicalMessage(), e);
             }
-            log.debug("Thread finished: encrypt archive");
+            log.trace("Thread finished: create asic");
         });
 
+        PipedOutputStream encryptedOutputStream = new PipedOutputStream();
         PipedInputStream encryptedInputStream;
         try {
             encryptedInputStream = new PipedInputStream(encryptedOutputStream);
@@ -128,9 +117,21 @@ public class AsicHandler {
             log.error(errorMsg);
             throw new MeldingsUtvekslingRuntimeException(errorMsg, e);
         }
+
+        CompletableFuture.runAsync(() -> {
+            log.debug("Starting thread: encrypt archive");
+            encryptArchive(ctx.getMottaker(), si, archiveInputStream, encryptedOutputStream);
+            try {
+                encryptedOutputStream.flush();
+                encryptedOutputStream.close();
+            } catch (IOException e) {
+                log.error("Error closing encryption stream");
+            }
+            log.debug("Thread finished: encrypt archive");
+        });
+
         return encryptedInputStream;
     }
-
 
     private void encryptArchive(Mottaker mottaker, ServiceIdentifier serviceIdentifier, InputStream archive, OutputStream encrypted) {
         Set<ServiceIdentifier> standardEncryptionUsers = EnumSet.of(DPE_INNSYN, DPE_RECEIPT);

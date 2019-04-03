@@ -36,7 +36,7 @@ import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerF
 @RestController
 @Validated
 @Api
-@RequestMapping("/api/message/in")
+@RequestMapping("/api/messages/in")
 @Slf4j
 @RequiredArgsConstructor
 public class NextMoveMessageInController {

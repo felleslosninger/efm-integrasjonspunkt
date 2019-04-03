@@ -34,7 +34,7 @@ public class MockHooks {
                 .willReturn(Collections.singletonList(DocumentTypeIdentifier.of("urn:no:difi:meldingsutveksling:2.0")));
 
         doAnswer((Answer<Void>) invocation -> {
-            nextMoveSender.send((NextMoveMessage) invocation.getArgument(0));
+            nextMoveSender.send(invocation.getArgument(0));
             return null;
         }).when(internalQueue).enqueueNextMove2(any());
     }

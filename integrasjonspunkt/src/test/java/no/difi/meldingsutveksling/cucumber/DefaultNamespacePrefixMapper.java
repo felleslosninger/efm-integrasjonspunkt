@@ -16,6 +16,19 @@ public class DefaultNamespacePrefixMapper extends NamespacePrefixMapper {
         namespaceMap.put("http://www.altinn.no/services/common/fault/2009/10", "altinn3");
         namespaceMap.put("http://schemas.microsoft.com/2003/10/Serialization/", "ms");
         namespaceMap.put("http://schemas.altinn.no/services/serviceEntity/2015/06", "altinn4");
+
+        namespaceMap.put("http://schemas.altinn.no/services/Intermediary/Receipt/2009/10", "altinn5");
+        namespaceMap.put("http://www.altinn.no/services/ServiceEngine/ReporteeElementList/2009/10", "altinn6");
+        namespaceMap.put("http://schemas.altinn.no/services/ServiceEngine/Correspondence/2013/06", "altinn7");
+        namespaceMap.put("http://schemas.altinn.no/serviceengine/formsengine/2009/10", "altinn8");
+        namespaceMap.put("http://www.altinn.no/services/ServiceEngine/Correspondence/2009/10", "altinn9");
+        namespaceMap.put("http://schemas.altinn.no/services/ServiceEngine/Correspondence/2010/10", "altinn10");
+        namespaceMap.put("http://www.altinn.no/services/ServiceEngine/ReporteeElementList/2010/10", "altinn11");
+        namespaceMap.put("http://schemas.altinn.no/services/ServiceEngine/Correspondence/2009/10", "altinn12");
+        namespaceMap.put("http://schemas.altinn.no/services/ServiceEngine/Notification/2009/10", "altinn13");
+        namespaceMap.put("http://schemas.altinn.no/services/ServiceEngine/Correspondence/2016/02", "altinn14");
+        namespaceMap.put("http://schemas.altinn.no/services/ServiceEngine/Correspondence/2014/10", "altinn15");
+        namespaceMap.put("http://schemas.altinn.no/services/ServiceEngine/Correspondence/2013/11", "altinn16");
     }
 
     /* (non-Javadoc)

@@ -30,7 +30,7 @@ public class DpiConversationStrategy implements ConversationStrategy {
     private final CryptoMessagePersister cryptoMessagePersister;
 
     @Override
-    public void send(ConversationResource conversationResource) throws NextMoveException {
+    public void send(ConversationResource conversationResource) {
         throw new UnsupportedOperationException("ConversationResource no longer in use");
     }
 

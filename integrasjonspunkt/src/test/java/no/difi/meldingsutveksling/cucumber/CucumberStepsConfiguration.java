@@ -2,38 +2,56 @@ package no.difi.meldingsutveksling.cucumber;
 
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasic;
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExternalBasicStreamed;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceClient;
+import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceClientImpl;
 import no.difi.meldingsutveksling.nextmove.ServiceBusRestTemplate;
+import no.difi.meldingsutveksling.noark.NoarkClientFactory;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClientSettings;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
+import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
+import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.vefa.peppol.lookup.LookupClient;
+import no.difi.webservice.support.SoapFaultInterceptorLogger;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
 import org.springframework.boot.test.context.SpringBootContextLoader;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.ws.client.support.interceptor.ClientInterceptor;
+import org.springframework.ws.soap.axiom.AxiomSoapMessageFactory;
+import org.springframework.ws.transport.http.AbstractHttpWebServiceMessageSender;
 
+import javax.xml.bind.Marshaller;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
@@ -52,8 +70,95 @@ public class CucumberStepsConfiguration {
 
     @Configuration
     @Profile("cucumber")
-    @SpyBean(IntegrasjonspunktProperties.class)
+    @RequiredArgsConstructor
     public static class SpringConfiguration {
+
+        @Bean
+        @Primary
+        public IntegrasjonspunktProperties properties(IntegrasjonspunktProperties properties) {
+            IntegrasjonspunktProperties spy = spy(properties);
+            given(spy.getNoarkSystem()).willReturn(spy(properties.getNoarkSystem()));
+            return spy;
+        }
+
+        @Bean
+        public CachingWebServiceTemplateFactory cachingWebServiceTemplateFactory(
+                RequestCaptureClientInterceptor requestCaptureClientInterceptor
+        ) {
+            return new CachingWebServiceTemplateFactory(requestCaptureClientInterceptor);
+        }
+
+        @Primary
+        @Bean(name = "localNoark")
+        public NoarkClient localNoark(CachingWebServiceTemplateFactory cachingWebServiceTemplateFactory,
+                                      IntegrasjonspunktProperties properties) {
+            NoarkClientSettings clientSettings = spy(new NoarkClientSettings(
+                    properties.getNoarkSystem().getEndpointURL(),
+                    properties.getNoarkSystem().getUsername(),
+                    properties.getNoarkSystem().getPassword(),
+                    properties.getNoarkSystem().getDomain()));
+
+            given(clientSettings.createTemplateFactory()).willReturn(cachingWebServiceTemplateFactory);
+
+            return new NoarkClientFactory(clientSettings).from(properties);
+        }
+
+        @Bean
+        @Primary
+        public CorrespondenceAgencyClient correspondenceAgencyClient(
+                CorrespondenceAgencyConfiguration config,
+                RequestCaptureClientInterceptor requestCaptureClientInterceptor) {
+            return new CorrespondenceAgencyClient(config) {
+
+                @Override
+                protected List<ClientInterceptor> getAdditionalInterceptors() {
+                    return Collections.singletonList(requestCaptureClientInterceptor);
+                }
+
+                protected Map<String, Object> getMarshallerProperties() {
+                    Map<String, Object> properties = new HashMap<>();
+                    properties.put(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+                    properties.put(XMLMarshaller.PREFIX_MAPPER, new DefaultNamespacePrefixMapper());
+                    return properties;
+                }
+            };
+        }
+
+        @Bean
+        @Primary
+        public SvarUtWebServiceClientImpl svarUtClient(RequestCaptureClientInterceptor requestCaptureClientInterceptor, Jaxb2Marshaller marshaller, AxiomSoapMessageFactory svarUtMessageFactory, AbstractHttpWebServiceMessageSender svarUtMessageSender) {
+            SvarUtWebServiceClientImpl client = new SvarUtWebServiceClientImpl();
+            client.setDefaultUri("http://localhost:8080");
+            client.setMarshaller(marshaller);
+            client.setUnmarshaller(marshaller);
+
+            client.setMessageFactory(svarUtMessageFactory);
+            client.setMessageSender(svarUtMessageSender);
+
+            final ClientInterceptor[] interceptors = new ClientInterceptor[2];
+            interceptors[0] = SoapFaultInterceptorLogger.withLogMarkers(Markers.append("serviceidentifier", "fiks"));
+            interceptors[1] = requestCaptureClientInterceptor;
+            client.setInterceptors(interceptors);
+
+            return client;
+        }
+
+        @Bean
+        public RequestCaptureClientInterceptor requestCaptureClientInterceptor(Holder<List<String>> webServicePayloadHolder) {
+            return new RequestCaptureClientInterceptor(webServicePayloadHolder);
+        }
+
+        /**
+         * Hack to avoid problems when creating PostVirksomhetStrategyFactory
+         */
+        @Bean
+        @Primary
+        public ServiceRegistryLookup init(ServiceRegistryLookup serviceRegistryLookup) {
+            ServiceRegistryLookup spy = spy(serviceRegistryLookup);
+            doReturn(new InfoRecord()
+                    .setOrganizationName("Test - C2")).when(spy).getInfoRecord("974720760");
+            return spy;
+        }
 
         @Bean
         @Primary
@@ -77,17 +182,18 @@ public class CucumberStepsConfiguration {
         @Primary
         public AltinnWsClientFactory altinnWsClientFactory(
                 IBrokerServiceExternalBasic iBrokerServiceExternalBasic,
-                IBrokerServiceExternalBasicStreamed iBrokerServiceExternalBasicStreamed
+                IBrokerServiceExternalBasicStreamed iBrokerServiceExternalBasicStreamed,
+                ApplicationContextHolder applicationContextHolder,
+                AltinnWsConfigurationFactory altinnWsConfigurationFactory
         ) {
-            return new AltinnWsClientFactory() {
+            return new AltinnWsClientFactory(applicationContextHolder, altinnWsConfigurationFactory) {
                 @Override
                 public AltinnWsClient getAltinnWsClient(ServiceRecord serviceRecord) {
-                    AltinnWsConfiguration configuration = AltinnWsConfiguration.fromConfiguration(serviceRecord, getApplicationContext());
                     return new AltinnWsClient(
                             iBrokerServiceExternalBasic,
                             iBrokerServiceExternalBasicStreamed,
-                            configuration,
-                            getApplicationContext());
+                            altinnWsConfigurationFactory.fromServiceRecord(serviceRecord),
+                            applicationContextHolder.getApplicationContext());
                 }
             };
         }
@@ -121,6 +227,11 @@ public class CucumberStepsConfiguration {
         public Holder<Message> messageSentHolder() {
             return new Holder<>();
         }
+
+        @Bean
+        public Holder<List<String>> webServicePayloadHolder() {
+            return new Holder<>();
+        }
     }
 
     @Rule
@@ -128,25 +239,17 @@ public class CucumberStepsConfiguration {
 
     @MockBean public IBrokerServiceExternalBasic iBrokerServiceExternalBasic;
     @MockBean public IBrokerServiceExternalBasicStreamed iBrokerServiceExternalBasicStreamed;
-    @MockBean public SvarUtWebServiceClient svarUtClient;
+    //    @MockBean public SvarUtWebServiceClient svarUtClient;
     @MockBean public UUIDGenerator uuidGenerator;
     @MockBean public LookupClient lookupClient;
     @MockBean public InternalQueue internalQueue;
     @MockBean public ServiceBusRestTemplate serviceBusRestTemplate;
 
-    @Autowired
-    private IntegrasjonspunktProperties propertiesSpy;
 
     @Before
     @SneakyThrows
     public void before() {
         temporaryFolder.create();
-        IntegrasjonspunktProperties.NextMove nextMoveSpy = spy(propertiesSpy.getNextmove());
-        doReturn(nextMoveSpy).when(propertiesSpy).getNextmove();
-        doReturn(temporaryFolder.getRoot().getAbsolutePath()).when(nextMoveSpy).getFiledir();
-
-        IntegrasjonspunktProperties.FeatureToggle featureToggleSpy = spy(propertiesSpy.getFeature());
-        doReturn(featureToggleSpy).when(propertiesSpy).getFeature();
     }
 
     @After

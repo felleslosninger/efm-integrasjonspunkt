@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.ks.svarinn;
 
+import no.difi.meldingsutveksling.Decryptor;
+import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -9,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
-@ConditionalOnProperty(name="difi.move.feature.enableDPO", havingValue = "true")
+@ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
 @EnableConfigurationProperties(IntegrasjonspunktProperties.class)
 public class SvarInnBeans {
     @Bean
@@ -21,11 +23,9 @@ public class SvarInnBeans {
     }
 
     @Bean
-    SvarInnService svarInnService(SvarInnClient svarInnClient,
-                                  SvarInnFileDecryptor svarInnFileDecryptor,
-                                  SvarInnUnzipper svarInnUnzipper,
-                                  IntegrasjonspunktProperties properties) {
-        return new SvarInnService(svarInnClient, svarInnFileDecryptor, svarInnUnzipper, properties);
+    public SvarInnService svarInnService(SvarInnClient svarInnClient,
+                                         SvarInnFileDecryptor decryptor) {
+        return new SvarInnService(svarInnClient, decryptor);
     }
 
     @Bean
@@ -35,12 +35,7 @@ public class SvarInnBeans {
 
     @Bean
     public SvarInnFileDecryptor svarInnFileDecryptor(IntegrasjonspunktProperties properties) {
-        return new SvarInnFileDecryptor(properties.getFiks().getKeystore());
+        Decryptor decryptor = new Decryptor(new IntegrasjonspunktNokkel(properties.getFiks().getKeystore()));
+        return new SvarInnFileDecryptor(decryptor);
     }
-
-    @Bean
-    public SvarInnUnzipper svarInnUnzipper() {
-        return new SvarInnUnzipper();
-    }
-
 }

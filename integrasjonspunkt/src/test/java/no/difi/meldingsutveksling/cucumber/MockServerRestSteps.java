@@ -6,7 +6,6 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.nextmove.ServiceBusRestClient;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
@@ -33,7 +32,6 @@ public class MockServerRestSteps {
     private final RestClient restClient;
     private final ServiceBusRestClient serviceBusRestClient;
     private final SvarInnClient svarInnClient;
-    private final IntegrasjonspunktProperties properties;
 
     private MockServerRestTemplateCustomizer mockServerRestTemplateCustomizer;
     private DefaultResponseCreator responseCreator;
@@ -126,5 +124,4 @@ public class MockServerRestSteps {
                         .contentType(MediaType.parseMediaType(contentType))
                         .body(new ClassPathResource(path)));
     }
-
 }

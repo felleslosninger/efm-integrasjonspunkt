@@ -17,6 +17,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import org.springframework.test.web.client.ExpectedCount
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.web.client.RestTemplate
+import sun.misc.IOUtils
 
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
@@ -52,18 +53,17 @@ public class SvarInnClientTest {
 
     @Test
     public void lastNedFil() {
-        String downloadUrl = "path/to/file"
+        def forsendelse = new Forsendelse(downloadUrl: "path/to/file")
         def bytes = getClass().getResource("/decrypted-dokumenter-ae68b33d.zip").getBytes()
 
-        this.server.expect(ExpectedCount.once(), requestTo(Matchers.equalTo(downloadUrl))).andRespond(withSuccess(new ByteArrayResource(bytes), SvarInnClient.APPLICATION_ZIP))
+        this.server.expect(ExpectedCount.once(), requestTo(Matchers.equalTo(forsendelse.downloadUrl))).andRespond(withSuccess(new ByteArrayResource(bytes), MediaType.valueOf("application/zip;charset=UTF-8")))
 
-        def receive = client.downloadFile(downloadUrl)
+        def receive = client.downloadZipFile(forsendelse)
+
+        assert receive instanceof InputStream
+        assert receive.bytes == bytes
 
         this.server.verify()
-
-        assert receive instanceof SvarInnFile
-        assert receive.mediaType == SvarInnClient.APPLICATION_ZIP
-        assert receive.contents == bytes
     }
 
     @Test

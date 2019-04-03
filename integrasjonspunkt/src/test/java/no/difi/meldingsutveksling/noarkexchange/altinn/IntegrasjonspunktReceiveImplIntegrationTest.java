@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.altinn;
 
 import no.difi.meldingsutveksling.IntegrasjonspunktApplication;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.Receiver;
 import no.difi.meldingsutveksling.core.Sender;
@@ -20,12 +19,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -33,10 +26,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
-import java.io.IOException;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -63,7 +52,7 @@ public class IntegrasjonspunktReceiveImplIntegrationTest {
     IntegrajonspunktReceiveImpl integrajonspunktReceiveSpy;
 
     @Before
-    public void setUp() throws JAXBException, IOException, MessageException {
+    public void setUp() throws MessageException {
         AppReceiptType appReceiptTypeMock = mock(AppReceiptType.class);
         when(appReceiptTypeMock.getType()).thenReturn("OK");
         PutMessageResponseType putMessageResponseTypeMock = mock(PutMessageResponseType.class);

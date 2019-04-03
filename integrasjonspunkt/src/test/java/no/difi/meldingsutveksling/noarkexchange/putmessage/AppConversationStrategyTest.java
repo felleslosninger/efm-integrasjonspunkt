@@ -17,7 +17,6 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecordWra
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 /**
@@ -25,21 +24,20 @@ import static org.mockito.Mockito.*;
  */
 public class AppConversationStrategyTest {
 
-    public static final String RECEIVER_ORG_NR = "11111111";
-    public static final String SENDER_ORG_NR = "22222222";
-    private String receiptPayload = "<AppReceipt type=\"OK\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.arkivverket.no/Noark/Exchange/types\">\n" +
+    private static final String RECEIVER_ORG_NR = "11111111";
+    private static final String SENDER_ORG_NR = "22222222";
+    private static final String receiptPayload = "<AppReceipt type=\"OK\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.arkivverket.no/Noark/Exchange/types\">\n" +
             "  <message code=\"ID\" xmlns=\"\">\n" +
             "    <text>210725</text>\n" +
             "  </message>\n" +
             "</AppReceipt>";
 
     private MessageSender messageSender;
-    private IntegrasjonspunktProperties properties;
 
     @Before
     public void init() {
         messageSender = mock(MessageSender.class);
-        properties = mock(IntegrasjonspunktProperties.class);
+        IntegrasjonspunktProperties properties = mock(IntegrasjonspunktProperties.class);
         IntegrasjonspunktProperties.NorskArkivstandardSystem noark = mock(IntegrasjonspunktProperties
                 .NorskArkivstandardSystem.class);
         when(noark.getType()).thenReturn("p360");

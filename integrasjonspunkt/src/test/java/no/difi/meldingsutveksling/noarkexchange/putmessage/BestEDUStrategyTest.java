@@ -16,7 +16,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -29,7 +29,7 @@ import static org.mockito.Mockito.verify;
 public class BestEDUStrategyTest {
 
 
-    private String ePhorteStyle = "    <soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:typ=\"http://www.arkivverket.no/Noark/Exchange/types\">\n" +
+    private static final String ePhorteStyle = "    <soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:typ=\"http://www.arkivverket.no/Noark/Exchange/types\">\n" +
             "        <soapenv:Header/>\n" +
             "        <soapenv:Body>\n" +
             "            <typ:PutMessageRequest>\n" +
@@ -134,7 +134,7 @@ public class BestEDUStrategyTest {
             "        </soapenv:Body>\n" +
             "    </soapenv:Envelope>";
 
-    private String p360Style = "&lt;Melding xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.arkivverket.no/Noark4-1-WS-WD/types\"&gt;\n" +
+    private static final String p360Style = "&lt;Melding xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.arkivverket.no/Noark4-1-WS-WD/types\"&gt;\n" +
             "  &lt;journpost xmlns=\"\"&gt;\n" +
             "    &lt;jpId&gt;210707&lt;/jpId&gt;\n" +
             "    &lt;jpJaar&gt;2015&lt;/jpJaar&gt;\n" +

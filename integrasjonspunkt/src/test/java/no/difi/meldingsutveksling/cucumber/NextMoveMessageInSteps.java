@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -49,7 +49,7 @@ public class NextMoveMessageInSteps {
     @Given("^I peek and lock a message$")
     public void iPeekAndLockAMessage() {
         ResponseEntity<StandardBusinessDocument> response = testRestTemplate.exchange(
-                "/api/message/in/peek",
+                "/api/messages/in/peek",
                 HttpMethod.GET,
                 null,
                 StandardBusinessDocument.class);
@@ -72,7 +72,7 @@ public class NextMoveMessageInSteps {
         };
 
         testRestTemplate.execute(
-                "/api/message/in/pop/{conversationId}",
+                "/api/messages/in/pop/{conversationId}",
                 HttpMethod.GET,
                 requestCallback, responseExtractor,
                 Collections.singletonMap("conversationId", messageReceivedHolder.get().getSbd().getConversationId())
@@ -82,7 +82,7 @@ public class NextMoveMessageInSteps {
     @And("^I remove the message$")
     public void iRemoveTheMessage() {
         ResponseEntity<StandardBusinessDocument> response = testRestTemplate.exchange(
-                "/api/message/in/{conversationId}",
+                "/api/messages/in/{conversationId}",
                 HttpMethod.DELETE,
                 new HttpEntity<>(null),
                 StandardBusinessDocument.class,

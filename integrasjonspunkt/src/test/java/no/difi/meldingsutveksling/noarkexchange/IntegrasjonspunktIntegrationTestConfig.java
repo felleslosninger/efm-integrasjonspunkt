@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import no.difi.meldingsutveksling.ApplicationContextHolder;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.KeystoreProvider;
 import no.difi.meldingsutveksling.ServiceIdentifier;
@@ -11,12 +12,15 @@ import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
+import no.difi.meldingsutveksling.ks.svarinn.SvarInnFileDecryptor;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.nextmove.AsicHandler;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
+import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
+import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
+import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.receipt.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
@@ -67,8 +71,9 @@ public class IntegrasjonspunktIntegrationTestConfig {
     public MessageSender messageSender(TransportFactory transportFactory,
                                        StandardBusinessDocumentFactory standardBusinessDocumentFactory,
                                        AsicHandler asicHandler,
-                                       MessageContextFactory messageContextFactory) {
-        return new MessageSender(transportFactory, standardBusinessDocumentFactory, asicHandler, messageContextFactory);
+                                       MessageContextFactory messageContextFactory,
+                                       ApplicationContextHolder applicationContextHolder) {
+        return new MessageSender(transportFactory, standardBusinessDocumentFactory, asicHandler, messageContextFactory, applicationContextHolder);
     }
 
     @Bean
@@ -79,7 +84,7 @@ public class IntegrasjonspunktIntegrationTestConfig {
 
     @Bean
     @Primary
-    public KeystoreProvider meldingsformidlerKeystoreProvider() throws MeldingsformidlerException {
+    public KeystoreProvider meldingsformidlerKeystoreProvider() {
         return mock(KeystoreProvider.class);
     }
 
@@ -89,10 +94,12 @@ public class IntegrasjonspunktIntegrationTestConfig {
     }
 
     @Bean
-    public StrategyFactory messageStrategyFactory(MessageSender messageSender,
-                                                  ServiceRegistryLookup serviceRegistryLookup,
-                                                  InternalQueue internalQueue) {
-        return new StrategyFactory(messageSender, serviceRegistryLookup, properties, mock(NoarkClient.class), internalQueue);
+    public StrategyFactory messageStrategyFactory(
+            CorrespondenceAgencyClient client,
+            CorrespondenceAgencyMessageFactory correspondenceAgencyMessageFactory,
+            MessageSender messageSender,
+            InternalQueue internalQueue) {
+        return new StrategyFactory(client, correspondenceAgencyMessageFactory, messageSender, properties, mock(NoarkClient.class), internalQueue);
     }
 
     @Bean
@@ -216,12 +223,33 @@ public class IntegrasjonspunktIntegrationTestConfig {
     }
 
     @Bean
-    public NoarkClient noarkClient() {
+    public NoarkClient localNoark() {
         return mock(NoarkClient.class);
     }
 
     @Bean
-    public NoarkClient mailClient() {
+    public NoarkClient fiksMailClient() {
         return mock(NoarkClient.class);
+    }
+
+    @Bean
+    public CorrespondenceAgencyConfiguration correspondenceAgencyConfiguration(IntegrasjonspunktProperties properties) {
+        return new CorrespondenceAgencyConfiguration()
+                .setExternalServiceCode(properties.getDpv().getExternalServiceCode())
+                .setExternalServiceEditionCode(properties.getDpv().getExternalServiceEditionCode())
+                .setPassword(properties.getDpv().getPassword())
+                .setSystemUserCode(properties.getDpv().getUsername())
+                .setNotifyEmail(properties.getDpv().isNotifyEmail())
+                .setNotifySms(properties.getDpv().isNotifySms())
+                .setNotificationText(Optional.ofNullable(properties.getDpv())
+                        .map(IntegrasjonspunktProperties.PostVirksomheter::getNotificationText)
+                        .orElse(null))
+                .setNextmoveFiledir(properties.getNextmove().getFiledir())
+                .setEndpointUrl(properties.getDpv().getEndpointUrl().toString());
+    }
+
+    @Bean
+    public SvarInnFileDecryptor svarInnFileDecryptor(IntegrasjonspunktProperties properties) {
+        return mock(SvarInnFileDecryptor.class);
     }
 }
