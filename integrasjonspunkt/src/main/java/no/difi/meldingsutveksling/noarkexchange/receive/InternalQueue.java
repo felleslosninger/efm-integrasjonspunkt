@@ -254,13 +254,13 @@ public class InternalQueue {
         receipt.setType("ERROR");
         StatusMessageType statusMessageType = new StatusMessageType();
         statusMessageType.setCode("ID");
-        statusMessageType.setText(String.format("Feilet under mottak hos %s", sbd.getReceiverOrgNumber()));
+        statusMessageType.setText(String.format("Feilet under mottak hos %s", sbd.getReceiverIdentifier()));
         receipt.getMessage().add(statusMessageType);
 
         EDUCore eduCore = eduCoreFactory.create(receipt,
                 sbd.getConversationId(),
-                sbd.getReceiverOrgNumber(),
-                sbd.getSenderOrgNumber());
+                sbd.getReceiverIdentifier(),
+                sbd.getSenderIdentifier());
         enqueueExternal(eduCore);
     }
 

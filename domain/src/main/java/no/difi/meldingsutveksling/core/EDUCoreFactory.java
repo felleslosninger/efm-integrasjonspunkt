@@ -112,7 +112,7 @@ public class EDUCoreFactory {
 
     public EDUCore create(StandardBusinessDocument sbd, Arkivmelding am, byte[] asic) {
         // TODO fix refs from SBD
-        EDUCore eduCore = createCommon(sbd.getSenderOrgNumber(), sbd.getReceiverOrgNumber(), null, null);
+        EDUCore eduCore = createCommon(sbd.getSenderIdentifier(), sbd.getReceiverIdentifier(), null, null);
         eduCore.setId(sbd.getConversationId());
         eduCore.setMessageType(EDUCore.MessageType.EDU);
         eduCore.setMessageReference(sbd.getConversationId());

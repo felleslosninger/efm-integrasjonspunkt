@@ -47,8 +47,8 @@ public class MessageMarkerFactory {
         LogstashMarker journalPostIdMarker = journalPostIdMarker(sbd.getJournalPostId());
         LogstashMarker documentIdMarker = Markers.append(DOCUMENT_ID, sbd.getDocumentId());
         LogstashMarker conversationIdMarker = conversationIdMarker(sbd.getConversationId());
-        final LogstashMarker receiverMarker = receiverMarker(sbd.getReceiverOrgNumber());
-        final LogstashMarker senderMarker = senderMarker(sbd.getSenderOrgNumber());
+        final LogstashMarker receiverMarker = receiverMarker(sbd.getReceiverIdentifier());
+        final LogstashMarker senderMarker = senderMarker(sbd.getSenderIdentifier());
         return documentIdMarker.and(journalPostIdMarker).and(conversationIdMarker).and(senderMarker).and(receiverMarker).and(messageTypeMarker);
     }
 

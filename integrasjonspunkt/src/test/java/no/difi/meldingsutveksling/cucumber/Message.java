@@ -36,10 +36,10 @@ public class Message {
     }
 
     Mottaker getMottaker() {
-        return new Mottaker(Organisasjonsnummer.from(sbd.getReceiverOrgNumber()), null);
+        return new Mottaker(Organisasjonsnummer.from(sbd.getReceiverIdentifier()), null);
     }
 
     Avsender getAvsender() {
-        return new Avsender(Organisasjonsnummer.from(sbd.getSenderOrgNumber()));
+        return new Avsender(Organisasjonsnummer.from(sbd.getSenderIdentifier()));
     }
 }

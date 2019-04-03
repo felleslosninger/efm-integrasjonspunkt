@@ -29,7 +29,7 @@ public class AltinnZipContentParser {
     Message parse(ZipContent zipContent) {
         StandardBusinessDocument sbd = getSbd(zipContent);
 
-        String receiverOrgNumber = sbd.getReceiverOrgNumber();
+        String receiverOrgNumber = sbd.getReceiverIdentifier();
         PrivateKey privateKey = cucumberKeyStore.getPrivateKey(receiverOrgNumber);
 
         byte[] encryptedAsic = zipContent.getFile(ASIC_FILE).getBytes();

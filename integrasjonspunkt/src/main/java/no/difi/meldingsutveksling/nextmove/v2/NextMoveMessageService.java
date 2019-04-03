@@ -10,12 +10,11 @@ import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingException;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.*;
-import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
-import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
-import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -34,9 +33,7 @@ import java.util.stream.Stream;
 import static com.google.common.base.Strings.emptyToNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPI_DIGITAL;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPI_PRINT;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
+import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 
 @Component
 @RequiredArgsConstructor
@@ -46,6 +43,7 @@ public class NextMoveMessageService {
     private final NextMoveMessageOutRepository messageRepo;
     private final InternalQueue internalQueue;
     private final ConversationService conversationService;
+    private final ServiceRegistryLookup sr;
 
     NextMoveOutMessage getMessage(String conversationId) {
         return messageRepo.findByConversationId(conversationId)
@@ -76,7 +74,20 @@ public class NextMoveMessageService {
                 s.setInstanceIdentifier(createConversationId());
             }
         });
+
+        if (sbd.getServiceIdentifier() == DPI_PRINT) {
+            setDpiDefaults(sbd);
+        }
+
         return sbd;
+    }
+
+    private void setDpiDefaults(StandardBusinessDocument sbd) {
+        DpiPrintMessage dpiMessage = (DpiPrintMessage) sbd.getAny();
+        if (dpiMessage.getReceiver() == null) {
+            dpiMessage.setReceiver(new PostAddress());
+        }
+
     }
 
     void addFile(NextMoveOutMessage message, MultipartFile file) {

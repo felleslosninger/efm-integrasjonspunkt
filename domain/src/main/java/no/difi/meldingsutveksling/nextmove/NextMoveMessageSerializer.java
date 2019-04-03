@@ -31,9 +31,9 @@ public class NextMoveMessageSerializer extends StdSerializer<StandardBusinessDoc
             gen.writeFieldName("dpi_digital");
             gen.writeObject(value.getAny());
         } else if (value.getAny() instanceof DpiPrintMessage) {
-        gen.writeFieldName("dpi_print");
-        gen.writeObject(value.getAny());
-    }
+            gen.writeFieldName("dpi_print");
+            gen.writeObject(value.getAny());
+        }
         gen.writeEndObject();
     }
 }

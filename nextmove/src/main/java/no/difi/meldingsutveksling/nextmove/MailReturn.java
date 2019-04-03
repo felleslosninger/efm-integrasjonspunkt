@@ -15,6 +15,6 @@ import javax.persistence.Entity;
 @Embeddable
 public class MailReturn {
 
-    private PrintReceiver receiver;
+    private PostAddress receiver;
     private Returhaandtering returnHandling;
 }

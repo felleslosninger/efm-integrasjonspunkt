@@ -79,16 +79,16 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
 
     @JsonIgnore
     public MessageInfo getMessageInfo() {
-        return new MessageInfo(getReceiverOrgNumber(), getSenderOrgNumber(), getJournalPostId(), getConversationId(), getMessageType());
+        return new MessageInfo(getReceiverIdentifier(), getSenderIdentifier(), getJournalPostId(), getConversationId(), getMessageType());
     }
 
     @JsonIgnore
-    public String getSenderOrgNumber() {
+    public String getSenderIdentifier() {
         return getStandardBusinessDocumentHeader().getSender().iterator().next().getIdentifier().getValue().split(":")[1];
     }
 
     @JsonIgnore
-    public String getReceiverOrgNumber() {
+    public String getReceiverIdentifier() {
         return getStandardBusinessDocumentHeader().getReceiver().iterator().next().getIdentifier().getValue().split(":")[1];
     }
 

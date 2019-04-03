@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import com.google.common.collect.Sets;
 import lombok.*;
 
 import javax.persistence.Embeddable;
@@ -12,7 +13,7 @@ import javax.persistence.Entity;
 @AllArgsConstructor
 @NoArgsConstructor
 @Embeddable
-public class PrintReceiver {
+public class PostAddress {
 
     private String name;
     private String addressLine1;
@@ -22,6 +23,9 @@ public class PrintReceiver {
     private String postalCode;
     private String postalArea;
     private String countryCode;
-    private String county;
+    private String country;
 
+    public boolean isNorge() {
+        return (country == null || "".equals(country)) || Sets.newHashSet("NORGE", "NORWAY", "NO", "NOR").contains(country.toUpperCase());
+    }
 }

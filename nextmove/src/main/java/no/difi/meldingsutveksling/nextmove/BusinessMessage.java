@@ -18,6 +18,5 @@ import javax.persistence.InheritanceType;
 public abstract class BusinessMessage extends AbstractEntity<Long> {
 
     private String securityLevel;
-
     private String primaryDocumentFilename;
 }

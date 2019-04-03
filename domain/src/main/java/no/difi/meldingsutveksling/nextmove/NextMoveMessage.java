@@ -53,8 +53,8 @@ public class NextMoveMessage {
     public static NextMoveMessage of(StandardBusinessDocument sbd) {
         NextMoveMessage message = new NextMoveMessage(
                 sbd.getConversationId(),
-                sbd.getReceiverOrgNumber(),
-                sbd.getSenderOrgNumber(),
+                sbd.getReceiverIdentifier(),
+                sbd.getSenderIdentifier(),
                 sbd.getServiceIdentifier(),
                 sbd);
         message.setFiles(new HashSet<>());

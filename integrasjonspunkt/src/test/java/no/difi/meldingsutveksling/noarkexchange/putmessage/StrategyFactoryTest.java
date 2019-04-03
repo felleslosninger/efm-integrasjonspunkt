@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
-import no.difi.meldingsutveksling.KeystoreProvider;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.KeyStoreProperties;
@@ -52,11 +51,10 @@ public class StrategyFactoryTest {
         final ServiceRegistryLookup serviceRegistryLookup = mock(ServiceRegistryLookup.class);
         when(serviceRegistryLookup.getInfoRecord(any())).thenReturn(mock(InfoRecord.class));
 
-        final KeystoreProvider keystoreProvider = mock(KeystoreProvider.class);
         SvarUtService svarUtService = mock(SvarUtService.class);
         NoarkClient noarkClientMock = mock(NoarkClient.class);
         InternalQueue internalQueue = mock(InternalQueue.class);
-        strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider, properties, noarkClientMock, internalQueue);
+        strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, properties, noarkClientMock, internalQueue);
         strategyFactory.registerMessageStrategyFactory(FiksMessageStrategyFactory.newInstance(svarUtService, noarkClientMock));
 
     }

@@ -27,8 +27,8 @@ public class NextMoveInMessage extends NextMoveMessage {
     public static NextMoveInMessage of(StandardBusinessDocument sbd) {
         return new NextMoveInMessage(
                 sbd.getConversationId(),
-                sbd.getReceiverOrgNumber(),
-                sbd.getSenderOrgNumber(),
+                sbd.getReceiverIdentifier(),
+                sbd.getSenderIdentifier(),
                 sbd.getServiceIdentifier(),
                 sbd);
     }

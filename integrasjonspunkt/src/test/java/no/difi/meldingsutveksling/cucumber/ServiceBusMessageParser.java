@@ -27,7 +27,7 @@ public class ServiceBusMessageParser {
     public Message parse(byte[] in) {
         ServiceBusPayload serviceBusPayload = objectMapper.readValue(in, ServiceBusPayload.class);
 
-        String receiverOrgNumber = serviceBusPayload.getSbd().getReceiverOrgNumber();
+        String receiverOrgNumber = serviceBusPayload.getSbd().getReceiverIdentifier();
         PrivateKey privateKey = cucumberKeyStore.getPrivateKey(receiverOrgNumber);
 
         byte[] encryptedAsic = Base64.getDecoder().decode(serviceBusPayload.getAsic());

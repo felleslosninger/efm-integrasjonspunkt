@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.dpi;
 
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress;
+import no.difi.meldingsutveksling.nextmove.PostAddress;
 
 import java.util.List;
 

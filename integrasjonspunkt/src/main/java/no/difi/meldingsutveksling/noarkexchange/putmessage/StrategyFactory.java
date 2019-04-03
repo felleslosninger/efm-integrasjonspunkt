@@ -1,10 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
-import no.difi.meldingsutveksling.KeystoreProvider;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
@@ -26,24 +23,13 @@ public class StrategyFactory {
 
     public StrategyFactory(MessageSender messageSender,
                            ServiceRegistryLookup serviceRegistryLookup,
-                           KeystoreProvider keystoreProvider,
                            IntegrasjonspunktProperties properties,
                            NoarkClient noarkClient,
                            InternalQueue internalQueue) {
-        MessageStrategyFactory postInnbyggerStrategyFactory;
-        try {
-            postInnbyggerStrategyFactory = PostInnbyggerStrategyFactory.newInstance(properties, serviceRegistryLookup, keystoreProvider);
-        } catch (MeldingsformidlerException e) {
-            throw new MeldingsUtvekslingRuntimeException("Unable to create client for sikker digital post", e);
-        }
 
         factories = new EnumMap<>(ServiceIdentifier.class);
         if (properties.getFeature().isEnableDPO()) {
             factories.put(DPO, EduMessageStrategyFactory.newInstance(messageSender));
-        }
-        if (properties.getFeature().isEnableDPI()) {
-            factories.put(DPI_DIGITAL, postInnbyggerStrategyFactory);
-            factories.put(DPI_PRINT, postInnbyggerStrategyFactory);
         }
         if (properties.getFeature().isEnableDPV()) {
             factories.put(DPV, PostVirksomhetStrategyFactory.newInstance(properties, noarkClient, serviceRegistryLookup, internalQueue));

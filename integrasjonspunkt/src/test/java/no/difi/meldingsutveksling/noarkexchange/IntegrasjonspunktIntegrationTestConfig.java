@@ -91,10 +91,8 @@ public class IntegrasjonspunktIntegrationTestConfig {
     @Bean
     public StrategyFactory messageStrategyFactory(MessageSender messageSender,
                                                   ServiceRegistryLookup serviceRegistryLookup,
-                                                  KeystoreProvider keystoreProvider,
-                                                  SvarUtService svarUtService,
                                                   InternalQueue internalQueue) {
-        return new StrategyFactory(messageSender, serviceRegistryLookup, keystoreProvider, properties, mock(NoarkClient.class), internalQueue);
+        return new StrategyFactory(messageSender, serviceRegistryLookup, properties, mock(NoarkClient.class), internalQueue);
     }
 
     @Bean

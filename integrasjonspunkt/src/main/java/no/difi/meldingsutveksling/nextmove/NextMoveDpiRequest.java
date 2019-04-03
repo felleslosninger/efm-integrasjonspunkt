@@ -7,16 +7,13 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.dpi.Document;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static no.difi.meldingsutveksling.MimeTypeExtensionMapper.getMimetype;
 
 @RequiredArgsConstructor
 public class NextMoveDpiRequest implements MeldingsformidlerRequest {
@@ -52,18 +49,6 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
         return docList;
     }
 
-    private String getMime(String ext) {
-        // DPI specific override
-        if ("XML".equals(ext)) {
-            return "application/ehf+xml";
-        }
-        return getMimetype(ext);
-    }
-
-    private String getExtension(String fileName) {
-        return Stream.of(fileName.split(".")).reduce((a, b) -> b).orElse(DEFAULT_EXT);
-    }
-
     private byte[] getContent(String fileName) {
         try {
             return cryptoMessagePersister.read(message.getConversationId(), fileName);
@@ -72,6 +57,21 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
         }
     }
 
+    private boolean isDigitalMessage() {
+        return this.message.getBusinessMessage() instanceof DpiDigitalMessage;
+    }
+
+    private boolean isPrintMessage() {
+        return this.message.getBusinessMessage() instanceof DpiPrintMessage;
+    }
+
+    private DpiDigitalMessage getDigitalMessage() {
+        return (DpiDigitalMessage) message.getBusinessMessage();
+    }
+
+    private DpiPrintMessage getPrintMessage() {
+        return (DpiPrintMessage) message.getBusinessMessage();
+    }
 
     @Override
     public String getMottakerPid() {
@@ -125,14 +125,18 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     @Override
     public String getSmsVarslingstekst() {
-        // TODO get from businessmessage
-        return props.getDpi().getSms().getVarslingstekst();
+        if (isDigitalMessage()) {
+            return getDigitalMessage().getNotification().getSmsText();
+        }
+        return null;
     }
 
     @Override
     public String getEmailVarslingstekst() {
-        // TODO get from businessmessage
-        return props.getDpi().getEmail().getVarslingstekst();
+        if (isDigitalMessage()) {
+            return getDigitalMessage().getNotification().getEmailText();
+        }
+        return null;
     }
 
     @Override
@@ -147,16 +151,22 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     @Override
     public boolean isPrintProvider() {
-        return message.getBusinessMessage() instanceof DpiPrintMessage;
+        return isPrintMessage();
     }
 
     @Override
     public PostAddress getPostAddress() {
-        return serviceRecord.getPostAddress();
+        if (isPrintMessage()) {
+            return getPrintMessage().getReceiver();
+        }
+        return null;
     }
 
     @Override
     public PostAddress getReturnAddress() {
-        return serviceRecord.getReturnAddress();
+        if (isPrintMessage()) {
+            return getPrintMessage().getMailReturn().getReceiver();
+        }
+        return null;
     }
 }

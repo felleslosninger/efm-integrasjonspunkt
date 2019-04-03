@@ -2,18 +2,13 @@ package no.difi.meldingsutveksling.dpi;
 
 import com.google.common.io.ByteStreams;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.KeyStoreProperties;
 import no.difi.meldingsutveksling.config.dpi.securitylevel.SecurityLevel;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress;
+import no.difi.meldingsutveksling.nextmove.PostAddress;
 import no.difi.sdp.client2.domain.Prioritet;
 import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;

@@ -121,7 +121,7 @@ public class Conversation {
     public static Conversation of(StandardBusinessDocument sbd, MessageStatus... statuses) {
         // Only used when receiving messages, and will for StandardBusinessDocument always be DPO
         Conversation c = new Conversation(sbd.getConversationId(), sbd.getConversationId(),
-                sbd.getSenderOrgNumber(), sbd.getReceiverOrgNumber(), ConversationDirection.INCOMING,
+                sbd.getSenderIdentifier(), sbd.getReceiverIdentifier(), ConversationDirection.INCOMING,
                "", ServiceIdentifier.DPO);
         if (statuses != null && statuses.length > 0) {
             Stream.of(statuses)

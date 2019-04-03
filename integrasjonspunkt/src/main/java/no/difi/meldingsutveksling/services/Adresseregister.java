@@ -33,14 +33,14 @@ public class Adresseregister {
     }
 
     public void validateCertificates(StandardBusinessDocument sbd) throws MessageException {
-        ServiceRecord receiverServiceRecord = serviceRegistryLookup.getServiceRecord(sbd.getReceiverOrgNumber()).getServiceRecord();
+        ServiceRecord receiverServiceRecord = serviceRegistryLookup.getServiceRecord(sbd.getReceiverIdentifier()).getServiceRecord();
         try {
             getCertificate(receiverServiceRecord);
         } catch (CertificateException e) {
             throw new MessageException(e, StatusMessage.MISSING_RECIEVER_CERTIFICATE);
         }
 
-        ServiceRecord senderServiceRecord = serviceRegistryLookup.getServiceRecord(sbd.getSenderOrgNumber()).getServiceRecord();
+        ServiceRecord senderServiceRecord = serviceRegistryLookup.getServiceRecord(sbd.getSenderIdentifier()).getServiceRecord();
         try {
             getCertificate(senderServiceRecord);
         } catch (CertificateException e) {

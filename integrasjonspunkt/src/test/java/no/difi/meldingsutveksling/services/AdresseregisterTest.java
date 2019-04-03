@@ -41,8 +41,8 @@ public class AdresseregisterTest {
     @Before
     public void setup() {
         adresseregister = new Adresseregister(serviceRegistryLookup);
-        when(sbdMock.getSenderOrgNumber()).thenReturn(SENDER_PARTY_NUMBER);
-        when(sbdMock.getReceiverOrgNumber()).thenReturn(RECIEVER_PARTY_NUMBER);
+        when(sbdMock.getSenderIdentifier()).thenReturn(SENDER_PARTY_NUMBER);
+        when(sbdMock.getReceiverIdentifier()).thenReturn(RECIEVER_PARTY_NUMBER);
         when(serviceRegistryLookup.getServiceRecord(RECIEVER_PARTY_NUMBER)).thenReturn(ServiceRecordWrapper.of(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"), Lists.newArrayList(), Maps.newHashMap()));
         when(serviceRegistryLookup.getServiceRecord(SENDER_PARTY_NUMBER)).thenReturn(ServiceRecordWrapper.of(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"), Lists.newArrayList(), Maps.newHashMap()));
     }

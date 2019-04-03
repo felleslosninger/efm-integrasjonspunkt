@@ -105,12 +105,11 @@ public class IntegrasjonspunktBeans {
     @Bean
     public StrategyFactory messageStrategyFactory(MessageSender messageSender,
                                                   ServiceRegistryLookup serviceRegistryLookup,
-                                                  KeystoreProvider meldingsformidlerKeystoreProvider,
                                                   @Lazy InternalQueue internalQueue,
                                                   @Qualifier("localNoark") ObjectProvider<NoarkClient> localNoark,
                                                   @SuppressWarnings("SpringJavaAutowiringInspection") ObjectProvider<List<MessageStrategyFactory>> messageStrategyFactory,
                                                   IntegrasjonspunktProperties properties) {
-        final StrategyFactory strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, meldingsformidlerKeystoreProvider, properties, localNoark.getIfAvailable(), internalQueue);
+        final StrategyFactory strategyFactory = new StrategyFactory(messageSender, serviceRegistryLookup, properties, localNoark.getIfAvailable(), internalQueue);
         if (messageStrategyFactory.getIfAvailable() != null) {
             messageStrategyFactory.getIfAvailable().forEach(strategyFactory::registerMessageStrategyFactory);
         }

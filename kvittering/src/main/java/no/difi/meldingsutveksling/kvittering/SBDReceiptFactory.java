@@ -50,8 +50,8 @@ public class SBDReceiptFactory {
     public static StandardBusinessDocument createDpeReceiptFrom(StandardBusinessDocument sbd) {
         StandardBusinessDocument receipt = new StandardBusinessDocument();
         StandardBusinessDocumentHeader sbdh = new StandardBusinessDocumentHeader.Builder()
-                .from(Organisasjonsnummer.from(sbd.getReceiverOrgNumber()))
-                .to(Organisasjonsnummer.from(sbd.getSenderOrgNumber()))
+                .from(Organisasjonsnummer.from(sbd.getReceiverIdentifier()))
+                .to(Organisasjonsnummer.from(sbd.getSenderIdentifier()))
                 .relatedToConversationId(sbd.getConversationId())
                 .type(StandardBusinessDocumentHeader.DocumentType.DPE_RECEIPT)
                 .build();

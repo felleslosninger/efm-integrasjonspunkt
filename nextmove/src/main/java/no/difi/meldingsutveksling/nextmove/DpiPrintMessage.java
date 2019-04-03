@@ -18,7 +18,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "dpi_print", namespace = "urn:no:difi:profile:digitalpost:ver1.0")
 public class DpiPrintMessage extends BusinessMessage {
 
-    private PrintReceiver receiver;
+    private PostAddress receiver;
     private Utskriftsfarge color;
     private ShippingType shippingType;
     private MailReturn mailReturn;
