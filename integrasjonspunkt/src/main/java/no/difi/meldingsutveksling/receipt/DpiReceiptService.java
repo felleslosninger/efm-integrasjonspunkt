@@ -1,20 +1,15 @@
 package no.difi.meldingsutveksling.receipt;
 
+import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
-import no.difi.meldingsutveksling.KeystoreProvider;
 
+@RequiredArgsConstructor
 public class DpiReceiptService {
-    private IntegrasjonspunktProperties properties;
-    private KeystoreProvider keystoreProvider;
+    private final IntegrasjonspunktProperties properties;
+    private final MeldingsformidlerClient meldingsformidlerClient;
 
-    public DpiReceiptService(IntegrasjonspunktProperties properties, KeystoreProvider keystoreProvider) {
-        this.properties = properties;
-        this.keystoreProvider = keystoreProvider;
-    }
-
-    public ExternalReceipt checkForReceipts() {
-        MeldingsformidlerClient client = new MeldingsformidlerClient(properties.getDpi(), keystoreProvider.getKeyStore());
-        return client.sjekkEtterKvittering(properties.getOrg().getNumber());
+    ExternalReceipt checkForReceipts() {
+        return meldingsformidlerClient.sjekkEtterKvittering(properties.getOrg().getNumber());
     }
 }

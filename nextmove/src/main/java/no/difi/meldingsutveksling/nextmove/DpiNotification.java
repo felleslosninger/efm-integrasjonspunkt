@@ -1,16 +1,10 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import lombok.*;
+import lombok.Data;
 
 import javax.persistence.Embeddable;
-import javax.persistence.Entity;
 
-@Getter
-@Setter
-@ToString
-@Entity
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
 @Embeddable
 public class DpiNotification {
 

@@ -4,9 +4,10 @@ import cucumber.api.java.Before;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.UUIDGenerator;
-import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
+import no.difi.meldingsutveksling.dpi.SikkerDigitalPostKlientFactory;
 import no.difi.meldingsutveksling.nextmove.NextMoveSender;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
+import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.vefa.peppol.common.model.DocumentTypeIdentifier;
 import no.difi.vefa.peppol.lookup.LookupClient;
 import org.mockito.stubbing.Answer;
@@ -24,6 +25,8 @@ public class MockHooks {
     private final LookupClient lookupClient;
     private final InternalQueue internalQueue;
     private final NextMoveSender nextMoveSender;
+    public final SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory;
+    public final SikkerDigitalPostKlient sikkerDigitalPostKlient;
 
     @Before
     @SneakyThrows
@@ -37,5 +40,8 @@ public class MockHooks {
             nextMoveSender.send(invocation.getArgument(0));
             return null;
         }).when(internalQueue).enqueueNextMove2(any());
+
+        given(sikkerDigitalPostKlientFactory.createSikkerDigitalPostKlient(any())).willReturn(sikkerDigitalPostKlient);
+        given(sikkerDigitalPostKlientFactory.createSikkerDigitalPostKlient(any(), any())).willReturn(sikkerDigitalPostKlient);
     }
 }

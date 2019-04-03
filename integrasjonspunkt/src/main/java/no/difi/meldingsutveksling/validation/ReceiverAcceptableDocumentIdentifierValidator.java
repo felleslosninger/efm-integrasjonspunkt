@@ -56,7 +56,7 @@ public class ReceiverAcceptableDocumentIdentifierValidator implements Constraint
     }
 
     private ParticipantIdentifier getParticipantIdentifier(StandardBusinessDocumentHeader header) {
-        return header.getReceiver().stream().findFirst()
+        return header.getFirstReceiver()
                 .map(Partner::getIdentifier)
                 .map(p -> ParticipantIdentifier.of(p.getValue(), Scheme.of(p.getAuthority())))
                 .orElse(null);

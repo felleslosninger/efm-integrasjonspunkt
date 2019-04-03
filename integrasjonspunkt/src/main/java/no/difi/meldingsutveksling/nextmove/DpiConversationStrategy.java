@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.nextmove;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.KeystoreProvider;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
@@ -26,8 +25,8 @@ public class DpiConversationStrategy implements ConversationStrategy {
 
     private final IntegrasjonspunktProperties props;
     private final ServiceRegistryLookup sr;
-    private final KeystoreProvider keystore;
     private final CryptoMessagePersister cryptoMessagePersister;
+    private final MeldingsformidlerClient meldingsformidlerClient;
 
     @Override
     public void send(ConversationResource conversationResource) {
@@ -52,9 +51,9 @@ public class DpiConversationStrategy implements ConversationStrategy {
         }
 
         NextMoveDpiRequest request = new NextMoveDpiRequest(props, message, serviceRecord.get(), cryptoMessagePersister);
-        MeldingsformidlerClient client = new MeldingsformidlerClient(props.getDpi(), keystore.getKeyStore());
+
         try {
-            client.sendMelding(request);
+            meldingsformidlerClient.sendMelding(request);
         } catch (MeldingsformidlerException e) {
             Audit.error("Failed to send message to DPI", markerFrom(message), e);
             throw new NextMoveException(e);

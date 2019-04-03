@@ -16,7 +16,6 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.nextmove.AbstractEntity;
-import no.difi.meldingsutveksling.nextmove.BusinessMessage;
 import no.difi.meldingsutveksling.validation.ReceiverAcceptableDocumentIdentifier;
 import no.difi.meldingsutveksling.validation.ReceiverAcceptableServiceIdentifier;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -30,10 +29,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
@@ -158,6 +154,16 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
     public StandardBusinessDocumentHeader addReceiver(Receiver partner) {
         getReceiver().add(partner);
         return this;
+    }
+
+    @JsonIgnore
+    public Optional<Sender> getFirstSender() {
+        return sender.stream().findFirst();
+    }
+
+    @JsonIgnore
+    public Optional<Receiver> getFirstReceiver() {
+        return receiver.stream().findFirst();
     }
 
     @JsonIgnore

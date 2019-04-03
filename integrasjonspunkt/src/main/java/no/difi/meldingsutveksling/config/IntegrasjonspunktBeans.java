@@ -2,7 +2,10 @@ package no.difi.meldingsutveksling.config;
 
 import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
+import no.difi.meldingsutveksling.dpi.ForsendelseHandlerFactory;
+import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
+import no.difi.meldingsutveksling.dpi.SikkerDigitalPostKlientFactory;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.lang.KeystoreProviderException;
 import no.difi.meldingsutveksling.mail.MailClient;
@@ -117,8 +120,8 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public DpiReceiptService dpiReceiptService(IntegrasjonspunktProperties integrasjonspunktProperties, KeystoreProvider keystoreProvider) {
-        return new DpiReceiptService(integrasjonspunktProperties, keystoreProvider);
+    public DpiReceiptService dpiReceiptService(IntegrasjonspunktProperties integrasjonspunktProperties, MeldingsformidlerClient meldingsformidlerClient) {
+        return new DpiReceiptService(integrasjonspunktProperties, meldingsformidlerClient);
     }
 
     @Bean(name = "fiksMailClient")
@@ -175,6 +178,23 @@ public class IntegrasjonspunktBeans {
                         .orElse(null))
                 .setNextmoveFiledir(properties.getNextmove().getFiledir())
                 .setEndpointUrl(properties.getDpv().getEndpointUrl().toString());
+    }
+
+    @Bean
+    public SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory(IntegrasjonspunktProperties properties, KeystoreProvider keystoreProvider) {
+        return new SikkerDigitalPostKlientFactory(properties.getDpi(), keystoreProvider.getKeyStore());
+    }
+
+    @Bean
+    public ForsendelseHandlerFactory forsendelseHandlerFactory(IntegrasjonspunktProperties properties) {
+        return new ForsendelseHandlerFactory(properties.getDpi());
+    }
+
+    @Bean
+    public MeldingsformidlerClient meldingsformidlerClient(IntegrasjonspunktProperties properties,
+                                                           SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory,
+                                                           ForsendelseHandlerFactory forsendelseHandlerFactory) {
+        return new MeldingsformidlerClient(properties.getDpi(), sikkerDigitalPostKlientFactory, forsendelseHandlerFactory);
     }
 }
 

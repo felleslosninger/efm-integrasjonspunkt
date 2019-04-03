@@ -34,7 +34,9 @@ public class MeldingsformidlerClientMain {
         KeyStore keystore = createKeyStore();
         String mpcId = "1";
         DigitalPostInnbyggerConfig config = getDigitalPostInnbyggerConfig(mpcId);
-        MeldingsformidlerClient meldingsformidlerClient = new MeldingsformidlerClient(config, keystore);
+        SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory = new SikkerDigitalPostKlientFactory(config, keystore);
+        ForsendelseHandlerFactory forsendelseHandlerFactory = new ForsendelseHandlerFactory(config);
+        MeldingsformidlerClient meldingsformidlerClient = new MeldingsformidlerClient(config, sikkerDigitalPostKlientFactory, forsendelseHandlerFactory);
         final MeldingsformidlerRequest request = new MeldingsformidlerRequest() {
             @Override
             public Document getDocument() {

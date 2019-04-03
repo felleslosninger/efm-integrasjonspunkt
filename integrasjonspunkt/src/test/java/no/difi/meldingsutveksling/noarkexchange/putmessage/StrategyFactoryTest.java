@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.noarkexchange.putmessage;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.KeyStoreProperties;
+import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
@@ -56,6 +57,7 @@ public class StrategyFactoryTest {
         when(serviceRegistryLookup.getInfoRecord(any())).thenReturn(mock(InfoRecord.class));
 
         SvarUtService svarUtService = mock(SvarUtService.class);
+        MeldingsformidlerClient meldingsformidlerClientMock = mock(MeldingsformidlerClient.class);
         NoarkClient noarkClientMock = mock(NoarkClient.class);
         InternalQueue internalQueue = mock(InternalQueue.class);
         strategyFactory = new StrategyFactory(client, correspondenceAgencyMessageFactory, messageSender, properties, noarkClientMock, internalQueue);

@@ -40,7 +40,12 @@
         <jacoco.version>0.7.5.201505241946</jacoco.version>
         <!-- bug with logstash-logback-encoder in 1.1.7, wait for 1.1.8 http://jira.qos.ch/browse/LOGBACK-1158 -->
         <logback.version>1.1.6</logback.version>
-        <mockito.version>1.10.19</mockito.version>
+
+        <powermock.version>2.0.0</powermock.version>
+        <mockito.version>2.23.4</mockito.version>
+        <cucumber.version>2.3.1</cucumber.version>
+
+<!--        <mockito.version>1.10.19</mockito.version>-->
         <move-common.version>1.0.26</move-common.version>
         <maven.javadoc.skip>true</maven.javadoc.skip>
         <lombok.version>1.18.6</lombok.version>
@@ -121,6 +126,19 @@
                 <groupId>com.querydsl</groupId>
                 <artifactId>querydsl-apt</artifactId>
                 <version>4.1.4</version>
+            </dependency>
+            <dependency>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-module-junit4</artifactId>
+                <version>${powermock.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-api-mockito2</artifactId>
+                <version>${powermock.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -95,8 +95,10 @@ public class NextMoveMessageOutSteps {
                 .withFailMessage(response.toString())
                 .isEqualTo(HttpStatus.OK);
 
+        StandardBusinessDocument sbd = objectMapper.readValue(response.getBody(), StandardBusinessDocument.class);
+        
         messageOutHolder.getOrCalculate(Message::new)
-                .setSbd(objectMapper.readValue(response.getBody(), StandardBusinessDocument.class));
+                .setSbd(sbd);
     }
 
     @Given("^I upload a file named \"([^\"]+)\" with mimetype \"([^\"]+)\" and title \"([^\"]+)\" with the following body:$")

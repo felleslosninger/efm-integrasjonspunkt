@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnFileDecryptor;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.nextmove.AsicHandler;
@@ -113,8 +114,13 @@ public class IntegrasjonspunktIntegrationTestConfig {
     }
 
     @Bean
-    public DpiReceiptService dpiReceiptService(IntegrasjonspunktProperties properties, KeystoreProvider keystoreProvider) {
-        return new DpiReceiptService(properties, keystoreProvider);
+    public DpiReceiptService dpiReceiptService(IntegrasjonspunktProperties properties, MeldingsformidlerClient meldingsformidlerClient) {
+        return new DpiReceiptService(properties, meldingsformidlerClient);
+    }
+
+    @Bean
+    public MeldingsformidlerClient meldingsformidlerClient() {
+        return mock(MeldingsformidlerClient.class);
     }
 
     @Bean

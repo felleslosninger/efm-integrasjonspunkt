@@ -2,8 +2,8 @@ package no.difi.meldingsutveksling.validation;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.DocumentIdentification;
+import no.difi.meldingsutveksling.domain.sbdh.Partner;
 import no.difi.meldingsutveksling.domain.sbdh.PartnerIdentification;
-import no.difi.meldingsutveksling.domain.sbdh.Receiver;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -13,15 +13,11 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.Collections;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.UNKNOWN;
 
 public class ReceiverAcceptableServiceIdentifierValidator implements ConstraintValidator<ReceiverAcceptableServiceIdentifier, StandardBusinessDocumentHeader> {
-
-    private static final Pattern PARTNER_IDENTIFIER_PATTERN = Pattern.compile("^\\d{4}:(\\d{9})$");
 
     @Autowired
     private ServiceRegistryLookup sr;
@@ -65,34 +61,19 @@ public class ReceiverAcceptableServiceIdentifierValidator implements ConstraintV
     }
 
     private Set<ServiceIdentifier> getAcceptableServiceIdentifiers(StandardBusinessDocumentHeader header) {
-        if (header.getReceiver() == null || header.getReceiver().size() != 1) {
-            return Collections.emptySet();
-        }
-
-        Receiver receiver = header.getReceiver().iterator().next();
-        PartnerIdentification identifier = receiver.getIdentifier();
-
-        if (identifier == null || identifier.getValue() == null) {
-            return Collections.emptySet();
-        }
-
-        Matcher matcher = PARTNER_IDENTIFIER_PATTERN.matcher(identifier.getValue());
-
-        if (!matcher.matches()) {
-            return Collections.emptySet();
-        }
-
-        String orgnr = matcher.group(1);
-
-        Set<ServiceIdentifier> identifiers = sr.getServiceRecords(orgnr)
+        Set<ServiceIdentifier> serviceIdentifiers = header.getFirstReceiver()
+                .map(Partner::getIdentifier)
+                .map(PartnerIdentification::getStrippedValue)
+                .map(p -> sr.getServiceRecords(p))
+                .orElse(Collections.emptyList())
                 .stream()
                 .map(ServiceRecord::getServiceIdentifier)
                 .collect(Collectors.toSet());
 
-        if (identifiers.contains(ServiceIdentifier.DPF)) {
-            identifiers.add(ServiceIdentifier.DPO);
+        if (serviceIdentifiers.contains(ServiceIdentifier.DPF)) {
+            serviceIdentifiers.add(ServiceIdentifier.DPO);
         }
 
-        return identifiers;
+        return serviceIdentifiers;
     }
 }

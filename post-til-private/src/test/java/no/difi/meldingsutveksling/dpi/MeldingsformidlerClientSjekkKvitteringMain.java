@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.dpi;
 
+import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.receipt.ExternalReceipt;
 import no.difi.sdp.client2.domain.Prioritet;
 
@@ -16,10 +17,12 @@ public class MeldingsformidlerClientSjekkKvitteringMain {
 
     public static void main(String[] args) throws MeldingsformidlerException {
         String mpcId = "1";
-        final MeldingsformidlerClient client = new MeldingsformidlerClient(getDigitalPostInnbyggerConfig(mpcId), createKeyStore());
+        DigitalPostInnbyggerConfig config = getDigitalPostInnbyggerConfig(mpcId);
+        SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory = new SikkerDigitalPostKlientFactory(config, createKeyStore());
+        ForsendelseHandlerFactory forsendelseHandlerFactory = new ForsendelseHandlerFactory(config);
+        MeldingsformidlerClient client = new MeldingsformidlerClient(config, sikkerDigitalPostKlientFactory, forsendelseHandlerFactory);
+
         final ExternalReceipt kvittering = client.sjekkEtterKvittering(MeldingsformidlerClientMain.DIFI_ORGNR);
         kvittering.confirmReceipt();
-
-
     }
 }

@@ -10,6 +10,7 @@ import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasic;
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExternalBasicStreamed;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.dpi.SikkerDigitalPostKlientFactory;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceClientImpl;
 import no.difi.meldingsutveksling.nextmove.ServiceBusRestTemplate;
 import no.difi.meldingsutveksling.noark.NoarkClientFactory;
@@ -21,6 +22,7 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.vefa.peppol.lookup.LookupClient;
 import no.difi.webservice.support.SoapFaultInterceptorLogger;
 import org.junit.Rule;
@@ -52,8 +54,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = {
         IntegrasjonspunktApplication.class,
@@ -239,12 +240,12 @@ public class CucumberStepsConfiguration {
 
     @MockBean public IBrokerServiceExternalBasic iBrokerServiceExternalBasic;
     @MockBean public IBrokerServiceExternalBasicStreamed iBrokerServiceExternalBasicStreamed;
-    //    @MockBean public SvarUtWebServiceClient svarUtClient;
     @MockBean public UUIDGenerator uuidGenerator;
     @MockBean public LookupClient lookupClient;
     @MockBean public InternalQueue internalQueue;
     @MockBean public ServiceBusRestTemplate serviceBusRestTemplate;
-
+    @MockBean public SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory;
+    @MockBean public SikkerDigitalPostKlient sikkerDigitalPostKlient;
 
     @Before
     @SneakyThrows

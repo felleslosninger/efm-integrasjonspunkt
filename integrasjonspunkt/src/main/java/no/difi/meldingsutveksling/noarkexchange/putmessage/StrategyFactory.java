@@ -23,11 +23,11 @@ public class StrategyFactory {
     private final Map<ServiceIdentifier, MessageStrategyFactory> factories;
 
     public StrategyFactory(CorrespondenceAgencyClient client,
-            CorrespondenceAgencyMessageFactory correspondenceAgencyMessageFactory,
-            MessageSender messageSender,
-            IntegrasjonspunktProperties properties,
-            NoarkClient noarkClient,
-            InternalQueue internalQueue) {
+                           CorrespondenceAgencyMessageFactory correspondenceAgencyMessageFactory,
+                           MessageSender messageSender,
+                           IntegrasjonspunktProperties properties,
+                           NoarkClient noarkClient,
+                           InternalQueue internalQueue) {
 
         factories = new EnumMap<>(ServiceIdentifier.class);
         if (properties.getFeature().isEnableDPO()) {

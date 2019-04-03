@@ -8,6 +8,7 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.Embeddable;
@@ -42,4 +43,14 @@ public class PartnerIdentification {
 
     @XmlAttribute(name = "Authority")
     protected String authority;
+
+    @JsonIgnore
+    public String getStrippedValue() {
+        if (value == null) {
+            return null;
+        }
+        int index = value.indexOf(':') + 1;
+        return index == 0 || index >= value.length()
+                ? value : value.substring(index);
+    }
 }

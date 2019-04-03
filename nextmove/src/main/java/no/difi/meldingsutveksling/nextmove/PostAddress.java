@@ -1,17 +1,11 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import com.google.common.collect.Sets;
-import lombok.*;
+import lombok.Data;
 
 import javax.persistence.Embeddable;
-import javax.persistence.Entity;
 
-@Getter
-@Setter
-@ToString
-@Entity
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
 @Embeddable
 public class PostAddress {
 

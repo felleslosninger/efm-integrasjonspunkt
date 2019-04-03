@@ -1,17 +1,16 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.dpi.Document;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
@@ -39,14 +38,16 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     @Override
     public List<Document> getAttachments() {
-        final List<Document> docList = Lists.newArrayList();
+        return message.getFiles()
+                .stream()
+                .filter(f -> !f.getPrimaryDocument())
+                .map(this::getDocument)
+                .collect(Collectors.toList());
+    }
 
-        message.getFiles().stream().filter(f -> !f.getPrimaryDocument()).forEach(f -> {
-            String title = isNullOrEmpty(f.getTitle()) ? MISSING_TXT : f.getTitle();
-            docList.add(new Document(getContent(f.getIdentifier()), f.getMimetype(), f.getFilename(), title));
-        });
-
-        return docList;
+    private Document getDocument(BusinessMessageFile file) {
+        String title = isNullOrEmpty(file.getTitle()) ? MISSING_TXT : file.getTitle();
+        return new Document(getContent(file.getIdentifier()), file.getMimetype(), file.getFilename(), title);
     }
 
     private byte[] getContent(String fileName) {
@@ -81,7 +82,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     @Override
     public String getSubject() {
         if (message.getBusinessMessage() instanceof DpiDigitalMessage) {
-            return((DpiDigitalMessage) message.getBusinessMessage()).getNonSensitiveTitle();
+            return ((DpiDigitalMessage) message.getBusinessMessage()).getNonSensitiveTitle();
         }
         if (message.getBusinessMessage() instanceof DpiPrintMessage) {
             return null;
@@ -106,11 +107,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     @Override
     public byte[] getCertificate() {
-        try {
-            return serviceRecord.getPemCertificate().getBytes("UTF-8"); /* fra KRR via SR */
-        } catch (UnsupportedEncodingException e) {
-            throw new MeldingsUtvekslingRuntimeException("Pem certificate from servicerecord problems", e);
-        }
+        return serviceRecord.getPemCertificate().getBytes(StandardCharsets.UTF_8); /* fra KRR via SR */
     }
 
     @Override

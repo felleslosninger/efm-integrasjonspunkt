@@ -73,7 +73,7 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
 
     @XmlAnyElement(lax = true)
     @JsonDeserialize(using = NextMoveMessageDeserializer.class)
-    @JsonAlias({"dpo", "dpv", "dpe", "dpe"})
+    @JsonAlias({"dpo", "dpv", "dpe", "dpi_digital", "dpi_print"})
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = BusinessMessage.class)
     protected Object any;
 
@@ -84,12 +84,18 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
 
     @JsonIgnore
     public String getSenderIdentifier() {
-        return getStandardBusinessDocumentHeader().getSender().iterator().next().getIdentifier().getValue().split(":")[1];
+        return getStandardBusinessDocumentHeader().getFirstSender()
+                .map(Partner::getIdentifier)
+                .map(PartnerIdentification::getStrippedValue)
+                .orElse(null);
     }
 
     @JsonIgnore
     public String getReceiverIdentifier() {
-        return getStandardBusinessDocumentHeader().getReceiver().iterator().next().getIdentifier().getValue().split(":")[1];
+        return getStandardBusinessDocumentHeader().getFirstReceiver()
+                .map(Partner::getIdentifier)
+                .map(PartnerIdentification::getStrippedValue)
+                .orElse(null);
     }
 
     @JsonIgnore
