@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.validation.group;
 
+import no.difi.meldingsutveksling.ServiceIdentifier;
+
 import javax.validation.groups.Default;
 
 public interface ValidationGroups {

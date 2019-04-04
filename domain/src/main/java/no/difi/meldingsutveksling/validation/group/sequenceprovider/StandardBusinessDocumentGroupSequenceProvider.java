@@ -4,7 +4,7 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.DocumentIdentification;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
-import no.difi.meldingsutveksling.validation.group.ValidationGroups;
+import no.difi.meldingsutveksling.validation.group.ValidationGroupFactory;
 import org.hibernate.validator.spi.group.DefaultGroupSequenceProvider;
 
 import java.util.ArrayList;
@@ -21,35 +21,12 @@ public class StandardBusinessDocumentGroupSequenceProvider implements DefaultGro
 
         getType(input).ifPresent(type ->
                 ServiceIdentifier.safeValueOf(type)
-                        .map(this::getValidationGroup)
+                        .map(ValidationGroupFactory::toServiceIdentifier)
                         .filter(Objects::nonNull)
                         .ifPresent(defaultGroupSequence::add)
         );
 
         return defaultGroupSequence;
-    }
-
-    private Class<?> getValidationGroup(ServiceIdentifier serviceIdentifier) {
-        switch (serviceIdentifier) {
-            case DPO:
-                return ValidationGroups.ServiceIdentifier.Dpo.class;
-            case DPV:
-                return ValidationGroups.ServiceIdentifier.Dpv.class;
-            case DPI_DIGITAL:
-                return ValidationGroups.ServiceIdentifier.DpiDigital.class;
-            case DPI_PRINT:
-                return ValidationGroups.ServiceIdentifier.DpiPrint.class;
-            case DPF:
-                return ValidationGroups.ServiceIdentifier.Dpf.class;
-            case DPE_INNSYN:
-                return ValidationGroups.ServiceIdentifier.DpeInnsyn.class;
-            case DPE_DATA:
-                return ValidationGroups.ServiceIdentifier.DpeData.class;
-            case DPE_RECEIPT:
-                return ValidationGroups.ServiceIdentifier.DpeReceipt.class;
-            default:
-                return null;
-        }
     }
 
     private Optional<String> getType(StandardBusinessDocument input) {
