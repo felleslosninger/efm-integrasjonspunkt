@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
+import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.serviceIdentifierLoggingOverride;
 
 @Component
 public class DpeConversationStrategy implements ConversationStrategy {
@@ -37,7 +38,7 @@ public class DpeConversationStrategy implements ConversationStrategy {
         }
         serviceBus.putMessage(conversationResource);
         Audit.info(format("Message [id=%s, serviceIdentifier=%s] sent to service bus",
-                conversationResource.getConversationId(), conversationResource.getServiceIdentifier()),
+                conversationResource.getConversationId(), serviceIdentifierLoggingOverride(conversationResource)),
                 markerFrom(conversationResource));
     }
 

@@ -28,6 +28,7 @@ import java.util.zip.ZipInputStream;
 
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
+import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.serviceIdentifierLoggingOverride;
 
 @Component
 public class NextMoveQueue {
@@ -88,7 +89,7 @@ public class NextMoveQueue {
         Conversation c = conversationService.registerConversation(message);
         conversationService.registerStatus(c, MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_MOTTATT));
         Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] put on local queue",
-                message.getConversationId(), message.getServiceIdentifier()), markerFrom(message));
+                message.getConversationId(), serviceIdentifierLoggingOverride(message)), markerFrom(message));
         return Optional.of(message);
     }
 
