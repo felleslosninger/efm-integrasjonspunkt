@@ -12,6 +12,8 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -68,6 +70,7 @@ import java.util.Optional;
 @Table(name = "document")
 @JsonSerialize(using = NextMoveMessageSerializer.class)
 @GroupSequenceProvider(StandardBusinessDocumentGroupSequenceProvider.class)
+@ApiModel(description = "Standard Business Document")
 public class StandardBusinessDocument extends AbstractEntity<Long> {
 
     @XmlElement(name = "StandardBusinessDocumentHeader")
@@ -86,7 +89,10 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
     @InstanceOf(value = DpiDigitalMessage.class, groups = DpiDigital.class)
     @InstanceOf(value = DpiPrintMessage.class, groups = DpiPrint.class)
     @InstanceOf(value = DpeMessage.class, groups = {DpeInnsyn.class, DpeData.class, DpeReceipt.class})
-    protected Object any;
+    @Getter(onMethod_ =
+    @ApiModelProperty(name = "dpo|dpv|dpe|dpi_digital|dpi_print", value = "The payload of the document", required = true, dataType = "no.difi.meldingsutveksling.nextmove.BusinessMessage")
+    )
+    private Object any;
 
     @JsonIgnore
     public MessageInfo getMessageInfo() {

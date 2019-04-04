@@ -67,7 +67,7 @@ public class NextMoveMessageOutSteps {
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
         ResponseEntity<String> response = testRestTemplate.exchange(
-                "/api/messages/out",
+                "/api/messages/out/multipart",
                 HttpMethod.POST,
                 new HttpEntity<>(multipart, headers),
                 String.class);

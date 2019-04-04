@@ -43,14 +43,15 @@ public class NextMoveMessageOutController {
     private static final int MAX_SIZE = 5 * 1024 * 1024;
     private final NextMoveMessageService messageService;
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @ApiOperation(value = "Create message", notes = "Create and send a new message with the given values")
+    @PostMapping(value = "multipart", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ApiOperation(value = "Create and send multipart message", notes = "Create and send a new message with the given values")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
             @ApiResponse(code = 400, message = "Bad request", response = String.class)
     })
     @Transactional
     public StandardBusinessDocument createAndSendMessage(
+            @ApiParam(name = "SBD", value = "Standard Business Document to send", required = true)
             @RequestParam("sbd") @NotNull @Valid StandardBusinessDocument sbd,
             MultipartRequest multipartRequest) {
         List<MultipartFile> files = multipartRequest.getMultiFileMap().values().stream()
@@ -81,6 +82,7 @@ public class NextMoveMessageOutController {
     })
     @Transactional
     public StandardBusinessDocument createMessage(
+            @ApiParam(name = "SBD", value = "Standard Business Document to send", required = true)
             @Valid @RequestBody StandardBusinessDocument sbd) {
         NextMoveOutMessage message = messageService.createMessage(sbd);
         return message.getSbd();
@@ -121,7 +123,7 @@ public class NextMoveMessageOutController {
     public void uploadFile(
             @ApiParam(value = "ConversationId", required = true)
             @PathVariable("conversationId") String conversationId,
-            @ApiParam(value = "Title", required = true)
+            @ApiParam(value = "Title")
             @RequestParam(value = "title", required = false) String title,
             HttpServletRequest request) {
 

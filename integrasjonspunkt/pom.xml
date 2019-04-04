@@ -19,8 +19,6 @@
         <jersey-version>1.8</jersey-version>
         <jstlVersion>1.2</jstlVersion>
         <jerseyVersion>1.17</jerseyVersion>
-        <mockito.version>2.23.4</mockito.version>
-        <cucumber.version>2.3.1</cucumber.version>
         <docker.registry>docker-registry.dmz.local/difi</docker.registry>
         <docker.build.version>${project.version}</docker.build.version>
     </properties>
@@ -696,6 +694,10 @@
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger-ui</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-bean-validators</artifactId>
         </dependency>
 
         <dependency>
