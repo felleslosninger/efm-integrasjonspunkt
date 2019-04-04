@@ -35,11 +35,13 @@ public class SBDUtil {
         ZonedDateTime zonedDateTime = header.getExpectedResponseDateTime();
         ZonedDateTime now = ZonedDateTime.now();
         if (now.isAfter(zonedDateTime)) {
-            log.error("ExpectedResponseDateTime is expired. Message will not be handled further. Please resend...");
             return true;
         }
         else {
             return false;
         }
+    }
+    public static void timeToLiveErrorMessage(StandardBusinessDocumentHeader header) {
+        log.error("ExpectedResponseDateTime (%s) is after current time. Message will not be handled further. Please resend...", header.getExpectedResponseDateTime());
     }
 }

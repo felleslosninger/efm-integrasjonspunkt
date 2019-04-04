@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageRepository;
 import no.difi.meldingsutveksling.receipt.ConversationService;
@@ -14,6 +15,8 @@ import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.Optional;
 
+import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isExpired;
+import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.timeToLiveErrorMessage;
 import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
 
 @Component
@@ -28,6 +31,11 @@ public class NextMoveSender {
 
     @Transactional
     public void send(NextMoveMessage msg) throws NextMoveException {
+        StandardBusinessDocumentHeader header = msg.getSbd().getStandardBusinessDocumentHeader();
+        if(isExpired(header)) {
+            timeToLiveErrorMessage(header);
+        }
+
         Optional<ConversationStrategy> strategy = strategyFactory.getStrategy(msg);
         if (!strategy.isPresent()) {
             String errorStr = String.format("Cannot send message - serviceIdentifier \"%s\" not supported",

@@ -17,6 +17,8 @@ import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.NextMoveStreamedFile;
 import no.difi.meldingsutveksling.domain.StreamedFile;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
+import no.difi.meldingsutveksling.exceptions.TimeToLiveException;
 import no.difi.meldingsutveksling.ks.svarinn.*;
 import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
@@ -52,8 +54,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
-import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isNextMove;
-import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isReceipt;
+import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.*;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 import static no.difi.meldingsutveksling.receipt.GenericReceiptStatus.INNKOMMENDE_LEVERT;
 import static no.difi.meldingsutveksling.receipt.GenericReceiptStatus.INNKOMMENDE_MOTTATT;
@@ -155,6 +156,10 @@ public class MessagePolling implements ApplicationContextAware {
                 if (isNextMove(sbd)) {
                     log.debug(format("NextMove message id=%s", sbd.getConversationId()));
                     client.confirmDownload(request);
+                    StandardBusinessDocumentHeader header = sbd.getStandardBusinessDocumentHeader();
+                    if (isExpired(header)) {
+                        throw new TimeToLiveException(header.getExpectedResponseDateTime());
+                    }
                     if (properties.getNoarkSystem().isEnable() && !properties.getNoarkSystem().getEndpointURL().isEmpty()) {
                         internalQueue.enqueueNoark(sbd);
                     } else {

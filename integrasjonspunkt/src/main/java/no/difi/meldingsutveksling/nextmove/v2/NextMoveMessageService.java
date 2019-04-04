@@ -15,7 +15,6 @@ import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
-import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
@@ -158,8 +157,7 @@ public class NextMoveMessageService {
 
         StandardBusinessDocumentHeader header = message.getSbd().getStandardBusinessDocumentHeader();
         if (isExpired(header)) {
-            String string = String.format("ExpectedResponseDateTime (%s) is after current time. Message will not be handled further. Please resend...", header.getExpectedResponseDateTime());
-            new NextMoveRuntimeException(string);
+            throw new TimeToLiveException(header.getExpectedResponseDateTime());
         }
         if (ServiceIdentifier.DPO == message.getServiceIdentifier()) {
             // Arkivmelding must exist for DPO
