@@ -296,8 +296,7 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
     }
 
     public ZonedDateTime getExpectedResponseDateTime() {
-        Set<Scope> scope = this.getBusinessScope().getScope();
-        return scope.stream().flatMap(s-> s.getScopeInformation()
+        return this.getBusinessScope().getScope().stream().flatMap(s-> s.getScopeInformation()
                 .stream())
                 .map(CorrelationInformation::getExpectedResponseDateTime)
                 .findFirst()
