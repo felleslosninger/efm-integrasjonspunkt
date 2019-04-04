@@ -101,7 +101,6 @@ public class ForsendelseMapper {
     }
 
     private NoarkMetadataFraAvleverendeSakssystem metaDataFrom(MeldingType meldingType) {
-
         NoarkMetadataFraAvleverendeSakssystem.Builder<Void> metadata = NoarkMetadataFraAvleverendeSakssystem.builder();
         metadata.withSakssekvensnummer(Integer.valueOf(meldingType.getNoarksak().getSaSeknr()));
         metadata.withSaksaar(Integer.valueOf(meldingType.getNoarksak().getSaSaar()));
@@ -113,10 +112,8 @@ public class ForsendelseMapper {
         metadata.withJournaldato(journalDatoFrom(meldingType.getJournpost().getJpJdato()));
         metadata.withDokumentetsDato(journalDatoFrom(meldingType.getJournpost().getJpDokdato()));
         metadata.withTittel(meldingType.getJournpost().getJpOffinnhold());
-
         Optional<AvsmotType> avsender = getAvsender(meldingType);
         avsender.map(a -> a.getAmNavn()).ifPresent(metadata::withSaksbehandler);
-
         return metadata.build();
     }
 
@@ -126,8 +123,11 @@ public class ForsendelseMapper {
         return avsmotlist.stream().filter(f -> "0".equals(f.getAmIhtype())).findFirst();
     }
 
-    private XMLGregorianCalendar journalDatoFrom(String jpDato) {
-        LocalDateTime localDateTime = LocalDateTime.of(LocalDate.parse(jpDato), LocalTime.of(0, 0));
+    private XMLGregorianCalendar journalDatoFrom(String date) {
+        if (null == Strings.emptyToNull(date)) {
+            return null;
+        }
+        LocalDateTime localDateTime = LocalDateTime.of(LocalDate.parse(date), LocalTime.of(0, 0));
 
         GregorianCalendar gcal = GregorianCalendar.from(localDateTime.atZone(ZoneId.systemDefault()));
         try {
