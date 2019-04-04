@@ -38,11 +38,4 @@ public enum ServiceIdentifier {
                 .filter(p -> p.name().equalsIgnoreCase(s))
                 .findAny();
     }
-
-    public static ServiceIdentifier valueOfIgnoreCase(String name) {
-        return Arrays.stream(ServiceIdentifier.values())
-                .filter(p -> p.name().equalsIgnoreCase(name))
-                .findAny()
-                .orElse(ServiceIdentifier.valueOf(name));
-    }
 }

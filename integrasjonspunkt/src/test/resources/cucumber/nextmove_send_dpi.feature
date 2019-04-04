@@ -27,7 +27,7 @@ Feature: Sending a Next Move DPI message
                 "creationDateAndTime": "2019-04-11T15:29:58.753+02:00",
                 "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
                 "standard": "urn:no:difi:meldingsutveksling:2.0",
-                "type": "DPI",
+                "type": "DPI_DIGITAL",
                 "typeVersion": "2.0"
             },
             "headerVersion": "1.0",

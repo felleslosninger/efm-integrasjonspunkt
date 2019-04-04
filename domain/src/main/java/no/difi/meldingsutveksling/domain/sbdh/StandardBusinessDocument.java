@@ -21,7 +21,11 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.nextmove.*;
+import no.difi.meldingsutveksling.validation.InstanceOf;
+import no.difi.meldingsutveksling.validation.group.ValidationGroups.ServiceIdentifier.*;
+import no.difi.meldingsutveksling.validation.group.sequenceprovider.StandardBusinessDocumentGroupSequenceProvider;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
+import org.hibernate.validator.group.GroupSequenceProvider;
 import org.w3c.dom.Node;
 
 import javax.persistence.*;
@@ -63,6 +67,7 @@ import java.util.Optional;
 @Entity
 @Table(name = "document")
 @JsonSerialize(using = NextMoveMessageSerializer.class)
+@GroupSequenceProvider(StandardBusinessDocumentGroupSequenceProvider.class)
 public class StandardBusinessDocument extends AbstractEntity<Long> {
 
     @XmlElement(name = "StandardBusinessDocumentHeader")
@@ -75,6 +80,12 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
     @JsonDeserialize(using = NextMoveMessageDeserializer.class)
     @JsonAlias({"dpo", "dpv", "dpe", "dpi_digital", "dpi_print"})
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = BusinessMessage.class)
+    @NotNull
+    @InstanceOf(value = DpoMessage.class, groups = {Dpo.class, Dpf.class})
+    @InstanceOf(value = DpvMessage.class, groups = Dpv.class)
+    @InstanceOf(value = DpiDigitalMessage.class, groups = DpiDigital.class)
+    @InstanceOf(value = DpiPrintMessage.class, groups = DpiPrint.class)
+    @InstanceOf(value = DpeMessage.class, groups = {DpeInnsyn.class, DpeData.class, DpeReceipt.class})
     protected Object any;
 
     @JsonIgnore
