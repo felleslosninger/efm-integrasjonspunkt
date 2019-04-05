@@ -26,7 +26,10 @@ import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
-import no.difi.meldingsutveksling.noarkexchange.*;
+import no.difi.meldingsutveksling.noarkexchange.MessageContext;
+import no.difi.meldingsutveksling.noarkexchange.MessageContextException;
+import no.difi.meldingsutveksling.noarkexchange.MessageContextFactory;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.logging.PutMessageResponseMarkers;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
@@ -56,6 +59,7 @@ import static java.lang.String.format;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.*;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
+import static no.difi.meldingsutveksling.nextmove.TimeToLiveHelper.registerErrorStatusAndMessage;
 import static no.difi.meldingsutveksling.receipt.GenericReceiptStatus.INNKOMMENDE_LEVERT;
 import static no.difi.meldingsutveksling.receipt.GenericReceiptStatus.INNKOMMENDE_MOTTATT;
 
@@ -158,8 +162,7 @@ public class MessagePolling implements ApplicationContextAware {
                     client.confirmDownload(request);
                     StandardBusinessDocumentHeader header = sbd.getStandardBusinessDocumentHeader();
                     if (isExpired(header)) {
-                        MessageStatus ms = MessageStatus.of(GenericReceiptStatus.FEIL, LocalDateTime.now(), expectedResponseDateTimeExpiredErrorMessage(header));
-                        conversationService.registerStatus(sbd.getConversationId(), ms);
+                        registerErrorStatusAndMessage(sbd, conversationService);
                         throw new TimeToLiveException(header.getExpectedResponseDateTime());
                     }
                     if (properties.getNoarkSystem().isEnable() && !properties.getNoarkSystem().getEndpointURL().isEmpty()) {
