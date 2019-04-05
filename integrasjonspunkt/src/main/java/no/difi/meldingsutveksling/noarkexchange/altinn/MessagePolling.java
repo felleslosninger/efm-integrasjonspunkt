@@ -59,7 +59,6 @@ import static java.lang.String.format;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.*;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
-import static no.difi.meldingsutveksling.nextmove.TimeToLiveHelper.registerErrorStatusAndMessage;
 import static no.difi.meldingsutveksling.receipt.GenericReceiptStatus.INNKOMMENDE_LEVERT;
 import static no.difi.meldingsutveksling.receipt.GenericReceiptStatus.INNKOMMENDE_MOTTATT;
 
@@ -162,7 +161,7 @@ public class MessagePolling implements ApplicationContextAware {
                     client.confirmDownload(request);
                     StandardBusinessDocumentHeader header = sbd.getStandardBusinessDocumentHeader();
                     if (isExpired(header)) {
-                        registerErrorStatusAndMessage(sbd, conversationService);
+                        log.error("Received message with ConversationId %s, but message has expired at: %s");
                         throw new TimeToLiveException(header.getExpectedResponseDateTime());
                     }
                     if (properties.getNoarkSystem().isEnable() && !properties.getNoarkSystem().getEndpointURL().isEmpty()) {

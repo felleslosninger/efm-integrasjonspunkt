@@ -18,7 +18,6 @@ import java.util.Optional;
 import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isExpired;
 import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
 import static no.difi.meldingsutveksling.nextmove.TimeToLiveHelper.registerErrorStatusAndMessage;
-import static no.difi.meldingsutveksling.nextmove.TimeToLiveHelper.timeToLiveErrorMessage;
 
 @Component
 @Slf4j
@@ -35,7 +34,7 @@ public class NextMoveSender {
         StandardBusinessDocumentHeader header = msg.getSbd().getStandardBusinessDocumentHeader();
         if(isExpired(header)) {
             registerErrorStatusAndMessage(msg.getSbd(), conversationService);
-            timeToLiveErrorMessage(header);
+            return;
         }
 
         Optional<ConversationStrategy> strategy = strategyFactory.getStrategy(msg);
