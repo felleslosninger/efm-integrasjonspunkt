@@ -13,11 +13,13 @@ import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isExpired;
-import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.timeToLiveErrorMessage;
 import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
+import static no.difi.meldingsutveksling.nextmove.TimeToLiveHelper.expectedResponseDateTimeExpiredErrorMessage;
+import static no.difi.meldingsutveksling.nextmove.TimeToLiveHelper.timeToLiveErrorMessage;
 
 @Component
 @Slf4j
@@ -33,6 +35,8 @@ public class NextMoveSender {
     public void send(NextMoveMessage msg) throws NextMoveException {
         StandardBusinessDocumentHeader header = msg.getSbd().getStandardBusinessDocumentHeader();
         if(isExpired(header)) {
+            MessageStatus ms = MessageStatus.of(GenericReceiptStatus.FEIL, LocalDateTime.now(), expectedResponseDateTimeExpiredErrorMessage(header));
+            conversationService.registerStatus(msg.getConversationId(), ms);
             timeToLiveErrorMessage(header);
         }
 

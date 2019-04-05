@@ -41,7 +41,4 @@ public class SBDUtil {
             return false;
         }
     }
-    public static void timeToLiveErrorMessage(StandardBusinessDocumentHeader header) {
-        log.error("ExpectedResponseDateTime (%s) is after current time. Message will not be handled further. Please resend...", header.getExpectedResponseDateTime());
-    }
 }

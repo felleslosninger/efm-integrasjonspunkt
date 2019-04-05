@@ -158,6 +158,8 @@ public class MessagePolling implements ApplicationContextAware {
                     client.confirmDownload(request);
                     StandardBusinessDocumentHeader header = sbd.getStandardBusinessDocumentHeader();
                     if (isExpired(header)) {
+                        MessageStatus ms = MessageStatus.of(GenericReceiptStatus.FEIL, LocalDateTime.now(), expectedResponseDateTimeExpiredErrorMessage(header));
+                        conversationService.registerStatus(sbd.getConversationId(), ms);
                         throw new TimeToLiveException(header.getExpectedResponseDateTime());
                     }
                     if (properties.getNoarkSystem().isEnable() && !properties.getNoarkSystem().getEndpointURL().isEmpty()) {

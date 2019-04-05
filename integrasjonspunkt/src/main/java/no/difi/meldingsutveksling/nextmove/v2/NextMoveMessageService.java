@@ -18,6 +18,8 @@ import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
+import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
+import no.difi.meldingsutveksling.receipt.MessageStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -27,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -38,7 +41,8 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
-import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isExpired;
+import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.*;
+import static no.difi.meldingsutveksling.nextmove.TimeToLiveHelper.expectedResponseDateTimeExpiredErrorMessage;
 
 @Slf4j
 @Component
@@ -157,6 +161,8 @@ public class NextMoveMessageService {
 
         StandardBusinessDocumentHeader header = message.getSbd().getStandardBusinessDocumentHeader();
         if (isExpired(header)) {
+            MessageStatus ms = MessageStatus.of(GenericReceiptStatus.FEIL, LocalDateTime.now(), expectedResponseDateTimeExpiredErrorMessage(header));
+            conversationService.registerStatus(message.getConversationId(), ms);
             throw new TimeToLiveException(header.getExpectedResponseDateTime());
         }
         if (ServiceIdentifier.DPO == message.getServiceIdentifier()) {
@@ -198,6 +204,4 @@ public class NextMoveMessageService {
     private String createConversationId() {
         return UUID.randomUUID().toString();
     }
-
-
 }
