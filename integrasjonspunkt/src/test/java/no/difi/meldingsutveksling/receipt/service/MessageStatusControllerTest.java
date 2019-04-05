@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.receipt.service;
 import com.querydsl.core.types.Predicate;
 import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.MessageStatusQueryInput;
 import no.difi.meldingsutveksling.receipt.MessageStatusRepository;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,6 +64,8 @@ public class MessageStatusControllerTest {
         cId2ms3.setConversationId("321");
 
 
+        when(statRepo.find(ArgumentMatchers.any(MessageStatusQueryInput.class), ArgumentMatchers.any(Pageable.class)))
+                .thenReturn(new PageImpl<>(asList(cId1ms1, cId1ms2, cId2ms1, cId2ms2, cId2ms3)));
         when(statRepo.findAll(ArgumentMatchers.any(Predicate.class), ArgumentMatchers.any(Pageable.class)))
                 .thenReturn(new PageImpl<>(asList(cId1ms1, cId1ms2, cId2ms1, cId2ms2, cId2ms3)));
         when(statRepo.findAll(ArgumentMatchers.isNull(), ArgumentMatchers.any(Pageable.class)))

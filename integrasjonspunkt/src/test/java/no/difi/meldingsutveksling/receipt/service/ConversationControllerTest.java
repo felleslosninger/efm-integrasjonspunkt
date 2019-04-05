@@ -2,10 +2,8 @@ package no.difi.meldingsutveksling.receipt.service;
 
 import com.querydsl.core.types.Predicate;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.receipt.Conversation;
-import no.difi.meldingsutveksling.receipt.ConversationRepository;
-import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.nextmove.ConversationStrategyFactory;
+import no.difi.meldingsutveksling.receipt.*;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,6 +44,8 @@ public class ConversationControllerTest {
 
     @MockBean
     private ConversationRepository convoRepo;
+    @MockBean
+    private ConversationStrategyFactory strategyFactory;
 
     @Before
     public void setup() {
@@ -78,6 +78,8 @@ public class ConversationControllerTest {
         c2.setPollable(false);
         c2.setLastUpdate(NOW);
 
+        when(convoRepo.find(ArgumentMatchers.any(ConversationQueryInput.class), ArgumentMatchers.any(Pageable.class)))
+                .thenReturn(new PageImpl<>(asList(c1, c2)));
         when(convoRepo.findAll(ArgumentMatchers.any(Predicate.class), ArgumentMatchers.any(Pageable.class)))
                 .thenReturn(new PageImpl<>(asList(c1, c2)));
         when(convoRepo.findAll(isNull(), ArgumentMatchers.any(Pageable.class)))

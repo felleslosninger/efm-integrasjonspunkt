@@ -1,5 +1,8 @@
 package no.difi.meldingsutveksling.receipt;
 
+import com.querydsl.core.BooleanBuilder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
@@ -25,5 +28,30 @@ public interface MessageStatusRepository extends PagingAndSortingRepository<Mess
     @Override
     default void customize(QuerydslBindings bindings, QMessageStatus root) {
         // NOOP
+    }
+
+    default Page<MessageStatus> find(MessageStatusQueryInput input, Pageable pageable) {
+        return findAll(createQuery(input).getValue()
+                , pageable);
+    }
+
+    default BooleanBuilder createQuery(MessageStatusQueryInput input) {
+        BooleanBuilder builder = new BooleanBuilder();
+
+        QMessageStatus messageStatus = QMessageStatus.messageStatus;
+
+        if (input.getConvId() != null) {
+            builder.and(messageStatus.convId.eq(input.getConvId()));
+        }
+
+        if (input.getConversationId() != null) {
+            builder.and(messageStatus.conversationId.eq(input.getConversationId()));
+        }
+
+        if (input.getStatus() != null) {
+            builder.and(messageStatus.status.eq(input.getStatus()));
+        }
+
+        return builder;
     }
 }

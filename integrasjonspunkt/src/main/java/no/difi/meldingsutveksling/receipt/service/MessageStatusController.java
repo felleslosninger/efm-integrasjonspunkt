@@ -1,23 +1,26 @@
 package no.difi.meldingsutveksling.receipt.service;
 
-import com.querydsl.core.types.Predicate;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.exceptions.MessageStatusNotFoundException;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.MessageStatusQueryInput;
 import no.difi.meldingsutveksling.receipt.MessageStatusRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 @RestController
+@Validated
 @Api
 @RequiredArgsConstructor
 @RequestMapping("/api/statuses")
@@ -31,10 +34,10 @@ public class MessageStatusController {
             @ApiResponse(code = 200, message = "Success", response = MessageStatus[].class)
     })
     public Page<MessageStatus> conversations(
-            @QuerydslPredicate(root = MessageStatus.class) Predicate predicate,
+            @Valid MessageStatusQueryInput input,
             @PageableDefault(sort = "statId", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        return statusRepo.findAll(predicate, pageable);
+        return statusRepo.find(input, pageable);
     }
 
     @GetMapping("{id}")

@@ -27,7 +27,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -40,8 +43,8 @@ import static no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRe
 public class ServiceRegistryLookup {
 
     private final RestClient client;
-    private IntegrasjonspunktProperties properties;
-    private SasKeyRepository sasKeyRepository;
+    private final IntegrasjonspunktProperties properties;
+    private final SasKeyRepository sasKeyRepository;
     private final LoadingCache<String, String> skCache;
     private final LoadingCache<Parameters, ServiceRecordWrapper> srCache;
     private final LoadingCache<Parameters, List<ServiceRecord>> srsCache;
@@ -98,22 +101,23 @@ public class ServiceRegistryLookup {
 
     /**
      * Method to find out which transport channel to use to send messages to given organization
+     *
      * @param identifier of the receiver
      * @return a ServiceRecord if found. Otherwise an empty ServiceRecord is returned.
      */
     public ServiceRecordWrapper getServiceRecord(String identifier) {
-        Notification notification = properties.isVarslingsplikt()? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
+        Notification notification = properties.isVarslingsplikt() ? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
         return srCache.getUnchecked(new Parameters(identifier, notification));
     }
 
     public Optional<ServiceRecord> getServiceRecord(String identifier, ServiceIdentifier serviceIdentifier) {
-        Notification notification = properties.isVarslingsplikt()? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
+        Notification notification = properties.isVarslingsplikt() ? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
         List<ServiceRecord> serviceRecords = srsCache.getUnchecked(new Parameters(identifier, notification));
         return serviceRecords.stream().filter(isServiceIdentifier(serviceIdentifier)).findFirst();
     }
 
     public List<ServiceRecord> getServiceRecords(String identifier) {
-        Notification notification = properties.isVarslingsplikt()? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
+        Notification notification = properties.isVarslingsplikt() ? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
         return srsCache.getUnchecked(new Parameters(identifier, notification));
     }
 
@@ -125,9 +129,10 @@ public class ServiceRegistryLookup {
             final DocumentContext documentContext = JsonPath.parse(serviceRecords, jsonPathConfiguration());
             serviceRecord = documentContext.read("$.serviceRecord", ServiceRecord.class);
             String[] failedServiceIdentifiers = documentContext.read("$.failedServiceIdentifiers", String[].class);
-            Map<ServiceIdentifier, Integer> securitylevels = documentContext.read("$.securitylevels", new TypeRef<Map<ServiceIdentifier, Integer>>() {});
+            Map<ServiceIdentifier, Integer> securitylevels = documentContext.read("$.securitylevels", new TypeRef<Map<ServiceIdentifier, Integer>>() {
+            });
             recordWrapper = ServiceRecordWrapper.of(serviceRecord, Stream.of(failedServiceIdentifiers).map(ServiceIdentifier::valueOf).collect(Collectors.toList()), securitylevels);
-        } catch(HttpClientErrorException httpException) {
+        } catch (HttpClientErrorException httpException) {
             if (Arrays.asList(HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED).contains(httpException.getStatusCode())) {
                 log.warn("RestClient returned {} when looking up service record with identifier {}",
                         httpException.getStatusCode(), parameters, httpException);
@@ -136,8 +141,9 @@ public class ServiceRegistryLookup {
                 throw new ServiceRegistryLookupException(String.format("RestClient threw exception when looking up service record with identifier %s", parameters), httpException);
             }
         } catch (BadJWSException e) {
-            log.error("Bad signature in service record response", e);
-            throw new ServiceRegistryLookupException("Bad signature in service record response", e);
+            String message = "Bad signature in service record response";
+            log.error(message, e);
+            throw new ServiceRegistryLookupException(message, e);
         }
         return recordWrapper;
     }
@@ -148,7 +154,7 @@ public class ServiceRegistryLookup {
             final String resource = client.getResource("identifier/" + parameters.getIdentifier(), parameters.getQuery());
             final DocumentContext documentContext = JsonPath.parse(resource, jsonPathConfiguration());
             serviceRecords = documentContext.read("$.serviceRecords", ServiceRecord[].class);
-        } catch(HttpClientErrorException httpException) {
+        } catch (HttpClientErrorException httpException) {
             if (Arrays.asList(HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED).contains(httpException.getStatusCode())) {
                 log.warn("RestClient returned {} when looking up service record with identifier {}",
                         httpException.getStatusCode(), parameters, httpException);
@@ -164,11 +170,12 @@ public class ServiceRegistryLookup {
 
     /**
      * Method to fetch the info record for the given identifier
+     *
      * @param identifier of the receiver
      * @return an {@link InfoRecord} for the respective identifier
      */
     public InfoRecord getInfoRecord(String identifier) {
-        Notification notification = properties.isVarslingsplikt()? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
+        Notification notification = properties.isVarslingsplikt() ? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
         return irCache.getUnchecked(new Parameters(identifier, notification));
     }
 
