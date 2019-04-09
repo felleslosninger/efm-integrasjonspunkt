@@ -4,7 +4,7 @@ import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import no.difi.meldingsutveksling.validation.NorwegianReceiverId;
+import no.difi.meldingsutveksling.validation.InServiceRegistry;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,7 +33,7 @@ public class CapabilitiesController {
     public List<String> capabilities(@ApiParam(value = "receiverid", required = true)
                                      @PathVariable
                                      @NotNull
-                                     @NorwegianReceiverId String receiverid) {
+                                     @InServiceRegistry String receiverid) {
         return sr.getServiceRecords(receiverid)
                 .stream()
                 .map(ServiceRecord::getServiceIdentifier)

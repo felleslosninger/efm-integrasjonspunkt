@@ -67,6 +67,7 @@ public class Partner extends AbstractEntity<Long> {
     @XmlElement(name = "ContactInformation")
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "partner_id", nullable = false)
+    @Valid
     protected Set<ContactInformation> contactInformation;
 
     /**

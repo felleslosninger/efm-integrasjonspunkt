@@ -102,6 +102,7 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
     @JoinColumn(name = "header_id", nullable = false)
     @NotEmpty
     @Size(min = 1, max = 1)
+    @Valid
     protected Set<Sender> sender;
 
     @XmlElement(name = "Receiver", required = true)
@@ -109,6 +110,7 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
     @JoinColumn(name = "header_id", nullable = false)
     @NotEmpty
     @Size(min = 1, max = 1)
+    @Valid
     protected Set<Receiver> receiver;
 
     @XmlElement(name = "DocumentIdentification", required = true)

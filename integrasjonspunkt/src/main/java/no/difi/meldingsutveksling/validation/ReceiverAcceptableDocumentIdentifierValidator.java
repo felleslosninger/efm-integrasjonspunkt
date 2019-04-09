@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class ReceiverAcceptableDocumentIdentifierValidator implements ConstraintValidator<ReceiverAcceptableDocumentIdentifier, StandardBusinessDocumentHeader> {
@@ -37,9 +38,12 @@ public class ReceiverAcceptableDocumentIdentifierValidator implements Constraint
             return true;
         }
 
-        DocumentTypeIdentifier standard = getStandard(header);
+        String standard = getStandard(header);
 
-        List<DocumentTypeIdentifier> acceptedDocumentIdentifiers = documentIdentifierLookup.getDocumentIdentifiers(participantIdentifier);
+        List<String> acceptedDocumentIdentifiers = documentIdentifierLookup.getDocumentIdentifiers(participantIdentifier)
+                .stream()
+                .map(DocumentTypeIdentifier::getIdentifier)
+                .collect(Collectors.toList());
 
         if (acceptedDocumentIdentifiers.contains(standard)) {
             return true;
@@ -62,13 +66,13 @@ public class ReceiverAcceptableDocumentIdentifierValidator implements Constraint
                 .orElse(null);
     }
 
-    private DocumentTypeIdentifier getStandard(StandardBusinessDocumentHeader header) {
+    private String getStandard(StandardBusinessDocumentHeader header) {
         DocumentIdentification documentIdentification = header.getDocumentIdentification();
 
         if (documentIdentification == null) {
             return null;
         }
 
-        return DocumentTypeIdentifier.of(documentIdentification.getStandard());
+        return documentIdentification.getStandard();
     }
 }

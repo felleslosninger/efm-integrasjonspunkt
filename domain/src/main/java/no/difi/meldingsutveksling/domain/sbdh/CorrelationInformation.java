@@ -17,6 +17,7 @@ import no.difi.meldingsutveksling.xml.ZonedDateTimeAdapter;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.validation.constraints.Future;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.time.ZonedDateTime;
@@ -66,5 +67,6 @@ public class CorrelationInformation extends AbstractEntity<Long> {
     @XmlSchemaType(name = "dateTime")
     @XmlJavaTypeAdapter(ZonedDateTimeAdapter.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING)
+    @Future
     protected ZonedDateTime expectedResponseDateTime;
 }

@@ -16,7 +16,7 @@ import java.util.Optional;
 @Getter
 public enum ServiceIdentifier {
 
-    @XmlEnumValue("DPO") DPO("DPO", "urn:no:difi:meldingsutveksling:2.0"),
+    @XmlEnumValue("DPO") DPO("DPO", null),
     @XmlEnumValue("DPV") DPV("DPV", null),
     @XmlEnumValue("DPI_DIGITAL") DPI_DIGITAL("DPI_DIGITAL", null),
     @XmlEnumValue("DPI_PRINT") DPI_PRINT("DPI_PRINT", null),

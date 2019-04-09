@@ -13,9 +13,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Constraint(validatedBy = {})
 @Target({FIELD, PARAMETER, ANNOTATION_TYPE})
 @Retention(RUNTIME)
-public @interface AcceptableMimeType {
+public @interface InServiceRegistry {
 
-    String message() default "{no.difi.meldingsutveksling.validation.AcceptableMimeType}";
+    String message() default "{no.difi.meldingsutveksling.validation.InServiceRegistry}";
 
     Class<?>[] groups() default {};
 

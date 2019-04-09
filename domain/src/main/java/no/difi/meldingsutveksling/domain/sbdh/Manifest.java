@@ -16,6 +16,7 @@ import no.difi.meldingsutveksling.nextmove.AbstractEntity;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
+import javax.validation.Valid;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -62,6 +63,7 @@ public class Manifest extends AbstractEntity<Long> {
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "header_id", nullable = false)
     @NotEmpty
+    @Valid
     protected Set<ManifestItem> manifestItem;
 
     @JsonProperty

@@ -10,6 +10,8 @@ package no.difi.meldingsutveksling.domain.sbdh;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.validation.InServiceRegistry;
 
 import javax.persistence.Embeddable;
 import javax.xml.bind.annotation.*;
@@ -39,6 +41,7 @@ import javax.xml.bind.annotation.*;
 public class PartnerIdentification {
 
     @XmlValue
+    @InServiceRegistry
     protected String value;
 
     @XmlAttribute(name = "Authority")
@@ -49,8 +52,7 @@ public class PartnerIdentification {
         if (value == null) {
             return null;
         }
-        int index = value.indexOf(':') + 1;
-        return index == 0 || index >= value.length()
-                ? value : value.substring(index);
+
+        return Organisasjonsnummer.isIso6523(value) ? Organisasjonsnummer.fromIso6523(value).toString() : value;
     }
 }
