@@ -5,8 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.nextmove.BusinessMessage;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
-import no.difi.meldingsutveksling.nextmove.DpeMessage;
+import no.difi.meldingsutveksling.nextmove.DpeInnsynMessage;
+import no.difi.meldingsutveksling.nextmove.DpePubliseringMessage;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.springframework.stereotype.Component;
 
@@ -51,8 +53,18 @@ public class ServiceBusPayloadConverter {
         if (!any.getConversation().getServiceIdentifier().equals(ServiceIdentifier.DPE_RECEIPT)) {
             asic = DatatypeConverter.parseBase64Binary(any.getContent());
         }
-        String props = any.getConversation().getCustomProperties().values().stream().reduce((a, b) -> a + " " + b).orElse("");
-        DpeMessage dpeMessage = new DpeMessage(props);
+        String orgnr = any.getConversation().getCustomProperties().getOrDefault("orgnr", "");
+        BusinessMessage dpeMessage;
+        if (any.getConversation().getCustomProperties().containsKey("meeting") &&
+                Boolean.parseBoolean(any.getConversation().getCustomProperties().get("meeting"))) {
+            dpeMessage = new DpePubliseringMessage(orgnr);
+        }
+        else if (any.getConversation().getServiceIdentifier().equals(ServiceIdentifier.DPE_INNSYN)) {
+            String email = any.getConversation().getCustomProperties().getOrDefault("email", "");
+            dpeMessage = new DpeInnsynMessage(orgnr, email);
+        } else {
+            dpeMessage = new DpePubliseringMessage(orgnr);
+        }
         sbd.setAny(dpeMessage);
         return ServiceBusPayload.of(sbd, asic);
     }

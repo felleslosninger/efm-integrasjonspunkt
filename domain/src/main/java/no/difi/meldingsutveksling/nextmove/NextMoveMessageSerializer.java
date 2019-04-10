@@ -18,20 +18,20 @@ public class NextMoveMessageSerializer extends StdSerializer<StandardBusinessDoc
         gen.writeStartObject();
         gen.writeFieldName("standardBusinessDocumentHeader");
         gen.writeObject(value.getStandardBusinessDocumentHeader());
-        if (value.getAny() instanceof DpoMessage) {
-            gen.writeFieldName("dpo");
+        if (value.getAny() instanceof ArkivmeldingMessage) {
+            gen.writeFieldName("arkivmelding");
             gen.writeObject(value.getAny());
-        } else if (value.getAny() instanceof DpvMessage) {
-            gen.writeFieldName("dpv");
+        } else if (value.getAny() instanceof DpeInnsynMessage) {
+            gen.writeFieldName("innsynskrav");
             gen.writeObject(value.getAny());
-        } else if (value.getAny() instanceof DpeMessage) {
-            gen.writeFieldName("dpe");
+        } else if (value.getAny() instanceof DpePubliseringMessage) {
+            gen.writeFieldName("publisering");
             gen.writeObject(value.getAny());
         } else if (value.getAny() instanceof DpiDigitalMessage) {
-            gen.writeFieldName("dpi_digital");
+            gen.writeFieldName("digital");
             gen.writeObject(value.getAny());
         } else if (value.getAny() instanceof DpiPrintMessage) {
-            gen.writeFieldName("dpi_print");
+            gen.writeFieldName("print");
             gen.writeObject(value.getAny());
         }
         gen.writeEndObject();

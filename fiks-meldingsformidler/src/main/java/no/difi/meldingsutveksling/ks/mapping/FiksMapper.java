@@ -84,8 +84,8 @@ public class FiksMapper {
     private Forsendelse getForsendelse(NextMoveMessage message, X509Certificate certificate) throws NextMoveException, ArkivmeldingException {
         // Process arkivmelding
         Arkivmelding am = getArkivmelding(message);
-        Saksmappe saksmappe = getSaksmappe(am);
-        Journalpost journalpost = getJournalpost(saksmappe);
+        Saksmappe saksmappe = ArkivmeldingUtil.getSaksmappe(am);
+        Journalpost journalpost = ArkivmeldingUtil.getJournalpost(am);
 
         return Forsendelse.builder()
                 .withEksternref(message.getConversationId())
@@ -124,22 +124,6 @@ public class FiksMapper {
         ServiceRecordWrapper serviceRecord = serviceRegistry.getServiceRecord(message.getReceiverIdentifier());
         Integer dpfSecurityLevel = serviceRecord.getSecuritylevels().get(ServiceIdentifier.DPF);
         return dpfSecurityLevel != null && dpfSecurityLevel == 4;
-    }
-
-    private Journalpost getJournalpost(Saksmappe saksmappe) throws ArkivmeldingException {
-        return saksmappe.getBasisregistrering().stream()
-                .filter(Journalpost.class::isInstance)
-                .map(Journalpost.class::cast)
-                .findFirst()
-                .orElseThrow(() -> new ArkivmeldingException("No \"Journalpost\" found in Arkivmelding"));
-    }
-
-    private Saksmappe getSaksmappe(Arkivmelding am) throws ArkivmeldingException {
-        return am.getMappe().stream()
-                .filter(Saksmappe.class::isInstance)
-                .map(Saksmappe.class::cast)
-                .findFirst()
-                .orElseThrow(() -> new ArkivmeldingException("No \"Saksmappe\" found in Arkivmelding"));
     }
 
     private Set<Dokumentbeskrivelse> getDokumentbeskrivelser(Journalpost journalpost) {

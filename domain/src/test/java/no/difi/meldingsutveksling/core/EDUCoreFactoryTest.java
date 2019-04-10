@@ -7,7 +7,7 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.domain.sbdh.Receiver;
 import no.difi.meldingsutveksling.domain.sbdh.Sender;
-import no.difi.meldingsutveksling.nextmove.DpoMessage;
+import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
 import no.difi.meldingsutveksling.noarkexchange.PayloadException;
 import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
@@ -287,7 +287,7 @@ public class EDUCoreFactoryTest {
                                 )
                         )
                 )
-                .setAny(new DpoMessage()
+                .setAny(new ArkivmeldingMessage()
                         .setDpoField("foo")
                         .setSecurityLevel("3"));
     }

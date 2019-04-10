@@ -20,7 +20,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.ks.svarinn.Forsendelse;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
 import no.difi.meldingsutveksling.nextmove.AsicHandler;
-import no.difi.meldingsutveksling.nextmove.DpoMessage;
+import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
@@ -69,8 +69,8 @@ public class SvarInnNextMoveForwarder implements Consumer<Forsendelse> {
                 context.getMottaker().getOrgNummer(),
                 context.getConversationId(),
                 ServiceIdentifier.DPO,
-                new DpoMessage());
-        NextMoveInMessage nextMoveMessage = NextMoveInMessage.of(sbd, ServiceIdentifier.DPF);
+                new ArkivmeldingMessage());
+        NextMoveInMessage nextMoveMessage = NextMoveInMessage.of(sbd);
         NextMoveStreamedFile arkivmeldingFile = getArkivmeldingFile(forsendelse);
 
         Stream<StreamedFile> attachments = Stream.concat(

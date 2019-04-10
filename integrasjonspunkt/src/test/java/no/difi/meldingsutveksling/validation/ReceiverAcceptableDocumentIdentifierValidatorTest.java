@@ -1,40 +1,70 @@
-package no.difi.meldingsutveksling.nextmove.v2;
+package no.difi.meldingsutveksling.validation;
 
-import no.difi.meldingsutveksling.config.JacksonConfig;
+import no.difi.meldingsutveksling.config.ValidationConfig;
 import no.difi.meldingsutveksling.domain.sbdh.*;
-import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
+import no.difi.meldingsutveksling.elma.DocumentIdentifierLookup;
+import no.difi.meldingsutveksling.nextmove.ConversationStrategyFactory;
+import no.difi.meldingsutveksling.nextmove.DpoMessage;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.vefa.peppol.common.model.DocumentTypeIdentifier;
+import no.difi.vefa.peppol.common.model.ParticipantIdentifier;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.json.JsonTest;
-import org.springframework.boot.test.json.JacksonTester;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
+import javax.validation.metadata.ConstraintDescriptor;
+import java.lang.annotation.Annotation;
 import java.time.ZonedDateTime;
+import java.util.Collections;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
+@SuppressWarnings("unused")
 @RunWith(SpringRunner.class)
-@JsonTest
-@ActiveProfiles("test")
-@Import(JacksonConfig.class)
-public class StandardBusinessDocumentJsonTest {
+@ContextConfiguration(classes = ValidationConfig.class)
+public class ReceiverAcceptableDocumentIdentifierValidatorTest {
 
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
-    private JacksonTester<StandardBusinessDocument> json;
+    private Validator validator;
+
+    @MockBean private DocumentIdentifierLookup documentIdentifierLookup;
+    @MockBean private ServiceRegistryLookup serviceRegistryLookup;
+    @MockBean private ConversationStrategyFactory conversationStrategyFactory;
 
     @Test
-    public void testSerialize() throws Exception {
-        assertThat(json.write(getDocument())).isEqualToJson("/sbd/StandardBusinessDocument.json");
+    public void testAccepted() {
+        given(documentIdentifierLookup.getDocumentIdentifiers(any())).willReturn(
+                Collections.singletonList(DocumentTypeIdentifier.of("urn:no:difi:meldingsutveksling:2.0"))
+        );
+
+        assertThat(validator.validate(getDocument()))
+                .extracting("messageTemplate")
+                .doesNotContain("{no.difi.meldingsutveksling.validation.ReceiverAcceptableDocumentIdentifier} [urn:no:difi:meldingsutveksling:2.0]");
+
+        verify(documentIdentifierLookup).getDocumentIdentifiers(ParticipantIdentifier.of("9908:910075918"));
     }
 
     @Test
-    public void testDeserialize() throws Exception {
-        assertThat(json.read("/sbd/StandardBusinessDocument.json").getObject().toString())
-                .isEqualTo(getDocument().toString());
+    public void testNotAccepted() {
+        given(documentIdentifierLookup.getDocumentIdentifiers(any())).willReturn(
+                Collections.singletonList(DocumentTypeIdentifier.of("other"))
+        );
+
+        assertThat(validator.validate(getDocument()))
+                .extracting("messageTemplate")
+                .contains("{no.difi.meldingsutveksling.validation.ReceiverAcceptableDocumentIdentifier} [other]");
+
+        verify(documentIdentifierLookup).getDocumentIdentifiers(ParticipantIdentifier.of("9908:910075918"));
     }
 
     private StandardBusinessDocument getDocument() {
@@ -71,9 +101,10 @@ public class StandardBusinessDocumentJsonTest {
                                 )
                         )
                 )
-                .setAny(new ArkivmeldingMessage()
+                .setAny(new DpoMessage()
                         .setDpoField("foo")
                         .setSecurityLevel("3")
                 );
     }
 }
+

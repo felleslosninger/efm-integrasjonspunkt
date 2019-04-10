@@ -15,12 +15,15 @@ import no.altinn.services.serviceengine.correspondence._2009._10.GetCorresponden
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentExternalBEV2List;
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentV2;
+import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
+import no.arkivverket.standarder.noark5.arkivmelding.Journalpost;
 import no.difi.meldingsutveksling.InputStreamDataSource;
+import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
-import no.difi.meldingsutveksling.nextmove.DpvMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
@@ -39,6 +42,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
+import java.io.InputStream;
 import java.time.Clock;
 import java.time.ZonedDateTime;
 import java.util.Base64;
@@ -46,6 +50,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static no.difi.meldingsutveksling.NextMoveConsts.ARKIVMELDING_FILE;
 
 /**
  * Class used to create an InsertCorrespondenceV2 object based on an internal message format.
@@ -65,7 +70,7 @@ public class CorrespondenceAgencyMessageFactory {
         no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory reporteeFactory = new no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory();
         BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
 
-        if (!(message.getBusinessMessage() instanceof DpvMessage)) {
+        if (!(message.getBusinessMessage() instanceof ArkivmeldingMessage)) {
             throw new NextMoveRuntimeException("StandardBusinessDocument.any not instance of DpvMessage, aborting");
         }
 
@@ -81,10 +86,17 @@ public class CorrespondenceAgencyMessageFactory {
             attachmentExternalBEV2List.getBinaryAttachmentV2().add(binaryAttachmentV2);
         }
 
-        DpvMessage dpvMessage = (DpvMessage) message.getBusinessMessage();
+        BusinessMessageFile arkivmeldingFile = message.getFiles().stream()
+                .filter(f -> ARKIVMELDING_FILE.equals(f.getFilename()))
+                .findFirst()
+                .orElseThrow(() -> new NextMoveRuntimeException(String.format("%s not found for message %s", ARKIVMELDING_FILE, message.getConversationId())));
+        InputStream is = cryptoMessagePersister.readStream(message.getConversationId(), arkivmeldingFile.getIdentifier()).getInputStream();
+        Arkivmelding arkivmelding = ArkivmeldingUtil.unmarshalArkivmelding(is);
+
+        Journalpost jp = ArkivmeldingUtil.getJournalpost(arkivmelding);
         return create(message.getConversationId(), message.getReceiverIdentifier(),
-                dpvMessage.getTitle(),
-                dpvMessage.getContent(),
+                jp.getOffentligTittel(),
+                jp.getTittel(),
                 attachmentExternalBEV2List);
     }
 

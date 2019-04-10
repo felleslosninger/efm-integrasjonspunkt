@@ -11,10 +11,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Setter
 @ToString
 @Entity
-@DiscriminatorValue("dpi_digital")
+@DiscriminatorValue("digital")
 @AllArgsConstructor
 @NoArgsConstructor
-@XmlRootElement(name = "dpi_digital", namespace = "urn:no:difi:profile:digitalpost:ver1.0")
+@XmlRootElement(name = "digital", namespace = "urn:no:difi:profile:digitalpost:ver1.0")
 public class DpiDigitalMessage extends BusinessMessage {
 
     private String nonSensitiveTitle;
