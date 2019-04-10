@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.core;
 
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.*;
+import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.arkivmelding.AvskrivningsmaateMapper;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalposttypeMapper;
@@ -117,16 +118,8 @@ public class EDUCoreFactory {
         eduCore.setMessageType(EDUCore.MessageType.EDU);
         eduCore.setMessageReference(sbd.getConversationId());
 
-        Saksmappe sm = am.getMappe().stream()
-                .filter(Saksmappe.class::isInstance)
-                .map(Saksmappe.class::cast)
-                .findFirst()
-                .orElseThrow(() -> new MeldingsUtvekslingRuntimeException("No \"Saksmappe\" found in Arkivmelding"));
-        Journalpost jp = sm.getBasisregistrering().stream()
-                .filter(Journalpost.class::isInstance)
-                .map(Journalpost.class::cast)
-                .findFirst()
-                .orElseThrow(() -> new MeldingsUtvekslingRuntimeException("No \"Journalpost\" found in Arkivmelding"));
+        Saksmappe sm = ArkivmeldingUtil.getSaksmappe(am);
+        Journalpost jp = ArkivmeldingUtil.getJournalpost(am);
 
         ObjectFactory of = new ObjectFactory();
         NoarksakType noarksakType = of.createNoarksakType();
