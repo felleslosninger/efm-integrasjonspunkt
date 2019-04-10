@@ -4,7 +4,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiParam;
 import lombok.Data;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
-import no.difi.meldingsutveksling.validation.EnabledService;
 
 @Data
 @ApiModel
@@ -20,7 +19,6 @@ public class ConversationQueryInput {
     String senderIdentifier;
 
     @ApiParam(value = "serviceIdentifier")
-    @EnabledService
     String serviceIdentifier;
 
     @ApiParam(value = "messageReference")

@@ -7,10 +7,7 @@ import cucumber.api.java.en.And;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.nextmove.ServiceBusRestTemplate;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayload;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.util.MultiValueMap;
 
 import java.net.URI;
@@ -18,6 +15,7 @@ import java.util.Base64;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 
 @RequiredArgsConstructor
@@ -47,8 +45,8 @@ public class ServiceBusInSteps {
         ResponseEntity<String> messageResponse = new ResponseEntity<>(body, headers, HttpStatus.OK);
         ResponseEntity<String> notFound = ResponseEntity.notFound().build();
 
-        given(serviceBusRestTemplate.exchange(
-                any(URI.class), eq(HttpMethod.POST), any(), eq(String.class)))
-                .willReturn(messageResponse, notFound);
+        doReturn(messageResponse, notFound)
+                .when(serviceBusRestTemplate)
+                .exchange(any(URI.class), eq(HttpMethod.POST), any(), eq(String.class));
     }
 }

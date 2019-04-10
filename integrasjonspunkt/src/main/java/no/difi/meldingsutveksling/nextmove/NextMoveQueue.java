@@ -14,6 +14,7 @@ import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import org.springframework.stereotype.Component;
 
+import javax.transaction.Transactional;
 import java.util.Optional;
 
 import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
@@ -26,19 +27,21 @@ public class NextMoveQueue {
     private final ConversationService conversationService;
     private final NextMoveMessageInRepository messageRepo;
 
-    public Optional<NextMoveMessage> enqueue(StandardBusinessDocument sbd) {
+    @Transactional
+    public Optional<NextMoveMessage> enqueue(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
         if (sbd.getAny() instanceof BusinessMessage) {
-            NextMoveInMessage message = NextMoveInMessage.of(sbd);
+            NextMoveInMessage message = NextMoveInMessage.of(sbd, serviceIdentifier);
 
             if (ServiceIdentifier.DPE_RECEIPT.equals(message.getServiceIdentifier())) {
                 handleDpeReceipt(message.getConversationId());
                 return Optional.empty();
             }
 
-            messageRepo.findByConversationId(sbd.getConversationId())
-                    .orElseGet(() -> messageRepo.save(message));
+            if(!messageRepo.findByConversationId(sbd.getConversationId()).isPresent()) {
+                messageRepo.save(message);
+            }
 
-            Conversation c = conversationService.registerConversation(sbd);
+            Conversation c = conversationService.registerConversation(message);
             conversationService.registerStatus(c, MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_MOTTATT));
             Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] put on local queue",
                     message.getConversationId(), message.getServiceIdentifier()), markerFrom(message));

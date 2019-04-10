@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
-import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageRepository;
+import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageOutRepository;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
@@ -24,7 +24,7 @@ public class NextMoveSender {
     private final ConversationStrategyFactory strategyFactory;
     private final ConversationService conversationService;
     private final CryptoMessagePersister cryptoMessagePersister;
-    private final NextMoveMessageRepository messageRepo;
+    private final NextMoveMessageOutRepository messageRepo;
 
     @Transactional
     public void send(NextMoveMessage msg) throws NextMoveException {

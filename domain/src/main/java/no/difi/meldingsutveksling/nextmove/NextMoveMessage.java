@@ -50,12 +50,12 @@ public class NextMoveMessage {
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private StandardBusinessDocument sbd;
 
-    public static NextMoveMessage of(StandardBusinessDocument sbd) {
+    public static NextMoveMessage of(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
         NextMoveMessage message = new NextMoveMessage(
                 sbd.getConversationId(),
                 sbd.getReceiverIdentifier(),
                 sbd.getSenderIdentifier(),
-                sbd.getServiceIdentifier(),
+                serviceIdentifier,
                 sbd);
         message.setFiles(new HashSet<>());
         return message;

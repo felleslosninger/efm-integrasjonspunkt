@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.nextmove.v2;
 import com.querydsl.core.BooleanBuilder;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import no.difi.meldingsutveksling.nextmove.QNextMoveInMessage;
 import org.springframework.data.domain.Page;
@@ -36,7 +35,7 @@ public interface NextMoveMessageInRepository extends PagingAndSortingRepository<
                 .map(NextMoveInMessage::getSbd);
     }
 
-    default NextMoveInMessage peek(NextMoveInMessageQueryInput input) {
+    default Optional<NextMoveInMessage> peek(NextMoveInMessageQueryInput input) {
         return findAll(
                 createQuery(input)
                         .and(QNextMoveInMessage.nextMoveInMessage.lockTimeout.isNull())
@@ -44,8 +43,7 @@ public interface NextMoveMessageInRepository extends PagingAndSortingRepository<
                 FIRST_BY_LAST_UPDATED_ASC)
                 .getContent()
                 .stream()
-                .findFirst()
-                .orElseThrow(NoContentException::new);
+                .findFirst();
     }
 
     default BooleanBuilder createQuery(NextMoveInMessageQueryInput input) {

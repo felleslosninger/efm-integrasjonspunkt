@@ -16,8 +16,6 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.nextmove.AbstractEntity;
-import no.difi.meldingsutveksling.validation.ReceiverAcceptableDocumentIdentifier;
-import no.difi.meldingsutveksling.validation.ReceiverAcceptableServiceIdentifier;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
@@ -70,8 +68,6 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 @ToString
 @Entity
 @Table(name = "header")
-@ReceiverAcceptableServiceIdentifier
-@ReceiverAcceptableDocumentIdentifier
 public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
 
     public enum DocumentType {KVITTERING, MELDING, DPE_RECEIPT}

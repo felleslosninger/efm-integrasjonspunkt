@@ -22,12 +22,12 @@ public class NextMoveOutMessage extends NextMoveMessage {
         super(conversationId, receiverIdentifier, senderIdentifier, serviceIdentifier, sbd);
     }
 
-    public static NextMoveOutMessage of(StandardBusinessDocument sbd) {
+    public static NextMoveOutMessage of(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
         return new NextMoveOutMessage(
                 sbd.getConversationId(),
                 sbd.getReceiverIdentifier(),
                 sbd.getSenderIdentifier(),
-                sbd.getServiceIdentifier(),
+                serviceIdentifier,
                 sbd);
     }
 }

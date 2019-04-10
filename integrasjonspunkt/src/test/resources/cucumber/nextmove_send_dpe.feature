@@ -1,7 +1,8 @@
 Feature: Sending a Next Move DPE message
 
   Background:
-    Given a "GET" request to "http://localhost:9099/identifier/910075935?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075935.json"
+    Given a "GET" request to "http://localhost:9099/identifier/910075935?notification=obligated&process=urn:no:difi:profile:eFormidling:ver2.0" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075935.json"
+    And a "GET" request to "http://localhost:9099/identifier/910075935?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075935.json"
     And a "GET" request to "http://localhost:9099/identifier/910077473?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
 
   Scenario: As a user I want to send a DPE message
@@ -17,7 +18,7 @@ Feature: Sending a Next Move DPE message
                                 "expectedResponseDateTime": "2019-05-10T00:31:52Z"
                             }
                         ],
-                        "identifier": "urn:no:difi:meldingsutveksling:2.0",
+                        "identifier": "urn:no:difi:profile:eFormidling:ver2.0",
                         "instanceIdentifier": "45efbd4c-413d-4e2c-bbc5-257ef4a65a91",
                         "type": "ConversationId"
                     }
@@ -90,7 +91,7 @@ Feature: Sending a Next Move DPE message
             "scope" : [ {
               "type" : "ConversationId",
               "instanceIdentifier" : "45efbd4c-413d-4e2c-bbc5-257ef4a65a91",
-              "identifier" : "urn:no:difi:meldingsutveksling:2.0",
+              "identifier" : "urn:no:difi:profile:eFormidling:ver2.0",
               "scopeInformation" : [ {
                 "expectedResponseDateTime" : "2019-05-10T00:31:52Z"
               } ]

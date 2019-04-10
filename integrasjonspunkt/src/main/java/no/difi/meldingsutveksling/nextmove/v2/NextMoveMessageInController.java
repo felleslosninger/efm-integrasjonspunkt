@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
 import no.difi.meldingsutveksling.exceptions.ConversationNotLockedException;
 import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
+import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
@@ -71,7 +72,8 @@ public class NextMoveMessageInController {
     })
     @Transactional
     public StandardBusinessDocument peek(@Valid NextMoveInMessageQueryInput input) {
-        NextMoveInMessage message = messageRepo.peek(input);
+        NextMoveInMessage message = messageRepo.peek(input)
+                .orElseThrow(NoContentException::new);
 
         messageRepo.save(message.setLockTimeout(ZonedDateTime.now()
                 .plusMinutes(props.getNextmove().getLockTimeoutMinutes())));

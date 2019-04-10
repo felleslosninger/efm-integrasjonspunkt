@@ -18,7 +18,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.logstash.logback.marker.LogstashMarker;
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.Payload;
@@ -69,7 +68,7 @@ import java.util.Optional;
 @Entity
 @Table(name = "document")
 @JsonSerialize(using = NextMoveMessageSerializer.class)
-@GroupSequenceProvider(StandardBusinessDocumentGroupSequenceProvider.class)
+//@GroupSequenceProvider(StandardBusinessDocumentGroupSequenceProvider.class)
 @ApiModel(description = "Standard Business Document")
 public class StandardBusinessDocument extends AbstractEntity<Long> {
 
@@ -84,11 +83,11 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
     @JsonAlias({"dpo", "dpv", "dpe", "dpi_digital", "dpi_print"})
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = BusinessMessage.class)
     @NotNull
-    @InstanceOf(value = DpoMessage.class, groups = {Dpo.class, Dpf.class})
-    @InstanceOf(value = DpvMessage.class, groups = Dpv.class)
-    @InstanceOf(value = DpiDigitalMessage.class, groups = DpiDigital.class)
-    @InstanceOf(value = DpiPrintMessage.class, groups = DpiPrint.class)
-    @InstanceOf(value = DpeMessage.class, groups = {DpeInnsyn.class, DpeData.class, DpeReceipt.class})
+//    @InstanceOf(value = DpoMessage.class, groups = {Dpo.class, Dpf.class})
+//    @InstanceOf(value = DpvMessage.class, groups = Dpv.class)
+//    @InstanceOf(value = DpiDigitalMessage.class, groups = DpiDigital.class)
+//    @InstanceOf(value = DpiPrintMessage.class, groups = DpiPrint.class)
+//    @InstanceOf(value = DpeMessage.class, groups = {DpeInnsyn.class, DpeData.class, DpeReceipt.class})
     @Getter(onMethod_ =
     @ApiModelProperty(name = "dpo|dpv|dpe|dpi_digital|dpi_print", value = "The payload of the document", required = true, dataType = "no.difi.meldingsutveksling.nextmove.BusinessMessage")
     )
@@ -139,6 +138,11 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
         return findScope(ScopeType.CONVERSATION_ID);
     }
 
+    private Scope getScope(ScopeType scopeType) {
+        return findScope(scopeType)
+                .orElseThrow(() -> new NextMoveRuntimeException(String.format("Missing scope %s", scopeType.name())));
+    }
+
     private Optional<Scope> findScope(ScopeType scopeType) {
         return getStandardBusinessDocumentHeader().getBusinessScope()
                 .getScope()
@@ -148,15 +152,14 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
     }
 
     @JsonIgnore
-    public ServiceIdentifier getServiceIdentifier() {
-        String diType = getStandardBusinessDocumentHeader().getDocumentIdentification().getType();
-        return ServiceIdentifier.safeValueOf(diType).orElseThrow(() ->
-                new NextMoveRuntimeException(String.format("Could not create ServiceIdentifier from documentIdentification.type=%s for message with id=%s", diType, getConversationId())));
+    public String getMessageType() {
+        return getStandardBusinessDocumentHeader().getDocumentIdentification().getType();
     }
 
     @JsonIgnore
-    public String getMessageType() {
-        return getStandardBusinessDocumentHeader().getDocumentIdentification().getType();
+    public String getProcess() {
+        return getScope(ScopeType.CONVERSATION_ID)
+                .getIdentifier();
     }
 
     @JsonIgnore

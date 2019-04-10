@@ -17,7 +17,7 @@ Feature: Sending a Next Move DPI message
                                 "expectedResponseDateTime": "2019-05-10T00:31:52Z"
                             }
                         ],
-                        "identifier": "urn:no:difi:meldingsutveksling:2.0",
+                        "identifier": "urn:no:difi:profile:eFormidling:ver2.0",
                         "instanceIdentifier": "97efbd4c-413d-4e2c-bbc5-257ef4a61212",
                         "type": "ConversationId"
                     }
@@ -184,7 +184,7 @@ Feature: Sending a Next Move DPI message
                                 "expectedResponseDateTime": "2019-05-10T00:31:52Z"
                             }
                         ],
-                        "identifier": "urn:no:difi:meldingsutveksling:2.0",
+                        "identifier": "urn:no:difi:profile:eFormidling:ver2.0",
                         "instanceIdentifier": "97efbd4c-413d-4e2c-bbc5-257ef4a61212",
                         "type": "ConversationId"
                     }

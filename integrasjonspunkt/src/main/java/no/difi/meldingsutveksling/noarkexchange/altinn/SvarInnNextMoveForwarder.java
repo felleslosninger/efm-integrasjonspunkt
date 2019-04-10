@@ -70,7 +70,7 @@ public class SvarInnNextMoveForwarder implements Consumer<Forsendelse> {
                 context.getConversationId(),
                 ServiceIdentifier.DPO,
                 new DpoMessage());
-        NextMoveInMessage nextMoveMessage = NextMoveInMessage.of(sbd);
+        NextMoveInMessage nextMoveMessage = NextMoveInMessage.of(sbd, ServiceIdentifier.DPF);
         NextMoveStreamedFile arkivmeldingFile = getArkivmeldingFile(forsendelse);
 
         Stream<StreamedFile> attachments = Stream.concat(

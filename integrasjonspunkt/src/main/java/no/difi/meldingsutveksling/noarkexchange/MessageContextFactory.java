@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.util.Optional;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
@@ -106,8 +105,8 @@ public class MessageContextFactory {
     }
 
     private Certificate getCertificate(String identifier, ServiceIdentifier serviceIdentifier) throws MessageContextException {
-        Optional<ServiceRecord> record = serviceRegistryLookup.getServiceRecord(identifier, serviceIdentifier);
-        ServiceRecord serviceRecord = record.orElseThrow(() -> new MessageContextException(StatusMessage.NO_MATCHING_SERVICEIDENTIFIER));
+        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(identifier, serviceIdentifier)
+                .orElseThrow(() -> new MessageContextException(StatusMessage.NO_MATCHING_SERVICEIDENTIFIER));
 
         try {
             return adresseregister.getCertificate(serviceRecord);

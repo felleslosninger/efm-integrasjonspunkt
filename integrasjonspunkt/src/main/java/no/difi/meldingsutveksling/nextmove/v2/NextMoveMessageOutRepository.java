@@ -14,6 +14,8 @@ public interface NextMoveMessageOutRepository extends PagingAndSortingRepository
         QuerydslBinderCustomizer<QNextMoveOutMessage> {
     Optional<NextMoveOutMessage> findByConversationId(String conversationId);
 
+    void deleteByConversationId(String conversationId);
+
     @Override
     default void customize(QuerydslBindings bindings, QNextMoveOutMessage root) {
         bindings.excluding(root.sbd);

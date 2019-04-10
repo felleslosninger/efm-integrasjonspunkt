@@ -25,13 +25,16 @@ public class MockHooks {
     private final LookupClient lookupClient;
     private final InternalQueue internalQueue;
     private final NextMoveSender nextMoveSender;
-    public final SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory;
-    public final SikkerDigitalPostKlient sikkerDigitalPostKlient;
+    private final SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory;
+    private final SikkerDigitalPostKlient sikkerDigitalPostKlient;
 
     @Before
     @SneakyThrows
     public void before() {
-        given(uuidGenerator.generate()).willReturn("19efbd4c-413d-4e2c-bbc5-257ef4a65b38");
+        given(uuidGenerator.generate()).willReturn(
+                "19efbd4c-413d-4e2c-bbc5-257ef4a65b38",
+                "ac5efbd4c-413d-4e2c-bbc5-257ef4a65b23"
+        );
 
         given(lookupClient.getDocumentIdentifiers(any()))
                 .willReturn(Collections.singletonList(DocumentTypeIdentifier.of("urn:no:difi:meldingsutveksling:2.0")));

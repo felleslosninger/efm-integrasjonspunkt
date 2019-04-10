@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord.isProcess;
 import static no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord.isServiceIdentifier;
 
 @Service
@@ -119,6 +120,12 @@ public class ServiceRegistryLookup {
     public List<ServiceRecord> getServiceRecords(String identifier) {
         Notification notification = properties.isVarslingsplikt() ? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
         return srsCache.getUnchecked(new Parameters(identifier, notification));
+    }
+
+    public Optional<ServiceRecord> getServiceRecordByProcess(String identifier, String process) {
+        Notification notification = properties.isVarslingsplikt() ? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
+        List<ServiceRecord> serviceRecords = srsCache.getUnchecked(new Parameters(identifier, process, notification));
+        return serviceRecords.stream().filter(isProcess(process)).findFirst();
     }
 
     private ServiceRecordWrapper loadServiceRecord(Parameters parameters) {

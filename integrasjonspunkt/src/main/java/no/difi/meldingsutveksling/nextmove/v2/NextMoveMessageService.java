@@ -6,6 +6,7 @@ import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingException;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -46,6 +47,8 @@ public class NextMoveMessageService {
     private final InternalQueue internalQueue;
     private final ConversationService conversationService;
     private final ServiceRegistryLookup sr;
+    private final ServiceIdentifierService serviceIdentifierService;
+    private final UUIDGenerator uuidGenerator;
 
     NextMoveOutMessage getMessage(String conversationId) {
         return messageRepo.findByConversationId(conversationId)
@@ -63,25 +66,37 @@ public class NextMoveMessageService {
                     throw new ConversationAlreadyExistsException(p.getConversationId());
                 });
 
-        NextMoveOutMessage message = NextMoveOutMessage.of(setDefaults(sbd));
+        ServiceIdentifier serviceIdentifier = getServiceIdentifier(sbd);
+
+        if (!serviceIdentifierService.isEnabled(serviceIdentifier)) {
+            throw new ServiceNotEnabledException(serviceIdentifier);
+        }
+
+        setDefaults(sbd, serviceIdentifier);
+        NextMoveOutMessage message = NextMoveOutMessage.of(sbd, serviceIdentifier);
         messageRepo.save(message);
-        conversationService.registerConversation(sbd);
+        conversationService.registerConversation(message);
 
         return message;
     }
 
-    private StandardBusinessDocument setDefaults(StandardBusinessDocument sbd) {
+    private ServiceIdentifier getServiceIdentifier(StandardBusinessDocument sbd) {
+        return sr.getServiceRecordByProcess(sbd.getReceiverIdentifier(), sbd.getProcess())
+                .map(ServiceRecord::getServiceIdentifier)
+                .map(p -> p == DPF ? DPO : p)
+                .orElseThrow(() -> new ReceiverDoNotAcceptProcessException(sbd.getProcess()));
+    }
+
+    private void setDefaults(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
         sbd.getConversationScope().ifPresent(s -> {
             if (isNullOrEmpty(s.getInstanceIdentifier())) {
                 s.setInstanceIdentifier(createConversationId());
             }
         });
 
-        if (sbd.getServiceIdentifier() == DPI_PRINT) {
+        if (serviceIdentifier == DPI_PRINT) {
             setDpiDefaults(sbd);
         }
-
-        return sbd;
     }
 
     private void setDpiDefaults(StandardBusinessDocument sbd) {
@@ -224,6 +239,6 @@ public class NextMoveMessageService {
     }
 
     private String createConversationId() {
-        return UUID.randomUUID().toString();
+        return uuidGenerator.generate();
     }
 }

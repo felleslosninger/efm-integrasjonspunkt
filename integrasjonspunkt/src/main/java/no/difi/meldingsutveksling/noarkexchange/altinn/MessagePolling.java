@@ -135,7 +135,7 @@ public class MessagePolling {
                     if (properties.getNoarkSystem().isEnable() && !properties.getNoarkSystem().getEndpointURL().isEmpty()) {
                         internalQueue.enqueueNoark(sbd);
                     } else {
-                        nextMoveQueue.enqueue(sbd);
+                        nextMoveQueue.enqueue(sbd, DPO);
                     }
                     continue;
                 }
