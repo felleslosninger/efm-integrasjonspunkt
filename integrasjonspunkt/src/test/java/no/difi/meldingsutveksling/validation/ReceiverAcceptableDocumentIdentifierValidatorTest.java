@@ -3,8 +3,8 @@ package no.difi.meldingsutveksling.validation;
 import no.difi.meldingsutveksling.config.ValidationConfig;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.elma.DocumentIdentifierLookup;
+import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
 import no.difi.meldingsutveksling.nextmove.ConversationStrategyFactory;
-import no.difi.meldingsutveksling.nextmove.DpoMessage;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.vefa.peppol.common.model.DocumentTypeIdentifier;
 import no.difi.vefa.peppol.common.model.ParticipantIdentifier;
@@ -15,14 +15,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
-import javax.validation.metadata.ConstraintDescriptor;
-import java.lang.annotation.Annotation;
 import java.time.ZonedDateTime;
 import java.util.Collections;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -101,7 +96,7 @@ public class ReceiverAcceptableDocumentIdentifierValidatorTest {
                                 )
                         )
                 )
-                .setAny(new DpoMessage()
+                .setAny(new ArkivmeldingMessage()
                         .setDpoField("foo")
                         .setSecurityLevel("3")
                 );

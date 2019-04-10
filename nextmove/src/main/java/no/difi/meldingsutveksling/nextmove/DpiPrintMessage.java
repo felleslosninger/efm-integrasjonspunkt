@@ -11,10 +11,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Setter
 @ToString
 @Entity
-@DiscriminatorValue("dpi_print")
+@DiscriminatorValue("print")
 @AllArgsConstructor
 @NoArgsConstructor
-@XmlRootElement(name = "dpi_print", namespace = "urn:no:difi:profile:digitalpost:ver1.0")
+@XmlRootElement(name = "print", namespace = "urn:no:difi:profile:digitalpost:ver1.0")
 public class DpiPrintMessage extends BusinessMessage {
 
     @Embedded

@@ -17,20 +17,20 @@ public class NextMoveMessageDeserializer extends StdDeserializer<BusinessMessage
     @Override
     public BusinessMessage deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
         TreeNode node = p.readValueAsTree();
-        if ("dpo".equals(p.currentName())) {
-            return p.getCodec().treeToValue(node, DpoMessage.class);
+        if ("arkivmelding".equals(p.currentName())) {
+            return p.getCodec().treeToValue(node, ArkivmeldingMessage.class);
         }
-        if ("dpv".equals(p.currentName())) {
-            return p.getCodec().treeToValue(node, DpvMessage.class);
-        }
-        if ("dpi_digital".equals(p.currentName())) {
+        if ("digital".equals(p.currentName())) {
             return p.getCodec().treeToValue(node, DpiDigitalMessage.class);
         }
-        if ("dpi_print".equals(p.currentName())) {
+        if ("print".equals(p.currentName())) {
             return p.getCodec().treeToValue(node, DpiPrintMessage.class);
         }
-        if ("dpe".equals(p.currentName())) {
-            return p.getCodec().treeToValue(node, DpeMessage.class);
+        if ("innsynskrav".equals(p.currentName())) {
+            return p.getCodec().treeToValue(node, DpeInnsynMessage.class);
+        }
+        if ("publisering".equals(p.currentName())) {
+            return p.getCodec().treeToValue(node, DpePubliseringMessage.class);
         }
         return null;
     }

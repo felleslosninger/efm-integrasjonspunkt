@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.nextmove.v2;
 
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.domain.sbdh.*;
-import no.difi.meldingsutveksling.nextmove.DpoMessage;
+import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.xml.transform.StringResult;
@@ -25,7 +25,7 @@ public class StandardBusinessDocumentJaxbTest {
     @Before
     @SneakyThrows
     public void createMarshaller() {
-        JAXBContext context = JAXBContext.newInstance(StandardBusinessDocument.class, DpoMessage.class);
+        JAXBContext context = JAXBContext.newInstance(StandardBusinessDocument.class, ArkivmeldingMessage.class);
         marshaller = context.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
         unmarshaller = context.createUnmarshaller();
@@ -85,7 +85,7 @@ public class StandardBusinessDocumentJaxbTest {
                                 )
                         )
                 )
-                .setAny(new DpoMessage()
+                .setAny(new ArkivmeldingMessage()
                         .setDpoField("foo")
                         .setSecurityLevel("3"));
     }

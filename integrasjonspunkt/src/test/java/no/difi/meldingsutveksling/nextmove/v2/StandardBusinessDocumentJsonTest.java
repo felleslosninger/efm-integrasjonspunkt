@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.nextmove.v2;
 
 import no.difi.meldingsutveksling.config.JacksonConfig;
 import no.difi.meldingsutveksling.domain.sbdh.*;
-import no.difi.meldingsutveksling.nextmove.DpoMessage;
+import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +71,7 @@ public class StandardBusinessDocumentJsonTest {
                                 )
                         )
                 )
-                .setAny(new DpoMessage()
+                .setAny(new ArkivmeldingMessage()
                         .setDpoField("foo")
                         .setSecurityLevel("3")
                 );

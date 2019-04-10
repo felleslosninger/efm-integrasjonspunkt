@@ -10,10 +10,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Setter
 @ToString
 @Entity
-@DiscriminatorValue("dpo")
+@DiscriminatorValue("arkivmelding")
 @AllArgsConstructor
 @NoArgsConstructor
-@XmlRootElement(name = "dpo", namespace = "urn:no:difi:meldingsutveksling:2.0")
-public class DpoMessage extends BusinessMessage {
+@XmlRootElement(name = "arkivmelding", namespace = "urn:no:difi:meldingsutveksling:2.0")
+public class ArkivmeldingMessage extends BusinessMessage {
     private String dpoField;
 }
