@@ -138,7 +138,7 @@ Feature: Receiving a Next Move DPF message
           } ]
         }
       },
-      "dpo" : { }
+      "arkivmelding" : { }
     }
     """
     And I have an ASIC that contains a file named "arkivmelding.xml" with mimetype="application/xml":

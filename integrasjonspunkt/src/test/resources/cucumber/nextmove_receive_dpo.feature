@@ -45,7 +45,7 @@ Feature: Receiving a Next Move DPO message
                 }
             ]
         },
-        "dpo": {
+        "arkivmelding": {
           "securityLevel": "3",
           "dpoField": "foo"
         }

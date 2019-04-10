@@ -1,8 +1,10 @@
 Feature: Sending a Next Move DPV message
 
   Background:
+
     Given a "GET" request to "http://localhost:9099/identifier/910075946?notification=obligated&process=urn:no:difi:profile:eFormidling:ver2.0" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075946.json"
     And a "GET" request to "http://localhost:9099/identifier/910075946?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075946.json"
+    And a "GET" request to "http://localhost:9099/identifier/910077473?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
     And a "GET" request to "http://localhost:9099/identifier/974720760" will respond with status "200" and the following "application/json" in "/restmocks/identifier/974720760.json"
     And a SOAP request to "http://localhost:9876/ServiceEngineExternal/CorrespondenceAgencyExternal.svc" will respond with the following payload:
     """
@@ -57,8 +59,8 @@ Feature: Sending a Next Move DPV message
             "documentIdentification": {
                 "creationDateAndTime": "2019-04-11T15:29:58.753+02:00",
                 "instanceIdentifier": "abc8849c-e281-4809-8555-7cd54952b916",
-                "standard": "urn:no:difi:meldingsutveksling:2.0",
-                "type": "DPV",
+                "standard": "urn:no:difi.arkivmelding:xsd:skatterOgAvgifter::arkivmelding",
+                "type": "arkivmelding",
                 "typeVersion": "2.0"
             },
             "headerVersion": "1.0",
@@ -79,11 +81,92 @@ Feature: Sending a Next Move DPV message
                 }
             ]
         },
-        "dpv": {
+        "arkivmelding": {
           "securityLevel": "3",
           "primaryDocumentFilename": "test.txt"
         }
     }
+    """
+    And I upload a file named "arkivmelding.xml" with mimetype "text/xml" and title "Arkivmelding" with the following body:
+    """
+    <?xml version="1.0" encoding="utf-8"?>
+    <arkivmelding xmlns="http://www.arkivverket.no/standarder/noark5/arkivmelding" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.arkivverket.no/standarder/noark5/arkivmelding arkivmelding.xsd">
+        <system>LandLord</system>
+        <meldingId>3380ed76-5d4c-43e7-aa70-8ed8d97e4835</meldingId>
+        <tidspunkt>2017-05-23T12:46:00</tidspunkt>
+        <antallFiler>1</antallFiler>
+
+        <mappe xsi:type="saksmappe">
+            <systemID>43fbe161-7aac-4c9f-a888-d8167aab4144</systemID>
+            <tittel>Nye lysrør Hauketo Skole</tittel>
+            <opprettetDato>2017-06-01T10:10:12.000+01:00</opprettetDato>
+            <opprettetAv/>
+            <klassifikasjon>
+                <referanseKlassifikasjonssystem>Funksjoner</referanseKlassifikasjonssystem>
+                <klasseID>vedlikehold av skole</klasseID>
+                <tittel>vedlikehold av skole</tittel>
+                <opprettetDato>2017-05-23T21:56:12.000+01:00</opprettetDato>
+                <opprettetAv>Knut Hansen</opprettetAv>
+            </klassifikasjon>
+            <klassifikasjon>
+                <referanseKlassifikasjonssystem>Objekter</referanseKlassifikasjonssystem>
+                <klasseID>20500</klasseID>
+                <tittel>Hauketo Skole</tittel>
+                <opprettetDato>2017-05-23T21:56:12.000+01:00</opprettetDato>
+                <opprettetAv>Knut Hansen</opprettetAv>
+            </klassifikasjon>
+            <basisregistrering xsi:type="journalpost">
+                <systemID>430a6710-a3d4-4863-8bd0-5eb1021bee45</systemID>
+                <opprettetDato>2012-02-17T21:56:12.000+01:00</opprettetDato>
+                <opprettetAv>LandLord</opprettetAv>
+                <arkivertDato>2012-02-17T21:56:12.000+01:00</arkivertDato>
+                <arkivertAv>LandLord</arkivertAv>
+                <referanseForelderMappe>43fbe161-7aac-4c9f-a888-d8167aab4144</referanseForelderMappe>
+                <dokumentbeskrivelse>
+                    <systemID>3e518e5b-a361-42c7-8668-bcbb9eecf18d</systemID>
+                    <dokumenttype>Bestilling</dokumenttype>
+                    <dokumentstatus>Dokumentet er ferdigstilt</dokumentstatus>
+                    <tittel>Bestilling - nye lysrør</tittel>
+                    <opprettetDato>2012-02-17T21:56:12.000+01:00</opprettetDato>
+                    <opprettetAv>Landlord</opprettetAv>
+                    <tilknyttetRegistreringSom>Hoveddokument</tilknyttetRegistreringSom>
+                    <dokumentnummer>1</dokumentnummer>
+                    <tilknyttetDato>2012-02-17T21:56:12.000+01:00</tilknyttetDato>
+                    <tilknyttetAv>Landlord</tilknyttetAv>
+                    <dokumentobjekt>
+                        <versjonsnummer>1</versjonsnummer>
+                        <variantformat>Produksjonsformat</variantformat>
+                        <opprettetDato>2012-02-17T21:56:12.000+01:00</opprettetDato>
+                        <opprettetAv>Landlord</opprettetAv>
+                        <referanseDokumentfil>test.txt</referanseDokumentfil>
+                    </dokumentobjekt>
+                </dokumentbeskrivelse>
+                <tittel>Nye lysrør</tittel>
+                <offentligTittel>Nye lysrør</offentligTittel>
+
+                <virksomhetsspesifikkeMetadata>
+                    <forvaltningsnummer>20050</forvaltningsnummer>
+                    <objektnavn>Hauketo Skole</objektnavn>
+                    <eiendom>200501</eiendom>
+                    <bygning>2005001</bygning>
+                    <bestillingtype>Materiell, elektro</bestillingtype>
+                    <rammeavtale>K-123123-elektriker</rammeavtale>
+                </virksomhetsspesifikkeMetadata>
+
+                <journalposttype>Utgående dokument</journalposttype>
+                <journalstatus>Journalført</journalstatus>
+                <journaldato>2017-05-23</journaldato>
+                <korrespondansepart>
+                    <korrespondanseparttype>Mottaker</korrespondanseparttype>
+                    <korrespondansepartNavn>elektrikeren AS, Veien 100, Oslo</korrespondansepartNavn>
+                </korrespondansepart>
+            </basisregistrering>
+            <saksdato>2017-06-01</saksdato>
+            <administrativEnhet>Blah</administrativEnhet>
+            <saksansvarlig>KNUTKÅRE</saksansvarlig>
+            <saksstatus>Avsluttet</saksstatus>
+        </mappe>
+    </arkivmelding>
     """
     And I upload a file named "test.txt" with mimetype "text/plain" and title "Test" with the following body:
     """
@@ -93,19 +176,19 @@ Feature: Sending a Next Move DPV message
     Then the CorrespondenceAgencyClient is called with the following payload:
     """
     <?xml version="1.0" encoding="UTF-8"?>
-    <altinn9:InsertCorrespondenceV2
-        xmlns:altinn10="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2010/10"
-        xmlns:altinn11="http://www.altinn.no/services/ServiceEngine/ReporteeElementList/2010/10"
-        xmlns:altinn12="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2009/10"
-        xmlns:altinn13="http://schemas.altinn.no/services/ServiceEngine/Notification/2009/10"
-        xmlns:altinn14="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2016/02"
-        xmlns:altinn15="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2014/10"
-        xmlns:altinn16="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2013/11"
-        xmlns:altinn5="http://schemas.altinn.no/services/Intermediary/Receipt/2009/10"
-        xmlns:altinn6="http://www.altinn.no/services/ServiceEngine/ReporteeElementList/2009/10"
-        xmlns:altinn7="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2013/06"
-        xmlns:altinn8="http://schemas.altinn.no/serviceengine/formsengine/2009/10"
-        xmlns:altinn9="http://www.altinn.no/services/ServiceEngine/Correspondence/2009/10" xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope">
+    <altinn9:InsertCorrespondenceV2 xmlns:altinn9="http://www.altinn.no/services/ServiceEngine/Correspondence/2009/10"
+                                    xmlns:altinn10="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2010/10"
+                                    xmlns:altinn11="http://www.altinn.no/services/ServiceEngine/ReporteeElementList/2010/10"
+                                    xmlns:altinn12="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2009/10"
+                                    xmlns:altinn13="http://schemas.altinn.no/services/ServiceEngine/Notification/2009/10"
+                                    xmlns:altinn14="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2016/02"
+                                    xmlns:altinn15="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2014/10"
+                                    xmlns:altinn16="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2013/11"
+                                    xmlns:altinn5="http://schemas.altinn.no/services/Intermediary/Receipt/2009/10"
+                                    xmlns:altinn6="http://www.altinn.no/services/ServiceEngine/ReporteeElementList/2009/10"
+                                    xmlns:altinn7="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2013/06"
+                                    xmlns:altinn8="http://schemas.altinn.no/serviceengine/formsengine/2009/10"
+                                    xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope">
         <altinn9:SystemUserCode>stuntman</altinn9:SystemUserCode>
         <altinn9:ExternalShipmentReference>45efbd4c-413d-4e2c-bbc5-257ef4a65a91</altinn9:ExternalShipmentReference>
         <altinn9:Correspondence>
@@ -114,20 +197,25 @@ Feature: Sending a Next Move DPV message
             <altinn10:Reportee>910075946</altinn10:Reportee>
             <altinn10:Content>
                 <altinn10:LanguageCode>1044</altinn10:LanguageCode>
-                <altinn10:MessageTitle
-                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
-                <altinn10:MessageSummary
-                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
-                <altinn10:MessageBody
-                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                <altinn10:MessageTitle>Nye lysrør</altinn10:MessageTitle>
+                <altinn10:MessageSummary>Nye lysrør</altinn10:MessageSummary>
+                <altinn10:MessageBody>Nye lysrør</altinn10:MessageBody>
                 <altinn10:Attachments>
                     <altinn10:BinaryAttachments>
+                        <altinn11:BinaryAttachmentV2>
+                            <altinn11:FunctionType>Unspecified</altinn11:FunctionType>
+                            <altinn11:FileName>arkivmelding.xml</altinn11:FileName>
+                            <altinn11:Name>Arkivmelding</altinn11:Name>
+                            <altinn11:Encrypted>false</altinn11:Encrypted>
+                            <altinn11:Data></altinn11:Data>
+                            <altinn11:SendersReference>AttachmentReference_as123452</altinn11:SendersReference>
+                        </altinn11:BinaryAttachmentV2>
                         <altinn11:BinaryAttachmentV2>
                             <altinn11:FunctionType>Unspecified</altinn11:FunctionType>
                             <altinn11:FileName>test.txt</altinn11:FileName>
                             <altinn11:Name>Test</altinn11:Name>
                             <altinn11:Encrypted>false</altinn11:Encrypted>
-                            <altinn11:Data>VGVzdGluZyAxIDIgMw==</altinn11:Data>
+                            <altinn11:Data></altinn11:Data>
                             <altinn11:SendersReference>AttachmentReference_as123452</altinn11:SendersReference>
                         </altinn11:BinaryAttachmentV2>
                     </altinn10:BinaryAttachments>
@@ -161,8 +249,90 @@ Feature: Sending a Next Move DPV message
     </altinn9:InsertCorrespondenceV2>
     """
     And the sent message contains the following files:
-      | filename     |
-      | test.txt     |
+      | filename         |
+      | arkivmelding.xml |
+      | test.txt         |
+    And the content of the file named "arkivmelding.xml" is:
+    """
+    <?xml version="1.0" encoding="utf-8"?>
+    <arkivmelding xmlns="http://www.arkivverket.no/standarder/noark5/arkivmelding" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.arkivverket.no/standarder/noark5/arkivmelding arkivmelding.xsd">
+        <system>LandLord</system>
+        <meldingId>3380ed76-5d4c-43e7-aa70-8ed8d97e4835</meldingId>
+        <tidspunkt>2017-05-23T12:46:00</tidspunkt>
+        <antallFiler>1</antallFiler>
+
+        <mappe xsi:type="saksmappe">
+            <systemID>43fbe161-7aac-4c9f-a888-d8167aab4144</systemID>
+            <tittel>Nye lysrør Hauketo Skole</tittel>
+            <opprettetDato>2017-06-01T10:10:12.000+01:00</opprettetDato>
+            <opprettetAv/>
+            <klassifikasjon>
+                <referanseKlassifikasjonssystem>Funksjoner</referanseKlassifikasjonssystem>
+                <klasseID>vedlikehold av skole</klasseID>
+                <tittel>vedlikehold av skole</tittel>
+                <opprettetDato>2017-05-23T21:56:12.000+01:00</opprettetDato>
+                <opprettetAv>Knut Hansen</opprettetAv>
+            </klassifikasjon>
+            <klassifikasjon>
+                <referanseKlassifikasjonssystem>Objekter</referanseKlassifikasjonssystem>
+                <klasseID>20500</klasseID>
+                <tittel>Hauketo Skole</tittel>
+                <opprettetDato>2017-05-23T21:56:12.000+01:00</opprettetDato>
+                <opprettetAv>Knut Hansen</opprettetAv>
+            </klassifikasjon>
+            <basisregistrering xsi:type="journalpost">
+                <systemID>430a6710-a3d4-4863-8bd0-5eb1021bee45</systemID>
+                <opprettetDato>2012-02-17T21:56:12.000+01:00</opprettetDato>
+                <opprettetAv>LandLord</opprettetAv>
+                <arkivertDato>2012-02-17T21:56:12.000+01:00</arkivertDato>
+                <arkivertAv>LandLord</arkivertAv>
+                <referanseForelderMappe>43fbe161-7aac-4c9f-a888-d8167aab4144</referanseForelderMappe>
+                <dokumentbeskrivelse>
+                    <systemID>3e518e5b-a361-42c7-8668-bcbb9eecf18d</systemID>
+                    <dokumenttype>Bestilling</dokumenttype>
+                    <dokumentstatus>Dokumentet er ferdigstilt</dokumentstatus>
+                    <tittel>Bestilling - nye lysrør</tittel>
+                    <opprettetDato>2012-02-17T21:56:12.000+01:00</opprettetDato>
+                    <opprettetAv>Landlord</opprettetAv>
+                    <tilknyttetRegistreringSom>Hoveddokument</tilknyttetRegistreringSom>
+                    <dokumentnummer>1</dokumentnummer>
+                    <tilknyttetDato>2012-02-17T21:56:12.000+01:00</tilknyttetDato>
+                    <tilknyttetAv>Landlord</tilknyttetAv>
+                    <dokumentobjekt>
+                        <versjonsnummer>1</versjonsnummer>
+                        <variantformat>Produksjonsformat</variantformat>
+                        <opprettetDato>2012-02-17T21:56:12.000+01:00</opprettetDato>
+                        <opprettetAv>Landlord</opprettetAv>
+                        <referanseDokumentfil>test.txt</referanseDokumentfil>
+                    </dokumentobjekt>
+                </dokumentbeskrivelse>
+                <tittel>Nye lysrør</tittel>
+                <offentligTittel>Nye lysrør</offentligTittel>
+
+                <virksomhetsspesifikkeMetadata>
+                    <forvaltningsnummer>20050</forvaltningsnummer>
+                    <objektnavn>Hauketo Skole</objektnavn>
+                    <eiendom>200501</eiendom>
+                    <bygning>2005001</bygning>
+                    <bestillingtype>Materiell, elektro</bestillingtype>
+                    <rammeavtale>K-123123-elektriker</rammeavtale>
+                </virksomhetsspesifikkeMetadata>
+
+                <journalposttype>Utgående dokument</journalposttype>
+                <journalstatus>Journalført</journalstatus>
+                <journaldato>2017-05-23</journaldato>
+                <korrespondansepart>
+                    <korrespondanseparttype>Mottaker</korrespondanseparttype>
+                    <korrespondansepartNavn>elektrikeren AS, Veien 100, Oslo</korrespondansepartNavn>
+                </korrespondansepart>
+            </basisregistrering>
+            <saksdato>2017-06-01</saksdato>
+            <administrativEnhet>Blah</administrativEnhet>
+            <saksansvarlig>KNUTKÅRE</saksansvarlig>
+            <saksstatus>Avsluttet</saksstatus>
+        </mappe>
+    </arkivmelding>
+    """
     And the content of the file named "test.txt" is:
     """
     Testing 1 2 3

@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.domain.ByteArrayFile;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.springframework.boot.test.json.JacksonTester;
+import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
 import org.springframework.web.client.RequestCallback;
@@ -93,13 +94,17 @@ public class NextMoveMessageInSteps {
 
     @Then("^the converted SBD is:$")
     public void theReceivedSBDMatchesTheIncomingSBD(String expectedSBD) throws IOException {
-        assertThat(json.write(messageReceivedHolder.get().getSbd()))
+        JsonContent<StandardBusinessDocument> actual = json.write(messageReceivedHolder.get().getSbd());
+        assertThat(actual)
+                .withFailMessage(actual.getJson())
                 .isEqualToJson(expectedSBD);
     }
 
     @Then("^the received SBD matches the incoming SBD:$")
     public void theReceivedSBDMatchesTheIncomingSBD() throws IOException {
-        assertThat(json.write(messageInHolder.get().getSbd()))
+        JsonContent<StandardBusinessDocument> actual = json.write(messageInHolder.get().getSbd());
+        assertThat(actual)
+                .withFailMessage(actual.getJson())
                 .isEqualToJson(json.write(messageReceivedHolder.get().getSbd()).getJson());
     }
 

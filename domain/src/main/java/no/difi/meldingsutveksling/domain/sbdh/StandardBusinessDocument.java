@@ -80,7 +80,7 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
 
     @XmlAnyElement(lax = true)
     @JsonDeserialize(using = NextMoveMessageDeserializer.class)
-    @JsonAlias({"dpo", "dpv", "dpe", "dpi_digital", "dpi_print"})
+    @JsonAlias({"arkivmelding", "digital", "print", "innsynskrav", "publisering"})
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = BusinessMessage.class)
     @NotNull
 //    @InstanceOf(value = DpoMessage.class, groups = {Dpo.class, Dpf.class})
@@ -89,7 +89,7 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
 //    @InstanceOf(value = DpiPrintMessage.class, groups = DpiPrint.class)
 //    @InstanceOf(value = DpeMessage.class, groups = {DpeInnsyn.class, DpeData.class, DpeReceipt.class})
     @Getter(onMethod_ =
-    @ApiModelProperty(name = "dpo|dpv|dpe|dpi_digital|dpi_print", value = "The payload of the document", required = true, dataType = "no.difi.meldingsutveksling.nextmove.BusinessMessage")
+    @ApiModelProperty(name = "arkivmelding|digital|print|innsynskrav|publisering", value = "The payload of the document", required = true, dataType = "no.difi.meldingsutveksling.nextmove.BusinessMessage")
     )
     private Object any;
 

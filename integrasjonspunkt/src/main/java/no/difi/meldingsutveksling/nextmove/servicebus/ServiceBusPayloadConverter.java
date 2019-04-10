@@ -58,8 +58,7 @@ public class ServiceBusPayloadConverter {
         if (any.getConversation().getCustomProperties().containsKey("meeting") &&
                 Boolean.parseBoolean(any.getConversation().getCustomProperties().get("meeting"))) {
             dpeMessage = new DpePubliseringMessage(orgnr);
-        }
-        else if (any.getConversation().getServiceIdentifier().equals(ServiceIdentifier.DPE_INNSYN)) {
+        } else if (any.getConversation().getServiceIdentifier().equals(ServiceIdentifier.DPE_INNSYN)) {
             String email = any.getConversation().getCustomProperties().getOrDefault("email", "");
             dpeMessage = new DpeInnsynMessage(orgnr, email);
         } else {

@@ -49,7 +49,7 @@ Feature: Sending a Next Move DPE message
                 }
             ]
         },
-        "dpe": {
+        "innsynskrav": {
           "securityLevel": "3",
           "primaryDocumentFilename": "test.txt"
         }
@@ -98,7 +98,7 @@ Feature: Sending a Next Move DPE message
             } ]
           }
         },
-        "dpe" : {
+        "innsynskrav" : {
           "securityLevel" : "3",
           "primaryDocumentFilename" : "test.txt"
         }

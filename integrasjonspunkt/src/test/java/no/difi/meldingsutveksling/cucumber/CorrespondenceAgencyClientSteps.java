@@ -23,7 +23,7 @@ public class CorrespondenceAgencyClientSteps {
     public void theCorrespondenceAgencyClientIsCalledWithTheFollowingPayload(String expectedPayload) {
         List<String> payloads = webServicePayloadHolder.get();
         String actualPayload = payloads.get(0);
-        assertThat(actualPayload).isXmlEqualTo(expectedPayload);
+        assertThat(hideData(actualPayload)).isXmlEqualTo(expectedPayload);
 
         InsertCorrespondenceV2 in = xmlMarshaller.unmarshall(actualPayload, InsertCorrespondenceV2.class);
 
@@ -40,6 +40,10 @@ public class CorrespondenceAgencyClientSteps {
 
         messageSentHolder.set(new Message()
                 .attachments(attachments));
+    }
+
+    private String hideData(String s) {
+        return s.replaceAll("<altinn11:Data>[^<]*</altinn11:Data>", "<altinn11:Data></altinn11:Data>");
     }
 
     @SneakyThrows

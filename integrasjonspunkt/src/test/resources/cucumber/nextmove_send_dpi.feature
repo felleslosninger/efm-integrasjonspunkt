@@ -48,7 +48,7 @@ Feature: Sending a Next Move DPI message
                 }
             ]
         },
-        "dpi_digital": {
+        "digital": {
           "title" : "Min supertittel",
           "securityLevel": "3",
           "primaryDocumentFilename": "arkivmelding.xml"
@@ -215,7 +215,7 @@ Feature: Sending a Next Move DPI message
                 }
             ]
         },
-        "dpo": {
+        "digital": {
           "securityLevel": "3",
           "primaryDocumentFilename": "arkivmelding.xml"
         }
