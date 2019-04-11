@@ -7,9 +7,12 @@ import no.arkivverket.standarder.noark5.arkivmelding.Journalpost;
 import no.arkivverket.standarder.noark5.arkivmelding.Korrespondansepart;
 import no.arkivverket.standarder.noark5.arkivmelding.Saksmappe;
 import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
-import no.difi.meldingsutveksling.Process;
-import no.difi.meldingsutveksling.*;
+import no.difi.meldingsutveksling.DocumentType;
+import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.NextMoveConsts;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateSBD;
 import no.difi.meldingsutveksling.domain.NextMoveStreamedFile;
 import no.difi.meldingsutveksling.domain.StreamedFile;
@@ -50,6 +53,7 @@ public class SvarInnNextMoveForwarder implements Consumer<Forsendelse> {
     private final AsicHandler asicHandler;
     private final NextMoveMessageInRepository messageRepo;
     private final CreateSBD createSBD;
+    private final IntegrasjonspunktProperties properties;
 
     @Override
     public void accept(Forsendelse forsendelse) {
@@ -67,7 +71,7 @@ public class SvarInnNextMoveForwarder implements Consumer<Forsendelse> {
                 context.getAvsender().getOrgNummer(),
                 context.getMottaker().getOrgNummer(),
                 context.getConversationId(),
-                Process.ARKIVMELDING_ADMINISTRASJON.getValue(),
+                properties.getFiks().getInn().getProcess(),
                 DocumentType.ARKIVMELDING,
                 new ArkivmeldingMessage());
         NextMoveInMessage nextMoveMessage = NextMoveInMessage.of(sbd, ServiceIdentifier.DPO);

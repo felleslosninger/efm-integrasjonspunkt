@@ -40,5 +40,7 @@ public class FiksConfig {
         private boolean mailOnError;
         private String mailSubject;
         private String fallbackSenderOrgNr;
+        @NotNull
+        private String process;
     }
 }
