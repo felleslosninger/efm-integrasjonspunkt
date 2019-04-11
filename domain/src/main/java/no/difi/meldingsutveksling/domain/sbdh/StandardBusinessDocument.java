@@ -23,7 +23,7 @@ import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.validation.InstanceOf;
-import no.difi.meldingsutveksling.validation.group.ValidationGroups.ServiceIdentifier.*;
+import no.difi.meldingsutveksling.validation.group.ValidationGroups;
 import no.difi.meldingsutveksling.validation.group.sequenceprovider.StandardBusinessDocumentGroupSequenceProvider;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.hibernate.validator.group.GroupSequenceProvider;
@@ -68,7 +68,7 @@ import java.util.Optional;
 @Entity
 @Table(name = "document")
 @JsonSerialize(using = NextMoveMessageSerializer.class)
-//@GroupSequenceProvider(StandardBusinessDocumentGroupSequenceProvider.class)
+@GroupSequenceProvider(StandardBusinessDocumentGroupSequenceProvider.class)
 @ApiModel(description = "Standard Business Document")
 public class StandardBusinessDocument extends AbstractEntity<Long> {
 
@@ -83,11 +83,11 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
     @JsonAlias({"arkivmelding", "digital", "print", "innsynskrav", "publisering"})
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = BusinessMessage.class)
     @NotNull
-//    @InstanceOf(value = DpoMessage.class, groups = {Dpo.class, Dpf.class})
-//    @InstanceOf(value = DpvMessage.class, groups = Dpv.class)
-//    @InstanceOf(value = DpiDigitalMessage.class, groups = DpiDigital.class)
-//    @InstanceOf(value = DpiPrintMessage.class, groups = DpiPrint.class)
-//    @InstanceOf(value = DpeMessage.class, groups = {DpeInnsyn.class, DpeData.class, DpeReceipt.class})
+    @InstanceOf(value = ArkivmeldingMessage.class, groups = ValidationGroups.DocumentType.Arkivmelding.class)
+    @InstanceOf(value = DpiDigitalMessage.class, groups = ValidationGroups.DocumentType.Digital.class)
+    @InstanceOf(value = DpiPrintMessage.class, groups = ValidationGroups.DocumentType.Print.class)
+    @InstanceOf(value = DpeInnsynMessage.class, groups = ValidationGroups.DocumentType.Innsynskrav.class)
+    @InstanceOf(value = DpePubliseringMessage.class, groups = ValidationGroups.DocumentType.Publisering.class)
     @Getter(onMethod_ =
     @ApiModelProperty(name = "arkivmelding|digital|print|innsynskrav|publisering", value = "The payload of the document", required = true, dataType = "no.difi.meldingsutveksling.nextmove.BusinessMessage")
     )

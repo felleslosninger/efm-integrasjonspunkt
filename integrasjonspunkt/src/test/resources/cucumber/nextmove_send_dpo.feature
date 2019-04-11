@@ -2,7 +2,6 @@ Feature: Sending a Next Move DPO message
 
   Background:
     Given a "GET" request to "http://localhost:9099/identifier/987464291?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/987464291.json"
-    And a "GET" request to "http://localhost:9099/identifier/910075918?notification=obligated&process=urn:no:difi:profile:eFormidling:ver2.0" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
     And a "GET" request to "http://localhost:9099/identifier/910075918?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
 
   Scenario: As a user I want to send a DPO message
@@ -18,7 +17,7 @@ Feature: Sending a Next Move DPO message
                                 "expectedResponseDateTime": "2019-05-10T00:31:52Z"
                             }
                         ],
-                        "identifier": "urn:no:difi:profile:eFormidling:ver2.0",
+                        "identifier": "urn:no:difi:profile:administrasjon::arkivmelding",
                         "instanceIdentifier": "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
                         "type": "ConversationId"
                     }
@@ -27,8 +26,8 @@ Feature: Sending a Next Move DPO message
             "documentIdentification": {
                 "creationDateAndTime": "2019-04-11T15:29:58.753+02:00",
                 "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
-                "standard": "urn:no:difi:eFormidling:xsd::Message##urn:www.difi.no:eFormidling:melding:2.0",
-                "type": "melding",
+                "standard": "urn:no:difi.arkivmelding:xsd::arkivmelding",
+                "type": "arkivmelding",
                 "typeVersion": "2.0"
             },
             "headerVersion": "1.0",
@@ -205,7 +204,7 @@ Feature: Sending a Next Move DPO message
                                 "expectedResponseDateTime": "2019-05-10T00:31:52Z"
                             }
                         ],
-                        "identifier": "urn:no:difi:profile:eFormidling:ver2.0",
+                        "identifier": "urn:no:difi:profile:administrasjon::arkivmelding",
                         "instanceIdentifier": "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
                         "type": "ConversationId"
                     }
@@ -214,8 +213,8 @@ Feature: Sending a Next Move DPO message
             "documentIdentification": {
                 "creationDateAndTime": "2019-04-11T15:29:58.753+02:00",
                 "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
-                "standard": "urn:no:difi:eFormidling:xsd::Message##urn:www.difi.no:eFormidling:melding:2.0",
-                "type": "melding",
+                "standard": "urn:no:difi.arkivmelding:xsd::arkivmelding",
+                "type": "arkivmelding",
                 "typeVersion": "2.0"
             },
             "headerVersion": "1.0",

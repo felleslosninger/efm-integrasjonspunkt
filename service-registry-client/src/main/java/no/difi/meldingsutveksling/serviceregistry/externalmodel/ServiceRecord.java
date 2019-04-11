@@ -2,9 +2,11 @@ package no.difi.meldingsutveksling.serviceregistry.externalmodel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 @Data
@@ -55,5 +57,13 @@ public class ServiceRecord {
     @JsonIgnore
     public ServiceIdentifier getServiceIdentifier() {
         return getService().getIdentifier();
+    }
+
+    public Optional<String> getStandard(DocumentType documentType) {
+        final String suffix = "::" + documentType.getType();
+
+        return documentTypes.stream()
+                .filter(p -> p.endsWith(suffix))
+                .findAny();
     }
 }

@@ -12,7 +12,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.DocumentType;
+import no.difi.meldingsutveksling.Process;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.nextmove.AbstractEntity;
@@ -70,28 +71,9 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 @Table(name = "header")
 public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
 
-    public enum DocumentType {KVITTERING, MELDING, DPE_RECEIPT}
-
-    public static final String VERSION_1 = "1.0";
-    public static final String VERSION_2 = "2.0";
-    public static final String STANDARD_LEGACY = "urn:no:difi:meldingsutveksling:1.0";
-    public static final String KVITTERING_TYPE = "kvittering";
-    public static final String KVITTERING_VERSION = "urn:no:difi:meldingsutveksling:1.0";
-    public static final String MELDING_TYPE = "melding";
-    public static final String MELDING_VERSION = "urn:no:difi:meldingsutveksling:1.0";
-
-    public static final String NEXTMOVE_TYPE = "nextmove";
-    public static final String STANDARD_NEXTMOVE = "urn:no:difi:meldingsutveksling:2.0";
-    public static final String STANDARD_BESTEDU = "urn:no:difi:profile:eformidling:ver1.0";
-    public static final String STANDARD_DPO = "urn:no:difi:profile:eformidling:ver2.0";
-    public static final String STANDARD_DPV = "urn:no:difi:profile:eformidling:ver2.0";
-    public static final String STANDARD_DPI = "urn:no:difi:profile:digitalpost:ver1.0";
-    public static final String STANDARD_DPE_DATA = "urn:no:difi:profile:einnsyn-journalpost:ver1.0";
-    public static final String STANDARD_DPE_INNSYN = "urn:no:difi:profile:einnsyn-innsynskrav:ver1.0";
-
     @XmlElement(name = "HeaderVersion", required = true)
     @NotNull
-    protected String headerVersion;
+    private String headerVersion;
 
     @XmlElement(name = "Sender", required = true)
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -99,7 +81,7 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
     @NotEmpty
     @Size(min = 1, max = 1)
     @Valid
-    protected Set<Sender> sender;
+    private Set<Sender> sender;
 
     @XmlElement(name = "Receiver", required = true)
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -107,24 +89,24 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
     @NotEmpty
     @Size(min = 1, max = 1)
     @Valid
-    protected Set<Receiver> receiver;
+    private Set<Receiver> receiver;
 
     @XmlElement(name = "DocumentIdentification", required = true)
     @Embedded
     @NotNull
     @Valid
-    protected DocumentIdentification documentIdentification;
+    private DocumentIdentification documentIdentification;
 
     @XmlElement(name = "Manifest")
     @Valid
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    protected Manifest manifest;
+    private Manifest manifest;
 
     @XmlElement(name = "BusinessScope")
     @Embedded
     @NotNull
     @Valid
-    protected BusinessScope businessScope;
+    private BusinessScope businessScope;
 
     public void setSender(Set<Sender> sender) {
         this.sender = sender;
@@ -155,12 +137,12 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
     }
 
     @JsonIgnore
-    public Optional<Sender> getFirstSender() {
+    Optional<Sender> getFirstSender() {
         return sender.stream().findFirst();
     }
 
     @JsonIgnore
-    public Optional<Receiver> getFirstReceiver() {
+    Optional<Receiver> getFirstReceiver() {
         return receiver.stream().findFirst();
     }
 
@@ -181,12 +163,15 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
     public static class Builder {
 
         private static final String HEADER_VERSION = "1.0";
+        private static final String TYPE_VERSION = "2.0";
 
         private Organisasjonsnummer avsender;
         private Organisasjonsnummer mottaker;
         private String journalPostId;
         private String conversationId;
         private DocumentType documentType;
+        private String standard;
+        private Process process;
 
         public Builder from(Organisasjonsnummer avsender) {
             this.avsender = avsender;
@@ -208,6 +193,16 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
             return this;
         }
 
+        public Builder standard(String standard) {
+            this.standard = standard;
+            return this;
+        }
+
+        public Builder process(Process process) {
+            this.process = process;
+            return this;
+        }
+
         public Builder relatedToConversationId(String conversationId) {
             this.conversationId = conversationId;
             return this;
@@ -219,7 +214,7 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
                     .addSender(createSender(avsender))
                     .addReceiver(createReciever(mottaker))
                     .setBusinessScope(createBusinessScope(fromConversationId(conversationId)))
-                    .setDocumentIdentification(createDocumentIdentification(documentType));
+                    .setDocumentIdentification(createDocumentIdentification(documentType, standard));
             if (!isNullOrEmpty(journalPostId)) {
                 sbdh.getBusinessScope().getScope().add(fromJournalPostId(journalPostId));
             }
@@ -227,53 +222,29 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
         }
 
         private Sender createSender(Organisasjonsnummer orgNummer) {
-            Sender sender = new Sender();
-            sender.setIdentifier(new PartnerIdentification()
-                    .setValue(orgNummer.asIso6523())
-                    .setAuthority(orgNummer.asIso6523()));
-            return sender;
+            return new Sender()
+                    .setIdentifier(new PartnerIdentification()
+                            .setValue(orgNummer.asIso6523())
+                            .setAuthority(orgNummer.asIso6523()));
         }
 
         private Receiver createReciever(Organisasjonsnummer orgNummer) {
-            Receiver sender = new Receiver();
-            sender.setIdentifier(new PartnerIdentification()
-                    .setValue(orgNummer.asIso6523())
-                    .setAuthority(orgNummer.asIso6523()));
-            return sender;
+            return new Receiver()
+                    .setIdentifier(new PartnerIdentification()
+                            .setValue(orgNummer.asIso6523())
+                            .setAuthority(orgNummer.asIso6523()));
         }
 
-        private DocumentIdentification createDocumentIdentification(DocumentType documentType) {
+        private DocumentIdentification createDocumentIdentification(DocumentType documentType, String standard) {
             if (documentType == null) {
                 throw new MeldingsUtvekslingRuntimeException("DocumentType must be set");
             }
 
-            switch (documentType) {
-                case KVITTERING:
-                    return createDocumentIdentification(KVITTERING_TYPE, KVITTERING_VERSION);
-                case MELDING:
-                    return createDocumentIdentification(MELDING_TYPE, MELDING_VERSION);
-                case DPE_RECEIPT:
-                    return createDocumentIdentification(ServiceIdentifier.DPE_RECEIPT.name(), STANDARD_NEXTMOVE, VERSION_2);
-                default:
-                    throw new MeldingsUtvekslingRuntimeException(String.format("Unsupported DocumentType: %s", documentType.name()));
-            }
-        }
-
-        private DocumentIdentification createDocumentIdentification(String type, String standard, String version) {
             return new DocumentIdentification()
                     .setCreationDateAndTime(ZonedDateTime.now())
                     .setStandard(standard)
-                    .setType(type)
-                    .setTypeVersion(version)
-                    .setInstanceIdentifier(UUID.randomUUID().toString());
-        }
-
-        private DocumentIdentification createDocumentIdentification(String type, String version) {
-            return new DocumentIdentification()
-                    .setCreationDateAndTime(ZonedDateTime.now())
-                    .setStandard(STANDARD_LEGACY)
-                    .setType(type)
-                    .setTypeVersion(version)
+                    .setType(documentType.getType())
+                    .setTypeVersion(TYPE_VERSION)
                     .setInstanceIdentifier(UUID.randomUUID().toString());
         }
 
@@ -295,7 +266,11 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
         }
 
         private Scope createDefaultScope() {
-            return new Scope().setIdentifier(STANDARD_LEGACY);
+            if (process == null) {
+                throw new MeldingsUtvekslingRuntimeException("Process must be set");
+            }
+
+            return new Scope().setIdentifier(process.getValue());
         }
     }
 }

@@ -33,11 +33,12 @@
       "dpeCapabilities": [
         "DPE_INNSYN"
       ],
-      "process": "urn:no:difi:profile:eFormidling:ver2.0",
+      "process": "urn:no:difi:profile:administrasjon::arkivmelding",
       "documentTypes": [
-        "urn:no:difi:eFormidling:xsd::Message##urn:www.difi.no:eFormidling:melding:2.0",
-        "urn:no:difi:eFormidling:xsd::Receipt##urn:www.difi.no:eFormidling:melding:2.0",
-        "urn:no:difi:eFormidling:xsd::Error##urn:www.difi.no:eFormidling:melding:2.0"
+        "urn:no:difi.arkivmelding:xsd::arkivmelding",
+        "urn:no:difi.arkivmelding:xsd::arkivmelding_kvittering",
+        "urn:no:difi.arkivmelding:xsd::status*",
+        "urn:no:difi.arkivmelding:xsd::feil*"
       ],
       "service": {
         "identifier": "DPO",

@@ -4,6 +4,7 @@ import no.difi.meldingsutveksling.AltinnWsClientFactory;
 import no.difi.meldingsutveksling.ApplicationContextHolder;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
+import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
 import no.difi.meldingsutveksling.nextmove.ConversationResourceRepository;
 import no.difi.meldingsutveksling.nextmove.ConversationResourceUnlocker;
 import no.difi.meldingsutveksling.nextmove.NextMoveQueue;
@@ -49,7 +50,8 @@ public class SchedulingConfiguration {
             SvarInnService svarInnService,
             SvarInnEduCoreForwarder svarInnEduCoreForwarder,
             SvarInnNextMoveForwarder svarInnNextMoveForwarder,
-            ApplicationContextHolder applicationContextHolder) {
+            ApplicationContextHolder applicationContextHolder,
+            SBDReceiptFactory sbdReceiptFactory) {
         return new MessagePolling(
                 properties,
                 internalQueue,
@@ -64,6 +66,7 @@ public class SchedulingConfiguration {
                 svarInnService,
                 svarInnEduCoreForwarder,
                 svarInnNextMoveForwarder,
-                applicationContextHolder);
+                applicationContextHolder,
+                sbdReceiptFactory);
     }
 }

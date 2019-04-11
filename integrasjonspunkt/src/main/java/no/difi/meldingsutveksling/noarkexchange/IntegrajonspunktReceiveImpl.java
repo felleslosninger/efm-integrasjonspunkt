@@ -68,6 +68,7 @@ public class IntegrajonspunktReceiveImpl {
     private final MessageSender messageSender;
     private final EDUCoreFactory eduCoreFactory;
     private final MessagePersister messagePersister;
+    private final SBDReceiptFactory sbdReceiptFactory;
 
     private ApplicationContext context;
 
@@ -80,7 +81,8 @@ public class IntegrajonspunktReceiveImpl {
                                        ConversationService conversationService,
                                        MessageSender messageSender,
                                        EDUCoreFactory eduCoreFactory,
-                                       ObjectProvider<MessagePersister> messagePersister) {
+                                       ObjectProvider<MessagePersister> messagePersister,
+                                       SBDReceiptFactory sbdReceiptFactory) {
         this.context = context;
         this.transportFactory = transportFactory;
         this.localNoark = localNoark.getIfAvailable();
@@ -91,6 +93,7 @@ public class IntegrajonspunktReceiveImpl {
         this.messageSender = messageSender;
         this.eduCoreFactory = eduCoreFactory;
         this.messagePersister = messagePersister.getIfUnique();
+        this.sbdReceiptFactory = sbdReceiptFactory;
     }
 
     public CorrelationInformation forwardToNoarkSystem(StandardBusinessDocument sbd) throws MessageException {
@@ -192,7 +195,7 @@ public class IntegrajonspunktReceiveImpl {
     }
 
     public void sendReceiptOpen(StandardBusinessDocument inputDocument) {
-        StandardBusinessDocument doc = SBDReceiptFactory.createAapningskvittering(inputDocument.getMessageInfo(), keyInfo);
+        StandardBusinessDocument doc = sbdReceiptFactory.createAapningskvittering(inputDocument.getMessageInfo(), keyInfo);
         sendReceipt(doc);
     }
 

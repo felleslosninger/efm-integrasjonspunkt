@@ -7,9 +7,8 @@ import no.arkivverket.standarder.noark5.arkivmelding.Journalpost;
 import no.arkivverket.standarder.noark5.arkivmelding.Korrespondansepart;
 import no.arkivverket.standarder.noark5.arkivmelding.Saksmappe;
 import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
-import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
-import no.difi.meldingsutveksling.NextMoveConsts;
-import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.Process;
+import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateSBD;
 import no.difi.meldingsutveksling.domain.NextMoveStreamedFile;
@@ -68,7 +67,8 @@ public class SvarInnNextMoveForwarder implements Consumer<Forsendelse> {
                 context.getAvsender().getOrgNummer(),
                 context.getMottaker().getOrgNummer(),
                 context.getConversationId(),
-                ServiceIdentifier.DPO,
+                Process.ARKIVMELDING_ADMINISTRASJON.getValue(),
+                DocumentType.ARKIVMELDING,
                 new ArkivmeldingMessage());
         NextMoveInMessage nextMoveMessage = NextMoveInMessage.of(sbd, ServiceIdentifier.DPO);
         NextMoveStreamedFile arkivmeldingFile = getArkivmeldingFile(forsendelse);

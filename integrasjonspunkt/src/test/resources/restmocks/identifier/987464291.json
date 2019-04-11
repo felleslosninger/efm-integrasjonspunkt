@@ -13,11 +13,12 @@
     "dpeCapabilities": [
       "DPE_INNSYN"
     ],
-    "process": "urn:no:difi:profile:eFormidling:ver2.0",
+    "process": "urn:no:difi:profile:einnsyn-innsynskrav:ver1.0",
     "documentTypes": [
-      "urn:no:difi:eFormidling:xsd::Message##urn:www.difi.no:eFormidling:melding:2.0",
-      "urn:no:difi:eFormidling:xsd::Receipt##urn:www.difi.no:eFormidling:melding:2.0",
-      "urn:no:difi:eFormidling:xsd::Error##urn:www.difi.no:eFormidling:melding:2.0"
+      "urn:no:difi.einnsyn:xsd:innsyn::innsynskrav",
+      "urn:no:difi.einnsyn:xsd::einnsyn_kvittering",
+      "urn:no:difi.eformidling:xsd::status*",
+      "urn:no:difi.eformidling:xsd::feil*"
     ],
     "service": {
       "identifier": "DPO",
@@ -33,11 +34,12 @@
       "dpeCapabilities": [
         "DPE_INNSYN"
       ],
-      "process": "urn:no:difi:profile:eFormidling:ver2.0",
+      "process": "urn:no:difi:profile:einnsyn-innsynskrav:ver1.0",
       "documentTypes": [
-        "urn:no:difi:eFormidling:xsd::Message##urn:www.difi.no:eFormidling:melding:2.0",
-        "urn:no:difi:eFormidling:xsd::Receipt##urn:www.difi.no:eFormidling:melding:2.0",
-        "urn:no:difi:eFormidling:xsd::Error##urn:www.difi.no:eFormidling:melding:2.0"
+        "urn:no:difi.einnsyn:xsd:innsyn::innsynskrav",
+        "urn:no:difi.einnsyn:xsd::einnsyn_kvittering",
+        "urn:no:difi.eformidling:xsd::status*",
+        "urn:no:difi.eformidling:xsd::feil*"
       ],
       "service": {
         "identifier": "DPO",

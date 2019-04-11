@@ -14,6 +14,8 @@ import com.jayway.jsonpath.spi.json.GsonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.GsonMappingProvider;
 import com.nimbusds.jose.proc.BadJWSException;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.DocumentType;
+import no.difi.meldingsutveksling.Process;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
@@ -122,9 +124,30 @@ public class ServiceRegistryLookup {
         return srsCache.getUnchecked(new Parameters(identifier, notification));
     }
 
+    public String getStandard(String identifier, Process process, DocumentType documentType) {
+        return getStandard(identifier, process.getValue(), documentType);
+    }
+
+    public String getStandard(String identifier, String process, DocumentType documentType) {
+        ServiceRecord serviceRecord = getServiceRecordByProcess(identifier, process)
+                .orElseThrow(() -> new ServiceRegistryLookupException(
+                        String.format("Process '%s' not found in SR for identifier '%s'",
+                                process, identifier)));
+
+        return serviceRecord.getStandard(documentType)
+                .orElseThrow(() -> new ServiceRegistryLookupException(
+                        String.format("Standard not found for documentType '%s' for identifier '%s'",
+                                documentType.getType(), identifier)));
+
+    }
+
+    public Optional<ServiceRecord> getServiceRecordByProcess(String identifier, Process process) {
+        return getServiceRecordByProcess(identifier, process.getValue());
+    }
+
     public Optional<ServiceRecord> getServiceRecordByProcess(String identifier, String process) {
         Notification notification = properties.isVarslingsplikt() ? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
-        List<ServiceRecord> serviceRecords = srsCache.getUnchecked(new Parameters(identifier, process, notification));
+        List<ServiceRecord> serviceRecords = srsCache.getUnchecked(new Parameters(identifier, notification));
         return serviceRecords.stream().filter(isProcess(process)).findFirst();
     }
 

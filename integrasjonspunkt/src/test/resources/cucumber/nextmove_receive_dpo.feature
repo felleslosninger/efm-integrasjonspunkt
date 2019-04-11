@@ -14,7 +14,7 @@ Feature: Receiving a Next Move DPO message
                                 "expectedResponseDateTime": "2019-05-10T00:31:52Z"
                             }
                         ],
-                        "identifier": "urn:no:difi:meldingsutveksling:2.0",
+                        "identifier": "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
                         "instanceIdentifier": "37efbd4c-413d-4e2c-bbc5-257ef4a65a45",
                         "type": "ConversationId"
                     }
@@ -23,8 +23,8 @@ Feature: Receiving a Next Move DPO message
             "documentIdentification": {
                 "creationDateAndTime": "2019-04-11T15:29:58.753+02:00",
                 "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
-                "standard": "urn:no:difi:meldingsutveksling:2.0",
-                "type": "DPO",
+                "standard": "urn:no:difi.arkivmelding:xsd::arkivmelding",
+                "type": "arkivmelding",
                 "typeVersion": "2.0"
             },
             "headerVersion": "1.0",

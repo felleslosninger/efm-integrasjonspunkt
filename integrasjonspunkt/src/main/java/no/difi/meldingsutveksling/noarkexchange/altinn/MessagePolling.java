@@ -59,6 +59,7 @@ public class MessagePolling {
     private final SvarInnEduCoreForwarder svarInnEduCoreForwarder;
     private final SvarInnNextMoveForwarder svarInnNextMoveForwarder;
     private final ApplicationContextHolder applicationContextHolder;
+    private final SBDReceiptFactory sbdReceiptFactory;
 
     private ServiceRecord serviceRecord;
     private CompletableFuture batchRead;
@@ -182,7 +183,7 @@ public class MessagePolling {
     }
 
     private void sendReceipt(MessageInfo messageInfo) {
-        StandardBusinessDocument doc = SBDReceiptFactory.createLeveringsKvittering(messageInfo, keyInfo);
+        StandardBusinessDocument doc = sbdReceiptFactory.createLeveringsKvittering(messageInfo, keyInfo);
         Transport t = transportFactory.createTransport(doc);
         t.send(applicationContextHolder.getApplicationContext(), doc);
     }

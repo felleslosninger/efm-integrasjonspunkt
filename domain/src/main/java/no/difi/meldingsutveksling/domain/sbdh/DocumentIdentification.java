@@ -16,6 +16,7 @@ import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 
 
@@ -52,7 +53,7 @@ import java.time.ZonedDateTime;
 })
 @Data
 @Embeddable
-public class DocumentIdentification {
+public class DocumentIdentification implements Serializable {
 
     @XmlElement(name = "Standard", required = true)
     @NotNull

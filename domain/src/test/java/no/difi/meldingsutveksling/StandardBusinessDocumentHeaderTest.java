@@ -7,10 +7,6 @@ import no.difi.meldingsutveksling.domain.sbdh.Receiver;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import org.junit.Test;
 
-import java.util.HashSet;
-
-import static no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader.DocumentType.KVITTERING;
-import static no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader.DocumentType.MELDING;
 import static org.junit.Assert.assertEquals;
 
 public class StandardBusinessDocumentHeaderTest {
@@ -56,10 +52,13 @@ public class StandardBusinessDocumentHeaderTest {
                 .to(Organisasjonsnummer.fromIso6523("123456789"))
                 .relatedToJournalPostId("some journalpost")
                 .relatedToConversationId("some conversation")
-                .type(KVITTERING)
+                .process(Process.LEGACY)
+                .standard(Standard.LEGACY.getValue())
+                .type(DocumentType.BESTEDU_KVITTERING)
                 .build();
-        assertEquals(StandardBusinessDocumentHeader.KVITTERING_TYPE, h.getDocumentIdentification().getType());
-        assertEquals(StandardBusinessDocumentHeader.KVITTERING_VERSION, h.getDocumentIdentification().getTypeVersion());
+        assertEquals(Standard.LEGACY.getValue(), h.getDocumentIdentification().getStandard());
+        assertEquals(DocumentType.BESTEDU_KVITTERING.getType(), h.getDocumentIdentification().getType());
+        assertEquals("2.0", h.getDocumentIdentification().getTypeVersion());
     }
 
     @Test
@@ -69,10 +68,13 @@ public class StandardBusinessDocumentHeaderTest {
                 .to(Organisasjonsnummer.fromIso6523("123456789"))
                 .relatedToJournalPostId("some journalpost")
                 .relatedToConversationId("some conversation")
-                .type(MELDING)
+                .process(Process.LEGACY)
+                .standard(Standard.LEGACY.getValue())
+                .type(DocumentType.BESTEDU_MELDING)
                 .build();
-        assertEquals(StandardBusinessDocumentHeader.MELDING_TYPE, h.getDocumentIdentification().getType());
-        assertEquals(StandardBusinessDocumentHeader.MELDING_VERSION, h.getDocumentIdentification().getTypeVersion());
+        assertEquals(Standard.LEGACY.getValue(), h.getDocumentIdentification().getStandard());
+        assertEquals(DocumentType.BESTEDU_MELDING.getType(), h.getDocumentIdentification().getType());
+        assertEquals("2.0", h.getDocumentIdentification().getTypeVersion());
     }
 
     @Test(expected = MeldingsUtvekslingRuntimeException.class)

@@ -1,7 +1,8 @@
 Feature: Receiving a Next Move DPF message
 
   Background:
-    Given Fiks prepares a message with the following body:
+    Given a "GET" request to "http://localhost:9099/identifier/910229028?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910229028.json"
+    And Fiks prepares a message with the following body:
     """
     [
       {
@@ -123,17 +124,17 @@ Feature: Receiving a Next Move DPF message
           "contactInformation" : [ ]
         } ],
         "documentIdentification" : {
-          "standard" : "urn:no:difi:eFormidling:xsd::Melding##urn:www.difi.no:eFormidling:melding:2.0 ",
+          "standard" : "urn:no:difi.arkivmelding:xsd::arkivmelding",
           "typeVersion" : "2.0",
           "instanceIdentifier" : "19efbd4c-413d-4e2c-bbc5-257ef4a65b38",
-          "type" : "DPO",
+          "type" : "arkivmelding",
           "creationDateAndTime" : "2019-03-25T12:38:23+01:00"
         },
         "businessScope" : {
           "scope" : [ {
             "type" : "ConversationId",
             "instanceIdentifier" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
-            "identifier" : "urn:no:difi:meldingsutveksling:1.0",
+            "identifier" : "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
             "scopeInformation" : [ ]
           } ]
         }

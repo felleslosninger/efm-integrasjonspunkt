@@ -1,10 +1,12 @@
 package no.difi.meldingsutveksling.dokumentpakking.service;
 
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.DocumentType;
+import no.difi.meldingsutveksling.Process;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.*;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
@@ -18,43 +20,56 @@ import static no.difi.meldingsutveksling.dokumentpakking.service.ScopeFactory.fr
 public class CreateSBD {
     private static final String STANDARD = "urn:no:difi:meldingsutveksling:1.0";
     private static final String HEADER_VERSION = "1.0";
-    private static final String TYPE_VERSION_1 = "1.0";
     private static final String TYPE_VERSION_2 = "2.0";
-    private static final String DPO_MELDING_DOCTYPE = "urn:no:difi:eFormidling:xsd::Melding##urn:www.difi.no:eFormidling:melding:2.0 ";
 
+    private final ServiceRegistryLookup serviceRegistryLookup;
     private final UUIDGenerator uuidGenerator;
     private final Clock clock;
 
-    public StandardBusinessDocument createSBD(Organisasjonsnummer avsender, Organisasjonsnummer mottaker, Object payload, String conversationId, String type, String journalPostId) {
+    public StandardBusinessDocument createSBD(Organisasjonsnummer avsender,
+                                              Organisasjonsnummer mottaker,
+                                              Object payload,
+                                              String conversationId,
+                                              DocumentType documentType,
+                                              String journalPostId) {
         return new StandardBusinessDocument()
-                .setStandardBusinessDocumentHeader(createHeader(avsender, mottaker, conversationId, type, journalPostId))
+                .setStandardBusinessDocumentHeader(createHeader(avsender, mottaker, conversationId, documentType, journalPostId))
                 .setAny(payload);
     }
 
     public StandardBusinessDocument createNextMoveSBD(Organisasjonsnummer avsender,
                                                       Organisasjonsnummer mottaker,
                                                       String conversationId,
-                                                      ServiceIdentifier serviceIdentifier,
+                                                      String process,
+                                                      DocumentType documentType,
                                                       Object any) {
         return new StandardBusinessDocument()
                 .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
                         .setHeaderVersion(HEADER_VERSION)
                         .addSender(createSender(avsender))
                         .addReceiver(createReceiver(mottaker))
-                        .setDocumentIdentification(createDocumentIdentification(serviceIdentifier, DPO_MELDING_DOCTYPE))
-                        .setBusinessScope(createBusinessScope(fromConversationId(conversationId)))
+                        .setDocumentIdentification(createDocumentIdentification(documentType, getStandard(mottaker.toString(), process, documentType)))
+                        .setBusinessScope(createBusinessScope(fromConversationId(conversationId, process)))
                 ).setAny(any);
     }
 
-    private StandardBusinessDocumentHeader createHeader(Organisasjonsnummer avsender, Organisasjonsnummer mottaker,
-                                                        String conversationId, String documentType, String
-                                                                journalPostId) {
+    private String getStandard(String identifier, String process, DocumentType documentType) {
+        return serviceRegistryLookup.getStandard(identifier, process, documentType);
+    }
+
+    private StandardBusinessDocumentHeader createHeader(Organisasjonsnummer avsender,
+                                                        Organisasjonsnummer mottaker,
+                                                        String conversationId,
+                                                        DocumentType documentType,
+                                                        String journalPostId) {
         return new StandardBusinessDocumentHeader()
                 .setHeaderVersion(HEADER_VERSION)
                 .addSender(createSender(avsender))
                 .addReceiver(createReceiver(mottaker))
-                .setDocumentIdentification(createDocumentIdentification(documentType))
-                .setBusinessScope(createBusinessScope(fromConversationId(conversationId), fromJournalPostId(journalPostId)));
+                .setDocumentIdentification(createDocumentIdentification(documentType, STANDARD))
+                .setBusinessScope(createBusinessScope(
+                        fromConversationId(conversationId, Process.LEGACY.getValue()),
+                        fromJournalPostId(journalPostId, Process.LEGACY.getValue())));
     }
 
     private Receiver createReceiver(Organisasjonsnummer orgNummer) {
@@ -75,21 +90,12 @@ public class CreateSBD {
                 .setAuthority(orgNummer.asIso6523()));
     }
 
-    private DocumentIdentification createDocumentIdentification(ServiceIdentifier serviceIdentifier, String docType) {
+    private DocumentIdentification createDocumentIdentification(DocumentType documentType, String standard) {
         return new DocumentIdentification()
                 .setCreationDateAndTime(ZonedDateTime.now(clock))
-                .setStandard(docType)
-                .setType(serviceIdentifier.getFullname())
+                .setStandard(standard)
+                .setType(documentType.getType())
                 .setTypeVersion(TYPE_VERSION_2)
-                .setInstanceIdentifier(uuidGenerator.generate());
-    }
-
-    private DocumentIdentification createDocumentIdentification(String type) {
-        return new DocumentIdentification()
-                .setCreationDateAndTime(ZonedDateTime.now(clock))
-                .setStandard(STANDARD)
-                .setType(type)
-                .setTypeVersion(TYPE_VERSION_1)
                 .setInstanceIdentifier(uuidGenerator.generate());
     }
 

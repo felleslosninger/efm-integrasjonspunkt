@@ -1,7 +1,11 @@
 package no.difi.meldingsutveksling.kvittering;
 
 
+import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.Process;
+import no.difi.meldingsutveksling.Standard;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
@@ -12,7 +16,9 @@ import no.difi.meldingsutveksling.kvittering.xsd.Aapning;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.kvittering.xsd.Levering;
 import no.difi.meldingsutveksling.kvittering.xsd.ObjectFactory;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.apache.xml.security.exceptions.XMLSecurityException;
+import org.springframework.stereotype.Component;
 
 import javax.xml.xpath.XPathExpressionException;
 
@@ -26,19 +32,20 @@ import static no.difi.meldingsutveksling.kvittering.DocumentToDocumentConverter.
  *
  * @author Glenn bech
  */
+@Component
+@RequiredArgsConstructor
 public class SBDReceiptFactory {
 
-    private SBDReceiptFactory() {
-    }
+    private final ServiceRegistryLookup serviceRegistryLookup;
 
-    public static StandardBusinessDocument createAapningskvittering(MessageInfo messageInfo, IntegrasjonspunktNokkel keyInfo) {
+    public StandardBusinessDocument createAapningskvittering(MessageInfo messageInfo, IntegrasjonspunktNokkel keyInfo) {
         Kvittering k = new Kvittering();
         k.setAapning(new Aapning());
         k.setTidspunkt(XMLTimeStamp.createTimeStamp());
         return signAndWrapDocument(messageInfo, keyInfo, k);
     }
 
-    public static StandardBusinessDocument createLeveringsKvittering(MessageInfo messageInfo, IntegrasjonspunktNokkel keyInfo) {
+    public StandardBusinessDocument createLeveringsKvittering(MessageInfo messageInfo, IntegrasjonspunktNokkel keyInfo) {
         Kvittering k = new Kvittering();
         k.setLevering(new Levering());
         k.setTidspunkt(XMLTimeStamp.createTimeStamp());
@@ -47,20 +54,22 @@ public class SBDReceiptFactory {
                 k);
     }
 
-    public static StandardBusinessDocument createDpeReceiptFrom(StandardBusinessDocument sbd) {
-        StandardBusinessDocument receipt = new StandardBusinessDocument();
-        StandardBusinessDocumentHeader sbdh = new StandardBusinessDocumentHeader.Builder()
-                .from(Organisasjonsnummer.from(sbd.getReceiverIdentifier()))
-                .to(Organisasjonsnummer.from(sbd.getSenderIdentifier()))
-                .relatedToConversationId(sbd.getConversationId())
-                .type(StandardBusinessDocumentHeader.DocumentType.DPE_RECEIPT)
-                .build();
-        receipt.setStandardBusinessDocumentHeader(sbdh);
-        receipt.setAny(sbd.getAny());
-        return receipt;
+    public StandardBusinessDocument createDpeReceiptFrom(StandardBusinessDocument sbd, DocumentType documentType) {
+        String standard = serviceRegistryLookup.getStandard(sbd.getSenderIdentifier(), Process.EINNSYN, documentType);
+
+        return new StandardBusinessDocument()
+                .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader.Builder()
+                        .from(Organisasjonsnummer.from(sbd.getReceiverIdentifier()))
+                        .to(Organisasjonsnummer.from(sbd.getSenderIdentifier()))
+                        .relatedToConversationId(sbd.getConversationId())
+                        .process(Process.EINNSYN)
+                        .standard(standard)
+                        .type(documentType)
+                        .build())
+                .setAny(sbd.getAny());
     }
 
-    private static StandardBusinessDocument signAndWrapDocument(MessageInfo messageInfo, IntegrasjonspunktNokkel keyInfo, Kvittering kvittering) {
+    private StandardBusinessDocument signAndWrapDocument(MessageInfo messageInfo, IntegrasjonspunktNokkel keyInfo, Kvittering kvittering) {
 
         StandardBusinessDocument unsignedReceipt = new StandardBusinessDocument();
         StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader.Builder()
@@ -69,7 +78,9 @@ public class SBDReceiptFactory {
                 .to(new Organisasjonsnummer(messageInfo.getSenderOrgNumber()))
                 .relatedToConversationId(messageInfo.getConversationId())
                 .relatedToJournalPostId(messageInfo.getJournalPostId())
-                .type(StandardBusinessDocumentHeader.DocumentType.KVITTERING)
+                .process(Process.LEGACY)
+                .standard(Standard.LEGACY.getValue())
+                .type(DocumentType.BESTEDU_MELDING)
                 .build();
 
         unsignedReceipt.setStandardBusinessDocumentHeader(header);

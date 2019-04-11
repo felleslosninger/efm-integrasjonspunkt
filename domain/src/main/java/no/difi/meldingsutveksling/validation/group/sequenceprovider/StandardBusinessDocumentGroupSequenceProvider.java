@@ -1,15 +1,12 @@
 package no.difi.meldingsutveksling.validation.group.sequenceprovider;
 
-import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.domain.sbdh.DocumentIdentification;
+import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.validation.group.ValidationGroupFactory;
 import org.hibernate.validator.spi.group.DefaultGroupSequenceProvider;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 public class StandardBusinessDocumentGroupSequenceProvider implements DefaultGroupSequenceProvider<StandardBusinessDocument> {
@@ -19,11 +16,9 @@ public class StandardBusinessDocumentGroupSequenceProvider implements DefaultGro
         List<Class<?>> defaultGroupSequence = new ArrayList<>();
         defaultGroupSequence.add(StandardBusinessDocument.class);
 
-        getType(input).ifPresent(type ->
-                ServiceIdentifier.safeValueOf(type)
-                        .map(ValidationGroupFactory::toServiceIdentifier)
-                        .filter(Objects::nonNull)
-                        .ifPresent(defaultGroupSequence::add)
+        getType(input).ifPresent(type -> DocumentType.valueOfType(type)
+                .map(ValidationGroupFactory::toDocumentType)
+                .ifPresent(defaultGroupSequence::add)
         );
 
         return defaultGroupSequence;
@@ -31,8 +26,6 @@ public class StandardBusinessDocumentGroupSequenceProvider implements DefaultGro
 
     private Optional<String> getType(StandardBusinessDocument input) {
         return Optional.ofNullable(input)
-                .map(StandardBusinessDocument::getStandardBusinessDocumentHeader)
-                .map(StandardBusinessDocumentHeader::getDocumentIdentification)
-                .map(DocumentIdentification::getType);
+                .map(StandardBusinessDocument::getMessageType);
     }
 }

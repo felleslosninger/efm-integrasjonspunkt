@@ -1,35 +1,30 @@
 package no.difi.meldingsutveksling.validation.group;
 
-import no.difi.meldingsutveksling.ServiceIdentifier;
-
 import javax.validation.groups.Default;
 
 public interface ValidationGroups {
 
-    interface ServiceIdentifier extends Default {
+    interface DocumentType extends Default {
 
-        interface Dpo extends ServiceIdentifier {
+        interface Arkivmelding extends DocumentType {
         }
 
-        interface Dpv extends ServiceIdentifier {
+        interface ArkivmeldingKvittering extends DocumentType {
         }
 
-        interface DpiDigital extends ServiceIdentifier {
+        interface Digital extends DocumentType {
         }
 
-        interface DpiPrint extends ServiceIdentifier {
+        interface Print extends DocumentType {
         }
 
-        interface Dpf extends ServiceIdentifier {
+        interface Innsynskrav extends DocumentType {
         }
 
-        interface DpeInnsyn extends ServiceIdentifier {
+        interface Publisering extends DocumentType {
         }
 
-        interface DpeData extends ServiceIdentifier {
-        }
-
-        interface DpeReceipt extends ServiceIdentifier {
+        interface EInnsynKvittering extends DocumentType {
         }
     }
 }

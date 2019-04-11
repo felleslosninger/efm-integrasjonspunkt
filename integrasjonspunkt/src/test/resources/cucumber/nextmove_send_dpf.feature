@@ -3,7 +3,6 @@ Feature: Sending a Next Move DPF message
   Background:
 
     Given a "GET" request to "http://localhost:9099/identifier/987464291?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/987464291.json"
-    And a "GET" request to "http://localhost:9099/identifier/910075924?notification=obligated&process=urn:no:difi:profile:eFormidling:ver2.0" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075924.json"
     And a "GET" request to "http://localhost:9099/identifier/910075924?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075924.json"
     And a "GET" request to "http://localhost:9099/identifier/910077473?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
     And a SOAP request to "https://test.svarut.ks.no/tjenester/forsendelseservice/ForsendelsesServiceV9" will respond with the following payload:
@@ -27,7 +26,7 @@ Feature: Sending a Next Move DPF message
                                 "expectedResponseDateTime": "2019-05-10T00:31:52Z"
                             }
                         ],
-                        "identifier": "urn:no:difi:profile:eFormidling:ver2.0",
+                        "identifier": "urn:no:difi:profile:administrasjon::arkivmelding",
                         "instanceIdentifier": "45efbd4c-413d-4e2c-bbc5-257ef4a65a91",
                         "type": "ConversationId"
                     }
@@ -36,8 +35,8 @@ Feature: Sending a Next Move DPF message
             "documentIdentification": {
                 "creationDateAndTime": "2019-04-11T15:29:58.753+02:00",
                 "instanceIdentifier": "abc8849c-e281-4809-8555-7cd54952b916",
-                "standard": "urn:no:difi:meldingsutveksling:2.0",
-                "type": "DPO",
+                "standard": "urn:no:difi.arkivmelding:xsd::arkivmelding",
+                "type": "arkivmelding",
                 "typeVersion": "2.0"
             },
             "headerVersion": "1.0",

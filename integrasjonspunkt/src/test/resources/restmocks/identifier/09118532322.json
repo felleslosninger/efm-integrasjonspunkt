@@ -15,11 +15,10 @@
     ],
     "orgnrPostkasse": "9908:987464291",
     "postkasseAdresse": "dummy",
-    "process": "urn:no:difi:profile:eFormidling:ver2.0",
+    "process": "urn:no:difi:profile:DigitalpostInfo:ver1.0",
     "documentTypes": [
-      "urn:no:difi:eFormidling:xsd::Message##urn:www.difi.no:eFormidling:melding:2.0",
-      "urn:no:difi:eFormidling:xsd::Receipt##urn:www.difi.no:eFormidling:melding:2.0",
-      "urn:no:difi:eFormidling:xsd::Error##urn:www.difi.no:eFormidling:melding:2.0"
+      "urn:no:difi.digitalpost:xsd:digital::digital",
+      "urn:no:difi.digitalpost:xsd:fysisk::print"
     ],
     "service": {
       "identifier": "DPI_DIGITAL",
@@ -36,11 +35,10 @@
       ],
       "orgnrPostkasse": "9908:987464291",
       "postkasseAdresse": "dummy",
-      "process": "urn:no:difi:profile:eFormidling:ver2.0",
+      "process": "urn:no:difi:profile:DigitalpostInfo:ver1.0",
       "documentTypes": [
-        "urn:no:difi:eFormidling:xsd::Message##urn:www.difi.no:eFormidling:melding:2.0",
-        "urn:no:difi:eFormidling:xsd::Receipt##urn:www.difi.no:eFormidling:melding:2.0",
-        "urn:no:difi:eFormidling:xsd::Error##urn:www.difi.no:eFormidling:melding:2.0"
+        "urn:no:difi.digitalpost:xsd:digital::digital",
+        "urn:no:difi.digitalpost:xsd:fysisk::print"
       ],
       "service": {
         "identifier": "DPI_DIGITAL",

@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.noarkexchange;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.marker.LogstashMarker;
+import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.core.EDUCore;
@@ -13,7 +14,6 @@ import no.difi.meldingsutveksling.dokumentpakking.service.CreateAsice;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateSBD;
 import no.difi.meldingsutveksling.domain.*;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.AsicHandler;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
@@ -39,8 +39,6 @@ import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.payloadSiz
 @Slf4j
 public class StandardBusinessDocumentFactory {
 
-    private static final String DOCUMENT_TYPE_MELDING = "melding";
-
     private final IntegrasjonspunktNokkel integrasjonspunktNokkel;
     private final AsicHandler asicHandler;
     private final CreateSBD createSBD;
@@ -63,15 +61,25 @@ public class StandardBusinessDocumentFactory {
         }
         Payload payload = new Payload(encryptArchive(mottaker, archive, shipment.getServiceIdentifier()));
 
-        return createSBD.createSBD(avsender.getOrgNummer(), mottaker.getOrgNummer(), payload, conversationId, DOCUMENT_TYPE_MELDING, shipment.getJournalpostId());
+        return createSBD.createSBD(
+                avsender.getOrgNummer(),
+                mottaker.getOrgNummer(),
+                payload,
+                conversationId,
+                DocumentType.BESTEDU_MELDING,
+                shipment.getJournalpostId());
     }
 
     public StandardBusinessDocument create(ConversationResource cr, MessageContext context) throws MessageException {
         InputStream is = asicHandler.createEncryptedAsic(cr, context);
         Payload payload = new Payload(is, cr);
 
-        return createSBD.createSBD(context.getAvsender().getOrgNummer(), context.getMottaker().getOrgNummer(),
-                payload, context.getConversationId(), StandardBusinessDocumentHeader.NEXTMOVE_TYPE,
+        return createSBD.createSBD(
+                context.getAvsender().getOrgNummer(),
+                context.getMottaker().getOrgNummer(),
+                payload,
+                context.getConversationId(),
+                DocumentType.ARKIVMELDING,
                 context.getJournalPostId());
     }
 
@@ -80,10 +88,10 @@ public class StandardBusinessDocumentFactory {
         Set<ServiceIdentifier> standardEncryptionUsers = EnumSet.of(DPE_INNSYN, DPE_RECEIPT);
 
         CmsUtil cmsUtil;
-        if(standardEncryptionUsers.contains(serviceIdentifier)){
+        if (standardEncryptionUsers.contains(serviceIdentifier)) {
 
             cmsUtil = new CmsUtil(null);
-        }else{
+        } else {
 
             cmsUtil = new CmsUtil();
         }
@@ -95,5 +103,4 @@ public class StandardBusinessDocumentFactory {
             IOException {
         return new CreateAsice().createAsice(byteArrayFile, integrasjonspunktNokkel.getSignatureHelper(), avsender, mottaker);
     }
-
 }

@@ -9,6 +9,7 @@ import com.microsoft.azure.servicebus.ReceiveMode;
 import com.microsoft.azure.servicebus.primitives.ConnectionStringBuilder;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -60,6 +61,7 @@ public class NextMoveServiceBus {
     private final InternalQueue internalQueue;
     private final CryptoMessagePersister cryptoMessagePersister;
     private final ServiceBusPayloadConverter payloadConverter;
+    private final SBDReceiptFactory sbdReceiptFactory;
 
     private IMessageReceiver messageReceiver;
     private ServiceIdentifier serviceIdentifier;
@@ -72,7 +74,8 @@ public class NextMoveServiceBus {
                               AsicHandler asicHandler,
                               @Lazy InternalQueue internalQueue,
                               CryptoMessagePersister cryptoMessagePersister,
-                              ServiceBusPayloadConverter payloadConverter) {
+                              ServiceBusPayloadConverter payloadConverter,
+                              SBDReceiptFactory sbdReceiptFactory) {
         this.props = props;
         this.nextMoveQueue = nextMoveQueue;
         this.serviceBusClient = serviceBusClient;
@@ -82,6 +85,7 @@ public class NextMoveServiceBus {
         this.internalQueue = internalQueue;
         this.cryptoMessagePersister = cryptoMessagePersister;
         this.payloadConverter = payloadConverter;
+        this.sbdReceiptFactory = sbdReceiptFactory;
     }
 
     @PostConstruct
@@ -230,7 +234,8 @@ public class NextMoveServiceBus {
 
     private void sendReceipt(NextMoveMessage message) {
         if (asList(DPE_INNSYN, DPE_DATA).contains(message.getServiceIdentifier())) {
-            StandardBusinessDocument sbdReceipt = SBDReceiptFactory.createDpeReceiptFrom(message.getSbd());
+            StandardBusinessDocument sbdReceipt = sbdReceiptFactory.createDpeReceiptFrom(
+                    message.getSbd(), DocumentType.EINNSYN_KVITTERING);
             internalQueue.enqueueNextMove2(NextMoveMessage.of(sbdReceipt, ServiceIdentifier.DPE_RECEIPT));
         }
     }
