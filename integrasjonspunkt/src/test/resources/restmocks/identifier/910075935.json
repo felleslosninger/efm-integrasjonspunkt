@@ -21,7 +21,7 @@
       "urn:no:difi.eformidling:xsd::feil*"
     ],
     "service": {
-      "identifier": "DPE_INNSYN",
+      "identifier": "DPE",
       "serviceCode": "4192",
       "serviceEditionCode": "270815"
     }
@@ -41,7 +41,7 @@
         "urn:no:difi.eformidling:xsd::feil*"
       ],
       "service": {
-        "identifier": "DPE_INNSYN",
+        "identifier": "DPE",
         "serviceCode": "4192",
         "serviceEditionCode": "270815"
       }
