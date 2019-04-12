@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 
 import java.io.IOException;
@@ -19,21 +20,23 @@ public class NextMoveMessageSerializer extends StdSerializer<StandardBusinessDoc
         gen.writeFieldName("standardBusinessDocumentHeader");
         gen.writeObject(value.getStandardBusinessDocumentHeader());
         if (value.getAny() instanceof ArkivmeldingMessage) {
-            gen.writeFieldName("arkivmelding");
-            gen.writeObject(value.getAny());
+            gen.writeFieldName(DocumentType.ARKIVMELDING.getType());
         } else if (value.getAny() instanceof InnsynskravMessage) {
-            gen.writeFieldName("innsynskrav");
-            gen.writeObject(value.getAny());
+            gen.writeFieldName(DocumentType.INNSYNSKRAV.getType());
         } else if (value.getAny() instanceof PubliseringMessage) {
-            gen.writeFieldName("publisering");
-            gen.writeObject(value.getAny());
+            gen.writeFieldName(DocumentType.PUBLISERING.getType());
         } else if (value.getAny() instanceof DpiDigitalMessage) {
-            gen.writeFieldName("digital");
-            gen.writeObject(value.getAny());
+            gen.writeFieldName(DocumentType.DIGITAL.getType());
         } else if (value.getAny() instanceof DpiPrintMessage) {
-            gen.writeFieldName("print");
-            gen.writeObject(value.getAny());
+            gen.writeFieldName(DocumentType.PRINT.getType());
+        } else if (value.getAny() instanceof StatusMessage) {
+            gen.writeFieldName(DocumentType.STATUS.getType());
+        } else if (value.getAny() instanceof ArkivmeldingKvitteringMessage) {
+            gen.writeFieldName(DocumentType.ARKIVMELDING_KVITTERING.getType());
+        } else if (value.getAny() instanceof EinnsynKvitteringMessage) {
+            gen.writeFieldName(DocumentType.EINNSYN_KVITTERING.getType());
         }
+        gen.writeObject(value.getAny());
         gen.writeEndObject();
     }
 }

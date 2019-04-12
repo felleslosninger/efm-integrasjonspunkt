@@ -15,6 +15,8 @@ import java.util.stream.Stream;
 @Getter
 public enum DocumentType {
 
+    STATUS("status", ApiType.NEXTMOVE),
+
     ARKIVMELDING_KVITTERING("arkivmelding_kvittering", ApiType.NEXTMOVE),
     ARKIVMELDING("arkivmelding", ApiType.NEXTMOVE, ARKIVMELDING_KVITTERING),
 

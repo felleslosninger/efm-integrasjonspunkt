@@ -16,6 +16,7 @@ import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.NextMoveQueue;
 import no.difi.meldingsutveksling.nextmove.NextMoveServiceBus;
+import no.difi.meldingsutveksling.nextmove.StatusMessage;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.*;
@@ -35,6 +36,7 @@ import static java.lang.String.format;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isNextMove;
 import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isReceipt;
+import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isStatus;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
 /**
@@ -132,33 +134,38 @@ public class MessagePolling {
 
                 if (isNextMove(sbd)) {
                     log.debug(format("NextMove message id=%s", sbd.getConversationId()));
-                    client.confirmDownload(request);
-                    if (properties.getNoarkSystem().isEnable() && !properties.getNoarkSystem().getEndpointURL().isEmpty()) {
-                        internalQueue.enqueueNoark(sbd);
+                    if (isStatus(sbd)) {
+                        StatusMessage status = (StatusMessage) sbd.getAny();
+                        DpoReceiptStatus dpoReceiptStatus = DpoReceiptStatus.valueOf(status.getType().toUpperCase());
+                        MessageStatus ms = MessageStatus.of(dpoReceiptStatus);
+                        conversationService.registerStatus(sbd.getConversationId(), ms);
                     } else {
-                        nextMoveQueue.enqueue(sbd, DPO);
+                        if (properties.getNoarkSystem().isEnable() && !properties.getNoarkSystem().getEndpointURL().isEmpty()) {
+                            internalQueue.enqueueNoark(sbd);
+                        } else {
+                            nextMoveQueue.enqueue(sbd, DPO);
+                        }
                     }
-                    continue;
-                }
 
-                if (!isReceipt(sbd)) {
-                    sendReceipt(sbd.getMessageInfo());
-                    log.debug(sbd.createLogstashMarkers(), "Delivery receipt sent");
-                    Conversation c = conversationService.registerConversation(sbd);
-                    internalQueue.enqueueNoark(sbd);
-                    conversationService.registerStatus(c, MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_MOTTATT));
+                } else {
+                    if (isReceipt(sbd)) {
+                        JAXBElement<Kvittering> jaxbKvit = (JAXBElement<Kvittering>) sbd.getAny();
+                        Audit.info(format("Message id=%s is a receipt", sbd.getConversationId()),
+                                sbd.createLogstashMarkers().and(getReceiptTypeMarker(jaxbKvit.getValue())));
+                        MessageStatus status = statusFromKvittering(jaxbKvit.getValue());
+                        conversationService.registerStatus(sbd.getConversationId(), status);
+                    } else {
+                        sendReceipt(sbd.getMessageInfo());
+                        log.debug(sbd.createLogstashMarkers(), "Delivery receipt sent");
+                        Conversation c = conversationService.registerConversation(sbd);
+                        internalQueue.enqueueNoark(sbd);
+                        conversationService.registerStatus(c, MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_MOTTATT));
+                    }
                 }
 
                 client.confirmDownload(request);
                 log.debug(markerFrom(reference).and(sbd.createLogstashMarkers()), "Message confirmed downloaded");
 
-                if (isReceipt(sbd)) {
-                    JAXBElement<Kvittering> jaxbKvit = (JAXBElement<Kvittering>) sbd.getAny();
-                    Audit.info(format("Message id=%s is a receipt", sbd.getConversationId()),
-                            sbd.createLogstashMarkers().and(getReceiptTypeMarker(jaxbKvit.getValue())));
-                    MessageStatus status = statusFromKvittering(jaxbKvit.getValue());
-                    conversationService.registerStatus(sbd.getConversationId(), status);
-                }
             } catch (Exception e) {
                 log.error(format("Error during Altinn message polling, message altinnId=%s", reference.getValue()), e);
             }

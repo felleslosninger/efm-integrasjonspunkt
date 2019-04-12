@@ -19,4 +19,10 @@ public class SBDUtil {
                 .map(DocumentType::isReceipt)
                 .orElse(false);
     }
+
+    public static boolean isStatus(StandardBusinessDocument sbd) {
+        return DocumentType.valueOfType(sbd.getMessageType())
+                .map(dt -> dt == DocumentType.STATUS)
+                .orElse(false);
+    }
 }
