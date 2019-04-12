@@ -49,6 +49,7 @@
         <!-- bug with logstash-logback-encoder in 1.1.7, wait for 1.1.8 http://jira.qos.ch/browse/LOGBACK-1158 -->
         <logback.version>1.1.6</logback.version>
 
+        <sikker-digital-post-klient.version>5.2.1</sikker-digital-post-klient.version>
         <powermock.version>2.0.0</powermock.version>
         <mockito.version>2.23.4</mockito.version>
         <cucumber.version>2.3.1</cucumber.version>
@@ -109,6 +110,14 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
+            <dependency>
+                <groupId>no.difi.sdp</groupId>
+                <artifactId>sikker-digital-post-klient-java</artifactId>
+                <version>${sikker-digital-post-klient.version}</version>
+            </dependency>
+
+
             <!-- Overriden until spring boot updates the dependencies artifact.
                  See https://nvd.nist.gov/vuln/detail/CVE-2017-17485 -->
             <dependency>

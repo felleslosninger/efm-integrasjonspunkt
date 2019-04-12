@@ -13,7 +13,6 @@
         <dependency>
             <groupId>no.difi.sdp</groupId>
             <artifactId>sikker-digital-post-klient-java</artifactId>
-            <version>5.2.1</version>
         </dependency>
 
         <dependency>
