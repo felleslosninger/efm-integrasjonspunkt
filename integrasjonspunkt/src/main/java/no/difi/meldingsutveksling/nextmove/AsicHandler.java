@@ -20,15 +20,12 @@ import org.springframework.stereotype.Component;
 import java.io.*;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_INNSYN;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_RECEIPT;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
 
 @Component
 @Slf4j
@@ -134,14 +131,10 @@ public class AsicHandler {
     }
 
     private void encryptArchive(Mottaker mottaker, ServiceIdentifier serviceIdentifier, InputStream archive, OutputStream encrypted) {
-        Set<ServiceIdentifier> standardEncryptionUsers = EnumSet.of(DPE_INNSYN, DPE_RECEIPT);
-
         CmsUtil cmsUtil;
-        if (standardEncryptionUsers.contains(serviceIdentifier)) {
-
+        if (DPE == serviceIdentifier) {
             cmsUtil = new CmsUtil(null);
         } else {
-
             cmsUtil = new CmsUtil();
         }
 

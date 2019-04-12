@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Payload;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
@@ -32,7 +33,8 @@ public class NextMoveQueue {
         if (sbd.getAny() instanceof BusinessMessage) {
             NextMoveInMessage message = NextMoveInMessage.of(sbd, serviceIdentifier);
 
-            if (ServiceIdentifier.DPE_RECEIPT.equals(message.getServiceIdentifier())) {
+            // TODO handle all receipts
+            if (SBDUtil.isReceipt(sbd)) {
                 handleDpeReceipt(message.getConversationId());
                 return Optional.empty();
             }

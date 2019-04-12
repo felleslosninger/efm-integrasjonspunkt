@@ -35,7 +35,7 @@ public class StrategyFactory {
         }
         if (properties.getFeature().isEnableDPV()) {
             factories.put(DPV, PostVirksomhetStrategyFactory.newInstance(correspondenceAgencyMessageFactory, client, noarkClient, internalQueue));
-            factories.put(DPE_INNSYN, PostVirksomhetStrategyFactory.newInstance(correspondenceAgencyMessageFactory, client, noarkClient, internalQueue));
+            factories.put(DPE, PostVirksomhetStrategyFactory.newInstance(correspondenceAgencyMessageFactory, client, noarkClient, internalQueue));
         }
     }
 

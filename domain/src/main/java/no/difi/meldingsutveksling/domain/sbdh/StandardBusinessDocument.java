@@ -86,8 +86,8 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
     @InstanceOf(value = ArkivmeldingMessage.class, groups = ValidationGroups.DocumentType.Arkivmelding.class)
     @InstanceOf(value = DpiDigitalMessage.class, groups = ValidationGroups.DocumentType.Digital.class)
     @InstanceOf(value = DpiPrintMessage.class, groups = ValidationGroups.DocumentType.Print.class)
-    @InstanceOf(value = DpeInnsynMessage.class, groups = ValidationGroups.DocumentType.Innsynskrav.class)
-    @InstanceOf(value = DpePubliseringMessage.class, groups = ValidationGroups.DocumentType.Publisering.class)
+    @InstanceOf(value = InnsynskravMessage.class, groups = ValidationGroups.DocumentType.Innsynskrav.class)
+    @InstanceOf(value = PubliseringMessage.class, groups = ValidationGroups.DocumentType.Publisering.class)
     @Getter(onMethod_ =
     @ApiModelProperty(name = "arkivmelding|digital|print|innsynskrav|publisering", value = "The payload of the document", required = true, dataType = "no.difi.meldingsutveksling.nextmove.BusinessMessage")
     )

@@ -34,18 +34,12 @@ public class ConversationStrategyFactory {
             strategies.put(ServiceIdentifier.DPI_PRINT, dpiStrat);
         }
         if (props.getFeature().isEnableDPE()) {
-            strategies.put(ServiceIdentifier.DPE_INNSYN, dpeStrat);
-            strategies.put(ServiceIdentifier.DPE_DATA, dpeStrat);
-            strategies.put(ServiceIdentifier.DPE_RECEIPT, dpeStrat);
+            strategies.put(ServiceIdentifier.DPE, dpeStrat);
         }
     }
 
     public List<ServiceIdentifier> getEnabledServices() {
         return Lists.newArrayList(strategies.keySet());
-    }
-
-    public Optional<ConversationStrategy> getStrategy(ConversationResource conversationResource) {
-        return Optional.ofNullable(strategies.get(conversationResource.getServiceIdentifier()));
     }
 
     public Optional<ConversationStrategy> getStrategy(NextMoveMessage nextMoveMessage) {

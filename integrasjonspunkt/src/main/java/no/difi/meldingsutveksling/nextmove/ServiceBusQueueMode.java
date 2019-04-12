@@ -1,24 +1,18 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.ServiceIdentifier;
 
 import java.util.Arrays;
 
 @RequiredArgsConstructor
 public enum ServiceBusQueueMode {
-    INNSYN("innsyn", ServiceIdentifier.DPE_INNSYN),
-    DATA("data", ServiceIdentifier.DPE_DATA);
+    INNSYN("innsyn"),
+    DATA("data");
 
     private final String fullname;
-    private final ServiceIdentifier serviceIdentifier;
 
     public String fullname() {
         return this.fullname;
-    }
-
-    public ServiceIdentifier getServiceIdentifier() {
-        return serviceIdentifier;
     }
 
     public static ServiceBusQueueMode valueOfFullname(String fullname) {

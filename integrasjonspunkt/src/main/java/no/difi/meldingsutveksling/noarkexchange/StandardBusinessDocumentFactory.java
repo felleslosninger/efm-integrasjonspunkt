@@ -22,12 +22,9 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.cert.X509Certificate;
-import java.util.EnumSet;
-import java.util.Set;
 import java.util.UUID;
 
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_INNSYN;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_RECEIPT;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
 import static no.difi.meldingsutveksling.core.EDUCoreMarker.markerFrom;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.payloadSizeMarker;
 
@@ -84,15 +81,10 @@ public class StandardBusinessDocumentFactory {
     }
 
     private byte[] encryptArchive(Mottaker mottaker, Archive archive, ServiceIdentifier serviceIdentifier) {
-
-        Set<ServiceIdentifier> standardEncryptionUsers = EnumSet.of(DPE_INNSYN, DPE_RECEIPT);
-
         CmsUtil cmsUtil;
-        if (standardEncryptionUsers.contains(serviceIdentifier)) {
-
+        if (DPE == serviceIdentifier) {
             cmsUtil = new CmsUtil(null);
         } else {
-
             cmsUtil = new CmsUtil();
         }
 

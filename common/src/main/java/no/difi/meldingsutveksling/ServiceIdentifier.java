@@ -18,9 +18,7 @@ public enum ServiceIdentifier {
     @XmlEnumValue("DPI_DIGITAL") DPI_DIGITAL("DPI_DIGITAL"),
     @XmlEnumValue("DPI_PRINT") DPI_PRINT("DPI_PRINT"),
     @XmlEnumValue("DPF") DPF("DPF"),
-    @XmlEnumValue("DPE_INNSYN") DPE_INNSYN("DPE_innsyn"),
-    @XmlEnumValue("DPE_DATA") DPE_DATA("DPE_data"),
-    @XmlEnumValue("DPE_RECEIPT") DPE_RECEIPT("DPE_RECEIPT"),
+    @XmlEnumValue("DPE") DPE("DPE"),
     UNKNOWN("UNKNOWN");
 
     private final String fullname;

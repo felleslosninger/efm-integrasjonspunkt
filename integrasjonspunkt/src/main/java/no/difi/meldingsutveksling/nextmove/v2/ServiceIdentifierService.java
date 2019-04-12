@@ -15,9 +15,7 @@ public class ServiceIdentifierService {
         switch (serviceIdentifier) {
             case DPO:
                 return properties.getFeature().isEnableDPO();
-            case DPE_INNSYN:
-            case DPE_DATA:
-            case DPE_RECEIPT:
+            case DPE:
                 return properties.getFeature().isEnableDPE();
             case DPI_DIGITAL:
             case DPI_PRINT:

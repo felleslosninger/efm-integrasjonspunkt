@@ -27,10 +27,10 @@ public class NextMoveMessageDeserializer extends StdDeserializer<BusinessMessage
             return p.getCodec().treeToValue(node, DpiPrintMessage.class);
         }
         if ("innsynskrav".equals(p.currentName())) {
-            return p.getCodec().treeToValue(node, DpeInnsynMessage.class);
+            return p.getCodec().treeToValue(node, InnsynskravMessage.class);
         }
         if ("publisering".equals(p.currentName())) {
-            return p.getCodec().treeToValue(node, DpePubliseringMessage.class);
+            return p.getCodec().treeToValue(node, PubliseringMessage.class);
         }
         return null;
     }

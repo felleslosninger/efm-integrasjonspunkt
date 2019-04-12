@@ -16,10 +16,6 @@ import org.springframework.util.StringUtils;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 
-import static java.util.Arrays.asList;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_INNSYN;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
-
 @Component
 public class Adresseregister {
 
@@ -60,22 +56,6 @@ public class Adresseregister {
             throw new CertificateException(String.format("Failed to parse pem certificate: invalid certificate for " +
                     "organization %s? ", serviceRecord.getOrganisationNumber()), e);
         }
-    }
-
-    public boolean hasAdresseregisterCertificate(ServiceRecord serviceRecord) {
-
-        if (asList(DPV, DPE_INNSYN).contains(serviceRecord.getServiceIdentifier())) {
-            return false;
-        }
-
-        log.info("hasAdresseregisterCertificate orgnr:" +serviceRecord.getOrganisationNumber());
-        try {
-            getCertificate(serviceRecord);
-        } catch (Exception e) {
-            log.warn("getCertificate: ", e);
-            return false;
-        }
-        return true;
     }
 
 }

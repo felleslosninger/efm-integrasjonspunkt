@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class DpeReceiptConversationResource extends ConversationResource {
 
     private DpeReceiptConversationResource(String conversationId, String senderId, String receiverId) {
-        super(conversationId, senderId, receiverId, ServiceIdentifier.DPE_RECEIPT, LocalDateTime.now(), Maps.newHashMap(), Maps.newHashMap());
+        super(conversationId, senderId, receiverId, ServiceIdentifier.DPE, LocalDateTime.now(), Maps.newHashMap(), Maps.newHashMap());
     }
     public static DpeReceiptConversationResource of(ConversationResource cr) {
         DpeReceiptConversationResource dpeCr = new DpeReceiptConversationResource(cr.getConversationId(), cr.getReceiverId(), cr.getSenderId());
