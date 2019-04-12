@@ -59,11 +59,15 @@ public class ServiceRecord {
         return getService().getIdentifier();
     }
 
+    @JsonIgnore
     public Optional<String> getStandard(DocumentType documentType) {
-        final String suffix = "::" + documentType.getType();
-
         return documentTypes.stream()
-                .filter(p -> p.endsWith(suffix))
+                .filter(documentType::fitsStandard)
                 .findAny();
+    }
+
+    @JsonIgnore
+    public boolean hasStandard(String standard) {
+        return documentTypes.contains(standard);
     }
 }
