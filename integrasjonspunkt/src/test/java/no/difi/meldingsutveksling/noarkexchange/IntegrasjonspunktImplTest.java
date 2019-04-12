@@ -86,7 +86,6 @@ public class IntegrasjonspunktImplTest {
 
     @Test
     public void shouldBeAbleToReceiveWhenServiceIdentifierIsDPOAndHasCertificate() {
-        when(adresseregister.hasAdresseregisterCertificate(any(ServiceRecord.class))).thenReturn(true);
         disableMsh();
         GetCanReceiveMessageRequestType request = GetCanReceiveObjectMother.createRequest("1234");
         final GetCanReceiveMessageResponseType canReceiveMessage = integrasjonspunkt.getCanReceiveMessage(request);
@@ -96,7 +95,6 @@ public class IntegrasjonspunktImplTest {
 
     @Test
     public void shouldCheckWithMSHWhenServiceIdentifierIsDPOAndAdresseregisterMissingCertificate() {
-        when(adresseregister.hasAdresseregisterCertificate(any(ServiceRecord.class))).thenReturn(false);
         enableMsh();
         final GetCanReceiveMessageRequestType request = GetCanReceiveObjectMother.createRequest(IDENTIFIER);
 
@@ -109,7 +107,6 @@ public class IntegrasjonspunktImplTest {
     public void shouldBeAbleToReceiveWhenServiceIdentifierIsDPVAndMSHIsDisabled() {
         ServiceRecord serviceRecord = ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER);
         ServiceRecordWrapper recordWrapper = ServiceRecordWrapper.of(serviceRecord, Lists.newArrayList(), Maps.newHashMap());
-        when(adresseregister.hasAdresseregisterCertificate(serviceRecord)).thenReturn(true);
         when(serviceRegistryLookup.getServiceRecord(IDENTIFIER)).thenReturn(recordWrapper);
         disableMsh();
         final GetCanReceiveMessageRequestType request = GetCanReceiveObjectMother.createRequest(IDENTIFIER);

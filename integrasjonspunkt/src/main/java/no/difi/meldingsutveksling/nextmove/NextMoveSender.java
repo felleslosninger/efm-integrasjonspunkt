@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.nextmove;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageOutRepository;
 import no.difi.meldingsutveksling.receipt.ConversationService;
@@ -37,7 +37,7 @@ public class NextMoveSender {
         }
 
         strategy.get().send(msg);
-        if (msg.getServiceIdentifier() == ServiceIdentifier.DPE_RECEIPT) {
+        if (SBDUtil.isReceipt(msg.getSbd())) {
             return;
         }
 

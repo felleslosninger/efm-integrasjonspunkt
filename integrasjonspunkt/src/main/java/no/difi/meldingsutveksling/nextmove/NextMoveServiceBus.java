@@ -10,8 +10,8 @@ import com.microsoft.azure.servicebus.primitives.ConnectionStringBuilder;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.DocumentType;
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
@@ -21,6 +21,8 @@ import no.difi.meldingsutveksling.noarkexchange.MessageContext;
 import no.difi.meldingsutveksling.noarkexchange.MessageContextException;
 import no.difi.meldingsutveksling.noarkexchange.MessageContextFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.io.IOUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -39,10 +41,8 @@ import java.util.concurrent.CompletableFuture;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_DATA;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_INNSYN;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
 import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.DATA;
 import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.INNSYN;
 
@@ -62,9 +62,9 @@ public class NextMoveServiceBus {
     private final CryptoMessagePersister cryptoMessagePersister;
     private final ServiceBusPayloadConverter payloadConverter;
     private final SBDReceiptFactory sbdReceiptFactory;
+    private final ServiceRegistryLookup serviceRegistryLookup;
 
     private IMessageReceiver messageReceiver;
-    private ServiceIdentifier serviceIdentifier;
 
     public NextMoveServiceBus(IntegrasjonspunktProperties props,
                               NextMoveQueue nextMoveQueue,
@@ -75,7 +75,8 @@ public class NextMoveServiceBus {
                               @Lazy InternalQueue internalQueue,
                               CryptoMessagePersister cryptoMessagePersister,
                               ServiceBusPayloadConverter payloadConverter,
-                              SBDReceiptFactory sbdReceiptFactory) {
+                              SBDReceiptFactory sbdReceiptFactory,
+                              ServiceRegistryLookup serviceRegistryLookup) {
         this.props = props;
         this.nextMoveQueue = nextMoveQueue;
         this.serviceBusClient = serviceBusClient;
@@ -86,6 +87,7 @@ public class NextMoveServiceBus {
         this.cryptoMessagePersister = cryptoMessagePersister;
         this.payloadConverter = payloadConverter;
         this.sbdReceiptFactory = sbdReceiptFactory;
+        this.serviceRegistryLookup = serviceRegistryLookup;
     }
 
     @PostConstruct
@@ -104,19 +106,13 @@ public class NextMoveServiceBus {
             }
         }
 
-        this.serviceIdentifier = getServiceIdentifier();
-    }
-
-    private ServiceIdentifier getServiceIdentifier() {
-        return ServiceBusQueueMode.valueOfFullname(props.getNextmove().getServiceBus().getMode()).getServiceIdentifier();
     }
 
     public void putMessage(NextMoveMessage message) throws NextMoveException {
         ServiceBusPayload payload = ServiceBusPayload.of(message.getSbd(), getAsicBytes(message));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             om.writeValue(bos, payload);
-            String queue = getQueue(message);
-            serviceBusClient.sendMessage(bos.toByteArray(), queue);
+            serviceBusClient.sendMessage(bos.toByteArray(), getReceiverQueue(message));
         } catch (IOException e) {
             throw new NextMoveException("Error creating servicebus payload", e);
         }
@@ -144,24 +140,6 @@ public class NextMoveServiceBus {
         }
     }
 
-    private String getQueue(NextMoveMessage message) throws NextMoveException {
-        String queue = NEXTMOVE_QUEUE_PREFIX + message.getReceiverIdentifier();
-        switch (message.getServiceIdentifier()) {
-            case DPE_INNSYN:
-                queue = queue + INNSYN.fullname();
-                break;
-            case DPE_DATA:
-                queue = queue + DATA.fullname();
-                break;
-            case DPE_RECEIPT:
-                queue = queue + receiptTarget();
-                break;
-            default:
-                throw new NextMoveException("ServiceBus has no queue for ServiceIdentifier=" + message.getServiceIdentifier());
-        }
-        return queue;
-    }
-
     public void getAllMessagesRest() {
         boolean messagesInQueue = true;
         while (messagesInQueue) {
@@ -185,7 +163,7 @@ public class NextMoveServiceBus {
                         throw new NextMoveRuntimeException("Error persisting ASiC, aborting..", e);
                     }
                 }
-                Optional<NextMoveMessage> cr = nextMoveQueue.enqueue(msg.getPayload().getSbd(), serviceIdentifier);
+                Optional<NextMoveMessage> cr = nextMoveQueue.enqueue(msg.getPayload().getSbd(), DPE);
                 cr.ifPresent(this::sendReceipt);
                 serviceBusClient.deleteMessage(msg);
             }
@@ -209,7 +187,7 @@ public class NextMoveServiceBus {
                                 if (payload.getAsic() != null) {
                                     cryptoMessagePersister.write(payload.getSbd().getConversationId(), ASIC_FILE, Base64.getDecoder().decode(payload.getAsic()));
                                 }
-                                Optional<NextMoveMessage> message = nextMoveQueue.enqueue(payload.getSbd(), serviceIdentifier);
+                                Optional<NextMoveMessage> message = nextMoveQueue.enqueue(payload.getSbd(), DPE);
                                 message.ifPresent(this::sendReceiptAsync);
                                 messageReceiver.completeAsync(m.getLockToken());
                             } catch (JAXBException | IOException e) {
@@ -233,11 +211,18 @@ public class NextMoveServiceBus {
     }
 
     private void sendReceipt(NextMoveMessage message) {
-        if (asList(DPE_INNSYN, DPE_DATA).contains(message.getServiceIdentifier())) {
-            StandardBusinessDocument sbdReceipt = sbdReceiptFactory.createDpeReceiptFrom(
-                    message.getSbd(), DocumentType.EINNSYN_KVITTERING);
-            internalQueue.enqueueNextMove2(NextMoveMessage.of(sbdReceipt, ServiceIdentifier.DPE_RECEIPT));
+        StandardBusinessDocument sbdReceipt = sbdReceiptFactory.createDpeReceiptFrom(
+                message.getSbd(), DocumentType.EINNSYN_KVITTERING);
+        internalQueue.enqueueNextMove2(NextMoveMessage.of(sbdReceipt, DPE));
+    }
+
+    private String getReceiverQueue(NextMoveMessage message) {
+        if (SBDUtil.isReceipt(message.getSbd())) {
+            return receiptTarget();
         }
+        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecordByProcess(message.getReceiverIdentifier(), message.getSbd().getProcess())
+                .orElseThrow(() -> new NextMoveRuntimeException(String.format("Unable to get service record for %s", message.getReceiverIdentifier())));
+        return serviceRecord.getService().getEndpointUrl();
     }
 
     private String receiptTarget() {

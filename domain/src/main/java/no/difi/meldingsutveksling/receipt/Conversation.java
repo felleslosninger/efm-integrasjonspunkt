@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_INNSYN;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 
@@ -144,7 +144,7 @@ public class Conversation {
 
         Conversation c = new Conversation(eduCore.getId(), eduCore.getMessageReference(),
                 eduCore.getSender().getIdentifier(), eduCore.getReceiver().getIdentifier(), ConversationDirection.OUTGOING,
-                msgTitle, eduCore.getServiceIdentifier() == DPE_INNSYN ? DPV : eduCore.getServiceIdentifier());
+                msgTitle, eduCore.getServiceIdentifier() == DPE ? DPV : eduCore.getServiceIdentifier());
 
         if (statuses != null && statuses.length > 0) {
             Stream.of(statuses)

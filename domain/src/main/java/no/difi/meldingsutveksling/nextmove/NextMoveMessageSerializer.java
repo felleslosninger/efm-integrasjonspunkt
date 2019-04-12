@@ -21,10 +21,10 @@ public class NextMoveMessageSerializer extends StdSerializer<StandardBusinessDoc
         if (value.getAny() instanceof ArkivmeldingMessage) {
             gen.writeFieldName("arkivmelding");
             gen.writeObject(value.getAny());
-        } else if (value.getAny() instanceof DpeInnsynMessage) {
+        } else if (value.getAny() instanceof InnsynskravMessage) {
             gen.writeFieldName("innsynskrav");
             gen.writeObject(value.getAny());
-        } else if (value.getAny() instanceof DpePubliseringMessage) {
+        } else if (value.getAny() instanceof PubliseringMessage) {
             gen.writeFieldName("publisering");
             gen.writeObject(value.getAny());
         } else if (value.getAny() instanceof DpiDigitalMessage) {

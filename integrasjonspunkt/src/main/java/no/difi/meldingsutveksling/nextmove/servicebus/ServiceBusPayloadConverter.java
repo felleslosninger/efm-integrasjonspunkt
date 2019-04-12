@@ -7,8 +7,8 @@ import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.BusinessMessage;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
-import no.difi.meldingsutveksling.nextmove.DpeInnsynMessage;
-import no.difi.meldingsutveksling.nextmove.DpePubliseringMessage;
+import no.difi.meldingsutveksling.nextmove.InnsynskravMessage;
+import no.difi.meldingsutveksling.nextmove.PubliseringMessage;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.springframework.stereotype.Component;
 
@@ -50,19 +50,19 @@ public class ServiceBusPayloadConverter {
         StandardBusinessDocument sbd = unmarshaller.unmarshal(new StreamSource(bis), StandardBusinessDocument.class).getValue();
         Payload any = (Payload) sbd.getAny();
         byte[] asic = null;
-        if (!any.getConversation().getServiceIdentifier().equals(ServiceIdentifier.DPE_RECEIPT)) {
+        if (!any.getConversation().getServiceIdentifier().equals(ServiceIdentifier.DPE)) {
             asic = DatatypeConverter.parseBase64Binary(any.getContent());
         }
         String orgnr = any.getConversation().getCustomProperties().getOrDefault("orgnr", "");
         BusinessMessage dpeMessage;
         if (any.getConversation().getCustomProperties().containsKey("meeting") &&
                 Boolean.parseBoolean(any.getConversation().getCustomProperties().get("meeting"))) {
-            dpeMessage = new DpePubliseringMessage(orgnr);
-        } else if (any.getConversation().getServiceIdentifier().equals(ServiceIdentifier.DPE_INNSYN)) {
+            dpeMessage = new PubliseringMessage(orgnr);
+        } else if (any.getConversation().getServiceIdentifier().equals(ServiceIdentifier.DPE)) {
             String email = any.getConversation().getCustomProperties().getOrDefault("email", "");
-            dpeMessage = new DpeInnsynMessage(orgnr, email);
+            dpeMessage = new InnsynskravMessage(orgnr, email);
         } else {
-            dpeMessage = new DpePubliseringMessage(orgnr);
+            dpeMessage = new PubliseringMessage(orgnr);
         }
         sbd.setAny(dpeMessage);
         return ServiceBusPayload.of(sbd, asic);
