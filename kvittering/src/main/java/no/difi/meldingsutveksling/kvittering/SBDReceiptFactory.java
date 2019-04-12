@@ -55,14 +55,14 @@ public class SBDReceiptFactory {
     }
 
     public StandardBusinessDocument createDpeReceiptFrom(StandardBusinessDocument sbd, DocumentType documentType) {
-        String standard = serviceRegistryLookup.getStandard(sbd.getSenderIdentifier(), Process.EINNSYN, documentType);
+        String standard = serviceRegistryLookup.getStandard(sbd.getSenderIdentifier(), Process.EINNSYN_RESPONSE, documentType);
 
         return new StandardBusinessDocument()
                 .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader.Builder()
                         .from(Organisasjonsnummer.from(sbd.getReceiverIdentifier()))
                         .to(Organisasjonsnummer.from(sbd.getSenderIdentifier()))
                         .relatedToConversationId(sbd.getConversationId())
-                        .process(Process.EINNSYN)
+                        .process(Process.EINNSYN_RESPONSE)
                         .standard(standard)
                         .type(documentType)
                         .build())

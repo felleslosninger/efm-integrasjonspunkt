@@ -157,6 +157,11 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
     }
 
     @JsonIgnore
+    public String getStandard() {
+        return getStandardBusinessDocumentHeader().getDocumentIdentification().getStandard();
+    }
+
+    @JsonIgnore
     public String getProcess() {
         return getScope(ScopeType.CONVERSATION_ID)
                 .getIdentifier();

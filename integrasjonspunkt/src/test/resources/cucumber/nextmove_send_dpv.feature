@@ -48,7 +48,7 @@ Feature: Sending a Next Move DPV message
                                 "expectedResponseDateTime": "2019-05-10T00:31:52Z"
                             }
                         ],
-                        "identifier": "urn:no:difi:profile:administrasjon::arkivmelding",
+                        "identifier": "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
                         "instanceIdentifier": "45efbd4c-413d-4e2c-bbc5-257ef4a65a91",
                         "type": "ConversationId"
                     }
@@ -57,7 +57,7 @@ Feature: Sending a Next Move DPV message
             "documentIdentification": {
                 "creationDateAndTime": "2019-04-11T15:29:58.753+02:00",
                 "instanceIdentifier": "abc8849c-e281-4809-8555-7cd54952b916",
-                "standard": "urn:no:difi.arkivmelding:xsd:skatterOgAvgifter::arkivmelding",
+                "standard": "urn:no:difi.arkivmelding:xsd::arkivmelding",
                 "type": "arkivmelding",
                 "typeVersion": "2.0"
             },

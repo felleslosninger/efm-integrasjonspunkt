@@ -3,10 +3,7 @@ package no.difi.meldingsutveksling.nextmove.v2;
 import com.querydsl.core.types.Predicate;
 import lombok.RequiredArgsConstructor;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
-import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
-import no.difi.meldingsutveksling.NextMoveConsts;
-import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.UUIDGenerator;
+import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingException;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -66,10 +63,24 @@ public class NextMoveMessageService {
                     throw new ConversationAlreadyExistsException(p.getConversationId());
                 });
 
-        ServiceIdentifier serviceIdentifier = getServiceIdentifier(sbd);
+        ServiceRecord serviceRecord = getServiceRecord(sbd);
+        ServiceIdentifier serviceIdentifier = getServiceIdentifier(serviceRecord);
 
         if (!serviceIdentifierService.isEnabled(serviceIdentifier)) {
             throw new ServiceNotEnabledException(serviceIdentifier);
+        }
+
+        DocumentType documentType = DocumentType.valueOf(sbd.getMessageType(), ApiType.NEXTMOVE)
+                .orElseThrow(() -> new UnknownNextMoveDocumentTypeException(sbd.getMessageType()));
+
+        String standard = sbd.getStandard();
+
+        if (!documentType.fitsStandard(standard)) {
+            throw new DocumentTypeDoNotFitDocumentStandardException(documentType, standard);
+        }
+
+        if (!serviceRecord.hasStandard(standard)) {
+            throw new ReceiverDoNotAcceptDocumentStandard(standard, sbd.getProcess());
         }
 
         setDefaults(sbd, serviceIdentifier);
@@ -80,10 +91,13 @@ public class NextMoveMessageService {
         return message;
     }
 
-    private ServiceIdentifier getServiceIdentifier(StandardBusinessDocument sbd) {
+    private ServiceIdentifier getServiceIdentifier(ServiceRecord serviceRecord) {
+        ServiceIdentifier serviceIdentifier = serviceRecord.getServiceIdentifier();
+        return serviceIdentifier == DPF ? DPO : serviceIdentifier;
+    }
+
+    private ServiceRecord getServiceRecord(StandardBusinessDocument sbd) {
         return sr.getServiceRecordByProcess(sbd.getReceiverIdentifier(), sbd.getProcess())
-                .map(ServiceRecord::getServiceIdentifier)
-                .map(p -> p == DPF ? DPO : p)
                 .orElseThrow(() -> new ReceiverDoNotAcceptProcessException(sbd.getProcess()));
     }
 

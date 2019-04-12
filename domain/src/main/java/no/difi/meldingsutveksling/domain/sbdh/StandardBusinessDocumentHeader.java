@@ -237,7 +237,7 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
 
         private DocumentIdentification createDocumentIdentification(DocumentType documentType, String standard) {
             if (documentType == null) {
-                throw new MeldingsUtvekslingRuntimeException("DocumentType must be set");
+                throw new MeldingsUtvekslingRuntimeException("IsDocumentType must be set");
             }
 
             return new DocumentIdentification()

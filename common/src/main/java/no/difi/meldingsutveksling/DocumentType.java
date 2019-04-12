@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 @AllArgsConstructor
@@ -37,9 +38,36 @@ public enum DocumentType {
         return RECEIPTS.contains(this);
     }
 
+    public boolean fitsStandard(String standard) {
+        return standard.endsWith("::" + type);
+    }
+
+    public static DocumentType[] values(ApiType api) {
+        return stream(api)
+                .toArray(DocumentType[]::new);
+    }
+
     public static Optional<DocumentType> valueOfType(String type) {
+        if (type == null) {
+            return Optional.empty();
+        }
         return Arrays.stream(DocumentType.values())
                 .filter(p -> p.type.equalsIgnoreCase(type))
                 .findAny();
     }
+
+    public static Optional<DocumentType> valueOf(String type, ApiType api) {
+        if (type == null) {
+            return Optional.empty();
+        }
+        return stream(api)
+                .filter(p -> p.type.equalsIgnoreCase(type))
+                .findAny();
+    }
+
+    public static Stream<DocumentType> stream(ApiType api) {
+        return Arrays.stream(DocumentType.values())
+                .filter(p -> p.api == api);
+    }
+
 }
