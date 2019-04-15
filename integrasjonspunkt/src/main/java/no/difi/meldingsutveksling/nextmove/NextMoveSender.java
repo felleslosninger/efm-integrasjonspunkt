@@ -6,8 +6,8 @@ import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageOutRepository;
 import no.difi.meldingsutveksling.receipt.ConversationService;
-import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
@@ -41,7 +41,7 @@ public class NextMoveSender {
             return;
         }
 
-        conversationService.registerStatus(msg.getConversationId(), MessageStatus.of(GenericReceiptStatus.SENDT));
+        conversationService.registerStatus(msg.getConversationId(), MessageStatus.of(ReceiptStatus.SENDT));
         messageRepo.deleteByConversationId(msg.getConversationId());
         try {
             cryptoMessagePersister.delete(msg.getConversationId());

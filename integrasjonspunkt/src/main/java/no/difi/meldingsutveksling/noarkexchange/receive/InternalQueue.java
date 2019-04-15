@@ -14,8 +14,8 @@ import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType;
 import no.difi.meldingsutveksling.receipt.ConversationService;
-import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,7 +154,7 @@ public class InternalQueue {
     @SuppressWarnings("squid:S1166")
     @JmsListener(destination = DLQ)
     public void dlqListener(byte[] message, Session session) {
-        MessageStatus ms = MessageStatus.of(GenericReceiptStatus.FEIL);
+        MessageStatus ms = MessageStatus.of(ReceiptStatus.FEIL);
         String conversationId = "";
         String errorMsg = "";
 

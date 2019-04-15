@@ -35,11 +35,8 @@ import java.util.function.Consumer;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
-import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isNextMove;
-import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isReceipt;
-import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isStatus;
+import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.*;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
-import static no.difi.meldingsutveksling.receipt.GenericReceiptStatus.LEST;
 
 /**
  * MessagePolling periodically checks Altinn Formidlingstjeneste for new messages. If new messages are discovered they are
@@ -138,8 +135,7 @@ public class MessagePolling {
                     log.debug(format("NextMove message id=%s", sbd.getConversationId()));
                     if (isStatus(sbd)) {
                         StatusMessage status = (StatusMessage) sbd.getAny();
-                        DpoReceiptStatus dpoReceiptStatus = DpoReceiptStatus.valueOf(status.getType().toUpperCase());
-                        MessageStatus ms = MessageStatus.of(dpoReceiptStatus);
+                        MessageStatus ms = MessageStatus.of(status.getStatus());
                         conversationService.registerStatus(sbd.getConversationId(), ms);
                     } else {
                         if (properties.getNoarkSystem().isEnable() && !properties.getNoarkSystem().getEndpointURL().isEmpty()) {
@@ -147,7 +143,7 @@ public class MessagePolling {
                         } else {
                             nextMoveQueue.enqueue(sbd, DPO);
                         }
-                        sendStatus(sbd, LEST);
+                        sendStatus(sbd, ReceiptStatus.MOTTATT);
                     }
 
                 } else {
@@ -162,7 +158,7 @@ public class MessagePolling {
                         log.debug(sbd.createLogstashMarkers(), "Delivery receipt sent");
                         Conversation c = conversationService.registerConversation(sbd);
                         internalQueue.enqueueNoark(sbd);
-                        conversationService.registerStatus(c, MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_MOTTATT));
+                        conversationService.registerStatus(c, MessageStatus.of(ReceiptStatus.INNKOMMENDE_MOTTATT));
                     }
                 }
 
@@ -187,13 +183,13 @@ public class MessagePolling {
     }
 
     private MessageStatus statusFromKvittering(Kvittering kvittering) {
-        DpoReceiptStatus status = DpoReceiptStatus.of(kvittering);
+        ReceiptStatus status = DpoReceiptMapper.from(kvittering);
         LocalDateTime tidspunkt = kvittering.getTidspunkt().toGregorianCalendar().toZonedDateTime().toLocalDateTime();
         return MessageStatus.of(status, tidspunkt);
     }
 
     private void sendStatus(StandardBusinessDocument sbd, ReceiptStatus status) {
-        StandardBusinessDocument lestStatusMessage = sbdReceiptFactory.createArkivmeldingStatusFrom(sbd, DocumentType.STATUS, LEST);
+        StandardBusinessDocument lestStatusMessage = sbdReceiptFactory.createArkivmeldingStatusFrom(sbd, DocumentType.STATUS, status);
         NextMoveOutMessage msg = NextMoveOutMessage.of(lestStatusMessage, DPO);
         internalQueue.enqueueNextMove2(msg);
     }

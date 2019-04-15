@@ -60,7 +60,7 @@ public class SBDReceiptFactory {
                                                                  DocumentType documentType,
                                                                  ReceiptStatus status) {
         String standard = serviceRegistryLookup.getStandard(sbd.getSenderIdentifier(), Process.ARKIVMELDING_RESPONSE, documentType);
-        StatusMessage statusMessage = new StatusMessage(status.getStatus());
+        StatusMessage statusMessage = new StatusMessage(status);
 
         return new StandardBusinessDocument()
                 .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader.Builder()

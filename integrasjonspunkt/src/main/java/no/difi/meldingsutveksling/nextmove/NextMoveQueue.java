@@ -11,8 +11,8 @@ import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
-import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
@@ -44,7 +44,7 @@ public class NextMoveQueue {
             }
 
             Conversation c = conversationService.registerConversation(message);
-            conversationService.registerStatus(c, MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_MOTTATT));
+            conversationService.registerStatus(c, MessageStatus.of(ReceiptStatus.INNKOMMENDE_MOTTATT));
             Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] put on local queue",
                     message.getConversationId(), message.getServiceIdentifier()), markerFrom(message));
             return Optional.of(message);
@@ -58,7 +58,7 @@ public class NextMoveQueue {
 
     private void handleDpeReceipt(String conversationId) {
         log.debug(String.format("Message with id=%s is a receipt", conversationId));
-        Optional<Conversation> c = conversationService.registerStatus(conversationId, MessageStatus.of(GenericReceiptStatus.LEVERT));
+        Optional<Conversation> c = conversationService.registerStatus(conversationId, MessageStatus.of(ReceiptStatus.LEVERT));
         c.ifPresent(conversationService::markFinished);
     }
 }

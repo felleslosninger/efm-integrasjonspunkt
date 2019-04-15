@@ -14,8 +14,8 @@ import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.receipt.ConversationService;
-import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.beans.factory.ObjectProvider;
@@ -92,7 +92,7 @@ public class EDUCoreSender {
         if (properties.getFeature().isEnableReceipts() &&
                 message.getServiceIdentifier() != null &&
                 "OK".equals(result.getResult().getType())) {
-            MessageStatus ms = MessageStatus.of(GenericReceiptStatus.SENDT);
+            MessageStatus ms = MessageStatus.of(ReceiptStatus.SENDT);
             if (message.getMessageType() == EDUCore.MessageType.APPRECEIPT) {
                 ms.setDescription("AppReceipt");
             }

@@ -2,17 +2,14 @@ package no.difi.meldingsutveksling.dpi;
 
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
-import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.nextmove.ConversationDirection;
-import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ExternalReceipt;
-import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 
 public class EmptyKvittering implements ExternalReceipt {
 
     public static final String EMPTY = "empty";
-    private static final MessageStatus EMPTY_RECEIPT = MessageStatus.of(GenericReceiptStatus.ANNET);
+    private static final MessageStatus EMPTY_RECEIPT = MessageStatus.of(ReceiptStatus.ANNET, "Tom kvittering");
 
     @Override
     public void confirmReceipt() {
@@ -34,11 +31,6 @@ public class EmptyKvittering implements ExternalReceipt {
     @Override
     public MessageStatus toMessageStatus() {
         return EMPTY_RECEIPT;
-    }
-
-    @Override
-    public void auditLog() {
-        Audit.info("Got empty receipt", logMarkers());
     }
 
 }

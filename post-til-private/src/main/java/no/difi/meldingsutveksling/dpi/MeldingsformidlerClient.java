@@ -14,8 +14,6 @@ import no.difi.sdp.client2.domain.exceptions.SendException;
 import no.difi.sdp.client2.domain.kvittering.ForretningsKvittering;
 import no.difi.sdp.client2.domain.kvittering.KvitteringForespoersel;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -126,22 +124,9 @@ public class MeldingsformidlerClient {
 
         @Override
         public MessageStatus toMessageStatus() {
-            MessageStatus domainReceipt = MessageStatus.of(getReceiptType(),
-                    LocalDateTime.ofInstant(eksternKvittering.getTidspunkt(), ZoneId.systemDefault()));
-            domainReceipt.setRawReceipt(getRawReceipt());
-            return domainReceipt;
-        }
-
-        /**
-         * Audit logs the receipt description
-         */
-        @Override
-        public void auditLog() {
-            getReceiptType().invokeLoggerMethod(logMarkers());
-        }
-
-        public DpiReceiptStatus getReceiptType() {
-            return DpiReceiptStatus.from(eksternKvittering);
+            MessageStatus ms = DpiReceiptMapper.from(eksternKvittering);
+            ms.setRawReceipt(getRawReceipt());
+            return ms;
         }
 
     }

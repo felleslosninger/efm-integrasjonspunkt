@@ -29,8 +29,4 @@ public interface ExternalReceipt {
      */
     MessageStatus toMessageStatus();
 
-    /**
-     *  Performs audit logging of itself including a description
-     */
-    void auditLog();
 }

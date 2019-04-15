@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
@@ -55,13 +56,14 @@ public class ConversationService {
     @SuppressWarnings("squid:S2250")
     public Conversation registerStatus(Conversation conversation, MessageStatus status) {
         boolean hasStatus = conversation.getMessageStatuses().stream()
-                .map(MessageStatus::getStatus)
-                .anyMatch(status.getStatus()::equals);
+                .anyMatch(ms -> ms.getStatus().equals(status.getStatus()) && ms.getDescription().equals(status.getDescription()));
         if (!hasStatus) {
             conversation.addMessageStatus(status);
-
+            Audit.info(String.format("Added status '%s' to conversation[id=%s]", status.getStatus(),
+                    conversation.getConversationId()),
+                    MessageStatusMarker.from(status));
             if (conversation.getDirection() == ConversationDirection.OUTGOING &&
-                    GenericReceiptStatus.SENDT.toString().equals(status.getStatus()) &&
+                    ReceiptStatus.SENDT.toString().equals(status.getStatus()) &&
                     POLLABLES.contains(conversation.getServiceIdentifier()) &&
                     !conversation.isMsh()) {
                 conversation.setPollable(true);
@@ -84,7 +86,7 @@ public class ConversationService {
             return find.get();
         }
 
-        MessageStatus ms = MessageStatus.of(GenericReceiptStatus.OPPRETTET);
+        MessageStatus ms = MessageStatus.of(ReceiptStatus.OPPRETTET);
         if (message.getMessageType() == EDUCore.MessageType.APPRECEIPT) {
             ms.setDescription("AppReceipt");
         }
@@ -105,7 +107,7 @@ public class ConversationService {
             log.warn(String.format(CONVERSATION_EXISTS, cr.getConversationId()));
             return find.get();
         }
-        MessageStatus ms = MessageStatus.of(GenericReceiptStatus.OPPRETTET);
+        MessageStatus ms = MessageStatus.of(ReceiptStatus.OPPRETTET);
         Conversation c = Conversation.of(cr, ms);
         return repo.save(c);
     }
@@ -117,7 +119,7 @@ public class ConversationService {
             return find.get();
         }
 
-        MessageStatus ms = MessageStatus.of(GenericReceiptStatus.OPPRETTET);
+        MessageStatus ms = MessageStatus.of(ReceiptStatus.OPPRETTET);
         Conversation c = Conversation.of(message, ms);
         return repo.save(c);
     }
@@ -129,7 +131,7 @@ public class ConversationService {
             return find.get();
         }
 
-        MessageStatus ms = MessageStatus.of(GenericReceiptStatus.OPPRETTET);
+        MessageStatus ms = MessageStatus.of(ReceiptStatus.OPPRETTET);
         Conversation c = Conversation.of(sbd, ms);
         return repo.save(c);
     }

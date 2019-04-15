@@ -11,6 +11,7 @@ public class DocumentTypeTest {
         assertThat(DocumentType.values(ApiType.NEXTMOVE)).containsOnly(
                 DocumentType.ARKIVMELDING,
                 DocumentType.ARKIVMELDING_KVITTERING,
+                DocumentType.STATUS,
                 DocumentType.DIGITAL,
                 DocumentType.PRINT,
                 DocumentType.INNSYNSKRAV,

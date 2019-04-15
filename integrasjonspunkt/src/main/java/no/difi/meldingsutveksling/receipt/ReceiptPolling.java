@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.receipt;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.dpi.DpiReceiptStatus;
 import no.difi.meldingsutveksling.logging.Audit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,12 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.dpi.MeldingsformidlerClient.EMPTY_KVITTERING;
 import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
+import static no.difi.meldingsutveksling.receipt.ReceiptStatus.FEIL;
+import static no.difi.meldingsutveksling.receipt.ReceiptStatus.LEST;
 
 /**
  * Periodically checks non final receipts, and their respective services for updates.
@@ -68,11 +70,10 @@ public class ReceiptPolling {
         if (props.getFeature().isEnableReceipts() && props.getFeature().isEnableDPI()) {
             ExternalReceipt externalReceipt = dpiReceiptService.checkForReceipts();
             while (externalReceipt != EMPTY_KVITTERING) {
-                externalReceipt.auditLog();
                 final String id = externalReceipt.getId();
                 MessageStatus status = externalReceipt.toMessageStatus();
                 Optional<Conversation> c = conversationService.registerStatus(id, status);
-                if (c.isPresent() && DpiReceiptStatus.LEST.toString().equals(status.getStatus())) {
+                if (c.isPresent() && Arrays.asList(LEST, FEIL).contains(ReceiptStatus.valueOf(status.getStatus()))) {
                     conversationService.markFinished(c.get());
                 }
                 Audit.info("Updated receipt (DPI)", externalReceipt.logMarkers());

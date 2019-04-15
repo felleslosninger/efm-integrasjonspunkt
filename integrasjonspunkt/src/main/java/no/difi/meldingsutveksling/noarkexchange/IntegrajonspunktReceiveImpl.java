@@ -20,10 +20,7 @@ import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import no.difi.meldingsutveksling.receipt.Conversation;
-import no.difi.meldingsutveksling.receipt.ConversationService;
-import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.*;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
@@ -119,7 +116,7 @@ public class IntegrajonspunktReceiveImpl {
             eduCore = convertAsicEntrytoEduCore(decryptedAsicPackage);
             if (PayloadUtil.isAppReceipt(eduCore.getPayload())) {
                 Audit.info("AppReceipt extracted", markerFrom(sbd));
-                Optional<Conversation> c = conversationService.registerStatus(eduCore.getId(), MessageStatus.of(GenericReceiptStatus.LEST));
+                Optional<Conversation> c = conversationService.registerStatus(eduCore.getId(), MessageStatus.of(ReceiptStatus.LEST));
                 c.ifPresent(conversationService::markFinished);
                 if (!properties.getFeature().isForwardReceivedAppReceipts()) {
                     Audit.info("AppReceipt forwarding disabled - will not deliver to archive");
@@ -148,7 +145,7 @@ public class IntegrajonspunktReceiveImpl {
         Arkivmelding arkivmelding = convertAsicEntryToArkivmelding(asic);
 
         EDUCore eduCore = eduCoreFactory.create(sbd, arkivmelding, asic);
-        Optional<Conversation> c = conversationService.registerStatus(eduCore.getId(), MessageStatus.of(GenericReceiptStatus.LEST));
+        Optional<Conversation> c = conversationService.registerStatus(eduCore.getId(), MessageStatus.of(ReceiptStatus.LEST));
         c.ifPresent(conversationService::markFinished);
 
         return eduCore;
@@ -169,7 +166,7 @@ public class IntegrajonspunktReceiveImpl {
             if (result.getType().equals(OK_TYPE)) {
                 Audit.info("Delivered archive", markerFrom(response));
                 Optional<Conversation> c = conversationService.registerStatus(sbd.getConversationId(),
-                        MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_LEVERT));
+                        MessageStatus.of(ReceiptStatus.INNKOMMENDE_LEVERT));
                 c.ifPresent(conversationService::markFinished);
                 sendReceiptOpen(sbd);
                 if (localNoark instanceof MailClient && eduCore.getMessageType() != EDUCore.MessageType.APPRECEIPT) {

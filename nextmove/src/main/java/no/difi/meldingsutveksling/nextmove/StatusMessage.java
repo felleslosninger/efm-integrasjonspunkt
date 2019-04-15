@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import lombok.*;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -15,5 +16,5 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NoArgsConstructor
 @XmlRootElement(name = "status", namespace = "urn:no:difi:meldingsutveksling:2.0")
 public class StatusMessage extends BusinessMessage {
-    private String type;
+    private ReceiptStatus status;
 }

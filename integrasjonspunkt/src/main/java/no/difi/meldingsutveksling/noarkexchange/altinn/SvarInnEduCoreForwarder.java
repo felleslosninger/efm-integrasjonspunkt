@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static java.lang.String.format;
-import static no.difi.meldingsutveksling.receipt.GenericReceiptStatus.INNKOMMENDE_LEVERT;
-import static no.difi.meldingsutveksling.receipt.GenericReceiptStatus.INNKOMMENDE_MOTTATT;
+import static no.difi.meldingsutveksling.receipt.ReceiptStatus.INNKOMMENDE_LEVERT;
+import static no.difi.meldingsutveksling.receipt.ReceiptStatus.INNKOMMENDE_MOTTATT;
 
 @RequiredArgsConstructor
 @Component

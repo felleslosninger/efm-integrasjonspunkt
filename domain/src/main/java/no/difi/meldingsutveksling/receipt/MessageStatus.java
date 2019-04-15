@@ -44,6 +44,10 @@ public class MessageStatus {
         return new MessageStatus(status.toString(), lastUpdate, null);
     }
 
+    public static MessageStatus of(ReceiptStatus status, String description) {
+        return new MessageStatus(status.toString(), LocalDateTime.now(), description);
+    }
+
     public static MessageStatus of(ReceiptStatus status, LocalDateTime lastUpdate, String description) {
         return new MessageStatus(status.toString(), lastUpdate, description);
     }

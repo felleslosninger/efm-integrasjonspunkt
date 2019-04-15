@@ -9,12 +9,11 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.ks.mapping.FiksMapper;
 import no.difi.meldingsutveksling.ks.mapping.FiksStatusMapper;
-import no.difi.meldingsutveksling.ks.receipt.DpfReceiptStatus;
 import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.receipt.Conversation;
-import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 
@@ -63,10 +62,9 @@ public class SvarUtService {
         final String forsendelseId = client.getForsendelseId(getFiksUtUrl(), conversation.getConversationId());
         if (forsendelseId != null) {
             final ForsendelseStatus forsendelseStatus = client.getForsendelseStatus(getFiksUtUrl(), forsendelseId);
-            final DpfReceiptStatus receiptStatus = FiksStatusMapper.mapFrom(forsendelseStatus);
-            return MessageStatus.of(receiptStatus);
+            return FiksStatusMapper.mapFrom(forsendelseStatus);
         } else {
-            return MessageStatus.of(GenericReceiptStatus.FEIL, LocalDateTime.now(), "forsendelseId finnes ikke i SvarUt.");
+            return MessageStatus.of(ReceiptStatus.FEIL, LocalDateTime.now(), "forsendelseId finnes ikke i SvarUt.");
         }
     }
 

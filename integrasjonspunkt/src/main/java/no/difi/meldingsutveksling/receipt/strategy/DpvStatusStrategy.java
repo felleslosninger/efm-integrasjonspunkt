@@ -53,7 +53,7 @@ public class DpvStatusStrategy implements StatusStrategy {
             Optional<StatusChangeV2> createdStatus = statusChanges.stream()
                     .filter(s -> STATUS_CREATED.equals(s.getStatusType().value()))
                     .findFirst();
-            GenericReceiptStatus levertStatus = GenericReceiptStatus.LEVERT;
+            ReceiptStatus levertStatus = ReceiptStatus.LEVERT;
             boolean hasCreatedStatus = conversation.getMessageStatuses().stream()
                     .anyMatch(r -> levertStatus.toString().equals(r.getStatus()));
             if (!hasCreatedStatus && createdStatus.isPresent()) {
@@ -65,7 +65,7 @@ public class DpvStatusStrategy implements StatusStrategy {
             Optional<StatusChangeV2> readStatus = statusChanges.stream()
                     .filter(s -> STATUS_READ.equals(s.getStatusType().value()))
                     .findFirst();
-            GenericReceiptStatus lestStatus = GenericReceiptStatus.LEST;
+            ReceiptStatus lestStatus = ReceiptStatus.LEST;
             if (readStatus.isPresent()) {
                 ZonedDateTime readZoned = readStatus.get().getStatusDate().toGregorianCalendar().toZonedDateTime();
                 MessageStatus status = MessageStatus.of(lestStatus, readZoned.toLocalDateTime());

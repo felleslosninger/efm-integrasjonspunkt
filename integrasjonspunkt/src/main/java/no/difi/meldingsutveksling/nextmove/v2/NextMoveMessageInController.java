@@ -13,8 +13,8 @@ import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.receipt.ConversationService;
-import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -140,7 +140,7 @@ public class NextMoveMessageInController {
         messageRepo.delete(message);
 
         conversationService.registerStatus(conversationId,
-                MessageStatus.of(GenericReceiptStatus.INNKOMMENDE_LEVERT))
+                MessageStatus.of(ReceiptStatus.INNKOMMENDE_LEVERT))
                 .ifPresent(conversationService::markFinished);
 
         Audit.info(format("Conversation with id=%s popped from queue", conversationId),

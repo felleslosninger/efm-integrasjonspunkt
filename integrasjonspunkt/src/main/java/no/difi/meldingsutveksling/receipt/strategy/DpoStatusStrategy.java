@@ -29,17 +29,17 @@ public class DpoStatusStrategy implements StatusStrategy {
         }
 
         Optional<MessageStatus> lestStatus = conversation.getMessageStatuses().stream()
-                .filter(ms -> ms.getStatus().equals(GenericReceiptStatus.LEST.toString()))
+                .filter(ms -> ms.getStatus().equals(ReceiptStatus.LEST.toString()))
                 .findFirst();
         lestStatus.ifPresent(s -> conversationService.markFinished(conversation));
 
         if (!conversation.isFinished()) {
             Optional<MessageStatus> sendtStatus = conversation.getMessageStatuses().stream()
-                    .filter(ms -> ms.getStatus().equals(GenericReceiptStatus.SENDT.toString()))
+                    .filter(ms -> ms.getStatus().equals(ReceiptStatus.SENDT.toString()))
                     .findFirst();
             sendtStatus.ifPresent(s -> {
                 if (LocalDateTime.now().isAfter(s.getLastUpdate().plusHours(props.getStatus().getMessageTimeoutHours()))) {
-                    conversationService.registerStatus(conversation, MessageStatus.of(GenericReceiptStatus.FEIL));
+                    conversationService.registerStatus(conversation, MessageStatus.of(ReceiptStatus.FEIL));
                     conversationService.markFinished(conversation);
                 }
             });
