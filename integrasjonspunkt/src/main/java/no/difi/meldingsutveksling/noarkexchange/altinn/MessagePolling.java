@@ -14,6 +14,7 @@ import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
 import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveQueue;
 import no.difi.meldingsutveksling.nextmove.NextMoveServiceBus;
 import no.difi.meldingsutveksling.nextmove.StatusMessage;
@@ -38,6 +39,7 @@ import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isNextMove;
 import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isReceipt;
 import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isStatus;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
+import static no.difi.meldingsutveksling.receipt.GenericReceiptStatus.LEST;
 
 /**
  * MessagePolling periodically checks Altinn Formidlingstjeneste for new messages. If new messages are discovered they are
@@ -145,6 +147,7 @@ public class MessagePolling {
                         } else {
                             nextMoveQueue.enqueue(sbd, DPO);
                         }
+                        sendStatus(sbd, LEST);
                     }
 
                 } else {
@@ -187,6 +190,12 @@ public class MessagePolling {
         DpoReceiptStatus status = DpoReceiptStatus.of(kvittering);
         LocalDateTime tidspunkt = kvittering.getTidspunkt().toGregorianCalendar().toZonedDateTime().toLocalDateTime();
         return MessageStatus.of(status, tidspunkt);
+    }
+
+    private void sendStatus(StandardBusinessDocument sbd, ReceiptStatus status) {
+        StandardBusinessDocument lestStatusMessage = sbdReceiptFactory.createArkivmeldingStatusFrom(sbd, DocumentType.STATUS, LEST);
+        NextMoveOutMessage msg = NextMoveOutMessage.of(lestStatusMessage, DPO);
+        internalQueue.enqueueNextMove2(msg);
     }
 
     private void sendReceipt(MessageInfo messageInfo) {

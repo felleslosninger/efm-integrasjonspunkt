@@ -16,6 +16,8 @@ import no.difi.meldingsutveksling.kvittering.xsd.Aapning;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.kvittering.xsd.Levering;
 import no.difi.meldingsutveksling.kvittering.xsd.ObjectFactory;
+import no.difi.meldingsutveksling.nextmove.StatusMessage;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.apache.xml.security.exceptions.XMLSecurityException;
 import org.springframework.stereotype.Component;
@@ -52,6 +54,24 @@ public class SBDReceiptFactory {
         return signAndWrapDocument(messageInfo,
                 keyInfo,
                 k);
+    }
+
+    public StandardBusinessDocument createArkivmeldingStatusFrom(StandardBusinessDocument sbd,
+                                                                 DocumentType documentType,
+                                                                 ReceiptStatus status) {
+        String standard = serviceRegistryLookup.getStandard(sbd.getSenderIdentifier(), Process.ARKIVMELDING_RESPONSE, documentType);
+        StatusMessage statusMessage = new StatusMessage(status.getStatus());
+
+        return new StandardBusinessDocument()
+                .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader.Builder()
+                        .from(Organisasjonsnummer.from(sbd.getReceiverIdentifier()))
+                        .to(Organisasjonsnummer.from(sbd.getSenderIdentifier()))
+                        .relatedToConversationId(sbd.getConversationId())
+                        .process(Process.ARKIVMELDING_RESPONSE)
+                        .standard(standard)
+                        .type(documentType)
+                        .build())
+                .setAny(statusMessage);
     }
 
     public StandardBusinessDocument createDpeReceiptFrom(StandardBusinessDocument sbd, DocumentType documentType) {
