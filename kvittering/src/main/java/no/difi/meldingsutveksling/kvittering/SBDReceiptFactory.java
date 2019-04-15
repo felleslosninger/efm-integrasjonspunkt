@@ -74,8 +74,11 @@ public class SBDReceiptFactory {
                 .setAny(statusMessage);
     }
 
-    public StandardBusinessDocument createDpeReceiptFrom(StandardBusinessDocument sbd, DocumentType documentType) {
+    public StandardBusinessDocument createEinnsynStatusFrom(StandardBusinessDocument sbd,
+                                                            DocumentType documentType,
+                                                            ReceiptStatus status) {
         String standard = serviceRegistryLookup.getStandard(sbd.getSenderIdentifier(), Process.EINNSYN_RESPONSE, documentType);
+        StatusMessage statusMessage = new StatusMessage(status);
 
         return new StandardBusinessDocument()
                 .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader.Builder()
@@ -86,7 +89,7 @@ public class SBDReceiptFactory {
                         .standard(standard)
                         .type(documentType)
                         .build())
-                .setAny(sbd.getAny());
+                .setAny(statusMessage);
     }
 
     private StandardBusinessDocument signAndWrapDocument(MessageInfo messageInfo, IntegrasjonspunktNokkel keyInfo, Kvittering kvittering) {

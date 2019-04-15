@@ -143,7 +143,7 @@ public class MessagePolling {
                         } else {
                             nextMoveQueue.enqueue(sbd, DPO);
                         }
-                        sendStatus(sbd, ReceiptStatus.MOTTATT);
+                        sendReceivedStatusToSender(sbd);
                     }
 
                 } else {
@@ -188,9 +188,9 @@ public class MessagePolling {
         return MessageStatus.of(status, tidspunkt);
     }
 
-    private void sendStatus(StandardBusinessDocument sbd, ReceiptStatus status) {
-        StandardBusinessDocument lestStatusMessage = sbdReceiptFactory.createArkivmeldingStatusFrom(sbd, DocumentType.STATUS, status);
-        NextMoveOutMessage msg = NextMoveOutMessage.of(lestStatusMessage, DPO);
+    private void sendReceivedStatusToSender(StandardBusinessDocument sbd) {
+        StandardBusinessDocument statusSbd = sbdReceiptFactory.createArkivmeldingStatusFrom(sbd, DocumentType.STATUS, ReceiptStatus.MOTTATT);
+        NextMoveOutMessage msg = NextMoveOutMessage.of(statusSbd, DPO);
         internalQueue.enqueueNextMove2(msg);
     }
 

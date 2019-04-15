@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Payload;
-import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
@@ -16,7 +15,6 @@ import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
-import java.util.Optional;
 
 import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
 
@@ -29,15 +27,9 @@ public class NextMoveQueue {
     private final NextMoveMessageInRepository messageRepo;
 
     @Transactional
-    public Optional<NextMoveMessage> enqueue(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
+    public NextMoveMessage enqueue(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
         if (sbd.getAny() instanceof BusinessMessage) {
             NextMoveInMessage message = NextMoveInMessage.of(sbd, serviceIdentifier);
-
-            // TODO handle all receipts
-            if (SBDUtil.isReceipt(sbd)) {
-                handleDpeReceipt(message.getConversationId());
-                return Optional.empty();
-            }
 
             if(!messageRepo.findByConversationId(sbd.getConversationId()).isPresent()) {
                 messageRepo.save(message);
@@ -47,7 +39,7 @@ public class NextMoveQueue {
             conversationService.registerStatus(c, MessageStatus.of(ReceiptStatus.INNKOMMENDE_MOTTATT));
             Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] put on local queue",
                     message.getConversationId(), message.getServiceIdentifier()), markerFrom(message));
-            return Optional.of(message);
+            return message;
 
         } else {
             String errorMsg = String.format("SBD payload not of known types: %s, %s", Payload.class.getName(), BusinessMessage.class.getName());
@@ -56,9 +48,4 @@ public class NextMoveQueue {
         }
     }
 
-    private void handleDpeReceipt(String conversationId) {
-        log.debug(String.format("Message with id=%s is a receipt", conversationId));
-        Optional<Conversation> c = conversationService.registerStatus(conversationId, MessageStatus.of(ReceiptStatus.LEVERT));
-        c.ifPresent(conversationService::markFinished);
-    }
 }

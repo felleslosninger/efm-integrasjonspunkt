@@ -37,7 +37,8 @@ public class NextMoveSender {
         }
 
         strategy.get().send(msg);
-        if (SBDUtil.isReceipt(msg.getSbd())) {
+
+        if (SBDUtil.isStatus(msg.getSbd())) {
             return;
         }
 

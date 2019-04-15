@@ -21,6 +21,10 @@ import no.difi.meldingsutveksling.noarkexchange.MessageContext;
 import no.difi.meldingsutveksling.noarkexchange.MessageContextException;
 import no.difi.meldingsutveksling.noarkexchange.MessageContextFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
+import no.difi.meldingsutveksling.receipt.Conversation;
+import no.difi.meldingsutveksling.receipt.ConversationService;
+import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.io.IOUtils;
@@ -63,6 +67,7 @@ public class NextMoveServiceBus {
     private final ServiceBusPayloadConverter payloadConverter;
     private final SBDReceiptFactory sbdReceiptFactory;
     private final ServiceRegistryLookup serviceRegistryLookup;
+    private final ConversationService conversationService;
 
     private IMessageReceiver messageReceiver;
 
@@ -76,7 +81,8 @@ public class NextMoveServiceBus {
                               CryptoMessagePersister cryptoMessagePersister,
                               ServiceBusPayloadConverter payloadConverter,
                               SBDReceiptFactory sbdReceiptFactory,
-                              ServiceRegistryLookup serviceRegistryLookup) {
+                              ServiceRegistryLookup serviceRegistryLookup,
+                              ConversationService conversationService) {
         this.props = props;
         this.nextMoveQueue = nextMoveQueue;
         this.serviceBusClient = serviceBusClient;
@@ -88,6 +94,7 @@ public class NextMoveServiceBus {
         this.payloadConverter = payloadConverter;
         this.sbdReceiptFactory = sbdReceiptFactory;
         this.serviceRegistryLookup = serviceRegistryLookup;
+        this.conversationService = conversationService;
     }
 
     @PostConstruct
@@ -163,8 +170,7 @@ public class NextMoveServiceBus {
                         throw new NextMoveRuntimeException("Error persisting ASiC, aborting..", e);
                     }
                 }
-                Optional<NextMoveMessage> cr = nextMoveQueue.enqueue(msg.getPayload().getSbd(), DPE);
-                cr.ifPresent(this::sendReceipt);
+                handleSbd(msg.getPayload().getSbd());
                 serviceBusClient.deleteMessage(msg);
             }
         }
@@ -187,8 +193,7 @@ public class NextMoveServiceBus {
                                 if (payload.getAsic() != null) {
                                     cryptoMessagePersister.write(payload.getSbd().getConversationId(), ASIC_FILE, Base64.getDecoder().decode(payload.getAsic()));
                                 }
-                                Optional<NextMoveMessage> message = nextMoveQueue.enqueue(payload.getSbd(), DPE);
-                                message.ifPresent(this::sendReceiptAsync);
+                                handleSbd(payload.getSbd());
                                 messageReceiver.completeAsync(m.getLockToken());
                             } catch (JAXBException | IOException e) {
                                 log.error("Failed to put message on local queue", e);
@@ -206,13 +211,25 @@ public class NextMoveServiceBus {
         });
     }
 
-    private CompletableFuture sendReceiptAsync(NextMoveMessage message) {
-        return CompletableFuture.runAsync(() -> sendReceipt(message));
+    private void handleSbd(StandardBusinessDocument sbd) {
+        if (SBDUtil.isStatus(sbd)) {
+            log.debug(String.format("Message with id=%s is a receipt", sbd.getConversationId()));
+            StatusMessage msg = (StatusMessage) sbd.getAny();
+            Optional<Conversation> c = conversationService.registerStatus(sbd.getConversationId(), MessageStatus.of(msg.getStatus()));
+            c.ifPresent(conversationService::markFinished);
+        } else {
+            sendReceiptAsync(nextMoveQueue.enqueue(sbd, DPE));
+        }
+    }
+
+    private void sendReceiptAsync(NextMoveMessage message) {
+        CompletableFuture.runAsync(() -> sendReceipt(message));
     }
 
     private void sendReceipt(NextMoveMessage message) {
-        StandardBusinessDocument sbdReceipt = sbdReceiptFactory.createDpeReceiptFrom(
-                message.getSbd(), DocumentType.EINNSYN_KVITTERING);
+        StandardBusinessDocument sbdReceipt = sbdReceiptFactory.createEinnsynStatusFrom(message.getSbd(),
+                DocumentType.STATUS,
+                ReceiptStatus.MOTTATT);
         internalQueue.enqueueNextMove2(NextMoveMessage.of(sbdReceipt, DPE));
     }
 

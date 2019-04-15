@@ -3,15 +3,19 @@ package no.difi.meldingsutveksling.nextmove.v2;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
 import no.difi.meldingsutveksling.exceptions.ConversationNotLockedException;
 import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
+import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
+import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
@@ -32,6 +36,8 @@ import java.time.ZonedDateTime;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
 
 @RestController
@@ -49,6 +55,8 @@ public class NextMoveMessageInController {
     private final ConversationService conversationService;
     private final NextMoveMessageInRepository messageRepo;
     private final CryptoMessagePersisterImpl cryptoMessagePersister;
+    private final InternalQueue internalQueue;
+    private final SBDReceiptFactory receiptFactory;
 
     @GetMapping
     @ApiOperation(value = "Get all incoming messages")
@@ -145,6 +153,17 @@ public class NextMoveMessageInController {
 
         Audit.info(format("Conversation with id=%s popped from queue", conversationId),
                 markerFrom(message));
+
+        if (message.getServiceIdentifier() == DPO) {
+            StandardBusinessDocument statusSbd = receiptFactory.createArkivmeldingStatusFrom(message.getSbd(), DocumentType.STATUS, ReceiptStatus.LEVERT);
+            NextMoveOutMessage msg = NextMoveOutMessage.of(statusSbd, DPO);
+            internalQueue.enqueueNextMove2(msg);
+        }
+        if (message.getServiceIdentifier() == DPE) {
+            StandardBusinessDocument statusSbd = receiptFactory.createEinnsynStatusFrom(message.getSbd(), DocumentType.STATUS, ReceiptStatus.LEVERT);
+            NextMoveOutMessage msg = NextMoveOutMessage.of(statusSbd, DPE);
+            internalQueue.enqueueNextMove2(msg);
+        }
 
         return message.getSbd();
     }
