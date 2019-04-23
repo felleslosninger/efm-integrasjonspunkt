@@ -5,6 +5,7 @@ import lombok.Data;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Data
 class ZipContent {
@@ -22,9 +23,13 @@ class ZipContent {
     }
 
     ZipFile getFile(String filename) {
+        return getOptionalFile(filename)
+                .orElseThrow(() -> new IllegalArgumentException(String.format("File not found for %s", filename)));
+    }
+
+    Optional<ZipFile> getOptionalFile(String filename) {
         return files.stream()
                 .filter(p -> p.getFileName().equals(filename))
-                .findAny()
-                .orElseThrow(() -> new IllegalArgumentException(String.format("File not found for %s", filename)));
+                .findAny();
     }
 }

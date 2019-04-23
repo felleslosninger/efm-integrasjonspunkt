@@ -136,9 +136,8 @@ public class ServiceRegistryLookup {
 
         return serviceRecord.getStandard(documentType)
                 .orElseThrow(() -> new ServiceRegistryLookupException(
-                        String.format("Standard not found for documentType '%s' for identifier '%s'",
-                                documentType.getType(), identifier)));
-
+                        String.format("Standard not found for process '%s' and documentType '%s' for identifier '%s'",
+                                process, documentType.getType(), identifier)));
     }
 
     public Optional<ServiceRecord> getServiceRecordByProcess(String identifier, Process process) {

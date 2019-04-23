@@ -33,12 +33,10 @@
       "dpeCapabilities": [
         "DPE_INNSYN"
       ],
-      "process": "urn:no:difi:profile:administrasjon::arkivmelding",
+      "process": "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
       "documentTypes": [
         "urn:no:difi.arkivmelding:xsd::arkivmelding",
-        "urn:no:difi.arkivmelding:xsd::arkivmelding_kvittering",
-        "urn:no:difi.arkivmelding:xsd::status*",
-        "urn:no:difi.arkivmelding:xsd::feil*"
+        "urn:no:difi.arkivmelding:xsd::arkivmelding_kvittering"
       ],
       "service": {
         "identifier": "DPO",

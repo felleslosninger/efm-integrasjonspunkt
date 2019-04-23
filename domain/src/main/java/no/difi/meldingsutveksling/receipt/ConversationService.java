@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -56,7 +57,8 @@ public class ConversationService {
     @SuppressWarnings("squid:S2250")
     public Conversation registerStatus(Conversation conversation, MessageStatus status) {
         boolean hasStatus = conversation.getMessageStatuses().stream()
-                .anyMatch(ms -> ms.getStatus().equals(status.getStatus()) && ms.getDescription().equals(status.getDescription()));
+                .anyMatch(ms -> ms.getStatus().equals(status.getStatus()) &&
+                        Objects.equals(ms.getDescription(), status.getDescription()));
         if (!hasStatus) {
             conversation.addMessageStatus(status);
             Audit.info(String.format("Added status '%s' to conversation[id=%s]", status.getStatus(),

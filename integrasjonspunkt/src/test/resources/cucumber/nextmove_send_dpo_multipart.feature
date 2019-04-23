@@ -19,7 +19,7 @@ Feature: Sending a Next Move DPO multipart/form message
                                 "expectedResponseDateTime": "2019-05-10T00:31:52Z"
                             }
                         ],
-                        "identifier": "urn:no:difi:profile:administrasjon::arkivmelding",
+                        "identifier": "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
                         "instanceIdentifier": "37efbd4c-413d-4e2c-bbc5-257ef4a65a57",
                         "type": "ConversationId"
                     }
@@ -206,7 +206,7 @@ Feature: Sending a Next Move DPO multipart/form message
                                 "expectedResponseDateTime": "2019-05-10T00:31:52Z"
                             }
                         ],
-                        "identifier": "urn:no:difi:profile:administrasjon::arkivmelding",
+                        "identifier": "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
                         "instanceIdentifier": "37efbd4c-413d-4e2c-bbc5-257ef4a65a57",
                         "type": "ConversationId"
                     }

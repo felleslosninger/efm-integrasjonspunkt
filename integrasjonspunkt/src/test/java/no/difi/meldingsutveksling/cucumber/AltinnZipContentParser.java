@@ -32,12 +32,16 @@ public class AltinnZipContentParser {
         String receiverOrgNumber = sbd.getReceiverIdentifier();
         PrivateKey privateKey = cucumberKeyStore.getPrivateKey(receiverOrgNumber);
 
-        byte[] encryptedAsic = zipContent.getFile(ASIC_FILE).getBytes();
-        byte[] asic = cmsUtil.decryptCMS(encryptedAsic, privateKey);
+        Message message = new Message()
+                .setSbd(sbd);
 
-        return new Message()
-                .setSbd(sbd)
-                .attachments(getAttachments(asic));
+        zipContent.getOptionalFile(ASIC_FILE).ifPresent(asicFile -> {
+            byte[] encryptedAsic = asicFile.getBytes();
+            byte[] asic = cmsUtil.decryptCMS(encryptedAsic, privateKey);
+            message.attachments(getAttachments(asic));
+        });
+
+        return message;
     }
 
     private StandardBusinessDocument getSbd(ZipContent zipContent) throws java.io.IOException {

@@ -15,10 +15,7 @@
     ],
     "process": "urn:no:difi:profile:einnsyn-innsynskrav:ver1.0",
     "documentTypes": [
-      "urn:no:difi.einnsyn:xsd:innsyn::innsynskrav",
-      "urn:no:difi.einnsyn:xsd::einnsyn_kvittering",
-      "urn:no:difi.eformidling:xsd::status*",
-      "urn:no:difi.eformidling:xsd::feil*"
+      "urn:no:difi.einnsyn:xsd:innsyn::innsynskrav"
     ],
     "service": {
       "identifier": "DPE",
@@ -35,10 +32,7 @@
       ],
       "process": "urn:no:difi:profile:einnsyn-innsynskrav:ver1.0",
       "documentTypes": [
-        "urn:no:difi.einnsyn:xsd:innsyn::innsynskrav",
-        "urn:no:difi.einnsyn:xsd::einnsyn_kvittering",
-        "urn:no:difi.eformidling:xsd::status*",
-        "urn:no:difi.eformidling:xsd::feil*"
+        "urn:no:difi.einnsyn:xsd:innsyn::innsynskrav"
       ],
       "service": {
         "identifier": "DPE",
