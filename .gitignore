@@ -1,4 +1,3 @@
-
 *.jks
 *.cer
 *.crt
@@ -137,3 +136,4 @@ integrasjonspunkt-logs/*.log
 
 # Overrides (files for tests)
 !/fiks-meldingsformidler/src/test/resources/somdalen.jks
+!/integrasjonspunkt/src/test/resources/no/difi/meldingsutveksling/cucumber/cucumber.jks
