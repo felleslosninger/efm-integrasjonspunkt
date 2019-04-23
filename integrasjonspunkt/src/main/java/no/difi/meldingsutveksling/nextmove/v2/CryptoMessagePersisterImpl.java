@@ -33,6 +33,7 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
 
     public void writeStream(String conversationId, String filename, InputStream stream, long size) throws IOException {
         PipedOutputStream pos = new PipedOutputStream();
+        PipedInputStream pis = new PipedInputStream(pos);
 
         CompletableFuture.runAsync(() -> {
             log.trace("Starting thread: encrypt attachment");
@@ -46,12 +47,11 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
             log.trace("Thread finished: encrypt attachment");
         });
 
-        PipedInputStream pis = new PipedInputStream(pos);
         delegate.writeStream(conversationId, filename, pis, size);
     }
 
     public byte[] read(String conversationId, String filename) throws IOException {
-        return delegate.read(conversationId, filename);
+        return getCmsUtil().decryptCMS(delegate.read(conversationId, filename), keyInfo.loadPrivateKey());
     }
 
     public FileEntryStream readStream(String conversationId, String filename) {
