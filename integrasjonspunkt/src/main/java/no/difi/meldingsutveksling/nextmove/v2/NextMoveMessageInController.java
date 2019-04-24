@@ -115,7 +115,7 @@ public class NextMoveMessageInController {
                     .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME + ASIC_FILE)
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .body(new InputStreamResource(fileEntry.getInputStream()));
-        } catch (PersistenceException e) {
+        } catch (PersistenceException | IOException e) {
             Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing message from queue",
                     ASIC_FILE, message.getConversationId(), message.getSenderIdentifier()), markerFrom(message), e);
             throw new FileNotFoundException(ASIC_FILE);

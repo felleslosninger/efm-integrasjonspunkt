@@ -43,9 +43,12 @@ public class AsicHandler {
         List<StreamedFile> attachments = new ArrayList<>();
         if (cr.getFileRefs() != null) {
             for (String filename : cr.getFileRefs().values()) {
-                FileEntryStream fileEntryStream = cryptoMessagePersister.readStream(cr.getConversationId(), filename);
-                String ext = Stream.of(filename.split(".")).reduce((p, e) -> e).orElse("pdf");
-                attachments.add(new NextMoveStreamedFile(filename, fileEntryStream.getInputStream(), MimeTypeExtensionMapper.getMimetype(ext)));
+                try (FileEntryStream fileEntryStream = cryptoMessagePersister.readStream(cr.getConversationId(), filename)) {
+                    String ext = Stream.of(filename.split(".")).reduce((p, e) -> e).orElse("pdf");
+                    attachments.add(new NextMoveStreamedFile(filename, fileEntryStream.getInputStream(), MimeTypeExtensionMapper.getMimetype(ext)));
+                } catch (IOException e) {
+                    throw new NextMoveRuntimeException(String.format("Could not read file named '%s' for conversationId = '%s'", filename, cr.getConversationId()));
+                }
             }
         }
 
@@ -62,8 +65,13 @@ public class AsicHandler {
                     if (b.getPrimaryDocument()) return 1;
                     return a.getFilename().compareTo(b.getFilename());
                 }).map(f -> {
-                    FileEntryStream fes = cryptoMessagePersister.readStream(msg.getConversationId(), f.getIdentifier());
-                    return new NextMoveStreamedFile(f.getFilename(), fes.getInputStream(), getMimetype(f));
+                    try {
+                        FileEntryStream fes = cryptoMessagePersister.readStream(msg.getConversationId(), f.getIdentifier());
+                        return new NextMoveStreamedFile(f.getFilename(), fes.getInputStream(), getMimetype(f));
+                    } catch (IOException e) {
+                        throw new NextMoveRuntimeException(
+                                String.format("Could not read file named '%s' for conversationId = '%s'", f.getFilename(), msg.getConversationId()));
+                    }
                 }).collect(Collectors.toList());
 
         return archiveAndEncryptAttachments(attachments.get(0), attachments.stream(), messageContext, msg.getServiceIdentifier());

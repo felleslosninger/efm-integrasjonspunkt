@@ -20,6 +20,7 @@ import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
+import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.AvsmotType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
@@ -140,12 +141,13 @@ public class FiksMapper {
 
     private Arkivmelding getArkivmelding(NextMoveMessage message) throws NextMoveException {
         String arkivmeldingIdentifier = getArkivmeldingIdentifier(message);
-        InputStream is = cryptoMessagePersister.readStream(message.getConversationId(), arkivmeldingIdentifier).getInputStream();
 
-        try {
-            return ArkivmeldingUtil.unmarshalArkivmelding(is);
+        try (FileEntryStream fileEntryStream = cryptoMessagePersister.readStream(message.getConversationId(), arkivmeldingIdentifier)) {
+            return ArkivmeldingUtil.unmarshalArkivmelding(fileEntryStream.getInputStream());
         } catch (JAXBException e) {
             throw new NextMoveException("Error unmarshalling arkivmelding", e);
+        } catch (IOException e) {
+            throw new NextMoveException("Reading failed for arkivmelding", e);
         }
     }
 
@@ -237,17 +239,22 @@ public class FiksMapper {
         return message.getFiles().stream()
                 .filter(bmf -> bmf.getFilename().equals(referanseDokumentfil))
                 .findFirst()
-                .orElseThrow(() -> new NextMoveRuntimeException("File '%s' referenced in '%s' not found"));
+                .orElseThrow(() -> new NextMoveRuntimeException(
+                        String.format("File '%s' referenced in '%s' not found", referanseDokumentfil, message.getConversationId())));
     }
 
     private Dokument getDocument(String conversationId, BusinessMessageFile file, X509Certificate cert) {
-        InputStream is = cryptoMessagePersister.readStream(conversationId, file.getIdentifier()).getInputStream();
+        try {
+            FileEntryStream fileEntryStream = cryptoMessagePersister.readStream(conversationId, file.getIdentifier());
 
-        return Dokument.builder()
-                .withData(getDataHandler(cert, is))
-                .withFilnavn(file.getFilename())
-                .withMimetype(file.getMimetype())
-                .build();
+            return Dokument.builder()
+                    .withData(getDataHandler(cert, fileEntryStream.getInputStream()))
+                    .withFilnavn(file.getFilename())
+                    .withMimetype(file.getMimetype())
+                    .build();
+        } catch (IOException e) {
+            throw new NextMoveRuntimeException(String.format("Could not get Document for conversationId %s", conversationId));
+        }
     }
 
     private DataHandler getDataHandler(X509Certificate cert, InputStream is) {

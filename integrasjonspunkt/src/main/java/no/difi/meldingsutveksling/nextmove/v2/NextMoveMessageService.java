@@ -10,6 +10,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
+import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -217,24 +218,10 @@ public class NextMoveMessageService {
         }
 
         if (ServiceIdentifier.DPO == message.getServiceIdentifier()) {
-            // Arkivmelding must exist for DPO
-            BusinessMessageFile arkivmeldingFile = message.getFiles().stream()
-                    .filter(f -> NextMoveConsts.ARKIVMELDING_FILE.equals(f.getFilename()))
-                    .findAny()
-                    .orElseThrow(MissingArkivmeldingException::new);
-
-            InputStream is = cryptoMessagePersister.readStream(message.getConversationId(), arkivmeldingFile.getIdentifier()).getInputStream();
-            Arkivmelding arkivmelding;
-            try {
-                arkivmelding = ArkivmeldingUtil.unmarshalArkivmelding(is);
-            } catch (JAXBException e) {
-                throw new UnmarshalArkivmeldingException();
-            }
-
             // Verify each file referenced in arkivmelding is uploaded
             List<String> arkivmeldingFiles;
             try {
-                arkivmeldingFiles = ArkivmeldingUtil.getFilenames(arkivmelding);
+                arkivmeldingFiles = ArkivmeldingUtil.getFilenames(getArkivmelding(message));
             } catch (ArkivmeldingException e) {
                 throw new ArkivmeldingProcessingException(e);
             }
@@ -249,6 +236,22 @@ public class NextMoveMessageService {
             if (!missingFiles.isEmpty()) {
                 throw new MissingArkivmeldingFileException(String.join(",", missingFiles));
             }
+        }
+    }
+
+    private Arkivmelding getArkivmelding(NextMoveMessage message) {
+        // Arkivmelding must exist for DPO
+        BusinessMessageFile arkivmeldingFile = message.getFiles().stream()
+                .filter(f -> NextMoveConsts.ARKIVMELDING_FILE.equals(f.getFilename()))
+                .findAny()
+                .orElseThrow(MissingArkivmeldingException::new);
+
+        try(FileEntryStream fileEntryStream = cryptoMessagePersister.readStream(message.getConversationId(), arkivmeldingFile.getIdentifier())) {
+                return ArkivmeldingUtil.unmarshalArkivmelding(fileEntryStream.getInputStream());
+        } catch (JAXBException e) {
+            throw new UnmarshalArkivmeldingException();
+        } catch (IOException e) {
+            throw new UnmarshalArkivmeldingException();
         }
     }
 

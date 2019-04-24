@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
@@ -36,15 +37,15 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
         PipedInputStream pis = new PipedInputStream(pos);
 
         CompletableFuture.runAsync(() -> {
-            log.trace("Starting thread: encrypt attachment");
+            log.trace("Starting thread: writeStream encrypted");
             cmsUtilProvider.getIfAvailable().createCMSStreamed(stream, pos, keyInfo.getX509Certificate());
             try {
                 pos.flush();
                 pos.close();
             } catch (IOException e) {
-                throw new NextMoveRuntimeException("Error closing attachment encryption output stream", e);
+                throw new NextMoveRuntimeException("Error closing writeStream output stream", e);
             }
-            log.trace("Thread finished: encrypt attachment");
+            log.trace("Thread finished: writeStream encrypted");
         });
 
         delegate.writeStream(conversationId, filename, pis, size);
@@ -54,10 +55,26 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
         return getCmsUtil().decryptCMS(delegate.read(conversationId, filename), keyInfo.loadPrivateKey());
     }
 
-    public FileEntryStream readStream(String conversationId, String filename) {
-        FileEntryStream fileEntryStream = delegate.readStream(conversationId, filename);
-        InputStream decryptedInputStream = getCmsUtil().decryptCMSStreamed(fileEntryStream.getInputStream(), keyInfo.loadPrivateKey());
-        return FileEntryStream.of(decryptedInputStream, -1);
+    public FileEntryStream readStream(String conversationId, String filename) throws IOException {
+
+        PipedOutputStream pos = new PipedOutputStream();
+        PipedInputStream pis = new PipedInputStream(pos);
+
+        CompletableFuture.runAsync(() -> {
+            log.trace("Starting thread: readStream encrypted");
+            try (FileEntryStream fileEntryStream = delegate.readStream(conversationId, filename)) {
+                InputStream decryptedInputStream = getCmsUtil().decryptCMSStreamed(fileEntryStream.getInputStream(), keyInfo.loadPrivateKey());
+                IOUtils.copy(decryptedInputStream, pos);
+                pos.flush();
+                pos.close();
+            } catch (IOException e) {
+                throw new NextMoveRuntimeException("Error closing attachment readStream output stream", e);
+            }
+
+            log.trace("Thread finished: readStream encrypted");
+        });
+
+        return FileEntryStream.of(pis, -1);
     }
 
     public void delete(String conversationId) throws IOException {

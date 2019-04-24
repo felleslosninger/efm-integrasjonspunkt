@@ -12,8 +12,7 @@ public interface CryptoMessagePersister {
 
     byte[] read(String conversationId, String filename) throws IOException;
 
-    FileEntryStream readStream(String conversationId, String filename);
-
+    FileEntryStream readStream(String conversationId, String filename) throws IOException;
 
     void delete(String conversationId) throws IOException;
 }
