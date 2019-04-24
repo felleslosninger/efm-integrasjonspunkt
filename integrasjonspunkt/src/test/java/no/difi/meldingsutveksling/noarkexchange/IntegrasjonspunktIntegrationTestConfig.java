@@ -186,7 +186,7 @@ public class IntegrasjonspunktIntegrationTestConfig {
         ServiceRecord sr = mock(ServiceRecord.class);
         when(sr.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPO);
         when(sr.getOrganisationNumber()).thenReturn("1337");
-        ServiceRecordWrapper recordWrapper = ServiceRecordWrapper.of(sr, Lists.newArrayList(), Maps.newHashMap());
+        ServiceRecordWrapper recordWrapper = ServiceRecordWrapper.of(sr, Maps.newHashMap());
         when(srMock.getServiceRecord(anyString())).thenReturn(recordWrapper);
         when(srMock.getServiceRecord(anyString(), any(ServiceIdentifier.class))).thenReturn(Optional.ofNullable(sr));
         when(srMock.getServiceRecords(anyString())).thenReturn(Lists.newArrayList(sr));

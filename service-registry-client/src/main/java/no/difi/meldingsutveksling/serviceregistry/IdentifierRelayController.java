@@ -29,7 +29,7 @@ public class IdentifierRelayController {
         }
 
         InfoRecord infoRecord = serviceRegistryLookup.getInfoRecord(identifier);
-        return ResponseEntity.ok(SRResponseWrapper.of(infoRecord, serviceRecord.getFailedServiceIdentifiers(), serviceRecord.getServiceRecord(), serviceRecords));
+        return ResponseEntity.ok(SRResponseWrapper.of(infoRecord, serviceRecord.getServiceRecord(), serviceRecords));
     }
 
 }

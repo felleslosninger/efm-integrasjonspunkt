@@ -39,6 +39,9 @@ public class IntegrasjonspunktProperties {
     private ElmaConfig elma;
 
     @Valid
+    private Arkivmelding arkivmelding;
+
+    @Valid
     private PostVirksomheter dpv;
 
     @Valid
@@ -79,6 +82,12 @@ public class IntegrasjonspunktProperties {
      * (See http://begrep.difi.no/SikkerDigitalPost/1.2.3/forretningslag/varsling for more information)
      */
     private boolean varslingsplikt = true;
+
+    @Data
+    public static class Arkivmelding {
+        @NotNull
+        private String defaultProcess;
+    }
 
     @Data
     public static class Status {

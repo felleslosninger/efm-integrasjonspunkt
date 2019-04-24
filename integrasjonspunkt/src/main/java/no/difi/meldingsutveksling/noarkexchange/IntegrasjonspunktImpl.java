@@ -11,7 +11,6 @@ import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecordWrapper;
 import no.difi.meldingsutveksling.services.Adresseregister;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,12 +85,6 @@ public class IntegrasjonspunktImpl implements SOAPport {
         }
 
         final LogstashMarker receiverMarker = MarkerFactory.receiverMarker(organisasjonsnummer);
-        if (!serviceRecord.getFailedServiceIdentifiers().isEmpty()) {
-            String failed = StringUtils.join(serviceRecord.getFailedServiceIdentifiers(), ", ");
-            log.error(receiverMarker, "Service registry failed to look up one or more potential service identifiers - getCanReceive returning false (failed: {})", failed);
-            response.setResult(false);
-            return response;
-        }
 
         boolean validServiceIdentifier = false;
         boolean mshCanReceive = false;
@@ -140,12 +133,6 @@ public class IntegrasjonspunktImpl implements SOAPport {
         }
 
         ServiceRecordWrapper receiverRecord = serviceRegistryLookup.getServiceRecord(message.getRecieverPartyNumber());
-
-        if (!receiverRecord.getFailedServiceIdentifiers().isEmpty()) {
-            String failed = StringUtils.join(receiverRecord.getFailedServiceIdentifiers(), ", ");
-            log.error("Service registry failed to look up one or more potential service identifiers - getCanReceive returning false (failed: {})", failed);
-            return PutMessageResponseFactory.createErrorResponse(new MessageException(StatusMessage.FAILED_SERVICEIDENTIFIERS));
-        }
 
         if (PayloadUtil.isAppReceipt(message.getPayload()) &&
                 receiverRecord.getServiceRecord().getServiceIdentifier() != ServiceIdentifier.DPO) {
