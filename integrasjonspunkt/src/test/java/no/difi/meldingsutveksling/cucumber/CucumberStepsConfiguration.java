@@ -23,6 +23,7 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
+import no.difi.sdp.client2.domain.AktoerOrganisasjonsnummer;
 import no.difi.vefa.peppol.lookup.LookupClient;
 import no.difi.webservice.support.SoapFaultInterceptorLogger;
 import org.junit.Rule;
@@ -54,7 +55,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
 @ContextConfiguration(classes = {
         IntegrasjonspunktApplication.class,
@@ -73,6 +75,27 @@ public class CucumberStepsConfiguration {
     @Profile("cucumber")
     @RequiredArgsConstructor
     public static class SpringConfiguration {
+
+        @Primary
+        @Bean
+        public SikkerDigitalPostKlient sikkerDigitalPostKlient(IntegrasjonspunktProperties properties,
+                                                               KeystoreProvider keystoreProvider,
+                                                               RequestCaptureClientInterceptor requestCaptureClientInterceptor) {
+            SikkerDigitalPostKlientFactory factory = new SikkerDigitalPostKlientFactory(properties.getDpi(), keystoreProvider.getKeyStore());
+            SikkerDigitalPostKlient klient = factory.createSikkerDigitalPostKlient(
+                    AktoerOrganisasjonsnummer.of("910077473"));
+            klient.getMeldingTemplate().setInterceptors(new ClientInterceptor[]{
+                    requestCaptureClientInterceptor, new FakeEbmsClientInterceptor()});
+
+            Jaxb2Marshaller marshaller = (Jaxb2Marshaller) klient.getMeldingTemplate().getMarshaller();
+
+            Map<String, Object> marshallerProperties = new HashMap<>();
+            marshallerProperties.put(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+            marshallerProperties.put(XMLMarshaller.PREFIX_MAPPER, new DefaultNamespacePrefixMapper());
+            marshaller.setMarshallerProperties(marshallerProperties);
+
+            return klient;
+        }
 
         @Bean
         @Primary
@@ -142,11 +165,6 @@ public class CucumberStepsConfiguration {
             client.setInterceptors(interceptors);
 
             return client;
-        }
-
-        @Bean
-        public RequestCaptureClientInterceptor requestCaptureClientInterceptor(Holder<List<String>> webServicePayloadHolder) {
-            return new RequestCaptureClientInterceptor(webServicePayloadHolder);
         }
 
         /**
@@ -245,7 +263,6 @@ public class CucumberStepsConfiguration {
     @MockBean public InternalQueue internalQueue;
     @MockBean public ServiceBusRestTemplate serviceBusRestTemplate;
     @MockBean public SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory;
-    @MockBean public SikkerDigitalPostKlient sikkerDigitalPostKlient;
 
     @Before
     @SneakyThrows

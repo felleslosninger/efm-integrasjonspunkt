@@ -61,6 +61,8 @@ public class AltinnWsClient {
 
             AltinnPackage altinnPackage = AltinnPackage.from(request);
             PipedOutputStream pos = new PipedOutputStream();
+            PipedInputStream pis = new PipedInputStream(pos);
+
             CompletableFuture.runAsync(() -> {
                 log.debug("Starting thread: write altinn zip");
                 try {
@@ -74,7 +76,6 @@ public class AltinnWsClient {
                 log.debug("Thread finished: write altinn zip");
             });
 
-            PipedInputStream pis = new PipedInputStream(pos);
             parameters.setDataStream(new DataHandler(InputStreamDataSource.of(pis)));
 
             CompletableFuture<Void> altinnUpload = CompletableFuture.runAsync(() -> {

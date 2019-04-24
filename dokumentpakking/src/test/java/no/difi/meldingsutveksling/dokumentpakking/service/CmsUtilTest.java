@@ -108,10 +108,10 @@ public class CmsUtilTest {
         byte[] plaintext = "Text to be encrypted".getBytes();
         ByteArrayInputStream bis = new ByteArrayInputStream(plaintext);
         PipedOutputStream bos = new PipedOutputStream();
+        PipedInputStream pis = new PipedInputStream(bos);
 
         CompletableFuture.runAsync(() -> util.createCMSStreamed(bis, bos, cert));
 
-        PipedInputStream pis = new PipedInputStream(bos);
         InputStream decrypted = util.decryptCMSStreamed(pis, keyPair.getPrivate());
         assertThat(IOUtils.toByteArray(decrypted), is(equalTo(plaintext)));
     }

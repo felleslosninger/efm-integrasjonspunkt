@@ -34,5 +34,5 @@ public class NextMoveMessageEntry {
 
     @Column(name = "size")
     @NonNull
-    private long size;
+    private Long size;
 }

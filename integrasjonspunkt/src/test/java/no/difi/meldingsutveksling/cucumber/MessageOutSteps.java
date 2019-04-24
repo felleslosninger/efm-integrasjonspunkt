@@ -38,14 +38,20 @@ public class MessageOutSteps {
     @Then("^the content of the file named \"([^\"]*)\" is:$")
     public void theContentOfTheFileNamedIs(String filename, String expectedContent) {
         Message message = messageSentHolder.get();
-        assertThat(new String(message.getAttachment(filename).getBytes()))
-                .isEqualToIgnoringWhitespace(expectedContent);
+        String actualContent = new String(message.getAttachment(filename).getBytes());
+        assertThat(actualContent).isEqualToIgnoringWhitespace(expectedContent);
+    }
+
+    @Then("^the XML content of the file named \"([^\"]*)\" is:$")
+    public void theXmlContentOfTheFileNamedIs(String filename, String expectedContent) {
+        Message message = messageSentHolder.get();
+        String actualContent = new String(message.getAttachment(filename).getBytes());
+        assertThat(actualContent).isXmlEqualTo(expectedContent);
     }
 
     @Then("^the XML payload of the message is:$")
     public void theXmlPayloadOfTheMessageIs(String expectedPayload) {
         Message message = messageSentHolder.get();
-        assertThat(message.getBody())
-                .isXmlEqualTo(expectedPayload);
+        assertThat(message.getBody()).isXmlEqualTo(expectedPayload);
     }
 }

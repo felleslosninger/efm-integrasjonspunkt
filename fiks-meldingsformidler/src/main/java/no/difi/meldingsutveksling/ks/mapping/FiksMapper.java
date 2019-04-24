@@ -251,28 +251,31 @@ public class FiksMapper {
     }
 
     private DataHandler getDataHandler(X509Certificate cert, InputStream is) {
-        PipedOutputStream pos = new PipedOutputStream();
-        CompletableFuture.runAsync(() -> {
-            log.trace("Starting thread: encrypt attachment for FIKS forsendelse");
-            cmsUtilProvider.getIfAvailable().createCMSStreamed(is, pos, cert);
-            try {
-                pos.flush();
-                pos.close();
-            } catch (IOException e) {
-                throw new NextMoveRuntimeException("Error closing attachment encryption output stream", e);
-            }
-            log.trace("Thread finished: encrypt attachment for FIKS forsendelse");
-        });
-
-        return getDataHandler(pos);
-    }
-
-    private DataHandler getDataHandler(PipedOutputStream pos) {
         try {
-            return new DataHandler(InputStreamDataSource.of(new PipedInputStream(pos)));
+            PipedOutputStream pos = new PipedOutputStream();
+            PipedInputStream sink = new PipedInputStream(pos);
+
+            CompletableFuture.runAsync(() -> {
+                log.trace("Starting thread: encrypt attachment for FIKS forsendelse");
+                cmsUtilProvider.getIfAvailable().createCMSStreamed(is, pos, cert);
+                try {
+                    pos.flush();
+                    pos.close();
+                } catch (IOException e) {
+                    throw new NextMoveRuntimeException("Error closing attachment encryption output stream", e);
+                }
+                log.trace("Thread finished: encrypt attachment for FIKS forsendelse");
+            });
+
+            return getDataHandler(sink);
+
         } catch (IOException e) {
             throw new NextMoveRuntimeException("Error creating PipedInputStream from encrypted attachment", e);
         }
+    }
+
+    private DataHandler getDataHandler(PipedInputStream sink) {
+        return new DataHandler(InputStreamDataSource.of(sink));
     }
 
     private NoarkMetadataFraAvleverendeSakssystem metaDataFrom(Saksmappe sm, Journalpost jp) {

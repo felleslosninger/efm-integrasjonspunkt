@@ -37,10 +37,15 @@ public class AsicParser {
     }
 
     private String getMimeType(AsicManifest asicManifest, String filename) {
+        AsicFile file = getFile(asicManifest, filename);
+        return file.getMimetype();
+    }
+
+    private AsicFile getFile(AsicManifest asicManifest, String filename) {
         return asicManifest.getFile().stream()
                 .filter(p -> p.getName().equals(filename))
-                .map(AsicFile::getMimetype)
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException(String.format("File not found: %s", filename)));
     }
+
 }

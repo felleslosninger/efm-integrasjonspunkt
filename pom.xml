@@ -43,20 +43,25 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jerseyVersion>1.19.4</jerseyVersion>
         <commons.lang.version>2.3</commons.lang.version>
+        <commons.io.version>2.6</commons.io.version>
+        <commons.logging.version>1.2</commons.logging.version>
+        <commons.compress.version>1.13</commons.compress.version>
         <apache.commons.version>10.0-b28</apache.commons.version>
         <jacoco.version>0.7.5.201505241946</jacoco.version>
+        <jaxws-rt.version>2.3.2</jaxws-rt.version>
         <!-- bug with logstash-logback-encoder in 1.1.7, wait for 1.1.8 http://jira.qos.ch/browse/LOGBACK-1158 -->
         <logback.version>1.1.6</logback.version>
 
-        <sikker-digital-post-klient.version>5.2.1</sikker-digital-post-klient.version>
+        <sikker-digital-post-klient.version>5.5</sikker-digital-post-klient.version>
         <powermock.version>2.0.0</powermock.version>
         <mockito.version>2.23.4</mockito.version>
         <cucumber.version>2.3.1</cucumber.version>
         <springfox.version>2.9.2</springfox.version>
         <swagger.version>1.5.21</swagger.version>
-
-        <!--        <mockito.version>1.10.19</mockito.version>-->
+        <spring.ws.version>2.4.3.RELEASE</spring.ws.version>
+        <apache.wss4j.version>2.1.11</apache.wss4j.version>
         <move-common.version>1.0.26</move-common.version>
         <maven.javadoc.skip>true</maven.javadoc.skip>
         <lombok.version>1.18.6</lombok.version>
@@ -89,6 +94,17 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>no.difi.meldingsutveksling</groupId>
+                <artifactId>security</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.difi.meldingsutveksling</groupId>
+                <artifactId>test-tools</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>no.difi.move-common</groupId>
                 <artifactId>audit</artifactId>
                 <version>${move-common.version}</version>
@@ -117,6 +133,91 @@
                 <version>${sikker-digital-post-klient.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.sun.xml.ws</groupId>
+                <artifactId>jaxws-rt</artifactId>
+                <version>${jaxws-rt.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.ws.commons.axiom</groupId>
+                <artifactId>axiom-api</artifactId>
+                <version>1.2.20</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ws.commons.axiom</groupId>
+                <artifactId>axiom-impl</artifactId>
+                <version>1.2.20</version>
+                <scope>runtime</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy</artifactId>
+                <version>1.9.3</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.wss4j</groupId>
+                <artifactId>wss4j-ws-security-common</artifactId>
+                <version>${apache.wss4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.wss4j</groupId>
+                <artifactId>wss4j-ws-security-dom</artifactId>
+                <version>${apache.wss4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.ws</groupId>
+                <artifactId>spring-ws-core</artifactId>
+                <version>${spring.ws.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.ws</groupId>
+                <artifactId>spring-xml</artifactId>
+                <version>${spring.ws.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.ws</groupId>
+                <artifactId>spring-ws-security</artifactId>
+                <version>${spring.ws.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.sun.xml.wsit</groupId>
+                        <artifactId>xws-security</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.ws.security</groupId>
+                        <artifactId>wss4j</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>net.sf.ehcache</groupId>
+                        <artifactId>ehcache</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons.io.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>${commons.logging.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+                <version>${commons.compress.version}</version>
+            </dependency>
 
             <!-- Overriden until spring boot updates the dependencies artifact.
                  See https://nvd.nist.gov/vuln/detail/CVE-2017-17485 -->
@@ -134,6 +235,18 @@
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
                 <version>2.9.4</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.sun.jersey</groupId>
+                <artifactId>jersey-servlet</artifactId>
+                <version>${jerseyVersion}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.sun.jersey</groupId>
+                <artifactId>jersey-json</artifactId>
+                <version>${jerseyVersion}</version>
             </dependency>
 
             <dependency>

@@ -17,6 +17,10 @@ public class DefaultNamespacePrefixMapper extends NamespacePrefixMapper {
         namespaceMap.put("http://schemas.microsoft.com/2003/10/Serialization/", "ms");
         namespaceMap.put("http://schemas.altinn.no/services/serviceEntity/2015/06", "altinn4");
 
+        namespaceMap.put("http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader", "dpi1");
+        namespaceMap.put("http://www.w3.org/2000/09/xmldsig#", "dpi2");
+        namespaceMap.put("http://begrep.difi.no/sdp/schema_v10", "dpi3");
+
         namespaceMap.put("http://schemas.altinn.no/services/Intermediary/Receipt/2009/10", "altinn5");
         namespaceMap.put("http://www.altinn.no/services/ServiceEngine/ReporteeElementList/2009/10", "altinn6");
         namespaceMap.put("http://schemas.altinn.no/services/ServiceEngine/Correspondence/2013/06", "altinn7");

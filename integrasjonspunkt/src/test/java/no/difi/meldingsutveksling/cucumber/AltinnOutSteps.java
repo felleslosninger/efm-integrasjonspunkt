@@ -90,7 +90,7 @@ public class AltinnOutSteps {
                 .pollInterval(100, MILLISECONDS)
                 .until(zipContentHolder::isPresent);
 
-        String result = xmlMarshaller.masrshall(
+        String result = xmlMarshaller.marshall(
                 new ObjectFactory().createBrokerServiceInitiation(captor.getValue()));
 
         assertThat(result).isXmlEqualTo(body);

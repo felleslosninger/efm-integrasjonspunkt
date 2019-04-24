@@ -38,7 +38,7 @@ public class DBMessagePersister implements MessagePersister {
             BugFix610.applyPatch(message, conversationId);
         }
 
-        NextMoveMessageEntry entry = NextMoveMessageEntry.of(conversationId, filename, contentBlob, message.length);
+        NextMoveMessageEntry entry = NextMoveMessageEntry.of(conversationId, filename, contentBlob, (long) message.length);
         repo.save(entry);
     }
 

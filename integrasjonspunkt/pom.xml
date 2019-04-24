@@ -16,9 +16,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <compilerPluginVersion>2.3.2</compilerPluginVersion>
-        <jersey-version>1.8</jersey-version>
         <jstlVersion>1.2</jstlVersion>
-        <jerseyVersion>1.17</jerseyVersion>
         <docker.registry>docker-registry.dmz.local/difi</docker.registry>
         <docker.build.version>${project.version}</docker.build.version>
     </properties>
@@ -131,9 +129,8 @@
                     <dependency>
                         <groupId>com.sun.xml.ws</groupId>
                         <artifactId>jaxws-rt</artifactId>
-                        <version>2.2.8</version>
+                        <version>${jaxws-rt.version}</version>
                     </dependency>
-
                 </dependencies>
                 <configuration>
                     <webApp>
@@ -390,11 +387,22 @@
             <artifactId>assertj-core</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.xmlunit</groupId>
+            <artifactId>xmlunit-core</artifactId>
+            <version>2.6.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.xmlunit</groupId>
+            <artifactId>xmlunit-assertj</artifactId>
+            <version>2.6.2</version>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
-            <version>1.8.0</version>
         </dependency>
 
         <!-- start of logging/monitoring dependencies -->
@@ -451,7 +459,6 @@
         <dependency>
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>jaxws-rt</artifactId>
-            <version>2.2.8</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -467,8 +474,6 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>javax</groupId>
@@ -566,13 +571,10 @@
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-servlet</artifactId>
-            <version>${jerseyVersion}</version>
         </dependency>
-
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-json</artifactId>
-            <version>${jerseyVersion}</version>
         </dependency>
 
         <dependency>
@@ -607,9 +609,7 @@
         <dependency>
             <groupId>org.codehaus.janino</groupId>
             <artifactId>janino</artifactId>
-            <version>2.6.1</version>
         </dependency>
-
 
         <dependency>
             <groupId>io.cucumber</groupId>

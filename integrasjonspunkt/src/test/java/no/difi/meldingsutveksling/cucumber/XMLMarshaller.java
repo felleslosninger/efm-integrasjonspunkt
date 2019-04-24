@@ -18,7 +18,7 @@ public class XMLMarshaller {
     static final String PREFIX_MAPPER = "com.sun.xml.bind.namespacePrefixMapper";
 
     @SneakyThrows
-    <T> String masrshall(JAXBElement<T> t) {
+    <T> String marshall(JAXBElement<T> t) {
         JAXBContext context = JAXBContext.newInstance(t.getDeclaredType());
 
         Marshaller marshaller = context.createMarshaller();
