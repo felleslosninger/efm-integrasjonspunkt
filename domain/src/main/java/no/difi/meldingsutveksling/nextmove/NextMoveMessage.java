@@ -69,6 +69,7 @@ public class NextMoveMessage {
         return files;
     }
 
+    @JsonIgnore
     public BusinessMessage getBusinessMessage() {
         if (getSbd().getAny() == null) {
             throw new NextMoveRuntimeException("SBD missing BusinessMessage");

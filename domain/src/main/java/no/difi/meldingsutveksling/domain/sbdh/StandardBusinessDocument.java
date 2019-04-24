@@ -80,7 +80,7 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
 
     @XmlAnyElement(lax = true)
     @JsonDeserialize(using = NextMoveMessageDeserializer.class)
-    @JsonAlias({"arkivmelding", "digital", "print", "innsynskrav", "publisering"})
+    @JsonAlias({"arkivmelding", "arkivmelding_kvittering", "digital", "print", "innsynskrav", "publisering", "einnsyn_kvittering", "status"})
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = BusinessMessage.class)
     @NotNull
     @InstanceOf(value = ArkivmeldingMessage.class, groups = ValidationGroups.DocumentType.Arkivmelding.class)

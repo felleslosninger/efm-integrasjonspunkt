@@ -9,7 +9,6 @@ import com.google.gson.GsonBuilder;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.TypeRef;
 import com.jayway.jsonpath.spi.json.GsonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.GsonMappingProvider;
 import com.nimbusds.jose.proc.BadJWSException;
@@ -31,12 +30,9 @@ import org.springframework.web.client.RestClientException;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord.isProcess;
 import static no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord.isServiceIdentifier;
@@ -151,30 +147,14 @@ public class ServiceRegistryLookup {
     }
 
     private ServiceRecordWrapper loadServiceRecord(Parameters parameters) {
-        ServiceRecord serviceRecord;
-        ServiceRecordWrapper recordWrapper;
-        try {
-            final String serviceRecords = client.getResource("identifier/" + parameters.getIdentifier(), parameters.getQuery());
-            final DocumentContext documentContext = JsonPath.parse(serviceRecords, jsonPathConfiguration());
-            serviceRecord = documentContext.read("$.serviceRecord", ServiceRecord.class);
-            String[] failedServiceIdentifiers = documentContext.read("$.failedServiceIdentifiers", String[].class);
-            Map<ServiceIdentifier, Integer> securitylevels = documentContext.read("$.securitylevels", new TypeRef<Map<ServiceIdentifier, Integer>>() {
-            });
-            recordWrapper = ServiceRecordWrapper.of(serviceRecord, Stream.of(failedServiceIdentifiers).map(ServiceIdentifier::valueOf).collect(Collectors.toList()), securitylevels);
-        } catch (HttpClientErrorException httpException) {
-            if (Arrays.asList(HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED).contains(httpException.getStatusCode())) {
-                log.warn("RestClient returned {} when looking up service record with identifier {}",
-                        httpException.getStatusCode(), parameters, httpException);
-                throw httpException;
-            } else {
-                throw new ServiceRegistryLookupException(String.format("RestClient threw exception when looking up service record with identifier %s", parameters), httpException);
-            }
-        } catch (BadJWSException e) {
-            String message = "Bad signature in service record response";
-            log.error(message, e);
-            throw new ServiceRegistryLookupException(message, e);
-        }
-        return recordWrapper;
+        List<ServiceRecord> serviceRecords = loadServiceRecords(parameters);
+        String defaultProcess = properties.getArkivmelding().getDefaultProcess();
+        ServiceRecord defaultRecord = serviceRecords.stream()
+                .filter(r -> r.getProcess().equals(defaultProcess))
+                .findFirst()
+                .orElseThrow(() -> new ServiceRegistryLookupException(String.format("Could not find service record for default process %s", defaultProcess)));
+        // TODO fiks security levels in wrapper
+        return ServiceRecordWrapper.of(defaultRecord, null);
     }
 
     private List<ServiceRecord> loadServiceRecords(Parameters parameters) {
