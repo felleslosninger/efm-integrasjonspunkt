@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.dokumentpakking.service;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.pipes.Pipe;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -31,7 +32,6 @@ import java.security.interfaces.RSAPrivateKey;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.concurrent.CompletableFuture;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -107,12 +107,10 @@ public class CmsUtilTest {
 
         byte[] plaintext = "Text to be encrypted".getBytes();
         ByteArrayInputStream bis = new ByteArrayInputStream(plaintext);
-        PipedOutputStream bos = new PipedOutputStream();
-        PipedInputStream pis = new PipedInputStream(bos);
 
-        CompletableFuture.runAsync(() -> util.createCMSStreamed(bis, bos, cert));
+        InputStream encrypted = Pipe.of("CMS encrypt", inlet -> util.createCMSStreamed(bis, inlet, cert)).outlet();
+        InputStream decrypted = util.decryptCMSStreamed(encrypted, keyPair.getPrivate());
 
-        InputStream decrypted = util.decryptCMSStreamed(pis, keyPair.getPrivate());
         assertThat(IOUtils.toByteArray(decrypted), is(equalTo(plaintext)));
     }
 

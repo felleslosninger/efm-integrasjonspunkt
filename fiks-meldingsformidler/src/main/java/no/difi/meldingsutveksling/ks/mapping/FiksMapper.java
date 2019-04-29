@@ -7,7 +7,6 @@ import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
 import no.difi.meldingsutveksling.InputStreamDataSource;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.UUIDGenerator;
-import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingException;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
@@ -26,6 +25,7 @@ import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.AvsmotType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
+import no.difi.meldingsutveksling.pipes.Pipe;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecordWrapper;
@@ -40,7 +40,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
 import java.time.LocalDate;
@@ -48,7 +47,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -76,14 +74,14 @@ public class FiksMapper {
         this.cmsUtilProvider = cmsUtilProvider;
     }
 
-    public SendForsendelseMedId mapFrom(NextMoveMessage message, X509Certificate certificate) throws NextMoveException, ArkivmeldingException {
+    public SendForsendelseMedId mapFrom(NextMoveMessage message, X509Certificate certificate) throws NextMoveException {
         return SendForsendelseMedId.builder()
                 .withForsendelse(getForsendelse(message, certificate))
                 .withForsendelsesid(message.getSbd().findScope(ScopeType.SENDER_REF).map(Scope::getIdentifier).orElse(message.getConversationId()))
                 .build();
     }
 
-    private Forsendelse getForsendelse(NextMoveMessage message, X509Certificate certificate) throws NextMoveException, ArkivmeldingException {
+    private Forsendelse getForsendelse(NextMoveMessage message, X509Certificate certificate) throws NextMoveException {
         Arkivmelding am = getArkivmelding(message);
         Saksmappe saksmappe = ArkivmeldingUtil.getSaksmappe(am);
         Journalpost journalpost = ArkivmeldingUtil.getJournalpost(am);
@@ -257,31 +255,11 @@ public class FiksMapper {
     }
 
     private DataHandler getDataHandler(X509Certificate cert, InputStream is) {
-        try {
-            PipedOutputStream pos = new PipedOutputStream();
-            PipedInputStream sink = new PipedInputStream(pos);
+        PipedInputStream encrypted = Pipe.of("encrypt attachment for FIKS forsendelse",
+                inlet -> cmsUtilProvider.getIfAvailable().createCMSStreamed(is, inlet, cert))
+                .outlet();
 
-            CompletableFuture.runAsync(() -> {
-                log.trace("Starting thread: encrypt attachment for FIKS forsendelse");
-                cmsUtilProvider.getIfAvailable().createCMSStreamed(is, pos, cert);
-                try {
-                    pos.flush();
-                    pos.close();
-                } catch (IOException e) {
-                    throw new NextMoveRuntimeException("Error closing attachment encryption output stream", e);
-                }
-                log.trace("Thread finished: encrypt attachment for FIKS forsendelse");
-            });
-
-            return getDataHandler(sink);
-
-        } catch (IOException e) {
-            throw new NextMoveRuntimeException("Error creating PipedInputStream from encrypted attachment", e);
-        }
-    }
-
-    private DataHandler getDataHandler(PipedInputStream sink) {
-        return new DataHandler(InputStreamDataSource.of(sink));
+        return new DataHandler(InputStreamDataSource.of(encrypted));
     }
 
     private NoarkMetadataFraAvleverendeSakssystem metaDataFrom(Saksmappe sm, Journalpost jp) {

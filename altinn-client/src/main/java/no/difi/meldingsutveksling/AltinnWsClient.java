@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
+import no.difi.meldingsutveksling.pipes.Pipe;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.shipping.ws.AltinnReasonFactory;
 import no.difi.meldingsutveksling.shipping.ws.AltinnWsException;
@@ -58,32 +59,16 @@ public class AltinnWsClient {
 
         try {
             StreamedPayloadBasicBE parameters = new StreamedPayloadBasicBE();
-
             AltinnPackage altinnPackage = AltinnPackage.from(request);
-            PipedOutputStream pos = new PipedOutputStream();
-            PipedInputStream pis = new PipedInputStream(pos);
 
-            CompletableFuture.runAsync(() -> {
-                log.debug("Starting thread: write altinn zip");
-                try {
-                    altinnPackage.write(pos, context);
-                    pos.flush();
-                    pos.close();
-                } catch (IOException e) {
-                    Audit.error("Message failed to upload to altinn", request.getMarkers(), e);
-                    throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, e);
-                }
-                log.debug("Thread finished: write altinn zip");
-            });
-
-            parameters.setDataStream(new DataHandler(InputStreamDataSource.of(pis)));
+            PipedInputStream outlet = Pipe.of("write Altinn zip", inlet -> writeAltinnZip(request, altinnPackage, inlet)).outlet();
+            parameters.setDataStream(new DataHandler(InputStreamDataSource.of(outlet)));
 
             CompletableFuture<Void> altinnUpload = CompletableFuture.runAsync(() -> {
                 log.debug("Starting thread: upload to altinn");
                 try {
                     ReceiptExternalStreamedBE receiptAltinn = iBrokerServiceExternalBasicStreamed.uploadFileStreamedBasic(parameters, FILE_NAME, senderReference, request.getSender(), configuration.getPassword(), configuration.getUsername());
                     Audit.info("Message uploaded to altinn", markerFrom(receiptAltinn).and(request.getMarkers()));
-
                 } catch (IBrokerServiceExternalBasicStreamedUploadFileStreamedBasicAltinnFaultFaultFaultMessage e) {
                     Audit.error("Message failed to upload to altinn", request.getMarkers(), e);
                     throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, AltinnReasonFactory.from(e), e);
@@ -96,6 +81,15 @@ public class AltinnWsClient {
             } catch (InterruptedException | ExecutionException e) {
                 throw new MeldingsUtvekslingRuntimeException("Error waiting for upload thread to finish", e);
             }
+        } catch (Exception e) {
+            Audit.error("Message failed to upload to altinn", request.getMarkers(), e);
+            throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, e);
+        }
+    }
+
+    private void writeAltinnZip(UploadRequest request, AltinnPackage altinnPackage, PipedOutputStream pos) {
+        try {
+            altinnPackage.write(pos, context);
         } catch (IOException e) {
             Audit.error("Message failed to upload to altinn", request.getMarkers(), e);
             throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, e);
