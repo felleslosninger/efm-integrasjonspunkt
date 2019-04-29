@@ -50,7 +50,6 @@ public class NextMoveServiceBus {
     private static final Logger log = LoggerFactory.getLogger(NextMoveServiceBus.class);
 
     private static final String NEXTMOVE_QUEUE_PREFIX = "nextbestqueue";
-    private static final String MEETING_QUEUE_SUFFIX = "meeting";
 
     private IntegrasjonspunktProperties props;
     private StandardBusinessDocumentFactory sbdf;
@@ -108,7 +107,7 @@ public class NextMoveServiceBus {
             String queue = NEXTMOVE_QUEUE_PREFIX + resource.getReceiverId();
             if (resource.getCustomProperties() != null &&
                     resource.getCustomProperties().containsKey(MEETING.fullname()) &&
-                    resource.getCustomProperties().get(MEETING.fullname()).equals("true")) {
+                    "true".equals(resource.getCustomProperties().get(MEETING.fullname()))) {
                 queue = queue + MEETING.fullname();
             } else {
                 switch (resource.getServiceIdentifier()) {

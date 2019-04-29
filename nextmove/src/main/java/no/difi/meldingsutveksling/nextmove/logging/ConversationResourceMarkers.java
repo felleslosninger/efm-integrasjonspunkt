@@ -26,7 +26,7 @@ public class ConversationResourceMarkers {
     public static String serviceIdentifierLoggingOverride(ConversationResource cr) {
         if (cr.getCustomProperties() != null &&
                 cr.getCustomProperties().containsKey("meeting") &&
-                cr.getCustomProperties().get("meeting").equals("true")) {
+                "true".equals(cr.getCustomProperties().get("meeting"))) {
             return "DPE_MEETING";
         }
         return cr.getServiceIdentifier().toString();
