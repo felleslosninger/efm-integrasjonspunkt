@@ -13,6 +13,8 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
+import no.difi.meldingsutveksling.domain.sbdh.Scope;
+import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.ks.mapping.edu.FileTypeHandlerFactory;
 import no.difi.meldingsutveksling.ks.svarut.*;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
@@ -77,13 +79,11 @@ public class FiksMapper {
     public SendForsendelseMedId mapFrom(NextMoveMessage message, X509Certificate certificate) throws NextMoveException, ArkivmeldingException {
         return SendForsendelseMedId.builder()
                 .withForsendelse(getForsendelse(message, certificate))
-                // TODO Scope.SenderRef
-                .withForsendelsesid(message.getConversationId())
+                .withForsendelsesid(message.getSbd().findScope(ScopeType.SENDER_REF).map(Scope::getIdentifier).orElse(message.getConversationId()))
                 .build();
     }
 
     private Forsendelse getForsendelse(NextMoveMessage message, X509Certificate certificate) throws NextMoveException, ArkivmeldingException {
-        // Process arkivmelding
         Arkivmelding am = getArkivmelding(message);
         Saksmappe saksmappe = ArkivmeldingUtil.getSaksmappe(am);
         Journalpost journalpost = ArkivmeldingUtil.getJournalpost(am);
@@ -91,8 +91,7 @@ public class FiksMapper {
         return Forsendelse.builder()
                 .withEksternref(message.getConversationId())
                 .withKunDigitalLevering(false)
-                // TODO Scope.ReceiverRef?
-                .withSvarPaForsendelse(uuidGenerator.generate())
+                .withSvarPaForsendelse(message.getSbd().findScope(ScopeType.RECEIVER_REF).map(Scope::getIdentifier).orElse(uuidGenerator.generate()))
                 .withTittel(journalpost.getOffentligTittel())
                 .withKrevNiva4Innlogging(kreverNiva4Innlogging(message))
                 .withKonteringskode(properties.getFiks().getUt().getKonteringsKode())

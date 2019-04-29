@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.Process;
 import no.difi.meldingsutveksling.UUIDGenerator;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -25,6 +26,7 @@ public class CreateSBD {
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final UUIDGenerator uuidGenerator;
     private final Clock clock;
+    private final IntegrasjonspunktProperties props;
 
     public StandardBusinessDocument createSBD(Organisasjonsnummer avsender,
                                               Organisasjonsnummer mottaker,
@@ -49,7 +51,7 @@ public class CreateSBD {
                         .addSender(createSender(avsender))
                         .addReceiver(createReceiver(mottaker))
                         .setDocumentIdentification(createDocumentIdentification(documentType, getStandard(mottaker.toString(), process, documentType)))
-                        .setBusinessScope(createBusinessScope(fromConversationId(conversationId, process)))
+                        .setBusinessScope(createBusinessScope(fromConversationId(conversationId, process, ZonedDateTime.now().plusHours(props.getNextmove().getDefaultTtlHours()))))
                 ).setAny(any);
     }
 
@@ -68,7 +70,7 @@ public class CreateSBD {
                 .addReceiver(createReceiver(mottaker))
                 .setDocumentIdentification(createDocumentIdentification(documentType, STANDARD))
                 .setBusinessScope(createBusinessScope(
-                        fromConversationId(conversationId, Process.LEGACY.getValue()),
+                        fromConversationId(conversationId, Process.LEGACY.getValue(), ZonedDateTime.now().plusHours(props.getNextmove().getDefaultTtlHours())),
                         fromJournalPostId(journalPostId, Process.LEGACY.getValue())));
     }
 

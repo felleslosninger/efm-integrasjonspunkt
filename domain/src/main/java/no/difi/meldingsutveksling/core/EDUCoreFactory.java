@@ -8,6 +8,8 @@ import no.difi.meldingsutveksling.domain.arkivmelding.AvskrivningsmaateMapper;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalposttypeMapper;
 import no.difi.meldingsutveksling.domain.arkivmelding.TilknyttetRegistreringSomMapper;
 import no.difi.meldingsutveksling.domain.arkivmelding.VariantformatMapper;
+import no.difi.meldingsutveksling.domain.sbdh.Scope;
+import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.noarkexchange.PayloadException;
 import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
@@ -112,8 +114,9 @@ public class EDUCoreFactory {
     }
 
     public EDUCore create(StandardBusinessDocument sbd, Arkivmelding am, byte[] asic) {
-        // TODO fix refs from SBD
-        EDUCore eduCore = createCommon(sbd.getSenderIdentifier(), sbd.getReceiverIdentifier(), null, null);
+        String senderRef = sbd.findScope(ScopeType.SENDER_REF).map(Scope::getIdentifier).orElse(null);
+        String receiverRef = sbd.findScope(ScopeType.RECEIVER_REF).map(Scope::getIdentifier).orElse(null);
+        EDUCore eduCore = createCommon(sbd.getSenderIdentifier(), sbd.getReceiverIdentifier(), senderRef, receiverRef);
         eduCore.setId(sbd.getConversationId());
         eduCore.setMessageType(EDUCore.MessageType.EDU);
         eduCore.setMessageReference(sbd.getConversationId());

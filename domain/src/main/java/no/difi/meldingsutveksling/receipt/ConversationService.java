@@ -9,7 +9,6 @@ import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
-import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import org.springframework.beans.factory.ObjectProvider;
@@ -100,18 +99,6 @@ public class ConversationService {
         }
 
         return repo.save(conversation);
-    }
-
-    // TODO remove together with ConversationResource controllers/repo
-    public Conversation registerConversation(ConversationResource cr) {
-        Optional<Conversation> find = repo.findByConversationId(cr.getConversationId()).stream().findFirst();
-        if (find.isPresent()) {
-            log.warn(String.format(CONVERSATION_EXISTS, cr.getConversationId()));
-            return find.get();
-        }
-        MessageStatus ms = MessageStatus.of(ReceiptStatus.OPPRETTET);
-        Conversation c = Conversation.of(cr, ms);
-        return repo.save(c);
     }
 
     public Conversation registerConversation(NextMoveMessage message) {

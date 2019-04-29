@@ -143,7 +143,7 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
                 .orElseThrow(() -> new NextMoveRuntimeException(String.format("Missing scope %s", scopeType.name())));
     }
 
-    private Optional<Scope> findScope(ScopeType scopeType) {
+    public Optional<Scope> findScope(ScopeType scopeType) {
         return getStandardBusinessDocumentHeader().getBusinessScope()
                 .getScope()
                 .stream()

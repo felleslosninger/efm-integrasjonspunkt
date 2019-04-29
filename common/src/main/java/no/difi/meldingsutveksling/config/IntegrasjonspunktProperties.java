@@ -205,6 +205,8 @@ public class IntegrasjonspunktProperties {
         @NotNull
         private Integer lockTimeoutMinutes;
         @NotNull
+        private Integer defaultTtlHours;
+        @NotNull
         private Boolean applyZipHeaderPatch = Boolean.FALSE;
         @Valid
         private ServiceBus serviceBus;

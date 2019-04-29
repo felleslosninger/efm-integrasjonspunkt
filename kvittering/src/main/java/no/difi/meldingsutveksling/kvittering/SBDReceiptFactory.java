@@ -30,7 +30,6 @@ import static no.difi.meldingsutveksling.kvittering.DocumentToDocumentConverter.
 /**
  * Factory class for creating Kvittering documents. This class is the only one visible from outside and uses
  * the other package local classes to perform its tasks.
- * //todo move StandardBusinessDocumentFactory to domain, and remove the two "borrowed" private create methods
  *
  * @author Glenn bech
  */
