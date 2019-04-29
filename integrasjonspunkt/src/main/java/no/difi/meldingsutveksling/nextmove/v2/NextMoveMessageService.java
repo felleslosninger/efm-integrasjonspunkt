@@ -103,11 +103,10 @@ public class NextMoveMessageService {
     }
 
     private void setDefaults(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
-        sbd.getConversationScope().ifPresent(s -> {
-            if (isNullOrEmpty(s.getInstanceIdentifier())) {
-                s.setInstanceIdentifier(createConversationId());
-            }
-        });
+        sbd.getScopes()
+                .stream()
+                .filter(p -> isNullOrEmpty(p.getInstanceIdentifier()))
+                .forEach(p -> p.setInstanceIdentifier(createConversationId()));
 
         if (serviceIdentifier == DPI_PRINT) {
             setDpiDefaults(sbd);
@@ -246,11 +245,9 @@ public class NextMoveMessageService {
                 .findAny()
                 .orElseThrow(MissingArkivmeldingException::new);
 
-        try(FileEntryStream fileEntryStream = cryptoMessagePersister.readStream(message.getConversationId(), arkivmeldingFile.getIdentifier())) {
-                return ArkivmeldingUtil.unmarshalArkivmelding(fileEntryStream.getInputStream());
-        } catch (JAXBException e) {
-            throw new UnmarshalArkivmeldingException();
-        } catch (IOException e) {
+        try (FileEntryStream fileEntryStream = cryptoMessagePersister.readStream(message.getConversationId(), arkivmeldingFile.getIdentifier())) {
+            return ArkivmeldingUtil.unmarshalArkivmelding(fileEntryStream.getInputStream());
+        } catch (JAXBException | IOException e) {
             throw new UnmarshalArkivmeldingException();
         }
     }

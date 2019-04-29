@@ -37,6 +37,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.*;
 import java.util.Optional;
+import java.util.Set;
 
 
 /**
@@ -138,14 +139,19 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
         return findScope(ScopeType.CONVERSATION_ID);
     }
 
+    public Set<Scope> getScopes() {
+        return getStandardBusinessDocumentHeader()
+                .getBusinessScope()
+                .getScope();
+    }
+
     private Scope getScope(ScopeType scopeType) {
         return findScope(scopeType)
                 .orElseThrow(() -> new NextMoveRuntimeException(String.format("Missing scope %s", scopeType.name())));
     }
 
     public Optional<Scope> findScope(ScopeType scopeType) {
-        return getStandardBusinessDocumentHeader().getBusinessScope()
-                .getScope()
+        return getScopes()
                 .stream()
                 .filter(scope -> scopeType.toString().equals(scope.getType()) || scopeType.name().equals(scope.getType()))
                 .findAny();

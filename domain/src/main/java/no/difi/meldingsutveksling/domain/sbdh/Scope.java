@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import no.difi.meldingsutveksling.nextmove.AbstractEntity;
+import no.difi.meldingsutveksling.validation.OneOf;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -58,12 +59,14 @@ public class Scope extends AbstractEntity<Long> {
 
     @XmlElement(name = "Type", required = true)
     @NotNull
+    @OneOf({"ConversationId", "SenderRef", "ReceiverRef"})
     protected String type;
 
     @XmlElement(name = "InstanceIdentifier", required = true)
     protected String instanceIdentifier;
 
     @XmlElement(name = "Identifier")
+    @NotNull
     protected String identifier;
 
     @XmlElement(name = "ScopeInformation")
