@@ -45,24 +45,24 @@ public class InServiceRegistryValidatorTest {
 
     @Test
     public void testInServiceRegistry() {
-        given(serviceRegistryLookup.getServiceRecord(any())).willReturn(serviceRecordWrapper);
+        given(serviceRegistryLookup.isInServiceRegistry(any())).willReturn(true);
 
         assertThat(validator.validate(new Foo("98765432")))
                 .withFailMessage("Should accept identifiers in the Service Registry")
                 .isEmpty();
 
-        verify(serviceRegistryLookup).getServiceRecord("98765432");
+        verify(serviceRegistryLookup).isInServiceRegistry("98765432");
     }
 
     @Test
     public void testNotInServiceRegistry() {
-        given(serviceRegistryLookup.getServiceRecord(any())).willThrow(UncheckedExecutionException.class);
+        given(serviceRegistryLookup.isInServiceRegistry(any())).willReturn(false);
 
         assertThat(validator.validate(new Foo("98765432")))
                 .withFailMessage("Should only accept identifiers in the Service Registry")
                 .isNotEmpty();
 
-        verify(serviceRegistryLookup).getServiceRecord("98765432");
+        verify(serviceRegistryLookup).isInServiceRegistry("98765432");
     }
 }
 

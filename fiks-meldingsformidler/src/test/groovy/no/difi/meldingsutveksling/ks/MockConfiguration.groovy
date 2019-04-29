@@ -23,7 +23,7 @@ public class MockConfiguration {
         def lookup = mock(ServiceRegistryLookup)
         def pem = this.getClass().getClassLoader().getResource("difi-cert-test.pem").text
         when(lookup.getServiceRecord(Mockito.any(String), Mockito.eq(DPF))).thenReturn(Optional.of(new ServiceRecord(DPF, "123456789", pem, "http://localhost")))
-        when(lookup.getServiceRecord(Mockito.any(String))).thenReturn(ServiceRecordWrapper.of(new ServiceRecord(DPF, "123456789", pem, "http://localhost"), Lists.newArrayList(), Maps.newHashMap()))
+        when(lookup.getServiceRecord(Mockito.any(String))).thenReturn(ServiceRecordWrapper.of(new ServiceRecord(DPF, "123456789", pem, "http://localhost"), Maps.newHashMap()))
         def infoRecord = new InfoRecord("123456789", "foo", new EntityType("Organisasjonsledd", "ORGL"))
         when(lookup.getInfoRecord(Mockito.any(String))).thenReturn(infoRecord)
         return lookup
