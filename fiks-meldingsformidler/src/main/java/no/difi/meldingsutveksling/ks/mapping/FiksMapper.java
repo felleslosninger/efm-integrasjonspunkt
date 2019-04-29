@@ -99,7 +99,7 @@ public class FiksMapper {
                 .withAvgivendeSystem(properties.getNoarkSystem().getType())
                 .withPrintkonfigurasjon(getPrintkonfigurasjon())
                 .withMottaker(getMottaker(message))
-                .withSvarSendesTil(geetSvarSendesTil(message, journalpost))
+                .withSvarSendesTil(getSvarSendesTil(message, journalpost))
                 .withMetadataFraAvleverendeSystem(metaDataFrom(saksmappe, journalpost))
                 .withDokumenter(mapArkivmeldingDokumenter(message, getDokumentbeskrivelser(journalpost), certificate))
                 .build();
@@ -112,7 +112,7 @@ public class FiksMapper {
                 .withBrevtype(Brevtype.BPOST).build();
     }
 
-    private Adresse geetSvarSendesTil(NextMoveMessage message, Journalpost journalpost) {
+    private Adresse getSvarSendesTil(NextMoveMessage message, Journalpost journalpost) {
         return journalpost.getKorrespondansepart().stream()
                 .filter(k -> k.getKorrespondanseparttype().equals(Korrespondanseparttype.AVSENDER))
                 .map(a -> mottakerFrom(a, message.getSenderIdentifier()))

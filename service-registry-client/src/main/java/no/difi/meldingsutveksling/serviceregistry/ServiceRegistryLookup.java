@@ -29,6 +29,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -120,6 +121,10 @@ public class ServiceRegistryLookup {
         return srsCache.getUnchecked(new Parameters(identifier, notification));
     }
 
+    public boolean isInServiceRegistry(String identifier) {
+        return !getServiceRecords(identifier).isEmpty();
+    }
+
     public String getStandard(String identifier, Process process, DocumentType documentType) {
         return getStandard(identifier, process.getValue(), documentType);
     }
@@ -154,7 +159,7 @@ public class ServiceRegistryLookup {
                 .findFirst()
                 .orElseThrow(() -> new ServiceRegistryLookupException(String.format("Could not find service record for default process %s", defaultProcess)));
         // TODO fiks security levels in wrapper
-        return ServiceRecordWrapper.of(defaultRecord, null);
+        return ServiceRecordWrapper.of(defaultRecord, Collections.emptyMap());
     }
 
     private List<ServiceRecord> loadServiceRecords(Parameters parameters) {

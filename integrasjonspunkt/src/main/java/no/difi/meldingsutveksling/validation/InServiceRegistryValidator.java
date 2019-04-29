@@ -24,8 +24,7 @@ public class InServiceRegistryValidator implements ConstraintValidator<InService
         }
 
         try {
-            serviceRegistryLookup.getServiceRecord(getStrippedIdentifier(s));
-            return true;
+            return serviceRegistryLookup.isInServiceRegistry(getStrippedIdentifier(s));
         } catch (Exception e) {
             return false;
         }
