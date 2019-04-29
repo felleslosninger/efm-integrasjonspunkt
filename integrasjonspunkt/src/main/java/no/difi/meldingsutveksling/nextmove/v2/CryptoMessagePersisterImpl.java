@@ -4,19 +4,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
-import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
-import org.apache.commons.io.IOUtils;
+import no.difi.meldingsutveksling.pipes.Pipe;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
-import java.util.concurrent.CompletableFuture;
+
+import static no.difi.meldingsutveksling.pipes.PipeOperations.close;
+import static no.difi.meldingsutveksling.pipes.PipeOperations.copy;
 
 @Slf4j
 @Component
@@ -33,22 +33,8 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
     }
 
     public void writeStream(String conversationId, String filename, InputStream stream, long size) throws IOException {
-        PipedOutputStream pos = new PipedOutputStream();
-        PipedInputStream pis = new PipedInputStream(pos);
-
-        CompletableFuture.runAsync(() -> {
-            log.trace("Starting thread: writeStream encrypted");
-            cmsUtilProvider.getIfAvailable().createCMSStreamed(stream, pos, keyInfo.getX509Certificate());
-            try {
-                pos.flush();
-                pos.close();
-            } catch (IOException e) {
-                throw new NextMoveRuntimeException("Error closing writeStream output stream", e);
-            }
-            log.trace("Thread finished: writeStream encrypted");
-        });
-
-        delegate.writeStream(conversationId, filename, pis, size);
+        Pipe pipe = Pipe.of("CMS encrypt", inlet -> cmsUtilProvider.getIfAvailable().createCMSStreamed(stream, inlet, keyInfo.getX509Certificate()));
+        delegate.writeStream(conversationId, filename, pipe.outlet(), size);
     }
 
     public byte[] read(String conversationId, String filename) throws IOException {
@@ -56,25 +42,9 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
     }
 
     public FileEntryStream readStream(String conversationId, String filename) throws IOException {
-
-        PipedOutputStream pos = new PipedOutputStream();
-        PipedInputStream pis = new PipedInputStream(pos);
-
-        CompletableFuture.runAsync(() -> {
-            log.trace("Starting thread: readStream encrypted");
-            try (FileEntryStream fileEntryStream = delegate.readStream(conversationId, filename)) {
-                InputStream decryptedInputStream = getCmsUtil().decryptCMSStreamed(fileEntryStream.getInputStream(), keyInfo.loadPrivateKey());
-                IOUtils.copy(decryptedInputStream, pos);
-                pos.flush();
-                pos.close();
-            } catch (IOException e) {
-                throw new NextMoveRuntimeException("Error closing attachment readStream output stream", e);
-            }
-
-            log.trace("Thread finished: readStream encrypted");
-        });
-
-        return FileEntryStream.of(pis, -1);
+        InputStream inputStream = delegate.readStream(conversationId, filename).getInputStream();
+        PipedInputStream pipedInputStream = Pipe.of("Reading file", copy(inputStream).andThen(close(inputStream))).outlet();
+        return FileEntryStream.of(getCmsUtil().decryptCMSStreamed(pipedInputStream, keyInfo.loadPrivateKey()), -1);
     }
 
     public void delete(String conversationId) throws IOException {

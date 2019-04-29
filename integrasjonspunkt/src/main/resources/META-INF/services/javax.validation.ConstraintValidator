@@ -1,3 +1,4 @@
 no.difi.meldingsutveksling.validation.IsDocumentTypeValidator
 no.difi.meldingsutveksling.validation.InServiceRegistryValidator
 no.difi.meldingsutveksling.validation.InstanceOfValidator
+no.difi.meldingsutveksling.validation.OneOfValidator

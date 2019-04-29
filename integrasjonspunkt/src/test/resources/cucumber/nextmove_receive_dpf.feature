@@ -135,7 +135,9 @@ Feature: Receiving a Next Move DPF message
             "type" : "ConversationId",
             "instanceIdentifier" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
             "identifier" : "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
-            "scopeInformation" : [ ]
+            "scopeInformation" : [ {
+              "expectedResponseDateTime" : "2019-03-26T12:38:23+01:00"
+            } ]
           } ]
         }
       },

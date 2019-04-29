@@ -52,7 +52,7 @@ public class BusinessScope implements Serializable {
     @XmlElement(name = "Scope")
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "header_id", nullable = false)
-    @Size(min = 1, max = 1)
+    @Size(min = 1)
     @NotNull
     @Valid
     protected Set<Scope> scope;

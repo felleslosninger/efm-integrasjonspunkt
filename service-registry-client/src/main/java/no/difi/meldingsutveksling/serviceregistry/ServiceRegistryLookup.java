@@ -119,6 +119,10 @@ public class ServiceRegistryLookup {
         return srsCache.getUnchecked(new Parameters(identifier, notification));
     }
 
+    public boolean isInServiceRegistry(String identifier) {
+        return !getServiceRecords(identifier).isEmpty();
+    }
+
     public String getStandard(String identifier, Process process, DocumentType documentType) {
         return getStandard(identifier, process.getValue(), documentType);
     }

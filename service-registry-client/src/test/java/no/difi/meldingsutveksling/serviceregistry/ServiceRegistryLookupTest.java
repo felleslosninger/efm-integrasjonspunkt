@@ -34,6 +34,7 @@ public class ServiceRegistryLookupTest {
 
     private static final String ORGNR = "12345678";
     private static final String ORGNAME = "test";
+    private static final String DEFAULT_PROCESS = "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0";
 
     @Mock
     private RestClient client;
@@ -52,9 +53,12 @@ public class ServiceRegistryLookupTest {
         IntegrasjonspunktProperties.Arkivmelding arkivmeldingProps = new IntegrasjonspunktProperties.Arkivmelding().setDefaultProcess("foo");
         when(properties.getArkivmelding()).thenReturn(arkivmeldingProps);
         when(properties.isVarslingsplikt()).thenReturn(false);
-        dpo.setProcess("foo");
+        IntegrasjonspunktProperties.Arkivmelding arkivmelding = mock(IntegrasjonspunktProperties.Arkivmelding.class);
+        when(arkivmelding.getDefaultProcess()).thenReturn(DEFAULT_PROCESS);
+        when(properties.getArkivmelding()).thenReturn(arkivmelding);
         service = new ServiceRegistryLookup(client, properties, sasKeyRepoMock);
         query = Notification.NOT_OBLIGATED.createQuery();
+        dpo.setProcess(DEFAULT_PROCESS);
     }
 
     @Test
@@ -70,7 +74,7 @@ public class ServiceRegistryLookupTest {
         final String json = new SRContentBuilder().build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
-        final ServiceRecord serviceRecord = this.service.getServiceRecord(ORGNR);
+        this.service.getServiceRecord(ORGNR);
     }
 
     @Test

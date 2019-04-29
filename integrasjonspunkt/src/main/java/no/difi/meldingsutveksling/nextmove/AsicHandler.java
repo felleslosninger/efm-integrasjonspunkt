@@ -8,20 +8,21 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateAsice;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.NextMoveStreamedFile;
 import no.difi.meldingsutveksling.domain.StreamedFile;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.noarkexchange.MessageContext;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
+import no.difi.meldingsutveksling.pipes.Pipe;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PipedOutputStream;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -78,74 +79,41 @@ public class AsicHandler {
     }
 
     private String getMimetype(BusinessMessageFile f) {
-        String mimetype;
         if (Strings.isNullOrEmpty(f.getMimetype())) {
             String ext = Stream.of(f.getFilename().split(".")).reduce((p, e) -> e).orElse("pdf");
-            mimetype = MimeTypeExtensionMapper.getMimetype(ext);
-        } else {
-            mimetype = f.getMimetype();
+            return MimeTypeExtensionMapper.getMimetype(ext);
         }
-        return mimetype;
+
+        return f.getMimetype();
     }
 
     public InputStream archiveAndEncryptAttachments(StreamedFile mainAttachment, Stream<? extends StreamedFile> att, MessageContext ctx, ServiceIdentifier si) {
-        PipedOutputStream archiveOutputStream = new PipedOutputStream();
-        PipedInputStream archiveInputStream;
-        try {
-            archiveInputStream = new PipedInputStream(archiveOutputStream);
-        } catch (IOException e) {
-            String errorMsg = "Error creating PipedInputStream from ASiC";
-            log.error(errorMsg);
-            throw new MeldingsUtvekslingRuntimeException(errorMsg, e);
-        }
+        CmsUtil cmsUtil = getCmsUtil(si);
+        X509Certificate mottakerSertifikat = getMottakerSertifikat(ctx);
 
-        CompletableFuture.runAsync(() -> {
-            log.trace("Starting thread: create asic");
-            try {
-                new CreateAsice().createAsiceStreamed(mainAttachment, att, archiveOutputStream, keyHelper.getSignatureHelper(),
-                        ctx.getAvsender(), ctx.getMottaker());
-
-                archiveOutputStream.flush();
-                archiveOutputStream.close();
-            } catch (IOException e) {
-                throw new MeldingsUtvekslingRuntimeException(StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT.getTechnicalMessage(), e);
-            }
-            log.trace("Thread finished: create asic");
-        });
-
-        PipedOutputStream encryptedOutputStream = new PipedOutputStream();
-        PipedInputStream encryptedInputStream;
-        try {
-            encryptedInputStream = new PipedInputStream(encryptedOutputStream);
-        } catch (IOException e) {
-            String errorMsg = "Error creating PipedInputStream from encrypted ASiC";
-            log.error(errorMsg);
-            throw new MeldingsUtvekslingRuntimeException(errorMsg, e);
-        }
-
-        CompletableFuture.runAsync(() -> {
-            log.debug("Starting thread: encrypt archive");
-            encryptArchive(ctx.getMottaker(), si, archiveInputStream, encryptedOutputStream);
-            try {
-                encryptedOutputStream.flush();
-                encryptedOutputStream.close();
-            } catch (IOException e) {
-                log.error("Error closing encryption stream");
-            }
-            log.debug("Thread finished: encrypt archive");
-        });
-
-        return encryptedInputStream;
+        return Pipe.of("create asic", inlet -> createAsic(mainAttachment, att, ctx, inlet))
+                .andThen("CMS encrypt asic", (outlet, inlet) -> cmsUtil.createCMSStreamed(outlet, inlet, mottakerSertifikat))
+                .outlet();
     }
 
-    private void encryptArchive(Mottaker mottaker, ServiceIdentifier serviceIdentifier, InputStream archive, OutputStream encrypted) {
-        CmsUtil cmsUtil;
+    private X509Certificate getMottakerSertifikat(MessageContext ctx) {
+        return (X509Certificate) ctx.getMottaker().getSertifikat();
+    }
+
+    private void createAsic(StreamedFile mainAttachment, Stream<? extends StreamedFile> att, MessageContext ctx, PipedOutputStream pipeOutlet) {
+        try {
+            new CreateAsice().createAsiceStreamed(mainAttachment, att, pipeOutlet, keyHelper.getSignatureHelper(),
+                    ctx.getAvsender(), ctx.getMottaker());
+        } catch (IOException e) {
+            throw new MeldingsUtvekslingRuntimeException(StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT.getTechnicalMessage(), e);
+        }
+    }
+
+    private CmsUtil getCmsUtil(ServiceIdentifier serviceIdentifier) {
         if (DPE == serviceIdentifier) {
-            cmsUtil = new CmsUtil(null);
-        } else {
-            cmsUtil = new CmsUtil();
+            return new CmsUtil(null);
         }
 
-        cmsUtil.createCMSStreamed(archive, encrypted, (X509Certificate) mottaker.getSertifikat());
+        return new CmsUtil();
     }
 }

@@ -51,7 +51,7 @@ public class CreateSBD {
                         .addSender(createSender(avsender))
                         .addReceiver(createReceiver(mottaker))
                         .setDocumentIdentification(createDocumentIdentification(documentType, getStandard(mottaker.toString(), process, documentType)))
-                        .setBusinessScope(createBusinessScope(fromConversationId(conversationId, process, ZonedDateTime.now().plusHours(props.getNextmove().getDefaultTtlHours()))))
+                        .setBusinessScope(createBusinessScope(fromConversationId(conversationId, process, ZonedDateTime.now(clock).plusHours(props.getNextmove().getDefaultTtlHours()))))
                 ).setAny(any);
     }
 
@@ -70,7 +70,7 @@ public class CreateSBD {
                 .addReceiver(createReceiver(mottaker))
                 .setDocumentIdentification(createDocumentIdentification(documentType, STANDARD))
                 .setBusinessScope(createBusinessScope(
-                        fromConversationId(conversationId, Process.LEGACY.getValue(), ZonedDateTime.now().plusHours(props.getNextmove().getDefaultTtlHours())),
+                        fromConversationId(conversationId, Process.LEGACY.getValue(), ZonedDateTime.now(clock).plusHours(props.getNextmove().getDefaultTtlHours())),
                         fromJournalPostId(journalPostId, Process.LEGACY.getValue())));
     }
 
