@@ -21,7 +21,6 @@ import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.Notification;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecordWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -45,7 +44,7 @@ public class ServiceRegistryLookup {
     private final IntegrasjonspunktProperties properties;
     private final SasKeyRepository sasKeyRepository;
     private final LoadingCache<String, String> skCache;
-    private final LoadingCache<Parameters, ServiceRecordWrapper> srCache;
+    private final LoadingCache<Parameters, ServiceRecord> srCache;
     private final LoadingCache<Parameters, List<ServiceRecord>> srsCache;
     private final LoadingCache<Parameters, InfoRecord> irCache;
 
@@ -70,9 +69,9 @@ public class ServiceRegistryLookup {
         this.srCache = CacheBuilder.newBuilder()
                 .maximumSize(100)
                 .expireAfterWrite(1, TimeUnit.MINUTES)
-                .build(new CacheLoader<Parameters, ServiceRecordWrapper>() {
+                .build(new CacheLoader<Parameters, ServiceRecord>() {
                     @Override
-                    public ServiceRecordWrapper load(Parameters key) throws Exception {
+                    public ServiceRecord load(Parameters key) throws Exception {
                         return loadServiceRecord(key);
                     }
                 });
@@ -104,7 +103,7 @@ public class ServiceRegistryLookup {
      * @param identifier of the receiver
      * @return a ServiceRecord if found. Otherwise an empty ServiceRecord is returned.
      */
-    public ServiceRecordWrapper getServiceRecord(String identifier) {
+    public ServiceRecord getServiceRecord(String identifier) {
         Notification notification = properties.isVarslingsplikt() ? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
         return srCache.getUnchecked(new Parameters(identifier, notification));
     }
@@ -146,15 +145,14 @@ public class ServiceRegistryLookup {
         return serviceRecords.stream().filter(isProcess(process)).findFirst();
     }
 
-    private ServiceRecordWrapper loadServiceRecord(Parameters parameters) {
+    private ServiceRecord loadServiceRecord(Parameters parameters) {
         List<ServiceRecord> serviceRecords = loadServiceRecords(parameters);
         String defaultProcess = properties.getArkivmelding().getDefaultProcess();
-        ServiceRecord defaultRecord = serviceRecords.stream()
+        return serviceRecords.stream()
                 .filter(r -> r.getProcess().equals(defaultProcess))
                 .findFirst()
+                // TODO fix for DPI/DPE
                 .orElseThrow(() -> new ServiceRegistryLookupException(String.format("Could not find service record for default process %s", defaultProcess)));
-        // TODO fiks security levels in wrapper
-        return ServiceRecordWrapper.of(defaultRecord, null);
     }
 
     private List<ServiceRecord> loadServiceRecords(Parameters parameters) {

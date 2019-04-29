@@ -73,7 +73,7 @@ public class StandardBusinessDocumentJsonTest {
                 )
                 .setAny(new ArkivmeldingMessage()
                         .setDpoField("foo")
-                        .setSecurityLevel("3")
+                        .setSecurityLevel(3)
                 );
     }
 }

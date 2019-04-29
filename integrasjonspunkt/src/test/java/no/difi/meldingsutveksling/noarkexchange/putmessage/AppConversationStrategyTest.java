@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange.putmessage;
 
-import com.google.common.collect.Maps;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
@@ -12,7 +11,6 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecordWrapper;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -60,7 +58,7 @@ public class AppConversationStrategyTest {
         receiverInfoRecord.setIdentifier("bar");
         when(srMock.getInfoRecord(SENDER_ORG_NR)).thenReturn(senderInfoRecord);
         when(srMock.getInfoRecord(RECEIVER_ORG_NR)).thenReturn(receiverInfoRecord);
-        ServiceRecordWrapper serviceRecord = ServiceRecordWrapper.of(new ServiceRecord(ServiceIdentifier.DPO, RECEIVER_ORG_NR, "pem123", "http://foo"), Maps.newHashMap());
+        ServiceRecord serviceRecord = new ServiceRecord(ServiceIdentifier.DPO, RECEIVER_ORG_NR, "pem123", "http://foo");
         when(srMock.getServiceRecord(RECEIVER_ORG_NR)).thenReturn(serviceRecord);
 
         EDUCoreFactory eduCoreFactory = new EDUCoreFactory(srMock);

@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.*;
 import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
 import no.difi.meldingsutveksling.InputStreamDataSource;
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingException;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
@@ -28,7 +27,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecordWrapper;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
@@ -121,9 +120,7 @@ public class FiksMapper {
     }
 
     private boolean kreverNiva4Innlogging(NextMoveMessage message) {
-        ServiceRecordWrapper serviceRecord = serviceRegistry.getServiceRecord(message.getReceiverIdentifier());
-        Integer dpfSecurityLevel = serviceRecord.getSecuritylevels().get(ServiceIdentifier.DPF);
-        return dpfSecurityLevel != null && dpfSecurityLevel == 4;
+        return message.getBusinessMessage().getSecurityLevel() == 4;
     }
 
     private Set<Dokumentbeskrivelse> getDokumentbeskrivelser(Journalpost journalpost) {
@@ -170,9 +167,8 @@ public class FiksMapper {
         final FileTypeHandlerFactory fileTypeHandlerFactory = new FileTypeHandlerFactory(properties.getFiks(), certificate);
         forsendelse.withDokumenter(mapFrom(meldingType.getJournpost().getDokument(), fileTypeHandlerFactory));
 
-        ServiceRecordWrapper serviceRecord = serviceRegistry.getServiceRecord(eduCore.getReceiver().getIdentifier());
-        Integer dpfSecurityLevel = serviceRecord.getSecuritylevels().get(ServiceIdentifier.DPF);
-        if (dpfSecurityLevel != null && dpfSecurityLevel == 4) {
+        ServiceRecord serviceRecord = serviceRegistry.getServiceRecord(eduCore.getReceiver().getIdentifier());
+        if (serviceRecord.getService().getSecurityLevel() == 4) {
             forsendelse.withKrevNiva4Innlogging(true);
         }
 

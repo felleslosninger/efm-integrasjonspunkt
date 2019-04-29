@@ -70,7 +70,7 @@ public class StandardBusinessDocumentRepositoryTest {
                         )
                 ).setAny(new ArkivmeldingMessage()
                         .setDpoField("1")
-                        .setSecurityLevel("3")
+                        .setSecurityLevel(3)
                 );
     }
 }

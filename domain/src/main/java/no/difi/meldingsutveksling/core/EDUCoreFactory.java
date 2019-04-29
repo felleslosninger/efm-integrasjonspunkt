@@ -224,7 +224,7 @@ public class EDUCoreFactory {
         InfoRecord receiverInfo = serviceRegistryLookup.getInfoRecord(receiverOrgNr);
 
         EDUCore eduCore = new EDUCore();
-        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(receiverOrgNr).getServiceRecord();
+        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(receiverOrgNr);
         eduCore.setServiceIdentifier(serviceRecord.getServiceIdentifier());
 
         eduCore.setSender(Sender.of(senderInfo.getIdentifier(), senderInfo.getOrganizationName(), serviceRecord.getServiceIdentifier() == DPF ? senderRef : null));

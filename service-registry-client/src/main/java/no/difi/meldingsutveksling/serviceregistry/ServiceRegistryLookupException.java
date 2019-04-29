@@ -12,4 +12,8 @@ class ServiceRegistryLookupException extends RuntimeException {
     ServiceRegistryLookupException(String s) {
         super(s);
     }
+
+    ServiceRegistryLookupException(Throwable t) {
+        super(t);
+    }
 }
