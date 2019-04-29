@@ -49,6 +49,7 @@ import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
 import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
+import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.serviceIdentifierLoggingOverride;
 
 @RestController
 @Api
@@ -173,7 +174,7 @@ public class MessageOutController {
         cr = outRepo.save(cr);
         conversationService.registerConversation(cr);
         log.info(markerFrom(cr), "Created new conversation resource [id={}, serviceIdentifier={}]",
-                cr.getConversationId(), cr.getServiceIdentifier());
+                cr.getConversationId(), serviceIdentifierLoggingOverride(cr));
 
         return ResponseEntity.ok(cr);
     }

@@ -2,8 +2,11 @@ package no.difi.meldingsutveksling.dpi;
 
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
+import no.difi.meldingsutveksling.KeystoreProvider;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.lang.KeystoreProviderException;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ExternalReceipt;
@@ -14,15 +17,19 @@ import no.difi.sdp.client2.domain.*;
 import no.difi.sdp.client2.domain.exceptions.SendException;
 import no.difi.sdp.client2.domain.kvittering.ForretningsKvittering;
 import no.difi.sdp.client2.domain.kvittering.KvitteringForespoersel;
+import no.difi.sdp.client2.internal.TrustedCertificates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 
 import java.lang.invoke.MethodHandles;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.cert.Certificate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -90,7 +97,32 @@ public class MeldingsformidlerClient {
     }
 
     private SikkerDigitalPostKlient createSikkerDigitalPostKlient(KlientKonfigurasjon klientKonfigurasjon, AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer) {
-        Databehandler tekniskAvsender = Databehandler.builder(aktoerOrganisasjonsnummer.forfremTilDatabehandler(), Noekkelpar.fraKeyStoreUtenTrustStore(keyStore, config.getKeystore().getAlias(), config.getKeystore().getPassword())).build();
+        Databehandler tekniskAvsender;
+        if (this.config.getTrustStore() != null) {
+            KeyStore trustStore;
+            try {
+                trustStore = KeystoreProvider.loadKeyStore(this.config.getTrustStore());
+            } catch (KeystoreProviderException e) {
+                throw new MeldingsUtvekslingRuntimeException("Cannot load DPI trust store", e);
+            }
+            KeyStore trustedSDP = TrustedCertificates.getTrustStore();
+            Enumeration<String> aliases = null;
+            try {
+                aliases = trustedSDP.aliases();
+                while (aliases.hasMoreElements()) {
+                    String alias = aliases.nextElement();
+                    Certificate certificate = trustedSDP.getCertificate(alias);
+                    trustStore.setCertificateEntry(alias, certificate);
+                }
+            } catch (KeyStoreException e) {
+                throw new MeldingsUtvekslingRuntimeException("Could not get SDP truststore aliases", e);
+            }
+
+            NoekkelparOverride noekkelparOverride = new NoekkelparOverride(keyStore, trustStore, config.getKeystore().getAlias(), config.getKeystore().getPassword(), false);
+            tekniskAvsender = Databehandler.builder(aktoerOrganisasjonsnummer.forfremTilDatabehandler(), noekkelparOverride).build();
+        } else {
+            tekniskAvsender = Databehandler.builder(aktoerOrganisasjonsnummer.forfremTilDatabehandler(), Noekkelpar.fraKeyStoreUtenTrustStore(keyStore, config.getKeystore().getAlias(), config.getKeystore().getPassword())).build();
+        }
 
         return new SikkerDigitalPostKlient(tekniskAvsender, klientKonfigurasjon);
     }

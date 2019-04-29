@@ -2,7 +2,8 @@ package no.difi.meldingsutveksling.nextmove;
 
 public enum ServiceBusQueueMode {
     INNSYN("innsyn"),
-    DATA("data");
+    DATA("data"),
+    MEETING("meeting");
 
     private String fullname;
 

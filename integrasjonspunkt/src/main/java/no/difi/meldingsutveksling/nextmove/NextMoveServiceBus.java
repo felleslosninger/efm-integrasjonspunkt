@@ -42,6 +42,7 @@ import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_DATA;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_INNSYN;
 import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.DATA;
 import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.INNSYN;
+import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.MEETING;
 
 @Component
 public class NextMoveServiceBus {
@@ -104,18 +105,24 @@ public class NextMoveServiceBus {
             marshaller.marshal(sbd, os);
 
             String queue = NEXTMOVE_QUEUE_PREFIX + resource.getReceiverId();
-            switch (resource.getServiceIdentifier()) {
-                case DPE_INNSYN:
-                    queue = queue + INNSYN.fullname();
-                    break;
-                case DPE_DATA:
-                    queue = queue + DATA.fullname();
-                    break;
-                case DPE_RECEIPT:
-                    queue = queue + receiptTarget();
-                    break;
-                default:
-                    throw new NextMoveException("ServiceBus has no queue for ServiceIdentifier=" + resource.getServiceIdentifier());
+            if (resource.getCustomProperties() != null &&
+                    resource.getCustomProperties().containsKey(MEETING.fullname()) &&
+                    "true".equals(resource.getCustomProperties().get(MEETING.fullname()))) {
+                queue = queue + MEETING.fullname();
+            } else {
+                switch (resource.getServiceIdentifier()) {
+                    case DPE_INNSYN:
+                        queue = queue + INNSYN.fullname();
+                        break;
+                    case DPE_DATA:
+                        queue = queue + DATA.fullname();
+                        break;
+                    case DPE_RECEIPT:
+                        queue = queue + receiptTarget();
+                        break;
+                    default:
+                        throw new NextMoveException("ServiceBus has no queue for ServiceIdentifier=" + resource.getServiceIdentifier());
+                }
             }
             serviceBusClient.sendMessage(os.toByteArray(), queue);
 
@@ -197,6 +204,9 @@ public class NextMoveServiceBus {
     private String receiptTarget() {
         if (!isNullOrEmpty(props.getNextmove().getServiceBus().getReceiptQueue())) {
             return props.getNextmove().getServiceBus().getReceiptQueue();
+        }
+        if (MEETING.fullname().equals(props.getNextmove().getServiceBus().getMode())) {
+            return INNSYN.fullname();
         }
         if (INNSYN.fullname().equals(props.getNextmove().getServiceBus().getMode())) {
             return DATA.fullname();

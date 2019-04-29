@@ -27,6 +27,9 @@ public class DigitalPostInnbyggerConfig {
     @Valid
     private KeyStoreProperties keystore;
 
+    @Valid
+    KeyStoreProperties trustStore;
+
     private FeatureToggle feature = new FeatureToggle();
 
     @Valid
@@ -54,6 +57,14 @@ public class DigitalPostInnbyggerConfig {
 
     @NotNull
     private PrintSettings printSettings;
+
+    public KeyStoreProperties getTrustStore() {
+        return trustStore;
+    }
+
+    public void setTrustStore(KeyStoreProperties trustStore) {
+        this.trustStore = trustStore;
+    }
 
     public PrintSettings getPrintSettings() {
         return printSettings;
