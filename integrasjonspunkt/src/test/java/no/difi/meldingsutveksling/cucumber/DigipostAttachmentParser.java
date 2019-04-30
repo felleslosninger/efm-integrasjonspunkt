@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import org.unece.cefact.namespaces.standardbusinessdocumentheader.StandardBusinessDocument;
 import org.w3c.dom.Element;
 
-import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.security.PrivateKey;
 import java.util.List;
 
@@ -23,7 +23,7 @@ public class DigipostAttachmentParser {
     private final CucumberKeyStore cucumberKeyStore;
 
     @SneakyThrows
-    Message parse(String payload, byte[] encryptedAsic) {
+    Message parse(String payload, InputStream encryptedAsic) {
 
         StandardBusinessDocument sbd = xmlMarshaller.unmarshall(payload, StandardBusinessDocument.class);
 
@@ -33,17 +33,12 @@ public class DigipostAttachmentParser {
         String receiverOrgNumber = personidentifikator.getTextContent();
         PrivateKey privateKey = cucumberKeyStore.getPrivateKey(receiverOrgNumber);
 
-        Message message = new Message()
-                .setBody(payload);
-
-        byte[] asic = cmsUtil.decryptCMS(encryptedAsic, privateKey);
-        List<Attachment> attachments = getAttachments(asic);
-
-        message.attachments(attachments);
-        return message;
+        return new Message()
+                .setBody(payload)
+                .attachments(getAttachments(cmsUtil.decryptCMSStreamed(encryptedAsic, privateKey)));
     }
 
-    private List<Attachment> getAttachments(byte[] asic) {
-        return asicParser.parse(new ByteArrayInputStream(asic));
+    private List<Attachment> getAttachments(InputStream asic) {
+        return asicParser.parse(asic);
     }
 }

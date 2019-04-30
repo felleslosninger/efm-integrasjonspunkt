@@ -15,6 +15,7 @@ import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExter
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.ReceiptExternalStreamedBE;
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.StreamedPayloadBasicBE;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import org.apache.commons.io.IOUtils;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
@@ -117,9 +118,10 @@ public class AltinnOutSteps {
     }
 
     @Then("^the content of the Altinn ZIP file named \"([^\"]*)\" is:$")
+    @SneakyThrows
     public void theContentOfTheAltinnZipFileNamedIs(String filename, String expectedContent) {
         ZipContent zipContent = zipContentHolder.get();
-        assertThat(new String(zipContent.getFile(filename).getBytes()))
+        assertThat(new String(IOUtils.toByteArray(zipContent.getFile(filename).getInputStream())))
                 .isEqualToIgnoringWhitespace(expectedContent);
     }
 
@@ -127,7 +129,7 @@ public class AltinnOutSteps {
     @SneakyThrows
     public void theJsonContentOfTheAltinnZipFileNamedIs(String filename, String expectedContent) {
         ZipContent zipContent = zipContentHolder.get();
-        String jsonString = new String(zipContent.getFile(filename).getBytes());
+        String jsonString = new String(IOUtils.toByteArray(zipContent.getFile(filename).getInputStream()));
         new JsonContentAssert(StandardBusinessDocument.class, jsonString)
                 .isEqualToJson(expectedContent);
     }

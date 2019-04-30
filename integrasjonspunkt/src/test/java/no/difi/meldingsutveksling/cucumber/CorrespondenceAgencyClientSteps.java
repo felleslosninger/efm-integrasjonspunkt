@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentV2;
-import org.apache.commons.io.IOUtils;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,9 +33,8 @@ public class CorrespondenceAgencyClientSteps {
                 .getBinaryAttachments().getValue()
                 .getBinaryAttachmentV2()
                 .stream()
-                .map(p -> new Attachment()
+                .map(p -> new Attachment(getInpuStream(p))
                         .setFileName(p.getFileName().getValue())
-                        .setBytes(getBytes(p))
                 ).collect(Collectors.toList());
 
         messageSentHolder.set(new Message()
@@ -47,7 +46,7 @@ public class CorrespondenceAgencyClientSteps {
     }
 
     @SneakyThrows
-    private byte[] getBytes(BinaryAttachmentV2 p) {
-        return IOUtils.toByteArray(p.getData().getValue().getInputStream());
+    private InputStream getInpuStream(BinaryAttachmentV2 p) {
+        return p.getData().getValue().getInputStream();
     }
 }

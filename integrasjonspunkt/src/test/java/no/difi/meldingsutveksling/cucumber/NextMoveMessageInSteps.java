@@ -9,8 +9,8 @@ import cucumber.api.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.domain.ByteArrayFile;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import org.apache.commons.io.IOUtils;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -110,13 +110,15 @@ public class NextMoveMessageInSteps {
 
     @And("^I have an ASIC that contains a file named \"([^\"]*)\" with mimetype=\"([^\"]*)\":$")
     public void iHaveAnASICThatContainsAFileNamedWithMimetype(String filename, String mimetype, String body) throws Throwable {
-        ByteArrayFile attachement = messageReceivedHolder.get().getAttachment(filename);
+        Attachment attachement = messageReceivedHolder.get().getAttachment(filename);
         assertThat(attachement.getMimeType()).isEqualTo(mimetype);
 
+        String actual = new String(IOUtils.toByteArray(attachement.getInputStream()));
+
         if (MediaType.APPLICATION_XML_VALUE.equals(mimetype)) {
-            assertThat(new String(attachement.getBytes())).isXmlEqualTo(body);
+            assertThat(actual).isXmlEqualTo(body);
         } else {
-            assertThat(new String(attachement.getBytes())).isEqualTo(body);
+            assertThat(actual).isEqualTo(body);
         }
     }
 }

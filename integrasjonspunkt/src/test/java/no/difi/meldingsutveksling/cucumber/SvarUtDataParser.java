@@ -7,13 +7,17 @@ import no.difi.meldingsutveksling.ks.svarut.Dokument;
 import no.difi.meldingsutveksling.ks.svarut.OrganisasjonDigitalAdresse;
 import no.difi.meldingsutveksling.ks.svarut.SendForsendelseMedId;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtRequest;
-import org.apache.commons.io.IOUtils;
+import no.difi.meldingsutveksling.pipes.Pipe;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import java.io.InputStream;
+import java.io.PipedInputStream;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static no.difi.meldingsutveksling.pipes.PipeOperations.copy;
 
 @Component
 @Profile("cucumber")
@@ -42,10 +46,10 @@ public class SvarUtDataParser {
 
     @SneakyThrows
     private Attachment getAttachment(Dokument dokument, PrivateKey privateKey) {
-        byte[] encrypted = IOUtils.toByteArray(dokument.getData().getInputStream());
-        byte[] decrypted = cmsUtil.decryptCMS(encrypted, privateKey);
-        return new Attachment()
-                .setBytes(decrypted)
+        InputStream inputStream = dokument.getData().getInputStream();
+        PipedInputStream encrypted = Pipe.of("read", copy(inputStream)).outlet();
+        InputStream decrypted = cmsUtil.decryptCMSStreamed(encrypted, privateKey);
+        return new Attachment(decrypted)
                 .setMimeType(dokument.getMimetype())
                 .setFileName(dokument.getFilnavn());
     }

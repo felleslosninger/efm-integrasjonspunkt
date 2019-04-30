@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
+import no.difi.meldingsutveksling.pipes.Pipe;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.PipedInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -38,10 +41,9 @@ public class AltinnZipFactory {
 
         out.putNextEntry(new ZipEntry(ASIC_FILE));
 
-        byte[] asic = asicFactory.getAsic(message);
-        byte[] encryptedAsic = cmsUtilProvider.getIfAvailable().createCMS(asic, keyInfo.getX509Certificate());
-
-        out.write(encryptedAsic);
+        InputStream asic = asicFactory.getAsic(message);
+        PipedInputStream encryptedAsic = Pipe.of("CMS encrypt", inlet -> cmsUtilProvider.getIfAvailable().createCMSStreamed(asic, inlet, keyInfo.getX509Certificate())).outlet();
+        IOUtils.copy(encryptedAsic, out);
         out.closeEntry();
 
         out.close();

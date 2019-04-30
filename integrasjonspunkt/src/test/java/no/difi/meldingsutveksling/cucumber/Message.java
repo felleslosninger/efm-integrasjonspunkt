@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.cucumber;
 
 import lombok.Data;
 import no.difi.meldingsutveksling.domain.Avsender;
-import no.difi.meldingsutveksling.domain.ByteArrayFile;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -16,7 +15,7 @@ public class Message {
 
     private StandardBusinessDocument sbd;
     private String body;
-    private List<ByteArrayFile> attachments = new ArrayList<>();
+    private List<Attachment> attachments = new ArrayList<>();
 
     Message attachment(Attachment attachment) {
         attachments.add(attachment);
@@ -28,7 +27,11 @@ public class Message {
         return this;
     }
 
-    ByteArrayFile getAttachment(String filename) {
+    Attachment getFirstAttachment() {
+        return attachments.get(0);
+    }
+
+    Attachment getAttachment(String filename) {
         return attachments.stream()
                 .filter(p -> p.getFileName().equals(filename))
                 .findAny()
@@ -42,4 +45,5 @@ public class Message {
     Avsender getAvsender() {
         return new Avsender(Organisasjonsnummer.from(sbd.getSenderIdentifier()));
     }
+
 }
