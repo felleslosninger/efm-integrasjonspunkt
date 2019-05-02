@@ -38,6 +38,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.time.Clock;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -54,6 +55,7 @@ public class SvarInnNextMoveForwarder implements Consumer<Forsendelse> {
     private final NextMoveMessageInRepository messageRepo;
     private final CreateSBD createSBD;
     private final IntegrasjonspunktProperties properties;
+    private final Clock clock;
 
     @Override
     public void accept(Forsendelse forsendelse) {
@@ -137,8 +139,8 @@ public class SvarInnNextMoveForwarder implements Consumer<Forsendelse> {
         journalpost.setJournalpostnummer(BigInteger.valueOf(Long.valueOf(metadata.getJournalpostnummer())));
         journalpost.setJournalposttype(JournalposttypeMapper.getArkivmeldingType(metadata.getJournalposttype()));
         journalpost.setJournalstatus(JournalstatusMapper.getArkivmeldingType(metadata.getJournalstatus()));
-        journalpost.setJournaldato(ArkivmeldingUtil.epochMilliAsXmlGregorianCalendar(metadata.getJournaldato()));
-        journalpost.setDokumentetsDato(ArkivmeldingUtil.epochMilliAsXmlGregorianCalendar(metadata.getDokumentetsDato()));
+        journalpost.setJournaldato(ArkivmeldingUtil.epochMilliAsXmlGregorianCalendar(metadata.getJournaldato(), clock));
+        journalpost.setDokumentetsDato(ArkivmeldingUtil.epochMilliAsXmlGregorianCalendar(metadata.getDokumentetsDato(), clock));
         journalpost.setOffentligTittel(metadata.getTittel());
 
         saksmappe.getBasisregistrering().add(journalpost);

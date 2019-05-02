@@ -165,15 +165,17 @@ public class ServiceRegistryLookup {
         Optional<ServiceRecord> serviceRecord = serviceRecords.stream()
                 .filter(r -> r.getService().getIdentifier() == ServiceIdentifier.DPI)
                 .findFirst();
-        if (!serviceRecord.isPresent()) {
-            serviceRecord = serviceRecords.stream()
-                    .filter(r -> r.getService().getIdentifier() == ServiceIdentifier.DPE)
-                    .findFirst();
-        }
+
         if (!serviceRecord.isPresent()) {
             String defaultProcess = properties.getArkivmelding().getDefaultProcess();
             serviceRecord = serviceRecords.stream()
                     .filter(r -> r.getProcess().equals(defaultProcess))
+                    .findFirst();
+        }
+
+        if (!serviceRecord.isPresent()) {
+            serviceRecord = serviceRecords.stream()
+                    .filter(r -> r.getService().getIdentifier() == ServiceIdentifier.DPE)
                     .findFirst();
         }
 

@@ -15,9 +15,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -82,9 +80,9 @@ public class ArkivmeldingUtil {
         }
     }
 
-    public static XMLGregorianCalendar epochMilliAsXmlGregorianCalendar(String ms) {
-        LocalDate localDate = Instant.ofEpochMilli(Long.valueOf(ms)).atZone(ZoneId.systemDefault()).toLocalDate();
-        GregorianCalendar gcal = GregorianCalendar.from(localDate.atStartOfDay(ZoneId.systemDefault()));
+    public static XMLGregorianCalendar epochMilliAsXmlGregorianCalendar(String ms, Clock clock) {
+        ZonedDateTime zonedDateTime = Instant.ofEpochMilli(Long.valueOf(ms)).atZone(clock.getZone());
+        GregorianCalendar gcal = GregorianCalendar.from(zonedDateTime);
         try {
             return DatatypeFactory.newInstance().newXMLGregorianCalendar(gcal);
         } catch (DatatypeConfigurationException e) {

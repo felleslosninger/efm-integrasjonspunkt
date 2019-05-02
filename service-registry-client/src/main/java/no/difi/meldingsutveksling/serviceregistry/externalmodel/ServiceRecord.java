@@ -24,7 +24,6 @@ public class ServiceRecord {
     private boolean kanVarsles;
     private PostAddress postAddress;
     private PostAddress returnAddress;
-    private List<String> dpeCapabilities;
     private String process;
     private List<String> documentTypes;
     private Service service;

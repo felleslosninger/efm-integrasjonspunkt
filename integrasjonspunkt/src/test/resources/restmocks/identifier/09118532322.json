@@ -7,48 +7,21 @@
       "name": "ORGL"
     }
   },
-  "serviceRecord": {
-    "organisationNumber": "09118532322",
-    "pemCertificate": "-----BEGIN CERTIFICATE-----\nMIICvjCCAaagAwIBAgIEXKRPEjANBgkqhkiG9w0BAQsFADAgMR4wHAYDVQQDDBVU\nZXN0IERJRkkgMDkxMTg1MzIzMjIwIBcNMTkwNDAzMDYxMzM4WhgPMjExOTA0MDMw\nNjEzMzhaMCAxHjAcBgNVBAMMFVRlc3QgRElGSSAwOTExODUzMjMyMjCCASIwDQYJ\nKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKx7F22UlcIUNuEF8Vxn2SPTgMvEfUnJ\nWZY1RGr2dOmCTG0hg/a8eSBRrirGXIONULhRowv/bnUWaxUyHmxvvDLgiSnvbAZo\nNok3lBZIo8uPR3rmSzl0Z/6Xe1IhBCrCawpA6O0ohe2dACyoGinfFmAa2Bp4GlJk\niU+8wQlZJ5TsvVGqMIPz2iWWy9myQddYWpDdso1kitANmM3cr+ExES9NPJ2Pg1ol\nVA8gBZL/yVQ8fnq+lWl9xdhC03CJ7HLiWamd46n16fIqTq25icu8EpxG7VGL9A7N\noXhLgkV+oXHxaZ+5CNJAlbNu1xzPHlKRWQ0CkTD1/RcIxPH6E5xdgR8CAwEAATAN\nBgkqhkiG9w0BAQsFAAOCAQEASN0GL4i8X4LDIBa2gbg34ZPWnrVhc4410a1KYODP\nDgKJ4yhaRs/4p4h3kVZdqKQc9B7TkkYJhC0af98wNKRoy2hN9ziFnnsb3Rb+7uvD\nPtXZ+l+YTctMgtSDKzunTpaqxOGMD3dgo/xWrseH0XEGZPm3skH39bhtVps3Ulf0\n1Nh6qRrpacy77RHJSTT8dhfm+bsAVRRVbbZnYmfrzMwCwsiu2he5bpwoMYsZpf/k\ngIADbmEmhUlxWsuHEmGxtJeVuZxi1Boy6GZiYg+WSeWuJE49lJYX5Z2tBKvIMoQ0\nVKObepywsh1F7HBL7N+0frE6/7ZYRAC1WNHbrJJ4fOEdIA==\n-----END CERTIFICATE-----\n",
-    "dpeCapabilities": [
-      "DPE_INNSYN"
-    ],
-    "orgnrPostkasse": "9908:987464291",
-    "postkasseAdresse": "dummy",
-    "process": "urn:no:difi:profile:DigitalpostInfo:ver1.0",
-    "documentTypes": [
-      "urn:no:difi.digitalpost:xsd:digital::digital",
-      "urn:no:difi.digitalpost:xsd:fysisk::print"
-    ],
-    "service": {
-      "identifier": "DPI_DIGITAL",
-      "serviceCode": "4192",
-      "serviceEditionCode": "270815"
-    }
-  },
   "serviceRecords": [
     {
       "organisationNumber": "09118532322",
       "pemCertificate": "-----BEGIN CERTIFICATE-----\nMIICvjCCAaagAwIBAgIEXKRPEjANBgkqhkiG9w0BAQsFADAgMR4wHAYDVQQDDBVU\nZXN0IERJRkkgMDkxMTg1MzIzMjIwIBcNMTkwNDAzMDYxMzM4WhgPMjExOTA0MDMw\nNjEzMzhaMCAxHjAcBgNVBAMMFVRlc3QgRElGSSAwOTExODUzMjMyMjCCASIwDQYJ\nKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKx7F22UlcIUNuEF8Vxn2SPTgMvEfUnJ\nWZY1RGr2dOmCTG0hg/a8eSBRrirGXIONULhRowv/bnUWaxUyHmxvvDLgiSnvbAZo\nNok3lBZIo8uPR3rmSzl0Z/6Xe1IhBCrCawpA6O0ohe2dACyoGinfFmAa2Bp4GlJk\niU+8wQlZJ5TsvVGqMIPz2iWWy9myQddYWpDdso1kitANmM3cr+ExES9NPJ2Pg1ol\nVA8gBZL/yVQ8fnq+lWl9xdhC03CJ7HLiWamd46n16fIqTq25icu8EpxG7VGL9A7N\noXhLgkV+oXHxaZ+5CNJAlbNu1xzPHlKRWQ0CkTD1/RcIxPH6E5xdgR8CAwEAATAN\nBgkqhkiG9w0BAQsFAAOCAQEASN0GL4i8X4LDIBa2gbg34ZPWnrVhc4410a1KYODP\nDgKJ4yhaRs/4p4h3kVZdqKQc9B7TkkYJhC0af98wNKRoy2hN9ziFnnsb3Rb+7uvD\nPtXZ+l+YTctMgtSDKzunTpaqxOGMD3dgo/xWrseH0XEGZPm3skH39bhtVps3Ulf0\n1Nh6qRrpacy77RHJSTT8dhfm+bsAVRRVbbZnYmfrzMwCwsiu2he5bpwoMYsZpf/k\ngIADbmEmhUlxWsuHEmGxtJeVuZxi1Boy6GZiYg+WSeWuJE49lJYX5Z2tBKvIMoQ0\nVKObepywsh1F7HBL7N+0frE6/7ZYRAC1WNHbrJJ4fOEdIA==\n-----END CERTIFICATE-----\n",
-      "dpeCapabilities": [
-        "DPE_INNSYN"
-      ],
       "orgnrPostkasse": "9908:987464291",
       "postkasseAdresse": "dummy",
-      "process": "urn:no:difi:profile:DigitalpostInfo:ver1.0",
+      "process": "urn:no:difi:profile:digitalpost:info:ver1.0",
       "documentTypes": [
-        "urn:no:difi.digitalpost:xsd:digital::digital",
-        "urn:no:difi.digitalpost:xsd:fysisk::print"
+        "urn:no:difi.digitalpost:xsd:digital::digital"
       ],
       "service": {
-        "identifier": "DPI_DIGITAL",
+        "identifier": "DPI",
         "serviceCode": "4192",
         "serviceEditionCode": "270815"
       }
     }
-  ],
-  "failedServiceIdentifiers": [],
-  "securitylevels": {
-    "DPI": 3
-  }
+  ]
 }

@@ -52,9 +52,5 @@
         "serviceEditionCode": "270815"
       }
     }
-  ],
-  "failedServiceIdentifiers": [],
-  "securitylevels": {
-    "DPO": 3
-  }
+  ]
 }
