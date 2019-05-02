@@ -50,7 +50,7 @@ Feature: Sending a Next Move DPO message
             ]
         },
         "arkivmelding": {
-          "securityLevel": "3",
+          "securityLevel": 3,
           "primaryDocumentFilename": "arkivmelding.xml"
         }
     }
@@ -237,7 +237,7 @@ Feature: Sending a Next Move DPO message
             ]
         },
         "arkivmelding": {
-          "securityLevel": "3",
+          "securityLevel": 3,
           "primaryDocumentFilename": "arkivmelding.xml"
         }
     }

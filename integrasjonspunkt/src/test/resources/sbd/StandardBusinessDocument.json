@@ -40,7 +40,7 @@
         ]
     },
     "arkivmelding": {
-      "securityLevel": "3",
+      "securityLevel": 3,
       "dpoField": "foo"
     }
 }
