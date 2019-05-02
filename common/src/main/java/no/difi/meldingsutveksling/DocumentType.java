@@ -72,4 +72,8 @@ public enum DocumentType {
                 .filter(p -> p.api == api);
     }
 
+    public static DocumentType getOrThrow(String type) {
+        return valueOfType(type).orElseThrow(() -> new RuntimeException(String.format("Unknown document type '%s'", type)));
+    }
+
 }

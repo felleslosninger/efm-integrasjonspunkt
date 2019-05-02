@@ -11,14 +11,13 @@ public class ServiceIdentifierService {
 
     private final IntegrasjonspunktProperties properties;
 
-    boolean isEnabled(ServiceIdentifier serviceIdentifier) {
+    public boolean isEnabled(ServiceIdentifier serviceIdentifier) {
         switch (serviceIdentifier) {
             case DPO:
                 return properties.getFeature().isEnableDPO();
             case DPE:
                 return properties.getFeature().isEnableDPE();
-            case DPI_DIGITAL:
-            case DPI_PRINT:
+            case DPI:
                 return properties.getFeature().isEnableDPI();
             case DPF:
                 return properties.getFeature().isEnableDPF() || properties.getFeature().isEnableDPO();

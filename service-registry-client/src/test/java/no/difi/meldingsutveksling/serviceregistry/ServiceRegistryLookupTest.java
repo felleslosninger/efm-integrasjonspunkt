@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.serviceregistry;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.nimbusds.jose.proc.BadJWSException;
@@ -19,6 +18,8 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -61,18 +62,17 @@ public class ServiceRegistryLookupTest {
         dpo.setProcess(DEFAULT_PROCESS);
     }
 
-    @Test
-    public void clientThrowsExceptionWithInternalServerErrorThenServiceShouldThrowServiceRegistryLookupException() throws BadJWSException {
-        thrown.expect(UncheckedExecutionException.class);
-//        when(client.getResource(any(String.class))).thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
-
-        service.getServiceRecord(ORGNR);
-    }
-
-    @Test(expected = UncheckedExecutionException.class)
+    @Test(expected = ServiceRegistryLookupException.class)
     public void organizationWithoutServiceRecord() throws BadJWSException {
         final String json = new SRContentBuilder().build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
+
+        this.service.getServiceRecord(ORGNR);
+    }
+
+    @Test(expected = ServiceRegistryLookupException.class)
+    public void noEntityForOrganization() throws BadJWSException {
+        when(client.getResource("identifier/" + ORGNR, query)).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
 
         this.service.getServiceRecord(ORGNR);
     }
@@ -108,7 +108,7 @@ public class ServiceRegistryLookupTest {
     }
 
     @Test
-    public void testSasKeyCacheInvalidation() throws BadJWSException {
+    public void testSasKeyCacheInvalidation() throws BadJWSException, ServiceRegistryLookupException {
         when(client.getResource("sastoken")).thenReturn("123").thenReturn("456");
 
         assertThat(service.getSasKey(), is("123"));

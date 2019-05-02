@@ -15,8 +15,7 @@ public enum ServiceIdentifier {
 
     @XmlEnumValue("DPO") DPO("DPO"),
     @XmlEnumValue("DPV") DPV("DPV"),
-    @XmlEnumValue("DPI_DIGITAL") DPI_DIGITAL("DPI_DIGITAL"),
-    @XmlEnumValue("DPI_PRINT") DPI_PRINT("DPI_PRINT"),
+    @XmlEnumValue("DPI") DPI("DPI"),
     @XmlEnumValue("DPF") DPF("DPF"),
     @XmlEnumValue("DPE") DPE("DPE"),
     UNKNOWN("UNKNOWN");

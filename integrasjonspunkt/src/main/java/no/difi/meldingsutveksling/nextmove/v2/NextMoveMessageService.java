@@ -108,21 +108,23 @@ public class NextMoveMessageService {
                 .filter(p -> isNullOrEmpty(p.getInstanceIdentifier()))
                 .forEach(p -> p.setInstanceIdentifier(createConversationId()));
 
-        if (serviceIdentifier == DPI_PRINT) {
+        if (serviceIdentifier == DPI) {
             setDpiDefaults(sbd);
         }
     }
 
     private void setDpiDefaults(StandardBusinessDocument sbd) {
-        Optional<ServiceRecord> serviceRecord = sr.getServiceRecord(sbd.getReceiverIdentifier(), DPI_PRINT);
-        ServiceRecord record = serviceRecord.orElseThrow(() -> new NextMoveRuntimeException(String.format("No service record of type %s found for receiver", DPI_PRINT.toString())));
-        DpiPrintMessage dpiMessage = (DpiPrintMessage) sbd.getAny();
-        if (dpiMessage.getReceiver() == null) {
-            dpiMessage.setReceiver(new PostAddress());
-        }
+        Optional<ServiceRecord> serviceRecord = sr.getServiceRecord(sbd.getReceiverIdentifier(), DPI);
+        ServiceRecord record = serviceRecord.orElseThrow(() -> new NextMoveRuntimeException(String.format("No service record of type %s found for receiver", DPI.toString())));
+        if (DocumentType.getOrThrow(sbd.getMessageType()) == DocumentType.PRINT) {
+            DpiPrintMessage dpiMessage = (DpiPrintMessage) sbd.getAny();
+            if (dpiMessage.getReceiver() == null) {
+                dpiMessage.setReceiver(new PostAddress());
+            }
 
-        setReceiverDefaults(dpiMessage.getReceiver(), record.getPostAddress());
-        setReceiverDefaults(dpiMessage.getMailReturn().getReceiver(), record.getReturnAddress());
+            setReceiverDefaults(dpiMessage.getReceiver(), record.getPostAddress());
+            setReceiverDefaults(dpiMessage.getMailReturn().getReceiver(), record.getReturnAddress());
+        }
     }
 
     private void setReceiverDefaults(PostAddress receiver, no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress srReceiver) {
@@ -167,7 +169,7 @@ public class NextMoveMessageService {
             throw new MultiplePrimaryDocumentsNotAllowedException();
         }
 
-        List<ServiceIdentifier> requiredTitleCapabilities = asList(DPV, DPI_DIGITAL, DPI_PRINT);
+        List<ServiceIdentifier> requiredTitleCapabilities = asList(DPV, DPI);
         if (requiredTitleCapabilities.contains(message.getServiceIdentifier()) && isNullOrEmpty(title)) {
             throw new MissingFileTitleException(requiredTitleCapabilities.stream()
                     .map(ServiceIdentifier::toString)

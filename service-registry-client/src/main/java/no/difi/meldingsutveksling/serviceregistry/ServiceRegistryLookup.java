@@ -4,6 +4,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.jayway.jsonpath.Configuration;
@@ -17,6 +18,7 @@ import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.Process;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.Notification;
@@ -71,7 +73,7 @@ public class ServiceRegistryLookup {
                 .expireAfterWrite(1, TimeUnit.MINUTES)
                 .build(new CacheLoader<Parameters, ServiceRecord>() {
                     @Override
-                    public ServiceRecord load(Parameters key) throws Exception {
+                    public ServiceRecord load(Parameters key) {
                         return loadServiceRecord(key);
                     }
                 });
@@ -105,7 +107,15 @@ public class ServiceRegistryLookup {
      */
     public ServiceRecord getServiceRecord(String identifier) {
         Notification notification = properties.isVarslingsplikt() ? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
-        return srCache.getUnchecked(new Parameters(identifier, notification));
+        try {
+            return srCache.get(new Parameters(identifier, notification));
+        } catch (ExecutionException | UncheckedExecutionException e) {
+            if (e.getCause() instanceof ServiceRegistryLookupException) {
+                throw (ServiceRegistryLookupException) e.getCause();
+            } else {
+                throw new MeldingsUtvekslingRuntimeException(e.getCause());
+            }
+        }
     }
 
     public Optional<ServiceRecord> getServiceRecord(String identifier, ServiceIdentifier serviceIdentifier) {
@@ -123,11 +133,11 @@ public class ServiceRegistryLookup {
         return !getServiceRecords(identifier).isEmpty();
     }
 
-    public String getStandard(String identifier, Process process, DocumentType documentType) {
+    public String getStandard(String identifier, Process process, DocumentType documentType) throws ServiceRegistryLookupException {
         return getStandard(identifier, process.getValue(), documentType);
     }
 
-    public String getStandard(String identifier, String process, DocumentType documentType) {
+    public String getStandard(String identifier, String process, DocumentType documentType) throws ServiceRegistryLookupException {
         ServiceRecord serviceRecord = getServiceRecordByProcess(identifier, process)
                 .orElseThrow(() -> new ServiceRegistryLookupException(
                         String.format("Process '%s' not found in SR for identifier '%s'",
@@ -151,15 +161,26 @@ public class ServiceRegistryLookup {
 
     private ServiceRecord loadServiceRecord(Parameters parameters) {
         List<ServiceRecord> serviceRecords = loadServiceRecords(parameters);
-        String defaultProcess = properties.getArkivmelding().getDefaultProcess();
-        return serviceRecords.stream()
-                .filter(r -> r.getProcess().equals(defaultProcess))
-                .findFirst()
-                // TODO fix for DPI/DPE
-                .orElseThrow(() -> new ServiceRegistryLookupException(String.format("Could not find service record for default process %s", defaultProcess)));
+
+        Optional<ServiceRecord> serviceRecord = serviceRecords.stream()
+                .filter(r -> r.getService().getIdentifier() == ServiceIdentifier.DPI)
+                .findFirst();
+        if (!serviceRecord.isPresent()) {
+            serviceRecord = serviceRecords.stream()
+                    .filter(r -> r.getService().getIdentifier() == ServiceIdentifier.DPE)
+                    .findFirst();
+        }
+        if (!serviceRecord.isPresent()) {
+            String defaultProcess = properties.getArkivmelding().getDefaultProcess();
+            serviceRecord = serviceRecords.stream()
+                    .filter(r -> r.getProcess().equals(defaultProcess))
+                    .findFirst();
+        }
+
+        return serviceRecord.orElseThrow(() -> new ServiceRegistryLookupException(String.format("Could not find service record for receiver '%s'", parameters.getIdentifier())));
     }
 
-    private List<ServiceRecord> loadServiceRecords(Parameters parameters) {
+    private List<ServiceRecord> loadServiceRecords(Parameters parameters) throws ServiceRegistryLookupException {
         ServiceRecord[] serviceRecords = {};
         try {
             final String resource = client.getResource("identifier/" + parameters.getIdentifier(), parameters.getQuery());
@@ -190,7 +211,7 @@ public class ServiceRegistryLookup {
         return irCache.getUnchecked(new Parameters(identifier, notification));
     }
 
-    private InfoRecord loadInfoRecord(Parameters parameters) {
+    private InfoRecord loadInfoRecord(Parameters parameters) throws ServiceRegistryLookupException {
         final String infoRecordString;
         try {
             infoRecordString = client.getResource("identifier/" + parameters.getIdentifier(), parameters.getQuery());
@@ -201,7 +222,7 @@ public class ServiceRegistryLookup {
         return documentContext.read("$.infoRecord", InfoRecord.class);
     }
 
-    public String getSasKey() {
+    public String getSasKey() throws ServiceRegistryLookupException {
         // Single entry, key does not matter
         try {
             return skCache.get("");

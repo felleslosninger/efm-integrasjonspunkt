@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.receipt;
 
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.nextmove.v2.ServiceIdentifierService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,10 +38,13 @@ public class ReceiptPolling {
     private ConversationService conversationService;
 
     @Autowired
-    StatusStrategyFactory statusStrategyFactory;
+    private StatusStrategyFactory statusStrategyFactory;
 
     @Autowired
-    DpiReceiptService dpiReceiptService;
+    private DpiReceiptService dpiReceiptService;
+
+    @Autowired
+    private ServiceIdentifierService serviceIdentifierService;
 
     @Scheduled(fixedRate = 60000)
     public void checkReceiptStatus() {
@@ -52,7 +55,7 @@ public class ReceiptPolling {
         List<Conversation> conversations = conversationRepository.findByPollable(true);
 
         conversations.forEach(c -> {
-            if (serviceEnabled(c.getServiceIdentifier())) {
+            if (serviceIdentifierService.isEnabled(c.getServiceIdentifier())) {
                 log.debug(markerFrom(c), "Checking status, conversationId={}", c.getConversationId());
                 try {
                     StatusStrategy strategy = statusStrategyFactory.getFactory(c);
@@ -81,22 +84,6 @@ public class ReceiptPolling {
                 Audit.info("Confirmed receipt (DPI)", externalReceipt.logMarkers());
                 externalReceipt = dpiReceiptService.checkForReceipts();
             }
-        }
-    }
-
-    private boolean serviceEnabled(ServiceIdentifier si) {
-        switch (si) {
-            case DPO:
-                return props.getFeature().isEnableDPO();
-            case DPV:
-                return props.getFeature().isEnableDPV();
-            case DPF:
-                return props.getFeature().isEnableDPF();
-            case DPI_DIGITAL:
-            case DPI_PRINT:
-                return props.getFeature().isEnableDPI();
-            default:
-                return false;
         }
     }
 
