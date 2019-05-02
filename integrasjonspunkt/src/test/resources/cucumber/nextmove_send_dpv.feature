@@ -80,7 +80,7 @@ Feature: Sending a Next Move DPV message
             ]
         },
         "arkivmelding": {
-          "securityLevel": "3",
+          "securityLevel": 3,
           "primaryDocumentFilename": "test.txt"
         }
     }

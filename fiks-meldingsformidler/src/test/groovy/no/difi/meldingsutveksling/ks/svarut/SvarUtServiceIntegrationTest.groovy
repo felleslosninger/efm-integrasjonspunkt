@@ -13,9 +13,12 @@ import no.difi.meldingsutveksling.ks.MockConfiguration
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister
 import no.difi.meldingsutveksling.noarkexchange.schema.core.*
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.Service
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest
@@ -58,9 +61,15 @@ public class SvarUtServiceIntegrationTest {
     void setup() {
         server = MockWebServiceServer.createServer(client)
 
-        SendForsendelseMedIdResponse payload = SendForsendelseMedIdResponse.builder().withReturn("123").build()
+        SendForsendelseMedIdResponse payload = SendForsendelseMedIdResponse.builder().withReturn("19d5938b-31f1-4fdc-9d8c-cc30b9fadb3d").build()
         JAXBContext context = JAXBContext.newInstance(payload.getClass())
         server.expect(anything()).andRespond(withPayload(new JAXBSource(context, payload)))
+
+        ServiceRecord serviceRecord = Mockito.mock(ServiceRecord.class)
+        Service service = Mockito.mock(Service.class)
+        Mockito.when(serviceRecord.getService()).thenReturn(service)
+        Mockito.when(service.securityLevel).thenReturn(4)
+        Mockito.when(serviceRegistryLookup.getServiceRecord(Mockito.any())).thenReturn(serviceRecord)
     }
 
     @Test
@@ -69,7 +78,7 @@ public class SvarUtServiceIntegrationTest {
 
 
         def forsendelseId = service.send(eduCore)
-        assert forsendelseId == "123"
+        assert forsendelseId == "19d5938b-31f1-4fdc-9d8c-cc30b9fadb3d"
 
         server.verify()
     }

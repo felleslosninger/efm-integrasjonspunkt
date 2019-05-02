@@ -21,6 +21,7 @@ public class JacksonConfig {
                         .featuresToDisable(
                                 SerializationFeature.WRITE_DATES_AS_TIMESTAMPS,
                                 SerializationFeature.CLOSE_CLOSEABLE,
+                                DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY,
                                 DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
                                 DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE);
     }

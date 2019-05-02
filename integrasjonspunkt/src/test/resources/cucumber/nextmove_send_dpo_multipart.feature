@@ -51,7 +51,7 @@ Feature: Sending a Next Move DPO multipart/form message
             ]
         },
         "arkivmelding": {
-          "securityLevel": "3",
+          "securityLevel": 3,
           "primaryDocumentFilename": "arkivmelding.xml"
         }
     }
@@ -238,7 +238,7 @@ Feature: Sending a Next Move DPO multipart/form message
             ]
         },
         "arkivmelding": {
-          "securityLevel": "3",
+          "securityLevel": 3,
           "primaryDocumentFilename": "arkivmelding.xml"
         }
     }

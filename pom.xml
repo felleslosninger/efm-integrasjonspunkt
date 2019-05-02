@@ -50,7 +50,7 @@
         <commons.compress.version>1.13</commons.compress.version>
         <apache.commons.version>10.0-b28</apache.commons.version>
         <jacoco.version>0.7.5.201505241946</jacoco.version>
-        <jaxws-rt.version>2.3.2</jaxws-rt.version>
+        <jaxws-rt.version>2.2.10</jaxws-rt.version>
         <!-- bug with logstash-logback-encoder in 1.1.7, wait for 1.1.8 http://jira.qos.ch/browse/LOGBACK-1158 -->
         <logback.version>1.1.6</logback.version>
 
@@ -217,6 +217,11 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
                 <version>${commons.compress.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.woodstox</groupId>
+                <artifactId>stax2-api</artifactId>
+                <version>3.1.4</version>
             </dependency>
 
             <!-- Overriden until spring boot updates the dependencies artifact.
