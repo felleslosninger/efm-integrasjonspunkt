@@ -4,8 +4,9 @@ import cucumber.api.DataTable;
 import cucumber.api.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import no.difi.meldingsutveksling.domain.ByteArrayFile;
+import org.apache.commons.io.IOUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -26,7 +27,7 @@ public class MessageOutSteps {
         List<List<String>> actualList = new ArrayList<>();
         actualList.add(Collections.singletonList("filename"));
         actualList.addAll(message.getAttachments().stream()
-                .map(ByteArrayFile::getFileName)
+                .map(Attachment::getFileName)
                 .map(Collections::singletonList)
                 .collect(Collectors.toList())
         );
@@ -36,16 +37,18 @@ public class MessageOutSteps {
     }
 
     @Then("^the content of the file named \"([^\"]*)\" is:$")
-    public void theContentOfTheFileNamedIs(String filename, String expectedContent) {
+    public void theContentOfTheFileNamedIs(String filename, String expectedContent) throws IOException {
         Message message = messageSentHolder.get();
-        String actualContent = new String(message.getAttachment(filename).getBytes());
+
+
+        String actualContent = new String(IOUtils.toByteArray(message.getAttachment(filename).getInputStream()));
         assertThat(actualContent).isEqualToIgnoringWhitespace(expectedContent);
     }
 
     @Then("^the XML content of the file named \"([^\"]*)\" is:$")
-    public void theXmlContentOfTheFileNamedIs(String filename, String expectedContent) {
+    public void theXmlContentOfTheFileNamedIs(String filename, String expectedContent) throws IOException {
         Message message = messageSentHolder.get();
-        String actualContent = new String(message.getAttachment(filename).getBytes());
+        String actualContent = new String(IOUtils.toByteArray(message.getAttachment(filename).getInputStream()));
         assertThat(actualContent).isXmlEqualTo(expectedContent);
     }
 

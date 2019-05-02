@@ -4,7 +4,7 @@ import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
-import no.difi.meldingsutveksling.domain.ByteArrayFile;
+import org.apache.commons.io.IOUtils;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
@@ -29,9 +29,9 @@ public class SvarInnZipFactory {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ZipOutputStream out = new ZipOutputStream(bos);
 
-        for (ByteArrayFile file : message.getAttachments()) {
+        for (Attachment file : message.getAttachments()) {
             out.putNextEntry(new ZipEntry(file.getFileName()));
-            out.write(file.getBytes());
+            IOUtils.copy(file.getInputStream(), out);
             out.closeEntry();
         }
 

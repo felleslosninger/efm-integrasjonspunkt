@@ -5,7 +5,6 @@ import no.difi.asic.AsicReader;
 import no.difi.asic.AsicReaderFactory;
 import no.difi.commons.asic.jaxb.asic.AsicFile;
 import no.difi.commons.asic.jaxb.asic.AsicManifest;
-import org.apache.commons.io.IOUtils;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -22,10 +21,8 @@ public class AsicParser {
             String filename;
 
             while ((filename = asicReader.getNextFile()) != null) {
-                String content = new String(IOUtils.toByteArray(asicReader.inputStream()));
-                attachments.add(new Attachment()
+                attachments.add(new Attachment(asicReader.inputStream())
                         .setFileName(filename)
-                        .setBytes(content.getBytes())
                 );
             }
 

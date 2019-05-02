@@ -8,7 +8,8 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import java.io.ByteArrayInputStream;
+import java.io.BufferedInputStream;
+import java.io.InputStream;
 import java.security.PrivateKey;
 import java.util.List;
 
@@ -36,19 +37,18 @@ public class AltinnZipContentParser {
                 .setSbd(sbd);
 
         zipContent.getOptionalFile(ASIC_FILE).ifPresent(asicFile -> {
-            byte[] encryptedAsic = asicFile.getBytes();
-            byte[] asic = cmsUtil.decryptCMS(encryptedAsic, privateKey);
-            message.attachments(getAttachments(asic));
+            InputStream asicInputStream = cmsUtil.decryptCMSStreamed(asicFile.getInputStream(), privateKey);
+            message.attachments(getAttachments(asicInputStream));
         });
 
         return message;
     }
 
     private StandardBusinessDocument getSbd(ZipContent zipContent) throws java.io.IOException {
-        return objectMapper.readValue(zipContent.getFile(ALTINN_SBD_FILE).getBytes(), StandardBusinessDocument.class);
+        return objectMapper.readValue(zipContent.getFile(ALTINN_SBD_FILE).getInputStream(), StandardBusinessDocument.class);
     }
 
-    private List<Attachment> getAttachments(byte[] asic) {
-        return asicParser.parse(new ByteArrayInputStream(asic));
+    private List<Attachment> getAttachments(InputStream is) {
+        return asicParser.parse(new BufferedInputStream(is));
     }
 }

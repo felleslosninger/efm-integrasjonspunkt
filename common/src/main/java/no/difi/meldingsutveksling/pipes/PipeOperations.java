@@ -15,6 +15,7 @@ public class PipeOperations {
         return pos -> {
             try {
                 IOUtils.copy(inputStream, pos);
+                pos.flush();
             } catch (IOException e) {
                 throw new PipeRuntimeException("Copy failed!", e);
             }

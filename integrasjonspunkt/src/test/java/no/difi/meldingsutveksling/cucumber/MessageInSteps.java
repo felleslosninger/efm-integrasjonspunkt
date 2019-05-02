@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.springframework.boot.test.json.JacksonTester;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 @RequiredArgsConstructor
@@ -36,10 +37,11 @@ public class MessageInSteps {
     }
 
     @And("^appends a file named \"([^\"]*)\" with mimetype=\"([^\"]*)\":$")
-    public void appendsAFileNamedWithMimetype(String filename, String mimeType, String body) throws Throwable {
-        messageInHolder.get().attachment(new Attachment()
+    public void appendsAFileNamedWithMimetype(String filename, String mimeType, String body) {
+        Attachment attachment = new Attachment(new ByteArrayInputStream(body.getBytes()))
                 .setFileName(filename)
-                .setMimeType(mimeType)
-                .setBytes(body.getBytes()));
+                .setMimeType(mimeType);
+
+        messageInHolder.get().attachment(attachment);
     }
 }

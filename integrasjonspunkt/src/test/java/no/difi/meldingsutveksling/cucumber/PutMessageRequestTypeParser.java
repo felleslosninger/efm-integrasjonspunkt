@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,8 +36,7 @@ public class PutMessageRequestTypeParser {
 
     @SneakyThrows
     private Attachment getAttachment(DokumentType dokument) {
-        return new Attachment()
-                .setBytes(dokument.getFil().getBase64())
+        return new Attachment(new ByteArrayInputStream(dokument.getFil().getBase64()))
                 .setMimeType(dokument.getVeMimeType())
                 .setFileName(dokument.getVeFilnavn());
     }
