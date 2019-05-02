@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.core;
 
-import com.google.common.collect.Maps;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.*;
@@ -15,7 +14,6 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecordWrapper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.junit.Before;
@@ -193,7 +191,7 @@ public class EDUCoreFactoryTest {
         serviceRegistryLookup = Mockito.mock(ServiceRegistryLookup.class);
 
         InfoRecord infoRecord = new InfoRecord("1234", "Foo", new EntityType("Organisasjonsledd", "ORGL"));
-        ServiceRecordWrapper serviceRecord = ServiceRecordWrapper.of(new ServiceRecord(ServiceIdentifier.DPO, "1234", "pem123", "http://foo"), Maps.newHashMap());
+        ServiceRecord serviceRecord = new ServiceRecord(ServiceIdentifier.DPO, "1234", "pem123", "http://foo");
         when(serviceRegistryLookup.getInfoRecord(anyString())).thenReturn(infoRecord);
         when(serviceRegistryLookup.getServiceRecord(anyString())).thenReturn(serviceRecord);
     }
@@ -288,6 +286,6 @@ public class EDUCoreFactoryTest {
                 )
                 .setAny(new ArkivmeldingMessage()
                         .setDpoField("foo")
-                        .setSecurityLevel("3"));
+                        .setSecurityLevel(3));
     }
 }

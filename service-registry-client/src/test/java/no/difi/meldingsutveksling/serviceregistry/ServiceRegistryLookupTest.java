@@ -13,7 +13,6 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.Notification;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -25,7 +24,6 @@ import java.util.HashMap;
 import java.util.Optional;
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
@@ -45,7 +43,6 @@ public class ServiceRegistryLookupTest {
     public ExpectedException thrown = ExpectedException.none();
 
     private ServiceRegistryLookup service;
-    private ServiceRecord dpv = new ServiceRecord(DPV, "000", "", "http://localhost:6789");
     private ServiceRecord dpo = new ServiceRecord(DPO, "000", "certificate", "http://localhost:4567");
     private String query;
 
@@ -53,6 +50,8 @@ public class ServiceRegistryLookupTest {
     public void setup() {
         final IntegrasjonspunktProperties properties = mock(IntegrasjonspunktProperties.class);
         SasKeyRepository sasKeyRepoMock = mock(SasKeyRepository.class);
+        IntegrasjonspunktProperties.Arkivmelding arkivmeldingProps = new IntegrasjonspunktProperties.Arkivmelding().setDefaultProcess("foo");
+        when(properties.getArkivmelding()).thenReturn(arkivmeldingProps);
         when(properties.isVarslingsplikt()).thenReturn(false);
         IntegrasjonspunktProperties.Arkivmelding arkivmelding = mock(IntegrasjonspunktProperties.Arkivmelding.class);
         when(arkivmelding.getDefaultProcess()).thenReturn(DEFAULT_PROCESS);
@@ -60,7 +59,6 @@ public class ServiceRegistryLookupTest {
         service = new ServiceRegistryLookup(client, properties, sasKeyRepoMock);
         query = Notification.NOT_OBLIGATED.createQuery();
         dpo.setProcess(DEFAULT_PROCESS);
-        dpv.setProcess(DEFAULT_PROCESS);
     }
 
     @Test
@@ -71,15 +69,12 @@ public class ServiceRegistryLookupTest {
         service.getServiceRecord(ORGNR);
     }
 
-    @Test
-    @Ignore
+    @Test(expected = UncheckedExecutionException.class)
     public void organizationWithoutServiceRecord() throws BadJWSException {
         final String json = new SRContentBuilder().build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
-        final ServiceRecord serviceRecord = this.service.getServiceRecord(ORGNR).getServiceRecord();
-
-        assertThat(serviceRecord, is(ServiceRecord.EMPTY));
+        this.service.getServiceRecord(ORGNR);
     }
 
     @Test
@@ -96,7 +91,7 @@ public class ServiceRegistryLookupTest {
         final String json = new SRContentBuilder().withServiceRecord(dpo).build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
-        final ServiceRecord serviceRecord = service.getServiceRecord(ORGNR).getServiceRecord();
+        final ServiceRecord serviceRecord = service.getServiceRecord(ORGNR);
 
         assertThat(serviceRecord, is(dpo));
     }

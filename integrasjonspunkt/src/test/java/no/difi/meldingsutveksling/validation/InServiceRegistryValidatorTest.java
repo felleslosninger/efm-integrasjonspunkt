@@ -4,7 +4,7 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 import lombok.Value;
 import no.difi.meldingsutveksling.config.ValidationConfig;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecordWrapper;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ public class InServiceRegistryValidatorTest {
     private Validator validator;
 
     @MockBean private ServiceRegistryLookup serviceRegistryLookup;
-    @MockBean private ServiceRecordWrapper serviceRecordWrapper;
+    @MockBean private ServiceRecord serviceRecord;
 
     @Value
     private static class Foo {

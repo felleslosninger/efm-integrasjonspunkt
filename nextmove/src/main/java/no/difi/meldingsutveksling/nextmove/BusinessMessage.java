@@ -17,6 +17,6 @@ import javax.persistence.InheritanceType;
 @DiscriminatorColumn(name = "type")
 public abstract class BusinessMessage extends AbstractEntity<Long> {
 
-    private String securityLevel;
+    private Integer securityLevel;
     private String primaryDocumentFilename;
 }

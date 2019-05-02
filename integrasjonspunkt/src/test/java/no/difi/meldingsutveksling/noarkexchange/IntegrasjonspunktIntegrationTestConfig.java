@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import no.difi.meldingsutveksling.ApplicationContextHolder;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.KeystoreProvider;
@@ -28,7 +27,6 @@ import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecordWrapper;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
@@ -186,8 +184,7 @@ public class IntegrasjonspunktIntegrationTestConfig {
         ServiceRecord sr = mock(ServiceRecord.class);
         when(sr.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPO);
         when(sr.getOrganisationNumber()).thenReturn("1337");
-        ServiceRecordWrapper recordWrapper = ServiceRecordWrapper.of(sr, Maps.newHashMap());
-        when(srMock.getServiceRecord(anyString())).thenReturn(recordWrapper);
+        when(srMock.getServiceRecord(anyString())).thenReturn(sr);
         when(srMock.getServiceRecord(anyString(), any(ServiceIdentifier.class))).thenReturn(Optional.ofNullable(sr));
         when(srMock.getServiceRecords(anyString())).thenReturn(Lists.newArrayList(sr));
 

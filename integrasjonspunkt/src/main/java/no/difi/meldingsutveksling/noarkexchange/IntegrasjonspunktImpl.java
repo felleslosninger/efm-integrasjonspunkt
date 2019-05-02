@@ -9,7 +9,7 @@ import no.difi.meldingsutveksling.logging.MarkerFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecordWrapper;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +75,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
             return response;
         }
 
-        final ServiceRecordWrapper serviceRecord;
+        final ServiceRecord serviceRecord;
         try {
             serviceRecord = serviceRegistryLookup.getServiceRecord(organisasjonsnummer);
         } catch (Exception e) {
@@ -89,8 +89,8 @@ public class IntegrasjonspunktImpl implements SOAPport {
         boolean validServiceIdentifier = false;
         boolean mshCanReceive = false;
         boolean isDpv = false;
-        if (asList(DPO, DPI_DIGITAL, DPI_PRINT, DPF).contains(serviceRecord.getServiceRecord().getServiceIdentifier()) &&
-                strategyFactory.hasFactory(serviceRecord.getServiceRecord().getServiceIdentifier())) {
+        if (asList(DPO, DPI_DIGITAL, DPI_PRINT, DPF).contains(serviceRecord.getServiceIdentifier()) &&
+                strategyFactory.hasFactory(serviceRecord.getServiceIdentifier())) {
             validServiceIdentifier = true;
             Audit.info("CanReceive = true", receiverMarker);
         } else if (mshClient.canRecieveMessage(organisasjonsnummer)) {
@@ -132,10 +132,10 @@ public class IntegrasjonspunktImpl implements SOAPport {
             }
         }
 
-        ServiceRecordWrapper receiverRecord = serviceRegistryLookup.getServiceRecord(message.getRecieverPartyNumber());
+        ServiceRecord receiverRecord = serviceRegistryLookup.getServiceRecord(message.getRecieverPartyNumber());
 
         if (PayloadUtil.isAppReceipt(message.getPayload()) &&
-                receiverRecord.getServiceRecord().getServiceIdentifier() != ServiceIdentifier.DPO) {
+                receiverRecord.getServiceIdentifier() != ServiceIdentifier.DPO) {
             Audit.info(String.format("Message is AppReceipt, but receiver (%s) is not DPO. Discarding message.",
                     message.getRecieverPartyNumber()), markerFrom(message));
             return PutMessageResponseFactory.createOkResponse();

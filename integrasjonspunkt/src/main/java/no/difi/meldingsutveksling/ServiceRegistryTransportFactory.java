@@ -24,7 +24,7 @@ public class ServiceRegistryTransportFactory implements TransportFactory {
 
     @Override
     public Transport createTransport(StandardBusinessDocument message) {
-        return Optional.of(serviceRegistryLookup.getServiceRecord(message.getReceiverIdentifier()).getServiceRecord())
+        return Optional.of(serviceRegistryLookup.getServiceRecord(message.getReceiverIdentifier()))
                 .filter(isServiceIdentifier(DPO))
                 .map(altinnWsClientFactory::getAltinnWsClient)
                 .map(client -> new AltinnTransport(client, uuidGenerator))

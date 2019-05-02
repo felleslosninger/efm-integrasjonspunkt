@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.ptv;
 
-import com.google.common.collect.Maps;
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -14,7 +13,6 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecordWrapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -78,9 +76,8 @@ public class CorrespondenceAgencyMessageFactoryTest {
 
         InfoRecord infoRecord = new InfoRecord("910075918", "Fylkesmannen i Sogn og Fjordane", new EntityType("DPV", "DPV"));
         ServiceRecord serviceRecord = new ServiceRecord(ServiceIdentifier.DPO, "1234", "pem123", "http://foo");
-        ServiceRecordWrapper recordWrapper = ServiceRecordWrapper.of(serviceRecord, Maps.newHashMap());
         when(srMock.getInfoRecord(any())).thenReturn(infoRecord);
-        when(srMock.getServiceRecord(any())).thenReturn(recordWrapper);
+        when(srMock.getServiceRecord(any())).thenReturn(serviceRecord);
 
         eduCoreFactory = new EDUCoreFactory(srMock);
     }
