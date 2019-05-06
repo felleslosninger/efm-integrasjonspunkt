@@ -1,9 +1,10 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
 import no.difi.meldingsutveksling.domain.Payload;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
+import no.difi.meldingsutveksling.nextmove.*;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 
 import javax.xml.bind.JAXBContext;
@@ -19,11 +20,23 @@ public class DocumentConverter {
 
     static {
         try {
-            ctx = JAXBContextFactory.createContext(new Class[]{StandardBusinessDocument.class, Payload.class, Kvittering.class}, null);
+            ctx = JAXBContextFactory.createContext(new Class[]{
+                    StandardBusinessDocument.class,
+                    ArkivmeldingMessage.class,
+                    ArkivmeldingKvitteringMessage.class,
+                    DpiDigitalMessage.class,
+                    DpiPrintMessage.class,
+                    EinnsynKvitteringMessage.class,
+                    InnsynskravMessage.class,
+                    PubliseringMessage.class,
+                    StatusMessage.class,
+                    Payload.class,
+                    Kvittering.class}, null);
         } catch (JAXBException e) {
             throw new RuntimeException("Could not initialize " + DocumentConverter.class, e);
         }
     }
+
     public byte[] marshallToBytes(StandardBusinessDocument sbd) {
         Marshaller marshaller;
         try {
