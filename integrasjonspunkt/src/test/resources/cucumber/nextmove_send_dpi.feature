@@ -225,7 +225,7 @@ Feature: Sending a Next Move DPI message
                 <ns9:virkningstidspunkt>2019-04-23T11:00:42.408Z</ns9:virkningstidspunkt>
                 <ns9:aapningskvittering>false</ns9:aapningskvittering>
                 <ns9:sikkerhetsnivaa>3</ns9:sikkerhetsnivaa>
-                <ns9:ikkeSensitivTittel lang="NO"/>
+                <ns9:ikkeSensitivTittel lang="NO" xmlns:ns9="http://begrep.difi.no/sdp/schema_v10">Min supertittel</ns9:ikkeSensitivTittel>
                 <ns9:varsler/>
             </ns9:digitalPostInfo>
             <ns9:dokumentpakkefingeravtrykk>
