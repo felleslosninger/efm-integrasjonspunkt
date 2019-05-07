@@ -17,13 +17,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "digital", namespace = "urn:no:difi:profile:digitalpost:ver1.0")
 public class DpiDigitalMessage extends BusinessMessage {
 
-    private String nonSensitiveTitle;
-    private String language;
+    private String ikkeSensitivTittel;
+    private String spraak;
 
     @Embedded
     private DigitalPostInfo digitalPostInfo;
-    private Boolean mandatoryNotification;
 
     @Embedded
-    private DpiNotification notification;
+    private DpiNotification varsler;
 }
