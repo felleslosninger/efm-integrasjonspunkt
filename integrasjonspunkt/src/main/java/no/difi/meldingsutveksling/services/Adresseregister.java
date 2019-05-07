@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,14 +30,24 @@ public class Adresseregister {
     }
 
     public void validateCertificates(StandardBusinessDocument sbd) throws MessageException {
-        ServiceRecord receiverServiceRecord = serviceRegistryLookup.getServiceRecord(sbd.getReceiverIdentifier());
+        ServiceRecord receiverServiceRecord;
+        try {
+            receiverServiceRecord = serviceRegistryLookup.getServiceRecord(sbd.getReceiverIdentifier());
+        } catch (ServiceRegistryLookupException e) {
+            throw new MessageException(e, StatusMessage.MISSING_SERVICE_RECORD);
+        }
         try {
             getCertificate(receiverServiceRecord);
         } catch (CertificateException e) {
             throw new MessageException(e, StatusMessage.MISSING_RECIEVER_CERTIFICATE);
         }
 
-        ServiceRecord senderServiceRecord = serviceRegistryLookup.getServiceRecord(sbd.getSenderIdentifier());
+        ServiceRecord senderServiceRecord;
+        try {
+            senderServiceRecord = serviceRegistryLookup.getServiceRecord(sbd.getSenderIdentifier());
+        } catch (ServiceRegistryLookupException e) {
+            throw new MessageException(e, StatusMessage.MISSING_SERVICE_RECORD);
+        }
         try {
             getCertificate(senderServiceRecord);
         } catch (CertificateException e) {

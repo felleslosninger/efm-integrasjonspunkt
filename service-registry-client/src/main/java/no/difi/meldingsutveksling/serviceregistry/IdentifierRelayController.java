@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.serviceregistry;
 
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
+@Slf4j
 public class IdentifierRelayController {
 
     @Autowired
@@ -20,7 +22,13 @@ public class IdentifierRelayController {
 
     @RequestMapping(value = "/servicerecord/{identifier}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getServiceRecord(@PathVariable("identifier") String identifier) {
-        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(identifier);
+        ServiceRecord serviceRecord = null;
+        try {
+            serviceRecord = serviceRegistryLookup.getServiceRecord(identifier);
+        } catch (ServiceRegistryLookupException e) {
+            log.error("Error while looking up service record for {}", identifier, e);
+            return ResponseEntity.notFound().build();
+        }
 
         List<ServiceRecord> serviceRecords = serviceRegistryLookup.getServiceRecords(identifier);
         if (serviceRecords.isEmpty()) {

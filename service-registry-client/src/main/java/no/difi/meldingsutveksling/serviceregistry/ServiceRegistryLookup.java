@@ -4,7 +4,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.jayway.jsonpath.Configuration;
@@ -73,7 +72,7 @@ public class ServiceRegistryLookup {
                 .expireAfterWrite(1, TimeUnit.MINUTES)
                 .build(new CacheLoader<Parameters, ServiceRecord>() {
                     @Override
-                    public ServiceRecord load(Parameters key) {
+                    public ServiceRecord load(Parameters key) throws Exception {
                         return loadServiceRecord(key);
                     }
                 });
@@ -105,11 +104,11 @@ public class ServiceRegistryLookup {
      * @param identifier of the receiver
      * @return a ServiceRecord if found. Otherwise an empty ServiceRecord is returned.
      */
-    public ServiceRecord getServiceRecord(String identifier) {
+    public ServiceRecord getServiceRecord(String identifier) throws ServiceRegistryLookupException {
         Notification notification = properties.isVarslingsplikt() ? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
         try {
             return srCache.get(new Parameters(identifier, notification));
-        } catch (ExecutionException | UncheckedExecutionException e) {
+        } catch (ExecutionException e) {
             if (e.getCause() instanceof ServiceRegistryLookupException) {
                 throw (ServiceRegistryLookupException) e.getCause();
             } else {
@@ -120,7 +119,13 @@ public class ServiceRegistryLookup {
 
     public Optional<ServiceRecord> getServiceRecord(String identifier, ServiceIdentifier serviceIdentifier) {
         Notification notification = properties.isVarslingsplikt() ? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
-        List<ServiceRecord> serviceRecords = srsCache.getUnchecked(new Parameters(identifier, notification));
+        List<ServiceRecord> serviceRecords;
+        try {
+            serviceRecords = srsCache.get(new Parameters(identifier, notification));
+        } catch (ExecutionException e) {
+            log.error("Error when looking up service record for {}", e.getCause());
+            return Optional.empty();
+        }
         return serviceRecords.stream().filter(isServiceIdentifier(serviceIdentifier)).findFirst();
     }
 
@@ -159,7 +164,7 @@ public class ServiceRegistryLookup {
         return serviceRecords.stream().filter(isProcess(process)).findFirst();
     }
 
-    private ServiceRecord loadServiceRecord(Parameters parameters) {
+    private ServiceRecord loadServiceRecord(Parameters parameters) throws ServiceRegistryLookupException {
         List<ServiceRecord> serviceRecords = loadServiceRecords(parameters);
 
         Optional<ServiceRecord> serviceRecord = serviceRecords.stream()
@@ -224,12 +229,12 @@ public class ServiceRegistryLookup {
         return documentContext.read("$.infoRecord", InfoRecord.class);
     }
 
-    public String getSasKey() throws ServiceRegistryLookupException {
+    public String getSasKey() {
         // Single entry, key does not matter
         try {
             return skCache.get("");
         } catch (ExecutionException e) {
-            throw new ServiceRegistryLookupException("An error occured when fetching SAS key", e);
+            throw new RuntimeException("An error occured when fetching SAS key", e.getCause());
         }
     }
 

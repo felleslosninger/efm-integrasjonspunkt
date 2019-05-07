@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.ks.mapping.edu.FileTypeHandlerFactory;
@@ -26,6 +27,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.pipes.Pipe;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.beans.factory.ObjectProvider;
@@ -165,7 +167,13 @@ public class FiksMapper {
         final FileTypeHandlerFactory fileTypeHandlerFactory = new FileTypeHandlerFactory(properties.getFiks(), certificate);
         forsendelse.withDokumenter(mapFrom(meldingType.getJournpost().getDokument(), fileTypeHandlerFactory));
 
-        ServiceRecord serviceRecord = serviceRegistry.getServiceRecord(eduCore.getReceiver().getIdentifier());
+        ServiceRecord serviceRecord;
+        try {
+            serviceRecord = serviceRegistry.getServiceRecord(eduCore.getReceiver().getIdentifier());
+        } catch (ServiceRegistryLookupException e) {
+            log.error("Error looking up service record for {}", eduCore.getReceiver().getIdentifier(), e);
+            throw new MeldingsUtvekslingRuntimeException(e);
+        }
         if (serviceRecord.getService().getSecurityLevel() == 4) {
             forsendelse.withKrevNiva4Innlogging(true);
         }

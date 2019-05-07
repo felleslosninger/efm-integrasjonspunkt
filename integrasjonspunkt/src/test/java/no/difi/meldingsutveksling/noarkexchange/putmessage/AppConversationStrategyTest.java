@@ -9,6 +9,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
 import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.junit.Before;
@@ -45,7 +46,7 @@ public class AppConversationStrategyTest {
      * The AppReceiptStrategy should send the receipt back to the sender
      */
     @Test
-    public void appReceiptsShouldBeReturnedToSender() {
+    public void appReceiptsShouldBeReturnedToSender() throws ServiceRegistryLookupException {
         AppReceiptMessageStrategy strategy = new AppReceiptMessageStrategy(messageSender);
         PutMessageRequestType request = createPutMessageRequestType();
 

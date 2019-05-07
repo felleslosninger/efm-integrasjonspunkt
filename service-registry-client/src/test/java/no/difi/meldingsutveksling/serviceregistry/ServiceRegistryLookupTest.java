@@ -63,7 +63,7 @@ public class ServiceRegistryLookupTest {
     }
 
     @Test(expected = ServiceRegistryLookupException.class)
-    public void organizationWithoutServiceRecord() throws BadJWSException {
+    public void organizationWithoutServiceRecord() throws BadJWSException, ServiceRegistryLookupException {
         final String json = new SRContentBuilder().build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
@@ -71,7 +71,7 @@ public class ServiceRegistryLookupTest {
     }
 
     @Test(expected = ServiceRegistryLookupException.class)
-    public void noEntityForOrganization() throws BadJWSException {
+    public void noEntityForOrganization() throws BadJWSException, ServiceRegistryLookupException {
         when(client.getResource("identifier/" + ORGNR, query)).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
 
         this.service.getServiceRecord(ORGNR);
@@ -87,7 +87,7 @@ public class ServiceRegistryLookupTest {
     }
 
     @Test
-    public void organizationWithSingleServiceRecordHasServiceRecord() throws BadJWSException {
+    public void organizationWithSingleServiceRecordHasServiceRecord() throws BadJWSException, ServiceRegistryLookupException {
         final String json = new SRContentBuilder().withServiceRecord(dpo).build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 

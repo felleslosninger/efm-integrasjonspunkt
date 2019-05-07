@@ -5,6 +5,7 @@ import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import no.difi.meldingsutveksling.noarkexchange.TestConstants;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
@@ -36,7 +37,7 @@ public class AdresseregisterTest {
     private String emptyCertificate = "";
 
     @Before
-    public void setup() {
+    public void setup() throws ServiceRegistryLookupException {
         adresseregister = new Adresseregister(serviceRegistryLookup);
         when(sbdMock.getSenderIdentifier()).thenReturn(SENDER_PARTY_NUMBER);
         when(sbdMock.getReceiverIdentifier()).thenReturn(RECIEVER_PARTY_NUMBER);
@@ -65,7 +66,7 @@ public class AdresseregisterTest {
     }
 
     @Test
-    public void certificatesAreValid() throws MessageException {
+    public void certificatesAreValid() throws MessageException, ServiceRegistryLookupException {
         adresseregister.validateCertificates(sbdMock);
         when(serviceRegistryLookup.getServiceRecord(RECIEVER_PARTY_NUMBER)).thenReturn(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"));
     }

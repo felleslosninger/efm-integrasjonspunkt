@@ -5,9 +5,11 @@ import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.Process;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
@@ -56,7 +58,11 @@ public class CreateSBD {
     }
 
     private String getStandard(String identifier, String process, DocumentType documentType) {
-        return serviceRegistryLookup.getStandard(identifier, process, documentType);
+        try {
+            return serviceRegistryLookup.getStandard(identifier, process, documentType);
+        } catch (ServiceRegistryLookupException e) {
+            throw new MeldingsUtvekslingRuntimeException(String.format("Error looking up service record for %s", identifier), e);
+        }
     }
 
     private StandardBusinessDocumentHeader createHeader(Organisasjonsnummer avsender,

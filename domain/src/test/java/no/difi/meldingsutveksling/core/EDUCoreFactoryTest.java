@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -186,7 +187,7 @@ public class EDUCoreFactoryTest {
     private ServiceRegistryLookup serviceRegistryLookup;
 
     @Before
-    public void init() throws JAXBException {
+    public void init() throws JAXBException, ServiceRegistryLookupException {
         putMessageJaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
         serviceRegistryLookup = Mockito.mock(ServiceRegistryLookup.class);
 
