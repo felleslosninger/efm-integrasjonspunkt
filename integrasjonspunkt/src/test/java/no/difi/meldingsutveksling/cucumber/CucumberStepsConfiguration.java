@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.cucumber;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,8 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import no.difi.meldingsutveksling.webhooks.UrlPusher;
+import no.difi.meldingsutveksling.webhooks.WebhookPusher;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.sdp.client2.domain.AktoerOrganisasjonsnummer;
 import no.difi.vefa.peppol.lookup.LookupClient;
@@ -32,6 +35,7 @@ import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebCl
 import org.springframework.boot.test.context.SpringBootContextLoader;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -54,6 +58,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
@@ -74,7 +79,18 @@ public class CucumberStepsConfiguration {
     @Configuration
     @Profile("cucumber")
     @RequiredArgsConstructor
+    @SpyBean(WebhookPusher.class)
     public static class SpringConfiguration {
+
+        @Bean
+        public WireMockServer wireMockServer() {
+            return new WireMockServer(options().port(9800));
+        }
+
+        @Bean
+        public WireMockMonitor wireMockMonitor(WireMockServer wireMockServer) {
+            return new WireMockMonitor(wireMockServer);
+        }
 
         @Primary
         @Bean
