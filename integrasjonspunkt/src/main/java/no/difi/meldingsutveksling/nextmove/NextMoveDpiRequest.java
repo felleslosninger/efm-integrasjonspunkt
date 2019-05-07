@@ -82,7 +82,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     @Override
     public String getSubject() {
         if (message.getBusinessMessage() instanceof DpiDigitalMessage) {
-            return ((DpiDigitalMessage) message.getBusinessMessage()).getNonSensitiveTitle();
+            return ((DpiDigitalMessage) message.getBusinessMessage()).getIkkeSensitivTittel();
         }
         if (message.getBusinessMessage() instanceof DpiPrintMessage) {
             return null;
@@ -123,7 +123,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     @Override
     public String getSmsVarslingstekst() {
         if (isDigitalMessage()) {
-            return getDigitalMessage().getNotification().getSmsText();
+            return getDigitalMessage().getVarsler().getSmsTekst();
         }
         return null;
     }
@@ -131,7 +131,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     @Override
     public String getEmailVarslingstekst() {
         if (isDigitalMessage()) {
-            return getDigitalMessage().getNotification().getEmailText();
+            return getDigitalMessage().getVarsler().getEpostTekst();
         }
         return null;
     }

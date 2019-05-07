@@ -53,9 +53,9 @@ Feature: Sending a Next Move DPI message
             ]
         },
         "digital": {
-          "title" : "Min supertittel",
-          "securityLevel": 3,
-          "primaryDocumentFilename": "arkivmelding.xml"
+          "ikkeSensitivTittel" : "Min supertittel",
+          "sikkerhetsnivaa": 3,
+          "primaerDokumentNavn": "arkivmelding.xml"
         }
     }
     """

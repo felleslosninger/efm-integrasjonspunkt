@@ -58,8 +58,8 @@ Feature: Sending a Next Move DPF message
             ]
         },
         "arkivmelding": {
-          "securityLevel": 3,
-          "primaryDocumentFilename": "arkivmelding.xml"
+          "sikkerhetsnivaa": 3,
+          "primaerDokumentNavn": "arkivmelding.xml"
         }
     }
     """

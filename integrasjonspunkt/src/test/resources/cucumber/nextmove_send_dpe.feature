@@ -49,8 +49,8 @@ Feature: Sending a Next Move DPE message
             ]
         },
         "innsynskrav": {
-          "securityLevel": 3,
-          "primaryDocumentFilename": "test.txt"
+          "sikkerhetsnivaa": 3,
+          "primaerDokumentNavn": "test.txt"
         }
     }
     """
@@ -98,8 +98,8 @@ Feature: Sending a Next Move DPE message
           }
         },
         "innsynskrav" : {
-          "securityLevel" : 3,
-          "primaryDocumentFilename" : "test.txt"
+          "sikkerhetsnivaa" : 3,
+          "primaerDokumentNavn" : "test.txt"
         }
       },
       "asic" : "content is hidden"

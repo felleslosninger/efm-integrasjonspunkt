@@ -204,7 +204,7 @@ public class NextMoveMessageService {
     }
 
     private boolean isPrimaryDocument(NextMoveOutMessage message, String filename) {
-        return filename.equals(message.getBusinessMessage().getPrimaryDocumentFilename());
+        return filename.equals(message.getBusinessMessage().getPrimaerDokumentNavn());
     }
 
     void sendMessage(NextMoveMessage message) {

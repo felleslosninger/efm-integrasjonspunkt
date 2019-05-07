@@ -8,6 +8,6 @@ import javax.persistence.Embeddable;
 @Embeddable
 public class DpiNotification {
 
-    String emailText;
-    String smsText;
+    String epostTekst;
+    String smsTekst;
 }
