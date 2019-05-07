@@ -66,8 +66,8 @@ Feature: Sending a Next Move DPF message with sender And receiver refs
             ]
         },
         "arkivmelding": {
-          "securityLevel": 3,
-          "primaryDocumentFilename": "arkivmelding.xml"
+          "sikkerhetsnivaa": 3,
+          "primaerDokumentNavn": "arkivmelding.xml"
         }
     }
     """
