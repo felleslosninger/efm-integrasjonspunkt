@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.config;
 
+import no.difi.meldingsutveksling.exceptions.ErrorDescriber;
 import org.springframework.boot.autoconfigure.web.DefaultErrorAttributes;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -26,6 +27,11 @@ public class IntegrasjonspunktErrorAttributes extends DefaultErrorAttributes {
         if (error instanceof ConstraintViolationException) {
             final ConstraintViolationException cve = (ConstraintViolationException) error;
             addErrorMessage(errorAttributes, cve);
+        }
+
+        if (error instanceof ErrorDescriber) {
+            ErrorDescriber describer = (ErrorDescriber) error;
+            errorAttributes.put("description", describer.getDescription());
         }
 
         return errorAttributes;

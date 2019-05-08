@@ -35,7 +35,8 @@ import java.util.stream.Stream;
 import static com.google.common.base.Strings.emptyToNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
-import static no.difi.meldingsutveksling.ServiceIdentifier.*;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 
 @Component
 @RequiredArgsConstructor
@@ -97,8 +98,7 @@ public class NextMoveMessageService {
         try {
             return sr.getServiceRecordByProcess(sbd.getReceiverIdentifier(), sbd.getProcess());
         } catch (ServiceRegistryLookupException e) {
-            // TODO Feilmelding inn her
-            throw new ReceiverDoNotAcceptProcessException(sbd.getProcess());
+            throw new ReceiverDoNotAcceptProcessException(sbd.getProcess(), e.getLocalizedMessage());
         }
     }
 
