@@ -65,6 +65,9 @@ public class IntegrasjonspunktProperties {
     private NextMove nextmove;
 
     @Valid
+    private WebHooks webhooks;
+
+    @Valid
     private Sign sign;
 
     @Valid
@@ -211,6 +214,15 @@ public class IntegrasjonspunktProperties {
         @Valid
         private ServiceBus serviceBus;
 
+    }
+
+    @Data
+    public static class WebHooks {
+
+        @NotNull
+        private Integer connectTimeout;
+        @NotNull
+        private Integer readTimeout;
     }
 
     @Data

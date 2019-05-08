@@ -57,6 +57,8 @@
         <sikker-digital-post-klient.version>5.5</sikker-digital-post-klient.version>
         <powermock.version>2.0.0</powermock.version>
         <mockito.version>2.23.4</mockito.version>
+        <assertj.version>2.9.0</assertj.version>
+        <xmlunit.version>2.6.2</xmlunit.version>
         <cucumber.version>2.3.1</cucumber.version>
         <springfox.version>2.9.2</springfox.version>
         <swagger.version>1.5.21</swagger.version>
@@ -298,6 +300,25 @@
                 <artifactId>powermock-api-mockito2</artifactId>
                 <version>${powermock.version}</version>
                 <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.xmlunit</groupId>
+                <artifactId>xmlunit-core</artifactId>
+                <version>${xmlunit.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.xmlunit</groupId>
+                <artifactId>xmlunit-assertj</artifactId>
+                <version>${xmlunit.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

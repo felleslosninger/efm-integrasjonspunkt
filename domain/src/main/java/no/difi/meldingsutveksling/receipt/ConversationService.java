@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
+import no.difi.meldingsutveksling.webhooks.WebhookPublisher;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -27,9 +28,10 @@ import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 @Slf4j
 public class ConversationService {
 
-    private ConversationRepository repo;
-    private IntegrasjonspunktProperties props;
-    private NoarkClient mshClient;
+    private final ConversationRepository repo;
+    private final IntegrasjonspunktProperties props;
+    private final NoarkClient mshClient;
+    private final WebhookPublisher webhookPublisher;
 
     private static final String CONVERSATION_EXISTS = "Conversation with id=%s already exists, not recreating";
     private static final Set<ServiceIdentifier> POLLABLES = Sets.newHashSet(DPV, DPF, DPO);
@@ -37,10 +39,11 @@ public class ConversationService {
     @Autowired
     public ConversationService(ConversationRepository repo,
                                IntegrasjonspunktProperties props,
-                               @Qualifier("mshClient") ObjectProvider<NoarkClient> mshClient) {
+                               @Qualifier("mshClient") ObjectProvider<NoarkClient> mshClient, WebhookPublisher webhookPublisher) {
         this.repo = repo;
         this.props = props;
         this.mshClient = mshClient.getIfAvailable();
+        this.webhookPublisher = webhookPublisher;
     }
 
     public Optional<Conversation> registerStatus(String conversationId, MessageStatus status) {
@@ -60,6 +63,7 @@ public class ConversationService {
                         Objects.equals(ms.getDescription(), status.getDescription()));
         if (!hasStatus) {
             conversation.addMessageStatus(status);
+            webhookPublisher.publish(status);
             Audit.info(String.format("Added status '%s' to conversation[id=%s]", status.getStatus(),
                     conversation.getConversationId()),
                     MessageStatusMarker.from(status));

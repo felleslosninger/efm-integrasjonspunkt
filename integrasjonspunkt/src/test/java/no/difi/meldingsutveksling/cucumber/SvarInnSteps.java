@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.cucumber;
 
 import cucumber.api.java.After;
 import cucumber.api.java.en.And;
+import cucumber.api.java.en.Given;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;

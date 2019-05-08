@@ -117,7 +117,7 @@ public class SBDReceiptFactory {
                 .relatedToJournalPostId(messageInfo.getJournalPostId())
                 .process(Process.LEGACY)
                 .standard(Standard.LEGACY.getValue())
-                .type(DocumentType.BESTEDU_MELDING)
+                .type(DocumentType.BESTEDU_KVITTERING)
                 .build();
 
         unsignedReceipt.setStandardBusinessDocumentHeader(header);
