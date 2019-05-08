@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.ks.svarut;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.CertificateParserException;
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingException;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
@@ -15,6 +14,7 @@ import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 
 import java.security.cert.X509Certificate;
@@ -29,8 +29,12 @@ public class SvarUtService {
     private final CertificateParser certificateParser;
 
     public String send(EDUCore message) {
-        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(message.getReceiver().getIdentifier(), message.getServiceIdentifier())
-                .orElseThrow(() -> new SvarUtServiceException(String.format("No DPF ServiceRecord found for identifier %s", message.getReceiver().getIdentifier())));
+        ServiceRecord serviceRecord;
+        try {
+            serviceRecord = serviceRegistryLookup.getServiceRecord(message.getReceiver().getIdentifier(), message.getServiceIdentifier());
+        } catch (ServiceRegistryLookupException e) {
+            throw new SvarUtServiceException(String.format("DPF service record not found for identifier=%s", message.getReceiver().getIdentifier()));
+        }
 
         final X509Certificate x509Certificate = toX509Certificate(serviceRecord.getPemCertificate());
         final SendForsendelseMedId forsendelse = fiksMapper.mapFrom(message, x509Certificate);
@@ -39,8 +43,12 @@ public class SvarUtService {
     }
 
     public String send(NextMoveMessage message) throws NextMoveException, ArkivmeldingException {
-        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(message.getReceiverIdentifier(), ServiceIdentifier.DPF)
-                .orElseThrow(() -> new SvarUtServiceException(String.format("No DPF ServiceRecord found for identifier %s", message.getReceiverIdentifier())));
+        ServiceRecord serviceRecord;
+        try {
+            serviceRecord = serviceRegistryLookup.getServiceRecord(message.getReceiverIdentifier(), message.getServiceIdentifier());
+        } catch (ServiceRegistryLookupException e) {
+            throw new SvarUtServiceException(String.format("DPF service record not found for identifier=%s", message.getReceiverIdentifier()));
+        }
 
         SvarUtRequest svarUtRequest = new SvarUtRequest(
                 getFiksUtUrl(),

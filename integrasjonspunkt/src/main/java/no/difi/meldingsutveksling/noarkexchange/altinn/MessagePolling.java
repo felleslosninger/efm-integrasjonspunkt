@@ -22,6 +22,7 @@ import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
@@ -112,8 +113,11 @@ public class MessagePolling {
         log.debug("Checking for new messages");
 
         if (serviceRecord == null) {
-            serviceRecord = serviceRegistryLookup.getServiceRecord(properties.getOrg().getNumber(), DPO)
-                    .orElseThrow(() -> new MeldingsUtvekslingRuntimeException(String.format("DPO ServiceRecord not found for %s", properties.getOrg().getNumber())));
+            try {
+                serviceRecord = serviceRegistryLookup.getServiceRecord(properties.getOrg().getNumber(), DPO);
+            } catch (ServiceRegistryLookupException e) {
+                throw new MeldingsUtvekslingRuntimeException(String.format("DPO ServiceRecord not found for %s", properties.getOrg().getNumber()), e);
+            }
         }
 
         AltinnWsClient client = altinnWsClientFactory.getAltinnWsClient(serviceRecord);

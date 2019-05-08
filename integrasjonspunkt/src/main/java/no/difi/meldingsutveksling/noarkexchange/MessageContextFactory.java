@@ -9,6 +9,7 @@ import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import org.springframework.stereotype.Component;
@@ -105,8 +106,12 @@ public class MessageContextFactory {
     }
 
     private Certificate getCertificate(String identifier, ServiceIdentifier serviceIdentifier) throws MessageContextException {
-        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(identifier, serviceIdentifier)
-                .orElseThrow(() -> new MessageContextException(StatusMessage.NO_MATCHING_SERVICEIDENTIFIER));
+        ServiceRecord serviceRecord;
+        try {
+            serviceRecord = serviceRegistryLookup.getServiceRecord(identifier, serviceIdentifier);
+        } catch (ServiceRegistryLookupException e) {
+                throw new MessageContextException(StatusMessage.NO_MATCHING_SERVICEIDENTIFIER, e);
+        }
 
         try {
             return adresseregister.getCertificate(serviceRecord);

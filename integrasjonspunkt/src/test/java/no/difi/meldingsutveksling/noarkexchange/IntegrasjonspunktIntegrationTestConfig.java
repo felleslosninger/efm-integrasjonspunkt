@@ -185,7 +185,7 @@ public class IntegrasjonspunktIntegrationTestConfig {
         when(sr.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPO);
         when(sr.getOrganisationNumber()).thenReturn("1337");
         when(srMock.getServiceRecord(anyString())).thenReturn(sr);
-        when(srMock.getServiceRecord(anyString(), any(ServiceIdentifier.class))).thenReturn(Optional.ofNullable(sr));
+        when(srMock.getServiceRecord(anyString(), any(ServiceIdentifier.class))).thenReturn(sr);
         when(srMock.getServiceRecords(anyString())).thenReturn(Lists.newArrayList(sr));
 
         return srMock;
