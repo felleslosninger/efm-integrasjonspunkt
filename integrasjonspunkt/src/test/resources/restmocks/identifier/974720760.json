@@ -18,7 +18,7 @@
       ],
       "service": {
         "identifier": "DPO",
-        "endpointUrl": "http://localhost:1234",
+        "endpointUrl": "http://localhost:9800",
         "serviceCode": "4192",
         "serviceEditionCode": "270815"
       }

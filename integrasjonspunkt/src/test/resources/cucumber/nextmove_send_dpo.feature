@@ -143,25 +143,33 @@ Feature: Sending a Next Move DPO message
     And I send the message
     Then an upload to Altinn is initiated with:
     """
-    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-    <BrokerServiceInitiation xmlns="http://schemas.altinn.no/services/ServiceEngine/Broker/2015/06" xmlns:ms="http://schemas.microsoft.com/2003/10/Serialization/" xmlns:altinn3="http://www.altinn.no/services/common/fault/2009/10" xmlns:altinn2="http://www.altinn.no/services/ServiceEngine/Broker/2015/06" xmlns:altinn1="http://www.altinn.no/services/2009/10" xmlns:altinn4="http://schemas.altinn.no/services/serviceEntity/2015/06">
-        <Manifest>
-            <ExternalServiceCode>4192</ExternalServiceCode>
-            <ExternalServiceEditionCode>270815</ExternalServiceEditionCode>
-            <ArrayOfFile>
+    <?xml version='1.0' encoding='UTF-8'?>
+    <S:Envelope xmlns:S="http://schemas.xmlsoap.org/soap/envelope/">
+      <S:Body>
+        <ns2:InitiateBrokerServiceBasic xmlns="http://schemas.altinn.no/services/ServiceEngine/Broker/2015/06" xmlns:ns2="http://www.altinn.no/services/ServiceEngine/Broker/2015/06" xmlns:ns3="http://www.altinn.no/services/common/fault/2009/10" xmlns:ns4="http://www.altinn.no/services/2009/10" xmlns:ns5="http://schemas.microsoft.com/2003/10/Serialization/" xmlns:ns6="http://schemas.altinn.no/services/serviceEntity/2015/06">
+          <ns2:systemUserName>testuser</ns2:systemUserName>
+          <ns2:systemPassword>testpass</ns2:systemPassword>
+          <ns2:brokerServiceInitiation>
+            <Manifest>
+              <ExternalServiceCode>4192</ExternalServiceCode>
+              <ExternalServiceEditionCode>270815</ExternalServiceEditionCode>
+              <ArrayOfFile>
                 <File>
-                    <FileName>sbd.zip</FileName>
+                  <FileName>sbd.zip</FileName>
                 </File>
-            </ArrayOfFile>
-            <Reportee>910077473</Reportee>
-            <SendersReference>19efbd4c-413d-4e2c-bbc5-257ef4a65b38</SendersReference>
-        </Manifest>
-        <RecipientList>
-            <Recipient>
+              </ArrayOfFile>
+              <Reportee>910077473</Reportee>
+              <SendersReference>19efbd4c-413d-4e2c-bbc5-257ef4a65b38</SendersReference>
+            </Manifest>
+            <RecipientList>
+              <Recipient>
                 <PartyNumber>910075918</PartyNumber>
-            </Recipient>
-        </RecipientList>
-    </BrokerServiceInitiation>
+              </Recipient>
+            </RecipientList>
+          </ns2:brokerServiceInitiation>
+        </ns2:InitiateBrokerServiceBasic>
+      </S:Body>
+    </S:Envelope>
     """
     And the sent Altinn ZIP contains the following files:
       | filename       |

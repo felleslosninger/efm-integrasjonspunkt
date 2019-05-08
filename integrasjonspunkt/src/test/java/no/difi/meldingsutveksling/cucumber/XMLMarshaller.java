@@ -5,11 +5,10 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.xml.transform.StringResult;
 import org.springframework.xml.transform.StringSource;
+import org.w3c.dom.Document;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.*;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 @Component
 @Profile("cucumber")
@@ -19,15 +18,25 @@ public class XMLMarshaller {
 
     @SneakyThrows
     <T> String marshall(JAXBElement<T> t) {
+        StringResult result = new StringResult();
+        getMarshaller(t).marshal(t, result);
+        return result.toString();
+    }
+
+    @SneakyThrows
+    <T> Document getDocument(JAXBElement<T> t) {
+        Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+        getMarshaller(t).marshal(t, document);
+        return document;
+    }
+
+    private <T> Marshaller getMarshaller(JAXBElement<T> t) throws JAXBException {
         JAXBContext context = JAXBContext.newInstance(t.getDeclaredType());
 
         Marshaller marshaller = context.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
         marshaller.setProperty(PREFIX_MAPPER, new DefaultNamespacePrefixMapper());
-
-        StringResult result = new StringResult();
-        marshaller.marshal(t, result);
-        return result.toString();
+        return marshaller;
     }
 
     @SneakyThrows

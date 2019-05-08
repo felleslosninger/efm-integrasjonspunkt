@@ -12,6 +12,8 @@ import no.difi.meldingsutveksling.webhooks.subscription.SubscriptionRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 
+import javax.transaction.Transactional;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -22,6 +24,7 @@ public class WebhookPusher {
     private final UrlPusher urlPusher;
     private final WebhookEventFactory webhookEventFactory;
 
+    @Transactional
     public void push(WebhookEvent event) {
         String json = getJson(event);
         subscriptionRepository.findAll().forEach(subscription -> urlPusher.pushAsync(subscription.getPushEndpoint(), json));
