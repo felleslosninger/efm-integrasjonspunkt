@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.serviceregistry;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
@@ -57,7 +58,7 @@ public class ServiceRegistryLookupTest {
         IntegrasjonspunktProperties.Arkivmelding arkivmelding = mock(IntegrasjonspunktProperties.Arkivmelding.class);
         when(arkivmelding.getDefaultProcess()).thenReturn(DEFAULT_PROCESS);
         when(properties.getArkivmelding()).thenReturn(arkivmelding);
-        service = new ServiceRegistryLookup(client, properties, sasKeyRepoMock);
+        service = new ServiceRegistryLookup(client, properties, sasKeyRepoMock, new ObjectMapper());
         query = Notification.NOT_OBLIGATED.createQuery();
         dpo.setProcess(DEFAULT_PROCESS);
     }

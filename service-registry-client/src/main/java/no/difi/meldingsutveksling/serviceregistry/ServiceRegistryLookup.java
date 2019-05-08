@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.serviceregistry;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -23,12 +24,11 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.Notification;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 
-import java.util.Arrays;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -44,6 +44,7 @@ public class ServiceRegistryLookup {
     private final RestClient client;
     private final IntegrasjonspunktProperties properties;
     private final SasKeyRepository sasKeyRepository;
+    private final ObjectMapper objectMapper;
     private final LoadingCache<String, String> skCache;
     private final LoadingCache<Parameters, ServiceRecord> srCache;
     private final LoadingCache<Parameters, List<ServiceRecord>> srsCache;
@@ -52,10 +53,12 @@ public class ServiceRegistryLookup {
     @Autowired
     public ServiceRegistryLookup(RestClient client,
                                  IntegrasjonspunktProperties properties,
-                                 SasKeyRepository sasKeyRepository) {
+                                 SasKeyRepository sasKeyRepository,
+                                 ObjectMapper objectMapper) {
         this.client = client;
         this.properties = properties;
         this.sasKeyRepository = sasKeyRepository;
+        this.objectMapper = objectMapper;
 
         this.skCache = CacheBuilder.newBuilder()
                 .maximumSize(1)
@@ -143,25 +146,29 @@ public class ServiceRegistryLookup {
     }
 
     public String getStandard(String identifier, String process, DocumentType documentType) throws ServiceRegistryLookupException {
-        ServiceRecord serviceRecord = getServiceRecordByProcess(identifier, process)
-                .orElseThrow(() -> new ServiceRegistryLookupException(
-                        String.format("Process '%s' not found in SR for identifier '%s'",
-                                process, identifier)));
-
+        ServiceRecord serviceRecord = getServiceRecordByProcess(identifier, process);
         return serviceRecord.getStandard(documentType)
                 .orElseThrow(() -> new ServiceRegistryLookupException(
                         String.format("Standard not found for process '%s' and documentType '%s' for identifier '%s'",
                                 process, documentType.getType(), identifier)));
     }
 
-    public Optional<ServiceRecord> getServiceRecordByProcess(String identifier, Process process) {
-        return getServiceRecordByProcess(identifier, process.getValue());
-    }
-
-    public Optional<ServiceRecord> getServiceRecordByProcess(String identifier, String process) {
+    public ServiceRecord getServiceRecordByProcess(String identifier, String process) throws ServiceRegistryLookupException {
         Notification notification = properties.isVarslingsplikt() ? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
-        List<ServiceRecord> serviceRecords = srsCache.getUnchecked(new Parameters(identifier, notification));
-        return serviceRecords.stream().filter(isProcess(process)).findFirst();
+        List<ServiceRecord> serviceRecords = null;
+        try {
+            serviceRecords = srsCache.get(new Parameters(identifier, notification));
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof ServiceRegistryLookupException) {
+                throw (ServiceRegistryLookupException) e.getCause();
+            } else {
+                throw new MeldingsUtvekslingRuntimeException(e);
+            }
+        }
+        return serviceRecords.stream()
+                .filter(isProcess(process))
+                .findFirst()
+                .orElseThrow(() -> new ServiceRegistryLookupException(String.format("Service record for identifier=%s with process=%s not found", identifier, process)));
     }
 
     private ServiceRecord loadServiceRecord(Parameters parameters) throws ServiceRegistryLookupException {
@@ -188,17 +195,21 @@ public class ServiceRegistryLookup {
     }
 
     private List<ServiceRecord> loadServiceRecords(Parameters parameters) throws ServiceRegistryLookupException {
-        ServiceRecord[] serviceRecords = {};
+        ServiceRecord[] serviceRecords;
         try {
             final String resource = client.getResource("identifier/" + parameters.getIdentifier(), parameters.getQuery());
             final DocumentContext documentContext = JsonPath.parse(resource, jsonPathConfiguration());
             serviceRecords = documentContext.read("$.serviceRecords", ServiceRecord[].class);
         } catch (HttpClientErrorException httpException) {
-            if (Arrays.asList(HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED).contains(httpException.getStatusCode())) {
-                log.warn("RestClient returned {} when looking up service record with identifier {}",
-                        httpException.getStatusCode(), parameters, httpException);
-            } else {
-                throw new ServiceRegistryLookupException(String.format("RestClient threw exception when looking up service record with identifier %s", parameters), httpException);
+            byte[] errorBody = httpException.getResponseBodyAsByteArray();
+            try {
+                ErrorResponse error = objectMapper.readValue(errorBody, ErrorResponse.class);
+                throw new ServiceRegistryLookupException(String.format("Caught exception when looking up service record with identifier %s, http status %s (%s): %s",
+                        parameters.getIdentifier(), httpException.getStatusCode(), httpException.getStatusText(), error.getErrorDescription()), httpException);
+            } catch (IOException e) {
+                log.warn("Could not parse error response from service registry");
+                throw new ServiceRegistryLookupException(String.format("Caught exception when looking up service record with identifier %s, http status: %s (%s)",
+                        parameters.getIdentifier(), httpException.getStatusCode(), httpException.getStatusText()), httpException);
             }
         } catch (BadJWSException e) {
             log.error("Bad signature in service record response", e);
