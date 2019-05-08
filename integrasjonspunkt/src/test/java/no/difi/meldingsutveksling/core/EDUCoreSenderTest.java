@@ -12,11 +12,10 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.ObjectProvider;
-
-import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 
@@ -67,9 +66,9 @@ public class EDUCoreSenderTest {
 
 
     @Test
-    public void givenServiceIdentifierIsDPVAndMshIsEnabledWhenSendingMessageThenShouldCheckMSH() {
+    public void givenServiceIdentifierIsDPVAndMshIsEnabledWhenSendingMessageThenShouldCheckMSH() throws ServiceRegistryLookupException {
         when(serviceRegistryLookup.getServiceRecord(IDENTIFIER, ServiceIdentifier.DPV))
-                .thenReturn(Optional.of(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER)));
+                .thenReturn(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER));
         enableMsh();
 
         eduCoreSender.sendMessage(eduCore);
@@ -78,9 +77,9 @@ public class EDUCoreSenderTest {
     }
 
     @Test
-    public void givenServiceIdentifierIsDPVAndMshCanReceiveMessageWhenSendingMessageThenMshShouldBeUsed() {
+    public void givenServiceIdentifierIsDPVAndMshCanReceiveMessageWhenSendingMessageThenMshShouldBeUsed() throws ServiceRegistryLookupException {
         when(serviceRegistryLookup.getServiceRecord(IDENTIFIER, ServiceIdentifier.DPV))
-                .thenReturn(Optional.of(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER)));
+                .thenReturn(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER));
         when(mshClient.canRecieveMessage(IDENTIFIER)).thenReturn(true);
         enableMsh();
 

@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.nextmove.v2;
 
 import com.querydsl.core.types.Predicate;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingException;
@@ -26,7 +27,6 @@ import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -35,7 +35,8 @@ import java.util.stream.Stream;
 import static com.google.common.base.Strings.emptyToNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
-import static no.difi.meldingsutveksling.ServiceIdentifier.*;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 
 @Component
 @RequiredArgsConstructor
@@ -113,17 +114,17 @@ public class NextMoveMessageService {
         }
     }
 
+    @SneakyThrows
     private void setDpiDefaults(StandardBusinessDocument sbd) {
-        Optional<ServiceRecord> serviceRecord = sr.getServiceRecord(sbd.getReceiverIdentifier(), DPI);
-        ServiceRecord record = serviceRecord.orElseThrow(() -> new NextMoveRuntimeException(String.format("No service record of type %s found for receiver", DPI.toString())));
+        ServiceRecord serviceRecord = sr.getServiceRecord(sbd.getReceiverIdentifier(), DPI);
         if (DocumentType.getOrThrow(sbd.getMessageType()) == DocumentType.PRINT) {
             DpiPrintMessage dpiMessage = (DpiPrintMessage) sbd.getAny();
             if (dpiMessage.getReceiver() == null) {
                 dpiMessage.setReceiver(new PostAddress());
             }
 
-            setReceiverDefaults(dpiMessage.getReceiver(), record.getPostAddress());
-            setReceiverDefaults(dpiMessage.getMailReturn().getReceiver(), record.getReturnAddress());
+            setReceiverDefaults(dpiMessage.getReceiver(), serviceRecord.getPostAddress());
+            setReceiverDefaults(dpiMessage.getMailReturn().getReceiver(), serviceRecord.getReturnAddress());
         }
     }
 

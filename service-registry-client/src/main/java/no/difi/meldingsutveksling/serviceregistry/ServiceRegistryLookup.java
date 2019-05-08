@@ -120,16 +120,21 @@ public class ServiceRegistryLookup {
         }
     }
 
-    public Optional<ServiceRecord> getServiceRecord(String identifier, ServiceIdentifier serviceIdentifier) {
+    public ServiceRecord getServiceRecord(String identifier, ServiceIdentifier serviceIdentifier) throws ServiceRegistryLookupException {
         Notification notification = properties.isVarslingsplikt() ? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
         List<ServiceRecord> serviceRecords;
         try {
             serviceRecords = srsCache.get(new Parameters(identifier, notification));
         } catch (ExecutionException e) {
-            log.error("Error when looking up service record for {}", e.getCause());
-            return Optional.empty();
+            if (e.getCause() instanceof ServiceRegistryLookupException) {
+                throw (ServiceRegistryLookupException) e.getCause();
+            } else {
+                throw new MeldingsUtvekslingRuntimeException(e.getCause());
+            }
         }
-        return serviceRecords.stream().filter(isServiceIdentifier(serviceIdentifier)).findFirst();
+        return serviceRecords.stream()
+                .filter(isServiceIdentifier(serviceIdentifier)).findFirst()
+                .orElseThrow(() -> new ServiceRegistryLookupException(String.format("Service record of type=%s not found for identifier=%s", serviceIdentifier, identifier)));
     }
 
     public List<ServiceRecord> getServiceRecords(String identifier) {

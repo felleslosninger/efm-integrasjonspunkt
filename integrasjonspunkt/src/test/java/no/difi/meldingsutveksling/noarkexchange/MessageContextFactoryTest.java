@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.Receiver;
 import no.difi.meldingsutveksling.core.Sender;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
@@ -22,7 +23,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.util.Optional;
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static org.mockito.Mockito.mock;
@@ -50,7 +50,7 @@ public class MessageContextFactoryTest {
     private MessageContextFactory messageContextFactory;
 
     @Before
-    public void setUp() {
+    public void setUp() throws ServiceRegistryLookupException {
         IntegrasjonspunktProperties.Organization org = new IntegrasjonspunktProperties.Organization();
         org.setNumber(SENDER_PARTY_NUMBER);
         when(propertiesMock.getOrg()).thenReturn(org);
@@ -58,9 +58,9 @@ public class MessageContextFactoryTest {
         messageContextFactory = new MessageContextFactory(propertiesMock, adresseregister, serviceRegistryLookup);
 
         when(serviceRegistryLookup.getServiceRecord(SENDER_PARTY_NUMBER, DPV))
-                .thenReturn(Optional.of(ServiceRecordObjectMother.createDPVServiceRecord(SENDER_PARTY_NUMBER)));
+                .thenReturn(ServiceRecordObjectMother.createDPVServiceRecord(SENDER_PARTY_NUMBER));
         when(serviceRegistryLookup.getServiceRecord(RECIEVER_PARTY_NUMBER, DPV))
-                .thenReturn(Optional.of(ServiceRecordObjectMother.createDPVServiceRecord(RECIEVER_PARTY_NUMBER)));
+                .thenReturn(ServiceRecordObjectMother.createDPVServiceRecord(RECIEVER_PARTY_NUMBER));
     }
 
     @Test

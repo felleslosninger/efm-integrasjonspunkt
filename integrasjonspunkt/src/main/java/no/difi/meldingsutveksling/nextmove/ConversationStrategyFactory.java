@@ -19,12 +19,16 @@ public class ConversationStrategyFactory {
     @Autowired
     public ConversationStrategyFactory(IntegrasjonspunktProperties props,
                                        DpoConversationStrategy dpoStrat,
+                                       DpfConversationStrategy dpfStrat,
                                        DpeConversationStrategy dpeStrat,
                                        DpvConversationStrategy dpvStrat,
                                        DpiConversationStrategy dpiStrat) {
         strategies = Maps.newEnumMap(ServiceIdentifier.class);
         if (props.getFeature().isEnableDPO()) {
             strategies.put(ServiceIdentifier.DPO, dpoStrat);
+        }
+        if (props.getFeature().isEnableDPF()) {
+            strategies.put(ServiceIdentifier.DPF, dpfStrat);
         }
         if (props.getFeature().isEnableDPV()) {
             strategies.put(ServiceIdentifier.DPV, dpvStrat);

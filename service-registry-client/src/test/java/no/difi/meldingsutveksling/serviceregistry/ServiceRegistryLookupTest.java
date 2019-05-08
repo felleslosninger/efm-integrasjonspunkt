@@ -23,11 +23,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.HashMap;
-import java.util.Optional;
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -79,12 +78,11 @@ public class ServiceRegistryLookupTest {
     }
 
     @Test
-    public void organizationWithoutServiceRecords() throws BadJWSException {
+    public void organizationWithoutServiceRecords() throws BadJWSException, ServiceRegistryLookupException {
         final String json = new SRContentBuilder().build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
-        Optional<ServiceRecord> serviceRecord = this.service.getServiceRecord(ORGNR, DPO);
-        assertFalse(serviceRecord.isPresent());
+        this.service.getServiceRecord(ORGNR, DPO);
     }
 
     @Test
@@ -98,14 +96,13 @@ public class ServiceRegistryLookupTest {
     }
 
     @Test
-    public void organizationWithSingleServiceRecordHasServiceRecords() throws BadJWSException {
+    public void organizationWithSingleServiceRecordHasServiceRecords() throws BadJWSException, ServiceRegistryLookupException {
         final String json = new SRContentBuilder().withServiceRecord(dpo).build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
-        Optional<ServiceRecord> serviceRecord = service.getServiceRecord(ORGNR, DPO);
+        ServiceRecord serviceRecord = service.getServiceRecord(ORGNR, DPO);
 
-        assertTrue(serviceRecord.isPresent());
-        assertThat(serviceRecord.get(), is(dpo));
+        assertThat(serviceRecord, is(dpo));
     }
 
     @Test
