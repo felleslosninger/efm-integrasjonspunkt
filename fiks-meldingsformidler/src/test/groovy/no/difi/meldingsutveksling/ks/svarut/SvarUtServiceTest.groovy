@@ -22,7 +22,7 @@ class SvarUtServiceTest extends Specification {
         def serviceRegistry = Mock(ServiceRegistryLookup)
         def props = Mock(IntegrasjonspunktProperties)
         service = new SvarUtService(Mock(SvarUtWebServiceClient), serviceRegistry, Mock(FiksMapper), props, Mock(CertificateParser))
-        serviceRegistry.getServiceRecord(IDENTIFIER, DPF) >> Optional.of(new ServiceRecord(pemCertificate: "asdf"))
+        serviceRegistry.getServiceRecord(IDENTIFIER, DPF) >> new ServiceRecord(pemCertificate: "asdf")
         def fiksConfig = Mock(FiksConfig)
         def svarUtConfig = Mock(FiksConfig.SvarUt)
         svarUtConfig.endpointUrl >> new URL("http://foo")

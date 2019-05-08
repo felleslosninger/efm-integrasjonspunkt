@@ -77,7 +77,7 @@ public class ServiceRegistryLookupTest {
         this.service.getServiceRecord(ORGNR);
     }
 
-    @Test
+    @Test(expected = ServiceRegistryLookupException.class)
     public void organizationWithoutServiceRecords() throws BadJWSException, ServiceRegistryLookupException {
         final String json = new SRContentBuilder().build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
