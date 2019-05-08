@@ -14,6 +14,7 @@ import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -65,7 +66,7 @@ public class NextMoveMessageService {
                 });
 
         ServiceRecord serviceRecord = getServiceRecord(sbd);
-        ServiceIdentifier serviceIdentifier = getServiceIdentifier(serviceRecord);
+        ServiceIdentifier serviceIdentifier = serviceRecord.getServiceIdentifier();
 
         if (!serviceIdentifierService.isEnabled(serviceIdentifier)) {
             throw new ServiceNotEnabledException(serviceIdentifier);
@@ -92,14 +93,13 @@ public class NextMoveMessageService {
         return message;
     }
 
-    private ServiceIdentifier getServiceIdentifier(ServiceRecord serviceRecord) {
-        ServiceIdentifier serviceIdentifier = serviceRecord.getServiceIdentifier();
-        return serviceIdentifier == DPF ? DPO : serviceIdentifier;
-    }
-
     private ServiceRecord getServiceRecord(StandardBusinessDocument sbd) {
-        return sr.getServiceRecordByProcess(sbd.getReceiverIdentifier(), sbd.getProcess())
-                .orElseThrow(() -> new ReceiverDoNotAcceptProcessException(sbd.getProcess()));
+        try {
+            return sr.getServiceRecordByProcess(sbd.getReceiverIdentifier(), sbd.getProcess());
+        } catch (ServiceRegistryLookupException e) {
+            // TODO Feilmelding inn her
+            throw new ReceiverDoNotAcceptProcessException(sbd.getProcess());
+        }
     }
 
     private void setDefaults(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {

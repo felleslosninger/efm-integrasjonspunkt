@@ -10,6 +10,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
 import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -63,7 +64,7 @@ public class CorrespondenceAgencyMessageFactoryTest {
     private CorrespondenceAgencyMessageFactory correspondenceAgencyMessageFactory;
 
     @Before
-    public void initializeJaxb() throws JAXBException {
+    public void initializeJaxb() throws JAXBException, ServiceRegistryLookupException {
         correspondenceAgencyMessageFactory = new CorrespondenceAgencyMessageFactory(postConfig, properties, srMock, cryptoMessagePersister, Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), ZoneId.of("Europe/Oslo")));
         putMessageJaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
 

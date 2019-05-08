@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.kvittering;
 
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.Process;
@@ -19,6 +20,7 @@ import no.difi.meldingsutveksling.kvittering.xsd.ObjectFactory;
 import no.difi.meldingsutveksling.nextmove.StatusMessage;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import org.apache.xml.security.exceptions.XMLSecurityException;
 import org.springframework.stereotype.Component;
 
@@ -35,6 +37,7 @@ import static no.difi.meldingsutveksling.kvittering.DocumentToDocumentConverter.
  */
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class SBDReceiptFactory {
 
     private final ServiceRegistryLookup serviceRegistryLookup;
@@ -58,7 +61,13 @@ public class SBDReceiptFactory {
     public StandardBusinessDocument createArkivmeldingStatusFrom(StandardBusinessDocument sbd,
                                                                  DocumentType documentType,
                                                                  ReceiptStatus status) {
-        String standard = serviceRegistryLookup.getStandard(sbd.getSenderIdentifier(), Process.ARKIVMELDING_RESPONSE, documentType);
+        String standard;
+        try {
+            standard = serviceRegistryLookup.getStandard(sbd.getSenderIdentifier(), Process.ARKIVMELDING_RESPONSE, documentType);
+        } catch (ServiceRegistryLookupException e) {
+            log.error("Error looking up service record for {}", sbd.getSenderIdentifier(), e);
+            throw new MeldingsUtvekslingRuntimeException(e);
+        }
         StatusMessage statusMessage = new StatusMessage(status);
 
         return new StandardBusinessDocument()
@@ -76,7 +85,13 @@ public class SBDReceiptFactory {
     public StandardBusinessDocument createEinnsynStatusFrom(StandardBusinessDocument sbd,
                                                             DocumentType documentType,
                                                             ReceiptStatus status) {
-        String standard = serviceRegistryLookup.getStandard(sbd.getSenderIdentifier(), Process.EINNSYN_RESPONSE, documentType);
+        String standard;
+        try {
+            standard = serviceRegistryLookup.getStandard(sbd.getSenderIdentifier(), Process.EINNSYN_RESPONSE, documentType);
+        } catch (ServiceRegistryLookupException e) {
+            log.error("Error looking up service record for {}", sbd.getSenderIdentifier(), e);
+            throw new MeldingsUtvekslingRuntimeException(e);
+        }
         StatusMessage statusMessage = new StatusMessage(status);
 
         return new StandardBusinessDocument()

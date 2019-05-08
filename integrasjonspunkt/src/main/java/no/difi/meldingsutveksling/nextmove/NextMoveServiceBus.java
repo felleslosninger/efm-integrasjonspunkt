@@ -26,6 +26,7 @@ import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.io.IOUtils;
 import org.springframework.context.annotation.Lazy;
@@ -237,8 +238,12 @@ public class NextMoveServiceBus {
         if (SBDUtil.isReceipt(message.getSbd())) {
             return receiptTarget();
         }
-        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecordByProcess(message.getReceiverIdentifier(), message.getSbd().getProcess())
-                .orElseThrow(() -> new NextMoveRuntimeException(String.format("Unable to get service record for %s", message.getReceiverIdentifier())));
+        ServiceRecord serviceRecord;
+        try {
+            serviceRecord = serviceRegistryLookup.getServiceRecordByProcess(message.getReceiverIdentifier(), message.getSbd().getProcess());
+        } catch (ServiceRegistryLookupException e) {
+            throw new NextMoveRuntimeException(String.format("Unable to get service record for %s", message.getReceiverIdentifier()), e);
+        }
         return serviceRecord.getService().getEndpointUrl();
     }
 

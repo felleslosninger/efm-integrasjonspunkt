@@ -21,6 +21,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.*;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.ObjectFactory;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.io.IOUtils;
@@ -224,7 +225,13 @@ public class EDUCoreFactory {
         InfoRecord receiverInfo = serviceRegistryLookup.getInfoRecord(receiverOrgNr);
 
         EDUCore eduCore = new EDUCore();
-        ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(receiverOrgNr);
+        ServiceRecord serviceRecord;
+        try {
+            serviceRecord = serviceRegistryLookup.getServiceRecord(receiverOrgNr);
+        } catch (ServiceRegistryLookupException e) {
+            log.error("Error looking up service record for {}", receiverOrgNr, e);
+            throw new MeldingsUtvekslingRuntimeException(e);
+        }
         eduCore.setServiceIdentifier(serviceRecord.getServiceIdentifier());
 
         eduCore.setSender(Sender.of(senderInfo.getIdentifier(), senderInfo.getOrganizationName(), serviceRecord.getServiceIdentifier() == DPF ? senderRef : null));

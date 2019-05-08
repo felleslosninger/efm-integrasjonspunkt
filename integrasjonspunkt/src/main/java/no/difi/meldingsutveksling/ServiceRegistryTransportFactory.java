@@ -1,16 +1,14 @@
 package no.difi.meldingsutveksling;
 
 import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import no.difi.meldingsutveksling.transport.altinn.AltinnTransport;
 
-import java.util.Optional;
-
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
-import static no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord.isServiceIdentifier;
 
 /**
  * Used to create transport based on service registry lookup.
@@ -24,10 +22,9 @@ public class ServiceRegistryTransportFactory implements TransportFactory {
 
     @Override
     public Transport createTransport(StandardBusinessDocument message) {
-        return Optional.of(serviceRegistryLookup.getServiceRecord(message.getReceiverIdentifier()))
-                .filter(isServiceIdentifier(DPO))
+        return serviceRegistryLookup.getServiceRecord(message.getReceiverIdentifier(), DPO)
                 .map(altinnWsClientFactory::getAltinnWsClient)
                 .map(client -> new AltinnTransport(client, uuidGenerator))
-                .orElseThrow(() -> new RuntimeException("Failed to create transport"));
+                .orElseThrow(() -> new MeldingsUtvekslingRuntimeException(String.format("Failed to create altinn transport, no DPO service record found for %s", message.getReceiverIdentifier())));
     }
 }

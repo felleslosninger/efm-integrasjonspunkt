@@ -23,6 +23,7 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.receipt.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
@@ -39,7 +40,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.*;
 import org.springframework.jms.core.JmsTemplate;
 
-import java.net.URISyntaxException;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -173,7 +173,7 @@ public class IntegrasjonspunktIntegrationTestConfig {
 
     @Bean
     @Primary
-    public ServiceRegistryLookup serviceRegistryLookup() throws URISyntaxException {
+    public ServiceRegistryLookup serviceRegistryLookup() throws ServiceRegistryLookupException {
         ServiceRegistryLookup srMock = mock(ServiceRegistryLookup.class);
         InfoRecord ir = mock(InfoRecord.class);
         when(ir.getIdentifier()).thenReturn("1337");

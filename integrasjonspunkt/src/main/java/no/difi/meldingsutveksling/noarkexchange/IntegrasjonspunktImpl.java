@@ -9,6 +9,7 @@ import no.difi.meldingsutveksling.logging.MarkerFactory;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import org.slf4j.Logger;
@@ -132,7 +133,13 @@ public class IntegrasjonspunktImpl implements SOAPport {
             }
         }
 
-        ServiceRecord receiverRecord = serviceRegistryLookup.getServiceRecord(message.getRecieverPartyNumber());
+        ServiceRecord receiverRecord = null;
+        try {
+            receiverRecord = serviceRegistryLookup.getServiceRecord(message.getRecieverPartyNumber());
+        } catch (ServiceRegistryLookupException e) {
+            log.error("Error looking up service record for {}", message.getRecieverPartyNumber(), e);
+            return PutMessageResponseFactory.createErrorResponse(StatusMessage.MISSING_SERVICE_RECORD);
+        }
 
         if (PayloadUtil.isAppReceipt(message.getPayload()) &&
                 receiverRecord.getServiceIdentifier() != ServiceIdentifier.DPO) {
@@ -152,7 +159,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
             if (properties.getFeature().isReturnOkOnEmptyPayload()) {
                 return PutMessageResponseFactory.createOkResponse();
             } else {
-                return PutMessageResponseFactory.createErrorResponse(new MessageException(StatusMessage.MISSING_PAYLOAD));
+                return PutMessageResponseFactory.createErrorResponse(StatusMessage.MISSING_PAYLOAD);
             }
         }
 
