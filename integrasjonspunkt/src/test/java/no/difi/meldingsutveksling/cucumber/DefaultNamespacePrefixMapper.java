@@ -4,6 +4,7 @@ import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class DefaultNamespacePrefixMapper extends NamespacePrefixMapper {
 
@@ -33,6 +34,12 @@ public class DefaultNamespacePrefixMapper extends NamespacePrefixMapper {
         namespaceMap.put("http://schemas.altinn.no/services/ServiceEngine/Correspondence/2016/02", "altinn14");
         namespaceMap.put("http://schemas.altinn.no/services/ServiceEngine/Correspondence/2014/10", "altinn15");
         namespaceMap.put("http://schemas.altinn.no/services/ServiceEngine/Correspondence/2013/11", "altinn16");
+        namespaceMap.put("http://schemas.altinn.no/services/ServiceEngine/Broker/2015/06", "altinn17");
+    }
+
+    public Map<String, String> getPrefix2UrlMap() {
+        return namespaceMap.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
     }
 
     /* (non-Javadoc)

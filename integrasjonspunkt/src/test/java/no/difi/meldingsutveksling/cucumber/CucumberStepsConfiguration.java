@@ -7,9 +7,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.marker.Markers;
-import no.difi.meldingsutveksling.*;
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasic;
-import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExternalBasicStreamed;
+import no.difi.meldingsutveksling.IntegrasjonspunktApplication;
+import no.difi.meldingsutveksling.KeystoreProvider;
+import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dpi.SikkerDigitalPostKlientFactory;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceClientImpl;
@@ -22,8 +22,6 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import no.difi.meldingsutveksling.webhooks.UrlPusher;
 import no.difi.meldingsutveksling.webhooks.WebhookPusher;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.sdp.client2.domain.AktoerOrganisasjonsnummer;
@@ -40,13 +38,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.task.SyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
+import org.springframework.ws.soap.SoapVersion;
 import org.springframework.ws.soap.axiom.AxiomSoapMessageFactory;
+import org.springframework.ws.soap.saaj.SaajSoapMessageFactory;
 import org.springframework.ws.transport.http.AbstractHttpWebServiceMessageSender;
 
 import javax.xml.bind.Marshaller;
@@ -81,6 +83,19 @@ public class CucumberStepsConfiguration {
     @RequiredArgsConstructor
     @SpyBean(WebhookPusher.class)
     public static class SpringConfiguration {
+
+        @Bean
+        @Primary
+        public TaskExecutor taskExecutor() {
+            return new SyncTaskExecutor();
+        }
+
+        @Bean
+        public SaajSoapMessageFactory saajSoapMessageFactory() {
+            SaajSoapMessageFactory messageFactory = new SaajSoapMessageFactory();
+            messageFactory.setSoapVersion(SoapVersion.SOAP_11);
+            return messageFactory;
+        }
 
         @Bean
         public WireMockServer wireMockServer() {
@@ -212,27 +227,6 @@ public class CucumberStepsConfiguration {
             return new AsicParser();
         }
 
-        @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-        @Bean
-        @Primary
-        public AltinnWsClientFactory altinnWsClientFactory(
-                IBrokerServiceExternalBasic iBrokerServiceExternalBasic,
-                IBrokerServiceExternalBasicStreamed iBrokerServiceExternalBasicStreamed,
-                ApplicationContextHolder applicationContextHolder,
-                AltinnWsConfigurationFactory altinnWsConfigurationFactory
-        ) {
-            return new AltinnWsClientFactory(applicationContextHolder, altinnWsConfigurationFactory) {
-                @Override
-                public AltinnWsClient getAltinnWsClient(ServiceRecord serviceRecord) {
-                    return new AltinnWsClient(
-                            iBrokerServiceExternalBasic,
-                            iBrokerServiceExternalBasicStreamed,
-                            altinnWsConfigurationFactory.fromServiceRecord(serviceRecord),
-                            applicationContextHolder.getApplicationContext());
-                }
-            };
-        }
-
         @Bean
         public CucumberKeyStore cucumberKeyStore(IntegrasjonspunktProperties properties) {
             return new CucumberKeyStore(properties.getOrg().getKeystore());
@@ -272,8 +266,6 @@ public class CucumberStepsConfiguration {
     @Rule
     private final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    @MockBean public IBrokerServiceExternalBasic iBrokerServiceExternalBasic;
-    @MockBean public IBrokerServiceExternalBasicStreamed iBrokerServiceExternalBasicStreamed;
     @MockBean public UUIDGenerator uuidGenerator;
     @MockBean public LookupClient lookupClient;
     @MockBean public InternalQueue internalQueue;
