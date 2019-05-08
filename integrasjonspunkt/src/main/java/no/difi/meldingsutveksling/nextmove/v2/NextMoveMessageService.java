@@ -66,7 +66,7 @@ public class NextMoveMessageService {
                 });
 
         ServiceRecord serviceRecord = getServiceRecord(sbd);
-        ServiceIdentifier serviceIdentifier = getServiceIdentifier(serviceRecord);
+        ServiceIdentifier serviceIdentifier = serviceRecord.getServiceIdentifier();
 
         if (!serviceIdentifierService.isEnabled(serviceIdentifier)) {
             throw new ServiceNotEnabledException(serviceIdentifier);
@@ -91,11 +91,6 @@ public class NextMoveMessageService {
         conversationService.registerConversation(message);
 
         return message;
-    }
-
-    private ServiceIdentifier getServiceIdentifier(ServiceRecord serviceRecord) {
-        ServiceIdentifier serviceIdentifier = serviceRecord.getServiceIdentifier();
-        return serviceIdentifier == DPF ? DPO : serviceIdentifier;
     }
 
     private ServiceRecord getServiceRecord(StandardBusinessDocument sbd) {
