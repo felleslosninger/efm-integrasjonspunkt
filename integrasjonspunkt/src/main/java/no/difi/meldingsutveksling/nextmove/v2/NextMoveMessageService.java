@@ -98,8 +98,7 @@ public class NextMoveMessageService {
         try {
             return sr.getServiceRecordByProcess(sbd.getReceiverIdentifier(), sbd.getProcess());
         } catch (ServiceRegistryLookupException e) {
-            // TODO Feilmelding inn her
-            throw new ReceiverDoNotAcceptProcessException(sbd.getProcess());
+            throw new ReceiverDoNotAcceptProcessException(sbd.getProcess(), e.getLocalizedMessage());
         }
     }
 
