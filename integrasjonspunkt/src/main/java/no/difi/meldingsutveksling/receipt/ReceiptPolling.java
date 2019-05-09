@@ -10,8 +10,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.dpi.MeldingsformidlerClient.EMPTY_KVITTERING;
@@ -52,20 +50,20 @@ public class ReceiptPolling {
             return;
         }
 
-        List<Conversation> conversations = conversationRepository.findByPollable(true);
+        conversationRepository.findByPollable(true)
+                .stream()
+                .filter(c -> serviceIdentifierService.isEnabled(c.getServiceIdentifier()))
+                .forEach(this::checkReceiptStatus);
+    }
 
-        conversations.forEach(c -> {
-            if (serviceIdentifierService.isEnabled(c.getServiceIdentifier())) {
-                log.debug(markerFrom(c), "Checking status, conversationId={}", c.getConversationId());
-                try {
-                    StatusStrategy strategy = statusStrategyFactory.getFactory(c);
-                    strategy.checkStatus(c);
-                } catch (Exception e) {
-                    log.error(format("Exception during receipt polling, conversationId=%s", c.getConversationId()), e);
-                }
-            }
-        });
-
+    private void checkReceiptStatus(Conversation c) {
+        log.debug(markerFrom(c), "Checking status, conversationId={}", c.getConversationId());
+        try {
+            StatusStrategy strategy = statusStrategyFactory.getFactory(c);
+            strategy.checkStatus(c);
+        } catch (Exception e) {
+            log.error(format("Exception during receipt polling, conversationId=%s", c.getConversationId()), e);
+        }
     }
 
     @Scheduled(fixedRate = 10000)
@@ -75,10 +73,11 @@ public class ReceiptPolling {
             while (externalReceipt != EMPTY_KVITTERING) {
                 final String id = externalReceipt.getId();
                 MessageStatus status = externalReceipt.toMessageStatus();
-                Optional<Conversation> c = conversationService.registerStatus(id, status);
-                if (c.isPresent() && Arrays.asList(LEST, FEIL).contains(ReceiptStatus.valueOf(status.getStatus()))) {
-                    conversationService.markFinished(c.get());
-                }
+
+                conversationService.registerStatus(id, status)
+                        .filter(c -> Arrays.asList(LEST, FEIL).contains(ReceiptStatus.valueOf(status.getStatus())))
+                        .ifPresent(c -> conversationService.markFinished(c));
+
                 Audit.info("Updated receipt (DPI)", externalReceipt.logMarkers());
                 externalReceipt.confirmReceipt();
                 Audit.info("Confirmed receipt (DPI)", externalReceipt.logMarkers());
@@ -86,5 +85,4 @@ public class ReceiptPolling {
             }
         }
     }
-
 }

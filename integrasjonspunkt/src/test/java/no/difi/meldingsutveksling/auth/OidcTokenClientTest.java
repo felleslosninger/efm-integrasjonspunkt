@@ -77,7 +77,7 @@ public class OidcTokenClientTest {
         System.out.println(jwt);
         SignedJWT parsedJWT = SignedJWT.parse(jwt);
         assertEquals("test_move", parsedJWT.getJWTClaimsSet().getIssuer());
-        assertEquals(scopes.stream().reduce((a, b) -> a + " " + b).get(), parsedJWT.getJWTClaimsSet().getClaims().get("scope"));
+        assertEquals(scopes.stream().reduce((a, b) -> a + " " + b).orElse(""), parsedJWT.getJWTClaimsSet().getClaims().get("scope"));
     }
 
     @Test

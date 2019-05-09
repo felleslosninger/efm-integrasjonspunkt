@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static no.difi.meldingsutveksling.ptv.WithLogstashMarker.withLogstashMarker;
 import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
@@ -31,7 +30,7 @@ public class DpvStatusStrategy implements StatusStrategy {
     private final CorrespondenceAgencyClient client;
 
     @Override
-    public void checkStatus(Conversation conversation) {
+    public void checkStatus(final Conversation conversation) {
         GetCorrespondenceStatusDetailsV2 receiptRequest = correspondenceAgencyMessageFactory.createReceiptRequest(conversation);
 
         Object response = withLogstashMarker(markerFrom(conversation))
@@ -45,34 +44,33 @@ public class DpvStatusStrategy implements StatusStrategy {
         GetCorrespondenceStatusDetailsV2Response result = (GetCorrespondenceStatusDetailsV2Response) response;
 
         // TODO: need to find a way to search for CorrespondenceIDs (in response( as ConversationID is not unqiue
-        List<StatusV2> statusList = result.getGetCorrespondenceStatusDetailsV2Result().getValue().getStatusList().getValue().getStatusV2();
-        Optional<StatusV2> op = statusList.stream().findFirst();
-        if (op.isPresent()) {
-            List<StatusChangeV2> statusChanges = op.get().getStatusChanges().getValue().getStatusChangeV2();
+        result.getGetCorrespondenceStatusDetailsV2Result().getValue().getStatusList().getValue().getStatusV2()
+                .stream().findFirst()
+                .ifPresent(op -> checkStatus(conversation, op));
+    }
 
-            Optional<StatusChangeV2> createdStatus = statusChanges.stream()
-                    .filter(s -> STATUS_CREATED.equals(s.getStatusType().value()))
-                    .findFirst();
-            ReceiptStatus levertStatus = ReceiptStatus.LEVERT;
-            boolean hasCreatedStatus = conversation.getMessageStatuses().stream()
-                    .anyMatch(r -> levertStatus.toString().equals(r.getStatus()));
-            if (!hasCreatedStatus && createdStatus.isPresent()) {
-                ZonedDateTime createdZoned = createdStatus.get().getStatusDate().toGregorianCalendar().toZonedDateTime();
-                MessageStatus status = MessageStatus.of(levertStatus, createdZoned.toLocalDateTime());
-                conversationService.registerStatus(conversation, status);
-            }
+    private void checkStatus(Conversation conversation, StatusV2 op) {
+        List<StatusChangeV2> statusChanges = op.getStatusChanges().getValue().getStatusChangeV2();
 
-            Optional<StatusChangeV2> readStatus = statusChanges.stream()
-                    .filter(s -> STATUS_READ.equals(s.getStatusType().value()))
-                    .findFirst();
-            ReceiptStatus lestStatus = ReceiptStatus.LEST;
-            if (readStatus.isPresent()) {
-                ZonedDateTime readZoned = readStatus.get().getStatusDate().toGregorianCalendar().toZonedDateTime();
-                MessageStatus status = MessageStatus.of(lestStatus, readZoned.toLocalDateTime());
-                conversation = conversationService.registerStatus(conversation, status);
-                conversationService.markFinished(conversation);
-            }
-        }
+        statusChanges.stream()
+                .filter(s -> STATUS_CREATED.equals(s.getStatusType().value()))
+                .filter(createdStatus -> conversation.getMessageStatuses().stream()
+                        .noneMatch(r -> ReceiptStatus.LEVERT.toString().equals(r.getStatus())))
+                .findFirst()
+                .ifPresent(createdStatus -> {
+                    ZonedDateTime createdZoned = createdStatus.getStatusDate().toGregorianCalendar().toZonedDateTime();
+                    MessageStatus status = MessageStatus.of(ReceiptStatus.LEVERT, createdZoned.toLocalDateTime());
+                    conversationService.registerStatus(conversation, status);
+                });
+
+        statusChanges.stream()
+                .filter(s -> STATUS_READ.equals(s.getStatusType().value()))
+                .findFirst()
+                .ifPresent(readStatus -> {
+                    ZonedDateTime readZoned = readStatus.getStatusDate().toGregorianCalendar().toZonedDateTime();
+                    MessageStatus status = MessageStatus.of(ReceiptStatus.LEST, readZoned.toLocalDateTime());
+                    conversationService.markFinished(conversationService.registerStatus(conversation, status));
+                });
     }
 
     @Override

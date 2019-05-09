@@ -23,6 +23,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import java.time.Clock;
+
 @ConditionalOnProperty(
         value = "app.scheduling.enable", havingValue = "true", matchIfMissing = true
 )
@@ -31,8 +33,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class SchedulingConfiguration {
 
     @Bean
-    public ConversationResourceUnlocker conversationResourceUnlocker(ConversationResourceRepository repo) {
-        return new ConversationResourceUnlocker(repo);
+    public ConversationResourceUnlocker conversationResourceUnlocker(ConversationResourceRepository repo, Clock clock) {
+        return new ConversationResourceUnlocker(repo, clock);
     }
 
     @Bean

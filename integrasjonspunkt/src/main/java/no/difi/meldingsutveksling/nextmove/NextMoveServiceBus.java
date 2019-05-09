@@ -21,7 +21,6 @@ import no.difi.meldingsutveksling.noarkexchange.MessageContext;
 import no.difi.meldingsutveksling.noarkexchange.MessageContextException;
 import no.difi.meldingsutveksling.noarkexchange.MessageContextFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
-import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
@@ -54,8 +53,6 @@ import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.INNSYN;
 @Component
 @Slf4j
 public class NextMoveServiceBus {
-
-    private static final String NEXTMOVE_QUEUE_PREFIX = "nextbestqueue";
 
     private final IntegrasjonspunktProperties props;
     private final NextMoveQueue nextMoveQueue;
@@ -177,7 +174,6 @@ public class NextMoveServiceBus {
         }
     }
 
-
     public CompletableFuture getAllMessagesBatch() {
         return CompletableFuture.runAsync(() -> {
             boolean hasQueuedMessages = true;
@@ -216,8 +212,8 @@ public class NextMoveServiceBus {
         if (SBDUtil.isStatus(sbd)) {
             log.debug(String.format("Message with id=%s is a receipt", sbd.getConversationId()));
             StatusMessage msg = (StatusMessage) sbd.getAny();
-            Optional<Conversation> c = conversationService.registerStatus(sbd.getConversationId(), MessageStatus.of(msg.getStatus()));
-            c.ifPresent(conversationService::markFinished);
+            conversationService.registerStatus(sbd.getConversationId(), MessageStatus.of(msg.getStatus()))
+                    .ifPresent(conversationService::markFinished);
         } else {
             sendReceiptAsync(nextMoveQueue.enqueue(sbd, DPE));
         }
@@ -228,23 +224,29 @@ public class NextMoveServiceBus {
     }
 
     private void sendReceipt(NextMoveMessage message) {
-        StandardBusinessDocument sbdReceipt = sbdReceiptFactory.createEinnsynStatusFrom(message.getSbd(),
+        internalQueue.enqueueNextMove2(NextMoveMessage.of(getReceipt(message), DPE));
+    }
+
+    private StandardBusinessDocument getReceipt(NextMoveMessage message) {
+        return sbdReceiptFactory.createEinnsynStatusFrom(message.getSbd(),
                 DocumentType.STATUS,
                 ReceiptStatus.MOTTATT);
-        internalQueue.enqueueNextMove2(NextMoveMessage.of(sbdReceipt, DPE));
     }
 
     private String getReceiverQueue(NextMoveMessage message) {
         if (SBDUtil.isReceipt(message.getSbd())) {
             return receiptTarget();
         }
-        ServiceRecord serviceRecord;
+
         try {
-            serviceRecord = serviceRegistryLookup.getServiceRecordByProcess(message.getReceiverIdentifier(), message.getSbd().getProcess());
+            ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecordByProcess(
+                    message.getReceiverIdentifier(),
+                    message.getSbd().getProcess());
+
+            return serviceRecord.getService().getEndpointUrl();
         } catch (ServiceRegistryLookupException e) {
             throw new NextMoveRuntimeException(String.format("Unable to get service record for %s", message.getReceiverIdentifier()), e);
         }
-        return serviceRecord.getService().getEndpointUrl();
     }
 
     private String receiptTarget() {
