@@ -20,7 +20,7 @@ public class ServiceIdentifierService {
             case DPI:
                 return properties.getFeature().isEnableDPI();
             case DPF:
-                return properties.getFeature().isEnableDPF() || properties.getFeature().isEnableDPO();
+                return properties.getFeature().isEnableDPF();
             case DPV:
                 return properties.getFeature().isEnableDPV();
             default:

@@ -1,13 +1,11 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -41,11 +39,7 @@ public class ConversationStrategyFactory {
         }
     }
 
-    public List<ServiceIdentifier> getEnabledServices() {
-        return Lists.newArrayList(strategies.keySet());
-    }
-
-    public Optional<ConversationStrategy> getStrategy(NextMoveMessage nextMoveMessage) {
-        return Optional.ofNullable(strategies.get(nextMoveMessage.getServiceIdentifier()));
+    Optional<ConversationStrategy> getStrategy(ServiceIdentifier serviceIdentifier) {
+        return Optional.ofNullable(strategies.get(serviceIdentifier));
     }
 }

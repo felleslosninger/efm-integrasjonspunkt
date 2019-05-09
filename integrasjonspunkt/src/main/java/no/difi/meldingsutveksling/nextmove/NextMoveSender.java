@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
-import java.util.Optional;
 
 import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
 
@@ -28,15 +27,13 @@ public class NextMoveSender {
 
     @Transactional
     public void send(NextMoveMessage msg) throws NextMoveException {
-        Optional<ConversationStrategy> strategy = strategyFactory.getStrategy(msg);
-        if (!strategy.isPresent()) {
-            String errorStr = String.format("Cannot send message - serviceIdentifier \"%s\" not supported",
-                    msg.getServiceIdentifier());
-            log.error(markerFrom(msg), errorStr);
-            throw new NextMoveRuntimeException(errorStr);
-        }
-
-        strategy.get().send(msg);
+        strategyFactory.getStrategy(msg.getServiceIdentifier())
+                .orElseThrow(() -> {
+                    String errorStr = String.format("Cannot send message - serviceIdentifier \"%s\" not supported",
+                            msg.getServiceIdentifier());
+                    log.error(markerFrom(msg), errorStr);
+                    return new NextMoveRuntimeException(errorStr);
+                }).send(msg);
 
         if (SBDUtil.isStatus(msg.getSbd())) {
             return;

@@ -213,7 +213,7 @@ public class NextMoveMessageService {
     }
 
     private void validate(NextMoveMessage message) {
-        // Must always be atleast one attachment
+        // Must always be at least one attachment
         if (message.getFiles() == null || message.getFiles().isEmpty()) {
             throw new MissingFileException();
         }
