@@ -13,6 +13,7 @@ public class DocumentTypeTest {
                 DocumentType.ARKIVMELDING_KVITTERING,
                 DocumentType.STATUS,
                 DocumentType.DIGITAL,
+                DocumentType.DIGITAL_DPV,
                 DocumentType.PRINT,
                 DocumentType.INNSYNSKRAV,
                 DocumentType.PUBLISERING,

@@ -22,10 +22,7 @@ import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
-import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
-import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
-import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
+import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.noarkexchange.NoarkDocument;
@@ -70,10 +67,6 @@ public class CorrespondenceAgencyMessageFactory {
         no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory reporteeFactory = new no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory();
         BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
 
-        if (!(message.getBusinessMessage() instanceof ArkivmeldingMessage)) {
-            throw new NextMoveRuntimeException("StandardBusinessDocument.any not instance of DpvMessage, aborting");
-        }
-
         for (BusinessMessageFile f : message.getFiles()) {
             FileEntryStream fileEntry = cryptoMessagePersister.readStream(message.getConversationId(), f.getIdentifier());
             BinaryAttachmentV2 binaryAttachmentV2 = new BinaryAttachmentV2();
@@ -86,18 +79,33 @@ public class CorrespondenceAgencyMessageFactory {
             attachmentExternalBEV2List.getBinaryAttachmentV2().add(binaryAttachmentV2);
         }
 
-        BusinessMessageFile arkivmeldingFile = message.getFiles().stream()
-                .filter(f -> ARKIVMELDING_FILE.equals(f.getFilename()))
-                .findFirst()
-                .orElseThrow(() -> new NextMoveRuntimeException(String.format("%s not found for message %s", ARKIVMELDING_FILE, message.getConversationId())));
-        InputStream is = cryptoMessagePersister.readStream(message.getConversationId(), arkivmeldingFile.getIdentifier()).getInputStream();
-        Arkivmelding arkivmelding = ArkivmeldingUtil.unmarshalArkivmelding(is);
+        if (message.getBusinessMessage() instanceof ArkivmeldingMessage) {
+            BusinessMessageFile arkivmeldingFile = message.getFiles().stream()
+                    .filter(f -> ARKIVMELDING_FILE.equals(f.getFilename()))
+                    .findFirst()
+                    .orElseThrow(() -> new NextMoveRuntimeException(String.format("%s not found for message %s", ARKIVMELDING_FILE, message.getConversationId())));
+            InputStream is = cryptoMessagePersister.readStream(message.getConversationId(), arkivmeldingFile.getIdentifier()).getInputStream();
+            Arkivmelding arkivmelding = ArkivmeldingUtil.unmarshalArkivmelding(is);
 
-        Journalpost jp = ArkivmeldingUtil.getJournalpost(arkivmelding);
-        return create(message.getConversationId(), message.getReceiverIdentifier(),
-                jp.getOffentligTittel(),
-                jp.getTittel(),
-                attachmentExternalBEV2List);
+            Journalpost jp = ArkivmeldingUtil.getJournalpost(arkivmelding);
+            return create(message.getConversationId(), message.getReceiverIdentifier(),
+                    jp.getOffentligTittel(),
+                    jp.getOffentligTittel(),
+                    jp.getTittel(),
+                    attachmentExternalBEV2List);
+        }
+
+        if (message.getBusinessMessage() instanceof DigitalDpvMessage) {
+            DigitalDpvMessage msg = (DigitalDpvMessage) message.getBusinessMessage();
+            return create(message.getConversationId(), message.getReceiverIdentifier(),
+                    msg.getTitle(),
+                    msg.getSummary(),
+                    msg.getBody(),
+                    attachmentExternalBEV2List);
+        }
+
+        throw new NextMoveRuntimeException(String.format("StandardBusinessDocument.any not instance of %s or %s, aborting",
+                ArkivmeldingMessage.class.getName(), DigitalDpvMessage.class.getName()));
     }
 
 
@@ -122,7 +130,7 @@ public class CorrespondenceAgencyMessageFactory {
             String title = PayloadUtil.queryPayload(edu.getPayload(), "Melding/journpost/jpInnhold");
             String content = PayloadUtil.queryPayload(edu.getPayload(), "Melding/journpost/jpOffinnhold");
 
-            return create(edu.getId(), edu.getReceiver().getIdentifier(), title, content, attachmentExternalBEV2List);
+            return create(edu.getId(), edu.getReceiver().getIdentifier(), title, title, content, attachmentExternalBEV2List);
         } catch (PayloadException e) {
             throw new MeldingsUtvekslingRuntimeException("Error querying payload for Dokument", e);
         }
@@ -132,7 +140,8 @@ public class CorrespondenceAgencyMessageFactory {
     public InsertCorrespondenceV2 create(String conversationId,
                                          String receiverIdentifier,
                                          String messageTitle,
-                                         String messageContent,
+                                         String messageSummary,
+                                         String messageBody,
                                          BinaryAttachmentExternalBEV2List attachments) {
 
         MyInsertCorrespondenceV2 correspondence = new MyInsertCorrespondenceV2();
@@ -154,8 +163,8 @@ public class CorrespondenceAgencyMessageFactory {
         ExternalContentV2 externalContentV2 = new ExternalContentV2();
         externalContentV2.setLanguageCode(objectFactory.createExternalContentV2LanguageCode("1044"));
         externalContentV2.setMessageTitle(objectFactory.createExternalContentV2MessageTitle(messageTitle));
-        externalContentV2.setMessageSummary(objectFactory.createExternalContentV2MessageSummary(messageTitle));
-        externalContentV2.setMessageBody(objectFactory.createExternalContentV2MessageBody(messageContent));
+        externalContentV2.setMessageSummary(objectFactory.createExternalContentV2MessageSummary(messageSummary));
+        externalContentV2.setMessageBody(objectFactory.createExternalContentV2MessageBody(messageBody));
 
         // The date and time the message can be deleted by the user
         correspondence.setAllowSystemDeleteDateTime(

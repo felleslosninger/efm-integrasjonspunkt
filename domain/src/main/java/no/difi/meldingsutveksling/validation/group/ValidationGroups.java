@@ -15,6 +15,9 @@ public interface ValidationGroups {
         interface Digital extends DocumentType {
         }
 
+        interface DigitalDpv extends DocumentType {
+        }
+
         interface Print extends DocumentType {
         }
 

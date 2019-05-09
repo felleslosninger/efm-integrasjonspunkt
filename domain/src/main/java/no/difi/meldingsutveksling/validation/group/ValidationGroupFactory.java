@@ -16,6 +16,8 @@ public class ValidationGroupFactory {
                 return ValidationGroups.DocumentType.Print.class;
             case DIGITAL:
                 return ValidationGroups.DocumentType.Digital.class;
+            case DIGITAL_DPV:
+                return ValidationGroups.DocumentType.DigitalDpv.class;
             case INNSYNSKRAV:
                 return ValidationGroups.DocumentType.Innsynskrav.class;
             case PUBLISERING:

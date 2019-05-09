@@ -27,6 +27,8 @@ public class NextMoveMessageSerializer extends StdSerializer<StandardBusinessDoc
             gen.writeFieldName(DocumentType.PUBLISERING.getType());
         } else if (value.getAny() instanceof DpiDigitalMessage) {
             gen.writeFieldName(DocumentType.DIGITAL.getType());
+        } else if (value.getAny() instanceof DigitalDpvMessage) {
+            gen.writeFieldName(DocumentType.DIGITAL_DPV.getType());
         } else if (value.getAny() instanceof DpiPrintMessage) {
             gen.writeFieldName(DocumentType.PRINT.getType());
         } else if (value.getAny() instanceof StatusMessage) {
