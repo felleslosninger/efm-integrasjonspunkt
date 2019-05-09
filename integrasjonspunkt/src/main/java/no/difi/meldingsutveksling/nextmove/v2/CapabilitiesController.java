@@ -2,8 +2,8 @@ package no.difi.meldingsutveksling.nextmove.v2;
 
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.domain.capabilities.Capability;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.validation.InServiceRegistry;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 public class CapabilitiesController {
 
     private final ServiceRegistryLookup sr;
+    private final CapabilityFactory capabilityFactory;
 
     @GetMapping("{receiverid}")
     @ApiOperation(value = "Get all capabilities", notes = "Gets a list of all capabilities")
@@ -30,14 +31,13 @@ public class CapabilitiesController {
             @ApiResponse(code = 200, message = "Success", response = String[].class),
             @ApiResponse(code = 400, message = "BadRequest", response = String.class)
     })
-    public List<String> capabilities(@ApiParam(value = "receiverid", required = true)
-                                     @PathVariable
-                                     @NotNull
-                                     @InServiceRegistry String receiverid) {
+    public List<Capability> capabilities(@ApiParam(value = "receiverid", required = true)
+                                         @PathVariable
+                                         @NotNull
+                                         @InServiceRegistry String receiverid) {
         return sr.getServiceRecords(receiverid)
                 .stream()
-                .map(ServiceRecord::getServiceIdentifier)
-                .map(Enum::name)
+                .map(capabilityFactory::getCapability)
                 .collect(Collectors.toList());
     }
 }
