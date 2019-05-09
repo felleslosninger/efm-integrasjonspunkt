@@ -1,3 +1,4 @@
+group: deprecated
 language: java
 jdk:
   - oraclejdk8
