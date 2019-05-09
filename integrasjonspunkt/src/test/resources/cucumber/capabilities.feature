@@ -1,3 +1,4 @@
+@Ignore
 Feature: Capabilities
 
   Background:
@@ -6,7 +7,7 @@ Feature: Capabilities
 
   Scenario: As a user I want to get a list of all capabilities for 910077473
     Given I request all capabilities for "910077473"
-    Then the returned capabilties are:
+    Then the returned capabilities are:
       """
       [ {
         "process" : "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
@@ -46,7 +47,7 @@ Feature: Capabilities
 
   Scenario: As a user I want to get a list of all capabilities for 910075935
     Given I request all capabilities for "910075935"
-    Then the returned capabilties are:
+    Then the returned capabilities are:
       """
       [ {
         "process" : "urn:no:difi:profile:einnsyn-innsynskrav:ver1.0",
