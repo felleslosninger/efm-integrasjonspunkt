@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.dpi;
 
 import lombok.RequiredArgsConstructor;
 import net.logstash.logback.marker.LogstashMarker;
+import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.receipt.ExternalReceipt;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
@@ -23,11 +24,10 @@ import static no.difi.meldingsutveksling.logging.MarkerFactory.conversationIdMar
 @RequiredArgsConstructor
 public class MeldingsformidlerClient {
 
-    public static final EmptyKvittering EMPTY_KVITTERING = new EmptyKvittering();
-
     private final DigitalPostInnbyggerConfig config;
     private final SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory;
     private final ForsendelseHandlerFactory forsendelseHandlerFactory;
+    private final DpiReceiptMapper dpiReceiptMapper;
 
     public void sendMelding(MeldingsformidlerRequest request) throws MeldingsformidlerException {
         Dokument dokument = dokumentFromDocument(request.getDocument());
@@ -68,42 +68,42 @@ public class MeldingsformidlerClient {
         SikkerDigitalPostKlient klient = sikkerDigitalPostKlientFactory.createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer.of(orgnr), payloadInterceptor);
         final ForretningsKvittering forretningsKvittering = klient.hentKvittering(KvitteringForespoersel.builder(config.getPriority()).mpcId(config.getMpcId()).build());
         if (forretningsKvittering == null) {
-            return EMPTY_KVITTERING;
+            return new EmptyKvittering();
         }
         return kvittering.setEksternKvittering(forretningsKvittering).withCallback(klient::bekreft);
     }
 
 
-    public static class Kvittering implements ExternalReceipt {
+    public class Kvittering implements ExternalReceipt {
         private ForretningsKvittering eksternKvittering;
         private Consumer<ForretningsKvittering> callback;
         private String rawReceipt;
 
-        public Kvittering() {
+        Kvittering() {
             /* This is empty because we need an instance of Kvittering before we have all the values provided for Kvittering.
              * But it could dropped empty constructor if we used a Builder */
 
         }
 
-        public void setRawReceipt(String rawReceipt) {
+        void setRawReceipt(String rawReceipt) {
             this.rawReceipt = rawReceipt;
         }
 
-        public String getRawReceipt() {
+        String getRawReceipt() {
             return rawReceipt;
         }
 
-        public Kvittering withCallback(Consumer<ForretningsKvittering> callback) {
+        Kvittering withCallback(Consumer<ForretningsKvittering> callback) {
             this.callback = callback;
             return this;
         }
 
-        public Kvittering setEksternKvittering(ForretningsKvittering eksternKvittering) {
+        Kvittering setEksternKvittering(ForretningsKvittering eksternKvittering) {
             this.eksternKvittering = eksternKvittering;
             return this;
         }
 
-        public void executeCallback() {
+        void executeCallback() {
             callback.accept(eksternKvittering);
         }
 
@@ -124,10 +124,36 @@ public class MeldingsformidlerClient {
 
         @Override
         public MessageStatus toMessageStatus() {
-            MessageStatus ms = DpiReceiptMapper.from(eksternKvittering);
+            MessageStatus ms = dpiReceiptMapper.from(eksternKvittering);
             ms.setRawReceipt(getRawReceipt());
             return ms;
         }
+    }
 
+    public class EmptyKvittering implements ExternalReceipt {
+
+        private static final String EMPTY = "empty";
+
+        @Override
+        public void confirmReceipt() {
+            /*
+             * Do nothing because this is a non-existent/empty receipt where confirmation is undefined.
+             */
+        }
+
+        @Override
+        public String getId() {
+            return EMPTY;
+        }
+
+        @Override
+        public LogstashMarker logMarkers() {
+            return Markers.append("receipt_type", EMPTY);
+        }
+
+        @Override
+        public MessageStatus toMessageStatus() {
+            return dpiReceiptMapper.getEmpty();
+        }
     }
 }

@@ -62,6 +62,7 @@ public class MessagePolling {
     private final SvarInnNextMoveForwarder svarInnNextMoveForwarder;
     private final ApplicationContextHolder applicationContextHolder;
     private final SBDReceiptFactory sbdReceiptFactory;
+    private final MessageStatusFactory messageStatusFactory;
 
     private ServiceRecord serviceRecord;
     private CompletableFuture batchRead;
@@ -139,7 +140,7 @@ public class MessagePolling {
                     log.debug(format("NextMove message id=%s", sbd.getConversationId()));
                     if (isStatus(sbd)) {
                         StatusMessage status = (StatusMessage) sbd.getAny();
-                        MessageStatus ms = MessageStatus.of(status.getStatus());
+                        MessageStatus ms = messageStatusFactory.getMessageStatus(status.getStatus());
                         conversationService.registerStatus(sbd.getConversationId(), ms);
                     } else {
                         if (properties.getNoarkSystem().isEnable() && !properties.getNoarkSystem().getEndpointURL().isEmpty()) {
@@ -162,7 +163,7 @@ public class MessagePolling {
                         log.debug(sbd.createLogstashMarkers(), "Delivery receipt sent");
                         Conversation c = conversationService.registerConversation(sbd);
                         internalQueue.enqueueNoark(sbd);
-                        conversationService.registerStatus(c, MessageStatus.of(ReceiptStatus.INNKOMMENDE_MOTTATT));
+                        conversationService.registerStatus(c, messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_MOTTATT));
                     }
                 }
 
@@ -189,7 +190,7 @@ public class MessagePolling {
     private MessageStatus statusFromKvittering(Kvittering kvittering) {
         ReceiptStatus status = DpoReceiptMapper.from(kvittering);
         LocalDateTime tidspunkt = kvittering.getTidspunkt().toGregorianCalendar().toZonedDateTime().toLocalDateTime();
-        return MessageStatus.of(status, tidspunkt);
+        return messageStatusFactory.getMessageStatus(status, tidspunkt);
     }
 
     private void sendReceivedStatusToSender(StandardBusinessDocument sbd) {

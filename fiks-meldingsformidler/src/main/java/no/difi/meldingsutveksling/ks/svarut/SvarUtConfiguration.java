@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.ks.svarut;
 import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.ks.mapping.FiksMapper;
+import no.difi.meldingsutveksling.ks.mapping.FiksStatusMapper;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -29,7 +30,9 @@ public class SvarUtConfiguration {
                                        SvarUtWebServiceClient svarUtClient,
                                        ServiceRegistryLookup serviceRegistryLookup,
                                        IntegrasjonspunktProperties props,
-                                       CertificateParser certificateParser) {
-        return new SvarUtService(svarUtClient, serviceRegistryLookup, fiksMapper, props, certificateParser);
+                                       CertificateParser certificateParser,
+                                       FiksStatusMapper fiksStatusMapper
+    ) {
+        return new SvarUtService(svarUtClient, serviceRegistryLookup, fiksMapper, props, certificateParser, fiksStatusMapper);
     }
 }

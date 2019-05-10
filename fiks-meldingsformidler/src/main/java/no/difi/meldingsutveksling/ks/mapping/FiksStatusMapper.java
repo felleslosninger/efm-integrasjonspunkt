@@ -1,35 +1,52 @@
 package no.difi.meldingsutveksling.ks.mapping;
 
+import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.ks.svarut.ForsendelseStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
+import org.springframework.stereotype.Component;
 
-import java.util.EnumMap;
-
+@Component
+@RequiredArgsConstructor
 public class FiksStatusMapper {
-    private static EnumMap<ForsendelseStatus, MessageStatus> mapping;
 
-    static {
-        mapping = new EnumMap<>(ForsendelseStatus.class);
-        mapping.put(ForsendelseStatus.LEST, MessageStatus.of(ReceiptStatus.LEST));
-        mapping.put(ForsendelseStatus.MOTTATT, MessageStatus.of(ReceiptStatus.MOTTATT));
-        mapping.put(ForsendelseStatus.AVVIST, MessageStatus.of(ReceiptStatus.FEIL, "Avvist"));
-        mapping.put(ForsendelseStatus.AKSEPTERT, MessageStatus.of(ReceiptStatus.LEVERT, "Akseptert"));
-        mapping.put(ForsendelseStatus.IKKE_LEVERT, MessageStatus.of(ReceiptStatus.FEIL, "Ikke levert"));
-        mapping.put(ForsendelseStatus.MANUELT_HANDTERT, MessageStatus.of(ReceiptStatus.LEST, "Manuelt håndtert"));
-        mapping.put(ForsendelseStatus.LEVERT_SDP, MessageStatus.of(ReceiptStatus.ANNET, "Levert SDP"));
-        mapping.put(ForsendelseStatus.PRINTET, MessageStatus.of(ReceiptStatus.ANNET, "Printet"));
-        mapping.put(ForsendelseStatus.SENDT_DIGITALT, MessageStatus.of(ReceiptStatus.LEST, "Sendt digitalt"));
-        mapping.put(ForsendelseStatus.SENDT_PRINT, MessageStatus.of(ReceiptStatus.LEST, "Sendt print"));
-        mapping.put(ForsendelseStatus.SENDT_SDP, MessageStatus.of(ReceiptStatus.LEST, "Sendt SDP"));
-        mapping.put(ForsendelseStatus.VARSLET, MessageStatus.of(ReceiptStatus.ANNET, "Varslet"));
-        mapping.put(ForsendelseStatus.KLAR_FOR_MOTTAK, MessageStatus.of(ReceiptStatus.LEVERT, "Klar for mottak"));
+    private final MessageStatusFactory messageStatusFactory;
+
+    public MessageStatus mapFrom(ForsendelseStatus forsendelseStatus) {
+        switch (forsendelseStatus) {
+            case LEST:
+                return messageStatusFactory.getMessageStatus(ReceiptStatus.LEST);
+            case MOTTATT:
+                return messageStatusFactory.getMessageStatus(ReceiptStatus.MOTTATT);
+            case AVVIST:
+                return messageStatusFactory.getMessageStatus(ReceiptStatus.FEIL, "Avvist");
+            case AKSEPTERT:
+                return messageStatusFactory.getMessageStatus(ReceiptStatus.LEVERT, "Akseptert");
+            case IKKE_LEVERT:
+                return messageStatusFactory.getMessageStatus(ReceiptStatus.FEIL, "Ikke levert");
+            case MANUELT_HANDTERT:
+                return messageStatusFactory.getMessageStatus(ReceiptStatus.LEST, "Manuelt håndtert");
+            case LEVERT_SDP:
+                return messageStatusFactory.getMessageStatus(ReceiptStatus.ANNET, "Levert SDP");
+            case PRINTET:
+                return messageStatusFactory.getMessageStatus(ReceiptStatus.ANNET, "Printet");
+            case SENDT_DIGITALT:
+                return messageStatusFactory.getMessageStatus(ReceiptStatus.LEST, "Sendt digitalt");
+            case SENDT_PRINT:
+                return messageStatusFactory.getMessageStatus(ReceiptStatus.LEST, "Sendt print");
+            case SENDT_SDP:
+                return messageStatusFactory.getMessageStatus(ReceiptStatus.LEST, "Sendt SDP");
+            case VARSLET:
+                return messageStatusFactory.getMessageStatus(ReceiptStatus.ANNET, "Varslet");
+            case KLAR_FOR_MOTTAK:
+                return messageStatusFactory.getMessageStatus(ReceiptStatus.LEVERT, "Klar for mottak");
+            default:
+                return null;
+        }
     }
 
-    private FiksStatusMapper() {
-    }
-
-    public static MessageStatus mapFrom(ForsendelseStatus forsendelseStatus) {
-        return mapping.get(forsendelseStatus);
+    public MessageStatus noForsendelseId() {
+        return messageStatusFactory.getMessageStatus(ReceiptStatus.FEIL, "forsendelseId finnes ikke i SvarUt.");
     }
 }

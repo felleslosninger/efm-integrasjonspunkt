@@ -17,7 +17,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -36,6 +36,7 @@ public class SvarInnEduCoreForwarder implements Consumer<Forsendelse> {
     private final SvarInnService svarInnService;
     private final NoarkClient localNoark;
     private final NoarkClient fiksMailClient;
+    private final MessageStatusFactory messageStatusFactory;
 
     @Override
     public void accept(Forsendelse forsendelse) {
@@ -49,7 +50,7 @@ public class SvarInnEduCoreForwarder implements Consumer<Forsendelse> {
         }
 
         Conversation c = conversationService.registerConversation(eduCore);
-        c = conversationService.registerStatus(c, MessageStatus.of(INNKOMMENDE_MOTTATT));
+        c = conversationService.registerStatus(c, messageStatusFactory.getMessageStatus(INNKOMMENDE_MOTTATT));
 
         PutMessageRequestType putMessage = EDUCoreFactory.createPutMessageFromCore(eduCore);
         if (!validateRequiredFields(forsendelse, eduCore, builder.getDokumentTypeList())) {
@@ -60,12 +61,12 @@ public class SvarInnEduCoreForwarder implements Consumer<Forsendelse> {
         final PutMessageResponseType response = localNoark.sendEduMelding(putMessage);
         if ("OK".equals(response.getResult().getType())) {
             Audit.info("Message successfully forwarded");
-            conversationService.registerStatus(c, MessageStatus.of(INNKOMMENDE_LEVERT));
+            conversationService.registerStatus(c, messageStatusFactory.getMessageStatus(INNKOMMENDE_LEVERT));
             svarInnService.confirmMessage(forsendelse.getId());
         } else if ("WARNING".equals(response.getResult().getType())) {
             Audit.info(format("Archive system responded with warning for message with fiks-id %s",
                     forsendelse.getId()), PutMessageResponseMarkers.markerFrom(response));
-            conversationService.registerStatus(c, MessageStatus.of(INNKOMMENDE_LEVERT));
+            conversationService.registerStatus(c, messageStatusFactory.getMessageStatus(INNKOMMENDE_LEVERT));
             svarInnService.confirmMessage(forsendelse.getId());
         } else {
             Audit.error(format("Message with fiks-id %s failed", forsendelse.getId()), PutMessageResponseMarkers.markerFrom(response));

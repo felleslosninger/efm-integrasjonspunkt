@@ -32,6 +32,7 @@ public class ConversationService {
     private final IntegrasjonspunktProperties props;
     private final NoarkClient mshClient;
     private final WebhookPublisher webhookPublisher;
+    private final MessageStatusFactory messageStatusFactory;
 
     private static final String CONVERSATION_EXISTS = "Conversation with id=%s already exists, not recreating";
     private static final Set<ServiceIdentifier> POLLABLES = Sets.newHashSet(DPV, DPF, DPO);
@@ -39,11 +40,14 @@ public class ConversationService {
     @Autowired
     public ConversationService(ConversationRepository repo,
                                IntegrasjonspunktProperties props,
-                               @Qualifier("mshClient") ObjectProvider<NoarkClient> mshClient, WebhookPublisher webhookPublisher) {
+                               @Qualifier("mshClient") ObjectProvider<NoarkClient> mshClient,
+                               WebhookPublisher webhookPublisher,
+                               MessageStatusFactory messageStatusFactory) {
         this.repo = repo;
         this.props = props;
         this.mshClient = mshClient.getIfAvailable();
         this.webhookPublisher = webhookPublisher;
+        this.messageStatusFactory = messageStatusFactory;
     }
 
     public Optional<Conversation> registerStatus(String conversationId, MessageStatus status) {
@@ -91,7 +95,7 @@ public class ConversationService {
             return find.get();
         }
 
-        MessageStatus ms = MessageStatus.of(ReceiptStatus.OPPRETTET);
+        MessageStatus ms = messageStatusFactory.getMessageStatus(ReceiptStatus.OPPRETTET);
         if (message.getMessageType() == EDUCore.MessageType.APPRECEIPT) {
             ms.setDescription("AppReceipt");
         }
@@ -112,7 +116,7 @@ public class ConversationService {
             return find.get();
         }
 
-        MessageStatus ms = MessageStatus.of(ReceiptStatus.OPPRETTET);
+        MessageStatus ms = messageStatusFactory.getMessageStatus(ReceiptStatus.OPPRETTET);
         Conversation c = Conversation.of(message, ms);
         return repo.save(c);
     }
@@ -124,7 +128,7 @@ public class ConversationService {
             return find.get();
         }
 
-        MessageStatus ms = MessageStatus.of(ReceiptStatus.OPPRETTET);
+        MessageStatus ms = messageStatusFactory.getMessageStatus(ReceiptStatus.OPPRETTET);
         Conversation c = Conversation.of(sbd, ms);
         return repo.save(c);
     }

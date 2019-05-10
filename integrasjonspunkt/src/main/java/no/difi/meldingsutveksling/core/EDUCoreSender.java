@@ -14,8 +14,8 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -29,23 +29,24 @@ import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 
 @Component
 public class EDUCoreSender {
+
     private final IntegrasjonspunktProperties properties;
-    private final ServiceRegistryLookup serviceRegistryLookup;
     private final StrategyFactory strategyFactory;
     private final NoarkClient mshClient;
     private final ConversationService conversationService;
+    private final MessageStatusFactory messageStatusFactory;
 
     @Autowired
     EDUCoreSender(IntegrasjonspunktProperties properties,
-                  ServiceRegistryLookup serviceRegistryLookup,
                   StrategyFactory strategyFactory,
                   ConversationService conversationService,
-                  @Qualifier("mshClient") ObjectProvider<NoarkClient> mshClient) {
+                  @Qualifier("mshClient") ObjectProvider<NoarkClient> mshClient,
+                  MessageStatusFactory messageStatusFactory) {
         this.properties = properties;
-        this.serviceRegistryLookup = serviceRegistryLookup;
         this.strategyFactory = strategyFactory;
         this.conversationService = conversationService;
         this.mshClient = mshClient.getIfAvailable();
+        this.messageStatusFactory = messageStatusFactory;
     }
 
     public PutMessageResponseType sendMessage(EDUCore message) {
@@ -76,16 +77,22 @@ public class EDUCoreSender {
             }
         }
 
-        auditResult(result, message, Optional.ofNullable(strategy));
+        auditResult(result, message, getType(strategy));
         createReceiptIfValidResult(result, message);
         return result;
+    }
+
+    private String getType(MessageStrategy strategy) {
+        return Optional.ofNullable(strategy)
+                .map(MessageStrategy::serviceName)
+                .orElse("MSH");
     }
 
     private void createReceiptIfValidResult(PutMessageResponseType result, EDUCore message) {
         if (properties.getFeature().isEnableReceipts() &&
                 message.getServiceIdentifier() != null &&
                 "OK".equals(result.getResult().getType())) {
-            MessageStatus ms = MessageStatus.of(ReceiptStatus.SENDT);
+            MessageStatus ms = messageStatusFactory.getMessageStatus(ReceiptStatus.SENDT);
             if (message.getMessageType() == EDUCore.MessageType.APPRECEIPT) {
                 ms.setDescription("AppReceipt");
             }
@@ -93,13 +100,11 @@ public class EDUCoreSender {
         }
     }
 
-    private void auditResult(PutMessageResponseType result, EDUCore message, Optional<MessageStrategy> strategy) {
-        String type = strategy.map(MessageStrategy::serviceName).orElse("MSH");
+    private void auditResult(PutMessageResponseType result, EDUCore message, String type) {
         if ("OK".equals(result.getResult().getType())) {
             Audit.info(String.format("%s message sent", type), EDUCoreMarker.markerFrom(message));
         } else {
             Audit.error(String.format("%s message sending failed", type), EDUCoreMarker.markerFrom(message));
         }
     }
-
 }

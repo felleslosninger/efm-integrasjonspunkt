@@ -22,7 +22,7 @@ import no.difi.meldingsutveksling.noarkexchange.MessageContextException;
 import no.difi.meldingsutveksling.noarkexchange.MessageContextFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
@@ -66,6 +66,7 @@ public class NextMoveServiceBus {
     private final SBDReceiptFactory sbdReceiptFactory;
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final ConversationService conversationService;
+    private final MessageStatusFactory messageStatusFactory;
 
     private IMessageReceiver messageReceiver;
 
@@ -80,7 +81,7 @@ public class NextMoveServiceBus {
                               ServiceBusPayloadConverter payloadConverter,
                               SBDReceiptFactory sbdReceiptFactory,
                               ServiceRegistryLookup serviceRegistryLookup,
-                              ConversationService conversationService) {
+                              ConversationService conversationService, MessageStatusFactory messageStatusFactory) {
         this.props = props;
         this.nextMoveQueue = nextMoveQueue;
         this.serviceBusClient = serviceBusClient;
@@ -93,6 +94,7 @@ public class NextMoveServiceBus {
         this.sbdReceiptFactory = sbdReceiptFactory;
         this.serviceRegistryLookup = serviceRegistryLookup;
         this.conversationService = conversationService;
+        this.messageStatusFactory = messageStatusFactory;
     }
 
     @PostConstruct
@@ -212,7 +214,7 @@ public class NextMoveServiceBus {
         if (SBDUtil.isStatus(sbd)) {
             log.debug(String.format("Message with id=%s is a receipt", sbd.getConversationId()));
             StatusMessage msg = (StatusMessage) sbd.getAny();
-            conversationService.registerStatus(sbd.getConversationId(), MessageStatus.of(msg.getStatus()))
+            conversationService.registerStatus(sbd.getConversationId(), messageStatusFactory.getMessageStatus(msg.getStatus()))
                     .ifPresent(conversationService::markFinished);
         } else {
             sendReceiptAsync(nextMoveQueue.enqueue(sbd, DPE));

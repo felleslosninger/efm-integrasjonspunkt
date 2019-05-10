@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.ks.svarut;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.CertificateParserException;
-import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingException;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.ks.mapping.FiksMapper;
@@ -12,13 +11,11 @@ import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
-import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 
 import java.security.cert.X509Certificate;
-import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
 public class SvarUtService {
@@ -27,6 +24,7 @@ public class SvarUtService {
     private final FiksMapper fiksMapper;
     private final IntegrasjonspunktProperties props;
     private final CertificateParser certificateParser;
+    private final FiksStatusMapper fiksStatusMapper;
 
     public String send(EDUCore message) {
         ServiceRecord serviceRecord;
@@ -42,7 +40,7 @@ public class SvarUtService {
         return client.sendMessage(svarUtRequest);
     }
 
-    public String send(NextMoveMessage message) throws NextMoveException, ArkivmeldingException {
+    public String send(NextMoveMessage message) throws NextMoveException {
         ServiceRecord serviceRecord;
         try {
             serviceRecord = serviceRegistryLookup.getServiceRecord(message.getReceiverIdentifier(), message.getServiceIdentifier());
@@ -61,7 +59,7 @@ public class SvarUtService {
         return props.getFiks().getUt().getEndpointUrl().toString();
     }
 
-    private SendForsendelseMedId getForsendelse(NextMoveMessage message, ServiceRecord serviceRecord) throws NextMoveException, ArkivmeldingException {
+    private SendForsendelseMedId getForsendelse(NextMoveMessage message, ServiceRecord serviceRecord) throws NextMoveException {
         final X509Certificate x509Certificate = toX509Certificate(serviceRecord.getPemCertificate());
         return fiksMapper.mapFrom(message, x509Certificate);
     }
@@ -70,9 +68,9 @@ public class SvarUtService {
         final String forsendelseId = client.getForsendelseId(getFiksUtUrl(), conversation.getConversationId());
         if (forsendelseId != null) {
             final ForsendelseStatus forsendelseStatus = client.getForsendelseStatus(getFiksUtUrl(), forsendelseId);
-            return FiksStatusMapper.mapFrom(forsendelseStatus);
+            return fiksStatusMapper.mapFrom(forsendelseStatus);
         } else {
-            return MessageStatus.of(ReceiptStatus.FEIL, LocalDateTime.now(), "forsendelseId finnes ikke i SvarUt.");
+            return fiksStatusMapper.noForsendelseId();
         }
     }
 

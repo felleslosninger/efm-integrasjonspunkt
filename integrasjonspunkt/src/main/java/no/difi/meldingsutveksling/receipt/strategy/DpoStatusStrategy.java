@@ -1,25 +1,23 @@
 package no.difi.meldingsutveksling.receipt.strategy;
 
+import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.receipt.*;
 import org.springframework.stereotype.Component;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Component
+@RequiredArgsConstructor
 public class DpoStatusStrategy implements StatusStrategy {
     private static final ServiceIdentifier serviceIdentifier = ServiceIdentifier.DPO;
 
-    private IntegrasjonspunktProperties props;
-    private ConversationService conversationService;
-
-    public DpoStatusStrategy(IntegrasjonspunktProperties props,
-                             ConversationService conversationService) {
-        this.props = props;
-        this.conversationService = conversationService;
-    }
+    private final IntegrasjonspunktProperties props;
+    private final ConversationService conversationService;
+    private final MessageStatusFactory messageStatusFactory;
+    private final Clock clock;
 
     @Override
     public void checkStatus(Conversation conversation) {
@@ -28,21 +26,21 @@ public class DpoStatusStrategy implements StatusStrategy {
             return;
         }
 
-        Optional<MessageStatus> lestStatus = conversation.getMessageStatuses().stream()
+        conversation.getMessageStatuses().stream()
                 .filter(ms -> ms.getStatus().equals(ReceiptStatus.LEST.toString()))
-                .findFirst();
-        lestStatus.ifPresent(s -> conversationService.markFinished(conversation));
+                .findFirst()
+                .ifPresent(s -> conversationService.markFinished(conversation));
 
         if (!conversation.isFinished()) {
-            Optional<MessageStatus> sendtStatus = conversation.getMessageStatuses().stream()
+            conversation.getMessageStatuses().stream()
                     .filter(ms -> ms.getStatus().equals(ReceiptStatus.SENDT.toString()))
-                    .findFirst();
-            sendtStatus.ifPresent(s -> {
-                if (LocalDateTime.now().isAfter(s.getLastUpdate().plusHours(props.getStatus().getMessageTimeoutHours()))) {
-                    conversationService.registerStatus(conversation, MessageStatus.of(ReceiptStatus.FEIL));
-                    conversationService.markFinished(conversation);
-                }
-            });
+                    .findFirst()
+                    .ifPresent(s -> {
+                        if (LocalDateTime.now(clock).isAfter(s.getLastUpdate().plusHours(props.getStatus().getMessageTimeoutHours()))) {
+                            conversationService.registerStatus(conversation, messageStatusFactory.getMessageStatus(ReceiptStatus.FEIL));
+                            conversationService.markFinished(conversation);
+                        }
+                    });
         }
     }
 

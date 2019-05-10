@@ -8,15 +8,20 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
 import org.mockito.Mockito
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Primary
+
+import java.time.Clock
+import java.time.Instant
+import java.time.ZoneId
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPF
 import static org.mockito.Mockito.mock
 import static org.mockito.Mockito.when
 
 @Configuration
-public class MockConfiguration {
+class MockConfiguration {
     @Bean
-    public ServiceRegistryLookup serviceRegistryLookup() {
+    ServiceRegistryLookup serviceRegistryLookup() {
         def lookup = mock(ServiceRegistryLookup)
         def pem = this.getClass().getClassLoader().getResource("difi-cert-test.pem").text
         when(lookup.getServiceRecord(Mockito.any(String), Mockito.eq(DPF))).thenReturn(new ServiceRecord(DPF, "123456789", pem, "http://localhost"))
@@ -27,12 +32,18 @@ public class MockConfiguration {
     }
 
     @Bean(name = "localNoark")
-    public NoarkClient noarkClient() {
+    NoarkClient noarkClient() {
         return mock(NoarkClient)
     }
 
     @Bean(name = "fiksMailClient")
     NoarkClient fiksMailCLient() {
         return mock(NoarkClient)
+    }
+
+    @Bean
+    @Primary
+    Clock clock() {
+        return Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), ZoneId.of("Europe/Oslo"))
     }
 }

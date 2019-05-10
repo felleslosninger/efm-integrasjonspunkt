@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
+import no.difi.meldingsutveksling.ApplicationContextHolder;
 import no.difi.meldingsutveksling.Decryptor;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.NextMoveConsts;
@@ -20,14 +21,16 @@ import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import no.difi.meldingsutveksling.receipt.*;
+import no.difi.meldingsutveksling.receipt.Conversation;
+import no.difi.meldingsutveksling.receipt.ConversationService;
+import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.xml.bind.DatatypeConverter;
@@ -57,7 +60,7 @@ public class IntegrajonspunktReceiveImpl {
     private static final String OK_TYPE = OKEY_TYPE;
 
     private final TransportFactory transportFactory;
-    private NoarkClient localNoark;
+    private final NoarkClient localNoark;
     private final Adresseregister adresseregisterService;
     private final IntegrasjonspunktProperties properties;
     private final IntegrasjonspunktNokkel keyInfo;
@@ -66,10 +69,10 @@ public class IntegrajonspunktReceiveImpl {
     private final EDUCoreFactory eduCoreFactory;
     private final MessagePersister messagePersister;
     private final SBDReceiptFactory sbdReceiptFactory;
+    private final ApplicationContextHolder applicationContextHolder;
+    private final MessageStatusFactory messageStatusFactory;
 
-    private ApplicationContext context;
-
-    public IntegrajonspunktReceiveImpl(ApplicationContext context,
+    public IntegrajonspunktReceiveImpl(ApplicationContextHolder applicationContextHolder,
                                        TransportFactory transportFactory,
                                        @Qualifier("localNoark") ObjectProvider<NoarkClient> localNoark,
                                        Adresseregister adresseregisterService,
@@ -79,8 +82,8 @@ public class IntegrajonspunktReceiveImpl {
                                        MessageSender messageSender,
                                        EDUCoreFactory eduCoreFactory,
                                        ObjectProvider<MessagePersister> messagePersister,
-                                       SBDReceiptFactory sbdReceiptFactory) {
-        this.context = context;
+                                       SBDReceiptFactory sbdReceiptFactory, MessageStatusFactory messageStatusFactory) {
+        this.applicationContextHolder = applicationContextHolder;
         this.transportFactory = transportFactory;
         this.localNoark = localNoark.getIfAvailable();
         this.adresseregisterService = adresseregisterService;
@@ -91,6 +94,7 @@ public class IntegrajonspunktReceiveImpl {
         this.eduCoreFactory = eduCoreFactory;
         this.messagePersister = messagePersister.getIfUnique();
         this.sbdReceiptFactory = sbdReceiptFactory;
+        this.messageStatusFactory = messageStatusFactory;
     }
 
     public CorrelationInformation forwardToNoarkSystem(StandardBusinessDocument sbd) throws MessageException {
@@ -116,7 +120,7 @@ public class IntegrajonspunktReceiveImpl {
             eduCore = convertAsicEntrytoEduCore(decryptedAsicPackage);
             if (PayloadUtil.isAppReceipt(eduCore.getPayload())) {
                 Audit.info("AppReceipt extracted", markerFrom(sbd));
-                Optional<Conversation> c = conversationService.registerStatus(eduCore.getId(), MessageStatus.of(ReceiptStatus.LEST));
+                Optional<Conversation> c = conversationService.registerStatus(eduCore.getId(), messageStatusFactory.getMessageStatus(ReceiptStatus.LEST));
                 c.ifPresent(conversationService::markFinished);
                 if (!properties.getFeature().isForwardReceivedAppReceipts()) {
                     Audit.info("AppReceipt forwarding disabled - will not deliver to archive");
@@ -145,7 +149,7 @@ public class IntegrajonspunktReceiveImpl {
         Arkivmelding arkivmelding = convertAsicEntryToArkivmelding(asic);
 
         EDUCore eduCore = eduCoreFactory.create(sbd, arkivmelding, asic);
-        Optional<Conversation> c = conversationService.registerStatus(eduCore.getId(), MessageStatus.of(ReceiptStatus.LEST));
+        Optional<Conversation> c = conversationService.registerStatus(eduCore.getId(), messageStatusFactory.getMessageStatus(ReceiptStatus.LEST));
         c.ifPresent(conversationService::markFinished);
 
         return eduCore;
@@ -166,7 +170,7 @@ public class IntegrajonspunktReceiveImpl {
             if (result.getType().equals(OK_TYPE)) {
                 Audit.info("Delivered archive", markerFrom(response));
                 Optional<Conversation> c = conversationService.registerStatus(sbd.getConversationId(),
-                        MessageStatus.of(ReceiptStatus.INNKOMMENDE_LEVERT));
+                        messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_LEVERT));
                 c.ifPresent(conversationService::markFinished);
                 sendReceiptOpen(sbd);
                 if (localNoark instanceof MailClient && eduCore.getMessageType() != EDUCore.MessageType.APPRECEIPT) {
@@ -198,7 +202,7 @@ public class IntegrajonspunktReceiveImpl {
 
     private void sendReceipt(StandardBusinessDocument receipt) {
         Transport t = transportFactory.createTransport(receipt);
-        t.send(context, receipt);
+        t.send(applicationContextHolder.getApplicationContext(), receipt);
     }
 
     public EDUCore convertAsicEntrytoEduCore(byte[] bytes) throws MessageException {
@@ -217,7 +221,7 @@ public class IntegrajonspunktReceiveImpl {
         throw new MessageException(StatusMessage.UNABLE_TO_EXTRACT_BEST_EDU);
     }
 
-    public Arkivmelding convertAsicEntryToArkivmelding(byte[] bytes) {
+    private Arkivmelding convertAsicEntryToArkivmelding(byte[] bytes) {
         try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes))) {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
@@ -232,25 +236,4 @@ public class IntegrajonspunktReceiveImpl {
             throw new NextMoveRuntimeException("Unable to read arkivmelding.xml in ASiC", e);
         }
     }
-
-    public TransportFactory getTransportFactory() {
-        return transportFactory;
-    }
-
-    public NoarkClient getLocalNoark() {
-        return localNoark;
-    }
-
-    public void setLocalNoark(NoarkClient localNoark) {
-        this.localNoark = localNoark;
-    }
-
-    public IntegrasjonspunktProperties getProperties() {
-        return properties;
-    }
-
-    public IntegrasjonspunktNokkel getKeyInfo() {
-        return keyInfo;
-    }
-
 }

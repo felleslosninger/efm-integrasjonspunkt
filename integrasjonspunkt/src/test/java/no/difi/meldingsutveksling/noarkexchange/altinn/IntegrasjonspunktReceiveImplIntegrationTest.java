@@ -19,6 +19,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -41,15 +43,17 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
         IntegrasjonspunktIntegrationTestConfig.class
 }, webEnvironment = RANDOM_PORT, properties = {"app.local.properties.enable=false"})
 @ActiveProfiles("test")
+@SpyBean(IntegrajonspunktReceiveImpl.class)
 public class IntegrasjonspunktReceiveImplIntegrationTest {
 
     @Autowired
     InternalQueue internalQueue;
 
     @Autowired
-    IntegrajonspunktReceiveImpl integrajonspunktReceive;
-
     IntegrajonspunktReceiveImpl integrajonspunktReceiveSpy;
+
+    @MockBean(name = "localNoark")
+    NoarkClient noarkClientMock;
 
     @Before
     public void setUp() throws MessageException {
@@ -57,11 +61,7 @@ public class IntegrasjonspunktReceiveImplIntegrationTest {
         when(appReceiptTypeMock.getType()).thenReturn("OK");
         PutMessageResponseType putMessageResponseTypeMock = mock(PutMessageResponseType.class);
         when(putMessageResponseTypeMock.getResult()).thenReturn(appReceiptTypeMock);
-        NoarkClient noarkClientMock = mock(NoarkClient.class);
         when(noarkClientMock.sendEduMelding(any(PutMessageRequestType.class))).thenReturn(putMessageResponseTypeMock);
-        integrajonspunktReceive.setLocalNoark(noarkClientMock);
-
-        integrajonspunktReceiveSpy = spy(integrajonspunktReceive);
         doReturn("42".getBytes()).when(integrajonspunktReceiveSpy).decrypt(any(Payload.class));
 
         Sender senderMock = mock(Sender.class);
@@ -76,7 +76,6 @@ public class IntegrasjonspunktReceiveImplIntegrationTest {
 
         doReturn(requestMock).when(integrajonspunktReceiveSpy).convertAsicEntrytoEduCore(any(byte[].class));
         doNothing().when(integrajonspunktReceiveSpy).sendReceiptOpen(any(StandardBusinessDocument.class));
-        internalQueue.setIntegrajonspunktReceiveImpl(integrajonspunktReceiveSpy);
     }
 
     @Test
@@ -93,5 +92,4 @@ public class IntegrasjonspunktReceiveImplIntegrationTest {
         Unmarshaller unmarshaller = ctx.createUnmarshaller();
         return unmarshaller.unmarshal(new StreamSource(IntegrasjonspunktReceiveImplIntegrationTest.class.getClassLoader().getResourceAsStream(filename)), StandardBusinessDocument.class).getValue();
     }
-
 }

@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.ks.svarinn.SvarInnBeans
 import no.difi.meldingsutveksling.ks.MockConfiguration
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister
 import no.difi.meldingsutveksling.noarkexchange.schema.core.*
+import no.difi.meldingsutveksling.receipt.MessageStatusFactory
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.Service
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
@@ -39,9 +40,11 @@ import static org.springframework.ws.test.client.ResponseCreators.withPayload
         SvarUtWebServiceBeans.class,
         SvarUtConfiguration.class,
         MockConfiguration.class,
-        FiksMapper.class])
+        FiksMapper.class,
+        MessageStatusFactory.class
+])
 @EnableConfigurationProperties(IntegrasjonspunktProperties)
-public class SvarUtServiceIntegrationTest {
+class SvarUtServiceIntegrationTest {
 
     @MockBean
     CryptoMessagePersister cryptoMessagePersister

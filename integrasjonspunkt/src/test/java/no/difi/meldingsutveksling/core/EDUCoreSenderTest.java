@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.core;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.ServiceRecordObjectMother;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory;
@@ -11,7 +10,7 @@ import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.receipt.ConversationService;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +21,6 @@ import static org.mockito.Mockito.*;
 public class EDUCoreSenderTest {
 
     private IntegrasjonspunktProperties properties;
-    private ServiceRegistryLookup serviceRegistryLookup;
     private ConversationService conversationService;
     private StrategyFactory strategyFactory;
     private NoarkClient mshClient;
@@ -33,7 +31,6 @@ public class EDUCoreSenderTest {
     @Before
     public void setup() {
         properties = mock(IntegrasjonspunktProperties.class);
-        serviceRegistryLookup = mock(ServiceRegistryLookup.class);
         conversationService = mock(ConversationService.class);
         strategyFactory = mock(StrategyFactory.class);
         mshClient = mock(NoarkClient.class);
@@ -50,8 +47,9 @@ public class EDUCoreSenderTest {
         when(mshClient.sendEduMelding(any(PutMessageRequestType.class))).thenReturn(response);
         ObjectProvider objectProvider = mock(ObjectProvider.class);
         when(objectProvider.getIfAvailable()).thenReturn(mshClient);
+        MessageStatusFactory messageStatusFactory = mock(MessageStatusFactory.class);
 
-        eduCoreSender = new EDUCoreSender(properties, serviceRegistryLookup, strategyFactory, conversationService, objectProvider);
+        eduCoreSender = new EDUCoreSender(properties, strategyFactory, conversationService, objectProvider, messageStatusFactory);
         setupDefaultProperties();
         setupDefaultMessage();
     }
@@ -67,8 +65,6 @@ public class EDUCoreSenderTest {
 
     @Test
     public void givenServiceIdentifierIsDPVAndMshIsEnabledWhenSendingMessageThenShouldCheckMSH() throws ServiceRegistryLookupException {
-        when(serviceRegistryLookup.getServiceRecord(IDENTIFIER, ServiceIdentifier.DPV))
-                .thenReturn(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER));
         enableMsh();
 
         eduCoreSender.sendMessage(eduCore);
@@ -78,8 +74,6 @@ public class EDUCoreSenderTest {
 
     @Test
     public void givenServiceIdentifierIsDPVAndMshCanReceiveMessageWhenSendingMessageThenMshShouldBeUsed() throws ServiceRegistryLookupException {
-        when(serviceRegistryLookup.getServiceRecord(IDENTIFIER, ServiceIdentifier.DPV))
-                .thenReturn(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER));
         when(mshClient.canRecieveMessage(IDENTIFIER)).thenReturn(true);
         enableMsh();
 

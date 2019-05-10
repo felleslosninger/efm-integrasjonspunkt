@@ -28,6 +28,7 @@ public class DpvStatusStrategy implements StatusStrategy {
     private final ConversationService conversationService;
     private final CorrespondenceAgencyMessageFactory correspondenceAgencyMessageFactory;
     private final CorrespondenceAgencyClient client;
+    private final MessageStatusFactory messageStatusFactory;
 
     @Override
     public void checkStatus(final Conversation conversation) {
@@ -59,7 +60,7 @@ public class DpvStatusStrategy implements StatusStrategy {
                 .findFirst()
                 .ifPresent(createdStatus -> {
                     ZonedDateTime createdZoned = createdStatus.getStatusDate().toGregorianCalendar().toZonedDateTime();
-                    MessageStatus status = MessageStatus.of(ReceiptStatus.LEVERT, createdZoned.toLocalDateTime());
+                    MessageStatus status = messageStatusFactory.getMessageStatus(ReceiptStatus.LEVERT, createdZoned.toLocalDateTime());
                     conversationService.registerStatus(conversation, status);
                 });
 
@@ -68,7 +69,7 @@ public class DpvStatusStrategy implements StatusStrategy {
                 .findFirst()
                 .ifPresent(readStatus -> {
                     ZonedDateTime readZoned = readStatus.getStatusDate().toGregorianCalendar().toZonedDateTime();
-                    MessageStatus status = MessageStatus.of(ReceiptStatus.LEST, readZoned.toLocalDateTime());
+                    MessageStatus status = messageStatusFactory.getMessageStatus(ReceiptStatus.LEST, readZoned.toLocalDateTime());
                     conversationService.markFinished(conversationService.registerStatus(conversation, status));
                 });
     }

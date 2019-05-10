@@ -28,7 +28,8 @@ public class MessageStatus {
     @Lob
     private String rawReceipt;
 
-    MessageStatus(){}
+    MessageStatus() {
+    }
 
     private MessageStatus(String status, LocalDateTime lastUpdate, String description) {
         this.status = status;
@@ -36,16 +37,8 @@ public class MessageStatus {
         this.description = description;
     }
 
-    public static MessageStatus of(ReceiptStatus status) {
-        return new MessageStatus(status.toString(), LocalDateTime.now(), null);
-    }
-
     public static MessageStatus of(ReceiptStatus status, LocalDateTime lastUpdate) {
         return new MessageStatus(status.toString(), lastUpdate, null);
-    }
-
-    public static MessageStatus of(ReceiptStatus status, String description) {
-        return new MessageStatus(status.toString(), LocalDateTime.now(), description);
     }
 
     public static MessageStatus of(ReceiptStatus status, LocalDateTime lastUpdate, String description) {

@@ -355,3 +355,36 @@ Feature: Sending a Next Move DPO message
     """
     Testing 1 2 3
     """
+    And the message statuses for the conversation with id = "37efbd4c-413d-4e2c-bbc5-257ef4a65a56" are:
+    """
+    {
+      "content" : [ {
+        "statId" : 1,
+        "convId" : 1,
+        "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
+        "lastUpdate" : "2019-03-25T12:38:23",
+        "status" : "OPPRETTET"
+      }, {
+        "statId" : 2,
+        "convId" : 1,
+        "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
+        "lastUpdate" : "2019-03-25T12:38:23",
+        "status" : "SENDT"
+      } ],
+      "last" : true,
+      "totalElements" : 2,
+      "totalPages" : 1,
+      "size" : 10,
+      "number" : 0,
+      "sort" : [ {
+        "direction" : "ASC",
+        "property" : "statId",
+        "ignoreCase" : false,
+        "nullHandling" : "NATIVE",
+        "descending" : false,
+        "ascending" : true
+      } ],
+      "first" : true,
+      "numberOfElements" : 2
+    }
+    """

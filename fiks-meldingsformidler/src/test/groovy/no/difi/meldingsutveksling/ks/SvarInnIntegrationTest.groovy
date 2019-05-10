@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.noarkexchange.NoarkClient
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType
+import no.difi.meldingsutveksling.receipt.MessageStatusFactory
 import org.hamcrest.Matchers
 import org.junit.Before
 import org.junit.Test
@@ -39,7 +40,9 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
         SvarUtWebServiceBeans.class,
         SvarUtConfiguration.class,
         MockConfiguration,
-        FiksMapper.class])
+        FiksMapper.class,
+        MessageStatusFactory.class
+])
 @EnableConfigurationProperties(IntegrasjonspunktProperties)
 class SvarInnIntegrationTest {
 
@@ -66,7 +69,7 @@ class SvarInnIntegrationTest {
     NoarkClient noarkClient
 
     @Before
-    public void setup() {
+    void setup() {
         server = MockRestServiceServer.bindTo(restTemplate).build()
         String response = getClass().getResource("/sampleresponse.json").text
         server.expect(requestTo(Matchers.endsWith("/svarinn/mottaker/hentNyeForsendelser"))).andRespond(withSuccess(response, MediaType.APPLICATION_JSON))
@@ -74,7 +77,7 @@ class SvarInnIntegrationTest {
     }
 
     @Test
-    public void receiveMessageFromFiks() {
+    void receiveMessageFromFiks() {
         byte[] zipFile = getClass().getResource("/somdalen-dokumenter-ae68b33d.zip").getBytes()
         server.expect(requestTo(Matchers.containsString("/svarinn/forsendelse/"))).andRespond(withSuccess(zipFile, MediaType.valueOf("application/zip;charset=UTF-8")))
 
@@ -86,7 +89,7 @@ class SvarInnIntegrationTest {
     }
 
     @Test
-    public void downloadedEmptyZipFile() {
+    void downloadedEmptyZipFile() {
         byte[] emptyZipFile = getClass().getResource("/empty_encrypted_svarinnfiles.zip").getBytes()
         server.expect(requestTo(Matchers.containsString("/svarinn/forsendelse/"))).andRespond(withSuccess(emptyZipFile, MediaType.valueOf("application/zip;charset=UTF-8")))
 

@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.*;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
@@ -15,10 +16,9 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -43,6 +43,7 @@ import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom
  * The JMS listener has the responsibility is to forward the message to the archive system.
  */
 @Component
+@Slf4j
 public class InternalQueue {
 
     private static final String EXTERNAL = "external";
@@ -51,12 +52,8 @@ public class InternalQueue {
     private static final String PUTMSG = "putmessage";
     private static final String DLQ = "ActiveMQ.DLQ";
 
-    private Logger logger = LoggerFactory.getLogger(InternalQueue.class);
-
     @Autowired
     private JmsTemplate jmsTemplate;
-
-    private IntegrajonspunktReceiveImpl integrajonspunktReceive;
 
     @Autowired
     private IntegrasjonspunktProperties properties;
@@ -73,9 +70,12 @@ public class InternalQueue {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private NoarkClient noarkClient;
+    @Autowired // Avoid circular depencency
+    private MessageStatusFactory messageStatusFactory;
 
-    private EDUCoreFactory eduCoreFactory;
+    private final IntegrajonspunktReceiveImpl integrajonspunktReceive;
+    private final NoarkClient noarkClient;
+    private final EDUCoreFactory eduCoreFactory;
 
     private static JAXBContext jaxbContext;
     private static JAXBContext jaxbContextNextmove;
@@ -96,7 +96,7 @@ public class InternalQueue {
             jaxbContext = JAXBContextFactory.createContext(new Class[]{StandardBusinessDocument.class, Payload.class, Kvittering.class, PutMessageRequestType.class}, null);
             jaxbContextNextmove = JAXBContextFactory.createContext(new Class[]{ConversationResource.class}, null);
         } catch (JAXBException e) {
-            throw new RuntimeException("Could not start internal queue: Failed to create JAXBContext", e);
+            throw new NextMoveRuntimeException("Could not start internal queue: Failed to create JAXBContext", e);
         }
     }
 
@@ -154,7 +154,7 @@ public class InternalQueue {
     @SuppressWarnings("squid:S1166")
     @JmsListener(destination = DLQ)
     public void dlqListener(byte[] message, Session session) {
-        MessageStatus ms = MessageStatus.of(ReceiptStatus.FEIL);
+        MessageStatus ms = messageStatusFactory.getMessageStatus(ReceiptStatus.FEIL);
         String conversationId = "";
         String errorMsg = "";
 
@@ -202,7 +202,7 @@ public class InternalQueue {
             FileOutputStream fos = new FileOutputStream(new File("failed_messages/" + request.getId() + "_failed.xml"));
             bos.writeTo(fos);
         } catch (JAXBException | IOException e) {
-            logger.error("Failed writing message to disk", e);
+            log.error("Failed writing message to disk", e);
         }
     }
 
@@ -213,7 +213,7 @@ public class InternalQueue {
             Unmarshaller unmarshaller = jaxbContextNextmove.createUnmarshaller();
             return unmarshaller.unmarshal(ss, ConversationResource.class).getValue();
         } catch (JAXBException e) {
-            logger.error("Could not unmarshal nextmove message", e);
+            log.error("Could not unmarshal nextmove message", e);
             throw new MeldingsUtvekslingRuntimeException(e);
         }
     }
@@ -225,7 +225,7 @@ public class InternalQueue {
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             return unmarshaller.unmarshal(ss, PutMessageRequestType.class).getValue();
         } catch (JAXBException e) {
-            logger.error("Could not unmarshal putmessage", e);
+            log.error("Could not unmarshal putmessage", e);
             throw new MeldingsUtvekslingRuntimeException(e);
         }
     }
@@ -324,13 +324,9 @@ public class InternalQueue {
         } catch (Exception e) {
             Audit.error("Failed delivering to archive", markerFrom(sbd), e);
             if (e instanceof MessageException) {
-                logger.error(markerFrom(sbd), ((MessageException) e).getStatusMessage().getTechnicalMessage(), e);
+                log.error(markerFrom(sbd), ((MessageException) e).getStatusMessage().getTechnicalMessage(), e);
             }
             throw new MeldingsUtvekslingRuntimeException(e);
         }
-    }
-
-    public void setIntegrajonspunktReceiveImpl(IntegrajonspunktReceiveImpl integrajonspunktReceiveImpl) {
-        this.integrajonspunktReceive = integrajonspunktReceiveImpl;
     }
 }

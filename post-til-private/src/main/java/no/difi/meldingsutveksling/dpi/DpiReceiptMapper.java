@@ -1,34 +1,56 @@
 package no.difi.meldingsutveksling.dpi;
 
+import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
-import no.difi.sdp.client2.domain.kvittering.*;
+import no.difi.sdp.client2.domain.kvittering.ForretningsKvittering;
+import org.springframework.stereotype.Component;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.HashMap;
 
 import static no.difi.meldingsutveksling.receipt.ReceiptStatus.FEIL;
 
+@Component
+@RequiredArgsConstructor
 public class DpiReceiptMapper {
 
-    private static final HashMap<Class, MessageStatus> mapper;
-    static {
-        mapper = new HashMap<>();
-        mapper.put(LeveringsKvittering.class, MessageStatus.of(ReceiptStatus.LEVERT, "Kvittering på at digital post er tilgjengeliggjort eller at en fysisk post er postlagt"));
-        mapper.put(AapningsKvittering.class, MessageStatus.of(ReceiptStatus.LEST, "Kvittering fra Innbygger for at digital post er åpnet"));
-        mapper.put(VarslingFeiletKvittering.class, MessageStatus.of(FEIL, "Kvittering for at en spesifisert varsling ikke har blitt sendt"));
-        mapper.put(MottaksKvittering.class, MessageStatus.of(ReceiptStatus.LEST, "Kvittering fra utskrift og forsendelsestjenesten om at melding er mottatt og lagt til print"));
-        mapper.put(ReturpostKvittering.class, MessageStatus.of(FEIL, "Kvittering fra utskrift og forsendelsestjenesten om at posten ikke har blitt levert til Mottaker."));
-        mapper.put(Feil.class, MessageStatus.of(FEIL, "Generell melding om at det har skjedd en feil"));
-    }
+    private final MessageStatusFactory messageStatusFactory;
+    private final Clock clock;
 
-    public static MessageStatus from(ForretningsKvittering forretningsKvittering) {
-        MessageStatus ms = mapper.getOrDefault(forretningsKvittering.getClass(), MessageStatus.of(ReceiptStatus.ANNET, "Ukjent kvittering"));
+    public MessageStatus from(ForretningsKvittering forretningsKvittering) {
+        MessageStatus ms = getMessageStatus(forretningsKvittering.getClass());
         if (forretningsKvittering.getTidspunkt() != null) {
-            ms.setLastUpdate(LocalDateTime.ofInstant(forretningsKvittering.getTidspunkt(), ZoneId.systemDefault()));
+            ms.setLastUpdate(LocalDateTime.ofInstant(forretningsKvittering.getTidspunkt(), clock.getZone()));
         }
         return ms;
     }
 
+    private MessageStatus getMessageStatus(Class clazz) {
+        if (clazz == null) {
+            return messageStatusFactory.getMessageStatus(ReceiptStatus.ANNET, "Ukjent kvittering");
+        }
+
+        switch (clazz.getSimpleName()) {
+            case "LeveringsKvittering":
+                return messageStatusFactory.getMessageStatus(ReceiptStatus.LEVERT, "Kvittering på at digital post er tilgjengeliggjort eller at en fysisk post er postlagt");
+            case "AapningsKvittering":
+                return messageStatusFactory.getMessageStatus(ReceiptStatus.LEST, "Kvittering fra Innbygger for at digital post er åpnet");
+            case "VarslingFeiletKvittering":
+                return messageStatusFactory.getMessageStatus(FEIL, "Kvittering for at en spesifisert varsling ikke har blitt sendt");
+            case "MottaksKvittering":
+                return messageStatusFactory.getMessageStatus(ReceiptStatus.LEST, "Kvittering fra utskrift og forsendelsestjenesten om at melding er mottatt og lagt til print");
+            case "ReturpostKvittering":
+                return messageStatusFactory.getMessageStatus(FEIL, "Kvittering fra utskrift og forsendelsestjenesten om at posten ikke har blitt levert til Mottaker.");
+            case "Feil":
+                return messageStatusFactory.getMessageStatus(FEIL, "Generell melding om at det har skjedd en feil");
+            default:
+                return messageStatusFactory.getMessageStatus(ReceiptStatus.ANNET, "Ukjent kvittering");
+        }
+    }
+
+    MessageStatus getEmpty() {
+        return messageStatusFactory.getMessageStatus(ReceiptStatus.ANNET, "Tom kvittering");
+    }
 }

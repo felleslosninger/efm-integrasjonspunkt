@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.receipt;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.v2.ServiceIdentifierService;
 import org.slf4j.Logger;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 
 import static java.lang.String.format;
-import static no.difi.meldingsutveksling.dpi.MeldingsformidlerClient.EMPTY_KVITTERING;
 import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 import static no.difi.meldingsutveksling.receipt.ReceiptStatus.FEIL;
 import static no.difi.meldingsutveksling.receipt.ReceiptStatus.LEST;
@@ -70,7 +70,7 @@ public class ReceiptPolling {
     public void dpiReceiptsScheduledTask() {
         if (props.getFeature().isEnableReceipts() && props.getFeature().isEnableDPI()) {
             ExternalReceipt externalReceipt = dpiReceiptService.checkForReceipts();
-            while (externalReceipt != EMPTY_KVITTERING) {
+            while (!(externalReceipt instanceof MeldingsformidlerClient.EmptyKvittering)) {
                 final String id = externalReceipt.getId();
                 MessageStatus status = externalReceipt.toMessageStatus();
 

@@ -17,7 +17,7 @@ import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
@@ -57,6 +57,7 @@ public class NextMoveMessageInController {
     private final CryptoMessagePersisterImpl cryptoMessagePersister;
     private final InternalQueue internalQueue;
     private final SBDReceiptFactory receiptFactory;
+    private final MessageStatusFactory messageStatusFactory;
 
     @GetMapping
     @ApiOperation(value = "Get all incoming messages")
@@ -148,7 +149,7 @@ public class NextMoveMessageInController {
         messageRepo.delete(message);
 
         conversationService.registerStatus(conversationId,
-                MessageStatus.of(ReceiptStatus.INNKOMMENDE_LEVERT))
+                messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_LEVERT))
                 .ifPresent(conversationService::markFinished);
 
         Audit.info(format("Conversation with id=%s popped from queue", conversationId),

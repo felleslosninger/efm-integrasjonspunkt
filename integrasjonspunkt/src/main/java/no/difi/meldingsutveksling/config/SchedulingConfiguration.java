@@ -15,6 +15,7 @@ import no.difi.meldingsutveksling.noarkexchange.altinn.SvarInnEduCoreForwarder;
 import no.difi.meldingsutveksling.noarkexchange.altinn.SvarInnNextMoveForwarder;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
+import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -53,7 +54,8 @@ public class SchedulingConfiguration {
             SvarInnEduCoreForwarder svarInnEduCoreForwarder,
             SvarInnNextMoveForwarder svarInnNextMoveForwarder,
             ApplicationContextHolder applicationContextHolder,
-            SBDReceiptFactory sbdReceiptFactory) {
+            SBDReceiptFactory sbdReceiptFactory,
+            MessageStatusFactory messageStatusFactory) {
         return new MessagePolling(
                 properties,
                 internalQueue,
@@ -69,6 +71,7 @@ public class SchedulingConfiguration {
                 svarInnEduCoreForwarder,
                 svarInnNextMoveForwarder,
                 applicationContextHolder,
-                sbdReceiptFactory);
+                sbdReceiptFactory,
+                messageStatusFactory);
     }
 }
