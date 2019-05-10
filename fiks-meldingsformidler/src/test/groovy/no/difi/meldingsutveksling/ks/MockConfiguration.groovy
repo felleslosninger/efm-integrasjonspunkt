@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.ks
 
+import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType
@@ -19,7 +20,7 @@ import static org.mockito.Mockito.mock
 import static org.mockito.Mockito.when
 
 @Configuration
-class MockConfiguration {
+public class MockConfiguration {
     @Bean
     ServiceRegistryLookup serviceRegistryLookup() {
         def lookup = mock(ServiceRegistryLookup)
@@ -32,18 +33,18 @@ class MockConfiguration {
     }
 
     @Bean(name = "localNoark")
-    NoarkClient noarkClient() {
+    public NoarkClient noarkClient() {
         return mock(NoarkClient)
     }
 
     @Bean(name = "fiksMailClient")
-    NoarkClient fiksMailCLient() {
+    public NoarkClient fiksMailCLient() {
         return mock(NoarkClient)
     }
 
     @Bean
     @Primary
-    Clock clock() {
+    public Clock clock() {
         return Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), ZoneId.of("Europe/Oslo"))
     }
 }

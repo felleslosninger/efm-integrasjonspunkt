@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.ks.svarut;
+package no.difi.meldingsutveksling.ks.svarinn;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.ks.mapping.FiksMapper;
@@ -12,8 +12,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @EnableConfigurationProperties({IntegrasjonspunktProperties.class})
 @ComponentScan(basePackageClasses = {
-        FiksMapper.class
+        FiksMapper.class,
+        SvarInnService.class
 })
-public class SvarUtConfiguration {
+public class SvarInnConfiguration {
 
 }

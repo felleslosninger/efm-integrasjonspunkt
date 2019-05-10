@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.ks.svarut
 
+import no.difi.meldingsutveksling.ks.MockConfiguration
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,7 +23,10 @@ import static org.springframework.ws.test.client.ResponseCreators.withPayload
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
-@ContextConfiguration(classes = [SvarUtWebServiceBeans])
+@ContextConfiguration(classes = [
+        SvarUtWebServiceBeans,
+        MockConfiguration
+])
 class SvarUtWebServiceClientImplTest {
     @Autowired
     SvarUtWebServiceClientImpl client

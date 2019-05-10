@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.ks.svarut
 
+import no.difi.meldingsutveksling.CertificateParser
 import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.UUIDGenerator
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
@@ -9,6 +10,7 @@ import no.difi.meldingsutveksling.core.Receiver
 import no.difi.meldingsutveksling.core.Sender
 import no.difi.meldingsutveksling.ks.MockConfiguration
 import no.difi.meldingsutveksling.ks.mapping.FiksMapper
+import no.difi.meldingsutveksling.ks.mapping.FiksStatusMapper
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister
 import no.difi.meldingsutveksling.noarkexchange.schema.core.*
 import no.difi.meldingsutveksling.receipt.MessageStatusFactory
@@ -39,7 +41,10 @@ import static org.springframework.ws.test.client.ResponseCreators.withPayload
         SvarUtWebServiceBeans.class,
         MockConfiguration.class,
         FiksMapper.class,
-        MessageStatusFactory.class
+        FiksStatusMapper.class,
+        MessageStatusFactory.class,
+        SvarUtService.class,
+        CertificateParser.class
 ])
 @EnableConfigurationProperties(IntegrasjonspunktProperties)
 class SvarUtServiceIntegrationTest {
