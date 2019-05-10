@@ -29,6 +29,7 @@ import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import javax.transaction.Transactional;
 import javax.xml.bind.JAXBElement;
 import java.time.LocalDateTime;
 import java.util.List;

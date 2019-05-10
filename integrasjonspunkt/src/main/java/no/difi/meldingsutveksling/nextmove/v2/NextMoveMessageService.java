@@ -17,6 +17,8 @@ import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import no.difi.meldingsutveksling.validation.Asserter;
+import no.difi.meldingsutveksling.validation.group.ValidationGroupFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -49,6 +51,7 @@ public class NextMoveMessageService {
     private final ServiceRegistryLookup sr;
     private final ServiceIdentifierService serviceIdentifierService;
     private final UUIDGenerator uuidGenerator;
+    private final Asserter asserter;
 
     NextMoveOutMessage getMessage(String conversationId) {
         return messageRepo.findByConversationId(conversationId)
@@ -85,6 +88,8 @@ public class NextMoveMessageService {
         if (!serviceRecord.hasStandard(standard)) {
             throw new ReceiverDoNotAcceptDocumentStandard(standard, sbd.getProcess());
         }
+
+        asserter.isValid(sbd.getAny(), ValidationGroupFactory.toServiceIdentifier(serviceIdentifier));
 
         setDefaults(sbd, serviceIdentifier);
         NextMoveOutMessage message = NextMoveOutMessage.of(sbd, serviceIdentifier);

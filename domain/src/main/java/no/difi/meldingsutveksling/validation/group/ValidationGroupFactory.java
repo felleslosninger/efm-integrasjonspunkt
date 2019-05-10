@@ -2,6 +2,9 @@ package no.difi.meldingsutveksling.validation.group;
 
 import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.DocumentType;
+import no.difi.meldingsutveksling.ServiceIdentifier;
+
+import javax.validation.groups.Default;
 
 @UtilityClass
 public class ValidationGroupFactory {
@@ -25,7 +28,18 @@ public class ValidationGroupFactory {
             case EINNSYN_KVITTERING:
                 return ValidationGroups.DocumentType.EInnsynKvittering.class;
             default:
-                return null;
+                return Default.class;
+        }
+    }
+
+    public static Class<?> toServiceIdentifier(ServiceIdentifier serviceIdentifier) {
+        switch (serviceIdentifier) {
+            case DPF:
+                return ValidationGroups.ServiceIdentifier.DPF.class;
+            case DPI:
+                return ValidationGroups.ServiceIdentifier.DPI.class;
+            default:
+                return Default.class;
         }
     }
 }

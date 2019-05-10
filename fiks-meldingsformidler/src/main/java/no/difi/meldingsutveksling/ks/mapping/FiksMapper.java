@@ -117,7 +117,8 @@ public class FiksMapper {
     }
 
     private boolean kreverNiva4Innlogging(NextMoveMessage message) {
-        return message.getBusinessMessage().getSikkerhetsnivaa() == 4;
+        Integer sikkerhetsnivaa = message.getBusinessMessage().getSikkerhetsnivaa();
+        return sikkerhetsnivaa != null && sikkerhetsnivaa == 4;
     }
 
     private Set<Dokumentbeskrivelse> getDokumentbeskrivelser(Journalpost journalpost) {

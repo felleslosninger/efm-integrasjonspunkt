@@ -30,4 +30,13 @@ public interface ValidationGroups {
         interface EInnsynKvittering extends DocumentType {
         }
     }
+
+    interface ServiceIdentifier extends Default {
+
+        interface DPF extends ServiceIdentifier {
+        }
+
+        interface DPI extends ServiceIdentifier {
+        }
+    }
 }

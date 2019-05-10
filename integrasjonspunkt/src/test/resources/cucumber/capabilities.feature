@@ -1,4 +1,3 @@
-@Ignore
 Feature: Capabilities
 
   Background:

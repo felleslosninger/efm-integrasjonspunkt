@@ -51,6 +51,7 @@ import org.springframework.ws.soap.axiom.AxiomSoapMessageFactory;
 import org.springframework.ws.soap.saaj.SaajSoapMessageFactory;
 import org.springframework.ws.transport.http.AbstractHttpWebServiceMessageSender;
 
+import javax.transaction.Transactional;
 import javax.xml.bind.Marshaller;
 import java.time.Clock;
 import java.time.Instant;
@@ -76,6 +77,7 @@ import static org.mockito.Mockito.spy;
 @AutoConfigureWebClient(registerRestTemplate = true)
 @Slf4j
 @TestPropertySource
+@Transactional
 public class CucumberStepsConfiguration {
 
     @Configuration

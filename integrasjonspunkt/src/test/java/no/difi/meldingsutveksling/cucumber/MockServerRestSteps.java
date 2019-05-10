@@ -48,7 +48,9 @@ public class MockServerRestSteps {
 
     @After
     public void after() {
+        mockServerRestTemplateCustomizer.getServers().values().forEach(MockRestServiceServer::reset);
         mockServerRestTemplateCustomizer = null;
+        responseActions = null;
     }
 
     private MockRestServiceServer getServer(String url) {

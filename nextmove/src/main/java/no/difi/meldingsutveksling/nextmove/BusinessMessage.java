@@ -1,11 +1,13 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import lombok.*;
+import no.difi.meldingsutveksling.validation.group.ValidationGroups;
 
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
@@ -17,6 +19,11 @@ import javax.persistence.InheritanceType;
 @DiscriminatorColumn(name = "type")
 public abstract class BusinessMessage extends AbstractEntity<Long> {
 
+    @NotNull(groups = {
+            ValidationGroups.ServiceIdentifier.DPF.class,
+            ValidationGroups.ServiceIdentifier.DPI.class
+    })
     private Integer sikkerhetsnivaa;
+
     private String primaerDokumentNavn;
 }

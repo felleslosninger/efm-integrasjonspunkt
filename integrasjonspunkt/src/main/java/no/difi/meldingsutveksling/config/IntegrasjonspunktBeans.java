@@ -24,6 +24,7 @@ import no.difi.meldingsutveksling.receipt.StatusStrategyFactory;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.transport.TransportFactory;
+import no.difi.meldingsutveksling.validation.Asserter;
 import no.difi.move.common.oauth.JWTDecoder;
 import no.difi.vefa.peppol.common.lang.PeppolLoadingException;
 import no.difi.vefa.peppol.lookup.LookupClient;
@@ -41,6 +42,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.client.RestOperations;
 
+import javax.validation.Validator;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
