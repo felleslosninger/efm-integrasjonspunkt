@@ -10,6 +10,7 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayload;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayloadConverter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +29,7 @@ import static java.util.Arrays.asList;
 
 @Slf4j
 @Component
+@ConditionalOnProperty(name = "difi.move.feature.enableDPE", havingValue = "true")
 public class ServiceBusRestClient {
 
     private static final String NEXTMOVE_QUEUE_PREFIX = "nextbestqueue";

@@ -46,12 +46,12 @@ public class SchedulingConfiguration {
             ServiceRegistryLookup serviceRegistryLookup,
             ConversationService conversationService,
             NextMoveQueue nextMoveQueue,
-            NextMoveServiceBus nextMoveServiceBus,
+            ObjectProvider<NextMoveServiceBus> nextMoveServiceBus,
             ObjectProvider<MessagePersister> messagePersister,
             AltinnWsClientFactory altinnWsClientFactory,
-            SvarInnService svarInnService,
-            SvarInnEduCoreForwarder svarInnEduCoreForwarder,
-            SvarInnNextMoveForwarder svarInnNextMoveForwarder,
+            ObjectProvider<SvarInnService> svarInnService,
+            ObjectProvider<SvarInnEduCoreForwarder> svarInnEduCoreForwarder,
+            ObjectProvider<SvarInnNextMoveForwarder> svarInnNextMoveForwarder,
             ApplicationContextHolder applicationContextHolder,
             SBDReceiptFactory sbdReceiptFactory) {
         return new MessagePolling(

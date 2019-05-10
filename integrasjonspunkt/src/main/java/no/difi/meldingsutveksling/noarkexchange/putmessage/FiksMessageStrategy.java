@@ -14,6 +14,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType;
 
 class FiksMessageStrategy implements MessageStrategy {
+
     private SvarUtService svarUtService;
     private NoarkClient noarkClient;
 

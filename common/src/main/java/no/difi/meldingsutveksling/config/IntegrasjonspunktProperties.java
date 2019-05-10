@@ -228,8 +228,6 @@ public class IntegrasjonspunktProperties {
     @Data
     @ToString(exclude = "sasToken")
     public static class ServiceBus {
-
-        private boolean enable;
         @NotNull
         private String sasKeyName;
         @NotNull

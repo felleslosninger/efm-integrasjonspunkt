@@ -17,14 +17,13 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import org.springframework.test.web.client.ExpectedCount
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.web.client.RestTemplate
-import sun.misc.IOUtils
 
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 
 @RunWith(SpringJUnit4ClassRunner)
 @SpringBootTest
-@ContextConfiguration(classes = [SvarInnBeans, MockConfiguration])
+@ContextConfiguration(classes = [MockConfiguration])
 @ActiveProfiles("dev")
 public class SvarInnClientTest {
 

@@ -3,6 +3,8 @@ package no.difi.meldingsutveksling.ks.svarinn;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.logging.Audit;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 import java.util.Iterator;
@@ -18,6 +20,8 @@ import java.util.zip.ZipInputStream;
 import static java.lang.String.format;
 
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
+@Component
 public class SvarInnService {
 
     private final SvarInnClient svarInnClient;

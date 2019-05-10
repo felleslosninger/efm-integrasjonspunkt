@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.ks.svarut;
 
-import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.CertificateParserException;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingException;
@@ -16,17 +15,32 @@ import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
 
 import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 
-@RequiredArgsConstructor
+@Component
+@ConditionalOnProperty(name="difi.move.feature.enableDPF", havingValue = "true")
 public class SvarUtService {
+
     private final SvarUtWebServiceClient client;
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final FiksMapper fiksMapper;
     private final IntegrasjonspunktProperties props;
     private final CertificateParser certificateParser;
+
+    public SvarUtService(SvarUtWebServiceClient client,
+                         ServiceRegistryLookup serviceRegistryLookup,
+                         FiksMapper fiksMapper,
+                         IntegrasjonspunktProperties props) {
+        this.client = client;
+        this.serviceRegistryLookup = serviceRegistryLookup;
+        this.fiksMapper = fiksMapper;
+        this.props = props;
+        this.certificateParser = new CertificateParser();
+    }
 
     public String send(EDUCore message) {
         ServiceRecord serviceRecord;

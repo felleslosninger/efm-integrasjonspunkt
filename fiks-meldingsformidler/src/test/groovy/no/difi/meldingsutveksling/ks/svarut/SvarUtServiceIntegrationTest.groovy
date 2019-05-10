@@ -7,9 +7,8 @@ import no.difi.meldingsutveksling.core.EDUCore
 import no.difi.meldingsutveksling.core.EDUCoreConverter
 import no.difi.meldingsutveksling.core.Receiver
 import no.difi.meldingsutveksling.core.Sender
-import no.difi.meldingsutveksling.ks.mapping.FiksMapper
-import no.difi.meldingsutveksling.ks.svarinn.SvarInnBeans
 import no.difi.meldingsutveksling.ks.MockConfiguration
+import no.difi.meldingsutveksling.ks.mapping.FiksMapper
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister
 import no.difi.meldingsutveksling.noarkexchange.schema.core.*
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
@@ -26,6 +25,7 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.ws.test.client.MockWebServiceServer
+
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.util.JAXBSource
 
@@ -35,7 +35,6 @@ import static org.springframework.ws.test.client.ResponseCreators.withPayload
 @RunWith(SpringRunner)
 @SpringBootTest
 @ContextConfiguration(classes = [
-        SvarInnBeans.class,
         SvarUtWebServiceBeans.class,
         SvarUtConfiguration.class,
         MockConfiguration.class,
