@@ -17,7 +17,7 @@ import org.springframework.ws.transport.http.AbstractHttpWebServiceMessageSender
 import java.lang.invoke.MethodHandles;
 
 @Configuration
-@ConditionalOnProperty(name="difi.move.feature.enableDPO", havingValue = "true")
+@ConditionalOnProperty(name="difi.move.feature.enableDPF", havingValue = "true")
 @EnableConfigurationProperties({IntegrasjonspunktProperties.class})
 public class SvarUtWebServiceBeans {
     private Logger logger = org.slf4j.LoggerFactory.getLogger(MethodHandles.lookup().lookupClass().getName());

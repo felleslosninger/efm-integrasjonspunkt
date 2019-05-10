@@ -61,7 +61,7 @@ public class StrategyFactoryTest {
         NoarkClient noarkClientMock = mock(NoarkClient.class);
         InternalQueue internalQueue = mock(InternalQueue.class);
         strategyFactory = new StrategyFactory(client, correspondenceAgencyMessageFactory, messageSender, properties, noarkClientMock, internalQueue);
-        strategyFactory.registerMessageStrategyFactory(FiksMessageStrategyFactory.newInstance(svarUtService, noarkClientMock));
+        strategyFactory.registerMessageStrategyFactory(new FiksMessageStrategyFactory(svarUtService, noarkClientMock));
     }
 
     @Test

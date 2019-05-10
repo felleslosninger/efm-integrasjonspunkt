@@ -26,6 +26,7 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import javax.xml.bind.JAXBElement;
@@ -54,12 +55,12 @@ public class MessagePolling {
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final ConversationService conversationService;
     private final NextMoveQueue nextMoveQueue;
-    private final NextMoveServiceBus nextMoveServiceBus;
+    private final ObjectProvider<NextMoveServiceBus> nextMoveServiceBus;
     private final MessagePersister messagePersister;
     private final AltinnWsClientFactory altinnWsClientFactory;
-    private final SvarInnService svarInnService;
-    private final SvarInnEduCoreForwarder svarInnEduCoreForwarder;
-    private final SvarInnNextMoveForwarder svarInnNextMoveForwarder;
+    private final ObjectProvider<SvarInnService> svarInnService;
+    private final ObjectProvider<SvarInnEduCoreForwarder> svarInnEduCoreForwarder;
+    private final ObjectProvider<SvarInnNextMoveForwarder> svarInnNextMoveForwarder;
     private final ApplicationContextHolder applicationContextHolder;
     private final SBDReceiptFactory sbdReceiptFactory;
     private final MessageStatusFactory messageStatusFactory;
@@ -69,16 +70,16 @@ public class MessagePolling {
 
     @Scheduled(fixedRateString = "${difi.move.nextmove.serviceBus.pollingrate}")
     public void checkForNewNextMoveMessages() {
-        if (properties.getNextmove().getServiceBus().isEnable() &&
+        if (nextMoveServiceBus.getIfAvailable() != null &&
                 !properties.getNextmove().getServiceBus().isBatchRead()) {
             log.debug("Checking for new NextMove messages..");
-            nextMoveServiceBus.getAllMessagesRest();
+            nextMoveServiceBus.getIfAvailable().getAllMessagesRest();
         }
-        if (properties.getNextmove().getServiceBus().isEnable() &&
+        if (nextMoveServiceBus.getIfAvailable() != null &&
                 properties.getNextmove().getServiceBus().isBatchRead()) {
             if (this.batchRead == null || this.batchRead.isDone()) {
                 log.debug("Checking for new NextMove messages (batch)..");
-                this.batchRead = nextMoveServiceBus.getAllMessagesBatch();
+                this.batchRead = nextMoveServiceBus.getIfAvailable().getAllMessagesBatch();
             } else {
                 log.debug("Batch still processing..");
             }
@@ -94,16 +95,22 @@ public class MessagePolling {
 
         log.debug("Checking for new FIKS messages");
         Consumer<Forsendelse> forwarder = getSvarInnForwarder();
-        svarInnService.getForsendelser().forEach(forwarder);
+        svarInnService.getIfAvailable().getForsendelser().forEach(forwarder);
     }
 
     private Consumer<Forsendelse> getSvarInnForwarder() {
         if (properties.getNoarkSystem().isEnable()
                 && !properties.getNoarkSystem().getEndpointURL().isEmpty()) {
-            return svarInnEduCoreForwarder;
+            if (svarInnEduCoreForwarder.getIfAvailable() == null) {
+                throw new MeldingsUtvekslingRuntimeException(String.format("DPF enabled, but bean %s not loaded", SvarInnEduCoreForwarder.class.getName()));
+            }
+            return svarInnEduCoreForwarder.getIfAvailable();
         }
 
-        return svarInnNextMoveForwarder;
+        if (svarInnNextMoveForwarder.getIfAvailable() == null) {
+            throw new MeldingsUtvekslingRuntimeException(String.format("DPF enabled, but bean %s not loaded", SvarInnNextMoveForwarder.class.getName()));
+        }
+        return svarInnNextMoveForwarder.getIfAvailable();
     }
 
     @Scheduled(fixedRate = 15000)

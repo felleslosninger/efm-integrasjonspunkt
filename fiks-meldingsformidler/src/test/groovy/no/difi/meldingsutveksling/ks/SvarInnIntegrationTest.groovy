@@ -3,9 +3,7 @@ package no.difi.meldingsutveksling.ks
 import no.difi.meldingsutveksling.UUIDGenerator
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.ks.mapping.FiksMapper
-import no.difi.meldingsutveksling.ks.svarinn.SvarInnBeans
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService
-import no.difi.meldingsutveksling.ks.svarut.SvarUtConfiguration
 import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceBeans
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient
@@ -36,9 +34,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 @RunWith(SpringRunner)
 @SpringBootTest
 @ContextConfiguration(classes = [
-        SvarInnBeans.class,
         SvarUtWebServiceBeans.class,
-        SvarUtConfiguration.class,
         MockConfiguration,
         FiksMapper.class,
         MessageStatusFactory.class

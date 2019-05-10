@@ -1,14 +1,20 @@
 package no.difi.meldingsutveksling.ks.svarinn;
 
-import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.Decryptor;
+import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 
-@RequiredArgsConstructor
+@Component
 public class SvarInnFileDecryptor {
 
     private final Decryptor decryptor;
+
+    public SvarInnFileDecryptor(IntegrasjonspunktProperties props) {
+        this.decryptor = new Decryptor(new IntegrasjonspunktNokkel(props.getFiks().getKeystore()));
+    }
 
     /**
      * Decrypts input using SvarInn cipher algorithms and the integrasjonspunkt keystore

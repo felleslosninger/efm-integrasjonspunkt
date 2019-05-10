@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.ks.svarut;
 
-import lombok.RequiredArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.CertificateParserException;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -14,10 +15,15 @@ import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
 
 import java.security.cert.X509Certificate;
 
-@RequiredArgsConstructor
+@Component
+@ConditionalOnProperty(name="difi.move.feature.enableDPF", havingValue = "true")
+@Getter
+@Setter
 public class SvarUtService {
     private final SvarUtWebServiceClient client;
     private final ServiceRegistryLookup serviceRegistryLookup;

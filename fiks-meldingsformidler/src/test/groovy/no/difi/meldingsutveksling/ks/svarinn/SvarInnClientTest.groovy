@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.ks.svarinn
 
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.ks.MockConfiguration
 import no.difi.meldingsutveksling.receipt.ConversationService
 import org.hamcrest.Matchers
@@ -7,6 +8,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.core.io.ByteArrayResource
@@ -16,20 +18,16 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import org.springframework.test.web.client.ExpectedCount
 import org.springframework.test.web.client.MockRestServiceServer
-import org.springframework.web.client.RestTemplate
-import sun.misc.IOUtils
 
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 
 @RunWith(SpringJUnit4ClassRunner)
 @SpringBootTest
-@ContextConfiguration(classes = [SvarInnBeans, MockConfiguration])
+@ContextConfiguration(classes = [MockConfiguration, SvarInnClient])
 @ActiveProfiles("dev")
+@EnableConfigurationProperties(IntegrasjonspunktProperties)
 public class SvarInnClientTest {
-
-    @Autowired
-    RestTemplate restTemplate
 
     @Autowired
     SvarInnClient client
@@ -40,7 +38,7 @@ public class SvarInnClientTest {
 
     @Before
     public void setup() {
-        server = MockRestServiceServer.bindTo(restTemplate).build()
+        server = MockRestServiceServer.bindTo(client.getRestTemplate()).build()
     }
 
     @Test

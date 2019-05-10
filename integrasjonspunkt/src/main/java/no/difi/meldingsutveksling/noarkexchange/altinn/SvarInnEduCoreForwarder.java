@@ -18,6 +18,8 @@ import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
+import no.difi.meldingsutveksling.receipt.MessageStatus;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -28,6 +30,7 @@ import static no.difi.meldingsutveksling.receipt.ReceiptStatus.INNKOMMENDE_LEVER
 import static no.difi.meldingsutveksling.receipt.ReceiptStatus.INNKOMMENDE_MOTTATT;
 
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
 @Component
 public class SvarInnEduCoreForwarder implements Consumer<Forsendelse> {
 

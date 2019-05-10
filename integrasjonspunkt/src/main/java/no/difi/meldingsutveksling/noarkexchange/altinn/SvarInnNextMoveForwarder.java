@@ -30,6 +30,7 @@ import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
 import no.difi.meldingsutveksling.noarkexchange.MessageContext;
 import no.difi.meldingsutveksling.noarkexchange.MessageContextException;
 import no.difi.meldingsutveksling.noarkexchange.MessageContextFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
@@ -44,6 +45,7 @@ import java.util.stream.Stream;
 
 @Slf4j
 @Component
+@ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
 @RequiredArgsConstructor
 public class SvarInnNextMoveForwarder implements Consumer<Forsendelse> {
 
