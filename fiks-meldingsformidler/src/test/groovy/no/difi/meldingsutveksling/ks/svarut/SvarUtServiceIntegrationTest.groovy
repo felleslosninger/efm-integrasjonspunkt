@@ -36,7 +36,6 @@ import static org.springframework.ws.test.client.ResponseCreators.withPayload
 @SpringBootTest
 @ContextConfiguration(classes = [
         SvarUtWebServiceBeans.class,
-        SvarUtConfiguration.class,
         MockConfiguration.class,
         FiksMapper.class])
 @EnableConfigurationProperties(IntegrasjonspunktProperties)
@@ -68,7 +67,7 @@ public class SvarUtServiceIntegrationTest {
         Service service = Mockito.mock(Service.class)
         Mockito.when(serviceRecord.getService()).thenReturn(service)
         Mockito.when(service.securityLevel).thenReturn(4)
-        Mockito.when(serviceRegistryLookup.getServiceRecord(Mockito.any())).thenReturn(serviceRecord)
+        Mockito.when(serviceRegistryLookup.getServiceRecord(Mockito.anyString())).thenReturn(serviceRecord)
     }
 
     @Test

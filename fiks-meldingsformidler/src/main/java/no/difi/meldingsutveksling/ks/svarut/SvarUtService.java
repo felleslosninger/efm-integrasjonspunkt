@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.ks.svarut;
 
+import lombok.Getter;
+import lombok.Setter;
 import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.CertificateParserException;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingException;
@@ -23,13 +25,15 @@ import java.time.LocalDateTime;
 
 @Component
 @ConditionalOnProperty(name="difi.move.feature.enableDPF", havingValue = "true")
+@Getter
+@Setter
 public class SvarUtService {
 
     private final SvarUtWebServiceClient client;
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final FiksMapper fiksMapper;
     private final IntegrasjonspunktProperties props;
-    private final CertificateParser certificateParser;
+    private CertificateParser certificateParser;
 
     public SvarUtService(SvarUtWebServiceClient client,
                          ServiceRegistryLookup serviceRegistryLookup,
