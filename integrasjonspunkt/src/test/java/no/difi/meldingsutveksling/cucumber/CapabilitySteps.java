@@ -1,11 +1,11 @@
 package no.difi.meldingsutveksling.cucumber;
 
 import cucumber.api.java.After;
+import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
-import org.junit.Before;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpMethod;
@@ -42,8 +42,8 @@ public class CapabilitySteps {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
-    @Then("^the returned capabilties are:$")
-    public void theReturnedCapabiltiesAre(String expectedJson) throws JSONException {
+    @Then("^the returned capabilities are:$")
+    public void theReturnedCapabilitiesAre(String expectedJson) throws JSONException {
         JSONAssert.assertEquals(expectedJson, response.getBody(), true);
     }
 }
