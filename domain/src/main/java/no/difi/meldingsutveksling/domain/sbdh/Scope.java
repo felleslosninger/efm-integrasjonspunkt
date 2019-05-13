@@ -13,6 +13,7 @@ import lombok.Setter;
 import lombok.ToString;
 import no.difi.meldingsutveksling.nextmove.AbstractEntity;
 import no.difi.meldingsutveksling.validation.OneOf;
+import no.difi.meldingsutveksling.validation.UUID;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -63,6 +64,7 @@ public class Scope extends AbstractEntity<Long> {
     protected String type;
 
     @XmlElement(name = "InstanceIdentifier", required = true)
+    @UUID
     protected String instanceIdentifier;
 
     @XmlElement(name = "Identifier")

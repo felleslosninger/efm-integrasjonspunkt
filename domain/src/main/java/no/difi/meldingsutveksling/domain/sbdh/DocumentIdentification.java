@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.validation.IsDocumentType;
+import no.difi.meldingsutveksling.validation.UUID;
 import no.difi.meldingsutveksling.xml.ZonedDateTimeAdapter;
 
 import javax.persistence.Embeddable;
@@ -67,6 +68,7 @@ public class DocumentIdentification implements Serializable {
 
     @XmlElement(name = "InstanceIdentifier", required = true)
     @NotNull
+    @UUID
     protected String instanceIdentifier;
 
     @XmlElement(name = "Type", required = true)
