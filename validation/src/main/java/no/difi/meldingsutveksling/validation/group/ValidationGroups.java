@@ -33,10 +33,19 @@ public interface ValidationGroups {
 
     interface ServiceIdentifier extends Default {
 
+        interface DPE extends ServiceIdentifier {
+        }
+
         interface DPF extends ServiceIdentifier {
         }
 
         interface DPI extends ServiceIdentifier {
+        }
+
+        interface DPO extends ServiceIdentifier {
+        }
+
+        interface DPV extends ServiceIdentifier {
         }
     }
 }

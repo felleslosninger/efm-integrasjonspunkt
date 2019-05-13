@@ -34,10 +34,16 @@ public class ValidationGroupFactory {
 
     public static Class<?> toServiceIdentifier(ServiceIdentifier serviceIdentifier) {
         switch (serviceIdentifier) {
+            case DPE:
+                return ValidationGroups.ServiceIdentifier.DPE.class;
             case DPF:
                 return ValidationGroups.ServiceIdentifier.DPF.class;
             case DPI:
                 return ValidationGroups.ServiceIdentifier.DPI.class;
+            case DPO:
+                return ValidationGroups.ServiceIdentifier.DPO.class;
+            case DPV:
+                return ValidationGroups.ServiceIdentifier.DPV.class;
             default:
                 return Default.class;
         }

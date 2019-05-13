@@ -85,6 +85,7 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
     @NotNull
     @InstanceOf(value = ArkivmeldingMessage.class, groups = ValidationGroups.DocumentType.Arkivmelding.class)
     @InstanceOf(value = DpiDigitalMessage.class, groups = ValidationGroups.DocumentType.Digital.class)
+    @InstanceOf(value = DigitalDpvMessage.class, groups = ValidationGroups.DocumentType.DigitalDpv.class)
     @InstanceOf(value = DpiPrintMessage.class, groups = ValidationGroups.DocumentType.Print.class)
     @InstanceOf(value = InnsynskravMessage.class, groups = ValidationGroups.DocumentType.Innsynskrav.class)
     @InstanceOf(value = PubliseringMessage.class, groups = ValidationGroups.DocumentType.Publisering.class)
