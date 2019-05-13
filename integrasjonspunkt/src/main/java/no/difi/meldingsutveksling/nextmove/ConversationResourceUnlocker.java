@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.nextmove;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import javax.transaction.Transactional;
 import java.time.Clock;
@@ -17,7 +16,6 @@ public class ConversationResourceUnlocker {
     private final ConversationResourceRepository repo;
     private final Clock clock;
 
-    @Scheduled(fixedDelay = 5000)
     @Transactional
     public void unlockTimedOutMessages() {
         repo.findByLockTimeoutLessThanEqual(LocalDateTime.now(clock)).forEach(cr -> {
