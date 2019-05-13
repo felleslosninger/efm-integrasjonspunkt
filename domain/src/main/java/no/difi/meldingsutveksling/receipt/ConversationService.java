@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import javax.transaction.Transactional;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -50,6 +51,7 @@ public class ConversationService {
         this.messageStatusFactory = messageStatusFactory;
     }
 
+    @Transactional
     public Optional<Conversation> registerStatus(String conversationId, MessageStatus status) {
         Optional<Conversation> c = repo.findByConversationId(conversationId).stream().findFirst();
         if (c.isPresent()) {

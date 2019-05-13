@@ -3,7 +3,11 @@ package no.difi.meldingsutveksling.nextmove;
 import lombok.*;
 import no.difi.sdp.client2.domain.fysisk_post.Returhaandtering;
 
-import javax.persistence.*;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
@@ -15,6 +19,10 @@ import javax.persistence.*;
 public class MailReturn extends AbstractEntity<Long> {
 
     @Embedded
+    @NotNull
+    @Valid
     private PostAddress receiver;
+
+    @NotNull
     private Returhaandtering returnHandling;
 }

@@ -67,7 +67,6 @@ public class DocumentIdentification implements Serializable {
     protected String typeVersion;
 
     @XmlElement(name = "InstanceIdentifier", required = true)
-    @NotNull
     @UUID
     protected String instanceIdentifier;
 
@@ -83,6 +82,5 @@ public class DocumentIdentification implements Serializable {
     @XmlSchemaType(name = "dateTime")
     @XmlJavaTypeAdapter(ZonedDateTimeAdapter.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    @NotNull
     protected ZonedDateTime creationDateAndTime;
 }

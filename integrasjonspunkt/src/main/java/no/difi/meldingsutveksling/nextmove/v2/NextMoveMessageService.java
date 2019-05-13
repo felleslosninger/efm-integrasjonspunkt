@@ -7,6 +7,7 @@ import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingException;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
+import no.difi.meldingsutveksling.domain.sbdh.DocumentIdentification;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.nextmove.*;
@@ -28,6 +29,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Clock;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -52,6 +55,7 @@ public class NextMoveMessageService {
     private final ServiceIdentifierService serviceIdentifierService;
     private final UUIDGenerator uuidGenerator;
     private final Asserter asserter;
+    private final Clock clock;
 
     NextMoveOutMessage getMessage(String conversationId) {
         return messageRepo.findByConversationId(conversationId)
@@ -112,6 +116,16 @@ public class NextMoveMessageService {
                 .stream()
                 .filter(p -> isNullOrEmpty(p.getInstanceIdentifier()))
                 .forEach(p -> p.setInstanceIdentifier(createConversationId()));
+
+        DocumentIdentification documentIdentification = sbd.getStandardBusinessDocumentHeader().getDocumentIdentification();
+
+        if (documentIdentification.getInstanceIdentifier() == null) {
+            documentIdentification.setInstanceIdentifier(uuidGenerator.generate());
+        }
+
+        if (documentIdentification.getCreationDateAndTime() == null) {
+            documentIdentification.setCreationDateAndTime(ZonedDateTime.now(clock));
+        }
 
         if (serviceIdentifier == DPI) {
             setDpiDefaults(sbd);

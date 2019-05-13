@@ -53,10 +53,20 @@ Feature: Sending a Next Move DPI message
             ]
         },
         "digital": {
-          "ikkeSensitivTittel" : "Min supertittel",
           "sikkerhetsnivaa": 3,
-          "primaerDokumentNavn": "arkivmelding.xml"
-        }
+          "primaerDokumentNavn": "arkivmelding.xml",
+          "ikkeSensitivTittel" : "Min supertittel",
+          "spraak": "NO",
+          "digitalPostInfo": {
+            "virkningsdato": "2019-05-12",
+            "virkningstidspunkt": "",
+            "aapningskvittering": "false"
+          },
+          "varsler": {
+            "epostTekst": "Varseltekst",
+            "smsTekst": "Varseltekst"
+          }
+       }
     }
     """
     And the response status is "OK"

@@ -48,9 +48,9 @@ Feature: Sending a Next Move DPE message
                 }
             ]
         },
-        "innsynskrav": {
-          "sikkerhetsnivaa": 3,
-          "primaerDokumentNavn": "test.txt"
+        "innsynskrav" : {
+          "orgnr" : "98765432",
+          "email" : "doofenshmirtz@evil.inc"
         }
     }
     """
@@ -99,8 +99,8 @@ Feature: Sending a Next Move DPE message
           }
         },
         "innsynskrav" : {
-          "sikkerhetsnivaa" : 3,
-          "primaerDokumentNavn" : "test.txt"
+          "orgnr" : "98765432",
+          "email" : "doofenshmirtz@evil.inc"
         }
       },
       "asic" : "content is hidden"
