@@ -225,14 +225,14 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
             return new Sender()
                     .setIdentifier(new PartnerIdentification()
                             .setValue(orgNummer.asIso6523())
-                            .setAuthority(orgNummer.asIso6523()));
+                            .setAuthority(orgNummer.authority()));
         }
 
         private Receiver createReciever(Organisasjonsnummer orgNummer) {
             return new Receiver()
                     .setIdentifier(new PartnerIdentification()
                             .setValue(orgNummer.asIso6523())
-                            .setAuthority(orgNummer.asIso6523()));
+                            .setAuthority(orgNummer.authority()));
         }
 
         private DocumentIdentification createDocumentIdentification(DocumentType documentType, String standard) {

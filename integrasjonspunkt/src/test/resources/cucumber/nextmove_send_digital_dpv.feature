@@ -73,7 +73,7 @@ Feature: Sending a Next Move Digital DPV message
                 {
                     "identifier": {
                         "authority": "iso6523-actorid-upis",
-                        "value": "9908:974720760"
+                        "value": "0192:974720760"
                     }
                 }
             ]
@@ -85,6 +85,7 @@ Feature: Sending a Next Move Digital DPV message
         }
     }
     """
+    And the response status is "OK"
     And I upload a file named "test.txt" with mimetype "text/plain" and title "Test" with the following body:
     """
     Testing 1 2 3

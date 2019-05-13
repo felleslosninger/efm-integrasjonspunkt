@@ -111,15 +111,15 @@ Feature: Receiving a Next Move DPF message
         "headerVersion" : "1.0",
         "sender" : [ {
           "identifier" : {
-            "value" : "9908:910229028",
-            "authority" : "9908:910229028"
+            "value" : "0192:910229028",
+            "authority" : "iso6523-actorid-upis"
           },
           "contactInformation" : [ ]
         } ],
         "receiver" : [ {
           "identifier" : {
-            "value" : "9908:910229028",
-            "authority" : "9908:910229028"
+            "value" : "0192:910229028",
+            "authority" : "iso6523-actorid-upis"
           },
           "contactInformation" : [ ]
         } ],

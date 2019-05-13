@@ -34,7 +34,7 @@ Feature: Receiving a Next Move DPE message
                 {
                     "identifier": {
                         "authority": "iso6523-actorid-upis",
-                        "value": "9908:910075935"
+                        "value": "0192:910075935"
                     }
                 }
             ],
@@ -42,7 +42,7 @@ Feature: Receiving a Next Move DPE message
                 {
                     "identifier": {
                         "authority": "iso6523-actorid-upis",
-                        "value": "9908:910077473"
+                        "value": "0192:910077473"
                     }
                 }
             ]

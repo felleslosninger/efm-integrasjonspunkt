@@ -95,7 +95,7 @@ public class CreateSBD {
     private void fillPartner(Partner partner, Organisasjonsnummer orgNummer) {
         partner.setIdentifier(new PartnerIdentification()
                 .setValue(orgNummer.asIso6523())
-                .setAuthority(orgNummer.asIso6523()));
+                .setAuthority(orgNummer.authority()));
     }
 
     private DocumentIdentification createDocumentIdentification(DocumentType documentType, String standard) {

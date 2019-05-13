@@ -44,7 +44,7 @@ Feature: Sending a Next Move DPF message
                 {
                     "identifier": {
                         "authority": "iso6523-actorid-upis",
-                        "value": "9908:910075924"
+                        "value": "0192:910075924"
                     }
                 }
             ],
@@ -52,7 +52,7 @@ Feature: Sending a Next Move DPF message
                 {
                     "identifier": {
                         "authority": "iso6523-actorid-upis",
-                        "value": "9908:910077473"
+                        "value": "0192:910077473"
                     }
                 }
             ]
@@ -63,6 +63,7 @@ Feature: Sending a Next Move DPF message
         }
     }
     """
+    And the response status is "OK"
     And I upload a file named "arkivmelding.xml" with mimetype "text/xml" and title "Arkivmelding" with the following body:
     """
     <?xml version="1.0" encoding="utf-8"?>

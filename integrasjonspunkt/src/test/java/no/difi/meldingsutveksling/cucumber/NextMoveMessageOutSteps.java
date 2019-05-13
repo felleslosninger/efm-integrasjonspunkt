@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
+import cucumber.api.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -27,6 +28,7 @@ public class NextMoveMessageOutSteps {
     private final ObjectMapper objectMapper;
 
     private MultiValueMap<String, HttpEntity<?>> multipart;
+    private ResponseEntity<String> response;
 
     @Before
     public void before() {
@@ -36,6 +38,7 @@ public class NextMoveMessageOutSteps {
     public void after() {
         messageOutHolder.reset();
         multipart = null;
+        response = null;
     }
 
     @Given("^I prepare a multipart request$")
@@ -66,7 +69,7 @@ public class NextMoveMessageOutSteps {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-        ResponseEntity<String> response = testRestTemplate.exchange(
+        this.response = testRestTemplate.exchange(
                 "/api/messages/out/multipart",
                 HttpMethod.POST,
                 new HttpEntity<>(multipart, headers),
@@ -85,20 +88,25 @@ public class NextMoveMessageOutSteps {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        ResponseEntity<String> response = testRestTemplate.exchange(
+        this.response = testRestTemplate.exchange(
                 "/api/messages/out",
                 HttpMethod.POST,
                 new HttpEntity<>(body, headers),
                 String.class);
 
-        assertThat(response.getStatusCode())
-                .withFailMessage(response.toString())
-                .isEqualTo(HttpStatus.OK);
+        if (response.getStatusCode() == HttpStatus.OK) {
+            StandardBusinessDocument sbd = objectMapper.readValue(response.getBody(), StandardBusinessDocument.class);
 
-        StandardBusinessDocument sbd = objectMapper.readValue(response.getBody(), StandardBusinessDocument.class);
-        
-        messageOutHolder.getOrCalculate(Message::new)
-                .setSbd(sbd);
+            messageOutHolder.getOrCalculate(Message::new)
+                    .setSbd(sbd);
+        }
+    }
+
+    @Then("^the response status is \"([^\"]+)\"")
+    public void thenTheResponseStatusIs(String expectedStatusName) {
+        assertThat(response.getStatusCode())
+                .withFailMessage(response.getBody())
+                .isEqualTo(HttpStatus.valueOf(expectedStatusName));
     }
 
     @Given("^I upload a file named \"([^\"]+)\" with mimetype \"([^\"]+)\" and title \"([^\"]+)\" with the following body:$")
@@ -117,7 +125,7 @@ public class NextMoveMessageOutSteps {
         uriVariables.put("conversationId", messageOutHolder.get().getSbd().getConversationId());
         uriVariables.put("title", title);
 
-        ResponseEntity<String> response = testRestTemplate.exchange(
+        this.response = testRestTemplate.exchange(
                 "/api/messages/out/{conversationId}?title={title}",
                 HttpMethod.PUT,
                 new HttpEntity<>(body, headers),
@@ -131,7 +139,7 @@ public class NextMoveMessageOutSteps {
 
     @Given("^I send the message$")
     public void iSendTheMessage() {
-        ResponseEntity<String> response = testRestTemplate.exchange(
+        this.response = testRestTemplate.exchange(
                 "/api/messages/out/{conversationId}",
                 HttpMethod.POST, new HttpEntity(null),
                 String.class,

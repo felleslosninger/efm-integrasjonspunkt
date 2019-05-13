@@ -33,7 +33,7 @@ Feature: Receiving a Next Move DPO message
                 {
                     "identifier": {
                         "authority": "iso6523-actorid-upis",
-                        "value": "9908:910075918"
+                        "value": "0192:910075918"
                     }
                 }
             ],
@@ -41,7 +41,7 @@ Feature: Receiving a Next Move DPO message
                 {
                     "identifier": {
                         "authority": "iso6523-actorid-upis",
-                        "value": "9908:910077473"
+                        "value": "0192:910077473"
                     }
                 }
             ]

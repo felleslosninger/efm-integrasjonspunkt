@@ -35,7 +35,7 @@ Feature: Sending a Next Move DPE message
                 {
                     "identifier": {
                         "authority": "iso6523-actorid-upis",
-                        "value": "9908:910075935"
+                        "value": "0192:910075935"
                     }
                 }
             ],
@@ -43,7 +43,7 @@ Feature: Sending a Next Move DPE message
                 {
                     "identifier": {
                         "authority": "iso6523-actorid-upis",
-                        "value": "9908:910077473"
+                        "value": "0192:910077473"
                     }
                 }
             ]
@@ -54,6 +54,7 @@ Feature: Sending a Next Move DPE message
         }
     }
     """
+    And the response status is "OK"
     And I upload a file named "test.txt" with mimetype "text/plain" and title "Test" with the following body:
     """
     Testing 1 2 3
@@ -67,14 +68,14 @@ Feature: Sending a Next Move DPE message
           "headerVersion" : "1.0",
           "sender" : [ {
             "identifier" : {
-              "value" : "9908:910077473",
+              "value" : "0192:910077473",
               "authority" : "iso6523-actorid-upis"
             },
             "contactInformation" : [ ]
           } ],
           "receiver" : [ {
             "identifier" : {
-              "value" : "9908:910075935",
+              "value" : "0192:910075935",
               "authority" : "iso6523-actorid-upis"
             },
             "contactInformation" : [ ]
@@ -114,10 +115,10 @@ Feature: Sending a Next Move DPE message
     <?xml version="1.0" encoding="UTF-8"?>
     <manifest>
        <mottaker>
-          <organisasjon authority="iso6523-actorid-upis">9908:910075935</organisasjon>
+          <organisasjon authority="iso6523-actorid-upis">0192:910075935</organisasjon>
        </mottaker>
        <avsender>
-          <organisasjon authority="iso6523-actorid-upis">9908:910077473</organisasjon>
+          <organisasjon authority="iso6523-actorid-upis">0192:910077473</organisasjon>
        </avsender>
        <hoveddokument href="test.txt" mime="text/plain">
           <tittel lang="no">Hoveddokument</tittel>
