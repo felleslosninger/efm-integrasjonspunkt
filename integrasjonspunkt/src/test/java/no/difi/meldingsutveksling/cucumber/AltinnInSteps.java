@@ -69,6 +69,20 @@ public class AltinnInSteps {
                 )
         );
 
+        wireMockServer.givenThat(post(urlEqualTo("/ServiceEngineExternal/BrokerServiceExternalBasic.svc?wsdl"))
+                .withHeader(SOAP_ACTION, containing("ConfirmDownloadedBasic"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withBody("<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ns=\"http://www.altinn.no/services/ServiceEngine/Broker/2015/06\">" +
+                                "<soapenv:Header/>" +
+                                "<soapenv:Body>" +
+                                "<ns:InitiateBrokerServiceBasicResponse>" +
+                                "</ns:InitiateBrokerServiceBasicResponse>" +
+                                "</soapenv:Body>" +
+                                "</soapenv:Envelope>")
+                )
+        );
+
         wireMockServer.givenThat(post(urlEqualTo("/ServiceEngineExternal/BrokerServiceExternalBasicStreamed.svc?wsdl"))
                 .withHeader(SOAP_ACTION, containing("UploadFileStreamedBasic"))
                 .willReturn(aResponse()
