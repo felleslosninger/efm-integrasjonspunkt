@@ -22,6 +22,7 @@ import no.difi.meldingsutveksling.receipt.MessageStatus;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -42,6 +43,7 @@ public class SvarInnEduCoreForwarder implements Consumer<Forsendelse> {
     private final MessageStatusFactory messageStatusFactory;
 
     @Override
+    @Transactional
     public void accept(Forsendelse forsendelse) {
         SvarInnEduCoreBuilder builder = new SvarInnEduCoreBuilder(forsendelse);
         svarInnService.getAttachments(forsendelse).forEach(builder::streamedFile);

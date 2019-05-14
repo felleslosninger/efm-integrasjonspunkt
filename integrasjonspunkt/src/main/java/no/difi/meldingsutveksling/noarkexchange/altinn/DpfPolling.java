@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import javax.transaction.Transactional;
 import java.util.function.Consumer;
 
 @Slf4j
