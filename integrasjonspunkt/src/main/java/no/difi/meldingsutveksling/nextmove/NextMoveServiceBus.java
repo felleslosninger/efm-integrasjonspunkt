@@ -51,6 +51,7 @@ import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
 import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.DATA;
 import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.INNSYN;
+import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.MEETING;
 
 @Component
 @ConditionalOnProperty(name = "difi.move.feature.enableDPE", havingValue = "true")
@@ -258,6 +259,9 @@ public class NextMoveServiceBus {
     private String receiptTarget() {
         if (!isNullOrEmpty(props.getNextmove().getServiceBus().getReceiptQueue())) {
             return props.getNextmove().getServiceBus().getReceiptQueue();
+        }
+        if (MEETING.fullname().equals(props.getNextmove().getServiceBus().getMode())) {
+            return INNSYN.fullname();
         }
         if (INNSYN.fullname().equals(props.getNextmove().getServiceBus().getMode())) {
             return DATA.fullname();

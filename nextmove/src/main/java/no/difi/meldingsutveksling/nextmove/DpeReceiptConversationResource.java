@@ -21,6 +21,7 @@ public class DpeReceiptConversationResource extends ConversationResource {
     public static DpeReceiptConversationResource of(ConversationResource cr) {
         DpeReceiptConversationResource dpeCr = new DpeReceiptConversationResource(cr.getConversationId(), cr.getReceiverId(), cr.getSenderId());
         dpeCr.setFileRefs(Maps.newHashMap());
+        dpeCr.setCustomProperties(Maps.newHashMap());
         return dpeCr;
     }
 }

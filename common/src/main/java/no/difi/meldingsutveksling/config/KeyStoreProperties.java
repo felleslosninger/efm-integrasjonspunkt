@@ -21,7 +21,6 @@ public class KeyStoreProperties {
     /**
      * Keystore alias for key.
      */
-    @NotNull
     private String alias;
 
     /**
