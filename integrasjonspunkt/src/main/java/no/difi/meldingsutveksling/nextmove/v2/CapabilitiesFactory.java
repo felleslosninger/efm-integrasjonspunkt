@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.nextmove.v2;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.capabilities.Capabilities;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.stereotype.Component;
 
@@ -12,9 +13,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CapabilitiesFactory {
 
+    private final ServiceRegistryLookup sr;
     private final CapabilityFactory capabilityFactory;
 
-    public Capabilities getCapabilities(List<ServiceRecord> serviceRecords) {
+    Capabilities getCapabilities(String receiverid) {
+        List<ServiceRecord> serviceRecords = sr.getServiceRecords(receiverid);
+
         return new Capabilities()
                 .setCapabilities(serviceRecords
                         .stream()

@@ -21,6 +21,7 @@ import org.hibernate.validator.group.GroupSequenceProvider;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.*;
+import java.io.Serializable;
 
 
 /**
@@ -45,7 +46,7 @@ import javax.xml.bind.annotation.*;
 @Data
 @Embeddable
 @GroupSequenceProvider(value = PartnerIdentificationGroupSequenceProvider.class)
-public class PartnerIdentification {
+public class PartnerIdentification implements Serializable {
 
     @XmlTransient
     @JsonIgnore

@@ -10,5 +10,6 @@ public class Capability {
 
     private String process;
     private ServiceIdentifier serviceIdentifier;
+    private PostalAddress returnAddress;
     private List<DocumentType> documentTypes;
 }
