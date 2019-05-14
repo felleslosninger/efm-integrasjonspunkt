@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.nextmove.v2;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.capabilities.Capabilities;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.validation.InServiceRegistry;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +20,6 @@ import javax.validation.constraints.NotNull;
 @Validated
 public class CapabilitiesController {
 
-    private final ServiceRegistryLookup sr;
     private final CapabilitiesFactory capabilitiesFactory;
 
     @GetMapping("{receiverid}")
@@ -35,6 +33,6 @@ public class CapabilitiesController {
             @ApiParam(value = "receiverid", required = true)
             @PathVariable
             @NotNull @InServiceRegistry String receiverid) {
-        return capabilitiesFactory.getCapabilities(sr.getServiceRecords(receiverid));
+        return capabilitiesFactory.getCapabilities(receiverid);
     }
 }
