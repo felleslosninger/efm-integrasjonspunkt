@@ -5,8 +5,6 @@ import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.exceptions.InputStreamException;
-import no.difi.meldingsutveksling.exceptions.MissingHttpHeaderException;
 import no.difi.meldingsutveksling.exceptions.MultipartFileToLargeException;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
@@ -14,7 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -25,10 +22,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -122,27 +117,9 @@ public class NextMoveMessageOutController {
     public void uploadFile(
             @ApiParam(value = "ConversationId", required = true)
             @PathVariable("conversationId") String conversationId,
-            @ApiParam(value = "Title")
-            @RequestParam(value = "title", required = false) String title,
             HttpServletRequest request) {
-
         NextMoveOutMessage message = messageService.getMessage(conversationId);
-
-        ContentDisposition contentDisposition = Optional.ofNullable(request.getHeader(HttpHeaders.CONTENT_DISPOSITION))
-                .map(ContentDisposition::parse)
-                .orElseThrow(() -> new MissingHttpHeaderException(HttpHeaders.CONTENT_DISPOSITION));
-
-        try {
-            messageService.addFile(
-                    message,
-                    title,
-                    contentDisposition.getFilename(),
-                    request.getContentType(),
-                    request.getInputStream(),
-                    request.getContentLength());
-        } catch (IOException e) {
-            throw new InputStreamException(contentDisposition.getFilename());
-        }
+        messageService.addFile(message, new NextMoveUploadedFile(request));
     }
 
     @PostMapping("/{conversationId}")

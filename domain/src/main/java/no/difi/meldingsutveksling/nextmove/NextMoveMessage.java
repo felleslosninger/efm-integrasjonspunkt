@@ -9,7 +9,6 @@ import org.hibernate.annotations.DiscriminatorOptions;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -49,17 +48,6 @@ public class NextMoveMessage {
     @NonNull
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private StandardBusinessDocument sbd;
-
-    public static NextMoveMessage of(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
-        NextMoveMessage message = new NextMoveMessage(
-                sbd.getConversationId(),
-                sbd.getReceiverIdentifier(),
-                sbd.getSenderIdentifier(),
-                serviceIdentifier,
-                sbd);
-        message.setFiles(new HashSet<>());
-        return message;
-    }
 
     @JsonIgnore
     public Set<BusinessMessageFile> getOrCreateFiles() {

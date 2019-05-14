@@ -230,7 +230,7 @@ public class NextMoveServiceBus {
     }
 
     private void sendReceipt(NextMoveMessage message) {
-        internalQueue.enqueueNextMove2(NextMoveMessage.of(getReceipt(message), DPE));
+        internalQueue.enqueueNextMove2(NextMoveOutMessage.of(getReceipt(message), DPE));
     }
 
     private StandardBusinessDocument getReceipt(NextMoveMessage message) {

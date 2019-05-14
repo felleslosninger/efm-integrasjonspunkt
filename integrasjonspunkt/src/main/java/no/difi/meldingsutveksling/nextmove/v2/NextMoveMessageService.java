@@ -2,60 +2,38 @@ package no.difi.meldingsutveksling.nextmove.v2;
 
 import com.querydsl.core.types.Predicate;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
-import no.difi.meldingsutveksling.*;
-import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingException;
-import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
-import no.difi.meldingsutveksling.domain.sbdh.DocumentIdentification;
+import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.exceptions.*;
-import no.difi.meldingsutveksling.nextmove.*;
+import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
+import no.difi.meldingsutveksling.exceptions.MessagePersistException;
+import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
+import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
-import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import no.difi.meldingsutveksling.validation.Asserter;
-import no.difi.meldingsutveksling.validation.group.ValidationGroupFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.xml.bind.JAXBException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.time.Clock;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Strings.emptyToNull;
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.util.Arrays.asList;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 
 @Component
 @RequiredArgsConstructor
 public class NextMoveMessageService {
 
+    private final NextMoveValidator validator;
+    private final NextMoveOutMessageFactory nextMoveOutMessageFactory;
     private final CryptoMessagePersister cryptoMessagePersister;
     private final NextMoveMessageOutRepository messageRepo;
     private final InternalQueue internalQueue;
     private final ConversationService conversationService;
-    private final ServiceRegistryLookup sr;
-    private final ServiceIdentifierService serviceIdentifierService;
-    private final UUIDGenerator uuidGenerator;
-    private final Asserter asserter;
-    private final Clock clock;
 
     NextMoveOutMessage getMessage(String conversationId) {
         return messageRepo.findByConversationId(conversationId)
@@ -67,150 +45,38 @@ public class NextMoveMessageService {
     }
 
     NextMoveOutMessage createMessage(StandardBusinessDocument sbd) {
-        sbd.getOptionalConversationId()
-                .flatMap(messageRepo::findByConversationId)
-                .map(p -> {
-                    throw new ConversationAlreadyExistsException(p.getConversationId());
-                });
-
-        ServiceRecord serviceRecord = getServiceRecord(sbd);
-        ServiceIdentifier serviceIdentifier = serviceRecord.getServiceIdentifier();
-
-        if (!serviceIdentifierService.isEnabled(serviceIdentifier)) {
-            throw new ServiceNotEnabledException(serviceIdentifier);
-        }
-
-        DocumentType documentType = DocumentType.valueOf(sbd.getMessageType(), ApiType.NEXTMOVE)
-                .orElseThrow(() -> new UnknownNextMoveDocumentTypeException(sbd.getMessageType()));
-
-        String standard = sbd.getStandard();
-
-        if (!documentType.fitsStandard(standard)) {
-            throw new DocumentTypeDoNotFitDocumentStandardException(documentType, standard);
-        }
-
-        if (!serviceRecord.hasStandard(standard)) {
-            throw new ReceiverDoNotAcceptDocumentStandard(standard, sbd.getProcess());
-        }
-
-        asserter.isValid(sbd.getAny(), ValidationGroupFactory.toServiceIdentifier(serviceIdentifier));
-
-        setDefaults(sbd, serviceIdentifier);
-        NextMoveOutMessage message = NextMoveOutMessage.of(sbd, serviceIdentifier);
+        validator.validate(sbd);
+        NextMoveOutMessage message = nextMoveOutMessageFactory.getNextMoveOutMessage(sbd);
         messageRepo.save(message);
         conversationService.registerConversation(message);
-
         return message;
     }
 
-    private ServiceRecord getServiceRecord(StandardBusinessDocument sbd) {
-        try {
-            return sr.getServiceRecordByProcess(sbd.getReceiverIdentifier(), sbd.getProcess());
-        } catch (ServiceRegistryLookupException e) {
-            throw new ReceiverDoNotAcceptProcessException(sbd.getProcess(), e.getLocalizedMessage());
-        }
-    }
-
-    private void setDefaults(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
-        sbd.getScopes()
-                .stream()
-                .filter(p -> isNullOrEmpty(p.getInstanceIdentifier()))
-                .forEach(p -> p.setInstanceIdentifier(createConversationId()));
-
-        DocumentIdentification documentIdentification = sbd.getStandardBusinessDocumentHeader().getDocumentIdentification();
-
-        if (documentIdentification.getInstanceIdentifier() == null) {
-            documentIdentification.setInstanceIdentifier(uuidGenerator.generate());
-        }
-
-        if (documentIdentification.getCreationDateAndTime() == null) {
-            documentIdentification.setCreationDateAndTime(ZonedDateTime.now(clock));
-        }
-
-        if (serviceIdentifier == DPI) {
-            setDpiDefaults(sbd);
-        }
-    }
-
-    @SneakyThrows
-    private void setDpiDefaults(StandardBusinessDocument sbd) {
-        ServiceRecord serviceRecord = sr.getServiceRecord(sbd.getReceiverIdentifier(), DPI);
-        if (DocumentType.getOrThrow(sbd.getMessageType()) == DocumentType.PRINT) {
-            DpiPrintMessage dpiMessage = (DpiPrintMessage) sbd.getAny();
-            if (dpiMessage.getReceiver() == null) {
-                dpiMessage.setReceiver(new PostAddress());
-            }
-
-            setReceiverDefaults(dpiMessage.getReceiver(), serviceRecord.getPostAddress());
-            setReceiverDefaults(dpiMessage.getMailReturn().getReceiver(), serviceRecord.getReturnAddress());
-        }
-    }
-
-    private void setReceiverDefaults(PostAddress receiver, no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress srReceiver) {
-        if (isNullOrEmpty(receiver.getName())) {
-            receiver.setName(srReceiver.getName());
-        }
-        if (isNullOrEmpty(receiver.getAddressLine1())) {
-            receiver.setAddressLine1(srReceiver.getStreet());
-        }
-        if (isNullOrEmpty(receiver.getPostalCode())) {
-            receiver.setPostalCode(srReceiver.getPostalCode());
-        }
-        if (isNullOrEmpty(receiver.getPostalArea())) {
-            receiver.setPostalArea(srReceiver.getPostalArea());
-        }
-        if (isNullOrEmpty(receiver.getCountry())) {
-            receiver.setCountryCode(srReceiver.getCountry());
-        }
-    }
-
     void addFile(NextMoveOutMessage message, MultipartFile file) {
-        try {
-            addFile(message, file.getName(), file.getOriginalFilename(), file.getContentType(), file.getInputStream(), file.getSize());
-        } catch (IOException e) {
-            throw new InputStreamException(file.getOriginalFilename());
-        }
-    }
+        validator.validateFile(message, file);
 
-    void addFile(
-            NextMoveOutMessage message,
-            String title,
-            String filename,
-            String contentType,
-            InputStream inputStream,
-            long size) {
+        String identifier = persistFile(message, file);
 
-        Set<BusinessMessageFile> files = message.getOrCreateFiles();
-
-        boolean primaryDocument = isPrimaryDocument(message, filename);
-
-        if (primaryDocument && files.stream().anyMatch(BusinessMessageFile::getPrimaryDocument)) {
-            throw new MultiplePrimaryDocumentsNotAllowedException();
-        }
-
-        List<ServiceIdentifier> requiredTitleCapabilities = asList(DPV, DPI);
-        if (requiredTitleCapabilities.contains(message.getServiceIdentifier()) && isNullOrEmpty(title)) {
-            throw new MissingFileTitleException(requiredTitleCapabilities.stream()
-                    .map(ServiceIdentifier::toString)
-                    .collect(Collectors.joining(",")));
-        }
-
-        BusinessMessageFile file = new BusinessMessageFile()
-                .setIdentifier(UUID.randomUUID().toString())
-                .setTitle(emptyToNull(title))
-                .setFilename(filename)
-                .setMimetype(getMimeType(contentType, filename))
-                .setPrimaryDocument(primaryDocument);
-
-        try {
-            cryptoMessagePersister.writeStream(message.getConversationId(), file.getIdentifier(), inputStream, size);
-        } catch (IOException e) {
-            throw new MessagePersistException(filename);
-        }
-
-        files.add(file);
+        message.getOrCreateFiles().add(new BusinessMessageFile()
+                .setIdentifier(identifier)
+                .setTitle(emptyToNull(file.getName()))
+                .setFilename(file.getOriginalFilename())
+                .setMimetype(getMimeType(file.getContentType(), file.getOriginalFilename()))
+                .setPrimaryDocument(message.isPrimaryDocument(file.getOriginalFilename())));
 
         messageRepo.save(message);
+    }
+
+    private String persistFile(NextMoveOutMessage message, MultipartFile file) {
+        String identifier = UUID.randomUUID().toString();
+
+        try {
+            cryptoMessagePersister.writeStream(message.getConversationId(), identifier, file.getInputStream(), file.getSize());
+        } catch (IOException e) {
+            throw new MessagePersistException(file.getOriginalFilename());
+        }
+
+        return identifier;
     }
 
     private String getMimeType(String contentType, String filename) {
@@ -222,58 +88,8 @@ public class NextMoveMessageService {
         return contentType;
     }
 
-    private boolean isPrimaryDocument(NextMoveOutMessage message, String filename) {
-        return filename.equals(message.getBusinessMessage().getPrimaerDokumentNavn());
-    }
-
     void sendMessage(NextMoveMessage message) {
-        validate(message);
+        validator.validate(message);
         internalQueue.enqueueNextMove2(message);
-    }
-
-    private void validate(NextMoveMessage message) {
-        // Must always be at least one attachment
-        if (message.getFiles() == null || message.getFiles().isEmpty()) {
-            throw new MissingFileException();
-        }
-
-        if (ServiceIdentifier.DPO == message.getServiceIdentifier()) {
-            // Verify each file referenced in arkivmelding is uploaded
-            List<String> arkivmeldingFiles;
-            try {
-                arkivmeldingFiles = ArkivmeldingUtil.getFilenames(getArkivmelding(message));
-            } catch (ArkivmeldingException e) {
-                throw new ArkivmeldingProcessingException(e);
-            }
-            Set<String> messageFiles = message.getFiles().stream()
-                    .map(BusinessMessageFile::getFilename)
-                    .collect(Collectors.toSet());
-
-            List<String> missingFiles = arkivmeldingFiles.stream()
-                    .filter(p -> !messageFiles.contains(p))
-                    .collect(Collectors.toList());
-
-            if (!missingFiles.isEmpty()) {
-                throw new MissingArkivmeldingFileException(String.join(",", missingFiles));
-            }
-        }
-    }
-
-    private Arkivmelding getArkivmelding(NextMoveMessage message) {
-        // Arkivmelding must exist for DPO
-        BusinessMessageFile arkivmeldingFile = message.getFiles().stream()
-                .filter(f -> NextMoveConsts.ARKIVMELDING_FILE.equals(f.getFilename()))
-                .findAny()
-                .orElseThrow(MissingArkivmeldingException::new);
-
-        try (FileEntryStream fileEntryStream = cryptoMessagePersister.readStream(message.getConversationId(), arkivmeldingFile.getIdentifier())) {
-            return ArkivmeldingUtil.unmarshalArkivmelding(fileEntryStream.getInputStream());
-        } catch (JAXBException | IOException e) {
-            throw new UnmarshalArkivmeldingException();
-        }
-    }
-
-    private String createConversationId() {
-        return uuidGenerator.generate();
     }
 }

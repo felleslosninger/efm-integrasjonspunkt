@@ -9,6 +9,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import java.util.HashSet;
 
 @Entity
 @DiscriminatorValue("out")
@@ -22,12 +23,19 @@ public class NextMoveOutMessage extends NextMoveMessage {
         super(conversationId, receiverIdentifier, senderIdentifier, serviceIdentifier, sbd);
     }
 
+
     public static NextMoveOutMessage of(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
-        return new NextMoveOutMessage(
+        NextMoveOutMessage message = new NextMoveOutMessage(
                 sbd.getConversationId(),
                 sbd.getReceiverIdentifier(),
                 sbd.getSenderIdentifier(),
                 serviceIdentifier,
                 sbd);
+        message.setFiles(new HashSet<>());
+        return message;
+    }
+
+    public boolean isPrimaryDocument(String filename) {
+        return filename.equals(getBusinessMessage().getPrimaerDokumentNavn());
     }
 }
