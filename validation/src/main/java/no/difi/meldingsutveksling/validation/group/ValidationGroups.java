@@ -48,4 +48,13 @@ public interface ValidationGroups {
         interface DPV extends ServiceIdentifier {
         }
     }
+
+    interface Partner extends Default {
+
+        interface Sender extends Partner {
+        }
+
+        interface Receiver extends Partner {
+        }
+    }
 }

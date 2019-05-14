@@ -21,8 +21,8 @@ public class StandardBusinessDocumentHeaderTest {
     @Test(expected = MeldingsUtvekslingRuntimeException.class)
     public void testShouldFailOnWrongReceiverListsizeOneOrMore() {
         StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader();
-        header.getReceiver().add(new Receiver());
-        header.getReceiver().add(new Receiver());
+        header.getReceiver().add(new Receiver().setIdentifier(new PartnerIdentification()));
+        header.getReceiver().add(new Receiver().setIdentifier(new PartnerIdentification()));
         header.getReceiverOrganisationNumber();
     }
 

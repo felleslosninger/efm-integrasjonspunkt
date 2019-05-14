@@ -1,6 +1,6 @@
+no.difi.meldingsutveksling.validation.EqualToPropertyValidator
 no.difi.meldingsutveksling.validation.IsDocumentTypeValidator
 no.difi.meldingsutveksling.validation.InServiceRegistryValidator
 no.difi.meldingsutveksling.validation.InstanceOfValidator
 no.difi.meldingsutveksling.validation.OneOfValidator
 no.difi.meldingsutveksling.validation.UUIDValidator
-

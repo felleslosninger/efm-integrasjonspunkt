@@ -3,8 +3,9 @@ package no.difi.meldingsutveksling.validation.group;
 import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-
-import javax.validation.groups.Default;
+import no.difi.meldingsutveksling.domain.sbdh.Partner;
+import no.difi.meldingsutveksling.domain.sbdh.Receiver;
+import no.difi.meldingsutveksling.domain.sbdh.Sender;
 
 @UtilityClass
 public class ValidationGroupFactory {
@@ -28,7 +29,7 @@ public class ValidationGroupFactory {
             case EINNSYN_KVITTERING:
                 return ValidationGroups.DocumentType.EInnsynKvittering.class;
             default:
-                return Default.class;
+                return null;
         }
     }
 
@@ -45,7 +46,21 @@ public class ValidationGroupFactory {
             case DPV:
                 return ValidationGroups.ServiceIdentifier.DPV.class;
             default:
-                return Default.class;
+                return null;
         }
+    }
+
+    public static Class<?> toPartner(Partner partner) {
+        if (partner == null) {
+            return null;
+        }
+
+        if (partner instanceof Sender) {
+            return ValidationGroups.Partner.Sender.class;
+        } else if (partner instanceof Receiver) {
+            return ValidationGroups.Partner.Receiver.class;
+        }
+
+        return null;
     }
 }

@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -69,7 +70,9 @@ public class NextMoveValidator {
             throw new ReceiverDoNotAcceptDocumentStandard(standard, sbd.getProcess());
         }
 
-        asserter.isValid(sbd.getAny(), ValidationGroupFactory.toServiceIdentifier(serviceIdentifier));
+
+        Class<?> group = ValidationGroupFactory.toServiceIdentifier(serviceIdentifier);
+        asserter.isValid(sbd.getAny(), group != null ? new Class<?>[] { group } : new Class<?>[0]);
     }
 
     void validate(NextMoveMessage message) {

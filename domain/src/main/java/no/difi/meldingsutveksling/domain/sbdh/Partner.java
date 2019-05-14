@@ -70,6 +70,12 @@ public class Partner extends AbstractEntity<Long> {
     @Valid
     protected Set<ContactInformation> contactInformation;
 
+    public Partner setIdentifier(PartnerIdentification identifier) {
+        this.identifier = identifier;
+        identifier.setPartner(this);
+        return this;
+    }
+
     /**
      * Gets the value of the contactInformation property.
      *

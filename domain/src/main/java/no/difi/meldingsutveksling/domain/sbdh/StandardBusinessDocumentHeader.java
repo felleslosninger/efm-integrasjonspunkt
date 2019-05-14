@@ -78,8 +78,7 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
     @XmlElement(name = "Sender", required = true)
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "header_id", nullable = false)
-    @NotEmpty
-    @Size(min = 1, max = 1)
+    @Size(max = 1)
     @Valid
     private Set<Sender> sender;
 

@@ -11,9 +11,15 @@ package no.difi.meldingsutveksling.domain.sbdh;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.validation.EqualToProperty;
 import no.difi.meldingsutveksling.validation.InServiceRegistry;
+import no.difi.meldingsutveksling.validation.group.ValidationGroups;
+import no.difi.meldingsutveksling.validation.group.sequenceprovider.PartnerIdentificationGroupSequenceProvider;
+import org.hibernate.annotations.Parent;
+import org.hibernate.validator.group.GroupSequenceProvider;
 
 import javax.persistence.Embeddable;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.*;
 
 
@@ -38,17 +44,26 @@ import javax.xml.bind.annotation.*;
 })
 @Data
 @Embeddable
+@GroupSequenceProvider(value = PartnerIdentificationGroupSequenceProvider.class)
 public class PartnerIdentification {
+
+    @XmlTransient
+    @JsonIgnore
+    @Parent
+    private Partner partner;
 
     @XmlValue
     @InServiceRegistry
+    @EqualToProperty(value = "difi.move.org.number", groups = ValidationGroups.Partner.Sender.class)
+    @NotNull
     protected String value;
 
     @XmlAttribute(name = "Authority")
+    @NotNull
     protected String authority;
 
     @JsonIgnore
-    public String getStrippedValue() {
+    String getStrippedValue() {
         if (value == null) {
             return null;
         }

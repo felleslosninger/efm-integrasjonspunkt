@@ -5,7 +5,11 @@ import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.UUIDGenerator;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.DocumentIdentification;
+import no.difi.meldingsutveksling.domain.sbdh.PartnerIdentification;
+import no.difi.meldingsutveksling.domain.sbdh.Sender;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.UnknownNextMoveDocumentTypeException;
 import no.difi.meldingsutveksling.nextmove.DpiPrintMessage;
@@ -23,6 +27,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 @RequiredArgsConstructor
 public class NextMoveOutMessageFactory {
 
+    private final IntegrasjonspunktProperties properties;
     private final NextMoveServiceRecordProvider serviceRecordProvider;
     private final UUIDGenerator uuidGenerator;
     private final Clock clock;
@@ -45,6 +50,16 @@ public class NextMoveOutMessageFactory {
                 .stream()
                 .filter(p -> isNullOrEmpty(p.getInstanceIdentifier()))
                 .forEach(p -> p.setInstanceIdentifier(uuidGenerator.generate()));
+
+        if (sbd.getSenderIdentifier() == null) {
+            Organisasjonsnummer org = Organisasjonsnummer.from(properties.getOrg().getNumber());
+            sbd.getStandardBusinessDocumentHeader().addSender(
+                    new Sender()
+                            .setIdentifier(new PartnerIdentification()
+                                    .setValue(org.asIso6523())
+                                    .setAuthority(org.authority()))
+            );
+        }
 
         DocumentIdentification documentIdentification = sbd.getStandardBusinessDocumentHeader().getDocumentIdentification();
 
