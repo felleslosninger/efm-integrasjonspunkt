@@ -12,7 +12,7 @@ public class MessagePollingSteps {
 
     @Given("^the application checks for new DPO messages$")
     public void theApplicationChecksForNewNextMoveDPOMessages() {
-        messagePolling.checkForNewMessages();
+        messagePolling.checkForNewAltinnMessages();
     }
 
     @Given("^the application checks for new DPF messages$")

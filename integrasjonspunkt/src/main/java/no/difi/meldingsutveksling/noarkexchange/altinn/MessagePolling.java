@@ -20,7 +20,7 @@ public class MessagePolling {
     private final ObjectProvider<DpoPolling> dpoPolling;
 
     @Scheduled(fixedRateString = "${difi.move.nextmove.serviceBus.pollingrate}")
-    public void checkForNewNextMoveMessages() {
+    public void checkForNewEinnsynMessages() {
         Optional.ofNullable(dpePolling.getIfAvailable()).ifPresent(DpePolling::poll);
     }
 
@@ -30,7 +30,7 @@ public class MessagePolling {
     }
 
     @Scheduled(fixedRate = 15000)
-    public void checkForNewMessages() {
+    public void checkForNewAltinnMessages() {
         Optional.ofNullable(dpoPolling.getIfAvailable()).ifPresent(DpoPolling::poll);
     }
 }
