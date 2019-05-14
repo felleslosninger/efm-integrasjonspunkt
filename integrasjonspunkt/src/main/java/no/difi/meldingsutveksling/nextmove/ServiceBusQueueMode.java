@@ -7,7 +7,8 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public enum ServiceBusQueueMode {
     INNSYN("innsyn"),
-    DATA("data");
+    DATA("data"),
+    MEETING("meeting");
 
     private final String fullname;
 

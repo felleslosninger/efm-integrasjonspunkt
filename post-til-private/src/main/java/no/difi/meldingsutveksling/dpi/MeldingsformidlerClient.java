@@ -14,7 +14,6 @@ import no.difi.sdp.client2.domain.Forsendelse;
 import no.difi.sdp.client2.domain.exceptions.SendException;
 import no.difi.sdp.client2.domain.kvittering.ForretningsKvittering;
 import no.difi.sdp.client2.domain.kvittering.KvitteringForespoersel;
-
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;

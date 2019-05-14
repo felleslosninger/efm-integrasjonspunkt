@@ -317,6 +317,10 @@ public class FiksMapper {
     }
 
     private XMLGregorianCalendar journalDatoFrom(String jpDato) {
+        if (Strings.isNullOrEmpty(jpDato)) {
+            return null;
+        }
+
         LocalDateTime localDateTime = LocalDateTime.of(LocalDate.parse(jpDato), LocalTime.of(0, 0));
 
         GregorianCalendar gcal = GregorianCalendar.from(localDateTime.atZone(ZoneId.systemDefault()));
