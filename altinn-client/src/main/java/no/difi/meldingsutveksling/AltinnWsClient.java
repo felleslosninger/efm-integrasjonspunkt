@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling;
 
 import com.google.common.collect.Lists;
-import com.sun.xml.internal.ws.client.BindingProviderProperties;
+import com.sun.xml.ws.client.BindingProviderProperties;
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.*;
