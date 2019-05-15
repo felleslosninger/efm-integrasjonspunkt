@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling;
 
 import com.google.common.collect.Lists;
-import com.sun.xml.ws.client.BindingProviderProperties;
+import com.sun.xml.ws.developer.JAXWSProperties;
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.*;
@@ -61,8 +61,8 @@ public class AltinnWsClient {
 
         BindingProvider bp = (BindingProvider) streamingService;
         bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, configuration.getStreamingServiceUrl().toString());
-        bp.getRequestContext().put(BindingProviderProperties.REQUEST_TIMEOUT, REQUEST_TIMEOUT);
-        bp.getRequestContext().put(BindingProviderProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT);
+        bp.getRequestContext().put(JAXWSProperties.REQUEST_TIMEOUT, REQUEST_TIMEOUT);
+        bp.getRequestContext().put(JAXWSProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT);
 
         try {
             StreamedPayloadBasicBE parameters = new StreamedPayloadBasicBE();
@@ -104,8 +104,8 @@ public class AltinnWsClient {
         IBrokerServiceExternalBasic service = brokerServiceExternalBasicSF.getBasicHttpBindingIBrokerServiceExternalBasic();
         BindingProvider bp = (BindingProvider) service;
         bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, configuration.getBrokerServiceUrl().toString());
-        bp.getRequestContext().put(BindingProviderProperties.REQUEST_TIMEOUT, REQUEST_TIMEOUT);
-        bp.getRequestContext().put(BindingProviderProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT);
+        bp.getRequestContext().put(JAXWSProperties.REQUEST_TIMEOUT, REQUEST_TIMEOUT);
+        bp.getRequestContext().put(JAXWSProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT);
 
         BrokerServiceSearch searchParameters = new BrokerServiceSearch();
         searchParameters.setFileStatus(BrokerServiceAvailableFileStatus.UPLOADED);
@@ -135,8 +135,8 @@ public class AltinnWsClient {
         IBrokerServiceExternalBasicStreamed streamingService = brokerServiceExternalBasicStreamedSF.getBasicHttpBindingIBrokerServiceExternalBasicStreamed(new MTOMFeature(true));
         BindingProvider bp = (BindingProvider) streamingService;
         bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, configuration.getStreamingServiceUrl().toString());
-        bp.getRequestContext().put(BindingProviderProperties.REQUEST_TIMEOUT, REQUEST_TIMEOUT);
-        bp.getRequestContext().put(BindingProviderProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT);
+        bp.getRequestContext().put(JAXWSProperties.REQUEST_TIMEOUT, REQUEST_TIMEOUT);
+        bp.getRequestContext().put(JAXWSProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT);
         SOAPBinding binding = (SOAPBinding) bp.getBinding();
         binding.setMTOMEnabled(true);
 
@@ -159,8 +159,8 @@ public class AltinnWsClient {
         final BindingProvider bp = (BindingProvider) service;
 
         bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, configuration.getBrokerServiceUrl().toString());
-        bp.getRequestContext().put(BindingProviderProperties.REQUEST_TIMEOUT, REQUEST_TIMEOUT);
-        bp.getRequestContext().put(BindingProviderProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT);
+        bp.getRequestContext().put(JAXWSProperties.REQUEST_TIMEOUT, REQUEST_TIMEOUT);
+        bp.getRequestContext().put(JAXWSProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT);
 
         try {
             service.confirmDownloadedBasic(configuration.getUsername(), configuration.getPassword(), request.fileReference, request.getReciever());
@@ -178,8 +178,8 @@ public class AltinnWsClient {
             IBrokerServiceExternalBasic service = brokerServiceExternalBasicSF.getBasicHttpBindingIBrokerServiceExternalBasic();
             BindingProvider bp = (BindingProvider) service;
             bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, configuration.getBrokerServiceUrl().toString());
-            bp.getRequestContext().put(BindingProviderProperties.REQUEST_TIMEOUT, REQUEST_TIMEOUT);
-            bp.getRequestContext().put(BindingProviderProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT);
+            bp.getRequestContext().put(JAXWSProperties.REQUEST_TIMEOUT, REQUEST_TIMEOUT);
+            bp.getRequestContext().put(JAXWSProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT);
             return service.initiateBrokerServiceBasic(configuration.getUsername(), configuration.getPassword(), brokerServiceInitiation);
         } catch (IBrokerServiceExternalBasicInitiateBrokerServiceBasicAltinnFaultFaultFaultMessage e) {
             throw new AltinnWsException(FAILED_TO_INITATE_ALTINN_BROKER_SERVICE, AltinnReasonFactory.from(e), e);
