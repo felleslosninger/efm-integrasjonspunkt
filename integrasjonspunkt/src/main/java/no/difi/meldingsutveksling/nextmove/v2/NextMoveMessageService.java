@@ -7,7 +7,6 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MessagePersistException;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
-import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
@@ -88,7 +87,7 @@ public class NextMoveMessageService {
         return contentType;
     }
 
-    void sendMessage(NextMoveMessage message) {
+    void sendMessage(NextMoveOutMessage message) {
         validator.validate(message);
         internalQueue.enqueueNextMove2(message);
     }

@@ -8,7 +8,7 @@ import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.ks.mapping.FiksMapper;
 import no.difi.meldingsutveksling.ks.mapping.FiksStatusMapper;
 import no.difi.meldingsutveksling.nextmove.NextMoveException;
-import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -45,7 +45,7 @@ public class SvarUtService {
         return client.sendMessage(svarUtRequest);
     }
 
-    public String send(NextMoveMessage message) throws NextMoveException {
+    public String send(NextMoveOutMessage message) throws NextMoveException {
         ServiceRecord serviceRecord;
         try {
             serviceRecord = serviceRegistryLookup.getServiceRecord(message.getReceiverIdentifier(), message.getServiceIdentifier());
@@ -64,7 +64,7 @@ public class SvarUtService {
         return props.getFiks().getUt().getEndpointUrl().toString();
     }
 
-    private SendForsendelseMedId getForsendelse(NextMoveMessage message, ServiceRecord serviceRecord) throws NextMoveException {
+    private SendForsendelseMedId getForsendelse(NextMoveOutMessage message, ServiceRecord serviceRecord) throws NextMoveException {
         final X509Certificate x509Certificate = toX509Certificate(serviceRecord.getPemCertificate());
         return fiksMapper.mapFrom(message, x509Certificate);
     }

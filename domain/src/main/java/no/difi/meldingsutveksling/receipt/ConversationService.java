@@ -3,13 +3,12 @@ package no.difi.meldingsutveksling.receipt;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
-import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.webhooks.WebhookPublisher;
 import org.springframework.beans.factory.ObjectProvider;
@@ -63,6 +62,7 @@ public class ConversationService {
     }
 
     @SuppressWarnings("squid:S2250")
+    @Transactional
     public Conversation registerStatus(Conversation conversation, MessageStatus status) {
         boolean hasStatus = conversation.getMessageStatuses().stream()
                 .anyMatch(ms -> ms.getStatus().equals(status.getStatus()) &&
@@ -84,12 +84,14 @@ public class ConversationService {
         return conversation;
     }
 
+    @Transactional
     public Conversation markFinished(Conversation conversation) {
         conversation.setFinished(true);
         conversation.setPollable(false);
         return repo.save(conversation);
     }
 
+    @Transactional
     public Conversation registerConversation(EDUCore message) {
         Optional<Conversation> find = repo.findByConversationId(message.getId()).stream().findFirst();
         if (find.isPresent()) {
@@ -111,7 +113,8 @@ public class ConversationService {
         return repo.save(conversation);
     }
 
-    public Conversation registerConversation(NextMoveMessage message) {
+    @Transactional
+    public Conversation registerConversation(MessageInformable message) {
         Optional<Conversation> find = repo.findByConversationId(message.getConversationId()).stream().findFirst();
         if (find.isPresent()) {
             log.warn(String.format(CONVERSATION_EXISTS, message.getConversationId()));
@@ -121,27 +124,5 @@ public class ConversationService {
         MessageStatus ms = messageStatusFactory.getMessageStatus(ReceiptStatus.OPPRETTET);
         Conversation c = Conversation.of(message, ms);
         return repo.save(c);
-    }
-
-    public Conversation registerConversation(StandardBusinessDocument sbd) {
-        Optional<Conversation> find = repo.findByConversationId(sbd.getConversationId()).stream().findFirst();
-        if (find.isPresent()) {
-            log.warn(String.format(CONVERSATION_EXISTS, sbd.getConversationId()));
-            return find.get();
-        }
-
-        MessageStatus ms = messageStatusFactory.getMessageStatus(ReceiptStatus.OPPRETTET);
-        Conversation c = Conversation.of(sbd, ms);
-        return repo.save(c);
-    }
-
-    public void setServiceIdentifier(String conversationId, ServiceIdentifier si) {
-        Optional<Conversation> find = repo.findByConversationId(conversationId).stream().findFirst();
-        if (find.isPresent()) {
-            Conversation c = find.get();
-            c.setServiceIdentifier(si);
-            c.setPollable(POLLABLES.contains(si));
-            repo.save(c);
-        }
     }
 }

@@ -8,7 +8,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.AsicHandler;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
-import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
@@ -57,14 +57,12 @@ public class MessageSender {
         return createOkResponse();
     }
 
-
-    public void sendMessage(NextMoveMessage message) throws MessageContextException {
+    public void sendMessage(NextMoveOutMessage message) throws MessageContextException {
         MessageContext messageContext = messageContextFactory.from(message);
         InputStream is = asicHandler.createEncryptedAsic(message, messageContext);
         Transport transport = transportFactory.createTransport(message.getSbd());
         transport.send(applicationContextHolder.getApplicationContext(), message.getSbd(), is);
     }
-
 
     public void sendMessage(ConversationResource conversation) throws MessageContextException {
         MessageContext messageContext = messageContextFactory.from(conversation);

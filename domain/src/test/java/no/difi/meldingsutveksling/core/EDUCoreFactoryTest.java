@@ -286,7 +286,6 @@ public class EDUCoreFactoryTest {
                         )
                 )
                 .setAny(new ArkivmeldingMessage()
-                        .setDpoField("foo")
                         .setSikkerhetsnivaa(3));
     }
 }

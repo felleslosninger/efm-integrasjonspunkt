@@ -23,7 +23,7 @@ public class DpfConversationStrategy implements ConversationStrategy {
     }
 
     @Override
-    public void send(NextMoveMessage message) throws NextMoveException {
+    public void send(NextMoveOutMessage message) throws NextMoveException {
         svarUtService.send(message);
 
         Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] sent to SvarUt",

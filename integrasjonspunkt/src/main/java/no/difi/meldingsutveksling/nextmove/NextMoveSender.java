@@ -27,7 +27,7 @@ public class NextMoveSender {
     private final MessageStatusFactory messageStatusFactory;
 
     @Transactional
-    public void send(NextMoveMessage msg) throws NextMoveException {
+    public void send(NextMoveOutMessage msg) throws NextMoveException {
         strategyFactory.getStrategy(msg.getServiceIdentifier())
                 .orElseThrow(() -> {
                     String errorStr = String.format("Cannot send message - serviceIdentifier \"%s\" not supported",

@@ -22,7 +22,7 @@ public class DpvConversationStrategy implements ConversationStrategy {
     }
 
     @Override
-    public void send(NextMoveMessage message) throws NextMoveException {
+    public void send(NextMoveOutMessage message) throws NextMoveException {
 
         InsertCorrespondenceV2 correspondence = correspondenceAgencyMessageFactory.create(message);
 

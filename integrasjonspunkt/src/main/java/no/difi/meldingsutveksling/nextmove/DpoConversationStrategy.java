@@ -22,7 +22,7 @@ public class DpoConversationStrategy implements ConversationStrategy {
     }
 
     @Override
-    public void send(NextMoveMessage message) throws NextMoveException {
+    public void send(NextMoveOutMessage message) throws NextMoveException {
         try {
             messageSender.sendMessage(message);
         } catch (MessageContextException e) {

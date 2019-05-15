@@ -102,9 +102,9 @@ public class InternalQueue {
 
     @JmsListener(destination = NEXTMOVE, containerFactory = "myJmsContainerFactory", concurrency = "100")
     public void nextMove2Listener(byte[] message, Session session) {
-        NextMoveMessage nextMoveMessage;
+        NextMoveOutMessage nextMoveMessage;
         try {
-            nextMoveMessage = objectMapper.readValue(message, NextMoveMessage.class);
+            nextMoveMessage = objectMapper.readValue(message, NextMoveOutMessage.class);
         } catch (IOException e) {
             throw new NextMoveRuntimeException("Unable to unmarshall NextMove message from queue", e);
         }
@@ -264,7 +264,7 @@ public class InternalQueue {
         enqueueExternal(eduCore);
     }
 
-    public void enqueueNextMove2(NextMoveMessage msg) {
+    public void enqueueNextMove2(NextMoveOutMessage msg) {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             objectMapper.writeValue(bos, msg);
             jmsTemplate.convertAndSend(NEXTMOVE, bos.toByteArray());

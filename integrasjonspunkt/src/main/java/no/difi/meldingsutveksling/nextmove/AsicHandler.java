@@ -56,7 +56,7 @@ public class AsicHandler {
         return archiveAndEncryptAttachments(attachments.get(0), attachments.stream(), messageContext, cr.getServiceIdentifier());
     }
 
-    public InputStream createEncryptedAsic(NextMoveMessage msg, MessageContext messageContext) {
+    public InputStream createEncryptedAsic(NextMoveOutMessage msg, MessageContext messageContext) {
 
         if (msg.getFiles() == null || msg.getFiles().isEmpty()) return null;
 

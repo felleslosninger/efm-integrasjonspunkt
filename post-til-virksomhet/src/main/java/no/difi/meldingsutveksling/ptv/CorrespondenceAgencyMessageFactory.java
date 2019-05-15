@@ -63,7 +63,7 @@ public class CorrespondenceAgencyMessageFactory {
     private final Clock clock;
 
     @SneakyThrows
-    public InsertCorrespondenceV2 create(NextMoveMessage message) {
+    public InsertCorrespondenceV2 create(NextMoveOutMessage message) {
         no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory reporteeFactory = new no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory();
         BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
 

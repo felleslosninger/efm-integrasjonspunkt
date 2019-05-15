@@ -6,12 +6,10 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.core.EDUCore;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
-import no.difi.meldingsutveksling.nextmove.ConversationResource;
-import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.noarkexchange.PayloadException;
 import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 import org.slf4j.Logger;
@@ -30,8 +28,8 @@ import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 @Data
 @Slf4j
 @Table(name = "conversation",
-    indexes = {@Index(columnList = "conversation_id")})
-public class Conversation {
+        indexes = {@Index(columnList = "conversation_id")})
+public class Conversation implements MessageInformable {
 
     public static final Logger statusLogger = LoggerFactory.getLogger("STATUS");
 
@@ -57,7 +55,8 @@ public class Conversation {
     @JoinColumn(name = "conv_id")
     private List<MessageStatus> messageStatuses;
 
-    Conversation() {}
+    Conversation() {
+    }
 
     private Conversation(String conversationId,
                          String messageReference,
@@ -77,6 +76,15 @@ public class Conversation {
         this.lastUpdate = LocalDateTime.now();
     }
 
+    private Conversation addMessageStatuses(MessageStatus... statuses) {
+        if (statuses != null && statuses.length > 0) {
+            Stream.of(statuses)
+                    .peek(r -> r.setConversationId(conversationId))
+                    .forEach(this::addMessageStatus);
+        }
+        return this;
+    }
+
     public static Conversation of(String conversationId,
                                   String messageReference,
                                   String senderIdentifier,
@@ -86,49 +94,15 @@ public class Conversation {
                                   ServiceIdentifier serviceIdentifier,
                                   MessageStatus... statuses) {
 
-        Conversation c = new Conversation(conversationId, messageReference, senderIdentifier, receiverIdentifier, direction, messageTitle, serviceIdentifier);
-        if (statuses != null && statuses.length > 0) {
-            Stream.of(statuses)
-                    .peek(r -> r.setConversationId(conversationId))
-                    .forEach(c::addMessageStatus);
-        }
-        return c;
+        return new Conversation(conversationId, messageReference, senderIdentifier, receiverIdentifier, direction, messageTitle, serviceIdentifier)
+                .addMessageStatuses(statuses);
     }
 
-    public static Conversation of(ConversationResource cr, MessageStatus... statuses) {
-        Conversation c = new Conversation(cr.getConversationId(), cr.getConversationId(), cr.getSenderId(), cr.getReceiverId(),
-                cr.getDirection(), "", cr.getServiceIdentifier());
-        if (statuses != null && statuses.length > 0) {
-            Stream.of(statuses)
-                    .peek(r -> r.setConversationId(cr.getConversationId()))
-                    .forEach(c::addMessageStatus);
-        }
-        return c;
-    }
 
-    public static Conversation of(NextMoveMessage msg, MessageStatus... statuses) {
-        // TODO: fix after direction impl
-        Conversation c = new Conversation(msg.getConversationId(), msg.getConversationId(), msg.getSenderIdentifier(), msg.getReceiverIdentifier(),
-                ConversationDirection.INCOMING, "", msg.getServiceIdentifier());
-        if (statuses != null && statuses.length > 0) {
-            Stream.of(statuses)
-                    .peek(r -> r.setConversationId(msg.getConversationId()))
-                    .forEach(c::addMessageStatus);
-        }
-        return c;
-    }
-
-    public static Conversation of(StandardBusinessDocument sbd, MessageStatus... statuses) {
-        // Only used when receiving messages, and will for StandardBusinessDocument always be DPO
-        Conversation c = new Conversation(sbd.getConversationId(), sbd.getConversationId(),
-                sbd.getSenderIdentifier(), sbd.getReceiverIdentifier(), ConversationDirection.INCOMING,
-               "", ServiceIdentifier.DPO);
-        if (statuses != null && statuses.length > 0) {
-            Stream.of(statuses)
-                    .peek(r -> r.setConversationId(sbd.getConversationId()))
-                    .forEach(c::addMessageStatus);
-        }
-        return c;
+    public static Conversation of(MessageInformable msg, MessageStatus... statuses) {
+        return new Conversation(msg.getConversationId(), msg.getConversationId(), msg.getSenderIdentifier(), msg.getReceiverIdentifier(),
+                msg.getDirection(), "", msg.getServiceIdentifier())
+                .addMessageStatuses(statuses);
     }
 
     public static Conversation of(EDUCore eduCore, MessageStatus... statuses) {
@@ -142,19 +116,13 @@ public class Conversation {
             }
         }
 
-        Conversation c = new Conversation(eduCore.getId(), eduCore.getMessageReference(),
+        return new Conversation(eduCore.getId(), eduCore.getMessageReference(),
                 eduCore.getSender().getIdentifier(), eduCore.getReceiver().getIdentifier(), ConversationDirection.OUTGOING,
-                msgTitle, eduCore.getServiceIdentifier() == DPE ? DPV : eduCore.getServiceIdentifier());
-
-        if (statuses != null && statuses.length > 0) {
-            Stream.of(statuses)
-                    .peek(r -> r.setConversationId(eduCore.getId()))
-                    .forEach(c::addMessageStatus);
-        }
-        return c;
+                msgTitle, eduCore.getServiceIdentifier() == DPE ? DPV : eduCore.getServiceIdentifier())
+                .addMessageStatuses(statuses);
     }
 
-    public void addMessageStatus(MessageStatus status) {
+    void addMessageStatus(MessageStatus status) {
         status.setConversationId(getConversationId());
         this.messageStatuses.add(status);
         this.lastUpdate = LocalDateTime.now();
