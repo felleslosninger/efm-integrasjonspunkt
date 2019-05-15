@@ -1,14 +1,18 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import lombok.RequiredArgsConstructor;
+import no.difi.begrep.sdp.schema_v10.SDPSikkerhetsnivaa;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dpi.Document;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +25,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     private static final String MISSING_TXT = "Missing title";
 
     private final IntegrasjonspunktProperties props;
+    private final Clock clock;
     private final NextMoveMessage message;
     private final ServiceRecord serviceRecord;
     private final CryptoMessagePersister cryptoMessagePersister;
@@ -165,5 +170,23 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
             return getPrintMessage().getMailReturn().getReceiver();
         }
         return null;
+    }
+
+    @Override
+    public Sikkerhetsnivaa getSecurityLevel() {
+        SDPSikkerhetsnivaa sdpSikkerhetsnivaa = SDPSikkerhetsnivaa.fromValue(String.valueOf(message.getBusinessMessage().getSikkerhetsnivaa()));
+        return Sikkerhetsnivaa.valueOf(sdpSikkerhetsnivaa.toString());
+    }
+
+    @Override
+    public Date getVirkningsdato() {
+        if (isDigitalMessage()) {
+            return Date.from(getDigitalMessage().getDigitalPostInfo()
+                    .getVirkningsdato()
+                    .atStartOfDay()
+                    .atZone(clock.getZone())
+                    .toInstant());
+        }
+        return new Date();
     }
 }

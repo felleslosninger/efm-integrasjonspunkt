@@ -2,7 +2,9 @@ package no.difi.meldingsutveksling.dpi;
 
 
 import no.difi.meldingsutveksling.nextmove.PostAddress;
+import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
 
+import java.util.Date;
 import java.util.List;
 
 public class Request implements MeldingsformidlerRequest {
@@ -94,6 +96,16 @@ public class Request implements MeldingsformidlerRequest {
 
     @Override
     public PostAddress getReturnAddress() {
+        return null;
+    }
+
+    @Override
+    public Sikkerhetsnivaa getSecurityLevel() {
+        return null;
+    }
+
+    @Override
+    public Date getVirkningsdato() {
         return null;
     }
 

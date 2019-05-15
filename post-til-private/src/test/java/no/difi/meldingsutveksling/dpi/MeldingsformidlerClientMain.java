@@ -19,6 +19,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -125,6 +126,16 @@ public class MeldingsformidlerClientMain {
             @Override
             public PostAddress getReturnAddress() {
                 return null;
+            }
+
+            @Override
+            public Sikkerhetsnivaa getSecurityLevel() {
+                return Sikkerhetsnivaa.NIVAA_3;
+            }
+
+            @Override
+            public Date getVirkningsdato() {
+                return new Date();
             }
 
             @Override
