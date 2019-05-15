@@ -16,6 +16,7 @@ import no.difi.meldingsutveksling.validation.OneOf;
 import no.difi.meldingsutveksling.validation.UUID;
 
 import javax.persistence.*;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -74,6 +75,7 @@ public class Scope extends AbstractEntity<Long> {
     @XmlElement(name = "ScopeInformation")
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "scope_id", nullable = false)
+    @Valid
     protected Set<CorrelationInformation> scopeInformation;
 
     /**
