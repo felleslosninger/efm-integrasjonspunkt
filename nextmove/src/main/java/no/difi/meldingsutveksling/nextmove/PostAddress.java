@@ -9,17 +9,17 @@ import javax.persistence.Embeddable;
 @Embeddable
 public class PostAddress {
 
-    private String name;
-    private String addressLine1;
-    private String addressLine2;
-    private String addressLine3;
-    private String addressLine4;
-    private String postalCode;
-    private String postalArea;
-    private String countryCode;
-    private String country;
+    private String navn;
+    private String adresselinje1;
+    private String adresselinje2;
+    private String adresselinje3;
+    private String adresselinje4;
+    private String postnummer;
+    private String poststed;
+    private String landkode;
+    private String land;
 
     public boolean isNorge() {
-        return (country == null || "".equals(country)) || Sets.newHashSet("NORGE", "NORWAY", "NO", "NOR").contains(country.toUpperCase());
+        return (land == null || "".equals(land)) || Sets.newHashSet("NORGE", "NORWAY", "NO", "NOR").contains(land.toUpperCase());
     }
 }

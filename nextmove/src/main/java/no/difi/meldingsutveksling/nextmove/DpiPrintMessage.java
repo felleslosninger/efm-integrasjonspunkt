@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import lombok.*;
-import no.difi.meldingsutveksling.config.dpi.ShippingType;
+import no.difi.sdp.client2.domain.fysisk_post.Posttype;
 import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
 
 import javax.persistence.*;
@@ -22,12 +22,12 @@ public class DpiPrintMessage extends BusinessMessage {
     @Embedded
     @NotNull
     @Valid
-    private PostAddress receiver;
-    private Utskriftsfarge color;
-    private ShippingType shippingType;
+    private PostAddress mottaker;
+    private Utskriftsfarge utskriftsfarge;
+    private Posttype posttype;
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @NotNull
     @Valid
-    private MailReturn mailReturn;
+    private MailReturn retur;
 }
