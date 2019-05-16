@@ -37,7 +37,7 @@ public class MeldingsformidlerClient {
 
         Forsendelse forsendelse = forsendelseBuilder.konversasjonsId(request.getConversationId())
                 .mpcId(config.getMpcId())
-                .spraakkode(config.getLanguage())
+                .spraakkode(request.getLanguage())
                 .prioritet(config.getPriority()).build();
 
         SikkerDigitalPostKlient klient = sikkerDigitalPostKlientFactory.createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer.of(request.getSenderOrgnumber()));

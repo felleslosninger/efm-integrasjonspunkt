@@ -31,6 +31,7 @@ public class DigitalForsendelseHandler extends ForsendelseBuilderHandler {
         final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(request.getSenderOrgnumber());
         DigitalPost.Builder digitalPost = DigitalPost.builder(mottaker, request.getSubject())
                 .virkningsdato(request.getVirkningsdato())
+                .aapningskvittering(request.isAapningskvittering())
                 .sikkerhetsnivaa(request.getSecurityLevel());
         digitalPost = smsNotificationHandler.handle(request, digitalPost);
         digitalPost = emailNotificationHandler.handle(request, digitalPost);

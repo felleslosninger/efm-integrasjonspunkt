@@ -3,6 +3,9 @@ package no.difi.meldingsutveksling.dpi;
 
 import no.difi.meldingsutveksling.nextmove.PostAddress;
 import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
+import no.difi.sdp.client2.domain.fysisk_post.Posttype;
+import no.difi.sdp.client2.domain.fysisk_post.Returhaandtering;
+import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
 
 import java.util.Date;
 import java.util.List;
@@ -11,6 +14,7 @@ public class Request implements MeldingsformidlerRequest {
     private boolean notifiable;
     private String mobileNumber;
     private String email;
+    private String sms;
 
     Request() {}
 
@@ -66,12 +70,12 @@ public class Request implements MeldingsformidlerRequest {
 
     @Override
     public String getSmsVarslingstekst() {
-        return null;
+        return sms;
     }
 
     @Override
     public String getEmailVarslingstekst() {
-        return null;
+        return email;
     }
 
     @Override
@@ -109,6 +113,31 @@ public class Request implements MeldingsformidlerRequest {
         return null;
     }
 
+    @Override
+    public String getLanguage() {
+        return "NO";
+    }
+
+    @Override
+    public boolean isAapningskvittering() {
+        return false;
+    }
+
+    @Override
+    public Utskriftsfarge getPrintColor() {
+        return Utskriftsfarge.SORT_HVIT;
+    }
+
+    @Override
+    public Posttype getPosttype() {
+        return Posttype.B_OEKONOMI;
+    }
+
+    @Override
+    public Returhaandtering getReturnHandling() {
+        return Returhaandtering.DIREKTE_RETUR;
+    }
+
     Request withNotifiable(boolean notifiable) {
         this.notifiable = notifiable;
         return this;
@@ -121,6 +150,11 @@ public class Request implements MeldingsformidlerRequest {
 
     Request withEmail(String email) {
         this.email = email;
+        return this;
+    }
+
+    Request withSms(String sms) {
+        this.sms = sms;
         return this;
     }
 }

@@ -8,6 +8,9 @@ import no.difi.meldingsutveksling.nextmove.PostAddress;
 import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
 import no.difi.sdp.client2.domain.Prioritet;
 import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
+import no.difi.sdp.client2.domain.fysisk_post.Posttype;
+import no.difi.sdp.client2.domain.fysisk_post.Returhaandtering;
+import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -136,6 +139,31 @@ public class MeldingsformidlerClientMain {
             @Override
             public Date getVirkningsdato() {
                 return new Date();
+            }
+
+            @Override
+            public String getLanguage() {
+                return "NO";
+            }
+
+            @Override
+            public boolean isAapningskvittering() {
+                return false;
+            }
+
+            @Override
+            public Utskriftsfarge getPrintColor() {
+                return Utskriftsfarge.SORT_HVIT;
+            }
+
+            @Override
+            public Posttype getPosttype() {
+                return Posttype.B_OEKONOMI;
+            }
+
+            @Override
+            public Returhaandtering getReturnHandling() {
+                return Returhaandtering.DIREKTE_RETUR;
             }
 
             @Override

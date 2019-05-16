@@ -59,7 +59,6 @@ Feature: Sending a Next Move DPI message
           "spraak": "NO",
           "digitalPostInfo": {
             "virkningsdato": "2019-05-12",
-            "virkningstidspunkt": "",
             "aapningskvittering": "false"
           },
           "varsler": {

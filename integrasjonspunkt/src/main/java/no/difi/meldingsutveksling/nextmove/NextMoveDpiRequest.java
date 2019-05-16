@@ -8,6 +8,9 @@ import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
+import no.difi.sdp.client2.domain.fysisk_post.Posttype;
+import no.difi.sdp.client2.domain.fysisk_post.Returhaandtering;
+import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -21,7 +24,6 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 @RequiredArgsConstructor
 public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
-    private static final String DEFAULT_EXT = "PDF";
     private static final String MISSING_TXT = "Missing title";
 
     private final IntegrasjonspunktProperties props;
@@ -130,7 +132,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
         if (isDigitalMessage()) {
             return getDigitalMessage().getVarsler().getSmsTekst();
         }
-        return null;
+        return props.getDpi().getEmail().getVarslingstekst();
     }
 
     @Override
@@ -138,7 +140,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
         if (isDigitalMessage()) {
             return getDigitalMessage().getVarsler().getEpostTekst();
         }
-        return null;
+        return props.getDpi().getEmail().getVarslingstekst();
     }
 
     @Override
@@ -159,7 +161,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     @Override
     public PostAddress getPostAddress() {
         if (isPrintMessage()) {
-            return getPrintMessage().getReceiver();
+            return getPrintMessage().getMottaker();
         }
         return null;
     }
@@ -167,7 +169,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     @Override
     public PostAddress getReturnAddress() {
         if (isPrintMessage()) {
-            return getPrintMessage().getMailReturn().getReceiver();
+            return getPrintMessage().getRetur().getMottaker();
         }
         return null;
     }
@@ -188,5 +190,45 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
                     .toInstant());
         }
         return new Date();
+    }
+
+    @Override
+    public String getLanguage() {
+        if (isDigitalMessage()) {
+            return getDigitalMessage().getSpraak();
+        }
+        return props.getDpi().getLanguage();
+    }
+
+    @Override
+    public boolean isAapningskvittering() {
+        if (isDigitalMessage()) {
+            return getDigitalMessage().getDigitalPostInfo().getAapningskvittering();
+        }
+        return false;
+    }
+
+    @Override
+    public Utskriftsfarge getPrintColor() {
+        if (isPrintMessage()) {
+            return getPrintMessage().getUtskriftsfarge();
+        }
+        return Utskriftsfarge.SORT_HVIT;
+    }
+
+    @Override
+    public Posttype getPosttype() {
+        if (isPrintMessage()) {
+            return getPrintMessage().getPosttype();
+        }
+        return Posttype.B_OEKONOMI;
+    }
+
+    @Override
+    public Returhaandtering getReturnHandling() {
+        if (isPrintMessage()) {
+            return getPrintMessage().getRetur().getReturhaandtering();
+        }
+        return Returhaandtering.DIREKTE_RETUR;
     }
 }
