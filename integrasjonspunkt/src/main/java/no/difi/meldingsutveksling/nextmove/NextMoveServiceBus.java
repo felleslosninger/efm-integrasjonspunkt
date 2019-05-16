@@ -49,9 +49,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
-import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.DATA;
-import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.INNSYN;
-import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.MEETING;
+import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.*;
 
 @Component
 @ConditionalOnProperty(name = "difi.move.feature.enableDPE", havingValue = "true")
@@ -119,7 +117,7 @@ public class NextMoveServiceBus {
 
     }
 
-    public void putMessage(NextMoveMessage message) throws NextMoveException {
+    public void putMessage(NextMoveOutMessage message) throws NextMoveException {
         ServiceBusPayload payload = ServiceBusPayload.of(message.getSbd(), getAsicBytes(message));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             om.writeValue(bos, payload);
@@ -129,7 +127,7 @@ public class NextMoveServiceBus {
         }
     }
 
-    private byte[] getAsicBytes(NextMoveMessage message) throws NextMoveException {
+    private byte[] getAsicBytes(NextMoveOutMessage message) throws NextMoveException {
         byte[] asicBytes = null;
         try {
             InputStream encryptedAsic = asicHandler.createEncryptedAsic(message, getMessageContext(message));
@@ -190,19 +188,7 @@ public class NextMoveServiceBus {
                     Collection<IMessage> messages = messageReceiver.receiveBatch(100, Duration.ofSeconds(10));
                     if (messages != null && !messages.isEmpty()) {
                         log.debug("Processing {} messages..", messages.size());
-                        messages.forEach(m -> {
-                            try {
-                                log.debug(format("Received message on queue=%s with id=%s", serviceBusClient.getLocalQueuePath(), m.getMessageId()));
-                                ServiceBusPayload payload = payloadConverter.convert(m.getBody(), m.getMessageId());
-                                if (payload.getAsic() != null) {
-                                    cryptoMessagePersister.write(payload.getSbd().getConversationId(), ASIC_FILE, Base64.getDecoder().decode(payload.getAsic()));
-                                }
-                                handleSbd(payload.getSbd());
-                                messageReceiver.completeAsync(m.getLockToken());
-                            } catch (JAXBException | IOException e) {
-                                log.error("Failed to put message on local queue", e);
-                            }
-                        });
+                        messages.forEach(this::handleMessage);
                         log.debug("Done processing {} messages", messages.size());
                     } else {
                         log.trace("No messages in queue, cancelling batch");
@@ -213,6 +199,20 @@ public class NextMoveServiceBus {
                 }
             }
         });
+    }
+
+    private void handleMessage(IMessage m) {
+        try {
+            log.debug(format("Received message on queue=%s with id=%s", serviceBusClient.getLocalQueuePath(), m.getMessageId()));
+            ServiceBusPayload payload = payloadConverter.convert(m.getBody(), m.getMessageId());
+            if (payload.getAsic() != null) {
+                cryptoMessagePersister.write(payload.getSbd().getConversationId(), ASIC_FILE, Base64.getDecoder().decode(payload.getAsic()));
+            }
+            handleSbd(payload.getSbd());
+            messageReceiver.completeAsync(m.getLockToken());
+        } catch (JAXBException | IOException e) {
+            log.error("Failed to put message on local queue", e);
+        }
     }
 
     private void handleSbd(StandardBusinessDocument sbd) {
@@ -226,21 +226,21 @@ public class NextMoveServiceBus {
         }
     }
 
-    private void sendReceiptAsync(NextMoveMessage message) {
+    private void sendReceiptAsync(NextMoveInMessage message) {
         CompletableFuture.runAsync(() -> sendReceipt(message));
     }
 
-    private void sendReceipt(NextMoveMessage message) {
+    private void sendReceipt(NextMoveInMessage message) {
         internalQueue.enqueueNextMove2(NextMoveOutMessage.of(getReceipt(message), DPE));
     }
 
-    private StandardBusinessDocument getReceipt(NextMoveMessage message) {
+    private StandardBusinessDocument getReceipt(NextMoveInMessage message) {
         return sbdReceiptFactory.createEinnsynStatusFrom(message.getSbd(),
                 DocumentType.STATUS,
                 ReceiptStatus.MOTTATT);
     }
 
-    private String getReceiverQueue(NextMoveMessage message) {
+    private String getReceiverQueue(NextMoveOutMessage message) {
         if (SBDUtil.isReceipt(message.getSbd())) {
             return receiptTarget();
         }

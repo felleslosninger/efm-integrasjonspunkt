@@ -29,6 +29,5 @@
     </ns2:StandardBusinessDocumentHeader>
     <ns3:arkivmelding>
         <sikkerhetsnivaa>3</sikkerhetsnivaa>
-        <dpoField>foo</dpoField>
     </ns3:arkivmelding>
 </ns2:StandardBusinessDocument>

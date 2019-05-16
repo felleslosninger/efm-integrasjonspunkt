@@ -4,7 +4,6 @@ import lombok.*;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @Getter
@@ -12,10 +11,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @ToString
 @Entity
 @DiscriminatorValue("arkivmelding")
-@AllArgsConstructor
 @NoArgsConstructor
 @XmlRootElement(name = "arkivmelding", namespace = "urn:no:difi:meldingsutveksling:2.0")
 public class ArkivmeldingMessage extends BusinessMessage {
-
-    private String dpoField;
 }

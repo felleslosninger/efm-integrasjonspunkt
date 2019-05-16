@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.hibernate.annotations.DiscriminatorOptions;
@@ -12,19 +13,16 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-@Entity
 @DiscriminatorColumn(name = "direction", discriminatorType = DiscriminatorType.STRING)
 @DiscriminatorOptions(force = true)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@Data
+@Getter
+@Setter
+@ToString
+@Entity
 @RequiredArgsConstructor
 @NoArgsConstructor
-public class NextMoveMessage {
-
-    @Id
-    @GeneratedValue
-    @Setter(AccessLevel.PRIVATE)
-    private Long id;
+abstract class NextMoveMessage extends AbstractEntity<Long> implements MessageInformable {
 
     @Column(unique = true)
     @NonNull

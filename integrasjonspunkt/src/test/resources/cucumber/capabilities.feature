@@ -3,6 +3,7 @@ Feature: Capabilities
   Background:
     Given a "GET" request to "http://localhost:9099/identifier/910077473?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
     Given a "GET" request to "http://localhost:9099/identifier/910075935?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075935.json"
+    Given a "GET" request to "http://localhost:9099/identifier/09118532322?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/09118532322.json"
 
   Scenario: As a user I want to get a list of all capabilities for 910077473
     Given I request all capabilities for "910077473"
@@ -60,5 +61,48 @@ Feature: Capabilities
           "standard" : "urn:no:difi.einnsyn:xsd:innsyn::innsynskrav"
         } ]
       } ]
+      }
+      """
+
+  Scenario: As a user I want to get a list of all capabilities for 09118532322
+    Given I request all capabilities for "09118532322"
+    Then the returned capabilities are:
+      """
+      {
+        "capabilities" : [ {
+          "process" : "urn:no:difi:profile:digitalpost:info:ver1.0",
+          "serviceIdentifier" : "DPI",
+          "returnAddress" : {
+            "name" : "",
+            "street" : "",
+            "postalCode" : "",
+            "postalArea" : "",
+            "country" : ""
+          },
+          "documentTypes" : [ {
+            "type" : "digital",
+            "standard" : "urn:no:difi.digitalpost:xsd:digital::digital"
+          }, {
+            "type" : "print",
+            "standard" : "urn:no:difi.digitalpost:xsd:fysisk::print"
+          } ]
+        }, {
+          "process" : "urn:no:difi:profile:digitalpost:vedtak:ver1.0",
+          "serviceIdentifier" : "DPI",
+          "returnAddress" : {
+            "name" : "",
+            "street" : "",
+            "postalCode" : "",
+            "postalArea" : "",
+            "country" : ""
+          },
+          "documentTypes" : [ {
+            "type" : "digital",
+            "standard" : "urn:no:difi.digitalpost:xsd:digital::digital"
+          }, {
+            "type" : "print",
+            "standard" : "urn:no:difi.digitalpost:xsd:fysisk::print"
+          } ]
+        } ]
       }
       """

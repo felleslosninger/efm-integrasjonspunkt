@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.MultipartFileToLargeException;
-import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -93,7 +92,7 @@ public class NextMoveMessageOutController {
             @QuerydslPredicate(root = NextMoveOutMessage.class) Predicate predicate,
             @PageableDefault Pageable pageable) {
         return messageService.findMessages(predicate, pageable)
-                .map(NextMoveMessage::getSbd);
+                .map(NextMoveOutMessage::getSbd);
     }
 
     @GetMapping("/{conversationId}")
@@ -130,7 +129,7 @@ public class NextMoveMessageOutController {
     })
     @Transactional
     public void sendMessage(@PathVariable("conversationId") String conversationId) {
-        NextMoveMessage message = messageService.getMessage(conversationId);
+        NextMoveOutMessage message = messageService.getMessage(conversationId);
         messageService.sendMessage(message);
     }
 }

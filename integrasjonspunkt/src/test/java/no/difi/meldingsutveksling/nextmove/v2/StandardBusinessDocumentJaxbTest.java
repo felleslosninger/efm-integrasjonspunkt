@@ -86,7 +86,6 @@ public class StandardBusinessDocumentJaxbTest {
                         )
                 )
                 .setAny(new ArkivmeldingMessage()
-                        .setDpoField("foo")
                         .setSikkerhetsnivaa(3));
     }
 }

@@ -38,4 +38,9 @@ public class NextMoveOutMessage extends NextMoveMessage {
     public boolean isPrimaryDocument(String filename) {
         return filename.equals(getBusinessMessage().getPrimaerDokumentNavn());
     }
+
+    @Override
+    public ConversationDirection getDirection() {
+        return ConversationDirection.OUTGOING;
+    }
 }

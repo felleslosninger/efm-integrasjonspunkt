@@ -6,11 +6,13 @@ import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.ApplicationContextHolder;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.*;
 import no.difi.meldingsutveksling.transport.Transport;
@@ -45,7 +47,9 @@ public class AltinnConversationMessageHandler implements AltinnMessageHandler {
         } else {
             sendReceipt(sbd.getMessageInfo());
             log.debug(sbd.createLogstashMarkers(), "Delivery receipt sent");
-            Conversation c = conversationService.registerConversation(sbd);
+            Conversation c = conversationService.registerConversation(
+                    NextMoveInMessage.of(sbd, ServiceIdentifier.DPO)
+            );
             internalQueue.enqueueNoark(sbd);
             conversationService.registerStatus(c, messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_MOTTATT));
         }

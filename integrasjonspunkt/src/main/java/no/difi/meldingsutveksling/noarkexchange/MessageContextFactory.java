@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
@@ -7,7 +8,6 @@ import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
-import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -34,7 +34,7 @@ public class MessageContextFactory {
         this.serviceRegistryLookup = srLookup;
     }
 
-    public MessageContext from(NextMoveMessage message) throws MessageContextException {
+    public MessageContext from(MessageInformable message) throws MessageContextException {
         MessageContext context = new MessageContext();
         context.setAvsender(createAvsender(message.getSenderIdentifier()));
         context.setMottaker(createMottaker(message.getReceiverIdentifier(), message.getServiceIdentifier()));
@@ -110,7 +110,7 @@ public class MessageContextFactory {
         try {
             serviceRecord = serviceRegistryLookup.getServiceRecord(identifier, serviceIdentifier);
         } catch (ServiceRegistryLookupException e) {
-                throw new MessageContextException(StatusMessage.NO_MATCHING_SERVICEIDENTIFIER, e);
+            throw new MessageContextException(StatusMessage.NO_MATCHING_SERVICEIDENTIFIER, e);
         }
 
         try {

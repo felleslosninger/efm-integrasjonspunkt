@@ -28,7 +28,7 @@ public class NextMoveQueue {
     private final MessageStatusFactory messageStatusFactory;
 
     @Transactional
-    public NextMoveMessage enqueue(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
+    public NextMoveInMessage enqueue(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
         if (sbd.getAny() instanceof BusinessMessage) {
             NextMoveInMessage message = NextMoveInMessage.of(sbd, serviceIdentifier);
 

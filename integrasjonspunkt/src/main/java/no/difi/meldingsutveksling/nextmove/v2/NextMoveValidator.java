@@ -11,7 +11,6 @@ import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
-import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
@@ -74,7 +73,7 @@ public class NextMoveValidator {
         asserter.isValid(sbd.getAny(), group != null ? new Class<?>[]{group} : new Class<?>[0]);
     }
 
-    void validate(NextMoveMessage message) {
+    void validate(NextMoveOutMessage message) {
         // Must always be at least one attachment
         if (message.getFiles() == null || message.getFiles().isEmpty()) {
             throw new MissingFileException();
@@ -102,7 +101,7 @@ public class NextMoveValidator {
         }
     }
 
-    private Arkivmelding getArkivmelding(NextMoveMessage message) {
+    private Arkivmelding getArkivmelding(NextMoveOutMessage message) {
         // Arkivmelding must exist for DPO
         BusinessMessageFile arkivmeldingFile = message.getFiles().stream()
                 .filter(f -> NextMoveConsts.ARKIVMELDING_FILE.equals(f.getFilename()))

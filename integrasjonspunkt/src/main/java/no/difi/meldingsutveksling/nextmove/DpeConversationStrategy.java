@@ -23,7 +23,7 @@ public class DpeConversationStrategy implements ConversationStrategy {
     }
 
     @Override
-    public void send(NextMoveMessage message) throws NextMoveException {
+    public void send(NextMoveOutMessage message) throws NextMoveException {
         serviceBus.putMessage(message);
         Audit.info(format("Message [id=%s, serviceIdentifier=%s] sent to service bus",
                 message.getConversationId(), message.getServiceIdentifier()),

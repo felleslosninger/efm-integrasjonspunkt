@@ -7,6 +7,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class PostalAddressFactory {
     PostalAddress getPostalAddress(PostAddress in) {
+        if (in == null) {
+            return null;
+        }
+
         return new PostalAddress()
                 .setName(in.getName())
                 .setStreet(in.getStreet())

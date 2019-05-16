@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.validation;
 
-import com.google.common.util.concurrent.UncheckedExecutionException;
 import lombok.Value;
 import no.difi.meldingsutveksling.config.ValidationConfig;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -20,7 +19,10 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = ValidationConfig.class)
+@ContextConfiguration(classes = {
+        ValidationConfig.class,
+        FixedClockConfig.class
+})
 public class InServiceRegistryValidatorTest {
 
     @Autowired

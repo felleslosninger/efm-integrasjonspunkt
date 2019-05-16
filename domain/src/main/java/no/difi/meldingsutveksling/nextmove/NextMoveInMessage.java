@@ -35,4 +35,9 @@ public class NextMoveInMessage extends NextMoveMessage {
                 serviceIdentifier,
                 sbd);
     }
+
+    @Override
+    public ConversationDirection getDirection() {
+        return ConversationDirection.INCOMING;
+    }
 }

@@ -36,7 +36,7 @@ public class DpiConversationStrategy implements ConversationStrategy {
     }
 
     @Override
-    public void send(NextMoveMessage message) throws NextMoveException {
+    public void send(NextMoveOutMessage message) throws NextMoveException {
         List<ServiceRecord> serviceRecords = sr.getServiceRecords(message.getReceiverIdentifier());
         Optional<ServiceRecord> serviceRecord = serviceRecords.stream()
                 .filter(r -> message.getServiceIdentifier() == r.getServiceIdentifier())

@@ -18,7 +18,7 @@ import no.difi.meldingsutveksling.ks.mapping.edu.FileTypeHandlerFactory;
 import no.difi.meldingsutveksling.ks.svarut.*;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveException;
-import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
@@ -43,7 +43,10 @@ import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -72,14 +75,14 @@ public class FiksMapper {
         this.cmsUtilProvider = cmsUtilProvider;
     }
 
-    public SendForsendelseMedId mapFrom(NextMoveMessage message, X509Certificate certificate) throws NextMoveException {
+    public SendForsendelseMedId mapFrom(NextMoveOutMessage message, X509Certificate certificate) throws NextMoveException {
         return SendForsendelseMedId.builder()
                 .withForsendelse(getForsendelse(message, certificate))
                 .withForsendelsesid(message.getSbd().findScope(ScopeType.SENDER_REF).map(Scope::getIdentifier).orElse(message.getConversationId()))
                 .build();
     }
 
-    private Forsendelse getForsendelse(NextMoveMessage message, X509Certificate certificate) throws NextMoveException {
+    private Forsendelse getForsendelse(NextMoveOutMessage message, X509Certificate certificate) throws NextMoveException {
         Arkivmelding am = getArkivmelding(message);
         Saksmappe saksmappe = ArkivmeldingUtil.getSaksmappe(am);
         Journalpost journalpost = ArkivmeldingUtil.getJournalpost(am);
@@ -108,7 +111,7 @@ public class FiksMapper {
                 .withBrevtype(Brevtype.BPOST).build();
     }
 
-    private Adresse getSvarSendesTil(NextMoveMessage message, Journalpost journalpost) {
+    private Adresse getSvarSendesTil(NextMoveOutMessage message, Journalpost journalpost) {
         return journalpost.getKorrespondansepart().stream()
                 .filter(k -> k.getKorrespondanseparttype().equals(Korrespondanseparttype.AVSENDER))
                 .map(a -> mottakerFrom(a, message.getSenderIdentifier()))
@@ -116,7 +119,7 @@ public class FiksMapper {
                 .orElseGet(() -> mottakerFrom(serviceRegistry.getInfoRecord(message.getSenderIdentifier())));
     }
 
-    private boolean kreverNiva4Innlogging(NextMoveMessage message) {
+    private boolean kreverNiva4Innlogging(NextMoveOutMessage message) {
         Integer sikkerhetsnivaa = message.getBusinessMessage().getSikkerhetsnivaa();
         return sikkerhetsnivaa != null && sikkerhetsnivaa == 4;
     }
@@ -128,12 +131,12 @@ public class FiksMapper {
                 .collect(Collectors.toSet());
     }
 
-    private Adresse getMottaker(NextMoveMessage message) {
+    private Adresse getMottaker(NextMoveOutMessage message) {
         final InfoRecord receiverInfo = serviceRegistry.getInfoRecord(message.getReceiverIdentifier());
         return mottakerFrom(receiverInfo);
     }
 
-    private Arkivmelding getArkivmelding(NextMoveMessage message) throws NextMoveException {
+    private Arkivmelding getArkivmelding(NextMoveOutMessage message) throws NextMoveException {
         String arkivmeldingIdentifier = getArkivmeldingIdentifier(message);
 
         try (FileEntryStream fileEntryStream = cryptoMessagePersister.readStream(message.getConversationId(), arkivmeldingIdentifier)) {
@@ -145,7 +148,7 @@ public class FiksMapper {
         }
     }
 
-    private String getArkivmeldingIdentifier(NextMoveMessage message) throws NextMoveException {
+    private String getArkivmeldingIdentifier(NextMoveOutMessage message) throws NextMoveException {
         return message.getFiles().stream()
                 .filter(f -> ARKIVMELDING_FILE.equals(f.getFilename()))
                 .findAny()
@@ -206,7 +209,7 @@ public class FiksMapper {
             try {
                 UUID.fromString(senderRef);
             } catch (IllegalArgumentException e) {
-                log.warn("sender.ref={} is not valid UUID, using conversationId={} as forsendelsesId", senderRef, eduCore.getId(), e);
+                log.warn("sender.ref={} is not valid UUID, using conversationId={} as forsendelsesId", senderRef, eduCore.getId());
                 senderRef = eduCore.getId();
             }
         }
@@ -219,14 +222,14 @@ public class FiksMapper {
             try {
                 UUID.fromString(receiverRef);
             } catch (IllegalArgumentException e) {
-                log.warn("receiver.ref={} is not valid UUID, setting blank value", receiverRef, e);
+                log.warn("receiver.ref={} is not valid UUID, setting blank value", receiverRef);
                 receiverRef = null;
             }
         }
         return receiverRef;
     }
 
-    private Set<Dokument> mapArkivmeldingDokumenter(NextMoveMessage message, Set<Dokumentbeskrivelse> docs, X509Certificate cert) {
+    private Set<Dokument> mapArkivmeldingDokumenter(NextMoveOutMessage message, Set<Dokumentbeskrivelse> docs, X509Certificate cert) {
         return docs.stream()
                 .flatMap(p -> p.getDokumentobjekt().stream())
                 .map(d -> getBusinessMessageFile(message, d.getReferanseDokumentfil()))
@@ -234,7 +237,7 @@ public class FiksMapper {
                 .collect(Collectors.toSet());
     }
 
-    private BusinessMessageFile getBusinessMessageFile(NextMoveMessage message, String referanseDokumentfil) {
+    private BusinessMessageFile getBusinessMessageFile(NextMoveOutMessage message, String referanseDokumentfil) {
         return message.getFiles().stream()
                 .filter(bmf -> bmf.getFilename().equals(referanseDokumentfil))
                 .findFirst()

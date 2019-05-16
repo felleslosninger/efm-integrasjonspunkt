@@ -69,7 +69,6 @@ public class StandardBusinessDocumentRepositoryTest {
                                 )
                         )
                 ).setAny(new ArkivmeldingMessage()
-                        .setDpoField("1")
                         .setSikkerhetsnivaa(3)
                 );
     }
