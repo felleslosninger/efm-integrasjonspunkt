@@ -2,12 +2,7 @@ package no.difi.meldingsutveksling.config;
 
 import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
-import no.difi.meldingsutveksling.dpi.ForsendelseHandlerFactory;
-import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
-import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
-import no.difi.meldingsutveksling.dpi.SikkerDigitalPostKlientFactory;
 import no.difi.meldingsutveksling.dpi.*;
-import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.lang.KeystoreProviderException;
 import no.difi.meldingsutveksling.mail.MailClient;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
@@ -24,7 +19,6 @@ import no.difi.meldingsutveksling.receipt.StatusStrategyFactory;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.transport.TransportFactory;
-import no.difi.meldingsutveksling.validation.Asserter;
 import no.difi.move.common.oauth.JWTDecoder;
 import no.difi.vefa.peppol.common.lang.PeppolLoadingException;
 import no.difi.vefa.peppol.lookup.LookupClient;
@@ -42,7 +36,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.client.RestOperations;
 
-import javax.validation.Validator;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -115,7 +108,7 @@ public class IntegrasjonspunktBeans {
 
     @Bean(name = "fiksMailClient")
     public NoarkClient fiksMailClient(IntegrasjonspunktProperties properties) {
-        return new MailClient(properties, Optional.ofNullable(properties.getFiks().getInn().getMailSubject()));
+        return new MailClient(properties, properties.getFiks().getInn().getMailSubject());
     }
 
     @Bean

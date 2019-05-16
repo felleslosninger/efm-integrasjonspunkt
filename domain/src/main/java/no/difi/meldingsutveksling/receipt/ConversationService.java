@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -64,63 +63,72 @@ public class ConversationService {
     @SuppressWarnings("squid:S2250")
     @Transactional
     public Conversation registerStatus(Conversation conversation, MessageStatus status) {
-        boolean hasStatus = conversation.getMessageStatuses().stream()
-                .anyMatch(ms -> ms.getStatus().equals(status.getStatus()) &&
-                        Objects.equals(ms.getDescription(), status.getDescription()));
-        if (!hasStatus) {
-            conversation.addMessageStatus(status);
-            webhookPublisher.publish(status);
-            Audit.info(String.format("Added status '%s' to conversation[id=%s]", status.getStatus(),
-                    conversation.getConversationId()),
-                    MessageStatusMarker.from(status));
-            if (conversation.getDirection() == ConversationDirection.OUTGOING &&
-                    ReceiptStatus.SENDT.toString().equals(status.getStatus()) &&
-                    POLLABLES.contains(conversation.getServiceIdentifier()) &&
-                    !conversation.isMsh()) {
-                conversation.setPollable(true);
-            }
-            return repo.save(conversation);
+        if (conversation.hasStatus(status)) {
+            return conversation;
         }
-        return conversation;
+
+        conversation.addMessageStatus(status)
+                .setPollable(isPollable(conversation, status));
+
+        webhookPublisher.publish(status);
+
+        Audit.info(String.format("Added status '%s' to conversation[id=%s]", status.getStatus(),
+                conversation.getConversationId()),
+                MessageStatusMarker.from(status));
+
+        return repo.save(conversation);
+    }
+
+    private boolean isPollable(Conversation conversation, MessageStatus status) {
+        return conversation.getDirection() == ConversationDirection.OUTGOING &&
+                ReceiptStatus.SENDT.toString().equals(status.getStatus()) &&
+                POLLABLES.contains(conversation.getServiceIdentifier()) &&
+                !conversation.isMsh();
     }
 
     @Transactional
     public Conversation markFinished(Conversation conversation) {
-        conversation.setFinished(true);
-        conversation.setPollable(false);
-        return repo.save(conversation);
+        return repo.save(conversation
+                .setFinished(true)
+                .setPollable(false));
     }
 
     @Transactional
     public Conversation registerConversation(EDUCore message) {
-        Optional<Conversation> find = repo.findByConversationId(message.getId()).stream().findFirst();
-        if (find.isPresent()) {
-            log.warn(String.format(CONVERSATION_EXISTS, message.getId()));
-            return find.get();
-        }
+        return findConversation(message.getId())
+                .orElseGet(() -> createConversation(message));
+    }
 
-        MessageStatus ms = messageStatusFactory.getMessageStatus(ReceiptStatus.OPPRETTET);
-        if (message.getMessageType() == EDUCore.MessageType.APPRECEIPT) {
-            ms.setDescription("AppReceipt");
-        }
-        Conversation conversation = Conversation.of(message, ms);
-
-        if (!Strings.isNullOrEmpty(props.getMsh().getEndpointURL())
-                && mshClient.canRecieveMessage(message.getReceiver().getIdentifier())) {
-            conversation.setMsh(true);
-        }
+    private Conversation createConversation(EDUCore message) {
+        MessageStatus ms = messageStatusFactory.getMessageStatus(ReceiptStatus.OPPRETTET, getDescription(message));
+        Conversation conversation = Conversation.of(message, ms)
+                .setMsh(isMsh(message));
 
         return repo.save(conversation);
     }
 
+    private String getDescription(EDUCore message) {
+        return message.getMessageType() == EDUCore.MessageType.APPRECEIPT ? "AppReceipt" : null;
+    }
+
+    private boolean isMsh(EDUCore message) {
+        return !Strings.isNullOrEmpty(props.getMsh().getEndpointURL())
+                && mshClient.canRecieveMessage(message.getReceiver().getIdentifier());
+    }
+
     @Transactional
     public Conversation registerConversation(MessageInformable message) {
-        Optional<Conversation> find = repo.findByConversationId(message.getConversationId()).stream().findFirst();
-        if (find.isPresent()) {
-            log.warn(String.format(CONVERSATION_EXISTS, message.getConversationId()));
-            return find.get();
-        }
+        return findConversation(message.getConversationId())
+                .orElseGet(() -> createConversation(message));
+    }
 
+    private Optional<Conversation> findConversation(String conversationId) {
+        return repo.findByConversationId(conversationId).stream()
+                .findFirst()
+                .filter(p -> {  log.warn(String.format(CONVERSATION_EXISTS, conversationId)); return true; });
+    }
+
+    private Conversation createConversation(MessageInformable message) {
         MessageStatus ms = messageStatusFactory.getMessageStatus(ReceiptStatus.OPPRETTET);
         Conversation c = Conversation.of(message, ms);
         return repo.save(c);

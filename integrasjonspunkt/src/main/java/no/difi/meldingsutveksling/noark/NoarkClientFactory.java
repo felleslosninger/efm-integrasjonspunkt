@@ -39,7 +39,7 @@ public class NoarkClientFactory {
             case WEBSAK:
                 return new WebsakClient(settings);
             case MAIL:
-                return new MailClient(properties, Optional.empty());
+                return new MailClient(properties);
             default:
                 throw new UnknownArchiveSystemException(noarkType);
         }

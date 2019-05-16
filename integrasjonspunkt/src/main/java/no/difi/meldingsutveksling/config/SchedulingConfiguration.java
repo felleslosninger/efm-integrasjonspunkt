@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.config;
 
-import no.difi.meldingsutveksling.nextmove.ConversationResourceRepository;
-import no.difi.meldingsutveksling.nextmove.ConversationResourceUnlocker;
+import no.difi.meldingsutveksling.nextmove.NextMoveInMessageUnlocker;
+import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
 import no.difi.meldingsutveksling.noarkexchange.altinn.DpePolling;
 import no.difi.meldingsutveksling.noarkexchange.altinn.DpfPolling;
 import no.difi.meldingsutveksling.noarkexchange.altinn.DpoPolling;
@@ -22,8 +22,8 @@ import java.time.Clock;
 public class SchedulingConfiguration {
 
     @Bean
-    public ConversationResourceUnlocker conversationResourceUnlocker(ConversationResourceRepository repo, Clock clock) {
-        return new ConversationResourceUnlocker(repo, clock);
+    public NextMoveInMessageUnlocker nextMoveInMessageUnlocker(NextMoveMessageInRepository repo, Clock clock) {
+        return new NextMoveInMessageUnlocker(repo, clock);
     }
 
     @Bean

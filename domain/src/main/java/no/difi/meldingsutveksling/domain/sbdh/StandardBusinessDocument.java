@@ -131,11 +131,6 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
                 .map(Scope::getInstanceIdentifier);
     }
 
-    @JsonIgnore
-    public Optional<Scope> getConversationScope() {
-        return findScope(ScopeType.CONVERSATION_ID);
-    }
-
     public Set<Scope> getScopes() {
         return getStandardBusinessDocumentHeader()
                 .getBusinessScope()

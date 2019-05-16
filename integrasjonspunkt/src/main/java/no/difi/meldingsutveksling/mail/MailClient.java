@@ -10,10 +10,14 @@ import java.util.Optional;
 
 public class MailClient implements NoarkClient {
 
-    private IntegrasjonspunktProperties props;
-    private Optional<String> subject;
+    private final IntegrasjonspunktProperties props;
+    private String subject;
 
-    public MailClient(IntegrasjonspunktProperties props, Optional subject) {
+    public MailClient(IntegrasjonspunktProperties props) {
+        this.props = props;
+    }
+
+    public MailClient(IntegrasjonspunktProperties props, String subject) {
         this.props = props;
         this.subject = subject;
     }
@@ -25,10 +29,17 @@ public class MailClient implements NoarkClient {
 
     @Override
     public PutMessageResponseType sendEduMelding(PutMessageRequestType request) {
-        EduMailSender eduMailSender = new EduMailSender(props);
-        String defaultSubject = String.format("Integrasjonspunkt: melding fra %s, conversationId=%s",
-                request.getEnvelope().getSender().getOrgnr(), request.getEnvelope().getConversationId());
-        eduMailSender.send(request, subject.orElse(defaultSubject));
+        new EduMailSender(props).send(request, getSubject(request));
         return PutMessageResponseFactory.createOkResponse();
+    }
+
+    private String getSubject(PutMessageRequestType request) {
+        return Optional.ofNullable(subject).orElseGet(() -> getDefaultSubject(request));
+    }
+
+    private String getDefaultSubject(PutMessageRequestType request) {
+        return String.format("Integrasjonspunkt: melding fra %s, conversationId=%s",
+                request.getEnvelope().getSender().getOrgnr(),
+                request.getEnvelope().getConversationId());
     }
 }
