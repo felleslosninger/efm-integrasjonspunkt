@@ -15,7 +15,7 @@ public class Pipe {
     private final PipedOutputStream inlet;
     private final PipedInputStream outlet;
 
-    private Pipe() {
+    public Pipe() {
         this.inlet = new PipedOutputStream();
         this.outlet = new PipedInputStream();
         connectInletAndOutlet();
@@ -42,14 +42,18 @@ public class Pipe {
         }
     }
 
-    public static Pipe of(String description, Consumer<PipedOutputStream> consumer) {
-        Pipe pipe = new Pipe();
+    public Pipe consume(String description, Consumer<PipedOutputStream> consumer) {
         CompletableFuture.runAsync(() -> {
             log.trace("Starting thread: {}", description);
-            consumer.accept(pipe.inlet);
+            consumer.accept(inlet);
             log.trace("Thread finished: {}", description);
-        }).whenCompleteAsync((dummy, ex) -> pipe.close());
-        return pipe;
+        }).whenCompleteAsync((dummy, ex) -> close());
+        return this;
+    }
+
+    public static Pipe of(String description, Consumer<PipedOutputStream> consumer) {
+        Pipe pipe = new Pipe();
+        return pipe.consume(description, consumer);
     }
 
     public Pipe andThen(String description, BiConsumer<PipedInputStream, PipedOutputStream> consumer) {

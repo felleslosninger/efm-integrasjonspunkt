@@ -9,10 +9,13 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.InputStream;
+import java.io.PipedOutputStream;
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,25 +28,32 @@ public class SvarInnClient {
     private final RestTemplate restTemplate;
 
     public SvarInnClient(IntegrasjonspunktProperties props) {
-        RestTemplateBuilder builder = new RestTemplateBuilder();
-        builder = builder.rootUri(props.getFiks().getInn().getBaseUrl());
-        builder = builder.basicAuthorization(props.getFiks().getInn().getUsername(), props.getFiks().getInn().getPassword());
-        this.restTemplate = builder.build();
+        this.restTemplate = new RestTemplateBuilder()
+                .errorHandler(new DefaultResponseErrorHandler())
+                .rootUri(props.getFiks().getInn().getBaseUrl())
+                .basicAuthorization(props.getFiks().getInn().getUsername(), props.getFiks().getInn().getPassword())
+                .build();
     }
 
     List<Forsendelse> checkForNewMessages() {
         return Arrays.asList(restTemplate.getForObject("/mottaker/hentNyeForsendelser", Forsendelse[].class));
     }
 
-    @SneakyThrows
     InputStream downloadZipFile(Forsendelse forsendelse) {
-        return Pipe.of("downloading zip file", inlet ->
-                restTemplate.execute(forsendelse.getDownloadUrl(), HttpMethod.GET, null, response -> {
-                    int bytes = IOUtils.copy(response.getBody(), inlet);
-                    log.info("File for forsendelse {} was downloaded ({} bytes)", forsendelse.getId(), bytes);
-                    return null;
-                })
-        ).outlet();
+        Pipe pipe = new Pipe();
+
+        restTemplate.execute(forsendelse.getDownloadUrl(), HttpMethod.GET, null, response -> {
+            pipe.consume("downloading zip file", inlet -> downloadZipFile(forsendelse, response, inlet));
+            return null;
+        });
+
+        return pipe.outlet();
+    }
+
+    @SneakyThrows
+    private void downloadZipFile(Forsendelse forsendelse, ClientHttpResponse response, PipedOutputStream inlet) {
+        int bytes = IOUtils.copy(response.getBody(), inlet);
+        log.info("File for forsendelse {} was downloaded ({} bytes)", forsendelse.getId(), bytes);
     }
 
     void confirmMessage(String forsendelseId) {
