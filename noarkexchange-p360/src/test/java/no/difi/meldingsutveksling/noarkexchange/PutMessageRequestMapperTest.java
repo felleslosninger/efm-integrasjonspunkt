@@ -15,7 +15,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
 
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 public class PutMessageRequestMapperTest {
 
@@ -34,7 +35,7 @@ public class PutMessageRequestMapperTest {
 
         final JAXBElement<no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType> p360PutMessage = mapper.mapFrom(putMessageRequestType);
 
-        assertTrue(p360PutMessage.getValue().getPayload() != null);
+        assertNotNull(p360PutMessage.getValue().getPayload());
     }
 
     @Ignore("Work in progress")
@@ -45,7 +46,7 @@ public class PutMessageRequestMapperTest {
         PutMessageRequestMapper mapper = new PutMessageRequestMapper();
         no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType p360Request = mapper.mapFrom(putMessageRequestType).getValue();
 
-        assertTrue(!PayloadUtil.isEmpty(p360Request.getPayload()));
+        assertFalse(PayloadUtil.isEmpty(p360Request.getPayload()));
         //assertTrue(p360Request.getPayload().contains("Melding"));
         JAXBContext ctx2 = JAXBContext.newInstance(PutMessageRequestType.class);
         Marshaller marshaller = ctx2.createMarshaller();
