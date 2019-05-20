@@ -41,7 +41,7 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
         return getCmsUtil().decryptCMS(delegate.read(conversationId, filename), keyInfo.loadPrivateKey());
     }
 
-    public FileEntryStream readStream(String conversationId, String filename) throws IOException {
+    public FileEntryStream readStream(String conversationId, String filename) {
         InputStream inputStream = delegate.readStream(conversationId, filename).getInputStream();
         PipedInputStream pipedInputStream = Pipe.of("Reading file", copy(inputStream).andThen(close(inputStream))).outlet();
         return FileEntryStream.of(getCmsUtil().decryptCMSStreamed(pipedInputStream, keyInfo.loadPrivateKey()), -1);
