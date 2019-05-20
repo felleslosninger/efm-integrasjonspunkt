@@ -16,6 +16,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -51,7 +52,7 @@ public class EduMailSenderTest {
     @Test
     public void testSend() throws JAXBException, IOException {
         PutMessageRequestType putMessage = createPutMessageCdataXml(FileUtils.readFileToString(new File
-                ("src/test/resources/putmessage_test.xml")));
+                ("src/test/resources/putmessage_test.xml"), StandardCharsets.UTF_8));
         mailSender.send(putMessage, "foo");
     }
 
