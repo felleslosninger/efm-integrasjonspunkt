@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.stereotype.Component;
 
+import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,6 +26,7 @@ public class DpiConversationStrategy implements ConversationStrategy {
 
     private final IntegrasjonspunktProperties props;
     private final ServiceRegistryLookup sr;
+    private final Clock clock;
     private final CryptoMessagePersister cryptoMessagePersister;
     private final MeldingsformidlerClient meldingsformidlerClient;
 
@@ -50,7 +52,7 @@ public class DpiConversationStrategy implements ConversationStrategy {
             throw new NextMoveException(errorStr);
         }
 
-        NextMoveDpiRequest request = new NextMoveDpiRequest(props, message, serviceRecord.get(), cryptoMessagePersister);
+        NextMoveDpiRequest request = new NextMoveDpiRequest(props, clock, message, serviceRecord.get(), cryptoMessagePersister);
 
         try {
             meldingsformidlerClient.sendMelding(request);

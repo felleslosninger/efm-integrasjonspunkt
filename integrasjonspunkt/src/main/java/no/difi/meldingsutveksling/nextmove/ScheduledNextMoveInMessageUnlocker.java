@@ -4,12 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 
 @RequiredArgsConstructor
-public class ScheduledConversationResourceUnlocker {
+public class ScheduledNextMoveInMessageUnlocker {
 
-    private final ConversationResourceUnlocker conversationResourceUnlocker;
+    private final NextMoveInMessageUnlocker nextMoveInMessageUnlocker;
 
     @Scheduled(fixedDelay = 5000)
     public void unlockTimedOutMessages() {
-        conversationResourceUnlocker.unlockTimedOutMessages();
+        nextMoveInMessageUnlocker.unlockTimedOutMessages();
     }
 }

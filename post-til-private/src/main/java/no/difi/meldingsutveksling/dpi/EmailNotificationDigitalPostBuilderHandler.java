@@ -14,7 +14,7 @@ public class EmailNotificationDigitalPostBuilderHandler extends DigitalPostBuild
 
     @Override
     public DigitalPost.Builder handle(MeldingsformidlerRequest request, DigitalPost.Builder builder) {
-        if (getConfig().isEnableEmailNotification() &&
+        if (!isNullOrEmpty(request.getEmailVarslingstekst()) &&
                 request.isNotifiable() &&
                 !isNullOrEmpty(request.getEmailAddress())) {
             final EpostVarsel varsel = createVarselEttereForvaltningsforskriften(request);

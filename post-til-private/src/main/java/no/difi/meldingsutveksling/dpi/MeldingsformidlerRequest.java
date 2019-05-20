@@ -1,7 +1,12 @@
 package no.difi.meldingsutveksling.dpi;
 
 import no.difi.meldingsutveksling.nextmove.PostAddress;
+import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
+import no.difi.sdp.client2.domain.fysisk_post.Posttype;
+import no.difi.sdp.client2.domain.fysisk_post.Returhaandtering;
+import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -110,4 +115,18 @@ public interface MeldingsformidlerRequest {
     PostAddress getPostAddress();
 
     PostAddress getReturnAddress();
+
+    Sikkerhetsnivaa getSecurityLevel();
+
+    Date getVirkningsdato();
+
+    String getLanguage();
+
+    boolean isAapningskvittering();
+
+    Utskriftsfarge getPrintColor();
+
+    Posttype getPosttype();
+
+    Returhaandtering getReturnHandling();
 }

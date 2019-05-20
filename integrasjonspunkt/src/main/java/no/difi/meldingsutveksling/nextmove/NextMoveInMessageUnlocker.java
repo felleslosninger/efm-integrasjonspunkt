@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.nextmove;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
 
 import javax.transaction.Transactional;
 import java.time.Clock;
@@ -11,9 +12,9 @@ import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerF
 
 @Slf4j
 @RequiredArgsConstructor
-public class ConversationResourceUnlocker {
+public class NextMoveInMessageUnlocker {
 
-    private final ConversationResourceRepository repo;
+    private final NextMoveMessageInRepository repo;
     private final Clock clock;
 
     @Transactional
@@ -21,7 +22,7 @@ public class ConversationResourceUnlocker {
         repo.findByLockTimeoutLessThanEqual(LocalDateTime.now(clock)).forEach(cr -> {
             cr.setLockTimeout(null);
             repo.save(cr);
-            log.debug(markerFrom(cr), "Lock for conversation with id={} timed out, releasing", cr.getConversationId());
+            log.debug(markerFrom(cr), "Lock for message with id={} timed out, releasing", cr.getConversationId());
         });
     }
 }

@@ -21,8 +21,8 @@ public class MailReturn extends AbstractEntity<Long> {
     @Embedded
     @NotNull
     @Valid
-    private PostAddress receiver;
+    private PostAddress mottaker;
 
     @NotNull
-    private Returhaandtering returnHandling;
+    private Returhaandtering returhaandtering;
 }

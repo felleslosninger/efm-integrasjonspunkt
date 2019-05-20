@@ -82,30 +82,30 @@ public class NextMoveOutMessageFactory {
 
         if (documentType == DocumentType.PRINT) {
             DpiPrintMessage dpiMessage = (DpiPrintMessage) sbd.getAny();
-            if (dpiMessage.getReceiver() == null) {
-                dpiMessage.setReceiver(new PostAddress());
+            if (dpiMessage.getMottaker() == null) {
+                dpiMessage.setMottaker(new PostAddress());
             }
 
-            setReceiverDefaults(dpiMessage.getReceiver(), serviceRecord.getPostAddress());
-            setReceiverDefaults(dpiMessage.getMailReturn().getReceiver(), serviceRecord.getReturnAddress());
+            setReceiverDefaults(dpiMessage.getMottaker(), serviceRecord.getPostAddress());
+            setReceiverDefaults(dpiMessage.getRetur().getMottaker(), serviceRecord.getReturnAddress());
         }
     }
 
     private void setReceiverDefaults(PostAddress receiver, no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress srReceiver) {
-        if (isNullOrEmpty(receiver.getName())) {
-            receiver.setName(srReceiver.getName());
+        if (isNullOrEmpty(receiver.getNavn())) {
+            receiver.setNavn(srReceiver.getName());
         }
-        if (isNullOrEmpty(receiver.getAddressLine1())) {
-            receiver.setAddressLine1(srReceiver.getStreet());
+        if (isNullOrEmpty(receiver.getAdresselinje1())) {
+            receiver.setAdresselinje1(srReceiver.getStreet());
         }
-        if (isNullOrEmpty(receiver.getPostalCode())) {
-            receiver.setPostalCode(srReceiver.getPostalCode());
+        if (isNullOrEmpty(receiver.getPostnummer())) {
+            receiver.setPostnummer(srReceiver.getPostalCode());
         }
-        if (isNullOrEmpty(receiver.getPostalArea())) {
-            receiver.setPostalArea(srReceiver.getPostalArea());
+        if (isNullOrEmpty(receiver.getPoststed())) {
+            receiver.setPoststed(srReceiver.getPostalArea());
         }
-        if (isNullOrEmpty(receiver.getCountry())) {
-            receiver.setCountryCode(srReceiver.getCountry());
+        if (isNullOrEmpty(receiver.getLand())) {
+            receiver.setLand(srReceiver.getCountry());
         }
     }
 }

@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
@@ -122,12 +123,19 @@ public class Conversation implements MessageInformable {
                 .addMessageStatuses(statuses);
     }
 
-    void addMessageStatus(MessageStatus status) {
+    Conversation addMessageStatus(MessageStatus status) {
         status.setConversationId(getConversationId());
         this.messageStatuses.add(status);
         this.lastUpdate = LocalDateTime.now();
         statusLogger.info(markerFrom(this).and(markerFrom(status)), String.format("Conversation [id=%s] updated with status \"%s\"",
                 this.getConversationId(), status.getStatus()));
+        return this;
+    }
+
+    boolean hasStatus(MessageStatus status) {
+        return getMessageStatuses().stream()
+                .anyMatch(ms -> ms.getStatus().equals(status.getStatus()) &&
+                        Objects.equals(ms.getDescription(), status.getDescription()));
     }
 
     @Override
