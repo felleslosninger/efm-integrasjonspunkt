@@ -10,6 +10,7 @@ import com.microsoft.azure.servicebus.primitives.ConnectionStringBuilder;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.DocumentType;
+import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -102,9 +103,8 @@ public class NextMoveServiceBus {
     @PostConstruct
     public void init() throws NextMoveException {
         if (props.getNextmove().getServiceBus().isBatchRead()) {
-            String connectionString = String.format("Endpoint=sb://%s.%s/;SharedAccessKeyName=%s;SharedAccessKey=%s",
-                    props.getNextmove().getServiceBus().getNamespace(),
-                    props.getNextmove().getServiceBus().getHost(),
+            String connectionString = String.format("Endpoint=sb://%s/;SharedAccessKeyName=%s;SharedAccessKey=%s",
+                    props.getNextmove().getServiceBus().getBaseUrl(),
                     props.getNextmove().getServiceBus().getSasKeyName(),
                     serviceBusClient.getSasKey());
             ConnectionStringBuilder connectionStringBuilder = new ConnectionStringBuilder(connectionString, serviceBusClient.getLocalQueuePath());
@@ -241,8 +241,10 @@ public class NextMoveServiceBus {
     }
 
     private String getReceiverQueue(NextMoveOutMessage message) {
+        String prefix = NextMoveConsts.NEXTMOVE_QUEUE_PREFIX+message.getReceiverIdentifier();
+
         if (SBDUtil.isReceipt(message.getSbd())) {
-            return receiptTarget();
+            return prefix+receiptTarget();
         }
 
         try {
@@ -250,7 +252,7 @@ public class NextMoveServiceBus {
                     message.getReceiverIdentifier(),
                     message.getSbd().getProcess());
 
-            return serviceRecord.getService().getEndpointUrl();
+            return prefix+serviceRecord.getService().getEndpointUrl();
         } catch (ServiceRegistryLookupException e) {
             throw new NextMoveRuntimeException(String.format("Unable to get service record for %s", message.getReceiverIdentifier()), e);
         }

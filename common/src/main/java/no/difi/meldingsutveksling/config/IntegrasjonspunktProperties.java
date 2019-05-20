@@ -232,12 +232,12 @@ public class IntegrasjonspunktProperties {
         private String sasKeyName;
         @NotNull
         private String sasToken;
-        @Pattern(regexp = "innsyn|data", flags = Pattern.Flag.CASE_INSENSITIVE)
+        @Pattern(regexp = "innsyn|data|meeting", flags = Pattern.Flag.CASE_INSENSITIVE)
         private String mode;
         @NotNull
-        private String namespace;
+        private String baseUrl;
         @NotNull
-        private String host;
+        private boolean useHttps;
         private String receiptQueue;
         private Integer readMaxMessages;
         private boolean batchRead;
