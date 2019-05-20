@@ -16,10 +16,10 @@ public class TimeToLiveHelper {
     }
 
     public static String expectedResponseDateTimeExpiredErrorMessage(StandardBusinessDocument sbd) {
-        return String.format("Levetid for meldingen er utgått: %s . Må sendes på nytt", sbd.getExpectedResponseDateTime());
+        return String.format("Levetid for melding: %s er utgått. Må sendes på nytt", sbd.getExpectedResponseDateTime());
     }
+
     public static void registerErrorStatusAndMessage(StandardBusinessDocument sbd, ConversationService conversationService) {
-        MessageStatus ms = MessageStatus.of(ReceiptStatus.FEIL, LocalDateTime.now(), expectedResponseDateTimeExpiredErrorMessage(sbd));
-        conversationService.registerStatus(sbd.getConversationId(), ms);
+         conversationService.registerStatus(sbd.getConversationId(), MessageStatus.of(ReceiptStatus.FEIL, LocalDateTime.now(), expectedResponseDateTimeExpiredErrorMessage(sbd)));
     }
 }

@@ -49,7 +49,10 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
+import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isExpired;
 import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.*;
+import static no.difi.meldingsutveksling.nextmove.TimeToLiveHelper.registerErrorStatusAndMessage;
+import static no.difi.meldingsutveksling.nextmove.TimeToLiveHelper.timeToLiveErrorMessage;
 
 @Component
 @ConditionalOnProperty(name = "difi.move.feature.enableDPE", havingValue = "true")
@@ -175,6 +178,10 @@ public class NextMoveServiceBus {
                 }
                 handleSbd(msg.getPayload().getSbd());
                 serviceBusClient.deleteMessage(msg);
+
+                if (isExpired(msg.getPayload().getSbd())) {
+                    registerErrorStatusAndMessage(msg.getPayload().getSbd(), conversationService);
+                }
             }
         }
     }

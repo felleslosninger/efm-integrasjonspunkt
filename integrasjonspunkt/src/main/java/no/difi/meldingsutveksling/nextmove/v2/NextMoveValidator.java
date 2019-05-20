@@ -14,6 +14,7 @@ import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
+import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.validation.Asserter;
 import no.difi.meldingsutveksling.validation.group.ValidationGroupFactory;
@@ -30,6 +31,9 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
+import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isExpired;
+import static no.difi.meldingsutveksling.nextmove.TimeToLiveHelper.registerErrorStatusAndMessage;
+import static no.difi.meldingsutveksling.nextmove.TimeToLiveHelper.timeToLiveErrorMessage;
 
 @Component
 @RequiredArgsConstructor
@@ -40,6 +44,7 @@ public class NextMoveValidator {
     private final ServiceIdentifierService serviceIdentifierService;
     private final Asserter asserter;
     private final CryptoMessagePersister cryptoMessagePersister;
+    private final ConversationService conversationService;
 
     void validate(StandardBusinessDocument sbd) {
         sbd.getOptionalConversationId()
@@ -68,6 +73,11 @@ public class NextMoveValidator {
             throw new ReceiverDoNotAcceptDocumentStandard(standard, sbd.getProcess());
         }
 
+        if (isExpired(sbd)) {
+            registerErrorStatusAndMessage(sbd, conversationService);
+            timeToLiveErrorMessage(sbd);
+            throw new TimeToLiveException(sbd.getExpectedResponseDateTime());
+        }
 
         Class<?> group = ValidationGroupFactory.toServiceIdentifier(serviceIdentifier);
         asserter.isValid(sbd.getAny(), group != null ? new Class<?>[]{group} : new Class<?>[0]);
@@ -75,8 +85,15 @@ public class NextMoveValidator {
 
     void validate(NextMoveOutMessage message) {
         // Must always be at least one attachment
+        StandardBusinessDocument sbd = message.getSbd();
         if (message.getFiles() == null || message.getFiles().isEmpty()) {
             throw new MissingFileException();
+        }
+
+        if (isExpired(sbd)) {
+            registerErrorStatusAndMessage(sbd, conversationService);
+            timeToLiveErrorMessage(sbd);
+            throw new TimeToLiveException(sbd.getExpectedResponseDateTime());
         }
 
         if (ServiceIdentifier.DPO == message.getServiceIdentifier()) {
