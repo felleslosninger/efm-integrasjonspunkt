@@ -26,13 +26,13 @@ import java.util.Optional;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static no.difi.meldingsutveksling.NextMoveConsts.NEXTMOVE_QUEUE_PREFIX;
 
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "difi.move.feature.enableDPE", havingValue = "true")
 public class ServiceBusRestClient {
 
-    private static final String NEXTMOVE_QUEUE_PREFIX = "nextbestqueue";
     private static final String AUTH_HEADER = "Authorization";
 
     private final ServiceRegistryLookup sr;
@@ -54,9 +54,8 @@ public class ServiceBusRestClient {
     }
 
     public String getBase() {
-        return format("https://%s.%s",
-                props.getNextmove().getServiceBus().getNamespace(),
-                props.getNextmove().getServiceBus().getHost());
+        return format("%s://%s", props.getNextmove().getServiceBus().isUseHttps() ? "https" : "http",
+                props.getNextmove().getServiceBus().getBaseUrl());
     }
 
     public void sendMessage(byte[] message, String queuePath) {
