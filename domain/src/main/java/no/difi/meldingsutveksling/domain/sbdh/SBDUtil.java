@@ -4,6 +4,8 @@ import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.DocumentType;
 
+import java.time.ZonedDateTime;
+
 @UtilityClass
 public class SBDUtil {
 
@@ -24,5 +26,11 @@ public class SBDUtil {
         return DocumentType.valueOfType(sbd.getMessageType())
                 .map(dt -> dt == DocumentType.STATUS)
                 .orElse(false);
+    }
+
+    public static boolean isExpired(StandardBusinessDocument sbd) {
+        ZonedDateTime expectedResponseDateTime = sbd.getExpectedResponseDateTime();
+        ZonedDateTime currentDateTime = ZonedDateTime.now();
+        return currentDateTime.isAfter(expectedResponseDateTime);
     }
 }
