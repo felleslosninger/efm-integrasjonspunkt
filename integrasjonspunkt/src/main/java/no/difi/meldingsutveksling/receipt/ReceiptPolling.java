@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.receipt;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.v2.ServiceIdentifierService;
 import org.slf4j.Logger;
@@ -11,6 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
@@ -69,20 +69,25 @@ public class ReceiptPolling {
     @Scheduled(fixedRate = 10000)
     public void dpiReceiptsScheduledTask() {
         if (props.getFeature().isEnableReceipts() && props.getFeature().isEnableDPI()) {
-            ExternalReceipt externalReceipt = dpiReceiptService.checkForReceipts();
-            while (!(externalReceipt instanceof MeldingsformidlerClient.EmptyKvittering)) {
-                final String id = externalReceipt.getId();
-                MessageStatus status = externalReceipt.toMessageStatus();
+            Optional<ExternalReceipt> externalReceipt = dpiReceiptService.checkForReceipts();
 
-                conversationService.registerStatus(id, status)
-                        .filter(c -> Arrays.asList(LEST, FEIL).contains(ReceiptStatus.valueOf(status.getStatus())))
-                        .ifPresent(c -> conversationService.markFinished(c));
-
-                Audit.info("Updated receipt (DPI)", externalReceipt.logMarkers());
-                externalReceipt.confirmReceipt();
-                Audit.info("Confirmed receipt (DPI)", externalReceipt.logMarkers());
+            while (externalReceipt.isPresent()) {
+                externalReceipt.ifPresent(this::handleReceipt);
                 externalReceipt = dpiReceiptService.checkForReceipts();
             }
         }
+    }
+
+    private void handleReceipt(ExternalReceipt externalReceipt) {
+        final String id = externalReceipt.getId();
+        MessageStatus status = externalReceipt.toMessageStatus();
+
+        conversationService.registerStatus(id, status)
+                .filter(c -> Arrays.asList(LEST, FEIL).contains(ReceiptStatus.valueOf(status.getStatus())))
+                .ifPresent(c -> conversationService.markFinished(c));
+
+        Audit.info("Updated receipt (DPI)", externalReceipt.logMarkers());
+        externalReceipt.confirmReceipt();
+        Audit.info("Confirmed receipt (DPI)", externalReceipt.logMarkers());
     }
 }
