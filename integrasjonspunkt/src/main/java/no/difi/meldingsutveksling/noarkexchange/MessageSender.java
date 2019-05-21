@@ -67,14 +67,8 @@ public class MessageSender {
     public void sendMessage(ConversationResource conversation) throws MessageContextException {
         MessageContext messageContext = messageContextFactory.from(conversation);
 
-        StandardBusinessDocument edu;
-        try {
-            edu = standardBusinessDocumentFactory.create(conversation, messageContext);
-            log.info("EduMessage created from ConversationResource");
-        } catch (MessageException e) {
-            log.error("Failed creating EduMessage from ConversationResource", e);
-            return;
-        }
+        StandardBusinessDocument edu = standardBusinessDocumentFactory.create(conversation, messageContext);
+        log.info("EduMessage created from ConversationResource");
 
         Transport t = transportFactory.createTransport(edu);
         t.send(applicationContextHolder.getApplicationContext(), edu);

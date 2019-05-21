@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.services;
 
+import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.CertificateParserException;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -8,9 +9,6 @@ import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -18,16 +16,10 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 
 @Component
+@RequiredArgsConstructor
 public class Adresseregister {
 
-    private static final Logger log = LoggerFactory.getLogger(Adresseregister.class);
-
-    private ServiceRegistryLookup serviceRegistryLookup;
-
-    @Autowired
-    public Adresseregister(ServiceRegistryLookup serviceRegistryLookup) {
-        this.serviceRegistryLookup = serviceRegistryLookup;
-    }
+    private final ServiceRegistryLookup serviceRegistryLookup;
 
     public void validateCertificates(StandardBusinessDocument sbd) throws MessageException {
         ServiceRecord receiverServiceRecord;

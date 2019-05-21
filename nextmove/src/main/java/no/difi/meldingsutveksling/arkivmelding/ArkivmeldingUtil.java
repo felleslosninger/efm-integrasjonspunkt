@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.arkivmelding;
 import com.google.common.collect.Lists;
 import no.arkivverket.standarder.noark5.arkivmelding.*;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 
 import javax.xml.bind.JAXBContext;
@@ -26,7 +27,7 @@ public class ArkivmeldingUtil {
     private ArkivmeldingUtil() {
     }
 
-    public static List<String> getFilenames(Arkivmelding am) throws ArkivmeldingException {
+    public static List<String> getFilenames(Arkivmelding am) {
         List<String> filenames = Lists.newArrayList();
 
         getJournalpost(am).getDokumentbeskrivelseAndDokumentobjekt().stream()
@@ -76,7 +77,7 @@ public class ArkivmeldingUtil {
         try {
             return DatatypeFactory.newInstance().newXMLGregorianCalendar(gcal);
         } catch (DatatypeConfigurationException e) {
-            throw new RuntimeException(e);
+            throw new NextMoveRuntimeException(e);
         }
     }
 
@@ -86,7 +87,7 @@ public class ArkivmeldingUtil {
         try {
             return DatatypeFactory.newInstance().newXMLGregorianCalendar(gcal);
         } catch (DatatypeConfigurationException e) {
-            throw new RuntimeException(e);
+            throw new NextMoveRuntimeException(e);
         }
     }
 

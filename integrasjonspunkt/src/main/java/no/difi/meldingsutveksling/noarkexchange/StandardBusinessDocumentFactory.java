@@ -67,7 +67,7 @@ public class StandardBusinessDocumentFactory {
                 shipment.getJournalpostId());
     }
 
-    public StandardBusinessDocument create(ConversationResource cr, MessageContext context) throws MessageException {
+    public StandardBusinessDocument create(ConversationResource cr, MessageContext context) {
         InputStream is = asicHandler.createEncryptedAsic(cr, context);
         Payload payload = new Payload(is, cr);
 
