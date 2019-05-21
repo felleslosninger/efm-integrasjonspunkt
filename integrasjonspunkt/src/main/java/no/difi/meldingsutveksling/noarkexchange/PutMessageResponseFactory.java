@@ -26,6 +26,18 @@ public class PutMessageResponseFactory {
         return response;
     }
 
+    public static PutMessageResponseType createErrorResponse(String errorMsg) {
+        PutMessageResponseType response = new PutMessageResponseType();
+        AppReceiptType receipt = new AppReceiptType();
+        receipt.setType("ERROR");
+        StatusMessageType statusMessageType = new StatusMessageType();
+        statusMessageType.setText(errorMsg);
+        statusMessageType.setCode("Unknown");
+        receipt.getMessage().add(statusMessageType);
+        response.setResult(receipt);
+        return response;
+    }
+
     public static PutMessageResponseType createOkResponse() {
         PutMessageResponseType response = new PutMessageResponseType();
         AppReceiptType receipt = new AppReceiptType();

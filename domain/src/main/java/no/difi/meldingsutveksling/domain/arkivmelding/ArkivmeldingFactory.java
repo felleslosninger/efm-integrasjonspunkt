@@ -12,7 +12,6 @@ import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Optional;
 
@@ -101,13 +100,6 @@ public class ArkivmeldingFactory {
 
             dbeskr.getDokumentobjekt().add(dobj);
             jp.getDokumentbeskrivelseAndDokumentobjekt().add(dbeskr);
-
-            try {
-                writeDokument(putMessage.getConversationId(), d.getVeFilnavn(), d.getFil().getBase64());
-            } catch (IOException e) {
-                log.error("Could not write file {} from message {}", d.getVeFilnavn(), putMessage.getConversationId());
-                throw new MeldingsUtvekslingRuntimeException(e);
-            }
         });
 
         sm.getBasisregistrering().add(jp);
@@ -115,7 +107,4 @@ public class ArkivmeldingFactory {
         return am;
     }
 
-    private void writeDokument(String convId, String filename, byte[] content) throws IOException {
-        cryptoMessagePersister.write(convId, filename, content);
-    }
 }

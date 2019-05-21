@@ -3,15 +3,14 @@ package no.difi.meldingsutveksling.noarkexchange;
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.core.EDUCoreService;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.logging.MarkerFactory;
+import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
 import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import no.difi.meldingsutveksling.services.Adresseregister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,16 +52,13 @@ public class IntegrasjonspunktImpl implements SOAPport {
     private IntegrasjonspunktProperties properties;
 
     @Autowired
-    private Adresseregister adresseRegister;
-
-    @Autowired
-    private EDUCoreService coreService;
-
-    @Autowired
     private ServiceRegistryLookup serviceRegistryLookup;
 
     @Autowired
     private StrategyFactory strategyFactory;
+
+    @Autowired
+    private NextMoveMessageService messageService;
 
     @Override
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
@@ -126,25 +122,25 @@ public class IntegrasjonspunktImpl implements SOAPport {
             }
 
             if (!isNullOrEmpty(properties.getFiks().getInn().getFallbackSenderOrgNr()) &&
-                    message.getRecieverPartyNumber().equals(properties.getFiks().getInn().getFallbackSenderOrgNr())) {
+                    message.getReceiverPartyNumber().equals(properties.getFiks().getInn().getFallbackSenderOrgNr())) {
                 Audit.info(String.format("Message is AppReceipt, but receiver (%s) is the configured fallback sender organization number. Discarding message.",
-                        message.getRecieverPartyNumber()), markerFrom(message));
+                        message.getReceiverPartyNumber()), markerFrom(message));
                 return PutMessageResponseFactory.createOkResponse();
             }
         }
 
-        ServiceRecord receiverRecord = null;
+        ServiceRecord receiverRecord;
         try {
-            receiverRecord = serviceRegistryLookup.getServiceRecord(message.getRecieverPartyNumber());
+            receiverRecord = serviceRegistryLookup.getServiceRecord(message.getReceiverPartyNumber());
         } catch (ServiceRegistryLookupException e) {
-            log.error("Error looking up service record for {}", message.getRecieverPartyNumber(), e);
+            log.error("Error looking up service record for {}", message.getReceiverPartyNumber(), e);
             return PutMessageResponseFactory.createErrorResponse(StatusMessage.MISSING_SERVICE_RECORD);
         }
 
         if (PayloadUtil.isAppReceipt(message.getPayload()) &&
                 receiverRecord.getServiceIdentifier() != ServiceIdentifier.DPO) {
             Audit.info(String.format("Message is AppReceipt, but receiver (%s) is not DPO. Discarding message.",
-                    message.getRecieverPartyNumber()), markerFrom(message));
+                    message.getReceiverPartyNumber()), markerFrom(message));
             return PutMessageResponseFactory.createOkResponse();
         }
 
@@ -163,27 +159,12 @@ public class IntegrasjonspunktImpl implements SOAPport {
             }
         }
 
-        return coreService.queueMessage(message);
+        return messageService.convertAndSend(message);
+//        queueMessage(message);
     }
 
     public void setMshClient(NoarkClient mshClient) {
         this.mshClient = mshClient;
-    }
-
-    public NoarkClient getMshClient() {
-        return mshClient;
-    }
-
-    public void setAdresseRegister(Adresseregister adresseRegister) {
-        this.adresseRegister = adresseRegister;
-    }
-
-    public EDUCoreService getCoreService() {
-        return coreService;
-    }
-
-    void setCoreService(EDUCoreService coreService) {
-        this.coreService = coreService;
     }
 
 }

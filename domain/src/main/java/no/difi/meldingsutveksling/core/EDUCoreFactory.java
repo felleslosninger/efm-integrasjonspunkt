@@ -52,7 +52,7 @@ public class EDUCoreFactory {
 
     public EDUCore create(PutMessageRequestType putMessageRequestType, String senderOrgNr) {
         PutMessageRequestWrapper requestWrapper = new PutMessageRequestWrapper(putMessageRequestType);
-        EDUCore eduCore = createCommon(senderOrgNr, requestWrapper.getRecieverPartyNumber(),
+        EDUCore eduCore = createCommon(senderOrgNr, requestWrapper.getReceiverPartyNumber(),
                 requestWrapper.getEnvelope().getSender().getRef(), requestWrapper.getEnvelope().getReceiver().getRef());
 
         eduCore.setPayload(putMessageRequestType.getPayload());

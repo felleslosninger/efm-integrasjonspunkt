@@ -138,6 +138,12 @@ public class PayloadUtil {
                                 noarkDocument.setFilename(event.asCharacters().getData());
                             }
                             break;
+                        case "dbTittel":
+                            event = eventReader.nextEvent();
+                            if (noarkDocument != null) {
+                                noarkDocument.setTitle(event.asCharacters().getData());
+                            }
+                            break;
                         case "base64":
                             event = eventReader.nextEvent();
                             if (noarkDocument != null) {
