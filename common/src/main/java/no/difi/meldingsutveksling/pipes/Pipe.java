@@ -47,7 +47,10 @@ public class Pipe {
             log.trace("Starting thread: {}", description);
             consumer.accept(inlet);
             log.trace("Thread finished: {}", description);
-        }).whenCompleteAsync((dummy, ex) -> close());
+        }).whenCompleteAsync((dummy, ex) -> {
+            close();
+            if (ex != null) throw new PipeRuntimeException("Exception was thrown in thread", ex);
+        });
         return this;
     }
 
@@ -62,7 +65,10 @@ public class Pipe {
             log.trace("Starting thread: {}", description);
             consumer.accept(outlet, newPipe.inlet);
             log.trace("Thread finished: {}", description);
-        }).whenCompleteAsync((dummy, ex) -> newPipe.close());
+        }).whenCompleteAsync((dummy, ex) -> {
+            newPipe.close();
+            if (ex != null) throw new PipeRuntimeException("Exception was thrown in thread", ex);
+        });
         return newPipe;
     }
 }

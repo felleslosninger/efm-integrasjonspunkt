@@ -1,23 +1,21 @@
 package no.difi.meldingsutveksling.ks.svarinn;
 
 import lombok.Getter;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.pipes.Pipe;
-import org.apache.commons.io.IOUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.InputStream;
-import java.io.PipedOutputStream;
 import java.util.Arrays;
 import java.util.List;
+
+import static no.difi.meldingsutveksling.pipes.PipeOperations.copy;
 
 @Component
 @ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
@@ -43,17 +41,11 @@ public class SvarInnClient {
         Pipe pipe = new Pipe();
 
         restTemplate.execute(forsendelse.getDownloadUrl(), HttpMethod.GET, null, response -> {
-            pipe.consume("downloading zip file", inlet -> downloadZipFile(forsendelse, response, inlet));
+            pipe.consume("downloading zip file", copy(response.getBody()));
             return null;
         });
 
         return pipe.outlet();
-    }
-
-    @SneakyThrows
-    private void downloadZipFile(Forsendelse forsendelse, ClientHttpResponse response, PipedOutputStream inlet) {
-        int bytes = IOUtils.copy(response.getBody(), inlet);
-        log.info("File for forsendelse {} was downloaded ({} bytes)", forsendelse.getId(), bytes);
     }
 
     void confirmMessage(String forsendelseId) {
