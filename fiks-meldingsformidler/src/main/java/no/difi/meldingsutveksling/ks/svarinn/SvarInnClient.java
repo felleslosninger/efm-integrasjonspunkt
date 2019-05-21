@@ -24,8 +24,10 @@ public class SvarInnClient {
     @Getter
     private final RestTemplate restTemplate;
 
-    public SvarInnClient(IntegrasjonspunktProperties props) {
-        this.restTemplate = new RestTemplateBuilder()
+    public SvarInnClient(IntegrasjonspunktProperties props, RestTemplateBuilder restTemplateBuilder) {
+        this.restTemplate = restTemplateBuilder
+                .setConnectTimeout(props.getFiks().getInn().getConnectTimeout())
+                .setReadTimeout(props.getFiks().getInn().getReadTimeout())
                 .errorHandler(new DefaultResponseErrorHandler())
                 .rootUri(props.getFiks().getInn().getBaseUrl())
                 .basicAuthorization(props.getFiks().getInn().getUsername(), props.getFiks().getInn().getPassword())

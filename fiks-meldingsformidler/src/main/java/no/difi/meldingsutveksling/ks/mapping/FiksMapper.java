@@ -278,11 +278,25 @@ public class FiksMapper {
                 .withJournalpostnummer(toInt(jp.getJournalpostnummer()))
                 .withJournalposttype(jp.getJournalposttype().value())
                 .withJournalstatus(jp.getJournalstatus().value())
-                .withJournaldato(jp.getJournaldato())
+                .withJournaldato(toDateTime(jp.getJournaldato()))
                 .withDokumentetsDato(jp.getDokumentetsDato())
                 .withTittel(jp.getOffentligTittel())
                 .withSaksbehandler(getSaksbehandler(jp).orElse(null))
                 .build();
+    }
+
+    private XMLGregorianCalendar toDateTime(XMLGregorianCalendar in) {
+        if (in == null) {
+            return null;
+        }
+
+        try {
+            XMLGregorianCalendar out = DatatypeFactory.newInstance().newXMLGregorianCalendar(in.toGregorianCalendar());
+            out.setTime(0, 0, 0, 0);
+            return out;
+        } catch (DatatypeConfigurationException e) {
+            throw new NextMoveRuntimeException("Could not convert DateTime to " + XMLGregorianCalendar.class, e);
+        }
     }
 
     private Optional<String> getSaksbehandler(Journalpost jp) {
