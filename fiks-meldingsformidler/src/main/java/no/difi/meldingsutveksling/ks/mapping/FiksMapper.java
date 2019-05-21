@@ -198,6 +198,7 @@ public class FiksMapper {
                 .build();
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private String getSenderRef(EDUCore eduCore) {
         String senderRef;
         if (Strings.isNullOrEmpty(eduCore.getSender().getRef())) {
@@ -216,6 +217,7 @@ public class FiksMapper {
         return senderRef;
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private String getReceiverRef(EDUCore eduCore) {
         String receiverRef = eduCore.getReceiver().getRef();
         if (!Strings.isNullOrEmpty(receiverRef)) {

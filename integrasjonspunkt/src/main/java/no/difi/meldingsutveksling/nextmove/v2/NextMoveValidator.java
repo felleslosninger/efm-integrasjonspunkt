@@ -6,7 +6,6 @@ import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingException;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.*;
@@ -81,12 +80,7 @@ public class NextMoveValidator {
 
         if (ServiceIdentifier.DPO == message.getServiceIdentifier()) {
             // Verify each file referenced in arkivmelding is uploaded
-            List<String> arkivmeldingFiles;
-            try {
-                arkivmeldingFiles = ArkivmeldingUtil.getFilenames(getArkivmelding(message));
-            } catch (ArkivmeldingException e) {
-                throw new ArkivmeldingProcessingException(e);
-            }
+            List<String> arkivmeldingFiles = ArkivmeldingUtil.getFilenames(getArkivmelding(message));
             Set<String> messageFiles = message.getFiles().stream()
                     .map(BusinessMessageFile::getFilename)
                     .collect(Collectors.toSet());

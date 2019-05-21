@@ -42,13 +42,18 @@ public class Pipe {
         }
     }
 
+    private void handleCompleteAsync(Void dummy, Throwable t) {
+        close();
+        if (t != null) throw new PipeRuntimeException("Exception was thrown in thread", t);
+    }
+
     public static Pipe of(String description, Consumer<PipedOutputStream> consumer) {
         Pipe pipe = new Pipe();
         CompletableFuture.runAsync(() -> {
             log.trace("Starting thread: {}", description);
             consumer.accept(pipe.inlet);
             log.trace("Thread finished: {}", description);
-        }).whenCompleteAsync((dummy, ex) -> pipe.close());
+        }).whenCompleteAsync(pipe::handleCompleteAsync);
         return pipe;
     }
 
@@ -58,7 +63,7 @@ public class Pipe {
             log.trace("Starting thread: {}", description);
             consumer.accept(outlet, newPipe.inlet);
             log.trace("Thread finished: {}", description);
-        }).whenCompleteAsync((dummy, ex) -> newPipe.close());
+        }).whenCompleteAsync(newPipe::handleCompleteAsync);
         return newPipe;
     }
 }
