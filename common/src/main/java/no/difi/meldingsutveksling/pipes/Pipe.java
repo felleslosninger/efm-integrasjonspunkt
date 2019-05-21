@@ -15,7 +15,7 @@ public class Pipe {
     private final PipedOutputStream inlet;
     private final PipedInputStream outlet;
 
-    public Pipe() {
+    private Pipe() {
         this.inlet = new PipedOutputStream();
         this.outlet = new PipedInputStream();
         connectInletAndOutlet();
@@ -42,21 +42,19 @@ public class Pipe {
         }
     }
 
-    public Pipe consume(String description, Consumer<PipedOutputStream> consumer) {
-        CompletableFuture.runAsync(() -> {
-            log.trace("Starting thread: {}", description);
-            consumer.accept(inlet);
-            log.trace("Thread finished: {}", description);
-        }).whenCompleteAsync((dummy, ex) -> {
-            close();
-            if (ex != null) throw new PipeRuntimeException("Exception was thrown in thread", ex);
-        });
-        return this;
+    private void handleCompleteAsync(Void dummy, Throwable t) {
+        close();
+        if (t != null) throw new PipeRuntimeException("Exception was thrown in thread", t);
     }
 
     public static Pipe of(String description, Consumer<PipedOutputStream> consumer) {
         Pipe pipe = new Pipe();
-        return pipe.consume(description, consumer);
+        CompletableFuture.runAsync(() -> {
+            log.trace("Starting thread: {}", description);
+            consumer.accept(pipe.inlet);
+            log.trace("Thread finished: {}", description);
+        }).whenCompleteAsync(pipe::handleCompleteAsync);
+        return pipe;
     }
 
     public Pipe andThen(String description, BiConsumer<PipedInputStream, PipedOutputStream> consumer) {
@@ -65,10 +63,7 @@ public class Pipe {
             log.trace("Starting thread: {}", description);
             consumer.accept(outlet, newPipe.inlet);
             log.trace("Thread finished: {}", description);
-        }).whenCompleteAsync((dummy, ex) -> {
-            newPipe.close();
-            if (ex != null) throw new PipeRuntimeException("Exception was thrown in thread", ex);
-        });
+        }).whenCompleteAsync(newPipe::handleCompleteAsync);
         return newPipe;
     }
 }
