@@ -19,7 +19,6 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import no.difi.meldingsutveksling.services.Adresseregister;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -54,8 +53,6 @@ public class IntegrasjonspunktImplTest {
     @Mock
     private NoarkClient msh;
     @Mock
-    private Adresseregister adresseregister;
-    @Mock
     private ConversationService conversationService;
 
     @Before
@@ -63,7 +60,6 @@ public class IntegrasjonspunktImplTest {
         initMocks(this);
 
         coreServiceMock.setEduCoreFactory(eduCoreFactory);
-        integrasjonspunkt.setCoreService(coreServiceMock);
         InfoRecord infoRecord = new InfoRecord();
         infoRecord.setIdentifier("1234");
         infoRecord.setOrganizationName("foo");
