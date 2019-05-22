@@ -5,16 +5,24 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
-import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
+@Component
 @Slf4j
 public class TimeToLiveHelper {
-    private static ConversationService conversationService;
 
-    @Bean
-    public static void registerErrorStatusAndMessage(StandardBusinessDocument sbd) {
+    private final ConversationService conversationService;
+
+    @Autowired
+    public TimeToLiveHelper(ConversationService conversationService) {
+        this.conversationService = conversationService;
+
+    }
+
+    public void registerErrorStatusAndMessage(StandardBusinessDocument sbd) {
         String status = String.format("Levetid for melding: %s er utgått. Må sendes på nytt", sbd.getExpectedResponseDateTime());
         conversationService.registerStatus(sbd.getConversationId(), MessageStatus.of(ReceiptStatus.FEIL, LocalDateTime.now(), status));
     }
