@@ -14,7 +14,7 @@ import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,7 +29,7 @@ public interface NextMoveMessageInRepository extends PagingAndSortingRepository<
 
     PageRequest FIRST_BY_LAST_UPDATED_ASC = new PageRequest(0, 1, Sort.Direction.ASC, QNextMoveInMessage.nextMoveInMessage.lastUpdated.getMetadata().getName());
 
-    List<NextMoveInMessage> findByLockTimeoutLessThanEqual(LocalDateTime now);
+    List<NextMoveInMessage> findByLockTimeoutLessThanEqual(ZonedDateTime now);
 
     Optional<NextMoveInMessage> findByConversationId(String conversationId);
 
