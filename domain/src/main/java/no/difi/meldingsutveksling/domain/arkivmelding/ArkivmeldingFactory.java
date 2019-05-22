@@ -7,7 +7,6 @@ import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import org.springframework.stereotype.Component;
@@ -23,8 +22,6 @@ import static java.util.Optional.ofNullable;
 @Component
 @RequiredArgsConstructor
 public class ArkivmeldingFactory {
-
-    private final CryptoMessagePersister cryptoMessagePersister;
 
     public Arkivmelding createArkivmeldingAndWriteFiles(PutMessageRequestWrapper putMessage) {
         MeldingType mt = EDUCoreConverter.payloadAsMeldingType(putMessage.getPayload());

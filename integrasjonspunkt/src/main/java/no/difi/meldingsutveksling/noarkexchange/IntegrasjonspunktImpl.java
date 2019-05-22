@@ -160,11 +160,9 @@ public class IntegrasjonspunktImpl implements SOAPport {
         }
 
         return messageService.convertAndSend(message);
-//        queueMessage(message);
     }
 
     public void setMshClient(NoarkClient mshClient) {
         this.mshClient = mshClient;
     }
-
 }

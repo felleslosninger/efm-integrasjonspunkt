@@ -5,11 +5,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 
 @RequiredArgsConstructor(staticName = "of")
-public class BasicNextMoveFile implements MultipartFile  {
+public class BasicNextMoveFile implements MultipartFile {
 
     private final String title;
     private final String filename;
@@ -47,17 +46,17 @@ public class BasicNextMoveFile implements MultipartFile  {
     }
 
     @Override
-    public byte[] getBytes() throws IOException {
+    public byte[] getBytes() {
         return content;
     }
 
     @Override
-    public InputStream getInputStream() throws IOException {
+    public InputStream getInputStream() {
         return new ByteArrayInputStream(content);
     }
 
     @Override
-    public void transferTo(File dest) throws IOException, IllegalStateException {
+    public void transferTo(File dest) {
         throw new UnsupportedOperationException();
     }
 }

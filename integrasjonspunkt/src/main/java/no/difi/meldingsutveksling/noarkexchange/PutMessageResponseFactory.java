@@ -1,13 +1,16 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType;
 
 /**
  * Factory class for different varieties of PutMessageResponse
+ *
  * @author Glenn Bech
  */
+@UtilityClass
 public class PutMessageResponseFactory {
 
     public static PutMessageResponseType createErrorResponse(MessageException exception) {
