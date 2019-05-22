@@ -6,9 +6,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import no.difi.meldingsutveksling.nextmove.QNextMoveInMessage;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
@@ -27,8 +25,6 @@ public interface NextMoveMessageInRepository extends PagingAndSortingRepository<
         bindings.excluding(root.sbd);
     }
 
-    PageRequest FIRST_BY_LAST_UPDATED_ASC = new PageRequest(0, 1, Sort.Direction.ASC, QNextMoveInMessage.nextMoveInMessage.lastUpdated.getMetadata().getName());
-
     List<NextMoveInMessage> findByLockTimeoutLessThanEqual(ZonedDateTime now);
 
     Optional<NextMoveInMessage> findByConversationId(String conversationId);
@@ -44,7 +40,7 @@ public interface NextMoveMessageInRepository extends PagingAndSortingRepository<
                 createQuery(input)
                         .and(QNextMoveInMessage.nextMoveInMessage.lockTimeout.isNull())
                         .getValue(),
-                FIRST_BY_LAST_UPDATED_ASC)
+                PageRequests.FIRST_BY_LAST_UPDATED_ASC)
                 .getContent()
                 .stream()
                 .findFirst();

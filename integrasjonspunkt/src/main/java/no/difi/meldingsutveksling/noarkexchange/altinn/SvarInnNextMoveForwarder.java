@@ -23,10 +23,9 @@ import no.difi.meldingsutveksling.ks.svarinn.Forsendelse;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
 import no.difi.meldingsutveksling.nextmove.AsicHandler;
-import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveQueue;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
-import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
 import no.difi.meldingsutveksling.noarkexchange.MessageContext;
 import no.difi.meldingsutveksling.noarkexchange.MessageContextException;
 import no.difi.meldingsutveksling.noarkexchange.MessageContextFactory;
@@ -34,7 +33,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
-import javax.transaction.Transactional;
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -55,13 +53,12 @@ public class SvarInnNextMoveForwarder implements Consumer<Forsendelse> {
     private final SvarInnService svarInnService;
     private final MessageContextFactory messageContextFactory;
     private final AsicHandler asicHandler;
-    private final NextMoveMessageInRepository messageRepo;
+    private final NextMoveQueue nextMoveQueue;
     private final CreateSBD createSBD;
     private final IntegrasjonspunktProperties properties;
     private final Clock clock;
 
     @Override
-    @Transactional
     public void accept(Forsendelse forsendelse) {
         MessageContext context;
         try {
@@ -80,21 +77,20 @@ public class SvarInnNextMoveForwarder implements Consumer<Forsendelse> {
                 properties.getFiks().getInn().getProcess(),
                 DocumentType.ARKIVMELDING,
                 new ArkivmeldingMessage());
-        NextMoveInMessage nextMoveMessage = NextMoveInMessage.of(sbd, ServiceIdentifier.DPO);
         NextMoveStreamedFile arkivmeldingFile = getArkivmeldingFile(forsendelse);
 
         Stream<StreamedFile> attachments = Stream.concat(
                 Stream.of(arkivmeldingFile),
                 svarInnService.getAttachments(forsendelse));
 
-        InputStream asicStream = asicHandler.archiveAndEncryptAttachments(arkivmeldingFile, attachments, context, ServiceIdentifier.DPO);
+        InputStream asicStream = asicHandler.archiveAndEncryptAttachments(arkivmeldingFile, attachments, context, ServiceIdentifier.DPF);
         try {
-            messagePersister.writeStream(nextMoveMessage.getConversationId(), NextMoveConsts.ASIC_FILE, asicStream, -1);
+            messagePersister.writeStream(context.getConversationId(), NextMoveConsts.ASIC_FILE, asicStream, -1);
         } catch (IOException e) {
             log.error("Error writing ASiC", e);
         }
 
-        messageRepo.save(nextMoveMessage);
+        nextMoveQueue.enqueue(sbd, ServiceIdentifier.DPF);
         svarInnService.confirmMessage(forsendelse.getId());
     }
 
