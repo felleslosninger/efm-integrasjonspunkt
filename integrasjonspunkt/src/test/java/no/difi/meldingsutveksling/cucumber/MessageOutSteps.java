@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.cucumber;
 
 import cucumber.api.DataTable;
+import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -17,7 +18,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RequiredArgsConstructor
 public class MessageOutSteps {
 
+    private final Holder<Message> messageOutHolder;
     private final Holder<Message> messageSentHolder;
+
+    @Given("^the sender is \"([^\"]*)\"")
+    public void givenTheSenderIs(String orgnr) {
+        messageOutHolder.getOrCalculate(Message::new).setSender(orgnr);
+    }
+
+    @Given("^the receiver is \"([^\"]*)\"")
+    public void givenTheRecieverIs(String orgnr) {
+        messageOutHolder.getOrCalculate(Message::new).setReceiver(orgnr);
+    }
+
+    @Given("^the conversationId is \"([^\"]*)\"")
+    public void givenTheConversationId(String conversationId) {
+        messageOutHolder.getOrCalculate(Message::new).setConversationId(conversationId);
+    }
 
     @Then("^the sent message contains the following files:$")
     @SneakyThrows

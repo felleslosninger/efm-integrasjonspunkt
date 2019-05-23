@@ -16,6 +16,9 @@ public class Message {
     private StandardBusinessDocument sbd;
     private String body;
     private List<Attachment> attachments = new ArrayList<>();
+    private String sender;
+    private String receiver;
+    private String conversationId;
 
     Message attachment(Attachment attachment) {
         attachments.add(attachment);

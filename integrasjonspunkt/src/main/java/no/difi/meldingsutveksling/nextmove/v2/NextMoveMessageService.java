@@ -160,7 +160,9 @@ public class NextMoveMessageService {
                 message.getConversationId(),
                 properties.getArkivmelding().getDefaultProcess(),
                 DocumentType.ARKIVMELDING,
-                new ArkivmeldingMessage());
+                new ArkivmeldingMessage()
+                        .setPrimaerDokumentNavn(ARKIVMELDING_FILE)
+        );
         NextMoveOutMessage nextMoveMessage = createMessage(sbd);
 
         noarkDocuments.forEach(d -> {
