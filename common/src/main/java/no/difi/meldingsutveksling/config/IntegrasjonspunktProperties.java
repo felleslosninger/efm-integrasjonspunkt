@@ -90,6 +90,8 @@ public class IntegrasjonspunktProperties {
     public static class Arkivmelding {
         @NotNull
         private String defaultProcess;
+        @NotNull
+        private String receiptProcess;
     }
 
     @Data
