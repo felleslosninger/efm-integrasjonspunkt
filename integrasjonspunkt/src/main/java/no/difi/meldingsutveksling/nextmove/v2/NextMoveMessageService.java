@@ -164,8 +164,7 @@ public class NextMoveMessageService {
         NextMoveOutMessage nextMoveMessage = createMessage(sbd);
 
         noarkDocuments.forEach(d -> {
-            String ext = Stream.of(d.getFilename().split(".")).reduce((a, b) -> b).orElse("pdf");
-            BasicNextMoveFile nmf = BasicNextMoveFile.of(d.getTitle(), d.getFilename(), MimeTypeExtensionMapper.getMimetype(ext), Base64.getDecoder().decode(d.getContent()));
+            BasicNextMoveFile nmf = BasicNextMoveFile.of(d.getTitle(), d.getFilename(), d.getContentType(), Base64.getDecoder().decode(d.getContent()));
             addFile(nextMoveMessage, nmf);
         });
 
