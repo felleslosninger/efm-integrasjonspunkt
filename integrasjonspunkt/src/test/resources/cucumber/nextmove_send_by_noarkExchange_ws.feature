@@ -1,9 +1,9 @@
-Feature: Receiving a BEST/EDU message by the noarkExchange WebService
+Feature: Sending a BEST/EDU message by the noarkExchange WebService
 
   Background:
     Given a "GET" request to "http://localhost:9099/identifier/910075918?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
 
-  Scenario: As a user I want to receive a BEST/EDU message
+  Scenario: As a user I want to send a BEST/EDU message
 
     Given the sender is "910077473"
     And the receiver is "910075918"
@@ -220,10 +220,10 @@ Feature: Receiving a BEST/EDU message by the noarkExchange WebService
     }
     """
     And the sent message contains the following files:
-      | filename         |
-      | manifest.xml     |
-      | arkivmelding.xml |
-      | test.txt         |
+      | filename         | content type |
+      | manifest.xml     | text/xml     |
+      | arkivmelding.xml | text/xml     |
+      | test.txt         | text/plain   |
     And the content of the file named "manifest.xml" is:
     """
     <?xml version="1.0" encoding="UTF-8"?>

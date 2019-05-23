@@ -248,9 +248,9 @@ Feature: Sending a Next Move DPV message
     </altinn9:InsertCorrespondenceV2>
     """
     And the sent message contains the following files:
-      | filename         |
-      | arkivmelding.xml |
-      | test.txt         |
+      | filename         | content type |
+      | arkivmelding.xml | text/xml     |
+      | test.txt         | text/plain   |
     And the content of the file named "arkivmelding.xml" is:
     """
     <?xml version="1.0" encoding="utf-8"?>

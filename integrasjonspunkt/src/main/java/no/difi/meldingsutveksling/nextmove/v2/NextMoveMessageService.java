@@ -101,7 +101,7 @@ public class NextMoveMessageService {
 
     private String getMimeType(String contentType, String filename) {
         if (MediaType.APPLICATION_OCTET_STREAM_VALUE.equals(contentType)) {
-            String ext = Stream.of(filename.split(".")).reduce((a, b) -> b).orElse("pdf");
+            String ext = Stream.of(filename.split("\\.")).reduce((a, b) -> b).orElse("pdf");
             return MimeTypeExtensionMapper.getMimetype(ext);
         }
 

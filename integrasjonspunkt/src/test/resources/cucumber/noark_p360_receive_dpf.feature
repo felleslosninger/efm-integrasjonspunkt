@@ -188,9 +188,9 @@ Feature: Receiving a DPF message and forward to Noark P360
     </Melding>
     """
     And the sent message contains the following files:
-      | filename           |
-      | primary.html       |
-      | before_the_law.txt |
+      | filename           | content type |
+      | primary.html       | text/html    |
+      | before_the_law.txt | text/plain   |
     And the content of the file named "primary.html" is:
     """
     <h1>Primary document</h1>

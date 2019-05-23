@@ -6,10 +6,11 @@ import cucumber.api.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.io.IOUtils;
+import org.eclipse.jetty.util.StringUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,10 +48,9 @@ public class MessageOutSteps {
         Message message = messageSentHolder.get();
 
         List<List<String>> actualList = new ArrayList<>();
-        actualList.add(Collections.singletonList("filename"));
+        actualList.add(Arrays.asList("filename", "content type"));
         actualList.addAll(message.getAttachments().stream()
-                .map(Attachment::getFileName)
-                .map(Collections::singletonList)
+                .map(p -> Arrays.asList(p.getFileName(), StringUtil.nonNull(p.getMimeType())))
                 .collect(Collectors.toList())
         );
 
@@ -61,7 +61,6 @@ public class MessageOutSteps {
     @Then("^the content of the file named \"([^\"]*)\" is:$")
     public void theContentOfTheFileNamedIs(String filename, String expectedContent) throws IOException {
         Message message = messageSentHolder.get();
-
 
         String actualContent = new String(IOUtils.toByteArray(message.getAttachment(filename).getInputStream()));
         assertThat(actualContent).isEqualToIgnoringWhitespace(expectedContent);
