@@ -15,6 +15,6 @@ public enum ReceiptStatus {
     @XmlEnumValue("FEIL")FEIL,
     @XmlEnumValue("ANNET")ANNET,
     @XmlEnumValue("INNKOMMENDE_MOTTATT")INNKOMMENDE_MOTTATT,
-    @XmlEnumValue("INNKOMMENDE_LEVERT")INNKOMMENDE_LEVERT;
-
+    @XmlEnumValue("INNKOMMENDE_LEVERT")INNKOMMENDE_LEVERT,
+    @XmlEnumValue("LEVETID_UTLOPT")LEVETID_UTLOPT;
 }

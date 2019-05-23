@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import no.difi.meldingsutveksling.core.EDUCoreFactory;
 import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.CorrelationInformation;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -45,8 +46,6 @@ import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isNextMove;
-import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isReceipt;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 import static no.difi.meldingsutveksling.noarkexchange.logging.PutMessageResponseMarkers.markerFrom;
 
@@ -72,6 +71,7 @@ public class IntegrajonspunktReceiveImpl {
     private final SBDReceiptFactory sbdReceiptFactory;
     private final ApplicationContextHolder applicationContextHolder;
     private final MessageStatusFactory messageStatusFactory;
+    private final SBDUtil sbdUtil;
 
     public IntegrajonspunktReceiveImpl(ApplicationContextHolder applicationContextHolder,
                                        TransportFactory transportFactory,
@@ -83,7 +83,9 @@ public class IntegrajonspunktReceiveImpl {
                                        MessageSender messageSender,
                                        EDUCoreFactory eduCoreFactory,
                                        ObjectProvider<MessagePersister> messagePersister,
-                                       SBDReceiptFactory sbdReceiptFactory, MessageStatusFactory messageStatusFactory) {
+                                       SBDReceiptFactory sbdReceiptFactory,
+                                       MessageStatusFactory messageStatusFactory,
+                                       SBDUtil sbdUtil) {
         this.applicationContextHolder = applicationContextHolder;
         this.transportFactory = transportFactory;
         this.localNoark = localNoark.getIfAvailable();
@@ -96,6 +98,7 @@ public class IntegrajonspunktReceiveImpl {
         this.messagePersister = messagePersister.getIfUnique();
         this.sbdReceiptFactory = sbdReceiptFactory;
         this.messageStatusFactory = messageStatusFactory;
+        this.sbdUtil = sbdUtil;
     }
 
     public CorrelationInformation forwardToNoarkSystem(StandardBusinessDocument sbd) throws MessageException {
@@ -108,7 +111,7 @@ public class IntegrajonspunktReceiveImpl {
         }
 
         EDUCore eduCore;
-        if (isNextMove(sbd)) {
+        if (sbdUtil.isNextMove(sbd)) {
             eduCore = convertNextMoveToEducore(sbd);
         } else {
             Payload payload = sbd.getPayload();
@@ -135,7 +138,7 @@ public class IntegrajonspunktReceiveImpl {
     }
 
     private EDUCore convertNextMoveToEducore(StandardBusinessDocument sbd) {
-        if (isReceipt(sbd)) {
+        if (sbdUtil.isReceipt(sbd)) {
             ArkivmeldingKvitteringMessage message = (ArkivmeldingKvitteringMessage) sbd.getAny();
             AppReceiptType appReceiptType = AppReceiptFactory.from(message);
             EDUCore eduCore = eduCoreFactory.create(appReceiptType, sbd.getConversationId(), sbd.getSenderIdentifier(), sbd.getReceiverIdentifier());
@@ -183,7 +186,7 @@ public class IntegrajonspunktReceiveImpl {
                     eduCore.setPayload(result);
                     messageSender.sendMessage(eduCore);
                 }
-                if (isNextMove(sbd)) {
+                if (sbdUtil.isNextMove(sbd)) {
                     try {
                         messagePersister.delete(sbd.getConversationId());
                     } catch (IOException e) {

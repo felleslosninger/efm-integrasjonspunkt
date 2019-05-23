@@ -257,10 +257,10 @@ Feature: Sending a Next Move DPO multipart/form message
     }
     """
     And the sent message contains the following files:
-      | filename         |
-      | manifest.xml     |
-      | arkivmelding.xml |
-      | test.txt         |
+      | filename         | content type |
+      | manifest.xml     | text/xml     |
+      | arkivmelding.xml | text/xml     |
+      | test.txt         | text/plain   |
     And the content of the file named "manifest.xml" is:
     """
     <?xml version="1.0" encoding="UTF-8"?>

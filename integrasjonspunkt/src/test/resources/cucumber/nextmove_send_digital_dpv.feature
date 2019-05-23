@@ -158,6 +158,6 @@ Feature: Sending a Next Move Digital DPV message
         </altinn9:Correspondence>
     </altinn9:InsertCorrespondenceV2>
     """
-      And the sent message contains the following files:
-          | filename         |
-          | test.txt         |
+    And the sent message contains the following files:
+      | filename | content type |
+      | test.txt | text/plain   |

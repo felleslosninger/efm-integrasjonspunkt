@@ -5,10 +5,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentV2;
+import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 
 import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,8 +37,8 @@ public class CorrespondenceAgencyClientSteps {
                 .stream()
                 .map(p -> new Attachment(getInpuStream(p))
                         .setFileName(p.getFileName().getValue())
+                        .setMimeType(MimeTypeExtensionMapper.getMimetype(Stream.of(p.getFileName().getValue().split("\\.")).reduce((a, b) -> b).orElse("pdf")))
                 ).collect(Collectors.toList());
-
         messageSentHolder.set(new Message()
                 .attachments(attachments));
     }

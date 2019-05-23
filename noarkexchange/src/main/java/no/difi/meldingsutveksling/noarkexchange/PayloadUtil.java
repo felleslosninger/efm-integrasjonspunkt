@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import com.google.common.collect.Lists;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import org.springframework.util.StringUtils;
@@ -33,7 +34,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Slf4j
+@UtilityClass
 public class PayloadUtil {
+
     private static final String APP_RECEIPT_INDICATOR = "AppReceipt";
     private static final String PAYLOAD_UNKNOWN_TYPE = "Payload is of unknown type cannot determine what type of message it is";
 

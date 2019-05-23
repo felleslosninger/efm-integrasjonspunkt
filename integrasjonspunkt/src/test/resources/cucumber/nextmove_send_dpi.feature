@@ -246,10 +246,10 @@ Feature: Sending a Next Move DPI message
     </ns3:StandardBusinessDocument>
     """
     And the sent message contains the following files:
-      | filename         |
-      | arkivmelding.xml |
-      | test.txt         |
-      | manifest.xml     |
+      | filename         | content type |
+      | arkivmelding.xml |              |
+      | test.txt         |              |
+      | manifest.xml     |              |
 
     And the XML content of the file named "manifest.xml" is:
     """

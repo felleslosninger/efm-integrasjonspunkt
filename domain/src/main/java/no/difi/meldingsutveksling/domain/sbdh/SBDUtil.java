@@ -1,34 +1,47 @@
 package no.difi.meldingsutveksling.domain.sbdh;
 
-import lombok.experimental.UtilityClass;
+import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.DocumentType;
+import org.springframework.stereotype.Component;
 
-@UtilityClass
+import java.time.Clock;
+import java.time.ZonedDateTime;
+
+@Component
+@RequiredArgsConstructor
 public class SBDUtil {
 
-    public static boolean isNextMove(StandardBusinessDocument sbd) {
+    private final Clock clock;
+
+    public boolean isNextMove(StandardBusinessDocument sbd) {
         return DocumentType.valueOfType(sbd.getMessageType())
                 .map(DocumentType::getApi)
                 .map(p -> p == ApiType.NEXTMOVE)
                 .orElse(false);
     }
 
-    public static boolean isReceipt(StandardBusinessDocument sbd) {
+    public boolean isReceipt(StandardBusinessDocument sbd) {
         return DocumentType.valueOfType(sbd.getMessageType())
                 .map(DocumentType::isReceipt)
                 .orElse(false);
     }
 
-    public static boolean isStatus(StandardBusinessDocument sbd) {
+    public boolean isStatus(StandardBusinessDocument sbd) {
         return DocumentType.valueOfType(sbd.getMessageType())
                 .map(dt -> dt == DocumentType.STATUS)
                 .orElse(false);
     }
 
-    public static boolean isType(StandardBusinessDocument sbd, DocumentType documentType) {
+    public boolean isType(StandardBusinessDocument sbd, DocumentType documentType) {
         return DocumentType.valueOfType(sbd.getMessageType())
                 .map(dt -> dt == documentType)
                 .orElse(false);
+    }
+
+    public boolean isExpired(StandardBusinessDocument sbd) {
+        ZonedDateTime expectedResponseDateTime = sbd.getExpectedResponseDateTime();
+        ZonedDateTime currentDateTime = ZonedDateTime.now(clock);
+        return currentDateTime.isAfter(expectedResponseDateTime);
     }
 }

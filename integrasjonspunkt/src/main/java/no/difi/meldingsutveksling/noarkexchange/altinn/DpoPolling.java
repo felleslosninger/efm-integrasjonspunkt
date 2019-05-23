@@ -8,8 +8,10 @@ import no.difi.meldingsutveksling.DownloadRequest;
 import no.difi.meldingsutveksling.FileReference;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
@@ -21,7 +23,6 @@ import java.util.List;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
-import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isNextMove;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
 @Slf4j
@@ -36,6 +37,8 @@ public class DpoPolling {
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final MessagePersister messagePersister;
     private final AltinnWsClientFactory altinnWsClientFactory;
+    private final TimeToLiveHelper timeToLiveHelper;
+    private final SBDUtil sbdUtil;
 
     private ServiceRecord serviceRecord;
 
@@ -75,15 +78,15 @@ public class DpoPolling {
             StandardBusinessDocument sbd = client.download(request, messagePersister);
             Audit.info(format("Downloaded message with id=%s", sbd.getConversationId()), sbd.createLogstashMarkers());
 
-            if (isNextMove(sbd)) {
+            if (sbdUtil.isExpired(sbd)) {
+                timeToLiveHelper.registerErrorStatusAndMessage(sbd);
+            } else if (sbdUtil.isNextMove(sbd)) {
                 altinnNextMoveMessageHandler.handleStandardBusinessDocument(sbd);
             } else {
                 altinnConversationMessageHandler.handleStandardBusinessDocument(sbd);
             }
-
             client.confirmDownload(request);
             log.debug(markerFrom(reference).and(sbd.createLogstashMarkers()), "Message confirmed downloaded");
-
         } catch (Exception e) {
             log.error(format("Error during Altinn message polling, message altinnId=%s", reference.getValue()), e);
         }

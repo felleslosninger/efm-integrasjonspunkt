@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
@@ -19,7 +20,6 @@ import org.springframework.stereotype.Component;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
-import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isStatus;
 
 @Slf4j
 @Component
@@ -33,12 +33,13 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
     private final NextMoveQueue nextMoveQueue;
     private final SBDReceiptFactory sbdReceiptFactory;
     private final MessageStatusFactory messageStatusFactory;
+    private final SBDUtil sbdUtil;
 
     @Override
     public void handleStandardBusinessDocument(StandardBusinessDocument sbd) {
         log.debug(format("NextMove message id=%s", sbd.getConversationId()));
 
-        if (isStatus(sbd)) {
+        if (sbdUtil.isStatus(sbd)) {
             handleStatus(sbd);
         } else {
             if (properties.getNoarkSystem().isEnable() && !properties.getNoarkSystem().getEndpointURL().isEmpty()) {

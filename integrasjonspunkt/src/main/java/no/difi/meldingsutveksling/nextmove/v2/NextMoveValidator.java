@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -31,7 +32,7 @@ import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.DocumentType.ARKIVMELDING;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
-import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isReceipt;
+
 
 @Component
 @RequiredArgsConstructor
@@ -42,6 +43,8 @@ public class NextMoveValidator {
     private final ServiceIdentifierService serviceIdentifierService;
     private final Asserter asserter;
     private final CryptoMessagePersister cryptoMessagePersister;
+    private final TimeToLiveHelper timeToLiveHelper;
+    private final SBDUtil sbdUtil;
 
     void validate(StandardBusinessDocument sbd) {
         sbd.getOptionalConversationId()
@@ -70,6 +73,10 @@ public class NextMoveValidator {
             throw new ReceiverDoNotAcceptDocumentStandard(standard, sbd.getProcess());
         }
 
+        if (sbdUtil.isExpired(sbd)) {
+            timeToLiveHelper.registerErrorStatusAndMessage(sbd);
+            throw new TimeToLiveException(sbd.getExpectedResponseDateTime());
+        }
 
         Class<?> group = ValidationGroupFactory.toServiceIdentifier(serviceIdentifier);
         asserter.isValid(sbd.getAny(), group != null ? new Class<?>[]{group} : new Class<?>[0]);
@@ -77,11 +84,17 @@ public class NextMoveValidator {
 
     void validate(NextMoveOutMessage message) {
         // Must always be at least one attachment
-        if (!isReceipt(message.getSbd()) && (message.getFiles() == null || message.getFiles().isEmpty())) {
+        StandardBusinessDocument sbd = message.getSbd();
+        if (!sbdUtil.isReceipt(sbd) && (message.getFiles() == null || message.getFiles().isEmpty())) {
             throw new MissingFileException();
         }
 
-        if (SBDUtil.isType(message.getSbd(), ARKIVMELDING)) {
+        if (sbdUtil.isExpired(sbd)) {
+            timeToLiveHelper.registerErrorStatusAndMessage(sbd);
+            throw new TimeToLiveException(sbd.getExpectedResponseDateTime());
+        }
+
+        if (sbdUtil.isType(message.getSbd(), ARKIVMELDING)) {
             // Verify each file referenced in arkivmelding is uploaded
             List<String> arkivmeldingFiles = ArkivmeldingUtil.getFilenames(getArkivmelding(message));
             Set<String> messageFiles = message.getFiles().stream()

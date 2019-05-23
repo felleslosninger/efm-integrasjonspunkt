@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.ApplicationContextHolder;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.MessageInfo;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
@@ -24,7 +25,6 @@ import javax.xml.bind.JAXBElement;
 import java.time.LocalDateTime;
 
 import static java.lang.String.format;
-import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isReceipt;
 
 @Slf4j
 @Component
@@ -39,10 +39,11 @@ public class AltinnConversationMessageHandler implements AltinnMessageHandler {
     private final ApplicationContextHolder applicationContextHolder;
     private final SBDReceiptFactory sbdReceiptFactory;
     private final MessageStatusFactory messageStatusFactory;
+    private final SBDUtil sbdUtil;
 
     @Override
     public void handleStandardBusinessDocument(StandardBusinessDocument sbd) {
-        if (isReceipt(sbd)) {
+        if (sbdUtil.isReceipt(sbd)) {
             handleReceipt(sbd);
         } else {
             sendReceipt(sbd.getMessageInfo());
