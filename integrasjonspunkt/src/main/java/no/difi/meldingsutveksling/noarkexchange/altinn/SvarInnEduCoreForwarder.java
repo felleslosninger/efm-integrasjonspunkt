@@ -43,7 +43,6 @@ public class SvarInnEduCoreForwarder implements Consumer<Forsendelse> {
     private final MessageStatusFactory messageStatusFactory;
 
     @Override
-    @Transactional
     public void accept(Forsendelse forsendelse) {
         SvarInnEduCoreBuilder builder = new SvarInnEduCoreBuilder(forsendelse);
         svarInnService.getAttachments(forsendelse).forEach(builder::streamedFile);

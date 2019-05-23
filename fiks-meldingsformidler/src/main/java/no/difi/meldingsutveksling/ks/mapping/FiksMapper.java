@@ -43,10 +43,7 @@ import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -62,17 +59,20 @@ public class FiksMapper {
     private final CryptoMessagePersister cryptoMessagePersister;
     private final UUIDGenerator uuidGenerator;
     private final ObjectProvider<CmsUtil> cmsUtilProvider;
+    private final Clock clock;
 
     public FiksMapper(IntegrasjonspunktProperties properties,
                       ServiceRegistryLookup serviceRegistry,
                       CryptoMessagePersister cryptoMessagePersister,
                       UUIDGenerator uuidGenerator,
-                      ObjectProvider<CmsUtil> cmsUtilProvider) {
+                      ObjectProvider<CmsUtil> cmsUtilProvider,
+                      Clock clock) {
         this.properties = properties;
         this.serviceRegistry = serviceRegistry;
         this.cryptoMessagePersister = cryptoMessagePersister;
         this.uuidGenerator = uuidGenerator;
         this.cmsUtilProvider = cmsUtilProvider;
+        this.clock = clock;
     }
 
     public SendForsendelseMedId mapFrom(NextMoveOutMessage message, X509Certificate certificate) throws NextMoveException {
@@ -198,6 +198,7 @@ public class FiksMapper {
                 .build();
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private String getSenderRef(EDUCore eduCore) {
         String senderRef;
         if (Strings.isNullOrEmpty(eduCore.getSender().getRef())) {
@@ -216,6 +217,7 @@ public class FiksMapper {
         return senderRef;
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private String getReceiverRef(EDUCore eduCore) {
         String receiverRef = eduCore.getReceiver().getRef();
         if (!Strings.isNullOrEmpty(receiverRef)) {
@@ -276,11 +278,26 @@ public class FiksMapper {
                 .withJournalpostnummer(toInt(jp.getJournalpostnummer()))
                 .withJournalposttype(jp.getJournalposttype().value())
                 .withJournalstatus(jp.getJournalstatus().value())
-                .withJournaldato(jp.getJournaldato())
+                .withJournaldato(toDateTime(jp.getJournaldato()))
                 .withDokumentetsDato(jp.getDokumentetsDato())
                 .withTittel(jp.getOffentligTittel())
                 .withSaksbehandler(getSaksbehandler(jp).orElse(null))
                 .build();
+    }
+
+    private XMLGregorianCalendar toDateTime(XMLGregorianCalendar in) {
+        if (in == null) {
+            return null;
+        }
+
+        try {
+            GregorianCalendar cal = in.toGregorianCalendar(TimeZone.getTimeZone(clock.getZone()), null, null);
+            XMLGregorianCalendar out = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
+            out.setTime(0, 0, 0, 0);
+            return out;
+        } catch (DatatypeConfigurationException e) {
+            throw new NextMoveRuntimeException("Could not convert DateTime to " + XMLGregorianCalendar.class, e);
+        }
     }
 
     private Optional<String> getSaksbehandler(Journalpost jp) {

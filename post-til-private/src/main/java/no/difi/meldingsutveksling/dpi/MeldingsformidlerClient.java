@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.dpi;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.marker.LogstashMarker;
-import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.receipt.ExternalReceipt;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
@@ -14,12 +14,15 @@ import no.difi.sdp.client2.domain.Forsendelse;
 import no.difi.sdp.client2.domain.exceptions.SendException;
 import no.difi.sdp.client2.domain.kvittering.ForretningsKvittering;
 import no.difi.sdp.client2.domain.kvittering.KvitteringForespoersel;
+
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static no.difi.meldingsutveksling.logging.MarkerFactory.conversationIdMarker;
 
+@Slf4j
 @RequiredArgsConstructor
 public class MeldingsformidlerClient {
 
@@ -61,17 +64,25 @@ public class MeldingsformidlerClient {
                 .build();
     }
 
-    public ExternalReceipt sjekkEtterKvittering(String orgnr) {
+    public Optional<ExternalReceipt> sjekkEtterKvittering(String orgnr) {
         Kvittering kvittering = new Kvittering();
+
         PayloadInterceptor payloadInterceptor = new PayloadInterceptor(kvittering::setRawReceipt);
         SikkerDigitalPostKlient klient = sikkerDigitalPostKlientFactory.createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer.of(orgnr), payloadInterceptor);
-        final ForretningsKvittering forretningsKvittering = klient.hentKvittering(KvitteringForespoersel.builder(config.getPriority()).mpcId(config.getMpcId()).build());
-        if (forretningsKvittering == null) {
-            return new EmptyKvittering();
-        }
-        return kvittering.setEksternKvittering(forretningsKvittering).withCallback(klient::bekreft);
+        return getForretningsKvittering(klient)
+                .map(forretningsKvittering -> kvittering.setEksternKvittering(forretningsKvittering)
+                        .withCallback(klient::bekreft)
+                );
     }
 
+    private Optional<ForretningsKvittering> getForretningsKvittering(SikkerDigitalPostKlient klient) {
+        try {
+            return Optional.ofNullable(klient.hentKvittering(KvitteringForespoersel.builder(config.getPriority()).mpcId(config.getMpcId()).build()));
+        } catch (SendException e) {
+            log.warn("Polling of DPI receipts failed with: {}", e.getLocalizedMessage());
+            return Optional.empty();
+        }
+    }
 
     public class Kvittering implements ExternalReceipt {
         private ForretningsKvittering eksternKvittering;
@@ -126,33 +137,6 @@ public class MeldingsformidlerClient {
             MessageStatus ms = dpiReceiptMapper.from(eksternKvittering);
             ms.setRawReceipt(getRawReceipt());
             return ms;
-        }
-    }
-
-    public class EmptyKvittering implements ExternalReceipt {
-
-        private static final String EMPTY = "empty";
-
-        @Override
-        public void confirmReceipt() {
-            /*
-             * Do nothing because this is a non-existent/empty receipt where confirmation is undefined.
-             */
-        }
-
-        @Override
-        public String getId() {
-            return EMPTY;
-        }
-
-        @Override
-        public LogstashMarker logMarkers() {
-            return Markers.append("receipt_type", EMPTY);
-        }
-
-        @Override
-        public MessageStatus toMessageStatus() {
-            return dpiReceiptMapper.getEmpty();
         }
     }
 }

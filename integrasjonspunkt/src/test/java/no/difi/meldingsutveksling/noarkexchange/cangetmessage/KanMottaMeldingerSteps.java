@@ -109,7 +109,6 @@ public class KanMottaMeldingerSteps {
         adresseRegister = mock(Adresseregister.class);
         mshClient = mock(NoarkClient.class);
         messageSender = mock(MessageSender.class);
-        integrasjonspunkt.setAdresseRegister(adresseRegister);
         integrasjonspunkt.setMshClient(mshClient);
     }
 

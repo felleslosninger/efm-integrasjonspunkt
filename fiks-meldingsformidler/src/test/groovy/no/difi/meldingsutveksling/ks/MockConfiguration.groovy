@@ -1,12 +1,13 @@
 package no.difi.meldingsutveksling.ks
 
-import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister
+
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
 import org.mockito.Mockito
+import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -30,6 +31,11 @@ public class MockConfiguration {
         def infoRecord = new InfoRecord("123456789", "foo", new EntityType("Organisasjonsledd", "ORGL"))
         when(lookup.getInfoRecord(Mockito.any(String))).thenReturn(infoRecord)
         return lookup
+    }
+
+    @Bean
+    RestTemplateBuilder restTemplateBuilder() {
+        return new RestTemplateBuilder()
     }
 
     @Bean(name = "localNoark")

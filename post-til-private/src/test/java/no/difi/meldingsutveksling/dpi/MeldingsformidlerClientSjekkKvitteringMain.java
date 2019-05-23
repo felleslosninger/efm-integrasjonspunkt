@@ -28,8 +28,7 @@ public class MeldingsformidlerClientSjekkKvitteringMain {
         Clock clock = Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), ZoneId.of("Europe/Oslo"));
         MessageStatusFactory messageStatusFactory = new MessageStatusFactory(clock);
         DpiReceiptMapper dpiReceiptMapper = new DpiReceiptMapper(messageStatusFactory, clock);
-        MeldingsformidlerClient client = new MeldingsformidlerClient(config, sikkerDigitalPostKlientFactory, forsendelseHandlerFactory,dpiReceiptMapper);
-        final ExternalReceipt kvittering = client.sjekkEtterKvittering(MeldingsformidlerClientMain.DIFI_ORGNR);
-        kvittering.confirmReceipt();
+        MeldingsformidlerClient client = new MeldingsformidlerClient(config, sikkerDigitalPostKlientFactory, forsendelseHandlerFactory, dpiReceiptMapper);
+        client.sjekkEtterKvittering(MeldingsformidlerClientMain.DIFI_ORGNR).ifPresent(ExternalReceipt::confirmReceipt);
     }
 }

@@ -42,5 +42,9 @@ public class FiksConfig {
         private String fallbackSenderOrgNr;
         @NotNull
         private String process;
+        @NotNull
+        private Integer connectTimeout;
+        @NotNull
+        private Integer readTimeout;
     }
 }

@@ -7,12 +7,10 @@ import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Optional;
 
@@ -24,8 +22,6 @@ import static java.util.Optional.ofNullable;
 @Component
 @RequiredArgsConstructor
 public class ArkivmeldingFactory {
-
-    private final CryptoMessagePersister cryptoMessagePersister;
 
     public Arkivmelding createArkivmeldingAndWriteFiles(PutMessageRequestWrapper putMessage) {
         MeldingType mt = EDUCoreConverter.payloadAsMeldingType(putMessage.getPayload());
@@ -101,13 +97,6 @@ public class ArkivmeldingFactory {
 
             dbeskr.getDokumentobjekt().add(dobj);
             jp.getDokumentbeskrivelseAndDokumentobjekt().add(dbeskr);
-
-            try {
-                writeDokument(putMessage.getConversationId(), d.getVeFilnavn(), d.getFil().getBase64());
-            } catch (IOException e) {
-                log.error("Could not write file {} from message {}", d.getVeFilnavn(), putMessage.getConversationId());
-                throw new MeldingsUtvekslingRuntimeException(e);
-            }
         });
 
         sm.getBasisregistrering().add(jp);
@@ -115,7 +104,4 @@ public class ArkivmeldingFactory {
         return am;
     }
 
-    private void writeDokument(String convId, String filename, byte[] content) throws IOException {
-        cryptoMessagePersister.write(convId, filename, content);
-    }
 }

@@ -6,7 +6,7 @@ import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
 
 import javax.transaction.Transactional;
 import java.time.Clock;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
 
@@ -19,7 +19,7 @@ public class NextMoveInMessageUnlocker {
 
     @Transactional
     public void unlockTimedOutMessages() {
-        repo.findByLockTimeoutLessThanEqual(LocalDateTime.now(clock)).forEach(cr -> {
+        repo.findByLockTimeoutLessThanEqual(ZonedDateTime.now(clock)).forEach(cr -> {
             cr.setLockTimeout(null);
             repo.save(cr);
             log.debug(markerFrom(cr), "Lock for message with id={} timed out, releasing", cr.getConversationId());

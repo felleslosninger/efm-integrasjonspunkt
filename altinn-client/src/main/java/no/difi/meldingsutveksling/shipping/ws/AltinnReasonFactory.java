@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.shipping.ws;
 
+import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasicConfirmDownloadedBasicAltinnFaultFaultFaultMessage;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasicGetAvailableFilesBasicAltinnFaultFaultFaultMessage;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasicInitiateBrokerServiceBasicAltinnFaultFaultFaultMessage;
@@ -9,6 +10,7 @@ import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExter
 /**
  * Creates AltinnReason to contain the SOAP faults from Altinn
  */
+@UtilityClass
 public class AltinnReasonFactory {
     public static AltinnReason from(IBrokerServiceExternalBasicInitiateBrokerServiceBasicAltinnFaultFaultFaultMessage initateAltinnFault) {
         String message = initateAltinnFault.getFaultInfo().getAltinnErrorMessage().getValue();

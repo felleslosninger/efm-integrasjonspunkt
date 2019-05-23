@@ -178,7 +178,7 @@ Feature: Sending a Next Move DPF message with sender And receiver refs
             <kunDigitalLevering>false</kunDigitalLevering>
             <metadataFraAvleverendeSystem>
                 <journalaar>0</journalaar>
-                <journaldato/>
+                <journaldato>2017-05-23T00:00:00.000+02:00</journaldato>
                 <journalpostnummer>0</journalpostnummer>
                 <journalposttype>Utgående dokument</journalposttype>
                 <journalsekvensnummer>0</journalsekvensnummer>
