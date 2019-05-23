@@ -16,6 +16,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.mail.MailClient;
+import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
@@ -139,20 +140,27 @@ public class IntegrajonspunktReceiveImpl {
     }
 
     private EDUCore convertNextMoveToEducore(StandardBusinessDocument sbd) {
-        byte[] asicBytes;
-        try {
-            asicBytes = messagePersister.read(sbd.getConversationId(), NextMoveConsts.ASIC_FILE);
-        } catch (IOException e) {
-            throw new NextMoveRuntimeException("Unable to read persisted ASiC", e);
+        if (isReceipt(sbd)) {
+            ArkivmeldingKvitteringMessage message = (ArkivmeldingKvitteringMessage) sbd.getAny();
+            AppReceiptType appReceiptType = AppReceiptFactory.from(message);
+            EDUCore eduCore = eduCoreFactory.create(appReceiptType, sbd.getConversationId(), sbd.getSenderIdentifier(), sbd.getReceiverIdentifier());
+
+            Optional<Conversation> c = conversationService.registerStatus(eduCore.getId(), messageStatusFactory.getMessageStatus(ReceiptStatus.LEST));
+            c.ifPresent(conversationService::markFinished);
+
+            return eduCore;
+        } else {
+            byte[] asicBytes;
+            try {
+                asicBytes = messagePersister.read(sbd.getConversationId(), NextMoveConsts.ASIC_FILE);
+            } catch (IOException e) {
+                throw new NextMoveRuntimeException("Unable to read persisted ASiC", e);
+            }
+            byte[] asic = new Decryptor(keyInfo).decrypt(asicBytes);
+            Arkivmelding arkivmelding = convertAsicEntryToArkivmelding(asic);
+
+            return eduCoreFactory.create(sbd, arkivmelding, asic);
         }
-        byte[] asic = new Decryptor(keyInfo).decrypt(asicBytes);
-        Arkivmelding arkivmelding = convertAsicEntryToArkivmelding(asic);
-
-        EDUCore eduCore = eduCoreFactory.create(sbd, arkivmelding, asic);
-        Optional<Conversation> c = conversationService.registerStatus(eduCore.getId(), messageStatusFactory.getMessageStatus(ReceiptStatus.LEST));
-        c.ifPresent(conversationService::markFinished);
-
-        return eduCore;
     }
 
     public byte[] decrypt(Payload payload) {
