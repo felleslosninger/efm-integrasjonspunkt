@@ -8,7 +8,7 @@ Feature: Receiving a BEST/EDU message by the noarkExchange WebService
     Given the sender is "910077473"
     And the receiver is "910075918"
     And the conversationId is "6e9cab22-a682-461c-bcd4-f201bfb3de8c"
-    And the BEST/EDU payload is:
+    And the payload is:
     """
     <?xml version="1.0" encoding="utf-8"?>
     <Melding xmlns="http://www.arkivverket.no/Noark4-1-WS-WD/types">

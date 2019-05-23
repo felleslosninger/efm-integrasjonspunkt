@@ -2,10 +2,7 @@ package no.difi.meldingsutveksling.cucumber;
 
 import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
-import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
-import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-import no.difi.meldingsutveksling.noarkexchange.schema.SOAPport;
+import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import org.springframework.boot.context.embedded.LocalServerPort;
 
 import javax.xml.namespace.QName;
@@ -13,12 +10,14 @@ import javax.xml.ws.Service;
 import java.io.IOException;
 import java.net.URL;
 
-public class EduSteps {
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class NoarkExchangeWebServiceSteps {
 
     private final Holder<Message> messageOutHolder;
     private final int port;
 
-    public EduSteps(
+    public NoarkExchangeWebServiceSteps(
             Holder<Message> messageOutHolder,
             @LocalServerPort int port) {
         this.messageOutHolder = messageOutHolder;
@@ -28,11 +27,6 @@ public class EduSteps {
     @Before
     public void before() {
         // NOOP
-    }
-
-    @Given("^the BEST/EDU payload is:$")
-    public void theBESTEDUPayloadIs(String payload) {
-        messageOutHolder.get().setBody(payload);
     }
 
     @Given("^I call the noarkExchange WebService$")
@@ -49,7 +43,8 @@ public class EduSteps {
         Service service = Service.create(wsdlDocumentLocation, serviceQN);
         SOAPport soapPort = service.getPort(portQN, SOAPport.class);
 
-        soapPort.putMessage(getMessageRequestType());
+        PutMessageResponseType putMessageResponseType = soapPort.putMessage(getMessageRequestType());
+        assertThat(putMessageResponseType.getResult().getType()).isEqualTo("OK");
     }
 
     private PutMessageRequestType getMessageRequestType() {

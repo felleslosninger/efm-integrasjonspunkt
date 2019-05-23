@@ -36,6 +36,11 @@ public class MessageOutSteps {
         messageOutHolder.getOrCalculate(Message::new).setConversationId(conversationId);
     }
 
+    @Given("^the payload is:$")
+    public void thePayloadIs(String payload) {
+        messageOutHolder.get().setBody(payload);
+    }
+
     @Then("^the sent message contains the following files:$")
     @SneakyThrows
     public void theSentMessageContainsTheFollowingFiles(DataTable expectedTable) {
