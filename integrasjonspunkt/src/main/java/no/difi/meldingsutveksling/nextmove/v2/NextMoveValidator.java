@@ -11,9 +11,9 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
-import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.validation.Asserter;
 import no.difi.meldingsutveksling.validation.group.ValidationGroupFactory;
@@ -31,8 +31,7 @@ import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isExpired;
-import static no.difi.meldingsutveksling.nextmove.TimeToLiveHelper.registerErrorStatusAndMessage;
-import static no.difi.meldingsutveksling.nextmove.TimeToLiveHelper.timeToLiveErrorMessage;
+
 
 @Component
 @RequiredArgsConstructor
@@ -43,7 +42,7 @@ public class NextMoveValidator {
     private final ServiceIdentifierService serviceIdentifierService;
     private final Asserter asserter;
     private final CryptoMessagePersister cryptoMessagePersister;
-    private final ConversationService conversationService;
+    private final TimeToLiveHelper timeToLiveHelper;
 
     void validate(StandardBusinessDocument sbd) {
         sbd.getOptionalConversationId()
@@ -73,8 +72,7 @@ public class NextMoveValidator {
         }
 
         if (isExpired(sbd)) {
-            registerErrorStatusAndMessage(sbd, conversationService);
-            timeToLiveErrorMessage(sbd);
+            timeToLiveHelper.registerErrorStatusAndMessage(sbd);
             throw new TimeToLiveException(sbd.getExpectedResponseDateTime());
         }
 
@@ -90,8 +88,7 @@ public class NextMoveValidator {
         }
 
         if (isExpired(sbd)) {
-            registerErrorStatusAndMessage(sbd, conversationService);
-            timeToLiveErrorMessage(sbd);
+            timeToLiveHelper.registerErrorStatusAndMessage(sbd);
             throw new TimeToLiveException(sbd.getExpectedResponseDateTime());
         }
 

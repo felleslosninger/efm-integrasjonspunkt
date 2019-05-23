@@ -5,21 +5,23 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
+@Component
 @Slf4j
 public class TimeToLiveHelper {
 
-    public static void timeToLiveErrorMessage(StandardBusinessDocument sbd) {
-        log.error("ExpectedResponseDateTime (%s) is after current time. Message will not be handled further. Please resend...", sbd.getExpectedResponseDateTime());
+    private final ConversationService conversationService;
+
+    public TimeToLiveHelper(ConversationService conversationService) {
+        this.conversationService = conversationService;
+
     }
 
-    public static String expectedResponseDateTimeExpiredErrorMessage(StandardBusinessDocument sbd) {
-        return String.format("Levetid for melding: %s er utgått. Må sendes på nytt", sbd.getExpectedResponseDateTime());
-    }
-
-    public static void registerErrorStatusAndMessage(StandardBusinessDocument sbd, ConversationService conversationService) {
-         conversationService.registerStatus(sbd.getConversationId(), MessageStatus.of(ReceiptStatus.FEIL, LocalDateTime.now(), expectedResponseDateTimeExpiredErrorMessage(sbd)));
+    public void registerErrorStatusAndMessage(StandardBusinessDocument sbd) {
+        String status = String.format("Levetid for melding: %s er utgått. Må sendes på nytt", sbd.getExpectedResponseDateTime());
+        conversationService.registerStatus(sbd.getConversationId(), MessageStatus.of(ReceiptStatus.LEVETID_UTLOPT, LocalDateTime.now(), status));
     }
 }

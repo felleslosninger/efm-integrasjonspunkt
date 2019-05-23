@@ -52,8 +52,6 @@ import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
 import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isExpired;
 import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.*;
-import static no.difi.meldingsutveksling.nextmove.TimeToLiveHelper.registerErrorStatusAndMessage;
-import static no.difi.meldingsutveksling.nextmove.TimeToLiveHelper.timeToLiveErrorMessage;
 
 @Component
 @ConditionalOnProperty(name = "difi.move.feature.enableDPE", havingValue = "true")
@@ -73,6 +71,7 @@ public class NextMoveServiceBus {
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final ConversationService conversationService;
     private final MessageStatusFactory messageStatusFactory;
+    private final TimeToLiveHelper timeToLiveHelper;
 
     private IMessageReceiver messageReceiver;
 
@@ -87,7 +86,7 @@ public class NextMoveServiceBus {
                               ServiceBusPayloadConverter payloadConverter,
                               SBDReceiptFactory sbdReceiptFactory,
                               ServiceRegistryLookup serviceRegistryLookup,
-                              ConversationService conversationService, MessageStatusFactory messageStatusFactory) {
+                              ConversationService conversationService, MessageStatusFactory messageStatusFactory, TimeToLiveHelper timeToLiveHelper) {
         this.props = props;
         this.nextMoveQueue = nextMoveQueue;
         this.serviceBusClient = serviceBusClient;
@@ -101,6 +100,7 @@ public class NextMoveServiceBus {
         this.serviceRegistryLookup = serviceRegistryLookup;
         this.conversationService = conversationService;
         this.messageStatusFactory = messageStatusFactory;
+        this.timeToLiveHelper = timeToLiveHelper;
     }
 
     @PostConstruct
@@ -163,7 +163,13 @@ public class NextMoveServiceBus {
                     messagesInQueue = false;
                     break;
                 }
-                messages.add(msg.get());
+                if (isExpired(msg.get().getPayload().getSbd())) {
+                    timeToLiveHelper.registerErrorStatusAndMessage(msg.get().getPayload().getSbd());
+                    serviceBusClient.deleteMessage(msg.get());
+                }
+                else {
+                    messages.add(msg.get());
+                }
             }
 
             for (ServiceBusMessage msg : messages) {
@@ -178,10 +184,6 @@ public class NextMoveServiceBus {
                 }
                 handleSbd(msg.getPayload().getSbd());
                 serviceBusClient.deleteMessage(msg);
-
-                if (isExpired(msg.getPayload().getSbd())) {
-                    registerErrorStatusAndMessage(msg.getPayload().getSbd(), conversationService);
-                }
             }
         }
     }
@@ -212,10 +214,14 @@ public class NextMoveServiceBus {
         try {
             log.debug(format("Received message on queue=%s with id=%s", serviceBusClient.getLocalQueuePath(), m.getMessageId()));
             ServiceBusPayload payload = payloadConverter.convert(m.getBody(), m.getMessageId());
-            if (payload.getAsic() != null) {
-                cryptoMessagePersister.write(payload.getSbd().getConversationId(), ASIC_FILE, Base64.getDecoder().decode(payload.getAsic()));
+            if (isExpired(payload.getSbd())) {
+                timeToLiveHelper.registerErrorStatusAndMessage(payload.getSbd());
+            } else {
+                if (payload.getAsic() != null) {
+                    cryptoMessagePersister.write(payload.getSbd().getConversationId(), ASIC_FILE, Base64.getDecoder().decode(payload.getAsic()));
+                    handleSbd(payload.getSbd());
+                }
             }
-            handleSbd(payload.getSbd());
             messageReceiver.completeAsync(m.getLockToken());
         } catch (JAXBException | IOException e) {
             log.error("Failed to put message on local queue", e);
