@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
 import no.difi.meldingsutveksling.domain.sbdh.*;
-import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,7 +33,7 @@ StandardBusinessDocument sbd;
                                         .addScopeInformation(new CorrelationInformation()
                                                 .setExpectedResponseDateTime(ZonedDateTime.parse("2025-02-10T00:31:52Z"))
                                         )
-                                        .setIdentifier("urn:no:difi:meldingsutveksling:2.0")
+                                        .setIdentifier("urn:no:difi:arkivmelding:xsd::arkivmelding")
                                         .setInstanceIdentifier("37efbd4c-413d-4e2c-bbc5-257ef4a65a45")
                                         .setType("ConversationId")
                                 )
@@ -42,8 +41,8 @@ StandardBusinessDocument sbd;
                         .setDocumentIdentification(new DocumentIdentification()
                                 .setCreationDateAndTime(ZonedDateTime.parse("2025-01-11T15:29:58.753+02:00"))
                                 .setInstanceIdentifier("ff88849c-e281-4809-8555-7cd54952b916")
-                                .setStandard("urn:no:difi:meldingsutveksling:2.0")
-                                .setType("DPO")
+                                .setStandard("urn:no:difi:profile:arkivmelding:administrasjon:ver1.0")
+                                .setType("ARKIVMELDING")
                                 .setTypeVersion("2.0")
                         )
                         .setHeaderVersion("1.0")
@@ -59,9 +58,6 @@ StandardBusinessDocument sbd;
                                         .setValue("9908:910077473")
                                 )
                         )
-                )
-                .setAny(new NextMoveOutMessage()
-                        .setConversationId("text")
                 );
-    }
+        }
 }

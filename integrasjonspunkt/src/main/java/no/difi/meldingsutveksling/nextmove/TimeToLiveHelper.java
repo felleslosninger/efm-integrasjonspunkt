@@ -22,6 +22,6 @@ public class TimeToLiveHelper {
 
     public void registerErrorStatusAndMessage(StandardBusinessDocument sbd) {
         String status = String.format("Levetid for melding: %s er utgått. Må sendes på nytt", sbd.getExpectedResponseDateTime());
-        conversationService.registerStatus(sbd.getConversationId(), MessageStatus.of(ReceiptStatus.FEIL, LocalDateTime.now(), status));
+        conversationService.registerStatus(sbd.getConversationId(), MessageStatus.of(ReceiptStatus.LEVETID_UTLOPT, LocalDateTime.now(), status));
     }
 }
