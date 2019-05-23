@@ -25,4 +25,10 @@ public class SBDUtil {
                 .map(dt -> dt == DocumentType.STATUS)
                 .orElse(false);
     }
+
+    public static boolean isType(StandardBusinessDocument sbd, DocumentType documentType) {
+        return DocumentType.valueOfType(sbd.getMessageType())
+                .map(dt -> dt == documentType)
+                .orElse(false);
+    }
 }

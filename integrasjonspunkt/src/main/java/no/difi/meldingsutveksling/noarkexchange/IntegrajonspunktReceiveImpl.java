@@ -107,11 +107,6 @@ public class IntegrajonspunktReceiveImpl {
             throw e;
         }
 
-        if (isReceipt(sbd)) {
-            Audit.info("Messagetype Receipt", markerFrom(sbd));
-            return new CorrelationInformation();
-        }
-
         EDUCore eduCore;
         if (isNextMove(sbd)) {
             eduCore = convertNextMoveToEducore(sbd);

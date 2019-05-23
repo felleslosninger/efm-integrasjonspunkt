@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
@@ -27,8 +28,10 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
+import static no.difi.meldingsutveksling.DocumentType.ARKIVMELDING;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
+import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isReceipt;
 
 @Component
 @RequiredArgsConstructor
@@ -74,11 +77,11 @@ public class NextMoveValidator {
 
     void validate(NextMoveOutMessage message) {
         // Must always be at least one attachment
-        if (message.getFiles() == null || message.getFiles().isEmpty()) {
+        if (!isReceipt(message.getSbd()) && (message.getFiles() == null || message.getFiles().isEmpty())) {
             throw new MissingFileException();
         }
 
-        if (ServiceIdentifier.DPO == message.getServiceIdentifier()) {
+        if (SBDUtil.isType(message.getSbd(), ARKIVMELDING)) {
             // Verify each file referenced in arkivmelding is uploaded
             List<String> arkivmeldingFiles = ArkivmeldingUtil.getFilenames(getArkivmelding(message));
             Set<String> messageFiles = message.getFiles().stream()

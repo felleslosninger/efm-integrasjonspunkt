@@ -11,12 +11,14 @@ public class AppReceiptFactory {
     public AppReceiptType from(ArkivmeldingKvitteringMessage receipt) {
         AppReceiptType appReceipt = new AppReceiptType();
         appReceipt.setType(receipt.getReceiptType());
-        receipt.getMessages().forEach(sm -> {
-            StatusMessageType statusMessageType = new StatusMessageType();
-            statusMessageType.setText(sm.getText());
-            statusMessageType.setCode(sm.getCode());
-            appReceipt.getMessage().add(statusMessageType);
-        });
+        if (receipt.getMessages() != null) {
+            receipt.getMessages().forEach(sm -> {
+                StatusMessageType statusMessageType = new StatusMessageType();
+                statusMessageType.setText(sm.getText());
+                statusMessageType.setCode(sm.getCode());
+                appReceipt.getMessage().add(statusMessageType);
+            });
+        }
         return appReceipt;
     }
 }
