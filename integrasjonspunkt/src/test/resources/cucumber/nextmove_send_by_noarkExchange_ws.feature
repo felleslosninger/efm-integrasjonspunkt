@@ -111,7 +111,7 @@ Feature: Receiving a BEST/EDU message by the noarkExchange WebService
         </noarksak>
     </Melding>
     """
-    And I call the Noark.Exchange WebService
+    And I call the noarkExchange WebService
     Then an upload to Altinn is initiated with:
     """
     <?xml version='1.0' encoding='UTF-8'?>

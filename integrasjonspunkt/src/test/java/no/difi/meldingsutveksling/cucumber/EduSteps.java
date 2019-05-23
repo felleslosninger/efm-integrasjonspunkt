@@ -35,7 +35,7 @@ public class EduSteps {
         messageOutHolder.get().setBody(payload);
     }
 
-    @Given("^I call the Noark.Exchange WebService$")
+    @Given("^I call the noarkExchange WebService$")
     public void iCallTheNoarkExchangeWebService() throws IOException {
         // Data to access the web service
         URL wsdlDocumentLocation = new URL(String.format("http://localhost:%d/noarkExchange?wsdl", port));
