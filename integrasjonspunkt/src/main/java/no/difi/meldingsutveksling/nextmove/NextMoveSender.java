@@ -25,6 +25,7 @@ public class NextMoveSender {
     private final CryptoMessagePersister cryptoMessagePersister;
     private final NextMoveMessageOutRepository messageRepo;
     private final MessageStatusFactory messageStatusFactory;
+    private final SBDUtil sbdUtil;
 
     @Transactional
     public void send(NextMoveOutMessage msg) throws NextMoveException {
@@ -36,7 +37,7 @@ public class NextMoveSender {
                     return new NextMoveRuntimeException(errorStr);
                 }).send(msg);
 
-        if (SBDUtil.isStatus(msg.getSbd())) {
+        if (sbdUtil.isStatus(msg.getSbd())) {
             return;
         }
 

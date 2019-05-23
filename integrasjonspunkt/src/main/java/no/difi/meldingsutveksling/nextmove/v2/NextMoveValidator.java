@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
@@ -30,7 +31,6 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
-import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isExpired;
 
 
 @Component
@@ -43,6 +43,7 @@ public class NextMoveValidator {
     private final Asserter asserter;
     private final CryptoMessagePersister cryptoMessagePersister;
     private final TimeToLiveHelper timeToLiveHelper;
+    private final SBDUtil sbdUtil;
 
     void validate(StandardBusinessDocument sbd) {
         sbd.getOptionalConversationId()
@@ -71,7 +72,7 @@ public class NextMoveValidator {
             throw new ReceiverDoNotAcceptDocumentStandard(standard, sbd.getProcess());
         }
 
-        if (isExpired(sbd)) {
+        if (sbdUtil.isExpired(sbd)) {
             timeToLiveHelper.registerErrorStatusAndMessage(sbd);
             throw new TimeToLiveException(sbd.getExpectedResponseDateTime());
         }
@@ -87,7 +88,7 @@ public class NextMoveValidator {
             throw new MissingFileException();
         }
 
-        if (isExpired(sbd)) {
+        if (sbdUtil.isExpired(sbd)) {
             timeToLiveHelper.registerErrorStatusAndMessage(sbd);
             throw new TimeToLiveException(sbd.getExpectedResponseDateTime());
         }

@@ -50,7 +50,6 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
-import static no.difi.meldingsutveksling.domain.sbdh.SBDUtil.isExpired;
 import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.*;
 
 @Component
@@ -72,6 +71,7 @@ public class NextMoveServiceBus {
     private final ConversationService conversationService;
     private final MessageStatusFactory messageStatusFactory;
     private final TimeToLiveHelper timeToLiveHelper;
+    private final SBDUtil sbdUtil;
 
     private IMessageReceiver messageReceiver;
 
@@ -86,7 +86,10 @@ public class NextMoveServiceBus {
                               ServiceBusPayloadConverter payloadConverter,
                               SBDReceiptFactory sbdReceiptFactory,
                               ServiceRegistryLookup serviceRegistryLookup,
-                              ConversationService conversationService, MessageStatusFactory messageStatusFactory, TimeToLiveHelper timeToLiveHelper) {
+                              ConversationService conversationService,
+                              MessageStatusFactory messageStatusFactory,
+                              TimeToLiveHelper timeToLiveHelper,
+                              SBDUtil sbdUtil) {
         this.props = props;
         this.nextMoveQueue = nextMoveQueue;
         this.serviceBusClient = serviceBusClient;
@@ -101,6 +104,7 @@ public class NextMoveServiceBus {
         this.conversationService = conversationService;
         this.messageStatusFactory = messageStatusFactory;
         this.timeToLiveHelper = timeToLiveHelper;
+        this.sbdUtil = sbdUtil;
     }
 
     @PostConstruct
@@ -163,11 +167,10 @@ public class NextMoveServiceBus {
                     messagesInQueue = false;
                     break;
                 }
-                if (isExpired(msg.get().getPayload().getSbd())) {
+                if (sbdUtil.isExpired(msg.get().getPayload().getSbd())) {
                     timeToLiveHelper.registerErrorStatusAndMessage(msg.get().getPayload().getSbd());
                     serviceBusClient.deleteMessage(msg.get());
-                }
-                else {
+                } else {
                     messages.add(msg.get());
                 }
             }
@@ -214,7 +217,7 @@ public class NextMoveServiceBus {
         try {
             log.debug(format("Received message on queue=%s with id=%s", serviceBusClient.getLocalQueuePath(), m.getMessageId()));
             ServiceBusPayload payload = payloadConverter.convert(m.getBody(), m.getMessageId());
-            if (isExpired(payload.getSbd())) {
+            if (sbdUtil.isExpired(payload.getSbd())) {
                 timeToLiveHelper.registerErrorStatusAndMessage(payload.getSbd());
             } else {
                 if (payload.getAsic() != null) {
@@ -229,7 +232,7 @@ public class NextMoveServiceBus {
     }
 
     private void handleSbd(StandardBusinessDocument sbd) {
-        if (SBDUtil.isStatus(sbd)) {
+        if (sbdUtil.isStatus(sbd)) {
             log.debug(String.format("Message with id=%s is a receipt", sbd.getConversationId()));
             StatusMessage msg = (StatusMessage) sbd.getAny();
             conversationService.registerStatus(sbd.getConversationId(), messageStatusFactory.getMessageStatus(msg.getStatus()))
@@ -254,10 +257,10 @@ public class NextMoveServiceBus {
     }
 
     private String getReceiverQueue(NextMoveOutMessage message) {
-        String prefix = NextMoveConsts.NEXTMOVE_QUEUE_PREFIX+message.getReceiverIdentifier();
+        String prefix = NextMoveConsts.NEXTMOVE_QUEUE_PREFIX + message.getReceiverIdentifier();
 
-        if (SBDUtil.isReceipt(message.getSbd())) {
-            return prefix+receiptTarget();
+        if (sbdUtil.isReceipt(message.getSbd())) {
+            return prefix + receiptTarget();
         }
 
         try {
@@ -265,7 +268,7 @@ public class NextMoveServiceBus {
                     message.getReceiverIdentifier(),
                     message.getSbd().getProcess());
 
-            return prefix+serviceRecord.getService().getEndpointUrl();
+            return prefix + serviceRecord.getService().getEndpointUrl();
         } catch (ServiceRegistryLookupException e) {
             throw new NextMoveRuntimeException(String.format("Unable to get service record for %s", message.getReceiverIdentifier()), e);
         }

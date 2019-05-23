@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.receipt.ConversationService;
@@ -11,14 +12,10 @@ import java.time.LocalDateTime;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class TimeToLiveHelper {
 
     private final ConversationService conversationService;
-
-    public TimeToLiveHelper(ConversationService conversationService) {
-        this.conversationService = conversationService;
-
-    }
 
     public void registerErrorStatusAndMessage(StandardBusinessDocument sbd) {
         String status = String.format("Levetid for melding: %s er utgått. Må sendes på nytt", sbd.getExpectedResponseDateTime());
