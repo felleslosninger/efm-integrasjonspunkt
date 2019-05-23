@@ -35,6 +35,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.*;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.Set;
 
@@ -197,5 +198,13 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
 
     public LogstashMarker createLogstashMarkers() {
         return getMessageInfo().createLogstashMarkers();
+    }
+
+    public ZonedDateTime getExpectedResponseDateTime() {
+        return getScope(ScopeType.CONVERSATION_ID)
+                .getScopeInformation()
+                .stream().findFirst()
+                .map(CorrelationInformation::getExpectedResponseDateTime)
+                .orElseThrow(()-> new NextMoveRuntimeException("Unable to get expectedResponseDateTime"));
     }
 }
