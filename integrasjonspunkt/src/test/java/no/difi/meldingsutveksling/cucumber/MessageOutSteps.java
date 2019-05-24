@@ -58,6 +58,13 @@ public class MessageOutSteps {
         expectedTable.diff(actualTable);
     }
 
+    @Then("^the sent message contains no files$")
+    @SneakyThrows
+    public void theSentMessageContainsNoFiles() {
+        Message message = messageSentHolder.get();
+        assertThat(message.getAttachments()).isEmpty();
+    }
+
     @Then("^the content of the file named \"([^\"]*)\" is:$")
     public void theContentOfTheFileNamedIs(String filename, String expectedContent) throws IOException {
         Message message = messageSentHolder.get();
