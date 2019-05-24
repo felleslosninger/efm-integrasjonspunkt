@@ -10,9 +10,8 @@ import static no.difi.meldingsutveksling.logging.MarkerFactory.receiverMarker;
 
 public class MshClient implements NoarkClient {
 
-    private String endpointURL;
-    private WebServiceTemplateFactory templateFactory;
-
+    private final String endpointURL;
+    private final WebServiceTemplateFactory templateFactory;
 
     public MshClient(String endpointURL) {
         this.endpointURL = endpointURL;
