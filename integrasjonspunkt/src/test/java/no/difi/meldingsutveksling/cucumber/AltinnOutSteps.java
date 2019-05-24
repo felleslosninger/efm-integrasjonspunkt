@@ -112,6 +112,6 @@ public class AltinnOutSteps {
         ZipContent zipContent = zipContentHolder.get();
         String jsonString = new String(IOUtils.toByteArray(zipContent.getFile(filename).getInputStream()));
         new JsonContentAssert(StandardBusinessDocument.class, jsonString)
-                .isEqualToJson(expectedContent);
+                .isStrictlyEqualToJson(expectedContent);
     }
 }

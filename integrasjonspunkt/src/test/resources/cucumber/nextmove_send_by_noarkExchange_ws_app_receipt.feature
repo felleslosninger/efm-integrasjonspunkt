@@ -14,9 +14,9 @@ Feature: Sending a BEST/EDU AppReceipt message by the noarkExchange WebService
     """
     <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <AppReceipt type="OK" xmlns="http://www.arkivverket.no/Noark/Exchange/types">
-        <message code="Recno">
-            <text>315890</text>
-        </message>
+      <message code="Recno" xmlns="">
+        <text>315890</text>
+      </message>
     </AppReceipt>
     """
     And I call the noarkExchange WebService
@@ -122,6 +122,11 @@ Feature: Sending a BEST/EDU AppReceipt message by the noarkExchange WebService
         }
       },
       "arkivmelding_kvittering" : {
+          "receiptType" : "OK",
+          "messages" : [ {
+            "code" : "Recno",
+            "text" : "315890"
+          } ]
       }
     }
     """

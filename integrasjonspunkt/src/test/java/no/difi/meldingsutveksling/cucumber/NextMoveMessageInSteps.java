@@ -97,7 +97,7 @@ public class NextMoveMessageInSteps {
         JsonContent<StandardBusinessDocument> actual = json.write(messageReceivedHolder.get().getSbd());
         assertThat(actual)
                 .withFailMessage(actual.getJson())
-                .isEqualToJson(expectedSBD);
+                .isStrictlyEqualToJson(expectedSBD);
     }
 
     @Then("^the received SBD matches the incoming SBD:$")
@@ -105,7 +105,7 @@ public class NextMoveMessageInSteps {
         JsonContent<StandardBusinessDocument> actual = json.write(messageInHolder.get().getSbd());
         assertThat(actual)
                 .withFailMessage(actual.getJson())
-                .isEqualToJson(json.write(messageReceivedHolder.get().getSbd()).getJson());
+                .isStrictlyEqualToJson(json.write(messageReceivedHolder.get().getSbd()).getJson());
     }
 
     @And("^I have an ASIC that contains a file named \"([^\"]*)\" with mimetype=\"([^\"]*)\":$")

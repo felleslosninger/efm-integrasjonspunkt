@@ -204,50 +204,44 @@ Feature: Sending a Next Move DPO message
     And the JSON content of the Altinn ZIP file named "sbd.json" is:
     """
     {
-        "standardBusinessDocumentHeader": {
-            "businessScope": {
-                "scope": [
-                    {
-                        "scopeInformation": [
-                            {
-                                "expectedResponseDateTime": "2019-05-10T00:31:52Z"
-                            }
-                        ],
-                        "identifier": "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
-                        "instanceIdentifier": "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
-                        "type": "ConversationId"
-                    }
-                ]
-            },
-            "documentIdentification": {
-                "creationDateAndTime": "2019-04-11T15:29:58.753+02:00",
-                "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
-                "standard": "urn:no:difi:arkivmelding:xsd::arkivmelding",
-                "type": "arkivmelding",
-                "typeVersion": "2.0"
-            },
-            "headerVersion": "1.0",
-            "receiver": [
-                {
-                    "identifier": {
-                        "authority": "iso6523-actorid-upis",
-                        "value": "0192:910075918"
-                    }
-                }
-            ],
-            "sender": [
-                {
-                    "identifier": {
-                        "authority": "iso6523-actorid-upis",
-                        "value": "0192:910077473"
-                    }
-                }
-            ]
+      "standardBusinessDocumentHeader" : {
+        "headerVersion" : "1.0",
+        "sender" : [ {
+          "identifier" : {
+            "value" : "0192:910077473",
+            "authority" : "iso6523-actorid-upis"
+          },
+          "contactInformation" : [ ]
+        } ],
+        "receiver" : [ {
+          "identifier" : {
+            "value" : "0192:910075918",
+            "authority" : "iso6523-actorid-upis"
+          },
+          "contactInformation" : [ ]
+        } ],
+        "documentIdentification" : {
+          "standard" : "urn:no:difi:arkivmelding:xsd::arkivmelding",
+          "typeVersion" : "2.0",
+          "instanceIdentifier" : "ff88849c-e281-4809-8555-7cd54952b916",
+          "type" : "arkivmelding",
+          "creationDateAndTime" : "2019-04-11T15:29:58.753+02:00"
         },
-        "arkivmelding": {
-          "sikkerhetsnivaa": 3,
-          "primaerDokumentNavn": "arkivmelding.xml"
+        "businessScope" : {
+          "scope" : [ {
+            "type" : "ConversationId",
+            "instanceIdentifier" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
+            "identifier" : "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
+            "scopeInformation" : [ {
+              "expectedResponseDateTime" : "2019-05-10T00:31:52Z"
+            } ]
+          } ]
         }
+      },
+      "arkivmelding" : {
+        "sikkerhetsnivaa" : 3,
+        "primaerDokumentNavn" : "arkivmelding.xml"
+      }
     }
     """
     And the sent message contains the following files:
