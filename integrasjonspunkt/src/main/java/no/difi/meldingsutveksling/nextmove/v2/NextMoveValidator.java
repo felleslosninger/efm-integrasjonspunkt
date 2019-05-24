@@ -32,6 +32,7 @@ import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.DocumentType.ARKIVMELDING;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
+import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
 
 
 @Component
@@ -74,7 +75,7 @@ public class NextMoveValidator {
         }
 
         if (sbdUtil.isExpired(sbd)) {
-            timeToLiveHelper.registerErrorStatusAndMessage(sbd);
+            timeToLiveHelper.registerErrorStatusAndMessage(sbd, serviceIdentifier, OUTGOING);
             throw new TimeToLiveException(sbd.getExpectedResponseDateTime());
         }
 
@@ -90,7 +91,7 @@ public class NextMoveValidator {
         }
 
         if (sbdUtil.isExpired(sbd)) {
-            timeToLiveHelper.registerErrorStatusAndMessage(sbd);
+            timeToLiveHelper.registerErrorStatusAndMessage(sbd, message.getServiceIdentifier(), message.getDirection());
             throw new TimeToLiveException(sbd.getExpectedResponseDateTime());
         }
 

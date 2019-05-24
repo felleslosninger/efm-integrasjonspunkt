@@ -24,6 +24,7 @@ import java.util.List;
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
+import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 
 @Slf4j
 @Component
@@ -79,7 +80,7 @@ public class DpoPolling {
             Audit.info(format("Downloaded message with id=%s", sbd.getConversationId()), sbd.createLogstashMarkers());
 
             if (sbdUtil.isExpired(sbd)) {
-                timeToLiveHelper.registerErrorStatusAndMessage(sbd);
+                timeToLiveHelper.registerErrorStatusAndMessage(sbd, DPO, INCOMING);
             } else if (sbdUtil.isNextMove(sbd)) {
                 altinnNextMoveMessageHandler.handleStandardBusinessDocument(sbd);
             } else {

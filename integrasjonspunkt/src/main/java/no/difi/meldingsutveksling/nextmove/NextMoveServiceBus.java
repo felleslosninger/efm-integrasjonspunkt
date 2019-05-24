@@ -50,6 +50,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
+import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.*;
 
 @Component
@@ -168,7 +169,7 @@ public class NextMoveServiceBus {
                     break;
                 }
                 if (sbdUtil.isExpired(msg.get().getPayload().getSbd())) {
-                    timeToLiveHelper.registerErrorStatusAndMessage(msg.get().getPayload().getSbd());
+                    timeToLiveHelper.registerErrorStatusAndMessage(msg.get().getPayload().getSbd(), DPE, INCOMING);
                     serviceBusClient.deleteMessage(msg.get());
                 } else {
                     messages.add(msg.get());
@@ -218,7 +219,7 @@ public class NextMoveServiceBus {
             log.debug(format("Received message on queue=%s with id=%s", serviceBusClient.getLocalQueuePath(), m.getMessageId()));
             ServiceBusPayload payload = payloadConverter.convert(m.getBody(), m.getMessageId());
             if (sbdUtil.isExpired(payload.getSbd())) {
-                timeToLiveHelper.registerErrorStatusAndMessage(payload.getSbd());
+                timeToLiveHelper.registerErrorStatusAndMessage(payload.getSbd(), DPE, INCOMING);
             } else {
                 if (payload.getAsic() != null) {
                     cryptoMessagePersister.write(payload.getSbd().getConversationId(), ASIC_FILE, Base64.getDecoder().decode(payload.getAsic()));
