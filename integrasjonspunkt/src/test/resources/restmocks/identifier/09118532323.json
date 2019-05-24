@@ -13,8 +13,8 @@
       "pemCertificate": "",
       "process": "urn:no:difi:profile:digitalpost:info:ver1.0",
       "documentTypes": [
-        "urn:no:difi.digitalpost:xsd:digital::digital_dpv",
-        "urn:no:difi.digitalpost:xsd:fysisk::print"
+        "urn:no:difi:digitalpost:xsd:digital::digital_dpv",
+        "urn:no:difi:digitalpost:xsd:fysisk::print"
       ],
       "service": {
         "identifier": "DPV",
@@ -27,8 +27,8 @@
       "pemCertificate": "",
       "process": "urn:no:difi:profile:digitalpost:vedtak:ver1.0",
       "documentTypes": [
-        "urn:no:difi.digitalpost:xsd:digital::digital_dpv",
-        "urn:no:difi.digitalpost:xsd:fysisk::print"
+        "urn:no:difi:digitalpost:xsd:digital::digital_dpv",
+        "urn:no:difi:digitalpost:xsd:fysisk::print"
       ],
       "service": {
         "identifier": "DPV",

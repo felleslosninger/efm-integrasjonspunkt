@@ -197,7 +197,7 @@ Feature: Sending a BEST/EDU message by the noarkExchange WebService
           "contactInformation" : [ ]
         } ],
         "documentIdentification" : {
-          "standard" : "urn:no:difi.arkivmelding:xsd::arkivmelding",
+          "standard" : "urn:no:difi:arkivmelding:xsd::arkivmelding",
           "typeVersion" : "2.0",
           "instanceIdentifier" : "19efbd4c-413d-4e2c-bbc5-257ef4a65b38",
           "type" : "arkivmelding",

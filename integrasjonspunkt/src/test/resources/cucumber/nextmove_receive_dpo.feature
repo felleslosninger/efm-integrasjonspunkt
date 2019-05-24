@@ -24,7 +24,7 @@ Feature: Receiving a Next Move DPO message
             "documentIdentification": {
                 "creationDateAndTime": "2019-04-11T15:29:58.753+02:00",
                 "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
-                "standard": "urn:no:difi.arkivmelding:xsd::arkivmelding",
+                "standard": "urn:no:difi:arkivmelding:xsd::arkivmelding",
                 "type": "arkivmelding",
                 "typeVersion": "2.0"
             },

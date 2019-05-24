@@ -15,8 +15,8 @@
       "postkasseAdresse": "dummy",
       "process": "urn:no:difi:profile:digitalpost:info:ver1.0",
       "documentTypes": [
-        "urn:no:difi.digitalpost:xsd:digital::digital",
-        "urn:no:difi.digitalpost:xsd:fysisk::print"
+        "urn:no:difi:digitalpost:xsd:digital::digital",
+        "urn:no:difi:digitalpost:xsd:fysisk::print"
       ],
       "service": {
         "identifier": "DPI",
@@ -31,8 +31,8 @@
       "postkasseAdresse": "dummy",
       "process": "urn:no:difi:profile:digitalpost:vedtak:ver1.0",
       "documentTypes": [
-        "urn:no:difi.digitalpost:xsd:digital::digital",
-        "urn:no:difi.digitalpost:xsd:fysisk::print"
+        "urn:no:difi:digitalpost:xsd:digital::digital",
+        "urn:no:difi:digitalpost:xsd:fysisk::print"
       ],
       "service": {
         "identifier": "DPI",

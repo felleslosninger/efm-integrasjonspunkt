@@ -15,7 +15,7 @@ Feature: Capabilities
           "serviceIdentifier" : "DPO",
           "documentTypes" : [ {
             "type" : "arkivmelding",
-            "standard" : "urn:no:difi.arkivmelding:xsd::arkivmelding"
+            "standard" : "urn:no:difi:arkivmelding:xsd::arkivmelding"
           } ]
         }, {
           "process" : "urn:no:difi:profile:arkivmelding:response:ver1.0",
@@ -25,17 +25,17 @@ Feature: Capabilities
             "standard" : "urn:no:difi:arkivmelding:xsd::arkivmelding_kvittering"
           }, {
             "type" : "status",
-            "standard" : "urn:no:difi.arkivmelding:xsd::status"
+            "standard" : "urn:no:difi:arkivmelding:xsd::status"
           }, {
             "type" : "feil",
-            "standard" : "urn:no:difi.arkivmelding:xsd::feil"
+            "standard" : "urn:no:difi:arkivmelding:xsd::feil"
           } ]
         }, {
           "process" : "urn:no:difi:profile:einnsyn:response:ver1.0",
           "serviceIdentifier" : "DPE",
           "documentTypes" : [ {
             "type" : "einnsyn_kvittering",
-            "standard" : "urn:no:difi.einnsyn:xsd::einnsyn_kvittering"
+            "standard" : "urn:no:difi:einnsyn:xsd::einnsyn_kvittering"
           }, {
             "type" : "status",
             "standard" : "urn:no:difi:eformidling:xsd::status"
@@ -58,7 +58,7 @@ Feature: Capabilities
         "serviceIdentifier" : "DPE",
         "documentTypes" : [ {
           "type" : "innsynskrav",
-          "standard" : "urn:no:difi.einnsyn:xsd:innsyn::innsynskrav"
+          "standard" : "urn:no:difi:einnsyn:xsd:innsyn::innsynskrav"
         } ]
       } ]
       }
@@ -81,10 +81,10 @@ Feature: Capabilities
           },
           "documentTypes" : [ {
             "type" : "digital",
-            "standard" : "urn:no:difi.digitalpost:xsd:digital::digital"
+            "standard" : "urn:no:difi:digitalpost:xsd:digital::digital"
           }, {
             "type" : "print",
-            "standard" : "urn:no:difi.digitalpost:xsd:fysisk::print"
+            "standard" : "urn:no:difi:digitalpost:xsd:fysisk::print"
           } ]
         }, {
           "process" : "urn:no:difi:profile:digitalpost:vedtak:ver1.0",
@@ -98,10 +98,10 @@ Feature: Capabilities
           },
           "documentTypes" : [ {
             "type" : "digital",
-            "standard" : "urn:no:difi.digitalpost:xsd:digital::digital"
+            "standard" : "urn:no:difi:digitalpost:xsd:digital::digital"
           }, {
             "type" : "print",
-            "standard" : "urn:no:difi.digitalpost:xsd:fysisk::print"
+            "standard" : "urn:no:difi:digitalpost:xsd:fysisk::print"
           } ]
         } ]
       }
