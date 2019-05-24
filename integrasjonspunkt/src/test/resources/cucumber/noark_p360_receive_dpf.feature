@@ -104,7 +104,7 @@ Feature: Receiving a DPF message and forward to Noark P360
     """
     <typ:PutMessageResponse xmlns:typ="http://www.arkivverket.no/Noark/Exchange/types">
         <!--Optional:-->
-        <result type="?">
+        <result type="OK">
            <!--Zero or more repetitions:-->
            <message code="?">
               <!--Optional:-->

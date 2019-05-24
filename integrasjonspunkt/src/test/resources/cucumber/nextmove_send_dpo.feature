@@ -3,6 +3,7 @@ Feature: Sending a Next Move DPO message
   Background:
     Given a "GET" request to "http://localhost:9099/identifier/910075918?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
     And a "GET" request to "http://localhost:9099/identifier/910077473?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
+    And a "GET" request to "http://localhost:9099/identifier/974720760?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/974720760.json"
 
   Scenario: As a user I want to send a DPO message
     Given I POST the following message:
@@ -380,5 +381,96 @@ Feature: Sending a Next Move DPO message
       } ],
       "first" : true,
       "numberOfElements" : 2
+    }
+    """
+
+  Scenario: As a user I want to receive a DPO receipt message
+    And Altinn prepares a message with the following SBD:
+    """
+    {
+        "standardBusinessDocumentHeader": {
+            "businessScope": {
+                "scope": [
+                    {
+                        "scopeInformation": [
+                            {
+                                "expectedResponseDateTime": "2019-05-10T00:31:52Z"
+                            }
+                        ],
+                        "identifier": "urn:no:difi:profile:arkivmelding:response:ver1.0",
+                        "instanceIdentifier": "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
+                        "type": "ConversationId"
+                    }
+                ]
+            },
+            "documentIdentification": {
+                "creationDateAndTime": "2019-04-11T15:29:58.753+02:00",
+                "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
+                "standard": "urn:no:difi:eformidling:xsd::status",
+                "type": "status",
+                "typeVersion": "2.0"
+            },
+            "headerVersion": "1.0",
+            "receiver": [
+                {
+                    "identifier": {
+                        "authority": "iso6523-actorid-upis",
+                        "value": "0192:910075918"
+                    }
+                }
+            ],
+            "sender": [
+                {
+                    "identifier": {
+                        "authority": "iso6523-actorid-upis",
+                        "value": "0192:910077473"
+                    }
+                }
+            ]
+        },
+        "status": {
+          "status": "LEVERT"
+        }
+    }
+    """
+    And Altinn sends the message
+    And the application checks for new DPO messages
+    And the message statuses for the conversation with id = "37efbd4c-413d-4e2c-bbc5-257ef4a65a56" are:
+    """
+    {
+      "content" : [ {
+        "statId" : 20,
+        "convId" : 12,
+        "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
+        "lastUpdate" : "2019-03-25T12:38:23",
+        "status" : "OPPRETTET"
+      }, {
+        "statId" : 21,
+        "convId" : 12,
+        "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
+        "lastUpdate" : "2019-03-25T12:38:23",
+        "status" : "SENDT"
+      }, {
+        "statId" : 24,
+        "convId" : 12,
+        "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
+        "lastUpdate" : "2019-03-25T12:38:23",
+        "status" : "LEVERT"
+      } ],
+      "totalPages" : 1,
+      "totalElements" : 3,
+      "last" : true,
+      "size" : 10,
+      "number" : 0,
+      "sort" : [ {
+        "direction" : "ASC",
+        "property" : "statId",
+        "ignoreCase" : false,
+        "nullHandling" : "NATIVE",
+        "ascending" : true,
+        "descending" : false
+      } ],
+      "first" : true,
+      "numberOfElements" : 3
     }
     """
