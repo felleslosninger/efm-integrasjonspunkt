@@ -79,7 +79,7 @@ public class DpoPolling {
             Audit.info(format("Downloaded message with id=%s", sbd.getConversationId()), sbd.createLogstashMarkers());
 
             if (isExpired(sbd)) {
-                timeToLiveHelper.registerErrorStatusAndMessage(sbd);
+                timeToLiveHelper.registerErrorStatusAndMessage(sbd, DPO);
             } else {
                 if (isNextMove(sbd)) {
                     altinnNextMoveMessageHandler.handleStandardBusinessDocument(sbd);

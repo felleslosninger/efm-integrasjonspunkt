@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -49,6 +50,7 @@ public class Conversation implements MessageInformable {
     private boolean pollable;
     private boolean finished;
     private boolean msh;
+    private ZonedDateTime expiry;
     private ConversationDirection direction;
     private ServiceIdentifier serviceIdentifier;
 
@@ -56,16 +58,14 @@ public class Conversation implements MessageInformable {
     @JoinColumn(name = "conv_id")
     private List<MessageStatus> messageStatuses;
 
-    Conversation() {
-    }
-
     private Conversation(String conversationId,
                          String messageReference,
                          String senderIdentifier,
                          String receiverIdentifier,
                          ConversationDirection direction,
                          String messageTitle,
-                         ServiceIdentifier serviceIdentifier) {
+                         ServiceIdentifier serviceIdentifier,
+                         ZonedDateTime expiry) {
         this.conversationId = conversationId;
         this.messageReference = messageReference;
         this.senderIdentifier = senderIdentifier;
@@ -74,6 +74,7 @@ public class Conversation implements MessageInformable {
         this.messageTitle = messageTitle;
         this.messageStatuses = Lists.newArrayList();
         this.serviceIdentifier = serviceIdentifier;
+        this.expiry = expiry;
         this.lastUpdate = LocalDateTime.now();
     }
 
@@ -93,20 +94,20 @@ public class Conversation implements MessageInformable {
                                   ConversationDirection direction,
                                   String messageTitle,
                                   ServiceIdentifier serviceIdentifier,
+                                  ZonedDateTime expiry,
                                   MessageStatus... statuses) {
-
-        return new Conversation(conversationId, messageReference, senderIdentifier, receiverIdentifier, direction, messageTitle, serviceIdentifier)
+        return new Conversation(conversationId, messageReference, senderIdentifier, receiverIdentifier, direction, messageTitle, serviceIdentifier, expiry)
                 .addMessageStatuses(statuses);
     }
 
 
     public static Conversation of(MessageInformable msg, MessageStatus... statuses) {
         return new Conversation(msg.getConversationId(), msg.getConversationId(), msg.getSenderIdentifier(), msg.getReceiverIdentifier(),
-                msg.getDirection(), "", msg.getServiceIdentifier())
+                msg.getDirection(), "", msg.getServiceIdentifier(), msg.getExpiry())
                 .addMessageStatuses(statuses);
     }
 
-    public static Conversation of(EDUCore eduCore, MessageStatus... statuses) {
+    public static Conversation of(EDUCore eduCore, ZonedDateTime expiry, MessageStatus... statuses) {
         String msgTitle = "";
         if (eduCore.getMessageType() == EDUCore.MessageType.EDU) {
             String jpInnholdXpath = "Melding/journpost/jpInnhold";
@@ -119,7 +120,7 @@ public class Conversation implements MessageInformable {
 
         return new Conversation(eduCore.getId(), eduCore.getMessageReference(),
                 eduCore.getSender().getIdentifier(), eduCore.getReceiver().getIdentifier(), ConversationDirection.OUTGOING,
-                msgTitle, eduCore.getServiceIdentifier() == DPE ? DPV : eduCore.getServiceIdentifier())
+                msgTitle, eduCore.getServiceIdentifier() == DPE ? DPV : eduCore.getServiceIdentifier(), expiry)
                 .addMessageStatuses(statuses);
     }
 

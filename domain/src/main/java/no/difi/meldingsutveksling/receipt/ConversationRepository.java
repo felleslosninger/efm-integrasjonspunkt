@@ -11,6 +11,7 @@ import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,6 +33,8 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
     List<Conversation> findByReceiverIdentifierAndDirection(String receiverIdentifier, ConversationDirection direction);
 
     List<Conversation> findByDirection(ConversationDirection direction);
+
+    List<Conversation> findByExpiryLessThanEqualAndFinished(ZonedDateTime zonedDateTime, Boolean finished);
 
     Long countByPollable(boolean pollable);
 
