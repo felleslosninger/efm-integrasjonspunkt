@@ -48,8 +48,7 @@ Feature: Receiving a Next Move DPE message
             ]
         },
         "innsynskrav": {
-          "securityLevel": 3,
-          "dpoField": "foo"
+          "securityLevel": 3
         }
     }
     """
