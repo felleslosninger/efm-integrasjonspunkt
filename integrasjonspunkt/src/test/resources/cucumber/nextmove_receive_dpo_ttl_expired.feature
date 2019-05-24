@@ -74,11 +74,18 @@ Feature: Receiving an expired Next Move DPO message
         "convId" : 1,
         "conversationId" : "2507fcb8-6543-4c5f-ac06-f5df75bb677e",
         "lastUpdate" : "2019-03-25T12:38:23",
-        "status" : "LEVETID_UTLOPT"
+        "status" : "OPPRETTET"
+      }, {
+        "statId" : 2,
+        "convId" : 1,
+        "conversationId" : "2507fcb8-6543-4c5f-ac06-f5df75bb677e",
+        "lastUpdate" : "2019-03-25T12:38:23",
+        "status" : "LEVETID_UTLOPT",
+        "description" : "Levetid for melding: 2019-03-25T11:00Z er utgått. Må sendes på nytt"
       } ],
-      "last" : true,
+      "totalElements" : 2,
       "totalPages" : 1,
-      "totalElements" : 1,
+      "last" : true,
       "size" : 10,
       "number" : 0,
       "sort" : [ {
@@ -90,6 +97,6 @@ Feature: Receiving an expired Next Move DPO message
         "descending" : false
       } ],
       "first" : true,
-      "numberOfElements" : 1
+      "numberOfElements" : 2
     }
     """
