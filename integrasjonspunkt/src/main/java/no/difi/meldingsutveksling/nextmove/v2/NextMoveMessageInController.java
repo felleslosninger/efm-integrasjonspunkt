@@ -32,6 +32,7 @@ import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.io.IOException;
+import java.time.Clock;
 import java.time.ZonedDateTime;
 
 import static java.lang.String.format;
@@ -58,6 +59,7 @@ public class NextMoveMessageInController {
     private final InternalQueue internalQueue;
     private final SBDReceiptFactory receiptFactory;
     private final MessageStatusFactory messageStatusFactory;
+    private final Clock clock;
 
     @GetMapping
     @ApiOperation(value = "Get all incoming messages")
@@ -84,7 +86,7 @@ public class NextMoveMessageInController {
         NextMoveInMessage message = messageRepo.peek(input)
                 .orElseThrow(NoContentException::new);
 
-        messageRepo.save(message.setLockTimeout(ZonedDateTime.now()
+        messageRepo.save(message.setLockTimeout(ZonedDateTime.now(clock)
                 .plusMinutes(props.getNextmove().getLockTimeoutMinutes())));
 
         log.info(markerFrom(message), "Conversation with id={} locked", message.getConversationId());
