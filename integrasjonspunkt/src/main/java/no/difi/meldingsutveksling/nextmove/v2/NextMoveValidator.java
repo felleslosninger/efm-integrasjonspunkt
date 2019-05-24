@@ -72,7 +72,7 @@ public class NextMoveValidator {
         }
 
         if (isExpired(sbd)) {
-            timeToLiveHelper.registerErrorStatusAndMessage(sbd, serviceRecord.getServiceIdentifier());
+            timeToLiveHelper.registerErrorStatusAndMessage(sbd);
             throw new TimeToLiveException(sbd.getExpectedResponseDateTime());
         }
 
@@ -88,7 +88,7 @@ public class NextMoveValidator {
         }
 
         if (isExpired(sbd)) {
-            timeToLiveHelper.registerErrorStatusAndMessage(sbd, message.getServiceIdentifier());
+            timeToLiveHelper.registerErrorStatusAndMessage(sbd);
             throw new TimeToLiveException(sbd.getExpectedResponseDateTime());
         }
 

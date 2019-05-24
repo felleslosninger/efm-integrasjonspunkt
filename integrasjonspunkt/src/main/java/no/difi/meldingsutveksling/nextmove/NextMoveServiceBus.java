@@ -164,7 +164,7 @@ public class NextMoveServiceBus {
                     break;
                 }
                 if (isExpired(msg.get().getPayload().getSbd())) {
-                    timeToLiveHelper.registerErrorStatusAndMessage(msg.get().getPayload().getSbd(), DPE);
+                    timeToLiveHelper.registerErrorStatusAndMessage(msg.get().getPayload().getSbd());
                     serviceBusClient.deleteMessage(msg.get());
                 }
                 else {
@@ -215,7 +215,7 @@ public class NextMoveServiceBus {
             log.debug(format("Received message on queue=%s with id=%s", serviceBusClient.getLocalQueuePath(), m.getMessageId()));
             ServiceBusPayload payload = payloadConverter.convert(m.getBody(), m.getMessageId());
             if (isExpired(payload.getSbd())) {
-                timeToLiveHelper.registerErrorStatusAndMessage(payload.getSbd(), DPE);
+                timeToLiveHelper.registerErrorStatusAndMessage(payload.getSbd());
             } else {
                 if (payload.getAsic() != null) {
                     cryptoMessagePersister.write(payload.getSbd().getConversationId(), ASIC_FILE, Base64.getDecoder().decode(payload.getAsic()));
