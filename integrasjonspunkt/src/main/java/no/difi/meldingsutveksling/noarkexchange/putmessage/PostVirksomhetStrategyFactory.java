@@ -37,6 +37,7 @@ public class PostVirksomhetStrategyFactory implements MessageStrategyFactory {
                 .withPassword(properties.getDpv().getPassword())
                 .withSystemUserCode(properties.getDpv().getUsername())
                 .withSender(infoRecord.getOrganizationName())
+                .withAllowForwarding(properties.getDpv().isAllowForwarding())
                 .withNotifyEmail(properties.getDpv().isNotifyEmail())
                 .withNotifySms(properties.getDpv().isNotifySms());
 

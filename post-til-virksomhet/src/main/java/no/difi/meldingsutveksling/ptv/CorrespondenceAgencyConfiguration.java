@@ -12,6 +12,7 @@ public class CorrespondenceAgencyConfiguration {
     private String sender;
     private String nextmoveFiledir;
     private String endpointUrl;
+    private boolean allowForwarding;
 
     private CorrespondenceAgencyConfiguration() {
     }
@@ -54,6 +55,10 @@ public class CorrespondenceAgencyConfiguration {
 
     public String getEndpointUrl() {
         return endpointUrl;
+    }
+
+    public boolean isAllowForwarding() {
+        return allowForwarding;
     }
 
     public static class Builder {
@@ -111,6 +116,11 @@ public class CorrespondenceAgencyConfiguration {
 
         public Builder withEndpointUrl(String endpointUrl) {
             correspondenceAgencyConfiguration.endpointUrl = endpointUrl;
+            return this;
+        }
+
+        public Builder withAllowForwarding(boolean allowForwarding) {
+            correspondenceAgencyConfiguration.allowForwarding = allowForwarding;
             return this;
         }
 
