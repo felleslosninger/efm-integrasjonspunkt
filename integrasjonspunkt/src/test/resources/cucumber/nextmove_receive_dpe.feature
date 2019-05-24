@@ -80,3 +80,42 @@ Feature: Receiving a Next Move DPE message
     """
     Before the law sits a gatekeeper.
     """
+    And the message statuses for the conversation with id = "37efbd4c-413d-4e2c-bbc5-257ef4a65a45" are:
+    """
+    {
+      "content" : [ {
+        "statId" : 1,
+        "convId" : 1,
+        "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a45",
+        "lastUpdate" : "2019-03-25T12:38:23",
+        "status" : "OPPRETTET"
+      }, {
+        "statId" : 2,
+        "convId" : 1,
+        "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a45",
+        "lastUpdate" : "2019-03-25T12:38:23",
+        "status" : "INNKOMMENDE_MOTTATT"
+      }, {
+        "statId" : 3,
+        "convId" : 1,
+        "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a45",
+        "lastUpdate" : "2019-03-25T12:38:23",
+        "status" : "INNKOMMENDE_LEVERT"
+      } ],
+      "last" : true,
+      "totalPages" : 1,
+      "totalElements" : 3,
+      "size" : 10,
+      "number" : 0,
+      "sort" : [ {
+        "direction" : "ASC",
+        "property" : "statId",
+        "ignoreCase" : false,
+        "nullHandling" : "NATIVE",
+        "ascending" : true,
+        "descending" : false
+      } ],
+      "first" : true,
+      "numberOfElements" : 3
+    }
+    """

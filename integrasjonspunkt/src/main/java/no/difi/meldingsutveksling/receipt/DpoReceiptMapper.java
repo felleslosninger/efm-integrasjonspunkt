@@ -1,7 +1,9 @@
 package no.difi.meldingsutveksling.receipt;
 
+import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 
+@UtilityClass
 public class DpoReceiptMapper {
 
     public static ReceiptStatus from(Kvittering kvittering) {

@@ -25,7 +25,7 @@ Feature: Receiving a DPF message and forward to Noark P360
               "orgnr": "910229028",
               "fnr": null
           },
-          "id": "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
+          "id": "d4751d30-c9e5-4648-9612-956cdb5e53bc",
           "tittel": "Test4 - liten fil - 22.04.16",
           "date": 1553183240681,
           "metadataFraAvleverendeSystem": {
@@ -83,7 +83,7 @@ Feature: Receiving a DPF message and forward to Noark P360
           "forsendelseType": null,
           "eksternRef": "bb8323b9-1023-4046-b620-63c4f9120c56",
           "lenker": [],
-          "downloadUrl": "/mottaker/forsendelse/81264cfa-1ba5-4fb5-a95d-48c824ed3bbb"
+          "downloadUrl": "/mottaker/forsendelse/d4751d30-c9e5-4648-9612-956cdb5e53bc"
       }
     ]
     """
@@ -96,7 +96,7 @@ Feature: Receiving a DPF message and forward to Noark P360
     """
     Before the law sits a gatekeeper.
     """
-    And Fiks has the message available
+    And Fiks has the message with conversationId="d4751d30-c9e5-4648-9612-956cdb5e53bc" available
 
   Scenario: As Noark p360 I want to receive a DPF message
 
@@ -119,11 +119,11 @@ Feature: Receiving a DPF message and forward to Noark P360
     <?xml version="1.0" encoding="UTF-8"?>
     <ns3:PutMessageRequest xmlns:ns3="http://www.arkivverket.no/Noark/Exchange/types">
         <envelope
-            contentNamespace="http://www.arkivverket.no/Noark4-1-WS-WD/types" conversationId="81264cfa-1ba5-4fb5-a95d-48c824ed3bbb">
+            contentNamespace="http://www.arkivverket.no/Noark4-1-WS-WD/types" conversationId="d4751d30-c9e5-4648-9612-956cdb5e53bc">
             <sender>
                 <orgnr>910229028</orgnr>
                 <name>Kontoret for voldsoffererstatning</name>
-                <ref>81264cfa-1ba5-4fb5-a95d-48c824ed3bbb</ref>
+                <ref>d4751d30-c9e5-4648-9612-956cdb5e53bc</ref>
             </sender>
             <receiver>
                 <orgnr>910229028</orgnr>
@@ -199,5 +199,44 @@ Feature: Receiving a DPF message and forward to Noark P360
     And the content of the file named "before_the_law.txt" is:
     """
     Before the law sits a gatekeeper.
+    """
+    And the message statuses for the conversation with id = "d4751d30-c9e5-4648-9612-956cdb5e53bc" are:
+    """
+    {
+      "content" : [ {
+        "statId" : 1,
+        "convId" : 1,
+        "conversationId" : "d4751d30-c9e5-4648-9612-956cdb5e53bc",
+        "lastUpdate" : "2019-03-25T12:38:23",
+        "status" : "OPPRETTET"
+      }, {
+        "statId" : 2,
+        "convId" : 1,
+        "conversationId" : "d4751d30-c9e5-4648-9612-956cdb5e53bc",
+        "lastUpdate" : "2019-03-25T12:38:23",
+        "status" : "INNKOMMENDE_MOTTATT"
+      }, {
+        "statId" : 3,
+        "convId" : 1,
+        "conversationId" : "d4751d30-c9e5-4648-9612-956cdb5e53bc",
+        "lastUpdate" : "2019-03-25T12:38:23",
+        "status" : "INNKOMMENDE_LEVERT"
+      } ],
+      "last" : true,
+      "totalPages" : 1,
+      "totalElements" : 3,
+      "size" : 10,
+      "number" : 0,
+      "sort" : [ {
+        "direction" : "ASC",
+        "property" : "statId",
+        "ignoreCase" : false,
+        "nullHandling" : "NATIVE",
+        "ascending" : true,
+        "descending" : false
+      } ],
+      "first" : true,
+      "numberOfElements" : 3
+    }
     """
 

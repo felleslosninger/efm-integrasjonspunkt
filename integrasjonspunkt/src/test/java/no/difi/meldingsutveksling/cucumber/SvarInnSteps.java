@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.cucumber;
 
 import cucumber.api.java.After;
 import cucumber.api.java.en.And;
-import cucumber.api.java.en.Given;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -25,8 +24,8 @@ public class SvarInnSteps {
         messageInHolder.set(new Message().setBody(body));
     }
 
-    @And("^Fiks has the message available$")
-    public void fiksHasTheMessageAvailable() {
+    @And("^Fiks has the message with conversationId=\"([^\"]*)\" available$")
+    public void fiksHasTheMessageWithConversationIdAvailable(String id) {
         mockServerRestSteps.aRequestToWillRespondWithStatusAndTheFollowing(
                 HttpMethod.GET.name(),
                 "/mottaker/hentNyeForsendelser",
@@ -37,7 +36,7 @@ public class SvarInnSteps {
 
         mockServerRestSteps.aRequestToWillRespondWithStatus(
                 HttpMethod.GET.name(),
-                "/mottaker/forsendelse/81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
+                "/mottaker/forsendelse/" + id,
                 HttpStatus.OK.value()
         );
 
@@ -48,7 +47,7 @@ public class SvarInnSteps {
 
         mockServerRestSteps.aRequestToWillRespondWithStatusAndTheFollowing(
                 HttpMethod.POST.name(),
-                "/kvitterMottak/forsendelse/81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
+                "/kvitterMottak/forsendelse/" + id,
                 HttpStatus.OK.value(),
                 MediaType.APPLICATION_JSON_VALUE,
                 ""

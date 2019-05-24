@@ -96,7 +96,7 @@ Feature: Receiving a Next Move DPF message
     """
     Before the law sits a gatekeeper.
     """
-    And Fiks has the message available
+    And Fiks has the message with conversationId="81264cfa-1ba5-4fb5-a95d-48c824ed3bbb" available
     And the application checks for new DPF messages
 
   Scenario: As a user I want to receive a DPF message
@@ -181,5 +181,44 @@ Feature: Receiving a Next Move DPF message
     And I have an ASIC that contains a file named "before_the_law.txt" with mimetype="text/plain":
     """
     Before the law sits a gatekeeper.
+    """
+    And the message statuses for the conversation with id = "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb" are:
+    """
+    {
+      "content" : [ {
+        "statId" : 1,
+        "convId" : 1,
+        "conversationId" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
+        "lastUpdate" : "2019-03-25T12:38:23",
+        "status" : "OPPRETTET"
+      }, {
+        "statId" : 2,
+        "convId" : 1,
+        "conversationId" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
+        "lastUpdate" : "2019-03-25T12:38:23",
+        "status" : "INNKOMMENDE_MOTTATT"
+      }, {
+        "statId" : 3,
+        "convId" : 1,
+        "conversationId" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
+        "lastUpdate" : "2019-03-25T12:38:23",
+        "status" : "INNKOMMENDE_LEVERT"
+      } ],
+      "last" : true,
+      "totalPages" : 1,
+      "totalElements" : 3,
+      "size" : 10,
+      "number" : 0,
+      "sort" : [ {
+        "direction" : "ASC",
+        "property" : "statId",
+        "ignoreCase" : false,
+        "nullHandling" : "NATIVE",
+        "ascending" : true,
+        "descending" : false
+      } ],
+      "first" : true,
+      "numberOfElements" : 3
+    }
     """
 
