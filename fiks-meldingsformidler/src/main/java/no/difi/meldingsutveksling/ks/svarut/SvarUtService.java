@@ -71,6 +71,10 @@ public class SvarUtService {
 
     public MessageStatus getMessageReceipt(final Conversation conversation) {
         final String forsendelseId = client.getForsendelseId(getFiksUtUrl(), conversation.getConversationId());
+        return getMessageReceipt(forsendelseId);
+    }
+
+    public MessageStatus getMessageReceipt(String forsendelseId) {
         if (forsendelseId != null) {
             final ForsendelseStatus forsendelseStatus = client.getForsendelseStatus(getFiksUtUrl(), forsendelseId);
             return fiksStatusMapper.mapFrom(forsendelseStatus);

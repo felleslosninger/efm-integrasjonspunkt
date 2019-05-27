@@ -12,6 +12,8 @@ import no.difi.meldingsutveksling.KeystoreProvider;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dpi.SikkerDigitalPostKlientFactory;
+import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
+import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceClientImpl;
 import no.difi.meldingsutveksling.nextmove.ServiceBusRestTemplate;
 import no.difi.meldingsutveksling.noark.NoarkClientFactory;
@@ -273,6 +275,8 @@ public class CucumberStepsConfiguration {
     @MockBean public InternalQueue internalQueue;
     @MockBean public ServiceBusRestTemplate serviceBusRestTemplate;
     @MockBean public SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory;
+    @MockBean public SvarUtConnectionCheck svarUtConnectionCheck;
+    @MockBean public SvarInnConnectionCheck svarInnConnectionCheck;
 
     @Before
     @SneakyThrows

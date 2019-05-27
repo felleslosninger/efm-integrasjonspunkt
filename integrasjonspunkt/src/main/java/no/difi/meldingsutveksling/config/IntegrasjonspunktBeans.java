@@ -3,6 +3,10 @@ package no.difi.meldingsutveksling.config;
 import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dpi.*;
+import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
+import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
+import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
+import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.lang.KeystoreProviderException;
 import no.difi.meldingsutveksling.mail.MailClient;
 import no.difi.meldingsutveksling.noarkexchange.MessageSender;
@@ -28,6 +32,7 @@ import no.difi.vefa.peppol.security.util.EmptyCertificateValidator;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -178,6 +183,18 @@ public class IntegrasjonspunktBeans {
                                                            ForsendelseHandlerFactory forsendelseHandlerFactory,
                                                            DpiReceiptMapper dpiReceiptMapper) {
         return new MeldingsformidlerClient(properties.getDpi(), sikkerDigitalPostKlientFactory, forsendelseHandlerFactory, dpiReceiptMapper);
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
+    public SvarInnConnectionCheck svarInnConnectionCheck(SvarInnClient svarInnClient) {
+        return new SvarInnConnectionCheck(svarInnClient);
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
+    public SvarUtConnectionCheck svarUtConnectionCheck(SvarUtService svarUtService) {
+        return new SvarUtConnectionCheck(svarUtService);
     }
 }
 

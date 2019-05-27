@@ -40,7 +40,12 @@ public class SBDUtil {
     }
 
     public boolean isExpired(StandardBusinessDocument sbd) {
-        ZonedDateTime expectedResponseDateTime = sbd.getExpectedResponseDateTime();
+        return sbd.getExpectedResponseDateTime()
+                .map(this::isExpired)
+                .orElse(false);
+    }
+
+    public boolean isExpired(ZonedDateTime expectedResponseDateTime) {
         ZonedDateTime currentDateTime = ZonedDateTime.now(clock);
         return currentDateTime.isAfter(expectedResponseDateTime);
     }
