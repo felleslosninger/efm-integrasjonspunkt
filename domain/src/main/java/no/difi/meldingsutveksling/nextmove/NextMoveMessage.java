@@ -9,6 +9,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.hibernate.annotations.DiscriminatorOptions;
 
 import javax.persistence.*;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -64,5 +65,10 @@ abstract class NextMoveMessage extends AbstractEntity<Long> implements MessageIn
             throw new NextMoveRuntimeException("SBD.any not instance of BusinessMessage");
         }
         return (BusinessMessage) getSbd().getAny();
+    }
+
+    @Override
+    public ZonedDateTime getExpiry() {
+        return getSbd().getExpectedResponseDateTime();
     }
 }
