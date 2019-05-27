@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.v2.ContentDisposition;
+import org.springframework.boot.test.json.JsonContentAssert;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
@@ -148,4 +149,17 @@ public class NextMoveMessageOutSteps {
                 .withFailMessage(response.toString())
                 .isEqualTo(HttpStatus.OK);
     }
+
+    @Given("^I send the message and get the following error response:$")
+    public void iSendTheMessageAndGetTheFollowingErrorResponse(String body) {
+        this.response = testRestTemplate.exchange(
+                "/api/messages/out/{conversationId}",
+                HttpMethod.POST, new HttpEntity(null),
+                String.class,
+                messageOutHolder.get().getSbd().getConversationId());
+
+        new JsonContentAssert(String.class, response.getBody())
+                .isStrictlyEqualToJson(body);
+    }
+
 }

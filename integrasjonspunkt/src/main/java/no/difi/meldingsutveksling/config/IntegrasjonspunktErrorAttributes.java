@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.config;
 
+import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.exceptions.ErrorDescriber;
 import org.springframework.boot.autoconfigure.web.DefaultErrorAttributes;
 import org.springframework.core.Ordered;
@@ -11,16 +12,22 @@ import org.springframework.web.context.request.RequestAttributes;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import java.time.Clock;
+import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
+@RequiredArgsConstructor
 public class IntegrasjonspunktErrorAttributes extends DefaultErrorAttributes {
+
+    private final Clock clock;
 
     @Override
     public Map<String, Object> getErrorAttributes(RequestAttributes requestAttributes, boolean includeStackTrace) {
         final Map<String, Object> errorAttributes = super.getErrorAttributes(requestAttributes, includeStackTrace);
+        errorAttributes.put("timestamp", ZonedDateTime.now(clock));
 
         final Throwable error = super.getError(requestAttributes);
 

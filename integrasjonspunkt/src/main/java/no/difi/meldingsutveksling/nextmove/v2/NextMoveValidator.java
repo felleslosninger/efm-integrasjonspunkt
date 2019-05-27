@@ -74,10 +74,12 @@ public class NextMoveValidator {
             throw new ReceiverDoNotAcceptDocumentStandard(standard, sbd.getProcess());
         }
 
-        if (sbdUtil.isExpired(sbd)) {
-            timeToLiveHelper.registerErrorStatusAndMessage(sbd, serviceIdentifier, OUTGOING);
-            throw new TimeToLiveException(sbd.getExpectedResponseDateTime());
-        }
+        sbd.getExpectedResponseDateTime().ifPresent(expectedResponseDateTime -> {
+            if (sbdUtil.isExpired(sbd)) {
+                timeToLiveHelper.registerErrorStatusAndMessage(sbd, serviceIdentifier, OUTGOING);
+                throw new TimeToLiveException(expectedResponseDateTime);
+            }
+        });
 
         Class<?> group = ValidationGroupFactory.toServiceIdentifier(serviceIdentifier);
         asserter.isValid(sbd.getAny(), group != null ? new Class<?>[]{group} : new Class<?>[0]);
@@ -90,10 +92,12 @@ public class NextMoveValidator {
             throw new MissingFileException();
         }
 
-        if (sbdUtil.isExpired(sbd)) {
-            timeToLiveHelper.registerErrorStatusAndMessage(sbd, message.getServiceIdentifier(), message.getDirection());
-            throw new TimeToLiveException(sbd.getExpectedResponseDateTime());
-        }
+        sbd.getExpectedResponseDateTime().ifPresent(expectedResponseDateTime -> {
+            if (sbdUtil.isExpired(sbd)) {
+                timeToLiveHelper.registerErrorStatusAndMessage(sbd, message.getServiceIdentifier(), message.getDirection());
+                throw new TimeToLiveException(expectedResponseDateTime);
+            }
+        });
 
         if (sbdUtil.isType(message.getSbd(), ARKIVMELDING)) {
             // Verify each file referenced in arkivmelding is uploaded

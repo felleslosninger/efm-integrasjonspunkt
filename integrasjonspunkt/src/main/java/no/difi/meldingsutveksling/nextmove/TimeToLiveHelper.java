@@ -5,10 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.springframework.stereotype.Component;
+
+import java.time.ZonedDateTime;
 
 @Component
 @Slf4j
@@ -19,33 +22,40 @@ public class TimeToLiveHelper {
     private final MessageStatusFactory messageStatusFactory;
 
     public void registerErrorStatusAndMessage(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier, ConversationDirection direction) {
-        String status = String.format("Levetid for melding: %s er utgått. Må sendes på nytt", sbd.getExpectedResponseDateTime());
-        conversationService.registerConversation(new MessageInformable() {
-            @Override
-            public String getConversationId() {
-                return sbd.getConversationId();
-            }
+        sbd.getExpectedResponseDateTime().ifPresent(p -> {
+            String status = String.format("Levetid for melding: %s er utgått. Må sendes på nytt", p);
+            Conversation conversation = conversationService.registerConversation(new MessageInformable() {
+                @Override
+                public String getConversationId() {
+                    return sbd.getConversationId();
+                }
 
-            @Override
-            public String getSenderIdentifier() {
-                return sbd.getSenderIdentifier();
-            }
+                @Override
+                public String getSenderIdentifier() {
+                    return sbd.getSenderIdentifier();
+                }
 
-            @Override
-            public String getReceiverIdentifier() {
-                return sbd.getReceiverIdentifier();
-            }
+                @Override
+                public String getReceiverIdentifier() {
+                    return sbd.getReceiverIdentifier();
+                }
 
-            @Override
-            public ConversationDirection getDirection() {
-                return direction;
-            }
+                @Override
+                public ConversationDirection getDirection() {
+                    return direction;
+                }
 
-            @Override
-            public ServiceIdentifier getServiceIdentifier() {
-                return serviceIdentifier;
-            }
+                @Override
+                public ServiceIdentifier getServiceIdentifier() {
+                    return serviceIdentifier;
+                }
+
+                @Override
+                public ZonedDateTime getExpiry() {
+                    return p;
+                }
+            });
+            conversationService.registerStatus(conversation.getConversationId(), messageStatusFactory.getMessageStatus(ReceiptStatus.LEVETID_UTLOPT, status));
         });
-        conversationService.registerStatus(sbd.getConversationId(), messageStatusFactory.getMessageStatus(ReceiptStatus.LEVETID_UTLOPT, status));
     }
 }
