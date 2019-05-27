@@ -50,7 +50,7 @@ Feature: Sending a Next Move DPE message
         },
         "innsynskrav" : {
           "orgnr" : "98765432",
-          "email" : "doofenshmirtz@evil.inc"
+          "epost" : "doofenshmirtz@evil.inc"
         }
     }
     """
@@ -100,7 +100,7 @@ Feature: Sending a Next Move DPE message
         },
         "innsynskrav" : {
           "orgnr" : "98765432",
-          "email" : "doofenshmirtz@evil.inc"
+          "epost" : "doofenshmirtz@evil.inc"
         }
       },
       "asic" : "content is hidden"
