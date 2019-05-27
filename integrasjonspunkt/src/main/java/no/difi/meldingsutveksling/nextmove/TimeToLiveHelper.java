@@ -5,10 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.springframework.stereotype.Component;
+
+import java.time.ZonedDateTime;
 
 @Component
 @Slf4j
@@ -21,7 +24,7 @@ public class TimeToLiveHelper {
     public void registerErrorStatusAndMessage(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier, ConversationDirection direction) {
         sbd.getExpectedResponseDateTime().ifPresent(p -> {
             String status = String.format("Levetid for melding: %s er utgått. Må sendes på nytt", p);
-            conversationService.registerConversation(new MessageInformable() {
+            Conversation conversation = conversationService.registerConversation(new MessageInformable() {
                 @Override
                 public String getConversationId() {
                     return sbd.getConversationId();
@@ -46,8 +49,13 @@ public class TimeToLiveHelper {
                 public ServiceIdentifier getServiceIdentifier() {
                     return serviceIdentifier;
                 }
+
+                @Override
+                public ZonedDateTime getExpiry() {
+                    return p;
+                }
             });
-            conversationService.registerStatus(sbd.getConversationId(), messageStatusFactory.getMessageStatus(ReceiptStatus.LEVETID_UTLOPT, status));
+            conversationService.registerStatus(conversation.getConversationId(), messageStatusFactory.getMessageStatus(ReceiptStatus.LEVETID_UTLOPT, status));
         });
     }
 }
