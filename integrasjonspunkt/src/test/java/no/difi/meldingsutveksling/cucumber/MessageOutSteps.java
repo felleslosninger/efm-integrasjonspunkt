@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.cucumber;
 
 import cucumber.api.DataTable;
+import cucumber.api.java.After;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,12 @@ public class MessageOutSteps {
 
     private final Holder<Message> messageOutHolder;
     private final Holder<Message> messageSentHolder;
+
+    @After
+    public void after() {
+        messageOutHolder.reset();
+        messageSentHolder.reset();
+    }
 
     @Given("^the sender is \"([^\"]*)\"")
     public void givenTheSenderIs(String orgnr) {
