@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.MultipartFileToLargeException;
+import no.difi.meldingsutveksling.exceptions.TimeToLiveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,7 +43,7 @@ public class NextMoveMessageOutController {
             @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
             @ApiResponse(code = 400, message = "Bad request", response = String.class)
     })
-    @Transactional
+    @Transactional(dontRollbackOn = TimeToLiveException.class)
     public StandardBusinessDocument createAndSendMessage(
             @ApiParam(name = "SBD", value = "Standard Business Document to send", required = true)
             @RequestParam("sbd") @NotNull @Valid StandardBusinessDocument sbd,
@@ -73,7 +74,7 @@ public class NextMoveMessageOutController {
             @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
             @ApiResponse(code = 400, message = "Bad request", response = String.class)
     })
-    @Transactional
+    @Transactional(dontRollbackOn = TimeToLiveException.class)
     public StandardBusinessDocument createMessage(
             @ApiParam(name = "SBD", value = "Standard Business Document to send", required = true)
             @Valid @RequestBody StandardBusinessDocument sbd) {
@@ -127,7 +128,7 @@ public class NextMoveMessageOutController {
             @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
             @ApiResponse(code = 400, message = "Bad request", response = String.class)
     })
-    @Transactional
+    @Transactional(dontRollbackOn = TimeToLiveException.class)
     public void sendMessage(@PathVariable("conversationId") String conversationId) {
         NextMoveOutMessage message = messageService.getMessage(conversationId);
         messageService.sendMessage(message);
