@@ -19,5 +19,5 @@ public class InnsynskravMessage extends BusinessMessage {
     @NotNull
     private String orgnr;
     @NotNull
-    private String email;
+    private String epost;
 }
