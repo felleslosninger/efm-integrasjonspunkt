@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
+import java.time.Clock;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.Set;
 
@@ -32,6 +34,7 @@ public class ConversationService {
     private final NoarkClient mshClient;
     private final WebhookPublisher webhookPublisher;
     private final MessageStatusFactory messageStatusFactory;
+    private final Clock clock;
 
     private static final String CONVERSATION_EXISTS = "Conversation with id=%s already exists, not recreating";
     private static final Set<ServiceIdentifier> POLLABLES = Sets.newHashSet(DPV, DPF, DPO);
@@ -41,12 +44,14 @@ public class ConversationService {
                                IntegrasjonspunktProperties props,
                                @Qualifier("mshClient") ObjectProvider<NoarkClient> mshClient,
                                WebhookPublisher webhookPublisher,
-                               MessageStatusFactory messageStatusFactory) {
+                               MessageStatusFactory messageStatusFactory,
+                               Clock clock) {
         this.repo = repo;
         this.props = props;
         this.mshClient = mshClient.getIfAvailable();
         this.webhookPublisher = webhookPublisher;
         this.messageStatusFactory = messageStatusFactory;
+        this.clock = clock;
     }
 
     @Transactional
@@ -101,7 +106,8 @@ public class ConversationService {
 
     private Conversation createConversation(EDUCore message) {
         MessageStatus ms = messageStatusFactory.getMessageStatus(ReceiptStatus.OPPRETTET, getDescription(message));
-        Conversation conversation = Conversation.of(message, ms)
+        ZonedDateTime expiry = ZonedDateTime.now(clock).plusHours(props.getStatus().getMessageTimeoutHours());
+        Conversation conversation = Conversation.of(message, expiry, ms)
                 .setMsh(isMsh(message));
 
         return repo.save(conversation);
