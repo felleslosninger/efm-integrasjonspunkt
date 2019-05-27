@@ -200,11 +200,10 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
         return getMessageInfo().createLogstashMarkers();
     }
 
-    public ZonedDateTime getExpectedResponseDateTime() {
+    public Optional<ZonedDateTime> getExpectedResponseDateTime() {
         return getScope(ScopeType.CONVERSATION_ID)
                 .getScopeInformation()
                 .stream().findFirst()
-                .map(CorrelationInformation::getExpectedResponseDateTime)
-                .orElseThrow(()-> new NextMoveRuntimeException("Unable to get expectedResponseDateTime"));
+                .map(CorrelationInformation::getExpectedResponseDateTime);
     }
 }
