@@ -42,7 +42,7 @@ public class MockHooks {
         doAnswer((Answer<Void>) invocation -> {
             nextMoveSender.send(invocation.getArgument(0));
             return null;
-        }).when(internalQueue).enqueueNextMove2(any());
+        }).when(internalQueue).enqueueNextMove(any());
 
         given(sikkerDigitalPostKlientFactory.createSikkerDigitalPostKlient(any())).willReturn(sikkerDigitalPostKlient);
         given(sikkerDigitalPostKlientFactory.createSikkerDigitalPostKlient(any(), any())).willReturn(sikkerDigitalPostKlient);

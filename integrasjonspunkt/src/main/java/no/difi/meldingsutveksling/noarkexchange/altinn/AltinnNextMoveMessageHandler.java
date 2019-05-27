@@ -60,6 +60,6 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
     private void sendReceivedStatusToSender(StandardBusinessDocument sbd) {
         StandardBusinessDocument statusSbd = sbdReceiptFactory.createArkivmeldingStatusFrom(sbd, DocumentType.STATUS, ReceiptStatus.MOTTATT);
         NextMoveOutMessage msg = NextMoveOutMessage.of(statusSbd, DPO);
-        internalQueue.enqueueNextMove2(msg);
+        internalQueue.enqueueNextMove(msg);
     }
 }

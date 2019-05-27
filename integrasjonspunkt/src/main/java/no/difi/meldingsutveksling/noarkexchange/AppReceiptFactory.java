@@ -21,4 +21,14 @@ public class AppReceiptFactory {
         }
         return appReceipt;
     }
+
+    public AppReceiptType from(String type, String code, String text) {
+        AppReceiptType appReceipt = new AppReceiptType();
+        appReceipt.setType(type);
+        StatusMessageType statusMessage = new StatusMessageType();
+        statusMessage.setCode(code);
+        statusMessage.setText(text);
+        appReceipt.getMessage().add(statusMessage);
+        return appReceipt;
+    }
 }

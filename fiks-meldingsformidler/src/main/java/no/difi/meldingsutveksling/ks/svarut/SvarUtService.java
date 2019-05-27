@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.CertificateParserException;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.ks.mapping.FiksMapper;
 import no.difi.meldingsutveksling.ks.mapping.FiksStatusMapper;
 import no.difi.meldingsutveksling.nextmove.NextMoveException;
@@ -30,20 +29,6 @@ public class SvarUtService {
     private final IntegrasjonspunktProperties props;
     private final CertificateParser certificateParser;
     private final FiksStatusMapper fiksStatusMapper;
-
-    public String send(EDUCore message) {
-        ServiceRecord serviceRecord;
-        try {
-            serviceRecord = serviceRegistryLookup.getServiceRecord(message.getReceiver().getIdentifier(), message.getServiceIdentifier());
-        } catch (ServiceRegistryLookupException e) {
-            throw new SvarUtServiceException(String.format("DPF service record not found for identifier=%s", message.getReceiver().getIdentifier()));
-        }
-
-        final X509Certificate x509Certificate = toX509Certificate(serviceRecord.getPemCertificate());
-        final SendForsendelseMedId forsendelse = fiksMapper.mapFrom(message, x509Certificate);
-        SvarUtRequest svarUtRequest = new SvarUtRequest(getFiksUtUrl(), forsendelse);
-        return client.sendMessage(svarUtRequest);
-    }
 
     public String send(NextMoveOutMessage message) throws NextMoveException {
         ServiceRecord serviceRecord;

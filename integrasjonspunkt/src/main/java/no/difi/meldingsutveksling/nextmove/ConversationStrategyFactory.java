@@ -38,7 +38,7 @@ public class ConversationStrategyFactory {
         }
     }
 
-    Optional<ConversationStrategy> getStrategy(ServiceIdentifier serviceIdentifier) {
+    public Optional<ConversationStrategy> getStrategy(ServiceIdentifier serviceIdentifier) {
         return Optional.ofNullable(strategies.get(serviceIdentifier));
     }
 }

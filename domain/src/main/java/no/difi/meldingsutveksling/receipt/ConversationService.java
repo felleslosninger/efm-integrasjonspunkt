@@ -122,7 +122,7 @@ public class ConversationService {
                 .orElseGet(() -> createConversation(message));
     }
 
-    private Optional<Conversation> findConversation(String conversationId) {
+    public Optional<Conversation> findConversation(String conversationId) {
         return repo.findByConversationId(conversationId).stream()
                 .findFirst()
                 .filter(p -> {  log.warn(String.format(CONVERSATION_EXISTS, conversationId)); return true; });

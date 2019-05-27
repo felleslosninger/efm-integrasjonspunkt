@@ -9,14 +9,8 @@ import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.lang.KeystoreProviderException;
 import no.difi.meldingsutveksling.mail.MailClient;
-import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
-import no.difi.meldingsutveksling.noarkexchange.putmessage.MessageStrategyFactory;
-import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
-import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
-import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
-import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.receipt.DpiReceiptService;
 import no.difi.meldingsutveksling.receipt.StatusStrategy;
 import no.difi.meldingsutveksling.receipt.StatusStrategyFactory;
@@ -29,14 +23,11 @@ import no.difi.vefa.peppol.lookup.LookupClient;
 import no.difi.vefa.peppol.lookup.LookupClientBuilder;
 import no.difi.vefa.peppol.lookup.locator.StaticLocator;
 import no.difi.vefa.peppol.security.util.EmptyCertificateValidator;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.client.RestOperations;
@@ -88,22 +79,6 @@ public class IntegrasjonspunktBeans {
         StatusStrategyFactory statusStrategyFactory = new StatusStrategyFactory();
         statusStrategies.forEach(statusStrategyFactory::registerStrategy);
         return statusStrategyFactory;
-    }
-
-    @Bean
-    public StrategyFactory messageStrategyFactory(
-            CorrespondenceAgencyClient client,
-            CorrespondenceAgencyMessageFactory correspondenceAgencyMessageFactory,
-            MessageSender messageSender,
-            @Lazy InternalQueue internalQueue,
-            @Qualifier("localNoark") ObjectProvider<NoarkClient> localNoark,
-            @SuppressWarnings("SpringJavaAutowiringInspection") ObjectProvider<List<MessageStrategyFactory>> messageStrategyFactory,
-            IntegrasjonspunktProperties properties) {
-        final StrategyFactory strategyFactory = new StrategyFactory(client, correspondenceAgencyMessageFactory, messageSender, properties, localNoark.getIfAvailable(), internalQueue);
-        if (messageStrategyFactory.getIfAvailable() != null) {
-            messageStrategyFactory.getIfAvailable().forEach(strategyFactory::registerMessageStrategyFactory);
-        }
-        return strategyFactory;
     }
 
     @Bean

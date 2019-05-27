@@ -110,7 +110,7 @@ public class NextMoveMessageService {
 
     public void sendMessage(NextMoveOutMessage message) {
         validator.validate(message);
-        internalQueue.enqueueNextMove2(message);
+        internalQueue.enqueueNextMove(message);
     }
 
     @Transactional

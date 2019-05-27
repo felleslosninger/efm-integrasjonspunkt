@@ -5,8 +5,9 @@ import no.difi.meldingsutveksling.PutMessageObjectMother;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.ServiceRecordObjectMother;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.nextmove.ConversationStrategyFactory;
+import no.difi.meldingsutveksling.nextmove.DpvConversationStrategy;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
-import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
@@ -19,6 +20,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -34,7 +37,7 @@ public class IntegrasjonspunktImplTest {
     @Mock private IntegrasjonspunktProperties propertiesMock;
     @Mock private IntegrasjonspunktProperties.Organization organizationMock;
     @Mock private ServiceRegistryLookup serviceRegistryLookup;
-    @Mock private StrategyFactory strategyFactory;
+    @Mock private ConversationStrategyFactory strategyFactory;
     @Mock private NoarkClient msh;
 
     @Before
@@ -43,7 +46,7 @@ public class IntegrasjonspunktImplTest {
         ServiceRecord serviceRecord = ServiceRecordObjectMother.createDPVServiceRecord("1234");
         when(serviceRegistryLookup.getServiceRecord(anyString())).thenReturn(serviceRecord);
         when(propertiesMock.getOrg()).thenReturn(organizationMock);
-        when(strategyFactory.hasFactory(ServiceIdentifier.DPV)).thenReturn(true);
+        when(strategyFactory.getStrategy(ServiceIdentifier.DPV)).thenReturn(Optional.of(mock(DpvConversationStrategy.class)));
     }
 
     @Test

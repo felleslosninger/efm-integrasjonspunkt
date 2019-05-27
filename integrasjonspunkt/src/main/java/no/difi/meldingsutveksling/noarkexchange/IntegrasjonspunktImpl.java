@@ -5,8 +5,8 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.logging.MarkerFactory;
+import no.difi.meldingsutveksling.nextmove.ConversationStrategyFactory;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
-import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
@@ -55,7 +55,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
     private ServiceRegistryLookup serviceRegistryLookup;
 
     @Autowired
-    private StrategyFactory strategyFactory;
+    private ConversationStrategyFactory strategyFactory;
 
     @Autowired
     private NextMoveMessageService messageService;
@@ -87,7 +87,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
         boolean mshCanReceive = false;
         boolean isDpv = false;
         if (asList(DPO, DPF).contains(serviceRecord.getServiceIdentifier()) &&
-                strategyFactory.hasFactory(serviceRecord.getServiceIdentifier())) {
+                strategyFactory.getStrategy(serviceRecord.getServiceIdentifier()).isPresent()) {
             validServiceIdentifier = true;
             Audit.info("CanReceive = true", receiverMarker);
         } else if (mshClient.canRecieveMessage(organisasjonsnummer)) {
@@ -99,7 +99,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
         boolean strategyFactoryAvailable;
         if (isDpv) {
-            strategyFactoryAvailable = strategyFactory.hasFactory(DPV);
+            strategyFactoryAvailable = strategyFactory.getStrategy(DPV).isPresent();
         } else {
             strategyFactoryAvailable = validServiceIdentifier;
         }

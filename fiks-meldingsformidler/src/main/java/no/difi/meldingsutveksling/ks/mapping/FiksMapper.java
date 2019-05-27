@@ -8,10 +8,7 @@ import no.difi.meldingsutveksling.InputStreamDataSource;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.core.EDUCore;
-import no.difi.meldingsutveksling.core.EDUCoreConverter;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.ks.mapping.edu.FileTypeHandlerFactory;
@@ -27,9 +24,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.pipes.Pipe;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
@@ -154,81 +149,6 @@ public class FiksMapper {
                 .findAny()
                 .map(BusinessMessageFile::getIdentifier)
                 .orElseThrow(() -> new NextMoveException(format("No attachement \"%s\" found", ARKIVMELDING_FILE)));
-    }
-
-    public SendForsendelseMedId mapFrom(EDUCore eduCore, X509Certificate certificate) {
-        final Forsendelse.Builder<Void> forsendelse = Forsendelse.builder()
-                .withEksternref(eduCore.getId())
-                .withKunDigitalLevering(false)
-                .withSvarPaForsendelse(getReceiverRef(eduCore));
-
-        final MeldingType meldingType = EDUCoreConverter.payloadAsMeldingType(eduCore.getPayload());
-        forsendelse.withTittel(meldingType.getJournpost().getJpOffinnhold());
-
-        final FileTypeHandlerFactory fileTypeHandlerFactory = new FileTypeHandlerFactory(properties.getFiks(), certificate);
-        forsendelse.withDokumenter(mapFrom(meldingType.getJournpost().getDokument(), fileTypeHandlerFactory));
-
-        ServiceRecord serviceRecord;
-        try {
-            serviceRecord = serviceRegistry.getServiceRecord(eduCore.getReceiver().getIdentifier());
-        } catch (ServiceRegistryLookupException e) {
-            log.error("Error looking up service record for {}", eduCore.getReceiver().getIdentifier(), e);
-            throw new MeldingsUtvekslingRuntimeException(e);
-        }
-        if (serviceRecord.getService().getSecurityLevel() == 4) {
-            forsendelse.withKrevNiva4Innlogging(true);
-        }
-
-        forsendelse.withKonteringskode(properties.getFiks().getUt().getKonteringsKode())
-                .withKryptert(properties.getFiks().isKryptert())
-                .withAvgivendeSystem(properties.getNoarkSystem().getType())
-                .withPrintkonfigurasjon(getPrintkonfigurasjon());
-
-        final InfoRecord receiverInfo = serviceRegistry.getInfoRecord(eduCore.getReceiver().getIdentifier());
-        forsendelse.withMottaker(mottakerFrom(receiverInfo));
-
-        final InfoRecord senderInfo = serviceRegistry.getInfoRecord(eduCore.getSender().getIdentifier());
-        forsendelse.withSvarSendesTil(mottakerFrom(senderInfo));
-
-        forsendelse.withMetadataFraAvleverendeSystem(metaDataFrom(meldingType));
-
-        return SendForsendelseMedId.builder()
-                .withForsendelse(forsendelse.build())
-                .withForsendelsesid(getSenderRef(eduCore))
-                .build();
-    }
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    private String getSenderRef(EDUCore eduCore) {
-        String senderRef;
-        if (Strings.isNullOrEmpty(eduCore.getSender().getRef())) {
-            log.warn("No envelope.sender.ref in message, using conversationId instead..");
-            senderRef = eduCore.getId();
-        } else {
-            senderRef = eduCore.getSender().getRef();
-            log.debug("sender.ref={}, validating", senderRef);
-            try {
-                UUID.fromString(senderRef);
-            } catch (IllegalArgumentException e) {
-                log.warn("sender.ref={} is not valid UUID, using conversationId={} as forsendelsesId", senderRef, eduCore.getId());
-                senderRef = eduCore.getId();
-            }
-        }
-        return senderRef;
-    }
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    private String getReceiverRef(EDUCore eduCore) {
-        String receiverRef = eduCore.getReceiver().getRef();
-        if (!Strings.isNullOrEmpty(receiverRef)) {
-            try {
-                UUID.fromString(receiverRef);
-            } catch (IllegalArgumentException e) {
-                log.warn("receiver.ref={} is not valid UUID, setting blank value", receiverRef);
-                receiverRef = null;
-            }
-        }
-        return receiverRef;
     }
 
     private Set<Dokument> mapArkivmeldingDokumenter(NextMoveOutMessage message, Set<Dokumentbeskrivelse> docs, X509Certificate cert) {

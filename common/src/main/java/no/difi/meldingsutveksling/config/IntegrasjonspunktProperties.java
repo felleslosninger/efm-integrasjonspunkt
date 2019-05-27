@@ -273,12 +273,6 @@ public class IntegrasjonspunktProperties {
 
     @Data
     public static class FeatureToggle {
-
-        /**
-         * Activate new internal queue.
-         */
-        private boolean enableQueue;
-
         private boolean enableReceipts;
         private boolean forwardReceivedAppReceipts;
         private boolean returnOkOnEmptyPayload;

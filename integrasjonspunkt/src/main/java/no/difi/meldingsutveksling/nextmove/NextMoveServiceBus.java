@@ -248,7 +248,7 @@ public class NextMoveServiceBus {
     }
 
     private void sendReceipt(NextMoveInMessage message) {
-        internalQueue.enqueueNextMove2(NextMoveOutMessage.of(getReceipt(message), DPE));
+        internalQueue.enqueueNextMove(NextMoveOutMessage.of(getReceipt(message), DPE));
     }
 
     private StandardBusinessDocument getReceipt(NextMoveInMessage message) {

@@ -2,8 +2,15 @@ package no.difi.meldingsutveksling.nextmove;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.core.EDUCore;
+import no.difi.meldingsutveksling.core.EDUCoreFactory;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.noarkexchange.AppReceiptFactory;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
+import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +23,9 @@ import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerF
 public class DpfConversationStrategy implements ConversationStrategy {
 
     private final SvarUtService svarUtService;
+    private final IntegrasjonspunktProperties props;
+    private final EDUCoreFactory eduCoreFactory;
+    private final NoarkClient noarkClient;
 
     @Override
     public void send(ConversationResource conversationResource) {
@@ -29,5 +39,17 @@ public class DpfConversationStrategy implements ConversationStrategy {
         Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] sent to SvarUt",
                 message.getConversationId(), message.getServiceIdentifier()),
                 markerFrom(message));
+
+        if (props.getNoarkSystem().isEnable()) {
+            sendAppReceipt(message);
+        }
+    }
+
+    private void sendAppReceipt(NextMoveOutMessage message) {
+        AppReceiptType appReceipt = AppReceiptFactory.from("OK", "None", "OK");
+        EDUCore eduCore = eduCoreFactory.create(appReceipt, message.getConversationId(),
+                message.getReceiverIdentifier(), message.getSenderIdentifier());
+        PutMessageRequestType putMessage = EDUCoreFactory.createPutMessageFromCore(eduCore);
+        noarkClient.sendEduMelding(putMessage);
     }
 }
