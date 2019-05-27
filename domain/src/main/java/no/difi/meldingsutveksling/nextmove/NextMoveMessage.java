@@ -69,6 +69,6 @@ abstract class NextMoveMessage extends AbstractEntity<Long> implements MessageIn
 
     @Override
     public ZonedDateTime getExpiry() {
-        return getSbd().getExpectedResponseDateTime();
+        return getSbd().getExpectedResponseDateTime().orElse(null);
     }
 }
