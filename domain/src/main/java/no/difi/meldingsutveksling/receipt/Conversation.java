@@ -58,6 +58,9 @@ public class Conversation implements MessageInformable {
     @JoinColumn(name = "conv_id")
     private List<MessageStatus> messageStatuses;
 
+    public Conversation() {
+    }
+
     private Conversation(String conversationId,
                          String messageReference,
                          String senderIdentifier,
