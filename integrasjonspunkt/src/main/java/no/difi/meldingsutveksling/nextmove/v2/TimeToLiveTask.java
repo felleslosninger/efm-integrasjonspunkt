@@ -15,7 +15,7 @@ public class TimeToLiveTask {
     private final ConversationRepository repo;
     private final MessageStatusFactory messageStatusFactory;
 
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedRateString = "${difi.move.nextmove.ttlPollingrate}")
     public void checkStatus() {
         List<Conversation> conversations = repo.findByExpiryLessThanEqualAndFinished(ZonedDateTime.now(), false);
         for (Conversation c : conversations) {
