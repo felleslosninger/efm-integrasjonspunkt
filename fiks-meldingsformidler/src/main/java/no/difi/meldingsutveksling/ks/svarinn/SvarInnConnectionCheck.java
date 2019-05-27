@@ -15,7 +15,7 @@ public class SvarInnConnectionCheck {
     public void checkTheConnection() {
         try {
             List<Forsendelse> forsendelses = svarInnClient.checkForNewMessages();
-            if (forsendelses == null || forsendelses.isEmpty()) {
+            if (forsendelses == null) {
                 throw new NextMoveRuntimeException("Couldn't check for new messages from SvarInn.");
             }
         } catch (Exception e) {
