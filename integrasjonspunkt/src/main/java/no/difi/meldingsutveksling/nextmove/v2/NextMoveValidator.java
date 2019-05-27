@@ -12,7 +12,6 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
-import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -32,7 +31,6 @@ import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.DocumentType.ARKIVMELDING;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
-import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
 
 
 @Component
@@ -44,7 +42,6 @@ public class NextMoveValidator {
     private final ServiceIdentifierService serviceIdentifierService;
     private final Asserter asserter;
     private final CryptoMessagePersister cryptoMessagePersister;
-    private final TimeToLiveHelper timeToLiveHelper;
     private final SBDUtil sbdUtil;
 
     void validate(StandardBusinessDocument sbd) {
@@ -76,7 +73,6 @@ public class NextMoveValidator {
 
         sbd.getExpectedResponseDateTime().ifPresent(expectedResponseDateTime -> {
             if (sbdUtil.isExpired(sbd)) {
-                timeToLiveHelper.registerErrorStatusAndMessage(sbd, serviceIdentifier, OUTGOING);
                 throw new TimeToLiveException(expectedResponseDateTime);
             }
         });
@@ -94,7 +90,6 @@ public class NextMoveValidator {
 
         sbd.getExpectedResponseDateTime().ifPresent(expectedResponseDateTime -> {
             if (sbdUtil.isExpired(sbd)) {
-                timeToLiveHelper.registerErrorStatusAndMessage(sbd, message.getServiceIdentifier(), message.getDirection());
                 throw new TimeToLiveException(expectedResponseDateTime);
             }
         });
