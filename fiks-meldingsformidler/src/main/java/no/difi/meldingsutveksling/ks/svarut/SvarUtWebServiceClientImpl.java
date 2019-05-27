@@ -41,13 +41,4 @@ public class SvarUtWebServiceClientImpl extends WebServiceGatewaySupport impleme
                         getWebServiceTemplate().marshalSendAndReceive(uri, request);
         return response.getValue().getReturn();
     }
-
-    @Override
-    public List<String> retreiveForsendelseTyper(String uri) {
-        RetreiveForsendelseTyper request = RetreiveForsendelseTyper.builder().build();
-        final JAXBElement<RetreiveForsendelseTyperResponse> response =
-                (JAXBElement<RetreiveForsendelseTyperResponse>)
-        getWebServiceTemplate().marshalSendAndReceive(uri, request);
-        return response.getValue().getReturn();
-    }
 }

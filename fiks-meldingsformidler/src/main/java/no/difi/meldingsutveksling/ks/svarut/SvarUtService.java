@@ -18,7 +18,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.security.cert.X509Certificate;
-import java.util.List;
 
 @Component
 @ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
@@ -31,10 +30,6 @@ public class SvarUtService {
     private final IntegrasjonspunktProperties props;
     private final CertificateParser certificateParser;
     private final FiksStatusMapper fiksStatusMapper;
-
-    public List<String> retreiveForsendelseTyper() {
-        return client.retreiveForsendelseTyper(getFiksUtUrl());
-    }
 
     public String send(EDUCore message) {
         ServiceRecord serviceRecord;
@@ -76,6 +71,10 @@ public class SvarUtService {
 
     public MessageStatus getMessageReceipt(final Conversation conversation) {
         final String forsendelseId = client.getForsendelseId(getFiksUtUrl(), conversation.getConversationId());
+        return getMessageReceipt(forsendelseId);
+    }
+
+    public MessageStatus getMessageReceipt(String forsendelseId) {
         if (forsendelseId != null) {
             final ForsendelseStatus forsendelseStatus = client.getForsendelseStatus(getFiksUtUrl(), forsendelseId);
             return fiksStatusMapper.mapFrom(forsendelseStatus);
