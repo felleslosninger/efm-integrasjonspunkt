@@ -13,15 +13,15 @@ public class SvarUtConnectionCheck {
 
     private final SvarUtService svarUtService;
 
-    @PostConstruct
-    public void checkTheConnection() {
-        try {
-            List<String> forsendelseTyper = svarUtService.retreiveForsendelseTyper();
-            if (forsendelseTyper.isEmpty()) {
-                throw new NextMoveRuntimeException("Couldn't retrieve forsendelse typer from SvarUt");
-            }
-        } catch (Exception e) {
-            throw new NextMoveRuntimeException("Couldn't retrieve forsendelse typer from SvarUt");
-        }
-    }
+//    @PostConstruct
+//    public void checkTheConnection() {
+//        try {
+//            List<String> forsendelseTyper = svarUtService.retreiveForsendelseTyper();
+//            if (forsendelseTyper.isEmpty()) {
+//                throw new NextMoveRuntimeException("Couldn't retrieve forsendelse typer from SvarUt");
+//            }
+//        } catch (Exception e) {
+//            throw new NextMoveRuntimeException("Couldn't retrieve forsendelse typer from SvarUt");
+//        }
+//    }
 }
