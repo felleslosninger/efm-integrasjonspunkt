@@ -10,6 +10,7 @@ import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.lang.KeystoreProviderException;
 import no.difi.meldingsutveksling.mail.MailClient;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
+import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnConnectionCheck;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.receipt.DpiReceiptService;
 import no.difi.meldingsutveksling.receipt.StatusStrategy;
@@ -123,7 +124,7 @@ public class IntegrasjonspunktBeans {
 
     @Bean
     public Clock clock() {
-        return Clock.systemDefaultZone();
+        return Clock.systemUTC();
     }
 
     @Bean
@@ -170,6 +171,16 @@ public class IntegrasjonspunktBeans {
     @ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
     public SvarUtConnectionCheck svarUtConnectionCheck(SvarUtService svarUtService) {
         return new SvarUtConnectionCheck(svarUtService);
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
+    public AltinnConnectionCheck altinnConnectionCheck(
+            IntegrasjonspunktProperties properties,
+            ServiceRegistryLookup serviceRegistryLookup,
+            AltinnWsClientFactory altinnWsClientFactory
+    ) {
+        return new AltinnConnectionCheck(properties, serviceRegistryLookup, altinnWsClientFactory);
     }
 }
 

@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.cucumber;
 
 import cucumber.api.DataTable;
 import cucumber.api.java.After;
+import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +24,9 @@ public class MessageOutSteps {
     private final Holder<Message> messageOutHolder;
     private final Holder<Message> messageSentHolder;
 
+    @Before
     @After
-    public void after() {
+    public void beforeAndAfter() {
         messageOutHolder.reset();
         messageSentHolder.reset();
     }
