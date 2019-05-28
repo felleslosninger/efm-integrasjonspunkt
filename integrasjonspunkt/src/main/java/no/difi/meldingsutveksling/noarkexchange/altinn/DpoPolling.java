@@ -81,11 +81,10 @@ public class DpoPolling {
 
             if (sbdUtil.isExpired(sbd)) {
                 timeToLiveHelper.registerErrorStatusAndMessage(sbd, DPO, INCOMING);
-            } else if (sbdUtil.isNextMove(sbd)) {
-                altinnNextMoveMessageHandler.handleStandardBusinessDocument(sbd);
             } else {
-                altinnConversationMessageHandler.handleStandardBusinessDocument(sbd);
+                altinnNextMoveMessageHandler.handleStandardBusinessDocument(sbd);
             }
+
             client.confirmDownload(request);
             log.debug(markerFrom(reference).and(sbd.createLogstashMarkers()), "Message confirmed downloaded");
         } catch (Exception e) {

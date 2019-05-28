@@ -4,12 +4,12 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
-import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.Receiver;
 import no.difi.meldingsutveksling.core.Sender;
+import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.PayloadConverter;
 import no.difi.meldingsutveksling.noarkexchange.receive.PayloadConverterImpl;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.*;
 import org.apache.commons.io.IOUtils;
 
@@ -21,18 +21,19 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 
 @RequiredArgsConstructor
 @Getter
-public class SvarInnEduCoreBuilder {
+public class SvarInnPutMessageBuilder {
 
     private static final PayloadConverter<MeldingType> payloadConverter = new PayloadConverterImpl<>(MeldingType.class,
             "http://www.arkivverket.no/Noark4-1-WS-WD/types", "Melding");
     private static final ObjectFactory objectFactory = new ObjectFactory();
 
     private final Forsendelse forsendelse;
+    private final PutMessageRequestFactory putMessageRequestFactory;
     @Setter private String fallbackSenderOrgNr;
 
     private final List<DokumentType> dokumentTypeList = new ArrayList<>();
 
-    public SvarInnEduCoreBuilder streamedFile(SvarInnStreamedFile streamedFile) {
+    public SvarInnPutMessageBuilder streamedFile(SvarInnStreamedFile streamedFile) {
         final DokumentType dokumentType = objectFactory.createDokumentType();
 
         String mimeType = streamedFile.getMimeType();
@@ -59,17 +60,14 @@ public class SvarInnEduCoreBuilder {
         }
     }
 
-    public EDUCore build() {
-        final EDUCore eduCore = new EDUCore();
-        // this is done because of a bug in when sending messages via NoarkClient:
-        // The payload util doesn't correctly handle payloads that are MeldingType.
-        // And I am afraid of fixing that bug might lead to trouble in the archive system.
-        eduCore.setPayload(getPayload());
-        eduCore.setId(forsendelse.getId());
-        eduCore.setSender(createSender());
-        eduCore.setReceiver(createReceiver());
-        eduCore.setServiceIdentifier(ServiceIdentifier.DPF);
-        return eduCore;
+    public PutMessageRequestType build() {
+        Sender sender = createSender();
+        Receiver receiver = createReceiver();
+
+        return putMessageRequestFactory.create(forsendelse.getId(),
+                sender,
+                receiver,
+                getPayload());
     }
 
     private String getPayload() {

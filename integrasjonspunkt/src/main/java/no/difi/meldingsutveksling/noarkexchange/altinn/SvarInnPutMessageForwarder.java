@@ -2,15 +2,17 @@ package no.difi.meldingsutveksling.noarkexchange.altinn;
 
 import lombok.RequiredArgsConstructor;
 import net.logstash.logback.marker.Markers;
+import no.difi.meldingsutveksling.MessageInformable;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.core.EDUCore;
-import no.difi.meldingsutveksling.core.EDUCoreFactory;
 import no.difi.meldingsutveksling.ks.svarinn.Forsendelse;
-import no.difi.meldingsutveksling.ks.svarinn.SvarInnEduCoreBuilder;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnFieldValidator;
+import no.difi.meldingsutveksling.ks.svarinn.SvarInnPutMessageBuilder;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
+import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestFactory;
 import no.difi.meldingsutveksling.noarkexchange.logging.PutMessageResponseMarkers;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
@@ -18,11 +20,11 @@ import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import javax.transaction.Transactional;
+import java.time.Clock;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -33,7 +35,7 @@ import static no.difi.meldingsutveksling.receipt.ReceiptStatus.INNKOMMENDE_MOTTA
 @RequiredArgsConstructor
 @ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
 @Component
-public class SvarInnEduCoreForwarder implements Consumer<Forsendelse> {
+public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
 
     private final IntegrasjonspunktProperties properties;
     private final ConversationService conversationService;
@@ -41,23 +43,54 @@ public class SvarInnEduCoreForwarder implements Consumer<Forsendelse> {
     private final NoarkClient localNoark;
     private final NoarkClient fiksMailClient;
     private final MessageStatusFactory messageStatusFactory;
+    private final PutMessageRequestFactory putMessageRequestFactory;
+    private final Clock clock;
 
     @Override
     public void accept(Forsendelse forsendelse) {
-        SvarInnEduCoreBuilder builder = new SvarInnEduCoreBuilder(forsendelse);
+        SvarInnPutMessageBuilder builder = new SvarInnPutMessageBuilder(forsendelse, putMessageRequestFactory);
         svarInnService.getAttachments(forsendelse).forEach(builder::streamedFile);
-        final EDUCore eduCore = builder.build();
+        PutMessageRequestType putMessage = builder.build();
 
         if (builder.getDokumentTypeList().isEmpty()) {
             Audit.error("Zipfile is empty: skipping message", Markers.append("fiks-id", forsendelse.getId()));
             return;
         }
 
-        Conversation c = conversationService.registerConversation(eduCore);
+        Conversation c = conversationService.registerConversation(new MessageInformable() {
+            @Override
+            public String getConversationId() {
+                return forsendelse.getId();
+            }
+
+            @Override
+            public String getSenderIdentifier() {
+                return putMessage.getEnvelope().getSender().getOrgnr();
+            }
+
+            @Override
+            public String getReceiverIdentifier() {
+                return putMessage.getEnvelope().getReceiver().getOrgnr();
+            }
+
+            @Override
+            public ConversationDirection getDirection() {
+                return ConversationDirection.INCOMING;
+            }
+
+            @Override
+            public ServiceIdentifier getServiceIdentifier() {
+                return ServiceIdentifier.DPF;
+            }
+
+            @Override
+            public ZonedDateTime getExpiry() {
+                return ZonedDateTime.now(clock).plusHours(properties.getNextmove().getDefaultTtlHours());
+            }
+        });
         c = conversationService.registerStatus(c, messageStatusFactory.getMessageStatus(INNKOMMENDE_MOTTATT));
 
-        PutMessageRequestType putMessage = EDUCoreFactory.createPutMessageFromCore(eduCore);
-        if (!validateRequiredFields(forsendelse, eduCore, builder.getDokumentTypeList())) {
+        if (!validateRequiredFields(forsendelse, putMessage, builder.getDokumentTypeList())) {
             checkAndSendMail(putMessage, forsendelse.getId());
             return;
         }
@@ -86,10 +119,10 @@ public class SvarInnEduCoreForwarder implements Consumer<Forsendelse> {
         }
     }
 
-    private boolean validateRequiredFields(Forsendelse forsendelse, EDUCore eduCore, List<DokumentType> files) {
+    private boolean validateRequiredFields(Forsendelse forsendelse, PutMessageRequestType putMessage, List<DokumentType> files) {
         SvarInnFieldValidator validator = SvarInnFieldValidator.validator()
                 .addField(forsendelse.getMottaker().getOrgnr(), "receiver: orgnr")
-                .addField(eduCore.getSender().getIdentifier(), "sender: orgnr")
+                .addField(putMessage.getEnvelope().getSender().getOrgnr(), "sender: orgnr")
                 .addField(forsendelse.getSvarSendesTil().getNavn(), "sender: name");
 
         files.forEach(f ->

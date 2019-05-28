@@ -32,6 +32,7 @@ import no.difi.meldingsutveksling.services.Adresseregister;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import javax.xml.bind.JAXBContext;
@@ -81,8 +82,8 @@ public class IntegrajonspunktReceiveImpl {
                                        MessageStatusFactory messageStatusFactory,
                                        SBDUtil sbdUtil,
                                        PutMessageRequestFactory putMessageRequestFactory,
-                                       NextMoveMessageService nextMoveMessageService,
-                                       InternalQueue internalQueue) {
+                                       @Lazy NextMoveMessageService nextMoveMessageService,
+                                       @Lazy InternalQueue internalQueue) {
         this.localNoark = localNoark.getIfAvailable();
         this.adresseregisterService = adresseregisterService;
         this.properties = properties;

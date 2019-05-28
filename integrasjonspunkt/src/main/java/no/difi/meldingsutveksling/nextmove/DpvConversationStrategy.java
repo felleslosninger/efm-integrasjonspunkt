@@ -11,19 +11,21 @@ import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
 import static no.difi.meldingsutveksling.ptv.WithLogstashMarker.withLogstashMarker;
 
 @Component
+@ConditionalOnProperty(name = "difi.move.feature.enableDPV", havingValue = "true")
 @RequiredArgsConstructor
 public class DpvConversationStrategy implements ConversationStrategy {
 
     private final CorrespondenceAgencyMessageFactory correspondenceAgencyMessageFactory;
     private final CorrespondenceAgencyClient client;
     private final IntegrasjonspunktProperties props;
-    private final NoarkClient noarkClient;
+    private final NoarkClient localNoark;
     private final PutMessageRequestFactory putMessageRequestFactory;
 
     @Override
@@ -47,6 +49,6 @@ public class DpvConversationStrategy implements ConversationStrategy {
         AppReceiptType appReceipt = AppReceiptFactory.from("OK", "None", "OK");
         PutMessageRequestType putMessage = putMessageRequestFactory.create(message.getSbd(),
                 EDUCoreConverter.appReceiptAsString(appReceipt));
-        noarkClient.sendEduMelding(putMessage);
+        localNoark.sendEduMelding(putMessage);
     }
 }

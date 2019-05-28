@@ -24,7 +24,7 @@ public class DpfConversationStrategy implements ConversationStrategy {
 
     private final SvarUtService svarUtService;
     private final IntegrasjonspunktProperties props;
-    private final NoarkClient noarkClient;
+    private final NoarkClient localNoark;
     private final PutMessageRequestFactory putMessageRequestFactory;
 
     @Override
@@ -44,6 +44,6 @@ public class DpfConversationStrategy implements ConversationStrategy {
         AppReceiptType appReceipt = AppReceiptFactory.from("OK", "None", "OK");
         PutMessageRequestType putMessage = putMessageRequestFactory.create(message.getSbd(),
                 EDUCoreConverter.appReceiptAsString(appReceipt));
-        noarkClient.sendEduMelding(putMessage);
+        localNoark.sendEduMelding(putMessage);
     }
 }

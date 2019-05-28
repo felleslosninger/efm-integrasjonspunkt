@@ -1,24 +1,17 @@
 package no.difi.meldingsutveksling.receipt;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
-import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.webhooks.WebhookPublisher;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
 import java.time.Clock;
-import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.Set;
 
@@ -30,8 +23,6 @@ import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 public class ConversationService {
 
     private final ConversationRepository repo;
-    private final IntegrasjonspunktProperties props;
-    private final NoarkClient mshClient;
     private final WebhookPublisher webhookPublisher;
     private final MessageStatusFactory messageStatusFactory;
     private final Clock clock;
@@ -41,14 +32,10 @@ public class ConversationService {
 
     @Autowired
     public ConversationService(ConversationRepository repo,
-                               IntegrasjonspunktProperties props,
-                               @Qualifier("mshClient") ObjectProvider<NoarkClient> mshClient,
                                WebhookPublisher webhookPublisher,
                                MessageStatusFactory messageStatusFactory,
                                Clock clock) {
         this.repo = repo;
-        this.props = props;
-        this.mshClient = mshClient.getIfAvailable();
         this.webhookPublisher = webhookPublisher;
         this.messageStatusFactory = messageStatusFactory;
         this.clock = clock;
@@ -96,30 +83,6 @@ public class ConversationService {
         return repo.save(conversation
                 .setFinished(true)
                 .setPollable(false));
-    }
-
-    @Transactional
-    public Conversation registerConversation(EDUCore message) {
-        return findConversation(message.getId())
-                .orElseGet(() -> createConversation(message));
-    }
-
-    private Conversation createConversation(EDUCore message) {
-        MessageStatus ms = messageStatusFactory.getMessageStatus(ReceiptStatus.OPPRETTET, getDescription(message));
-        ZonedDateTime expiry = ZonedDateTime.now(clock).plusHours(props.getStatus().getMessageTimeoutHours());
-        Conversation conversation = Conversation.of(message, expiry, ms)
-                .setMsh(isMsh(message));
-
-        return repo.save(conversation);
-    }
-
-    private String getDescription(EDUCore message) {
-        return message.getMessageType() == EDUCore.MessageType.APPRECEIPT ? "AppReceipt" : null;
-    }
-
-    private boolean isMsh(EDUCore message) {
-        return !Strings.isNullOrEmpty(props.getMsh().getEndpointURL())
-                && mshClient.canRecieveMessage(message.getReceiver().getIdentifier());
     }
 
     @Transactional

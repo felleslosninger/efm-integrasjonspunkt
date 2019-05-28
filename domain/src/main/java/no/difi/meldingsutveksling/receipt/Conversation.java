@@ -8,10 +8,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
-import no.difi.meldingsutveksling.noarkexchange.PayloadException;
-import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,8 +19,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 
 @Entity
@@ -107,23 +102,6 @@ public class Conversation implements MessageInformable {
     public static Conversation of(MessageInformable msg, MessageStatus... statuses) {
         return new Conversation(msg.getConversationId(), msg.getConversationId(), msg.getSenderIdentifier(), msg.getReceiverIdentifier(),
                 msg.getDirection(), "", msg.getServiceIdentifier(), msg.getExpiry())
-                .addMessageStatuses(statuses);
-    }
-
-    public static Conversation of(EDUCore eduCore, ZonedDateTime expiry, MessageStatus... statuses) {
-        String msgTitle = "";
-        if (eduCore.getMessageType() == EDUCore.MessageType.EDU) {
-            String jpInnholdXpath = "Melding/journpost/jpInnhold";
-            try {
-                msgTitle = PayloadUtil.queryPayload(eduCore.getPayload(), jpInnholdXpath);
-            } catch (PayloadException e) {
-                log.error("Could not read jpInnhold from payload", e);
-            }
-        }
-
-        return new Conversation(eduCore.getId(), eduCore.getMessageReference(),
-                eduCore.getSender().getIdentifier(), eduCore.getReceiver().getIdentifier(), ConversationDirection.OUTGOING,
-                msgTitle, eduCore.getServiceIdentifier() == DPE ? DPV : eduCore.getServiceIdentifier(), expiry)
                 .addMessageStatuses(statuses);
     }
 

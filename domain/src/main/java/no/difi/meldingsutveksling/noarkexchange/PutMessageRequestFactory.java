@@ -1,6 +1,8 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.core.Receiver;
+import no.difi.meldingsutveksling.core.Sender;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -21,34 +23,30 @@ public class PutMessageRequestFactory {
     public PutMessageRequestType create(StandardBusinessDocument sbd, Object payload) {
         String receiverRef = sbd.findScope(ScopeType.RECEIVER_REF).map(Scope::getIdentifier).orElse(null);
         String senderRef = sbd.findScope(ScopeType.SENDER_REF).map(Scope::getIdentifier).orElse(null);
+        InfoRecord receiverInfo = srLookup.getInfoRecord(sbd.getReceiverIdentifier());
+        InfoRecord senderInfo = srLookup.getInfoRecord(sbd.getSenderIdentifier());
         return create(sbd.getConversationId(),
-                sbd.getReceiverIdentifier(),
-                sbd.getSenderIdentifier(),
-                receiverRef,
-                senderRef,
+                Sender.of(sbd.getSenderIdentifier(), senderInfo.getOrganizationName(), senderRef),
+                Receiver.of(sbd.getReceiverIdentifier(), receiverInfo.getOrganizationName(), receiverRef),
                 payload);
     }
 
-    private PutMessageRequestType create(String conversationId,
-                                         String receiverIdentifier,
-                                         String senderIdentifier,
-                                         String receiverRef,
-                                         String senderRef,
+    public PutMessageRequestType create(String conversationId,
+                                         Sender sender,
+                                         Receiver receiver,
                                          Object payload) {
-        InfoRecord receiverInfo = srLookup.getInfoRecord(receiverIdentifier);
-        InfoRecord senderInfo = srLookup.getInfoRecord(senderIdentifier);
 
         no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory of = new no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory();
 
         AddressType receiverAddressType = of.createAddressType();
-        receiverAddressType.setOrgnr(receiverIdentifier);
-        receiverAddressType.setName(receiverInfo.getOrganizationName());
-        receiverAddressType.setRef(receiverRef);
+        receiverAddressType.setOrgnr(receiver.getIdentifier());
+        receiverAddressType.setName(receiver.getName());
+        receiverAddressType.setRef(receiver.getRef());
 
         AddressType senderAddressType = of.createAddressType();
-        senderAddressType.setOrgnr(senderIdentifier);
-        senderAddressType.setName(senderInfo.getOrganizationName());
-        senderAddressType.setRef(senderRef);
+        senderAddressType.setOrgnr(sender.getIdentifier());
+        senderAddressType.setName(sender.getName());
+        senderAddressType.setRef(sender.getRef());
 
         EnvelopeType envelopeType = of.createEnvelopeType();
         envelopeType.setConversationId(conversationId);

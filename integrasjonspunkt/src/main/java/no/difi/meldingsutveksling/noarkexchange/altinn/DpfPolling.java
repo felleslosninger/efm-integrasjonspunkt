@@ -18,7 +18,7 @@ public class DpfPolling {
 
     private final IntegrasjonspunktProperties properties;
     private final SvarInnService svarInnService;
-    private final SvarInnEduCoreForwarder svarInnEduCoreForwarder;
+    private final SvarInnPutMessageForwarder svarInnEduCoreForwarder;
     private final SvarInnNextMoveForwarder svarInnNextMoveForwarder;
 
     void poll() {
