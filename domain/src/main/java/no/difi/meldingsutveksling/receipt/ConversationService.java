@@ -137,6 +137,7 @@ public class ConversationService {
     private Conversation createConversation(MessageInformable message) {
         MessageStatus ms = messageStatusFactory.getMessageStatus(ReceiptStatus.OPPRETTET);
         Conversation c = Conversation.of(message, ms);
+        webhookPublisher.publish(ms);
         return repo.save(c);
     }
 }
