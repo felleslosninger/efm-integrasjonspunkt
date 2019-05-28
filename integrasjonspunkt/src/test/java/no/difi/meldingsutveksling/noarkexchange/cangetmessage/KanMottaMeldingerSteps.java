@@ -6,7 +6,6 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
-import no.difi.meldingsutveksling.noarkexchange.MessageSender;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -24,7 +23,6 @@ public class KanMottaMeldingerSteps {
     private IntegrasjonspunktImpl integrasjonspunkt;
     private Adresseregister adresseRegister;
     private GetCanReceiveMessageResponseType responseType;
-    private MessageSender messageSender;
     private NoarkClient mshClient;
 
     private String message = "&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;\n"
@@ -108,7 +106,6 @@ public class KanMottaMeldingerSteps {
         integrasjonspunkt = new IntegrasjonspunktImpl();
         adresseRegister = mock(Adresseregister.class);
         mshClient = mock(NoarkClient.class);
-        messageSender = mock(MessageSender.class);
         integrasjonspunkt.setMshClient(mshClient);
     }
 

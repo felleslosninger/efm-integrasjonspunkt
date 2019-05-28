@@ -31,11 +31,6 @@ public class DpiConversationStrategy implements ConversationStrategy {
     private final MeldingsformidlerClient meldingsformidlerClient;
 
     @Override
-    public void send(ConversationResource conversationResource) {
-        throw new UnsupportedOperationException("ConversationResource no longer in use");
-    }
-
-    @Override
     public void send(NextMoveOutMessage message) throws NextMoveException {
         List<ServiceRecord> serviceRecords = sr.getServiceRecords(message.getReceiverIdentifier());
         Optional<ServiceRecord> serviceRecord = serviceRecords.stream()

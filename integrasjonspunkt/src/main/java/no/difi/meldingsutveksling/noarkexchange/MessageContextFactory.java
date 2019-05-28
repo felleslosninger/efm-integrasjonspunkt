@@ -7,7 +7,6 @@ import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
-import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -49,20 +48,6 @@ public class MessageContextFactory {
         context.setMottaker(createMottaker(receiverOrgnr, certificate));
         context.setJpId("");
         context.setConversationId(conversationId);
-        return context;
-    }
-
-    public MessageContext from(ConversationResource conversation) throws MessageContextException {
-        if (isNullOrEmpty(conversation.getReceiverId())) {
-            throw new MessageContextException(StatusMessage.MISSING_RECIEVER_ORGANIZATION_NUMBER);
-        }
-
-        MessageContext context = new MessageContext();
-        context.setAvsender(createAvsender(conversation.getSenderId()));
-        context.setMottaker(createMottaker(conversation.getReceiverId(), conversation.getServiceIdentifier()));
-        context.setJpId("");
-        context.setConversationId(conversation.getConversationId());
-
         return context;
     }
 

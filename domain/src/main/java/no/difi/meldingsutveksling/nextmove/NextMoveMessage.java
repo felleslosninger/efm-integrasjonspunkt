@@ -23,7 +23,7 @@ import java.util.Set;
 @Entity
 @RequiredArgsConstructor
 @NoArgsConstructor
-abstract class NextMoveMessage extends AbstractEntity<Long> implements MessageInformable {
+abstract public class NextMoveMessage extends AbstractEntity<Long> implements MessageInformable {
 
     @Column(unique = true)
     @NonNull

@@ -16,11 +16,9 @@ import no.difi.meldingsutveksling.domain.*;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.AsicHandler;
-import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.cert.X509Certificate;
 import java.util.UUID;
 
@@ -65,19 +63,6 @@ public class StandardBusinessDocumentFactory {
                 conversationId,
                 DocumentType.BESTEDU_MELDING,
                 shipment.getJournalpostId());
-    }
-
-    public StandardBusinessDocument create(ConversationResource cr, MessageContext context) {
-        InputStream is = asicHandler.createEncryptedAsic(cr, context);
-        Payload payload = new Payload(is, cr);
-
-        return createSBD.createSBD(
-                context.getAvsender().getOrgNummer(),
-                context.getMottaker().getOrgNummer(),
-                payload,
-                context.getConversationId(),
-                DocumentType.ARKIVMELDING,
-                context.getJournalPostId());
     }
 
     private byte[] encryptArchive(Mottaker mottaker, Archive archive, ServiceIdentifier serviceIdentifier) {
