@@ -23,6 +23,7 @@ jacoco.exec
 /integrasjonspunkt/node_modules/
 /integrasjonspunkt/upload/
 /integrasjonspunkt/messages/
+/messages/
 /integrasjonspunkt/bootstrap.properties
 /integrasjonspunkt/receipt.mv.db
 /integrasjonspunkt/receipt.trace.db

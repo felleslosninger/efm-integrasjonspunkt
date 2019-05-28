@@ -108,7 +108,7 @@ Feature: Sending a Next Move DPE message
     """
     And the sent message contains the following files:
       | filename     | content type |
-      | manifest.xml | text/xml     |
+      | manifest.xml | application/xml     |
       | test.txt     | text/plain   |
     And the content of the file named "manifest.xml" is:
     """
