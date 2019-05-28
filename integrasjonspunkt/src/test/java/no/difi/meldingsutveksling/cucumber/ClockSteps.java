@@ -4,6 +4,7 @@ import cucumber.api.java.Before;
 import cucumber.api.java.en.And;
 import lombok.RequiredArgsConstructor;
 
+import java.time.Clock;
 import java.time.Instant;
 
 @RequiredArgsConstructor
@@ -18,6 +19,6 @@ public class ClockSteps {
 
     @And("^the clock is \"([^\"]*)\"$")
     public void theClockIs(String in) {
-        clock.withInstant(Instant.parse(in));
+        clock.setActive(in);
     }
 }

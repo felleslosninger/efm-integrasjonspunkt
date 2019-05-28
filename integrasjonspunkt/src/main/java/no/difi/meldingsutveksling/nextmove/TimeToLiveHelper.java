@@ -56,6 +56,7 @@ public class TimeToLiveHelper {
                 }
             });
             conversationService.registerStatus(conversation.getConversationId(), messageStatusFactory.getMessageStatus(ReceiptStatus.LEVETID_UTLOPT, status));
+            conversationService.markFinished(conversation);
         });
     }
 }

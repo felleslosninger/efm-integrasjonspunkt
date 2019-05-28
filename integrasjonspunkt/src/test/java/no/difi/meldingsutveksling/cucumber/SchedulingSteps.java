@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
 
 @RequiredArgsConstructor
-public class MessagePollingSteps {
+public class SchedulingSteps {
 
     private final MessagePolling messagePolling;
 

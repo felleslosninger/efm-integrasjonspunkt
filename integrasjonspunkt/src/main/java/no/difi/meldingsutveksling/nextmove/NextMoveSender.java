@@ -26,22 +26,32 @@ public class NextMoveSender {
     private final NextMoveMessageOutRepository messageRepo;
     private final MessageStatusFactory messageStatusFactory;
     private final SBDUtil sbdUtil;
+    private final TimeToLiveHelper timeToLiveHelper;
 
     @Transactional
     public void send(NextMoveOutMessage msg) throws NextMoveException {
-        strategyFactory.getStrategy(msg.getServiceIdentifier())
-                .orElseThrow(() -> {
-                    String errorStr = String.format("Cannot send message - serviceIdentifier \"%s\" not supported",
-                            msg.getServiceIdentifier());
-                    log.error(markerFrom(msg), errorStr);
-                    return new NextMoveRuntimeException(errorStr);
-                }).send(msg);
+        if (sbdUtil.isExpired(msg.getSbd())) {
+            timeToLiveHelper.registerErrorStatusAndMessage(msg.getSbd(), msg.getServiceIdentifier(), msg.getDirection());
 
-        if (sbdUtil.isStatus(msg.getSbd())) {
-            return;
+            if (sbdUtil.isStatus(msg.getSbd())) {
+                return;
+            }
+        } else {
+            strategyFactory.getStrategy(msg.getServiceIdentifier())
+                    .orElseThrow(() -> {
+                        String errorStr = String.format("Cannot send message - serviceIdentifier \"%s\" not supported",
+                                msg.getServiceIdentifier());
+                        log.error(markerFrom(msg), errorStr);
+                        return new NextMoveRuntimeException(errorStr);
+                    }).send(msg);
+
+            if (sbdUtil.isStatus(msg.getSbd())) {
+                return;
+            }
+
+            conversationService.registerStatus(msg.getConversationId(), messageStatusFactory.getMessageStatus(ReceiptStatus.SENDT));
         }
 
-        conversationService.registerStatus(msg.getConversationId(), messageStatusFactory.getMessageStatus(ReceiptStatus.SENDT));
         messageRepo.deleteByConversationId(msg.getConversationId());
         try {
             cryptoMessagePersister.delete(msg.getConversationId());

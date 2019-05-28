@@ -7,65 +7,63 @@ import java.time.ZoneId;
 
 public class TestClock extends Clock implements Serializable {
     private static final long serialVersionUID = -8207373320104896738L;
-    private Instant initialInstant;
-    private Instant instant;
-    private ZoneId initialZone;
-    private ZoneId zone;
+    private Clock initial;
+    private Clock active;
 
-    TestClock(Instant instant, ZoneId zone) {
-        this.initialInstant = instant;
-        this.instant = instant;
-        this.initialZone = zone;
-        this.zone = zone;
+    TestClock(Clock initial) {
+        this.initial = initial;
+        this.active = initial;
     }
 
     public void reset() {
-        this.instant = this.initialInstant;
-        this.zone = this.initialZone;
+        this.active = initial;
     }
 
     @Override
     public ZoneId getZone() {
-        return zone;
+        return active.getZone();
     }
 
     @Override
     public Clock withZone(ZoneId zone) {
-        this.zone = zone;
+        this.active.withZone(zone);
         return this;
     }
 
     @Override
     public long millis() {
-        return instant.toEpochMilli();
+        return active.millis();
     }
 
-    public Clock withInstant(Instant instant) {
-        this.instant = instant;
-        return this;
+    void setActive(String in) {
+        setActive(Clock.fixed(Instant.parse(in), getZone()));
+    }
+
+    private void setActive(Clock active) {
+        this.active = active;
     }
 
     @Override
     public Instant instant() {
-        return instant;
+        return active.instant();
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof TestClock) {
             TestClock other = (TestClock) obj;
-            return instant.equals(other.instant) && zone.equals(other.zone);
+            return active.equals(other.active);
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return instant.hashCode() ^ zone.hashCode();
+        return active.hashCode();
     }
 
     @Override
     public String toString() {
-        return "TestClock[" + instant + "," + zone + "]";
+        return "TestClock[" + active.instant() + "," + active.getZone() + "]";
     }
 }
