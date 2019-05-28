@@ -104,10 +104,10 @@ public class InternalQueue {
     public void noarkListener(byte[] message, Session session) {
         StandardBusinessDocument sbd = documentConverter.unmarshallFrom(message);
         try {
-            forwardToNoark(sbd);
+            integrajonspunktReceive.forwardToNoarkSystem(sbd);
         } catch (Exception e) {
-            Audit.warn("Failed to forward message.. queue will retry", sbd.createLogstashMarkers(), e);
-            throw e;
+            Audit.warn("Failed delivering message to archive.. queue will retry", markerFrom(sbd), e);
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
     }
 
@@ -138,7 +138,7 @@ public class InternalQueue {
         try {
             StandardBusinessDocument sbd = documentConverter.unmarshallFrom(message);
             errorMsg = "Failed to forward message to noark system. Moved to DLQ.";
-            Audit.error(errorMsg, sbd.createLogstashMarkers());
+            Audit.error(errorMsg, markerFrom(sbd));
             conversationId = sbd.getConversationId();
             sendBestEduErrorAppReceipt(sbd);
         } catch (Exception e) {
@@ -187,15 +187,6 @@ public class InternalQueue {
      */
     public void enqueueNoark(StandardBusinessDocument sbd) {
         jmsTemplate.convertAndSend(NOARK, documentConverter.marshallToBytes(sbd));
-    }
-
-    public void forwardToNoark(StandardBusinessDocument sbd) {
-        try {
-            sendToNoarkSystem(sbd);
-        } catch (Exception e) {
-            Audit.error("Failed to unserialize SBD");
-            throw new MeldingsUtvekslingRuntimeException("Could not forward document to archive system", e);
-        }
     }
 
     private void sendToNoarkSystem(StandardBusinessDocument sbd) {

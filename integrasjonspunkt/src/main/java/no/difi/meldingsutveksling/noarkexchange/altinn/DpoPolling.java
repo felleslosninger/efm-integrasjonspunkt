@@ -34,7 +34,6 @@ public class DpoPolling {
 
     private final IntegrasjonspunktProperties properties;
     private final AltinnNextMoveMessageHandler altinnNextMoveMessageHandler;
-    private final AltinnConversationMessageHandler altinnConversationMessageHandler;
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final MessagePersister messagePersister;
     private final AltinnWsClientFactory altinnWsClientFactory;
