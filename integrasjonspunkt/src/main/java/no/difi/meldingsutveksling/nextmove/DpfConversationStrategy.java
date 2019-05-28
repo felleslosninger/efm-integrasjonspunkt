@@ -25,7 +25,7 @@ public class DpfConversationStrategy implements ConversationStrategy {
     private final SvarUtService svarUtService;
     private final IntegrasjonspunktProperties props;
     private final EDUCoreFactory eduCoreFactory;
-    private final NoarkClient noarkClient;
+    private final NoarkClient localNoark;
 
     @Override
     public void send(ConversationResource conversationResource) {
@@ -50,6 +50,6 @@ public class DpfConversationStrategy implements ConversationStrategy {
         EDUCore eduCore = eduCoreFactory.create(appReceipt, message.getConversationId(),
                 message.getReceiverIdentifier(), message.getSenderIdentifier());
         PutMessageRequestType putMessage = EDUCoreFactory.createPutMessageFromCore(eduCore);
-        noarkClient.sendEduMelding(putMessage);
+        localNoark.sendEduMelding(putMessage);
     }
 }
