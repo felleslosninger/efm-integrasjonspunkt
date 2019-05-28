@@ -20,7 +20,7 @@ import static no.difi.meldingsutveksling.dokumentpakking.service.ScopeFactory.fr
 
 @Component
 @RequiredArgsConstructor
-public class CreateSBD {
+public class SBDFactory {
     private static final String STANDARD = "urn:no:difi:meldingsutveksling:1.0";
     private static final String HEADER_VERSION = "1.0";
     private static final String TYPE_VERSION_2 = "2.0";

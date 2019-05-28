@@ -6,7 +6,7 @@ import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.core.EDUCoreFactory;
-import no.difi.meldingsutveksling.dokumentpakking.service.CreateSBD;
+import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.Payload;
@@ -81,7 +81,7 @@ public class InternalQueue {
     private MessageStatusFactory messageStatusFactory;
 
     @Autowired
-    private CreateSBD createSBD;
+    private SBDFactory createSBD;
 
     @Autowired
     private NextMoveMessageService nextMoveMessageService;

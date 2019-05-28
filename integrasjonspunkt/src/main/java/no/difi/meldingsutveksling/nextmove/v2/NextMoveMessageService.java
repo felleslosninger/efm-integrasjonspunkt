@@ -10,7 +10,7 @@ import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCoreConverter;
-import no.difi.meldingsutveksling.dokumentpakking.service.CreateSBD;
+import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.arkivmelding.ArkivmeldingFactory;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -52,7 +52,7 @@ public class NextMoveMessageService {
     private final InternalQueue internalQueue;
     private final ConversationService conversationService;
     private final ArkivmeldingFactory arkivmeldingFactory;
-    private final CreateSBD createSBD;
+    private final SBDFactory createSBD;
     private final IntegrasjonspunktProperties properties;
 
     NextMoveOutMessage getMessage(String conversationId) {

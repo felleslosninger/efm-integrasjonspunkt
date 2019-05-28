@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.noarkexchange;
 import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
@@ -15,8 +14,6 @@ import org.springframework.stereotype.Component;
 
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
 
 @Component
 public class MessageContextFactory {
@@ -50,33 +47,6 @@ public class MessageContextFactory {
         context.setConversationId(conversationId);
         return context;
     }
-
-    public MessageContext from(EDUCore message) throws MessageContextException {
-        if (isNullOrEmpty(message.getReceiver().getIdentifier())) {
-            throw new MessageContextException(StatusMessage.MISSING_RECIEVER_ORGANIZATION_NUMBER);
-        }
-
-        MessageContext messageContext = new MessageContext();
-
-        Avsender avsender;
-        final Mottaker mottaker;
-        avsender = createAvsender(message.getSender().getIdentifier());
-        mottaker = createMottaker(message.getReceiver().getIdentifier(), message.getServiceIdentifier());
-
-        if (message.getMessageType() == EDUCore.MessageType.EDU) {
-            messageContext.setJpId(message.getJournalpostId());
-        } else {
-            messageContext.setJpId("");
-        }
-
-        String converationId = message.getId();
-
-        messageContext.setMottaker(mottaker);
-        messageContext.setAvsender(avsender);
-        messageContext.setConversationId(converationId);
-        return messageContext;
-    }
-
 
     private Avsender createAvsender(String identifier) {
         return Avsender.builder(new Organisasjonsnummer(identifier)).build();

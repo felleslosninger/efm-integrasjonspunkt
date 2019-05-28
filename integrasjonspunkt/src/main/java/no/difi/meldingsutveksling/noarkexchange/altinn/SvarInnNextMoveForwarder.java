@@ -13,7 +13,7 @@ import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.dokumentpakking.service.CreateSBD;
+import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory;
 import no.difi.meldingsutveksling.domain.NextMoveStreamedFile;
 import no.difi.meldingsutveksling.domain.StreamedFile;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalposttypeMapper;
@@ -54,7 +54,7 @@ public class SvarInnNextMoveForwarder implements Consumer<Forsendelse> {
     private final MessageContextFactory messageContextFactory;
     private final AsicHandler asicHandler;
     private final NextMoveQueue nextMoveQueue;
-    private final CreateSBD createSBD;
+    private final SBDFactory createSBD;
     private final IntegrasjonspunktProperties properties;
     private final Clock clock;
 
