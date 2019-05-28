@@ -19,6 +19,7 @@ import no.difi.meldingsutveksling.nextmove.ServiceBusRestTemplate;
 import no.difi.meldingsutveksling.noark.NoarkClientFactory;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClientSettings;
+import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnConnectionCheck;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
@@ -277,6 +278,7 @@ public class CucumberStepsConfiguration {
     @MockBean public SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory;
     @MockBean public SvarUtConnectionCheck svarUtConnectionCheck;
     @MockBean public SvarInnConnectionCheck svarInnConnectionCheck;
+    @MockBean public AltinnConnectionCheck altinnConnectionCheck;
 
     @Before
     @SneakyThrows

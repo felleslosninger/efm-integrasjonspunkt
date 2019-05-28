@@ -18,12 +18,14 @@ public class TimeToLiveTask {
 
     @Scheduled(fixedRateString = "${difi.move.nextmove.ttlPollingrate}")
     public void checkStatus() {
-        repo.findByExpiryLessThanEqualAndFinished(ZonedDateTime.now(clock), false)
+        repo.findAll(QConversation.conversation.expiry.before(ZonedDateTime.now(clock))
+                .and(QConversation.conversation.finished.isFalse()))
                 .forEach(this::setExpired);
     }
 
-    private void setExpired(Conversation c) {
-        conversationService.registerStatus(c, messageStatusFactory.getMessageStatus(ReceiptStatus.LEVETID_UTLOPT));
-        conversationService.markFinished(c);
+    private void setExpired(Conversation conversation) {
+        conversationService.registerStatus(conversation,
+                messageStatusFactory.getMessageStatus(ReceiptStatus.LEVETID_UTLOPT));
+        conversationService.markFinished(conversation);
     }
 }

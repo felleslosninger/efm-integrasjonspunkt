@@ -34,8 +34,6 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
 
     List<Conversation> findByDirection(ConversationDirection direction);
 
-    List<Conversation> findByExpiryLessThanEqualAndFinished(ZonedDateTime zonedDateTime, Boolean finished);
-
     Long countByPollable(boolean pollable);
 
     @Override

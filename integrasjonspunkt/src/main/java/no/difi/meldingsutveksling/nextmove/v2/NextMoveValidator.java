@@ -32,7 +32,6 @@ import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.DocumentType.ARKIVMELDING;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
-import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
 
 
 @Component
@@ -73,13 +72,6 @@ public class NextMoveValidator {
         if (!serviceRecord.hasStandard(standard)) {
             throw new ReceiverDoNotAcceptDocumentStandard(standard, sbd.getProcess());
         }
-
-        sbd.getExpectedResponseDateTime().ifPresent(expectedResponseDateTime -> {
-            if (sbdUtil.isExpired(sbd)) {
-                timeToLiveHelper.registerErrorStatusAndMessage(sbd, serviceIdentifier, OUTGOING);
-                throw new TimeToLiveException(expectedResponseDateTime);
-            }
-        });
 
         Class<?> group = ValidationGroupFactory.toServiceIdentifier(serviceIdentifier);
         asserter.isValid(sbd.getAny(), group != null ? new Class<?>[]{group} : new Class<?>[0]);
