@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.core.EDUCoreConverter;
+import no.difi.meldingsutveksling.core.BestEduConverter;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.AppReceiptFactory;
@@ -43,7 +43,7 @@ public class DpfConversationStrategy implements ConversationStrategy {
     private void sendAppReceipt(NextMoveOutMessage message) {
         AppReceiptType appReceipt = AppReceiptFactory.from("OK", "None", "OK");
         PutMessageRequestType putMessage = putMessageRequestFactory.create(message.getSbd(),
-                EDUCoreConverter.appReceiptAsString(appReceipt));
+                BestEduConverter.appReceiptAsString(appReceipt));
         localNoark.sendEduMelding(putMessage);
     }
 }

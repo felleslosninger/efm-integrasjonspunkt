@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.*;
 import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
-import no.difi.meldingsutveksling.core.EDUCoreConverter;
+import no.difi.meldingsutveksling.core.BestEduConverter;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
@@ -24,7 +24,7 @@ import static java.util.Optional.ofNullable;
 public class ArkivmeldingFactory {
 
     public Arkivmelding createArkivmeldingAndWriteFiles(PutMessageRequestWrapper putMessage) {
-        MeldingType mt = EDUCoreConverter.payloadAsMeldingType(putMessage.getPayload());
+        MeldingType mt = BestEduConverter.payloadAsMeldingType(putMessage.getPayload());
         no.arkivverket.standarder.noark5.arkivmelding.ObjectFactory amOf = new no.arkivverket.standarder.noark5.arkivmelding.ObjectFactory();
         Arkivmelding am = amOf.createArkivmelding();
 

@@ -20,21 +20,15 @@ import no.arkivverket.standarder.noark5.arkivmelding.Journalpost;
 import no.difi.meldingsutveksling.InputStreamDataSource;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.core.EDUCore;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
-import no.difi.meldingsutveksling.noarkexchange.NoarkDocument;
-import no.difi.meldingsutveksling.noarkexchange.PayloadException;
-import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import org.springframework.stereotype.Component;
 
 import javax.activation.DataHandler;
-import javax.mail.util.ByteArrayDataSource;
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -42,7 +36,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.InputStream;
 import java.time.Clock;
 import java.time.ZonedDateTime;
-import java.util.Base64;
 import java.util.GregorianCalendar;
 import java.util.List;
 
@@ -108,34 +101,6 @@ public class CorrespondenceAgencyMessageFactory {
                 ArkivmeldingMessage.class.getName(), DigitalDpvMessage.class.getName()));
     }
 
-
-    public InsertCorrespondenceV2 create(EDUCore edu) {
-
-        no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory reporteeFactory = new no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory();
-        BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
-        try {
-            List<NoarkDocument> noarkDocuments = PayloadUtil.parsePayloadForDocuments(edu.getPayload());
-            noarkDocuments.forEach(d -> {
-                BinaryAttachmentV2 binaryAttachmentV2 = new BinaryAttachmentV2();
-                binaryAttachmentV2.setFunctionType(AttachmentFunctionType.fromValue("Unspecified"));
-                binaryAttachmentV2.setFileName(reporteeFactory.createBinaryAttachmentV2FileName(d.getFilename()));
-                binaryAttachmentV2.setName(reporteeFactory.createBinaryAttachmentV2Name(d.getFilename()));
-                binaryAttachmentV2.setEncrypted(false);
-                binaryAttachmentV2.setSendersReference(reporteeFactory.createBinaryAttachmentV2SendersReference("AttachmentReference_as123452"));
-                DataHandler dataHandler = new DataHandler(new ByteArrayDataSource(Base64.getDecoder().decode(d.getContent()), "application/octet-stream"));
-                binaryAttachmentV2.setData(reporteeFactory.createBinaryAttachmentV2Data(dataHandler));
-                attachmentExternalBEV2List.getBinaryAttachmentV2().add(binaryAttachmentV2);
-            });
-
-            String title = PayloadUtil.queryPayload(edu.getPayload(), "Melding/journpost/jpInnhold");
-            String content = PayloadUtil.queryPayload(edu.getPayload(), "Melding/journpost/jpOffinnhold");
-
-            return create(edu.getId(), edu.getReceiver().getIdentifier(), title, title, content, attachmentExternalBEV2List);
-        } catch (PayloadException e) {
-            throw new MeldingsUtvekslingRuntimeException("Error querying payload for Dokument", e);
-        }
-
-    }
 
     public InsertCorrespondenceV2 create(String conversationId,
                                          String receiverIdentifier,

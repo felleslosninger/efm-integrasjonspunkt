@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import lombok.RequiredArgsConstructor;
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.core.EDUCoreConverter;
+import no.difi.meldingsutveksling.core.BestEduConverter;
 import no.difi.meldingsutveksling.noarkexchange.AppReceiptFactory;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestFactory;
@@ -48,7 +48,7 @@ public class DpvConversationStrategy implements ConversationStrategy {
     private void sendAppReceipt(NextMoveOutMessage message) {
         AppReceiptType appReceipt = AppReceiptFactory.from("OK", "None", "OK");
         PutMessageRequestType putMessage = putMessageRequestFactory.create(message.getSbd(),
-                EDUCoreConverter.appReceiptAsString(appReceipt));
+                BestEduConverter.appReceiptAsString(appReceipt));
         localNoark.sendEduMelding(putMessage);
     }
 }

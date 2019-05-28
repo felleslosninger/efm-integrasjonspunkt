@@ -9,7 +9,7 @@ import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.core.EDUCoreConverter;
+import no.difi.meldingsutveksling.core.BestEduConverter;
 import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.arkivmelding.ArkivmeldingFactory;
@@ -136,7 +136,7 @@ public class NextMoveMessageService {
     }
 
     private NextMoveOutMessage convertAppReceipt(PutMessageRequestWrapper message) {
-        AppReceiptType appReceiptType = EDUCoreConverter.payloadAsAppReceipt(message.getPayload());
+        AppReceiptType appReceiptType = BestEduConverter.payloadAsAppReceipt(message.getPayload());
         ArkivmeldingKvitteringMessage receipt = new ArkivmeldingKvitteringMessage(appReceiptType.getType(), Sets.newHashSet());
         appReceiptType.getMessage().forEach(sm -> receipt.getMessages().add(new KvitteringStatusMessage(sm.getCode(), sm.getText())));
 
