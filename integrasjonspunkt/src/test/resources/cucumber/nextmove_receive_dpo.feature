@@ -22,7 +22,7 @@ Feature: Receiving a Next Move DPO message
                 ]
             },
             "documentIdentification": {
-                "creationDateAndTime": "2019-04-11T15:29:58.753+02:00",
+                "creationDateAndTime": "2019-03-25T11:35:00Z",
                 "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
                 "standard": "urn:no:difi:arkivmelding:xsd::arkivmelding",
                 "type": "arkivmelding",
@@ -85,19 +85,19 @@ Feature: Receiving a Next Move DPO message
         "statId" : 1,
         "convId" : 1,
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a45",
-        "lastUpdate" : "2019-03-25T12:38:23",
+        "lastUpdate" : "2019-03-25T11:38:23Z",
         "status" : "OPPRETTET"
       }, {
         "statId" : 2,
         "convId" : 1,
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a45",
-        "lastUpdate" : "2019-03-25T12:38:23",
+        "lastUpdate" : "2019-03-25T11:38:23Z",
         "status" : "INNKOMMENDE_MOTTATT"
       }, {
         "statId" : 3,
         "convId" : 1,
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a45",
-        "lastUpdate" : "2019-03-25T12:38:23",
+        "lastUpdate" : "2019-03-25T11:38:23Z",
         "status" : "INNKOMMENDE_LEVERT"
       } ],
       "last" : true,

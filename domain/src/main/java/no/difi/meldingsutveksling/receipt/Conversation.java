@@ -13,10 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Stream;
 
 import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
@@ -40,7 +38,7 @@ public class Conversation implements MessageInformable {
     private String messageReference;
     private String messageTitle;
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private LocalDateTime lastUpdate;
+    private ZonedDateTime lastUpdate;
     @JsonIgnore
     private boolean pollable;
     private boolean finished;
@@ -63,7 +61,9 @@ public class Conversation implements MessageInformable {
                          ConversationDirection direction,
                          String messageTitle,
                          ServiceIdentifier serviceIdentifier,
-                         ZonedDateTime expiry) {
+                         ZonedDateTime expiry,
+                         ZonedDateTime lastUpdate
+    ) {
         this.conversationId = conversationId;
         this.messageReference = messageReference;
         this.senderIdentifier = senderIdentifier;
@@ -73,7 +73,7 @@ public class Conversation implements MessageInformable {
         this.messageStatuses = Lists.newArrayList();
         this.serviceIdentifier = serviceIdentifier;
         this.expiry = expiry;
-        this.lastUpdate = LocalDateTime.now();
+        this.lastUpdate = lastUpdate;
     }
 
     private Conversation addMessageStatuses(MessageStatus... statuses) {
@@ -93,22 +93,22 @@ public class Conversation implements MessageInformable {
                                   String messageTitle,
                                   ServiceIdentifier serviceIdentifier,
                                   ZonedDateTime expiry,
+                                  ZonedDateTime lastUpdate,
                                   MessageStatus... statuses) {
-        return new Conversation(conversationId, messageReference, senderIdentifier, receiverIdentifier, direction, messageTitle, serviceIdentifier, expiry)
+        return new Conversation(conversationId, messageReference, senderIdentifier, receiverIdentifier, direction, messageTitle, serviceIdentifier, expiry, lastUpdate)
                 .addMessageStatuses(statuses);
     }
 
 
-    public static Conversation of(MessageInformable msg, MessageStatus... statuses) {
+    public static Conversation of(MessageInformable msg, ZonedDateTime lastUpdate, MessageStatus... statuses) {
         return new Conversation(msg.getConversationId(), msg.getConversationId(), msg.getSenderIdentifier(), msg.getReceiverIdentifier(),
-                msg.getDirection(), "", msg.getServiceIdentifier(), msg.getExpiry())
+                msg.getDirection(), "", msg.getServiceIdentifier(), msg.getExpiry(), lastUpdate)
                 .addMessageStatuses(statuses);
     }
 
     Conversation addMessageStatus(MessageStatus status) {
         status.setConversationId(getConversationId());
         this.messageStatuses.add(status);
-        this.lastUpdate = LocalDateTime.now();
         statusLogger.info(markerFrom(this).and(markerFrom(status)), String.format("Conversation [id=%s] updated with status \"%s\"",
                 this.getConversationId(), status.getStatus()));
         return this;
@@ -116,8 +116,7 @@ public class Conversation implements MessageInformable {
 
     boolean hasStatus(MessageStatus status) {
         return getMessageStatuses().stream()
-                .anyMatch(ms -> ms.getStatus().equals(status.getStatus()) &&
-                        Objects.equals(ms.getDescription(), status.getDescription()));
+                .anyMatch(ms -> ms.getStatus().equals(status.getStatus()));
     }
 
     @Override

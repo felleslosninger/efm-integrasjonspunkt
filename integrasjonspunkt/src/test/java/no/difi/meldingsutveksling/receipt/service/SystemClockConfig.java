@@ -14,6 +14,6 @@ public class SystemClockConfig {
     @Bean
     @Primary
     public Clock clock() {
-        return Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), ZoneId.of("Europe/Oslo"));
+        return Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), ZoneId.of("UTC"));
     }
 }

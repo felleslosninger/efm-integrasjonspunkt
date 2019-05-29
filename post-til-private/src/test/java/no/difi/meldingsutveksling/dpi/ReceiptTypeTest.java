@@ -20,7 +20,7 @@ import static org.junit.Assert.assertThat;
 @RunWith(MockitoJUnitRunner.class)
 public class ReceiptTypeTest {
 
-    private final Clock clock = Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), ZoneId.of("Europe/Oslo"));
+    private final Clock clock = Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), ZoneId.of("UTC"));
 
     private DpiReceiptMapper dpiReceiptMapper;
 

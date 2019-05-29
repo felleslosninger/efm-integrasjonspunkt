@@ -65,7 +65,7 @@ public class CorrespondenceAgencyMessageFactoryTest {
 
     @Before
     public void initializeJaxb() throws JAXBException, ServiceRegistryLookupException {
-        correspondenceAgencyMessageFactory = new CorrespondenceAgencyMessageFactory(postConfig, properties, srMock, cryptoMessagePersister, Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), ZoneId.of("Europe/Oslo")));
+        correspondenceAgencyMessageFactory = new CorrespondenceAgencyMessageFactory(postConfig, properties, srMock, cryptoMessagePersister, Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), ZoneId.of("UTC")));
         putMessageJaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
 
         when(postConfig.getSystemUserCode()).thenReturn("AAS_TEST");

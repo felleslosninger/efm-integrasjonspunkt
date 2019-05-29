@@ -33,7 +33,7 @@ Feature: Sending a Next Move DPF message
                 ]
             },
             "documentIdentification": {
-                "creationDateAndTime": "2019-04-11T15:29:58.753+02:00",
+                "creationDateAndTime": "2019-03-25T11:35:00Z",
                 "instanceIdentifier": "abc8849c-e281-4809-8555-7cd54952b916",
                 "standard": "urn:no:difi:arkivmelding:xsd::arkivmelding",
                 "type": "arkivmelding",
@@ -170,7 +170,7 @@ Feature: Sending a Next Move DPF message
             <kunDigitalLevering>false</kunDigitalLevering>
             <metadataFraAvleverendeSystem>
                 <journalaar>0</journalaar>
-                <journaldato>2017-05-23T00:00:00.000+02:00</journaldato>
+                <journaldato>2017-05-23T00:00:00.000Z</journaldato>
                 <journalpostnummer>0</journalpostnummer>
                 <journalposttype>Utgående dokument</journalposttype>
                 <journalsekvensnummer>0</journalsekvensnummer>

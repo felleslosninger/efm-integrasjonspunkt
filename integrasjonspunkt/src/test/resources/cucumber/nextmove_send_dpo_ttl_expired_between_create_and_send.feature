@@ -25,7 +25,7 @@ Feature: Sending a Next Move DPO message when it expires between create and send
                 ]
             },
             "documentIdentification": {
-                "creationDateAndTime": "2019-04-11T15:29:58.753+02:00",
+                "creationDateAndTime": "2019-03-25T11:35:00Z",
                 "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
                 "standard": "urn:no:difi:arkivmelding:xsd::arkivmelding",
                 "type": "arkivmelding",
@@ -145,7 +145,7 @@ Feature: Sending a Next Move DPO message when it expires between create and send
     And I send the message and get the following error response:
     """
     {
-      "timestamp" : "2019-05-12T22:00:00+02:00",
+      "timestamp" : "2019-05-12T20:00:00Z",
       "status" : 400,
       "error" : "Bad Request",
       "exception" : "no.difi.meldingsutveksling.exceptions.TimeToLiveException",
@@ -160,15 +160,15 @@ Feature: Sending a Next Move DPO message when it expires between create and send
         "statId" : 1,
         "convId" : 1,
         "conversationId" : "8fb3a080-39fb-4dd7-b20a-dfc70f214f26",
-        "lastUpdate" : "2019-03-25T12:38:23",
+        "lastUpdate" : "2019-03-25T11:38:23Z",
         "status" : "OPPRETTET"
       }, {
         "statId" : 2,
         "convId" : 1,
         "conversationId" : "8fb3a080-39fb-4dd7-b20a-dfc70f214f26",
-        "lastUpdate" : "2019-05-12T22:00:00",
+        "lastUpdate" : "2019-05-12T20:00:00Z",
         "status" : "LEVETID_UTLOPT",
-        "description" : "Levetid for melding: 2019-05-10T00:31:52Z er utgått. Må sendes på nytt"
+        "description" : "Levetiden for meldingen er utgått. Må sendes på nytt"
       } ],
       "totalPages" : 1,
       "totalElements" : 2,

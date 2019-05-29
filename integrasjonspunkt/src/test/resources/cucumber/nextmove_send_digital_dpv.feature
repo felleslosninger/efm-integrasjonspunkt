@@ -54,7 +54,7 @@ Feature: Sending a Next Move Digital DPV message
                 ]
             },
             "documentIdentification": {
-                "creationDateAndTime": "2019-04-11T15:29:58.753+02:00",
+                "creationDateAndTime": "2019-03-25T11:35:00Z",
                 "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
                 "standard": "urn:no:difi:digitalpost:xsd:digital::digital_dpv",
                 "type": "digital_dpv",
@@ -131,30 +131,30 @@ Feature: Sending a Next Move Digital DPV message
                     </altinn10:BinaryAttachments>
                 </altinn10:Attachments>
             </altinn10:Content>
-            <altinn10:VisibleDateTime>2019-03-25T12:38:23.000+01:00</altinn10:VisibleDateTime>
-            <altinn10:AllowSystemDeleteDateTime>2019-03-25T12:43:23.000+01:00</altinn10:AllowSystemDeleteDateTime>
-            <altinn10:DueDateTime>2019-04-01T12:38:23.000+02:00</altinn10:DueDateTime>
-            <altinn10:Notifications>
-                <altinn13:Notification>
-                    <altinn13:FromAddress>no-reply@altinn.no</altinn13:FromAddress>
-                    <altinn13:ShipmentDateTime>2019-03-25T12:43:23.000+01:00</altinn13:ShipmentDateTime>
-                    <altinn13:LanguageCode>1044</altinn13:LanguageCode>
-                    <altinn13:NotificationType>VarselDPVMedRevarsel</altinn13:NotificationType>
-                    <altinn13:TextTokens>
-                        <altinn13:TextToken>
-                            <altinn13:TokenNum>1</altinn13:TokenNum>
-                            <altinn13:TokenValue>Du har mottatt en melding fra Test - C2.</altinn13:TokenValue>
-                        </altinn13:TextToken>
-                    </altinn13:TextTokens>
-                    <altinn13:ReceiverEndPoints>
-                        <altinn13:ReceiverEndPoint>
-                            <altinn13:TransportType>Both</altinn13:TransportType>
-                        </altinn13:ReceiverEndPoint>
-                    </altinn13:ReceiverEndPoints>
-                </altinn13:Notification>
-            </altinn10:Notifications>
-            <altinn10:AllowForwarding>false</altinn10:AllowForwarding>
-            <altinn10:MessageSender>Test - C2</altinn10:MessageSender>
+        <altinn10:VisibleDateTime>2019-03-25T11:38:23.000Z</altinn10:VisibleDateTime>
+        <altinn10:AllowSystemDeleteDateTime>2019-03-25T11:43:23.000Z</altinn10:AllowSystemDeleteDateTime>
+        <altinn10:DueDateTime>2019-04-01T11:38:23.000Z</altinn10:DueDateTime>
+        <altinn10:Notifications>
+            <altinn13:Notification>
+                <altinn13:FromAddress>no-reply@altinn.no</altinn13:FromAddress>
+                <altinn13:ShipmentDateTime>2019-03-25T11:43:23.000Z</altinn13:ShipmentDateTime>
+                <altinn13:LanguageCode>1044</altinn13:LanguageCode>
+                <altinn13:NotificationType>VarselDPVMedRevarsel</altinn13:NotificationType>
+                <altinn13:TextTokens>
+                    <altinn13:TextToken>
+                        <altinn13:TokenNum>1</altinn13:TokenNum>
+                        <altinn13:TokenValue>Du har mottatt en melding fra Test - C2.</altinn13:TokenValue>
+                    </altinn13:TextToken>
+                </altinn13:TextTokens>
+                <altinn13:ReceiverEndPoints>
+                    <altinn13:ReceiverEndPoint>
+                        <altinn13:TransportType>Both</altinn13:TransportType>
+                    </altinn13:ReceiverEndPoint>
+                </altinn13:ReceiverEndPoints>
+            </altinn13:Notification>
+        </altinn10:Notifications>
+        <altinn10:AllowForwarding>false</altinn10:AllowForwarding>
+        <altinn10:MessageSender>Test - C2</altinn10:MessageSender>
         </altinn9:Correspondence>
     </altinn9:InsertCorrespondenceV2>
     """

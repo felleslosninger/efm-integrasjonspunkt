@@ -17,11 +17,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
@@ -37,8 +36,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(SystemClockConfig.class)
 public class MessageStatusControllerTest {
 
-    private final static LocalDateTime NOW = LocalDateTime.now();
-    private final static LocalDateTime NOW_MINUS_5_MIN = LocalDateTime.now().minusMinutes(5);
+    private final static ZonedDateTime NOW = ZonedDateTime.now();
+    private final static ZonedDateTime NOW_MINUS_5_MIN = ZonedDateTime.now().minusMinutes(5);
 
     @Autowired
     private MockMvc mvc;

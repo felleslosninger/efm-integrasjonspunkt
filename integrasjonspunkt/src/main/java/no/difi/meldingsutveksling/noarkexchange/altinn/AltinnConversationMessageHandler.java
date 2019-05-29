@@ -22,7 +22,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import javax.xml.bind.JAXBElement;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import static java.lang.String.format;
 
@@ -77,7 +77,7 @@ public class AltinnConversationMessageHandler implements AltinnMessageHandler {
 
     private MessageStatus statusFromKvittering(Kvittering kvittering) {
         ReceiptStatus status = DpoReceiptMapper.from(kvittering);
-        LocalDateTime tidspunkt = kvittering.getTidspunkt().toGregorianCalendar().toZonedDateTime().toLocalDateTime();
+        ZonedDateTime tidspunkt = kvittering.getTidspunkt().toGregorianCalendar().toZonedDateTime();
         return MessageStatus.of(status, tidspunkt);
     }
 

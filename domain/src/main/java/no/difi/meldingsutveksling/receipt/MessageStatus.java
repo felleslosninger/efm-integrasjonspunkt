@@ -5,7 +5,7 @@ import com.google.common.base.MoreObjects;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * Used for storing and tracking receipt information.
@@ -21,7 +21,7 @@ public class MessageStatus {
     private Integer convId;
     private String conversationId;
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private LocalDateTime lastUpdate;
+    private ZonedDateTime lastUpdate;
     private String status;
     private String description;
 
@@ -31,17 +31,17 @@ public class MessageStatus {
     MessageStatus() {
     }
 
-    private MessageStatus(String status, LocalDateTime lastUpdate, String description) {
+    private MessageStatus(String status, ZonedDateTime lastUpdate, String description) {
         this.status = status;
         this.lastUpdate = lastUpdate;
         this.description = description;
     }
 
-    public static MessageStatus of(ReceiptStatus status, LocalDateTime lastUpdate) {
+    public static MessageStatus of(ReceiptStatus status, ZonedDateTime lastUpdate) {
         return new MessageStatus(status.toString(), lastUpdate, null);
     }
 
-    public static MessageStatus of(ReceiptStatus status, LocalDateTime lastUpdate, String description) {
+    public static MessageStatus of(ReceiptStatus status, ZonedDateTime lastUpdate, String description) {
         return new MessageStatus(status.toString(), lastUpdate, description);
     }
 

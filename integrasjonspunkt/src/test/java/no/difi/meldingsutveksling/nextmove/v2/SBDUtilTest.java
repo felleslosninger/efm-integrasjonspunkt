@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(MockitoJUnitRunner.class)
 public class SBDUtilTest {
 
-    private SBDUtil sbdUtil = new SBDUtil(Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), ZoneId.of("Europe/Oslo")));
+    private SBDUtil sbdUtil = new SBDUtil(Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), ZoneId.of("UTC")));
 
     @Test
     public void notExpired() {

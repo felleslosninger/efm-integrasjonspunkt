@@ -23,7 +23,6 @@ public class TimeToLiveHelper {
 
     public void registerErrorStatusAndMessage(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier, ConversationDirection direction) {
         sbd.getExpectedResponseDateTime().ifPresent(p -> {
-            String status = String.format("Levetid for melding: %s er utgått. Må sendes på nytt", p);
             Conversation conversation = conversationService.registerConversation(new MessageInformable() {
                 @Override
                 public String getConversationId() {
@@ -55,7 +54,9 @@ public class TimeToLiveHelper {
                     return p;
                 }
             });
-            conversationService.registerStatus(conversation.getConversationId(), messageStatusFactory.getMessageStatus(ReceiptStatus.LEVETID_UTLOPT, status));
+            conversationService.registerStatus(conversation.getConversationId(),
+                    messageStatusFactory.getMessageStatus(ReceiptStatus.LEVETID_UTLOPT,
+                            "Levetiden for meldingen er utgått. Må sendes på nytt"));
             conversationService.markFinished(conversation);
         });
     }

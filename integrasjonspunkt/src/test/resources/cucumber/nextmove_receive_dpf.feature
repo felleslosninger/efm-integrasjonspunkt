@@ -128,7 +128,7 @@ Feature: Receiving a Next Move DPF message
           "typeVersion" : "2.0",
           "instanceIdentifier" : "19efbd4c-413d-4e2c-bbc5-257ef4a65b38",
           "type" : "arkivmelding",
-          "creationDateAndTime" : "2019-03-25T12:38:23+01:00"
+          "creationDateAndTime" : "2019-03-25T11:38:23Z"
         },
         "businessScope" : {
           "scope" : [ {
@@ -136,7 +136,7 @@ Feature: Receiving a Next Move DPF message
             "instanceIdentifier" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
             "identifier" : "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
             "scopeInformation" : [ {
-              "expectedResponseDateTime" : "2019-03-26T12:38:23+01:00"
+              "expectedResponseDateTime" : "2019-03-26T11:38:23Z"
             } ]
           } ]
         }
@@ -157,8 +157,8 @@ Feature: Receiving a Next Move DPF message
                 <journalpostnummer>13</journalpostnummer>
                 <journalposttype>Utgående dokument</journalposttype>
                 <journalstatus>Godkjent av leder</journalstatus>
-                <journaldato>2016-03-21+01:00</journaldato>
-                <dokumentetsDato>2016-03-21+01:00</dokumentetsDato>
+                <journaldato>2016-03-20Z</journaldato>
+                <dokumentetsDato>2016-03-20Z</dokumentetsDato>
                 <korrespondansepart>
                     <korrespondanseparttype>Avsender</korrespondanseparttype>
                     <korrespondansepartNavn>Kontoret for voldsoffererstatning</korrespondansepartNavn>
@@ -189,19 +189,19 @@ Feature: Receiving a Next Move DPF message
         "statId" : 1,
         "convId" : 1,
         "conversationId" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
-        "lastUpdate" : "2019-03-25T12:38:23",
+        "lastUpdate" : "2019-03-25T11:38:23Z",
         "status" : "OPPRETTET"
       }, {
         "statId" : 2,
         "convId" : 1,
         "conversationId" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
-        "lastUpdate" : "2019-03-25T12:38:23",
+        "lastUpdate" : "2019-03-25T11:38:23Z",
         "status" : "INNKOMMENDE_MOTTATT"
       }, {
         "statId" : 3,
         "convId" : 1,
         "conversationId" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
-        "lastUpdate" : "2019-03-25T12:38:23",
+        "lastUpdate" : "2019-03-25T11:38:23Z",
         "status" : "INNKOMMENDE_LEVERT"
       } ],
       "last" : true,

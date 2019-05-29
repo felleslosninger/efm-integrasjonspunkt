@@ -15,9 +15,11 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.validation.Validator;
 
+import javax.annotation.PostConstruct;
 import javax.crypto.Cipher;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.TimeZone;
 
 @SpringBootApplication(exclude = {SolrAutoConfiguration.class})
 public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
@@ -39,6 +41,11 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
     @Bean
     public static Validator configurationPropertiesValidator() {
         return new IntegrasjonspunktPropertiesValidator();
+    }
+
+    @PostConstruct
+    void started() {
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     }
 
     public static void main(String[] args) {

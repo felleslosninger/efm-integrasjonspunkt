@@ -201,7 +201,7 @@ Feature: Sending a BEST/EDU message by the noarkExchange WebService
           "typeVersion" : "2.0",
           "instanceIdentifier" : "19efbd4c-413d-4e2c-bbc5-257ef4a65b38",
           "type" : "arkivmelding",
-          "creationDateAndTime" : "2019-03-25T12:38:23+01:00"
+          "creationDateAndTime" : "2019-03-25T11:38:23Z"
         },
         "businessScope" : {
           "scope" : [ {
@@ -209,7 +209,7 @@ Feature: Sending a BEST/EDU message by the noarkExchange WebService
             "instanceIdentifier" : "6e9cab22-a682-461c-bcd4-f201bfb3de8c",
             "identifier" : "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
             "scopeInformation" : [ {
-              "expectedResponseDateTime" : "2019-03-26T12:38:23+01:00"
+              "expectedResponseDateTime" : "2019-03-26T11:38:23Z"
             } ]
           } ]
         }
@@ -263,8 +263,8 @@ Feature: Sending a BEST/EDU message by the noarkExchange WebService
                 <journalsekvensnummer>25</journalsekvensnummer>
                 <journalpostnummer>13</journalpostnummer>
                 <journalposttype>Utgående dokument</journalposttype>
-                <journaldato>2016-03-21+01:00</journaldato>
-                <dokumentetsDato>2016-03-21+01:00</dokumentetsDato>
+                <journaldato>2016-03-21Z</journaldato>
+                <dokumentetsDato>2016-03-21Z</dokumentetsDato>
                 <korrespondansepart>
                     <korrespondanseparttype>Mottaker</korrespondanseparttype>
                     <korrespondansepartNavn>Kontoret for voldsoffererstatning</korrespondansepartNavn>
@@ -293,13 +293,13 @@ Feature: Sending a BEST/EDU message by the noarkExchange WebService
         "statId" : 1,
         "convId" : 1,
         "conversationId" : "6e9cab22-a682-461c-bcd4-f201bfb3de8c",
-        "lastUpdate" : "2019-03-25T12:38:23",
+        "lastUpdate" : "2019-03-25T11:38:23Z",
         "status" : "OPPRETTET"
       }, {
         "statId" : 2,
         "convId" : 1,
         "conversationId" : "6e9cab22-a682-461c-bcd4-f201bfb3de8c",
-        "lastUpdate" : "2019-03-25T12:38:23",
+        "lastUpdate" : "2019-03-25T11:38:23Z",
         "status" : "SENDT"
       } ],
       "last" : true,

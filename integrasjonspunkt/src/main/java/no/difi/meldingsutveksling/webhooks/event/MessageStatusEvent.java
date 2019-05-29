@@ -5,7 +5,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.Clock;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Getter
 @Setter
@@ -15,7 +15,7 @@ public class MessageStatusEvent extends WebhookEvent {
     private Integer statId;
     private Integer convId;
     private String conversationId;
-    private LocalDateTime lastUpdate;
+    private ZonedDateTime lastUpdate;
     private String status;
     private String description;
 

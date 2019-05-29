@@ -108,7 +108,7 @@ Feature: Sending a BEST/EDU AppReceipt message by the noarkExchange WebService
           "typeVersion" : "2.0",
           "instanceIdentifier" : "19efbd4c-413d-4e2c-bbc5-257ef4a65b38",
           "type" : "arkivmelding_kvittering",
-          "creationDateAndTime" : "2019-03-25T12:38:23+01:00"
+          "creationDateAndTime" : "2019-03-25T11:38:23Z"
         },
         "businessScope" : {
           "scope" : [ {
@@ -116,7 +116,7 @@ Feature: Sending a BEST/EDU AppReceipt message by the noarkExchange WebService
             "instanceIdentifier" : "c54636e3-4aa4-4d59-91d1-db1b2f59a4b2",
             "identifier" : "urn:no:difi:profile:arkivmelding:response:ver1.0",
             "scopeInformation" : [ {
-              "expectedResponseDateTime" : "2019-03-26T12:38:23+01:00"
+              "expectedResponseDateTime" : "2019-03-26T11:38:23Z"
             } ]
           } ]
         }
@@ -138,13 +138,13 @@ Feature: Sending a BEST/EDU AppReceipt message by the noarkExchange WebService
         "statId" : 1,
         "convId" : 1,
         "conversationId" : "c54636e3-4aa4-4d59-91d1-db1b2f59a4b2",
-        "lastUpdate" : "2019-03-25T12:38:23",
+        "lastUpdate" : "2019-03-25T11:38:23Z",
         "status" : "OPPRETTET"
       }, {
         "statId" : 2,
         "convId" : 1,
         "conversationId" : "c54636e3-4aa4-4d59-91d1-db1b2f59a4b2",
-        "lastUpdate" : "2019-03-25T12:38:23",
+        "lastUpdate" : "2019-03-25T11:38:23Z",
         "status" : "SENDT"
       } ],
       "last" : true,

@@ -28,7 +28,7 @@ Feature: Sending a Next Move DPI message
                 ]
             },
             "documentIdentification": {
-                "creationDateAndTime": "2019-04-11T15:29:58.753+02:00",
+                "creationDateAndTime": "2019-03-25T11:35:00Z",
                 "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
                 "standard": "urn:no:difi:digitalpost:xsd:digital::digital",
                 "type": "digital",
@@ -174,7 +174,7 @@ Feature: Sending a Next Move DPI message
                 <ns3:TypeVersion>1.0</ns3:TypeVersion>
                 <ns3:InstanceIdentifier>0bfe4b94-ea1a-465f-95b7-5d06bc986dfb</ns3:InstanceIdentifier>
                 <ns3:Type>digitalPost</ns3:Type>
-                <ns3:CreationDateAndTime>2019-04-23T13:00:42.413+02:00</ns3:CreationDateAndTime>
+                <ns3:CreationDateAndTime>2019-03-25T11:35:00Z</ns3:CreationDateAndTime>
             </ns3:DocumentIdentification>
             <ns3:BusinessScope>
                 <ns3:Scope>

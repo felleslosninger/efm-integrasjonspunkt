@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
 import java.time.Clock;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.Set;
 
@@ -60,6 +61,7 @@ public class ConversationService {
         }
 
         conversation.addMessageStatus(status)
+                .setLastUpdate(ZonedDateTime.now(clock))
                 .setPollable(isPollable(conversation, status));
 
         webhookPublisher.publish(status);
@@ -94,12 +96,15 @@ public class ConversationService {
     public Optional<Conversation> findConversation(String conversationId) {
         return repo.findByConversationId(conversationId).stream()
                 .findFirst()
-                .filter(p -> {  log.warn(String.format(CONVERSATION_EXISTS, conversationId)); return true; });
+                .filter(p -> {
+                    log.warn(String.format(CONVERSATION_EXISTS, conversationId));
+                    return true;
+                });
     }
 
     private Conversation createConversation(MessageInformable message) {
         MessageStatus ms = messageStatusFactory.getMessageStatus(ReceiptStatus.OPPRETTET);
-        Conversation c = Conversation.of(message, ms);
+        Conversation c = Conversation.of(message, ZonedDateTime.now(clock), ms);
         webhookPublisher.publish(ms);
         return repo.save(c);
     }

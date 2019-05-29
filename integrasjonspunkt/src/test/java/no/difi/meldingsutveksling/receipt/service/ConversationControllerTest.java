@@ -4,7 +4,6 @@ import com.querydsl.core.types.Predicate;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.nextmove.ConversationStrategyFactory;
 import no.difi.meldingsutveksling.receipt.*;
-import no.difi.meldingsutveksling.validation.FixedClockConfig;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,11 +17,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
@@ -33,7 +30,8 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(ConversationController.class)
@@ -41,8 +39,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(SystemClockConfig.class)
 public class ConversationControllerTest {
 
-    private final static LocalDateTime NOW = LocalDateTime.now();
-    private final static LocalDateTime NOW_MINUS_5_MIN = LocalDateTime.now().minusMinutes(5);
+    private final static ZonedDateTime NOW = ZonedDateTime.now();
+    private final static ZonedDateTime NOW_MINUS_5_MIN = ZonedDateTime.now().minusMinutes(5);
 
     @Autowired
     private MockMvc mvc;
@@ -74,11 +72,11 @@ public class ConversationControllerTest {
         cId2ms3.setStatId(5);
         cId2ms3.setConvId(2);
 
-        Conversation c1 = Conversation.of(cId1, "foo", "24", "42", OUTGOING, "foo", ServiceIdentifier.DPO, ZonedDateTime.now(), cId1ms1, cId1ms2);
+        Conversation c1 = Conversation.of(cId1, "foo", "24", "42", OUTGOING, "foo", ServiceIdentifier.DPO, ZonedDateTime.now(), ZonedDateTime.now(), cId1ms1, cId1ms2);
         c1.setConvId(1);
         c1.setPollable(true);
         c1.setLastUpdate(NOW_MINUS_5_MIN);
-        Conversation c2 = Conversation.of(cId2, "foo", "24", "43", OUTGOING, "foo", ServiceIdentifier.DPO, ZonedDateTime.now(), cId2ms1, cId2ms2, cId2ms3);
+        Conversation c2 = Conversation.of(cId2, "foo", "24", "43", OUTGOING, "foo", ServiceIdentifier.DPO, ZonedDateTime.now(), ZonedDateTime.now(), cId2ms1, cId2ms2, cId2ms3);
         c2.setConvId(2);
         c2.setPollable(false);
         c2.setLastUpdate(NOW);

@@ -24,7 +24,7 @@ Feature: Sending a Next Move DPE message
                 ]
             },
             "documentIdentification": {
-                "creationDateAndTime": "2019-04-11T15:29:58.753+02:00",
+                "creationDateAndTime": "2019-03-25T11:35:00Z",
                 "instanceIdentifier": "abc8849c-e281-4809-8555-7cd54952b916",
                 "standard": "urn:no:difi:einnsyn:xsd:innsyn::innsynskrav",
                 "type": "innsynskrav",
@@ -85,7 +85,7 @@ Feature: Sending a Next Move DPE message
             "typeVersion" : "2.0",
             "instanceIdentifier" : "abc8849c-e281-4809-8555-7cd54952b916",
             "type" : "innsynskrav",
-            "creationDateAndTime" : "2019-04-11T15:29:58.753+02:00"
+            "creationDateAndTime" : "2019-03-25T11:35:00Z"
           },
           "businessScope" : {
             "scope" : [ {

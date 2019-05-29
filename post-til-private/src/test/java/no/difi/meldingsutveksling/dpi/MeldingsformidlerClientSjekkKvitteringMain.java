@@ -25,7 +25,7 @@ public class MeldingsformidlerClientSjekkKvitteringMain {
         DigitalPostInnbyggerConfig config = getDigitalPostInnbyggerConfig(mpcId);
         SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory = new SikkerDigitalPostKlientFactory(config, createKeyStore());
         ForsendelseHandlerFactory forsendelseHandlerFactory = new ForsendelseHandlerFactory(config);
-        Clock clock = Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), ZoneId.of("Europe/Oslo"));
+        Clock clock = Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), ZoneId.of("UTC"));
         MessageStatusFactory messageStatusFactory = new MessageStatusFactory(clock);
         DpiReceiptMapper dpiReceiptMapper = new DpiReceiptMapper(messageStatusFactory, clock);
         MeldingsformidlerClient client = new MeldingsformidlerClient(config, sikkerDigitalPostKlientFactory, forsendelseHandlerFactory, dpiReceiptMapper);
