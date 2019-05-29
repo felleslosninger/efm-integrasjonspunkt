@@ -21,6 +21,7 @@ import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
@@ -68,7 +69,7 @@ public class InternalQueue {
                   ObjectMapper objectMapper,
                   MessageStatusFactory messageStatusFactory,
                   SBDFactory createSBD,
-                  NextMoveMessageService nextMoveMessageService,
+                  @Lazy NextMoveMessageService nextMoveMessageService,
                   PutMessageRequestFactory putMessageRequestFactory,
                   ObjectProvider<IntegrajonspunktReceiveImpl> integrajonspunktReceive,
                   @Qualifier("localNoark") ObjectProvider<NoarkClient> noarkClient) {
