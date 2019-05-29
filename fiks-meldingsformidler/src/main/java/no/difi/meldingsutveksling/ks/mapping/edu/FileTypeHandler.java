@@ -46,7 +46,7 @@ public class FileTypeHandler implements Handler<Dokument.Builder> {
             final DataHandler dataHandler = new DataHandler(new ByteArrayDataSource(new ByteArrayInputStream(base64), domainDocument.getVeMimeType()));
             builder.withData(dataHandler);
         } catch (IOException e) {
-            throw new DokumenterHandlerException("Unable to map EDUCore documents to KS SvarUt Dokument documents", e);
+            throw new DokumenterHandlerException("Unable to map NextMove documents to KS SvarUt Dokument documents", e);
         }
         return builder;
     }

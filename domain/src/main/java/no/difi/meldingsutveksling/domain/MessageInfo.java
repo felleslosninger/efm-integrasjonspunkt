@@ -50,6 +50,7 @@ public class MessageInfo {
         final LogstashMarker jpMarker = journalPostIdMarker(getJournalPostId());
         final LogstashMarker sMarker = senderMarker(getSenderOrgNumber());
         final LogstashMarker rMarker = receiverMarker(getReceiverOrgNumber());
-        return jpMarker.and(sMarker).and(rMarker).and(mtMarker);
+        final LogstashMarker cidMarker = conversationIdMarker(getConversationId());
+        return jpMarker.and(sMarker).and(rMarker).and(mtMarker).and(cidMarker);
     }
 }

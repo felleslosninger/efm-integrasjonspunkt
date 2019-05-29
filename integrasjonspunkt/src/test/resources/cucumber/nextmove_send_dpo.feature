@@ -247,7 +247,7 @@ Feature: Sending a Next Move DPO message
     """
     And the sent message contains the following files:
       | filename         | content type |
-      | manifest.xml     | text/xml     |
+      | manifest.xml     | application/xml     |
       | arkivmelding.xml | text/xml     |
       | test.txt         | text/plain   |
     And the content of the file named "manifest.xml" is:

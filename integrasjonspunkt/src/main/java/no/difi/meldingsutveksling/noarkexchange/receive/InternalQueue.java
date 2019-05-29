@@ -4,44 +4,29 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.core.EDUCore;
-import no.difi.meldingsutveksling.core.EDUCoreFactory;
+import no.difi.meldingsutveksling.core.BestEduConverter;
 import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
-import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
-import no.difi.meldingsutveksling.noarkexchange.AppReceiptFactory;
-import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
-import no.difi.meldingsutveksling.noarkexchange.MessageException;
-import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
+import no.difi.meldingsutveksling.noarkexchange.*;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
-import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.jms.Session;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.namespace.QName;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
@@ -62,55 +47,42 @@ public class InternalQueue {
     private static final String NEXTMOVE = "nextmove";
     private static final String DLQ = "ActiveMQ.DLQ";
 
-    @Autowired
     private JmsTemplate jmsTemplate;
-
-    @Autowired
     private IntegrasjonspunktProperties properties;
-
-    @Autowired
     private ConversationService conversationService;
-
-    @Autowired
     private NextMoveSender nextMoveSender;
-
-    @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired // Avoid circular depencency
     private MessageStatusFactory messageStatusFactory;
-
-    @Autowired
     private SBDFactory createSBD;
-
-    @Autowired
     private NextMoveMessageService nextMoveMessageService;
-
+    private PutMessageRequestFactory putMessageRequestFactory;
     private final IntegrajonspunktReceiveImpl integrajonspunktReceive;
     private final NoarkClient noarkClient;
-    private final EDUCoreFactory eduCoreFactory;
-
-    private static JAXBContext jaxbContext;
-    private static JAXBContext jaxbContextNextmove;
 
     private final DocumentConverter documentConverter = new DocumentConverter();
 
-    @Autowired
-    InternalQueue(ObjectProvider<IntegrajonspunktReceiveImpl> integrajonspunktReceive,
-                  @Qualifier("localNoark") ObjectProvider<NoarkClient> noarkClient,
-                  EDUCoreFactory eduCoreFactory) {
+    InternalQueue(JmsTemplate jmsTemplate,
+                  IntegrasjonspunktProperties properties,
+                  ConversationService conversationService,
+                  NextMoveSender nextMoveSender,
+                  ObjectMapper objectMapper,
+                  MessageStatusFactory messageStatusFactory,
+                  SBDFactory createSBD,
+                  NextMoveMessageService nextMoveMessageService,
+                  PutMessageRequestFactory putMessageRequestFactory,
+                  ObjectProvider<IntegrajonspunktReceiveImpl> integrajonspunktReceive,
+                  @Qualifier("localNoark") ObjectProvider<NoarkClient> noarkClient) {
+        this.jmsTemplate = jmsTemplate;
+        this.properties = properties;
+        this.conversationService = conversationService;
+        this.nextMoveSender = nextMoveSender;
+        this.objectMapper = objectMapper;
+        this.messageStatusFactory = messageStatusFactory;
+        this.createSBD = createSBD;
+        this.nextMoveMessageService = nextMoveMessageService;
+        this.putMessageRequestFactory = putMessageRequestFactory;
         this.integrajonspunktReceive = integrajonspunktReceive.getIfAvailable();
         this.noarkClient = noarkClient.getIfAvailable();
-        this.eduCoreFactory = eduCoreFactory;
-    }
-
-    static {
-        try {
-            jaxbContext = JAXBContextFactory.createContext(new Class[]{StandardBusinessDocument.class, Payload.class, Kvittering.class, PutMessageRequestType.class}, null);
-            jaxbContextNextmove = JAXBContextFactory.createContext(new Class[]{ConversationResource.class}, null);
-        } catch (JAXBException e) {
-            throw new NextMoveRuntimeException("Could not start internal queue: Failed to create JAXBContext", e);
-        }
     }
 
     @JmsListener(destination = NEXTMOVE, containerFactory = "myJmsContainerFactory", concurrency = "100")
@@ -132,10 +104,10 @@ public class InternalQueue {
     public void noarkListener(byte[] message, Session session) {
         StandardBusinessDocument sbd = documentConverter.unmarshallFrom(message);
         try {
-            forwardToNoark(sbd);
+            integrajonspunktReceive.forwardToNoarkSystem(sbd);
         } catch (Exception e) {
-            Audit.warn("Failed to forward message.. queue will retry", sbd.createLogstashMarkers(), e);
-            throw e;
+            Audit.warn("Failed delivering message to archive.. queue will retry", markerFrom(sbd), e);
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
     }
 
@@ -157,7 +129,7 @@ public class InternalQueue {
             conversationId = nextMoveMessage.getConversationId();
             Audit.error(errorMsg, NextMoveMessageMarkers.markerFrom(nextMoveMessage));
             if (properties.getNoarkSystem().isEnable() && noarkClient != null) {
-                sendErrorAppReceipt(nextMoveMessage, errorMsg);
+                sendBestEduErrorAppReceipt(nextMoveMessage, errorMsg);
             }
         } catch (IOException e) {
         }
@@ -166,9 +138,9 @@ public class InternalQueue {
         try {
             StandardBusinessDocument sbd = documentConverter.unmarshallFrom(message);
             errorMsg = "Failed to forward message to noark system. Moved to DLQ.";
-            Audit.error(errorMsg, sbd.createLogstashMarkers());
+            Audit.error(errorMsg, markerFrom(sbd));
             conversationId = sbd.getConversationId();
-            sendErrorAppReceipt(sbd);
+            sendBestEduErrorAppReceipt(sbd);
         } catch (Exception e) {
         }
 
@@ -176,31 +148,13 @@ public class InternalQueue {
         conversationService.registerStatus(conversationId, ms);
     }
 
-    private void writeMessageToDisk(EDUCore request) {
-        PutMessageRequestType putMessage = EDUCoreFactory.createPutMessageFromCore(request);
-        try {
-            Marshaller marshaller = jaxbContext.createMarshaller();
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            marshaller.marshal(new JAXBElement<>(new QName("uri", "local"), PutMessageRequestType.class, putMessage), bos);
-            FileOutputStream fos = new FileOutputStream(new File("failed_messages/" + request.getId() + "_failed.xml"));
-            bos.writeTo(fos);
-        } catch (JAXBException | IOException e) {
-            log.error("Failed writing message to disk", e);
-        }
-    }
-
-    private void sendErrorAppReceipt(NextMoveOutMessage message, String errorText) {
+    private void sendBestEduErrorAppReceipt(NextMoveOutMessage message, String errorText) {
         AppReceiptType appReceipt = AppReceiptFactory.from("ERROR", "Unknown", errorText);
-
-        EDUCore eduCore = eduCoreFactory.create(appReceipt,
-                message.getConversationId(),
-                message.getSenderIdentifier(),
-                message.getReceiverIdentifier());
-        PutMessageRequestType putMessage = EDUCoreFactory.createPutMessageFromCore(eduCore);
+        PutMessageRequestType putMessage = putMessageRequestFactory.create(message.getSbd(), BestEduConverter.appReceiptAsString(appReceipt));
         noarkClient.sendEduMelding(putMessage);
     }
 
-    private void sendErrorAppReceipt(StandardBusinessDocument sbd) {
+    private void sendBestEduErrorAppReceipt(StandardBusinessDocument sbd) {
         String errorText = String.format("Feilet under mottak hos %s - ble ikke avlevert sakarkivsystem", sbd.getReceiverIdentifier());
         ArkivmeldingKvitteringMessage kvittering = new ArkivmeldingKvitteringMessage()
                 .setReceiptType("ERROR")
@@ -233,15 +187,6 @@ public class InternalQueue {
      */
     public void enqueueNoark(StandardBusinessDocument sbd) {
         jmsTemplate.convertAndSend(NOARK, documentConverter.marshallToBytes(sbd));
-    }
-
-    public void forwardToNoark(StandardBusinessDocument sbd) {
-        try {
-            sendToNoarkSystem(sbd);
-        } catch (Exception e) {
-            Audit.error("Failed to unserialize SBD");
-            throw new MeldingsUtvekslingRuntimeException("Could not forward document to archive system", e);
-        }
     }
 
     private void sendToNoarkSystem(StandardBusinessDocument sbd) {

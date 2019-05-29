@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.mail;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.core.EDUCoreConverter;
+import no.difi.meldingsutveksling.core.BestEduConverter;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
@@ -64,7 +64,7 @@ public class EduMailSender {
             } else {
                 mimeBodyPart.setText("Du har fått en BestEdu melding. Se vedlegg for metadata og dokumenter.");
 
-                MeldingType meldingType = EDUCoreConverter.payloadAsMeldingType(request.getPayload());
+                MeldingType meldingType = BestEduConverter.payloadAsMeldingType(request.getPayload());
                 List<DokumentType> docs = meldingType.getJournpost().getDokument();
                 for (DokumentType doc : docs) {
                     ByteArrayDataSource ds = new ByteArrayDataSource(doc.getFil().getBase64(), doc.getVeMimeType());
@@ -75,7 +75,7 @@ public class EduMailSender {
                     // Set file content to null since we want the payload xml later as attachement
                     doc.getFil().setBase64(null);
                 }
-                String payload = EDUCoreConverter.meldingTypeAsString(meldingType);
+                String payload = BestEduConverter.meldingTypeAsString(meldingType);
                 MimeBodyPart payloadAttachement = new MimeBodyPart();
                 ByteArrayDataSource ds = new ByteArrayDataSource(payload.getBytes(), "application/xml");
                 payloadAttachement.setDataHandler(new DataHandler(ds));

@@ -7,7 +7,7 @@ import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.core.EDUCoreConverter;
+import no.difi.meldingsutveksling.core.BestEduConverter;
 import no.difi.meldingsutveksling.domain.sbdh.CorrelationInformation;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -125,7 +125,7 @@ public class IntegrajonspunktReceiveImpl {
         if (sbdUtil.isReceipt(sbd)) {
             ArkivmeldingKvitteringMessage message = (ArkivmeldingKvitteringMessage) sbd.getAny();
             AppReceiptType appReceiptType = AppReceiptFactory.from(message);
-            PutMessageRequestType putMessage = putMessageRequestFactory.create(sbd, EDUCoreConverter.appReceiptAsString(appReceiptType));
+            PutMessageRequestType putMessage = putMessageRequestFactory.create(sbd, BestEduConverter.appReceiptAsString(appReceiptType));
 
             Optional<Conversation> c = conversationService.registerStatus(sbd.getConversationId(), messageStatusFactory.getMessageStatus(ReceiptStatus.LEST));
             c.ifPresent(conversationService::markFinished);
@@ -141,7 +141,7 @@ public class IntegrajonspunktReceiveImpl {
             byte[] asic = new Decryptor(keyInfo).decrypt(asicBytes);
             Arkivmelding arkivmelding = convertAsicEntryToArkivmelding(asic);
             MeldingType meldingType = MeldingFactory.create(arkivmelding, asic);
-            return putMessageRequestFactory.create(sbd, EDUCoreConverter.meldingTypeAsString(meldingType));
+            return putMessageRequestFactory.create(sbd, BestEduConverter.meldingTypeAsString(meldingType));
         }
     }
 
@@ -159,7 +159,7 @@ public class IntegrajonspunktReceiveImpl {
                 sendLevertStatus(sbd);
                 if (localNoark instanceof MailClient && !sbdUtil.isReceipt(sbd)) {
                     // Need to send AppReceipt manually in case receiver is mail
-                    putMessage.setPayload(EDUCoreConverter.appReceiptAsString(result));
+                    putMessage.setPayload(BestEduConverter.appReceiptAsString(result));
                     PutMessageRequestWrapper putMessageWrapper = new PutMessageRequestWrapper(putMessage);
                     putMessageWrapper.swapSenderAndReceiver();
                     nextMoveMessageService.convertAndSend(putMessageWrapper);

@@ -36,7 +36,7 @@ public class CreateAsice {
                 mainAttachment.getFileName(), mainAttachment.getMimeType());
         AsicWriter asicWriter = AsicWriterFactory.newFactory()
                 .newContainer(archive)
-                .add(new ByteArrayInputStream(manifest.getBytes()), "manifest.xml");
+                .add(new ByteArrayInputStream(manifest.getBytes()), "manifest.xml", MimeType.XML);
 
         files.forEach(f -> {
             try {
