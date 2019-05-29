@@ -23,7 +23,7 @@ import static java.util.Optional.ofNullable;
 @RequiredArgsConstructor
 public class ArkivmeldingFactory {
 
-    public Arkivmelding createArkivmeldingAndWriteFiles(PutMessageRequestWrapper putMessage) {
+    public Arkivmelding from(PutMessageRequestWrapper putMessage) {
         MeldingType mt = BestEduConverter.payloadAsMeldingType(putMessage.getPayload());
         no.arkivverket.standarder.noark5.arkivmelding.ObjectFactory amOf = new no.arkivverket.standarder.noark5.arkivmelding.ObjectFactory();
         Arkivmelding am = amOf.createArkivmelding();
@@ -37,15 +37,30 @@ public class ArkivmeldingFactory {
         ofNullable(mt.getNoarksak().getSaAnsvinit()).ifPresent(sm::setSaksansvarlig);
         ofNullable(mt.getNoarksak().getSaAdmkort()).ifPresent(sm::setAdministrativEnhet);
         ofNullable(mt.getNoarksak().getSaOfftittel()).ifPresent(sm::setOffentligTittel);
+        ofNullable(mt.getNoarksak().getSaId()).ifPresent(sm::setSystemID);
+        ofNullable(mt.getNoarksak().getSaDato()).map(ArkivmeldingUtil::stringAsXmlGregorianCalendar).ifPresent(sm::setSaksdato);
+        ofNullable(mt.getNoarksak().getSaTittel()).ifPresent(sm::setTittel);
+        ofNullable(mt.getNoarksak().getSaStatus()).map(SaksstatusMapper::getArkivmeldingType).ifPresent(sm::setSaksstatus);
+        ofNullable(mt.getNoarksak().getSaArkdel()).ifPresent(sa -> sm.getReferanseArkivdel().add(sa));
+        ofNullable(mt.getNoarksak().getSaJenhet()).ifPresent(sm::setJournalenhet);
 
         if (mt.getJournpost() == null) {
             throw new MeldingsUtvekslingRuntimeException(format("No Journpost in MeldingType for message %s, aborting conversion", putMessage.getConversationId()));
         }
         Journalpost jp = amOf.createJournalpost();
+
+        ofNullable(mt.getJournpost().getJpId()).ifPresent(jp::setSystemID);
+        ofNullable(mt.getJournpost().getJpInnhold()).ifPresent(jp::setTittel);
         ofNullable(mt.getJournpost().getJpJaar()).map(BigInteger::new).ifPresent(jp::setJournalaar);
+        ofNullable(mt.getJournpost().getJpForfdato()).map(ArkivmeldingUtil::stringAsXmlGregorianCalendar).ifPresent(jp::setForfallsdato);
         ofNullable(mt.getJournpost().getJpSeknr()).map(BigInteger::new).ifPresent(jp::setJournalsekvensnummer);
         ofNullable(mt.getJournpost().getJpJpostnr()).map(BigInteger::new).ifPresent(jp::setJournalpostnummer);
         ofNullable(mt.getJournpost().getJpNdoktype()).map(JournalposttypeMapper::getArkivmeldingType).ifPresent(jp::setJournalposttype);
+        ofNullable(mt.getJournpost().getJpStatus()).map(JournalstatusMapper::getArkivmeldingType).ifPresent(jp::setJournalstatus);
+        ofNullable(mt.getJournpost().getJpArkdel()).ifPresent(jp::setReferanseArkivdel);
+        ofNullable(mt.getJournpost().getJpAntved()).map(BigInteger::new).ifPresent(jp::setAntallVedlegg);
+        ofNullable(mt.getJournpost().getJpOffinnhold()).ifPresent(jp::setOffentligTittel);
+
         Skjerming skjerming = amOf.createSkjerming();
         ofNullable(mt.getJournpost().getJpUoff()).ifPresent(skjerming::setSkjermingshjemmel);
         sm.setSkjerming(skjerming);

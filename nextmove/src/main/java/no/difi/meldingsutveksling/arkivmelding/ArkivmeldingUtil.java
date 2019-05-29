@@ -22,6 +22,8 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 public class ArkivmeldingUtil {
 
     private ArkivmeldingUtil() {
@@ -71,6 +73,10 @@ public class ArkivmeldingUtil {
     }
 
     public static XMLGregorianCalendar stringAsXmlGregorianCalendar(String date) {
+        if (isNullOrEmpty(date)) {
+            return null;
+        }
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate localDate = LocalDate.parse(date, formatter);
         GregorianCalendar gcal = GregorianCalendar.from(localDate.atStartOfDay(ZoneId.systemDefault()));

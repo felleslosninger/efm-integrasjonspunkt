@@ -4,10 +4,7 @@ import lombok.experimental.UtilityClass;
 import no.arkivverket.standarder.noark5.arkivmelding.*;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.arkivmelding.AvskrivningsmaateMapper;
-import no.difi.meldingsutveksling.domain.arkivmelding.JournalposttypeMapper;
-import no.difi.meldingsutveksling.domain.arkivmelding.TilknyttetRegistreringSomMapper;
-import no.difi.meldingsutveksling.domain.arkivmelding.VariantformatMapper;
+import no.difi.meldingsutveksling.domain.arkivmelding.*;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.*;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.ObjectFactory;
 import org.apache.commons.io.IOUtils;
@@ -16,6 +13,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -37,16 +35,33 @@ public class MeldingFactory {
         noarksakType.setSaAnsvinit(sm.getSaksansvarlig());
         noarksakType.setSaAdmkort(sm.getAdministrativEnhet());
         noarksakType.setSaOfftittel(sm.getOffentligTittel());
+        noarksakType.setSaId(sm.getSystemID());
+        ofNullable(sm.getSaksdato()).map(xmlGregCalToString).ifPresent(noarksakType::setSaDato);
+        noarksakType.setSaTittel(sm.getTittel());
+        ofNullable(sm.getSaksstatus()).map(SaksstatusMapper::getNoarkType).ifPresent(noarksakType::setSaStatus);
+        ofNullable(sm.getJournalenhet()).ifPresent(noarksakType::setSaJenhet);
+        if (!sm.getReferanseArkivdel().isEmpty()) {
+            noarksakType.setSaArkdel(sm.getReferanseArkivdel().get(0));
+        }
 
         JournpostType journpostType = of.createJournpostType();
+        ofNullable(jp.getSystemID()).ifPresent(journpostType::setJpId);
+        ofNullable(jp.getTittel()).ifPresent(journpostType::setJpInnhold);
         ofNullable(jp.getJournalaar()).map(BigInteger::toString).ifPresent(journpostType::setJpJaar);
         ofNullable(jp.getJournalsekvensnummer()).map(BigInteger::toString).ifPresent(journpostType::setJpSeknr);
         ofNullable(jp.getJournalpostnummer()).map(BigInteger::toString).ifPresent(journpostType::setJpJpostnr);
-        ofNullable(jp.getJournaldato()).map(XMLGregorianCalendar::toString).ifPresent(journpostType::setJpJdato);
+        ofNullable(jp.getJournaldato()).map(xmlGregCalToString).ifPresent(journpostType::setJpJdato);
+        ofNullable(jp.getJournaldato()).map(xmlGregCalToString).ifPresent(journpostType::setJpJdato);
+        ofNullable(jp.getForfallsdato()).map(xmlGregCalToString).ifPresent(journpostType::setJpForfdato);
         ofNullable(jp.getJournalposttype()).map(JournalposttypeMapper::getNoarkType).ifPresent(journpostType::setJpNdoktype);
-        ofNullable(jp.getDokumentetsDato()).map(XMLGregorianCalendar::toString).ifPresent(journpostType::setJpDokdato);
+        ofNullable(jp.getDokumentetsDato()).map(xmlGregCalToString).ifPresent(journpostType::setJpDokdato);
+        ofNullable(jp.getJournalstatus()).map(JournalstatusMapper::getNoarkType).ifPresent(journpostType::setJpStatus);
+        ofNullable(jp.getReferanseArkivdel()).ifPresent(journpostType::setJpArkdel);
+        ofNullable(jp.getAntallVedlegg()).map(BigInteger::toString).ifPresent(journpostType::setJpAntved);
+        ofNullable(jp.getOffentligTittel()).ifPresent(journpostType::setJpOffinnhold);
         ofNullable(sm.getSkjerming()).map(Skjerming::getSkjermingshjemmel).ifPresent(journpostType::setJpUoff);
-
+        ofNullable(sm.getSaksaar()).map(BigInteger::toString).ifPresent(journpostType::setJpSaar);
+        ofNullable(sm.getSakssekvensnummer()).map(BigInteger::toString).ifPresent(journpostType::setJpSaseknr);
 
         jp.getKorrespondansepart().forEach(k -> {
             AvsmotType avsmotType = of.createAvsmotType();
@@ -62,7 +77,7 @@ public class MeldingFactory {
             if (!jp.getAvskrivning().isEmpty()) {
                 Avskrivning avs = jp.getAvskrivning().get(0);
                 ofNullable(avs.getAvskrivningsmaate()).map(AvskrivningsmaateMapper::getNoarkType).ifPresent(avsmotType::setAmAvskm);
-                ofNullable(avs.getAvskrivningsdato()).map(XMLGregorianCalendar::toString).ifPresent(avsmotType::setAmAvskdato);
+                ofNullable(avs.getAvskrivningsdato()).map(xmlGregCalToString).ifPresent(avsmotType::setAmAvskdato);
                 avsmotType.setAmAvsavdok(avs.getReferanseAvskrivesAvJournalpost());
             }
 
@@ -83,6 +98,8 @@ public class MeldingFactory {
 
         return meldingType;
     }
+
+    private Function<XMLGregorianCalendar, String> xmlGregCalToString = x -> x.toGregorianCalendar().toZonedDateTime().toLocalDate().toString();
 
     private DokumentType createDokumentType(Dokumentbeskrivelse db, Dokumentobjekt dobj, byte[] asic) {
         ObjectFactory of = new ObjectFactory();
