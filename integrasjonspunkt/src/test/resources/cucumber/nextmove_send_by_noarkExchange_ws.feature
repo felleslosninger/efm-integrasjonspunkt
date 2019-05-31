@@ -241,46 +241,59 @@ Feature: Sending a BEST/EDU message by the noarkExchange WebService
     """
     And the content of the file named "arkivmelding.xml" is:
     """
-    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-    <arkivmelding xmlns="http://www.arkivverket.no/standarder/noark5/arkivmelding">
-        <antallFiler>0</antallFiler>
-        <mappe xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="saksmappe">
-            <offentligTittel>Test18 - Difi</offentligTittel>
-            <skjerming>
-                <skjermingshjemmel></skjermingshjemmel>
-            </skjerming>
-            <basisregistrering xsi:type="journalpost">
-                <dokumentbeskrivelse>
-                    <tittel>Test18 - liten fil - 22.04.16</tittel>
-                    <tilknyttetRegistreringSom>Hoveddokument</tilknyttetRegistreringSom>
-                    <dokumentnummer>1</dokumentnummer>
-                    <dokumentobjekt>
-                        <variantformat>Arkivformat</variantformat>
-                        <referanseDokumentfil>test.txt</referanseDokumentfil>
-                    </dokumentobjekt>
-                </dokumentbeskrivelse>
-                <journalaar>2016</journalaar>
-                <journalsekvensnummer>25</journalsekvensnummer>
-                <journalpostnummer>13</journalpostnummer>
-                <journalposttype>Utgående dokument</journalposttype>
-                <journaldato>2016-03-21</journaldato>
-                <dokumentetsDato>2016-03-21</dokumentetsDato>
-                <korrespondansepart>
-                    <korrespondanseparttype>Mottaker</korrespondanseparttype>
-                    <korrespondansepartNavn>Kontoret for voldsoffererstatning</korrespondansepartNavn>
-                    <administrativEnhet>[Ufordelt]</administrativEnhet>
-                    <saksbehandler>[Ufordelt]</saksbehandler>
-                </korrespondansepart>
-                <avskrivning>
-                    <referanseAvskrivesAvJournalpost></referanseAvskrivesAvJournalpost>
-                </avskrivning>
-            </basisregistrering>
-            <saksaar>2016</saksaar>
-            <sakssekvensnummer>1</sakssekvensnummer>
-            <administrativEnhet>ES-ADM</administrativEnhet>
-            <saksansvarlig>MABE</saksansvarlig>
-        </mappe>
-    </arkivmelding>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<arkivmelding xmlns="http://www.arkivverket.no/standarder/noark5/arkivmelding">
+    <antallFiler>0</antallFiler>
+    <mappe xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="saksmappe">
+        <systemID>6</systemID>
+        <tittel>Test18 - Difi</tittel>
+        <offentligTittel>Test18 - Difi</offentligTittel>
+        <referanseArkivdel>SAK1</referanseArkivdel>
+        <skjerming>
+            <skjermingshjemmel/>
+        </skjerming>
+        <basisregistrering xsi:type="journalpost">
+            <systemID>40</systemID>
+            <referanseArkivdel/>
+            <dokumentbeskrivelse>
+                <tittel>Test18 - liten fil - 22.04.16</tittel>
+                <tilknyttetRegistreringSom>Hoveddokument</tilknyttetRegistreringSom>
+                <dokumentnummer>1</dokumentnummer>
+                <dokumentobjekt>
+                    <variantformat>Arkivformat</variantformat>
+                    <referanseDokumentfil>test.txt</referanseDokumentfil>
+                </dokumentobjekt>
+            </dokumentbeskrivelse>
+            <tittel>Test - liten fil - 22.04.16</tittel>
+            <offentligTittel>Test18 - liten fil - 22.04.16
+      </offentligTittel>
+            <journalaar>2016</journalaar>
+            <journalsekvensnummer>25</journalsekvensnummer>
+            <journalpostnummer>13</journalpostnummer>
+            <journalposttype>Utgående dokument</journalposttype>
+            <journalstatus>Godkjent av leder</journalstatus>
+            <journaldato>2016-03-21</journaldato>
+            <dokumentetsDato>2016-03-21</dokumentetsDato>
+            <antallVedlegg>0</antallVedlegg>
+            <korrespondansepart>
+                <korrespondanseparttype>Mottaker</korrespondanseparttype>
+                <korrespondansepartNavn>Kontoret for voldsoffererstatning</korrespondansepartNavn>
+                <administrativEnhet>[Ufordelt]</administrativEnhet>
+                <saksbehandler>[Ufordelt]</saksbehandler>
+            </korrespondansepart>
+            <avskrivning>
+                <referanseAvskrivesAvJournalpost/>
+            </avskrivning>
+        </basisregistrering>
+        <saksaar>2016</saksaar>
+        <sakssekvensnummer>1</sakssekvensnummer>
+        <saksdato>2016-01-25Z</saksdato>
+        <administrativEnhet>ES-ADM</administrativEnhet>
+        <saksansvarlig>MABE</saksansvarlig>
+        <journalenhet>SIVHJ</journalenhet>
+        <saksstatus>Under behandling</saksstatus>
+    </mappe>
+</arkivmelding>
     """
     And the content of the file named "test.txt" is:
     """

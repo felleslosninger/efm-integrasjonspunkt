@@ -152,7 +152,7 @@ public class NextMoveMessageService {
     private NextMoveOutMessage convertEduMessage(PutMessageRequestWrapper message) throws PayloadException, JAXBException {
         List<NoarkDocument> noarkDocuments = PayloadUtil.parsePayloadForDocuments(message.getPayload());
 
-        Arkivmelding arkivmelding = arkivmeldingFactory.createArkivmeldingAndWriteFiles(message);
+        Arkivmelding arkivmelding = arkivmeldingFactory.from(message);
         byte[] arkivmeldingBytes = ArkivmeldingUtil.marshalArkivmelding(arkivmelding);
 
         StandardBusinessDocument sbd = createSBD.createNextMoveSBD(Organisasjonsnummer.from(message.getSenderPartynumber()),
