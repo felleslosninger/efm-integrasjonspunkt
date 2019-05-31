@@ -38,7 +38,7 @@ public class ArkivmeldingFactory {
         ofNullable(mt.getNoarksak().getSaAdmkort()).ifPresent(sm::setAdministrativEnhet);
         ofNullable(mt.getNoarksak().getSaOfftittel()).ifPresent(sm::setOffentligTittel);
         ofNullable(mt.getNoarksak().getSaId()).ifPresent(sm::setSystemID);
-        ofNullable(mt.getNoarksak().getSaDato()).map(ArkivmeldingUtil::stringAsXmlGregorianCalendar).ifPresent(sm::setSaksdato);
+        ofNullable(mt.getNoarksak().getSaDato()).map(DateTimeUtil::toXMLGregorianCalendar).ifPresent(sm::setSaksdato);
         ofNullable(mt.getNoarksak().getSaTittel()).ifPresent(sm::setTittel);
         ofNullable(mt.getNoarksak().getSaStatus()).map(SaksstatusMapper::getArkivmeldingType).ifPresent(sm::setSaksstatus);
         ofNullable(mt.getNoarksak().getSaArkdel()).ifPresent(sa -> sm.getReferanseArkivdel().add(sa));
@@ -52,7 +52,7 @@ public class ArkivmeldingFactory {
         ofNullable(mt.getJournpost().getJpId()).ifPresent(jp::setSystemID);
         ofNullable(mt.getJournpost().getJpInnhold()).ifPresent(jp::setTittel);
         ofNullable(mt.getJournpost().getJpJaar()).map(BigInteger::new).ifPresent(jp::setJournalaar);
-        ofNullable(mt.getJournpost().getJpForfdato()).map(ArkivmeldingUtil::stringAsXmlGregorianCalendar).ifPresent(jp::setForfallsdato);
+        ofNullable(mt.getJournpost().getJpForfdato()).map(DateTimeUtil::toXMLGregorianCalendar).ifPresent(jp::setForfallsdato);
         ofNullable(mt.getJournpost().getJpSeknr()).map(BigInteger::new).ifPresent(jp::setJournalsekvensnummer);
         ofNullable(mt.getJournpost().getJpJpostnr()).map(BigInteger::new).ifPresent(jp::setJournalpostnummer);
         ofNullable(mt.getJournpost().getJpNdoktype()).map(JournalposttypeMapper::getArkivmeldingType).ifPresent(jp::setJournalposttype);
