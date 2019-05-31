@@ -19,7 +19,7 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
@@ -68,7 +68,7 @@ public class NextMoveOutMessageFactory {
         }
 
         if (documentIdentification.getCreationDateAndTime() == null) {
-            documentIdentification.setCreationDateAndTime(ZonedDateTime.now(clock));
+            documentIdentification.setCreationDateAndTime(OffsetDateTime.now(clock));
         }
 
         if (serviceRecord.getServiceIdentifier() == ServiceIdentifier.DPI) {

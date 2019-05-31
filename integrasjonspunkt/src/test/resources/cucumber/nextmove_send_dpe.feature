@@ -14,7 +14,7 @@ Feature: Sending a Next Move DPE message
                     {
                         "scopeInformation": [
                             {
-                                "expectedResponseDateTime": "2019-05-10T00:31:52Z"
+                                "expectedResponseDateTime": "2019-05-10T00:31:52+01:00"
                             }
                         ],
                         "identifier": "urn:no:difi:profile:einnsyn-innsynskrav:ver1.0",
@@ -24,7 +24,7 @@ Feature: Sending a Next Move DPE message
                 ]
             },
             "documentIdentification": {
-                "creationDateAndTime": "2019-03-25T11:35:00Z",
+                "creationDateAndTime": "2019-03-25T11:35:00+01:00",
                 "instanceIdentifier": "abc8849c-e281-4809-8555-7cd54952b916",
                 "standard": "urn:no:difi:einnsyn:xsd:innsyn::innsynskrav",
                 "type": "innsynskrav",
@@ -85,7 +85,7 @@ Feature: Sending a Next Move DPE message
             "typeVersion" : "2.0",
             "instanceIdentifier" : "abc8849c-e281-4809-8555-7cd54952b916",
             "type" : "innsynskrav",
-            "creationDateAndTime" : "2019-03-25T11:35:00Z"
+            "creationDateAndTime" : "2019-03-25T11:35:00+01:00"
           },
           "businessScope" : {
             "scope" : [ {
@@ -93,7 +93,7 @@ Feature: Sending a Next Move DPE message
               "instanceIdentifier" : "45efbd4c-413d-4e2c-bbc5-257ef4a65a91",
               "identifier" : "urn:no:difi:profile:einnsyn-innsynskrav:ver1.0",
               "scopeInformation" : [ {
-                "expectedResponseDateTime" : "2019-05-10T00:31:52Z"
+                "expectedResponseDateTime" : "2019-05-10T00:31:52+01:00"
               } ]
             } ]
           }

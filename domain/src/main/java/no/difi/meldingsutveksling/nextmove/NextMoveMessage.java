@@ -9,7 +9,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.hibernate.annotations.DiscriminatorOptions;
 
 import javax.persistence.*;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -68,7 +68,7 @@ abstract public class NextMoveMessage extends AbstractEntity<Long> implements Me
     }
 
     @Override
-    public ZonedDateTime getExpiry() {
+    public OffsetDateTime getExpiry() {
         return getSbd().getExpectedResponseDateTime().orElse(null);
     }
 }

@@ -1,9 +1,9 @@
 package no.difi.meldingsutveksling.ks.mapping;
 
-import com.google.common.base.Strings;
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.*;
 import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
+import no.difi.meldingsutveksling.DateTimeUtil;
 import no.difi.meldingsutveksling.InputStreamDataSource;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
@@ -11,7 +11,6 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
-import no.difi.meldingsutveksling.ks.mapping.edu.FileTypeHandlerFactory;
 import no.difi.meldingsutveksling.ks.svarut.*;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveException;
@@ -19,9 +18,6 @@ import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
-import no.difi.meldingsutveksling.noarkexchange.schema.core.AvsmotType;
-import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
-import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.pipes.Pipe;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
@@ -30,16 +26,13 @@ import org.springframework.stereotype.Component;
 
 import javax.activation.DataHandler;
 import javax.xml.bind.JAXBException;
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
-import java.time.*;
-import java.util.*;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -54,20 +47,17 @@ public class FiksMapper {
     private final CryptoMessagePersister cryptoMessagePersister;
     private final UUIDGenerator uuidGenerator;
     private final ObjectProvider<CmsUtil> cmsUtilProvider;
-    private final Clock clock;
 
     public FiksMapper(IntegrasjonspunktProperties properties,
                       ServiceRegistryLookup serviceRegistry,
                       CryptoMessagePersister cryptoMessagePersister,
                       UUIDGenerator uuidGenerator,
-                      ObjectProvider<CmsUtil> cmsUtilProvider,
-                      Clock clock) {
+                      ObjectProvider<CmsUtil> cmsUtilProvider) {
         this.properties = properties;
         this.serviceRegistry = serviceRegistry;
         this.cryptoMessagePersister = cryptoMessagePersister;
         this.uuidGenerator = uuidGenerator;
         this.cmsUtilProvider = cmsUtilProvider;
-        this.clock = clock;
     }
 
     public SendForsendelseMedId mapFrom(NextMoveOutMessage message, X509Certificate certificate) throws NextMoveException {
@@ -198,26 +188,11 @@ public class FiksMapper {
                 .withJournalpostnummer(toInt(jp.getJournalpostnummer()))
                 .withJournalposttype(jp.getJournalposttype().value())
                 .withJournalstatus(jp.getJournalstatus().value())
-                .withJournaldato(toDateTime(jp.getJournaldato()))
+                .withJournaldato(DateTimeUtil.atStartOfDay(jp.getJournaldato()))
                 .withDokumentetsDato(jp.getDokumentetsDato())
                 .withTittel(jp.getOffentligTittel())
                 .withSaksbehandler(getSaksbehandler(jp).orElse(null))
                 .build();
-    }
-
-    private XMLGregorianCalendar toDateTime(XMLGregorianCalendar in) {
-        if (in == null) {
-            return null;
-        }
-
-        try {
-            GregorianCalendar cal = in.toGregorianCalendar(TimeZone.getTimeZone(clock.getZone()), null, null);
-            XMLGregorianCalendar out = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
-            out.setTime(0, 0, 0, 0);
-            return out;
-        } catch (DatatypeConfigurationException e) {
-            throw new NextMoveRuntimeException("Could not convert DateTime to " + XMLGregorianCalendar.class, e);
-        }
     }
 
     private Optional<String> getSaksbehandler(Journalpost jp) {
@@ -229,46 +204,6 @@ public class FiksMapper {
 
     private int toInt(BigInteger x) {
         return x == null ? 0 : x.intValueExact();
-    }
-
-    private NoarkMetadataFraAvleverendeSakssystem metaDataFrom(MeldingType meldingType) {
-        return NoarkMetadataFraAvleverendeSakssystem.builder()
-                .withSakssekvensnummer(Integer.valueOf(meldingType.getNoarksak().getSaSeknr()))
-                .withSaksaar(Integer.valueOf(meldingType.getNoarksak().getSaSaar()))
-                .withJournalaar(Integer.valueOf(meldingType.getJournpost().getJpJaar()))
-                .withJournalsekvensnummer(Integer.valueOf(meldingType.getJournpost().getJpSeknr()))
-                .withJournalpostnummer(Integer.valueOf(meldingType.getJournpost().getJpJpostnr()))
-                .withJournalposttype(meldingType.getJournpost().getJpNdoktype())
-                .withJournalstatus(meldingType.getJournpost().getJpStatus())
-                .withJournaldato(journalDatoFrom(meldingType.getJournpost().getJpJdato()))
-                .withDokumentetsDato(journalDatoFrom(meldingType.getJournpost().getJpDokdato()))
-                .withTittel(meldingType.getJournpost().getJpOffinnhold())
-                .withSaksbehandler(getAvsender(meldingType).orElse(null))
-                .build();
-    }
-
-
-    private Optional<String> getAvsender(MeldingType meldingType) {
-        return meldingType.getJournpost().getAvsmot()
-                .stream()
-                .filter(f -> "0".equals(f.getAmIhtype()))
-                .map(AvsmotType::getAmNavn)
-                .findFirst();
-    }
-
-    private XMLGregorianCalendar journalDatoFrom(String jpDato) {
-        if (Strings.isNullOrEmpty(jpDato)) {
-            return null;
-        }
-
-        LocalDateTime localDateTime = LocalDateTime.of(LocalDate.parse(jpDato), LocalTime.of(0, 0));
-
-        GregorianCalendar gcal = GregorianCalendar.from(localDateTime.atZone(ZoneId.systemDefault()));
-        try {
-            return DatatypeFactory.newInstance().newXMLGregorianCalendar(gcal);
-        } catch (DatatypeConfigurationException e) {
-            throw new ForsendelseMappingException("Unable to map date", e);
-        }
     }
 
     private Adresse mottakerFrom(Korrespondansepart kp, String orgnr) {
@@ -309,15 +244,5 @@ public class FiksMapper {
         }
 
         return builder.build();
-    }
-
-    private List<Dokument> mapFrom(List<DokumentType> dokumentTypes, FileTypeHandlerFactory fileTypeHandlerFactory) {
-        return dokumentTypes.stream()
-                .map(d -> fileTypeHandlerFactory.createFileTypeHandler(d)
-                        .map(Dokument.builder())
-                        .withFilnavn(d.getVeFilnavn())
-                        .withMimetype(d.getVeMimeType())
-                        .build())
-                .collect(Collectors.toList());
     }
 }

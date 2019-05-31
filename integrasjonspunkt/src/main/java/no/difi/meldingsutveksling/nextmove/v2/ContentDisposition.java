@@ -7,7 +7,7 @@ import org.springframework.util.Assert;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,9 +25,9 @@ public final class ContentDisposition {
     private final String filename;
     private final Charset charset;
     private final Long size;
-    private final ZonedDateTime creationDate;
-    private final ZonedDateTime modificationDate;
-    private final ZonedDateTime readDate;
+    private final OffsetDateTime creationDate;
+    private final OffsetDateTime modificationDate;
+    private final OffsetDateTime readDate;
 
 
     /**
@@ -97,9 +97,9 @@ public final class ContentDisposition {
         String filename = null;
         Charset charset = null;
         Long size = null;
-        ZonedDateTime creationDate = null;
-        ZonedDateTime modificationDate = null;
-        ZonedDateTime readDate = null;
+        OffsetDateTime creationDate = null;
+        OffsetDateTime modificationDate = null;
+        OffsetDateTime readDate = null;
         for (int i = 1; i < parts.size(); i++) {
             String part = parts.get(i);
             int eqIndex = part.indexOf('=');
@@ -121,19 +121,19 @@ public final class ContentDisposition {
                     size = Long.parseLong(value);
                 } else if (attribute.equals("creation-date")) {
                     try {
-                        creationDate = ZonedDateTime.parse(value, RFC_1123_DATE_TIME);
+                        creationDate = OffsetDateTime.parse(value, RFC_1123_DATE_TIME);
                     } catch (DateTimeParseException ex) {
                         // ignore
                     }
                 } else if (attribute.equals("modification-date")) {
                     try {
-                        modificationDate = ZonedDateTime.parse(value, RFC_1123_DATE_TIME);
+                        modificationDate = OffsetDateTime.parse(value, RFC_1123_DATE_TIME);
                     } catch (DateTimeParseException ex) {
                         // ignore
                     }
                 } else if (attribute.equals("read-date")) {
                     try {
-                        readDate = ZonedDateTime.parse(value, RFC_1123_DATE_TIME);
+                        readDate = OffsetDateTime.parse(value, RFC_1123_DATE_TIME);
                     } catch (DateTimeParseException ex) {
                         // ignore
                     }

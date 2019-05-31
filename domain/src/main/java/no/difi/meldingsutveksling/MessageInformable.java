@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling;
 
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 
 public interface MessageInformable {
 
@@ -16,5 +16,5 @@ public interface MessageInformable {
 
     ServiceIdentifier getServiceIdentifier();
 
-    ZonedDateTime getExpiry();
+    OffsetDateTime getExpiry();
 }

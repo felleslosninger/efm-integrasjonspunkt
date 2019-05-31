@@ -10,6 +10,7 @@ import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.IntegrasjonspunktApplication;
 import no.difi.meldingsutveksling.KeystoreProvider;
 import no.difi.meldingsutveksling.UUIDGenerator;
+import no.difi.meldingsutveksling.clock.TestClockConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dpi.SikkerDigitalPostKlientFactory;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
@@ -56,9 +57,6 @@ import org.springframework.ws.transport.http.AbstractHttpWebServiceMessageSender
 
 import javax.transaction.Transactional;
 import javax.xml.bind.Marshaller;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -71,7 +69,8 @@ import static org.mockito.Mockito.spy;
 
 @ContextConfiguration(classes = {
         IntegrasjonspunktApplication.class,
-        CucumberStepsConfiguration.SpringConfiguration.class
+        CucumberStepsConfiguration.SpringConfiguration.class,
+        TestClockConfig.class
 }, loader = SpringBootContextLoader.class)
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
@@ -213,12 +212,6 @@ public class CucumberStepsConfiguration {
             doReturn(new InfoRecord()
                     .setOrganizationName("Test - C2")).when(spy).getInfoRecord("974720760");
             return spy;
-        }
-
-        @Bean
-        @Primary
-        public Clock clock() {
-            return new TestClock(Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), ZoneId.of("UTC")));
         }
 
         @Bean

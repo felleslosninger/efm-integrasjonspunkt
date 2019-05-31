@@ -12,7 +12,7 @@ Feature: Receiving an expired Next Move DPO message
                     {
                         "scopeInformation": [
                             {
-                                "expectedResponseDateTime": "2019-03-25T11:00:00Z"
+                                "expectedResponseDateTime": "2019-03-25T11:00:00+01:00"
                             }
                         ],
                         "identifier": "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
@@ -22,7 +22,7 @@ Feature: Receiving an expired Next Move DPO message
                 ]
             },
             "documentIdentification": {
-                "creationDateAndTime": "2019-03-25T11:35:00Z",
+                "creationDateAndTime": "2019-03-25T11:35:00+01:00",
                 "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
                 "standard": "urn:no:difi:arkivmelding:xsd::arkivmelding",
                 "type": "arkivmelding",
@@ -72,13 +72,13 @@ Feature: Receiving an expired Next Move DPO message
         "statId" : 1,
         "convId" : 1,
         "conversationId" : "2507fcb8-6543-4c5f-ac06-f5df75bb677e",
-        "lastUpdate" : "2019-03-25T11:38:23Z",
+        "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET"
       }, {
         "statId" : 2,
         "convId" : 1,
         "conversationId" : "2507fcb8-6543-4c5f-ac06-f5df75bb677e",
-        "lastUpdate" : "2019-03-25T11:38:23Z",
+        "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "LEVETID_UTLOPT",
         "description" : "Levetiden for meldingen er utgått. Må sendes på nytt"
       } ],

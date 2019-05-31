@@ -17,6 +17,7 @@ import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAtta
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentV2;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.arkivverket.standarder.noark5.arkivmelding.Journalpost;
+import no.difi.meldingsutveksling.DateTimeUtil;
 import no.difi.meldingsutveksling.InputStreamDataSource;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -30,13 +31,9 @@ import org.springframework.stereotype.Component;
 
 import javax.activation.DataHandler;
 import javax.xml.bind.JAXBElement;
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.InputStream;
 import java.time.Clock;
-import java.time.ZonedDateTime;
-import java.util.GregorianCalendar;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -122,8 +119,8 @@ public class CorrespondenceAgencyMessageFactory {
         // Name of the message sender, always "Avsender"
         correspondence.setMessageSender(objectFactory.createMyInsertCorrespondenceV2MessageSender(getSender()));
         // The date and time the message should be visible in the Portal
-        correspondence.setVisibleDateTime(toXmlGregorianCalendar(ZonedDateTime.now(clock)));
-        correspondence.setDueDateTime(toXmlGregorianCalendar(ZonedDateTime.now(clock).plusDays(7)));
+        correspondence.setVisibleDateTime(DateTimeUtil.toXMLGregorianCalendar(OffsetDateTime.now(clock)));
+        correspondence.setDueDateTime(DateTimeUtil.toXMLGregorianCalendar(OffsetDateTime.now(clock).plusDays(7)));
 
         ExternalContentV2 externalContentV2 = new ExternalContentV2();
         externalContentV2.setLanguageCode(objectFactory.createExternalContentV2LanguageCode("1044"));
@@ -134,7 +131,7 @@ public class CorrespondenceAgencyMessageFactory {
         // The date and time the message can be deleted by the user
         correspondence.setAllowSystemDeleteDateTime(
                 objectFactory.createMyInsertCorrespondenceV2AllowSystemDeleteDateTime(
-                        toXmlGregorianCalendar(getAllowSystemDeleteDateTime())));
+                        DateTimeUtil.toXMLGregorianCalendar(getAllowSystemDeleteDateTime())));
 
 
         AttachmentsV2 attachmentsV2 = new AttachmentsV2();
@@ -180,7 +177,7 @@ public class CorrespondenceAgencyMessageFactory {
         no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory notificationFactory = new no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory();
         notification.setFromAddress(notificationFactory.createNotification2009FromAddress("no-reply@altinn.no"));
         // The date and time the notification should be sent
-        notification.setShipmentDateTime(toXmlGregorianCalendar(ZonedDateTime.now(clock).plusMinutes(5)));
+        notification.setShipmentDateTime(DateTimeUtil.toXMLGregorianCalendar(OffsetDateTime.now(clock).plusMinutes(5)));
         // Language code of the notification
         notification.setLanguageCode(notificationFactory.createNotification2009LanguageCode("1044"));
         // Notification type
@@ -209,8 +206,8 @@ public class CorrespondenceAgencyMessageFactory {
         return infoRecord.getOrganizationName();
     }
 
-    private ZonedDateTime getAllowSystemDeleteDateTime() {
-        return ZonedDateTime.now(clock).plusMinutes(5);
+    private OffsetDateTime getAllowSystemDeleteDateTime() {
+        return OffsetDateTime.now(clock).plusMinutes(5);
     }
 
     public GetCorrespondenceStatusDetailsV2 createReceiptRequest(Conversation conversation) {
@@ -262,13 +259,5 @@ public class CorrespondenceAgencyMessageFactory {
         ReceiverEndPointBEList receiverEndpoints = new ReceiverEndPointBEList();
         receiverEndpoints.getReceiverEndPoint().add(receiverEndPoint);
         return objectFactory.createNotification2009ReceiverEndPoints(receiverEndpoints);
-    }
-
-    private XMLGregorianCalendar toXmlGregorianCalendar(ZonedDateTime date) {
-        try {
-            return DatatypeFactory.newInstance().newXMLGregorianCalendar(GregorianCalendar.from(date));
-        } catch (DatatypeConfigurationException e) {
-            throw new RuntimeException("Could not convert ZonedDateTime(value=" + date + ") to " + XMLGregorianCalendar.class, e);
-        }
     }
 }

@@ -1,9 +1,11 @@
-package no.difi.meldingsutveksling.cucumber;
+package no.difi.meldingsutveksling.clock;
 
 import java.io.Serializable;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+
+import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 
 public class TestClock extends Clock implements Serializable {
     private static final long serialVersionUID = -8207373320104896738L;
@@ -35,8 +37,8 @@ public class TestClock extends Clock implements Serializable {
         return active.millis();
     }
 
-    void setActive(String in) {
-        setActive(Clock.fixed(Instant.parse(in), getZone()));
+    public void setActive(String in) {
+        setActive(Clock.fixed(Instant.parse(in), DEFAULT_ZONE_ID));
     }
 
     private void setActive(Clock active) {

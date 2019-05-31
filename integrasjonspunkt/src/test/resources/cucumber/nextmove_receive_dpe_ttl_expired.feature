@@ -14,7 +14,7 @@ Feature: Receiving an expired Next Move DPE message
                     {
                         "scopeInformation": [
                             {
-                                "expectedResponseDateTime": "2019-03-25T11:00:00Z"
+                                "expectedResponseDateTime": "2019-03-25T11:00:00+01:00"
                             }
                         ],
                         "identifier": "urn:no:difi:meldingsutveksling:2.0",
@@ -24,7 +24,7 @@ Feature: Receiving an expired Next Move DPE message
                 ]
             },
             "documentIdentification": {
-                "creationDateAndTime": "2019-03-25T11:35:00Z",
+                "creationDateAndTime": "2019-03-25T11:35:00+01:00",
                 "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
                 "standard": "urn:no:difi:meldingsutveksling:2.0",
                 "type": "innsynskrav",
@@ -74,13 +74,13 @@ Feature: Receiving an expired Next Move DPE message
         "statId" : 1,
         "convId" : 1,
         "conversationId" : "f58a286c-8325-41ee-9398-da8471c3e234",
-        "lastUpdate" : "2019-03-25T11:38:23Z",
+        "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET"
       }, {
         "statId" : 2,
         "convId" : 1,
         "conversationId" : "f58a286c-8325-41ee-9398-da8471c3e234",
-        "lastUpdate" : "2019-03-25T11:38:23Z",
+        "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "LEVETID_UTLOPT",
         "description" : "Levetiden for meldingen er utgått. Må sendes på nytt"
       } ],

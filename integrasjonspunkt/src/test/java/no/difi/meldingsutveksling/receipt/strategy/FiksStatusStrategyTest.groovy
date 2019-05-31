@@ -10,7 +10,7 @@ import no.difi.meldingsutveksling.receipt.ReceiptStatus
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import java.time.ZonedDateTime
+import java.time.OffsetDateTime
 
 class FiksStatusStrategyTest extends Specification {
 
@@ -22,7 +22,7 @@ class FiksStatusStrategyTest extends Specification {
         Conversation conversation = Mock(Conversation)
 
         when:
-        def messageReceipt = MessageStatus.of(status, ZonedDateTime.now())
+        def messageReceipt = MessageStatus.of(status, OffsetDateTime.now())
         FiksStatusStrategy strategy = new FiksStatusStrategy(svarUtService, conversationService)
         svarUtService.getMessageReceipt(_) >> messageReceipt
         conversationService.registerStatus(_ as Conversation, _ as MessageStatus) >> conversation

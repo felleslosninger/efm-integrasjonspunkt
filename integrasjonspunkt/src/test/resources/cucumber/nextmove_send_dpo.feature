@@ -15,7 +15,7 @@ Feature: Sending a Next Move DPO message
                     {
                         "scopeInformation": [
                             {
-                                "expectedResponseDateTime": "2019-05-10T00:31:52Z"
+                                "expectedResponseDateTime": "2019-05-10T00:31:52+01:00"
                             }
                         ],
                         "identifier": "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
@@ -25,7 +25,7 @@ Feature: Sending a Next Move DPO message
                 ]
             },
             "documentIdentification": {
-                "creationDateAndTime": "2019-03-25T11:35:00Z",
+                "creationDateAndTime": "2019-03-25T11:35:00+01:00",
                 "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
                 "standard": "urn:no:difi:arkivmelding:xsd::arkivmelding",
                 "type": "arkivmelding",
@@ -226,7 +226,7 @@ Feature: Sending a Next Move DPO message
           "typeVersion" : "2.0",
           "instanceIdentifier" : "ff88849c-e281-4809-8555-7cd54952b916",
           "type" : "arkivmelding",
-          "creationDateAndTime" : "2019-03-25T11:35:00Z"
+          "creationDateAndTime" : "2019-03-25T11:35:00+01:00"
         },
         "businessScope" : {
           "scope" : [ {
@@ -234,7 +234,7 @@ Feature: Sending a Next Move DPO message
             "instanceIdentifier" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
             "identifier" : "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
             "scopeInformation" : [ {
-              "expectedResponseDateTime" : "2019-05-10T00:31:52Z"
+              "expectedResponseDateTime" : "2019-05-10T00:31:52+01:00"
             } ]
           } ]
         }
@@ -357,13 +357,13 @@ Feature: Sending a Next Move DPO message
         "statId" : 1,
         "convId" : 1,
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
-        "lastUpdate" : "2019-03-25T11:38:23Z",
+        "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET"
       }, {
         "statId" : 2,
         "convId" : 1,
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
-        "lastUpdate" : "2019-03-25T11:38:23Z",
+        "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "SENDT"
       } ],
       "last" : true,
@@ -394,7 +394,7 @@ Feature: Sending a Next Move DPO message
                     {
                         "scopeInformation": [
                             {
-                                "expectedResponseDateTime": "2019-05-10T00:31:52Z"
+                                "expectedResponseDateTime": "2019-05-10T00:31:52+01:00"
                             }
                         ],
                         "identifier": "urn:no:difi:profile:arkivmelding:response:ver1.0",
@@ -404,7 +404,7 @@ Feature: Sending a Next Move DPO message
                 ]
             },
             "documentIdentification": {
-                "creationDateAndTime": "2019-03-25T11:35:00Z",
+                "creationDateAndTime": "2019-03-25T11:35:00+01:00",
                 "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
                 "standard": "urn:no:difi:eformidling:xsd::status",
                 "type": "status",
@@ -442,19 +442,19 @@ Feature: Sending a Next Move DPO message
         "statId" : 20,
         "convId" : 12,
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
-        "lastUpdate" : "2019-03-25T11:38:23Z",
+        "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET"
       }, {
         "statId" : 21,
         "convId" : 12,
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
-        "lastUpdate" : "2019-03-25T11:38:23Z",
+        "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "SENDT"
       }, {
         "statId" : 24,
         "convId" : 12,
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
-        "lastUpdate" : "2019-03-25T11:38:23Z",
+        "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "LEVERT"
       } ],
       "totalPages" : 1,

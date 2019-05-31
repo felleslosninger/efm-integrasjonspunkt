@@ -6,7 +6,7 @@ import no.difi.meldingsutveksling.domain.sbdh.CorrelationInformation;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 
 @UtilityClass
 class ScopeFactory {
@@ -18,7 +18,7 @@ class ScopeFactory {
                 .setInstanceIdentifier(journalPostId);
     }
 
-    static Scope fromConversationId(String conversationId, String process, ZonedDateTime expectedResponseDateTime) {
+    static Scope fromConversationId(String conversationId, String process, OffsetDateTime expectedResponseDateTime) {
         return new Scope()
                 .setIdentifier(process)
                 .setType(ScopeType.CONVERSATION_ID.toString())

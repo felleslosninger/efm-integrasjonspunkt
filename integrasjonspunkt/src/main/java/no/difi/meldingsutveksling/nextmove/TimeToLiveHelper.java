@@ -11,7 +11,7 @@ import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.springframework.stereotype.Component;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 
 @Component
 @Slf4j
@@ -50,7 +50,7 @@ public class TimeToLiveHelper {
                 }
 
                 @Override
-                public ZonedDateTime getExpiry() {
+                public OffsetDateTime getExpiry() {
                     return p;
                 }
             });

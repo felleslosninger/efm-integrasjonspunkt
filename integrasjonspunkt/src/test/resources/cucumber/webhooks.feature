@@ -11,7 +11,7 @@ Feature: Webhooks
     Then the following ping message is posted to "/my/test/endpoint":
     """
     {
-      "createdTs" : "2019-03-25T11:38:23Z",
+      "createdTs" : "2019-03-25T12:38:23+01:00",
       "type" : "ping"
     }
     """
@@ -27,7 +27,7 @@ Feature: Webhooks
     Then the following message is posted to "/my/test/endpoint":
       """
        {
-        "createdTs" : "2019-03-25T11:38:23Z",
+        "createdTs" : "2019-03-25T12:38:23+01:00",
         "type" : "message.status",
         "status" : "MOTTATT",
         "description" : "some description"

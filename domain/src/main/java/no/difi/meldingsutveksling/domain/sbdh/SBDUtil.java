@@ -6,7 +6,7 @@ import no.difi.meldingsutveksling.DocumentType;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 
 @Component
 @RequiredArgsConstructor
@@ -45,8 +45,8 @@ public class SBDUtil {
                 .orElse(false);
     }
 
-    public boolean isExpired(ZonedDateTime expectedResponseDateTime) {
-        ZonedDateTime currentDateTime = ZonedDateTime.now(clock);
+    private boolean isExpired(OffsetDateTime expectedResponseDateTime) {
+        OffsetDateTime currentDateTime = OffsetDateTime.now(clock);
         return currentDateTime.isAfter(expectedResponseDateTime);
     }
 }

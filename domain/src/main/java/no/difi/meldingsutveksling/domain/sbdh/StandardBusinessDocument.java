@@ -35,7 +35,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.*;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.Set;
 
@@ -200,7 +200,7 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
         return getMessageInfo().createLogstashMarkers();
     }
 
-    public Optional<ZonedDateTime> getExpectedResponseDateTime() {
+    public Optional<OffsetDateTime> getExpectedResponseDateTime() {
         return getScope(ScopeType.CONVERSATION_ID)
                 .getScopeInformation()
                 .stream().findFirst()

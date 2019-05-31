@@ -20,7 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
@@ -36,8 +36,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(SystemClockConfig.class)
 public class MessageStatusControllerTest {
 
-    private final static ZonedDateTime NOW = ZonedDateTime.now();
-    private final static ZonedDateTime NOW_MINUS_5_MIN = ZonedDateTime.now().minusMinutes(5);
+    private final static OffsetDateTime NOW = OffsetDateTime.now();
+    private final static OffsetDateTime NOW_MINUS_5_MIN = OffsetDateTime.now().minusMinutes(5);
 
     @Autowired
     private MockMvc mvc;

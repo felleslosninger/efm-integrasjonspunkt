@@ -44,6 +44,8 @@ import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 
+import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
+
 @Configuration
 @EnableConfigurationProperties({IntegrasjonspunktProperties.class})
 public class IntegrasjonspunktBeans {
@@ -124,7 +126,7 @@ public class IntegrasjonspunktBeans {
 
     @Bean
     public Clock clock() {
-        return Clock.systemUTC();
+        return Clock.system(DEFAULT_ZONE_ID);
     }
 
     @Bean

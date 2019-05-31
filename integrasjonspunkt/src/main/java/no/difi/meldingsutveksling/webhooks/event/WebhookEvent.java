@@ -5,17 +5,17 @@ import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
 import java.time.Clock;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 
 @JsonIgnoreProperties({"source", "timestamp"})
 public abstract class WebhookEvent extends ApplicationEvent {
 
     @Getter
-    private final ZonedDateTime createdTs;
+    private final OffsetDateTime createdTs;
 
     WebhookEvent(Clock clock, Object source) {
         super(source);
-        this.createdTs = ZonedDateTime.now(clock);
+        this.createdTs = OffsetDateTime.now(clock);
     }
 
     public abstract String getType();

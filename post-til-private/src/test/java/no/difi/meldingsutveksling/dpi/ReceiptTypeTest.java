@@ -12,15 +12,15 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.time.ZoneId;
 
+import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReceiptTypeTest {
 
-    private final Clock clock = Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), ZoneId.of("UTC"));
+    private final Clock clock = Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), DEFAULT_ZONE_ID);
 
     private DpiReceiptMapper dpiReceiptMapper;
 

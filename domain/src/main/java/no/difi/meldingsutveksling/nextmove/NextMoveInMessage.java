@@ -10,7 +10,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 
 @Entity
 @DiscriminatorValue("in")
@@ -21,7 +21,7 @@ import java.time.ZonedDateTime;
 public class NextMoveInMessage extends NextMoveMessage {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private ZonedDateTime lockTimeout;
+    private OffsetDateTime lockTimeout;
 
     public NextMoveInMessage(String conversationId, String receiverIdentifier, String senderIdentifier, ServiceIdentifier serviceIdentifier, StandardBusinessDocument sbd) {
         super(conversationId, receiverIdentifier, senderIdentifier, serviceIdentifier, sbd);

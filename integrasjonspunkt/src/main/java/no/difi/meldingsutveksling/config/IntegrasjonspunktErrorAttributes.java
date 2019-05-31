@@ -13,7 +13,7 @@ import org.springframework.web.context.request.RequestAttributes;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.time.Clock;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -27,7 +27,7 @@ public class IntegrasjonspunktErrorAttributes extends DefaultErrorAttributes {
     @Override
     public Map<String, Object> getErrorAttributes(RequestAttributes requestAttributes, boolean includeStackTrace) {
         final Map<String, Object> errorAttributes = super.getErrorAttributes(requestAttributes, includeStackTrace);
-        errorAttributes.put("timestamp", ZonedDateTime.now(clock));
+        errorAttributes.put("timestamp", OffsetDateTime.now(clock));
 
         final Throwable error = super.getError(requestAttributes);
 

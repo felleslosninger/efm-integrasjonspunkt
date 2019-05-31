@@ -20,7 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
@@ -39,8 +39,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(SystemClockConfig.class)
 public class ConversationControllerTest {
 
-    private final static ZonedDateTime NOW = ZonedDateTime.now();
-    private final static ZonedDateTime NOW_MINUS_5_MIN = ZonedDateTime.now().minusMinutes(5);
+    private final static OffsetDateTime NOW = OffsetDateTime.now();
+    private final static OffsetDateTime NOW_MINUS_5_MIN = OffsetDateTime.now().minusMinutes(5);
 
     @Autowired
     private MockMvc mvc;
@@ -72,11 +72,11 @@ public class ConversationControllerTest {
         cId2ms3.setStatId(5);
         cId2ms3.setConvId(2);
 
-        Conversation c1 = Conversation.of(cId1, "foo", "24", "42", OUTGOING, "foo", ServiceIdentifier.DPO, ZonedDateTime.now(), ZonedDateTime.now(), cId1ms1, cId1ms2);
+        Conversation c1 = Conversation.of(cId1, "foo", "24", "42", OUTGOING, "foo", ServiceIdentifier.DPO, OffsetDateTime.now(), OffsetDateTime.now(), cId1ms1, cId1ms2);
         c1.setConvId(1);
         c1.setPollable(true);
         c1.setLastUpdate(NOW_MINUS_5_MIN);
-        Conversation c2 = Conversation.of(cId2, "foo", "24", "43", OUTGOING, "foo", ServiceIdentifier.DPO, ZonedDateTime.now(), ZonedDateTime.now(), cId2ms1, cId2ms2, cId2ms3);
+        Conversation c2 = Conversation.of(cId2, "foo", "24", "43", OUTGOING, "foo", ServiceIdentifier.DPO, OffsetDateTime.now(), OffsetDateTime.now(), cId2ms1, cId2ms2, cId2ms3);
         c2.setConvId(2);
         c2.setPollable(false);
         c2.setLastUpdate(NOW);

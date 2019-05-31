@@ -15,7 +15,7 @@ Feature: Sending a Next Move DPO message when it expires between create and send
                     {
                         "scopeInformation": [
                             {
-                                "expectedResponseDateTime": "2019-05-10T00:31:52Z"
+                                "expectedResponseDateTime": "2019-05-10T00:31:52+01:00"
                             }
                         ],
                         "identifier": "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
@@ -25,7 +25,7 @@ Feature: Sending a Next Move DPO message when it expires between create and send
                 ]
             },
             "documentIdentification": {
-                "creationDateAndTime": "2019-03-25T11:35:00Z",
+                "creationDateAndTime": "2019-03-25T11:35:00+01:00",
                 "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
                 "standard": "urn:no:difi:arkivmelding:xsd::arkivmelding",
                 "type": "arkivmelding",
@@ -145,11 +145,11 @@ Feature: Sending a Next Move DPO message when it expires between create and send
     And I send the message and get the following error response:
     """
     {
-      "timestamp" : "2019-05-12T20:00:00Z",
+      "timestamp" : "2019-05-12T22:00:00+02:00",
       "status" : 400,
       "error" : "Bad Request",
       "exception" : "no.difi.meldingsutveksling.exceptions.TimeToLiveException",
-      "message" : "ExpectedResponseDateTime 2019-05-10T00:31:52Z has been exceeded. Please resend the message",
+      "message" : "ExpectedResponseDateTime 2019-05-10T00:31:52+01:00 has been exceeded. Please resend the message",
       "path" : "/api/messages/out/8fb3a080-39fb-4dd7-b20a-dfc70f214f26"
     }
     """
@@ -160,13 +160,13 @@ Feature: Sending a Next Move DPO message when it expires between create and send
         "statId" : 1,
         "convId" : 1,
         "conversationId" : "8fb3a080-39fb-4dd7-b20a-dfc70f214f26",
-        "lastUpdate" : "2019-03-25T11:38:23Z",
+        "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET"
       }, {
         "statId" : 2,
         "convId" : 1,
         "conversationId" : "8fb3a080-39fb-4dd7-b20a-dfc70f214f26",
-        "lastUpdate" : "2019-05-12T20:00:00Z",
+        "lastUpdate" : "2019-05-12T22:00:00+02:00",
         "status" : "LEVETID_UTLOPT",
         "description" : "Levetiden for meldingen er utgått. Må sendes på nytt"
       } ],

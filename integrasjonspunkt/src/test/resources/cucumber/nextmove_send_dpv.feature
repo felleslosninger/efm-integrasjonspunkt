@@ -45,7 +45,7 @@ Feature: Sending a Next Move DPV message
                     {
                         "scopeInformation": [
                             {
-                                "expectedResponseDateTime": "2019-05-10T00:31:52Z"
+                                "expectedResponseDateTime": "2019-05-10T00:31:52+01:00"
                             }
                         ],
                         "identifier": "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
@@ -55,7 +55,7 @@ Feature: Sending a Next Move DPV message
                 ]
             },
             "documentIdentification": {
-                "creationDateAndTime": "2019-03-25T11:35:00Z",
+                "creationDateAndTime": "2019-03-25T11:35:00+01:00",
                 "instanceIdentifier": "abc8849c-e281-4809-8555-7cd54952b916",
                 "standard": "urn:no:difi:arkivmelding:xsd::arkivmelding",
                 "type": "arkivmelding",
@@ -220,13 +220,13 @@ Feature: Sending a Next Move DPV message
                     </altinn10:BinaryAttachments>
                 </altinn10:Attachments>
             </altinn10:Content>
-            <altinn10:VisibleDateTime>2019-03-25T11:38:23.000Z</altinn10:VisibleDateTime>
-            <altinn10:AllowSystemDeleteDateTime>2019-03-25T11:43:23.000Z</altinn10:AllowSystemDeleteDateTime>
-            <altinn10:DueDateTime>2019-04-01T11:38:23.000Z</altinn10:DueDateTime>
+            <altinn10:VisibleDateTime>2019-03-25T12:38:23.000+01:00</altinn10:VisibleDateTime>
+            <altinn10:AllowSystemDeleteDateTime>2019-03-25T12:43:23.000+01:00</altinn10:AllowSystemDeleteDateTime>
+            <altinn10:DueDateTime>2019-04-01T12:38:23.000+01:00</altinn10:DueDateTime>
             <altinn10:Notifications>
                 <altinn13:Notification>
                     <altinn13:FromAddress>no-reply@altinn.no</altinn13:FromAddress>
-                    <altinn13:ShipmentDateTime>2019-03-25T11:43:23.000Z</altinn13:ShipmentDateTime>
+                    <altinn13:ShipmentDateTime>2019-03-25T12:43:23.000+01:00</altinn13:ShipmentDateTime>
                     <altinn13:LanguageCode>1044</altinn13:LanguageCode>
                     <altinn13:NotificationType>VarselDPVMedRevarsel</altinn13:NotificationType>
                     <altinn13:TextTokens>

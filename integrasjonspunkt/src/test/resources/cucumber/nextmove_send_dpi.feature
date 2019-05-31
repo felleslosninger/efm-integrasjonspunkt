@@ -18,7 +18,7 @@ Feature: Sending a Next Move DPI message
                     {
                         "scopeInformation": [
                             {
-                                "expectedResponseDateTime": "2019-05-10T00:31:52Z"
+                                "expectedResponseDateTime": "2019-05-10T00:31:52+01:00"
                             }
                         ],
                         "identifier": "urn:no:difi:profile:digitalpost:info:ver1.0",
@@ -28,7 +28,7 @@ Feature: Sending a Next Move DPI message
                 ]
             },
             "documentIdentification": {
-                "creationDateAndTime": "2019-03-25T11:35:00Z",
+                "creationDateAndTime": "2019-03-25T11:35:00+01:00",
                 "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
                 "standard": "urn:no:difi:digitalpost:xsd:digital::digital",
                 "type": "digital",
@@ -174,7 +174,7 @@ Feature: Sending a Next Move DPI message
                 <ns3:TypeVersion>1.0</ns3:TypeVersion>
                 <ns3:InstanceIdentifier>0bfe4b94-ea1a-465f-95b7-5d06bc986dfb</ns3:InstanceIdentifier>
                 <ns3:Type>digitalPost</ns3:Type>
-                <ns3:CreationDateAndTime>2019-03-25T11:35:00Z</ns3:CreationDateAndTime>
+                <ns3:CreationDateAndTime>2019-03-25T11:35:00+01:00</ns3:CreationDateAndTime>
             </ns3:DocumentIdentification>
             <ns3:BusinessScope>
                 <ns3:Scope>
@@ -232,7 +232,7 @@ Feature: Sending a Next Move DPI message
                 </ns9:person>
             </ns9:mottaker>
             <ns9:digitalPostInfo>
-                <ns9:virkningstidspunkt>2019-04-23T11:00:42.408Z</ns9:virkningstidspunkt>
+                <ns9:virkningstidspunkt>2019-04-23T11:00:42.408+01:00</ns9:virkningstidspunkt>
                 <ns9:aapningskvittering>false</ns9:aapningskvittering>
                 <ns9:sikkerhetsnivaa>3</ns9:sikkerhetsnivaa>
                 <ns9:ikkeSensitivTittel lang="NO" xmlns:ns9="http://begrep.difi.no/sdp/schema_v10">Min supertittel</ns9:ikkeSensitivTittel>

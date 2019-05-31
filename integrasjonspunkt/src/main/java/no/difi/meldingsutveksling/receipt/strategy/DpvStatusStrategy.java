@@ -11,7 +11,7 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.receipt.*;
 import org.springframework.stereotype.Component;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static no.difi.meldingsutveksling.ptv.WithLogstashMarker.withLogstashMarker;
@@ -59,7 +59,7 @@ public class DpvStatusStrategy implements StatusStrategy {
                         .noneMatch(r -> ReceiptStatus.LEVERT.toString().equals(r.getStatus())))
                 .findFirst()
                 .ifPresent(createdStatus -> {
-                    ZonedDateTime createdZoned = createdStatus.getStatusDate().toGregorianCalendar().toZonedDateTime();
+                    OffsetDateTime createdZoned = createdStatus.getStatusDate().toGregorianCalendar().toZonedDateTime().toOffsetDateTime();
                     MessageStatus status = messageStatusFactory.getMessageStatus(ReceiptStatus.LEVERT, createdZoned);
                     conversationService.registerStatus(conversation, status);
                 });
@@ -68,7 +68,7 @@ public class DpvStatusStrategy implements StatusStrategy {
                 .filter(s -> STATUS_READ.equals(s.getStatusType().value()))
                 .findFirst()
                 .ifPresent(readStatus -> {
-                    ZonedDateTime readZoned = readStatus.getStatusDate().toGregorianCalendar().toZonedDateTime();
+                    OffsetDateTime readZoned = readStatus.getStatusDate().toGregorianCalendar().toZonedDateTime().toOffsetDateTime();
                     MessageStatus status = messageStatusFactory.getMessageStatus(ReceiptStatus.LEST, readZoned);
                     conversationService.markFinished(conversationService.registerStatus(conversation, status));
                 });

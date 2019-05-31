@@ -33,7 +33,7 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.time.Clock;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
@@ -86,7 +86,7 @@ public class NextMoveMessageInController {
         NextMoveInMessage message = messageRepo.peek(input)
                 .orElseThrow(NoContentException::new);
 
-        messageRepo.save(message.setLockTimeout(ZonedDateTime.now(clock)
+        messageRepo.save(message.setLockTimeout(OffsetDateTime.now(clock)
                 .plusMinutes(props.getNextmove().getLockTimeoutMinutes())));
 
         log.info(markerFrom(message), "Conversation with id={} locked", message.getConversationId());

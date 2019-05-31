@@ -7,7 +7,7 @@ import no.difi.meldingsutveksling.receipt.*;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 
 @Component
 @RequiredArgsConstructor
@@ -36,7 +36,7 @@ public class DpoStatusStrategy implements StatusStrategy {
                     .filter(ms -> ms.getStatus().equals(ReceiptStatus.SENDT.toString()))
                     .findFirst()
                     .ifPresent(s -> {
-                        if (ZonedDateTime.now(clock).isAfter(s.getLastUpdate().plusHours(props.getStatus().getMessageTimeoutHours()))) {
+                        if (OffsetDateTime.now(clock).isAfter(s.getLastUpdate().plusHours(props.getStatus().getMessageTimeoutHours()))) {
                             conversationService.registerStatus(conversation, messageStatusFactory.getMessageStatus(ReceiptStatus.FEIL));
                             conversationService.markFinished(conversation);
                         }

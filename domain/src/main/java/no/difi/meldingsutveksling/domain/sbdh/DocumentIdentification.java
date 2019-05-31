@@ -13,7 +13,7 @@ import lombok.Data;
 import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.validation.IsDocumentType;
 import no.difi.meldingsutveksling.validation.UUID;
-import no.difi.meldingsutveksling.xml.ZonedDateTimeAdapter;
+import no.difi.meldingsutveksling.xml.OffsetDateTimeAdapter;
 
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
@@ -21,7 +21,7 @@ import javax.validation.constraints.Past;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 
 
 /**
@@ -81,8 +81,8 @@ public class DocumentIdentification implements Serializable {
 
     @XmlElement(name = "CreationDateAndTime", required = true)
     @XmlSchemaType(name = "dateTime")
-    @XmlJavaTypeAdapter(ZonedDateTimeAdapter.class)
+    @XmlJavaTypeAdapter(OffsetDateTimeAdapter.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     @Past
-    protected ZonedDateTime creationDateAndTime;
+    protected OffsetDateTime creationDateAndTime;
 }

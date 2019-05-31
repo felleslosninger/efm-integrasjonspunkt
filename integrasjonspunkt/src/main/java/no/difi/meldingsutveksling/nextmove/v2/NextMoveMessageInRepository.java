@@ -12,7 +12,7 @@ import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,7 +25,7 @@ public interface NextMoveMessageInRepository extends PagingAndSortingRepository<
         bindings.excluding(root.sbd);
     }
 
-    List<NextMoveInMessage> findByLockTimeoutLessThanEqual(ZonedDateTime now);
+    List<NextMoveInMessage> findByLockTimeoutLessThanEqual(OffsetDateTime now);
 
     Optional<NextMoveInMessage> findByConversationId(String conversationId);
 

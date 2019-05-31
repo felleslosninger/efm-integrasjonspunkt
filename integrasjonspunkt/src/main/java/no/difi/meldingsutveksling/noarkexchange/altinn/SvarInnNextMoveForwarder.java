@@ -7,10 +7,7 @@ import no.arkivverket.standarder.noark5.arkivmelding.Journalpost;
 import no.arkivverket.standarder.noark5.arkivmelding.Korrespondansepart;
 import no.arkivverket.standarder.noark5.arkivmelding.Saksmappe;
 import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
-import no.difi.meldingsutveksling.DocumentType;
-import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
-import no.difi.meldingsutveksling.NextMoveConsts;
-import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory;
@@ -38,7 +35,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.time.Clock;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -56,7 +52,6 @@ public class SvarInnNextMoveForwarder implements Consumer<Forsendelse> {
     private final NextMoveQueue nextMoveQueue;
     private final SBDFactory createSBD;
     private final IntegrasjonspunktProperties properties;
-    private final Clock clock;
 
     @Override
     public void accept(Forsendelse forsendelse) {
@@ -139,8 +134,8 @@ public class SvarInnNextMoveForwarder implements Consumer<Forsendelse> {
         journalpost.setJournalpostnummer(BigInteger.valueOf(Long.valueOf(metadata.getJournalpostnummer())));
         journalpost.setJournalposttype(JournalposttypeMapper.getArkivmeldingType(metadata.getJournalposttype()));
         journalpost.setJournalstatus(JournalstatusMapper.getArkivmeldingType(metadata.getJournalstatus()));
-        journalpost.setJournaldato(ArkivmeldingUtil.epochMilliAsXmlGregorianCalendar(metadata.getJournaldato(), clock));
-        journalpost.setDokumentetsDato(ArkivmeldingUtil.epochMilliAsXmlGregorianCalendar(metadata.getDokumentetsDato(), clock));
+        journalpost.setJournaldato(DateTimeUtil.toXMLGregorianCalendar(Long.valueOf(metadata.getJournaldato())));
+        journalpost.setDokumentetsDato(DateTimeUtil.toXMLGregorianCalendar(Long.valueOf(metadata.getDokumentetsDato())));
         journalpost.setOffentligTittel(metadata.getTittel());
 
         saksmappe.getBasisregistrering().add(journalpost);

@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.*;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -240,7 +240,7 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
             }
 
             return new DocumentIdentification()
-                    .setCreationDateAndTime(ZonedDateTime.now())
+                    .setCreationDateAndTime(OffsetDateTime.now())
                     .setStandard(standard)
                     .setType(documentType.getType())
                     .setTypeVersion(TYPE_VERSION)

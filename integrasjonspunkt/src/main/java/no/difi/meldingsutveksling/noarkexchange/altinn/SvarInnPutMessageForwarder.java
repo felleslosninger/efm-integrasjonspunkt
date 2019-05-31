@@ -24,7 +24,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -84,8 +84,8 @@ public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
             }
 
             @Override
-            public ZonedDateTime getExpiry() {
-                return ZonedDateTime.now(clock).plusHours(properties.getNextmove().getDefaultTtlHours());
+            public OffsetDateTime getExpiry() {
+                return OffsetDateTime.now(clock).plusHours(properties.getNextmove().getDefaultTtlHours());
             }
         });
         c = conversationService.registerStatus(c, messageStatusFactory.getMessageStatus(INNKOMMENDE_MOTTATT));

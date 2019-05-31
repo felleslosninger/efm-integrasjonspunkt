@@ -8,7 +8,7 @@ import no.difi.sdp.client2.domain.kvittering.ForretningsKvittering;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 
 import static no.difi.meldingsutveksling.receipt.ReceiptStatus.FEIL;
 
@@ -22,7 +22,7 @@ public class DpiReceiptMapper {
     public MessageStatus from(ForretningsKvittering forretningsKvittering) {
         MessageStatus ms = getMessageStatus(forretningsKvittering.getClass());
         if (forretningsKvittering.getTidspunkt() != null) {
-            ms.setLastUpdate(ZonedDateTime.ofInstant(forretningsKvittering.getTidspunkt(), clock.getZone()));
+            ms.setLastUpdate(OffsetDateTime.ofInstant(forretningsKvittering.getTidspunkt(), clock.getZone()));
         }
         return ms;
     }

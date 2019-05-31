@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.TimeZone;
 
+import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_TIME_ZONE;
+
 @SpringBootApplication(exclude = {SolrAutoConfiguration.class})
 public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
 
@@ -45,7 +47,7 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
 
     @PostConstruct
     void started() {
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+        TimeZone.setDefault(DEFAULT_TIME_ZONE);
     }
 
     public static void main(String[] args) {

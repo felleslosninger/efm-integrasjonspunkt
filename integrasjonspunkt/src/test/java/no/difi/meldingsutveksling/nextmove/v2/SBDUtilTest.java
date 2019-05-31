@@ -7,24 +7,24 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 
+import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SBDUtilTest {
 
-    private SBDUtil sbdUtil = new SBDUtil(Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), ZoneId.of("UTC")));
+    private SBDUtil sbdUtil = new SBDUtil(Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), DEFAULT_ZONE_ID));
 
     @Test
     public void notExpired() {
-        assertThat(sbdUtil.isExpired(getStandardBusinessDocument("2019-03-25T11:39:23Z"))).isFalse();
+        assertThat(sbdUtil.isExpired(getStandardBusinessDocument("2019-03-25T11:38:24Z"))).isFalse();
     }
 
     @Test
     public void expired() {
-        assertThat(sbdUtil.isExpired(getStandardBusinessDocument("2019-03-25T11:37:23Z"))).isTrue();
+        assertThat(sbdUtil.isExpired(getStandardBusinessDocument("2019-03-25T11:38:22Z"))).isTrue();
     }
 
     private StandardBusinessDocument getStandardBusinessDocument(String expectedResponseTime) {
@@ -34,7 +34,7 @@ public class SBDUtilTest {
                                 .addScope(new Scope()
                                         .setType("ConversationId")
                                         .addScopeInformation(new CorrelationInformation()
-                                                .setExpectedResponseDateTime(ZonedDateTime.parse(expectedResponseTime))
+                                                .setExpectedResponseDateTime(OffsetDateTime.parse(expectedResponseTime))
                                         )
                                 )
                         )

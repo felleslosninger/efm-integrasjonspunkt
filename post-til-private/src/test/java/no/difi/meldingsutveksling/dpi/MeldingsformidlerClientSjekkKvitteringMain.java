@@ -7,8 +7,8 @@ import no.difi.sdp.client2.domain.Prioritet;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.time.ZoneId;
 
+import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 import static no.difi.meldingsutveksling.dpi.MeldingsformidlerClientMain.createKeyStore;
 import static no.difi.meldingsutveksling.dpi.MeldingsformidlerClientMain.getDigitalPostInnbyggerConfig;
 
@@ -25,7 +25,7 @@ public class MeldingsformidlerClientSjekkKvitteringMain {
         DigitalPostInnbyggerConfig config = getDigitalPostInnbyggerConfig(mpcId);
         SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory = new SikkerDigitalPostKlientFactory(config, createKeyStore());
         ForsendelseHandlerFactory forsendelseHandlerFactory = new ForsendelseHandlerFactory(config);
-        Clock clock = Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), ZoneId.of("UTC"));
+        Clock clock = Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), DEFAULT_ZONE_ID);
         MessageStatusFactory messageStatusFactory = new MessageStatusFactory(clock);
         DpiReceiptMapper dpiReceiptMapper = new DpiReceiptMapper(messageStatusFactory, clock);
         MeldingsformidlerClient client = new MeldingsformidlerClient(config, sikkerDigitalPostKlientFactory, forsendelseHandlerFactory, dpiReceiptMapper);

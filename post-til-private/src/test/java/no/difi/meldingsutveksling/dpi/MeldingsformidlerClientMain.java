@@ -12,7 +12,10 @@ import no.difi.sdp.client2.domain.fysisk_post.Posttype;
 import no.difi.sdp.client2.domain.fysisk_post.Returhaandtering;
 import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -20,11 +23,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.time.Clock;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+
+import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 
 public class MeldingsformidlerClientMain {
 
@@ -45,7 +49,7 @@ public class MeldingsformidlerClientMain {
         DigitalPostInnbyggerConfig config = getDigitalPostInnbyggerConfig(mpcId);
         SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory = new SikkerDigitalPostKlientFactory(config, keystore);
         ForsendelseHandlerFactory forsendelseHandlerFactory = new ForsendelseHandlerFactory(config);
-        Clock clock = Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), ZoneId.of("UTC"));
+        Clock clock = Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), DEFAULT_ZONE_ID);
         MessageStatusFactory messageStatusFactory = new MessageStatusFactory(clock);
         DpiReceiptMapper dpiReceiptMapper = new DpiReceiptMapper(messageStatusFactory, clock);
         MeldingsformidlerClient meldingsformidlerClient = new MeldingsformidlerClient(config, sikkerDigitalPostKlientFactory, forsendelseHandlerFactory, dpiReceiptMapper);

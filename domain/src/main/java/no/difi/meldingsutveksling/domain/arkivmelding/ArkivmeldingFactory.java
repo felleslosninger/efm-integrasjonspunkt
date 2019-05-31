@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.*;
 import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
-import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
+import no.difi.meldingsutveksling.DateTimeUtil;
 import no.difi.meldingsutveksling.core.BestEduConverter;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
@@ -53,11 +53,11 @@ public class ArkivmeldingFactory {
         // expecting date in format yyyy-MM-dd
         Optional<String> jpDato = ofNullable(mt.getJournpost().getJpJdato());
         if (jpDato.isPresent()) {
-            jp.setJournaldato(ArkivmeldingUtil.stringAsXmlGregorianCalendar(mt.getJournpost().getJpJdato()));
+            jp.setJournaldato(DateTimeUtil.toXMLGregorianCalendar(mt.getJournpost().getJpJdato()));
         }
         Optional<String> jpDokdato = ofNullable(mt.getJournpost().getJpDokdato());
         if (jpDokdato.isPresent()) {
-            jp.setDokumentetsDato(ArkivmeldingUtil.stringAsXmlGregorianCalendar(mt.getJournpost().getJpDokdato()));
+            jp.setDokumentetsDato(DateTimeUtil.toXMLGregorianCalendar(mt.getJournpost().getJpDokdato()));
         }
 
         mt.getJournpost().getAvsmot().forEach(a -> {
@@ -77,7 +77,7 @@ public class ArkivmeldingFactory {
             ofNullable(a.getAmAvskm()).filter(s -> !s.isEmpty()).map(AvskrivningsmaateMapper::getArkivmeldingType).ifPresent(avs::setAvskrivningsmaate);
             ofNullable(a.getAmAvsavdok()).ifPresent(avs::setReferanseAvskrivesAvJournalpost);
             if (!isNullOrEmpty(a.getAmAvskdato())) {
-                avs.setAvskrivningsdato(ArkivmeldingUtil.stringAsXmlGregorianCalendar(a.getAmAvskdato()));
+                avs.setAvskrivningsdato(DateTimeUtil.toXMLGregorianCalendar(a.getAmAvskdato()));
             }
 
             jp.getAvskrivning().add(avs);

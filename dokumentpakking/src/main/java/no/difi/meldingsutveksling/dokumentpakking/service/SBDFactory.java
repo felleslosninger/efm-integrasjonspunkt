@@ -13,7 +13,7 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 
 import static no.difi.meldingsutveksling.dokumentpakking.service.ScopeFactory.fromConversationId;
 import static no.difi.meldingsutveksling.dokumentpakking.service.ScopeFactory.fromJournalPostId;
@@ -53,7 +53,7 @@ public class SBDFactory {
                         .addSender(createSender(avsender))
                         .addReceiver(createReceiver(mottaker))
                         .setDocumentIdentification(createDocumentIdentification(documentType, getStandard(mottaker.toString(), process, documentType)))
-                        .setBusinessScope(createBusinessScope(fromConversationId(conversationId, process, ZonedDateTime.now(clock).plusHours(props.getNextmove().getDefaultTtlHours()))))
+                        .setBusinessScope(createBusinessScope(fromConversationId(conversationId, process, OffsetDateTime.now(clock).plusHours(props.getNextmove().getDefaultTtlHours()))))
                 ).setAny(any);
     }
 
@@ -76,7 +76,7 @@ public class SBDFactory {
                 .addReceiver(createReceiver(mottaker))
                 .setDocumentIdentification(createDocumentIdentification(documentType, STANDARD))
                 .setBusinessScope(createBusinessScope(
-                        fromConversationId(conversationId, Process.LEGACY.getValue(), ZonedDateTime.now(clock).plusHours(props.getNextmove().getDefaultTtlHours())),
+                        fromConversationId(conversationId, Process.LEGACY.getValue(), OffsetDateTime.now(clock).plusHours(props.getNextmove().getDefaultTtlHours())),
                         fromJournalPostId(journalPostId, Process.LEGACY.getValue())));
     }
 
@@ -100,7 +100,7 @@ public class SBDFactory {
 
     private DocumentIdentification createDocumentIdentification(DocumentType documentType, String standard) {
         return new DocumentIdentification()
-                .setCreationDateAndTime(ZonedDateTime.now(clock))
+                .setCreationDateAndTime(OffsetDateTime.now(clock))
                 .setStandard(standard)
                 .setType(documentType.getType())
                 .setTypeVersion(TYPE_VERSION_2)

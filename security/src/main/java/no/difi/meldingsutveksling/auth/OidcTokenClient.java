@@ -24,9 +24,10 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.cert.CertificateEncodingException;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.*;
+
+import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 
 @Component
 public class OidcTokenClient {
@@ -71,7 +72,7 @@ public class OidcTokenClient {
 
         URI accessTokenUri;
         try {
-             accessTokenUri = props.getOidc().getUrl().toURI();
+            accessTokenUri = props.getOidc().getUrl().toURI();
         } catch (URISyntaxException e) {
             log.error("Error converting property to URI", e);
             throw new RuntimeException(e);
@@ -99,20 +100,20 @@ public class OidcTokenClient {
 
         String clientId = props.getOidc().getClientId();
         if (Strings.isNullOrEmpty(clientId)) {
-            clientId = CLIENT_ID_PREFIX+props.getOrg().getNumber();
+            clientId = CLIENT_ID_PREFIX + props.getOrg().getNumber();
         }
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
                 .audience(props.getOidc().getAudience())
                 .issuer(clientId)
                 .claim("scope", getCurrentScopes())
                 .jwtID(UUID.randomUUID().toString())
-                .issueTime(Date.from(ZonedDateTime.now(ZoneOffset.UTC).toInstant()))
-                .expirationTime(Date.from(ZonedDateTime.now(ZoneOffset.UTC).toInstant().plusSeconds(120)))
+                .issueTime(Date.from(OffsetDateTime.now(DEFAULT_ZONE_ID).toInstant()))
+                .expirationTime(Date.from(OffsetDateTime.now(DEFAULT_ZONE_ID).toInstant().plusSeconds(120)))
                 .build();
 
         RSASSASigner signer = new RSASSASigner(nokkel.loadPrivateKey());
 
-        if(nokkel.shouldLockProvider()) {
+        if (nokkel.shouldLockProvider()) {
             signer.getJCAContext().setProvider(nokkel.getKeyStore().getProvider());
         }
 

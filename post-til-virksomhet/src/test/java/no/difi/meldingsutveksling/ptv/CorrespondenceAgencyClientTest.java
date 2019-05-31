@@ -10,6 +10,7 @@ import no.altinn.schemas.services.serviceengine.subscription._2009._10.Attachmen
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentExternalBEV2List;
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentV2;
+import no.difi.meldingsutveksling.DateTimeUtil;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,13 +18,10 @@ import org.slf4j.LoggerFactory;
 import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
 import javax.xml.bind.JAXBElement;
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.File;
 import java.io.IOException;
-import java.time.ZonedDateTime;
-import java.util.GregorianCalendar;
+import java.time.OffsetDateTime;
 
 public class CorrespondenceAgencyClientTest {
     static Logger log = LoggerFactory.getLogger(CorrespondenceAgencyClientTest.class);
@@ -86,7 +84,7 @@ public class CorrespondenceAgencyClientTest {
         externalContentV2.setAttachments(objectFactory.createExternalContentV2Attachments(attachmentsV2));
         correspondence.setContent(objectFactory.createMyInsertCorrespondenceV2Content(externalContentV2));
 
-        XMLGregorianCalendar date = fiveMinutesFromNow();
+        XMLGregorianCalendar date = DateTimeUtil.toXMLGregorianCalendar(OffsetDateTime.now().plusMinutes(5));
         correspondence.setVisibleDateTime(date);
         correspondence.setAllowSystemDeleteDateTime(objectFactory.createMyInsertCorrespondenceV2AllowSystemDeleteDateTime(date));
 
@@ -140,17 +138,5 @@ public class CorrespondenceAgencyClientTest {
         ReceiverEndPointBEList receiverEndpoints = new ReceiverEndPointBEList();
         receiverEndpoints.getReceiverEndPoint().add(receiverEndPoint);
         return objectFactory.createNotification2009ReceiverEndPoints(receiverEndpoints);
-    }
-
-    private static XMLGregorianCalendar fiveMinutesFromNow() {
-        return toXmlGregorianCalendar(ZonedDateTime.now().plusMinutes(5));
-    }
-
-    private static XMLGregorianCalendar toXmlGregorianCalendar(ZonedDateTime date) {
-        try {
-            return DatatypeFactory.newInstance().newXMLGregorianCalendar(GregorianCalendar.from(date));
-        } catch (DatatypeConfigurationException e) {
-            throw new RuntimeException("Could not convert DateTime to " + XMLGregorianCalendar.class, e);
-        }
     }
 }

@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.validation;
 
 import lombok.Value;
+import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.ValidationConfig;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;

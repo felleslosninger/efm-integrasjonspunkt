@@ -6,7 +6,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 
 @Component
 @RequiredArgsConstructor
@@ -18,7 +18,7 @@ public class TimeToLiveTask {
 
     @Scheduled(fixedRateString = "${difi.move.nextmove.ttlPollingrate}")
     public void checkStatus() {
-        repo.findAll(QConversation.conversation.expiry.before(ZonedDateTime.now(clock))
+        repo.findAll(QConversation.conversation.expiry.before(OffsetDateTime.now(clock))
                 .and(QConversation.conversation.finished.isFalse()))
                 .forEach(this::setExpired);
     }
