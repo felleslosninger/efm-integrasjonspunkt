@@ -65,4 +65,8 @@ public class DateTimeUtil {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
     }
+
+    public static String toString(XMLGregorianCalendar in) {
+        return in != null ? in.toString() : null;
+    }
 }
