@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.mail.MailSender;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
@@ -22,6 +23,8 @@ import static java.lang.String.format;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPF;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
+import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
+import static no.difi.meldingsutveksling.receipt.GenericReceiptStatus.FEIL;
 
 @Component
 @Slf4j
@@ -30,6 +33,7 @@ public class ConversationService {
     private ConversationRepository repo;
     private IntegrasjonspunktProperties props;
     private NoarkClient mshClient;
+    private MailSender mailSender;
 
     private static final String CONVERSATION_EXISTS = "Conversation with id=%s already exists, not recreating";
     private static final List<ServiceIdentifier> POLLABLES = Lists.newArrayList(DPV, DPF, DPO);
@@ -37,10 +41,12 @@ public class ConversationService {
     @Autowired
     public ConversationService(ConversationRepository repo,
                                IntegrasjonspunktProperties props,
-                               @Qualifier("mshClient") ObjectProvider<NoarkClient> mshClient) {
+                               @Qualifier("mshClient") ObjectProvider<NoarkClient> mshClient,
+                               MailSender mailSender) {
         this.repo = repo;
         this.props = props;
         this.mshClient = mshClient.getIfAvailable();
+        this.mailSender = mailSender;
     }
 
     public Optional<Conversation> registerStatus(String conversationId, MessageStatus status) {
@@ -60,6 +66,19 @@ public class ConversationService {
                 .anyMatch(status.getStatus()::equals);
         if (!hasStatus) {
             conversation.addMessageStatus(status);
+
+            if (status.getStatus().equals(FEIL.toString()) &&
+                    props.getFeature().isMailErrorStatus()) {
+                try {
+                    String title = String.format("Integrasjonspunkt: status %s registrert for forsendelse %s", FEIL.toString(), conversation.getConversationId());
+                    String direction = conversation.getDirection() == INCOMING ? "Innkommende" : "Utgående";
+                    String body = String.format("%s forsendelse med conversationId %s har registrert status '%s'. Se statusgrensesnitt for detaljer.",
+                            direction, conversation.getConversationId(), FEIL.toString());
+                    mailSender.send(title, body);
+                } catch (Exception e) {
+                    log.error(String.format("Error sending status mail for conversationId %s", conversation.getConversationId()), e);
+                }
+            }
 
             if (conversation.getDirection() == ConversationDirection.OUTGOING &&
                     GenericReceiptStatus.SENDT.toString().equals(status.getStatus()) &&
