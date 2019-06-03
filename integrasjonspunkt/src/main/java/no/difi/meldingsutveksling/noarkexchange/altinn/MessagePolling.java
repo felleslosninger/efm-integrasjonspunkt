@@ -175,7 +175,7 @@ public class MessagePolling implements ApplicationContextAware {
                     Audit.info(format("Message id=%s is a receipt", eduDocument.getConversationId()),
                             eduDocument.createLogstashMarkers().and(getReceiptTypeMarker(jaxbKvit.getValue())));
                     MessageStatus status = statusFromKvittering(jaxbKvit.getValue());
-                    conversationService.registerStatus(eduDocument.getConversationId(), MessageStatus.of(GenericReceiptStatus.FEIL));
+                    conversationService.registerStatus(eduDocument.getConversationId(), status);
                 }
             } catch (Exception e) {
                 log.error(format("Error during Altinn message polling, message altinnId=%s", reference.getValue()), e);

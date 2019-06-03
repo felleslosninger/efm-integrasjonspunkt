@@ -33,6 +33,7 @@ public class MailSender {
 
         Session session = Session.getDefaultInstance(mailProps,
                 new javax.mail.Authenticator() {
+                    @Override
                     protected PasswordAuthentication getPasswordAuthentication() {
                         return new PasswordAuthentication(props.getMail().getUsername(),
                                 props.getMail().getPassword());
