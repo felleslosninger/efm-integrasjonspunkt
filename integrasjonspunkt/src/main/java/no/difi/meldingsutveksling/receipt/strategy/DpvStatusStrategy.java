@@ -32,7 +32,7 @@ public class DpvStatusStrategy implements StatusStrategy {
 
     @Override
     public void checkStatus(final Conversation conversation) {
-        GetCorrespondenceStatusDetailsV2 receiptRequest = correspondenceAgencyMessageFactory.createReceiptRequest(conversation);
+        GetCorrespondenceStatusDetailsV2 receiptRequest = correspondenceAgencyMessageFactory.createReceiptRequest(conversation.getConversationId());
 
         Object response = withLogstashMarker(markerFrom(conversation))
                 .execute(() -> client.sendStatusRequest(receiptRequest));

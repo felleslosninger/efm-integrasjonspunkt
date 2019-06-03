@@ -24,7 +24,6 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
-import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import org.springframework.stereotype.Component;
@@ -210,7 +209,7 @@ public class CorrespondenceAgencyMessageFactory {
         return OffsetDateTime.now(clock).plusMinutes(5);
     }
 
-    public GetCorrespondenceStatusDetailsV2 createReceiptRequest(Conversation conversation) {
+    public GetCorrespondenceStatusDetailsV2 createReceiptRequest(String conversationId) {
 
         no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory of = new no.altinn.services
                 .serviceengine.correspondence._2009._10.ObjectFactory();
@@ -220,7 +219,7 @@ public class CorrespondenceAgencyMessageFactory {
         no.altinn.schemas.services.serviceengine.correspondence._2014._10.ObjectFactory filterOF = new no.altinn
                 .schemas.services.serviceengine.correspondence._2014._10.ObjectFactory();
         JAXBElement<String> sendersReference = filterOF.createCorrespondenceStatusFilterV2SendersReference
-                (conversation.getConversationId());
+                (conversationId);
         filter.setSendersReference(sendersReference);
         filter.setServiceCode("4255");
         filter.setServiceEditionCode(10);

@@ -11,7 +11,10 @@ import no.difi.meldingsutveksling.lang.KeystoreProviderException;
 import no.difi.meldingsutveksling.mail.MailClient;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnConnectionCheck;
+import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
+import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
+import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionCheck;
 import no.difi.meldingsutveksling.receipt.DpiReceiptService;
 import no.difi.meldingsutveksling.receipt.StatusStrategy;
 import no.difi.meldingsutveksling.receipt.StatusStrategyFactory;
@@ -183,6 +186,13 @@ public class IntegrasjonspunktBeans {
             AltinnWsClientFactory altinnWsClientFactory
     ) {
         return new AltinnConnectionCheck(properties, serviceRegistryLookup, altinnWsClientFactory);
+    }
+
+    @Bean
+    public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck(UUIDGenerator uuidGenerator,
+                                                                                   CorrespondenceAgencyClient correspondenceAgencyClient,
+                                                                                   CorrespondenceAgencyMessageFactory correspondenceAgencyMessageFactory) {
+        return new CorrespondenceAgencyConnectionCheck(uuidGenerator, correspondenceAgencyClient, correspondenceAgencyMessageFactory);
     }
 }
 

@@ -24,6 +24,7 @@ import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnConnectionCheck;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
+import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionCheck;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.webhooks.WebhookPusher;
@@ -272,6 +273,7 @@ public class CucumberStepsConfiguration {
     @MockBean public SvarUtConnectionCheck svarUtConnectionCheck;
     @MockBean public SvarInnConnectionCheck svarInnConnectionCheck;
     @MockBean public AltinnConnectionCheck altinnConnectionCheck;
+    @MockBean public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck;
 
     @Before
     @SneakyThrows
