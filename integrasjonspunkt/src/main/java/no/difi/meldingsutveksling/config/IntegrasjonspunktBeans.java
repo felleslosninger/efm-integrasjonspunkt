@@ -189,6 +189,7 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
+    @ConditionalOnProperty(name = "difi.move.feature.enableDPV", havingValue = "true")
     public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck(UUIDGenerator uuidGenerator,
                                                                                    CorrespondenceAgencyClient correspondenceAgencyClient,
                                                                                    CorrespondenceAgencyMessageFactory correspondenceAgencyMessageFactory) {
