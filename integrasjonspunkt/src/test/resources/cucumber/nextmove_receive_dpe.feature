@@ -13,7 +13,7 @@ Feature: Receiving a Next Move DPE message
                     {
                         "scopeInformation": [
                             {
-                                "expectedResponseDateTime": "2019-05-10T00:31:52+01:00"
+                                "expectedResponseDateTime": "2019-05-10T01:31:52+02:00"
                             }
                         ],
                         "identifier": "urn:no:difi:meldingsutveksling:2.0",

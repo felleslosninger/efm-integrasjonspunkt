@@ -149,7 +149,7 @@ Feature: Sending a Next Move DPO message when it expires between create and send
       "status" : 400,
       "error" : "Bad Request",
       "exception" : "no.difi.meldingsutveksling.exceptions.TimeToLiveException",
-      "message" : "ExpectedResponseDateTime 2019-05-10T00:31:52+01:00 has been exceeded. Please resend the message",
+      "message" : "ExpectedResponseDateTime 2019-05-10T01:31:52+02:00 has been exceeded. Please resend the message",
       "path" : "/api/messages/out/8fb3a080-39fb-4dd7-b20a-dfc70f214f26"
     }
     """

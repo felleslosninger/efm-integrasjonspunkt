@@ -93,7 +93,7 @@ Feature: Sending a Next Move DPE message
               "instanceIdentifier" : "45efbd4c-413d-4e2c-bbc5-257ef4a65a91",
               "identifier" : "urn:no:difi:profile:einnsyn-innsynskrav:ver1.0",
               "scopeInformation" : [ {
-                "expectedResponseDateTime" : "2019-05-10T00:31:52+01:00"
+                "expectedResponseDateTime" : "2019-05-10T01:31:52+02:00"
               } ]
             } ]
           }
