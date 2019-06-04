@@ -101,9 +101,9 @@ public class IntegrajonspunktReceiveImpl {
     public CorrelationInformation forwardToNoarkSystem(StandardBusinessDocument sbd) throws MessageException {
         try {
             adresseregisterService.validateCertificates(sbd);
-            Audit.info("Certificates validated", markerFrom(sbd));
+            log.debug(markerFrom(sbd), "Certificates validated");
         } catch (MessageException e) {
-            Audit.error(e.getMessage(), markerFrom(sbd), e);
+            log.error(markerFrom(sbd), e.getMessage(), e);
             throw e;
         }
 
@@ -148,11 +148,11 @@ public class IntegrajonspunktReceiveImpl {
     private void forwardToNoarkSystemAndSendReceipts(StandardBusinessDocument sbd, PutMessageRequestType putMessage) {
         PutMessageResponseType response = localNoark.sendEduMelding(putMessage);
         if (response == null || response.getResult() == null) {
-            Audit.info("Empty response from archive", markerFrom(sbd));
+            Audit.info(String.format("Empty response from archive for message [id=%s]", sbd.getConversationId()), markerFrom(sbd));
         } else {
             AppReceiptType result = response.getResult();
             if (result.getType().equals(OK_TYPE)) {
-                Audit.info("Delivered archive", markerFrom(response));
+                Audit.info(String.format("Message [id=%s] delivered archive", sbd.getConversationId()), markerFrom(response));
                 Optional<Conversation> c = conversationService.registerStatus(sbd.getConversationId(),
                         messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_LEVERT));
                 c.ifPresent(conversationService::markFinished);
@@ -170,7 +170,7 @@ public class IntegrajonspunktReceiveImpl {
                     log.error(String.format("Unable to delete files for conversation with id=%s", sbd.getConversationId()), e);
                 }
             } else {
-                Audit.error("Unexpected response from archive", markerFrom(response));
+                Audit.error(String.format("Unexpected response from archive for message [id=%s]", sbd.getConversationId()), markerFrom(response));
                 log.error(">>> archivesystem: " + response.getResult().getMessage().get(0).getText());
             }
         }

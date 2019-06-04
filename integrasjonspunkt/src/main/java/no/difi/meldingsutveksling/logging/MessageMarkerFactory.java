@@ -7,6 +7,8 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.apache.commons.io.FileUtils;
 
 import static no.difi.meldingsutveksling.logging.MarkerFactory.*;
+import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.documentTypeMarker;
+import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.processMarker;
 
 /**
  * Example usage: import static
@@ -43,13 +45,19 @@ public class MessageMarkerFactory {
      * @return LogstashMarker
      */
     public static LogstashMarker markerFrom(StandardBusinessDocument sbd) {
+        LogstashMarker conversationIdMarker = conversationIdMarker(sbd.getConversationId());
         LogstashMarker messageTypeMarker = MarkerFactory.messageTypeMarker(sbd.getMessageType());
         LogstashMarker journalPostIdMarker = journalPostIdMarker(sbd.getJournalPostId());
-        LogstashMarker documentIdMarker = Markers.append(DOCUMENT_ID, sbd.getDocumentId());
-        LogstashMarker conversationIdMarker = conversationIdMarker(sbd.getConversationId());
-        final LogstashMarker receiverMarker = receiverMarker(sbd.getReceiverIdentifier());
-        final LogstashMarker senderMarker = senderMarker(sbd.getSenderIdentifier());
-        return documentIdMarker.and(journalPostIdMarker).and(conversationIdMarker).and(senderMarker).and(receiverMarker).and(messageTypeMarker);
+        LogstashMarker receiverMarker = receiverMarker(sbd.getReceiverIdentifier());
+        LogstashMarker senderMarker = senderMarker(sbd.getSenderIdentifier());
+        LogstashMarker documentTypeMarker = documentTypeMarker(sbd.getDocumentId());
+        LogstashMarker processMarker = processMarker(sbd.getProcess());
+        return conversationIdMarker.and(messageTypeMarker)
+                .and(journalPostIdMarker)
+                .and(receiverMarker)
+                .and(senderMarker)
+                .and(documentTypeMarker)
+                .and(processMarker);
     }
 
     public static LogstashMarker markerFrom(FileReference reference) {

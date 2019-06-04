@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
 
-import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
+import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
 @Component
 @RequiredArgsConstructor
