@@ -13,7 +13,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 @RestController
-@Api
+@Api(tags = "webhooks")
 @RequiredArgsConstructor
 @RequestMapping("/api/subscriptions")
 @Validated
@@ -22,7 +22,7 @@ public class SubscriptionController {
     private final SubscriptionService subscriptionService;
 
     @GetMapping
-    @ApiOperation(value = "List all subscriptions", notes = "List all subscriptions")
+    @ApiOperation(value = "List all webhook subscriptions", notes = "List all webhook subscriptions")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = Subscription[].class),
     })
@@ -31,7 +31,7 @@ public class SubscriptionController {
     }
 
     @GetMapping("{id}")
-    @ApiOperation(value = "Get a subscription", notes = "Get a subscription")
+    @ApiOperation(value = "Get a webhook subscription", notes = "Get a webhook subscription")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = Subscription.class),
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
@@ -43,7 +43,7 @@ public class SubscriptionController {
     }
 
     @PostMapping
-    @ApiOperation(value = "Create a subscription", notes = "Create a subscription")
+    @ApiOperation(value = "Create a webhook subscription", notes = "Create a webhook subscription")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = Subscription.class),
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
@@ -55,7 +55,7 @@ public class SubscriptionController {
     }
 
     @DeleteMapping("{id}")
-    @ApiOperation(value = "Delete a subscription", notes = "Delete a subscription")
+    @ApiOperation(value = "Delete a webhook subscription", notes = "Delete a webhook subscription")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success"),
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
