@@ -80,7 +80,7 @@ public class AltinnWsClient {
         log.debug("Starting thread: upload to altinn");
         try {
             ReceiptExternalStreamedBE receiptAltinn = iBrokerServiceExternalBasicStreamed.uploadFileStreamedBasic(parameters, FILE_NAME, senderReference, request.getSender(), configuration.getPassword(), configuration.getUsername());
-            Audit.info("Message uploaded to altinn", markerFrom(receiptAltinn).and(request.getMarkers()));
+            log.debug(markerFrom(receiptAltinn).and(request.getMarkers()), "Message uploaded to altinn");
         } catch (IBrokerServiceExternalBasicStreamedUploadFileStreamedBasicAltinnFaultFaultFaultMessage e) {
             Audit.error("Message failed to upload to altinn", request.getMarkers(), e);
             throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, AltinnReasonFactory.from(e), e);

@@ -1,11 +1,9 @@
 package no.difi.meldingsutveksling.receipt;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.v2.ServiceIdentifierService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -21,28 +19,16 @@ import static no.difi.meldingsutveksling.receipt.ReceiptStatus.LEST;
  * Periodically checks non final receipts, and their respective services for updates.
  */
 @Component
+@RequiredArgsConstructor
+@Slf4j
 public class ReceiptPolling {
 
-
-    private static final Logger log = LoggerFactory.getLogger(ReceiptPolling.class);
-
-    @Autowired
-    private IntegrasjonspunktProperties props;
-
-    @Autowired
-    private ConversationRepository conversationRepository;
-
-    @Autowired
-    private ConversationService conversationService;
-
-    @Autowired
-    private StatusStrategyFactory statusStrategyFactory;
-
-    @Autowired
-    private DpiReceiptService dpiReceiptService;
-
-    @Autowired
-    private ServiceIdentifierService serviceIdentifierService;
+    private final IntegrasjonspunktProperties props;
+    private final ConversationRepository conversationRepository;
+    private final ConversationService conversationService;
+    private final StatusStrategyFactory statusStrategyFactory;
+    private final DpiReceiptService dpiReceiptService;
+    private final ServiceIdentifierService serviceIdentifierService;
 
     @Scheduled(fixedRate = 60000)
     public void checkReceiptStatus() {
@@ -84,10 +70,10 @@ public class ReceiptPolling {
 
         conversationService.registerStatus(id, status)
                 .filter(c -> Arrays.asList(LEST, FEIL).contains(ReceiptStatus.valueOf(status.getStatus())))
-                .ifPresent(c -> conversationService.markFinished(c));
+                .ifPresent(conversationService::markFinished);
 
-        Audit.info("Updated receipt (DPI)", externalReceipt.logMarkers());
+        log.debug(externalReceipt.logMarkers(), "Updated receipt (DPI)");
         externalReceipt.confirmReceipt();
-        Audit.info("Confirmed receipt (DPI)", externalReceipt.logMarkers());
+        log.debug(externalReceipt.logMarkers(), "Confirmed receipt (DPI)");
     }
 }

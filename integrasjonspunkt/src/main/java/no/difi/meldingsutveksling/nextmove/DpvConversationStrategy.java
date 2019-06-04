@@ -14,7 +14,7 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
+import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 import static no.difi.meldingsutveksling.ptv.WithLogstashMarker.withLogstashMarker;
 
 @Component

@@ -39,7 +39,7 @@ import static java.lang.String.format;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
-import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
+import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
 @RestController
 @Validated

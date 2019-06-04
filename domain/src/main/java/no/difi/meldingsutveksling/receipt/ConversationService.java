@@ -4,7 +4,6 @@ import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.webhooks.WebhookPublisher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +65,7 @@ public class ConversationService {
 
         webhookPublisher.publish(status);
 
-        Audit.info(String.format("Added status '%s' to conversation[id=%s]", status.getStatus(),
+        log.debug(String.format("Added status '%s' to conversation[id=%s]", status.getStatus(),
                 conversation.getConversationId()),
                 MessageStatusMarker.from(status));
 

@@ -63,25 +63,25 @@ public class IntegrasjonspunktImpl implements SOAPport {
     @Override
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
 
-        String organisasjonsnummer = getCanReceiveMessageRequest.getReceiver().getOrgnr();
+        String orgnr = getCanReceiveMessageRequest.getReceiver().getOrgnr();
         GetCanReceiveMessageResponseType response = new GetCanReceiveMessageResponseType();
 
         Predicate<String> personnrPredicate = Pattern.compile(String.format("\\d{%d}", 11)).asPredicate();
-        if (personnrPredicate.test(organisasjonsnummer)) {
+        if (personnrPredicate.test(orgnr)) {
             response.setResult(false);
             return response;
         }
 
         final ServiceRecord serviceRecord;
         try {
-            serviceRecord = serviceRegistryLookup.getServiceRecord(organisasjonsnummer);
+            serviceRecord = serviceRegistryLookup.getServiceRecord(orgnr);
         } catch (Exception e) {
             log.error("Exception during service registry lookup: ", e);
             response.setResult(false);
             return response;
         }
 
-        final LogstashMarker receiverMarker = MarkerFactory.receiverMarker(organisasjonsnummer);
+        final LogstashMarker receiverMarker = MarkerFactory.receiverMarker(orgnr);
 
         boolean validServiceIdentifier = false;
         boolean mshCanReceive = false;
@@ -89,10 +89,10 @@ public class IntegrasjonspunktImpl implements SOAPport {
         if (asList(DPO, DPF).contains(serviceRecord.getServiceIdentifier()) &&
                 strategyFactory.getStrategy(serviceRecord.getServiceIdentifier()).isPresent()) {
             validServiceIdentifier = true;
-            Audit.info("CanReceive = true", receiverMarker);
-        } else if (mshClient.canRecieveMessage(organisasjonsnummer)) {
+            Audit.info(String.format("CanReceive = true, receiver: %s", orgnr), receiverMarker);
+        } else if (mshClient.canRecieveMessage(orgnr)) {
             mshCanReceive = true;
-            Audit.info("MSH canReceive = true", receiverMarker);
+            Audit.info(String.format("MSH canReceive = true, receiver: %s", orgnr), receiverMarker);
         } else {
             isDpv = true;
         }
@@ -104,7 +104,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
             strategyFactoryAvailable = validServiceIdentifier;
         }
         if (!strategyFactoryAvailable && !mshCanReceive) {
-            Audit.error("CanReceive = false. Either feature toggle for DPV is disabled, or MSH cannot receive", receiverMarker);
+            Audit.error(String.format("CanReceive = false, receiver: %s. Either feature toggle for DPV is disabled, or MSH cannot receive", orgnr), receiverMarker);
             response.setResult(false);
             return response;
         }
@@ -148,7 +148,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
             message.setSenderPartyNumber(properties.getOrg().getNumber());
         }
 
-        Audit.info("Received EDU message", markerFrom(message));
+        Audit.info(String.format("Received EDU message [id=%s]", message.getConversationId()), markerFrom(message));
 
         if (PayloadUtil.isEmpty(message.getPayload())) {
             Audit.error("Payload is missing", markerFrom(message));

@@ -14,7 +14,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
+import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
 @Component
 @ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")

@@ -8,7 +8,7 @@ import javax.transaction.Transactional;
 import java.time.Clock;
 import java.time.OffsetDateTime;
 
-import static no.difi.meldingsutveksling.nextmove.NextMoveMessageMarkers.markerFrom;
+import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
 @Slf4j
 @RequiredArgsConstructor
