@@ -223,8 +223,8 @@ public class NextMoveServiceBus {
             } else {
                 if (payload.getAsic() != null) {
                     cryptoMessagePersister.write(payload.getSbd().getConversationId(), ASIC_FILE, Base64.getDecoder().decode(payload.getAsic()));
-                    handleSbd(payload.getSbd());
                 }
+                handleSbd(payload.getSbd());
             }
             messageReceiver.completeAsync(m.getLockToken());
         } catch (JAXBException | IOException e) {
