@@ -19,17 +19,17 @@ public class MessagePolling {
     private final ObjectProvider<DpfPolling> dpfPolling;
     private final ObjectProvider<DpoPolling> dpoPolling;
 
-    @Scheduled(fixedRateString = "${difi.move.nextmove.serviceBus.pollingrate}")
+    @Scheduled(fixedDelayString = "${difi.move.nextmove.serviceBus.pollingrate}")
     public void checkForNewEinnsynMessages() {
         Optional.ofNullable(dpePolling.getIfAvailable()).ifPresent(DpePolling::poll);
     }
 
-    @Scheduled(fixedRateString = "${difi.move.fiks.pollingrate}")
+    @Scheduled(fixedDelayString = "${difi.move.fiks.pollingrate}")
     public void checkForFiksMessages() {
         Optional.ofNullable(dpfPolling.getIfAvailable()).ifPresent(DpfPolling::poll);
     }
 
-    @Scheduled(fixedRate = 15000)
+    @Scheduled(fixedDelay = 15000)
     public void checkForNewAltinnMessages() {
         Optional.ofNullable(dpoPolling.getIfAvailable()).ifPresent(DpoPolling::poll);
     }
