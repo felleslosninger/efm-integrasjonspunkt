@@ -13,6 +13,7 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.ResourceAccessException;
 
 import javax.xml.bind.JAXBException;
 import java.io.UnsupportedEncodingException;
@@ -88,30 +89,34 @@ public class ServiceBusRestClient {
 
         URI uri = convertToUri(resourceUri);
         log.debug("Calling {}", resourceUri);
-        ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.POST, httpEntity, String.class);
-        if (!asList(HttpStatus.OK, HttpStatus.CREATED).contains(response.getStatusCode())) {
-            log.debug("{} got response {}, returning empty", resourceUri, response.getStatusCode().toString());
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.POST, httpEntity, String.class);
+            if (!asList(HttpStatus.OK, HttpStatus.CREATED).contains(response.getStatusCode())) {
+                log.debug("{} got response {}, returning empty", resourceUri, response.getStatusCode().toString());
+                return Optional.empty();
+            }
+
+            ServiceBusMessage.ServiceBusMessageBuilder sbmBuilder = ServiceBusMessage.builder();
+            String brokerPropertiesJson = response.getHeaders().getFirst("BrokerProperties");
+            JsonParser jsonParser = new JsonParser();
+            JsonObject brokerProperties = jsonParser.parse(brokerPropertiesJson).getAsJsonObject();
+            String messageId = brokerProperties.get("MessageId").getAsString();
+            sbmBuilder.lockToken(brokerProperties.get("LockToken").getAsString())
+                    .messageId(messageId)
+                    .sequenceNumber(brokerProperties.get("SequenceNumber").getAsString());
+
+            try {
+                ServiceBusPayload payload = payloadConverter.convert(response.getBody(), messageId);
+                sbmBuilder.payload(payload);
+                log.debug(format("Received message on queue=%s with conversationId=%s", localQueuePath, payload.getSbd().getConversationId()));
+                return Optional.of(sbmBuilder.build());
+            } catch (JAXBException e) {
+                log.error(String.format("Error creating old format from message id=%s", messageId), e);
+            }
+        } catch (ResourceAccessException e) {
+            log.error("Polling of DPE messages failed with: {}", e.getLocalizedMessage());
             return Optional.empty();
         }
-
-        ServiceBusMessage.ServiceBusMessageBuilder sbmBuilder = ServiceBusMessage.builder();
-        String brokerPropertiesJson = response.getHeaders().getFirst("BrokerProperties");
-        JsonParser jsonParser = new JsonParser();
-        JsonObject brokerProperties = jsonParser.parse(brokerPropertiesJson).getAsJsonObject();
-        String messageId = brokerProperties.get("MessageId").getAsString();
-        sbmBuilder.lockToken(brokerProperties.get("LockToken").getAsString())
-                .messageId(messageId)
-                .sequenceNumber(brokerProperties.get("SequenceNumber").getAsString());
-
-        try {
-            ServiceBusPayload payload = payloadConverter.convert(response.getBody(), messageId);
-            sbmBuilder.payload(payload);
-            log.debug(format("Received message on queue=%s with conversationId=%s", localQueuePath, payload.getSbd().getConversationId()));
-            return Optional.of(sbmBuilder.build());
-        } catch (JAXBException e) {
-            log.error(String.format("Error creating old format from message id=%s", messageId), e);
-        }
-
         return Optional.empty();
     }
 
