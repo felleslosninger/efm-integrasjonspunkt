@@ -122,7 +122,6 @@ public class AltinnInSteps {
 
     @And("^Altinn sends the message$")
     public void altinnSendsTheMessage() throws IOException {
-        log.info("Start");
         if(wireMockServer.isRunning()) {
             log.info("Wiremock is running");
         } else {
@@ -137,6 +136,7 @@ public class AltinnInSteps {
         GetAvailableFilesBasicResponse response = new no.difi.meldingsutveksling.altinn.mock.brokerbasic.ObjectFactory().createGetAvailableFilesBasicResponse();
         response.setGetAvailableFilesBasicResult(new no.difi.meldingsutveksling.altinn.mock.brokerbasic.ObjectFactory().createGetAvailableFilesBasicResponseGetAvailableFilesBasicResult(filesBasic));
 
+        log.info("A");
         wireMockServer.givenThat(post(urlEqualTo("/ServiceEngineExternal/BrokerServiceExternalBasic.svc?wsdl"))
                 .withHeader(SOAP_ACTION, containing("GetAvailableFilesBasic"))
                 .willReturn(aResponse()
@@ -146,6 +146,7 @@ public class AltinnInSteps {
                 )
         );
 
+        log.info("B");
         String boundary = UUID.randomUUID().toString();
 
         wireMockServer.givenThat(post(urlEqualTo("/ServiceEngineExternal/BrokerServiceExternalBasicStreamed.svc?wsdl"))
@@ -162,7 +163,7 @@ public class AltinnInSteps {
                         .withBody(getDownloadBody(boundary))
                 )
         );
-
+        log.info("C");
     }
 
     private byte[] getDownloadBody(String boundary) throws IOException {

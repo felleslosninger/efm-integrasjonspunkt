@@ -40,13 +40,10 @@ public class MessageInSteps {
 
     @And("^appends a file named \"([^\"]*)\" with mimetype=\"([^\"]*)\":$")
     public void appendsAFileNamedWithMimetype(String filename, String mimeType, String body) {
-        log.info("Body {}", body);
         Attachment attachment = new Attachment(new ByteArrayInputStream(body.getBytes()))
                 .setFileName(filename)
                 .setMimeType(mimeType);
-        log.info("Attachment created");
 
         messageInHolder.get().attachment(attachment);
-        log.info("Attachment added");
     }
 }
