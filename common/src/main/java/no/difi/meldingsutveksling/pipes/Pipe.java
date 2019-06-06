@@ -57,10 +57,6 @@ public class Pipe {
         return pipe;
     }
 
-    private static void logFinish(String description, String s) {
-        log.trace(s, description);
-    }
-
     public Pipe andThen(String description, BiConsumer<PipedInputStream, PipedOutputStream> consumer) {
         Pipe newPipe = new Pipe();
         CompletableFuture.runAsync(() -> {
@@ -76,10 +72,11 @@ public class Pipe {
     }
 
     private static void logStart(String description) {
-        log.info("Starting thread: {}", description);
+
+        log.trace("Starting thread: {}", description);
     }
 
     private static void logFinish(String description) {
-        log.info("Finished thread: {}", description);
+        log.trace("Finished thread: {}", description);
     }
 }
