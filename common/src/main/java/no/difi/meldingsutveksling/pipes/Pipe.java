@@ -71,12 +71,8 @@ public class Pipe {
         return newPipe;
     }
 
-    public void andFinally(String description, Consumer<PipedInputStream> consumer) {
-        CompletableFuture.runAsync(() -> {
-            logStart(description);
-            consumer.accept(outlet);
-            logFinish(description);
-        });
+    public void andFinally(Consumer<PipedInputStream> consumer) {
+        consumer.accept(outlet);
     }
 
     private static void logStart(String description) {
@@ -84,6 +80,6 @@ public class Pipe {
     }
 
     private static void logFinish(String description) {
-        log.info("Starting thread: {}", description);
+        log.info("Finished thread: {}", description);
     }
 }

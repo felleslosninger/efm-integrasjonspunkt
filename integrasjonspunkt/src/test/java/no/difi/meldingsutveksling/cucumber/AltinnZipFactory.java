@@ -7,12 +7,14 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.pipes.Pipe;
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -51,7 +53,7 @@ public class AltinnZipFactory {
 
         Pipe.of("Get ASIC", copy(asicFactory.getAsic(message)))
                 .andThen("CMS encrypt", (outlet, inlet) -> cmsUtilProvider.getIfAvailable().createCMSStreamed(outlet, inlet, keyInfo.getX509Certificate()))
-                .andFinally("Copy to ZIP entry", copyTo(out));
+                .andFinally(copyTo(out));
 
         log.info("2");
         out.closeEntry();
