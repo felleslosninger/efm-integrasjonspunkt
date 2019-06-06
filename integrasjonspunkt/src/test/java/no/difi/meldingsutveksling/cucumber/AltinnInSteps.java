@@ -150,6 +150,10 @@ public class AltinnInSteps {
         log.info("B");
         String boundary = UUID.randomUUID().toString();
 
+        log.info("C");
+        byte[] downloadBody = getDownloadBody(boundary);
+        log.info("D");
+
         wireMockServer.givenThat(post(urlEqualTo("/ServiceEngineExternal/BrokerServiceExternalBasicStreamed.svc?wsdl"))
                 .withHeader(SOAP_ACTION, containing("DownloadFileStreamedBasic"))
                 .willReturn(aResponse()
@@ -162,10 +166,10 @@ public class AltinnInSteps {
                         .withHeader(HttpHeaders.TRANSFER_ENCODING, "chunked")
                         .withHeader("X-AspNet-Version", "4.0.30319")
                         .withHeader("X-Powered-By", "ASP.NET")
-                        .withBody(getDownloadBody(boundary))
+                        .withBody(downloadBody)
                 )
         );
-        log.info("C");
+        log.info("E");
     }
 
     private byte[] getDownloadBody(String boundary) throws IOException {
