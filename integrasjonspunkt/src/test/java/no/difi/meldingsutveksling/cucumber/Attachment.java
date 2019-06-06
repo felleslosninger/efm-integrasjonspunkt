@@ -5,6 +5,7 @@ import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.domain.StreamedFile;
 import org.apache.commons.io.IOUtils;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,6 +23,6 @@ class Attachment implements StreamedFile {
     }
 
     public InputStream getInputStream() {
-        return new ByteArrayInputStream(bytes);
+        return new BufferedInputStream(new ByteArrayInputStream(bytes));
     }
 }
