@@ -122,11 +122,6 @@ public class AltinnInSteps {
 
     @And("^Altinn sends the message$")
     public void altinnSendsTheMessage() throws IOException {
-        if (wireMockServer.isRunning()) {
-            log.info("Wiremock is running");
-        } else {
-            log.info("Wiremock is NOT running");
-        }
         BrokerServiceAvailableFileList filesBasic = new BrokerServiceAvailableFileList();
         BrokerServiceAvailableFile file = new BrokerServiceAvailableFile();
         file.setFileReference("testMessage");
