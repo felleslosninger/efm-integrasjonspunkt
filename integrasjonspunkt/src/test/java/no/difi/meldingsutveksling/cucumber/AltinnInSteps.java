@@ -6,6 +6,7 @@ import cucumber.api.java.Before;
 import cucumber.api.java.en.And;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceAvailableFile;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceAvailableFileList;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.GetAvailableFilesBasicResponse;
@@ -27,6 +28,7 @@ import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
+@Slf4j
 @RequiredArgsConstructor
 public class AltinnInSteps {
 
@@ -120,6 +122,12 @@ public class AltinnInSteps {
 
     @And("^Altinn sends the message$")
     public void altinnSendsTheMessage() throws IOException {
+        log.info("Start");
+        if(wireMockServer.isRunning()) {
+            log.info("Wiremock is running");
+        } else {
+            log.info("Wiremock is NOT running");
+        }
         BrokerServiceAvailableFileList filesBasic = new BrokerServiceAvailableFileList();
         BrokerServiceAvailableFile file = new BrokerServiceAvailableFile();
         file.setFileReference("testMessage");

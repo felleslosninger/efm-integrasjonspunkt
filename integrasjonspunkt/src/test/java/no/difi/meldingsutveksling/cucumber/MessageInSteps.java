@@ -5,6 +5,7 @@ import cucumber.api.java.After;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.And;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.springframework.boot.test.json.JacksonTester;
 
@@ -12,6 +13,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 @RequiredArgsConstructor
+@Slf4j
 public class MessageInSteps {
 
     private final Holder<Message> messageInHolder;
@@ -38,10 +40,13 @@ public class MessageInSteps {
 
     @And("^appends a file named \"([^\"]*)\" with mimetype=\"([^\"]*)\":$")
     public void appendsAFileNamedWithMimetype(String filename, String mimeType, String body) {
+        log.info("Body {}", body);
         Attachment attachment = new Attachment(new ByteArrayInputStream(body.getBytes()))
                 .setFileName(filename)
                 .setMimeType(mimeType);
+        log.info("Attachment created");
 
         messageInHolder.get().attachment(attachment);
+        log.info("Attachment added");
     }
 }

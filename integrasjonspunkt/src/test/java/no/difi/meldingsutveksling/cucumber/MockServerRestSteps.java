@@ -6,7 +6,6 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.nextmove.ServiceBusRestClient;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
@@ -28,7 +27,6 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 
 @RequiredArgsConstructor
-@Slf4j
 public class MockServerRestSteps {
 
     private final RestClient restClient;
@@ -61,16 +59,11 @@ public class MockServerRestSteps {
 
     @SuppressWarnings("squid:S1172")
     private RestTemplate getRestTemplate(String url) {
-        log.info("Url = {}", url);
         if (url.startsWith(serviceBusRestClient.getBase())) {
-            log.info("serviceBusRestClient");
             return serviceBusRestClient.getRestTemplate();
         } else if (url.startsWith("/mottaker") || url.startsWith("/kvitterMottak")) {
-            log.info("svarInnClient");
             return svarInnClient.getRestTemplate();
         }
-
-        log.info("restClient");
 
         return (RestTemplate) restClient.getRestTemplate();
     }
