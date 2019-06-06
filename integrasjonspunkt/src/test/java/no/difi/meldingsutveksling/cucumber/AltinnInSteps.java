@@ -136,7 +136,6 @@ public class AltinnInSteps {
         GetAvailableFilesBasicResponse response = new no.difi.meldingsutveksling.altinn.mock.brokerbasic.ObjectFactory().createGetAvailableFilesBasicResponse();
         response.setGetAvailableFilesBasicResult(new no.difi.meldingsutveksling.altinn.mock.brokerbasic.ObjectFactory().createGetAvailableFilesBasicResponseGetAvailableFilesBasicResult(filesBasic));
 
-        log.info("A");
         wireMockServer.givenThat(post(urlEqualTo("/ServiceEngineExternal/BrokerServiceExternalBasic.svc?wsdl"))
                 .withHeader(SOAP_ACTION, containing("GetAvailableFilesBasic"))
                 .willReturn(aResponse()
@@ -147,12 +146,11 @@ public class AltinnInSteps {
                 )
         );
 
-        log.info("B");
         String boundary = UUID.randomUUID().toString();
 
-        log.info("C");
+        log.info("getDownloadBody START ");
         byte[] downloadBody = getDownloadBody(boundary);
-        log.info("D");
+        log.info("getDownloadBody END");
 
         wireMockServer.givenThat(post(urlEqualTo("/ServiceEngineExternal/BrokerServiceExternalBasicStreamed.svc?wsdl"))
                 .withHeader(SOAP_ACTION, containing("DownloadFileStreamedBasic"))
@@ -169,12 +167,15 @@ public class AltinnInSteps {
                         .withBody(downloadBody)
                 )
         );
-        log.info("E");
+
+        log.info("WireMock END");
     }
 
     private byte[] getDownloadBody(String boundary) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        log.info("A");
         try (PrintWriter pw = new PrintWriter(bos)) {
+            log.info("B");
             pw.println("--" + boundary);
             pw.println("Content-ID: <http://tempuri.org/0>");
             pw.println("Content-Transfer-Encoding: 8bit");
@@ -188,11 +189,15 @@ public class AltinnInSteps {
             pw.println("Content-Type: application/octet-stream");
             pw.println();
             pw.flush();
+            log.info("C");
             bos.write(altinnZipFactory.getAltinnZipAsBytes(messageInHolder.get()));
+            log.info("D");
             bos.flush();
+            log.info("E");
             pw.println();
             pw.println("--" + boundary);
             pw.flush();
+            log.info("F");
         }
 
         return bos.toByteArray();
