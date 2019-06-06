@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.cucumber;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.pipes.Pipe;
@@ -23,7 +22,6 @@ import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.pipes.PipeOperations.copy;
 import static no.difi.meldingsutveksling.pipes.PipeOperations.copyTo;
 
-@Slf4j
 @Component
 @Profile("cucumber")
 @RequiredArgsConstructor
@@ -49,17 +47,12 @@ public class AltinnZipFactory {
 
         out.putNextEntry(new ZipEntry(ASIC_FILE));
 
-        log.info("1");
-
         Pipe.of("Get ASIC", copy(asicFactory.getAsic(message)))
                 .andThen("CMS encrypt", (outlet, inlet) -> cmsUtilProvider.getIfAvailable().createCMSStreamed(outlet, inlet, keyInfo.getX509Certificate()))
                 .andFinally(copyTo(out));
 
-        log.info("2");
         out.closeEntry();
-        log.info("3");
         out.close();
-        log.info("4");
 
         return bos.toByteArray();
     }

@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.dokumentpakking.service;
 
+import lombok.extern.slf4j.Slf4j;
 import no.difi.asic.AsicWriter;
 import no.difi.asic.AsicWriterFactory;
 import no.difi.asic.MimeType;
@@ -15,7 +16,7 @@ import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
 
-
+@Slf4j
 public class CreateAsice {
 
     ManifestFactory manifestFactory;
@@ -32,22 +33,29 @@ public class CreateAsice {
     public void createAsiceStreamed(StreamedFile mainAttachment, Stream<? extends StreamedFile> files, OutputStream archive, SignatureHelper signatureHelper, Avsender avsender,
                                     Mottaker mottaker) throws IOException {
 
+        log.info("1");
         Manifest manifest = manifestFactory.createManifest(avsender.getOrgNummer(), mottaker.getOrgNummer(),
                 mainAttachment.getFileName(), mainAttachment.getMimeType());
+        log.info("2");
         AsicWriter asicWriter = AsicWriterFactory.newFactory()
                 .newContainer(archive)
                 .add(new ByteArrayInputStream(manifest.getBytes()), "manifest.xml", MimeType.XML);
-
+        log.info("3");
         files.forEach(f -> {
             try {
+                log.info("4 {}", f.getFileName());
                 InputStream inputStream = new BufferedInputStream(f.getInputStream());
+                log.info("5 {}", f.getFileName());
                 asicWriter.add(inputStream, f.getFileName(), MimeType.forString(f.getMimeType()));
+                log.info("6 {}", f.getFileName());
             } catch (IOException e) {
                 throw new MeldingsUtvekslingRuntimeException(StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT.getTechnicalMessage(), e);
             }
         });
+        log.info("7");
 
         asicWriter.sign(signatureHelper);
+        log.info("8");
     }
 
     public Archive createAsice(List<ByteArrayFile> forsendelse, SignatureHelper signatureHelper, Avsender
