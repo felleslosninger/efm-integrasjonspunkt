@@ -13,5 +13,5 @@ import org.junit.runner.RunWith;
         tags = {"not @Ignore"}
 )
 @UtilityClass
-public class RunCucumberTest {
+public class RunCucumberIntegrationTest {
 }
