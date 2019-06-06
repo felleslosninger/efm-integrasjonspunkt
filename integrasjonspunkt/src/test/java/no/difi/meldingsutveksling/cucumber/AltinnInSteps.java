@@ -6,7 +6,6 @@ import cucumber.api.java.Before;
 import cucumber.api.java.en.And;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceAvailableFile;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceAvailableFileList;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.GetAvailableFilesBasicResponse;
@@ -28,7 +27,6 @@ import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
-@Slf4j
 @RequiredArgsConstructor
 public class AltinnInSteps {
 
@@ -143,10 +141,6 @@ public class AltinnInSteps {
 
         String boundary = UUID.randomUUID().toString();
 
-        log.info("getDownloadBody START ");
-        byte[] downloadBody = getDownloadBody(boundary);
-        log.info("getDownloadBody END");
-
         wireMockServer.givenThat(post(urlEqualTo("/ServiceEngineExternal/BrokerServiceExternalBasicStreamed.svc?wsdl"))
                 .withHeader(SOAP_ACTION, containing("DownloadFileStreamedBasic"))
                 .willReturn(aResponse()
@@ -159,18 +153,14 @@ public class AltinnInSteps {
                         .withHeader(HttpHeaders.TRANSFER_ENCODING, "chunked")
                         .withHeader("X-AspNet-Version", "4.0.30319")
                         .withHeader("X-Powered-By", "ASP.NET")
-                        .withBody(downloadBody)
+                        .withBody(getDownloadBody(boundary))
                 )
         );
-
-        log.info("WireMock END");
     }
 
     private byte[] getDownloadBody(String boundary) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        log.info("A");
         try (PrintWriter pw = new PrintWriter(bos)) {
-            log.info("B");
             pw.println("--" + boundary);
             pw.println("Content-ID: <http://tempuri.org/0>");
             pw.println("Content-Transfer-Encoding: 8bit");
@@ -184,15 +174,11 @@ public class AltinnInSteps {
             pw.println("Content-Type: application/octet-stream");
             pw.println();
             pw.flush();
-            log.info("C");
             bos.write(altinnZipFactory.getAltinnZipAsBytes(messageInHolder.get()));
-            log.info("D");
             bos.flush();
-            log.info("E");
             pw.println();
             pw.println("--" + boundary);
             pw.flush();
-            log.info("F");
         }
 
         return bos.toByteArray();
