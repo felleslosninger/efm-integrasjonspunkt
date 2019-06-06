@@ -21,7 +21,7 @@ public class DpfPolling {
     private final SvarInnPutMessageForwarder svarInnEduCoreForwarder;
     private final SvarInnNextMoveForwarder svarInnNextMoveForwarder;
 
-    void poll() {
+    public void poll() {
         log.debug("Checking for new FIKS messages");
         Consumer<Forsendelse> forwarder = getSvarInnForwarder();
         svarInnService.getForsendelser().forEach(forwarder);

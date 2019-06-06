@@ -42,7 +42,7 @@ public class DpoPolling {
 
     private ServiceRecord serviceRecord;
 
-    void poll() {
+    public void poll() {
         log.debug("Checking for new messages");
 
         AltinnWsClient client = getAltinnWsClient();

@@ -20,7 +20,7 @@ public class DpePolling {
 
     private CompletableFuture batchRead;
 
-    void poll() {
+    public void poll() {
         if (properties.getNextmove().getServiceBus().isBatchRead()) {
             if (this.batchRead == null || this.batchRead.isDone()) {
                 log.debug("Checking for new NextMove messages (batch)..");
