@@ -122,7 +122,7 @@ public class AltinnInSteps {
 
     @And("^Altinn sends the message$")
     public void altinnSendsTheMessage() throws IOException {
-        if(wireMockServer.isRunning()) {
+        if (wireMockServer.isRunning()) {
             log.info("Wiremock is running");
         } else {
             log.info("Wiremock is NOT running");
@@ -188,7 +188,8 @@ public class AltinnInSteps {
             pw.println("Content-Type: application/octet-stream");
             pw.println();
             pw.flush();
-            IOUtils.copy(altinnZipFactory.createAltinnZip(messageInHolder.get()), bos);
+            bos.write(altinnZipFactory.getAltinnZipAsBytes(messageInHolder.get()));
+            bos.flush();
             pw.println();
             pw.println("--" + boundary);
             pw.flush();

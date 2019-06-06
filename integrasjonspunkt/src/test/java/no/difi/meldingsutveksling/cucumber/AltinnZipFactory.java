@@ -11,10 +11,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.PipedInputStream;
+import java.io.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -33,6 +30,11 @@ public class AltinnZipFactory {
 
     @SneakyThrows
     InputStream createAltinnZip(Message message) {
+        byte[] zipAsBytes = getAltinnZipAsBytes(message);
+        return new ByteArrayInputStream(zipAsBytes);
+    }
+
+    byte[] getAltinnZipAsBytes(Message message) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ZipOutputStream out = new ZipOutputStream(bos);
         out.putNextEntry(new ZipEntry(ALTINN_SBD_FILE));
@@ -44,10 +46,11 @@ public class AltinnZipFactory {
         InputStream asic = asicFactory.getAsic(message);
         PipedInputStream encryptedAsic = Pipe.of("CMS encrypt", inlet -> cmsUtilProvider.getIfAvailable().createCMSStreamed(asic, inlet, keyInfo.getX509Certificate())).outlet();
         IOUtils.copy(encryptedAsic, out);
+        out.flush();
         out.closeEntry();
 
         out.close();
 
-        return new ByteArrayInputStream(bos.toByteArray());
+        return bos.toByteArray();
     }
 }
