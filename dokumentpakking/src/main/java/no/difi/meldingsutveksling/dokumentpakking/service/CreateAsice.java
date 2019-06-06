@@ -40,7 +40,7 @@ public class CreateAsice {
 
         files.forEach(f -> {
             try {
-                InputStream inputStream = f.getInputStream();
+                InputStream inputStream = new BufferedInputStream(f.getInputStream());
                 asicWriter.add(inputStream, f.getFileName(), MimeType.forString(f.getMimeType()));
             } catch (IOException e) {
                 throw new MeldingsUtvekslingRuntimeException(StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT.getTechnicalMessage(), e);
