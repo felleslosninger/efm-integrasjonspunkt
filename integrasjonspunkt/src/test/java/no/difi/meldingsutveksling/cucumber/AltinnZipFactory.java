@@ -19,6 +19,7 @@ import java.util.zip.ZipOutputStream;
 import static no.difi.meldingsutveksling.NextMoveConsts.ALTINN_SBD_FILE;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.pipes.PipeOperations.copy;
+import static no.difi.meldingsutveksling.pipes.PipeOperations.copyTo;
 
 @Slf4j
 @Component
@@ -48,19 +49,15 @@ public class AltinnZipFactory {
 
         log.info("1");
 
-        PipedInputStream encryptedAsic = Pipe.of("Get ASIC", copy(asicFactory.getAsic(message)))
+        Pipe.of("Get ASIC", copy(asicFactory.getAsic(message)))
                 .andThen("CMS encrypt", (outlet, inlet) -> cmsUtilProvider.getIfAvailable().createCMSStreamed(outlet, inlet, keyInfo.getX509Certificate()))
-                .outlet();
+                .andFinally("Copy to ZIP entry", copyTo(out));
 
         log.info("2");
-        IOUtils.copy(encryptedAsic, out);
-        log.info("3");
-        out.flush();
-        log.info("4");
         out.closeEntry();
-        log.info("5");
+        log.info("3");
         out.close();
-        log.info("6");
+        log.info("4");
 
         return bos.toByteArray();
     }

@@ -50,20 +50,40 @@ public class Pipe {
     public static Pipe of(String description, Consumer<PipedOutputStream> consumer) {
         Pipe pipe = new Pipe();
         CompletableFuture.runAsync(() -> {
-            log.trace("Starting thread: {}", description);
+            logStart(description);
             consumer.accept(pipe.inlet);
-            log.trace("Thread finished: {}", description);
+            logFinish(description);
         }).whenCompleteAsync(pipe::handleCompleteAsync);
         return pipe;
+    }
+
+    private static void logFinish(String description, String s) {
+        log.trace(s, description);
     }
 
     public Pipe andThen(String description, BiConsumer<PipedInputStream, PipedOutputStream> consumer) {
         Pipe newPipe = new Pipe();
         CompletableFuture.runAsync(() -> {
-            log.trace("Starting thread: {}", description);
+            logStart(description);
             consumer.accept(outlet, newPipe.inlet);
-            log.trace("Thread finished: {}", description);
+            logFinish(description);
         }).whenCompleteAsync(newPipe::handleCompleteAsync);
         return newPipe;
+    }
+
+    public void andFinally(String description, Consumer<PipedInputStream> consumer) {
+        CompletableFuture.runAsync(() -> {
+            logStart(description);
+            consumer.accept(outlet);
+            logFinish(description);
+        });
+    }
+
+    private static void logStart(String description) {
+        log.info("Starting thread: {}", description);
+    }
+
+    private static void logFinish(String description) {
+        log.info("Starting thread: {}", description);
     }
 }

@@ -3,9 +3,7 @@ package no.difi.meldingsutveksling.pipes;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.io.IOUtils;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PipedOutputStream;
+import java.io.*;
 import java.util.function.Consumer;
 
 @UtilityClass
@@ -28,6 +26,17 @@ public class PipeOperations {
                 inputStream.close();
             } catch (IOException e) {
                 throw new PipeRuntimeException("Closing input stream failed!", e);
+            }
+        };
+    }
+
+    public static Consumer<PipedInputStream> copyTo(OutputStream outputStream) {
+        return in -> {
+            try {
+                IOUtils.copy(in, outputStream);
+                outputStream.flush();
+            } catch (IOException e) {
+                throw new PipeRuntimeException("Copy failed!", e);
             }
         };
     }
