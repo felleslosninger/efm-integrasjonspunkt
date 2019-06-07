@@ -14,7 +14,7 @@ import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.springframework.stereotype.Component;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 

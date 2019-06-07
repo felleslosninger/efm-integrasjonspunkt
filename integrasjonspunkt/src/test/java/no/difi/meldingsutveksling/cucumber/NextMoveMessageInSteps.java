@@ -62,7 +62,6 @@ public class NextMoveMessageInSteps {
     }
 
     @And("^I pop the locked message$")
-    @SneakyThrows
     public void iPopTheLockedMessage() {
         RequestCallback requestCallback = request -> request.getHeaders()
                 .setAccept(Arrays.asList(MediaType.APPLICATION_OCTET_STREAM, MediaType.ALL));
