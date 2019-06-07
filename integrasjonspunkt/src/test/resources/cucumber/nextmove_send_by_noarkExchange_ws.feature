@@ -1,3 +1,4 @@
+@Ignore
 Feature: Sending a BEST/EDU message by the noarkExchange WebService
 
   Background:
