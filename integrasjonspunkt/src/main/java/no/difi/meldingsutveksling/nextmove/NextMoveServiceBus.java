@@ -34,7 +34,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.transaction.Transactional;
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -157,7 +156,6 @@ public class NextMoveServiceBus {
         }
     }
 
-    @Transactional
     public void getAllMessagesRest() {
         boolean messagesInQueue = true;
         while (messagesInQueue) {

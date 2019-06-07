@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.springframework.stereotype.Component;
 
+import javax.transaction.Transactional;
 import java.time.OffsetDateTime;
 
 @Component
@@ -21,6 +22,7 @@ public class TimeToLiveHelper {
     private final ConversationService conversationService;
     private final MessageStatusFactory messageStatusFactory;
 
+    @Transactional
     public void registerErrorStatusAndMessage(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier, ConversationDirection direction) {
         sbd.getExpectedResponseDateTime().ifPresent(p -> {
             Conversation conversation = conversationService.registerConversation(new MessageInformable() {
