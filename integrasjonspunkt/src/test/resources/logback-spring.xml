@@ -4,8 +4,20 @@
     <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener" />
     <!-- Logstash destination -->
 
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="CONSOLE"/>
     </root>
+
+    <logger name="no.difi.asic.AbstractAsicWriter">
+        <level value="DEBUG"/>
+    </logger>
+
+    <logger name="no.difi.asic.AsicOutputStream">
+        <level value="DEBUG"/>
+    </logger>
+
+    <logger name="no.difi.asic.SignatureHelper">
+        <level value="DEBUG"/>
+    </logger>
 
 </configuration>
