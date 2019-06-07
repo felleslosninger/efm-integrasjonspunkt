@@ -29,7 +29,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import org.springframework.transaction.annotation.Transactional;
+import javax.transaction.Transactional;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.util.Base64;

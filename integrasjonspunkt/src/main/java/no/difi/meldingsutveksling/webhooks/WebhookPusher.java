@@ -12,7 +12,7 @@ import no.difi.meldingsutveksling.webhooks.subscription.SubscriptionRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 
-import org.springframework.transaction.annotation.Transactional;
+import javax.transaction.Transactional;
 
 @Slf4j
 @Component

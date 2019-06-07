@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
 
-import org.springframework.transaction.annotation.Transactional;
+import javax.transaction.Transactional;
 import java.time.Clock;
 import java.time.OffsetDateTime;
 
