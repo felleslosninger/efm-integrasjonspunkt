@@ -69,8 +69,8 @@ import static org.mockito.Mockito.spy;
 
 @ContextConfiguration(classes = {
         IntegrasjonspunktApplication.class,
+        TestClockConfig.class,
         CucumberStepsConfiguration.SpringConfiguration.class,
-        TestClockConfig.class
 }, loader = SpringBootContextLoader.class)
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
