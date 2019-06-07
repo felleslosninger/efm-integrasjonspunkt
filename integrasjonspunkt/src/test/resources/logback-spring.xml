@@ -20,4 +20,8 @@
         <level value="DEBUG"/>
     </logger>
 
+    <logger name="no.difi.meldingsutveksling.dokumentpakking.service.CreateAsice">
+        <level value="DEBUG"/>
+    </logger>
+
 </configuration>
