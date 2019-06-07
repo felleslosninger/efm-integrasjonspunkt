@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.StreamedFile;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
+import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.util.stream.Stream;
@@ -35,7 +36,9 @@ public class CreateAsice {
             try {
                 log.info("Adding file {} of type {}", f.getFileName(), f.getMimeType());
                 InputStream inputStream = new BufferedInputStream(f.getInputStream());
-                asicWriter.add(inputStream, f.getFileName(), MimeType.forString(f.getMimeType()));
+                byte[] copy = IOUtils.toByteArray(inputStream);
+                log.info("Bytes {}", copy.length);
+                asicWriter.add(new ByteArrayInputStream(copy), f.getFileName(), MimeType.forString(f.getMimeType()));
             } catch (IOException e) {
                 throw new MeldingsUtvekslingRuntimeException(StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT.getTechnicalMessage(), e);
             }
