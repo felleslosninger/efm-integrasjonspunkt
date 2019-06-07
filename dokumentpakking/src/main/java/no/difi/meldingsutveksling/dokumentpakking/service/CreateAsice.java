@@ -5,29 +5,23 @@ import no.difi.asic.AsicWriter;
 import no.difi.asic.AsicWriterFactory;
 import no.difi.asic.MimeType;
 import no.difi.asic.SignatureHelper;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Archive;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Manifest;
-import no.difi.meldingsutveksling.domain.*;
+import no.difi.meldingsutveksling.domain.Avsender;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.Mottaker;
+import no.difi.meldingsutveksling.domain.StreamedFile;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 
 import java.io.*;
-import java.util.List;
 import java.util.stream.Stream;
-
-import static java.util.Collections.singletonList;
 
 @Slf4j
 public class CreateAsice {
 
-    ManifestFactory manifestFactory;
+    private final ManifestFactory manifestFactory;
 
     public CreateAsice() {
         manifestFactory = new ManifestFactory();
-    }
-
-    public Archive createAsice(ByteArrayFile forsendelse, SignatureHelper signatureHelper, Avsender avsender,
-                               Mottaker mottaker) throws IOException {
-        return createAsice(singletonList(forsendelse), signatureHelper, avsender, mottaker);
     }
 
     public void createAsiceStreamed(StreamedFile mainAttachment, Stream<? extends StreamedFile> files, OutputStream archive, SignatureHelper signatureHelper, Avsender avsender,
@@ -39,6 +33,7 @@ public class CreateAsice {
                 .add(new ByteArrayInputStream(manifest.getBytes()), "manifest.xml", MimeType.XML);
         files.forEach(f -> {
             try {
+                log.info("Adding file {} of type {}", f.getFileName(), f.getMimeType());
                 InputStream inputStream = new BufferedInputStream(f.getInputStream());
                 asicWriter.add(inputStream, f.getFileName(), MimeType.forString(f.getMimeType()));
             } catch (IOException e) {
@@ -49,23 +44,4 @@ public class CreateAsice {
         asicWriter.sign(signatureHelper);
         log.info("After sign");
     }
-
-    public Archive createAsice(List<ByteArrayFile> forsendelse, SignatureHelper signatureHelper, Avsender
-            avsender, Mottaker mottaker) throws IOException {
-
-        Manifest manifest = manifestFactory.createManifest(avsender.getOrgNummer(), mottaker.getOrgNummer(),
-                forsendelse.isEmpty() ? null : forsendelse.get(0).getFileName(), forsendelse.get(0).getMimeType());
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        AsicWriter asicWriter = AsicWriterFactory.newFactory()
-                .newContainer(bos)
-                .add(new ByteArrayInputStream(manifest.getBytes()), "manifest.xml");
-        for (ByteArrayFile f : forsendelse) {
-            asicWriter.add(new ByteArrayInputStream(f.getBytes()), f.getFileName(), MimeType.forString(f.getMimeType()));
-        }
-
-        asicWriter.sign(signatureHelper);
-        return new Archive(bos.toByteArray());
-    }
-
-
 }
