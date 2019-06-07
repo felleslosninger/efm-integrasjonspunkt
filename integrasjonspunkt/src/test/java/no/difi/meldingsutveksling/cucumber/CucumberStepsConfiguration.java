@@ -34,7 +34,6 @@ import no.difi.vefa.peppol.lookup.LookupClient;
 import no.difi.webservice.support.SoapFaultInterceptorLogger;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
 import org.springframework.boot.test.context.SpringBootContextLoader;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -51,19 +50,17 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 import org.springframework.ws.soap.SoapVersion;
 import org.springframework.ws.soap.axiom.AxiomSoapMessageFactory;
 import org.springframework.ws.soap.saaj.SaajSoapMessageFactory;
 import org.springframework.ws.transport.http.AbstractHttpWebServiceMessageSender;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Query;
-import javax.persistence.metamodel.EntityType;
 import javax.xml.bind.Marshaller;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.mockito.BDDMockito.given;
@@ -276,32 +273,10 @@ public class CucumberStepsConfiguration {
     @MockBean public AltinnConnectionCheck altinnConnectionCheck;
     @MockBean public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck;
 
-    @Autowired public EntityManagerFactory entityManagerFactory;
-    @Autowired public EntityManager entityManager;
-
     @Before
     @SneakyThrows
-    @Transactional
-//    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void before() {
         temporaryFolder.create();
-
-        List<String> schemas = entityManager.createNativeQuery("SHOW SCHEMAS").getResultList();
-        for (String schema : schemas) {
-            log.info("Schema: {}", schema);
-
-            if (!schema.equals("INFORMATION_SCHEMA")) {
-                entityManager.createNativeQuery("SET SCHEMA " + schema).executeUpdate();
-                for (Object[] tables : (List<Object[]>) entityManager.createNativeQuery("SHOW TABLES FROM " + schema)
-                        .getResultList()) {
-                    for (Object table : tables) {
-                        if (!table.equals(schema)) {
-                            log.info("TABLE {}", table);
-                        }
-                    }
-                }
-            }
-        }
     }
 
     @After
