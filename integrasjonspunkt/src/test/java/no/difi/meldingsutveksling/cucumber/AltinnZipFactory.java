@@ -10,10 +10,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -49,7 +46,7 @@ public class AltinnZipFactory {
 
         Pipe.of("Get ASIC", copy(asicFactory.getAsic(message)))
                 .andThen("CMS encrypt", (outlet, inlet) -> cmsUtilProvider.getIfAvailable().createCMSStreamed(outlet, inlet, keyInfo.getX509Certificate()))
-                .andFinally(copyTo(out));
+                .andFinally(copyTo(new BufferedOutputStream(out)));
 
         out.closeEntry();
         out.close();
