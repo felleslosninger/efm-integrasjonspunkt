@@ -69,7 +69,7 @@ Feature: Sending a Next Move DPI message
     }
     """
     And the response status is "OK"
-    And I upload a file named "arkivmelding.xml" with mimetype "text/xml" and title "Arkivmelding" with the following body:
+    And I upload a file named "arkivmelding.xml" with mimetype "application/xml" and title "Arkivmelding" with the following body:
     """
     <?xml version="1.0" encoding="utf-8"?>
     <arkivmelding xmlns="http://www.arkivverket.no/standarder/noark5/arkivmelding" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.arkivverket.no/standarder/noark5/arkivmelding arkivmelding.xsd">
@@ -264,7 +264,7 @@ Feature: Sending a Next Move DPI message
         <avsender>
             <organisasjon authority="iso6523-actorid-upis">9908:910077473</organisasjon>
         </avsender>
-        <hoveddokument href="arkivmelding.xml" mime="text/xml">
+        <hoveddokument href="arkivmelding.xml" mime="application/xml">
             <tittel lang="NO">Arkivmelding</tittel>
         </hoveddokument>
         <vedlegg href="test.txt" mime="text/plain">

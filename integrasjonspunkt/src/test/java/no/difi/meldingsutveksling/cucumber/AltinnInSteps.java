@@ -145,7 +145,7 @@ public class AltinnInSteps {
                 .withHeader(SOAP_ACTION, containing("DownloadFileStreamedBasic"))
                 .willReturn(aResponse()
                         .withStatus(200)
-                        .withHeader(HttpHeaders.CONNECTION, "close")
+//                        .withHeader(HttpHeaders.CONNECTION, "close")
                         .withHeader(HttpHeaders.CACHE_CONTROL, "private")
                         .withHeader(HttpHeaders.CONTENT_TYPE, String.format("multipart/related; type=\"application/xop+xml\";start=\"<http://tempuri.org/0>\";boundary=\"%s\";start-info=\"text/xml\"", boundary))
                         .withHeader("MIME-Version", "1.0")

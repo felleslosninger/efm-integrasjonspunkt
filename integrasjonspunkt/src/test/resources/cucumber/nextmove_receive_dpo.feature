@@ -1,4 +1,3 @@
-@Ignore
 Feature: Receiving a Next Move DPO message
 
   Background:

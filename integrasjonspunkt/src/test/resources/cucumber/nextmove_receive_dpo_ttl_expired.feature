@@ -1,4 +1,3 @@
-@Ignore
 Feature: Receiving an expired Next Move DPO message
 
   Background:

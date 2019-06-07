@@ -56,7 +56,7 @@ Feature: Sending a Next Move DPO multipart/form message
         }
     }
     """
-    And I add a part named "Min flotte arkivmelding" and filename "arkivmelding.xml" with content type "text/xml" and body:
+    And I add a part named "Min flotte arkivmelding" and filename "arkivmelding.xml" with content type "application/xml" and body:
     """
     <?xml version="1.0" encoding="utf-8"?>
     <arkivmelding xmlns="http://www.arkivverket.no/standarder/noark5/arkivmelding" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.arkivverket.no/standarder/noark5/arkivmelding arkivmelding.xsd">
@@ -253,7 +253,7 @@ Feature: Sending a Next Move DPO multipart/form message
     And the sent message contains the following files:
       | filename         | content type |
       | manifest.xml     | application/xml     |
-      | arkivmelding.xml | text/xml     |
+      | arkivmelding.xml | application/xml     |
       | test.txt         | text/plain   |
     And the content of the file named "manifest.xml" is:
     """
@@ -265,7 +265,7 @@ Feature: Sending a Next Move DPO multipart/form message
        <avsender>
           <organisasjon authority="iso6523-actorid-upis">0192:910077473</organisasjon>
        </avsender>
-       <hoveddokument href="arkivmelding.xml" mime="text/xml">
+       <hoveddokument href="arkivmelding.xml" mime="application/xml">
           <tittel lang="no">Hoveddokument</tittel>
        </hoveddokument>
     </manifest>
