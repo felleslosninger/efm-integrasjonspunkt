@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedOutputStream;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -38,22 +37,6 @@ public class AsicHandler {
     public AsicHandler(IntegrasjonspunktNokkel keyHelper, CryptoMessagePersister cryptoMessagePersister) {
         this.keyHelper = keyHelper;
         this.cryptoMessagePersister = cryptoMessagePersister;
-    }
-
-    public InputStream createEncryptedAsic(ConversationResource cr, MessageContext messageContext) {
-        List<StreamedFile> attachments = new ArrayList<>();
-        if (cr.getFileRefs() != null) {
-            for (String filename : cr.getFileRefs().values()) {
-                try (FileEntryStream fileEntryStream = cryptoMessagePersister.readStream(cr.getConversationId(), filename)) {
-                    String ext = Stream.of(filename.split(".")).reduce((p, e) -> e).orElse("pdf");
-                    attachments.add(new NextMoveStreamedFile(filename, fileEntryStream.getInputStream(), MimeTypeExtensionMapper.getMimetype(ext)));
-                } catch (IOException e) {
-                    throw new NextMoveRuntimeException(String.format("Could not read file named '%s' for conversationId = '%s'", filename, cr.getConversationId()));
-                }
-            }
-        }
-
-        return archiveAndEncryptAttachments(attachments.get(0), attachments.stream(), messageContext, cr.getServiceIdentifier());
     }
 
     public InputStream createEncryptedAsic(NextMoveOutMessage msg, MessageContext messageContext) {

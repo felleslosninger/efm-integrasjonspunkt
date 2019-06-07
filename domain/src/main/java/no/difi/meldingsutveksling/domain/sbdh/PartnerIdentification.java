@@ -9,7 +9,7 @@
 package no.difi.meldingsutveksling.domain.sbdh;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
+import lombok.*;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.validation.EqualToProperty;
 import no.difi.meldingsutveksling.validation.InServiceRegistry;
@@ -43,7 +43,11 @@ import java.io.Serializable;
 @XmlType(name = "PartnerIdentification", propOrder = {
         "value"
 })
-@Data
+@EqualsAndHashCode(exclude = "partner")
+@Getter
+@Setter
+@ToString(exclude = "partner")
+@RequiredArgsConstructor
 @Embeddable
 @GroupSequenceProvider(value = PartnerIdentificationGroupSequenceProvider.class)
 public class PartnerIdentification implements Serializable {
@@ -71,4 +75,6 @@ public class PartnerIdentification implements Serializable {
 
         return Organisasjonsnummer.isIso6523(value) ? Organisasjonsnummer.fromIso6523(value).toString() : value;
     }
+
+
 }

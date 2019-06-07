@@ -34,17 +34,15 @@ public class CreateAsice {
                 .add(new ByteArrayInputStream(manifest.getBytes()), "manifest.xml", MimeType.XML);
         files.forEach(f -> {
             try {
-                log.info("Adding file {} of type {}", f.getFileName(), f.getMimeType());
+                log.debug("Adding file {} of type {}", f.getFileName(), f.getMimeType());
                 InputStream inputStream = new BufferedInputStream(f.getInputStream());
-                byte[] copy = IOUtils.toByteArray(inputStream);
-                log.info("Bytes {}", copy.length);
-                asicWriter.add(new ByteArrayInputStream(copy), f.getFileName(), MimeType.forString(f.getMimeType()));
+                asicWriter.add(inputStream, f.getFileName(), MimeType.forString(f.getMimeType()));
             } catch (IOException e) {
                 throw new MeldingsUtvekslingRuntimeException(StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT.getTechnicalMessage(), e);
             }
         });
-        log.info("Before sign");
+        log.debug("Before sign");
         asicWriter.sign(signatureHelper);
-        log.info("After sign");
+        log.debug("After sign");
     }
 }
