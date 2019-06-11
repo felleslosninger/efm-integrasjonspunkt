@@ -34,15 +34,19 @@ public class MessageInSteps {
         messageInHolder.reset();
     }
 
-    @And("^\\w+ prepares a message with the following SBD:$")
-    public void altinnPreparesAMessageWithTheFollowingSBD(String body) throws IOException {
+    @And("^(\\w+) prepares a message with the following SBD:$")
+    public void altinnPreparesAMessageWithTheFollowingSBD(String who, String body) throws IOException {
         StandardBusinessDocument sbd = objectMapper.readValue(body, StandardBusinessDocument.class);
-        messageInHolder.set(new Message()
-                .setSbd(sbd)
-                .attachment(new Attachment(new ByteArrayInputStream(body.getBytes()))
-                        .setFileName(ALTINN_SBD_FILE)
-                        .setMimeType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-        );
+        Message message = new Message()
+                .setSbd(sbd);
+
+        if ("Altinn".equals(who)) {
+            message.attachment(new Attachment(new ByteArrayInputStream(body.getBytes()))
+                    .setFileName(ALTINN_SBD_FILE)
+                    .setMimeType(MediaType.APPLICATION_JSON_UTF8_VALUE));
+        }
+
+        messageInHolder.set(message);
     }
 
     @And("^appends a file named \"([^\"]*)\" with mimetype=\"([^\"]*)\":$")
