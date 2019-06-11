@@ -16,7 +16,7 @@ import java.util.zip.ZipOutputStream;
 
 import static no.difi.meldingsutveksling.NextMoveConsts.ALTINN_SBD_FILE;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
-import static no.difi.meldingsutveksling.pipes.PipeOperations.*;
+import static no.difi.meldingsutveksling.pipes.PipeOperations.copyTo;
 
 @Component
 @Profile("cucumber")
@@ -43,8 +43,7 @@ public class AltinnZipFactory {
 
         out.putNextEntry(new ZipEntry(ASIC_FILE));
 
-        InputStream asic = asicFactory.getAsic(message);
-        Pipe.of("Get ASIC", copy(asic).andThen(close(asic)))
+        Pipe.of("create asic", inlet -> asicFactory.createAsic(message, inlet))
                 .andThen("CMS encrypt", (outlet, inlet) -> cmsUtilProvider.getIfAvailable().createCMSStreamed(outlet, inlet, keyInfo.getX509Certificate()))
                 .andFinally(copyTo(new BufferedOutputStream(out)));
 

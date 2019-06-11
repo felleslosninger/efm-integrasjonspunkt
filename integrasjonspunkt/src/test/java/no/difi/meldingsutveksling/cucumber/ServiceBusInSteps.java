@@ -6,6 +6,7 @@ import cucumber.api.java.en.And;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.nextmove.ServiceBusRestTemplate;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayload;
+import no.difi.meldingsutveksling.pipes.Pipe;
 import org.apache.commons.io.IOUtils;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -16,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 
 import java.io.IOException;
+import java.io.PipedInputStream;
 import java.net.URI;
 import java.util.Base64;
 
@@ -42,7 +44,9 @@ public class ServiceBusInSteps {
         headers.add("BrokerProperties", "{ \"MessageId\" : \"1\", \"LockToken\" : \"T1\", \"SequenceNumber\" : \"S1\" }");
 
         Message message = messageInHolder.get();
-        byte[] asic = IOUtils.toByteArray(asicFactory.getAsic(message));
+
+        PipedInputStream is = Pipe.of("create asic", inlet -> asicFactory.createAsic(message, inlet)).outlet();
+        byte[] asic = IOUtils.toByteArray(is);
         byte[] base64encodedAsic = Base64.getEncoder().encode(asic);
         ServiceBusPayload serviceBusPayload = ServiceBusPayload.of(message.getSbd(), base64encodedAsic);
         String body = objectMapper.writeValueAsString(serviceBusPayload);
