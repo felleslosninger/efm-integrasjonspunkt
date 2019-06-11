@@ -74,10 +74,8 @@ public class AsicHandler {
         CmsUtil cmsUtil = getCmsUtil(si);
         X509Certificate mottakerSertifikat = getMottakerSertifikat(ctx);
 
-        return Pipe.of("create asic", inlet -> {
-            createAsic(mainAttachment, att, ctx, inlet);
-            att.forEach(this::close);
-        }).andThen("CMS encrypt asic", (outlet, inlet) -> cmsUtil.createCMSStreamed(outlet, inlet, mottakerSertifikat))
+        return Pipe.of("create asic", inlet -> createAsic(mainAttachment, att, ctx, inlet))
+                .andThen("CMS encrypt asic", (outlet, inlet) -> cmsUtil.createCMSStreamed(outlet, inlet, mottakerSertifikat))
                 .outlet();
     }
 
