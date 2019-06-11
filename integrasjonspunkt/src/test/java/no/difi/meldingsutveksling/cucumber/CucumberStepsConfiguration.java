@@ -89,6 +89,12 @@ public class CucumberStepsConfiguration {
 
         @Bean
         @Primary
+        InMemoryMessagePersister inMemoryMessagePersister() {
+            return new InMemoryMessagePersister();
+        }
+
+        @Bean
+        @Primary
         public TaskExecutor taskExecutor() {
             return new SyncTaskExecutor();
         }
