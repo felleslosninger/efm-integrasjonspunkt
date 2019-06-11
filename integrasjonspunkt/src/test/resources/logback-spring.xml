@@ -25,6 +25,6 @@
     </logger>
 
     <logger name="no.difi.meldingsutveksling.pipes.Pipe">
-        <level value="DEBUG"/>
+        <level value="TRACE"/>
     </logger>
 </configuration>
