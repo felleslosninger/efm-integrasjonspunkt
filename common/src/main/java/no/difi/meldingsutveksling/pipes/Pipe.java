@@ -44,7 +44,10 @@ public class Pipe {
 
     private void handleCompleteAsync(Void dummy, Throwable t) {
         close();
-        if (t != null) throw new PipeRuntimeException("Exception was thrown in thread", t);
+        if (t != null) {
+            log.error("Exception i pipe", t);
+            throw new PipeRuntimeException("Exception was thrown in thread", t);
+        }
     }
 
     public static Pipe of(String description, Consumer<PipedOutputStream> consumer) {
