@@ -10,7 +10,9 @@ import org.junit.runner.RunWith;
         glue = {"classpath:no.difi.meldingsutveksling.cucumber"},
         features = "classpath:cucumber",
         plugin = {"pretty", "json:target/cucumber/cucumber.json"},
-        tags = {"not @Ignore"}
+        tags = {"@New"}
+//        tags = {"not @Ignore"}
+
 )
 @UtilityClass
 public class RunCucumberIntegrationTest {
