@@ -8,9 +8,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.springframework.boot.test.json.JacksonTester;
+import org.springframework.http.MediaType;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+
+import static no.difi.meldingsutveksling.NextMoveConsts.ALTINN_SBD_FILE;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -35,7 +38,11 @@ public class MessageInSteps {
     public void altinnPreparesAMessageWithTheFollowingSBD(String body) throws IOException {
         StandardBusinessDocument sbd = objectMapper.readValue(body, StandardBusinessDocument.class);
         messageInHolder.set(new Message()
-                .setSbd(sbd));
+                .setSbd(sbd)
+                .attachment(new Attachment(new ByteArrayInputStream(body.getBytes()))
+                        .setFileName(ALTINN_SBD_FILE)
+                        .setMimeType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        );
     }
 
     @And("^appends a file named \"([^\"]*)\" with mimetype=\"([^\"]*)\":$")

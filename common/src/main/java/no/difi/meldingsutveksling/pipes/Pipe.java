@@ -45,8 +45,8 @@ public class Pipe {
     private void handleCompleteAsync(Void dummy, Throwable t) {
         close();
         if (t != null) {
-            log.error("Exception i pipe", t);
-            throw new PipeRuntimeException("Exception was thrown in thread", t);
+            log.error("Exception in pipe", t);
+            throw new PipeRuntimeException("Exception was thrown in pipe", t);
         }
     }
 
@@ -75,7 +75,6 @@ public class Pipe {
     }
 
     private static void logStart(String description) {
-
         log.trace("Starting thread: {}", description);
     }
 
