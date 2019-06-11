@@ -43,7 +43,7 @@ public class MessageInSteps {
         if ("Altinn".equals(who)) {
             message.attachment(new Attachment(new ByteArrayInputStream(body.getBytes()))
                     .setFileName(ALTINN_SBD_FILE)
-                    .setMimeType(MediaType.APPLICATION_JSON_UTF8_VALUE));
+                    .setMimeType(MediaType.APPLICATION_JSON_VALUE));
         }
 
         messageInHolder.set(message);

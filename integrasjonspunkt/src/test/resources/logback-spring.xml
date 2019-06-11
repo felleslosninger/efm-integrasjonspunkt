@@ -24,4 +24,7 @@
         <level value="DEBUG"/>
     </logger>
 
+    <logger name="no.difi.meldingsutveksling.pipes.Pipe">
+        <level value="DEBUG"/>
+    </logger>
 </configuration>
