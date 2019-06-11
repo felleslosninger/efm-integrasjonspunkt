@@ -72,6 +72,11 @@ public class Pipe {
 
     public void andFinally(Consumer<PipedInputStream> consumer) {
         consumer.accept(outlet);
+        try {
+            outlet.close();
+        } catch (IOException e) {
+            throw new PipeRuntimeException("Could not close outlet", e);
+        }
     }
 
     private static void logStart(String description) {

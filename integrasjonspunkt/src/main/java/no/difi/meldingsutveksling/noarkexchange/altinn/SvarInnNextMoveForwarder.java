@@ -85,6 +85,12 @@ public class SvarInnNextMoveForwarder implements Consumer<Forsendelse> {
             log.error("Error writing ASiC", e);
         }
 
+        try {
+            asicStream.close();
+        } catch (IOException e) {
+            log.error("Could not close ASIC", e);
+        }
+
         nextMoveQueue.enqueue(sbd, ServiceIdentifier.DPF);
         svarInnService.confirmMessage(forsendelse.getId());
     }
