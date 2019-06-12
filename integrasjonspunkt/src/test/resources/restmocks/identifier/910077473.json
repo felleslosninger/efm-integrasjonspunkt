@@ -49,8 +49,9 @@
       ],
       "service": {
         "identifier": "DPE",
-        "serviceCode": "4192",
-        "serviceEditionCode": "270815"
+        "endpointUrl": "",
+        "serviceCode": "",
+        "serviceEditionCode": ""
       }
     }
   ]
