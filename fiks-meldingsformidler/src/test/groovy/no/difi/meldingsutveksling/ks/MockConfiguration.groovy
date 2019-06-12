@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.ks
 
-
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient
+import no.difi.meldingsutveksling.pipes.Plumber
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord
@@ -11,6 +11,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 
 import java.time.Clock
 import java.time.Instant
@@ -52,5 +53,19 @@ public class MockConfiguration {
     @Primary
     public Clock clock() {
         return Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), ZoneId.of("UTC"))
+    }
+
+    @Bean
+    public ThreadPoolTaskExecutor getAsyncExecutor() {
+        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setCorePoolSize(20);
+        taskExecutor.setMaxPoolSize(100);
+        taskExecutor.initialize();
+        return taskExecutor;
+    }
+
+    @Bean
+    public Plumber plumber() {
+        return new Plumber(getAsyncExecutor());
     }
 }
