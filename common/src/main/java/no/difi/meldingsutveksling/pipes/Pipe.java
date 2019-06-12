@@ -52,6 +52,7 @@ public class Pipe {
 
     public static Pipe of(String description, Consumer<PipedOutputStream> consumer) {
         Pipe pipe = new Pipe();
+        logBeforeThread(description);
         CompletableFuture.runAsync(() -> {
             logStart(description);
             consumer.accept(pipe.inlet);
@@ -62,6 +63,7 @@ public class Pipe {
 
     public Pipe andThen(String description, BiConsumer<PipedInputStream, PipedOutputStream> consumer) {
         Pipe newPipe = new Pipe();
+        logBeforeThread(description);
         CompletableFuture.runAsync(() -> {
             logStart(description);
             consumer.accept(outlet, newPipe.inlet);
@@ -77,6 +79,10 @@ public class Pipe {
         } catch (IOException e) {
             throw new PipeRuntimeException("Could not close outlet", e);
         }
+    }
+
+    private static void logBeforeThread(String description) {
+        log.trace("Before thread: {}", description);
     }
 
     private static void logStart(String description) {
