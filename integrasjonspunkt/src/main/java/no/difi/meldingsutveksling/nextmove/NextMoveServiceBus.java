@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.microsoft.azure.servicebus.ClientFactory;
 import com.microsoft.azure.servicebus.IMessage;
@@ -258,7 +259,7 @@ public class NextMoveServiceBus {
     private String getReceiverQueue(NextMoveOutMessage message) {
         String prefix = NextMoveConsts.NEXTMOVE_QUEUE_PREFIX + message.getReceiverIdentifier();
 
-        if (sbdUtil.isReceipt(message.getSbd())) {
+        if (sbdUtil.isStatus(message.getSbd())) {
             return prefix + receiptTarget();
         }
 
@@ -267,6 +268,9 @@ public class NextMoveServiceBus {
                     message.getReceiverIdentifier(),
                     message.getSbd().getProcess());
 
+            if (Strings.isNullOrEmpty(serviceRecord.getService().getEndpointUrl())) {
+                throw new NextMoveRuntimeException(String.format("No endpointUrl defined for process %s", serviceRecord.getProcess()));
+            }
             return prefix + serviceRecord.getService().getEndpointUrl();
         } catch (ServiceRegistryLookupException e) {
             throw new NextMoveRuntimeException(String.format("Unable to get service record for %s", message.getReceiverIdentifier()), e);
