@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternal
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.BrokerServiceExternalBasicStreamedSF;
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExternalBasicStreamed;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import javax.xml.ws.BindingProvider;
@@ -19,6 +20,7 @@ public class AltinnWsClientFactory {
 
     private final ApplicationContextHolder applicationContextHolder;
     private final AltinnWsConfigurationFactory altinnWsConfigurationFactory;
+    private final ThreadPoolTaskExecutor taskExecutor;
 
     public AltinnWsClient getAltinnWsClient(ServiceRecord serviceRecord) {
         AltinnWsConfiguration configuration = altinnWsConfigurationFactory.fromServiceRecord(serviceRecord);
@@ -26,7 +28,8 @@ public class AltinnWsClientFactory {
                 getBrokerServiceExternalBasicSF(configuration),
                 getBrokerServiceExternalBasicStreamedSF(configuration),
                 configuration,
-                applicationContextHolder.getApplicationContext());
+                applicationContextHolder.getApplicationContext(),
+                taskExecutor);
     }
 
     private IBrokerServiceExternalBasic getBrokerServiceExternalBasicSF(AltinnWsConfiguration configuration) {

@@ -32,6 +32,7 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.io.IOUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -73,6 +74,7 @@ public class NextMoveServiceBus {
     private final MessageStatusFactory messageStatusFactory;
     private final TimeToLiveHelper timeToLiveHelper;
     private final SBDUtil sbdUtil;
+    private final ThreadPoolTaskExecutor taskExecutor;
 
     private IMessageReceiver messageReceiver;
 
@@ -90,7 +92,7 @@ public class NextMoveServiceBus {
                               ConversationService conversationService,
                               MessageStatusFactory messageStatusFactory,
                               TimeToLiveHelper timeToLiveHelper,
-                              SBDUtil sbdUtil) {
+                              SBDUtil sbdUtil, ThreadPoolTaskExecutor taskExecutor) {
         this.props = props;
         this.nextMoveQueue = nextMoveQueue;
         this.serviceBusClient = serviceBusClient;
@@ -106,6 +108,7 @@ public class NextMoveServiceBus {
         this.messageStatusFactory = messageStatusFactory;
         this.timeToLiveHelper = timeToLiveHelper;
         this.sbdUtil = sbdUtil;
+        this.taskExecutor = taskExecutor;
     }
 
     @PostConstruct
@@ -210,7 +213,7 @@ public class NextMoveServiceBus {
                     log.error("Error while processing messages from service bus", e);
                 }
             }
-        });
+        }, taskExecutor);
     }
 
     private void handleMessage(IMessage m) {
@@ -243,7 +246,7 @@ public class NextMoveServiceBus {
     }
 
     private void sendReceiptAsync(NextMoveInMessage message) {
-        CompletableFuture.runAsync(() -> sendReceipt(message));
+        CompletableFuture.runAsync(() -> sendReceipt(message), taskExecutor);
     }
 
     private void sendReceipt(NextMoveInMessage message) {

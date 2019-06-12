@@ -1,4 +1,3 @@
-@Ignore
 Feature: Sending a Next Move DPO multipart/form message
 
   Background:

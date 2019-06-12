@@ -1,4 +1,3 @@
-@Ignore
 Feature: Sending a BEST/EDU message by the noarkExchange WebService
 
   Background:
@@ -220,10 +219,10 @@ Feature: Sending a BEST/EDU message by the noarkExchange WebService
     }
     """
     And the sent message contains the following files:
-      | filename         | content type     |
-      | manifest.xml     | application/xml  |
-      | arkivmelding.xml | text/xml         |
-      | test.txt         | text/plain       |
+      | filename         | content type    |
+      | manifest.xml     | application/xml |
+      | arkivmelding.xml | text/xml        |
+      | test.txt         | text/plain      |
     And the content of the file named "manifest.xml" is:
     """
     <?xml version="1.0" encoding="UTF-8"?>

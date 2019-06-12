@@ -10,16 +10,23 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.SchedulingConfigurer;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 import java.time.Clock;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 @ConditionalOnProperty(
         value = "app.scheduling.enable", havingValue = "true", matchIfMissing = true
 )
 @Configuration
 @EnableScheduling
-public class SchedulingConfiguration {
+public class SchedulingConfiguration implements SchedulingConfigurer {
 
     @Bean
     public NextMoveInMessageUnlocker nextMoveInMessageUnlocker(NextMoveMessageInRepository repo, Clock clock) {
@@ -32,5 +39,15 @@ public class SchedulingConfiguration {
             ObjectProvider<DpfPolling> dpfPolling,
             ObjectProvider<DpoPolling> dpoPolling) {
         return new MessagePolling(dpePolling, dpfPolling, dpoPolling);
+    }
+
+    @Override
+    public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+        taskRegistrar.setScheduler(taskExecutor());
+    }
+
+    @Bean(destroyMethod="shutdown")
+    public ScheduledExecutorService taskExecutor() {
+        return Executors.newScheduledThreadPool(100);
     }
 }
