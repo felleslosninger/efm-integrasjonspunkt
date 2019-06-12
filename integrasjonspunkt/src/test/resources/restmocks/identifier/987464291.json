@@ -18,8 +18,8 @@
       ],
       "service": {
         "identifier": "DPE",
-        "endpointUrl": "http://localhost:9800",
-        "serviceCode": "innsyn",
+        "endpointUrl": "innsyn",
+        "serviceCode": "",
         "serviceEditionCode": ""
       }
     }
