@@ -5,9 +5,7 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedOutputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -22,13 +20,7 @@ class ZipParser {
         try (ZipInputStream stream = new ZipInputStream(is)) {
             ZipEntry entry;
             while ((entry = stream.getNextEntry()) != null) {
-                ZipFile zipFile = new ZipFile(entry.getName());
-
-                try (OutputStream os = zipFile.getOutputStream()) {
-                    IOUtils.copy(stream, os);
-                    os.flush();
-                }
-
+                ZipFile zipFile = new ZipFile(entry.getName(), IOUtils.toByteArray(stream));
                 zipContent.files(zipFile);
             }
         }

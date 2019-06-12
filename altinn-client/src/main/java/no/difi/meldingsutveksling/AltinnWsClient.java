@@ -11,7 +11,7 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
-import no.difi.meldingsutveksling.pipes.Pipe;
+import no.difi.meldingsutveksling.pipes.Plumber;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.shipping.ws.AltinnReasonFactory;
 import no.difi.meldingsutveksling.shipping.ws.AltinnWsException;
@@ -52,6 +52,7 @@ public class AltinnWsClient {
     private final AltinnWsConfiguration configuration;
     private final ApplicationContext context;
     private final ThreadPoolTaskExecutor taskExecutor;
+    private final Plumber plumber;
 
     public void send(UploadRequest request) {
         String senderReference = initiateBrokerService(request);
@@ -94,7 +95,7 @@ public class AltinnWsClient {
 
     private DataHandler getDataHandler(UploadRequest request) {
         AltinnPackage altinnPackage = AltinnPackage.from(request);
-        PipedInputStream outlet = Pipe.of("write Altinn zip", inlet -> writeAltinnZip(request, altinnPackage, inlet)).outlet();
+        PipedInputStream outlet = plumber.pipe("write Altinn zip", inlet -> writeAltinnZip(request, altinnPackage, inlet)).outlet();
         return new DataHandler(InputStreamDataSource.of(outlet));
     }
 

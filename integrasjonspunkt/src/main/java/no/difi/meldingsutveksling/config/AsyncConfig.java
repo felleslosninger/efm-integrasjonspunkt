@@ -1,6 +1,8 @@
 package no.difi.meldingsutveksling.config;
 
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +21,7 @@ public class AsyncConfig implements AsyncConfigurer {
     @Bean
     public Executor getAsyncExecutor() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-        taskExecutor.setCorePoolSize(10);
+        taskExecutor.setCorePoolSize(20);
         taskExecutor.setMaxPoolSize(100);
         taskExecutor.initialize();
         return taskExecutor;
@@ -27,7 +29,10 @@ public class AsyncConfig implements AsyncConfigurer {
 
     @Override
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
-        return (throwable, method, objects)
-                -> log.error("Aync exception thrown in method {}", method.getName(), throwable);
+        return (ex, method, params) -> {
+            Class<?> targetClass = method.getDeclaringClass();
+            Logger logger = LoggerFactory.getLogger(targetClass);
+            logger.error(ex.getMessage(), ex);
+        };
     }
 }

@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.pipes.Pipe;
+import no.difi.meldingsutveksling.pipes.Plumber;
 import org.apache.commons.io.IOUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -23,8 +24,10 @@ public class SvarInnClient {
 
     @Getter
     private final RestTemplate restTemplate;
+    private final Plumber plumber;
 
-    public SvarInnClient(IntegrasjonspunktProperties props, RestTemplateBuilder restTemplateBuilder) {
+    public SvarInnClient(IntegrasjonspunktProperties props, RestTemplateBuilder restTemplateBuilder, Plumber plumber) {
+        this.plumber = plumber;
         this.restTemplate = restTemplateBuilder
                 .setConnectTimeout(props.getFiks().getInn().getConnectTimeout())
                 .setReadTimeout(props.getFiks().getInn().getReadTimeout())
@@ -39,7 +42,7 @@ public class SvarInnClient {
     }
 
     InputStream downloadZipFile(Forsendelse forsendelse) {
-        return Pipe.of("downloading zip file", inlet ->
+        return plumber.pipe("downloading zip file", inlet ->
                 restTemplate.execute(forsendelse.getDownloadUrl(), HttpMethod.GET, null, response -> {
                     int bytes = IOUtils.copy(response.getBody(), inlet);
                     log.info("File for forsendelse {} was downloaded ({} bytes)", forsendelse.getId(), bytes);

@@ -6,16 +6,20 @@ import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 @Slf4j
 public class Pipe {
 
+    private final Executor executor;
     private final PipedOutputStream inlet;
     private final PipedInputStream outlet;
 
-    private Pipe() {
+    private Pipe(Executor executor) {
+        this.executor = executor;
         this.inlet = new PipedOutputStream();
         this.outlet = new PipedInputStream();
         connectInletAndOutlet();
@@ -50,19 +54,19 @@ public class Pipe {
         }
     }
 
-    public static Pipe of(String description, Consumer<PipedOutputStream> consumer) {
-        Pipe pipe = new Pipe();
+    public static Pipe of(Executor executor, String description, Consumer<PipedOutputStream> consumer) {
+        Pipe pipe = new Pipe(executor);
         logBeforeThread(description);
         CompletableFuture.runAsync(() -> {
             logStart(description);
             consumer.accept(pipe.inlet);
             logFinish(description);
-        }).whenCompleteAsync(pipe::handleCompleteAsync);
+        }, executor).whenCompleteAsync(pipe::handleCompleteAsync);
         return pipe;
     }
 
     public Pipe andThen(String description, BiConsumer<PipedInputStream, PipedOutputStream> consumer) {
-        Pipe newPipe = new Pipe();
+        Pipe newPipe = new Pipe(executor);
         logBeforeThread(description);
         CompletableFuture.runAsync(() -> {
             logStart(description);

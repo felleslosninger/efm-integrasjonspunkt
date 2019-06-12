@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.pipes.Pipe;
+import no.difi.meldingsutveksling.pipes.Plumber;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +27,7 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
     private final MessagePersister delegate;
     private final ObjectProvider<CmsUtil> cmsUtilProvider;
     private final IntegrasjonspunktNokkel keyInfo;
+    private final Plumber plumber;
 
     public void write(String conversationId, String filename, byte[] message) throws IOException {
         byte[] encryptedMessage = getCmsUtil().createCMS(message, keyInfo.getX509Certificate());
@@ -33,7 +35,7 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
     }
 
     public void writeStream(String conversationId, String filename, InputStream stream, long size) throws IOException {
-        Pipe pipe = Pipe.of("CMS encrypt", inlet -> cmsUtilProvider.getIfAvailable().createCMSStreamed(stream, inlet, keyInfo.getX509Certificate()));
+        Pipe pipe = plumber.pipe("CMS encrypt", inlet -> cmsUtilProvider.getIfAvailable().createCMSStreamed(stream, inlet, keyInfo.getX509Certificate()));
         try (PipedInputStream is = pipe.outlet()) {
             delegate.writeStream(conversationId, filename, is, size);
         }
@@ -45,7 +47,7 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
 
     public FileEntryStream readStream(String conversationId, String filename) {
         InputStream inputStream = delegate.readStream(conversationId, filename).getInputStream();
-        PipedInputStream pipedInputStream = Pipe.of("Reading file", copy(inputStream).andThen(close(inputStream))).outlet();
+        PipedInputStream pipedInputStream = plumber.pipe("Reading file", copy(inputStream).andThen(close(inputStream))).outlet();
         return FileEntryStream.of(getCmsUtil().decryptCMSStreamed(pipedInputStream, keyInfo.loadPrivateKey()), -1);
     }
 

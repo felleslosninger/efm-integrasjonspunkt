@@ -18,7 +18,7 @@ import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
-import no.difi.meldingsutveksling.pipes.Pipe;
+import no.difi.meldingsutveksling.pipes.Plumber;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import org.springframework.beans.factory.ObjectProvider;
@@ -47,17 +47,19 @@ public class FiksMapper {
     private final CryptoMessagePersister cryptoMessagePersister;
     private final UUIDGenerator uuidGenerator;
     private final ObjectProvider<CmsUtil> cmsUtilProvider;
+    private final Plumber plumber;
 
     public FiksMapper(IntegrasjonspunktProperties properties,
                       ServiceRegistryLookup serviceRegistry,
                       CryptoMessagePersister cryptoMessagePersister,
                       UUIDGenerator uuidGenerator,
-                      ObjectProvider<CmsUtil> cmsUtilProvider) {
+                      ObjectProvider<CmsUtil> cmsUtilProvider, Plumber plumber) {
         this.properties = properties;
         this.serviceRegistry = serviceRegistry;
         this.cryptoMessagePersister = cryptoMessagePersister;
         this.uuidGenerator = uuidGenerator;
         this.cmsUtilProvider = cmsUtilProvider;
+        this.plumber = plumber;
     }
 
     public SendForsendelseMedId mapFrom(NextMoveOutMessage message, X509Certificate certificate) throws NextMoveException {
@@ -172,7 +174,7 @@ public class FiksMapper {
     }
 
     private DataHandler getDataHandler(X509Certificate cert, InputStream is) {
-        PipedInputStream encrypted = Pipe.of("encrypt attachment for FIKS forsendelse",
+        PipedInputStream encrypted = plumber.pipe("encrypt attachment for FIKS forsendelse",
                 inlet -> cmsUtilProvider.getIfAvailable().createCMSStreamed(is, inlet, cert))
                 .outlet();
 

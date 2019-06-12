@@ -6,7 +6,7 @@ import cucumber.api.java.en.And;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.nextmove.ServiceBusRestTemplate;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayload;
-import no.difi.meldingsutveksling.pipes.Pipe;
+import no.difi.meldingsutveksling.pipes.Plumber;
 import org.apache.commons.io.IOUtils;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -32,6 +32,7 @@ public class ServiceBusInSteps {
     private final Holder<Message> messageInHolder;
     private final ObjectMapper objectMapper;
     private final AsicFactory asicFactory;
+    private final Plumber plumber;
 
     @After
     public void after() {
@@ -45,8 +46,9 @@ public class ServiceBusInSteps {
 
         Message message = messageInHolder.get();
 
-        PipedInputStream is = Pipe.of("create asic", inlet -> asicFactory.createAsic(message, inlet)).outlet();
+        PipedInputStream is = plumber.pipe("create asic", inlet -> asicFactory.createAsic(message, inlet)).outlet();
         byte[] asic = IOUtils.toByteArray(is);
+        is.close();
         byte[] base64encodedAsic = Base64.getEncoder().encode(asic);
         ServiceBusPayload serviceBusPayload = ServiceBusPayload.of(message.getSbd(), base64encodedAsic);
         String body = objectMapper.writeValueAsString(serviceBusPayload);

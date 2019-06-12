@@ -1,35 +1,17 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import lombok.Getter;
-import lombok.SneakyThrows;
-import no.difi.meldingsutveksling.pipes.Pipe;
+import lombok.Value;
 
-import java.io.*;
-import java.util.UUID;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
-import static no.difi.meldingsutveksling.pipes.PipeOperations.close;
-import static no.difi.meldingsutveksling.pipes.PipeOperations.copy;
-
+@Value
 class ZipFile {
 
-    @Getter
     private final String fileName;
-    private final File file;
+    private final byte[] payload;
 
-    @SneakyThrows(IOException.class)
-    ZipFile(String fileName) {
-        this.fileName = fileName;
-        this.file = File.createTempFile(UUID.randomUUID().toString(), null);
-    }
-
-    @SneakyThrows(FileNotFoundException.class)
-    InputStream getInputStream() {
-        InputStream inputStream = new BufferedInputStream(new FileInputStream(file));
-        return Pipe.of("reading file", copy(inputStream).andThen(close(inputStream))).outlet();
-    }
-
-    @SneakyThrows(FileNotFoundException.class)
-    OutputStream getOutputStream() {
-        return new BufferedOutputStream(new FileOutputStream(file));
+    public InputStream getInputStream() {
+        return new ByteArrayInputStream(payload);
     }
 }

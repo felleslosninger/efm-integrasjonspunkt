@@ -10,7 +10,6 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.http.MediaType;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import static no.difi.meldingsutveksling.NextMoveConsts.ALTINN_SBD_FILE;
@@ -41,7 +40,7 @@ public class MessageInSteps {
                 .setSbd(sbd);
 
         if ("Altinn".equals(who)) {
-            message.attachment(new Attachment(new ByteArrayInputStream(body.getBytes()))
+            message.attachment(new Attachment(body.getBytes())
                     .setFileName(ALTINN_SBD_FILE)
                     .setMimeType(MediaType.APPLICATION_JSON_VALUE));
         }
@@ -51,7 +50,7 @@ public class MessageInSteps {
 
     @And("^appends a file named \"([^\"]*)\" with mimetype=\"([^\"]*)\":$")
     public void appendsAFileNamedWithMimetype(String filename, String mimeType, String body) {
-        Attachment attachment = new Attachment(new ByteArrayInputStream(body.getBytes()))
+        Attachment attachment = new Attachment(body.getBytes())
                 .setFileName(filename)
                 .setMimeType(mimeType);
 

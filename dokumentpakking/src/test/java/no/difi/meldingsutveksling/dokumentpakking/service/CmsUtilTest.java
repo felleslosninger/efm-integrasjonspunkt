@@ -32,6 +32,8 @@ import java.security.interfaces.RSAPrivateKey;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -108,7 +110,7 @@ public class CmsUtilTest {
         byte[] plaintext = "Text to be encrypted".getBytes();
         ByteArrayInputStream bis = new ByteArrayInputStream(plaintext);
 
-        InputStream encrypted = Pipe.of("CMS encrypt", inlet -> util.createCMSStreamed(bis, inlet, cert)).outlet();
+        InputStream encrypted = Pipe.of(Executors.newSingleThreadExecutor(), "CMS encrypt", inlet -> util.createCMSStreamed(bis, inlet, cert)).outlet();
         InputStream decrypted = util.decryptCMSStreamed(encrypted, keyPair.getPrivate());
 
         assertThat(IOUtils.toByteArray(decrypted), is(equalTo(plaintext)));

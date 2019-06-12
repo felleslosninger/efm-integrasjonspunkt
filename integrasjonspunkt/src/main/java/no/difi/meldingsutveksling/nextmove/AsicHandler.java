@@ -14,7 +14,7 @@ import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.noarkexchange.MessageContext;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
-import no.difi.meldingsutveksling.pipes.Pipe;
+import no.difi.meldingsutveksling.pipes.Plumber;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -33,10 +33,12 @@ public class AsicHandler {
 
     private final IntegrasjonspunktNokkel keyHelper;
     private final CryptoMessagePersister cryptoMessagePersister;
+    private final Plumber plumber;
 
-    public AsicHandler(IntegrasjonspunktNokkel keyHelper, CryptoMessagePersister cryptoMessagePersister) {
+    public AsicHandler(IntegrasjonspunktNokkel keyHelper, CryptoMessagePersister cryptoMessagePersister, Plumber plumber) {
         this.keyHelper = keyHelper;
         this.cryptoMessagePersister = cryptoMessagePersister;
+        this.plumber = plumber;
     }
 
     public InputStream createEncryptedAsic(NextMoveOutMessage msg, MessageContext messageContext) {
@@ -74,7 +76,7 @@ public class AsicHandler {
         CmsUtil cmsUtil = getCmsUtil(si);
         X509Certificate mottakerSertifikat = getMottakerSertifikat(ctx);
 
-        return Pipe.of("create asic", inlet -> createAsic(mainAttachment, att, ctx, inlet))
+        return plumber.pipe("create asic", inlet -> createAsic(mainAttachment, att, ctx, inlet))
                 .andThen("CMS encrypt asic", (outlet, inlet) -> cmsUtil.createCMSStreamed(outlet, inlet, mottakerSertifikat))
                 .outlet();
     }

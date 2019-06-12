@@ -6,8 +6,8 @@ import lombok.SneakyThrows;
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentV2;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
+import org.apache.commons.io.IOUtils;
 
-import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -48,7 +48,7 @@ public class CorrespondenceAgencyClientSteps {
     }
 
     @SneakyThrows
-    private InputStream getInpuStream(BinaryAttachmentV2 p) {
-        return p.getData().getValue().getInputStream();
+    private byte[] getInpuStream(BinaryAttachmentV2 p) {
+        return IOUtils.toByteArray(p.getData().getValue().getInputStream());
     }
 }
