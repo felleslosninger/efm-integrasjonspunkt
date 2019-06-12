@@ -79,6 +79,14 @@ public class AsicHandler {
                 .outlet();
     }
 
+    private void close(StreamedFile attachment) {
+        try {
+            attachment.getInputStream().close();
+        } catch (IOException e) {
+            throw new NextMoveRuntimeException("Could not close file:" + attachment.getFileName());
+        }
+    }
+
     private X509Certificate getMottakerSertifikat(MessageContext ctx) {
         return (X509Certificate) ctx.getMottaker().getSertifikat();
     }

@@ -7,24 +7,4 @@
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
     </root>
-
-    <logger name="no.difi.asic.AbstractAsicWriter">
-        <level value="DEBUG"/>
-    </logger>
-
-    <logger name="no.difi.asic.AsicOutputStream">
-        <level value="DEBUG"/>
-    </logger>
-
-    <logger name="no.difi.asic.SignatureHelper">
-        <level value="DEBUG"/>
-    </logger>
-
-    <logger name="no.difi.meldingsutveksling.dokumentpakking.service.CreateAsice">
-        <level value="DEBUG"/>
-    </logger>
-
-    <logger name="no.difi.meldingsutveksling.pipes.Pipe">
-        <level value="TRACE"/>
-    </logger>
 </configuration>

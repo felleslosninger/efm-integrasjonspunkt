@@ -34,7 +34,9 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
 
     public void writeStream(String conversationId, String filename, InputStream stream, long size) throws IOException {
         Pipe pipe = Pipe.of("CMS encrypt", inlet -> cmsUtilProvider.getIfAvailable().createCMSStreamed(stream, inlet, keyInfo.getX509Certificate()));
-        delegate.writeStream(conversationId, filename, pipe.outlet(), size);
+        try (PipedInputStream is = pipe.outlet()) {
+            delegate.writeStream(conversationId, filename, is, size);
+        }
     }
 
     public byte[] read(String conversationId, String filename) throws IOException {
