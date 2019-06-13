@@ -114,7 +114,7 @@ public class CorrespondenceAgencyMessageFactory {
         // Service edition, default 10
         correspondence.setServiceEdition(getServiceEditionCode());
         // Should the user be allowed to forward the message from portal
-        correspondence.setAllowForwarding(objectFactory.createMyInsertCorrespondenceV2AllowForwarding(false));
+        correspondence.setAllowForwarding(objectFactory.createMyInsertCorrespondenceV2AllowForwarding(config.isAllowForwarding()));
         // Name of the message sender, always "Avsender"
         correspondence.setMessageSender(objectFactory.createMyInsertCorrespondenceV2MessageSender(getSender()));
         // The date and time the message should be visible in the Portal

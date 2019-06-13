@@ -138,6 +138,7 @@ public class IntegrasjonspunktBeans {
                         .map(IntegrasjonspunktProperties.PostVirksomheter::getNotificationText)
                         .orElse(null))
                 .setNextmoveFiledir(properties.getNextmove().getFiledir())
+                .setAllowForwarding(properties.getDpv().isAllowForwarding())
                 .setEndpointUrl(properties.getDpv().getEndpointUrl().toString());
     }
 

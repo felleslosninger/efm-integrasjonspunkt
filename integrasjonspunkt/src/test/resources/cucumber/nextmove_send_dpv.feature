@@ -242,7 +242,7 @@ Feature: Sending a Next Move DPV message
                     </altinn13:ReceiverEndPoints>
                 </altinn13:Notification>
             </altinn10:Notifications>
-            <altinn10:AllowForwarding>false</altinn10:AllowForwarding>
+            <altinn10:AllowForwarding>true</altinn10:AllowForwarding>
             <altinn10:MessageSender>Test - C2</altinn10:MessageSender>
         </altinn9:Correspondence>
     </altinn9:InsertCorrespondenceV2>
