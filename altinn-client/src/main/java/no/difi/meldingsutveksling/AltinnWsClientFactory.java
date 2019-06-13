@@ -9,7 +9,7 @@ import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExter
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.pipes.Plumber;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 
 import javax.xml.ws.BindingProvider;
@@ -22,7 +22,7 @@ public class AltinnWsClientFactory {
 
     private final ApplicationContextHolder applicationContextHolder;
     private final AltinnWsConfigurationFactory altinnWsConfigurationFactory;
-    private final ThreadPoolTaskExecutor taskExecutor;
+    private final TaskExecutor taskExecutor;
     private final Plumber plumber;
     private final IntegrasjonspunktProperties properties;
 

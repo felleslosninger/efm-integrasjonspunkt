@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.config;
 
+import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessageUnlocker;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
 import no.difi.meldingsutveksling.noarkexchange.altinn.DpePolling;
@@ -10,23 +11,24 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.task.TaskExecutor;
+import org.springframework.context.annotation.Import;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 import java.time.Clock;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 @ConditionalOnProperty(
         value = "app.scheduling.enable", havingValue = "true", matchIfMissing = true
 )
-@Configuration
 @EnableScheduling
+@Configuration
+@Import(TaskSchedulerConfiguration.class)
+@RequiredArgsConstructor
 public class SchedulingConfiguration implements SchedulingConfigurer {
+
+    private final TaskScheduler taskScheduler;
 
     @Bean
     public NextMoveInMessageUnlocker nextMoveInMessageUnlocker(NextMoveMessageInRepository repo, Clock clock) {
@@ -43,11 +45,6 @@ public class SchedulingConfiguration implements SchedulingConfigurer {
 
     @Override
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-        taskRegistrar.setScheduler(taskExecutor());
-    }
-
-    @Bean(destroyMethod="shutdown")
-    public ScheduledExecutorService taskExecutor() {
-        return Executors.newScheduledThreadPool(100);
+        taskRegistrar.setScheduler(taskScheduler);
     }
 }

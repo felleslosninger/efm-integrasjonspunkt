@@ -56,16 +56,16 @@ public class MockConfiguration {
     }
 
     @Bean
-    public ThreadPoolTaskExecutor getAsyncExecutor() {
-        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-        taskExecutor.setCorePoolSize(20);
-        taskExecutor.setMaxPoolSize(100);
-        taskExecutor.initialize();
-        return taskExecutor;
+    @Primary
+    public ThreadPoolTaskExecutor taskExecutor() {
+        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor()
+        taskExecutor.setCorePoolSize(20)
+        taskExecutor.initialize()
+        return taskExecutor
     }
 
     @Bean
-    public Plumber plumber() {
-        return new Plumber(getAsyncExecutor());
+    public Plumber plumber(ThreadPoolTaskExecutor taskExecutor) {
+        return new Plumber(taskExecutor);
     }
 }

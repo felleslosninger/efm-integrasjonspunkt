@@ -98,13 +98,6 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public ThreadPoolTaskScheduler taskScheduler() {
-        ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
-        taskScheduler.setPoolSize(10);
-        return taskScheduler;
-    }
-
-    @Bean
     public JWTDecoder jwtDecoder() throws CertificateException {
         return new JWTDecoder();
     }

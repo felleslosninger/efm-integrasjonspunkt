@@ -1,0 +1,37 @@
+package no.difi.meldingsutveksling.config;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
+@Slf4j
+@Configuration
+public class TaskExecutorConfig {
+
+    @Bean(destroyMethod = "shutdown")
+    public ThreadPoolTaskExecutor threadPoolTaskExecutor() {
+        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setCorePoolSize(getCorePoolSize());
+        /*
+            If corePoolSize or more threads are running, the Executor always prefers queuing a request rather than adding a new thread.
+         */
+        taskExecutor.setQueueCapacity(0);
+        taskExecutor.initialize();
+        return taskExecutor;
+    }
+
+    @Bean
+    @Primary
+    public TaskExecutor taskExecutor(ThreadPoolTaskExecutor threadPoolTaskExecutor) {
+        return threadPoolTaskExecutor;
+    }
+
+    private int getCorePoolSize() {
+        int availableProcessors = Runtime.getRuntime().availableProcessors();
+        log.info("Available processors: {}", availableProcessors);
+        return Math.max(6, availableProcessors - 1);
+    }
+}

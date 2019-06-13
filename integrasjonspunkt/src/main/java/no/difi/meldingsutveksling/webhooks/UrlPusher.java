@@ -2,9 +2,7 @@ package no.difi.meldingsutveksling.webhooks;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.client.RestTemplate;
 
@@ -22,6 +20,8 @@ public class UrlPusher {
     void push(String uri, String jsonPayload) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
-        restTemplate.postForEntity(uri, new HttpEntity<>(jsonPayload, headers), String.class);
+        log.debug("Pushing to {}", uri);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(uri, HttpMethod.POST, new HttpEntity<>(jsonPayload, headers), String.class);
+        log.debug("Response was {} {}", responseEntity.getStatusCode().value(), responseEntity.getStatusCode().getReasonPhrase());
     }
 }
