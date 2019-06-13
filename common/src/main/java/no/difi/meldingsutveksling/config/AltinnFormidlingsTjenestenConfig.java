@@ -22,7 +22,7 @@ public class AltinnFormidlingsTjenestenConfig {
 
     private String streamingserviceUrl;
     private String brokerserviceUrl;
-    private Long connectTimeout;
-    private Long requestTimeout;
+    private Integer connectTimeout;
+    private Integer requestTimeout;
 
 }
