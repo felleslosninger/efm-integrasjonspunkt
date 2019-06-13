@@ -14,4 +14,6 @@ public class CorrespondenceAgencyConfiguration {
     private String notificationText;
     private String nextmoveFiledir;
     private String endpointUrl;
+    private boolean allowForwarding;
+
 }
