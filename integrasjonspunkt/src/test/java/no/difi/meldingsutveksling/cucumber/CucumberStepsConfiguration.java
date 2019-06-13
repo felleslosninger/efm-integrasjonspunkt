@@ -94,12 +94,6 @@ public class CucumberStepsConfiguration {
         }
 
         @Bean
-        @Primary
-        public TaskExecutor taskExecutor() {
-            return new SyncTaskExecutor();
-        }
-
-        @Bean
         public SaajSoapMessageFactory saajSoapMessageFactory() {
             SaajSoapMessageFactory messageFactory = new SaajSoapMessageFactory();
             messageFactory.setSoapVersion(SoapVersion.SOAP_11);
@@ -221,7 +215,7 @@ public class CucumberStepsConfiguration {
 
         @Bean
         @Primary
-        public TaskScheduler poolScheduler() {
+        public TaskScheduler taskScheduler() {
             return new NoopTaskScheduler();
         }
 

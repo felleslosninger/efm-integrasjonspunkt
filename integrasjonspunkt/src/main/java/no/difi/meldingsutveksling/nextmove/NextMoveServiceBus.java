@@ -32,7 +32,7 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.io.IOUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -74,7 +74,7 @@ public class NextMoveServiceBus {
     private final MessageStatusFactory messageStatusFactory;
     private final TimeToLiveHelper timeToLiveHelper;
     private final SBDUtil sbdUtil;
-    private final ThreadPoolTaskExecutor taskExecutor;
+    private final TaskExecutor taskExecutor;
 
     private IMessageReceiver messageReceiver;
 
@@ -92,7 +92,7 @@ public class NextMoveServiceBus {
                               ConversationService conversationService,
                               MessageStatusFactory messageStatusFactory,
                               TimeToLiveHelper timeToLiveHelper,
-                              SBDUtil sbdUtil, ThreadPoolTaskExecutor taskExecutor) {
+                              SBDUtil sbdUtil, TaskExecutor taskExecutor) {
         this.props = props;
         this.nextMoveQueue = nextMoveQueue;
         this.serviceBusClient = serviceBusClient;

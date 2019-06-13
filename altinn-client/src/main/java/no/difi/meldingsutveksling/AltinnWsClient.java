@@ -19,7 +19,7 @@ import no.difi.meldingsutveksling.shipping.ws.ManifestBuilder;
 import no.difi.meldingsutveksling.shipping.ws.RecipientBuilder;
 import org.apache.commons.io.FileUtils;
 import org.springframework.context.ApplicationContext;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
 
 import javax.activation.DataHandler;
 import javax.xml.bind.JAXBElement;
@@ -51,7 +51,7 @@ public class AltinnWsClient {
     private final IBrokerServiceExternalBasicStreamed iBrokerServiceExternalBasicStreamed;
     private final AltinnWsConfiguration configuration;
     private final ApplicationContext context;
-    private final ThreadPoolTaskExecutor taskExecutor;
+    private final TaskExecutor taskExecutor;
     private final Plumber plumber;
 
     public void send(UploadRequest request) {
