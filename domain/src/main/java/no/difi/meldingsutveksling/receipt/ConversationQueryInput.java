@@ -33,9 +33,6 @@ public class ConversationQueryInput {
     @ApiModelProperty(value = "finished")
     Boolean finished;
 
-    @ApiModelProperty(value = "msh")
-    Boolean msh;
-
     @ApiModelProperty(value = "serviceIdentifier")
     ConversationDirection direction;
 }

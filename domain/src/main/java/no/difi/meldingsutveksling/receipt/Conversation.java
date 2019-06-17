@@ -45,7 +45,6 @@ public class Conversation implements MessageInformable {
     @JsonIgnore
     private boolean pollable;
     private boolean finished;
-    private boolean msh;
     private OffsetDateTime expiry;
     private ConversationDirection direction;
     private ServiceIdentifier serviceIdentifier;
