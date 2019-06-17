@@ -78,6 +78,10 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @NotNull
     @Valid
+    @ApiModelProperty(
+            value = "SBDH",
+            required = true
+    )
     private StandardBusinessDocumentHeader standardBusinessDocumentHeader;
 
     @XmlAnyElement(lax = true)
@@ -93,7 +97,7 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
     @InstanceOf(value = PubliseringMessage.class, groups = ValidationGroups.DocumentType.Publisering.class)
     @ApiModelProperty(
             name = "arkivmelding|arkivmelding_kvittering|digital|digital_dpv|print|innsynskrav|publisering|einnsyn_kvittering|status",
-            value = "URL to push the webhook messages too",
+            value = "The business message",
             required = true
     )
     private Object any;

@@ -103,7 +103,13 @@ public class NextMoveMessageOutController {
             @ApiResponse(code = 400, message = "Bad request", response = String.class)
     })
     @Transactional
-    public StandardBusinessDocument getMessage(@PathVariable("conversationId") String conversationId) {
+    public StandardBusinessDocument getMessage(
+            @ApiParam(
+                    value = "The conversation ID. Usually a UUID",
+                    example = "90c0bacf-c233-4a54-96fc-e205b79862d9",
+                    required = true
+            )
+            @PathVariable("conversationId") String conversationId) {
         return messageService.getMessage(conversationId).getSbd();
     }
 
@@ -115,7 +121,11 @@ public class NextMoveMessageOutController {
     })
     @Transactional
     public void uploadFile(
-            @ApiParam(value = "ConversationId", required = true)
+            @ApiParam(
+                    value = "The conversation ID. Usually a UUID",
+                    example = "90c0bacf-c233-4a54-96fc-e205b79862d9",
+                    required = true
+            )
             @PathVariable("conversationId") String conversationId,
             HttpServletRequest request) {
         NextMoveOutMessage message = messageService.getMessage(conversationId);
@@ -129,7 +139,13 @@ public class NextMoveMessageOutController {
             @ApiResponse(code = 400, message = "Bad request", response = String.class)
     })
     @Transactional(dontRollbackOn = TimeToLiveException.class)
-    public void sendMessage(@PathVariable("conversationId") String conversationId) {
+    public void sendMessage(
+            @ApiParam(
+                    value = "The conversation ID. Usually a UUID",
+                    example = "90c0bacf-c233-4a54-96fc-e205b79862d9",
+                    required = true
+            )
+            @PathVariable("conversationId") String conversationId) {
         NextMoveOutMessage message = messageService.getMessage(conversationId);
         messageService.sendMessage(message);
     }
