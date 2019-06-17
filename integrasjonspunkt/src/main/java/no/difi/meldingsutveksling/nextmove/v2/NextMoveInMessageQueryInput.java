@@ -8,12 +8,28 @@ import lombok.Data;
 @ApiModel
 public class NextMoveInMessageQueryInput {
 
-    @ApiModelProperty(value = "conversationId")
+    @ApiModelProperty(
+            value = "The conversation ID. Usually a UUID",
+            example = "90c0bacf-c233-4a54-96fc-e205b79862d9"
+    )
     String conversationId;
-    @ApiModelProperty(value = "receiverIdentifier")
+
+    @ApiModelProperty(
+            value = "Receiver identifier",
+            example = "0192:987654321"
+    )
     String receiverIdentifier;
-    @ApiModelProperty(value = "senderIdentifier")
+
+    @ApiModelProperty(
+            value = "Sender Identifier",
+            example = "0192:987654321"
+    )
     String senderIdentifier;
-    @ApiModelProperty(value = "serviceIdentifier")
+
+    @ApiModelProperty(
+            value = "Service identifier",
+            example = "DPO",
+            allowableValues = "DPO, DPV, DPI, DPF, DPE"
+    )
     String serviceIdentifier;
 }
