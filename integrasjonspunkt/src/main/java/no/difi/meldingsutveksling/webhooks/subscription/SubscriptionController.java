@@ -3,13 +3,13 @@ package no.difi.meldingsutveksling.webhooks.subscription;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.webhooks.Subscription;
+import no.difi.meldingsutveksling.validation.group.ValidationGroups;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 @RestController
@@ -36,7 +36,7 @@ public class SubscriptionController {
             @ApiResponse(code = 200, message = "Success", response = Subscription.class),
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })
-    public Subscription getSubscription(@ApiParam(value = "id", required = true)
+    public Subscription getSubscription(@ApiParam(value = "id", required = true, example = "1")
                                         @PathVariable
                                         @NotNull Long id) {
         return subscriptionService.getSubscription(id);
@@ -49,9 +49,27 @@ public class SubscriptionController {
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })
     public Subscription createSubscription(
-            @ApiParam(name = "Subscription", value = "Subscription", required = true)
-            @Valid @RequestBody Subscription subscription) {
+            @ApiParam(
+                    name = "Subscription",
+                    value = "Subscription",
+                    required = true
+            )
+            @Validated(ValidationGroups.Create.class) @RequestBody Subscription subscription) {
         return subscriptionService.createSubscription(subscription);
+    }
+
+    @PutMapping("{id}")
+    @ApiOperation(value = "Update a webhook subscription", notes = "Update a webhook subscription")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success"),
+            @ApiResponse(code = 404, message = "Not Found", response = String.class)
+    })
+    public void updateSubscription(@ApiParam(value = "id", required = true, example = "1")
+                                   @PathVariable
+                                   @NotNull Long id,
+                                   @ApiParam(name = "Subscription", value = "Subscription", required = true)
+                                   @Validated(ValidationGroups.Update.class) @RequestBody Subscription subscription) {
+        subscriptionService.updateSubscription(id, subscription);
     }
 
     @DeleteMapping("{id}")
@@ -60,7 +78,7 @@ public class SubscriptionController {
             @ApiResponse(code = 200, message = "Success"),
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })
-    public void deleteSubscription(@ApiParam(value = "id", required = true)
+    public void deleteSubscription(@ApiParam(value = "id", required = true, example = "1")
                                    @PathVariable
                                    @NotNull Long id) {
 

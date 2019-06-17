@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.receipt;
 
 import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 
@@ -9,33 +9,33 @@ import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 @ApiModel
 public class ConversationQueryInput {
 
-    @ApiParam(value = "conversationId")
+    @ApiModelProperty(value = "conversationId")
     String conversationId;
 
-    @ApiParam(value = "receiverIdentifier")
+    @ApiModelProperty(value = "receiverIdentifier")
     String receiverIdentifier;
 
-    @ApiParam(value = "senderIdentifier")
+    @ApiModelProperty(value = "senderIdentifier")
     String senderIdentifier;
 
-    @ApiParam(value = "serviceIdentifier")
+    @ApiModelProperty(value = "serviceIdentifier")
     String serviceIdentifier;
 
-    @ApiParam(value = "messageReference")
+    @ApiModelProperty(value = "messageReference")
     String messageReference;
 
-    @ApiParam(value = "messageTitle")
+    @ApiModelProperty(value = "messageTitle")
     String messageTitle;
 
-    @ApiParam(value = "pollable")
+    @ApiModelProperty(value = "pollable")
     Boolean pollable;
 
-    @ApiParam(value = "finished")
+    @ApiModelProperty(value = "finished")
     Boolean finished;
 
-    @ApiParam(value = "msh")
+    @ApiModelProperty(value = "msh")
     Boolean msh;
 
-    @ApiParam(value = "serviceIdentifier")
+    @ApiModelProperty(value = "serviceIdentifier")
     ConversationDirection direction;
 }

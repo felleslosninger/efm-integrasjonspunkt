@@ -47,7 +47,7 @@ public class MessageStatusController {
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })
     public MessageStatus status(
-            @ApiParam(value = "Status id", required = true)
+            @ApiParam(value = "Status id", required = true, example = "1")
             @PathVariable("id") Integer id) {
 
         return statusRepo.findByStatId(id)

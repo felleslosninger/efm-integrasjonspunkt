@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -90,6 +91,11 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
     @InstanceOf(value = DpiPrintMessage.class, groups = ValidationGroups.DocumentType.Print.class)
     @InstanceOf(value = InnsynskravMessage.class, groups = ValidationGroups.DocumentType.Innsynskrav.class)
     @InstanceOf(value = PubliseringMessage.class, groups = ValidationGroups.DocumentType.Publisering.class)
+    @ApiModelProperty(
+            name = "arkivmelding|arkivmelding_kvittering|digital|digital_dpv|print|innsynskrav|publisering|einnsyn_kvittering|status",
+            value = "URL to push the webhook messages too",
+            required = true
+    )
     private Object any;
 
     @JsonIgnore
@@ -132,6 +138,7 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
                 .map(Scope::getInstanceIdentifier);
     }
 
+    @JsonIgnore
     public Set<Scope> getScopes() {
         return getStandardBusinessDocumentHeader()
                 .getBusinessScope()
@@ -200,6 +207,7 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
         return getMessageInfo().createLogstashMarkers();
     }
 
+    @JsonIgnore
     public Optional<OffsetDateTime> getExpectedResponseDateTime() {
         return getScope(ScopeType.CONVERSATION_ID)
                 .getScopeInformation()

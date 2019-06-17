@@ -1,19 +1,19 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
 import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
 @ApiModel
 public class NextMoveInMessageQueryInput {
 
-    @ApiParam(value = "conversationId")
+    @ApiModelProperty(value = "conversationId")
     String conversationId;
-    @ApiParam(value = "receiverIdentifier")
+    @ApiModelProperty(value = "receiverIdentifier")
     String receiverIdentifier;
-    @ApiParam(value = "senderIdentifier")
+    @ApiModelProperty(value = "senderIdentifier")
     String senderIdentifier;
-    @ApiParam(value = "serviceIdentifier")
+    @ApiModelProperty(value = "serviceIdentifier")
     String serviceIdentifier;
 }

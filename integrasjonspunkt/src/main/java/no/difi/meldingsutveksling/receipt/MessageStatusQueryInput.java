@@ -1,19 +1,19 @@
 package no.difi.meldingsutveksling.receipt;
 
 import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
 @ApiModel
 public class MessageStatusQueryInput {
 
-    @ApiParam(value = "convId")
+    @ApiModelProperty(value = "convId", example = "1")
     Integer convId;
 
-    @ApiParam(value = "conversationId")
+    @ApiModelProperty(value = "conversationId")
     String conversationId;
 
-    @ApiParam(value = "status")
+    @ApiModelProperty(value = "status")
     String status;
 }

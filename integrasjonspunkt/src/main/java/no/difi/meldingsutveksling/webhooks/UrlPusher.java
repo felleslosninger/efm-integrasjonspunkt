@@ -12,7 +12,7 @@ public class UrlPusher {
 
     private final RestTemplate restTemplate;
 
-    @Async
+    @Async("threadPoolTaskScheduler")
     public void pushAsync(String uri, String jsonPayload) {
         push(uri, jsonPayload);
     }

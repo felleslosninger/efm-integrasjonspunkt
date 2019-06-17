@@ -12,5 +12,7 @@ public interface SubscriptionService {
 
     Subscription createSubscription(Subscription subscription);
 
+    void updateSubscription(Long id, Subscription subscription);
+
     void deleteSubscription(Long id);
 }

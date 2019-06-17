@@ -4,3 +4,4 @@ no.difi.meldingsutveksling.validation.InServiceRegistryValidator
 no.difi.meldingsutveksling.validation.InstanceOfValidator
 no.difi.meldingsutveksling.validation.OneOfValidator
 no.difi.meldingsutveksling.validation.UUIDValidator
+no.difi.meldingsutveksling.validation.WebhookFilterValidator

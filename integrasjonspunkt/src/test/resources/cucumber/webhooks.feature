@@ -5,14 +5,17 @@ Feature: Webhooks
     And I create the following webhook subscription:
     """
     {
-      "pushEndpoint": "http://127.0.0.1:9800/my/test/endpoint"
+      "name": "My test webhook",
+      "pushEndpoint": "http://127.0.0.1:9800/my/test/endpoint",
+      "resource": "all",
+      "event": "all"
     }
     """
     Then the following ping message is posted to "/my/test/endpoint":
     """
     {
       "createdTs" : "2019-03-25T12:38:23+01:00",
-      "type" : "ping"
+      "event" : "ping"
     }
     """
 
@@ -20,6 +23,8 @@ Feature: Webhooks
     Given the following message status is published:
       """
       {
+        "conversationId" : "bb8bb41a-c559-47ed-84f1-1846ece5d590",
+        "direction" : "INCOMING",
         "status" : "MOTTATT",
         "description" : "some description"
       }
@@ -28,7 +33,10 @@ Feature: Webhooks
       """
        {
         "createdTs" : "2019-03-25T12:38:23+01:00",
-        "type" : "message.status",
+        "resource" : "messages",
+        "event" : "status",
+        "conversationId" : "bb8bb41a-c559-47ed-84f1-1846ece5d590",
+        "direction" : "INCOMING",
         "status" : "MOTTATT",
         "description" : "some description"
       }

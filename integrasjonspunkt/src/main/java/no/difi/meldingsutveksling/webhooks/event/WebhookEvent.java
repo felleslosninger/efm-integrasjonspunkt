@@ -1,22 +1,15 @@
 package no.difi.meldingsutveksling.webhooks.event;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
-import java.time.Clock;
-import java.time.OffsetDateTime;
+@Getter
+public class WebhookEvent<T extends WebhookContent> extends ApplicationEvent {
 
-@JsonIgnoreProperties({"source", "timestamp"})
-public abstract class WebhookEvent extends ApplicationEvent {
+    private final T content;
 
-    @Getter
-    private final OffsetDateTime createdTs;
-
-    WebhookEvent(Clock clock, Object source) {
+    public WebhookEvent(T content, Object source) {
         super(source);
-        this.createdTs = OffsetDateTime.now(clock);
+        this.content = content;
     }
-
-    public abstract String getType();
 }

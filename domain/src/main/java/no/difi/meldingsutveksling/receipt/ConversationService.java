@@ -63,7 +63,7 @@ public class ConversationService {
                 .setLastUpdate(OffsetDateTime.now(clock))
                 .setPollable(isPollable(conversation, status));
 
-        webhookPublisher.publish(status);
+        webhookPublisher.publish(conversation, status);
 
         log.debug(String.format("Added status '%s' to conversation[id=%s]", status.getStatus(),
                 conversation.getConversationId()),
@@ -104,7 +104,7 @@ public class ConversationService {
     private Conversation createConversation(MessageInformable message) {
         MessageStatus ms = messageStatusFactory.getMessageStatus(ReceiptStatus.OPPRETTET);
         Conversation c = Conversation.of(message, OffsetDateTime.now(clock), ms);
-        webhookPublisher.publish(ms);
+        webhookPublisher.publish(c, ms);
         return repo.save(c);
     }
 }

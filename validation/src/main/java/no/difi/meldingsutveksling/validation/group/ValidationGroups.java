@@ -57,4 +57,12 @@ public interface ValidationGroups {
         interface Receiver extends Partner {
         }
     }
+
+    interface Create extends Default {
+
+    }
+
+    interface Update extends Default {
+
+    }
 }

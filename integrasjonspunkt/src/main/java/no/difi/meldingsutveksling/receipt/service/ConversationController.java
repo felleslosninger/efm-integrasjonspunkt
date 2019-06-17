@@ -48,7 +48,7 @@ public class ConversationController {
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })
     public Conversation getByConvId(
-            @ApiParam(value = "convId", required = true)
+            @ApiParam(value = "convId", required = true, example = "1")
             @PathVariable("id") Integer convId) {
         return convoRepo.findByConvIdAndDirection(convId, OUTGOING)
                 .orElseThrow(() -> new ConversationNotFoundException("convId", convId.toString()));

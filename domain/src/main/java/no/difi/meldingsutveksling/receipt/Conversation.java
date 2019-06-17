@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.MessageInformable;
@@ -24,6 +25,7 @@ import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 @Slf4j
 @Table(name = "conversation",
         indexes = {@Index(columnList = "conversation_id")})
+@ApiModel(description = "Conversation")
 public class Conversation implements MessageInformable {
 
     public static final Logger statusLogger = LoggerFactory.getLogger("STATUS");
@@ -31,6 +33,7 @@ public class Conversation implements MessageInformable {
     @Id
     @GeneratedValue
     private Integer convId;
+
     @Column(name = "conversation_id")
     private String conversationId;
     private String senderIdentifier;
@@ -114,6 +117,7 @@ public class Conversation implements MessageInformable {
         return this;
     }
 
+    @JsonIgnore
     boolean hasStatus(MessageStatus status) {
         return getMessageStatuses().stream()
                 .anyMatch(ms -> ms.getStatus().equals(status.getStatus()));

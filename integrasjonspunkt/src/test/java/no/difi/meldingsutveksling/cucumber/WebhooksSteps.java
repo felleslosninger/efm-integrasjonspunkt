@@ -7,10 +7,12 @@ import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
-import no.difi.meldingsutveksling.webhooks.UrlPusher;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.webhooks.WebhookPublisher;
 import no.difi.meldingsutveksling.webhooks.WebhookPusher;
+import no.difi.meldingsutveksling.webhooks.event.MessageStatusContent;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -74,8 +76,13 @@ public class WebhooksSteps {
 
     @Given("^the following message status is published:$")
     public void theFollowingMessageStatusIsPublished(String body) throws IOException {
-        MessageStatus messageStatus = objectMapper.readValue(body, MessageStatus.class);
-        webhookPublisher.publish(messageStatus);
+        MessageStatusContent event = objectMapper.readValue(body, MessageStatusContent.class);
+        Conversation conversation = new Conversation()
+                .setConversationId(event.getConversationId())
+                .setDirection(event.getDirection())
+                .setServiceIdentifier(event.getServiceIdentifier());
+        MessageStatus messageStatus = MessageStatus.of(ReceiptStatus.valueOf(event.getStatus()), event.getCreatedTs(), event.getDescription());
+        webhookPublisher.publish(conversation, messageStatus);
     }
 
     @Then("^the following ping message is posted to \"([^\"]*)\":$")
@@ -87,7 +94,7 @@ public class WebhooksSteps {
     }
 
     @Then("^the following message is posted to \"([^\"]*)\":$")
-    public void theFollowingMessageIsPostedTo(String url, String body) throws InterruptedException {
+    public void theFollowingMessageIsPostedTo(String url, String body) {
         await().atMost(3L, TimeUnit.SECONDS)
                 .pollInterval(1L, TimeUnit.SECONDS)
                 .untilTrue(pushed);
