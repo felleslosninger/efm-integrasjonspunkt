@@ -12,22 +12,27 @@ import java.util.Optional;
 
 public class NextMoveUploadedFile implements MultipartFile {
 
+    private final String contentType;
+    private final String title;
     private final HttpServletRequest request;
     private final String originalFilename;
 
-    NextMoveUploadedFile(HttpServletRequest request) {
+    NextMoveUploadedFile(String contentType, String contentDispositionString, String title, HttpServletRequest request) {
+        this.contentType = contentType;
+        this.title = title;
         this.request = request;
 
-        ContentDisposition contentDisposition = Optional.ofNullable(request.getHeader(HttpHeaders.CONTENT_DISPOSITION))
+        ContentDisposition contentDisposition = Optional.ofNullable(contentDispositionString)
                 .map(ContentDisposition::parse)
                 .orElseThrow(() -> new MissingHttpHeaderException(HttpHeaders.CONTENT_DISPOSITION));
 
         this.originalFilename = contentDisposition.getFilename();
     }
 
+
     @Override
     public String getName() {
-        return request.getParameter("title");
+        return title;
     }
 
     @Override
@@ -37,7 +42,7 @@ public class NextMoveUploadedFile implements MultipartFile {
 
     @Override
     public String getContentType() {
-        return request.getContentType();
+        return contentType;
     }
 
     @Override

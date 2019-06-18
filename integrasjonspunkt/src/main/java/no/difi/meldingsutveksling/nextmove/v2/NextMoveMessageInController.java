@@ -62,9 +62,10 @@ public class NextMoveMessageInController {
     private final Clock clock;
 
     @GetMapping
-    @ApiOperation(value = "Get all incoming messages")
+    @ApiOperation(value = "Find incoming messages")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument[].class),
+            @ApiResponse(code = 400, message = "Bad Request", response = String.class),
             @ApiResponse(code = 404, message = "Not found", response = String.class),
             @ApiResponse(code = 204, message = "No content", response = String.class)
     })
@@ -79,7 +80,8 @@ public class NextMoveMessageInController {
     @ApiOperation(value = "Peek and lock incoming queue", notes = "Gets the first message in the incoming queue, then locks the message")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
-            @ApiResponse(code = 204, message = "No content", response = String.class)
+            @ApiResponse(code = 204, message = "No content", response = String.class),
+            @ApiResponse(code = 400, message = "Bad Request", response = String.class)
     })
     @Transactional
     public StandardBusinessDocument peek(@Valid NextMoveInMessageQueryInput input) {
@@ -98,7 +100,8 @@ public class NextMoveMessageInController {
             "unless conversationId is specified, then removes it.")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = InputStreamResource.class),
-            @ApiResponse(code = 204, message = "No content", response = String.class)
+            @ApiResponse(code = 204, message = "No content", response = String.class),
+            @ApiResponse(code = 400, message = "Bad Request", response = String.class)
     })
     @Transactional
     public ResponseEntity<InputStreamResource> popMessage(
@@ -129,6 +132,7 @@ public class NextMoveMessageInController {
     @ApiOperation(value = "Remove message", notes = "Delete message")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
+            @ApiResponse(code = 400, message = "Bad Request", response = String.class),
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })
     @Transactional

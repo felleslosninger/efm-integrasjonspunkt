@@ -31,7 +31,8 @@ public class MessageStatusController {
     @GetMapping
     @ApiOperation(value = "Get all statuses", notes = "Get a list of all statuses with given parameters")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "Success", response = MessageStatus[].class)
+            @ApiResponse(code = 200, message = "Success", response = MessageStatus[].class),
+            @ApiResponse(code = 400, message = "Bad Request", response = String.class)
     })
     public Page<MessageStatus> conversations(
             @Valid MessageStatusQueryInput input,
@@ -44,6 +45,7 @@ public class MessageStatusController {
     @ApiOperation(value = "Get status", notes = "Get status with given id")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = MessageStatus.class),
+            @ApiResponse(code = 400, message = "Bad Request", response = String.class),
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })
     public MessageStatus status(

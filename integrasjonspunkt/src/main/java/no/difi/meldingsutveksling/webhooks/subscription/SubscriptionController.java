@@ -34,6 +34,7 @@ public class SubscriptionController {
     @ApiOperation(value = "Get a webhook subscription", notes = "Get a webhook subscription")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = Subscription.class),
+            @ApiResponse(code = 400, message = "Bad Request", response = String.class),
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })
     public Subscription getSubscription(@ApiParam(value = "id", required = true, example = "1")
@@ -46,6 +47,7 @@ public class SubscriptionController {
     @ApiOperation(value = "Create a webhook subscription", notes = "Create a webhook subscription")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = Subscription.class),
+            @ApiResponse(code = 400, message = "Bad Request", response = String.class),
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })
     public Subscription createSubscription(
@@ -62,6 +64,7 @@ public class SubscriptionController {
     @ApiOperation(value = "Update a webhook subscription", notes = "Update a webhook subscription")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success"),
+            @ApiResponse(code = 400, message = "Bad Request", response = String.class),
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })
     public void updateSubscription(@ApiParam(value = "id", required = true, example = "1")
@@ -76,6 +79,7 @@ public class SubscriptionController {
     @ApiOperation(value = "Delete a webhook subscription", notes = "Delete a webhook subscription")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success"),
+            @ApiResponse(code = 400, message = "Bad Request", response = String.class),
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })
     public void deleteSubscription(@ApiParam(value = "id", required = true, example = "1")

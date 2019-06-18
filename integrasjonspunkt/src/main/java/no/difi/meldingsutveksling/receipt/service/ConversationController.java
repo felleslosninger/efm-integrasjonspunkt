@@ -32,7 +32,8 @@ public class ConversationController {
     @GetMapping
     @ApiOperation(value = "Get all conversations", notes = "Gets a list of all outgoing conversations")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "Success", response = Conversation[].class)
+            @ApiResponse(code = 400, message = "Bad Request", response = String.class),
+            @ApiResponse(code = 200, message = "Success", response = Conversation[].class),
     })
     public Page<Conversation> conversations(
             @Valid ConversationQueryInput input,
@@ -45,6 +46,7 @@ public class ConversationController {
     @ApiOperation(value = "Get conversation", notes = "Find conversation based on id")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = Conversation.class),
+            @ApiResponse(code = 400, message = "Bad Request", response = String.class),
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })
     public Conversation getByConvId(
@@ -58,6 +60,7 @@ public class ConversationController {
     @ApiOperation(value = "Get conversation", notes = "Find conversation based on conversationId")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = Conversation.class),
+            @ApiResponse(code = 400, message = "Bad Request", response = String.class),
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })
     public Conversation getByConversationId(
