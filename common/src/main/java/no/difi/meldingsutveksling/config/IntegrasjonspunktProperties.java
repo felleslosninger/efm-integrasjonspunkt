@@ -153,7 +153,7 @@ public class IntegrasjonspunktProperties {
         private boolean notifySms;
         private String notificationText;
         private boolean allowForwarding;
-
+        private Long daysToReply;
     }
 
     /**

@@ -40,6 +40,7 @@ import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -156,7 +157,7 @@ public class CorrespondenceAgencyMessageFactory {
         correspondence.setMessageSender(objectFactory.createMyInsertCorrespondenceV2MessageSender(getSender()));
         // The date and time the message should be visible in the Portal
         correspondence.setVisibleDateTime(DateTimeUtil.toXMLGregorianCalendar(OffsetDateTime.now(clock)));
-        correspondence.setDueDateTime(DateTimeUtil.toXMLGregorianCalendar(OffsetDateTime.now(clock).plusDays(7)));
+        correspondence.setDueDateTime(DateTimeUtil.toXMLGregorianCalendar(OffsetDateTime.now(clock).plusDays(getDaysToReply())));
 
         ExternalContentV2 externalContentV2 = new ExternalContentV2();
         externalContentV2.setLanguageCode(objectFactory.createExternalContentV2LanguageCode("1044"));
@@ -190,6 +191,10 @@ public class CorrespondenceAgencyMessageFactory {
         myInsertCorrespondenceV2.setExternalShipmentReference(conversationId);
 
         return myInsertCorrespondenceV2;
+    }
+
+    private Long getDaysToReply() {
+        return Optional.ofNullable(properties.getDpv().getDaysToReply()).orElse(7L);
     }
 
     private List<Notification2009> createNotifications() {
