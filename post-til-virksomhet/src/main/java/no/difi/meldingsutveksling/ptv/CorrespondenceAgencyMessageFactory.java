@@ -34,10 +34,13 @@ import org.springframework.stereotype.Component;
 
 import javax.activation.DataHandler;
 import javax.xml.bind.JAXBElement;
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.NextMoveConsts.ARKIVMELDING_FILE;
@@ -54,23 +57,12 @@ public class CorrespondenceAgencyMessageFactory {
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final CryptoMessagePersister cryptoMessagePersister;
     private final Clock clock;
+    private final ReporteeFactory reporteeFactory;
 
     @SneakyThrows
     public InsertCorrespondenceV2 create(NextMoveOutMessage message) {
-        no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory reporteeFactory = new no.altinn.services.serviceengine.reporteeelementlist._2010._10.ObjectFactory();
         BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
-
-        for (BusinessMessageFile f : message.getFiles()) {
-            FileEntryStream fileEntry = cryptoMessagePersister.readStream(message.getConversationId(), f.getIdentifier());
-            BinaryAttachmentV2 binaryAttachmentV2 = new BinaryAttachmentV2();
-            binaryAttachmentV2.setFunctionType(AttachmentFunctionType.fromValue("Unspecified"));
-            binaryAttachmentV2.setFileName(reporteeFactory.createBinaryAttachmentV2FileName(f.getFilename()));
-            binaryAttachmentV2.setName(reporteeFactory.createBinaryAttachmentV2Name(f.getTitle()));
-            binaryAttachmentV2.setEncrypted(false);
-            binaryAttachmentV2.setSendersReference(reporteeFactory.createBinaryAttachmentV2SendersReference("AttachmentReference_as123452"));
-            binaryAttachmentV2.setData(reporteeFactory.createBinaryAttachmentV2Data(new DataHandler(InputStreamDataSource.of(fileEntry.getInputStream()))));
-            attachmentExternalBEV2List.getBinaryAttachmentV2().add(binaryAttachmentV2);
-        }
+        attachmentExternalBEV2List.getBinaryAttachmentV2().addAll(getAttachments(message));
 
         if (message.getBusinessMessage() instanceof ArkivmeldingMessage) {
             BusinessMessageFile arkivmeldingFile = message.getFiles().stream()
@@ -105,6 +97,35 @@ public class CorrespondenceAgencyMessageFactory {
                 ArkivmeldingMessage.class.getName(), DigitalDpvMessage.class.getName()));
     }
 
+    private List<BinaryAttachmentV2> getAttachments(NextMoveOutMessage message) {
+        return message.getFiles()
+                .stream()
+                .sorted(Comparator.comparing(AbstractEntity::getId))
+                .map(file -> getBinaryAttachmentV2(message, file))
+                .collect(Collectors.toList());
+    }
+
+    private BinaryAttachmentV2 getBinaryAttachmentV2(NextMoveOutMessage message, BusinessMessageFile file) {
+        FileEntryStream fileEntry = getFileEntry(message, file);
+        BinaryAttachmentV2 binaryAttachmentV2 = new BinaryAttachmentV2();
+        binaryAttachmentV2.setFunctionType(AttachmentFunctionType.fromValue("Unspecified"));
+        binaryAttachmentV2.setFileName(reporteeFactory.createBinaryAttachmentV2FileName(file.getFilename()));
+        binaryAttachmentV2.setName(reporteeFactory.createBinaryAttachmentV2Name(file.getTitle()));
+        binaryAttachmentV2.setEncrypted(false);
+        binaryAttachmentV2.setSendersReference(reporteeFactory.createBinaryAttachmentV2SendersReference("AttachmentReference_as123452"));
+        binaryAttachmentV2.setData(reporteeFactory.createBinaryAttachmentV2Data(new DataHandler(InputStreamDataSource.of(fileEntry.getInputStream()))));
+        return binaryAttachmentV2;
+    }
+
+    private FileEntryStream getFileEntry(NextMoveOutMessage message, BusinessMessageFile f) {
+        try {
+            return cryptoMessagePersister.readStream(message.getConversationId(), f.getIdentifier());
+        } catch (IOException e) {
+            throw new NextMoveRuntimeException(
+                    String.format("Could not read attachment %s for conversationId = %s", f.getIdentifier(), message.getConversationId())
+                    , e);
+        }
+    }
 
     public InsertCorrespondenceV2 create(String conversationId,
                                          String receiverIdentifier,

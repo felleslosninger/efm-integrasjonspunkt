@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -127,9 +129,16 @@ public class NextMoveMessageOutController {
                     required = true
             )
             @PathVariable("conversationId") String conversationId,
+            @RequestHeader(HttpHeaders.CONTENT_TYPE) String contentType,
+            @RequestHeader(HttpHeaders.CONTENT_DISPOSITION) String contentDisposition,
+            @ApiParam(
+                    value = "The title of the document. The title can alternatively be specified using the filename attribute of the Content-Disposition header.",
+                    example = "My nice and shiny document title"
+            )
+            @RequestParam(value = "title", required = false) String title,
             HttpServletRequest request) {
         NextMoveOutMessage message = messageService.getMessage(conversationId);
-        messageService.addFile(message, new NextMoveUploadedFile(request));
+        messageService.addFile(message, new NextMoveUploadedFile(contentType, contentDisposition, title, request));
     }
 
     @PostMapping("/{conversationId}")
