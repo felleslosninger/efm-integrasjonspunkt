@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
+import no.difi.meldingsutveksling.receipt.ConversationService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +25,7 @@ public class DpvConversationStrategy implements ConversationStrategy {
 
     private final CorrespondenceAgencyMessageFactory correspondenceAgencyMessageFactory;
     private final CorrespondenceAgencyClient client;
+    private final ConversationService conversationService;
     private final IntegrasjonspunktProperties props;
     private final NoarkClient localNoark;
     private final PutMessageRequestFactory putMessageRequestFactory;
@@ -39,6 +41,11 @@ public class DpvConversationStrategy implements ConversationStrategy {
         if (response == null) {
             throw new NextMoveException("Failed to create Correspondence Agency Request");
         }
+
+        String serviceCode = correspondence.getCorrespondence().getServiceCode().getValue();
+        String serviceEditionCode = correspondence.getCorrespondence().getServiceEdition().getValue();
+        conversationService.findConversation(message.getConversationId())
+                .ifPresent(c -> conversationService.save(c.setServiceCode(serviceCode).setServiceEditionCode(serviceEditionCode)));
 
         if (props.getNoarkSystem().isEnable()) {
             sendAppReceipt(message);

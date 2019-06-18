@@ -1,12 +1,13 @@
 package no.difi.meldingsutveksling.receipt;
 
 import com.google.common.collect.Sets;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.webhooks.WebhookPublisher;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
@@ -19,27 +20,18 @@ import static java.lang.String.format;
 import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 
 @Component
+@RequiredArgsConstructor
 @Slf4j
 public class ConversationService {
 
     private final ConversationRepository repo;
+    private final ServiceRegistryLookup serviceRegistryLookup;
     private final WebhookPublisher webhookPublisher;
     private final MessageStatusFactory messageStatusFactory;
     private final Clock clock;
 
     private static final String CONVERSATION_EXISTS = "Conversation with id=%s already exists, not recreating";
     private static final Set<ServiceIdentifier> POLLABLES = Sets.newHashSet(DPV, DPF, DPO);
-
-    @Autowired
-    public ConversationService(ConversationRepository repo,
-                               WebhookPublisher webhookPublisher,
-                               MessageStatusFactory messageStatusFactory,
-                               Clock clock) {
-        this.repo = repo;
-        this.webhookPublisher = webhookPublisher;
-        this.messageStatusFactory = messageStatusFactory;
-        this.clock = clock;
-    }
 
     @Transactional
     public Optional<Conversation> registerStatus(String conversationId, MessageStatus status) {
@@ -60,8 +52,12 @@ public class ConversationService {
         }
 
         conversation.addMessageStatus(status)
-                .setLastUpdate(OffsetDateTime.now(clock))
-                .setPollable(isPollable(conversation, status));
+                .setLastUpdate(OffsetDateTime.now(clock));
+        if (isPollable(conversation, status)) {
+            // Note: isPollable can not be moved into setPollable, as this would interrupt polling
+            // for every other registered status than 'SENDT'
+            conversation.setPollable(true);
+        }
 
         webhookPublisher.publish(conversation, status);
 
@@ -83,6 +79,11 @@ public class ConversationService {
         return repo.save(conversation
                 .setFinished(true)
                 .setPollable(false));
+    }
+
+    @Transactional
+    public Conversation save(Conversation conversation) {
+        return repo.save(conversation);
     }
 
     @Transactional

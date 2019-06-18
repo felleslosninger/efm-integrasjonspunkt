@@ -21,11 +21,15 @@ import no.difi.meldingsutveksling.DateTimeUtil;
 import no.difi.meldingsutveksling.InputStreamDataSource;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
+import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.stereotype.Component;
 
 import javax.activation.DataHandler;
@@ -69,7 +73,9 @@ public class CorrespondenceAgencyMessageFactory {
             Arkivmelding arkivmelding = ArkivmeldingUtil.unmarshalArkivmelding(is);
 
             Journalpost jp = ArkivmeldingUtil.getJournalpost(arkivmelding);
-            return create(message.getConversationId(), message.getReceiverIdentifier(),
+            return create(message.getConversationId(),
+                    message.getReceiverIdentifier(),
+                    message.getSbd().getProcess(),
                     jp.getOffentligTittel(),
                     jp.getOffentligTittel(),
                     jp.getTittel(),
@@ -78,7 +84,9 @@ public class CorrespondenceAgencyMessageFactory {
 
         if (message.getBusinessMessage() instanceof DigitalDpvMessage) {
             DigitalDpvMessage msg = (DigitalDpvMessage) message.getBusinessMessage();
-            return create(message.getConversationId(), message.getReceiverIdentifier(),
+            return create(message.getConversationId(),
+                    message.getReceiverIdentifier(),
+                    message.getSbd().getProcess(),
                     msg.getTitle(),
                     msg.getSummary(),
                     msg.getBody(),
@@ -121,6 +129,7 @@ public class CorrespondenceAgencyMessageFactory {
 
     public InsertCorrespondenceV2 create(String conversationId,
                                          String receiverIdentifier,
+                                         String process,
                                          String messageTitle,
                                          String messageSummary,
                                          String messageBody,
@@ -129,11 +138,18 @@ public class CorrespondenceAgencyMessageFactory {
         MyInsertCorrespondenceV2 correspondence = new MyInsertCorrespondenceV2();
         ObjectFactory objectFactory = new ObjectFactory();
 
+        ServiceRecord serviceRecord;
+        try {
+            serviceRecord = serviceRegistryLookup.getServiceRecordByProcess(receiverIdentifier, process);
+        } catch (ServiceRegistryLookupException e) {
+            throw new MeldingsUtvekslingRuntimeException(String.format("Could not get service record for receiver %s", receiverIdentifier));
+        }
+
         correspondence.setReportee(objectFactory.createMyInsertCorrespondenceV2Reportee(receiverIdentifier));
-        // Service code, default 4255
-        correspondence.setServiceCode(getServiceCode());
-        // Service edition, default 10
-        correspondence.setServiceEdition(getServiceEditionCode());
+        // Service code from service record, default 4255
+        correspondence.setServiceCode(objectFactory.createMyInsertCorrespondenceV2ServiceCode(serviceRecord.getService().getServiceCode()));
+        // Service edition from service record, default 10 (Administration)
+        correspondence.setServiceEdition(objectFactory.createMyInsertCorrespondenceV2ServiceEdition(serviceRecord.getService().getServiceEditionCode()));
         // Should the user be allowed to forward the message from portal
         correspondence.setAllowForwarding(objectFactory.createMyInsertCorrespondenceV2AllowForwarding(config.isAllowForwarding()));
         // Name of the message sender, always "Avsender"
@@ -230,7 +246,7 @@ public class CorrespondenceAgencyMessageFactory {
         return OffsetDateTime.now(clock).plusMinutes(5);
     }
 
-    public GetCorrespondenceStatusDetailsV2 createReceiptRequest(String conversationId) {
+    public GetCorrespondenceStatusDetailsV2 createReceiptRequest(Conversation conversation) {
 
         no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory of = new no.altinn.services
                 .serviceengine.correspondence._2009._10.ObjectFactory();
@@ -240,27 +256,13 @@ public class CorrespondenceAgencyMessageFactory {
         no.altinn.schemas.services.serviceengine.correspondence._2014._10.ObjectFactory filterOF = new no.altinn
                 .schemas.services.serviceengine.correspondence._2014._10.ObjectFactory();
         JAXBElement<String> sendersReference = filterOF.createCorrespondenceStatusFilterV2SendersReference
-                (conversationId);
+                (conversation.getConversationId());
         filter.setSendersReference(sendersReference);
-        filter.setServiceCode("4255");
-        filter.setServiceEditionCode(10);
+        filter.setServiceCode(conversation.getServiceCode());
+        filter.setServiceEditionCode(Integer.valueOf(conversation.getServiceEditionCode()));
         statusRequest.setFilterCriteria(filter);
 
         return statusRequest;
-    }
-
-    private JAXBElement<String> getServiceCode() {
-        String serviceCodeProp = config.getExternalServiceCode();
-        String serviceCode = !isNullOrEmpty(serviceCodeProp) ? serviceCodeProp : "4255";
-        ObjectFactory objectFactory = new ObjectFactory();
-        return objectFactory.createMyInsertCorrespondenceV2ServiceCode(serviceCode);
-    }
-
-    private JAXBElement<String> getServiceEditionCode() {
-        String serviceEditionProp = config.getExternalServiceEditionCode();
-        String serviceEdition = !isNullOrEmpty(serviceEditionProp) ? serviceEditionProp : "10";
-        ObjectFactory objectFactory = new ObjectFactory();
-        return objectFactory.createMyInsertCorrespondenceV2ServiceEdition(serviceEdition);
     }
 
     private TextToken createTextToken(int num, String value) {

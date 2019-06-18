@@ -40,6 +40,8 @@ public class Conversation implements MessageInformable {
     private String receiverIdentifier;
     private String messageReference;
     private String messageTitle;
+    private String serviceCode;
+    private String serviceEditionCode;
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private OffsetDateTime lastUpdate;
     @JsonIgnore

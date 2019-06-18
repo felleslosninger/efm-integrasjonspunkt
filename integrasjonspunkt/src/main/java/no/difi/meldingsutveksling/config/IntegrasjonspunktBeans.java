@@ -33,7 +33,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.client.RestOperations;
 
 import java.io.IOException;
@@ -128,8 +127,6 @@ public class IntegrasjonspunktBeans {
     @Bean
     public CorrespondenceAgencyConfiguration correspondenceAgencyConfiguration(IntegrasjonspunktProperties properties) {
         return new CorrespondenceAgencyConfiguration()
-                .setExternalServiceCode(properties.getDpv().getExternalServiceCode())
-                .setExternalServiceEditionCode(properties.getDpv().getExternalServiceEditionCode())
                 .setPassword(properties.getDpv().getPassword())
                 .setSystemUserCode(properties.getDpv().getUsername())
                 .setNotifyEmail(properties.getDpv().isNotifyEmail())
