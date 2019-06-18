@@ -55,11 +55,6 @@ public class ConversationQueryInput {
     Boolean finished;
 
     @ApiModelProperty(
-            value = "msh"
-    )
-    Boolean msh;
-
-    @ApiModelProperty(
             value = "Conversation direction",
             example = "OUTGOING",
             allowableValues = "OUTGOING, INCOMING"

@@ -14,7 +14,6 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.jws.WebParam;
 import javax.jws.WebService;
@@ -43,10 +42,6 @@ import static no.difi.meldingsutveksling.noarkexchange.PutMessageMarker.markerFr
 public class IntegrasjonspunktImpl implements SOAPport {
 
     private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktImpl.class);
-
-    @Autowired
-    @Qualifier("mshClient")
-    private NoarkClient mshClient;
 
     @Autowired
     private IntegrasjonspunktProperties properties;
@@ -83,33 +78,15 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
         final LogstashMarker receiverMarker = MarkerFactory.receiverMarker(orgnr);
 
-        boolean validServiceIdentifier = false;
-        boolean mshCanReceive = false;
-        boolean isDpv = false;
-        if (asList(DPO, DPF).contains(serviceRecord.getServiceIdentifier()) &&
+        if (asList(DPO, DPF, DPV).contains(serviceRecord.getServiceIdentifier()) &&
                 strategyFactory.getStrategy(serviceRecord.getServiceIdentifier()).isPresent()) {
-            validServiceIdentifier = true;
-            Audit.info(String.format("CanReceive = true, receiver: %s", orgnr), receiverMarker);
-        } else if (mshClient.canRecieveMessage(orgnr)) {
-            mshCanReceive = true;
-            Audit.info(String.format("MSH canReceive = true, receiver: %s", orgnr), receiverMarker);
-        } else {
-            isDpv = true;
-        }
-
-        boolean strategyFactoryAvailable;
-        if (isDpv) {
-            strategyFactoryAvailable = strategyFactory.getStrategy(DPV).isPresent();
-        } else {
-            strategyFactoryAvailable = validServiceIdentifier;
-        }
-        if (!strategyFactoryAvailable && !mshCanReceive) {
-            Audit.error(String.format("CanReceive = false, receiver: %s. Either feature toggle for DPV is disabled, or MSH cannot receive", orgnr), receiverMarker);
-            response.setResult(false);
+            Audit.info(String.format("CanReceive = true. Receiver = %s, service identifier = %s", orgnr, serviceRecord.getServiceIdentifier()), receiverMarker);
+            response.setResult(true);
             return response;
         }
 
-        response.setResult(true);
+        Audit.error(String.format("CanReceive = false. Receiver (%s) accepts %s, but feature is disabled.", orgnr, serviceRecord.getServiceIdentifier()), receiverMarker);
+        response.setResult(false);
         return response;
     }
 
@@ -162,7 +139,4 @@ public class IntegrasjonspunktImpl implements SOAPport {
         return messageService.convertAndSend(message);
     }
 
-    public void setMshClient(NoarkClient mshClient) {
-        this.mshClient = mshClient;
-    }
 }

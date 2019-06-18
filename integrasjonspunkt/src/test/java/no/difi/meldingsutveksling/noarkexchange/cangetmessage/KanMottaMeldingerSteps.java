@@ -1,12 +1,10 @@
 package no.difi.meldingsutveksling.noarkexchange.cangetmessage;
 
 import cucumber.api.java.Before;
-import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
-import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.services.Adresseregister;
@@ -23,7 +21,6 @@ public class KanMottaMeldingerSteps {
     private IntegrasjonspunktImpl integrasjonspunkt;
     private Adresseregister adresseRegister;
     private GetCanReceiveMessageResponseType responseType;
-    private NoarkClient mshClient;
 
     private String message = "&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;\n"
             + "                &lt;Melding xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"\n"
@@ -105,8 +102,6 @@ public class KanMottaMeldingerSteps {
     public void setup() {
         integrasjonspunkt = new IntegrasjonspunktImpl();
         adresseRegister = mock(Adresseregister.class);
-        mshClient = mock(NoarkClient.class);
-        integrasjonspunkt.setMshClient(mshClient);
     }
 
     @Given("^virksomhet (.+) i Adresseregisteret$")
@@ -115,15 +110,6 @@ public class KanMottaMeldingerSteps {
             when(adresseRegister.getCertificate(any(ServiceRecord.class))).thenReturn(new X509CertImpl());
         } else if ("finnes ikke".equals(finnes)) {
             when(adresseRegister.getCertificate(any(ServiceRecord.class))).thenThrow(CertificateException.class);
-        }
-    }
-
-    @And("^virksomhet (.+) i MSH sitt adresseregister$")
-    public void virksomhet_finnes_i_MSH(String finnes) throws Throwable {
-        if ("finnes".equals(finnes)) {
-            when(mshClient.canRecieveMessage(any(String.class))).thenReturn(true);
-        } else if ("finnes ikke".equals(finnes)) {
-            when(mshClient.canRecieveMessage(any(String.class))).thenReturn(false);
         }
     }
 
@@ -162,11 +148,6 @@ public class KanMottaMeldingerSteps {
         req.setPayload(message);
         integrasjonspunkt.putMessage(req);
 
-    }
-
-    @Then("^skal melding sendes til MSH$")
-    public void skal_melding_sendes_til_MSH() throws Throwable {
-        verify(mshClient).sendEduMelding(any(PutMessageRequestType.class));
     }
 
 }

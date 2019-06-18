@@ -11,7 +11,6 @@ import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -86,10 +85,6 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
 
         if (input.getFinished() != null) {
             builder.and(conversation.finished.eq(input.getFinished()));
-        }
-
-        if (input.getMsh() != null) {
-            builder.and(conversation.msh.eq(input.getMsh()));
         }
 
         if (input.getDirection() != null) {

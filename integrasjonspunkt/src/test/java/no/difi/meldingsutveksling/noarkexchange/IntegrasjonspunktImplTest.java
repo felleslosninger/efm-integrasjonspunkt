@@ -38,7 +38,6 @@ public class IntegrasjonspunktImplTest {
     @Mock private IntegrasjonspunktProperties.Organization organizationMock;
     @Mock private ServiceRegistryLookup serviceRegistryLookup;
     @Mock private ConversationStrategyFactory strategyFactory;
-    @Mock private NoarkClient msh;
 
     @Before
     public void setUp() throws ServiceRegistryLookupException {
@@ -51,58 +50,10 @@ public class IntegrasjonspunktImplTest {
 
     @Test
     public void shouldBeAbleToReceiveWhenServiceIdentifierIsDPOAndHasCertificate() {
-        disableMsh();
         GetCanReceiveMessageRequestType request = GetCanReceiveObjectMother.createRequest("1234");
         final GetCanReceiveMessageResponseType canReceiveMessage = integrasjonspunkt.getCanReceiveMessage(request);
 
         assertThat(canReceiveMessage.isResult(), is(true));
-    }
-
-    @Test
-    public void shouldCheckWithMSHWhenServiceIdentifierIsDPOAndAdresseregisterMissingCertificate() {
-        enableMsh();
-        final GetCanReceiveMessageRequestType request = GetCanReceiveObjectMother.createRequest(IDENTIFIER);
-
-        integrasjonspunkt.getCanReceiveMessage(request);
-
-        verify(this.msh).canRecieveMessage(IDENTIFIER);
-    }
-
-    @Test
-    public void shouldBeAbleToReceiveWhenServiceIdentifierIsDPVAndMSHIsDisabled() throws ServiceRegistryLookupException {
-        ServiceRecord serviceRecord = ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER);
-        when(serviceRegistryLookup.getServiceRecord(IDENTIFIER)).thenReturn(serviceRecord);
-        disableMsh();
-        final GetCanReceiveMessageRequestType request = GetCanReceiveObjectMother.createRequest(IDENTIFIER);
-
-        final GetCanReceiveMessageResponseType canReceiveMessage = integrasjonspunkt.getCanReceiveMessage(request);
-
-        assertThat(canReceiveMessage.isResult(), is(true));
-    }
-
-    @Test
-    public void shouldCheckWithMSHWhenServiceIdentifierIsDPVAndMSHEnabled() throws ServiceRegistryLookupException {
-        when(serviceRegistryLookup.getServiceRecord(IDENTIFIER)).thenReturn(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER));
-        enableMsh();
-        integrasjonspunkt.getCanReceiveMessage(GetCanReceiveObjectMother.createRequest(IDENTIFIER));
-        verify(this.msh).canRecieveMessage(IDENTIFIER);
-    }
-
-    @Test
-    public void shouldBeAbleToReceiveWhenMSHDisabledAndServiceIdentifierIsDPV() throws ServiceRegistryLookupException {
-        when(serviceRegistryLookup.getServiceRecord(IDENTIFIER)).thenReturn(ServiceRecordObjectMother.createDPVServiceRecord(IDENTIFIER));
-        disableMsh();
-        final GetCanReceiveMessageResponseType result = integrasjonspunkt.getCanReceiveMessage(GetCanReceiveObjectMother.createRequest(IDENTIFIER));
-
-        assertThat(result.isResult(), is(true));
-    }
-
-    private void disableMsh() {
-        when(this.msh.canRecieveMessage(any())).thenReturn(false);
-    }
-
-    private void enableMsh() {
-        when(this.msh.canRecieveMessage(any())).thenReturn(true);
     }
 
     @Test

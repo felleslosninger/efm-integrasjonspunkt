@@ -75,8 +75,7 @@ public class ConversationService {
     private boolean isPollable(Conversation conversation, MessageStatus status) {
         return conversation.getDirection() == ConversationDirection.OUTGOING &&
                 ReceiptStatus.SENDT.toString().equals(status.getStatus()) &&
-                POLLABLES.contains(conversation.getServiceIdentifier()) &&
-                !conversation.isMsh();
+                POLLABLES.contains(conversation.getServiceIdentifier());
     }
 
     @Transactional
