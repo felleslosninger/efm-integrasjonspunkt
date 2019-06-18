@@ -756,5 +756,9 @@
             <version>2.2.11</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.github.kirviq</groupId>
+            <artifactId>dumbster</artifactId>
+        </dependency>
     </dependencies>
 </project>

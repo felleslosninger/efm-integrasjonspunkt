@@ -198,6 +198,7 @@ public class IntegrasjonspunktProperties {
         private String username;
         private String password;
         private String trust;
+        private Long maxSize;
     }
 
     @Data

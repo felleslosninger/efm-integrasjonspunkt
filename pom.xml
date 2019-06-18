@@ -67,6 +67,7 @@
         <move-common.version>1.0.26</move-common.version>
         <maven.javadoc.skip>true</maven.javadoc.skip>
         <lombok.version>1.18.6</lombok.version>
+        <dumbster.version>1.7.1</dumbster.version>
     </properties>
 
     <modules>
@@ -320,6 +321,13 @@
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
                 <version>${assertj.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.github.kirviq</groupId>
+                <artifactId>dumbster</artifactId>
+                <version>${dumbster.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
