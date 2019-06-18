@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.nextmove.v2;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.asic.AsicUtils;
 import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -49,6 +50,7 @@ import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFr
 @RequiredArgsConstructor
 public class NextMoveMessageInController {
 
+    private static final MediaType MIMETYPE_ASICE = MediaType.parseMediaType(AsicUtils.MIMETYPE_ASICE);
     private static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
     private static final String HEADER_FILENAME = "attachment; filename=";
 
@@ -119,7 +121,7 @@ public class NextMoveMessageInController {
             FileEntryStream fileEntry = cryptoMessagePersister.readStream(conversationId, ASIC_FILE);
             return ResponseEntity.ok()
                     .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME + ASIC_FILE)
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .contentType(MIMETYPE_ASICE)
                     .body(new InputStreamResource(fileEntry.getInputStream()));
         } catch (PersistenceException e) {
             Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing message from queue",
