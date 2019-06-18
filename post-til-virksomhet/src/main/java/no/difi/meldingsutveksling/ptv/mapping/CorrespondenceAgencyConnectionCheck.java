@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
+import no.difi.meldingsutveksling.receipt.Conversation;
 
 import javax.annotation.PostConstruct;
 
@@ -31,6 +32,10 @@ public class CorrespondenceAgencyConnectionCheck {
     }
 
     private GetCorrespondenceStatusDetailsV2 getConnectionCheckRequest() {
-        return correspondenceAgencyMessageFactory.createReceiptRequest(uuidGenerator.generate());
+        Conversation c = new Conversation();
+        c.setConversationId(uuidGenerator.generate());
+        c.setServiceCode("4255");
+        c.setServiceEditionCode("10");
+        return correspondenceAgencyMessageFactory.createReceiptRequest(c);
     }
 }

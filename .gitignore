@@ -27,6 +27,8 @@ jacoco.exec
 /integrasjonspunkt/bootstrap.properties
 /integrasjonspunkt/receipt.mv.db
 /integrasjonspunkt/receipt.trace.db
+/integrasjonspunkt/integrasjonspunkt.mv.db
+/integrasjonspunkt/integrasjonspunkt.trace.db
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/

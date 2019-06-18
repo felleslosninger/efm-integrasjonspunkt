@@ -5,8 +5,6 @@ import lombok.Data;
 @Data
 public class CorrespondenceAgencyConfiguration {
 
-    private String externalServiceEditionCode;
-    private String externalServiceCode;
     private String password;
     private String systemUserCode;
     private boolean notifyEmail;

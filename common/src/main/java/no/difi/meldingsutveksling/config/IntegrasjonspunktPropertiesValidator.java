@@ -25,8 +25,6 @@ public class IntegrasjonspunktPropertiesValidator implements Validator {
         }
 
         if (props.getFeature().isEnableDPV()) {
-            ValidationUtils.rejectIfEmpty(errors, "dpv.externalServiceCode", EMPTY_FIELD, DPV_ERROR_MSG);
-            ValidationUtils.rejectIfEmpty(errors, "dpv.externalServiceEditionCode", EMPTY_FIELD, DPV_ERROR_MSG);
             ValidationUtils.rejectIfEmpty(errors, "dpv.username", EMPTY_FIELD, DPV_ERROR_MSG);
             ValidationUtils.rejectIfEmpty(errors, "dpv.password", EMPTY_FIELD, DPV_ERROR_MSG);
         }
