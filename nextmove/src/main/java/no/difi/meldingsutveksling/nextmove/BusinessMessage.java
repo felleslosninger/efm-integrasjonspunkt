@@ -33,7 +33,7 @@ public abstract class BusinessMessage extends AbstractEntity<Long> {
 
     @NotNull(groups = {
             ValidationGroups.ServiceIdentifier.DPF.class,
-            ValidationGroups.ServiceIdentifier.DPI.class
+            ValidationGroups.DocumentType.Digital.class
     })
     private Integer sikkerhetsnivaa;
 
