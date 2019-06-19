@@ -61,7 +61,7 @@
         <xmlunit.version>2.6.2</xmlunit.version>
         <cucumber.version>2.3.1</cucumber.version>
         <springfox.version>2.9.2</springfox.version>
-        <swagger.version>1.5.21</swagger.version>
+        <swagger.version>1.5.20</swagger.version>
         <spring.ws.version>2.4.3.RELEASE</spring.ws.version>
         <apache.wss4j.version>2.1.11</apache.wss4j.version>
         <move-common.version>1.0.26</move-common.version>
@@ -278,6 +278,16 @@
                 <groupId>io.springfox</groupId>
                 <artifactId>springfox-bean-validators</artifactId>
                 <version>${springfox.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>${swagger.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-models</artifactId>
+                <version>${swagger.version}</version>
             </dependency>
 
             <dependency>

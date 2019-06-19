@@ -79,7 +79,7 @@ public class EduMailSenderTest {
         assertThat(smtpMessage.getHeaderValue("To")).isEqualTo("stuntman@difi.no");
         assertThat(smtpMessage.getHeaderValue("Subject")).isEqualTo("foo");
 
-        assertThat(smtpMessage.getBody()).hasSize(80813);
+        assertThat(smtpMessage.getBody()).hasLineCount(4);
     }
 
     @Test

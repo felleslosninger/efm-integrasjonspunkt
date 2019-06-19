@@ -22,7 +22,7 @@ import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING
 
 @RestController
 @Validated
-@Api
+@Api(tags = "Conversations")
 @RequiredArgsConstructor
 @RequestMapping("/api/conversations")
 public class ConversationController {
@@ -30,7 +30,9 @@ public class ConversationController {
     private final ConversationRepository convoRepo;
 
     @GetMapping
-    @ApiOperation(value = "Get all conversations", notes = "Gets a list of all outgoing conversations")
+    @ApiOperation(
+            value = "Get all conversations",
+            notes = "Gets a list of all outgoing conversations")
     @ApiResponses({
             @ApiResponse(code = 400, message = "Bad Request", response = String.class),
             @ApiResponse(code = 200, message = "Success", response = Conversation[].class),

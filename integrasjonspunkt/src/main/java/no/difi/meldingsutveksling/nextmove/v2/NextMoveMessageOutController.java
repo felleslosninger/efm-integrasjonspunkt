@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @Validated
-@Api
+@Api(tags = "Outgoing messages")
 @RequestMapping("/api/messages/out")
 @Slf4j
 @RequiredArgsConstructor

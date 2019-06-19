@@ -9,6 +9,7 @@
 package no.difi.meldingsutveksling.domain.sbdh;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -73,6 +74,7 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
 
     @XmlElement(name = "HeaderVersion", required = true)
     @NotNull
+    @ApiModelProperty(example = "1.0", required = true)
     private String headerVersion;
 
     @XmlElement(name = "Sender", required = true)

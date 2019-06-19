@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import io.swagger.annotations.ApiModel;
 import lombok.*;
 
 import javax.persistence.DiscriminatorValue;
@@ -17,6 +18,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @AllArgsConstructor
 @NoArgsConstructor
 @XmlRootElement(name = "digital", namespace = "urn:no:difi:profile:digitalpost:ver1.0")
+@ApiModel(value="digital", parent = BusinessMessage.class)
 public class DpiDigitalMessage extends BusinessMessage {
 
     @NotNull

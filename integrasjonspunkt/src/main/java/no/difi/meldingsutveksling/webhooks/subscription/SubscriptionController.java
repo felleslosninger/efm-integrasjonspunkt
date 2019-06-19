@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.constraints.NotNull;
 
 @RestController
-@Api(tags = "webhooks")
+@Api(tags = "Webhooks")
 @RequiredArgsConstructor
 @RequestMapping("/api/subscriptions")
 @Validated

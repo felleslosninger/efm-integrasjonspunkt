@@ -44,7 +44,7 @@ import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFr
 
 @RestController
 @Validated
-@Api
+@Api(tags = "Incoming messages")
 @RequestMapping("/api/messages/in")
 @Slf4j
 @RequiredArgsConstructor

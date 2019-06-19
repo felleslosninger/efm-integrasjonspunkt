@@ -143,9 +143,9 @@ public class EduMailSender {
     }
 
     private long getMessageSize(MimeMessage m) {
-        try (CountingOutputStream cs = new CountingOutputStream(new NullOutputStream()); CRLFOutputStream out = new CRLFOutputStream(cs)) {
+        try (CountingOutputStream out = new CountingOutputStream(new NullOutputStream())) {
             m.writeTo(out);
-            return cs.getByteCount();
+            return out.getByteCount() + 100L;
         } catch (IOException | MessagingException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
