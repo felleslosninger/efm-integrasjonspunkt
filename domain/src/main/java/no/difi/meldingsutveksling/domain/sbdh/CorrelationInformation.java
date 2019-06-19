@@ -9,6 +9,7 @@
 package no.difi.meldingsutveksling.domain.sbdh;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -68,5 +69,9 @@ public class CorrelationInformation extends AbstractEntity<Long> {
     @XmlJavaTypeAdapter(OffsetDateTimeAdapter.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     @Future
+    @ApiModelProperty(
+            value = "A timeout timestamp for the message.",
+            example = "2019-05-10T01:31:52+02:00"
+    )
     protected OffsetDateTime expectedResponseDateTime;
 }

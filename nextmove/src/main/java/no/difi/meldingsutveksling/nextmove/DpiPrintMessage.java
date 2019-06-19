@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import io.swagger.annotations.ApiModel;
 import lombok.*;
 import no.difi.sdp.client2.domain.fysisk_post.Posttype;
 import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
@@ -17,6 +18,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @AllArgsConstructor
 @NoArgsConstructor
 @XmlRootElement(name = "print", namespace = "urn:no:difi:profile:digitalpost:ver1.0")
+@ApiModel(value="print", parent = BusinessMessage.class)
 public class DpiPrintMessage extends BusinessMessage {
 
     @Embedded

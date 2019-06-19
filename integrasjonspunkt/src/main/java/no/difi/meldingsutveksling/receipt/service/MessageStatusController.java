@@ -21,7 +21,7 @@ import javax.validation.Valid;
 
 @RestController
 @Validated
-@Api
+@Api(tags = "Message status")
 @RequiredArgsConstructor
 @RequestMapping("/api/statuses")
 public class MessageStatusController {
