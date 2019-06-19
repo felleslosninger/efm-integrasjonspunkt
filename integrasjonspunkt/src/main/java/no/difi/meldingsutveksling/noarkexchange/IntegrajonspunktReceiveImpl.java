@@ -24,7 +24,6 @@ import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
-import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
@@ -41,7 +40,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -108,8 +106,7 @@ public class IntegrajonspunktReceiveImpl {
         }
 
         if (sbdUtil.isReceipt(sbd)) {
-            Optional<Conversation> c = conversationService.registerStatus(sbd.getConversationId(), messageStatusFactory.getMessageStatus(ReceiptStatus.LEST));
-            c.ifPresent(conversationService::markFinished);
+            conversationService.registerStatus(sbd.getConversationId(), messageStatusFactory.getMessageStatus(ReceiptStatus.LEST));
             if (!properties.getFeature().isForwardReceivedAppReceipts()) {
                 Audit.info("AppReceipt forwarding disabled - will not deliver to archive");
                 return new CorrelationInformation();
@@ -125,12 +122,7 @@ public class IntegrajonspunktReceiveImpl {
         if (sbdUtil.isReceipt(sbd)) {
             ArkivmeldingKvitteringMessage message = (ArkivmeldingKvitteringMessage) sbd.getAny();
             AppReceiptType appReceiptType = AppReceiptFactory.from(message);
-            PutMessageRequestType putMessage = putMessageRequestFactory.create(sbd, BestEduConverter.appReceiptAsString(appReceiptType));
-
-            Optional<Conversation> c = conversationService.registerStatus(sbd.getConversationId(), messageStatusFactory.getMessageStatus(ReceiptStatus.LEST));
-            c.ifPresent(conversationService::markFinished);
-
-            return putMessage;
+            return putMessageRequestFactory.create(sbd, BestEduConverter.appReceiptAsString(appReceiptType));
         } else {
             byte[] asicBytes;
             try {
@@ -153,9 +145,7 @@ public class IntegrajonspunktReceiveImpl {
             AppReceiptType result = response.getResult();
             if (result.getType().equals(OK_TYPE)) {
                 Audit.info(String.format("Message [id=%s] delivered archive", sbd.getConversationId()), markerFrom(response));
-                Optional<Conversation> c = conversationService.registerStatus(sbd.getConversationId(),
-                        messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_LEVERT));
-                c.ifPresent(conversationService::markFinished);
+                conversationService.registerStatus(sbd.getConversationId(), messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_LEVERT));
                 sendLevertStatus(sbd);
                 if (localNoark instanceof MailClient && !sbdUtil.isReceipt(sbd)) {
                     // Need to send AppReceipt manually in case receiver is mail
@@ -177,7 +167,7 @@ public class IntegrajonspunktReceiveImpl {
     }
 
     public void sendLevertStatus(StandardBusinessDocument sbd) {
-        StandardBusinessDocument statusSbd = sbdReceiptFactory.createArkivmeldingStatusFrom(sbd, DocumentType.STATUS, ReceiptStatus.LEVERT);
+        StandardBusinessDocument statusSbd = sbdReceiptFactory.createArkivmeldingStatusFrom(sbd, DocumentType.STATUS, ReceiptStatus.LEST);
         NextMoveOutMessage msg = NextMoveOutMessage.of(statusSbd, DPO);
         internalQueue.enqueueNextMove(msg);
     }

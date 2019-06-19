@@ -157,19 +157,18 @@ public class NextMoveMessageInController {
         messageRepo.delete(message);
 
         conversationService.registerStatus(conversationId,
-                messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_LEVERT))
-                .ifPresent(conversationService::markFinished);
+                messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_LEVERT));
 
         Audit.info(format("Conversation with id=%s popped from queue", conversationId),
                 markerFrom(message));
 
         if (message.getServiceIdentifier() == DPO) {
-            StandardBusinessDocument statusSbd = receiptFactory.createArkivmeldingStatusFrom(message.getSbd(), DocumentType.STATUS, ReceiptStatus.LEVERT);
+            StandardBusinessDocument statusSbd = receiptFactory.createArkivmeldingStatusFrom(message.getSbd(), DocumentType.STATUS, ReceiptStatus.LEST);
             NextMoveOutMessage msg = NextMoveOutMessage.of(statusSbd, DPO);
             internalQueue.enqueueNextMove(msg);
         }
         if (message.getServiceIdentifier() == DPE) {
-            StandardBusinessDocument statusSbd = receiptFactory.createEinnsynStatusFrom(message.getSbd(), DocumentType.STATUS, ReceiptStatus.LEVERT);
+            StandardBusinessDocument statusSbd = receiptFactory.createEinnsynStatusFrom(message.getSbd(), DocumentType.STATUS, ReceiptStatus.LEST);
             NextMoveOutMessage msg = NextMoveOutMessage.of(statusSbd, DPE);
             internalQueue.enqueueNextMove(msg);
         }

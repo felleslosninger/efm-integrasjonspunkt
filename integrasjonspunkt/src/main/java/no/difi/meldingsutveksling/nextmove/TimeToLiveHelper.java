@@ -59,7 +59,6 @@ public class TimeToLiveHelper {
             conversationService.registerStatus(conversation.getConversationId(),
                     messageStatusFactory.getMessageStatus(ReceiptStatus.LEVETID_UTLOPT,
                             "Levetiden for meldingen er utgått. Må sendes på nytt"));
-            conversationService.markFinished(conversation);
         });
     }
 }

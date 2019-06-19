@@ -60,8 +60,7 @@ public class DpvStatusStrategy implements StatusStrategy {
                 .findFirst()
                 .ifPresent(createdStatus -> {
                     OffsetDateTime createdZoned = createdStatus.getStatusDate().toGregorianCalendar().toZonedDateTime().toOffsetDateTime();
-                    MessageStatus status = messageStatusFactory.getMessageStatus(ReceiptStatus.LEVERT, createdZoned);
-                    conversationService.registerStatus(conversation, status);
+                    conversationService.registerStatus(conversation, messageStatusFactory.getMessageStatus(ReceiptStatus.LEVERT, createdZoned));
                 });
 
         statusChanges.stream()
@@ -69,8 +68,7 @@ public class DpvStatusStrategy implements StatusStrategy {
                 .findFirst()
                 .ifPresent(readStatus -> {
                     OffsetDateTime readZoned = readStatus.getStatusDate().toGregorianCalendar().toZonedDateTime().toOffsetDateTime();
-                    MessageStatus status = messageStatusFactory.getMessageStatus(ReceiptStatus.LEST, readZoned);
-                    conversationService.markFinished(conversationService.registerStatus(conversation, status));
+                    conversationService.registerStatus(conversation, messageStatusFactory.getMessageStatus(ReceiptStatus.LEST, readZoned));
                 });
     }
 
