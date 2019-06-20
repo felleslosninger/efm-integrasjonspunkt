@@ -41,7 +41,7 @@ public class ConversationController {
             @Valid ConversationQueryInput input,
             @PageableDefault(sort = "lastUpdate", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return convoRepo.find(input, pageable);
+        return convoRepo.findWithMessageStatuses(input, pageable);
     }
 
     @GetMapping("{id}")
@@ -51,11 +51,11 @@ public class ConversationController {
             @ApiResponse(code = 400, message = "Bad Request", response = String.class),
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })
-    public Conversation getByConvId(
-            @ApiParam(value = "convId", required = true, example = "1")
-            @PathVariable("id") Integer convId) {
-        return convoRepo.findByConvIdAndDirection(convId, OUTGOING)
-                .orElseThrow(() -> new ConversationNotFoundException("convId", convId.toString()));
+    public Conversation getById(
+            @ApiParam(value = "id", required = true, example = "1")
+            @PathVariable("id") Long id) {
+        return convoRepo.findByIdAndDirection(id, OUTGOING)
+                .orElseThrow(() -> new ConversationNotFoundException("id", id.toString()));
     }
 
     @GetMapping("conversationId/{id}")

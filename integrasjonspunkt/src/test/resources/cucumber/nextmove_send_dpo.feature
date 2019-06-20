@@ -354,13 +354,13 @@ Feature: Sending a Next Move DPO message
     """
     {
       "content" : [ {
-        "statId" : 1,
+        "id" : 1,
         "convId" : 1,
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET"
       }, {
-        "statId" : 2,
+        "id" : 2,
         "convId" : 1,
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
@@ -373,7 +373,7 @@ Feature: Sending a Next Move DPO message
       "number" : 0,
       "sort" : [ {
         "direction" : "ASC",
-        "property" : "statId",
+        "property" : "id",
         "ignoreCase" : false,
         "nullHandling" : "NATIVE",
         "descending" : false,
@@ -439,19 +439,19 @@ Feature: Sending a Next Move DPO message
     """
     {
       "content" : [ {
-        "statId" : 20,
+        "id" : 20,
         "convId" : 12,
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET"
       }, {
-        "statId" : 21,
+        "id" : 21,
         "convId" : 12,
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "SENDT"
       }, {
-        "statId" : 24,
+        "id" : 24,
         "convId" : 12,
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
@@ -464,7 +464,7 @@ Feature: Sending a Next Move DPO message
       "number" : 0,
       "sort" : [ {
         "direction" : "ASC",
-        "property" : "statId",
+        "property" : "id",
         "ignoreCase" : false,
         "nullHandling" : "NATIVE",
         "ascending" : true,

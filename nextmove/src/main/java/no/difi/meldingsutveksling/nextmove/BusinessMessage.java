@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.nextmove;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import no.difi.meldingsutveksling.validation.group.ValidationGroups;
 
@@ -27,7 +26,7 @@ import javax.validation.constraints.NotNull;
 }, discriminator = "type")
 public abstract class BusinessMessage extends AbstractEntity<Long> {
 
-    @Column(name="type", insertable = false, updatable = false)
+    @Column(name = "type", insertable = false, updatable = false)
     @JsonIgnore
     private String type;
 

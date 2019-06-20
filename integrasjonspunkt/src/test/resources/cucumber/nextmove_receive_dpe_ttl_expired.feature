@@ -71,13 +71,13 @@ Feature: Receiving an expired Next Move DPE message
     """
     {
       "content" : [ {
-        "statId" : 1,
+        "id" : 1,
         "convId" : 1,
         "conversationId" : "f58a286c-8325-41ee-9398-da8471c3e234",
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET"
       }, {
-        "statId" : 2,
+        "id" : 2,
         "convId" : 1,
         "conversationId" : "f58a286c-8325-41ee-9398-da8471c3e234",
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
@@ -91,7 +91,7 @@ Feature: Receiving an expired Next Move DPE message
       "number" : 0,
       "sort" : [ {
         "direction" : "ASC",
-        "property" : "statId",
+        "property" : "id",
         "ignoreCase" : false,
         "nullHandling" : "NATIVE",
         "ascending" : true,

@@ -186,19 +186,19 @@ Feature: Receiving a Next Move DPF message
     """
     {
       "content" : [ {
-        "statId" : 1,
+        "id" : 1,
         "convId" : 1,
         "conversationId" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET"
       }, {
-        "statId" : 2,
+        "id" : 1,
         "convId" : 1,
         "conversationId" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "INNKOMMENDE_MOTTATT"
       }, {
-        "statId" : 3,
+        "id" : 1,
         "convId" : 1,
         "conversationId" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
@@ -211,7 +211,7 @@ Feature: Receiving a Next Move DPF message
       "number" : 0,
       "sort" : [ {
         "direction" : "ASC",
-        "property" : "statId",
+        "property" : "id",
         "ignoreCase" : false,
         "nullHandling" : "NATIVE",
         "ascending" : true,

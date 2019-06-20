@@ -135,13 +135,13 @@ Feature: Sending a BEST/EDU AppReceipt message by the noarkExchange WebService
     """
     {
       "content" : [ {
-        "statId" : 1,
+        "id" : 1,
         "convId" : 1,
         "conversationId" : "c54636e3-4aa4-4d59-91d1-db1b2f59a4b2",
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET"
       }, {
-        "statId" : 2,
+        "id" : 2,
         "convId" : 1,
         "conversationId" : "c54636e3-4aa4-4d59-91d1-db1b2f59a4b2",
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
@@ -154,7 +154,7 @@ Feature: Sending a BEST/EDU AppReceipt message by the noarkExchange WebService
       "number" : 0,
       "sort" : [ {
         "direction" : "ASC",
-        "property" : "statId",
+        "property" : "id",
         "ignoreCase" : false,
         "nullHandling" : "NATIVE",
         "descending" : false,

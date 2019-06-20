@@ -34,9 +34,9 @@ public class MessageStatusController {
             @ApiResponse(code = 200, message = "Success", response = MessageStatus[].class),
             @ApiResponse(code = 400, message = "Bad Request", response = String.class)
     })
-    public Page<MessageStatus> conversations(
+    public Page<MessageStatus> statuses(
             @Valid MessageStatusQueryInput input,
-            @PageableDefault(sort = "statId", direction = Sort.Direction.ASC) Pageable pageable
+            @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable
     ) {
         return statusRepo.find(input, pageable);
     }
@@ -49,10 +49,10 @@ public class MessageStatusController {
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })
     public MessageStatus status(
-            @ApiParam(value = "Status id", required = true, example = "1")
-            @PathVariable("id") Integer id) {
+            @ApiParam(value = "Id", required = true, example = "1")
+            @PathVariable("id") Long id) {
 
-        return statusRepo.findByStatId(id)
+        return statusRepo.findById(id)
                 .orElseThrow(() -> new MessageStatusNotFoundException(id));
     }
 

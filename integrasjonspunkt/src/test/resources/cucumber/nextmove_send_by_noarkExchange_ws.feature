@@ -301,13 +301,13 @@ Feature: Sending a BEST/EDU message by the noarkExchange WebService
     """
     {
       "content" : [ {
-        "statId" : 1,
+        "id" : 1,
         "convId" : 1,
         "conversationId" : "6e9cab22-a682-461c-bcd4-f201bfb3de8c",
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET"
       }, {
-        "statId" : 2,
+        "id" : 2,
         "convId" : 1,
         "conversationId" : "6e9cab22-a682-461c-bcd4-f201bfb3de8c",
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
@@ -320,7 +320,7 @@ Feature: Sending a BEST/EDU message by the noarkExchange WebService
       "number" : 0,
       "sort" : [ {
         "direction" : "ASC",
-        "property" : "statId",
+        "property" : "id",
         "ignoreCase" : false,
         "nullHandling" : "NATIVE",
         "descending" : false,

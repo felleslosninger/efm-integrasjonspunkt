@@ -13,9 +13,9 @@ public class BestEduConverter {
     private static final String MESSAGE_TYPE_NAMESPACE = "http://www.arkivverket.no/Noark4-1-WS-WD/types";
     private static final String APPRECEIPT_NAMESPACE = "http://www.arkivverket.no/Noark/Exchange/types";
 
-    private static final PayloadConverter meldingTypeConverter = new PayloadConverterImpl<>(MeldingType.class,
+    private static final PayloadConverter<MeldingType> meldingTypeConverter = new PayloadConverterImpl<>(MeldingType.class,
             MESSAGE_TYPE_NAMESPACE, "Melding");
-    private static final PayloadConverter appReceiptConverter = new PayloadConverterImpl<>(AppReceiptType.class,
+    private static final PayloadConverter<AppReceiptType> appReceiptConverter = new PayloadConverterImpl<>(AppReceiptType.class,
             APPRECEIPT_NAMESPACE, "AppReceipt");
 
     private BestEduConverter() {
@@ -30,11 +30,11 @@ public class BestEduConverter {
     }
 
     public static MeldingType payloadAsMeldingType(Object payload) {
-        return (MeldingType) meldingTypeConverter.unmarshallFrom(payloadBytes(payload));
+        return meldingTypeConverter.unmarshallFrom(payloadBytes(payload));
     }
 
     public static AppReceiptType payloadAsAppReceipt(Object payload) {
-        return (AppReceiptType) appReceiptConverter.unmarshallFrom(payloadBytes(payload));
+        return appReceiptConverter.unmarshallFrom(payloadBytes(payload));
     }
 
     private static byte[] payloadBytes(Object payload) {

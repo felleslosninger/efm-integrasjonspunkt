@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
@@ -15,22 +16,35 @@ import java.util.List;
 import java.util.Optional;
 
 @Profile("!test")
-public interface ConversationRepository extends PagingAndSortingRepository<Conversation, String>,
+public interface ConversationRepository extends PagingAndSortingRepository<Conversation, Long>,
         QueryDslPredicateExecutor<Conversation>,
         QuerydslBinderCustomizer<QConversation> {
 
-    Optional<Conversation> findByConvIdAndDirection(Integer convId, ConversationDirection direction);
+    @EntityGraph(value = "Conversation.messageStatuses")
+    default Page<Conversation> findWithMessageStatuses(ConversationQueryInput input, Pageable pageable) {
+        return findAll(createQuery(input).getValue()
+                , pageable);
+    }
 
+    @EntityGraph(value = "Conversation.messageStatuses")
+    Optional<Conversation> findByIdAndDirection(Long id, ConversationDirection direction);
+
+    @EntityGraph(value = "Conversation.messageStatuses")
     List<Conversation> findByConversationIdAndDirection(String conversationId, ConversationDirection direction);
 
+    @EntityGraph(value = "Conversation.messageStatuses")
     List<Conversation> findByConversationId(String conversationId);
 
+    @EntityGraph(value = "Conversation.messageStatuses")
     List<Conversation> findByPollable(boolean pollable);
 
+    @EntityGraph(value = "Conversation.messageStatuses")
     Page<Conversation> findByPollable(boolean pollable, Pageable pageable);
 
+    @EntityGraph(value = "Conversation.messageStatuses")
     List<Conversation> findByReceiverIdentifierAndDirection(String receiverIdentifier, ConversationDirection direction);
 
+    @EntityGraph(value = "Conversation.messageStatuses")
     List<Conversation> findByDirection(ConversationDirection direction);
 
     Long countByPollable(boolean pollable);

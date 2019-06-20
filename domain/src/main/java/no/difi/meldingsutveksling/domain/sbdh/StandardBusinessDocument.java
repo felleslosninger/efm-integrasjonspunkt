@@ -96,7 +96,8 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
     @InstanceOf(value = InnsynskravMessage.class, groups = ValidationGroups.DocumentType.Innsynskrav.class)
     @InstanceOf(value = PubliseringMessage.class, groups = ValidationGroups.DocumentType.Publisering.class)
     @ApiModelProperty(
-            value = "The business message",
+            value = "The business message. Please note that the property name is not 'any'. "
+                    + "It is one of the following: arkivmelding, digital, digital_dpv, print, innsynskrav or publisering.",
             dataType = "no.difi.meldingsutveksling.nextmove.BusinessMessage",
             required = true
     )
