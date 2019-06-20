@@ -89,7 +89,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     @Override
     public String getSubject() {
         if (message.getBusinessMessage() instanceof DpiDigitalMessage) {
-            return ((DpiDigitalMessage) message.getBusinessMessage()).getIkkeSensitivTittel();
+            return ((DpiDigitalMessage) message.getBusinessMessage()).getTittel();
         }
         if (message.getBusinessMessage() instanceof DpiPrintMessage) {
             return null;

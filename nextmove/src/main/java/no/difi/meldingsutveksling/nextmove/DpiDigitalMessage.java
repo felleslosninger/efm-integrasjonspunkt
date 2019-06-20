@@ -20,7 +20,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class DpiDigitalMessage extends BusinessMessage {
 
     @NotNull
-    private String ikkeSensitivTittel;
+    private String tittel;
     @NotNull
     private String spraak;
 

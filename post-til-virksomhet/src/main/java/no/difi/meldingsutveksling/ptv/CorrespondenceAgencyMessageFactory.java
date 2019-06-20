@@ -88,9 +88,9 @@ public class CorrespondenceAgencyMessageFactory {
             return create(message.getConversationId(),
                     message.getReceiverIdentifier(),
                     message.getSbd().getProcess(),
-                    msg.getTitle(),
-                    msg.getSummary(),
-                    msg.getBody(),
+                    msg.getTittel(),
+                    msg.getSammendrag(),
+                    msg.getInnhold(),
                     attachmentExternalBEV2List);
         }
 

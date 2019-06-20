@@ -25,5 +25,5 @@ public abstract class BusinessMessage extends AbstractEntity<Long> {
     })
     private Integer sikkerhetsnivaa;
 
-    private String primaerDokumentNavn;
+    private String hoveddokument;
 }
