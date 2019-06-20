@@ -176,8 +176,11 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     @Override
     public Sikkerhetsnivaa getSecurityLevel() {
-        SDPSikkerhetsnivaa sdpSikkerhetsnivaa = SDPSikkerhetsnivaa.fromValue(String.valueOf(message.getBusinessMessage().getSikkerhetsnivaa()));
-        return Sikkerhetsnivaa.valueOf(sdpSikkerhetsnivaa.toString());
+        if (isDigitalMessage()) {
+            SDPSikkerhetsnivaa sdpSikkerhetsnivaa = SDPSikkerhetsnivaa.fromValue(String.valueOf(message.getBusinessMessage().getSikkerhetsnivaa()));
+            return Sikkerhetsnivaa.valueOf(sdpSikkerhetsnivaa.toString());
+        }
+        return null;
     }
 
     @Override

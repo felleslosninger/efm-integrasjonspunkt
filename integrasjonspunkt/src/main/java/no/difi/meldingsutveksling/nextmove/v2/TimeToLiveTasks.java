@@ -34,7 +34,6 @@ public class TimeToLiveTasks {
     private void setExpired(Conversation conversation) {
         conversationService.registerStatus(conversation,
                 messageStatusFactory.getMessageStatus(ReceiptStatus.LEVETID_UTLOPT));
-        conversationService.markFinished(conversation);
 
         inRepository.findByConversationId(conversation.getConversationId()).ifPresent(c -> {
             try {

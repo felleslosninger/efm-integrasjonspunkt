@@ -3,11 +3,11 @@ package no.difi.meldingsutveksling.receipt.strategy;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
-import no.difi.meldingsutveksling.receipt.*;
+import no.difi.meldingsutveksling.receipt.Conversation;
+import no.difi.meldingsutveksling.receipt.ConversationService;
+import no.difi.meldingsutveksling.receipt.StatusStrategy;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-
-import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 
 @Slf4j
 @Component
@@ -24,15 +24,7 @@ public class FiksStatusStrategy implements StatusStrategy {
 
     @Override
     public void checkStatus(Conversation conversation) {
-        final MessageStatus messageStatus = svarUtService.getMessageReceipt(conversation);
-        Conversation c = conversationService.registerStatus(conversation, messageStatus);
-        if (ReceiptStatus.LEST.toString().equals(messageStatus.getStatus())) {
-            conversationService.markFinished(c);
-        }
-        if (ReceiptStatus.FEIL.toString().equals(messageStatus.getStatus())) {
-            conversationService.markFinished(c);
-            log.error(markerFrom(c), "DPF conversation {} finished with status {}", c.getConversationId(), messageStatus.getStatus());
-        }
+        conversationService.registerStatus(conversation, svarUtService.getMessageReceipt(conversation));
     }
 
     @Override

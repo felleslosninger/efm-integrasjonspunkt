@@ -17,7 +17,10 @@ import java.util.Optional;
 import java.util.Set;
 
 import static java.lang.String.format;
-import static no.difi.meldingsutveksling.ServiceIdentifier.*;
+import static java.util.Arrays.asList;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPF;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
+import static no.difi.meldingsutveksling.receipt.ReceiptStatus.*;
 
 @Component
 @RequiredArgsConstructor
@@ -31,7 +34,7 @@ public class ConversationService {
     private final Clock clock;
 
     private static final String CONVERSATION_EXISTS = "Conversation with id=%s already exists, not recreating";
-    private static final Set<ServiceIdentifier> POLLABLES = Sets.newHashSet(DPV, DPF, DPO);
+    private static final Set<ServiceIdentifier> POLLABLES = Sets.newHashSet(DPV, DPF);
 
     @Transactional
     public Optional<Conversation> registerStatus(String conversationId, MessageStatus status) {
@@ -58,6 +61,13 @@ public class ConversationService {
             // for every other registered status than 'SENDT'
             conversation.setPollable(true);
         }
+        if (ReceiptStatus.valueOf(status.getStatus()) == LEVERT) {
+            markFinished(conversation);
+        }
+        if (asList(LEST, FEIL, LEVETID_UTLOPT, INNKOMMENDE_LEVERT).contains(ReceiptStatus.valueOf(status.getStatus()))) {
+            markFinished(conversation);
+            disablePolling(conversation);
+        }
 
         webhookPublisher.publish(conversation, status);
 
@@ -77,8 +87,12 @@ public class ConversationService {
     @Transactional
     public Conversation markFinished(Conversation conversation) {
         return repo.save(conversation
-                .setFinished(true)
-                .setPollable(false));
+                .setFinished(true));
+    }
+
+    @Transactional
+    public Conversation disablePolling(Conversation conversation) {
+        return repo.save(conversation.setPollable(false));
     }
 
     @Transactional

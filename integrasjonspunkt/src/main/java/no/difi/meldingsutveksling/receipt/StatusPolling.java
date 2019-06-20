@@ -7,13 +7,10 @@ import no.difi.meldingsutveksling.nextmove.v2.ServiceIdentifierService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.Optional;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
-import static no.difi.meldingsutveksling.receipt.ReceiptStatus.FEIL;
-import static no.difi.meldingsutveksling.receipt.ReceiptStatus.LEST;
 
 /**
  * Periodically checks non final receipts, and their respective services for updates.
@@ -21,7 +18,7 @@ import static no.difi.meldingsutveksling.receipt.ReceiptStatus.LEST;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class ReceiptPolling {
+public class StatusPolling {
 
     private final IntegrasjonspunktProperties props;
     private final ConversationRepository conversationRepository;
@@ -68,9 +65,7 @@ public class ReceiptPolling {
         final String id = externalReceipt.getId();
         MessageStatus status = externalReceipt.toMessageStatus();
 
-        conversationService.registerStatus(id, status)
-                .filter(c -> Arrays.asList(LEST, FEIL).contains(ReceiptStatus.valueOf(status.getStatus())))
-                .ifPresent(conversationService::markFinished);
+        conversationService.registerStatus(id, status);
 
         log.debug(externalReceipt.logMarkers(), "Updated receipt (DPI)");
         externalReceipt.confirmReceipt();

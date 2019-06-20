@@ -88,7 +88,7 @@ public class InternalQueue {
     }
 
     @JmsListener(destination = NEXTMOVE, containerFactory = "myJmsContainerFactory", concurrency = "100")
-    public void nextMove2Listener(byte[] message, Session session) {
+    public void nextMoveListener(byte[] message, Session session) {
         NextMoveOutMessage nextMoveMessage;
         try {
             nextMoveMessage = objectMapper.readValue(message, NextMoveOutMessage.class);

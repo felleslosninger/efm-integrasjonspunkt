@@ -1,12 +1,12 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import no.difi.meldingsutveksling.validation.group.ValidationGroups;
 
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.Entity;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @Getter
@@ -17,11 +17,23 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "type")
+@ApiModel(subTypes = {
+        ArkivmeldingMessage.class,
+        DigitalDpvMessage.class,
+        DpiDigitalMessage.class,
+        DpiPrintMessage.class,
+        InnsynskravMessage.class,
+        PubliseringMessage.class
+}, discriminator = "type")
 public abstract class BusinessMessage extends AbstractEntity<Long> {
+
+    @Column(name="type", insertable = false, updatable = false)
+    @JsonIgnore
+    private String type;
 
     @NotNull(groups = {
             ValidationGroups.ServiceIdentifier.DPF.class,
-            ValidationGroups.ServiceIdentifier.DPI.class
+            ValidationGroups.DocumentType.Digital.class
     })
     private Integer sikkerhetsnivaa;
 

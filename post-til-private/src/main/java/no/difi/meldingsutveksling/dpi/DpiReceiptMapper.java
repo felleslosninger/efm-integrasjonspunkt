@@ -40,7 +40,7 @@ public class DpiReceiptMapper {
             case "VarslingFeiletKvittering":
                 return messageStatusFactory.getMessageStatus(FEIL, "Kvittering for at en spesifisert varsling ikke har blitt sendt");
             case "MottaksKvittering":
-                return messageStatusFactory.getMessageStatus(ReceiptStatus.LEST, "Kvittering fra utskrift og forsendelsestjenesten om at melding er mottatt og lagt til print");
+                return messageStatusFactory.getMessageStatus(ReceiptStatus.LEVERT, "Kvittering fra utskrift og forsendelsestjenesten om at melding er mottatt og lagt til print");
             case "ReturpostKvittering":
                 return messageStatusFactory.getMessageStatus(FEIL, "Kvittering fra utskrift og forsendelsestjenesten om at posten ikke har blitt levert til Mottaker.");
             case "Feil":

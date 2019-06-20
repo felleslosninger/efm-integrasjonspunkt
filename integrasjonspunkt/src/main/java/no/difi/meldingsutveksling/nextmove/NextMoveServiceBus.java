@@ -238,8 +238,7 @@ public class NextMoveServiceBus {
         if (sbdUtil.isStatus(sbd)) {
             log.debug(String.format("Message with id=%s is a receipt", sbd.getConversationId()));
             StatusMessage msg = (StatusMessage) sbd.getAny();
-            conversationService.registerStatus(sbd.getConversationId(), messageStatusFactory.getMessageStatus(msg.getStatus()))
-                    .ifPresent(conversationService::markFinished);
+            conversationService.registerStatus(sbd.getConversationId(), messageStatusFactory.getMessageStatus(msg.getStatus()));
         } else {
             sendReceiptAsync(nextMoveQueue.enqueue(sbd, DPE));
         }
@@ -256,7 +255,7 @@ public class NextMoveServiceBus {
     private StandardBusinessDocument getReceipt(NextMoveInMessage message) {
         return sbdReceiptFactory.createEinnsynStatusFrom(message.getSbd(),
                 DocumentType.STATUS,
-                ReceiptStatus.MOTTATT);
+                ReceiptStatus.LEVERT);
     }
 
     private String getReceiverQueue(NextMoveOutMessage message) {
