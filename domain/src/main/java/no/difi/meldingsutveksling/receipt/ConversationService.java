@@ -139,7 +139,7 @@ public class ConversationService {
         return repo.findByConversationId(conversationId).stream()
                 .findFirst()
                 .filter(p -> {
-                    log.warn(String.format(CONVERSATION_EXISTS, conversationId));
+                    log.debug(String.format(CONVERSATION_EXISTS, conversationId));
                     return true;
                 });
     }
