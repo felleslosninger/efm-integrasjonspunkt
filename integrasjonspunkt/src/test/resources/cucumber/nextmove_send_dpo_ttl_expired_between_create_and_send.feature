@@ -51,7 +51,7 @@ Feature: Sending a Next Move DPO message when it expires between create and send
         },
         "arkivmelding": {
           "sikkerhetsnivaa": 3,
-          "primaerDokumentNavn": "arkivmelding.xml"
+          "hoveddokument": "arkivmelding.xml"
         }
     }
     """

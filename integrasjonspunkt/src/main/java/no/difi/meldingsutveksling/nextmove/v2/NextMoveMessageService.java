@@ -161,7 +161,7 @@ public class NextMoveMessageService {
                 properties.getArkivmelding().getDefaultProcess(),
                 DocumentType.ARKIVMELDING,
                 new ArkivmeldingMessage()
-                        .setPrimaerDokumentNavn(ARKIVMELDING_FILE)
+                        .setHoveddokument(ARKIVMELDING_FILE)
         );
         NextMoveOutMessage nextMoveMessage = createMessage(sbd);
 

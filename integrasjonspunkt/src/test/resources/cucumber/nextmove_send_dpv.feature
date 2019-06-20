@@ -81,7 +81,7 @@ Feature: Sending a Next Move DPV message
         },
         "arkivmelding": {
           "sikkerhetsnivaa": 3,
-          "primaerDokumentNavn": "test.txt"
+          "hoveddokument": "test.txt"
         }
     }
     """

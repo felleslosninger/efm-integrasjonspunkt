@@ -20,9 +20,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class DigitalDpvMessage extends BusinessMessage {
 
     @NotNull
-    private String title;
+    private String tittel;
     @NotNull
-    private String summary;
+    private String sammendrag;
     @NotNull
-    private String body;
+    private String innhold;
+
 }
