@@ -54,8 +54,8 @@ Feature: Sending a Next Move DPI message
         },
         "digital": {
           "sikkerhetsnivaa": 3,
-          "primaerDokumentNavn": "arkivmelding.xml",
-          "ikkeSensitivTittel" : "Min supertittel",
+          "hoveddokument": "arkivmelding.xml",
+          "tittel" : "Min supertittel",
           "spraak": "NO",
           "digitalPostInfo": {
             "virkningsdato": "2019-05-12",

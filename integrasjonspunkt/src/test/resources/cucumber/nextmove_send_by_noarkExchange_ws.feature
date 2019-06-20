@@ -214,7 +214,7 @@ Feature: Sending a BEST/EDU message by the noarkExchange WebService
         }
       },
       "arkivmelding" : {
-        "primaerDokumentNavn" : "arkivmelding.xml"
+        "hoveddokument" : "arkivmelding.xml"
       }
     }
     """

@@ -79,9 +79,9 @@ Feature: Sending a Next Move Digital DPV message
             ]
         },
         "digital_dpv": {
-            "title": "foo",
-            "summary": "bar",
-            "body": "foobar"
+            "tittel": "foo",
+            "sammendrag": "bar",
+            "innhold": "foobar"
         }
     }
     """
