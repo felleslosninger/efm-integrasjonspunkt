@@ -5,8 +5,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.webhooks.WebhookPublisher;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +29,7 @@ import static no.difi.meldingsutveksling.receipt.ReceiptStatus.*;
 public class ConversationService {
 
     private final ConversationRepository repo;
-    private final ServiceRegistryLookup serviceRegistryLookup;
+    private final IntegrasjonspunktProperties props;
     private final WebhookPublisher webhookPublisher;
     private final MessageStatusFactory messageStatusFactory;
     private final Clock clock;
@@ -104,6 +105,42 @@ public class ConversationService {
     public Conversation registerConversation(MessageInformable message) {
         return findConversation(message.getConversationId())
                 .orElseGet(() -> createConversation(message));
+    }
+
+    @Transactional
+    public Conversation registerConversation(StandardBusinessDocument sbd, ServiceIdentifier si, ConversationDirection conversationDirection) {
+        OffsetDateTime ttl = sbd.getExpectedResponseDateTime().orElse(OffsetDateTime.now(clock).plusHours(props.getNextmove().getDefaultTtlHours()));
+        return registerConversation(new MessageInformable() {
+            @Override
+            public String getConversationId() {
+                return sbd.getConversationId();
+            }
+
+            @Override
+            public String getSenderIdentifier() {
+                return sbd.getSenderIdentifier();
+            }
+
+            @Override
+            public String getReceiverIdentifier() {
+                return sbd.getReceiverIdentifier();
+            }
+
+            @Override
+            public ConversationDirection getDirection() {
+                return conversationDirection;
+            }
+
+            @Override
+            public ServiceIdentifier getServiceIdentifier() {
+                return si;
+            }
+
+            @Override
+            public OffsetDateTime getExpiry() {
+                return ttl;
+            }
+        });
     }
 
     public Optional<Conversation> findConversation(String conversationId) {

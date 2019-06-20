@@ -15,6 +15,7 @@ import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
+import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.validation.Asserter;
 import no.difi.meldingsutveksling.validation.group.ValidationGroupFactory;
@@ -44,6 +45,7 @@ public class NextMoveValidator {
     private final Asserter asserter;
     private final CryptoMessagePersister cryptoMessagePersister;
     private final TimeToLiveHelper timeToLiveHelper;
+    private final ConversationService conversationService;
     private final SBDUtil sbdUtil;
 
     void validate(StandardBusinessDocument sbd) {

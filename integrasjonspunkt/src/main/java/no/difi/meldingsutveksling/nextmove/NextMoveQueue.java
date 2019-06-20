@@ -8,7 +8,6 @@ import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
-import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
@@ -35,9 +34,7 @@ public class NextMoveQueue {
             if (!messageRepo.findByConversationId(sbd.getConversationId()).isPresent()) {
                 messageRepo.save(message);
             }
-
-            Conversation c = conversationService.registerConversation(message);
-            conversationService.registerStatus(c, messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_MOTTATT));
+            conversationService.registerStatus(sbd.getConversationId(), messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_MOTTATT));
             Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] put on local queue",
                     message.getConversationId(), message.getServiceIdentifier()), markerFrom(message));
             return message;

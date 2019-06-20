@@ -31,7 +31,8 @@ public class NextMoveSender {
     @Transactional
     public void send(NextMoveOutMessage msg) throws NextMoveException {
         if (sbdUtil.isExpired(msg.getSbd())) {
-            timeToLiveHelper.registerErrorStatusAndMessage(msg.getSbd(), msg.getServiceIdentifier(), msg.getDirection());
+            conversationService.findConversation(msg.getConversationId())
+                    .ifPresent(timeToLiveHelper::registerErrorStatusAndMessage);
 
             if (sbdUtil.isStatus(msg.getSbd())) {
                 return;
