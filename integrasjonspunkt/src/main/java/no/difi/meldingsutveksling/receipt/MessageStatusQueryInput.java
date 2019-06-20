@@ -9,9 +9,9 @@ import lombok.Data;
 public class MessageStatusQueryInput {
 
     @ApiModelProperty(
-            value = "convId",
+            value = "id",
             example = "1")
-    Integer convId;
+    Long id;
 
     @ApiModelProperty(
             value = "The conversation ID. Usually a UUID",

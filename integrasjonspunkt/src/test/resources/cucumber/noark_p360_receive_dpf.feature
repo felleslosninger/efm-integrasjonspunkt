@@ -204,19 +204,19 @@ Feature: Receiving a DPF message and forward to Noark P360
     """
     {
       "content" : [ {
-        "statId" : 1,
+        "id" : 1,
         "convId" : 1,
         "conversationId" : "d4751d30-c9e5-4648-9612-956cdb5e53bc",
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET"
       }, {
-        "statId" : 2,
+        "id" : 2,
         "convId" : 1,
         "conversationId" : "d4751d30-c9e5-4648-9612-956cdb5e53bc",
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "INNKOMMENDE_MOTTATT"
       }, {
-        "statId" : 3,
+        "id" : 3,
         "convId" : 1,
         "conversationId" : "d4751d30-c9e5-4648-9612-956cdb5e53bc",
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
@@ -229,7 +229,7 @@ Feature: Receiving a DPF message and forward to Noark P360
       "number" : 0,
       "sort" : [ {
         "direction" : "ASC",
-        "property" : "statId",
+        "property" : "id",
         "ignoreCase" : false,
         "nullHandling" : "NATIVE",
         "ascending" : true,

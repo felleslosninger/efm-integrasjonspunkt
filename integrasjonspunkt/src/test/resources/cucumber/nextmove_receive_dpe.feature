@@ -83,19 +83,19 @@ Feature: Receiving a Next Move DPE message
     """
     {
       "content" : [ {
-        "statId" : 1,
+        "id" : 1,
         "convId" : 1,
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a45",
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET"
       }, {
-        "statId" : 2,
+        "id" : 2,
         "convId" : 1,
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a45",
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "INNKOMMENDE_MOTTATT"
       }, {
-        "statId" : 3,
+        "id" : 3,
         "convId" : 1,
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a45",
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
@@ -108,7 +108,7 @@ Feature: Receiving a Next Move DPE message
       "number" : 0,
       "sort" : [ {
         "direction" : "ASC",
-        "property" : "statId",
+        "property" : "id",
         "ignoreCase" : false,
         "nullHandling" : "NATIVE",
         "ascending" : true,

@@ -56,43 +56,35 @@ public class ConversationService {
 
         conversation.addMessageStatus(status)
                 .setLastUpdate(OffsetDateTime.now(clock));
-        if (isPollable(conversation, status)) {
+        if (isPollable(status)) {
             // Note: isPollable can not be moved into setPollable, as this would interrupt polling
             // for every other registered status than 'SENDT'
             conversation.setPollable(true);
         }
         if (ReceiptStatus.valueOf(status.getStatus()) == LEVERT) {
-            markFinished(conversation);
+            conversation.setFinished(true);
         }
         if (asList(LEST, FEIL, LEVETID_UTLOPT, INNKOMMENDE_LEVERT).contains(ReceiptStatus.valueOf(status.getStatus()))) {
-            markFinished(conversation);
-            disablePolling(conversation);
+            conversation.setFinished(true)
+                    .setPollable(false);
         }
-
-        webhookPublisher.publish(conversation, status);
 
         log.debug(String.format("Added status '%s' to conversation[id=%s]", status.getStatus(),
                 conversation.getConversationId()),
                 MessageStatusMarker.from(status));
 
-        return repo.save(conversation);
+        repo.save(conversation);
+
+        webhookPublisher.publish(conversation, status);
+
+        return conversation;
     }
 
-    private boolean isPollable(Conversation conversation, MessageStatus status) {
+    private boolean isPollable(MessageStatus status) {
+        Conversation conversation = status.getConversation();
         return conversation.getDirection() == ConversationDirection.OUTGOING &&
                 ReceiptStatus.SENDT.toString().equals(status.getStatus()) &&
                 POLLABLES.contains(conversation.getServiceIdentifier());
-    }
-
-    @Transactional
-    public Conversation markFinished(Conversation conversation) {
-        return repo.save(conversation
-                .setFinished(true));
-    }
-
-    @Transactional
-    public Conversation disablePolling(Conversation conversation) {
-        return repo.save(conversation.setPollable(false));
     }
 
     @Transactional
@@ -118,7 +110,8 @@ public class ConversationService {
     private Conversation createConversation(MessageInformable message) {
         MessageStatus ms = messageStatusFactory.getMessageStatus(ReceiptStatus.OPPRETTET);
         Conversation c = Conversation.of(message, OffsetDateTime.now(clock), ms);
+        repo.save(c);
         webhookPublisher.publish(c, ms);
-        return repo.save(c);
+        return c;
     }
 }

@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.receipt;
 import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
@@ -11,18 +12,23 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import java.util.List;
 import java.util.Optional;
 
-public interface MessageStatusRepository extends PagingAndSortingRepository<MessageStatus, String>,
+public interface MessageStatusRepository extends PagingAndSortingRepository<MessageStatus, Long>,
         QueryDslPredicateExecutor<MessageStatus>,
         QuerydslBinderCustomizer<QMessageStatus> {
 
-    Optional<MessageStatus> findByStatId(Integer statId);
+    @EntityGraph("MessageStatus.conversation")
+    Optional<MessageStatus> findById(Long id);
 
-    List<MessageStatus> findAllByConvId(Integer convId);
+    @EntityGraph("MessageStatus.conversation")
+    List<MessageStatus> findAllByConversation_Id(Long convId);
 
-    List<MessageStatus> findByStatIdGreaterThanEqual(Integer statId);
+    @EntityGraph("MessageStatus.conversation")
+    List<MessageStatus> findByIdGreaterThanEqual(Long id);
 
-    List<MessageStatus> findAllByConvIdAndStatIdGreaterThanEqual(Integer convId, Integer recId);
+    @EntityGraph("MessageStatus.conversation")
+    List<MessageStatus> findAllByConversation_IdAndIdGreaterThanEqual(Long convId, Long id);
 
+    @EntityGraph("MessageStatus.conversation")
     Optional<MessageStatus> findFirstByOrderByLastUpdateAsc();
 
     @Override
@@ -40,12 +46,12 @@ public interface MessageStatusRepository extends PagingAndSortingRepository<Mess
 
         QMessageStatus messageStatus = QMessageStatus.messageStatus;
 
-        if (input.getConvId() != null) {
-            builder.and(messageStatus.convId.eq(input.getConvId()));
+        if (input.getId() != null) {
+            builder.and(messageStatus.id.eq(input.getId()));
         }
 
         if (input.getConversationId() != null) {
-            builder.and(messageStatus.conversationId.eq(input.getConversationId()));
+            builder.and(messageStatus.conversation.conversationId.eq(input.getConversationId()));
         }
 
         if (input.getStatus() != null) {

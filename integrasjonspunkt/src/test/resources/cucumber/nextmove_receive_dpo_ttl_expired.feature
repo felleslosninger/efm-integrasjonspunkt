@@ -69,13 +69,13 @@ Feature: Receiving an expired Next Move DPO message
     """
     {
       "content" : [ {
-        "statId" : 1,
+        "id" : 1,
         "convId" : 1,
         "conversationId" : "2507fcb8-6543-4c5f-ac06-f5df75bb677e",
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET"
       }, {
-        "statId" : 2,
+        "id" : 2,
         "convId" : 1,
         "conversationId" : "2507fcb8-6543-4c5f-ac06-f5df75bb677e",
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
@@ -89,7 +89,7 @@ Feature: Receiving an expired Next Move DPO message
       "number" : 0,
       "sort" : [ {
         "direction" : "ASC",
-        "property" : "statId",
+        "property" : "id",
         "ignoreCase" : false,
         "nullHandling" : "NATIVE",
         "ascending" : true,
