@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
@@ -45,7 +46,6 @@ public class NextMoveValidator {
     private final Asserter asserter;
     private final CryptoMessagePersister cryptoMessagePersister;
     private final TimeToLiveHelper timeToLiveHelper;
-    private final ConversationService conversationService;
     private final SBDUtil sbdUtil;
 
     void validate(StandardBusinessDocument sbd) {
@@ -107,6 +107,11 @@ public class NextMoveValidator {
             if (!missingFiles.isEmpty()) {
                 throw new MissingArkivmeldingFileException(String.join(",", missingFiles));
             }
+        }
+
+        if (message.getServiceIdentifier() == DPI && message.getFiles().stream()
+                .noneMatch(BusinessMessageFile::getPrimaryDocument)) {
+            throw new MissingPrimaryDocumentException();
         }
     }
 
