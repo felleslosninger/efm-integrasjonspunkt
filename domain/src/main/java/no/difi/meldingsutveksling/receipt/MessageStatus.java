@@ -3,11 +3,13 @@ package no.difi.meldingsutveksling.receipt;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.MoreObjects;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 import no.difi.meldingsutveksling.nextmove.AbstractEntity;
+import no.difi.meldingsutveksling.view.Views;
 
 import javax.persistence.*;
 import java.time.OffsetDateTime;
@@ -28,30 +30,38 @@ public class MessageStatus extends AbstractEntity<Long> {
             position = 2,
             value = "Id",
             example = "1")
+    @JsonView({Views.Conversation.class, Views.MessageStatus.class})
     public Long getId() {
         return super.getId();
     }
 
     @JsonProperty
+    @JsonView(Views.MessageStatus.class)
     public Long getConvId() {
         return conversation.getId();
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "conv_id")
+    @JsonIgnore
     private Conversation conversation;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
+    @JsonView({Views.Conversation.class, Views.MessageStatus.class})
     private OffsetDateTime lastUpdate;
+    @JsonView({Views.Conversation.class, Views.MessageStatus.class})
     private String status;
+    @JsonView({Views.Conversation.class, Views.MessageStatus.class})
     private String description;
 
     @Lob
+    @JsonView(Views.MessageStatus.class)
     private String rawReceipt;
 
     MessageStatus() {
     }
 
+    @JsonView(Views.MessageStatus.class)
     public String getConversationId() {
         return conversation.getConversationId();
     }
@@ -60,11 +70,6 @@ public class MessageStatus extends AbstractEntity<Long> {
         this.status = status;
         this.lastUpdate = lastUpdate;
         this.description = description;
-    }
-
-    @JsonIgnore
-    public Conversation getConversation() {
-        return conversation;
     }
 
     public static MessageStatus of(ReceiptStatus status, OffsetDateTime lastUpdate) {

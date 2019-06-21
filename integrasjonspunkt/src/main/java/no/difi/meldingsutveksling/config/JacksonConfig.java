@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.InstantDeserializer;
@@ -11,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.time.temporal.TemporalQueries;
 
 import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
@@ -25,7 +27,9 @@ public class JacksonConfig {
                 builder.modulesToInstall(new JavaTimeModule())
                         .deserializerByType(OffsetDateTime.class, new IsoDateTimeDeserializer(clock))
                         .serializationInclusion(JsonInclude.Include.NON_NULL)
-                        .featuresToEnable(SerializationFeature.INDENT_OUTPUT)
+                        .featuresToEnable(
+                                SerializationFeature.INDENT_OUTPUT,
+                                MapperFeature.DEFAULT_VIEW_INCLUSION)
                         .featuresToDisable(
                                 SerializationFeature.WRITE_DATES_AS_TIMESTAMPS,
                                 SerializationFeature.CLOSE_CLOSEABLE,
@@ -34,26 +38,30 @@ public class JacksonConfig {
                                 DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE);
     }
 
+    @SuppressWarnings("squid:MaximumInheritanceDepth")
     private static final class IsoDateTimeDeserializer extends InstantDeserializer<OffsetDateTime> {
 
         IsoDateTimeDeserializer(Clock clock) {
             super(
-                    OffsetDateTime.class, DateTimeFormatter.ISO_DATE_TIME,
-                    temporal -> {
-                        ZoneId obj = temporal.query(TemporalQueries.zone());
-
-                        if (obj != null) {
-                            return OffsetDateTime.from(temporal);
-                        }
-
-                        return LocalDateTime.from(temporal)
-                                .atOffset(DEFAULT_ZONE_ID.getRules().getOffset(LocalDateTime.now(clock)));
-                    },
+                    OffsetDateTime.class,
+                    DateTimeFormatter.ISO_DATE_TIME,
+                    temporal -> getOffsetDateTime(clock, temporal),
                     a -> OffsetDateTime.ofInstant(Instant.ofEpochMilli(a.value), a.zoneId),
                     a -> OffsetDateTime.ofInstant(Instant.ofEpochSecond(a.integer, a.fraction), a.zoneId),
                     (d, z) -> d.withOffsetSameInstant(z.getRules().getOffset(d.toLocalDateTime())),
                     true // yes, replace +0000 with Z
             );
+        }
+
+        private static OffsetDateTime getOffsetDateTime(Clock clock, TemporalAccessor temporal) {
+            ZoneId obj = temporal.query(TemporalQueries.zone());
+
+            if (obj != null) {
+                return OffsetDateTime.from(temporal);
+            }
+
+            return LocalDateTime.from(temporal)
+                    .atOffset(DEFAULT_ZONE_ID.getRules().getOffset(LocalDateTime.now(clock)));
         }
     }
 }

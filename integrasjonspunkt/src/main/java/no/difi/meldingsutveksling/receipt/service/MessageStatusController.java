@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.receipt.service;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.exceptions.MessageStatusNotFoundException;
@@ -7,6 +8,7 @@ import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatusQueryInput;
 import no.difi.meldingsutveksling.receipt.MessageStatusRepository;
+import no.difi.meldingsutveksling.view.Views;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -48,6 +50,7 @@ public class MessageStatusController {
             @ApiResponse(code = 400, message = "Bad Request", response = String.class),
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })
+    @JsonView(Views.MessageStatus.class)
     public MessageStatus status(
             @ApiParam(value = "Id", required = true, example = "1")
             @PathVariable("id") Long id) {
@@ -62,6 +65,7 @@ public class MessageStatusController {
             @ApiResponse(code = 200, message = "Success", response = MessageStatus.class),
             @ApiResponse(code = 204, message = "No Content", response = String.class)
     })
+    @JsonView(Views.MessageStatus.class)
     public MessageStatus statusPeek() {
         return statusRepo.findFirstByOrderByLastUpdateAsc()
                 .orElseThrow(NoContentException::new);
