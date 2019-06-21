@@ -18,7 +18,7 @@ public class DpfPolling {
 
     private final IntegrasjonspunktProperties properties;
     private final SvarInnService svarInnService;
-    private final SvarInnPutMessageForwarder svarInnEduCoreForwarder;
+    private final SvarInnPutMessageForwarder svarInnPutMessageForwarder;
     private final SvarInnNextMoveForwarder svarInnNextMoveForwarder;
 
     public void poll() {
@@ -30,7 +30,7 @@ public class DpfPolling {
     private Consumer<Forsendelse> getSvarInnForwarder() {
         if (properties.getNoarkSystem().isEnable()
                 && !properties.getNoarkSystem().getEndpointURL().isEmpty()) {
-            return svarInnEduCoreForwarder;
+            return svarInnPutMessageForwarder;
         }
 
         return svarInnNextMoveForwarder;

@@ -13,7 +13,6 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
-import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
@@ -81,9 +80,8 @@ public class DpoPolling {
             StandardBusinessDocument sbd = client.download(request, messagePersister);
             Audit.info(format("Downloaded message with id=%s", sbd.getConversationId()), sbd.createLogstashMarkers());
 
-            Conversation conversation = conversationService.registerConversation(sbd, DPO, INCOMING);
             if (sbdUtil.isExpired(sbd)) {
-                timeToLiveHelper.registerErrorStatusAndMessage(conversation);
+                timeToLiveHelper.registerErrorStatusAndMessage(sbd, DPO, INCOMING);
             } else {
                 altinnNextMoveMessageHandler.handleStandardBusinessDocument(sbd);
             }

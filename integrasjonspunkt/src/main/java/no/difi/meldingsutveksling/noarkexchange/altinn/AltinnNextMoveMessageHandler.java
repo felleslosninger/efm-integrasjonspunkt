@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
+import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 
 @Slf4j
 @Component
@@ -43,11 +44,12 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
             handleStatus(sbd);
         } else {
             if (properties.getNoarkSystem().isEnable() && !properties.getNoarkSystem().getEndpointURL().isEmpty()) {
+                conversationService.registerConversation(sbd, DPO, INCOMING);
                 internalQueue.enqueueNoark(sbd);
+                conversationService.registerStatus(sbd.getConversationId(), messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_MOTTATT));
             } else {
                 nextMoveQueue.enqueue(sbd, DPO);
             }
-            conversationService.registerStatus(sbd.getConversationId(), messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_MOTTATT));
             sendReceivedStatusToSender(sbd);
         }
     }
