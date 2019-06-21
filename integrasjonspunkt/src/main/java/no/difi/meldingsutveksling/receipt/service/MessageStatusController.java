@@ -36,6 +36,7 @@ public class MessageStatusController {
             @ApiResponse(code = 200, message = "Success", response = MessageStatus[].class),
             @ApiResponse(code = 400, message = "Bad Request", response = String.class)
     })
+    @JsonView(Views.MessageStatus.class)
     public Page<MessageStatus> statuses(
             @Valid MessageStatusQueryInput input,
             @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable
