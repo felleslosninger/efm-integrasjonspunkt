@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.cucumber;
 import cucumber.api.java.After;
 import cucumber.api.java.en.Given;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONException;
 import org.junit.Before;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Slf4j
 @RequiredArgsConstructor
 public class MessageStatusSteps {
 
@@ -42,7 +44,8 @@ public class MessageStatusSteps {
         try {
             JSONAssert.assertEquals(replaceDatabaseIds(expectedJson), replaceDatabaseIds(response.getBody()), true);
         } catch (AssertionError e) {
-            int a = 1;
+            log.error(response.getBody());
+            throw e;
         }
     }
 
