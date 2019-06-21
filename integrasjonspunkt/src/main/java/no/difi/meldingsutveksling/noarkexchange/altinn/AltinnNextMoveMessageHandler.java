@@ -47,6 +47,7 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
             } else {
                 nextMoveQueue.enqueue(sbd, DPO);
             }
+            conversationService.registerStatus(sbd.getConversationId(), messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_MOTTATT));
             sendReceivedStatusToSender(sbd);
         }
     }
