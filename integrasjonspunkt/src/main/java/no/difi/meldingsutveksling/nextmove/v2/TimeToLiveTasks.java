@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.receipt.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.OffsetDateTime;
@@ -25,6 +26,7 @@ public class TimeToLiveTasks {
     private final Clock clock;
 
     @Scheduled(fixedRateString = "${difi.move.nextmove.ttlPollingrate}")
+    @Transactional
     public void checkExpiredMessages() {
         repo.findAll(QConversation.conversation.expiry.before(OffsetDateTime.now(clock))
                 .and(QConversation.conversation.finished.isFalse()))
