@@ -21,7 +21,6 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.Notification;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -108,9 +107,8 @@ public class ServiceRegistryLookup {
      * @return a ServiceRecord if found. Otherwise an empty ServiceRecord is returned.
      */
     public ServiceRecord getServiceRecord(String identifier) throws ServiceRegistryLookupException {
-        Notification notification = properties.isVarslingsplikt() ? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
         try {
-            return srCache.get(new Parameters(identifier, notification));
+            return srCache.get(new Parameters(identifier));
         } catch (ExecutionException e) {
             if (e.getCause() instanceof ServiceRegistryLookupException) {
                 throw (ServiceRegistryLookupException) e.getCause();
@@ -121,10 +119,9 @@ public class ServiceRegistryLookup {
     }
 
     public ServiceRecord getServiceRecord(String identifier, ServiceIdentifier serviceIdentifier) throws ServiceRegistryLookupException {
-        Notification notification = properties.isVarslingsplikt() ? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
         List<ServiceRecord> serviceRecords;
         try {
-            serviceRecords = srsCache.get(new Parameters(identifier, notification));
+            serviceRecords = srsCache.get(new Parameters(identifier));
         } catch (ExecutionException e) {
             if (e.getCause() instanceof ServiceRegistryLookupException) {
                 throw (ServiceRegistryLookupException) e.getCause();
@@ -138,8 +135,7 @@ public class ServiceRegistryLookup {
     }
 
     public List<ServiceRecord> getServiceRecords(String identifier) {
-        Notification notification = properties.isVarslingsplikt() ? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
-        return srsCache.getUnchecked(new Parameters(identifier, notification));
+        return srsCache.getUnchecked(new Parameters(identifier));
     }
 
     public boolean isInServiceRegistry(String identifier) {
@@ -159,10 +155,9 @@ public class ServiceRegistryLookup {
     }
 
     public ServiceRecord getServiceRecordByProcess(String identifier, String process) throws ServiceRegistryLookupException {
-        Notification notification = properties.isVarslingsplikt() ? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
         List<ServiceRecord> serviceRecords = null;
         try {
-            serviceRecords = srsCache.get(new Parameters(identifier, notification));
+            serviceRecords = srsCache.get(new Parameters(identifier));
         } catch (ExecutionException e) {
             if (e.getCause() instanceof ServiceRegistryLookupException) {
                 throw (ServiceRegistryLookupException) e.getCause();
@@ -230,8 +225,7 @@ public class ServiceRegistryLookup {
      * @return an {@link InfoRecord} for the respective identifier
      */
     public InfoRecord getInfoRecord(String identifier) {
-        Notification notification = properties.isVarslingsplikt() ? Notification.OBLIGATED : Notification.NOT_OBLIGATED;
-        return irCache.getUnchecked(new Parameters(identifier, notification));
+        return irCache.getUnchecked(new Parameters(identifier));
     }
 
     private InfoRecord loadInfoRecord(Parameters parameters) throws ServiceRegistryLookupException {

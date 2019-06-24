@@ -53,6 +53,10 @@ public class ServiceRecord {
         return s -> s != null && s.getProcess().equals(process);
     }
 
+    public static Predicate<ServiceRecord> hasDocumentType(String documentType) {
+        return s -> s != null && s.getDocumentTypes().contains(documentType);
+    }
+
     @JsonIgnore
     public ServiceIdentifier getServiceIdentifier() {
         return getService().getIdentifier();
