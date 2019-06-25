@@ -26,6 +26,8 @@ public class StandardBusinessDocumentGroupSequenceProvider implements DefaultGro
 
     private Optional<String> getType(StandardBusinessDocument input) {
         return Optional.ofNullable(input)
-                .map(StandardBusinessDocument::getMessageType);
+                .flatMap(p -> Optional.ofNullable(p.getStandardBusinessDocumentHeader()))
+                .flatMap(p -> Optional.ofNullable(p.getDocumentIdentification()))
+                .flatMap(p -> Optional.ofNullable(p.getType()));
     }
 }
