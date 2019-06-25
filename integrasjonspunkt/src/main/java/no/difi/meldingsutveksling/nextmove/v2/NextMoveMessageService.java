@@ -77,7 +77,7 @@ public class NextMoveMessageService {
 
         String identifier = persistFile(message, file);
 
-        message.getOrCreateFiles().add(new BusinessMessageFile()
+        message.addFile(new BusinessMessageFile()
                 .setIdentifier(identifier)
                 .setTitle(emptyToNull(file.getName()))
                 .setFilename(file.getOriginalFilename())
