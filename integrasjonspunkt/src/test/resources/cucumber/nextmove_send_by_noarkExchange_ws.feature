@@ -1,7 +1,7 @@
 Feature: Sending a BEST/EDU message by the noarkExchange WebService
 
   Background:
-    Given a "GET" request to "http://localhost:9099/identifier/910075918?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
+    Given a "GET" request to "http://localhost:9099/identifier/910075918" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
 
   Scenario: As a user I want to send a BEST/EDU message
 

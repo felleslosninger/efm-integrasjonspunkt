@@ -1,9 +1,9 @@
 Feature: Receiving a Next Move DPE message
 
   Background:
-    Given a "GET" request to "http://localhost:9099/identifier/910075935?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075935.json"
-    And a "GET" request to "http://localhost:9099/identifier/974720760?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/974720760.json"
-    And a "GET" request to "http://localhost:9099/identifier/910077473?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
+    Given a "GET" request to "http://localhost:9099/identifier/910075935" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075935.json"
+    And a "GET" request to "http://localhost:9099/identifier/974720760" will respond with status "200" and the following "application/json" in "/restmocks/identifier/974720760.json"
+    And a "GET" request to "http://localhost:9099/identifier/910077473" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
     And ServiceBus prepares a message with the following SBD:
     """
     {

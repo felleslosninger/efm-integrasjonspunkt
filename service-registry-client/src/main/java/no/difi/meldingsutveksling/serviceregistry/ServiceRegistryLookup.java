@@ -30,11 +30,12 @@ import org.springframework.web.client.RestClientException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
-import static no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord.isProcess;
-import static no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord.isServiceIdentifier;
+import static no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord.*;
 
 @Service
 @Slf4j
@@ -142,19 +143,31 @@ public class ServiceRegistryLookup {
         return !getServiceRecords(identifier).isEmpty();
     }
 
-    public String getStandard(String identifier, Process process, DocumentType documentType) throws ServiceRegistryLookupException {
-        return getStandard(identifier, process.getValue(), documentType);
+    public String getDocumentIdentifier(String identifier, Process process, DocumentType documentType) throws ServiceRegistryLookupException {
+        return getDocumentIdentifier(identifier, process.getValue(), documentType);
     }
 
-    public String getStandard(String identifier, String process, DocumentType documentType) throws ServiceRegistryLookupException {
-        ServiceRecord serviceRecord = getServiceRecordByProcess(identifier, process);
-        return serviceRecord.getStandard(documentType)
+    public String getDocumentIdentifier(String identifier, String process, DocumentType documentType) throws ServiceRegistryLookupException {
+        Set<ServiceRecord> serviceRecords = getServiceRecords(identifier, process);
+        return serviceRecords.stream()
+                .flatMap(r -> r.getDocumentTypes().stream())
+                .filter(documentType::fitsDocumentIdentifier)
+                .findFirst()
                 .orElseThrow(() -> new ServiceRegistryLookupException(
                         String.format("Standard not found for process '%s' and documentType '%s' for identifier '%s'",
                                 process, documentType.getType(), identifier)));
+
     }
 
-    public ServiceRecord getServiceRecordByProcess(String identifier, String process) throws ServiceRegistryLookupException {
+    public ServiceRecord getServiceRecord(String identifier, String process, String documentType) throws ServiceRegistryLookupException {
+        Set<ServiceRecord> serviceRecords = getServiceRecords(identifier, process);
+        return serviceRecords.stream()
+                .filter(hasDocumentType(documentType))
+                .findFirst()
+                .orElseThrow(() -> new ServiceRegistryLookupException(String.format("Service record for identifier=%s with process=%s not found", identifier, process)));
+    }
+
+    public Set<ServiceRecord> getServiceRecords(String identifier, String process) throws ServiceRegistryLookupException {
         List<ServiceRecord> serviceRecords = null;
         try {
             serviceRecords = srsCache.get(new Parameters(identifier));
@@ -167,8 +180,7 @@ public class ServiceRegistryLookup {
         }
         return serviceRecords.stream()
                 .filter(isProcess(process))
-                .findFirst()
-                .orElseThrow(() -> new ServiceRegistryLookupException(String.format("Service record for identifier=%s with process=%s not found", identifier, process)));
+                .collect(Collectors.toSet());
     }
 
     private ServiceRecord loadServiceRecord(Parameters parameters) throws ServiceRegistryLookupException {

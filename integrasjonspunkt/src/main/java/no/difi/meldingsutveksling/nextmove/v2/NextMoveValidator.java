@@ -12,11 +12,9 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
-import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
-import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.validation.Asserter;
 import no.difi.meldingsutveksling.validation.group.ValidationGroupFactory;
@@ -67,7 +65,7 @@ public class NextMoveValidator {
 
         String standard = sbd.getStandard();
 
-        if (!documentType.fitsStandard(standard)) {
+        if (!documentType.fitsDocumentIdentifier(standard)) {
             throw new DocumentTypeDoNotFitDocumentStandardException(documentType, standard);
         }
 

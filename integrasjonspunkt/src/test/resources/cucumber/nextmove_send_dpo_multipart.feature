@@ -1,8 +1,8 @@
 Feature: Sending a Next Move DPO multipart/form message
 
   Background:
-    Given a "GET" request to "http://localhost:9099/identifier/910075918?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
-    And a "GET" request to "http://localhost:9099/identifier/910077473?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
+    Given a "GET" request to "http://localhost:9099/identifier/910075918" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
+    And a "GET" request to "http://localhost:9099/identifier/910077473" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
 
   Scenario: As a user I want to send a DPO multipart/form message
 

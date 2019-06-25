@@ -41,8 +41,8 @@ public enum DocumentType {
         return RECEIPTS.contains(this);
     }
 
-    public boolean fitsStandard(String standard) {
-        return standard.endsWith("::" + type);
+    public boolean fitsDocumentIdentifier(String documentIdentifier) {
+        return documentIdentifier.endsWith("::" + type);
     }
 
     public static DocumentType[] values(ApiType api) {

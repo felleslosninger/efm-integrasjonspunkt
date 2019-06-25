@@ -77,6 +77,7 @@ public class CorrespondenceAgencyMessageFactory {
             return create(message.getConversationId(),
                     message.getReceiverIdentifier(),
                     message.getSbd().getProcess(),
+                    message.getSbd().getStandard(),
                     jp.getOffentligTittel(),
                     jp.getOffentligTittel(),
                     jp.getTittel(),
@@ -88,6 +89,7 @@ public class CorrespondenceAgencyMessageFactory {
             return create(message.getConversationId(),
                     message.getReceiverIdentifier(),
                     message.getSbd().getProcess(),
+                    message.getSbd().getStandard(),
                     msg.getTittel(),
                     msg.getSammendrag(),
                     msg.getInnhold(),
@@ -131,6 +133,7 @@ public class CorrespondenceAgencyMessageFactory {
     public InsertCorrespondenceV2 create(String conversationId,
                                          String receiverIdentifier,
                                          String process,
+                                         String documentType,
                                          String messageTitle,
                                          String messageSummary,
                                          String messageBody,
@@ -141,7 +144,7 @@ public class CorrespondenceAgencyMessageFactory {
 
         ServiceRecord serviceRecord;
         try {
-            serviceRecord = serviceRegistryLookup.getServiceRecordByProcess(receiverIdentifier, process);
+            serviceRecord = serviceRegistryLookup.getServiceRecord(receiverIdentifier, process, documentType);
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(String.format("Could not get service record for receiver %s", receiverIdentifier));
         }

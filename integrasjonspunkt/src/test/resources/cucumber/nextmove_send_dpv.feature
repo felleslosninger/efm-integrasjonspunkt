@@ -1,8 +1,8 @@
 Feature: Sending a Next Move DPV message
 
   Background:
-    Given a "GET" request to "http://localhost:9099/identifier/910075946?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075946.json"
-    And a "GET" request to "http://localhost:9099/identifier/910077473?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
+    Given a "GET" request to "http://localhost:9099/identifier/910075946" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075946.json"
+    And a "GET" request to "http://localhost:9099/identifier/910077473" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
     And a "GET" request to "http://localhost:9099/identifier/974720760" will respond with status "200" and the following "application/json" in "/restmocks/identifier/974720760.json"
     And a SOAP request to "http://localhost:9876/ServiceEngineExternal/CorrespondenceAgencyExternal.svc" will respond with the following payload:
     """

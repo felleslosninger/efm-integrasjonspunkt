@@ -52,14 +52,14 @@ public class SBDFactory {
                         .setHeaderVersion(HEADER_VERSION)
                         .addSender(createSender(avsender))
                         .addReceiver(createReceiver(mottaker))
-                        .setDocumentIdentification(createDocumentIdentification(documentType, getStandard(mottaker.toString(), process, documentType)))
+                        .setDocumentIdentification(createDocumentIdentification(documentType, getDocumentIdentifier(mottaker.toString(), process, documentType)))
                         .setBusinessScope(createBusinessScope(fromConversationId(conversationId, process, OffsetDateTime.now(clock).plusHours(props.getNextmove().getDefaultTtlHours()))))
                 ).setAny(any);
     }
 
-    private String getStandard(String identifier, String process, DocumentType documentType) {
+    private String getDocumentIdentifier(String identifier, String process, DocumentType documentType) {
         try {
-            return serviceRegistryLookup.getStandard(identifier, process, documentType);
+            return serviceRegistryLookup.getDocumentIdentifier(identifier, process, documentType);
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(String.format("Error looking up service record for %s", identifier), e);
         }

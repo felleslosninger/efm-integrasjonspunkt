@@ -10,7 +10,6 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.Notification;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.junit.Before;
 import org.junit.Rule;
@@ -36,6 +35,7 @@ public class ServiceRegistryLookupTest {
     private static final String ORGNR = "12345678";
     private static final String ORGNAME = "test";
     private static final String DEFAULT_PROCESS = "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0";
+    private static final String DEFAULT_DOCTYPE = "urn:no:difi:arkivmelding:xsd::arkivmelding";
 
     @Mock
     private RestClient client;
@@ -57,8 +57,9 @@ public class ServiceRegistryLookupTest {
         when(arkivmelding.getDefaultProcess()).thenReturn(DEFAULT_PROCESS);
         when(properties.getArkivmelding()).thenReturn(arkivmelding);
         service = new ServiceRegistryLookup(client, properties, sasKeyRepoMock, new ObjectMapper());
-        query = Notification.NOT_OBLIGATED.createQuery();
+        query = null;
         dpo.setProcess(DEFAULT_PROCESS);
+        dpo.setDocumentTypes(Lists.newArrayList(DEFAULT_DOCTYPE));
     }
 
     @Test(expected = ServiceRegistryLookupException.class)

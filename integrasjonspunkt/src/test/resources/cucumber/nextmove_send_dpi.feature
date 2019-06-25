@@ -1,8 +1,8 @@
 Feature: Sending a Next Move DPI message
 
   Background:
-    Given a "GET" request to "http://localhost:9099/identifier/09118532322?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/09118532322.json"
-    And a "GET" request to "http://localhost:9099/identifier/910077473?notification=obligated" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
+    Given a "GET" request to "http://localhost:9099/identifier/09118532322" will respond with status "200" and the following "application/json" in "/restmocks/identifier/09118532322.json"
+    And a "GET" request to "http://localhost:9099/identifier/910077473" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
     And a SOAP request to "http://localhost:3193/dpi/9908:910077473/9908:910077473" will respond with the following payload:
     """
     <dummy></dummy>

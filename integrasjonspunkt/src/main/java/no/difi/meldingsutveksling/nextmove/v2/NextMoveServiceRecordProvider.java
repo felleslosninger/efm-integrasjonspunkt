@@ -16,7 +16,7 @@ public class NextMoveServiceRecordProvider {
 
     ServiceRecord getServiceRecord(StandardBusinessDocument sbd) {
         try {
-            return serviceRegistryLookup.getServiceRecordByProcess(sbd.getReceiverIdentifier(), sbd.getProcess());
+            return serviceRegistryLookup.getServiceRecord(sbd.getReceiverIdentifier(), sbd.getProcess(), sbd.getStandard());
         } catch (ServiceRegistryLookupException e) {
             throw new ReceiverDoNotAcceptProcessException(sbd.getProcess(), e.getLocalizedMessage());
         }

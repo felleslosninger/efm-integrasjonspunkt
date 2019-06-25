@@ -37,7 +37,10 @@ public class Parameters {
     }
 
     public String getQuery() {
-        return notification.createQuery();
+        if (notification != null) {
+            return notification.createQuery();
+        }
+        return null;
     }
 
     @Override

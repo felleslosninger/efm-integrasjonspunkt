@@ -266,9 +266,10 @@ public class NextMoveServiceBus {
         }
 
         try {
-            ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecordByProcess(
+            ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(
                     message.getReceiverIdentifier(),
-                    message.getSbd().getProcess());
+                    message.getSbd().getProcess(),
+                    message.getSbd().getStandard());
 
             if (Strings.isNullOrEmpty(serviceRecord.getService().getEndpointUrl())) {
                 throw new NextMoveRuntimeException(String.format("No endpointUrl defined for process %s", serviceRecord.getProcess()));

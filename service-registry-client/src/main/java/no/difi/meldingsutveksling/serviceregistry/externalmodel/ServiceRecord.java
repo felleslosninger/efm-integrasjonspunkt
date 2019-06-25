@@ -65,7 +65,7 @@ public class ServiceRecord {
     @JsonIgnore
     public Optional<String> getStandard(DocumentType documentType) {
         return documentTypes.stream()
-                .filter(documentType::fitsStandard)
+                .filter(documentType::fitsDocumentIdentifier)
                 .findAny();
     }
 
