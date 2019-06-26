@@ -72,6 +72,7 @@ public class Scope extends AbstractEntity<Long> {
 
     @XmlElement(name = "InstanceIdentifier", required = true)
     @UUID
+    @NotNull
     @ApiModelProperty(
             value = "The conversation ID. Usually a UUID",
             example = "90c0bacf-c233-4a54-96fc-e205b79862d9"
@@ -79,7 +80,6 @@ public class Scope extends AbstractEntity<Long> {
     protected String instanceIdentifier;
 
     @XmlElement(name = "Identifier")
-    @NotNull
     @ApiModelProperty(
             value = "The document process",
             example = "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
