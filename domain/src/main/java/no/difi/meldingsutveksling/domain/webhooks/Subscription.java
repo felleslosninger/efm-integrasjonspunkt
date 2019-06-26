@@ -46,7 +46,6 @@ public class Subscription extends AbstractEntity<Long> {
     }
 
     @NotNull(groups = ValidationGroups.Create.class)
-    @Column(unique = true)
     @ApiModelProperty(
             position = 3,
             value = "URL to push the webhook messages too",

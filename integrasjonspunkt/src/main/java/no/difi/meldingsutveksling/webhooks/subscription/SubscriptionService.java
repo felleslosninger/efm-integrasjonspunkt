@@ -15,4 +15,6 @@ public interface SubscriptionService {
     void updateSubscription(Long id, Subscription subscription);
 
     void deleteSubscription(Long id);
+
+    void deleteAll();
 }
