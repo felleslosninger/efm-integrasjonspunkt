@@ -65,7 +65,7 @@ public class FiksMapper {
     public SendForsendelseMedId mapFrom(NextMoveOutMessage message, X509Certificate certificate) throws NextMoveException {
         return SendForsendelseMedId.builder()
                 .withForsendelse(getForsendelse(message, certificate))
-                .withForsendelsesid(message.getSbd().findScope(ScopeType.SENDER_REF).map(Scope::getIdentifier).orElse(message.getConversationId()))
+                .withForsendelsesid(message.getSbd().findScope(ScopeType.SENDER_REF).map(Scope::getInstanceIdentifier).orElse(message.getConversationId()))
                 .build();
     }
 
@@ -77,7 +77,7 @@ public class FiksMapper {
         return Forsendelse.builder()
                 .withEksternref(message.getConversationId())
                 .withKunDigitalLevering(false)
-                .withSvarPaForsendelse(message.getSbd().findScope(ScopeType.RECEIVER_REF).map(Scope::getIdentifier).orElse(uuidGenerator.generate()))
+                .withSvarPaForsendelse(message.getSbd().findScope(ScopeType.RECEIVER_REF).map(Scope::getInstanceIdentifier).orElse(uuidGenerator.generate()))
                 .withTittel(journalpost.getOffentligTittel())
                 .withKrevNiva4Innlogging(kreverNiva4Innlogging(message))
                 .withKonteringskode(properties.getFiks().getUt().getKonteringsKode())

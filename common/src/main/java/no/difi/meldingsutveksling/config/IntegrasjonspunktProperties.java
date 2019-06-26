@@ -42,6 +42,9 @@ public class IntegrasjonspunktProperties {
     private Arkivmelding arkivmelding;
 
     @Valid
+    private Einnsyn einnsyn;
+
+    @Valid
     private PostVirksomheter dpv;
 
     @Valid
@@ -82,6 +85,14 @@ public class IntegrasjonspunktProperties {
         private String defaultProcess;
         @NotNull
         private String receiptProcess;
+    }
+
+    @Data
+    public static class Einnsyn {
+        @NotNull
+        private String defaultJournalProcess;
+        @NotNull
+        private String defaultInnsynskravProcess;
     }
 
     @Data
