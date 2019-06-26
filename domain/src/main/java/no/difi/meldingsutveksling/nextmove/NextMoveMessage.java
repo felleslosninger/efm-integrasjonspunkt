@@ -49,6 +49,13 @@ abstract public class NextMoveMessage extends AbstractEntity<Long> implements Me
     private StandardBusinessDocument sbd;
 
     @JsonIgnore
+    public NextMoveMessage addFile(BusinessMessageFile file) {
+        Set<BusinessMessageFile> fileSet = getOrCreateFiles();
+        fileSet.add(file.setDokumentnummer(fileSet.size() + 1));
+        return this;
+    }
+
+    @JsonIgnore
     public Set<BusinessMessageFile> getOrCreateFiles() {
         if (files == null) {
             files = new LinkedHashSet<>();

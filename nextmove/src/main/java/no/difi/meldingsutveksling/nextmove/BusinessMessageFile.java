@@ -20,4 +20,6 @@ public class BusinessMessageFile extends AbstractEntity<Long> {
     private Boolean primaryDocument;
     private String mimetype;
     private String title;
+    @NonNull
+    private Integer dokumentnummer;
 }

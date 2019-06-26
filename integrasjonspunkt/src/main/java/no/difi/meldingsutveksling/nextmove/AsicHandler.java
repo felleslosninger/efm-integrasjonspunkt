@@ -49,7 +49,7 @@ public class AsicHandler {
                 .sorted((a, b) -> {
                     if (a.getPrimaryDocument()) return -1;
                     if (b.getPrimaryDocument()) return 1;
-                    return a.getFilename().compareTo(b.getFilename());
+                    return a.getDokumentnummer().compareTo(b.getDokumentnummer());
                 }).map(f -> {
                     try {
                         FileEntryStream fes = cryptoMessagePersister.readStream(msg.getConversationId(), f.getIdentifier());

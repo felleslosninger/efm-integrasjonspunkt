@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.arkivmelding;
 
-import com.google.common.collect.Lists;
 import no.arkivverket.standarder.noark5.arkivmelding.*;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
@@ -12,8 +11,11 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ArkivmeldingUtil {
 
@@ -21,16 +23,13 @@ public class ArkivmeldingUtil {
     }
 
     public static List<String> getFilenames(Arkivmelding am) {
-        List<String> filenames = Lists.newArrayList();
-
-        getJournalpost(am).getDokumentbeskrivelseAndDokumentobjekt().stream()
+        return getJournalpost(am).getDokumentbeskrivelseAndDokumentobjekt().stream()
                 .filter(Dokumentbeskrivelse.class::isInstance)
                 .map(Dokumentbeskrivelse.class::cast)
+                .sorted(Comparator.comparing(Dokumentbeskrivelse::getDokumentnummer))
                 .flatMap(d -> d.getDokumentobjekt().stream())
                 .map(Dokumentobjekt::getReferanseDokumentfil)
-                .forEach(filenames::add);
-
-        return filenames;
+                .collect(Collectors.toList());
     }
 
     public static byte[] marshalArkivmelding(Arkivmelding am) throws JAXBException {

@@ -38,9 +38,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.Clock;
 import java.time.OffsetDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -62,18 +60,29 @@ public class CorrespondenceAgencyMessageFactory {
 
     @SneakyThrows
     public InsertCorrespondenceV2 create(NextMoveOutMessage message) {
-        BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
-        attachmentExternalBEV2List.getBinaryAttachmentV2().addAll(getAttachments(message));
-
         if (message.getBusinessMessage() instanceof ArkivmeldingMessage) {
-            BusinessMessageFile arkivmeldingFile = message.getFiles().stream()
-                    .filter(f -> ARKIVMELDING_FILE.equals(f.getFilename()))
-                    .findFirst()
+            Map<String, BusinessMessageFile> fileMap = message.getFiles().stream()
+                    .collect(Collectors.toMap(BusinessMessageFile::getFilename, p -> p));
+
+            BusinessMessageFile arkivmeldingFile = Optional.ofNullable(fileMap.get(ARKIVMELDING_FILE))
                     .orElseThrow(() -> new NextMoveRuntimeException(String.format("%s not found for message %s", ARKIVMELDING_FILE, message.getConversationId())));
+
             InputStream is = cryptoMessagePersister.readStream(message.getConversationId(), arkivmeldingFile.getIdentifier()).getInputStream();
             Arkivmelding arkivmelding = ArkivmeldingUtil.unmarshalArkivmelding(is);
-
             Journalpost jp = ArkivmeldingUtil.getJournalpost(arkivmelding);
+
+            BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
+
+            List<BusinessMessageFile> files = new ArrayList<>();
+            files.add(arkivmeldingFile);
+            files.addAll(ArkivmeldingUtil.getFilenames(arkivmelding)
+                    .stream()
+                    .map(fileMap::get)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList()));
+
+            attachmentExternalBEV2List.getBinaryAttachmentV2().addAll(getAttachments(message.getConversationId(), files));
+
             return create(message.getConversationId(),
                     message.getReceiverIdentifier(),
                     message.getSbd().getProcess(),
@@ -86,6 +95,10 @@ public class CorrespondenceAgencyMessageFactory {
 
         if (message.getBusinessMessage() instanceof DigitalDpvMessage) {
             DigitalDpvMessage msg = (DigitalDpvMessage) message.getBusinessMessage();
+
+            BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
+            attachmentExternalBEV2List.getBinaryAttachmentV2().addAll(getAttachments(message.getConversationId(), message.getFiles()));
+
             return create(message.getConversationId(),
                     message.getReceiverIdentifier(),
                     message.getSbd().getProcess(),
@@ -100,16 +113,16 @@ public class CorrespondenceAgencyMessageFactory {
                 ArkivmeldingMessage.class.getName(), DigitalDpvMessage.class.getName()));
     }
 
-    private List<BinaryAttachmentV2> getAttachments(NextMoveOutMessage message) {
-        return message.getFiles()
+    private List<BinaryAttachmentV2> getAttachments(String conversationId, Collection<BusinessMessageFile> files) {
+        return files
                 .stream()
-                .sorted(Comparator.comparing(AbstractEntity::getId))
-                .map(file -> getBinaryAttachmentV2(message, file))
+                .sorted(Comparator.comparing(BusinessMessageFile::getDokumentnummer))
+                .map(file -> getBinaryAttachmentV2(conversationId, file))
                 .collect(Collectors.toList());
     }
 
-    private BinaryAttachmentV2 getBinaryAttachmentV2(NextMoveOutMessage message, BusinessMessageFile file) {
-        FileEntryStream fileEntry = getFileEntry(message, file);
+    private BinaryAttachmentV2 getBinaryAttachmentV2(String conversationId, BusinessMessageFile file) {
+        FileEntryStream fileEntry = getFileEntry(conversationId, file);
         BinaryAttachmentV2 binaryAttachmentV2 = new BinaryAttachmentV2();
         binaryAttachmentV2.setFunctionType(AttachmentFunctionType.fromValue("Unspecified"));
         binaryAttachmentV2.setFileName(reporteeFactory.createBinaryAttachmentV2FileName(file.getFilename()));
@@ -120,12 +133,12 @@ public class CorrespondenceAgencyMessageFactory {
         return binaryAttachmentV2;
     }
 
-    private FileEntryStream getFileEntry(NextMoveOutMessage message, BusinessMessageFile f) {
+    private FileEntryStream getFileEntry(String conversationId, BusinessMessageFile f) {
         try {
-            return cryptoMessagePersister.readStream(message.getConversationId(), f.getIdentifier());
+            return cryptoMessagePersister.readStream(conversationId, f.getIdentifier());
         } catch (IOException e) {
             throw new NextMoveRuntimeException(
-                    String.format("Could not read attachment %s for conversationId = %s", f.getIdentifier(), message.getConversationId())
+                    String.format("Could not read attachment %s for conversationId = %s", f.getIdentifier(), conversationId)
                     , e);
         }
     }
