@@ -45,5 +45,4 @@ public class AsicParser {
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException(String.format("File not found: %s", filename)));
     }
-
 }

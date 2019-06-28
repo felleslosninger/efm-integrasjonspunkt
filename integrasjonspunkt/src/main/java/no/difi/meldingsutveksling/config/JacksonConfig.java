@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -29,6 +30,7 @@ public class JacksonConfig {
                         .serializationInclusion(JsonInclude.Include.NON_NULL)
                         .featuresToEnable(
                                 SerializationFeature.INDENT_OUTPUT,
+                                JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS,
                                 MapperFeature.DEFAULT_VIEW_INCLUSION)
                         .featuresToDisable(
                                 SerializationFeature.WRITE_DATES_AS_TIMESTAMPS,

@@ -7,6 +7,7 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.v2.ContentDisposition;
 import org.springframework.boot.test.json.JsonContentAssert;
@@ -21,6 +22,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Slf4j
 @RequiredArgsConstructor
 public class NextMoveMessageOutSteps {
 
@@ -158,8 +160,13 @@ public class NextMoveMessageOutSteps {
                 String.class,
                 messageOutHolder.get().getSbd().getConversationId());
 
-        new JsonContentAssert(String.class, response.getBody())
-                .isStrictlyEqualToJson(body);
+        try {
+            new JsonContentAssert(String.class, response.getBody())
+                    .isStrictlyEqualToJson(body);
+        } catch(AssertionError e) {
+            log.info(response.getBody());
+            throw e;
+        }
     }
 
 }

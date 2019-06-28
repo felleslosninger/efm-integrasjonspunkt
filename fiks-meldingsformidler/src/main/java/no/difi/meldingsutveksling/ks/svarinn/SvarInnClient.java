@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.ks.svarinn;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.pipes.Pipe;
 import no.difi.meldingsutveksling.pipes.Plumber;
 import org.apache.commons.io.IOUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -14,6 +13,7 @@ import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,16 +24,19 @@ public class SvarInnClient {
 
     @Getter
     private final RestTemplate restTemplate;
+    @Getter
+    private final String rootUri;
     private final Plumber plumber;
 
     public SvarInnClient(IntegrasjonspunktProperties props, RestTemplateBuilder restTemplateBuilder, Plumber plumber) {
         this.plumber = plumber;
+        this.rootUri = props.getFiks().getInn().getBaseUrl();
         this.restTemplate = restTemplateBuilder
-                .setConnectTimeout(props.getFiks().getInn().getConnectTimeout())
-                .setReadTimeout(props.getFiks().getInn().getReadTimeout())
+                .setConnectTimeout(Duration.ofMillis(props.getFiks().getInn().getConnectTimeout()))
+                .setReadTimeout(Duration.ofMillis(props.getFiks().getInn().getReadTimeout()))
                 .errorHandler(new DefaultResponseErrorHandler())
                 .rootUri(props.getFiks().getInn().getBaseUrl())
-                .basicAuthorization(props.getFiks().getInn().getUsername(), props.getFiks().getInn().getPassword())
+                .basicAuthentication(props.getFiks().getInn().getUsername(), props.getFiks().getInn().getPassword())
                 .build();
     }
 

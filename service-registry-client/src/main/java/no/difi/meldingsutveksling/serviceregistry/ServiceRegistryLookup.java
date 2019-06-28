@@ -4,14 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Lists;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.spi.json.GsonJsonProvider;
-import com.jayway.jsonpath.spi.mapper.GsonMappingProvider;
 import com.nimbusds.jose.proc.BadJWSException;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.DocumentType;
@@ -20,6 +12,7 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.IdentifierResource;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -168,7 +161,7 @@ public class ServiceRegistryLookup {
     }
 
     public Set<ServiceRecord> getServiceRecords(String identifier, String process) throws ServiceRegistryLookupException {
-        List<ServiceRecord> serviceRecords = null;
+        List<ServiceRecord> serviceRecords;
         try {
             serviceRecords = srsCache.get(new Parameters(identifier));
         } catch (ExecutionException e) {
@@ -207,27 +200,7 @@ public class ServiceRegistryLookup {
     }
 
     private List<ServiceRecord> loadServiceRecords(Parameters parameters) throws ServiceRegistryLookupException {
-        ServiceRecord[] serviceRecords;
-        try {
-            final String resource = client.getResource("identifier/" + parameters.getIdentifier(), parameters.getQuery());
-            final DocumentContext documentContext = JsonPath.parse(resource, jsonPathConfiguration());
-            serviceRecords = documentContext.read("$.serviceRecords", ServiceRecord[].class);
-        } catch (HttpClientErrorException httpException) {
-            byte[] errorBody = httpException.getResponseBodyAsByteArray();
-            try {
-                ErrorResponse error = objectMapper.readValue(errorBody, ErrorResponse.class);
-                throw new ServiceRegistryLookupException(String.format("Caught exception when looking up service record with identifier %s, http status %s (%s): %s",
-                        parameters.getIdentifier(), httpException.getStatusCode(), httpException.getStatusText(), error.getErrorDescription()), httpException);
-            } catch (IOException e) {
-                log.warn("Could not parse error response from service registry");
-                throw new ServiceRegistryLookupException(String.format("Caught exception when looking up service record with identifier %s, http status: %s (%s)",
-                        parameters.getIdentifier(), httpException.getStatusCode(), httpException.getStatusText()), httpException);
-            }
-        } catch (BadJWSException e) {
-            log.error("Bad signature in service record response", e);
-            throw new ServiceRegistryLookupException("Bad signature in service record response", e);
-        }
-        return Lists.newArrayList(serviceRecords);
+        return loadIdentifierResource(parameters).getServiceRecords();
     }
 
     /**
@@ -241,14 +214,39 @@ public class ServiceRegistryLookup {
     }
 
     private InfoRecord loadInfoRecord(Parameters parameters) throws ServiceRegistryLookupException {
-        final String infoRecordString;
+        return loadIdentifierResource(parameters).getInfoRecord();
+    }
+
+    private IdentifierResource loadIdentifierResource(Parameters parameters) throws ServiceRegistryLookupException {
+        String identifierResourceString = getIdentifierResourceString(parameters);
+
         try {
-            infoRecordString = client.getResource("identifier/" + parameters.getIdentifier(), parameters.getQuery());
+            return objectMapper.readValue(identifierResourceString, IdentifierResource.class);
+        } catch (IOException e) {
+            throw new ServiceRegistryLookupException(
+                    String.format("Parsing response as a IdentifierResource JSON object failed. Content is: %s", identifierResourceString)
+                    , e);
+        }
+    }
+
+    private String getIdentifierResourceString(Parameters parameters) throws ServiceRegistryLookupException {
+        try {
+            return client.getResource("identifier/" + parameters.getIdentifier(), parameters.getQuery());
+        } catch (HttpClientErrorException httpException) {
+            byte[] errorBody = httpException.getResponseBodyAsByteArray();
+            try {
+                ErrorResponse error = objectMapper.readValue(errorBody, ErrorResponse.class);
+                throw new ServiceRegistryLookupException(String.format("Caught exception when looking up service record with identifier %s, http status %s (%s): %s",
+                        parameters.getIdentifier(), httpException.getStatusCode(), httpException.getStatusText(), error.getErrorDescription()), httpException);
+            } catch (IOException e) {
+                log.warn("Could not parse error response from service registry");
+                throw new ServiceRegistryLookupException(String.format("Caught exception when looking up service record with identifier %s, http status: %s (%s)",
+                        parameters.getIdentifier(), httpException.getStatusCode(), httpException.getStatusText()), httpException);
+            }
         } catch (BadJWSException e) {
+            log.error("Bad signature in service record response", e);
             throw new ServiceRegistryLookupException("Bad signature in response from service registry", e);
         }
-        final DocumentContext documentContext = JsonPath.parse(infoRecordString, jsonPathConfiguration());
-        return documentContext.read("$.infoRecord", InfoRecord.class);
     }
 
     public String getSasKey() {
@@ -287,10 +285,5 @@ public class ServiceRegistryLookup {
 
         log.info("Loading locally persisted SAS key");
         return key.get(0).saskey;
-    }
-
-    private Configuration jsonPathConfiguration() {
-        final Gson gson = new GsonBuilder().serializeNulls().create();
-        return Configuration.defaultConfiguration().jsonProvider(new GsonJsonProvider(gson)).mappingProvider(new GsonMappingProvider());
     }
 }

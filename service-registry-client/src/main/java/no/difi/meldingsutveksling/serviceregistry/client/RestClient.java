@@ -14,6 +14,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.security.PublicKey;
+import java.util.Collections;
 
 import static java.util.Arrays.asList;
 
@@ -56,7 +57,7 @@ public class RestClient {
 
         if (props.getSign().isEnable()) {
             HttpHeaders headers = new HttpHeaders();
-            headers.put("Accept", asList("application/jose, application/json"));
+            headers.put("Accept", Collections.singletonList("application/jose, application/json"));
 
             HttpEntity<Object> httpEntity = new HttpEntity<>(headers);
             ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.GET, httpEntity, String.class);

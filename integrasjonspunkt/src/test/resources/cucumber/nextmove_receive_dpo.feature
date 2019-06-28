@@ -82,38 +82,48 @@ Feature: Receiving a Next Move DPO message
     """
     {
       "content" : [ {
-        "id" : 1,
-        "convId" : 1,
-        "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a45",
+        "id" : 10,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
-        "status" : "OPPRETTET"
+        "status" : "OPPRETTET",
+        "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a45",
+        "convId" : 9
       }, {
-        "id" : 2,
-        "convId" : 1,
-        "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a45",
+        "id" : 11,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
-        "status" : "INNKOMMENDE_MOTTATT"
+        "status" : "INNKOMMENDE_MOTTATT",
+        "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a45",
+        "convId" : 9
       }, {
-        "id" : 3,
-        "convId" : 1,
-        "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a45",
+        "id" : 12,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
-        "status" : "INNKOMMENDE_LEVERT"
+        "status" : "INNKOMMENDE_LEVERT",
+        "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a45",
+        "convId" : 9
       } ],
+      "pageable" : {
+        "sort" : {
+          "sorted" : true,
+          "unsorted" : false,
+          "empty" : false
+        },
+        "offset" : 0,
+        "pageNumber" : 0,
+        "pageSize" : 10,
+        "unpaged" : false,
+        "paged" : true
+      },
       "last" : true,
       "totalPages" : 1,
       "totalElements" : 3,
       "size" : 10,
       "number" : 0,
-      "sort" : [ {
-        "direction" : "ASC",
-        "property" : "id",
-        "ignoreCase" : false,
-        "nullHandling" : "NATIVE",
-        "ascending" : true,
-        "descending" : false
-      } ],
+      "sort" : {
+        "sorted" : true,
+        "unsorted" : false,
+        "empty" : false
+      },
+      "numberOfElements" : 3,
       "first" : true,
-      "numberOfElements" : 3
+      "empty" : false
     }
     """

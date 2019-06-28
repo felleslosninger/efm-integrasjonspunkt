@@ -32,12 +32,10 @@ import java.security.interfaces.RSAPrivateKey;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 //@Ignore("JCE support is missing on our build server")
 public class CmsUtilTest {
@@ -55,7 +53,7 @@ public class CmsUtilTest {
         byte[] plaintext = "Text to be encrypted".getBytes();
         byte[] ciphertext = (new CmsUtil()).createCMS(plaintext, (X509Certificate) certificate);
         byte[] plaintextRecovered = util.decryptCMS(ciphertext, keyPair.getPrivate());
-        assertThat(plaintextRecovered, is(equalTo(plaintext)));
+        assertThat(plaintextRecovered).isEqualTo(plaintext);
     }
 
     @Test
@@ -82,7 +80,7 @@ public class CmsUtilTest {
         byte[] ciphertext = (new CmsUtil()).createCMS(plaintext, cert);
         byte[] plaintextRecovered = util.decryptCMS(ciphertext, keyPair.getPrivate());
 
-        assertThat(plaintextRecovered, is(equalTo(plaintext)));
+        assertThat(plaintextRecovered).isEqualTo(plaintext);
     }
 
     @Test
@@ -113,10 +111,10 @@ public class CmsUtilTest {
         InputStream encrypted = Pipe.of(Executors.newSingleThreadExecutor(), "CMS encrypt", inlet -> util.createCMSStreamed(bis, inlet, cert)).outlet();
         InputStream decrypted = util.decryptCMSStreamed(encrypted, keyPair.getPrivate());
 
-        assertThat(IOUtils.toByteArray(decrypted), is(equalTo(plaintext)));
+        assertThat(IOUtils.toByteArray(decrypted)).isEqualTo(plaintext);
     }
 
-    public KeyPair generateKeyPair() throws NoSuchAlgorithmException {
+    private KeyPair generateKeyPair() throws NoSuchAlgorithmException {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
         keyPairGenerator.initialize(2048);
         return keyPairGenerator.generateKeyPair();
@@ -152,7 +150,7 @@ public class CmsUtilTest {
         PEMParser pr = openPEMResource(fileName);
         Object o = pr.readObject();
 
-        if (o == null || !((o instanceof PEMKeyPair) || (o instanceof PEMEncryptedKeyPair))) {
+        if (!((o instanceof PEMKeyPair) || (o instanceof PEMEncryptedKeyPair))) {
             throw new MeldingsUtvekslingRuntimeException();
         }
 

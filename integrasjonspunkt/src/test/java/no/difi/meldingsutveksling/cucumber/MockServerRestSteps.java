@@ -61,7 +61,7 @@ public class MockServerRestSteps {
     private RestTemplate getRestTemplate(String url) {
         if (url.startsWith(serviceBusRestClient.getBase())) {
             return serviceBusRestClient.getRestTemplate();
-        } else if (url.startsWith("/mottaker") || url.startsWith("/kvitterMottak")) {
+        } else if (url.startsWith(svarInnClient.getRootUri())) {
             return svarInnClient.getRestTemplate();
         }
 

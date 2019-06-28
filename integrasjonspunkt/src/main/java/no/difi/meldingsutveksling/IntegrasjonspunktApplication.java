@@ -10,11 +10,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.solr.SolrAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
-import org.springframework.boot.web.support.SpringBootServletInitializer;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.validation.Validator;
-
 import javax.annotation.PostConstruct;
 import javax.crypto.Cipher;
 import java.io.IOException;
@@ -28,14 +27,14 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
 
     private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktApplication.class);
     private static final String MISSING_JCE_MESSAGE = "Failed startup. Possibly unlimited security policy files that is not updated."
-            + "/r/nTo fix this, download and replace policy files for the apropriate java version (found in ${java.home}/jre/lib/security/)"
+            + "/r/nTo fix this, download and replace policy files for the appropriate java version (found in ${java.home}/jre/lib/security/)"
             + "/r/n- Java7: http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html"
             + "/r/n- Java8: http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html";
 
     @Bean
     public ServletRegistrationBean servletNoArk() {
         WSSpringServlet servlet = new WSSpringServlet();
-        ServletRegistrationBean reg = new ServletRegistrationBean(servlet, "/noarkExchange");
+        ServletRegistrationBean reg = new ServletRegistrationBean<>(servlet, "/noarkExchange");
         reg.setLoadOnStartup(1);
         return reg;
     }
@@ -104,12 +103,9 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
     private static boolean validateJCE() {
         try {
             int maxKeyLen = Cipher.getMaxAllowedKeyLength("AES");
-            if (maxKeyLen > 128) {
-                return true;
-            }
+            return maxKeyLen > 128;
         } catch (NoSuchAlgorithmException ex) {
+            return false;
         }
-        return false;
-
     }
 }

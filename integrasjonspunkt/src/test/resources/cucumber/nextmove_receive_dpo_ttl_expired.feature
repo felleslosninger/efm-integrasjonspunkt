@@ -69,33 +69,43 @@ Feature: Receiving an expired Next Move DPO message
     """
     {
       "content" : [ {
-        "id" : 1,
-        "convId" : 1,
-        "conversationId" : "2507fcb8-6543-4c5f-ac06-f5df75bb677e",
+        "id" : 25,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
-        "status" : "OPPRETTET"
-      }, {
-        "id" : 2,
-        "convId" : 1,
+        "status" : "OPPRETTET",
         "conversationId" : "2507fcb8-6543-4c5f-ac06-f5df75bb677e",
+        "convId" : 24
+      }, {
+        "id" : 26,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "LEVETID_UTLOPT",
-        "description" : "Levetiden for meldingen er utgått. Må sendes på nytt"
+        "description" : "Levetiden for meldingen er utgått. Må sendes på nytt",
+        "conversationId" : "2507fcb8-6543-4c5f-ac06-f5df75bb677e",
+        "convId" : 24
       } ],
-      "totalElements" : 2,
-      "totalPages" : 1,
+      "pageable" : {
+        "sort" : {
+          "sorted" : true,
+          "unsorted" : false,
+          "empty" : false
+        },
+        "offset" : 0,
+        "pageNumber" : 0,
+        "pageSize" : 10,
+        "unpaged" : false,
+        "paged" : true
+      },
       "last" : true,
+      "totalPages" : 1,
+      "totalElements" : 2,
       "size" : 10,
       "number" : 0,
-      "sort" : [ {
-        "direction" : "ASC",
-        "property" : "id",
-        "ignoreCase" : false,
-        "nullHandling" : "NATIVE",
-        "ascending" : true,
-        "descending" : false
-      } ],
+      "sort" : {
+        "sorted" : true,
+        "unsorted" : false,
+        "empty" : false
+      },
+      "numberOfElements" : 2,
       "first" : true,
-      "numberOfElements" : 2
+      "empty" : false
     }
     """

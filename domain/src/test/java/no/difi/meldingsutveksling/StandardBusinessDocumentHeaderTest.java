@@ -7,7 +7,7 @@ import no.difi.meldingsutveksling.domain.sbdh.Receiver;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class StandardBusinessDocumentHeaderTest {
 
@@ -56,9 +56,9 @@ public class StandardBusinessDocumentHeaderTest {
                 .standard(Standard.LEGACY.getValue())
                 .type(DocumentType.BESTEDU_KVITTERING)
                 .build();
-        assertEquals(Standard.LEGACY.getValue(), h.getDocumentIdentification().getStandard());
-        assertEquals(DocumentType.BESTEDU_KVITTERING.getType(), h.getDocumentIdentification().getType());
-        assertEquals("2.0", h.getDocumentIdentification().getTypeVersion());
+        assertThat(h.getDocumentIdentification().getStandard()).isEqualTo(Standard.LEGACY.getValue());
+        assertThat(h.getDocumentIdentification().getType()).isEqualTo(DocumentType.BESTEDU_KVITTERING.getType());
+        assertThat(h.getDocumentIdentification().getTypeVersion()).isEqualTo("2.0");
     }
 
     @Test
@@ -72,9 +72,9 @@ public class StandardBusinessDocumentHeaderTest {
                 .standard(Standard.LEGACY.getValue())
                 .type(DocumentType.BESTEDU_MELDING)
                 .build();
-        assertEquals(Standard.LEGACY.getValue(), h.getDocumentIdentification().getStandard());
-        assertEquals(DocumentType.BESTEDU_MELDING.getType(), h.getDocumentIdentification().getType());
-        assertEquals("2.0", h.getDocumentIdentification().getTypeVersion());
+        assertThat(h.getDocumentIdentification().getStandard()).isEqualTo(Standard.LEGACY.getValue());
+        assertThat(h.getDocumentIdentification().getType()).isEqualTo(DocumentType.BESTEDU_MELDING.getType());
+        assertThat(h.getDocumentIdentification().getTypeVersion()).isEqualTo("2.0");
     }
 
     @Test(expected = MeldingsUtvekslingRuntimeException.class)

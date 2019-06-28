@@ -39,7 +39,8 @@ public class CapabilitySteps {
                 String.class,
                 receiverId);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getStatusCode())
+                .isEqualTo(HttpStatus.OK);
     }
 
     @Then("^the returned capabilities are:$")

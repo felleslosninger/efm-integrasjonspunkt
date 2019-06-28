@@ -11,6 +11,7 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 
 import java.io.IOException;
+import java.time.Duration;
 
 @Slf4j
 @Configuration
@@ -25,12 +26,11 @@ public class WebHookConfig {
         IntegrasjonspunktProperties.WebHooks webHooks = integrasjonspunktProperties.getWebhooks();
 
         return new UrlPusher(restTemplateBuilder
-                .setConnectTimeout(webHooks.getConnectTimeout())
-                .setReadTimeout(webHooks.getReadTimeout())
+                .setConnectTimeout(Duration.ofMillis(webHooks.getConnectTimeout()))
+                .setReadTimeout(Duration.ofMillis(webHooks.getReadTimeout()))
                 .errorHandler(new DefaultResponseErrorHandler() {
                     @Override
-                    public void handleError(ClientHttpResponse response) throws IOException {
-                        HttpStatus statusCode = getHttpStatusCode(response);
+                    protected void handleError(ClientHttpResponse response, HttpStatus statusCode) throws IOException {
                         log.info("Webhook push failed with: {} {}", statusCode, response.getStatusText());
                     }
                 })

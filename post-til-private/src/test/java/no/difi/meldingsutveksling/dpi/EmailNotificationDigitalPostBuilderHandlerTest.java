@@ -6,9 +6,6 @@ import no.difi.sdp.client2.domain.digital_post.EpostVarsel;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.security.KeyStoreException;
-
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 public class EmailNotificationDigitalPostBuilderHandlerTest {

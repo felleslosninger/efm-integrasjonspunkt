@@ -30,7 +30,8 @@ public class StandardBusinessDocumentRepositoryTest {
         entityManager.flush();
         entityManager.clear();
 
-        StandardBusinessDocument result = repository.findOne(document.getId());
+        StandardBusinessDocument result = repository.findById(document.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Entity not found!"));
 
         assertThat(result).isNotNull();
     }

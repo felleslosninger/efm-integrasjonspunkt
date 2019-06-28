@@ -24,7 +24,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public Subscription getSubscription(Long id) {
-        return Optional.ofNullable(subscriptionRepository.findOne(id))
+        return subscriptionRepository.findById(id)
                 .orElseThrow(() -> new SubscriptionNotFoundException(id));
     }
 
@@ -55,6 +55,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public void deleteSubscription(Long id) {
-        subscriptionRepository.delete(getSubscription(id).getId());
+        subscriptionRepository.delete(getSubscription(id));
     }
 }

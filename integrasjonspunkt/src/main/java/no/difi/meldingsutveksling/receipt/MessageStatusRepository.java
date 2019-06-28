@@ -4,29 +4,28 @@ import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.querydsl.QueryDslPredicateExecutor;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface MessageStatusRepository extends PagingAndSortingRepository<MessageStatus, Long>,
-        QueryDslPredicateExecutor<MessageStatus>,
+        QuerydslPredicateExecutor<MessageStatus>,
         QuerydslBinderCustomizer<QMessageStatus> {
 
     @EntityGraph("MessageStatus.conversation")
     Optional<MessageStatus> findById(Long id);
 
-    @EntityGraph("MessageStatus.conversation")
-    List<MessageStatus> findAllByConversation_Id(Long convId);
-
-    @EntityGraph("MessageStatus.conversation")
-    List<MessageStatus> findByIdGreaterThanEqual(Long id);
-
-    @EntityGraph("MessageStatus.conversation")
-    List<MessageStatus> findAllByConversation_IdAndIdGreaterThanEqual(Long convId, Long id);
+//    @EntityGraph("MessageStatus.conversation")
+//    List<MessageStatus> findAllByConversation_Id(Long convId);
+//
+//    @EntityGraph("MessageStatus.conversation")
+//    List<MessageStatus> findByIdGreaterThanEqual(Long id);
+//
+//    @EntityGraph("MessageStatus.conversation")
+//    List<MessageStatus> findAllByConversation_IdAndIdGreaterThanEqual(Long convId, Long id);
 
     @EntityGraph("MessageStatus.conversation")
     Optional<MessageStatus> findFirstByOrderByLastUpdateAsc();

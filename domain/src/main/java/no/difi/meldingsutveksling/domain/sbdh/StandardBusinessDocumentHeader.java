@@ -18,7 +18,7 @@ import no.difi.meldingsutveksling.Process;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.nextmove.AbstractEntity;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import javax.persistence.*;
 import javax.validation.Valid;

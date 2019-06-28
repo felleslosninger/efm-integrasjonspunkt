@@ -71,33 +71,43 @@ Feature: Receiving an expired Next Move DPE message
     """
     {
       "content" : [ {
-        "id" : 1,
-        "convId" : 1,
-        "conversationId" : "f58a286c-8325-41ee-9398-da8471c3e234",
+        "id" : 14,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
-        "status" : "OPPRETTET"
-      }, {
-        "id" : 2,
-        "convId" : 1,
+        "status" : "OPPRETTET",
         "conversationId" : "f58a286c-8325-41ee-9398-da8471c3e234",
+        "convId" : 13
+      }, {
+        "id" : 15,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "LEVETID_UTLOPT",
-        "description" : "Levetiden for meldingen er utgått. Må sendes på nytt"
+        "description" : "Levetiden for meldingen er utgått. Må sendes på nytt",
+        "conversationId" : "f58a286c-8325-41ee-9398-da8471c3e234",
+        "convId" : 13
       } ],
+      "pageable" : {
+        "sort" : {
+          "unsorted" : false,
+          "sorted" : true,
+          "empty" : false
+        },
+        "offset" : 0,
+        "pageNumber" : 0,
+        "pageSize" : 10,
+        "unpaged" : false,
+        "paged" : true
+      },
+      "last" : true,
       "totalElements" : 2,
       "totalPages" : 1,
-      "last" : true,
       "size" : 10,
       "number" : 0,
-      "sort" : [ {
-        "direction" : "ASC",
-        "property" : "id",
-        "ignoreCase" : false,
-        "nullHandling" : "NATIVE",
-        "ascending" : true,
-        "descending" : false
-      } ],
+      "sort" : {
+        "unsorted" : false,
+        "sorted" : true,
+        "empty" : false
+      },
+      "numberOfElements" : 2,
       "first" : true,
-      "numberOfElements" : 2
+      "empty" : false
     }
     """

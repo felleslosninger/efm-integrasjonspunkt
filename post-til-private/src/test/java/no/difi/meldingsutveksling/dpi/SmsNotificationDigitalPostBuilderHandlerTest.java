@@ -6,7 +6,6 @@ import no.difi.sdp.client2.domain.digital_post.SmsVarsel;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 public class SmsNotificationDigitalPostBuilderHandlerTest {

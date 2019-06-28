@@ -19,9 +19,8 @@ public class IntegrasjonspunktNokkel {
     private static final String ERR_MISSING_CERTIFICATE = "No Certificate with alias \"%s\" found in the KeyStore";
     private static final String ERR_GENERAL = "Unexpected problem occurred when operating KeyStore";
 
-    protected final KeyStoreProperties properties;
-
-    protected KeyStore keyStore;
+    private final KeyStoreProperties properties;
+    private final KeyStore keyStore;
 
     public IntegrasjonspunktNokkel(KeyStoreProperties properties) {
 
@@ -73,11 +72,9 @@ public class IntegrasjonspunktNokkel {
 
     public X509Certificate getX509Certificate() {
 
-        X509Certificate certificate;
-
         try {
 
-            certificate = (X509Certificate) keyStore.getCertificate(properties.getAlias());
+            X509Certificate certificate = (X509Certificate) keyStore.getCertificate(properties.getAlias());
 
             if (certificate == null) {
                 throw new IllegalStateException(
@@ -85,16 +82,13 @@ public class IntegrasjonspunktNokkel {
                 );
             }
 
+            return certificate;
         } catch (KeyStoreException e) {
-
             throw new IllegalStateException(ERR_GENERAL, e);
         }
-
-        return certificate;
     }
 
     public KeyPair getKeyPair() {
-
         PrivateKey privateKey = loadPrivateKey();
         X509Certificate certificate = getX509Certificate();
 
@@ -102,9 +96,7 @@ public class IntegrasjonspunktNokkel {
     }
 
     public SignatureHelper getSignatureHelper() {
-
         return new MoveSignaturHelper(keyStore, properties.getAlias(), properties.getPassword());
-
     }
 
     public boolean shouldLockProvider() {
@@ -115,10 +107,9 @@ public class IntegrasjonspunktNokkel {
         return keyStore;
     }
 
-
     public class MoveSignaturHelper extends SignatureHelper {
 
-        public MoveSignaturHelper(KeyStore keyStore, String keyAlias, String keyPassword) {
+        MoveSignaturHelper(KeyStore keyStore, String keyAlias, String keyPassword) {
 
             super(properties.getLockProvider() ? keyStore.getProvider() : null);
             loadCertificate(keyStore, keyAlias, keyPassword);

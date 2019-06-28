@@ -12,6 +12,7 @@ public class IdportenOidcTokenResponse {
     private String scope;
 
     public IdportenOidcTokenResponse() {
+        // NOOP
     }
 
     public String getAccessToken() {

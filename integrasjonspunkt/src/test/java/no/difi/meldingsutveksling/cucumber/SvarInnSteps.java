@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.cucumber;
 import cucumber.api.java.After;
 import cucumber.api.java.en.And;
 import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -13,6 +14,7 @@ public class SvarInnSteps {
     private final Holder<Message> messageInHolder;
     private final MockServerRestSteps mockServerRestSteps;
     private final SvarInnZipFactory svarInnZipFactory;
+    private final SvarInnClient svarInnClient;
 
     @After
     public void after() {
@@ -28,15 +30,16 @@ public class SvarInnSteps {
     public void fiksHasTheMessageWithConversationIdAvailable(String id) {
         mockServerRestSteps.aRequestToWillRespondWithStatusAndTheFollowing(
                 HttpMethod.GET.name(),
-                "/mottaker/hentNyeForsendelser",
+                svarInnClient.getRootUri() + "/mottaker/hentNyeForsendelser",
                 HttpStatus.OK.value(),
                 MediaType.APPLICATION_JSON_VALUE,
                 messageInHolder.get().getBody()
         );
 
+
         mockServerRestSteps.aRequestToWillRespondWithStatus(
                 HttpMethod.GET.name(),
-                "/mottaker/forsendelse/" + id,
+                svarInnClient.getRootUri() + "/mottaker/forsendelse/" + id,
                 HttpStatus.OK.value()
         );
 
@@ -47,7 +50,7 @@ public class SvarInnSteps {
 
         mockServerRestSteps.aRequestToWillRespondWithStatusAndTheFollowing(
                 HttpMethod.POST.name(),
-                "/kvitterMottak/forsendelse/" + id,
+                svarInnClient.getRootUri() + "/kvitterMottak/forsendelse/" + id,
                 HttpStatus.OK.value(),
                 MediaType.APPLICATION_JSON_VALUE,
                 ""

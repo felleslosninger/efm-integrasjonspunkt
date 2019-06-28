@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.kvittering;
 
 
+import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
@@ -26,6 +27,7 @@ import javax.xml.transform.dom.DOMSource;
  *
  * @author Glenn Bech
  */
+@UtilityClass
 class DocumentToDocumentConverter {
 
     private static JAXBContext jaxBContext;

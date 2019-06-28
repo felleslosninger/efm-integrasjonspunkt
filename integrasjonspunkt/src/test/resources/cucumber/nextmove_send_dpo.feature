@@ -354,33 +354,43 @@ Feature: Sending a Next Move DPO message
     """
     {
       "content" : [ {
-        "id" : 1,
-        "convId" : 1,
-        "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
+        "id" : 167,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
-        "status" : "OPPRETTET"
+        "status" : "OPPRETTET",
+        "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
+        "convId" : 166
       }, {
-        "id" : 2,
-        "convId" : 1,
-        "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
+        "id" : 170,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
-        "status" : "SENDT"
+        "status" : "SENDT",
+        "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
+        "convId" : 166
       } ],
+      "pageable" : {
+        "sort" : {
+          "sorted" : true,
+          "unsorted" : false,
+          "empty" : false
+        },
+        "offset" : 0,
+        "pageSize" : 10,
+        "pageNumber" : 0,
+        "paged" : true,
+        "unpaged" : false
+      },
       "last" : true,
       "totalElements" : 2,
       "totalPages" : 1,
       "size" : 10,
       "number" : 0,
-      "sort" : [ {
-        "direction" : "ASC",
-        "property" : "id",
-        "ignoreCase" : false,
-        "nullHandling" : "NATIVE",
-        "descending" : false,
-        "ascending" : true
-      } ],
       "first" : true,
-      "numberOfElements" : 2
+      "sort" : {
+        "sorted" : true,
+        "unsorted" : false,
+        "empty" : false
+      },
+      "numberOfElements" : 2,
+      "empty" : false
     }
     """
 
@@ -439,38 +449,48 @@ Feature: Sending a Next Move DPO message
     """
     {
       "content" : [ {
-        "id" : 20,
-        "convId" : 12,
-        "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
+        "id" : 167,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
-        "status" : "OPPRETTET"
+        "status" : "OPPRETTET",
+        "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
+        "convId" : 166
       }, {
-        "id" : 21,
-        "convId" : 12,
-        "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
+        "id" : 170,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
-        "status" : "SENDT"
+        "status" : "SENDT",
+        "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
+        "convId" : 166
       }, {
-        "id" : 24,
-        "convId" : 12,
-        "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
+        "id" : 171,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
-        "status" : "LEVERT"
+        "status" : "LEVERT",
+        "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
+        "convId" : 166
       } ],
-      "totalPages" : 1,
-      "totalElements" : 3,
+      "pageable" : {
+        "sort" : {
+          "sorted" : true,
+          "unsorted" : false,
+          "empty" : false
+        },
+        "offset" : 0,
+        "pageSize" : 10,
+        "pageNumber" : 0,
+        "paged" : true,
+        "unpaged" : false
+      },
       "last" : true,
+      "totalElements" : 3,
+      "totalPages" : 1,
       "size" : 10,
       "number" : 0,
-      "sort" : [ {
-        "direction" : "ASC",
-        "property" : "id",
-        "ignoreCase" : false,
-        "nullHandling" : "NATIVE",
-        "ascending" : true,
-        "descending" : false
-      } ],
       "first" : true,
-      "numberOfElements" : 3
+      "sort" : {
+        "sorted" : true,
+        "unsorted" : false,
+        "empty" : false
+      },
+      "numberOfElements" : 3,
+      "empty" : false
     }
-    """
+  """

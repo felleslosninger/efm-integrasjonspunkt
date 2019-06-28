@@ -204,39 +204,49 @@ Feature: Receiving a DPF message and forward to Noark P360
     """
     {
       "content" : [ {
-        "id" : 1,
-        "convId" : 1,
-        "conversationId" : "d4751d30-c9e5-4648-9612-956cdb5e53bc",
+        "id" : 221,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
-        "status" : "OPPRETTET"
+        "status" : "OPPRETTET",
+        "conversationId" : "d4751d30-c9e5-4648-9612-956cdb5e53bc",
+        "convId" : 220
       }, {
-        "id" : 2,
-        "convId" : 1,
-        "conversationId" : "d4751d30-c9e5-4648-9612-956cdb5e53bc",
+        "id" : 222,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
-        "status" : "INNKOMMENDE_MOTTATT"
+        "status" : "INNKOMMENDE_MOTTATT",
+        "conversationId" : "d4751d30-c9e5-4648-9612-956cdb5e53bc",
+        "convId" : 220
       }, {
-        "id" : 3,
-        "convId" : 1,
-        "conversationId" : "d4751d30-c9e5-4648-9612-956cdb5e53bc",
+        "id" : 223,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
-        "status" : "INNKOMMENDE_LEVERT"
+        "status" : "INNKOMMENDE_LEVERT",
+        "conversationId" : "d4751d30-c9e5-4648-9612-956cdb5e53bc",
+        "convId" : 220
       } ],
+      "pageable" : {
+        "sort" : {
+          "sorted" : true,
+          "unsorted" : false,
+          "empty" : false
+        },
+        "offset" : 0,
+        "pageNumber" : 0,
+        "pageSize" : 10,
+        "unpaged" : false,
+        "paged" : true
+      },
       "last" : true,
       "totalPages" : 1,
       "totalElements" : 3,
       "size" : 10,
       "number" : 0,
-      "sort" : [ {
-        "direction" : "ASC",
-        "property" : "id",
-        "ignoreCase" : false,
-        "nullHandling" : "NATIVE",
-        "ascending" : true,
-        "descending" : false
-      } ],
+      "sort" : {
+        "sorted" : true,
+        "unsorted" : false,
+        "empty" : false
+      },
+      "numberOfElements" : 3,
       "first" : true,
-      "numberOfElements" : 3
+      "empty" : false
     }
     """
 

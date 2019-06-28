@@ -120,7 +120,7 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public Clock clock() {
+    public Clock systemClock() {
         return Clock.system(DEFAULT_ZONE_ID);
     }
 

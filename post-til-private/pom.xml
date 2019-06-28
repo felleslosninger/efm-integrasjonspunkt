@@ -17,16 +17,24 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>domain</artifactId>
-            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>common</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jhades</groupId>
             <artifactId>jhades</artifactId>
-            <version>1.0.4</version>
         </dependency>
         <dependency>
             <groupId>no.difi.sdp</groupId>
             <artifactId>sikker-digital-post-klient-java</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>wss4j-ws-security-dom</artifactId>
+                    <groupId>org.apache.wss4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -37,11 +45,11 @@
             <artifactId>logback-classic</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <scope>provided</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>commons-logging</groupId>-->
+<!--            <artifactId>commons-logging</artifactId>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -58,19 +66,11 @@
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.10.19</version>
+            <artifactId>mockito-core</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
-            <version>1.1.0.Final</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>common</artifactId>
-            <version>1.7.98-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

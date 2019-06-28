@@ -10,6 +10,7 @@ import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.IntegrasjonspunktApplication;
 import no.difi.meldingsutveksling.KeystoreProvider;
 import no.difi.meldingsutveksling.UUIDGenerator;
+import no.difi.meldingsutveksling.clock.TestClock;
 import no.difi.meldingsutveksling.clock.TestClockConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dpi.SikkerDigitalPostKlientFactory;
@@ -43,8 +44,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.task.SyncTaskExecutor;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.test.context.ActiveProfiles;
@@ -57,6 +56,7 @@ import org.springframework.ws.soap.saaj.SaajSoapMessageFactory;
 import org.springframework.ws.transport.http.AbstractHttpWebServiceMessageSender;
 
 import javax.xml.bind.Marshaller;
+import java.time.Clock;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -86,6 +86,12 @@ public class CucumberStepsConfiguration {
     @RequiredArgsConstructor
     @SpyBean(WebhookPusher.class)
     public static class SpringConfiguration {
+
+        @Primary
+        @Bean
+        public Clock clock(TestClock testClock) {
+            return testClock;
+        }
 
         @Bean
         @Primary

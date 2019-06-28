@@ -27,6 +27,8 @@ import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
+//import org.jvnet.staxex.util.XMLStreamReaderToXMLStreamWriter$Breakpoint;
+
 @RequiredArgsConstructor
 public class AltinnInSteps {
 

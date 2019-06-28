@@ -7,7 +7,7 @@ import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import no.difi.meldingsutveksling.nextmove.QNextMoveInMessage;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.querydsl.QueryDslPredicateExecutor;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface NextMoveMessageInRepository extends PagingAndSortingRepository<NextMoveInMessage, Long>,
-        QueryDslPredicateExecutor<NextMoveInMessage>,
+        QuerydslPredicateExecutor<NextMoveInMessage>,
         QuerydslBinderCustomizer<QNextMoveInMessage> {
 
     @Override

@@ -1,14 +1,13 @@
 package no.difi.meldingsutveksling.config;
 
-import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.exceptions.ErrorDescriber;
-import org.springframework.boot.autoconfigure.web.DefaultErrorAttributes;
+import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
-import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.WebRequest;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
@@ -19,17 +18,21 @@ import java.util.stream.Collectors;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
-@RequiredArgsConstructor
 public class IntegrasjonspunktErrorAttributes extends DefaultErrorAttributes {
 
     private final Clock clock;
 
+    public IntegrasjonspunktErrorAttributes(Clock clock) {
+        super(true);
+        this.clock = clock;
+    }
+
     @Override
-    public Map<String, Object> getErrorAttributes(RequestAttributes requestAttributes, boolean includeStackTrace) {
-        final Map<String, Object> errorAttributes = super.getErrorAttributes(requestAttributes, includeStackTrace);
+    public Map<String, Object> getErrorAttributes(WebRequest webRequest, boolean includeStackTrace) {
+        final Map<String, Object> errorAttributes = super.getErrorAttributes(webRequest, includeStackTrace);
         errorAttributes.put("timestamp", OffsetDateTime.now(clock));
 
-        final Throwable error = super.getError(requestAttributes);
+        final Throwable error = super.getError(webRequest);
 
         if (error instanceof ConstraintViolationException) {
             final ConstraintViolationException cve = (ConstraintViolationException) error;

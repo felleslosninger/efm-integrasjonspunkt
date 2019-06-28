@@ -8,7 +8,7 @@ import org.springframework.data.domain.Sort;
 @UtilityClass
 class PageRequests {
 
-    static final PageRequest FIRST_BY_LAST_UPDATED_ASC = new PageRequest(0, 1,
+    static final PageRequest FIRST_BY_LAST_UPDATED_ASC = PageRequest.of(0, 1,
             Sort.Direction.ASC,
             QNextMoveInMessage.nextMoveInMessage.lastUpdated.getMetadata().getName());
 }

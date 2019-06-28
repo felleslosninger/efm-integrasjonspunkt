@@ -186,39 +186,49 @@ Feature: Receiving a Next Move DPF message
     """
     {
       "content" : [ {
-        "id" : 1,
-        "convId" : 1,
-        "conversationId" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
+        "id" : 10,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
-        "status" : "OPPRETTET"
+        "status" : "OPPRETTET",
+        "conversationId" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
+        "convId" : 9
       }, {
-        "id" : 1,
-        "convId" : 1,
-        "conversationId" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
+        "id" : 11,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
-        "status" : "INNKOMMENDE_MOTTATT"
+        "status" : "INNKOMMENDE_MOTTATT",
+        "conversationId" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
+        "convId" : 9
       }, {
-        "id" : 1,
-        "convId" : 1,
-        "conversationId" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
+        "id" : 12,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
-        "status" : "INNKOMMENDE_LEVERT"
+        "status" : "INNKOMMENDE_LEVERT",
+        "conversationId" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
+        "convId" : 9
       } ],
+      "pageable" : {
+        "sort" : {
+          "sorted" : true,
+          "unsorted" : false,
+          "empty" : false
+        },
+        "offset" : 0,
+        "pageSize" : 10,
+        "pageNumber" : 0,
+        "paged" : true,
+        "unpaged" : false
+      },
       "last" : true,
-      "totalPages" : 1,
       "totalElements" : 3,
+      "totalPages" : 1,
       "size" : 10,
       "number" : 0,
-      "sort" : [ {
-        "direction" : "ASC",
-        "property" : "id",
-        "ignoreCase" : false,
-        "nullHandling" : "NATIVE",
-        "ascending" : true,
-        "descending" : false
-      } ],
+      "sort" : {
+        "sorted" : true,
+        "unsorted" : false,
+        "empty" : false
+      },
+      "numberOfElements" : 3,
       "first" : true,
-      "numberOfElements" : 3
+      "empty" : false
     }
     """
 

@@ -15,6 +15,30 @@
 
   <dependencies>
     <dependency>
+      <groupId>no.difi.meldingsutveksling</groupId>
+      <artifactId>dokumentpakking</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>no.difi.meldingsutveksling</groupId>
+      <artifactId>common</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>no.difi.meldingsutveksling</groupId>
+      <artifactId>domain</artifactId>
+      <exclusions>
+        <exclusion>
+          <artifactId>javassist</artifactId>
+          <groupId>org.javassist</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>no.difi.move-common</groupId>
+      <artifactId>webservice-tools</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot</artifactId>
     </dependency>
@@ -25,13 +49,18 @@
     <dependency>
       <groupId>com.sun.mail</groupId>
       <artifactId>javax.mail</artifactId>
-      <version>1.5.6</version>
     </dependency>
     <dependency>
       <groupId>org.spockframework</groupId>
       <artifactId>spock-core</artifactId>
       <version>1.1-groovy-2.4</version>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>groovy-all</artifactId>
+          <groupId>org.codehaus.groovy</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.codehaus.groovy</groupId>
@@ -42,19 +71,16 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>${mockito.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.powermock</groupId>
       <artifactId>powermock-module-junit4</artifactId>
-      <version>2.0.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.powermock</groupId>
       <artifactId>powermock-api-mockito2</artifactId>
-      <version>2.0.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -90,33 +116,17 @@
     <dependency>
       <groupId>javax.validation</groupId>
       <artifactId>validation-api</artifactId>
-      <version>1.1.0.Final</version>
     </dependency>
-    <dependency>
-      <groupId>org.hibernate</groupId>
-      <artifactId>hibernate-validator</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>no.difi.meldingsutveksling</groupId>
-      <artifactId>domain</artifactId>
-      <version>${project.parent.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>cglib</groupId>
-      <artifactId>cglib</artifactId>
-      <version>3.2.4</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>no.difi.meldingsutveksling</groupId>
-      <artifactId>dokumentpakking</artifactId>
-      <version>${project.parent.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>no.difi.meldingsutveksling</groupId>
-      <artifactId>common</artifactId>
-      <version>${project.parent.version}</version>
-    </dependency>
+<!--    <dependency>-->
+<!--      <groupId>org.hibernate</groupId>-->
+<!--      <artifactId>hibernate-validator</artifactId>-->
+<!--    </dependency>-->
+<!--    <dependency>-->
+<!--      <groupId>cglib</groupId>-->
+<!--      <artifactId>cglib</artifactId>-->
+<!--      <version>3.2.4</version>-->
+<!--      <scope>test</scope>-->
+<!--    </dependency>-->
     <dependency>
       <groupId>org.apache.ws.commons.axiom</groupId>
       <artifactId>axiom-api</artifactId>
@@ -125,11 +135,12 @@
       <groupId>org.apache.ws.commons.axiom</groupId>
       <artifactId>axiom-impl</artifactId>
       <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest-core</artifactId>
-      <version>1.3</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>stax2-api</artifactId>
+          <groupId>org.codehaus.woodstox</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
   

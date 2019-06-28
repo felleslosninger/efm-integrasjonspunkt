@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.cucumber;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
-import org.springframework.boot.context.embedded.LocalServerPort;
+import org.springframework.boot.web.server.LocalServerPort;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;

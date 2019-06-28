@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.solr.SolrAutoConfiguration;
-import org.springframework.boot.web.support.SpringBootServletInitializer;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 
 /**
@@ -28,7 +28,7 @@ public class InternalQueueMain extends SpringBootServletInitializer {
     }
 
     public static void main(String... args) {
-        ConfigurableApplicationContext context = SpringApplication.run(new Object[]{InternalQueueMain.class, JmsConfiguration.class}, args);
+        ConfigurableApplicationContext context = SpringApplication.run(new Class[]{InternalQueueMain.class, JmsConfiguration.class}, args);
         InternalQueueMain bean = context.getBean(InternalQueueMain.class);
         bean.testPut();
     }

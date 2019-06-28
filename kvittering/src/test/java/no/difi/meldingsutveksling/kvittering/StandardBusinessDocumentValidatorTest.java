@@ -12,7 +12,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 import java.io.IOException;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 /**
@@ -27,6 +27,6 @@ public class StandardBusinessDocumentValidatorTest {
         DocumentBuilder builder;
         builder = dbf.newDocumentBuilder();
         Document doc = builder.parse(StandardBusinessDocumentValidatorTest.class.getClassLoader().getResourceAsStream("signed_sbd_kvittering.xml"));
-        assertTrue(DocumentValidator.validate(doc));
+        assertThat(DocumentValidator.validate(doc)).isTrue();
     }
 }

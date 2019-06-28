@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling;
 import com.google.common.io.ByteStreams;
 import no.difi.asic.*;
 import no.difi.commons.asic.jaxb.asic.Certificate;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.KeyStoreProperties;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -34,7 +33,7 @@ public class IntegrasjonspunktNokkelTest {
 
 
     @BeforeClass
-    public static void before()throws Exception{
+    public static void before() throws Exception {
 
         KeyStoreProperties properties = new KeyStoreProperties();
         properties.setAlias(ALIAS);
@@ -45,7 +44,7 @@ public class IntegrasjonspunktNokkelTest {
     }
 
     @Test
-    public void testGetKeyPair(){
+    public void testGetKeyPair() {
 
         KeyPair keyPair = integrasjonspunktNokkel.getKeyPair();
 
@@ -59,7 +58,7 @@ public class IntegrasjonspunktNokkelTest {
     }
 
 
-    public static void performGetSignatureHelper(IntegrasjonspunktNokkel integrasjonspunktNokkel, String alias) throws Exception{
+    public static void performGetSignatureHelper(IntegrasjonspunktNokkel integrasjonspunktNokkel, String alias) throws Exception {
 
         KeyStore keyStore = integrasjonspunktNokkel.getKeyStore();
         SignatureHelper signatureHelper = integrasjonspunktNokkel.getSignatureHelper();
@@ -71,7 +70,7 @@ public class IntegrasjonspunktNokkelTest {
 
         {
             // Setup
-            Assert.assertEquals("OutputStream is initially empty",0, baos.size());
+            Assert.assertEquals("OutputStream is initially empty", 0, baos.size());
 
             AsicWriter asicWriter = asicWriterFactory.newContainer(baos);
             try (InputStream inputStream = IntegrasjonspunktNokkelTest.class.getResourceAsStream("/" + FILE1_NAME)) {
@@ -92,12 +91,12 @@ public class IntegrasjonspunktNokkelTest {
 
             Assert.assertNull("ASiC contains no further files", asicReader.getNextFile());
 
-            Assert.assertEquals("ASiC contained a total of 1 file",1, asicReader.getAsicManifest().getFile().size());
+            Assert.assertEquals("ASiC contained a total of 1 file", 1, asicReader.getAsicManifest().getFile().size());
 
             // Check certificate used to sign the transferred file
-            Assert.assertEquals("ASiC contained a total of 1 certificates",1, asicReader.getAsicManifest().getCertificate().size());
+            Assert.assertEquals("ASiC contained a total of 1 certificates", 1, asicReader.getAsicManifest().getCertificate().size());
 
-            X509Certificate keyStoreCert =  (X509Certificate) keyStore.getCertificate(alias);
+            X509Certificate keyStoreCert = (X509Certificate) keyStore.getCertificate(alias);
             Certificate asicCert = asicReader.getAsicManifest().getCertificate().get(0);
 
             Assert.assertArrayEquals("ASiC file is signed by certificate from KeyStore",

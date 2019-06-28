@@ -17,17 +17,8 @@ public class ServiceBusRestErrorHandler extends DefaultResponseErrorHandler {
 
     private final ServiceRegistryLookup srLookup;
 
-    /**
-     * This default implementation throws a {@link HttpClientErrorException} if the response status code
-     * is {@link HttpStatus.Series#CLIENT_ERROR}, a {@link HttpServerErrorException}
-     * if it is {@link HttpStatus.Series#SERVER_ERROR},
-     * and a {@link RestClientException} in other cases.
-     *
-     * @param response
-     */
     @Override
-    public void handleError(ClientHttpResponse response) throws IOException {
-        HttpStatus statusCode = getHttpStatusCode(response);
+    protected void handleError(ClientHttpResponse response, HttpStatus statusCode) throws IOException {
         if (statusCode == HttpStatus.UNAUTHORIZED) {
             log.debug("Got status {} from service bus, invalidating sas key", statusCode.toString());
             srLookup.invalidateSasKey();

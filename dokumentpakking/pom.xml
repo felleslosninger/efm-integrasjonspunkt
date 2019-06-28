@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>dokumentpakking</artifactId>
@@ -40,7 +41,7 @@
                             <value>all</value>
                         </property>
                     </properties>
-                    <outputFile />
+                    <outputFile/>
                 </configuration>
             </plugin>
             <plugin>
@@ -54,12 +55,25 @@
     <dependencies>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>domain</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>nextmove</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>security</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>json-smart</artifactId>
+                    <groupId>net.minidev</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>no.difi.commons</groupId>
             <artifactId>commons-asic</artifactId>
-            <version>0.9.3-MOVE</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -80,44 +94,22 @@
             <groupId>org.springframework.ws</groupId>
             <artifactId>spring-xml</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-oxm</artifactId>
         </dependency>
-
         <dependency>
             <groupId>com.thoughtworks.xstream</groupId>
             <artifactId>xstream</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>domain</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>nextmove</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-all</artifactId>
-            <version>1.3</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
+            <artifactId>mockito-core</artifactId>
         </dependency>
 
         <dependency>

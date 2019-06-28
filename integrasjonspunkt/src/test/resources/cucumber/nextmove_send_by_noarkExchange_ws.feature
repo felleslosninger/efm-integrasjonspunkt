@@ -301,32 +301,42 @@ Feature: Sending a BEST/EDU message by the noarkExchange WebService
     """
     {
       "content" : [ {
-        "id" : 1,
-        "convId" : 1,
-        "conversationId" : "6e9cab22-a682-461c-bcd4-f201bfb3de8c",
+        "id" : 25,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
-        "status" : "OPPRETTET"
+        "status" : "OPPRETTET",
+        "conversationId" : "6e9cab22-a682-461c-bcd4-f201bfb3de8c",
+        "convId" : 24
       }, {
-        "id" : 2,
-        "convId" : 1,
-        "conversationId" : "6e9cab22-a682-461c-bcd4-f201bfb3de8c",
+        "id" : 28,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
-        "status" : "SENDT"
+        "status" : "SENDT",
+        "conversationId" : "6e9cab22-a682-461c-bcd4-f201bfb3de8c",
+        "convId" : 24
       } ],
+      "pageable" : {
+        "sort" : {
+          "unsorted" : false,
+          "sorted" : true,
+          "empty" : false
+        },
+        "offset" : 0,
+        "pageNumber" : 0,
+        "pageSize" : 10,
+        "unpaged" : false,
+        "paged" : true
+      },
       "last" : true,
       "totalElements" : 2,
       "totalPages" : 1,
       "size" : 10,
       "number" : 0,
-      "sort" : [ {
-        "direction" : "ASC",
-        "property" : "id",
-        "ignoreCase" : false,
-        "nullHandling" : "NATIVE",
-        "descending" : false,
-        "ascending" : true
-      } ],
+      "sort" : {
+        "unsorted" : false,
+        "sorted" : true,
+        "empty" : false
+      },
+      "numberOfElements" : 2,
       "first" : true,
-      "numberOfElements" : 2
+      "empty" : false
     }
     """

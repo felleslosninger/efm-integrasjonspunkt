@@ -2,17 +2,12 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-
-import static org.apache.commons.lang.StringUtils.isNotBlank;
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
-
-
-
+import org.springframework.util.StringUtils;
 
 public class PutMessageRequestWrapper {
     private PutMessageRequestType requestType;
 
-    public enum MessageType{
+    public enum MessageType {
         EDUMESSAGE, APPRECEIPT, UNKNOWN
     }
 
@@ -42,11 +37,11 @@ public class PutMessageRequestWrapper {
     }
 
     public boolean hasSenderPartyNumber() {
-        return hasSender() && isNotBlank(requestType.getEnvelope().getSender().getOrgnr());
+        return hasSender() && StringUtils.hasText(requestType.getEnvelope().getSender().getOrgnr());
     }
 
     public boolean hasRecieverPartyNumber() {
-        return hasReciever() && isNotEmpty(getReceiverPartyNumber());
+        return hasReciever() && StringUtils.hasLength(getReceiverPartyNumber());
     }
 
     private boolean hasReciever() {
@@ -86,7 +81,7 @@ public class PutMessageRequestWrapper {
     }
 
     public void swapSenderAndReceiver() {
-        final String sender = getSenderPartynumber() ;
+        final String sender = getSenderPartynumber();
         setSenderPartyNumber(getReceiverPartyNumber());
         setReceiverPartyNumber(sender);
     }
@@ -95,8 +90,8 @@ public class PutMessageRequestWrapper {
         return !PayloadUtil.isEmpty(getPayload());
     }
 
-    public MessageType getMessageType(){
-        if(hasPayload()) {
+    public MessageType getMessageType() {
+        if (hasPayload()) {
             if (PayloadUtil.isAppReceipt(getPayload())) {
                 return MessageType.APPRECEIPT;
             }

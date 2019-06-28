@@ -9,11 +9,10 @@ import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.stereotype.Component;
@@ -29,7 +28,9 @@ import java.util.*;
 
 import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 
+@Slf4j
 @Component
+@RequiredArgsConstructor
 public class OidcTokenClient {
 
     private static final String CLIENT_ID_PREFIX = "MOVE_IP_";
@@ -46,14 +47,7 @@ public class OidcTokenClient {
             "global/navn.read",
             "global/postadresse.read");
 
-    private static final Logger log = LoggerFactory.getLogger(OidcTokenClient.class);
-
-    private IntegrasjonspunktProperties props;
-
-    @Autowired
-    public OidcTokenClient(IntegrasjonspunktProperties props) {
-        this.props = props;
-    }
+    private final IntegrasjonspunktProperties props;
 
     public IdportenOidcTokenResponse fetchToken() {
         RestTemplate restTemplate = new RestTemplate();

@@ -6,12 +6,12 @@ import no.difi.meldingsutveksling.converter.StringToStandardBusinessDocumentConv
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @RequiredArgsConstructor
 @ComponentScan(basePackageClasses = StringToStandardBusinessDocumentConverter.class)
-public class MvcConfiguration extends WebMvcConfigurerAdapter {
+public class MvcConfiguration implements WebMvcConfigurer {
 
     private final StringToStandardBusinessDocumentConverter stringToStandardBusinessDocumentConverter;
     private final MultipartFileToStandardBusinessDocumentConverter multipartFileToStandardBusinessDocumentConverter;
