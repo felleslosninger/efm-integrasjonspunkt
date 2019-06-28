@@ -6,9 +6,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 @UtilityClass
-class PageRequests {
+public class PageRequests {
 
-    static final PageRequest FIRST_BY_LAST_UPDATED_ASC = new PageRequest(0, 1,
+    public static final PageRequest FIRST_BY_LAST_UPDATED_ASC = new PageRequest(0, 1,
             Sort.Direction.ASC,
             QNextMoveInMessage.nextMoveInMessage.lastUpdated.getMetadata().getName());
 }

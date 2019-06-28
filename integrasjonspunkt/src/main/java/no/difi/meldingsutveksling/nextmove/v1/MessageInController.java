@@ -1,6 +1,8 @@
 package no.difi.meldingsutveksling.nextmove.v1;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import com.querydsl.core.types.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.asic.AsicUtils;
@@ -13,13 +15,11 @@ import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.nextmove.InnsynskravMessage;
-import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
-import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
-import no.difi.meldingsutveksling.nextmove.PubliseringMessage;
+import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.v2.CryptoMessagePersisterImpl;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveInMessageQueryInput;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
+import no.difi.meldingsutveksling.nextmove.v2.PageRequests;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
@@ -29,10 +29,7 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
@@ -112,14 +109,29 @@ public class MessageInController {
         return ResponseEntity.ok(peekMessage);
     }
 
+    @PostMapping("/pop")
+    public ResponseEntity popPost(
+            @RequestParam(value = "serviceIdentifier", required = false) String serviceIdentifier,
+            @RequestParam(value = "conversationId", required = false) String conversationId) {
+        return pop(serviceIdentifier, conversationId);
+    }
+
     @GetMapping("/pop")
     @Transactional
     public ResponseEntity pop(
             @RequestParam(value = "serviceIdentifier", required = false) String serviceIdentifier,
-            @RequestParam(value = "conversationId") String conversationId) {
+            @RequestParam(value = "conversationId", required = false) String conversationId) {
 
-        NextMoveInMessage message = inRepo.findByConversationId(conversationId)
-                .orElseThrow(() -> new ConversationNotFoundException(conversationId));
+        NextMoveInMessage message;
+        if (Strings.isNullOrEmpty(conversationId)) {
+            NextMoveInMessageQueryInput query = new NextMoveInMessageQueryInput().setServiceIdentifier("DPE");
+            Predicate p = inRepo.createQuery(query).and(QNextMoveInMessage.nextMoveInMessage.lockTimeout.isNotNull()).getValue();
+            message = inRepo.findAll(p, PageRequests.FIRST_BY_LAST_UPDATED_ASC)
+                    .getContent().stream().findFirst().orElseThrow(NoContentException::new);
+        } else {
+            message = inRepo.findByConversationId(conversationId)
+                    .orElseThrow(() -> new ConversationNotFoundException(conversationId));
+        }
 
         if (message.getLockTimeout() == null) {
             throw new ConversationNotLockedException(conversationId);
@@ -150,5 +162,12 @@ public class MessageInController {
                     ASIC_FILE, message.getConversationId(), message.getSenderIdentifier()), markerFrom(message), e);
             throw new FileNotFoundException(ASIC_FILE);
         }
+    }
+
+    @GetMapping("/delete")
+    public ResponseEntity delete(
+            @RequestParam(value = "serviceIdentifier", required = false) String serviceIdentifier,
+            @RequestParam(value = "conversationId", required = false) String conversationId) {
+        return ResponseEntity.ok().build();
     }
 }
