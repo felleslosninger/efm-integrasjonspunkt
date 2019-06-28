@@ -1,13 +1,13 @@
 package no.difi.meldingsutveksling.domain.arkivmelding;
 
-import com.google.common.collect.HashBiMap;
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.metadatakatalog.Variantformat;
+import no.difi.meldingsutveksling.HashBiMap;
 
 @Slf4j
 public class VariantformatMapper {
 
-    private static final HashBiMap<String, Variantformat> mapper = HashBiMap.create();
+    private static final HashBiMap<String, Variantformat> mapper = new HashBiMap<>();
 
     private VariantformatMapper() {
     }

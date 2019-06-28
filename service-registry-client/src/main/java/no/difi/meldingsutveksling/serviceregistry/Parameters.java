@@ -1,7 +1,8 @@
 package no.difi.meldingsutveksling.serviceregistry;
 
-import com.google.common.base.Objects;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.Notification;
+
+import java.util.Objects;
 
 public class Parameters {
     private String identifier;
@@ -26,13 +27,13 @@ public class Parameters {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Parameters that = (Parameters) o;
-        return Objects.equal(identifier, that.identifier)
+        return Objects.equals(identifier, that.identifier)
                 && notification == that.notification;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(identifier, notification);
+        return Objects.hash(identifier, notification);
     }
 
     String getQuery() {

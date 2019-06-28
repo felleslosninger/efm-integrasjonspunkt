@@ -57,9 +57,9 @@
 
         <sikker-digital-post-klient.version>5.6</sikker-digital-post-klient.version>
         <powermock.version>2.0.0</powermock.version>
-<!--        <mockito.version>2.23.4</mockito.version>-->
-<!--        <assertj.version>2.9.0</assertj.version>-->
-<!--        <xmlunit.version>2.6.2</xmlunit.version>-->
+        <!--        <mockito.version>2.23.4</mockito.version>-->
+        <!--        <assertj.version>2.9.0</assertj.version>-->
+        <!--        <xmlunit.version>2.6.2</xmlunit.version>-->
         <cucumber.version>2.3.1</cucumber.version>
         <apache.wss4j.version>2.1.11</apache.wss4j.version>
         <move-common.version>1.0.28-spring_boot2-SNAPSHOT</move-common.version>
@@ -135,6 +135,11 @@
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
                 <artifactId>domain</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.difi.meldingsutveksling</groupId>
+                <artifactId>altinn-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -16,6 +16,22 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>noarkexchange</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>service-registry-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>nextmove</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>commons-codec</groupId>
@@ -48,24 +64,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>noarkexchange</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>service-registry-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>validation</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>nextmove</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>

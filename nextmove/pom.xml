@@ -90,12 +90,10 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>validation</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>common</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
@@ -134,10 +132,6 @@
             <artifactId>logstash-logback-encoder</artifactId>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>com.google.guava</groupId>-->
-<!--            <artifactId>guava</artifactId>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-jpa</artifactId>

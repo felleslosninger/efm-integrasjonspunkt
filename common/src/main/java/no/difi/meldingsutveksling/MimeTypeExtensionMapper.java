@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling;
 
-import com.google.common.collect.HashBiMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -9,7 +8,7 @@ public class MimeTypeExtensionMapper {
 
     private static final Logger log = LoggerFactory.getLogger(MimeTypeExtensionMapper.class);
 
-    private static final HashBiMap<String, String> mimeTypeMap = HashBiMap.create();
+    private static final HashBiMap<String, String> mimeTypeMap = new HashBiMap<>();
 
     static {
         mimeTypeMap.put("application/pdf", "pdf");

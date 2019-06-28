@@ -1,8 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import com.google.common.hash.Hashing;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -15,12 +13,17 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.JAXBException;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Optional;
@@ -38,15 +41,17 @@ public class ServiceBusRestClient {
 
     private final ServiceRegistryLookup sr;
     private final IntegrasjonspunktProperties props;
+    private final ObjectMapper objectMapper;
     private final ServiceBusPayloadConverter payloadConverter;
     @Getter
     private final ServiceBusRestTemplate restTemplate;
     @Getter
     private final String localQueuePath;
 
-    public ServiceBusRestClient(ServiceRegistryLookup sr, IntegrasjonspunktProperties props, ServiceBusPayloadConverter payloadConverter, ServiceBusRestTemplate restTemplate) {
+    public ServiceBusRestClient(ServiceRegistryLookup sr, IntegrasjonspunktProperties props, ObjectMapper objectMapper, ServiceBusPayloadConverter payloadConverter, ServiceBusRestTemplate restTemplate) {
         this.sr = sr;
         this.props = props;
+        this.objectMapper = objectMapper;
         this.payloadConverter = payloadConverter;
         this.restTemplate = restTemplate;
         this.localQueuePath = NEXTMOVE_QUEUE_PREFIX +
@@ -59,7 +64,7 @@ public class ServiceBusRestClient {
                 props.getNextmove().getServiceBus().getBaseUrl());
     }
 
-    public void sendMessage(byte[] message, String queuePath) {
+    void sendMessage(byte[] message, String queuePath) {
         String resourceUri = format("%s/%s/messages",
                 getBase(),
                 queuePath);
@@ -77,7 +82,7 @@ public class ServiceBusRestClient {
         }
     }
 
-    public Optional<ServiceBusMessage> receiveMessage() {
+    Optional<ServiceBusMessage> receiveMessage() {
         String resourceUri = format("%s/%s/messages/head",
                 getBase(),
                 localQueuePath);
@@ -97,13 +102,12 @@ public class ServiceBusRestClient {
             }
 
             ServiceBusMessage.ServiceBusMessageBuilder sbmBuilder = ServiceBusMessage.builder();
-            String brokerPropertiesJson = response.getHeaders().getFirst("BrokerProperties");
-            JsonParser jsonParser = new JsonParser();
-            JsonObject brokerProperties = jsonParser.parse(brokerPropertiesJson).getAsJsonObject();
-            String messageId = brokerProperties.get("MessageId").getAsString();
-            sbmBuilder.lockToken(brokerProperties.get("LockToken").getAsString())
+            BrokerProperties brokerProperties = getBrokerProperties(response);
+
+            String messageId = brokerProperties.getMessageId();
+            sbmBuilder.lockToken(brokerProperties.getLockToken())
                     .messageId(messageId)
-                    .sequenceNumber(brokerProperties.get("SequenceNumber").getAsString());
+                    .sequenceNumber(brokerProperties.getSequenceNumber());
 
             try {
                 ServiceBusPayload payload = payloadConverter.convert(response.getBody(), messageId);
@@ -113,14 +117,19 @@ public class ServiceBusRestClient {
             } catch (JAXBException e) {
                 log.error(String.format("Error creating old format from message id=%s", messageId), e);
             }
-        } catch (ResourceAccessException e) {
+        } catch (ResourceAccessException | IOException e) {
             log.error("Polling of DPE messages failed with: {}", e.getLocalizedMessage());
             return Optional.empty();
         }
         return Optional.empty();
     }
 
-    public void deleteMessage(ServiceBusMessage message) {
+    private BrokerProperties getBrokerProperties(ResponseEntity<String> response) throws IOException {
+        String brokerPropertiesJson = response.getHeaders().getFirst("BrokerProperties");
+        return objectMapper.readValue(brokerPropertiesJson, BrokerProperties.class);
+    }
+
+    void deleteMessage(ServiceBusMessage message) {
         String resourceUri = format("%s/%s/messages/%s/%s",
                 getBase(),
                 localQueuePath,
@@ -160,9 +169,7 @@ public class ServiceBusRestClient {
 
         int expiry = Math.round(Instant.now().plusSeconds(20).toEpochMilli() / 1000f);
         String hashInput = urlEncoded + "\n" + expiry;
-
-        byte[] bytes = Hashing.hmacSha256(getSasKey().getBytes(StandardCharsets.UTF_8))
-                .hashBytes(hashInput.getBytes(StandardCharsets.UTF_8)).asBytes();
+        byte[] bytes = hmacSha256(getSasKey(), hashInput);
         byte[] signEncoded = Base64.getEncoder().encode(bytes);
         String signature;
         try {
@@ -178,7 +185,18 @@ public class ServiceBusRestClient {
                 props.getNextmove().getServiceBus().getSasKeyName());
     }
 
-    public String getSasKey() {
+    private byte[] hmacSha256(String secret, String message) {
+        try {
+            Mac hmacSHA256 = Mac.getInstance("HmacSHA256");
+            SecretKeySpec secretKeySpec = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+            hmacSHA256.init(secretKeySpec);
+            return hmacSHA256.doFinal(message.getBytes(StandardCharsets.UTF_8));
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            throw new MeldingsUtvekslingRuntimeException(e);
+        }
+    }
+
+    String getSasKey() {
         if (props.getOidc().isEnable()) {
             return sr.getSasKey();
         } else {

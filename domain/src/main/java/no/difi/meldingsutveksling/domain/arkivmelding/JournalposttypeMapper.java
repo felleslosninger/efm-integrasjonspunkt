@@ -1,13 +1,13 @@
 package no.difi.meldingsutveksling.domain.arkivmelding;
 
-import com.google.common.collect.HashBiMap;
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.metadatakatalog.Journalposttype;
+import no.difi.meldingsutveksling.HashBiMap;
 
 @Slf4j
 public class JournalposttypeMapper {
 
-    private static final HashBiMap<String, Journalposttype> mapper = HashBiMap.create();
+    private static final HashBiMap<String, Journalposttype> mapper = new HashBiMap<>();
 
     private JournalposttypeMapper() {
     }

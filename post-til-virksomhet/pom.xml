@@ -12,19 +12,26 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>noarkexchange</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.difi.move-common</groupId>
+            <artifactId>audit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>service-registry-client</artifactId>
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>domain</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>nextmove</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -47,12 +54,6 @@
             <artifactId>logback-classic</artifactId>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>commons-logging</groupId>-->
-<!--            <artifactId>commons-logging</artifactId>-->
-<!--            <scope>provided</scope>-->
-<!--        </dependency>-->
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
@@ -61,11 +62,6 @@
             <groupId>org.apache.ws.commons.axiom</groupId>
             <artifactId>axiom-api</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.sun.xml.stream</groupId>-->
-<!--            <artifactId>sjsxp</artifactId>-->
-<!--            <version>1.0.2</version>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>org.apache.ws.commons.axiom</groupId>
             <artifactId>axiom-impl</artifactId>
@@ -74,32 +70,11 @@
             <groupId>org.codehaus.janino</groupId>
             <artifactId>janino</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>commons-io</groupId>-->
-<!--            <artifactId>commons-io</artifactId>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
         </dependency>
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>noarkexchange</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>no.difi.move-common</groupId>
-            <artifactId>audit</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>service-registry-client</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-
     </dependencies>
-
 
     <build>
         <plugins>

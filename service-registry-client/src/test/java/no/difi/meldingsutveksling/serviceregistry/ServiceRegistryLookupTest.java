@@ -1,14 +1,12 @@
 package no.difi.meldingsutveksling.serviceregistry;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.nimbusds.jose.proc.BadJWSException;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.IdentifierResource;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.junit.Before;
@@ -21,7 +19,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
 
-import java.util.HashMap;
+import java.util.Collections;
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static org.hamcrest.core.Is.is;
@@ -59,7 +57,7 @@ public class ServiceRegistryLookupTest {
         service = new ServiceRegistryLookup(client, properties, sasKeyRepoMock, new ObjectMapper());
         query = null;
         dpo.setProcess(DEFAULT_PROCESS);
-        dpo.setDocumentTypes(Lists.newArrayList(DEFAULT_DOCTYPE));
+        dpo.setDocumentTypes(Collections.singletonList(DEFAULT_DOCTYPE));
     }
 
     @Test(expected = ServiceRegistryLookupException.class)
@@ -115,7 +113,6 @@ public class ServiceRegistryLookupTest {
     }
 
     public static class SRContentBuilder {
-        private Gson gson = new GsonBuilder().serializeNulls().create();
         private ServiceRecord serviceRecord;
 
         SRContentBuilder withServiceRecord(ServiceRecord serviceRecord) {
@@ -127,20 +124,15 @@ public class ServiceRegistryLookupTest {
             EntityType entityType = new EntityType("Organisasjonsledd", "ORGL");
             InfoRecord infoRecord = new InfoRecord(ORGNR, ORGNAME, entityType);
 
-            final HashMap<String, Object> content = new HashMap<>();
+            IdentifierResource resource = new IdentifierResource()
+                    .setInfoRecord(infoRecord)
+                    .setServiceRecords(serviceRecord == null ? Collections.emptyList() : Collections.singletonList(this.serviceRecord));
 
-            if (this.serviceRecord == null) {
-                content.put("serviceRecord", ServiceRecord.EMPTY);
-                content.put("serviceRecords", Lists.newArrayList());
-            } else {
-                content.put("serviceRecord", this.serviceRecord);
-                content.put("serviceRecords", Lists.newArrayList(this.serviceRecord));
+            try {
+                return new ObjectMapper().writeValueAsString(resource);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
             }
-            content.put("infoRecord", infoRecord);
-            content.put("failedServiceIdentifiers", Lists.newArrayList());
-            content.put("securitylevels", Maps.newHashMap());
-            return gson.toJson(content);
         }
-
     }
 }
