@@ -252,7 +252,7 @@ public class CorrespondenceAgencyMessageFactory {
         if (!isNullOrEmpty(config.getNotificationText())) {
             tokens.getTextToken().add(createTextToken(1, config.getNotificationText()));
         } else {
-            tokens.getTextToken().add(createTextToken(1, String.format("Du har mottatt en melding fra %s.", getSender())));
+            tokens.getTextToken().add(createTextToken(1, String.format("$reporteeName$: Du har mottatt en melding fra %s.", getSender())));
         }
 
         return tokens;

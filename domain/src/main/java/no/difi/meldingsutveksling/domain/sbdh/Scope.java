@@ -72,7 +72,6 @@ public class Scope extends AbstractEntity<Long> {
 
     @XmlElement(name = "InstanceIdentifier", required = true)
     @UUID
-    @NotNull
     @ApiModelProperty(
             value = "The conversation ID. Usually a UUID",
             example = "90c0bacf-c233-4a54-96fc-e205b79862d9"
