@@ -57,4 +57,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public void deleteSubscription(Long id) {
         subscriptionRepository.delete(getSubscription(id).getId());
     }
+
+    @Override
+    public void deleteAll() {
+        subscriptionRepository.deleteAll();
+    }
 }

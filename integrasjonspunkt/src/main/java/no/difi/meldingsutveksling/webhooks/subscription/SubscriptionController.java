@@ -88,4 +88,15 @@ public class SubscriptionController {
 
         subscriptionService.deleteSubscription(id);
     }
+
+    @DeleteMapping()
+    @ApiOperation(value = "Delete all webhook subscriptions", notes = "Delete all webhook subscriptions")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success"),
+            @ApiResponse(code = 400, message = "Bad Request", response = String.class),
+            @ApiResponse(code = 404, message = "Not Found", response = String.class)
+    })
+    public void deleteAllSubscriptions() {
+        subscriptionService.deleteAll();
+    }
 }
