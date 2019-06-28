@@ -14,6 +14,7 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 
 import javax.jws.WebParam;
 import javax.jws.WebService;
@@ -21,7 +22,6 @@ import javax.xml.ws.BindingType;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageMarker.markerFrom;
@@ -98,7 +98,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
                 message.swapSenderAndReceiver();
             }
 
-            if (!isNullOrEmpty(properties.getFiks().getInn().getFallbackSenderOrgNr()) &&
+            if (StringUtils.hasText(properties.getFiks().getInn().getFallbackSenderOrgNr()) &&
                     message.getReceiverPartyNumber().equals(properties.getFiks().getInn().getFallbackSenderOrgNr())) {
                 Audit.info(String.format("Message is AppReceipt, but receiver (%s) is the configured fallback sender organization number. Discarding message.",
                         message.getReceiverPartyNumber()), markerFrom(message));

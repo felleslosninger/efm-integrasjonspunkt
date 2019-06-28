@@ -36,7 +36,7 @@ public class NextMoveOutMessage extends NextMoveMessage {
     }
 
     public boolean isPrimaryDocument(String filename) {
-        return filename.equals(getBusinessMessage().getHoveddokument());
+        return filename != null && filename.equals(getBusinessMessage().getHoveddokument());
     }
 
     @Override

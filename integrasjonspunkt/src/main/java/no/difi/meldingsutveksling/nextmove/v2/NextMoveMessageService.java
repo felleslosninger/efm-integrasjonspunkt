@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
-import com.google.common.collect.Sets;
 import com.querydsl.core.types.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,17 +26,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.util.Base64;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static com.google.common.base.Strings.emptyToNull;
 import static no.difi.meldingsutveksling.NextMoveConsts.ARKIVMELDING_FILE;
 
 @Component
@@ -79,12 +79,16 @@ public class NextMoveMessageService {
 
         message.addFile(new BusinessMessageFile()
                 .setIdentifier(identifier)
-                .setTitle(emptyToNull(file.getName()))
+                .setTitle(getTitle(file.getName()))
                 .setFilename(file.getOriginalFilename())
                 .setMimetype(getMimeType(file.getContentType(), file.getOriginalFilename()))
                 .setPrimaryDocument(message.isPrimaryDocument(file.getOriginalFilename())));
 
         messageRepo.save(message);
+    }
+
+    private String getTitle(String name) {
+        return StringUtils.hasText(name) ? name : null;
     }
 
     private String persistFile(NextMoveOutMessage message, MultipartFile file) {
@@ -137,7 +141,7 @@ public class NextMoveMessageService {
 
     private NextMoveOutMessage convertAppReceipt(PutMessageRequestWrapper message) {
         AppReceiptType appReceiptType = BestEduConverter.payloadAsAppReceipt(message.getPayload());
-        ArkivmeldingKvitteringMessage receipt = new ArkivmeldingKvitteringMessage(appReceiptType.getType(), Sets.newHashSet());
+        ArkivmeldingKvitteringMessage receipt = new ArkivmeldingKvitteringMessage(appReceiptType.getType(), new HashSet<>());
         appReceiptType.getMessage().forEach(sm -> receipt.getMessages().add(new KvitteringStatusMessage(sm.getCode(), sm.getText())));
 
         StandardBusinessDocument sbd = createSBD.createNextMoveSBD(Organisasjonsnummer.from(message.getSenderPartynumber()),

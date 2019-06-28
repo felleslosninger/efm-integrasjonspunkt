@@ -1,11 +1,18 @@
 package no.difi.meldingsutveksling.serviceregistry.externalmodel;
 
-import com.google.common.collect.Sets;
 import lombok.Data;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class PostAddress {
+
+    private static final Set<String> NORWAY_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("NORGE", "NORWAY", "NO", "NOR")));
     public static final PostAddress EMPTY = new PostAddress();
+
     private String name;
     private String street;
     private String postalCode;
@@ -29,7 +36,7 @@ public class PostAddress {
     }
 
     public boolean isNorge() {
-        return (country == null || "".equals(country)) || Sets.newHashSet("NORGE", "NORWAY", "NO", "NOR").contains(country.toUpperCase());
+        return (country == null || "".equals(country)) || NORWAY_SET.contains(country.toUpperCase());
     }
 
 }

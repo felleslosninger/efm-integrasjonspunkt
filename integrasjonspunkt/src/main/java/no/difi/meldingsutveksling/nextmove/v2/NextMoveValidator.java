@@ -19,6 +19,7 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.validation.Asserter;
 import no.difi.meldingsutveksling.validation.group.ValidationGroupFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.xml.bind.JAXBException;
@@ -27,7 +28,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.DocumentType.ARKIVMELDING;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
@@ -135,7 +135,8 @@ public class NextMoveValidator {
         }
 
         List<ServiceIdentifier> requiredTitleCapabilities = asList(DPV, DPI);
-        if (requiredTitleCapabilities.contains(message.getServiceIdentifier()) && isNullOrEmpty(file.getName())) {
+        if (requiredTitleCapabilities.contains(message.getServiceIdentifier())
+                && !StringUtils.hasText(file.getName())) {
             throw new MissingFileTitleException(requiredTitleCapabilities.stream()
                     .map(ServiceIdentifier::toString)
                     .collect(Collectors.joining(",")));

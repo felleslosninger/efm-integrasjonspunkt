@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.dokumentpakking.service;
 
-import com.google.common.collect.Sets;
 import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.domain.sbdh.CorrelationInformation;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
@@ -23,7 +22,7 @@ class ScopeFactory {
                 .setIdentifier(process)
                 .setType(ScopeType.CONVERSATION_ID.toString())
                 .setInstanceIdentifier(conversationId)
-                .setScopeInformation(Sets.newHashSet(new CorrelationInformation()
-                        .setExpectedResponseDateTime(expectedResponseDateTime)));
+                .addScopeInformation(new CorrelationInformation()
+                        .setExpectedResponseDateTime(expectedResponseDateTime));
     }
 }

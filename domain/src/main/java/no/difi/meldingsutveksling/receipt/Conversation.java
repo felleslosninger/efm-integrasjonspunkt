@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.receipt;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.MoreObjects;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -135,16 +134,22 @@ public class Conversation extends AbstractEntity<Long> implements MessageInforma
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("id", getId())
-                .add("conversationId", conversationId)
-                .add("messageReference", messageReference)
-                .add("receiverIdentifier", receiverIdentifier)
-                .add("messageReference", messageReference)
-                .add("messageTitle", messageTitle)
-                .add("pollable", pollable)
-                .add("serviceIdentifier", serviceIdentifier)
-                .add("messageStatuses", messageStatuses)
-                .toString();
+        return "Conversation{" +
+                "id=" + getId() + '\'' +
+                ", conversationId='" + conversationId + '\'' +
+                ", senderIdentifier='" + senderIdentifier + '\'' +
+                ", receiverIdentifier='" + receiverIdentifier + '\'' +
+                ", messageReference='" + messageReference + '\'' +
+                ", messageTitle='" + messageTitle + '\'' +
+                ", serviceCode='" + serviceCode + '\'' +
+                ", serviceEditionCode='" + serviceEditionCode + '\'' +
+                ", lastUpdate=" + lastUpdate +
+                ", pollable=" + pollable +
+                ", finished=" + finished +
+                ", expiry=" + expiry +
+                ", direction=" + direction +
+                ", serviceIdentifier=" + serviceIdentifier +
+                ", messageStatuses=" + messageStatuses +
+                '}';
     }
 }

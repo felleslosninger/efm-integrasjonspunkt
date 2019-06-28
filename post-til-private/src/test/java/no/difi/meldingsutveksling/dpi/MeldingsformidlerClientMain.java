@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.dpi;
 
-import com.google.common.io.ByteStreams;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.config.KeyStoreProperties;
 import no.difi.meldingsutveksling.config.dpi.securitylevel.SecurityLevel;
@@ -11,6 +10,7 @@ import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
 import no.difi.sdp.client2.domain.fysisk_post.Posttype;
 import no.difi.sdp.client2.domain.fysisk_post.Returhaandtering;
 import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
+import org.apache.commons.io.IOUtils;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -62,7 +62,7 @@ public class MeldingsformidlerClientMain {
 
             private Document loadDocumentFromFile(String filname, String title) {
                 try (final InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(filname)) {
-                    final byte[] bytes = ByteStreams.toByteArray(resourceAsStream);
+                    final byte[] bytes = IOUtils.toByteArray(resourceAsStream);
                     return new Document(bytes, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", filname, title);
                 } catch (IOException e) {
                     throw new RuntimeException("Unable to read Testdokument", e);

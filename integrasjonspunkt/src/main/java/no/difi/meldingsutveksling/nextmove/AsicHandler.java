@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import com.google.common.base.Strings;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
@@ -16,6 +15,7 @@ import no.difi.meldingsutveksling.noarkexchange.MessageContext;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import no.difi.meldingsutveksling.pipes.Plumber;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,7 +41,7 @@ public class AsicHandler {
         this.plumber = plumber;
     }
 
-    public InputStream createEncryptedAsic(NextMoveOutMessage msg, MessageContext messageContext) {
+    InputStream createEncryptedAsic(NextMoveOutMessage msg, MessageContext messageContext) {
 
         if (msg.getFiles() == null || msg.getFiles().isEmpty()) return null;
 
@@ -64,12 +64,12 @@ public class AsicHandler {
     }
 
     private String getMimetype(BusinessMessageFile f) {
-        if (Strings.isNullOrEmpty(f.getMimetype())) {
-            String ext = Stream.of(f.getFilename().split(".")).reduce((p, e) -> e).orElse("pdf");
-            return MimeTypeExtensionMapper.getMimetype(ext);
+        if (StringUtils.hasText(f.getMimetype())) {
+            return f.getMimetype();
         }
 
-        return f.getMimetype();
+        String ext = Stream.of(f.getFilename().split(".")).reduce((p, e) -> e).orElse("pdf");
+        return MimeTypeExtensionMapper.getMimetype(ext);
     }
 
     public InputStream archiveAndEncryptAttachments(StreamedFile mainAttachment, Stream<? extends StreamedFile> att, MessageContext ctx, ServiceIdentifier si) {
@@ -79,14 +79,6 @@ public class AsicHandler {
         return plumber.pipe("create asic", inlet -> createAsic(mainAttachment, att, ctx, inlet))
                 .andThen("CMS encrypt asic", (outlet, inlet) -> cmsUtil.createCMSStreamed(outlet, inlet, mottakerSertifikat))
                 .outlet();
-    }
-
-    private void close(StreamedFile attachment) {
-        try {
-            attachment.getInputStream().close();
-        } catch (IOException e) {
-            throw new NextMoveRuntimeException("Could not close file:" + attachment.getFileName());
-        }
     }
 
     private X509Certificate getMottakerSertifikat(MessageContext ctx) {

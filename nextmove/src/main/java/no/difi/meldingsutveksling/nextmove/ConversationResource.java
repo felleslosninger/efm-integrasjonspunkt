@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.google.common.base.MoreObjects;
 import lombok.Data;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.ServiceIdentifier;
@@ -86,10 +85,11 @@ public abstract class ConversationResource {
     @Transient
     private Arkivmelding arkivmelding;
 
-    ConversationResource() {}
+    ConversationResource() {
+    }
 
     ConversationResource(String conversationId, String senderId, String receiverId, ServiceIdentifier serviceIdentifier,
-                         LocalDateTime lastUpdate, Map<Integer, String> fileRefs, Map<String, String> customProperties){
+                         LocalDateTime lastUpdate, Map<Integer, String> fileRefs, Map<String, String> customProperties) {
         this.conversationId = conversationId;
         this.senderId = senderId;
         this.receiverId = receiverId;
@@ -99,22 +99,19 @@ public abstract class ConversationResource {
         this.customProperties = customProperties;
     }
 
-
-
     public void addFileRef(String fileRef) {
         Optional<Integer> max = this.fileRefs.keySet().stream().max(Integer::compare);
-        this.fileRefs.put(max.isPresent() ? max.get()+1 : 0, fileRef);
+        this.fileRefs.put(max.map(integer -> integer + 1).orElse(0), fileRef);
     }
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("conversationId", conversationId)
-                .add("receiverId", receiverId)
-                .add("serviceIdentifier", serviceIdentifier)
-                .add("lastUpdate", lastUpdate)
-                .add("fileRefs", fileRefs)
-                .toString();
+        return "ConversationResource{" +
+                "conversationId='" + conversationId + '\'' +
+                ", receiverId='" + receiverId + '\'' +
+                ", serviceIdentifier=" + serviceIdentifier +
+                ", lastUpdate=" + lastUpdate +
+                ", fileRefs=" + fileRefs +
+                '}';
     }
-
 }

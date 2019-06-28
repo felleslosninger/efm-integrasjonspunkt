@@ -1,12 +1,12 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import com.google.common.collect.Maps;
 import lombok.Data;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 
 @Entity
 @DiscriminatorValue("DPV")
@@ -16,10 +16,11 @@ public class DpvConversationResource extends ConversationResource {
     private String messageTitle;
     private String messageContent;
 
-    DpvConversationResource() {}
+    DpvConversationResource() {
+    }
 
     private DpvConversationResource(String conversationId, String senderId, String receiverId) {
-        super(conversationId, senderId, receiverId, ServiceIdentifier.DPV, LocalDateTime.now(), Maps.newHashMap(), Maps.newHashMap());
+        super(conversationId, senderId, receiverId, ServiceIdentifier.DPV, LocalDateTime.now(), new HashMap<>(), new HashMap<>());
     }
 
     public static DpvConversationResource of(String conversationId, String senderId, String receiverId) {

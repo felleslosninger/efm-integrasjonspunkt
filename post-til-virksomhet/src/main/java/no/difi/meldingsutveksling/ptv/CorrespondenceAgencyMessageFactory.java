@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.ptv;
 
-import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.altinn.schemas.serviceengine.formsengine._2009._10.TransportType;
@@ -31,6 +30,7 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.activation.DataHandler;
 import javax.xml.bind.JAXBElement;
@@ -41,7 +41,6 @@ import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.NextMoveConsts.ARKIVMELDING_FILE;
 
 /**
@@ -215,7 +214,7 @@ public class CorrespondenceAgencyMessageFactory {
 
     private List<Notification2009> createNotifications() {
 
-        List<Notification2009> notifications = Lists.newArrayList();
+        List<Notification2009> notifications = new ArrayList<>();
 
         if (config.isNotifyEmail() && config.isNotifySms()) {
             notifications.add(createNotification(TransportType.BOTH));
@@ -249,7 +248,7 @@ public class CorrespondenceAgencyMessageFactory {
     private TextTokenSubstitutionBEList createTokens() {
 
         TextTokenSubstitutionBEList tokens = new TextTokenSubstitutionBEList();
-        if (!isNullOrEmpty(config.getNotificationText())) {
+        if (StringUtils.hasText(config.getNotificationText())) {
             tokens.getTextToken().add(createTextToken(1, config.getNotificationText()));
         } else {
             tokens.getTextToken().add(createTextToken(1, String.format("Du har mottatt en melding fra %s.", getSender())));

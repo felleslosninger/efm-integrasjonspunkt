@@ -1,12 +1,12 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import com.google.common.collect.Maps;
 import lombok.Data;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 
 @Entity
 @DiscriminatorValue("DPO")
@@ -15,10 +15,11 @@ public class DpoConversationResource extends ConversationResource {
 
     private String jpId;
 
-    DpoConversationResource() {}
+    DpoConversationResource() {
+    }
 
     private DpoConversationResource(String conversationId, String senderId, String receiverId) {
-        super(conversationId, senderId, receiverId, ServiceIdentifier.DPO, LocalDateTime.now(), Maps.newHashMap(), Maps.newHashMap());
+        super(conversationId, senderId, receiverId, ServiceIdentifier.DPO, LocalDateTime.now(), new HashMap<>(), new HashMap<>());
     }
 
     public static DpoConversationResource of(String conversationId, String senderId, String receiverId) {

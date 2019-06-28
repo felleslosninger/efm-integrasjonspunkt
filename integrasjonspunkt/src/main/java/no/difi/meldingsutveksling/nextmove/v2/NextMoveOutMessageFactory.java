@@ -17,11 +17,10 @@ import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.PostAddress;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
 
 @Component
 @RequiredArgsConstructor
@@ -48,7 +47,7 @@ public class NextMoveOutMessageFactory {
     private void setDefaults(StandardBusinessDocument sbd, ServiceRecord serviceRecord) {
         sbd.getScopes()
                 .stream()
-                .filter(p -> isNullOrEmpty(p.getInstanceIdentifier()))
+                .filter(p -> !StringUtils.hasText(p.getInstanceIdentifier()))
                 .forEach(p -> p.setInstanceIdentifier(uuidGenerator.generate()));
 
         if (sbd.getSenderIdentifier() == null) {
@@ -92,19 +91,19 @@ public class NextMoveOutMessageFactory {
     }
 
     private void setReceiverDefaults(PostAddress receiver, no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress srReceiver) {
-        if (isNullOrEmpty(receiver.getNavn())) {
+        if (!StringUtils.hasText(receiver.getNavn())) {
             receiver.setNavn(srReceiver.getName());
         }
-        if (isNullOrEmpty(receiver.getAdresselinje1())) {
+        if (!StringUtils.hasText(receiver.getAdresselinje1())) {
             receiver.setAdresselinje1(srReceiver.getStreet());
         }
-        if (isNullOrEmpty(receiver.getPostnummer())) {
+        if (!StringUtils.hasText(receiver.getPostnummer())) {
             receiver.setPostnummer(srReceiver.getPostalCode());
         }
-        if (isNullOrEmpty(receiver.getPoststed())) {
+        if (!StringUtils.hasText(receiver.getPoststed())) {
             receiver.setPoststed(srReceiver.getPostalArea());
         }
-        if (isNullOrEmpty(receiver.getLand())) {
+        if (!StringUtils.hasText(receiver.getLand())) {
             receiver.setLand(srReceiver.getCountry());
         }
     }

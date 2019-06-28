@@ -106,7 +106,7 @@ public class ServiceRegistryLookupTest {
     }
 
     @Test
-    public void testSasKeyCacheInvalidation() throws BadJWSException, ServiceRegistryLookupException {
+    public void testSasKeyCacheInvalidation() throws BadJWSException {
         when(client.getResource("sastoken")).thenReturn("123").thenReturn("456");
 
         assertThat(service.getSasKey(), is("123"));

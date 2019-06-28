@@ -12,12 +12,11 @@ import no.difi.meldingsutveksling.noarkexchange.receive.PayloadConverterImpl;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.*;
 import org.apache.commons.io.IOUtils;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
 
 @RequiredArgsConstructor
 @Getter
@@ -81,7 +80,7 @@ public class SvarInnPutMessageBuilder {
     }
 
     private Sender createSender() {
-        if (isNullOrEmpty(forsendelse.getSvarSendesTil().getOrgnr()) && !isNullOrEmpty(fallbackSenderOrgNr)) {
+        if (!StringUtils.hasText(forsendelse.getSvarSendesTil().getOrgnr()) && StringUtils.hasText(fallbackSenderOrgNr)) {
             return Sender.of(fallbackSenderOrgNr, forsendelse.getSvarSendesTil().getNavn(), forsendelse.getId());
         }
         return Sender.of(forsendelse.getSvarSendesTil().getOrgnr(), forsendelse.getSvarSendesTil().getNavn(), forsendelse.getId());
@@ -118,10 +117,10 @@ public class SvarInnPutMessageBuilder {
     }
 
     private String getForsendelseTittel() {
-        if (!isNullOrEmpty(forsendelse.getMetadataFraAvleverendeSystem().getTittel())) {
+        if (StringUtils.hasText(forsendelse.getMetadataFraAvleverendeSystem().getTittel())) {
             return forsendelse.getMetadataFraAvleverendeSystem().getTittel();
         }
-        if (!isNullOrEmpty(forsendelse.getTittel())) {
+        if (StringUtils.hasText(forsendelse.getTittel())) {
             return forsendelse.getTittel();
         }
         return "Dokumentet mangler tittel";

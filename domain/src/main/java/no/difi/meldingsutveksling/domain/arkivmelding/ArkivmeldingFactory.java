@@ -10,11 +10,11 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.math.BigInteger;
 import java.util.Optional;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 
@@ -91,7 +91,7 @@ public class ArkivmeldingFactory {
             Avskrivning avs = amOf.createAvskrivning();
             ofNullable(a.getAmAvskm()).filter(s -> !s.isEmpty()).map(AvskrivningsmaateMapper::getArkivmeldingType).ifPresent(avs::setAvskrivningsmaate);
             ofNullable(a.getAmAvsavdok()).ifPresent(avs::setReferanseAvskrivesAvJournalpost);
-            if (!isNullOrEmpty(a.getAmAvskdato())) {
+            if (StringUtils.hasText(a.getAmAvskdato())) {
                 avs.setAvskrivningsdato(DateTimeUtil.toXMLGregorianCalendar(a.getAmAvskdato()));
             }
 

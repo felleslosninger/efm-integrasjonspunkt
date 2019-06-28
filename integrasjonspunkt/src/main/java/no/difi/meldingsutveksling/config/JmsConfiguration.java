@@ -8,11 +8,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
+import org.springframework.util.StringUtils;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.Session;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
 
 @Configuration
 @EnableJms
@@ -23,10 +22,10 @@ public class JmsConfiguration {
     @Bean
     ConnectionFactory jmsConnectionFactory(ActiveMQProperties activeMQProps, IntegrasjonspunktProperties props) {
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(activeMQProps.getBrokerUrl());
-        if (!isNullOrEmpty(activeMQProps.getUser())) {
+        if (StringUtils.hasText(activeMQProps.getUser())) {
             connectionFactory.setUserName(activeMQProps.getUser());
         }
-        if (!isNullOrEmpty(activeMQProps.getPassword())) {
+        if (StringUtils.hasText(activeMQProps.getPassword())) {
             connectionFactory.setPassword(activeMQProps.getPassword());
         }
 

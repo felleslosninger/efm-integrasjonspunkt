@@ -18,10 +18,11 @@ import no.difi.meldingsutveksling.Process;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.nextmove.AbstractEntity;
-import javax.validation.constraints.NotEmpty;
+import org.springframework.util.StringUtils;
 
 import javax.persistence.*;
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -30,8 +31,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import java.time.OffsetDateTime;
 import java.util.*;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
 
 
 /**
@@ -216,7 +215,7 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
                     .addReceiver(createReciever(mottaker))
                     .setBusinessScope(createBusinessScope(fromConversationId(conversationId)))
                     .setDocumentIdentification(createDocumentIdentification(documentType, standard));
-            if (!isNullOrEmpty(journalPostId)) {
+            if (StringUtils.hasText(journalPostId)) {
                 sbdh.getBusinessScope().getScope().add(fromJournalPostId(journalPostId));
             }
             return sbdh;

@@ -1,7 +1,5 @@
 package no.difi.meldingsutveksling.auth;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -18,6 +16,7 @@ import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
@@ -93,7 +92,7 @@ public class OidcTokenClient {
         JWSHeader jwsHeader = new JWSHeader.Builder(JWSAlgorithm.RS256).x509CertChain(certChain).build();
 
         String clientId = props.getOidc().getClientId();
-        if (Strings.isNullOrEmpty(clientId)) {
+        if (!StringUtils.hasText(clientId)) {
             clientId = CLIENT_ID_PREFIX + props.getOrg().getNumber();
         }
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
@@ -126,7 +125,7 @@ public class OidcTokenClient {
 
     public String getCurrentScopes() {
 
-        ArrayList<String> scopeList = Lists.newArrayList();
+        ArrayList<String> scopeList = new ArrayList<>();
         if (props.getFeature().isEnableDPO()) {
             scopeList.add(SCOPE_DPO);
         }

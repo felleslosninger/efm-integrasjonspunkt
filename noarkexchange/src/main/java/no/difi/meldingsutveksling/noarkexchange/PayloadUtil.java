@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import com.google.common.collect.Lists;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
@@ -31,6 +30,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -44,10 +44,10 @@ public class PayloadUtil {
         if (payload instanceof AppReceiptType) {
             return true;
         }
-        if(payload instanceof String) {
+        if (payload instanceof String) {
             return ((String) payload).contains(APP_RECEIPT_INDICATOR);
         }
-        if(payload instanceof Node) {
+        if (payload instanceof Node) {
             Node firstChild = ((Node) payload).getFirstChild();
             if (firstChild != null) {
                 final String nodeName = firstChild.getTextContent();
@@ -58,7 +58,7 @@ public class PayloadUtil {
     }
 
     public static String payloadAsString(Object payload) {
-        if(payload instanceof String) {
+        if (payload instanceof String) {
             return ((String) payload);
         } else if (payload instanceof Node) {
             return ((Node) payload).getFirstChild().getTextContent();
@@ -71,7 +71,7 @@ public class PayloadUtil {
         if (payload instanceof String) {
             return StringUtils.isEmpty(payload);
         } else if (payload instanceof Node) {
-           return  !((Node) payload).hasChildNodes();
+            return !((Node) payload).hasChildNodes();
         } else {
             throw new RuntimeException(PAYLOAD_UNKNOWN_TYPE);
         }
@@ -101,13 +101,13 @@ public class PayloadUtil {
             Document document = builder.parse(new ByteArrayInputStream(doc.getBytes(java.nio.charset.Charset.forName("utf-8"))));
             result = expression.evaluate(document);
         } catch (XPathExpressionException | ParserConfigurationException | SAXException | IOException e) {
-            throw new PayloadException("Could not execute query \'"+xpath+"\'  on the payload");
+            throw new PayloadException("Could not execute query \'" + xpath + "\'  on the payload");
         }
         return result;
     }
 
     public static List<NoarkDocument> parsePayloadForDocuments(Object payload) throws PayloadException {
-        List<NoarkDocument> docs = Lists.newArrayList();
+        List<NoarkDocument> docs = new ArrayList<>();
 
         String doc = getDoc(payload);
 

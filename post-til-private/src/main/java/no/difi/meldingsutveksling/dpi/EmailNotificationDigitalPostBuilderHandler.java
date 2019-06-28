@@ -1,11 +1,11 @@
 package no.difi.meldingsutveksling.dpi;
 
-import com.google.common.collect.Lists;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.sdp.client2.domain.digital_post.DigitalPost;
 import no.difi.sdp.client2.domain.digital_post.EpostVarsel;
+import org.springframework.util.StringUtils;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
+import java.util.Arrays;
 
 public class EmailNotificationDigitalPostBuilderHandler extends DigitalPostBuilderHandler {
     public EmailNotificationDigitalPostBuilderHandler(DigitalPostInnbyggerConfig config) {
@@ -14,9 +14,9 @@ public class EmailNotificationDigitalPostBuilderHandler extends DigitalPostBuild
 
     @Override
     public DigitalPost.Builder handle(MeldingsformidlerRequest request, DigitalPost.Builder builder) {
-        if (!isNullOrEmpty(request.getEmailVarslingstekst()) &&
+        if (StringUtils.hasText(request.getEmailVarslingstekst()) &&
                 request.isNotifiable() &&
-                !isNullOrEmpty(request.getEmailAddress())) {
+                StringUtils.hasText(request.getEmailAddress())) {
             final EpostVarsel varsel = createVarselEttereForvaltningsforskriften(request);
             builder.epostVarsel(varsel);
         }
@@ -25,7 +25,7 @@ public class EmailNotificationDigitalPostBuilderHandler extends DigitalPostBuild
 
     private EpostVarsel createVarselEttereForvaltningsforskriften(MeldingsformidlerRequest request) {
         return EpostVarsel.builder(request.getEmailAddress(), request.getEmailVarslingstekst())
-                        .varselEtterDager(Lists.newArrayList(0, 7))
-                        .build();
+                .varselEtterDager(Arrays.asList(0, 7))
+                .build();
     }
 }

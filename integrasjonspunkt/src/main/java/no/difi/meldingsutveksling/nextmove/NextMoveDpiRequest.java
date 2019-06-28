@@ -11,6 +11,7 @@ import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
 import no.difi.sdp.client2.domain.fysisk_post.Posttype;
 import no.difi.sdp.client2.domain.fysisk_post.Returhaandtering;
 import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -18,8 +19,6 @@ import java.time.Clock;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
 
 @RequiredArgsConstructor
 public class NextMoveDpiRequest implements MeldingsformidlerRequest {
@@ -39,7 +38,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
                 .findFirst()
                 .orElseThrow(() -> new NextMoveRuntimeException("No primary documents found, aborting send"));
 
-        String title = isNullOrEmpty(primary.getTitle()) ? MISSING_TXT : primary.getTitle();
+        String title = StringUtils.hasText(primary.getTitle()) ? primary.getTitle() : MISSING_TXT;
         return new Document(getContent(primary.getIdentifier()), primary.getMimetype(), primary.getFilename(), title);
     }
 
@@ -53,7 +52,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     }
 
     private Document getDocument(BusinessMessageFile file) {
-        String title = isNullOrEmpty(file.getTitle()) ? MISSING_TXT : file.getTitle();
+        String title = StringUtils.hasText(file.getTitle()) ? file.getTitle() : MISSING_TXT;
         return new Document(getContent(file.getIdentifier()), file.getMimetype(), file.getFilename(), title);
     }
 

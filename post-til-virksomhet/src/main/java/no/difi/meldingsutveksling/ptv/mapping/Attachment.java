@@ -1,10 +1,5 @@
 package no.difi.meldingsutveksling.ptv.mapping;
 
-import com.google.common.base.MoreObjects;
-
-/**
- * Used for mapping values in {@link CorrespondenceAgencyValues}.
- */
 public class Attachment {
 
     private String filename;
@@ -43,10 +38,9 @@ public class Attachment {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("filename", filename)
-                .add("name", name)
-                .toString();
+        return "Attachment{" +
+                "filename='" + filename + '\'' +
+                ", name='" + name + '\'' +
+                '}';
     }
-
 }

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.google.common.base.MoreObjects;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -82,12 +81,13 @@ public class MessageStatus extends AbstractEntity<Long> {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("id", getId())
-                .add("lastUpdate", lastUpdate)
-                .add("status", status)
-                .add("description", description)
-                .add("rawReceipt", rawReceipt)
-                .toString();
+        return "MessageStatus{" +
+                "id=" + getId() +
+                ", conversation=" + conversation +
+                ", lastUpdate=" + lastUpdate +
+                ", status='" + status + '\'' +
+                ", description='" + description + '\'' +
+                ", rawReceipt='" + rawReceipt + '\'' +
+                '}';
     }
 }

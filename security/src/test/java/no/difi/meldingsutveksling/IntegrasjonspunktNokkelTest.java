@@ -1,9 +1,9 @@
 package no.difi.meldingsutveksling;
 
-import com.google.common.io.ByteStreams;
 import no.difi.asic.*;
 import no.difi.commons.asic.jaxb.asic.Certificate;
 import no.difi.meldingsutveksling.config.KeyStoreProperties;
+import org.apache.commons.io.output.NullOutputStream;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -87,7 +87,7 @@ public class IntegrasjonspunktNokkelTest {
         {
             // Check files was transferred correctly
             Assert.assertEquals("ASiC contains original file", FILE1_NAME, asicReader.getNextFile());
-            asicReader.writeFile(ByteStreams.nullOutputStream()); // Consume file to advance to next entry and manifest
+            asicReader.writeFile(new NullOutputStream()); // Consume file to advance to next entry and manifest
 
             Assert.assertNull("ASiC contains no further files", asicReader.getNextFile());
 

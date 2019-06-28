@@ -1,11 +1,11 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.common.collect.Sets;
 import lombok.*;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -26,7 +26,7 @@ public class ArkivmeldingKvitteringMessage extends BusinessMessage {
     @JsonIgnore
     public ArkivmeldingKvitteringMessage addMessage(KvitteringStatusMessage message) {
         if (this.messages == null) {
-            this.messages = Sets.newHashSet();
+            this.messages = new HashSet<>();
         }
         this.messages.add(message);
         return this;

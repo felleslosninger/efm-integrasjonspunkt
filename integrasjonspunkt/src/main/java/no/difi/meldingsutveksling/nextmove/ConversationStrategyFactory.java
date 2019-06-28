@@ -1,11 +1,11 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import com.google.common.collect.Maps;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -20,7 +20,7 @@ public class ConversationStrategyFactory {
                                        ObjectProvider<DpeConversationStrategy> dpeStrat,
                                        ObjectProvider<DpvConversationStrategy> dpvStrat,
                                        ObjectProvider<DpiConversationStrategy> dpiStrat) {
-        strategies = Maps.newEnumMap(ServiceIdentifier.class);
+        strategies = new EnumMap<>(ServiceIdentifier.class);
         if (props.getFeature().isEnableDPO()) {
             strategies.put(ServiceIdentifier.DPO, dpoStrat.getIfAvailable());
         }

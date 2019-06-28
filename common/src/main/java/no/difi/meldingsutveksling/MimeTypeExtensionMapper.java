@@ -5,8 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 
-import java.util.Set;
-
 public class MimeTypeExtensionMapper {
 
     private static final Logger log = LoggerFactory.getLogger(MimeTypeExtensionMapper.class);
@@ -50,7 +48,7 @@ public class MimeTypeExtensionMapper {
             return mimeTypeMap.get(mimeType);
         }
 
-        log.error(String.format("MimeType \'%s\' not in map - defaulting to PDF", mimeType));
+        log.error("MimeType '{}' not in map - defaulting to PDF", mimeType);
         return "pdf";
     }
 
@@ -67,13 +65,5 @@ public class MimeTypeExtensionMapper {
         }
 
         return MediaType.APPLICATION_PDF_VALUE;
-    }
-
-    public static Set<String> getSupportedMimeTypes() {
-        return mimeTypeMap.keySet();
-    }
-
-    public static boolean isSupportedMimeType(String mimeType) {
-        return mimeTypeMap.containsKey(mimeType);
     }
 }

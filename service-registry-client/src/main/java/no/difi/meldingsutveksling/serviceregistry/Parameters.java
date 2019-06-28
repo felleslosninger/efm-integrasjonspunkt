@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.serviceregistry;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.Notification;
 
@@ -36,7 +35,7 @@ public class Parameters {
         return Objects.hashCode(identifier, notification);
     }
 
-    public String getQuery() {
+    String getQuery() {
         if (notification != null) {
             return notification.createQuery();
         }
@@ -45,9 +44,9 @@ public class Parameters {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("identifier", identifier)
-                .add("notification", notification)
-                .toString();
+        return "Parameters{" +
+                "identifier='" + identifier + '\'' +
+                ", notification=" + notification +
+                '}';
     }
 }

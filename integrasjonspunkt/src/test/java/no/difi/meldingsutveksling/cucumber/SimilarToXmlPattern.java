@@ -19,8 +19,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.tomakehurst.wiremock.common.Xml;
 import com.github.tomakehurst.wiremock.matching.MatchResult;
 import com.github.tomakehurst.wiremock.matching.StringValuePattern;
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
+import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xmlunit.XMLUnitException;
@@ -29,20 +28,17 @@ import org.xmlunit.builder.Input;
 import org.xmlunit.diff.*;
 import org.xmlunit.placeholder.PlaceholderDifferenceEvaluator;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static com.github.tomakehurst.wiremock.common.LocalNotifier.notifier;
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.xmlunit.diff.ComparisonType.*;
 
 public class SimilarToXmlPattern extends StringValuePattern {
 
-    private static List<ComparisonType> COUNTED_COMPARISONS = ImmutableList.of(
+    private static List<ComparisonType> COUNTED_COMPARISONS = Collections.unmodifiableList(Arrays.asList(
             ELEMENT_TAG_NAME,
             SCHEMA_LOCATION,
             NO_NAMESPACE_SCHEMA_LOCATION,
@@ -55,7 +51,7 @@ public class SimilarToXmlPattern extends StringValuePattern {
             CHILD_NODELIST_LENGTH,
             CHILD_LOOKUP,
             ATTR_NAME_LOOKUP
-    );
+    ));
 
     private final Document xmlDocument;
     private final Boolean enablePlaceholders;
@@ -110,7 +106,7 @@ public class SimilarToXmlPattern extends StringValuePattern {
         return new MatchResult() {
             @Override
             public boolean isExactMatch() {
-                if (isNullOrEmpty(value)) {
+                if (!StringUtils.hasLength(value)) {
                     return false;
                 }
                 try {
@@ -136,7 +132,7 @@ public class SimilarToXmlPattern extends StringValuePattern {
 
             @Override
             public double getDistance() {
-                if (isNullOrEmpty(value)) {
+                if (!StringUtils.hasLength(value)) {
                     return 1.0;
                 }
 
@@ -169,7 +165,9 @@ public class SimilarToXmlPattern extends StringValuePattern {
                 }
 
                 notifier().info(
-                        Joiner.on("\n").join(diff.getDifferences())
+                        StreamSupport.stream(diff.getDifferences().spliterator(), false)
+                                .map(Difference::toString)
+                                .collect(Collectors.joining("\n"))
                 );
 
                 return differences.doubleValue() / totalComparisons.doubleValue();

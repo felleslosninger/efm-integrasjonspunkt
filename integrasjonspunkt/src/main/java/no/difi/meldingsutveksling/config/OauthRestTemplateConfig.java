@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.config;
 
-import com.google.common.collect.Sets;
 import no.difi.meldingsutveksling.auth.IdportenOidcTokenResponse;
 import no.difi.meldingsutveksling.auth.OidcTokenClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +24,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URISyntaxException;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Date;
 
 import static java.util.Arrays.asList;
@@ -64,7 +64,7 @@ public class OauthRestTemplateConfig {
             IdportenOidcTokenResponse oidcTokenResponse = oidcTokenClient.fetchToken();
             DefaultOAuth2AccessToken oa2at = new DefaultOAuth2AccessToken(oidcTokenResponse.getAccessToken());
             oa2at.setExpiration(Date.from(Instant.now().plusSeconds(oidcTokenResponse.getExpiresIn())));
-            oa2at.setScope(Sets.newHashSet(oidcTokenResponse.getScope()));
+            oa2at.setScope(Collections.singleton(oidcTokenResponse.getScope()));
             return oa2at;
         }
 

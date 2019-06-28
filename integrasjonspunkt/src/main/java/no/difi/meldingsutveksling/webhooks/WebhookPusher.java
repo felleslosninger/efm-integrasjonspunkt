@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.webhooks;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
@@ -14,6 +13,7 @@ import no.difi.meldingsutveksling.webhooks.event.WebhookEvent;
 import no.difi.meldingsutveksling.webhooks.filter.WebhookFilterParser;
 import no.difi.meldingsutveksling.webhooks.subscription.SubscriptionRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 
 import javax.transaction.Transactional;
@@ -48,7 +48,7 @@ public class WebhookPusher {
     }
 
     private boolean inFilter(String filter, WebhookContent content) {
-        if (Strings.isNullOrEmpty(filter)) {
+        if (!StringUtils.hasText(filter)) {
             return true;
         }
 

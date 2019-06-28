@@ -1,8 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.microsoft.azure.servicebus.ClientFactory;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageReceiver;
@@ -34,6 +32,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBException;
@@ -47,7 +46,6 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
@@ -163,7 +161,7 @@ public class NextMoveServiceBus {
     public void getAllMessagesRest() {
         boolean messagesInQueue = true;
         while (messagesInQueue) {
-            ArrayList<ServiceBusMessage> messages = Lists.newArrayList();
+            ArrayList<ServiceBusMessage> messages = new ArrayList<>();
             for (int i = 0; i < props.getNextmove().getServiceBus().getReadMaxMessages(); i++) {
                 Optional<ServiceBusMessage> msg = serviceBusClient.receiveMessage();
                 if (!msg.isPresent()) {
@@ -271,7 +269,7 @@ public class NextMoveServiceBus {
                     message.getSbd().getProcess(),
                     message.getSbd().getStandard());
 
-            if (Strings.isNullOrEmpty(serviceRecord.getService().getEndpointUrl())) {
+            if (!StringUtils.hasText(serviceRecord.getService().getEndpointUrl())) {
                 throw new NextMoveRuntimeException(String.format("No endpointUrl defined for process %s", serviceRecord.getProcess()));
             }
             return prefix + serviceRecord.getService().getEndpointUrl();
@@ -281,7 +279,7 @@ public class NextMoveServiceBus {
     }
 
     private String receiptTarget() {
-        if (!isNullOrEmpty(props.getNextmove().getServiceBus().getReceiptQueue())) {
+        if (StringUtils.hasText(props.getNextmove().getServiceBus().getReceiptQueue())) {
             return props.getNextmove().getServiceBus().getReceiptQueue();
         }
         if (MEETING.fullname().equals(props.getNextmove().getServiceBus().getMode())) {

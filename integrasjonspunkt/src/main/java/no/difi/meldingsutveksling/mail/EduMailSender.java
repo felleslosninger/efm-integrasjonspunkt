@@ -12,7 +12,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import org.apache.commons.io.output.CountingOutputStream;
 import org.apache.commons.io.output.NullOutputStream;
-import org.apache.wss4j.common.util.CRLFOutputStream;
+import org.springframework.util.StringUtils;
 
 import javax.activation.DataHandler;
 import javax.mail.*;
@@ -28,8 +28,6 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -48,7 +46,7 @@ public class EduMailSender {
         props.put("mail.smtp.auth", properties.getMail().getEnableAuth());
 
         String trust = properties.getMail().getTrust();
-        if (!isNullOrEmpty(trust)) {
+        if (StringUtils.hasText(trust)) {
             props.put("mail.smtp.ssl.trust", trust);
         }
 
