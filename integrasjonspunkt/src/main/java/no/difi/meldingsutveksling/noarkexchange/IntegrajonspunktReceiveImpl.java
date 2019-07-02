@@ -18,7 +18,6 @@ import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
-import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
@@ -67,7 +66,7 @@ public class IntegrajonspunktReceiveImpl {
     private final MessageStatusFactory messageStatusFactory;
     private final SBDUtil sbdUtil;
     private final PutMessageRequestFactory putMessageRequestFactory;
-    private final NextMoveMessageService nextMoveMessageService;
+    private final NextMoveAdapter nextMoveAdapter;
     private final InternalQueue internalQueue;
 
     public IntegrajonspunktReceiveImpl(@Qualifier("localNoark") ObjectProvider<NoarkClient> localNoark,
@@ -80,7 +79,7 @@ public class IntegrajonspunktReceiveImpl {
                                        MessageStatusFactory messageStatusFactory,
                                        SBDUtil sbdUtil,
                                        PutMessageRequestFactory putMessageRequestFactory,
-                                       @Lazy NextMoveMessageService nextMoveMessageService,
+                                       @Lazy NextMoveAdapter nextMoveAdapter,
                                        @Lazy InternalQueue internalQueue) {
         this.localNoark = localNoark.getIfAvailable();
         this.adresseregisterService = adresseregisterService;
@@ -92,7 +91,7 @@ public class IntegrajonspunktReceiveImpl {
         this.messageStatusFactory = messageStatusFactory;
         this.sbdUtil = sbdUtil;
         this.putMessageRequestFactory = putMessageRequestFactory;
-        this.nextMoveMessageService = nextMoveMessageService;
+        this.nextMoveAdapter = nextMoveAdapter;
         this.internalQueue = internalQueue;
     }
 
@@ -152,7 +151,7 @@ public class IntegrajonspunktReceiveImpl {
                     putMessage.setPayload(BestEduConverter.appReceiptAsString(result));
                     PutMessageRequestWrapper putMessageWrapper = new PutMessageRequestWrapper(putMessage);
                     putMessageWrapper.swapSenderAndReceiver();
-                    nextMoveMessageService.convertAndSend(putMessageWrapper);
+                    nextMoveAdapter.convertAndSend(putMessageWrapper);
                 }
                 try {
                     messagePersister.delete(sbd.getConversationId());
@@ -166,7 +165,7 @@ public class IntegrajonspunktReceiveImpl {
         }
     }
 
-    public void sendLevertStatus(StandardBusinessDocument sbd) {
+    private void sendLevertStatus(StandardBusinessDocument sbd) {
         StandardBusinessDocument statusSbd = sbdReceiptFactory.createArkivmeldingStatusFrom(sbd, DocumentType.STATUS, ReceiptStatus.LEST);
         NextMoveOutMessage msg = NextMoveOutMessage.of(statusSbd, DPO);
         internalQueue.enqueueNextMove(msg);

@@ -53,8 +53,6 @@ public class NextMoveMessageOutController {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
-        NextMoveOutMessage message = messageService.createMessage(sbd);
-
         files.stream()
                 .filter(p -> p.getSize() > MAX_SIZE)
                 .findAny()
@@ -62,10 +60,8 @@ public class NextMoveMessageOutController {
                     throw new MultipartFileToLargeException(p.getOriginalFilename(), MAX_SIZE);
                 });
 
-        files.forEach(file -> messageService.addFile(message, file));
-
+        NextMoveOutMessage message = messageService.createMessage(sbd, files);
         messageService.sendMessage(message);
-
         return message.getSbd();
     }
 

@@ -6,7 +6,6 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.logging.MarkerFactory;
 import no.difi.meldingsutveksling.nextmove.ConversationStrategyFactory;
-import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
@@ -53,7 +52,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
     private ConversationStrategyFactory strategyFactory;
 
     @Autowired
-    private NextMoveMessageService messageService;
+    private NextMoveAdapter nextMoveAdapter;
 
     @Override
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
@@ -136,7 +135,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
             }
         }
 
-        return messageService.convertAndSend(message);
+        return nextMoveAdapter.convertAndSend(message);
     }
 
 }
