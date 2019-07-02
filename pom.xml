@@ -50,7 +50,8 @@
         <commons.logging.version>1.2</commons.logging.version>
         <commons.compress.version>1.18</commons.compress.version>
         <apache.commons.version>10.0-b28</apache.commons.version>
-        <jacoco.version>0.7.5.201505241946</jacoco.version>
+        <jacoco.version>0.8.4</jacoco.version>
+<!--        <jacoco.version>0.7.5.201505241946</jacoco.version>-->
         <jaxws-rt.version>2.2.8</jaxws-rt.version>
         <!-- bug with logstash-logback-encoder in 1.1.7, wait for 1.1.8 http://jira.qos.ch/browse/LOGBACK-1158 -->
         <logback.version>1.2.3</logback.version>
