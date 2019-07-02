@@ -14,9 +14,15 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.Collections;
@@ -27,7 +33,8 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = ServiceRegistryLookupTest.Config.class)
 public class ServiceRegistryLookupTest {
 
     private static final String ORGNR = "12345678";
@@ -35,7 +42,20 @@ public class ServiceRegistryLookupTest {
     private static final String DEFAULT_PROCESS = "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0";
     private static final String DEFAULT_DOCTYPE = "urn:no:difi:arkivmelding:xsd::arkivmelding";
 
-    @Mock
+    @Configuration
+    @EnableCaching
+    static class Config {
+
+        // Simulating your caching configuration
+        @Bean
+        CacheManager cacheManager() {
+            return new ConcurrentMapCacheManager(ServiceRegistryLookup.CACHE_GET_SAS_KEY);
+        }
+    }
+
+    @Autowired
+    private CacheManager cacheManager;
+
     private RestClient client;
 
     @Rule
@@ -47,6 +67,7 @@ public class ServiceRegistryLookupTest {
 
     @Before
     public void setup() {
+        client = mock(RestClient.class);
         final IntegrasjonspunktProperties properties = mock(IntegrasjonspunktProperties.class);
         SasKeyRepository sasKeyRepoMock = mock(SasKeyRepository.class);
         IntegrasjonspunktProperties.Arkivmelding arkivmeldingProps = new IntegrasjonspunktProperties.Arkivmelding().setDefaultProcess("foo");
@@ -108,7 +129,7 @@ public class ServiceRegistryLookupTest {
         when(client.getResource("sastoken")).thenReturn("123").thenReturn("456");
 
         assertThat(service.getSasKey(), is("123"));
-        service.invalidateSasKey();
+        cacheManager.getCache(ServiceRegistryLookup.CACHE_GET_SAS_KEY).clear();
         assertThat(service.getSasKey(), is("456"));
     }
 

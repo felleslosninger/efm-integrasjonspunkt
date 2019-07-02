@@ -1,10 +1,8 @@
 package no.difi.meldingsutveksling.serviceregistry;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.nimbusds.jose.proc.BadJWSException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.Process;
@@ -15,7 +13,7 @@ import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.IdentifierResource;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
@@ -24,75 +22,24 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord.*;
 
-@Service
 @Slf4j
+@Service
+@RequiredArgsConstructor
 public class ServiceRegistryLookup {
+
+    public static final String CACHE_GET_SAS_KEY = "getSasKey";
+    public static final String CACHE_GET_INFO_RECORD = "getInfoRecord";
+    public static final String CACHE_GET_SERVICE_RECORD = "getServiceRecord";
+    public static final String CACHE_GET_SERVICE_RECORDS = "getServiceRecords";
 
     private final RestClient client;
     private final IntegrasjonspunktProperties properties;
     private final SasKeyRepository sasKeyRepository;
     private final ObjectMapper objectMapper;
-    private final LoadingCache<String, String> skCache;
-    private final LoadingCache<Parameters, ServiceRecord> srCache;
-    private final LoadingCache<Parameters, List<ServiceRecord>> srsCache;
-    private final LoadingCache<Parameters, InfoRecord> irCache;
-
-    @Autowired
-    public ServiceRegistryLookup(RestClient client,
-                                 IntegrasjonspunktProperties properties,
-                                 SasKeyRepository sasKeyRepository,
-                                 ObjectMapper objectMapper) {
-        this.client = client;
-        this.properties = properties;
-        this.sasKeyRepository = sasKeyRepository;
-        this.objectMapper = objectMapper;
-
-        this.skCache = CacheBuilder.newBuilder()
-                .maximumSize(1)
-                .expireAfterWrite(1, TimeUnit.DAYS)
-                .build(new CacheLoader<String, String>() {
-                    @Override
-                    public String load(String key) throws Exception {
-                        return loadSasKey();
-                    }
-                });
-
-        this.srCache = CacheBuilder.newBuilder()
-                .maximumSize(100)
-                .expireAfterWrite(1, TimeUnit.MINUTES)
-                .build(new CacheLoader<Parameters, ServiceRecord>() {
-                    @Override
-                    public ServiceRecord load(Parameters key) throws Exception {
-                        return loadServiceRecord(key);
-                    }
-                });
-
-        this.srsCache = CacheBuilder.newBuilder()
-                .maximumSize(100)
-                .expireAfterWrite(1, TimeUnit.MINUTES)
-                .build(new CacheLoader<Parameters, List<ServiceRecord>>() {
-                    @Override
-                    public List<ServiceRecord> load(Parameters key) throws Exception {
-                        return loadServiceRecords(key);
-                    }
-                });
-
-        this.irCache = CacheBuilder.newBuilder()
-                .maximumSize(100)
-                .expireAfterWrite(1, TimeUnit.MINUTES)
-                .build(new CacheLoader<Parameters, InfoRecord>() {
-                    @Override
-                    public InfoRecord load(Parameters key) throws Exception {
-                        return loadInfoRecord(key);
-                    }
-                });
-    }
 
     /**
      * Method to find out which transport channel to use to send messages to given organization
@@ -100,36 +47,26 @@ public class ServiceRegistryLookup {
      * @param identifier of the receiver
      * @return a ServiceRecord if found. Otherwise an empty ServiceRecord is returned.
      */
+    @Cacheable(CACHE_GET_SERVICE_RECORD)
     public ServiceRecord getServiceRecord(String identifier) throws ServiceRegistryLookupException {
-        try {
-            return srCache.get(new Parameters(identifier));
-        } catch (ExecutionException e) {
-            if (e.getCause() instanceof ServiceRegistryLookupException) {
-                throw (ServiceRegistryLookupException) e.getCause();
-            } else {
-                throw new MeldingsUtvekslingRuntimeException(e.getCause());
-            }
-        }
+        return loadServiceRecord(new Parameters(identifier));
     }
 
+    @Cacheable(CACHE_GET_SERVICE_RECORD)
     public ServiceRecord getServiceRecord(String identifier, ServiceIdentifier serviceIdentifier) throws ServiceRegistryLookupException {
-        List<ServiceRecord> serviceRecords;
-        try {
-            serviceRecords = srsCache.get(new Parameters(identifier));
-        } catch (ExecutionException e) {
-            if (e.getCause() instanceof ServiceRegistryLookupException) {
-                throw (ServiceRegistryLookupException) e.getCause();
-            } else {
-                throw new MeldingsUtvekslingRuntimeException(e.getCause());
-            }
-        }
+        List<ServiceRecord> serviceRecords = loadServiceRecords(new Parameters(identifier));
         return serviceRecords.stream()
                 .filter(isServiceIdentifier(serviceIdentifier)).findFirst()
                 .orElseThrow(() -> new ServiceRegistryLookupException(String.format("Service record of type=%s not found for identifier=%s", serviceIdentifier, identifier)));
     }
 
+    @Cacheable(CACHE_GET_SERVICE_RECORDS)
     public List<ServiceRecord> getServiceRecords(String identifier) {
-        return srsCache.getUnchecked(new Parameters(identifier));
+        try {
+            return loadServiceRecords(new Parameters(identifier));
+        } catch (ServiceRegistryLookupException e) {
+            throw new MeldingsUtvekslingRuntimeException(e);
+        }
     }
 
     public boolean isInServiceRegistry(String identifier) {
@@ -160,17 +97,8 @@ public class ServiceRegistryLookup {
                 .orElseThrow(() -> new ServiceRegistryLookupException(String.format("Service record for identifier=%s with process=%s not found", identifier, process)));
     }
 
-    public Set<ServiceRecord> getServiceRecords(String identifier, String process) throws ServiceRegistryLookupException {
-        List<ServiceRecord> serviceRecords;
-        try {
-            serviceRecords = srsCache.get(new Parameters(identifier));
-        } catch (ExecutionException e) {
-            if (e.getCause() instanceof ServiceRegistryLookupException) {
-                throw (ServiceRegistryLookupException) e.getCause();
-            } else {
-                throw new MeldingsUtvekslingRuntimeException(e);
-            }
-        }
+    private Set<ServiceRecord> getServiceRecords(String identifier, String process) throws ServiceRegistryLookupException {
+        List<ServiceRecord> serviceRecords = loadServiceRecords(new Parameters(identifier));
         return serviceRecords.stream()
                 .filter(isProcess(process))
                 .collect(Collectors.toSet());
@@ -209,8 +137,13 @@ public class ServiceRegistryLookup {
      * @param identifier of the receiver
      * @return an {@link InfoRecord} for the respective identifier
      */
+    @Cacheable(CACHE_GET_INFO_RECORD)
     public InfoRecord getInfoRecord(String identifier) {
-        return irCache.getUnchecked(new Parameters(identifier));
+        try {
+            return loadInfoRecord(new Parameters(identifier));
+        } catch (ServiceRegistryLookupException e) {
+            throw new MeldingsUtvekslingRuntimeException(e);
+        }
     }
 
     private InfoRecord loadInfoRecord(Parameters parameters) throws ServiceRegistryLookupException {
@@ -249,20 +182,8 @@ public class ServiceRegistryLookup {
         }
     }
 
+    @Cacheable(CACHE_GET_SAS_KEY)
     public String getSasKey() {
-        // Single entry, key does not matter
-        try {
-            return skCache.get("");
-        } catch (ExecutionException e) {
-            throw new RuntimeException("An error occured when fetching SAS key", e.getCause());
-        }
-    }
-
-    public void invalidateSasKey() {
-        skCache.invalidateAll();
-    }
-
-    private String loadSasKey() throws SasKeyException {
         try {
             String sasKey = client.getResource("sastoken");
             // persist SAS key in case of ServiceRegistry down time

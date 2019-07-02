@@ -26,8 +26,6 @@ import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionCheck;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.webhooks.WebhookPusher;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.sdp.client2.domain.AktoerOrganisasjonsnummer;
@@ -64,7 +62,6 @@ import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
 @ContextConfiguration(classes = {
@@ -205,18 +202,6 @@ public class CucumberStepsConfiguration {
             client.setInterceptors(interceptors);
 
             return client;
-        }
-
-        /**
-         * Hack to avoid problems when creating PostVirksomhetStrategyFactory
-         */
-        @Bean
-        @Primary
-        public ServiceRegistryLookup init(ServiceRegistryLookup serviceRegistryLookup) {
-            ServiceRegistryLookup spy = spy(serviceRegistryLookup);
-            doReturn(new InfoRecord()
-                    .setOrganizationName("Test - C2")).when(spy).getInfoRecord("974720760");
-            return spy;
         }
 
         @Bean

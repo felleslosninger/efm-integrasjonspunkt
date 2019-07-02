@@ -13,7 +13,10 @@ import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
-import no.difi.meldingsutveksling.noarkexchange.*;
+import no.difi.meldingsutveksling.noarkexchange.AppReceiptFactory;
+import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
+import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.receipt.ConversationService;
@@ -49,19 +52,18 @@ public class InternalQueue {
     private static final String NEXTMOVE = "nextmove";
     private static final String DLQ = "ActiveMQ.DLQ";
 
-    private JmsTemplate jmsTemplate;
-    private IntegrasjonspunktProperties properties;
-    private ConversationService conversationService;
-    private NextMoveSender nextMoveSender;
-    private ObjectMapper objectMapper;
-    private MessageStatusFactory messageStatusFactory;
-    private SBDFactory createSBD;
-    private NextMoveMessageService nextMoveMessageService;
-    private PutMessageRequestFactory putMessageRequestFactory;
+    private final JmsTemplate jmsTemplate;
+    private final IntegrasjonspunktProperties properties;
+    private final ConversationService conversationService;
+    private final NextMoveSender nextMoveSender;
+    private final ObjectMapper objectMapper;
+    private final MessageStatusFactory messageStatusFactory;
+    private final SBDFactory createSBD;
+    private final NextMoveMessageService nextMoveMessageService;
+    private final PutMessageRequestFactory putMessageRequestFactory;
     private final IntegrajonspunktReceiveImpl integrajonspunktReceive;
     private final NoarkClient noarkClient;
-
-    private final DocumentConverter documentConverter = new DocumentConverter();
+    private final DocumentConverter documentConverter;
 
     InternalQueue(JmsTemplate jmsTemplate,
                   IntegrasjonspunktProperties properties,
@@ -73,7 +75,8 @@ public class InternalQueue {
                   @Lazy NextMoveMessageService nextMoveMessageService,
                   PutMessageRequestFactory putMessageRequestFactory,
                   ObjectProvider<IntegrajonspunktReceiveImpl> integrajonspunktReceive,
-                  @Qualifier("localNoark") ObjectProvider<NoarkClient> noarkClient) {
+                  @Qualifier("localNoark") ObjectProvider<NoarkClient> noarkClient,
+                  DocumentConverter documentConverter) {
         this.jmsTemplate = jmsTemplate;
         this.properties = properties;
         this.conversationService = conversationService;
@@ -85,6 +88,7 @@ public class InternalQueue {
         this.putMessageRequestFactory = putMessageRequestFactory;
         this.integrajonspunktReceive = integrajonspunktReceive.getIfAvailable();
         this.noarkClient = noarkClient.getIfAvailable();
+        this.documentConverter = documentConverter;
     }
 
     @JmsListener(destination = NEXTMOVE, containerFactory = "myJmsContainerFactory", concurrency = "100")
@@ -134,6 +138,7 @@ public class InternalQueue {
                 sendBestEduErrorAppReceipt(nextMoveMessage, errorMsg);
             }
         } catch (IOException e) {
+            // NOOP
         }
 
         // Messages attempted delivered to noark system
@@ -144,6 +149,7 @@ public class InternalQueue {
             conversationId = sbd.getConversationId();
             sendBestEduErrorAppReceipt(sbd);
         } catch (Exception e) {
+            // NOOP
         }
 
         ms.setDescription(errorMsg);
@@ -189,17 +195,5 @@ public class InternalQueue {
      */
     public void enqueueNoark(StandardBusinessDocument sbd) {
         jmsTemplate.convertAndSend(NOARK, documentConverter.marshallToBytes(sbd));
-    }
-
-    private void sendToNoarkSystem(StandardBusinessDocument sbd) {
-        try {
-            integrajonspunktReceive.forwardToNoarkSystem(sbd);
-        } catch (Exception e) {
-            Audit.error("Failed delivering to archive", markerFrom(sbd), e);
-            if (e instanceof MessageException) {
-                log.error(markerFrom(sbd), ((MessageException) e).getStatusMessage().getTechnicalMessage(), e);
-            }
-            throw new MeldingsUtvekslingRuntimeException(e);
-        }
     }
 }
