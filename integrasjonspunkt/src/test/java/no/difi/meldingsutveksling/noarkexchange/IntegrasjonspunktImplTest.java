@@ -7,7 +7,6 @@ import no.difi.meldingsutveksling.ServiceRecordObjectMother;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.ConversationStrategyFactory;
 import no.difi.meldingsutveksling.nextmove.DpvConversationStrategy;
-import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
 import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
@@ -31,9 +30,8 @@ import static org.mockito.MockitoAnnotations.initMocks;
 @RunWith(MockitoJUnitRunner.class)
 public class IntegrasjonspunktImplTest {
 
-    private static final String IDENTIFIER = "1234";
     @InjectMocks private IntegrasjonspunktImpl integrasjonspunkt;
-    @Mock private NextMoveMessageService nextMoveMessageServiceMock;
+    @Mock private NextMoveAdapter nextMoveAdapterMock;
     @Mock private IntegrasjonspunktProperties propertiesMock;
     @Mock private IntegrasjonspunktProperties.Organization organizationMock;
     @Mock private ServiceRegistryLookup serviceRegistryLookup;
@@ -71,7 +69,7 @@ public class IntegrasjonspunktImplTest {
 
         integrasjonspunkt.putMessage(request);
 
-        verify(nextMoveMessageServiceMock, times(1)).convertAndSend(any(PutMessageRequestWrapper.class));
+        verify(nextMoveAdapterMock, times(1)).convertAndSend(any(PutMessageRequestWrapper.class));
     }
 
     @Test
@@ -80,7 +78,7 @@ public class IntegrasjonspunktImplTest {
 
         integrasjonspunkt.putMessage(request);
 
-        verify(nextMoveMessageServiceMock, times(1)).convertAndSend(any(PutMessageRequestWrapper.class));
+        verify(nextMoveAdapterMock, times(1)).convertAndSend(any(PutMessageRequestWrapper.class));
     }
 
     @Test
@@ -89,6 +87,6 @@ public class IntegrasjonspunktImplTest {
 
         integrasjonspunkt.putMessage(request);
 
-        verify(nextMoveMessageServiceMock, times(1)).convertAndSend(any(PutMessageRequestWrapper.class));
+        verify(nextMoveAdapterMock, times(1)).convertAndSend(any(PutMessageRequestWrapper.class));
     }
 }
