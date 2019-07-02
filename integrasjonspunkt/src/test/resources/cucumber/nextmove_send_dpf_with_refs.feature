@@ -31,11 +31,11 @@ Feature: Sending a Next Move DPF message with sender And receiver refs
                         "type": "ConversationId"
                     },
                     {
-                        "identifier": "ec5e72a3-5772-4bd5-aa33-72094951ca4d",
+                        "instanceIdentifier": "ec5e72a3-5772-4bd5-aa33-72094951ca4d",
                         "type": "SenderRef"
                     },
                     {
-                        "identifier": "27991054-77b4-48ed-bf9b-ae36bb1b41d1",
+                        "instanceIdentifier": "27991054-77b4-48ed-bf9b-ae36bb1b41d1",
                         "type": "ReceiverRef"
                     }
                 ]

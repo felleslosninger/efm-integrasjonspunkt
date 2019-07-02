@@ -21,8 +21,8 @@ public class PutMessageRequestFactory {
 
 
     public PutMessageRequestType create(StandardBusinessDocument sbd, Object payload) {
-        String receiverRef = sbd.findScope(ScopeType.RECEIVER_REF).map(Scope::getIdentifier).orElse(null);
-        String senderRef = sbd.findScope(ScopeType.SENDER_REF).map(Scope::getIdentifier).orElse(null);
+        String receiverRef = sbd.findScope(ScopeType.RECEIVER_REF).map(Scope::getInstanceIdentifier).orElse(null);
+        String senderRef = sbd.findScope(ScopeType.SENDER_REF).map(Scope::getInstanceIdentifier).orElse(null);
         InfoRecord receiverInfo = srLookup.getInfoRecord(sbd.getReceiverIdentifier());
         InfoRecord senderInfo = srLookup.getInfoRecord(sbd.getSenderIdentifier());
         return create(sbd.getConversationId(),

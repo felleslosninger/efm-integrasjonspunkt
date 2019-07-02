@@ -143,7 +143,7 @@ Feature: Sending a Next Move Digital DPV message
                 <altinn13:TextTokens>
                     <altinn13:TextToken>
                         <altinn13:TokenNum>1</altinn13:TokenNum>
-                        <altinn13:TokenValue>Du har mottatt en melding fra Test - C2.</altinn13:TokenValue>
+                        <altinn13:TokenValue>$reporteeName$: Du har mottatt en melding fra Test - C2.</altinn13:TokenValue>
                     </altinn13:TextToken>
                 </altinn13:TextTokens>
                 <altinn13:ReceiverEndPoints>

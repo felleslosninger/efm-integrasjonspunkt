@@ -79,7 +79,6 @@ public class Scope extends AbstractEntity<Long> {
     protected String instanceIdentifier;
 
     @XmlElement(name = "Identifier")
-    @NotNull
     @ApiModelProperty(
             value = "The document process",
             example = "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
