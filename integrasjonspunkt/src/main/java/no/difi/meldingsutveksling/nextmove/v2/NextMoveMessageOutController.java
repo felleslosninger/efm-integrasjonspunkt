@@ -46,7 +46,8 @@ public class NextMoveMessageOutController {
     })
     @Transactional(dontRollbackOn = TimeToLiveException.class)
     public StandardBusinessDocument createAndSendMessage(
-            @ApiParam(name = "SBD", value = "Standard Business Document to send", required = true)
+            @ApiParam(name = "SBD", value = "Standard Business Document to send. Please note that the property name is not 'any'. \n"
+                    + "It is one of the following: arkivmelding, digital, digital_dpv, print, innsynskrav or publisering.", required = true)
             @RequestParam("sbd") @NotNull @Valid StandardBusinessDocument sbd,
             MultipartRequest multipartRequest) {
         List<MultipartFile> files = multipartRequest.getMultiFileMap().values().stream()
@@ -73,7 +74,8 @@ public class NextMoveMessageOutController {
     })
     @Transactional(dontRollbackOn = TimeToLiveException.class)
     public StandardBusinessDocument createMessage(
-            @ApiParam(name = "SBD", value = "Standard Business Document to send", required = true)
+            @ApiParam(name = "SBD", value = "Standard Business Document to send. Please note that the property name is not 'any'. \n"
+                    + "It is one of the following: arkivmelding, digital, digital_dpv, print, innsynskrav or publisering.", required = true)
             @Valid @RequestBody StandardBusinessDocument sbd) {
         NextMoveOutMessage message = messageService.createMessage(sbd);
         return message.getSbd();
