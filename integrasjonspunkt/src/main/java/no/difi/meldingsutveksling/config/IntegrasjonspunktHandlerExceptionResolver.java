@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.config;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.exceptions.HttpStatusCodeException;
+import org.eclipse.jetty.io.EofException;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.HttpStatus;
@@ -31,6 +32,10 @@ public class IntegrasjonspunktHandlerExceptionResolver extends DefaultHandlerExc
             } else if (ex instanceof ConstraintViolationException) {
                 return handleConstraintViolationException(
                         (ConstraintViolationException) ex, response);
+            }
+        } catch (EofException e) {
+            if (logger.isWarnEnabled()) {
+                logger.warn("Handling of [" + ex.getClass().getName() + "] resulted in exception: " + e.getCause().getLocalizedMessage());
             }
         } catch (Exception handlerException) {
             if (logger.isWarnEnabled()) {
