@@ -2,6 +2,8 @@ package no.difi.meldingsutveksling.cucumber;
 
 import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
 
+import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;

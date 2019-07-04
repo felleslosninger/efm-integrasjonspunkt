@@ -43,7 +43,6 @@
             <plugin>
                 <groupId>org.jvnet.jaxb2.maven2</groupId>
                 <artifactId>maven-jaxb2-plugin</artifactId>
-                <version>0.13.0</version>
                 <executions>
                     <execution>
                         <id>xsd-generate</id>
@@ -65,7 +64,6 @@
         </plugins>
     </build>
     <dependencies>
-
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>domain</artifactId>

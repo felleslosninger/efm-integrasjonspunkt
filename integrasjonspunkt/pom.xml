@@ -170,12 +170,12 @@
                             <value>dev</value>
                         </systemProperty>
                     </systemProperties>
-                    <connectors>
+                    <httpConnector>
                         <connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
                             <port>9090</port>
                             <maxIdleTime>60000</maxIdleTime>
                         </connector>
-                    </connectors>
+                    </httpConnector>
                     <stopKey/>
                     <stopPort/>
                 </configuration>
@@ -624,6 +624,10 @@
             <artifactId>bcprov-jdk15on</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>eclipselink</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>javax.mail</artifactId>

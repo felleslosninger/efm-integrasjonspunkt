@@ -12,7 +12,6 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 import org.springframework.ws.transport.http.HttpComponentsMessageSender;
-
 /**
  * Factory to create Spring ws template when no authentication is provided
  */
