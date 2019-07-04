@@ -415,9 +415,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <configuration>
                         <junitArtifactName>junit:junit</junitArtifactName>
-                        <argLine>${argLine} -Xms256m -Xmx512m -XX:MaxPermSize=128m -ea
-                            -Dfile.encoding=UTF-8
-                        </argLine>
+                        <argLine>${argLine} -Xms256m -Xmx512m -ea -Dfile.encoding=UTF-8</argLine>
                         <excludes>
                             <exclude>**/*IntegrationTest.java</exclude>
                         </excludes>
