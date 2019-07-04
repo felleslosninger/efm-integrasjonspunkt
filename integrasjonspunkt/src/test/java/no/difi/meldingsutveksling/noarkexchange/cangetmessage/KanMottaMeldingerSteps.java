@@ -8,9 +8,9 @@ import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.services.Adresseregister;
-import sun.security.x509.X509CertImpl;
 
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -107,7 +107,8 @@ public class KanMottaMeldingerSteps {
     @Given("^virksomhet (.+) i Adresseregisteret$")
     public void virksomhet_i_Adresseregisteret(String finnes) throws Throwable {
         if ("finnes".equals(finnes)) {
-            when(adresseRegister.getCertificate(any(ServiceRecord.class))).thenReturn(new X509CertImpl());
+            X509Certificate certificate = mock(X509Certificate.class);
+            when(adresseRegister.getCertificate(any(ServiceRecord.class))).thenReturn(certificate);
         } else if ("finnes ikke".equals(finnes)) {
             when(adresseRegister.getCertificate(any(ServiceRecord.class))).thenThrow(CertificateException.class);
         }

@@ -149,16 +149,9 @@
             </plugin>
 
             <plugin>
-                <groupId>org.mortbay.jetty</groupId>
+                <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
-                <version>8.1.16.v20140903</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.sun.xml.ws</groupId>
-                        <artifactId>jaxws-rt</artifactId>
-                        <version>${jaxws-rt.version}</version>
-                    </dependency>
-                </dependencies>
+                <version>9.4.19.v20190610</version>
                 <configuration>
                     <webApp>
                         <contextPath>/integrasjonspunkt</contextPath>
@@ -518,21 +511,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
-        <dependency>
-            <groupId>com.sun.xml.ws</groupId>
-            <artifactId>jaxws-rt</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>javax.xml.soap-api</artifactId>
-                    <groupId>javax.xml.soap</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>stax2-api</artifactId>
-                    <groupId>org.codehaus.woodstox</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-test</artifactId>
@@ -629,8 +607,8 @@
             <artifactId>eclipselink</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.sun.mail</groupId>
-            <artifactId>javax.mail</artifactId>
+            <groupId>javax.mail</groupId>
+            <artifactId>javax.mail-api</artifactId>
         </dependency>
 
         <dependency>

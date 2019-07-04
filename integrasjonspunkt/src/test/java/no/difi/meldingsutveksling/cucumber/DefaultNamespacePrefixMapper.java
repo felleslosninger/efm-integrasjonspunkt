@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
 
 import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
 
