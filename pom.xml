@@ -318,7 +318,7 @@
             <dependency>
                 <groupId>com.microsoft.azure</groupId>
                 <artifactId>azure-servicebus</artifactId>
-                <version>1.2.7</version>
+                <version>1.2.15</version>
             </dependency>
             <dependency>
                 <groupId>org.jhades</groupId>
@@ -550,6 +550,7 @@
                 <version>5.0.0</version>
                 <configuration>
                     <format>ALL</format>
+                    <suppressionFile>${basedir}/suppression.xml</suppressionFile>
                 </configuration>
             </plugin>
         </plugins>
