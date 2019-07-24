@@ -1,53 +1,38 @@
 package no.difi.meldingsutveksling.serviceregistry;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.Notification;
+import lombok.Data;
+import no.difi.meldingsutveksling.NextMoveConsts;
 
+import static java.lang.String.format;
+import static no.difi.meldingsutveksling.NextMoveConsts.DEFAULT_SECURITY_LEVEL;
+
+@Data
 public class Parameters {
+
     private String identifier;
-    private Notification notification;
+    private Integer securityLevel;
 
     public Parameters(String identifier) {
         this.identifier = identifier;
+        this.securityLevel = DEFAULT_SECURITY_LEVEL;
     }
 
-    public Parameters(String identifier, Notification notification) {
+    public Parameters(String identifier, Integer securityLevel) {
         this.identifier = identifier;
-        this.notification = notification;
-    }
-
-    public String getIdentifier() {
-        return identifier;
-    }
-
-    @Override
-    @SuppressWarnings({"squid:S00122", "squid:S1067"})
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Parameters that = (Parameters) o;
-        return Objects.equal(identifier, that.identifier)
-                && notification == that.notification;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(identifier, notification);
+        if (securityLevel == null) {
+            this.securityLevel = NextMoveConsts.DEFAULT_SECURITY_LEVEL;
+        } else {
+            this.securityLevel = securityLevel;
+        }
     }
 
     public String getQuery() {
-        if (notification != null) {
-            return notification.createQuery();
+        StringBuilder query = new StringBuilder();
+        if (securityLevel != null) {
+            query.append(format("securityLevel=%s", securityLevel));
         }
-        return null;
+
+        return query.toString();
     }
 
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("identifier", identifier)
-                .add("notification", notification)
-                .toString();
-    }
 }

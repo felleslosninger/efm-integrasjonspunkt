@@ -2,9 +2,9 @@ Feature: Sending a Next Move DPF message with sender And receiver refs
 
   Background:
 
-    Given a "GET" request to "http://localhost:9099/identifier/987464291" will respond with status "200" and the following "application/json" in "/restmocks/identifier/987464291.json"
-    And a "GET" request to "http://localhost:9099/identifier/910075924" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075924.json"
-    And a "GET" request to "http://localhost:9099/identifier/910077473" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
+    Given a "GET" request to "http://localhost:9099/identifier/987464291?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/987464291.json"
+    And a "GET" request to "http://localhost:9099/identifier/910075924?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075924.json"
+    And a "GET" request to "http://localhost:9099/identifier/910077473?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
     And a SOAP request to "https://test.svarut.ks.no/tjenester/forsendelseservice/ForsendelsesServiceV9" will respond with the following payload:
     """
     <ser:sendForsendelseMedIdResponse xmlns:ser="http://www.ks.no/svarut/servicesV9">

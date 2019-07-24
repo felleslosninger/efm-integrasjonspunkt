@@ -15,6 +15,7 @@ import com.jayway.jsonpath.spi.mapper.GsonMappingProvider;
 import com.nimbusds.jose.proc.BadJWSException;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.DocumentType;
+import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.Process;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -101,12 +102,6 @@ public class ServiceRegistryLookup {
                 });
     }
 
-    /**
-     * Method to find out which transport channel to use to send messages to given organization
-     *
-     * @param identifier of the receiver
-     * @return a ServiceRecord if found. Otherwise an empty ServiceRecord is returned.
-     */
     public ServiceRecord getServiceRecord(String identifier) throws ServiceRegistryLookupException {
         try {
             return srCache.get(new Parameters(identifier));
@@ -120,9 +115,13 @@ public class ServiceRegistryLookup {
     }
 
     public ServiceRecord getServiceRecord(String identifier, ServiceIdentifier serviceIdentifier) throws ServiceRegistryLookupException {
+        return getServiceRecord(identifier, serviceIdentifier, NextMoveConsts.DEFAULT_SECURITY_LEVEL);
+    }
+
+    public ServiceRecord getServiceRecord(String identifier, ServiceIdentifier serviceIdentifier, Integer securityLevel) throws ServiceRegistryLookupException {
         List<ServiceRecord> serviceRecords;
         try {
-            serviceRecords = srsCache.get(new Parameters(identifier));
+            serviceRecords = srsCache.get(new Parameters(identifier, securityLevel));
         } catch (ExecutionException e) {
             if (e.getCause() instanceof ServiceRegistryLookupException) {
                 throw (ServiceRegistryLookupException) e.getCause();
@@ -139,6 +138,10 @@ public class ServiceRegistryLookup {
         return srsCache.getUnchecked(new Parameters(identifier));
     }
 
+    public List<ServiceRecord> getServiceRecords(String identifier, Integer securityLevel) {
+        return srsCache.getUnchecked(new Parameters(identifier, securityLevel));
+    }
+
     public boolean isInServiceRegistry(String identifier) {
         return !getServiceRecords(identifier).isEmpty();
     }
@@ -148,7 +151,7 @@ public class ServiceRegistryLookup {
     }
 
     public String getDocumentIdentifier(String identifier, String process, DocumentType documentType) throws ServiceRegistryLookupException {
-        Set<ServiceRecord> serviceRecords = getServiceRecords(identifier, process);
+        Set<ServiceRecord> serviceRecords = getServiceRecords(identifier, process, NextMoveConsts.DEFAULT_SECURITY_LEVEL);
         return serviceRecords.stream()
                 .flatMap(r -> r.getDocumentTypes().stream())
                 .filter(documentType::fitsDocumentIdentifier)
@@ -160,17 +163,21 @@ public class ServiceRegistryLookup {
     }
 
     public ServiceRecord getServiceRecord(String identifier, String process, String documentType) throws ServiceRegistryLookupException {
-        Set<ServiceRecord> serviceRecords = getServiceRecords(identifier, process);
+        return getServiceRecord(identifier, process, documentType, NextMoveConsts.DEFAULT_SECURITY_LEVEL);
+    }
+
+    public ServiceRecord getServiceRecord(String identifier, String process, String documentType, Integer securityLevel) throws ServiceRegistryLookupException {
+        Set<ServiceRecord> serviceRecords = getServiceRecords(identifier, process, securityLevel);
         return serviceRecords.stream()
                 .filter(hasDocumentType(documentType))
                 .findFirst()
                 .orElseThrow(() -> new ServiceRegistryLookupException(String.format("Service record for identifier=%s with process=%s not found", identifier, process)));
     }
 
-    public Set<ServiceRecord> getServiceRecords(String identifier, String process) throws ServiceRegistryLookupException {
+    private Set<ServiceRecord> getServiceRecords(String identifier, String process, Integer securityLevel) throws ServiceRegistryLookupException {
         List<ServiceRecord> serviceRecords = null;
         try {
-            serviceRecords = srsCache.get(new Parameters(identifier));
+            serviceRecords = srsCache.get(new Parameters(identifier, securityLevel));
         } catch (ExecutionException e) {
             if (e.getCause() instanceof ServiceRegistryLookupException) {
                 throw (ServiceRegistryLookupException) e.getCause();

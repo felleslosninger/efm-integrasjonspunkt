@@ -57,7 +57,7 @@ public class ServiceRegistryLookupTest {
         when(arkivmelding.getDefaultProcess()).thenReturn(DEFAULT_PROCESS);
         when(properties.getArkivmelding()).thenReturn(arkivmelding);
         service = new ServiceRegistryLookup(client, properties, sasKeyRepoMock, new ObjectMapper());
-        query = null;
+        query = "securityLevel=3";
         dpo.setProcess(DEFAULT_PROCESS);
         dpo.setDocumentTypes(Lists.newArrayList(DEFAULT_DOCTYPE));
     }

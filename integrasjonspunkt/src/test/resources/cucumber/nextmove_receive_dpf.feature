@@ -1,7 +1,7 @@
 Feature: Receiving a Next Move DPF message
 
   Background:
-    Given a "GET" request to "http://localhost:9099/identifier/910229028" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910229028.json"
+    Given a "GET" request to "http://localhost:9099/identifier/910229028?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910229028.json"
     And Fiks prepares a message with the following body:
     """
     [

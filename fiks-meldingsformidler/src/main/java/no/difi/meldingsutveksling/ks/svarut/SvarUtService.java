@@ -33,7 +33,9 @@ public class SvarUtService {
     public String send(NextMoveOutMessage message) throws NextMoveException {
         ServiceRecord serviceRecord;
         try {
-            serviceRecord = serviceRegistryLookup.getServiceRecord(message.getReceiverIdentifier(), message.getServiceIdentifier());
+            serviceRecord = serviceRegistryLookup.getServiceRecord(message.getReceiverIdentifier(),
+                    message.getServiceIdentifier(),
+                    message.getBusinessMessage().getSikkerhetsnivaa());
         } catch (ServiceRegistryLookupException e) {
             throw new SvarUtServiceException(String.format("DPF service record not found for identifier=%s", message.getReceiverIdentifier()));
         }

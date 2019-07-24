@@ -16,8 +16,8 @@ public class CapabilitiesFactory {
     private final ServiceRegistryLookup sr;
     private final CapabilityFactory capabilityFactory;
 
-    Capabilities getCapabilities(String receiverid) {
-        List<ServiceRecord> serviceRecords = sr.getServiceRecords(receiverid);
+    Capabilities getCapabilities(String receiverid, Integer securityLevel) {
+        List<ServiceRecord> serviceRecords = sr.getServiceRecords(receiverid, securityLevel);
 
         return new Capabilities()
                 .setCapabilities(serviceRecords
