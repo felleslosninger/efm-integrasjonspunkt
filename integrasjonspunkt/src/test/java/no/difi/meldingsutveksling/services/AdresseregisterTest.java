@@ -4,6 +4,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import no.difi.meldingsutveksling.noarkexchange.TestConstants;
+import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -23,8 +24,9 @@ import static org.mockito.Mockito.when;
 public class AdresseregisterTest {
 
     Adresseregister adresseregister;
-    public static final String SENDER_PARTY_NUMBER = "910075918";
-    public static final String RECIEVER_PARTY_NUMBER = "910077473";
+    private static final String SENDER_PARTY_NUMBER = "910075918";
+    private static final String RECIEVER_PARTY_NUMBER = "910077473";
+    private static final String CONVERSATION_ID = "foo123";
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -41,7 +43,10 @@ public class AdresseregisterTest {
         adresseregister = new Adresseregister(serviceRegistryLookup);
         when(sbdMock.getSenderIdentifier()).thenReturn(SENDER_PARTY_NUMBER);
         when(sbdMock.getReceiverIdentifier()).thenReturn(RECIEVER_PARTY_NUMBER);
-        when(serviceRegistryLookup.getServiceRecord(RECIEVER_PARTY_NUMBER)).thenReturn(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"));
+        when(sbdMock.getConversationId()).thenReturn(CONVERSATION_ID);
+        when(serviceRegistryLookup.getServiceRecord(SRParameter.builder(RECIEVER_PARTY_NUMBER)
+                .conversationId(CONVERSATION_ID).build()))
+                .thenReturn(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"));
         when(serviceRegistryLookup.getServiceRecord(SENDER_PARTY_NUMBER)).thenReturn(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"));
     }
 
@@ -51,16 +56,16 @@ public class AdresseregisterTest {
         expectedException.expect(new StatusMatches(StatusMessage.MISSING_SENDER_CERTIFICATE));
         when(serviceRegistryLookup.getServiceRecord(SENDER_PARTY_NUMBER)).thenReturn(new ServiceRecord(null, SENDER_PARTY_NUMBER, emptyCertificate, "http://localhost:123"));
 
-
         adresseregister.validateCertificates(sbdMock);
-
     }
 
     @Test
     public void recieverCertificateIsInValid() throws Exception {
         expectedException.expect(MessageException.class);
         expectedException.expect(new StatusMatches(StatusMessage.MISSING_RECIEVER_CERTIFICATE));
-        when(serviceRegistryLookup.getServiceRecord(RECIEVER_PARTY_NUMBER)).thenReturn(new ServiceRecord(null, RECIEVER_PARTY_NUMBER, emptyCertificate, "http://localhost:123"));
+        when(serviceRegistryLookup.getServiceRecord(SRParameter.builder(RECIEVER_PARTY_NUMBER)
+                .conversationId(CONVERSATION_ID).build()))
+                .thenReturn(new ServiceRecord(null, RECIEVER_PARTY_NUMBER, emptyCertificate, "http://localhost:123"));
 
         adresseregister.validateCertificates(sbdMock);
     }

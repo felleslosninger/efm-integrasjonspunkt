@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
+import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.stereotype.Component;
@@ -32,7 +33,8 @@ public class DpiConversationStrategy implements ConversationStrategy {
 
     @Override
     public void send(NextMoveOutMessage message) throws NextMoveException {
-        List<ServiceRecord> serviceRecords = sr.getServiceRecords(message.getReceiverIdentifier());
+        List<ServiceRecord> serviceRecords = sr.getServiceRecords(SRParameter.builder(message.getReceiverIdentifier())
+                .conversationId(message.getConversationId()).build());
         Optional<ServiceRecord> serviceRecord = serviceRecords.stream()
                 .filter(r -> message.getServiceIdentifier() == r.getServiceIdentifier())
                 .findFirst();

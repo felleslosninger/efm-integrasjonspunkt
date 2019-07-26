@@ -10,6 +10,7 @@ import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -33,9 +34,10 @@ public class SvarUtService {
     public String send(NextMoveOutMessage message) throws NextMoveException {
         ServiceRecord serviceRecord;
         try {
-            serviceRecord = serviceRegistryLookup.getServiceRecord(message.getReceiverIdentifier(),
-                    message.getServiceIdentifier(),
-                    message.getBusinessMessage().getSikkerhetsnivaa());
+            serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
+                            .securityLevel(message.getBusinessMessage().getSikkerhetsnivaa())
+                            .conversationId(message.getConversationId()).build(),
+                    message.getServiceIdentifier());
         } catch (ServiceRegistryLookupException e) {
             throw new SvarUtServiceException(String.format("DPF service record not found for identifier=%s", message.getReceiverIdentifier()));
         }

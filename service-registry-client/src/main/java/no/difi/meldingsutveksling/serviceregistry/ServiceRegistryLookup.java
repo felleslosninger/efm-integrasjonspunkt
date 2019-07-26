@@ -15,7 +15,6 @@ import com.jayway.jsonpath.spi.mapper.GsonMappingProvider;
 import com.nimbusds.jose.proc.BadJWSException;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.DocumentType;
-import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.Process;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -47,9 +46,9 @@ public class ServiceRegistryLookup {
     private final SasKeyRepository sasKeyRepository;
     private final ObjectMapper objectMapper;
     private final LoadingCache<String, String> skCache;
-    private final LoadingCache<Parameters, ServiceRecord> srCache;
-    private final LoadingCache<Parameters, List<ServiceRecord>> srsCache;
-    private final LoadingCache<Parameters, InfoRecord> irCache;
+    private final LoadingCache<SRParameter, ServiceRecord> srCache;
+    private final LoadingCache<SRParameter, List<ServiceRecord>> srsCache;
+    private final LoadingCache<SRParameter, InfoRecord> irCache;
 
     @Autowired
     public ServiceRegistryLookup(RestClient client,
@@ -74,9 +73,9 @@ public class ServiceRegistryLookup {
         this.srCache = CacheBuilder.newBuilder()
                 .maximumSize(100)
                 .expireAfterWrite(1, TimeUnit.MINUTES)
-                .build(new CacheLoader<Parameters, ServiceRecord>() {
+                .build(new CacheLoader<SRParameter, ServiceRecord>() {
                     @Override
-                    public ServiceRecord load(Parameters key) throws Exception {
+                    public ServiceRecord load(SRParameter key) throws Exception {
                         return loadServiceRecord(key);
                     }
                 });
@@ -84,9 +83,9 @@ public class ServiceRegistryLookup {
         this.srsCache = CacheBuilder.newBuilder()
                 .maximumSize(100)
                 .expireAfterWrite(1, TimeUnit.MINUTES)
-                .build(new CacheLoader<Parameters, List<ServiceRecord>>() {
+                .build(new CacheLoader<SRParameter, List<ServiceRecord>>() {
                     @Override
-                    public List<ServiceRecord> load(Parameters key) throws Exception {
+                    public List<ServiceRecord> load(SRParameter key) throws Exception {
                         return loadServiceRecords(key);
                     }
                 });
@@ -94,17 +93,17 @@ public class ServiceRegistryLookup {
         this.irCache = CacheBuilder.newBuilder()
                 .maximumSize(100)
                 .expireAfterWrite(1, TimeUnit.MINUTES)
-                .build(new CacheLoader<Parameters, InfoRecord>() {
+                .build(new CacheLoader<SRParameter, InfoRecord>() {
                     @Override
-                    public InfoRecord load(Parameters key) throws Exception {
+                    public InfoRecord load(SRParameter key) throws Exception {
                         return loadInfoRecord(key);
                     }
                 });
     }
 
-    public ServiceRecord getServiceRecord(String identifier) throws ServiceRegistryLookupException {
+    public ServiceRecord getServiceRecord(SRParameter parameter) throws ServiceRegistryLookupException {
         try {
-            return srCache.get(new Parameters(identifier));
+            return srCache.get(parameter);
         } catch (ExecutionException e) {
             if (e.getCause() instanceof ServiceRegistryLookupException) {
                 throw (ServiceRegistryLookupException) e.getCause();
@@ -114,14 +113,18 @@ public class ServiceRegistryLookup {
         }
     }
 
-    public ServiceRecord getServiceRecord(String identifier, ServiceIdentifier serviceIdentifier) throws ServiceRegistryLookupException {
-        return getServiceRecord(identifier, serviceIdentifier, NextMoveConsts.DEFAULT_SECURITY_LEVEL);
+    public ServiceRecord getServiceRecord(String identifier) throws ServiceRegistryLookupException {
+        return getServiceRecord(SRParameter.builder(identifier).build());
     }
 
-    public ServiceRecord getServiceRecord(String identifier, ServiceIdentifier serviceIdentifier, Integer securityLevel) throws ServiceRegistryLookupException {
+    public ServiceRecord getServiceRecord(String identifier, ServiceIdentifier serviceIdentifier) throws ServiceRegistryLookupException {
+        return getServiceRecord(SRParameter.builder(identifier).build(), serviceIdentifier);
+    }
+
+    public ServiceRecord getServiceRecord(SRParameter parameter, ServiceIdentifier serviceIdentifier) throws ServiceRegistryLookupException {
         List<ServiceRecord> serviceRecords;
         try {
-            serviceRecords = srsCache.get(new Parameters(identifier, securityLevel));
+            serviceRecords = srsCache.get(parameter);
         } catch (ExecutionException e) {
             if (e.getCause() instanceof ServiceRegistryLookupException) {
                 throw (ServiceRegistryLookupException) e.getCause();
@@ -131,53 +134,53 @@ public class ServiceRegistryLookup {
         }
         return serviceRecords.stream()
                 .filter(isServiceIdentifier(serviceIdentifier)).findFirst()
-                .orElseThrow(() -> new ServiceRegistryLookupException(String.format("Service record of type=%s not found for identifier=%s", serviceIdentifier, identifier)));
+                .orElseThrow(() -> new ServiceRegistryLookupException(String.format("Service record of type=%s not found for identifier=%s", serviceIdentifier, parameter.getIdentifier())));
+    }
+
+    public List<ServiceRecord> getServiceRecords(SRParameter parameter) {
+        return srsCache.getUnchecked(parameter);
     }
 
     public List<ServiceRecord> getServiceRecords(String identifier) {
-        return srsCache.getUnchecked(new Parameters(identifier));
-    }
-
-    public List<ServiceRecord> getServiceRecords(String identifier, Integer securityLevel) {
-        return srsCache.getUnchecked(new Parameters(identifier, securityLevel));
+        return getServiceRecords(SRParameter.builder(identifier).build());
     }
 
     public boolean isInServiceRegistry(String identifier) {
-        return !getServiceRecords(identifier).isEmpty();
+        return !getServiceRecords(SRParameter.builder(identifier).build()).isEmpty();
     }
 
-    public String getDocumentIdentifier(String identifier, Process process, DocumentType documentType) throws ServiceRegistryLookupException {
-        return getDocumentIdentifier(identifier, process.getValue(), documentType);
+    public String getDocumentIdentifier(SRParameter parameter, Process process, DocumentType documentType) throws ServiceRegistryLookupException {
+        return getDocumentIdentifier(parameter, process.getValue(), documentType);
     }
 
-    public String getDocumentIdentifier(String identifier, String process, DocumentType documentType) throws ServiceRegistryLookupException {
-        Set<ServiceRecord> serviceRecords = getServiceRecords(identifier, process, NextMoveConsts.DEFAULT_SECURITY_LEVEL);
+    public String getDocumentIdentifier(SRParameter parameter, String process, DocumentType documentType) throws ServiceRegistryLookupException {
+        Set<ServiceRecord> serviceRecords = getServiceRecords(parameter, process);
         return serviceRecords.stream()
                 .flatMap(r -> r.getDocumentTypes().stream())
                 .filter(documentType::fitsDocumentIdentifier)
                 .findFirst()
                 .orElseThrow(() -> new ServiceRegistryLookupException(
                         String.format("Standard not found for process '%s' and documentType '%s' for identifier '%s'",
-                                process, documentType.getType(), identifier)));
+                                process, documentType.getType(), parameter.getIdentifier())));
 
     }
 
     public ServiceRecord getServiceRecord(String identifier, String process, String documentType) throws ServiceRegistryLookupException {
-        return getServiceRecord(identifier, process, documentType, NextMoveConsts.DEFAULT_SECURITY_LEVEL);
+        return getServiceRecord(SRParameter.builder(identifier).build(), process, documentType);
     }
 
-    public ServiceRecord getServiceRecord(String identifier, String process, String documentType, Integer securityLevel) throws ServiceRegistryLookupException {
-        Set<ServiceRecord> serviceRecords = getServiceRecords(identifier, process, securityLevel);
+    public ServiceRecord getServiceRecord(SRParameter parameter, String process, String documentType) throws ServiceRegistryLookupException {
+        Set<ServiceRecord> serviceRecords = getServiceRecords(parameter, process);
         return serviceRecords.stream()
                 .filter(hasDocumentType(documentType))
                 .findFirst()
-                .orElseThrow(() -> new ServiceRegistryLookupException(String.format("Service record for identifier=%s with process=%s not found", identifier, process)));
+                .orElseThrow(() -> new ServiceRegistryLookupException(String.format("Service record for identifier=%s with process=%s not found", parameter.getIdentifier(), process)));
     }
 
-    private Set<ServiceRecord> getServiceRecords(String identifier, String process, Integer securityLevel) throws ServiceRegistryLookupException {
+    private Set<ServiceRecord> getServiceRecords(SRParameter parameter, String process) throws ServiceRegistryLookupException {
         List<ServiceRecord> serviceRecords = null;
         try {
-            serviceRecords = srsCache.get(new Parameters(identifier, securityLevel));
+            serviceRecords = srsCache.get(parameter);
         } catch (ExecutionException e) {
             if (e.getCause() instanceof ServiceRegistryLookupException) {
                 throw (ServiceRegistryLookupException) e.getCause();
@@ -190,8 +193,8 @@ public class ServiceRegistryLookup {
                 .collect(Collectors.toSet());
     }
 
-    private ServiceRecord loadServiceRecord(Parameters parameters) throws ServiceRegistryLookupException {
-        List<ServiceRecord> serviceRecords = loadServiceRecords(parameters);
+    private ServiceRecord loadServiceRecord(SRParameter SRParameter) throws ServiceRegistryLookupException {
+        List<ServiceRecord> serviceRecords = loadServiceRecords(SRParameter);
 
         Optional<ServiceRecord> serviceRecord = serviceRecords.stream()
                 .filter(r -> r.getService().getIdentifier() == ServiceIdentifier.DPI)
@@ -210,13 +213,13 @@ public class ServiceRegistryLookup {
                     .findFirst();
         }
 
-        return serviceRecord.orElseThrow(() -> new ServiceRegistryLookupException(String.format("Could not find service record for receiver '%s'", parameters.getIdentifier())));
+        return serviceRecord.orElseThrow(() -> new ServiceRegistryLookupException(String.format("Could not find service record for receiver '%s'", SRParameter.getIdentifier())));
     }
 
-    private List<ServiceRecord> loadServiceRecords(Parameters parameters) throws ServiceRegistryLookupException {
+    private List<ServiceRecord> loadServiceRecords(SRParameter SRParameter) throws ServiceRegistryLookupException {
         ServiceRecord[] serviceRecords;
         try {
-            final String resource = client.getResource("identifier/" + parameters.getIdentifier(), parameters.getQuery());
+            final String resource = client.getResource("identifier/" + SRParameter.getIdentifier(), SRParameter.getQuery());
             final DocumentContext documentContext = JsonPath.parse(resource, jsonPathConfiguration());
             serviceRecords = documentContext.read("$.serviceRecords", ServiceRecord[].class);
         } catch (HttpClientErrorException httpException) {
@@ -224,11 +227,11 @@ public class ServiceRegistryLookup {
             try {
                 ErrorResponse error = objectMapper.readValue(errorBody, ErrorResponse.class);
                 throw new ServiceRegistryLookupException(String.format("Caught exception when looking up service record with identifier %s, http status %s (%s): %s",
-                        parameters.getIdentifier(), httpException.getStatusCode(), httpException.getStatusText(), error.getErrorDescription()), httpException);
+                        SRParameter.getIdentifier(), httpException.getStatusCode(), httpException.getStatusText(), error.getErrorDescription()), httpException);
             } catch (IOException e) {
                 log.warn("Could not parse error response from service registry");
                 throw new ServiceRegistryLookupException(String.format("Caught exception when looking up service record with identifier %s, http status: %s (%s)",
-                        parameters.getIdentifier(), httpException.getStatusCode(), httpException.getStatusText()), httpException);
+                        SRParameter.getIdentifier(), httpException.getStatusCode(), httpException.getStatusText()), httpException);
             }
         } catch (BadJWSException e) {
             log.error("Bad signature in service record response", e);
@@ -244,13 +247,13 @@ public class ServiceRegistryLookup {
      * @return an {@link InfoRecord} for the respective identifier
      */
     public InfoRecord getInfoRecord(String identifier) {
-        return irCache.getUnchecked(new Parameters(identifier));
+        return irCache.getUnchecked(SRParameter.builder(identifier).build());
     }
 
-    private InfoRecord loadInfoRecord(Parameters parameters) throws ServiceRegistryLookupException {
+    private InfoRecord loadInfoRecord(SRParameter SRParameter) throws ServiceRegistryLookupException {
         final String infoRecordString;
         try {
-            infoRecordString = client.getResource("identifier/" + parameters.getIdentifier(), parameters.getQuery());
+            infoRecordString = client.getResource("identifier/" + SRParameter.getIdentifier(), SRParameter.getQuery());
         } catch (BadJWSException e) {
             throw new ServiceRegistryLookupException("Bad signature in response from service registry", e);
         }

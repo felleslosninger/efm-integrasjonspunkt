@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.ReceiverDoNotAcceptProcessException;
 import no.difi.meldingsutveksling.nextmove.BusinessMessage;
+import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -18,10 +19,15 @@ public class NextMoveServiceRecordProvider {
     ServiceRecord getServiceRecord(StandardBusinessDocument sbd) {
         BusinessMessage businessMessage = sbd.getBusinessMessage();
         try {
+            SRParameter.SRParameterBuilder parameterBuilder = SRParameter.builder(sbd.getReceiverIdentifier())
+                    .conversationId(sbd.getConversationId());
             if (businessMessage.getSikkerhetsnivaa() != null) {
-                return serviceRegistryLookup.getServiceRecord(sbd.getReceiverIdentifier(), sbd.getProcess(), sbd.getStandard(), businessMessage.getSikkerhetsnivaa());
+                parameterBuilder.securityLevel(businessMessage.getSikkerhetsnivaa());
             }
-            return serviceRegistryLookup.getServiceRecord(sbd.getReceiverIdentifier(), sbd.getProcess(), sbd.getStandard());
+            return serviceRegistryLookup.getServiceRecord(
+                    parameterBuilder.build(),
+                    sbd.getProcess(),
+                    sbd.getStandard());
         } catch (ServiceRegistryLookupException e) {
             throw new ReceiverDoNotAcceptProcessException(sbd.getProcess(), e.getLocalizedMessage());
         }

@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -25,7 +26,8 @@ public class ServiceRegistryTransportFactory implements TransportFactory {
     @Override
     public Transport createTransport(StandardBusinessDocument message) {
         try {
-            ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(message.getReceiverIdentifier(), DPO);
+            ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
+                    .conversationId(message.getConversationId()).build(), DPO);
             AltinnWsClient altinnWsClient = altinnWsClientFactory.getAltinnWsClient(serviceRecord);
             return new AltinnTransport(altinnWsClient, uuidGenerator);
         } catch (ServiceRegistryLookupException e) {

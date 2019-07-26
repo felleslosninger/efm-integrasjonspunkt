@@ -1,9 +1,9 @@
 package no.difi.meldingsutveksling.serviceregistry;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @Slf4j
 public class IdentifierRelayController {
 
-    @Autowired
-    private ServiceRegistryLookup serviceRegistryLookup;
+    private final ServiceRegistryLookup serviceRegistryLookup;
 
     @RequestMapping(value = "/servicerecord/{identifier}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getServiceRecord(@PathVariable("identifier") String identifier) {
