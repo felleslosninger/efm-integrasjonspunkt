@@ -16,9 +16,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
@@ -55,6 +58,8 @@ public class OidcTokenClient {
         this.props = props;
     }
 
+    @Retryable(value = HttpClientErrorException.class, maxAttempts = -1,
+            backoff = @Backoff(delay = 5000, maxDelay = 1000*60*60, multiplier = 3))
     public IdportenOidcTokenResponse fetchToken() {
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.setErrorHandler(new OidcErrorHandler());
