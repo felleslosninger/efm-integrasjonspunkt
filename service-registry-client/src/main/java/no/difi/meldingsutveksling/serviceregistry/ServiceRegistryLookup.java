@@ -57,7 +57,11 @@ public class ServiceRegistryLookup {
         List<ServiceRecord> serviceRecords = loadServiceRecords(new Parameters(identifier));
         return serviceRecords.stream()
                 .filter(isServiceIdentifier(serviceIdentifier)).findFirst()
-                .orElseThrow(() -> new ServiceRegistryLookupException(String.format("Service record of type=%s not found for identifier=%s", serviceIdentifier, identifier)));
+                .orElseThrow(() -> new ServiceRegistryLookupException(String.format("Service record of type=%s not found for identifier=%s", serviceIdentifier, parameter.getIdentifier())));
+    }
+
+    public List<ServiceRecord> getServiceRecords(SRParameter parameter) {
+        return srsCache.getUnchecked(parameter);
     }
 
     @Cacheable(CACHE_GET_SERVICE_RECORDS)
@@ -70,31 +74,35 @@ public class ServiceRegistryLookup {
     }
 
     public boolean isInServiceRegistry(String identifier) {
-        return !getServiceRecords(identifier).isEmpty();
+        return !getServiceRecords(SRParameter.builder(identifier).build()).isEmpty();
     }
 
-    public String getDocumentIdentifier(String identifier, Process process, DocumentType documentType) throws ServiceRegistryLookupException {
-        return getDocumentIdentifier(identifier, process.getValue(), documentType);
+    public String getDocumentIdentifier(SRParameter parameter, Process process, DocumentType documentType) throws ServiceRegistryLookupException {
+        return getDocumentIdentifier(parameter, process.getValue(), documentType);
     }
 
-    public String getDocumentIdentifier(String identifier, String process, DocumentType documentType) throws ServiceRegistryLookupException {
-        Set<ServiceRecord> serviceRecords = getServiceRecords(identifier, process);
+    public String getDocumentIdentifier(SRParameter parameter, String process, DocumentType documentType) throws ServiceRegistryLookupException {
+        Set<ServiceRecord> serviceRecords = getServiceRecords(parameter, process);
         return serviceRecords.stream()
                 .flatMap(r -> r.getDocumentTypes().stream())
                 .filter(documentType::fitsDocumentIdentifier)
                 .findFirst()
                 .orElseThrow(() -> new ServiceRegistryLookupException(
                         String.format("Standard not found for process '%s' and documentType '%s' for identifier '%s'",
-                                process, documentType.getType(), identifier)));
+                                process, documentType.getType(), parameter.getIdentifier())));
 
     }
 
     public ServiceRecord getServiceRecord(String identifier, String process, String documentType) throws ServiceRegistryLookupException {
-        Set<ServiceRecord> serviceRecords = getServiceRecords(identifier, process);
+        return getServiceRecord(SRParameter.builder(identifier).build(), process, documentType);
+    }
+
+    public ServiceRecord getServiceRecord(SRParameter parameter, String process, String documentType) throws ServiceRegistryLookupException {
+        Set<ServiceRecord> serviceRecords = getServiceRecords(parameter, process);
         return serviceRecords.stream()
                 .filter(hasDocumentType(documentType))
                 .findFirst()
-                .orElseThrow(() -> new ServiceRegistryLookupException(String.format("Service record for identifier=%s with process=%s not found", identifier, process)));
+                .orElseThrow(() -> new ServiceRegistryLookupException(String.format("Service record for identifier=%s with process=%s not found", parameter.getIdentifier(), process)));
     }
 
     private Set<ServiceRecord> getServiceRecords(String identifier, String process) throws ServiceRegistryLookupException {
@@ -104,8 +112,8 @@ public class ServiceRegistryLookup {
                 .collect(Collectors.toSet());
     }
 
-    private ServiceRecord loadServiceRecord(Parameters parameters) throws ServiceRegistryLookupException {
-        List<ServiceRecord> serviceRecords = loadServiceRecords(parameters);
+    private ServiceRecord loadServiceRecord(SRParameter SRParameter) throws ServiceRegistryLookupException {
+        List<ServiceRecord> serviceRecords = loadServiceRecords(SRParameter);
 
         Optional<ServiceRecord> serviceRecord = serviceRecords.stream()
                 .filter(r -> r.getService().getIdentifier() == ServiceIdentifier.DPI)
@@ -124,7 +132,7 @@ public class ServiceRegistryLookup {
                     .findFirst();
         }
 
-        return serviceRecord.orElseThrow(() -> new ServiceRegistryLookupException(String.format("Could not find service record for receiver '%s'", parameters.getIdentifier())));
+        return serviceRecord.orElseThrow(() -> new ServiceRegistryLookupException(String.format("Could not find service record for receiver '%s'", SRParameter.getIdentifier())));
     }
 
     private List<ServiceRecord> loadServiceRecords(Parameters parameters) throws ServiceRegistryLookupException {
@@ -170,11 +178,11 @@ public class ServiceRegistryLookup {
             try {
                 ErrorResponse error = objectMapper.readValue(errorBody, ErrorResponse.class);
                 throw new ServiceRegistryLookupException(String.format("Caught exception when looking up service record with identifier %s, http status %s (%s): %s",
-                        parameters.getIdentifier(), httpException.getStatusCode(), httpException.getStatusText(), error.getErrorDescription()), httpException);
+                        SRParameter.getIdentifier(), httpException.getStatusCode(), httpException.getStatusText(), error.getErrorDescription()), httpException);
             } catch (IOException e) {
                 log.warn("Could not parse error response from service registry");
                 throw new ServiceRegistryLookupException(String.format("Caught exception when looking up service record with identifier %s, http status: %s (%s)",
-                        parameters.getIdentifier(), httpException.getStatusCode(), httpException.getStatusText()), httpException);
+                        SRParameter.getIdentifier(), httpException.getStatusCode(), httpException.getStatusText()), httpException);
             }
         } catch (BadJWSException e) {
             log.error("Bad signature in service record response", e);

@@ -25,6 +25,7 @@ import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.receipt.Conversation;
+import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
@@ -156,7 +157,11 @@ public class CorrespondenceAgencyMessageFactory {
 
         ServiceRecord serviceRecord;
         try {
-            serviceRecord = serviceRegistryLookup.getServiceRecord(receiverIdentifier, process, documentType);
+            serviceRecord = serviceRegistryLookup.getServiceRecord(
+                    SRParameter.builder(receiverIdentifier)
+                            .conversationId(conversationId).build(),
+                    process,
+                    documentType);
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(String.format("Could not get service record for receiver %s", receiverIdentifier));
         }

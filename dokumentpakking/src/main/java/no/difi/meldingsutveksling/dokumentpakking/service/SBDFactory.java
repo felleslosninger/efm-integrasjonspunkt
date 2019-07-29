@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.*;
+import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import org.springframework.stereotype.Component;
@@ -52,16 +53,17 @@ public class SBDFactory {
                         .setHeaderVersion(HEADER_VERSION)
                         .addSender(createSender(avsender))
                         .addReceiver(createReceiver(mottaker))
-                        .setDocumentIdentification(createDocumentIdentification(documentType, getDocumentIdentifier(mottaker.toString(), process, documentType)))
+                        .setDocumentIdentification(createDocumentIdentification(documentType, getDocumentIdentifier(SRParameter.builder(mottaker.toString())
+                                .conversationId(conversationId).build(), process, documentType)))
                         .setBusinessScope(createBusinessScope(fromConversationId(conversationId, process, OffsetDateTime.now(clock).plusHours(props.getNextmove().getDefaultTtlHours()))))
                 ).setAny(any);
     }
 
-    private String getDocumentIdentifier(String identifier, String process, DocumentType documentType) {
+    private String getDocumentIdentifier(SRParameter parameter, String process, DocumentType documentType) {
         try {
-            return serviceRegistryLookup.getDocumentIdentifier(identifier, process, documentType);
+            return serviceRegistryLookup.getDocumentIdentifier(parameter, process, documentType);
         } catch (ServiceRegistryLookupException e) {
-            throw new MeldingsUtvekslingRuntimeException(String.format("Error looking up service record for %s", identifier), e);
+            throw new MeldingsUtvekslingRuntimeException(String.format("Error looking up service record for %s", parameter.getIdentifier()), e);
         }
     }
 

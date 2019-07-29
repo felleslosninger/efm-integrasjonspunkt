@@ -19,6 +19,7 @@ import no.difi.meldingsutveksling.kvittering.xsd.Levering;
 import no.difi.meldingsutveksling.kvittering.xsd.ObjectFactory;
 import no.difi.meldingsutveksling.nextmove.StatusMessage;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
+import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import org.apache.xml.security.exceptions.XMLSecurityException;
@@ -63,7 +64,8 @@ public class SBDReceiptFactory {
                                                                  ReceiptStatus status) {
         String standard;
         try {
-            standard = serviceRegistryLookup.getDocumentIdentifier(sbd.getSenderIdentifier(), Process.ARKIVMELDING_RESPONSE, documentType);
+            standard = serviceRegistryLookup.getDocumentIdentifier(SRParameter.builder(sbd.getSenderIdentifier())
+                    .conversationId(sbd.getConversationId()).build(), Process.ARKIVMELDING_RESPONSE, documentType);
         } catch (ServiceRegistryLookupException e) {
             log.error("Error looking up service record for {}", sbd.getSenderIdentifier(), e);
             throw new MeldingsUtvekslingRuntimeException(e);
@@ -87,7 +89,8 @@ public class SBDReceiptFactory {
                                                             ReceiptStatus status) {
         String standard;
         try {
-            standard = serviceRegistryLookup.getDocumentIdentifier(sbd.getSenderIdentifier(), Process.EINNSYN_RESPONSE, documentType);
+            standard = serviceRegistryLookup.getDocumentIdentifier(SRParameter.builder(sbd.getSenderIdentifier())
+                    .conversationId(sbd.getConversationId()).build(), Process.EINNSYN_RESPONSE, documentType);
         } catch (ServiceRegistryLookupException e) {
             log.error("Error looking up service record for {}", sbd.getSenderIdentifier(), e);
             throw new MeldingsUtvekslingRuntimeException(e);

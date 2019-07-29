@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.CertificateParserException;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
+import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -24,7 +25,8 @@ public class Adresseregister {
     public void validateCertificates(StandardBusinessDocument sbd) throws MessageException {
         ServiceRecord receiverServiceRecord;
         try {
-            receiverServiceRecord = serviceRegistryLookup.getServiceRecord(sbd.getReceiverIdentifier());
+            receiverServiceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(sbd.getReceiverIdentifier())
+                    .conversationId(sbd.getConversationId()).build());
         } catch (ServiceRegistryLookupException e) {
             throw new MessageException(e, StatusMessage.MISSING_SERVICE_RECORD);
         }

@@ -1,8 +1,8 @@
 Feature: Sending a Next Move DPE message
 
   Background:
-    Given a "GET" request to "http://localhost:9099/identifier/910075935" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075935.json"
-    And a "GET" request to "http://localhost:9099/identifier/910077473" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
+    Given a "GET" request to "http://localhost:9099/identifier/910075935?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075935.json"
+    And a "GET" request to "http://localhost:9099/identifier/910077473?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
 
   Scenario: As a user I want to send a DPE message
     Given I POST the following message:

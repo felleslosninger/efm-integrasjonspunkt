@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.logging.MarkerFactory;
 import no.difi.meldingsutveksling.nextmove.ConversationStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
+import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -107,7 +108,9 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
         ServiceRecord receiverRecord;
         try {
-            receiverRecord = serviceRegistryLookup.getServiceRecord(message.getReceiverPartyNumber());
+            receiverRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(message.getReceiverPartyNumber())
+                    .conversationId(message.getConversationId())
+                    .build());
         } catch (ServiceRegistryLookupException e) {
             log.error("Error looking up service record for {}", message.getReceiverPartyNumber(), e);
             return PutMessageResponseFactory.createErrorResponse(StatusMessage.MISSING_SERVICE_RECORD);

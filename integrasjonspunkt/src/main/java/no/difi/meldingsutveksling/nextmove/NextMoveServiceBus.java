@@ -24,6 +24,7 @@ import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
+import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -265,7 +266,8 @@ public class NextMoveServiceBus {
 
         try {
             ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(
-                    message.getReceiverIdentifier(),
+                    SRParameter.builder(message.getReceiverIdentifier())
+                            .conversationId(message.getConversationId()).build(),
                     message.getSbd().getProcess(),
                     message.getSbd().getStandard());
 
