@@ -16,7 +16,7 @@ public class BestEduMessage implements ByteArrayFile {
 	}
 
 	public byte[] getBytes() {
-		return content.getByteArray();
+		return content.getContent();
 	}
 
 	public String getMimeType() {

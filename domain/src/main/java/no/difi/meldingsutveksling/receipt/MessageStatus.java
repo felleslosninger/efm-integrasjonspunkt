@@ -1,57 +1,89 @@
 package no.difi.meldingsutveksling.receipt;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.MoreObjects;
-import lombok.Data;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Getter;
+import lombok.Setter;
+import no.difi.meldingsutveksling.nextmove.AbstractEntity;
+import no.difi.meldingsutveksling.view.Views;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 /**
  * Used for storing and tracking receipt information.
  */
+@Getter
+@Setter
 @Entity
-@Data
-public class MessageStatus {
+@Table(name = "message_status")
+@NamedEntityGraph(name = "MessageStatus.conversation", attributeNodes = @NamedAttributeNode("conversation"))
+public class MessageStatus extends AbstractEntity<Long> {
 
-    @Id
-    @GeneratedValue
-    private Integer statId;
-    @Column(insertable = false, updatable = false, name = "conv_id")
-    private Integer convId;
-    private String conversationId;
+    @Override
+    @JsonProperty
+    @ApiModelProperty(
+            position = 2,
+            value = "Id",
+            example = "1")
+    @JsonView({Views.Conversation.class, Views.MessageStatus.class})
+    public Long getId() {
+        return super.getId();
+    }
+
+    @JsonProperty
+    @JsonView(Views.MessageStatus.class)
+    public Long getConvId() {
+        return conversation.getId();
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "conv_id")
+    @JsonIgnore
+    private Conversation conversation;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private LocalDateTime lastUpdate;
+    @JsonView({Views.Conversation.class, Views.MessageStatus.class})
+    private OffsetDateTime lastUpdate;
+    @JsonView({Views.Conversation.class, Views.MessageStatus.class})
     private String status;
+    @JsonView({Views.Conversation.class, Views.MessageStatus.class})
     private String description;
 
     @Lob
+    @JsonView(Views.MessageStatus.class)
     private String rawReceipt;
 
-    MessageStatus(){}
+    MessageStatus() {
+    }
 
-    private MessageStatus(String status, LocalDateTime lastUpdate, String description) {
+    @JsonView(Views.MessageStatus.class)
+    public String getConversationId() {
+        return conversation.getConversationId();
+    }
+
+    private MessageStatus(String status, OffsetDateTime lastUpdate, String description) {
         this.status = status;
         this.lastUpdate = lastUpdate;
         this.description = description;
     }
 
-    public static MessageStatus of(ReceiptStatus status) {
-        return new MessageStatus(status.toString(), LocalDateTime.now(), null);
-    }
-
-    public static MessageStatus of(ReceiptStatus status, LocalDateTime lastUpdate) {
+    public static MessageStatus of(ReceiptStatus status, OffsetDateTime lastUpdate) {
         return new MessageStatus(status.toString(), lastUpdate, null);
     }
 
-    public static MessageStatus of(ReceiptStatus status, LocalDateTime lastUpdate, String description) {
+    public static MessageStatus of(ReceiptStatus status, OffsetDateTime lastUpdate, String description) {
         return new MessageStatus(status.toString(), lastUpdate, description);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("statId", statId)
+                .add("id", getId())
                 .add("lastUpdate", lastUpdate)
                 .add("status", status)
                 .add("description", description)

@@ -1,60 +1,63 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
+import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
+import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageOutRepository;
 import no.difi.meldingsutveksling.receipt.ConversationService;
-import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
-import org.springframework.beans.factory.annotation.Autowired;
+import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
-import java.util.Optional;
 
-import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
-import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
+import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class NextMoveSender {
 
-    private ConversationStrategyFactory strategyFactory;
-    private ConversationService conversationService;
-    private MessagePersister messagePersister;
-    private DirectionalConversationResourceRepository outRepo;
-
-    @Autowired
-    public NextMoveSender(ConversationStrategyFactory strategyFactory,
-                          ConversationService conversationService,
-                          MessagePersister messagePersister,
-                          ConversationResourceRepository repo) {
-        this.strategyFactory = strategyFactory;
-        this.conversationService = conversationService;
-        this.messagePersister = messagePersister;
-        this.outRepo = new DirectionalConversationResourceRepository(repo, OUTGOING);
-    }
+    private final ConversationStrategyFactory strategyFactory;
+    private final ConversationService conversationService;
+    private final CryptoMessagePersister cryptoMessagePersister;
+    private final NextMoveMessageOutRepository messageRepo;
+    private final MessageStatusFactory messageStatusFactory;
+    private final SBDUtil sbdUtil;
+    private final TimeToLiveHelper timeToLiveHelper;
 
     @Transactional
-    public void send(ConversationResource cr) throws NextMoveException {
-        Optional<ConversationStrategy> strategy = strategyFactory.getStrategy(cr);
-        if (!strategy.isPresent()) {
-            String errorStr = String.format("Cannot send message - serviceIdentifier \"%s\" not supported",
-                    cr.getServiceIdentifier());
-            log.error(markerFrom(cr), errorStr);
-            throw new NextMoveRuntimeException(errorStr);
+    public void send(NextMoveOutMessage msg) throws NextMoveException {
+        if (sbdUtil.isExpired(msg.getSbd())) {
+            conversationService.findConversation(msg.getConversationId())
+                    .ifPresent(timeToLiveHelper::registerErrorStatusAndMessage);
+
+            if (sbdUtil.isStatus(msg.getSbd())) {
+                return;
+            }
+        } else {
+            strategyFactory.getStrategy(msg.getServiceIdentifier())
+                    .orElseThrow(() -> {
+                        String errorStr = String.format("Cannot send message - serviceIdentifier \"%s\" not supported",
+                                msg.getServiceIdentifier());
+                        log.error(markerFrom(msg), errorStr);
+                        return new NextMoveRuntimeException(errorStr);
+                    }).send(msg);
+
+            if (sbdUtil.isStatus(msg.getSbd())) {
+                return;
+            }
+
+            conversationService.registerStatus(msg.getConversationId(), messageStatusFactory.getMessageStatus(ReceiptStatus.SENDT));
         }
-        strategy.get().send(cr);
-        if (cr.getServiceIdentifier() == ServiceIdentifier.DPE_RECEIPT) {
-            return;
-        }
-        conversationService.registerStatus(cr.getConversationId(), MessageStatus.of(GenericReceiptStatus.SENDT));
-        outRepo.delete(cr);
+
+        messageRepo.deleteByConversationId(msg.getConversationId());
         try {
-            messagePersister.delete(cr);
+            cryptoMessagePersister.delete(msg.getConversationId());
         } catch (IOException e) {
-            log.error("Error deleting files from conversation with id={}", cr.getConversationId(),  e);
+            log.error("Error deleting files from conversation with id={}", msg.getConversationId(), e);
         }
     }
 }

@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.dokumentpakking.domain;
 
-import java.util.Arrays;
-
 import no.difi.meldingsutveksling.domain.ByteArrayFile;
+
+import java.util.Arrays;
 
 public class Manifest implements ByteArrayFile {
 
@@ -26,7 +26,7 @@ public class Manifest implements ByteArrayFile {
 
 	@Override
 	public String getMimeType() {
-		return "application/xml";
+		return "text/xml";
 	}
 
 }

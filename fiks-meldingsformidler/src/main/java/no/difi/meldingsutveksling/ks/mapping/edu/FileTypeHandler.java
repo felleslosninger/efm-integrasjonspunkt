@@ -11,6 +11,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 /**
  * Used to map domain FileTypeHandler to
@@ -18,8 +19,8 @@ import java.util.function.Function;
 public class FileTypeHandler implements Handler<Dokument.Builder> {
     private final DokumentType domainDocument;
     private X509Certificate certificate;
-    private static final Function<byte[], byte[]> noop = b -> b;
-    private final Function<byte[], byte[]> encrypt = b -> new CmsUtil().createCMS(b, certificate);
+    private static final UnaryOperator<byte[]> noop = b -> b;
+    private final UnaryOperator<byte[]> encrypt = b -> new CmsUtil().createCMS(b, certificate);
     private Function<byte[], byte[]> transform = noop;
 
     public FileTypeHandler(DokumentType domainDocument) {
@@ -45,7 +46,7 @@ public class FileTypeHandler implements Handler<Dokument.Builder> {
             final DataHandler dataHandler = new DataHandler(new ByteArrayDataSource(new ByteArrayInputStream(base64), domainDocument.getVeMimeType()));
             builder.withData(dataHandler);
         } catch (IOException e) {
-            throw new DokumenterHandlerException("Unable to map EDUCore documents to KS SvarUt Dokument documents", e);
+            throw new DokumenterHandlerException("Unable to map NextMove documents to KS SvarUt Dokument documents", e);
         }
         return builder;
     }

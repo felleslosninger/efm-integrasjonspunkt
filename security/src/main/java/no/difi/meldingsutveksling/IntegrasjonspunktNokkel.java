@@ -29,7 +29,7 @@ public class IntegrasjonspunktNokkel {
 
         try {
             this.keyStore = KeystoreProvider.loadKeyStore(properties);
-        }catch (KeystoreProviderException e){
+        } catch (KeystoreProviderException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -49,21 +49,21 @@ public class IntegrasjonspunktNokkel {
 
             privateKey = (PrivateKey) keyStore.getKey(properties.getAlias(), password);
 
-            if(privateKey == null){
+            if (privateKey == null) {
 
                 throw new IllegalStateException(
                         String.format(ERR_MISSING_PRIVATE_KEY, properties.getAlias())
                 );
             }
 
-        }catch (KeyStoreException | NoSuchAlgorithmException e) {
+        } catch (KeyStoreException | NoSuchAlgorithmException e) {
 
             throw new IllegalStateException(ERR_GENERAL, e);
-        }catch (UnrecoverableEntryException e){
+        } catch (UnrecoverableEntryException e) {
 
             throw new IllegalStateException(
                     String.format(ERR_MISSING_PRIVATE_KEY_OR_PASS, properties.getAlias())
-                    ,e
+                    , e
             );
 
         }
@@ -79,13 +79,13 @@ public class IntegrasjonspunktNokkel {
 
             certificate = (X509Certificate) keyStore.getCertificate(properties.getAlias());
 
-            if( certificate == null ){
+            if (certificate == null) {
                 throw new IllegalStateException(
                         String.format(ERR_MISSING_CERTIFICATE, properties.getAlias())
                 );
             }
 
-        }catch (KeyStoreException e){
+        } catch (KeyStoreException e) {
 
             throw new IllegalStateException(ERR_GENERAL, e);
         }
@@ -107,7 +107,7 @@ public class IntegrasjonspunktNokkel {
 
     }
 
-    public boolean shouldLockProvider(){
+    public boolean shouldLockProvider() {
         return properties.getLockProvider();
     }
 
@@ -118,7 +118,7 @@ public class IntegrasjonspunktNokkel {
 
     public class MoveSignaturHelper extends SignatureHelper {
 
-        public MoveSignaturHelper(KeyStore keyStore, String keyAlias, String keyPassword)  {
+        public MoveSignaturHelper(KeyStore keyStore, String keyAlias, String keyPassword) {
 
             super(properties.getLockProvider() ? keyStore.getProvider() : null);
             loadCertificate(keyStore, keyAlias, keyPassword);

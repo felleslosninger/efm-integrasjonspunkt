@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.auth.OidcTokenClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
@@ -30,6 +31,7 @@ import java.util.Date;
 import static java.util.Arrays.asList;
 
 @Configuration
+@Retryable
 @EnableOAuth2Client
 public class OauthRestTemplateConfig {
 

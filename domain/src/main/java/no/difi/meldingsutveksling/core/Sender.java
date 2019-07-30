@@ -9,9 +9,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
-/**
- * Used by {@link EDUCore}.
- */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Sender", propOrder = {
         "identifier",

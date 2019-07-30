@@ -14,7 +14,7 @@ public class AltinnPackageTest {
         UploadRequest uploadRequest = new MockRequest();
         AltinnPackage altinnPackage = AltinnPackage.from(uploadRequest);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        altinnPackage.write(outputStream);
+        altinnPackage.write(outputStream, null);
 
         byte[] bytes = outputStream.toByteArray();
 

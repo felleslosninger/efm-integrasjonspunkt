@@ -37,7 +37,7 @@ public class PutMessageRequestWrapper {
         return requestType.getEnvelope().getConversationId();
     }
 
-    public String getRecieverPartyNumber() {
+    public String getReceiverPartyNumber() {
         return requestType.getEnvelope().getReceiver().getOrgnr();
     }
 
@@ -46,7 +46,7 @@ public class PutMessageRequestWrapper {
     }
 
     public boolean hasRecieverPartyNumber() {
-        return hasReciever() && isNotEmpty(getRecieverPartyNumber());
+        return hasReciever() && isNotEmpty(getReceiverPartyNumber());
     }
 
     private boolean hasReciever() {
@@ -87,7 +87,7 @@ public class PutMessageRequestWrapper {
 
     public void swapSenderAndReceiver() {
         final String sender = getSenderPartynumber() ;
-        setSenderPartyNumber(getRecieverPartyNumber());
+        setSenderPartyNumber(getReceiverPartyNumber());
         setReceiverPartyNumber(sender);
     }
 

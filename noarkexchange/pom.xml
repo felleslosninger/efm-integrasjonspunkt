@@ -3,7 +3,7 @@
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>1.7.95-SNAPSHOT</version>
+        <version>1.7.98-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>noarkexchange</artifactId>
@@ -12,7 +12,6 @@
         <dependency>
             <groupId>org.springframework.ws</groupId>
             <artifactId>spring-ws-core</artifactId>
-            <version>2.1.4.RELEASE</version>
         </dependency>
 
         <dependency>
@@ -23,7 +22,6 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.1</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -38,7 +36,6 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>test-tools</artifactId>
-            <version>1.7.95-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -68,25 +65,6 @@
                             <packageName>no.difi.meldingsutveksling.noarkexchange.schema</packageName>
                             <wsdlFiles>
                                 <wsdlFile>${basedir}/src/wsdl/noarkExchange.wsdl</wsdlFile>
-                            </wsdlFiles>
-                            <vmArgs>
-                                <vmArg>-Djavax.xml.accessExternalDTD=all</vmArg>
-                                <vmArg>-Djavax.xml.accessExternalSchema=all</vmArg>
-                            </vmArgs>
-                            <verbose>true</verbose>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>integrasjonspunktReceive-exec</id>
-                        <goals>
-                            <goal>wsimport</goal>
-                        </goals>
-                        <configuration>
-                            <genJWS>true</genJWS>
-                            <packageName>no.difi.meldingsutveksling.noarkexchange.schema.receive</packageName>
-                            <wsdlFiles>
-                                <wsdlFile>${basedir}/src/wsdl/IntegrasjonspunktReceive.wsdl
-                                </wsdlFile>
                             </wsdlFiles>
                             <vmArgs>
                                 <vmArg>-Djavax.xml.accessExternalDTD=all</vmArg>

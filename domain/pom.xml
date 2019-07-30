@@ -8,7 +8,7 @@
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>1.7.95-SNAPSHOT</version>
+        <version>1.7.98-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -57,6 +57,11 @@
 
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>validation</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>nextmove</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
@@ -86,7 +91,18 @@
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-apt</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-models</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

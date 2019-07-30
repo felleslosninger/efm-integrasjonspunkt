@@ -8,7 +8,7 @@ import org.springframework.core.io.FileSystemResource;
 
 import java.security.PrivateKey;
 
-import static junit.framework.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Ignore("Temporary ignored. Functionality is to be moved, reason queue handling.")
 public class IngegrasjonspunktNokkelTest {
@@ -31,7 +31,7 @@ public class IngegrasjonspunktNokkelTest {
     public void testLastingavprivatnokkelfraTestressurser() {
 
         PrivateKey key = nokkel.loadPrivateKey();
-        assertNotNull(key.getFormat());
+        assertThat(key.getFormat()).isNotNull();
     }
 
 }

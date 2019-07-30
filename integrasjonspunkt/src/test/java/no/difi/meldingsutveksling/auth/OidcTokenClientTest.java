@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.KeyStoreProperties;
 import no.difi.meldingsutveksling.config.OauthRestTemplateConfig;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
+import no.difi.move.common.oauth.JWTDecoder;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -16,7 +17,9 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.PublicKey;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
@@ -28,16 +31,16 @@ public class OidcTokenClientTest {
 
     private IntegrasjonspunktProperties props;
     private List<String> scopes = Arrays.asList(
-                "move/dpo.read",
-                "move/dpe.read",
-                "move/dpv.read",
-                "move/dpi.read",
-                "global/kontaktinformasjon.read",
-                "global/sikkerdigitalpost.read",
-                "global/varslingsstatus.read",
-                "global/sertifikat.read",
-                "global/navn.read",
-                "global/postadresse.read");
+            "move/dpo.read",
+            "move/dpe.read",
+            "move/dpv.read",
+            "move/dpi.read",
+            "global/kontaktinformasjon.read",
+            "global/sikkerdigitalpost.read",
+            "global/varslingsstatus.read",
+            "global/sertifikat.read",
+            "global/navn.read",
+            "global/postadresse.read");
 
     @Before
     public void setup() throws MalformedURLException {
@@ -74,7 +77,7 @@ public class OidcTokenClientTest {
         System.out.println(jwt);
         SignedJWT parsedJWT = SignedJWT.parse(jwt);
         assertEquals("test_move", parsedJWT.getJWTClaimsSet().getIssuer());
-        assertEquals(scopes.stream().reduce((a, b) -> a+" "+b).get(), parsedJWT.getJWTClaimsSet().getClaims().get("scope"));
+        assertEquals(scopes.stream().reduce((a, b) -> a + " " + b).orElse(""), parsedJWT.getJWTClaimsSet().getClaims().get("scope"));
     }
 
     @Test
@@ -103,9 +106,14 @@ public class OidcTokenClientTest {
         OidcTokenClient oidcTokenClient = new OidcTokenClient(props);
         OauthRestTemplateConfig config = new OauthRestTemplateConfig(props, oidcTokenClient);
         RestOperations ops = config.restTemplate();
-        RestClient restClient = new RestClient(props, ops);
+        RestClient restClient = new RestClient(props, ops, new JWTDecoder(), publicKey(props), new URL(props.getServiceregistryEndpoint()).toURI());
         String response = restClient.getResource("sastoken");
         System.out.println(response);
     }
 
+    private PublicKey publicKey(IntegrasjonspunktProperties props) throws CertificateException, IOException {
+        return CertificateFactory.getInstance("X.509")
+                .generateCertificate(props.getSign().getCertificate().getInputStream())
+                .getPublicKey();
+    }
 }

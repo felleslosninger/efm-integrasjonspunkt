@@ -2,14 +2,13 @@ package no.difi.meldingsutveksling.nextmove.message;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.DpoConversationResource;
+import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
-import java.io.*;
-import java.util.Arrays;
+import java.io.ByteArrayInputStream;
+import java.io.File;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -20,7 +19,7 @@ public class FileMessagePersisterTest {
     private FileMessagePersister messagePersister;
 
     @Before
-    public void setup() throws IOException {
+    public void setup() {
         props = new IntegrasjonspunktProperties();
         IntegrasjonspunktProperties.NextMove nextMoveProps = new IntegrasjonspunktProperties.NextMove();
         nextMoveProps.setFiledir("target/filepersister_testdir");
@@ -36,15 +35,32 @@ public class FileMessagePersisterTest {
         String filename = "foo";
         byte[] content = "bar".getBytes(UTF_8);
 
-        messagePersister.write(cr, filename, content);
+        messagePersister.write(cr.getConversationId(), filename, content);
 
-        byte[] read = messagePersister.read(cr, filename);
+        byte[] read = messagePersister.read(cr.getConversationId(), filename);
         Assert.assertArrayEquals(content, read);
 
-        messagePersister.delete(cr);
+        messagePersister.delete(cr.getConversationId());
         File crDir = new File(props.getNextmove().getFiledir() + "/" + cr.getConversationId());
         Assert.assertFalse(crDir.exists());
     }
 
+    @Test
+    public void testFileMessagePersisterStream() throws Exception {
+        String filename = "foo";
+        byte[] content = "bar".getBytes(UTF_8);
+        ByteArrayInputStream bis = new ByteArrayInputStream(content);
 
+        messagePersister.writeStream(cr.getConversationId(), filename, bis, content.length);
+        FileEntryStream fileEntry = messagePersister.readStream(cr.getConversationId(), filename);
+
+        byte[] bytes = IOUtils.toByteArray(fileEntry.getInputStream());
+        Assert.assertArrayEquals(content, bytes);
+
+        fileEntry.getInputStream().close();
+
+        messagePersister.delete(cr.getConversationId());
+        File crDir = new File(props.getNextmove().getFiledir() + "/" + cr.getConversationId());
+        Assert.assertFalse(crDir.exists());
+    }
 }

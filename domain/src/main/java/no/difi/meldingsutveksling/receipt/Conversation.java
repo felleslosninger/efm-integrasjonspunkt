@@ -2,61 +2,71 @@ package no.difi.meldingsutveksling.receipt;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.Lists;
-import lombok.Data;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.core.EDUCore;
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.nextmove.AbstractEntity;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
-import no.difi.meldingsutveksling.nextmove.ConversationResource;
-import no.difi.meldingsutveksling.noarkexchange.PayloadException;
-import no.difi.meldingsutveksling.noarkexchange.PayloadUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Stream;
+import java.time.OffsetDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_INNSYN;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 
+@Getter
+@Setter
 @Entity
-@Data
 @Slf4j
 @Table(name = "conversation",
-    indexes = {@Index(columnList = "conversation_id")})
-public class Conversation {
+        indexes = {@Index(columnList = "conversation_id")})
+@ApiModel(description = "Conversation")
+@NamedEntityGraph(name = "Conversation.messageStatuses", attributeNodes = @NamedAttributeNode("messageStatuses"))
+public class Conversation extends AbstractEntity<Long> implements MessageInformable {
 
     public static final Logger statusLogger = LoggerFactory.getLogger("STATUS");
 
-    @Id
-    @GeneratedValue
-    private Integer convId;
+    @Override
+    @JsonProperty
+    @ApiModelProperty(
+            position = 2,
+            value = "Id",
+            example = "1")
+    public Long getId() {
+        return super.getId();
+    }
+
     @Column(name = "conversation_id")
     private String conversationId;
     private String senderIdentifier;
     private String receiverIdentifier;
     private String messageReference;
     private String messageTitle;
+    private String serviceCode;
+    private String serviceEditionCode;
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private LocalDateTime lastUpdate;
+    private OffsetDateTime lastUpdate;
     @JsonIgnore
     private boolean pollable;
     private boolean finished;
-    private boolean msh;
+    private OffsetDateTime expiry;
     private ConversationDirection direction;
     private ServiceIdentifier serviceIdentifier;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "conv_id")
-    private List<MessageStatus> messageStatuses;
+    @OneToMany(mappedBy = "conversation", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<MessageStatus> messageStatuses;
 
-    Conversation() {}
+    public Conversation() {
+    }
 
     private Conversation(String conversationId,
                          String messageReference,
@@ -64,16 +74,29 @@ public class Conversation {
                          String receiverIdentifier,
                          ConversationDirection direction,
                          String messageTitle,
-                         ServiceIdentifier serviceIdentifier) {
+                         ServiceIdentifier serviceIdentifier,
+                         OffsetDateTime expiry,
+                         OffsetDateTime lastUpdate
+    ) {
         this.conversationId = conversationId;
         this.messageReference = messageReference;
         this.senderIdentifier = senderIdentifier;
         this.receiverIdentifier = receiverIdentifier;
         this.direction = direction;
         this.messageTitle = messageTitle;
-        this.messageStatuses = Lists.newArrayList();
+        this.messageStatuses = new HashSet<>();
         this.serviceIdentifier = serviceIdentifier;
-        this.lastUpdate = LocalDateTime.now();
+        this.expiry = expiry;
+        this.lastUpdate = lastUpdate;
+    }
+
+    private Conversation addMessageStatuses(MessageStatus... statuses) {
+        if (statuses != null) {
+            for (MessageStatus status : statuses) {
+                addMessageStatus(status);
+            }
+        }
+        return this;
     }
 
     public static Conversation of(String conversationId,
@@ -83,76 +106,37 @@ public class Conversation {
                                   ConversationDirection direction,
                                   String messageTitle,
                                   ServiceIdentifier serviceIdentifier,
+                                  OffsetDateTime expiry,
+                                  OffsetDateTime lastUpdate,
                                   MessageStatus... statuses) {
-
-        Conversation c = new Conversation(conversationId, messageReference, senderIdentifier, receiverIdentifier, direction, messageTitle, serviceIdentifier);
-        if (statuses != null && statuses.length > 0) {
-            Stream.of(statuses)
-                    .peek(r -> r.setConversationId(conversationId))
-                    .forEach(c::addMessageStatus);
-        }
-        return c;
+        return new Conversation(conversationId, messageReference, senderIdentifier, receiverIdentifier, direction, messageTitle, serviceIdentifier, expiry, lastUpdate)
+                .addMessageStatuses(statuses);
     }
 
-    public static Conversation of(ConversationResource cr, MessageStatus... statuses) {
-        Conversation c = new Conversation(cr.getConversationId(), cr.getConversationId(), cr.getSenderId(), cr.getReceiverId(),
-                cr.getDirection(), "", cr.getServiceIdentifier());
-        if (statuses != null && statuses.length > 0) {
-            Stream.of(statuses)
-                    .peek(r -> r.setConversationId(cr.getConversationId()))
-                    .forEach(c::addMessageStatus);
-        }
-        return c;
+    public static Conversation of(MessageInformable msg, OffsetDateTime lastUpdate, MessageStatus... statuses) {
+        return new Conversation(msg.getConversationId(), msg.getConversationId(), msg.getSenderIdentifier(), msg.getReceiverIdentifier(),
+                msg.getDirection(), "", msg.getServiceIdentifier(), msg.getExpiry(), lastUpdate)
+                .addMessageStatuses(statuses);
     }
 
-    public static Conversation of(EduDocument eduDocument, MessageStatus... statuses) {
-        // Only used when receiving messages, and will for EduDocument always be DPO
-        Conversation c = new Conversation(eduDocument.getConversationId(), eduDocument.getConversationId(),
-                eduDocument.getSenderOrgNumber(), eduDocument.getReceiverOrgNumber(), ConversationDirection.INCOMING,
-               "", ServiceIdentifier.DPO);
-        if (statuses != null && statuses.length > 0) {
-            Stream.of(statuses)
-                    .peek(r -> r.setConversationId(eduDocument.getConversationId()))
-                    .forEach(c::addMessageStatus);
-        }
-        return c;
-    }
-
-    public static Conversation of(EDUCore eduCore, MessageStatus... statuses) {
-        String msgTitle = "";
-        if (eduCore.getMessageType() == EDUCore.MessageType.EDU) {
-            String jpInnholdXpath = "Melding/journpost/jpInnhold";
-            try {
-                msgTitle = PayloadUtil.queryPayload(eduCore.getPayload(), jpInnholdXpath);
-            } catch (PayloadException e) {
-                log.error("Could not read jpInnhold from payload", e);
-            }
-        }
-
-        Conversation c = new Conversation(eduCore.getId(), eduCore.getMessageReference(),
-                eduCore.getSender().getIdentifier(), eduCore.getReceiver().getIdentifier(), ConversationDirection.OUTGOING,
-                msgTitle, eduCore.getServiceIdentifier() == DPE_INNSYN ? DPV : eduCore.getServiceIdentifier());
-
-        if (statuses != null && statuses.length > 0) {
-            Stream.of(statuses)
-                    .peek(r -> r.setConversationId(eduCore.getId()))
-                    .forEach(c::addMessageStatus);
-        }
-        return c;
-    }
-
-    public void addMessageStatus(MessageStatus status) {
-        status.setConversationId(getConversationId());
+    Conversation addMessageStatus(MessageStatus status) {
+        status.setConversation(this);
         this.messageStatuses.add(status);
-        this.lastUpdate = LocalDateTime.now();
         statusLogger.info(markerFrom(this).and(markerFrom(status)), String.format("Conversation [id=%s] updated with status \"%s\"",
                 this.getConversationId(), status.getStatus()));
+        return this;
+    }
+
+    @JsonIgnore
+    boolean hasStatus(MessageStatus status) {
+        return getMessageStatuses().stream()
+                .anyMatch(ms -> ms.getStatus().equals(status.getStatus()));
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("convId", convId)
+                .add("id", getId())
                 .add("conversationId", conversationId)
                 .add("messageReference", messageReference)
                 .add("receiverIdentifier", receiverIdentifier)

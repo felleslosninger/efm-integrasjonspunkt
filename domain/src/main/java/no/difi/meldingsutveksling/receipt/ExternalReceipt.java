@@ -29,14 +29,4 @@ public interface ExternalReceipt {
      */
     MessageStatus toMessageStatus();
 
-    /**
-     *  Performs audit logging of itself including a description
-     */
-    void auditLog();
-
-    /**
-     * Used to create a new Conversation if one does not exist
-     * @return Conversation to put receipts on
-     */
-    Conversation createConversation();
 }

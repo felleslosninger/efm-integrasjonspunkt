@@ -8,19 +8,27 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
+import lombok.Data;
+
+import javax.persistence.*;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 
 /**
  * <p>Java class for BusinessScope complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="BusinessScope">
  *   &lt;complexContent>
@@ -32,49 +40,58 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "BusinessScope", propOrder = {
-    "scope"
+        "scope"
 })
-public class BusinessScope {
+@Data
+@Embeddable
+public class BusinessScope implements Serializable {
 
     @XmlElement(name = "Scope")
-    protected List<Scope> scope;
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "header_id", nullable = false)
+    @Size(min = 1)
+    @NotNull
+    @Valid
+    protected Set<Scope> scope;
 
     /**
      * Gets the value of the scope property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the scope property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getScope().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link Scope }
-     * 
-     * 
      */
-    public List<Scope> getScope() {
+    public Set<Scope> getScope() {
         if (scope == null) {
-            scope = new ArrayList<Scope>();
+            scope = new HashSet<>();
         }
         return this.scope;
     }
 
-
-    public void setScope(List<Scope> scope) {
-        this.scope = scope;
+    public BusinessScope addScope(Scope scope) {
+        getScope().add(scope);
+        return this;
     }
+
+    public BusinessScope addScopes(Scope... scopes) {
+        getScope().addAll(Arrays.asList(scopes));
+        return this;
+    }
+
 }

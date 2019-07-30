@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.serviceregistry;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.nimbusds.jose.proc.BadJWSException;
@@ -10,7 +10,6 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.Notification;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.junit.Before;
 import org.junit.Rule;
@@ -23,15 +22,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.HashMap;
-import java.util.Optional;
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -40,6 +34,8 @@ public class ServiceRegistryLookupTest {
 
     private static final String ORGNR = "12345678";
     private static final String ORGNAME = "test";
+    private static final String DEFAULT_PROCESS = "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0";
+    private static final String DEFAULT_DOCTYPE = "urn:no:difi:arkivmelding:xsd::arkivmelding";
 
     @Mock
     private RestClient client;
@@ -48,7 +44,6 @@ public class ServiceRegistryLookupTest {
     public ExpectedException thrown = ExpectedException.none();
 
     private ServiceRegistryLookup service;
-    private ServiceRecord dpv = new ServiceRecord(DPV, "000", "", "http://localhost:6789");
     private ServiceRecord dpo = new ServiceRecord(DPO, "000", "certificate", "http://localhost:4567");
     private String query;
 
@@ -56,61 +51,62 @@ public class ServiceRegistryLookupTest {
     public void setup() {
         final IntegrasjonspunktProperties properties = mock(IntegrasjonspunktProperties.class);
         SasKeyRepository sasKeyRepoMock = mock(SasKeyRepository.class);
-        when(properties.isVarslingsplikt()).thenReturn(false);
-        service = new ServiceRegistryLookup(client, properties, sasKeyRepoMock);
-        query = Notification.NOT_OBLIGATED.createQuery();
+        IntegrasjonspunktProperties.Arkivmelding arkivmeldingProps = new IntegrasjonspunktProperties.Arkivmelding().setDefaultProcess("foo");
+        when(properties.getArkivmelding()).thenReturn(arkivmeldingProps);
+        IntegrasjonspunktProperties.Arkivmelding arkivmelding = mock(IntegrasjonspunktProperties.Arkivmelding.class);
+        when(arkivmelding.getDefaultProcess()).thenReturn(DEFAULT_PROCESS);
+        when(properties.getArkivmelding()).thenReturn(arkivmelding);
+        service = new ServiceRegistryLookup(client, properties, sasKeyRepoMock, new ObjectMapper());
+        query = "securityLevel=3";
+        dpo.setProcess(DEFAULT_PROCESS);
+        dpo.setDocumentTypes(Lists.newArrayList(DEFAULT_DOCTYPE));
     }
 
-    @Test
-    public void clientThrowsExceptionWithInternalServerErrorThenServiceShouldThrowServiceRegistryLookupException() throws BadJWSException {
-        thrown.expect(UncheckedExecutionException.class);
-        when(client.getResource(any(String.class))).thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
-
-        service.getServiceRecord(ORGNR);
-    }
-
-    @Test
-    public void organizationWithoutServiceRecord() throws BadJWSException {
+    @Test(expected = ServiceRegistryLookupException.class)
+    public void organizationWithoutServiceRecord() throws BadJWSException, ServiceRegistryLookupException {
         final String json = new SRContentBuilder().build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
-        final ServiceRecord serviceRecord = this.service.getServiceRecord(ORGNR).getServiceRecord();
-
-        assertThat(serviceRecord, is(ServiceRecord.EMPTY));
+        this.service.getServiceRecord(ORGNR);
     }
 
-    @Test
-    public void organizationWithoutServiceRecords() throws BadJWSException {
+    @Test(expected = ServiceRegistryLookupException.class)
+    public void noEntityForOrganization() throws BadJWSException, ServiceRegistryLookupException {
+        when(client.getResource("identifier/" + ORGNR, query)).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
+
+        this.service.getServiceRecord(ORGNR);
+    }
+
+    @Test(expected = ServiceRegistryLookupException.class)
+    public void organizationWithoutServiceRecords() throws BadJWSException, ServiceRegistryLookupException {
         final String json = new SRContentBuilder().build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
-        Optional<ServiceRecord> serviceRecord = this.service.getServiceRecord(ORGNR, DPO);
-        assertFalse(serviceRecord.isPresent());
+        this.service.getServiceRecord(ORGNR, DPO);
     }
 
     @Test
-    public void organizationWithSingleServiceRecordHasServiceRecord() throws BadJWSException {
+    public void organizationWithSingleServiceRecordHasServiceRecord() throws BadJWSException, ServiceRegistryLookupException {
         final String json = new SRContentBuilder().withServiceRecord(dpo).build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
-        final ServiceRecord serviceRecord = service.getServiceRecord(ORGNR).getServiceRecord();
+        final ServiceRecord serviceRecord = service.getServiceRecord(ORGNR);
 
         assertThat(serviceRecord, is(dpo));
     }
 
     @Test
-    public void organizationWithSingleServiceRecordHasServiceRecords() throws BadJWSException {
+    public void organizationWithSingleServiceRecordHasServiceRecords() throws BadJWSException, ServiceRegistryLookupException {
         final String json = new SRContentBuilder().withServiceRecord(dpo).build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
-        Optional<ServiceRecord> serviceRecord = service.getServiceRecord(ORGNR, DPO);
+        ServiceRecord serviceRecord = service.getServiceRecord(ORGNR, DPO);
 
-        assertTrue(serviceRecord.isPresent());
-        assertThat(serviceRecord.get(), is(dpo));
+        assertThat(serviceRecord, is(dpo));
     }
 
     @Test
-    public void testSasKeyCacheInvalidation() throws BadJWSException {
+    public void testSasKeyCacheInvalidation() throws BadJWSException, ServiceRegistryLookupException {
         when(client.getResource("sastoken")).thenReturn("123").thenReturn("456");
 
         assertThat(service.getSasKey(), is("123"));

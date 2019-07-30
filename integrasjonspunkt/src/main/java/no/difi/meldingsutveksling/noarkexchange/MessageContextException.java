@@ -5,7 +5,7 @@ public class MessageContextException extends MessageException {
         super(statusMessage);
     }
 
-    public MessageContextException(Exception exception, StatusMessage statusMessage) {
+    public MessageContextException(StatusMessage statusMessage, Exception exception) {
         super(exception, statusMessage);
     }
 

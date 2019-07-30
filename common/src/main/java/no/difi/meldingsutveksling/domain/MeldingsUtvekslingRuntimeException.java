@@ -5,7 +5,7 @@ package no.difi.meldingsutveksling.domain;
  */
 public class MeldingsUtvekslingRuntimeException extends RuntimeException {
 
-    public MeldingsUtvekslingRuntimeException(Exception e) {
+    public MeldingsUtvekslingRuntimeException(Throwable e) {
         super(e);
     }
 

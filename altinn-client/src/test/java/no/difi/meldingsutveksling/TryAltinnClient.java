@@ -1,8 +1,10 @@
 package no.difi.meldingsutveksling;
 
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import org.slf4j.Marker;
+
+import java.io.InputStream;
 
 public class TryAltinnClient {
 
@@ -24,8 +26,13 @@ public class TryAltinnClient {
         }
 
         @Override
-        public EduDocument getPayload() {
-            return new EduDocument();
+        public StandardBusinessDocument getPayload() {
+            return new StandardBusinessDocument();
+        }
+
+        @Override
+        public InputStream getAsicInputStream() {
+            return null;
         }
 
         @Override

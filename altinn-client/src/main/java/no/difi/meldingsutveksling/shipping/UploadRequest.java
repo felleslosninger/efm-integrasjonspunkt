@@ -1,14 +1,17 @@
 package no.difi.meldingsutveksling.shipping;
 
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.slf4j.Marker;
+
+import java.io.InputStream;
 
 public interface UploadRequest {
     String getSender();
     String getReceiver();
     String getSenderReference();
 
-    EduDocument getPayload();
+    StandardBusinessDocument getPayload();
+    InputStream getAsicInputStream();
 
     /**
      * Used to get Markers needed to uniquely identify an upload when logging. In particular Audit

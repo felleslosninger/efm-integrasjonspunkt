@@ -23,9 +23,7 @@ public class EmailNotificationDigitalPostBuilderHandlerTest {
     }
 
     @Test
-    public void emailFeatureDisabledShouldNotSetEpostVarsel() throws KeyStoreException {
-        when(config.isEnableEmailNotification()).thenReturn(false);
-
+    public void emailFeatureDisabledShouldNotSetEpostVarsel() {
         EmailNotificationDigitalPostBuilderHandler handler = new EmailNotificationDigitalPostBuilderHandler(config);
         builder = handler.handle(new Request().withNotifiable(true), builder);
 
@@ -33,9 +31,7 @@ public class EmailNotificationDigitalPostBuilderHandlerTest {
     }
 
     @Test
-    public void notifiableFalseShouldNotSetEpostVarsel() throws KeyStoreException {
-        when(config.isEnableEmailNotification()).thenReturn(true);
-
+    public void notifiableFalseShouldNotSetEpostVarsel() {
         EmailNotificationDigitalPostBuilderHandler handler = new EmailNotificationDigitalPostBuilderHandler(config);
         builder = handler.handle(new Request().withNotifiable(false), builder);
 
@@ -43,9 +39,7 @@ public class EmailNotificationDigitalPostBuilderHandlerTest {
     }
 
     @Test
-    public void notifiableAndFeatureEnabledWithEmailShouldAddEpostVarsel() throws KeyStoreException {
-        when(config.isEnableEmailNotification()).thenReturn(true);
-
+    public void notifiableAndFeatureEnabledWithEmailShouldAddEpostVarsel() {
         EmailNotificationDigitalPostBuilderHandler handler = new EmailNotificationDigitalPostBuilderHandler(config);
         builder = handler.handle(new Request().withNotifiable(true).withEmail("foo@foo.com"), builder);
 
@@ -53,9 +47,7 @@ public class EmailNotificationDigitalPostBuilderHandlerTest {
     }
 
     @Test
-    public void notifiableAndFeatureEnabledWithoutEmailShouldNotAddEpostVarsel() throws KeyStoreException {
-        when(config.isEnableEmailNotification()).thenReturn(true);
-
+    public void notifiableAndFeatureEnabledWithoutEmailShouldNotAddEpostVarsel() {
         EmailNotificationDigitalPostBuilderHandler handler = new EmailNotificationDigitalPostBuilderHandler(config);
         builder = handler.handle(new Request().withNotifiable(true), builder);
 

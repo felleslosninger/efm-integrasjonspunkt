@@ -1,30 +1,24 @@
 package no.difi.meldingsutveksling;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlType
 @XmlEnum(String.class)
+@RequiredArgsConstructor
+@Getter
 public enum ServiceIdentifier {
 
-    @XmlEnumValue("DPO")         DPO("DPO"),
-    @XmlEnumValue("DPV")         DPV("DPV"),
-    @XmlEnumValue("DPI")         DPI("DPI"),
-    @XmlEnumValue("DPF")         DPF("DPF"),
-    @XmlEnumValue("DPE_INNSYN")  DPE_INNSYN("DPE_innsyn"),
-    @XmlEnumValue("DPE_DATA")    DPE_DATA("DPE_data"),
-    @XmlEnumValue("DPE_RECEIPT") DPE_RECEIPT("DPE_RECEIPT"),
-    UNKNOWN("ukjent");
+    @XmlEnumValue("DPO") DPO("DPO"),
+    @XmlEnumValue("DPV") DPV("DPV"),
+    @XmlEnumValue("DPI") DPI("DPI"),
+    @XmlEnumValue("DPF") DPF("DPF"),
+    @XmlEnumValue("DPE") DPE("DPE"),
+    UNKNOWN("UNKNOWN");
 
     private final String fullname;
-
-    ServiceIdentifier(String fullname) {
-        this.fullname = fullname;
-    }
-
-    public String fullname() {
-        return fullname;
-    }
-
 }

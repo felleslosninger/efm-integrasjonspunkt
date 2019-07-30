@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.ptv;
 
-import net.logstash.logback.marker.LogstashMarker;
-import no.difi.webservice.support.SoapFaultInterceptorLogger;
+import lombok.SneakyThrows;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -9,7 +8,9 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.HTTP;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+import org.springframework.stereotype.Component;
 import org.springframework.ws.client.core.WebServiceTemplate;
+import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 import org.springframework.ws.soap.SoapVersion;
 import org.springframework.ws.soap.addressing.client.ActionCallback;
@@ -20,89 +21,86 @@ import org.springframework.ws.transport.http.HttpComponentsMessageSender;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Used to send messages to Altinn InsertCorrespondence. InsertCorrespondence is used to send information to private companies.
  */
-public class CorrespondenceAgencyClient {
+@Component
+public class CorrespondenceAgencyClient extends WebServiceGatewaySupport {
 
-    private final LogstashMarker logstashMarker;
-    private final CorrespondenceAgencyConfiguration config;
     private final String endpointUrl;
 
     /**
      * Creates client to use Altinn Correspondence Agency
-     * @param logstashMarker used when logging to keep track of message flow
      */
-    public CorrespondenceAgencyClient(LogstashMarker logstashMarker, CorrespondenceAgencyConfiguration config) {
-        this.logstashMarker = logstashMarker;
-        this.config = config;
+    public CorrespondenceAgencyClient(CorrespondenceAgencyConfiguration config) {
+        super(getFactory());
         this.endpointUrl = config.getEndpointUrl();
-    }
-
-    /**
-     * Sends correspondence to Altinn Insert Correspondence
-     * @param request containing the message along with sender/receiver
-     * @return response if successful
-     */
-    public Object sendCorrespondence(CorrespondenceRequest request) {
-        AxiomSoapMessageFactory newSoapMessageFactory = new AxiomSoapMessageFactory();
-        newSoapMessageFactory.setSoapVersion(SoapVersion.SOAP_12);
-        WebServiceTemplate template = new WebServiceTemplate(newSoapMessageFactory);
         Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
         String contextPath = "no.altinn.services.serviceengine.correspondence._2009._10";
         marshaller.setContextPath(contextPath);
+        marshaller.setMarshallerProperties(getMarshallerProperties());
+
+        WebServiceTemplate template = getWebServiceTemplate();
+        template.setInterceptors(getInterceptors(config).toArray(new ClientInterceptor[0]));
         template.setMarshaller(marshaller);
         template.setUnmarshaller(marshaller);
-        ClientInterceptor[] interceptors = new ClientInterceptor[2];
-        interceptors[0] = createSecurityInterceptors(request.getUsername(), request.getPassword());
-        interceptors[1] = SoapFaultInterceptorLogger.withLogMarkers(logstashMarker);
-        template.setInterceptors(interceptors);
-
-        final String soapAction = "http://www.altinn.no/services/ServiceEngine/Correspondence/2009/10/ICorrespondenceAgencyExternal/InsertCorrespondenceV2";
         template.setMessageSender(createMessageSender());
-        final URI actionURI;
-        try {
-            actionURI = new URI(soapAction);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-        return template.marshalSendAndReceive(this.endpointUrl, request.getCorrespondence(), new ActionCallback(actionURI, new
-                Addressing10()));
     }
 
-    public Object sendStatusRequest(CorrespondenceRequest request) {
+    protected Map<String, Object> getMarshallerProperties() {
+        return Collections.emptyMap();
+    }
+
+    private static AxiomSoapMessageFactory getFactory() {
         AxiomSoapMessageFactory newSoapMessageFactory = new AxiomSoapMessageFactory();
         newSoapMessageFactory.setSoapVersion(SoapVersion.SOAP_12);
-        WebServiceTemplate template = new WebServiceTemplate(newSoapMessageFactory);
-        Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
-        String contextPath = "no.altinn.services.serviceengine.correspondence._2009._10";
-        marshaller.setContextPath(contextPath);
-        template.setMarshaller(marshaller);
-        template.setUnmarshaller(marshaller);
-        ClientInterceptor[] interceptors = new ClientInterceptor[2];
-        interceptors[0] = createSecurityInterceptors(request.getUsername(), request.getPassword());
-        interceptors[1] = SoapFaultInterceptorLogger.withLogMarkers(logstashMarker);
-        template.setInterceptors(interceptors);
+        return newSoapMessageFactory;
+    }
 
-        final String soapAction = "http://www.altinn.no/services/ServiceEngine/Correspondence/2009/10/ICorrespondenceAgencyExternal/GetCorrespondenceStatusDetailsV2";
-        template.setMessageSender(createMessageSender());
-        final URI actionURI;
-        try {
-            actionURI = new URI(soapAction);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-        return template.marshalSendAndReceive(this.endpointUrl, request.getCorrespondence(), new ActionCallback(actionURI, new
-                Addressing10()));
+    private List<ClientInterceptor> getInterceptors(CorrespondenceAgencyConfiguration config) {
+        List<ClientInterceptor> interceptors = new ArrayList<>();
+        interceptors.add(createSecurityInterceptors(config.getSystemUserCode(), config.getPassword()));
+        interceptors.add(new SoapFaultInterceptorLogger());
+        interceptors.addAll(getAdditionalInterceptors());
+        return interceptors;
+    }
+
+    protected List<ClientInterceptor> getAdditionalInterceptors() {
+        return Collections.emptyList();
     }
 
     private HttpComponentsMessageSender createMessageSender() {
         final HttpComponentsMessageSender messageSender = new HttpComponentsMessageSender();
+        messageSender.setHttpClient(getHttpClient());
+        return messageSender;
+    }
+
+    private HttpClient getHttpClient() {
+        return HttpClients.custom()
+                .addInterceptorFirst((HttpRequestInterceptor) (httpRequest, httpContext) -> {
+                    if (httpRequest.containsHeader(HTTP.CONTENT_LEN)) {
+                        httpRequest.removeHeaders(HTTP.CONTENT_LEN);
+                    }
+                })
+                .setConnectionManager(getConnectionManager())
+                .setDefaultRequestConfig(getRequestConfig())
+                .build();
+    }
+
+    private PoolingHttpClientConnectionManager getConnectionManager() {
         PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
         cm.setMaxTotal(18);
         cm.setDefaultMaxPerRoute(6);
-        RequestConfig requestConfig = RequestConfig.custom()
+        return cm;
+    }
+
+    private RequestConfig getRequestConfig() {
+        return RequestConfig.custom()
                 .setSocketTimeout(30000)
                 .setConnectTimeout(30000)
                 .setConnectionRequestTimeout(30000)
@@ -110,19 +108,6 @@ public class CorrespondenceAgencyClient {
                 .setRedirectsEnabled(true)
                 .setRelativeRedirectsAllowed(true)
                 .build();
-
-        HttpClient client = HttpClients.custom()
-                .addInterceptorFirst((HttpRequestInterceptor) (httpRequest, httpContext) -> {
-                    if(httpRequest.containsHeader(HTTP.CONTENT_LEN)) {
-                        httpRequest.removeHeaders(HTTP.CONTENT_LEN);
-                    }
-                })
-                .setConnectionManager(cm)
-                .setDefaultRequestConfig(requestConfig)
-                .build();
-
-        messageSender.setHttpClient(client);
-        return messageSender;
     }
 
     private ClientInterceptor createSecurityInterceptors(String username, String password) {
@@ -141,5 +126,24 @@ public class CorrespondenceAgencyClient {
         return securityInterceptor;
     }
 
+    /**
+     * Sends correspondence to Altinn Insert Correspondence
+     *
+     * @return response if successful
+     */
+    public Object sendCorrespondence(Object payload) {
+        final String soapAction = "http://www.altinn.no/services/ServiceEngine/Correspondence/2009/10/ICorrespondenceAgencyExternal/InsertCorrespondenceV2";
+        return getWebServiceTemplate().marshalSendAndReceive(this.endpointUrl, payload, getActionCallback(soapAction));
+    }
 
+    public Object sendStatusRequest(Object payload) {
+        final String soapAction = "http://www.altinn.no/services/ServiceEngine/Correspondence/2009/10/ICorrespondenceAgencyExternal/GetCorrespondenceStatusDetailsV2";
+        return getWebServiceTemplate().marshalSendAndReceive(this.endpointUrl, payload, getActionCallback(soapAction));
+    }
+
+    @SneakyThrows(URISyntaxException.class)
+    private ActionCallback getActionCallback(String action) {
+        return new ActionCallback(new URI(action), new
+                Addressing10());
+    }
 }

@@ -1,30 +1,29 @@
 package no.difi.meldingsutveksling.dokumentpakking.service;
 
+import com.google.common.collect.Sets;
+import lombok.experimental.UtilityClass;
+import no.difi.meldingsutveksling.domain.sbdh.CorrelationInformation;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 
-public class ScopeFactory {
+import java.time.OffsetDateTime;
 
-    public static final String DEFAULT_IDENTIFIER = "urn:no:difi:meldingsutveksling:1.0";
+@UtilityClass
+class ScopeFactory {
 
-    public static Scope fromJournalPostId(String journalPostId) {
-        Scope scope = createDefaultScope();
-        scope.setType(ScopeType.JOURNALPOST_ID.name());
-        scope.setInstanceIdentifier(journalPostId);
-        return scope;
+    static Scope fromJournalPostId(String journalPostId, String process) {
+        return new Scope()
+                .setIdentifier(process)
+                .setType(ScopeType.JOURNALPOST_ID.toString())
+                .setInstanceIdentifier(journalPostId);
     }
 
-    public static Scope fromConversationId(String conversationId) {
-        Scope scope = createDefaultScope();
-        scope.setType(ScopeType.CONVERSATION_ID.name());
-        scope.setInstanceIdentifier(conversationId);
-        return scope;
+    static Scope fromConversationId(String conversationId, String process, OffsetDateTime expectedResponseDateTime) {
+        return new Scope()
+                .setIdentifier(process)
+                .setType(ScopeType.CONVERSATION_ID.toString())
+                .setInstanceIdentifier(conversationId)
+                .setScopeInformation(Sets.newHashSet(new CorrelationInformation()
+                        .setExpectedResponseDateTime(expectedResponseDateTime)));
     }
-
-    private static Scope createDefaultScope() {
-        Scope scope = new Scope();
-        scope.setIdentifier(DEFAULT_IDENTIFIER);
-        return scope;
-    }
-
 }

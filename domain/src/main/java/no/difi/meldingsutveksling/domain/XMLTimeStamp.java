@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.domain;
 
+import lombok.experimental.UtilityClass;
+
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -10,6 +12,7 @@ import java.util.GregorianCalendar;
  *
  * @author Glenn Bech
  */
+@UtilityClass
 public class XMLTimeStamp {
 
     public static XMLGregorianCalendar createTimeStamp() {

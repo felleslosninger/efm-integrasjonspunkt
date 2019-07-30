@@ -32,11 +32,11 @@ public class JmsConfiguration {
 
         RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
         redeliveryPolicy.setRedeliveryDelay(20000L);
-        redeliveryPolicy.setMaximumRedeliveryDelay(1000*60*60);
+        redeliveryPolicy.setMaximumRedeliveryDelay(1000L * 60L * 60L);
         redeliveryPolicy.setInitialRedeliveryDelay(20000L);
-        redeliveryPolicy.setBackOffMultiplier(3.0);
+        redeliveryPolicy.setBackOffMultiplier(3.0d);
         // 5 retries will happen within the first hour. After that, get max retries from properties (default 20).
-        redeliveryPolicy.setMaximumRedeliveries(5+props.getQueue().getMaximumRetryHours());
+        redeliveryPolicy.setMaximumRedeliveries(5 + props.getQueue().getMaximumRetryHours());
         redeliveryPolicy.setUseExponentialBackOff(true);
         connectionFactory.setRedeliveryPolicy(redeliveryPolicy);
         connectionFactory.setNonBlockingRedelivery(true);
@@ -52,4 +52,5 @@ public class JmsConfiguration {
         factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
         factory.setConnectionFactory(connectionFactory);
         return factory;
-    }}
+    }
+}

@@ -1,6 +1,8 @@
 package no.difi.meldingsutveksling.config;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
@@ -34,13 +36,19 @@ public class IntegrasjonspunktProperties {
     private AltinnFormidlingsTjenestenConfig dpo;
 
     @Valid
+    private ElmaConfig elma;
+
+    @Valid
+    private Arkivmelding arkivmelding;
+
+    @Valid
+    private Einnsyn einnsyn;
+
+    @Valid
     private PostVirksomheter dpv;
 
     @Valid
     private NorskArkivstandardSystem noarkSystem;
-
-    @Valid
-    private MessageServiceHandler msh = new MessageServiceHandler();
 
     @Valid
     private DigitalPostInnbyggerConfig dpi;
@@ -57,6 +65,9 @@ public class IntegrasjonspunktProperties {
     private NextMove nextmove;
 
     @Valid
+    private WebHooks webhooks;
+
+    @Valid
     private Sign sign;
 
     @Valid
@@ -68,12 +79,21 @@ public class IntegrasjonspunktProperties {
     @Valid
     private Status status;
 
-    /**
-     * Use this parameter to indicate that the message are related to vedtak/messages that require the recipient to be
-     * notified. This parameter is passed over to ServiceRegistry to determine where the message should be sent.
-     * (See http://begrep.difi.no/SikkerDigitalPost/1.2.3/forretningslag/varsling for more information)
-     */
-    private boolean varslingsplikt = true;
+    @Data
+    public static class Arkivmelding {
+        @NotNull
+        private String defaultProcess;
+        @NotNull
+        private String receiptProcess;
+    }
+
+    @Data
+    public static class Einnsyn {
+        @NotNull
+        private String defaultJournalProcess;
+        @NotNull
+        private String defaultInnsynskravProcess;
+    }
 
     @Data
     public static class Status {
@@ -133,12 +153,11 @@ public class IntegrasjonspunktProperties {
         private String username;
         private String password;
         private URL endpointUrl;
-        private String externalServiceCode;
-        private String externalServiceEditionCode;
         private boolean notifyEmail;
         private boolean notifySms;
         private String notificationText;
-
+        private boolean allowForwarding;
+        private Long daysToReply;
     }
 
     /**
@@ -181,6 +200,7 @@ public class IntegrasjonspunktProperties {
         private String username;
         private String password;
         private String trust;
+        private Long maxSize;
     }
 
     @Data
@@ -189,9 +209,9 @@ public class IntegrasjonspunktProperties {
         @NotNull
         private String filedir;
         @NotNull
-        private String asicfile;
-        @NotNull
         private Integer lockTimeoutMinutes;
+        @NotNull
+        private Integer defaultTtlHours;
         @NotNull
         private Boolean applyZipHeaderPatch = Boolean.FALSE;
         @Valid
@@ -200,20 +220,27 @@ public class IntegrasjonspunktProperties {
     }
 
     @Data
+    public static class WebHooks {
+
+        @NotNull
+        private Integer connectTimeout;
+        @NotNull
+        private Integer readTimeout;
+    }
+
+    @Data
     @ToString(exclude = "sasToken")
     public static class ServiceBus {
-
-        private boolean enable;
         @NotNull
         private String sasKeyName;
         @NotNull
         private String sasToken;
-        @Pattern(regexp = "innsyn|data", flags = Pattern.Flag.CASE_INSENSITIVE)
+        @Pattern(regexp = "innsyn|data|meeting", flags = Pattern.Flag.CASE_INSENSITIVE)
         private String mode;
         @NotNull
-        private String namespace;
+        private String baseUrl;
         @NotNull
-        private String host;
+        private boolean useHttps;
         private String receiptQueue;
         private Integer readMaxMessages;
         private boolean batchRead;
@@ -224,6 +251,7 @@ public class IntegrasjonspunktProperties {
     @ToString(exclude = "password")
     public static class NorskArkivstandardSystem {
 
+        private boolean enable;
         private String endpointURL;
         private String username;
         private String password;
@@ -239,19 +267,7 @@ public class IntegrasjonspunktProperties {
     }
 
     @Data
-    public static class MessageServiceHandler {
-
-        private String endpointURL;
-    }
-
-    @Data
     public static class FeatureToggle {
-
-        /**
-         * Activate new internal queue.
-         */
-        private boolean enableQueue;
-
         private boolean enableReceipts;
         private boolean forwardReceivedAppReceipts;
         private boolean returnOkOnEmptyPayload;
@@ -270,8 +286,17 @@ public class IntegrasjonspunktProperties {
 
     @Data
     public static class Sms {
-        @Size(max=160)
+        @Size(max = 160)
         private String varslingstekst;
     }
+
+    @Data
+    @NoArgsConstructor
+    public static class ElmaConfig {
+
+        @NonNull
+        private String url;
+    }
+
 
 }

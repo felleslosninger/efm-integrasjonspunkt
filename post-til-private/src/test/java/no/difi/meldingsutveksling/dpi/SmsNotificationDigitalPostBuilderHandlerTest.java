@@ -22,18 +22,14 @@ public class SmsNotificationDigitalPostBuilderHandlerTest {
 
     @Test
     public void smsNotificationDisabledShouldNotSetEpostVarsel() {
-        when(config.isEnableSmsNotification()).thenReturn(false);
-
         SmsNotificationDigitalPostBuilderHandler handler = new SmsNotificationDigitalPostBuilderHandler(config);
-        handler.handle(new Request().withNotifiable(true), builder);
+        handler.handle(new Request().withNotifiable(true).withEmail("foo"), builder);
 
         verify(builder, never()).smsVarsel(any(SmsVarsel.class));
     }
 
     @Test
     public void notifiableFalseShouldNotSetSmsVarsel() {
-        when(config.isEnableEmailNotification()).thenReturn(true);
-
         SmsNotificationDigitalPostBuilderHandler handler = new SmsNotificationDigitalPostBuilderHandler(config);
         handler.handle(new Request().withNotifiable(false), builder);
 
@@ -42,8 +38,6 @@ public class SmsNotificationDigitalPostBuilderHandlerTest {
 
     @Test
     public void notifiableAndSmsFeatureEnabledWithoutNumberShouldNotSetSmsVarsel() {
-        when(config.isEnableSmsNotification()).thenReturn(true);
-
         SmsNotificationDigitalPostBuilderHandler handler = new SmsNotificationDigitalPostBuilderHandler(config);
         handler.handle(new Request().withNotifiable(true), builder);
 
@@ -52,10 +46,8 @@ public class SmsNotificationDigitalPostBuilderHandlerTest {
 
     @Test
     public void notifiableAndSmsFeatureEnabledWithNumberShouldSetSmsVarsel() {
-        when(config.isEnableSmsNotification()).thenReturn(true);
-
         SmsNotificationDigitalPostBuilderHandler handler = new SmsNotificationDigitalPostBuilderHandler(config);
-        handler.handle(new Request().withNotifiable(true).withMobileNumber("123"), builder);
+        handler.handle(new Request().withNotifiable(true).withMobileNumber("123").withSms("foo"), builder);
 
         verify(builder).smsVarsel(any(SmsVarsel.class));
     }

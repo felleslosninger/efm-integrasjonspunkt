@@ -1,110 +1,110 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import com.google.common.collect.Lists;
+import lombok.RequiredArgsConstructor;
+import no.difi.begrep.sdp.schema_v10.SDPSikkerhetsnivaa;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.dpi.Document;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
-import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress;
+import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
+import no.difi.sdp.client2.domain.fysisk_post.Posttype;
+import no.difi.sdp.client2.domain.fysisk_post.Returhaandtering;
+import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.time.Clock;
+import java.util.Date;
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
-import static no.difi.meldingsutveksling.MimeTypeExtensionMapper.getMimetype;
+import static com.google.common.base.Strings.isNullOrEmpty;
 
+@RequiredArgsConstructor
 public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
-    private static final String DEFAULT_EXT = "PDF";
     private static final String MISSING_TXT = "Missing title";
 
-    private IntegrasjonspunktProperties props;
-    private DpiConversationResource cr;
-    private ServiceRecord serviceRecord;
-    private MessagePersister messagePersister;
-
-    public NextMoveDpiRequest(IntegrasjonspunktProperties props,
-                              MessagePersister messagePersister,
-                              DpiConversationResource cr,
-                              ServiceRecord serviceRecord) {
-        this.props = props;
-        this.messagePersister = messagePersister;
-        this.cr = cr;
-        this.serviceRecord = serviceRecord;
-    }
+    private final IntegrasjonspunktProperties props;
+    private final Clock clock;
+    private final NextMoveMessage message;
+    private final ServiceRecord serviceRecord;
+    private final CryptoMessagePersister cryptoMessagePersister;
 
     @Override
     public Document getDocument() {
-        String primaryFileName = cr.getFileRefs().get(0);
-        String title;
-        if (cr.getCustomProperties() != null) {
-            title = cr.getCustomProperties().getOrDefault(primaryFileName, MISSING_TXT);
-        } else {
-            title = MISSING_TXT;
-        }
-        return new Document(getContent(primaryFileName), getMime(getExtension(primaryFileName)), primaryFileName, title);
+        BusinessMessageFile primary = message.getFiles().stream()
+                .filter(BusinessMessageFile::getPrimaryDocument)
+                .findFirst()
+                .orElseThrow(() -> new NextMoveRuntimeException("No primary documents found, aborting send"));
+
+        String title = isNullOrEmpty(primary.getTitle()) ? MISSING_TXT : primary.getTitle();
+        return new Document(getContent(primary.getIdentifier()), primary.getMimetype(), primary.getFilename(), title);
     }
 
     @Override
     public List<Document> getAttachments() {
-        final List<Document> docList = Lists.newArrayList();
-        cr.getFileRefs().forEach((k, f) -> {
-            if (k != 0) {
-                String title;
-                if (cr.getCustomProperties() != null) {
-                    title = cr.getCustomProperties().getOrDefault(f, MISSING_TXT);
-                } else {
-                    title = MISSING_TXT;
-                }
-                docList.add(new Document(getContent(f), getMime(getExtension(f)), f, title));
-            }
-        });
-
-        return docList;
+        return message.getFiles()
+                .stream()
+                .filter(f -> !f.getPrimaryDocument())
+                .map(this::getDocument)
+                .collect(Collectors.toList());
     }
 
-    private String getMime(String ext) {
-        // DPI specific override
-        if ("XML".equals(ext)) {
-            return "application/ehf+xml";
-        }
-        return getMimetype(ext);
-    }
-
-    private String getExtension(String fileName) {
-        return Stream.of(fileName.split(".")).reduce((a, b) -> b).orElse(DEFAULT_EXT);
+    private Document getDocument(BusinessMessageFile file) {
+        String title = isNullOrEmpty(file.getTitle()) ? MISSING_TXT : file.getTitle();
+        return new Document(getContent(file.getIdentifier()), file.getMimetype(), file.getFilename(), title);
     }
 
     private byte[] getContent(String fileName) {
         try {
-            return messagePersister.read(cr, fileName);
+            return cryptoMessagePersister.read(message.getConversationId(), fileName);
         } catch (IOException e) {
             throw new NextMoveRuntimeException(String.format("Could not read file \"%s\"", fileName), e);
         }
     }
 
+    private boolean isDigitalMessage() {
+        return this.message.getBusinessMessage() instanceof DpiDigitalMessage;
+    }
+
+    private boolean isPrintMessage() {
+        return this.message.getBusinessMessage() instanceof DpiPrintMessage;
+    }
+
+    private DpiDigitalMessage getDigitalMessage() {
+        return (DpiDigitalMessage) message.getBusinessMessage();
+    }
+
+    private DpiPrintMessage getPrintMessage() {
+        return (DpiPrintMessage) message.getBusinessMessage();
+    }
 
     @Override
     public String getMottakerPid() {
-        return cr.getReceiverId();
+        return message.getReceiverIdentifier();
     }
 
     @Override
     public String getSubject() {
-        return cr.getTitle();
+        if (message.getBusinessMessage() instanceof DpiDigitalMessage) {
+            return ((DpiDigitalMessage) message.getBusinessMessage()).getTittel();
+        }
+        if (message.getBusinessMessage() instanceof DpiPrintMessage) {
+            return null;
+        }
+        throw new NextMoveRuntimeException(String.format("BusinessMessage not instance of either %s or %s", DpiDigitalMessage.class.getName(), DpiPrintMessage.class.getName()));
     }
 
     @Override
     public String getSenderOrgnumber() {
-        return cr.getSenderId();
+        return message.getSenderIdentifier();
     }
 
     @Override
     public String getConversationId() {
-        return cr.getConversationId();
+        return message.getConversationId();
     }
 
     @Override
@@ -114,11 +114,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     @Override
     public byte[] getCertificate() {
-        try {
-            return serviceRecord.getPemCertificate().getBytes("UTF-8"); /* fra KRR via SR */
-        } catch (UnsupportedEncodingException e) {
-            throw new MeldingsUtvekslingRuntimeException("Pem certificate from servicerecord problems", e);
-        }
+        return serviceRecord.getPemCertificate().getBytes(StandardCharsets.UTF_8); /* fra KRR via SR */
     }
 
     @Override
@@ -133,11 +129,17 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     @Override
     public String getSmsVarslingstekst() {
-        return props.getDpi().getSms().getVarslingstekst();
+        if (isDigitalMessage()) {
+            return getDigitalMessage().getVarsler().getSmsTekst();
+        }
+        return props.getDpi().getEmail().getVarslingstekst();
     }
 
     @Override
     public String getEmailVarslingstekst() {
+        if (isDigitalMessage()) {
+            return getDigitalMessage().getVarsler().getEpostTekst();
+        }
         return props.getDpi().getEmail().getVarslingstekst();
     }
 
@@ -153,16 +155,83 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     @Override
     public boolean isPrintProvider() {
-        return serviceRecord.isFysiskPost();
+        return isPrintMessage();
     }
 
     @Override
     public PostAddress getPostAddress() {
-        return serviceRecord.getPostAddress();
+        if (isPrintMessage()) {
+            return getPrintMessage().getMottaker();
+        }
+        return null;
     }
 
     @Override
     public PostAddress getReturnAddress() {
-        return serviceRecord.getReturnAddress();
+        if (isPrintMessage()) {
+            return getPrintMessage().getRetur().getMottaker();
+        }
+        return null;
+    }
+
+    @Override
+    public Sikkerhetsnivaa getSecurityLevel() {
+        if (isDigitalMessage()) {
+            SDPSikkerhetsnivaa sdpSikkerhetsnivaa = SDPSikkerhetsnivaa.fromValue(String.valueOf(message.getBusinessMessage().getSikkerhetsnivaa()));
+            return Sikkerhetsnivaa.valueOf(sdpSikkerhetsnivaa.toString());
+        }
+        return null;
+    }
+
+    @Override
+    public Date getVirkningsdato() {
+        if (isDigitalMessage()) {
+            return Date.from(getDigitalMessage().getDigitalPostInfo()
+                    .getVirkningsdato()
+                    .atStartOfDay()
+                    .atZone(clock.getZone())
+                    .toInstant());
+        }
+        return new Date();
+    }
+
+    @Override
+    public String getLanguage() {
+        if (isDigitalMessage()) {
+            return getDigitalMessage().getSpraak();
+        }
+        return props.getDpi().getLanguage();
+    }
+
+    @Override
+    public boolean isAapningskvittering() {
+        if (isDigitalMessage()) {
+            return getDigitalMessage().getDigitalPostInfo().getAapningskvittering();
+        }
+        return false;
+    }
+
+    @Override
+    public Utskriftsfarge getPrintColor() {
+        if (isPrintMessage()) {
+            return getPrintMessage().getUtskriftsfarge();
+        }
+        return Utskriftsfarge.SORT_HVIT;
+    }
+
+    @Override
+    public Posttype getPosttype() {
+        if (isPrintMessage()) {
+            return getPrintMessage().getPosttype();
+        }
+        return Posttype.B_OEKONOMI;
+    }
+
+    @Override
+    public Returhaandtering getReturnHandling() {
+        if (isPrintMessage()) {
+            return getPrintMessage().getRetur().getReturhaandtering();
+        }
+        return Returhaandtering.DIREKTE_RETUR;
     }
 }

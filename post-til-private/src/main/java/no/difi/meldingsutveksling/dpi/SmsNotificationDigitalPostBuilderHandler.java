@@ -14,7 +14,7 @@ public class SmsNotificationDigitalPostBuilderHandler extends DigitalPostBuilder
 
     @Override
     public DigitalPost.Builder handle(MeldingsformidlerRequest request, DigitalPost.Builder builder) {
-        if (getConfig().isEnableSmsNotification() &&
+        if (!isNullOrEmpty(request.getSmsVarslingstekst()) &&
                 request.isNotifiable() &&
                 !isNullOrEmpty(request.getMobileNumber())) {
             final SmsVarsel varsel = createVarselEttereForvaltningsforskriften(request);

@@ -6,6 +6,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import javax.persistence.*;
+import java.sql.Blob;
 
 @Entity
 @RequiredArgsConstructor(staticName = "of")
@@ -22,10 +23,16 @@ public class NextMoveMessageEntry {
     @NonNull
     private String conversationId;
 
+    @Column(name = "filename")
     @NonNull
     private String filename;
 
     @Lob
+    @Column(name ="content")
     @NonNull
-    private byte[] content;
+    private Blob content;
+
+    @Column(name = "size")
+    @NonNull
+    private Long size;
 }

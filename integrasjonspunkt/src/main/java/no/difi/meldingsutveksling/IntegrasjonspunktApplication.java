@@ -15,9 +15,13 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.validation.Validator;
 
+import javax.annotation.PostConstruct;
 import javax.crypto.Cipher;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.TimeZone;
+
+import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_TIME_ZONE;
 
 @SpringBootApplication(exclude = {SolrAutoConfiguration.class})
 public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
@@ -31,7 +35,7 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
     @Bean
     public ServletRegistrationBean servletNoArk() {
         WSSpringServlet servlet = new WSSpringServlet();
-        ServletRegistrationBean reg = new ServletRegistrationBean(servlet, "/noarkExchange", "/receive");
+        ServletRegistrationBean reg = new ServletRegistrationBean(servlet, "/noarkExchange");
         reg.setLoadOnStartup(1);
         return reg;
     }
@@ -39,6 +43,11 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
     @Bean
     public static Validator configurationPropertiesValidator() {
         return new IntegrasjonspunktPropertiesValidator();
+    }
+
+    @PostConstruct
+    void started() {
+        TimeZone.setDefault(DEFAULT_TIME_ZONE);
     }
 
     public static void main(String[] args) {
@@ -73,7 +82,7 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
                 String errorStr = String.format("Startup failed. Offset from NTP host %s was more than 5 seconds (%sms). Adjust local clock and try again.", host, offset);
                 log.error(errorStr);
                 String stars = "\n**************************\n";
-                System.out.println(stars+errorStr+stars);
+                System.out.println(stars + errorStr + stars);
                 context.close();
             }
         } catch (IOException e) {

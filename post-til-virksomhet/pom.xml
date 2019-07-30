@@ -4,17 +4,16 @@
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>1.7.95-SNAPSHOT</version>
+        <version>1.7.98-SNAPSHOT</version>
     </parent>
 
     <artifactId>post-til-virksomhet</artifactId>
-    <version>1.7.95-SNAPSHOT</version>
+    <version>1.7.98-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>19.0</version>
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
@@ -51,7 +50,6 @@
         <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
-            <version>1.1.1</version>
             <scope>provided</scope>
         </dependency>
 
@@ -62,7 +60,6 @@
         <dependency>
             <groupId>org.apache.ws.commons.axiom</groupId>
             <artifactId>axiom-api</artifactId>
-            <version>1.2.19</version>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.stream</groupId>
@@ -72,7 +69,6 @@
         <dependency>
             <groupId>org.apache.ws.commons.axiom</groupId>
             <artifactId>axiom-impl</artifactId>
-            <version>1.2.19</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.janino</groupId>
@@ -81,7 +77,6 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.4</version>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>

@@ -1,153 +1,91 @@
 package no.difi.meldingsutveksling.receipt.service;
 
-import com.google.common.collect.Lists;
-import com.querydsl.core.BooleanBuilder;
+import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.annotations.*;
-import no.difi.meldingsutveksling.receipt.*;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
+import no.difi.meldingsutveksling.receipt.Conversation;
+import no.difi.meldingsutveksling.receipt.ConversationQueryInput;
+import no.difi.meldingsutveksling.receipt.ConversationRepository;
+import no.difi.meldingsutveksling.view.Views;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import javax.validation.Valid;
 
-import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
 
 @RestController
-@Api
+@Validated
+@Api(tags = "Conversations")
+@RequiredArgsConstructor
+@RequestMapping("/api/conversations")
 public class ConversationController {
 
-    @Autowired
-    private ConversationRepository convoRepo;
+    private final ConversationRepository convoRepo;
 
-    @Autowired
-    private MessageStatusRepository statusRepo;
-
-    @RequestMapping(value = "/conversations", method = RequestMethod.GET)
-    @ApiOperation(value = "Get all conversations", notes = "Gets a list of all outgoing conversations")
+    @GetMapping
+    @ApiOperation(
+            value = "Get all conversations",
+            notes = "Gets a list of all outgoing conversations")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "Success", response = Conversation[].class)
+            @ApiResponse(code = 400, message = "Bad Request", response = String.class),
+            @ApiResponse(code = 200, message = "Success", response = Conversation[].class),
     })
-    public List<Conversation> conversations(
-            @ApiParam(value = "Filter conversations based on finished status")
-            @RequestParam(value = "finished", required = false) Optional<Boolean> finished,
-            @ApiParam(value = "Filter conversations based on receiver identifier")
-            @RequestParam(value = "receiverIdentifier", required = false) Optional<String> receiverIdentifier,
-            @ApiParam(value = "Filter conversations based on having given status")
-            @RequestParam(value = "status", required = false) Optional<String> status) {
-
-        QConversation c = QConversation.conversation;
-        BooleanBuilder p = new BooleanBuilder();
-
-        p.and(c.direction.eq(OUTGOING));
-        finished.ifPresent(f -> p.and(c.finished.eq(f)));
-        receiverIdentifier.ifPresent(r -> p.and(c.receiverIdentifier.eq(r)));
-        status.ifPresent(s -> p.and(c.messageStatuses.any().status.equalsIgnoreCase(s)));
-
-        return Lists.newArrayList(convoRepo.findAll(p, c.lastUpdate.desc()));
+    @JsonView(Views.Conversation.class)
+    public Page<Conversation> conversations(
+            @Valid ConversationQueryInput input,
+            @PageableDefault(sort = "lastUpdate", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return convoRepo.findWithMessageStatuses(input, pageable);
     }
 
-    @RequestMapping(value = "/in/conversations", method = RequestMethod.GET)
-    @ApiOperation(value = "Get all conversations", notes = "Gets a list of all incoming conversations")
+    @GetMapping("{id}")
+    @ApiOperation(value = "Get conversation", notes = "Find conversation based on id")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "Success", response = Conversation[].class)
+            @ApiResponse(code = 200, message = "Success", response = Conversation.class),
+            @ApiResponse(code = 400, message = "Bad Request", response = String.class),
+            @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })
-    public List<Conversation> incomingConversations() {
-        ArrayList<Conversation> conversations = Lists.newArrayList(convoRepo.findByDirection(INCOMING));
-        return conversations.stream().sorted((a, b) -> b.getLastUpdate().compareTo(a.getLastUpdate())).collect(Collectors.toList());
+    @JsonView(Views.Conversation.class)
+    public Conversation getById(
+            @ApiParam(value = "id", required = true, example = "1")
+            @PathVariable("id") Long id) {
+        return convoRepo.findByIdAndDirection(id, OUTGOING)
+                .orElseThrow(() -> new ConversationNotFoundException("id", id.toString()));
     }
 
-    @RequestMapping(value = "/conversations/{id}", method = RequestMethod.GET)
-    @ApiOperation(value = "Find conversation", notes = "Find conversation based on id")
+    @GetMapping("conversationId/{id}")
+    @ApiOperation(value = "Get conversation", notes = "Find conversation based on conversationId")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "Success", response = Conversation.class)
+            @ApiResponse(code = 200, message = "Success", response = Conversation.class),
+            @ApiResponse(code = 400, message = "Bad Request", response = String.class),
+            @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })
-    public ResponseEntity conversation(
-            @ApiParam(value = "convId", required = true)
-            @PathVariable("id") String id,
-            @ApiParam(value = "Use conversationId for search")
-            @RequestParam(value = "useConversationId", required = false) boolean useConversationId) {
-
-        Optional<Conversation> c;
-        if (useConversationId) {
-            c = convoRepo.findByConversationIdAndDirection(id, OUTGOING).stream().findFirst();
-        } else {
-            if (!StringUtils.isNumeric(id)) {
-                return ResponseEntity.badRequest().body("convId is not numeric");
-            }
-            c = convoRepo.findByConvIdAndDirection(Integer.valueOf(id), OUTGOING);
-        }
-
-        if (!c.isPresent()) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(c.get());
+    @JsonView(Views.Conversation.class)
+    public Conversation getByConversationId(
+            @ApiParam(value = "conversationId", required = true)
+            @PathVariable("id") String conversationId) {
+        return convoRepo.findByConversationIdAndDirection(conversationId, OUTGOING)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new ConversationNotFoundException(conversationId));
     }
 
-    @RequestMapping(value = "/conversations/queue", method = RequestMethod.GET)
+    @GetMapping("queue")
     @ApiOperation(value = "Queued conversations", notes = "Get all conversations with not-finished state")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = Conversation[].class)
     })
-    public List<Conversation> queuedConversations() {
-        return Lists.newArrayList(convoRepo.findByPollable(true));
+    @JsonView(Views.Conversation.class)
+    public Page<Conversation> queuedConversations(@PageableDefault(sort = "lastUpdate", direction = Sort.Direction.DESC) Pageable pageable) {
+        return convoRepo.findByPollable(true, pageable);
     }
-
-    @RequestMapping(value = "/statuses", method = RequestMethod.GET)
-    @ApiOperation(value = "Get all statuses", notes = "Get a list of all statuses with given parameters")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "Success", response = MessageStatus[].class)
-    })
-    public ResponseEntity statuses(
-            @ApiParam(value = "Get all statuses with id equals to given value and higher")
-            @RequestParam(value = "fromId", required = false) Optional<Integer> fromId,
-            @ApiParam(value = "Get all statuses with given convId")
-            @RequestParam(value = "convId", required = false) Optional<Integer> convId) {
-
-        QMessageStatus ms = QMessageStatus.messageStatus;
-        BooleanBuilder p = new BooleanBuilder();
-
-        fromId.ifPresent(id -> p.and(ms.statId.goe(id)));
-        convId.ifPresent(id -> p.and(ms.convId.eq(id)));
-
-        return ResponseEntity.ok(statusRepo.findAll(p, ms.statId.asc()));
-
-    }
-
-    @RequestMapping(value = "/statuses/{id}", method = RequestMethod.GET)
-    @ApiOperation(value = "Find status", notes = "Find status with given id")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "Success", response = MessageStatus.class)
-    })
-    public ResponseEntity status(
-            @ApiParam(value = "Status id", required = true)
-            @PathVariable("id") Integer id) {
-
-        Optional<MessageStatus> r = statusRepo.findByStatId(id);
-        if (!r.isPresent()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok(r.get());
-    }
-
-    @RequestMapping(value = "/statuses/peek", method = RequestMethod.GET)
-    @ApiOperation(value = "Latest status", notes = "Get status with latest update")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "Success", response = MessageStatus.class)
-    })
-    public ResponseEntity statusPeek() {
-        Optional<MessageStatus> r = statusRepo.findFirstByOrderByLastUpdateAsc();
-        if (r.isPresent()) {
-            return ResponseEntity.ok(r.get());
-        }
-
-        return ResponseEntity.noContent().build();
-    }
-
-
 }

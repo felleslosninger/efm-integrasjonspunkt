@@ -1,62 +1,44 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import no.difi.meldingsutveksling.ServiceIdentifier;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.ApplicationContextHolder;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.noarkexchange.MessageContext;
 import no.difi.meldingsutveksling.noarkexchange.MessageContextException;
-import no.difi.meldingsutveksling.noarkexchange.MessageSender;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import no.difi.meldingsutveksling.noarkexchange.MessageContextFactory;
+import no.difi.meldingsutveksling.transport.Transport;
+import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.io.InputStream;
 
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
-import static no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers.markerFrom;
+import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
 @Component
+@RequiredArgsConstructor
+@Slf4j
 public class DpoConversationStrategy implements ConversationStrategy {
 
-    private static final Logger log = LoggerFactory.getLogger(DpoConversationStrategy.class);
-
-    private ServiceRegistryLookup sr;
-    private MessageSender messageSender;
-
-    @Autowired
-    DpoConversationStrategy(ServiceRegistryLookup sr,
-                            MessageSender messageSender) {
-        this.sr = sr;
-        this.messageSender = messageSender;
-    }
+    private final TransportFactory transportFactory;
+    private final AsicHandler asicHandler;
+    private final MessageContextFactory messageContextFactory;
+    private final ApplicationContextHolder applicationContextHolder;
 
     @Override
-    public void send(ConversationResource cr) throws NextMoveException {
-        List<ServiceRecord> serviceRecords = sr.getServiceRecords(cr.getReceiverId());
-        Optional<ServiceRecord> serviceRecord = serviceRecords.stream()
-                .filter(r -> DPO == r.getServiceIdentifier())
-                .findFirst();
-        if (!serviceRecord.isPresent()) {
-            List<ServiceIdentifier> acceptableTypes = serviceRecords.stream()
-                    .map(ServiceRecord::getServiceIdentifier)
-                    .collect(Collectors.toList());
-            String errorStr = String.format("Message is of type '%s', but receiver '%s' accepts types '%s'.",
-                    DPO, cr.getReceiverId(), acceptableTypes);
-            log.error(markerFrom(cr), errorStr);
-            throw new NextMoveException(errorStr);
-        }
+    public void send(NextMoveOutMessage message) throws NextMoveException {
         try {
-            messageSender.sendMessage(cr);
+            MessageContext messageContext = messageContextFactory.from(message);
+            InputStream is = asicHandler.createEncryptedAsic(message, messageContext);
+            Transport transport = transportFactory.createTransport(message.getSbd());
+            transport.send(applicationContextHolder.getApplicationContext(), message.getSbd(), is);
         } catch (MessageContextException e) {
-            log.error("Send message failed.", e);
-            throw new NextMoveException(e);
+            throw new NextMoveException(String.format("Error sending message with conversationId=%s to Altinn", message.getConversationId()), e);
         }
+
         Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] sent to altinn",
-                cr.getConversationId(), cr.getServiceIdentifier()),
-                markerFrom(cr));
+                message.getConversationId(), message.getServiceIdentifier()),
+                markerFrom(message));
     }
 
 }

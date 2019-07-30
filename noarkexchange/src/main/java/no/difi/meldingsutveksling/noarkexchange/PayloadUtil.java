@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import com.google.common.collect.Lists;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import org.springframework.util.StringUtils;
@@ -33,7 +34,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Slf4j
+@UtilityClass
 public class PayloadUtil {
+
     private static final String APP_RECEIPT_INDICATOR = "AppReceipt";
     private static final String PAYLOAD_UNKNOWN_TYPE = "Payload is of unknown type cannot determine what type of message it is";
 
@@ -91,12 +94,7 @@ public class PayloadUtil {
         XPath xPath = xPathFactory.newXPath();
         try {
             XPathExpression expression = xPath.compile(xpath);
-            String doc;
-            if (payload instanceof String) {
-                doc = (String) payload;
-            } else {
-                doc = ((Node) payload).getFirstChild().getTextContent().trim();
-            }
+            String doc = getDoc(payload);
 
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
@@ -111,12 +109,7 @@ public class PayloadUtil {
     public static List<NoarkDocument> parsePayloadForDocuments(Object payload) throws PayloadException {
         List<NoarkDocument> docs = Lists.newArrayList();
 
-        String doc;
-        if (payload instanceof String) {
-            doc = (String) payload;
-        } else {
-            doc = ((Node) payload).getFirstChild().getTextContent().trim();
-        }
+        String doc = getDoc(payload);
 
         XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
         XMLEventReader eventReader;
@@ -138,6 +131,18 @@ public class PayloadUtil {
                                 noarkDocument.setFilename(event.asCharacters().getData());
                             }
                             break;
+                        case "veMimeType":
+                            event = eventReader.nextEvent();
+                            if (noarkDocument != null) {
+                                noarkDocument.setContentType(event.asCharacters().getData());
+                            }
+                            break;
+                        case "dbTittel":
+                            event = eventReader.nextEvent();
+                            if (noarkDocument != null) {
+                                noarkDocument.setTitle(event.asCharacters().getData());
+                            }
+                            break;
                         case "base64":
                             event = eventReader.nextEvent();
                             if (noarkDocument != null) {
@@ -155,11 +160,20 @@ public class PayloadUtil {
                     }
                 }
             }
+            return docs;
         } catch (XMLStreamException e) {
             throw new PayloadException("Error parsing payload", e);
         }
+    }
 
-        return docs;
+    private static String getDoc(Object payload) {
+        String doc;
+        if (payload instanceof String) {
+            doc = (String) payload;
+        } else {
+            doc = ((Node) payload).getFirstChild().getTextContent().trim();
+        }
+        return doc;
     }
 
     public static String queryJpId(Object payload) {

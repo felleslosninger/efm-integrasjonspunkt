@@ -1,58 +1,61 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import lombok.RequiredArgsConstructor;
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.nextmove.logging.ConversationResourceMarkers;
-import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
-import no.difi.meldingsutveksling.noarkexchange.putmessage.PostVirksomhetStrategyFactory;
-import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
+import no.difi.meldingsutveksling.core.BestEduConverter;
+import no.difi.meldingsutveksling.noarkexchange.AppReceiptFactory;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
+import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestFactory;
+import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
+import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
-import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
-import no.difi.meldingsutveksling.ptv.CorrespondenceRequest;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
+import no.difi.meldingsutveksling.receipt.ConversationService;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
+import static no.difi.meldingsutveksling.ptv.WithLogstashMarker.withLogstashMarker;
+
 @Component
+@ConditionalOnProperty(name = "difi.move.feature.enableDPV", havingValue = "true")
+@RequiredArgsConstructor
 public class DpvConversationStrategy implements ConversationStrategy {
 
-    private IntegrasjonspunktProperties props;
-    private ServiceRegistryLookup sr;
-    private MessagePersister messagePersister;
-    private InternalQueue internalQueue;
-
-    @Autowired
-    DpvConversationStrategy(IntegrasjonspunktProperties props,
-                            ServiceRegistryLookup sr,
-                            MessagePersister messagePersister,
-                            @Lazy InternalQueue internalQueue) {
-        this.props = props;
-        this.sr = sr;
-        this.messagePersister = messagePersister;
-        this.internalQueue = internalQueue;
-    }
+    private final CorrespondenceAgencyMessageFactory correspondenceAgencyMessageFactory;
+    private final CorrespondenceAgencyClient client;
+    private final ConversationService conversationService;
+    private final IntegrasjonspunktProperties props;
+    private final NoarkClient localNoark;
+    private final PutMessageRequestFactory putMessageRequestFactory;
 
     @Override
-    public void send(ConversationResource conversationResource) throws NextMoveException {
-        DpvConversationResource cr = (DpvConversationResource) conversationResource;
+    public void send(NextMoveOutMessage message) throws NextMoveException {
 
-        PostVirksomhetStrategyFactory dpvFactory = PostVirksomhetStrategyFactory.newInstance(props, null, sr, internalQueue);
-        CorrespondenceAgencyConfiguration config = dpvFactory.getConfig();
-        InsertCorrespondenceV2 message;
-        message = CorrespondenceAgencyMessageFactory.create(config, cr, messagePersister);
+        InsertCorrespondenceV2 correspondence = correspondenceAgencyMessageFactory.create(message);
 
-        CorrespondenceAgencyClient client = new CorrespondenceAgencyClient(ConversationResourceMarkers.markerFrom(cr), config);
-        final CorrespondenceRequest request = new CorrespondenceRequest.Builder()
-                .withUsername(config.getSystemUserCode())
-                .withPassword(config.getPassword())
-                .withPayload(message).build();
+        Object response = withLogstashMarker(markerFrom(message))
+                .execute(() -> client.sendCorrespondence(correspondence));
 
-        if (client.sendCorrespondence(request) == null) {
+        if (response == null) {
             throw new NextMoveException("Failed to create Correspondence Agency Request");
         }
 
+        String serviceCode = correspondence.getCorrespondence().getServiceCode().getValue();
+        String serviceEditionCode = correspondence.getCorrespondence().getServiceEdition().getValue();
+        conversationService.findConversation(message.getConversationId())
+                .ifPresent(c -> conversationService.save(c.setServiceCode(serviceCode).setServiceEditionCode(serviceEditionCode)));
+
+        if (props.getNoarkSystem().isEnable()) {
+            sendAppReceipt(message);
+        }
     }
 
+    private void sendAppReceipt(NextMoveOutMessage message) {
+        AppReceiptType appReceipt = AppReceiptFactory.from("OK", "None", "OK");
+        PutMessageRequestType putMessage = putMessageRequestFactory.create(message.getSbd(),
+                BestEduConverter.appReceiptAsString(appReceipt));
+        localNoark.sendEduMelding(putMessage);
+    }
 }
