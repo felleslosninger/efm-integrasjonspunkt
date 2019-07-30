@@ -9,41 +9,47 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.IdentifierResource;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.Collections;
+import java.util.Objects;
+import java.util.UUID;
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @ContextConfiguration(classes = ServiceRegistryLookupTest.Config.class)
 public class ServiceRegistryLookupTest {
 
     private static final String ORGNR = "12345678";
+    private static final String ORGNR2 = "23456789";
     private static final String ORGNAME = "test";
     private static final String DEFAULT_PROCESS = "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0";
     private static final String DEFAULT_DOCTYPE = "urn:no:difi:arkivmelding:xsd::arkivmelding";
 
     @Configuration
     @EnableCaching
+    @Import({ServiceRegistryClient.class, ServiceRegistryLookup.class})
     static class Config {
 
         // Simulating your caching configuration
@@ -51,35 +57,51 @@ public class ServiceRegistryLookupTest {
         CacheManager cacheManager() {
             return new ConcurrentMapCacheManager();
         }
+
+        @Bean
+        ObjectMapper objectMapper() {
+            return new ObjectMapper();
+        }
     }
 
     @Autowired
     private CacheManager cacheManager;
 
+    @Autowired
+    private ServiceRegistryLookup service;
+
+    @MockBean
+    private IntegrasjonspunktProperties properties;
+
+    @MockBean
+    private SasKeyRepository sasKeyRepoMock;
+
+    @MockBean
     private RestClient client;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
-    private ServiceRegistryLookup service;
     private ServiceRecord dpo = new ServiceRecord(DPO, "000", "certificate", "http://localhost:4567");
     private String query;
 
     @Before
     public void setup() {
-        client = mock(RestClient.class);
-        final IntegrasjonspunktProperties properties = mock(IntegrasjonspunktProperties.class);
-        SasKeyRepository sasKeyRepoMock = mock(SasKeyRepository.class);
         IntegrasjonspunktProperties.Arkivmelding arkivmeldingProps = new IntegrasjonspunktProperties.Arkivmelding().setDefaultProcess("foo");
         when(properties.getArkivmelding()).thenReturn(arkivmeldingProps);
         IntegrasjonspunktProperties.Arkivmelding arkivmelding = mock(IntegrasjonspunktProperties.Arkivmelding.class);
         when(arkivmelding.getDefaultProcess()).thenReturn(DEFAULT_PROCESS);
         when(properties.getArkivmelding()).thenReturn(arkivmelding);
-        ServiceRegistryClient serviceRegistryClient = new ServiceRegistryClient(client, sasKeyRepoMock, new ObjectMapper());
-        service = new ServiceRegistryLookup(serviceRegistryClient, properties);
         query = "securityLevel=3";
         dpo.setProcess(DEFAULT_PROCESS);
         dpo.setDocumentTypes(Collections.singletonList(DEFAULT_DOCTYPE));
+    }
+
+    @After
+    public void after() {
+        cacheManager.getCacheNames().forEach(p -> {
+            Objects.requireNonNull(cacheManager.getCache(p)).clear();
+        });
     }
 
     @Test(expected = ServiceRegistryLookupException.class)
@@ -123,6 +145,23 @@ public class ServiceRegistryLookupTest {
         ServiceRecord serviceRecord = service.getServiceRecord(ORGNR, DPO);
 
         assertThat(serviceRecord, is(dpo));
+    }
+
+    @Test
+    public void testThatConversationIdIsNotInCacheKey() throws BadJWSException, ServiceRegistryLookupException {
+        final String json = new SRContentBuilder().withServiceRecord(dpo).build();
+        when(client.getResource(any(), any())).thenReturn(json);
+
+        String conversationId1 = UUID.randomUUID().toString();
+        String conversationId2 = UUID.randomUUID().toString();
+        service.getServiceRecord(SRParameter.builder(ORGNR).conversationId(conversationId1).build());
+        service.getServiceRecord(SRParameter.builder(ORGNR).conversationId(conversationId1).build());
+        service.getServiceRecord(SRParameter.builder(ORGNR).conversationId(conversationId2).build());
+        service.getServiceRecord(SRParameter.builder(ORGNR).build());
+        service.getServiceRecord(SRParameter.builder(ORGNR2).build());
+
+        verify(client, times(1)).getResource(endsWith(ORGNR), any());
+        verify(client, times(1)).getResource(endsWith(ORGNR2), any());
     }
 
     @Test
