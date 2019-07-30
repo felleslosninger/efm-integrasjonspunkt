@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryClient;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
@@ -29,21 +29,11 @@ public class CacheConfig extends CachingConfigurerSupport {
         SimpleCacheManager cacheManager = new SimpleCacheManager();
 
         cacheManager.setCaches(Arrays.asList(
-                new CaffeineCache(ServiceRegistryLookup.CACHE_GET_SAS_KEY,
+                new CaffeineCache(ServiceRegistryClient.CACHE_GET_SAS_KEY,
                         Caffeine.newBuilder()
                                 .expireAfterWrite(1, TimeUnit.DAYS)
                                 .build()),
-                new CaffeineCache(ServiceRegistryLookup.CACHE_GET_SERVICE_RECORD,
-                        Caffeine.newBuilder()
-                                .maximumSize(100L)
-                                .expireAfterWrite(1, TimeUnit.MINUTES)
-                                .build()),
-                new CaffeineCache(ServiceRegistryLookup.CACHE_GET_SERVICE_RECORDS,
-                        Caffeine.newBuilder()
-                                .maximumSize(100L)
-                                .expireAfterWrite(1, TimeUnit.MINUTES)
-                                .build()),
-                new CaffeineCache(ServiceRegistryLookup.CACHE_GET_INFO_RECORD,
+                new CaffeineCache(ServiceRegistryClient.CACHE_LOAD_IDENTIFIER_RESOURCE,
                         Caffeine.newBuilder()
                                 .maximumSize(100L)
                                 .expireAfterWrite(1, TimeUnit.MINUTES)

@@ -49,7 +49,7 @@ public class ServiceRegistryLookupTest {
         // Simulating your caching configuration
         @Bean
         CacheManager cacheManager() {
-            return new ConcurrentMapCacheManager(ServiceRegistryLookup.CACHE_GET_SAS_KEY);
+            return new ConcurrentMapCacheManager();
         }
     }
 
@@ -75,7 +75,8 @@ public class ServiceRegistryLookupTest {
         IntegrasjonspunktProperties.Arkivmelding arkivmelding = mock(IntegrasjonspunktProperties.Arkivmelding.class);
         when(arkivmelding.getDefaultProcess()).thenReturn(DEFAULT_PROCESS);
         when(properties.getArkivmelding()).thenReturn(arkivmelding);
-        service = new ServiceRegistryLookup(client, properties, sasKeyRepoMock, new ObjectMapper());
+        ServiceRegistryClient serviceRegistryClient = new ServiceRegistryClient(client, sasKeyRepoMock, new ObjectMapper());
+        service = new ServiceRegistryLookup(serviceRegistryClient, properties);
         query = "securityLevel=3";
         dpo.setProcess(DEFAULT_PROCESS);
         dpo.setDocumentTypes(Collections.singletonList(DEFAULT_DOCTYPE));
@@ -129,7 +130,7 @@ public class ServiceRegistryLookupTest {
         when(client.getResource("sastoken")).thenReturn("123").thenReturn("456");
 
         assertThat(service.getSasKey(), is("123"));
-        cacheManager.getCache(ServiceRegistryLookup.CACHE_GET_SAS_KEY).clear();
+        cacheManager.getCache(ServiceRegistryClient.CACHE_GET_SAS_KEY).clear();
         assertThat(service.getSasKey(), is("456"));
     }
 

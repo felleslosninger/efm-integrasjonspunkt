@@ -19,8 +19,10 @@ public class NextMoveServiceRecordProvider {
     ServiceRecord getServiceRecord(StandardBusinessDocument sbd) {
         BusinessMessage businessMessage = sbd.getBusinessMessage();
         try {
-            SRParameter.SRParameterBuilder parameterBuilder = SRParameter.builder(sbd.getReceiverIdentifier())
-                    .conversationId(sbd.getConversationId());
+            SRParameter.SRParameterBuilder parameterBuilder = SRParameter.builder(sbd.getReceiverIdentifier());
+
+            sbd.getOptionalConversationId().ifPresent(parameterBuilder::conversationId);
+
             if (businessMessage.getSikkerhetsnivaa() != null) {
                 parameterBuilder.securityLevel(businessMessage.getSikkerhetsnivaa());
             }
