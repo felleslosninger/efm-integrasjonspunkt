@@ -13,10 +13,13 @@ import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.springframework.http.*;
 import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
@@ -48,6 +51,8 @@ public class OidcTokenClient {
 
     private final IntegrasjonspunktProperties props;
 
+    @Retryable(value = HttpClientErrorException.class, maxAttempts = -1,
+            backoff = @Backoff(delay = 5000, maxDelay = 1000*60*60, multiplier = 3))
     public IdportenOidcTokenResponse fetchToken() {
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.setErrorHandler(new OidcErrorHandler());
