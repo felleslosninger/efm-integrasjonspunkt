@@ -29,6 +29,10 @@ jacoco.exec
 /integrasjonspunkt/receipt.trace.db
 /integrasjonspunkt/integrasjonspunkt.mv.db
 /integrasjonspunkt/integrasjonspunkt.trace.db
+*.db
+
+*/activemq-data/*
+/activemq-data/*
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
