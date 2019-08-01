@@ -10,6 +10,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.transaction.Transactional;
 import javax.validation.constraints.NotNull;
 
 @RestController
@@ -26,6 +27,7 @@ public class SubscriptionController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = Subscription[].class),
     })
+    @Transactional
     public Page<Subscription> listSubscriptions(@PageableDefault Pageable pageable) {
         return subscriptionService.listSubscriptions(pageable);
     }
@@ -37,6 +39,7 @@ public class SubscriptionController {
             @ApiResponse(code = 400, message = "Bad Request", response = String.class),
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })
+    @Transactional
     public Subscription getSubscription(@ApiParam(value = "id", required = true, example = "1")
                                         @PathVariable
                                         @NotNull Long id) {
@@ -50,6 +53,7 @@ public class SubscriptionController {
             @ApiResponse(code = 400, message = "Bad Request", response = String.class),
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })
+    @Transactional
     public Subscription createSubscription(
             @ApiParam(
                     name = "Subscription",
@@ -67,6 +71,7 @@ public class SubscriptionController {
             @ApiResponse(code = 400, message = "Bad Request", response = String.class),
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })
+    @Transactional
     public void updateSubscription(@ApiParam(value = "id", required = true, example = "1")
                                    @PathVariable
                                    @NotNull Long id,
@@ -82,6 +87,7 @@ public class SubscriptionController {
             @ApiResponse(code = 400, message = "Bad Request", response = String.class),
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })
+    @Transactional
     public void deleteSubscription(@ApiParam(value = "id", required = true, example = "1")
                                    @PathVariable
                                    @NotNull Long id) {
@@ -96,6 +102,7 @@ public class SubscriptionController {
             @ApiResponse(code = 400, message = "Bad Request", response = String.class),
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })
+    @Transactional
     public void deleteAllSubscriptions() {
         subscriptionService.deleteAll();
     }
