@@ -30,7 +30,7 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.jvnet.jax-ws-commons</groupId>
+                <groupId>com.sun.xml.ws</groupId>
                 <artifactId>jaxws-maven-plugin</artifactId>
 
                 <executions>
