@@ -30,6 +30,6 @@ public class ServiceBusRestErrorHandler extends DefaultResponseErrorHandler {
                             String.format("Couldn't get cache names %s", CACHE_GET_SAS_KEY)))
                     .clear();
         }
-        super.handleError(response);
+        super.handleError(response, statusCode);
     }
 }
