@@ -22,6 +22,11 @@
         </dependency>
 
         <dependency>
+            <groupId>no.difi.commons</groupId>
+            <artifactId>commons-asic</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
         </dependency>
