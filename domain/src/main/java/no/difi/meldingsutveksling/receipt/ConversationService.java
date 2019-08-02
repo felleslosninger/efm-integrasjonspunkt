@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.mail.MailSender;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.webhooks.WebhookPublisher;
 import org.springframework.stereotype.Component;
@@ -18,11 +19,14 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPF;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
+import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 import static no.difi.meldingsutveksling.receipt.ReceiptStatus.*;
+
 
 @Component
 @RequiredArgsConstructor
@@ -33,6 +37,7 @@ public class ConversationService {
     private final IntegrasjonspunktProperties props;
     private final WebhookPublisher webhookPublisher;
     private final MessageStatusFactory messageStatusFactory;
+    private final MailSender mailSender;
     private final Clock clock;
 
     private static final String CONVERSATION_EXISTS = "Conversation with id=%s already exists, not recreating";
@@ -65,6 +70,20 @@ public class ConversationService {
         }
         if (ReceiptStatus.valueOf(status.getStatus()) == LEVERT) {
             conversation.setFinished(true);
+        }
+        if (ReceiptStatus.valueOf(status.getStatus()) == FEIL &&
+                props.getFeature().isMailErrorStatus()) {
+            try {
+                String title = format("Integrasjonspunkt: status %s registrert for forsendelse %s", FEIL.toString(), conversation.getConversationId());
+                title = (isNullOrEmpty(conversation.getMessageReference())) ? title : title + format(" / %s", conversation.getMessageReference());
+                String direction = conversation.getDirection() == INCOMING ? "Innkommende" : "Utgående";
+                String messageRef = (isNullOrEmpty(conversation.getMessageReference())) ? "" : format("og messageReference %s ", conversation.getMessageReference());
+                String body = format("%s forsendelse med conversationId %s %shar registrert status '%s'. Se statusgrensesnitt for detaljer.",
+                        direction, conversation.getConversationId(), messageRef, FEIL.toString());
+                mailSender.send(title, body);
+            } catch (Exception e) {
+                log.error(format("Error sending status mail for conversationId %s", conversation.getConversationId()), e);
+            }
         }
         if (asList(LEST, FEIL, LEVETID_UTLOPT, INNKOMMENDE_LEVERT).contains(ReceiptStatus.valueOf(status.getStatus()))) {
             conversation.setFinished(true)

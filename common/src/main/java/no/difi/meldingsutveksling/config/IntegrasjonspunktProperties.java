@@ -272,6 +272,7 @@ public class IntegrasjonspunktProperties {
         private boolean forwardReceivedAppReceipts;
         private boolean returnOkOnEmptyPayload;
         private boolean dumpDlqMessages;
+        private boolean mailErrorStatus;
 
         /**
          * Service toggles
