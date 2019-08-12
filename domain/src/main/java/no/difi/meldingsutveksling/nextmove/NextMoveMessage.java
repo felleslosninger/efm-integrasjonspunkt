@@ -1,16 +1,15 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.hibernate.annotations.DiscriminatorOptions;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.OffsetDateTime;
-import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -35,10 +34,9 @@ public abstract class NextMoveMessage extends AbstractEntity<Long> implements Me
     @NonNull
     private ServiceIdentifier serviceIdentifier;
 
-    @Version
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    @UpdateTimestamp
     @Setter(AccessLevel.PRIVATE)
-    private Date lastUpdated;
+    private OffsetDateTime lastUpdated;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "message_id", nullable = false)

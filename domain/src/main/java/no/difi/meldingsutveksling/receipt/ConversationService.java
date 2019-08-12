@@ -61,8 +61,8 @@ public class ConversationService {
             return conversation;
         }
 
-        conversation.addMessageStatus(status)
-                .setLastUpdate(OffsetDateTime.now(clock));
+        conversation.addMessageStatus(status);
+
         if (isPollable(status)) {
             // Note: isPollable can not be moved into setPollable, as this would interrupt polling
             // for every other registered status than 'SENDT'

@@ -1,10 +1,10 @@
 package no.difi.meldingsutveksling.receipt;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.nextmove.AbstractEntity;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +53,8 @@ public class Conversation extends AbstractEntity<Long> implements MessageInforma
     private String messageTitle;
     private String serviceCode;
     private String serviceEditionCode;
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    @UpdateTimestamp
+    @Setter(AccessLevel.PRIVATE)
     private OffsetDateTime lastUpdate;
     @JsonIgnore
     private boolean pollable;

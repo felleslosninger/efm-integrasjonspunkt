@@ -1,15 +1,18 @@
 package no.difi.meldingsutveksling.webhooks.subscription;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.domain.webhooks.Subscription;
 import no.difi.meldingsutveksling.exceptions.SubscriptionNotFoundException;
 import no.difi.meldingsutveksling.webhooks.WebhookPusher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SubscriptionServiceImpl implements SubscriptionService {
@@ -56,7 +59,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     public void deleteSubscription(Long id) {
         getSubscription(id);
-        subscriptionRepository.deleteById(id);
+        subscriptionRepository.deleteSubscriptionById(id);
     }
 
     @Override
