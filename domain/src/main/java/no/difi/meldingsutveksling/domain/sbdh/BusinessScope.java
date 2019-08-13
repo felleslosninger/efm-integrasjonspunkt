@@ -51,7 +51,7 @@ public class BusinessScope implements Serializable {
 
     @XmlElement(name = "Scope")
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "header_id", nullable = false)
+    @JoinColumn(name = "sbdh_id", nullable = false)
     @Size(min = 1)
     @NotNull
     @Valid

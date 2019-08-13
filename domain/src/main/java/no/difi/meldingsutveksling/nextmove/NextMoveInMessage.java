@@ -23,13 +23,14 @@ public class NextMoveInMessage extends NextMoveMessage {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private OffsetDateTime lockTimeout;
 
-    public NextMoveInMessage(String conversationId, String receiverIdentifier, String senderIdentifier, ServiceIdentifier serviceIdentifier, StandardBusinessDocument sbd) {
-        super(conversationId, receiverIdentifier, senderIdentifier, serviceIdentifier, sbd);
+    public NextMoveInMessage(String conversationId, String processIdentifier, String receiverIdentifier, String senderIdentifier, ServiceIdentifier serviceIdentifier, StandardBusinessDocument sbd) {
+        super(conversationId, processIdentifier, receiverIdentifier, senderIdentifier, serviceIdentifier, sbd);
     }
 
     public static NextMoveInMessage of(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
         return new NextMoveInMessage(
                 sbd.getConversationId(),
+                sbd.getProcess(),
                 sbd.getReceiverIdentifier(),
                 sbd.getSenderIdentifier(),
                 serviceIdentifier,

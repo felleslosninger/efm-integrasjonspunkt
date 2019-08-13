@@ -68,7 +68,7 @@ import java.util.Set;
 @Setter
 @ToString
 @Entity
-@Table(name = "document")
+@Table(name = "sbd")
 @JsonSerialize(using = NextMoveMessageSerializer.class)
 @GroupSequenceProvider(StandardBusinessDocumentGroupSequenceProvider.class)
 @ApiModel(description = "Standard Business Document")

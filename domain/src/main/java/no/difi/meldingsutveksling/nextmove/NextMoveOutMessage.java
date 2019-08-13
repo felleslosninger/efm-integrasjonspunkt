@@ -19,14 +19,15 @@ import java.util.HashSet;
 @ToString
 public class NextMoveOutMessage extends NextMoveMessage {
 
-    public NextMoveOutMessage(String conversationId, String receiverIdentifier, String senderIdentifier, ServiceIdentifier serviceIdentifier, StandardBusinessDocument sbd) {
-        super(conversationId, receiverIdentifier, senderIdentifier, serviceIdentifier, sbd);
+    public NextMoveOutMessage(String conversationId, String processIdentifier, String receiverIdentifier, String senderIdentifier, ServiceIdentifier serviceIdentifier, StandardBusinessDocument sbd) {
+        super(conversationId, processIdentifier, receiverIdentifier, senderIdentifier, serviceIdentifier, sbd);
     }
 
 
     public static NextMoveOutMessage of(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
         NextMoveOutMessage message = new NextMoveOutMessage(
                 sbd.getConversationId(),
+                sbd.getProcess(),
                 sbd.getReceiverIdentifier(),
                 sbd.getSenderIdentifier(),
                 serviceIdentifier,

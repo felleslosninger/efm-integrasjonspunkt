@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.querydsl.core.annotations.QueryInit;
 import lombok.*;
 import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
@@ -28,6 +29,8 @@ public abstract class NextMoveMessage extends AbstractEntity<Long> implements Me
     @NonNull
     private String conversationId;
     @NonNull
+    private String processIdentifier;
+    @NonNull
     private String receiverIdentifier;
     @NonNull
     private String senderIdentifier;
@@ -44,6 +47,8 @@ public abstract class NextMoveMessage extends AbstractEntity<Long> implements Me
 
     @NonNull
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "sbd_id", referencedColumnName = "id")
+    @QueryInit("standardBusinessDocumentHeader.businessScope")
     private StandardBusinessDocument sbd;
 
     @JsonIgnore

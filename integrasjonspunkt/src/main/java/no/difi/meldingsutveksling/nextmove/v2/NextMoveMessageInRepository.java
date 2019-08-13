@@ -67,6 +67,10 @@ public interface NextMoveMessageInRepository extends PagingAndSortingRepository<
             builder.and(nextMoveInMessage.serviceIdentifier.eq(ServiceIdentifier.valueOf(input.getServiceIdentifier())));
         }
 
+        if (input.getProcess() != null) {
+            builder.and(nextMoveInMessage.processIdentifier.eq(input.getProcess()));
+        }
+
         return builder;
     }
 }

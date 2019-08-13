@@ -32,4 +32,10 @@ public class NextMoveInMessageQueryInput {
             allowableValues = "DPO, DPV, DPI, DPF, DPE"
     )
     String serviceIdentifier;
+
+    @ApiModelProperty(
+            value = "Process",
+            example = "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0"
+    )
+    String process;
 }

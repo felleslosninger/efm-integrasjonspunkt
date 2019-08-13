@@ -68,7 +68,7 @@ import java.util.*;
 @Setter
 @ToString
 @Entity
-@Table(name = "header")
+@Table(name = "sbdh")
 public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
 
     @XmlElement(name = "HeaderVersion", required = true)
