@@ -22,7 +22,7 @@ public class TimeToLiveHelper {
 
     @Transactional
     public void registerErrorStatusAndMessage(Conversation c) {
-        conversationService.registerStatus(c.getConversationId(),
+        conversationService.registerStatus(c.getMessageId(),
                 messageStatusFactory.getMessageStatus(ReceiptStatus.LEVETID_UTLOPT,
                         "Levetiden for meldingen er utgått. Må sendes på nytt"));
     }

@@ -30,10 +30,13 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
     Optional<Conversation> findByIdAndDirection(Long id, ConversationDirection direction);
 
     @EntityGraph(value = "Conversation.messageStatuses")
-    List<Conversation> findByConversationIdAndDirection(String conversationId, ConversationDirection direction);
+    List<Conversation> findByMessageIdAndDirection(String messageId, ConversationDirection direction);
 
     @EntityGraph(value = "Conversation.messageStatuses")
     List<Conversation> findByConversationId(String conversationId);
+
+    @EntityGraph(value = "Conversation.messageStatuses")
+    List<Conversation> findByMessageId(String messageId);
 
     @EntityGraph(value = "Conversation.messageStatuses")
     List<Conversation> findByPollable(boolean pollable);

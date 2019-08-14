@@ -70,6 +70,7 @@ public class NextMoveAdapter {
         StandardBusinessDocument sbd = createSBD.createNextMoveSBD(Organisasjonsnummer.from(message.getSenderPartynumber()),
                 Organisasjonsnummer.from(message.getReceiverPartyNumber()),
                 message.getConversationId(),
+                message.getConversationId(),
                 properties.getArkivmelding().getReceiptProcess(),
                 DocumentType.ARKIVMELDING_KVITTERING,
                 receipt);
@@ -79,6 +80,7 @@ public class NextMoveAdapter {
     private NextMoveOutMessage convertEduMessage(PutMessageRequestWrapper message) throws PayloadException, JAXBException {
         StandardBusinessDocument sbd = createSBD.createNextMoveSBD(Organisasjonsnummer.from(message.getSenderPartynumber()),
                 Organisasjonsnummer.from(message.getReceiverPartyNumber()),
+                message.getConversationId(),
                 message.getConversationId(),
                 properties.getArkivmelding().getDefaultProcess(),
                 DocumentType.ARKIVMELDING,

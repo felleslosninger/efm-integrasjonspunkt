@@ -37,11 +37,11 @@ public class TimeToLiveTasks {
         conversationService.registerStatus(conversation,
                 messageStatusFactory.getMessageStatus(ReceiptStatus.LEVETID_UTLOPT));
 
-        inRepository.findByConversationId(conversation.getConversationId()).ifPresent(c -> {
+        inRepository.findByMessageId(conversation.getMessageId()).ifPresent(c -> {
             try {
-                messagePersister.delete(c.getConversationId());
+                messagePersister.delete(c.getMessageId());
             } catch (IOException e) {
-                log.error(markerFrom(conversation), "Could not delete files for expired message {}",  c.getConversationId(), e);
+                log.error(markerFrom(conversation), "Could not delete files for expired message {}",  c.getMessageId(), e);
             }
             inRepository.delete(c);
         });

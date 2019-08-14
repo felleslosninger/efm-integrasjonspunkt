@@ -38,13 +38,14 @@ public class SBDFactory {
                                               DocumentType documentType,
                                               String journalPostId) {
         return new StandardBusinessDocument()
-                .setStandardBusinessDocumentHeader(createHeader(avsender, mottaker, conversationId, documentType, journalPostId))
+                .setStandardBusinessDocumentHeader(createHeader(avsender, mottaker, conversationId, conversationId, documentType, journalPostId))
                 .setAny(payload);
     }
 
     public StandardBusinessDocument createNextMoveSBD(Organisasjonsnummer avsender,
                                                       Organisasjonsnummer mottaker,
                                                       String conversationId,
+                                                      String documentId,
                                                       String process,
                                                       DocumentType documentType,
                                                       Object any) {
@@ -54,7 +55,7 @@ public class SBDFactory {
                         .addSender(createSender(avsender))
                         .addReceiver(createReceiver(mottaker))
                         .setDocumentIdentification(createDocumentIdentification(documentType, getDocumentIdentifier(SRParameter.builder(mottaker.toString())
-                                .conversationId(conversationId).build(), process, documentType)))
+                                .conversationId(conversationId).build(), process, documentType), documentId))
                         .setBusinessScope(createBusinessScope(fromConversationId(conversationId, process, OffsetDateTime.now(clock).plusHours(props.getNextmove().getDefaultTtlHours()))))
                 ).setAny(any);
     }
@@ -70,13 +71,14 @@ public class SBDFactory {
     private StandardBusinessDocumentHeader createHeader(Organisasjonsnummer avsender,
                                                         Organisasjonsnummer mottaker,
                                                         String conversationId,
+                                                        String documentId,
                                                         DocumentType documentType,
                                                         String journalPostId) {
         return new StandardBusinessDocumentHeader()
                 .setHeaderVersion(HEADER_VERSION)
                 .addSender(createSender(avsender))
                 .addReceiver(createReceiver(mottaker))
-                .setDocumentIdentification(createDocumentIdentification(documentType, STANDARD))
+                .setDocumentIdentification(createDocumentIdentification(documentType, STANDARD, documentId))
                 .setBusinessScope(createBusinessScope(
                         fromConversationId(conversationId, Process.LEGACY.getValue(), OffsetDateTime.now(clock).plusHours(props.getNextmove().getDefaultTtlHours())),
                         fromJournalPostId(journalPostId, Process.LEGACY.getValue())));
@@ -100,13 +102,15 @@ public class SBDFactory {
                 .setAuthority(orgNummer.authority()));
     }
 
-    private DocumentIdentification createDocumentIdentification(DocumentType documentType, String standard) {
+    private DocumentIdentification createDocumentIdentification(DocumentType documentType,
+                                                                String standard,
+                                                                String documentId) {
         return new DocumentIdentification()
                 .setCreationDateAndTime(OffsetDateTime.now(clock))
                 .setStandard(standard)
                 .setType(documentType.getType())
                 .setTypeVersion(TYPE_VERSION_2)
-                .setInstanceIdentifier(uuidGenerator.generate());
+                .setInstanceIdentifier(documentId);
     }
 
     private BusinessScope createBusinessScope(Scope... scopes) {

@@ -26,7 +26,7 @@ Feature: Sending a Next Move DPO message when it expires between create and send
             },
             "documentIdentification": {
                 "creationDateAndTime": "2019-03-25T11:35:00+01:00",
-                "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
+                "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b923",
                 "standard": "urn:no:difi:arkivmelding:xsd::arkivmelding",
                 "type": "arkivmelding",
                 "typeVersion": "2.0"
@@ -150,10 +150,10 @@ Feature: Sending a Next Move DPO message when it expires between create and send
       "error" : "Bad Request",
       "exception" : "no.difi.meldingsutveksling.exceptions.TimeToLiveException",
       "message" : "ExpectedResponseDateTime 2019-05-10T01:31:52+02:00 has been exceeded. Please resend the message",
-      "path" : "/api/messages/out/8fb3a080-39fb-4dd7-b20a-dfc70f214f26"
+      "path" : "/api/messages/out/ff88849c-e281-4809-8555-7cd54952b923"
     }
     """
-    Then the message statuses for the conversation with id = "8fb3a080-39fb-4dd7-b20a-dfc70f214f26" are:
+    Then the message statuses for the conversation with id = "ff88849c-e281-4809-8555-7cd54952b923" are:
     """
     {
       "content" : [ {
@@ -161,6 +161,7 @@ Feature: Sending a Next Move DPO message when it expires between create and send
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET",
         "conversationId" : "8fb3a080-39fb-4dd7-b20a-dfc70f214f26",
+        "messageId" : "ff88849c-e281-4809-8555-7cd54952b923",
         "convId" : 205
       }, {
         "id" : 209,
@@ -168,6 +169,7 @@ Feature: Sending a Next Move DPO message when it expires between create and send
         "status" : "LEVETID_UTLOPT",
         "description" : "Levetiden for meldingen er utgått. Må sendes på nytt",
         "conversationId" : "8fb3a080-39fb-4dd7-b20a-dfc70f214f26",
+        "messageId" : "ff88849c-e281-4809-8555-7cd54952b923",
         "convId" : 205
       } ],
       "pageable" : {

@@ -22,7 +22,7 @@ public class NextMoveInMessageUnlocker {
         repo.findByLockTimeoutLessThanEqual(OffsetDateTime.now(clock)).forEach(cr -> {
             cr.setLockTimeout(null);
             repo.save(cr);
-            log.debug(markerFrom(cr), "Lock for message with id={} timed out, releasing", cr.getConversationId());
+            log.debug(markerFrom(cr), "Lock for message with id={} timed out, releasing", cr.getMessageId());
         });
     }
 }

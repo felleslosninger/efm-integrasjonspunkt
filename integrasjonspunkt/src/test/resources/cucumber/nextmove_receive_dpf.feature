@@ -126,7 +126,7 @@ Feature: Receiving a Next Move DPF message
         "documentIdentification" : {
           "standard" : "urn:no:difi:arkivmelding:xsd::arkivmelding",
           "typeVersion" : "2.0",
-          "instanceIdentifier" : "19efbd4c-413d-4e2c-bbc5-257ef4a65b38",
+          "instanceIdentifier" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
           "type" : "arkivmelding",
           "creationDateAndTime" : "2019-03-25T12:38:23+01:00"
         },
@@ -190,18 +190,21 @@ Feature: Receiving a Next Move DPF message
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET",
         "conversationId" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
+        "messageId" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
         "convId" : 9
       }, {
         "id" : 11,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "INNKOMMENDE_MOTTATT",
         "conversationId" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
+        "messageId" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
         "convId" : 9
       }, {
         "id" : 12,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "INNKOMMENDE_LEVERT",
         "conversationId" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
+        "messageId" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
         "convId" : 9
       } ],
       "pageable" : {

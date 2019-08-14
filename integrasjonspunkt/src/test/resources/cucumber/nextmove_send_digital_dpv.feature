@@ -55,7 +55,7 @@ Feature: Sending a Next Move Digital DPV message
             },
             "documentIdentification": {
                 "creationDateAndTime": "2019-03-25T11:35:00+01:00",
-                "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
+                "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b922",
                 "standard": "urn:no:difi:digitalpost:xsd:digital::digital_dpv",
                 "type": "digital_dpv",
                 "typeVersion": "2.0"

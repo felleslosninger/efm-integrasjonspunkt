@@ -74,7 +74,7 @@ public class MessageInController {
 
         inRepo.save(message.setLockTimeout(OffsetDateTime.now(clock)
                 .plusMinutes(props.getNextmove().getLockTimeoutMinutes())));
-        log.info(markerFrom(message), "Conversation with id={} locked", message.getConversationId());
+        log.info(markerFrom(message), "Conversation with id={} locked", message.getMessageId());
 
         Map<String, String> customProperties = Maps.newHashMap();
         String si = null;
@@ -97,7 +97,7 @@ public class MessageInController {
         InfoRecord receiverInfoRecord = serviceRegistryLookup.getInfoRecord(message.getReceiverIdentifier());
 
         NextMoveV1Message peekMessage = new NextMoveV1Message()
-                .setConversationId(message.getConversationId())
+                .setConversationId(message.getMessageId())
                 .setSenderId(message.getSenderIdentifier())
                 .setReceiverId(message.getReceiverIdentifier())
                 .setSenderName(senderInfoRecord.getOrganizationName())
@@ -129,7 +129,7 @@ public class MessageInController {
             message = inRepo.findAll(p, PageRequests.FIRST_BY_LAST_UPDATED_ASC)
                     .getContent().stream().findFirst().orElseThrow(NoContentException::new);
         } else {
-            message = inRepo.findByConversationId(conversationId)
+            message = inRepo.findByMessageId(conversationId)
                     .orElseThrow(() -> new ConversationNotFoundException(conversationId));
         }
 
@@ -159,7 +159,7 @@ public class MessageInController {
                     .body(isr);
         } catch (PersistenceException | IOException e) {
             Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing message from queue",
-                    ASIC_FILE, message.getConversationId(), message.getSenderIdentifier()), markerFrom(message), e);
+                    ASIC_FILE, message.getMessageId(), message.getSenderIdentifier()), markerFrom(message), e);
             throw new FileNotFoundException(ASIC_FILE);
         }
     }

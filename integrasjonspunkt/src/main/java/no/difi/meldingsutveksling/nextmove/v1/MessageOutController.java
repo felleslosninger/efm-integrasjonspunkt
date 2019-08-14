@@ -45,6 +45,7 @@ public class MessageOutController {
                     Organisasjonsnummer.from(properties.getOrg().getNumber()),
                     Organisasjonsnummer.from(message.getReceiverId()),
                     message.getConversationId(),
+                    message.getConversationId(),
                     properties.getEinnsyn().getDefaultInnsynskravProcess(),
                     DocumentType.INNSYNSKRAV,
                     new InnsynskravMessage()
@@ -55,6 +56,7 @@ public class MessageOutController {
             sbd = sbdFactory.createNextMoveSBD(
                     Organisasjonsnummer.from(properties.getOrg().getNumber()),
                     Organisasjonsnummer.from(message.getReceiverId()),
+                    message.getConversationId(),
                     message.getConversationId(),
                     properties.getEinnsyn().getDefaultJournalProcess(),
                     DocumentType.PUBLISERING,

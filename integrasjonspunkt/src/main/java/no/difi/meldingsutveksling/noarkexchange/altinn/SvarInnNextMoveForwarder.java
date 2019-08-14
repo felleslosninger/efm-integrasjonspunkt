@@ -69,6 +69,7 @@ public class SvarInnNextMoveForwarder implements Consumer<Forsendelse> {
                 context.getAvsender().getOrgNummer(),
                 context.getMottaker().getOrgNummer(),
                 context.getConversationId(),
+                context.getConversationId(),
                 properties.getFiks().getInn().getProcess(),
                 DocumentType.ARKIVMELDING,
                 new ArkivmeldingMessage());

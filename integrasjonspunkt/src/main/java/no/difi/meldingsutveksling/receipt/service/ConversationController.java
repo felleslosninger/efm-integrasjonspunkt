@@ -62,21 +62,21 @@ public class ConversationController {
                 .orElseThrow(() -> new ConversationNotFoundException("id", id.toString()));
     }
 
-    @GetMapping("conversationId/{id}")
-    @ApiOperation(value = "Get conversation", notes = "Find conversation based on conversationId")
+    @GetMapping("messageId/{id}")
+    @ApiOperation(value = "Get conversation", notes = "Find conversation based on messageId")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = Conversation.class),
             @ApiResponse(code = 400, message = "Bad Request", response = String.class),
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })
     @JsonView(Views.Conversation.class)
-    public Conversation getByConversationId(
-            @ApiParam(value = "conversationId", required = true)
-            @PathVariable("id") String conversationId) {
-        return convoRepo.findByConversationIdAndDirection(conversationId, OUTGOING)
+    public Conversation getByMessageId(
+            @ApiParam(value = "messageId", required = true)
+            @PathVariable("id") String messageId) {
+        return convoRepo.findByMessageIdAndDirection(messageId, OUTGOING)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new ConversationNotFoundException(conversationId));
+                .orElseThrow(() -> new ConversationNotFoundException(messageId));
     }
 
     @GetMapping("queue")

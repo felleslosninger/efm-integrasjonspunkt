@@ -29,7 +29,7 @@ Feature: Sending a Next Move DPI message
             },
             "documentIdentification": {
                 "creationDateAndTime": "2019-03-25T11:35:00+01:00",
-                "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
+                "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b921",
                 "standard": "urn:no:difi:digitalpost:xsd:digital::digital",
                 "type": "digital",
                 "typeVersion": "2.0"

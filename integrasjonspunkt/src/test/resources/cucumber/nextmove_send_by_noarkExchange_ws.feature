@@ -8,6 +8,7 @@ Feature: Sending a BEST/EDU message by the noarkExchange WebService
     Given the sender is "910077473"
     And the receiver is "910075918"
     And the conversationId is "6e9cab22-a682-461c-bcd4-f201bfb3de8c"
+    And the messageId is "6e9cab22-a682-461c-bcd4-f201bfb3de8c"
     And the payload is:
     """
     <?xml version="1.0" encoding="utf-8"?>
@@ -134,7 +135,7 @@ Feature: Sending a BEST/EDU message by the noarkExchange WebService
                             </File>
                         </ArrayOfFile>
                         <Reportee>910077473</Reportee>
-                        <SendersReference>ac5efbd4c-413d-4e2c-bbc5-257ef4a65b23</SendersReference>
+                        <SendersReference>19efbd4c-413d-4e2c-bbc5-257ef4a65b38</SendersReference>
                     </Manifest>
                     <RecipientList>
                         <Recipient>
@@ -158,7 +159,7 @@ Feature: Sending a BEST/EDU message by the noarkExchange WebService
     <ns0:BrokerServiceManifest xmlns:ns0="http://schema.altinn.no/services/ServiceEngine/Broker/2015/06">
        <ns0:ExternalServiceCode>v3888</ns0:ExternalServiceCode>
        <ns0:ExternalServiceEditionCode>70515</ns0:ExternalServiceEditionCode>
-       <ns0:SendersReference>ac5efbd4c-413d-4e2c-bbc5-257ef4a65b23</ns0:SendersReference>
+       <ns0:SendersReference>19efbd4c-413d-4e2c-bbc5-257ef4a65b38</ns0:SendersReference>
        <ns0:Reportee>910077473</ns0:Reportee>
        <ns0:FileList>
           <ns0:File>
@@ -198,7 +199,7 @@ Feature: Sending a BEST/EDU message by the noarkExchange WebService
         "documentIdentification" : {
           "standard" : "urn:no:difi:arkivmelding:xsd::arkivmelding",
           "typeVersion" : "2.0",
-          "instanceIdentifier" : "19efbd4c-413d-4e2c-bbc5-257ef4a65b38",
+          "instanceIdentifier" : "6e9cab22-a682-461c-bcd4-f201bfb3de8c",
           "type" : "arkivmelding",
           "creationDateAndTime" : "2019-03-25T12:38:23+01:00"
         },
@@ -305,12 +306,14 @@ Feature: Sending a BEST/EDU message by the noarkExchange WebService
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET",
         "conversationId" : "6e9cab22-a682-461c-bcd4-f201bfb3de8c",
+        "messageId" : "6e9cab22-a682-461c-bcd4-f201bfb3de8c",
         "convId" : 24
       }, {
         "id" : 28,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "SENDT",
         "conversationId" : "6e9cab22-a682-461c-bcd4-f201bfb3de8c",
+        "messageId" : "6e9cab22-a682-461c-bcd4-f201bfb3de8c",
         "convId" : 24
       } ],
       "pageable" : {

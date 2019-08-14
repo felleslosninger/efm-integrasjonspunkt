@@ -5,14 +5,14 @@ import java.io.InputStream;
 
 public interface CryptoMessagePersister {
 
-    void write(String conversationId, String filename, byte[] message) throws IOException;
+    void write(String messageId, String filename, byte[] message) throws IOException;
 
-    void writeStream(String conversationId, String filename, InputStream stream, long size) throws IOException;
+    void writeStream(String messageId, String filename, InputStream stream, long size) throws IOException;
 
 
-    byte[] read(String conversationId, String filename) throws IOException;
+    byte[] read(String messageId, String filename) throws IOException;
 
-    FileEntryStream readStream(String conversationId, String filename) throws IOException;
+    FileEntryStream readStream(String messageId, String filename) throws IOException;
 
-    void delete(String conversationId) throws IOException;
+    void delete(String messageId) throws IOException;
 }

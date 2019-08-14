@@ -26,13 +26,13 @@ public class FileMessagePersister implements MessagePersister {
     }
 
     @Override
-    public void write(String conversationId, String filename, byte[] message) throws IOException {
-        String filedir = getConversationFiledirPath(conversationId);
+    public void write(String messageId, String filename, byte[] message) throws IOException {
+        String filedir = getMessageFiledirPath(messageId);
         File localFile = new File(filedir + filename);
         localFile.getParentFile().mkdirs();
 
         if (props.getNextmove().getApplyZipHeaderPatch() && ASIC_FILE.equals(filename)) {
-            BugFix610.applyPatch(message, conversationId);
+            BugFix610.applyPatch(message, messageId);
         }
 
         try (FileOutputStream os = new FileOutputStream(localFile);
@@ -45,8 +45,8 @@ public class FileMessagePersister implements MessagePersister {
     }
 
     @Override
-    public void writeStream(String conversationId, String filename, InputStream inputStream, long size) throws IOException {
-        String filedir = getConversationFiledirPath(conversationId);
+    public void writeStream(String messageId, String filename, InputStream inputStream, long size) throws IOException {
+        String filedir = getMessageFiledirPath(messageId);
         File localFile = new File(filedir + filename);
         localFile.getParentFile().mkdirs();
 
@@ -69,35 +69,35 @@ public class FileMessagePersister implements MessagePersister {
     }
 
     @Override
-    public byte[] read(String conversationId, String filename) throws IOException {
-        String filedir = getConversationFiledirPath(conversationId);
+    public byte[] read(String messageId, String filename) throws IOException {
+        String filedir = getMessageFiledirPath(messageId);
         File file = new File(filedir + filename);
         return FileUtils.readFileToByteArray(file);
     }
 
     @Override
-    public FileEntryStream readStream(String conversationId, String filename) {
-        String filedir = getConversationFiledirPath(conversationId);
+    public FileEntryStream readStream(String messageId, String filename) {
+        String filedir = getMessageFiledirPath(messageId);
         File file = new File(filedir + filename);
         try {
             BufferedInputStream fis = new BufferedInputStream(new FileInputStream(file));
             return FileEntryStream.of(fis, file.length());
         } catch (FileNotFoundException e) {
-            throw new PersistenceException(String.format("File \"%s\" not found for conversationId \"%s\"", filename, conversationId));
+            throw new PersistenceException(String.format("File \"%s\" not found for messageId \"%s\"", filename, messageId));
         }
     }
 
     @Override
-    public void delete(String conversationId) throws IOException {
-        File dir = new File(getConversationFiledirPath(conversationId));
+    public void delete(String messageId) throws IOException {
+        File dir = new File(getMessageFiledirPath(messageId));
         FileUtils.deleteDirectory(dir);
     }
 
-    private String getConversationFiledirPath(String conversationId) {
+    private String getMessageFiledirPath(String messageId) {
         String filedir = props.getNextmove().getFiledir();
         if (!filedir.endsWith("/")) {
             filedir = filedir + "/";
         }
-        return filedir + conversationId + "/";
+        return filedir + messageId + "/";
     }
 }

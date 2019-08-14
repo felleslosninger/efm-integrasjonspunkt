@@ -67,7 +67,7 @@ public class CorrespondenceAgencyMessageFactory {
             BusinessMessageFile arkivmeldingFile = Optional.ofNullable(fileMap.get(ARKIVMELDING_FILE))
                     .orElseThrow(() -> new NextMoveRuntimeException(String.format("%s not found for message %s", ARKIVMELDING_FILE, message.getConversationId())));
 
-            InputStream is = cryptoMessagePersister.readStream(message.getConversationId(), arkivmeldingFile.getIdentifier()).getInputStream();
+            InputStream is = cryptoMessagePersister.readStream(message.getMessageId(), arkivmeldingFile.getIdentifier()).getInputStream();
             Arkivmelding arkivmelding = ArkivmeldingUtil.unmarshalArkivmelding(is);
             Journalpost jp = ArkivmeldingUtil.getJournalpost(arkivmelding);
 
@@ -81,7 +81,7 @@ public class CorrespondenceAgencyMessageFactory {
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList()));
 
-            attachmentExternalBEV2List.getBinaryAttachmentV2().addAll(getAttachments(message.getConversationId(), files));
+            attachmentExternalBEV2List.getBinaryAttachmentV2().addAll(getAttachments(message.getMessageId(), files));
 
             return create(message.getConversationId(),
                     message.getReceiverIdentifier(),
@@ -97,7 +97,7 @@ public class CorrespondenceAgencyMessageFactory {
             DigitalDpvMessage msg = (DigitalDpvMessage) message.getBusinessMessage();
 
             BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
-            attachmentExternalBEV2List.getBinaryAttachmentV2().addAll(getAttachments(message.getConversationId(), message.getFiles()));
+            attachmentExternalBEV2List.getBinaryAttachmentV2().addAll(getAttachments(message.getMessageId(), message.getFiles()));
 
             return create(message.getConversationId(),
                     message.getReceiverIdentifier(),
@@ -113,16 +113,16 @@ public class CorrespondenceAgencyMessageFactory {
                 ArkivmeldingMessage.class.getName(), DigitalDpvMessage.class.getName()));
     }
 
-    private List<BinaryAttachmentV2> getAttachments(String conversationId, Collection<BusinessMessageFile> files) {
+    private List<BinaryAttachmentV2> getAttachments(String messageId, Collection<BusinessMessageFile> files) {
         return files
                 .stream()
                 .sorted(Comparator.comparing(BusinessMessageFile::getDokumentnummer))
-                .map(file -> getBinaryAttachmentV2(conversationId, file))
+                .map(file -> getBinaryAttachmentV2(messageId, file))
                 .collect(Collectors.toList());
     }
 
-    private BinaryAttachmentV2 getBinaryAttachmentV2(String conversationId, BusinessMessageFile file) {
-        FileEntryStream fileEntry = getFileEntry(conversationId, file);
+    private BinaryAttachmentV2 getBinaryAttachmentV2(String messageId, BusinessMessageFile file) {
+        FileEntryStream fileEntry = getFileEntry(messageId, file);
         BinaryAttachmentV2 binaryAttachmentV2 = new BinaryAttachmentV2();
         binaryAttachmentV2.setFunctionType(AttachmentFunctionType.fromValue("Unspecified"));
         binaryAttachmentV2.setFileName(reporteeFactory.createBinaryAttachmentV2FileName(file.getFilename()));
@@ -133,12 +133,12 @@ public class CorrespondenceAgencyMessageFactory {
         return binaryAttachmentV2;
     }
 
-    private FileEntryStream getFileEntry(String conversationId, BusinessMessageFile f) {
+    private FileEntryStream getFileEntry(String messageId, BusinessMessageFile f) {
         try {
-            return cryptoMessagePersister.readStream(conversationId, f.getIdentifier());
+            return cryptoMessagePersister.readStream(messageId, f.getIdentifier());
         } catch (IOException e) {
             throw new NextMoveRuntimeException(
-                    String.format("Could not read attachment %s for conversationId = %s", f.getIdentifier(), conversationId)
+                    String.format("Could not read attachment %s for messageId = %s", f.getIdentifier(), messageId)
                     , e);
         }
     }

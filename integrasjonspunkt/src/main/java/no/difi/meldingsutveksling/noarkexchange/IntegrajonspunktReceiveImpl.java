@@ -105,7 +105,7 @@ public class IntegrajonspunktReceiveImpl {
         }
 
         if (sbdUtil.isReceipt(sbd)) {
-            conversationService.registerStatus(sbd.getConversationId(), messageStatusFactory.getMessageStatus(ReceiptStatus.LEST));
+            conversationService.registerStatus(sbd.getDocumentId(), messageStatusFactory.getMessageStatus(ReceiptStatus.LEST));
             if (!properties.getFeature().isForwardReceivedAppReceipts()) {
                 Audit.info("AppReceipt forwarding disabled - will not deliver to archive");
                 return new CorrelationInformation();
@@ -144,7 +144,7 @@ public class IntegrajonspunktReceiveImpl {
             AppReceiptType result = response.getResult();
             if (result.getType().equals(OK_TYPE)) {
                 Audit.info(String.format("Message [id=%s] delivered archive", sbd.getConversationId()), markerFrom(response));
-                conversationService.registerStatus(sbd.getConversationId(), messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_LEVERT));
+                conversationService.registerStatus(sbd.getDocumentId(), messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_LEVERT));
                 sendLevertStatus(sbd);
                 if (localNoark instanceof MailClient && !sbdUtil.isReceipt(sbd)) {
                     // Need to send AppReceipt manually in case receiver is mail
@@ -154,7 +154,7 @@ public class IntegrajonspunktReceiveImpl {
                     nextMoveAdapter.convertAndSend(putMessageWrapper);
                 }
                 try {
-                    messagePersister.delete(sbd.getConversationId());
+                    messagePersister.delete(sbd.getDocumentId());
                 } catch (IOException e) {
                     log.error(String.format("Unable to delete files for conversation with id=%s", sbd.getConversationId()), e);
                 }

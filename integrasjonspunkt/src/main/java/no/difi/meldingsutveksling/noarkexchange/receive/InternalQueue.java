@@ -124,7 +124,7 @@ public class InternalQueue {
     @JmsListener(destination = DLQ)
     public void dlqListener(byte[] message, Session session) {
         MessageStatus ms = messageStatusFactory.getMessageStatus(ReceiptStatus.FEIL);
-        String conversationId = "";
+        String messageId = "";
         String errorMsg = "";
 
         // Outgoing NextMove messages
@@ -132,7 +132,7 @@ public class InternalQueue {
             NextMoveOutMessage nextMoveMessage = objectMapper.readValue(message, NextMoveOutMessage.class);
             errorMsg = String.format("Request to receiver '%s' failed delivery over %s - Moved to DLQ",
                     nextMoveMessage.getReceiverIdentifier(), nextMoveMessage.getServiceIdentifier());
-            conversationId = nextMoveMessage.getConversationId();
+            messageId = nextMoveMessage.getMessageId();
             Audit.error(errorMsg, NextMoveMessageMarkers.markerFrom(nextMoveMessage));
             if (properties.getNoarkSystem().isEnable() && noarkClient != null) {
                 sendBestEduErrorAppReceipt(nextMoveMessage, errorMsg);
@@ -146,14 +146,14 @@ public class InternalQueue {
             StandardBusinessDocument sbd = documentConverter.unmarshallFrom(message);
             errorMsg = "Failed to forward message to noark system. Moved to DLQ.";
             Audit.error(errorMsg, markerFrom(sbd));
-            conversationId = sbd.getConversationId();
+            messageId = sbd.getConversationId();
             sendBestEduErrorAppReceipt(sbd);
         } catch (Exception e) {
             // NOOP
         }
 
         ms.setDescription(errorMsg);
-        conversationService.registerStatus(conversationId, ms);
+        conversationService.registerStatus(messageId, ms);
     }
 
     private void sendBestEduErrorAppReceipt(NextMoveOutMessage message, String errorText) {
@@ -171,6 +171,7 @@ public class InternalQueue {
         StandardBusinessDocument receiptSbd = createSBD.createNextMoveSBD(Organisasjonsnummer.from(sbd.getReceiverIdentifier()),
                 Organisasjonsnummer.from(sbd.getSenderIdentifier()),
                 sbd.getConversationId(),
+                sbd.getDocumentId(),
                 properties.getArkivmelding().getReceiptProcess(),
                 DocumentType.ARKIVMELDING_KVITTERING,
                 kvittering);
@@ -184,7 +185,7 @@ public class InternalQueue {
             objectMapper.writeValue(bos, msg);
             jmsTemplate.convertAndSend(NEXTMOVE, bos.toByteArray());
         } catch (IOException e) {
-            throw new NextMoveRuntimeException(String.format("Unable to marshall NextMove message with id=%s", msg.getConversationId()), e);
+            throw new NextMoveRuntimeException(String.format("Unable to marshall NextMove message with id=%s", msg.getMessageId()), e);
         }
     }
 

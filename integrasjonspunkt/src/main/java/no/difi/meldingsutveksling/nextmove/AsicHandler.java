@@ -52,11 +52,11 @@ public class AsicHandler {
                     return a.getDokumentnummer().compareTo(b.getDokumentnummer());
                 }).map(f -> {
                     try {
-                        FileEntryStream fes = cryptoMessagePersister.readStream(msg.getConversationId(), f.getIdentifier());
+                        FileEntryStream fes = cryptoMessagePersister.readStream(msg.getMessageId(), f.getIdentifier());
                         return new NextMoveStreamedFile(f.getFilename(), fes.getInputStream(), getMimetype(f));
                     } catch (IOException e) {
                         throw new NextMoveRuntimeException(
-                                String.format("Could not read file named '%s' for conversationId = '%s'", f.getFilename(), msg.getConversationId()));
+                                String.format("Could not read file named '%s' for messageId = '%s'", f.getFilename(), msg.getMessageId()));
                     }
                 }).collect(Collectors.toList());
 

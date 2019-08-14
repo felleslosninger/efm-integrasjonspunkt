@@ -27,7 +27,7 @@ public interface NextMoveMessageInRepository extends PagingAndSortingRepository<
 
     List<NextMoveInMessage> findByLockTimeoutLessThanEqual(OffsetDateTime now);
 
-    Optional<NextMoveInMessage> findByConversationId(String conversationId);
+    Optional<NextMoveInMessage> findByMessageId(String messageId);
 
     default Page<StandardBusinessDocument> find(NextMoveInMessageQueryInput input, Pageable pageable) {
         return findAll(createQuery(input).getValue()

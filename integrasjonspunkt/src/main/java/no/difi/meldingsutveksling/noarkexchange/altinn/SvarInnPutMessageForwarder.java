@@ -64,6 +64,11 @@ public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
             }
 
             @Override
+            public String getMessageId() {
+                return forsendelse.getId();
+            }
+
+            @Override
             public String getSenderIdentifier() {
                 return putMessage.getEnvelope().getSender().getOrgnr();
             }
@@ -88,7 +93,7 @@ public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
                 return OffsetDateTime.now(clock).plusHours(properties.getNextmove().getDefaultTtlHours());
             }
         });
-        conversationService.registerStatus(c.getConversationId(), messageStatusFactory.getMessageStatus(INNKOMMENDE_MOTTATT));
+        conversationService.registerStatus(c.getMessageId(), messageStatusFactory.getMessageStatus(INNKOMMENDE_MOTTATT));
 
         if (!validateRequiredFields(forsendelse, putMessage, builder.getDokumentTypeList())) {
             checkAndSendMail(putMessage, forsendelse.getId());
@@ -98,12 +103,12 @@ public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
         final PutMessageResponseType response = localNoark.sendEduMelding(putMessage);
         if ("OK".equals(response.getResult().getType())) {
             Audit.info("Message successfully forwarded");
-            conversationService.registerStatus(c.getConversationId(), messageStatusFactory.getMessageStatus(INNKOMMENDE_LEVERT));
+            conversationService.registerStatus(c.getMessageId(), messageStatusFactory.getMessageStatus(INNKOMMENDE_LEVERT));
             svarInnService.confirmMessage(forsendelse.getId());
         } else if ("WARNING".equals(response.getResult().getType())) {
             Audit.info(format("Archive system responded with warning for message with fiks-id %s",
                     forsendelse.getId()), PutMessageResponseMarkers.markerFrom(response));
-            conversationService.registerStatus(c.getConversationId(), messageStatusFactory.getMessageStatus(INNKOMMENDE_LEVERT));
+            conversationService.registerStatus(c.getMessageId(), messageStatusFactory.getMessageStatus(INNKOMMENDE_LEVERT));
             svarInnService.confirmMessage(forsendelse.getId());
         } else {
             Audit.error(format("Message with fiks-id %s failed", forsendelse.getId()), PutMessageResponseMarkers.markerFrom(response));

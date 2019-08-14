@@ -7,7 +7,6 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.apache.commons.io.IOUtils;
@@ -72,21 +71,21 @@ public class NextMoveMessageInSteps {
         };
 
         testRestTemplate.execute(
-                "/api/messages/in/pop/{conversationId}",
+                "/api/messages/in/pop/{messageId}",
                 HttpMethod.GET,
                 requestCallback, responseExtractor,
-                Collections.singletonMap("conversationId", messageReceivedHolder.get().getSbd().getConversationId())
+                Collections.singletonMap("messageId", messageReceivedHolder.get().getSbd().getDocumentId())
         );
     }
 
     @And("^I remove the message$")
     public void iRemoveTheMessage() {
         ResponseEntity<StandardBusinessDocument> response = testRestTemplate.exchange(
-                "/api/messages/in/{conversationId}",
+                "/api/messages/in/{messageId}",
                 HttpMethod.DELETE,
                 new HttpEntity<>(null),
                 StandardBusinessDocument.class,
-                Collections.singletonMap("conversationId", messageReceivedHolder.get().getSbd().getConversationId())
+                Collections.singletonMap("messageId", messageReceivedHolder.get().getSbd().getDocumentId())
         );
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }

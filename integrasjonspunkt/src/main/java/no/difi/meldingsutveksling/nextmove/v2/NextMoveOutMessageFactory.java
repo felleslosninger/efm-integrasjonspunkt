@@ -38,6 +38,7 @@ public class NextMoveOutMessageFactory {
 
         return new NextMoveOutMessage(
                 sbd.getConversationId(),
+                sbd.getDocumentId(),
                 sbd.getProcess(),
                 sbd.getReceiverIdentifier(),
                 sbd.getSenderIdentifier(),

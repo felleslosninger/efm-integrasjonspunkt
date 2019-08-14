@@ -32,13 +32,13 @@ public class MessageStatusSteps {
     }
 
     @Given("^the message statuses for the conversation with id = \"([^\"]*)\" are:$")
-    public void theMessageStatusesForTheConversationIdAre(String conversationId, String expectedJson) throws JSONException {
+    public void theMessageStatusesForTheConversationIdAre(String messageId, String expectedJson) throws JSONException {
         this.response = testRestTemplate.exchange(
-                "/api/statuses?conversationId={conversationId}",
+                "/api/statuses?messageId={messageId}",
                 HttpMethod.GET,
                 null,
                 String.class,
-                conversationId);
+                messageId);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         try {

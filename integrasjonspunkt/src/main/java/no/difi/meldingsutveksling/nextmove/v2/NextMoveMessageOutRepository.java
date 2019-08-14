@@ -12,9 +12,12 @@ import java.util.Optional;
 public interface NextMoveMessageOutRepository extends PagingAndSortingRepository<NextMoveOutMessage, Long>,
         QuerydslPredicateExecutor<NextMoveOutMessage>,
         QuerydslBinderCustomizer<QNextMoveOutMessage> {
+
     Optional<NextMoveOutMessage> findByConversationId(String conversationId);
 
-    void deleteByConversationId(String conversationId);
+    Optional<NextMoveOutMessage> findByMessageId(String messageId);
+
+    void deleteByMessageId(String messageId);
 
     @Override
     default void customize(QuerydslBindings bindings, QNextMoveOutMessage root) {

@@ -93,13 +93,13 @@ public class NextMoveMessageInController {
         messageRepo.save(message.setLockTimeout(OffsetDateTime.now(clock)
                 .plusMinutes(props.getNextmove().getLockTimeoutMinutes())));
 
-        log.info(markerFrom(message), "Conversation with id={} locked", message.getConversationId());
+        log.info(markerFrom(message), "Message with id={} locked", message.getMessageId());
         return message.getSbd();
     }
 
-    @GetMapping(value = "pop/{conversationId}")
-    @ApiOperation(value = "Pop incoming queue", notes = "Gets the ASiC for the first non locked message in the queue, " +
-            "unless conversationId is specified, then removes it.")
+    @GetMapping(value = "pop/{messageId}")
+    @ApiOperation(value = "Pop incoming queue", notes = "Gets the ASiC for the first locked message in the queue, " +
+            "unless messageId is specified.")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = InputStreamResource.class),
             @ApiResponse(code = 204, message = "No content", response = String.class),
@@ -107,30 +107,30 @@ public class NextMoveMessageInController {
     })
     @Transactional
     public ResponseEntity<InputStreamResource> popMessage(
-            @ApiParam(value = "ConversationId", required = true)
-            @PathVariable("conversationId") String conversationId) {
+            @ApiParam(value = "MessageId", required = true)
+            @PathVariable("messageId") String messageId) {
 
-        NextMoveInMessage message = messageRepo.findByConversationId(conversationId)
-                .orElseThrow(() -> new ConversationNotFoundException(conversationId));
+        NextMoveInMessage message = messageRepo.findByMessageId(messageId)
+                .orElseThrow(() -> new ConversationNotFoundException(messageId));
 
         if (message.getLockTimeout() == null) {
-            throw new ConversationNotLockedException(conversationId);
+            throw new ConversationNotLockedException(messageId);
         }
 
         try {
-            FileEntryStream fileEntry = cryptoMessagePersister.readStream(conversationId, ASIC_FILE);
+            FileEntryStream fileEntry = cryptoMessagePersister.readStream(messageId, ASIC_FILE);
             return ResponseEntity.ok()
                     .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME + ASIC_FILE)
                     .contentType(MIMETYPE_ASICE)
                     .body(new InputStreamResource(fileEntry.getInputStream()));
         } catch (PersistenceException e) {
-            Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing message from queue",
-                    ASIC_FILE, message.getConversationId(), message.getSenderIdentifier()), markerFrom(message), e);
+            Audit.error(String.format("Can not read file \"%s\" for message [messageId=%s, sender=%s]. Removing message from queue",
+                    ASIC_FILE, message.getMessageId(), message.getSenderIdentifier()), markerFrom(message), e);
             throw new FileNotFoundException(ASIC_FILE);
         }
     }
 
-    @DeleteMapping(value = "/{conversationId}")
+    @DeleteMapping(value = "/{messageId}")
     @ApiOperation(value = "Remove message", notes = "Delete message")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
@@ -139,27 +139,27 @@ public class NextMoveMessageInController {
     })
     @Transactional
     public StandardBusinessDocument deleteMessage(
-            @ApiParam(value = "ConversationId", required = true)
-            @PathVariable("conversationId") String conversationId) {
-        NextMoveInMessage message = messageRepo.findByConversationId(conversationId)
-                .orElseThrow(() -> new ConversationNotFoundException(conversationId));
+            @ApiParam(value = "MessageId", required = true)
+            @PathVariable("messageId") String messageId) {
+        NextMoveInMessage message = messageRepo.findByMessageId(messageId)
+                .orElseThrow(() -> new ConversationNotFoundException(messageId));
 
         if (message.getLockTimeout() == null) {
-            throw new ConversationNotLockedException(conversationId);
+            throw new ConversationNotLockedException(messageId);
         }
 
         try {
-            cryptoMessagePersister.delete(conversationId);
+            cryptoMessagePersister.delete(messageId);
         } catch (IOException e) {
-            log.error("Error deleting files from conversation with id={}", conversationId, e);
+            log.error("Error deleting files from message with id={}", messageId, e);
         }
 
         messageRepo.delete(message);
 
-        conversationService.registerStatus(conversationId,
+        conversationService.registerStatus(messageId,
                 messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_LEVERT));
 
-        Audit.info(format("Conversation with id=%s popped from queue", conversationId),
+        Audit.info(format("Message with id=%s popped from queue", messageId),
                 markerFrom(message));
 
         if (message.getServiceIdentifier() == DPO) {

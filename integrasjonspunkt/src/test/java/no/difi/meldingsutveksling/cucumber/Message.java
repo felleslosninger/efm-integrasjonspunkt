@@ -19,6 +19,7 @@ public class Message {
     private String sender;
     private String receiver;
     private String conversationId;
+    private String messageId;
 
     Message attachment(Attachment attachment) {
         attachments.add(attachment);

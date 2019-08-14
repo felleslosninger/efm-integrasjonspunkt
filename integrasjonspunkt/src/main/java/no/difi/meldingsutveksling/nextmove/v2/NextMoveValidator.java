@@ -47,11 +47,10 @@ public class NextMoveValidator {
     private final SBDUtil sbdUtil;
 
     void validate(StandardBusinessDocument sbd) {
-        sbd.getOptionalConversationId()
-                .flatMap(messageRepo::findByConversationId)
-                .map(p -> {
-                    throw new ConversationAlreadyExistsException(p.getConversationId());
-                });
+        messageRepo.findByMessageId(sbd.getDocumentId())
+            .map(p -> {
+                throw new ConversationAlreadyExistsException(p.getMessageId());
+            });
 
         ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd);
         ServiceIdentifier serviceIdentifier = serviceRecord.getServiceIdentifier();
@@ -120,7 +119,7 @@ public class NextMoveValidator {
                 .findAny()
                 .orElseThrow(MissingArkivmeldingException::new);
 
-        try (FileEntryStream fileEntryStream = cryptoMessagePersister.readStream(message.getConversationId(), arkivmeldingFile.getIdentifier())) {
+        try (FileEntryStream fileEntryStream = cryptoMessagePersister.readStream(message.getMessageId(), arkivmeldingFile.getIdentifier())) {
             return ArkivmeldingUtil.unmarshalArkivmelding(fileEntryStream.getInputStream());
         } catch (JAXBException | IOException e) {
             throw new UnmarshalArkivmeldingException();

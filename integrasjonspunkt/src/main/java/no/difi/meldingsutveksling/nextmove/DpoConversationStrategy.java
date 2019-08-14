@@ -33,11 +33,11 @@ public class DpoConversationStrategy implements ConversationStrategy {
             Transport transport = transportFactory.createTransport(message.getSbd());
             transport.send(applicationContextHolder.getApplicationContext(), message.getSbd(), is);
         } catch (MessageContextException e) {
-            throw new NextMoveException(String.format("Error sending message with conversationId=%s to Altinn", message.getConversationId()), e);
+            throw new NextMoveException(String.format("Error sending message with messageId=%s to Altinn", message.getMessageId()), e);
         }
 
         Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] sent to altinn",
-                message.getConversationId(), message.getServiceIdentifier()),
+                message.getMessageId(), message.getServiceIdentifier()),
                 markerFrom(message));
     }
 

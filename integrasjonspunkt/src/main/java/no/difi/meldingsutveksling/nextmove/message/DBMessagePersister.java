@@ -31,31 +31,31 @@ public class DBMessagePersister implements MessagePersister {
 
     @Override
     @Transactional
-    public void write(String conversationId, String filename, byte[] message) throws IOException {
+    public void write(String messageId, String filename, byte[] message) throws IOException {
         LobHelper lobHelper = em.unwrap(Session.class).getLobHelper();
         Blob contentBlob = lobHelper.createBlob(message);
         if (props.getNextmove().getApplyZipHeaderPatch() && ASIC_FILE.equals(filename)) {
-            BugFix610.applyPatch(message, conversationId);
+            BugFix610.applyPatch(message, messageId);
         }
 
-        NextMoveMessageEntry entry = NextMoveMessageEntry.of(conversationId, filename, contentBlob, (long) message.length);
+        NextMoveMessageEntry entry = NextMoveMessageEntry.of(messageId, filename, contentBlob, (long) message.length);
         repo.save(entry);
     }
 
     @Override
     @Transactional
-    public void writeStream(String conversationId, String filename, InputStream stream, long size) throws IOException {
+    public void writeStream(String messageId, String filename, InputStream stream, long size) throws IOException {
         LobHelper lobHelper = em.unwrap(Session.class).getLobHelper();
         Blob contentBlob = lobHelper.createBlob(stream, size);
 
-        NextMoveMessageEntry entry = NextMoveMessageEntry.of(conversationId, filename, contentBlob, size);
+        NextMoveMessageEntry entry = NextMoveMessageEntry.of(messageId, filename, contentBlob, size);
         repo.save(entry);
     }
 
     @Override
-    public byte[] read(String conversationId, String filename) throws IOException {
-        NextMoveMessageEntry entry = repo.findByConversationIdAndFilename(conversationId, filename)
-                .orElseThrow(() -> new IOException(String.format("File \'%s\' for conversation with id=%s not found in repository", filename, conversationId)));
+    public byte[] read(String messageId, String filename) throws IOException {
+        NextMoveMessageEntry entry = repo.findByMessageIdAndFilename(messageId, filename)
+                .orElseThrow(() -> new IOException(String.format("File \'%s\' for message with id=%s not found in repository", filename, messageId)));
 
         try {
             return IOUtils.toByteArray(entry.getContent().getBinaryStream());
@@ -65,9 +65,9 @@ public class DBMessagePersister implements MessagePersister {
     }
 
     @Override
-    public FileEntryStream readStream(String conversationId, String filename) {
-        NextMoveMessageEntry entry = repo.findByConversationIdAndFilename(conversationId, filename)
-                .orElseThrow(() -> new PersistenceException(String.format("Entry for conversationId=%s, filename=%s not found in database", conversationId, filename)));
+    public FileEntryStream readStream(String messageId, String filename) {
+        NextMoveMessageEntry entry = repo.findByMessageIdAndFilename(messageId, filename)
+                .orElseThrow(() -> new PersistenceException(String.format("Entry for conversationId=%s, filename=%s not found in database", messageId, filename)));
 
         try {
             return FileEntryStream.of(entry.getContent().getBinaryStream(), entry.getSize());
@@ -78,7 +78,7 @@ public class DBMessagePersister implements MessagePersister {
 
     @Override
     @Transactional
-    public void delete(String conversationId) {
-        repo.deleteByConversationId(conversationId);
+    public void delete(String messageId) {
+        repo.deleteByMessageId(messageId);
     }
 }
