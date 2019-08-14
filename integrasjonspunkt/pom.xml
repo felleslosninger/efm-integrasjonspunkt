@@ -482,7 +482,6 @@
             <artifactId>wsdl4j</artifactId>
         </dependency>
 
-        <!-- manual upgrade to 2.9.4 while waiting for spring boot update -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
