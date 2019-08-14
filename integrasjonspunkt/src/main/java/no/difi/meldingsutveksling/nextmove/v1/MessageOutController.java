@@ -8,7 +8,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
+import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
 import no.difi.meldingsutveksling.nextmove.InnsynskravMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.PubliseringMessage;
@@ -71,7 +71,7 @@ public class MessageOutController {
     @Transactional
     public ResponseEntity send(@PathVariable("conversationId") String conversationId,
             MultipartRequest request) {
-        NextMoveOutMessage outMessage = outRepo.findByConversationId(conversationId).orElseThrow(() -> new ConversationNotFoundException(conversationId));
+        NextMoveOutMessage outMessage = outRepo.findByConversationId(conversationId).orElseThrow(() -> new MessageNotFoundException(conversationId));
         request.getFileMap().values().forEach(f -> messageService.addFile(outMessage, f));
         messageService.sendMessage(outMessage);
         return ResponseEntity.ok().build();

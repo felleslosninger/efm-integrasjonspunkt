@@ -7,8 +7,8 @@ import no.difi.asic.AsicUtils;
 import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
-import no.difi.meldingsutveksling.exceptions.ConversationNotLockedException;
+import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
+import no.difi.meldingsutveksling.exceptions.MessageNotLockedException;
 import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
@@ -111,10 +111,10 @@ public class NextMoveMessageInController {
             @PathVariable("messageId") String messageId) {
 
         NextMoveInMessage message = messageRepo.findByMessageId(messageId)
-                .orElseThrow(() -> new ConversationNotFoundException(messageId));
+                .orElseThrow(() -> new MessageNotFoundException(messageId));
 
         if (message.getLockTimeout() == null) {
-            throw new ConversationNotLockedException(messageId);
+            throw new MessageNotLockedException(messageId);
         }
 
         try {
@@ -142,10 +142,10 @@ public class NextMoveMessageInController {
             @ApiParam(value = "MessageId", required = true)
             @PathVariable("messageId") String messageId) {
         NextMoveInMessage message = messageRepo.findByMessageId(messageId)
-                .orElseThrow(() -> new ConversationNotFoundException(messageId));
+                .orElseThrow(() -> new MessageNotFoundException(messageId));
 
         if (message.getLockTimeout() == null) {
-            throw new ConversationNotLockedException(messageId);
+            throw new MessageNotLockedException(messageId);
         }
 
         try {

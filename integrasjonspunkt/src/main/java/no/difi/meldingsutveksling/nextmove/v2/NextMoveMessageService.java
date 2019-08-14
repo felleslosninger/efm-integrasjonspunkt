@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
+import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MessagePersistException;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
@@ -38,7 +38,7 @@ public class NextMoveMessageService {
 
     NextMoveOutMessage getMessage(String messageId) {
         return messageRepo.findByMessageId(messageId)
-                .orElseThrow(() -> new ConversationNotFoundException(messageId));
+                .orElseThrow(() -> new MessageNotFoundException(messageId));
     }
 
     Page<NextMoveOutMessage> findMessages(Predicate predicate, Pageable pageable) {

@@ -49,7 +49,7 @@ public class NextMoveValidator {
     void validate(StandardBusinessDocument sbd) {
         messageRepo.findByMessageId(sbd.getDocumentId())
             .map(p -> {
-                throw new ConversationAlreadyExistsException(p.getMessageId());
+                throw new MessageAlreadyExistsException(p.getMessageId());
             });
 
         ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd);

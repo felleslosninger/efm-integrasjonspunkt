@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.receipt.service;
 import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
+import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationQueryInput;
 import no.difi.meldingsutveksling.receipt.ConversationRepository;
@@ -59,7 +59,7 @@ public class ConversationController {
             @ApiParam(value = "id", required = true, example = "1")
             @PathVariable("id") Long id) {
         return convoRepo.findByIdAndDirection(id, OUTGOING)
-                .orElseThrow(() -> new ConversationNotFoundException("id", id.toString()));
+                .orElseThrow(() -> new MessageNotFoundException("id", id.toString()));
     }
 
     @GetMapping("messageId/{id}")
@@ -76,7 +76,7 @@ public class ConversationController {
         return convoRepo.findByMessageIdAndDirection(messageId, OUTGOING)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new ConversationNotFoundException(messageId));
+                .orElseThrow(() -> new MessageNotFoundException(messageId));
     }
 
     @GetMapping("queue")
