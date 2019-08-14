@@ -42,7 +42,8 @@ public class StandardBusinessDocumentWrapperTest {
         Mockito.when(integrasjonspunktNokkel.getKeyPair()).thenReturn(kp);
         Mockito.when(integrasjonspunktNokkel.shouldLockProvider()).thenReturn(false);
 
-        StandardBusinessDocument beforeConversion = sbdReceiptFactory.createAapningskvittering(new MessageInfo(RECEIVER, SENDER, "", "", DocumentType.BESTEDU_KVITTERING.getType()), integrasjonspunktNokkel);
+        MessageInfo mi = new MessageInfo(DocumentType.BESTEDU_KVITTERING.getType(), SENDER, RECEIVER, "", "", "");
+        StandardBusinessDocument beforeConversion = sbdReceiptFactory.createAapningskvittering(mi, integrasjonspunktNokkel);
         Document xmlDocVersion = DocumentToDocumentConverter.toXMLDocument(beforeConversion);
         StandardBusinessDocument afterConversion = DocumentToDocumentConverter.toDomainDocument(xmlDocVersion);
 

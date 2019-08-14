@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.noarkexchange.receive;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.DocumentType;
+import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.BestEduConverter;
 import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory;
@@ -64,6 +65,7 @@ public class InternalQueue {
     private final IntegrajonspunktReceiveImpl integrajonspunktReceive;
     private final NoarkClient noarkClient;
     private final DocumentConverter documentConverter;
+    private final UUIDGenerator uuidGenerator;
 
     InternalQueue(JmsTemplate jmsTemplate,
                   IntegrasjonspunktProperties properties,
@@ -76,7 +78,8 @@ public class InternalQueue {
                   PutMessageRequestFactory putMessageRequestFactory,
                   ObjectProvider<IntegrajonspunktReceiveImpl> integrajonspunktReceive,
                   @Qualifier("localNoark") ObjectProvider<NoarkClient> noarkClient,
-                  DocumentConverter documentConverter) {
+                  DocumentConverter documentConverter,
+                  UUIDGenerator uuidGenerator) {
         this.jmsTemplate = jmsTemplate;
         this.properties = properties;
         this.conversationService = conversationService;
@@ -89,6 +92,7 @@ public class InternalQueue {
         this.integrajonspunktReceive = integrajonspunktReceive.getIfAvailable();
         this.noarkClient = noarkClient.getIfAvailable();
         this.documentConverter = documentConverter;
+        this.uuidGenerator = uuidGenerator;
     }
 
     @JmsListener(destination = NEXTMOVE, containerFactory = "myJmsContainerFactory", concurrency = "10")
@@ -146,7 +150,7 @@ public class InternalQueue {
             StandardBusinessDocument sbd = documentConverter.unmarshallFrom(message);
             errorMsg = "Failed to forward message to noark system. Moved to DLQ.";
             Audit.error(errorMsg, markerFrom(sbd));
-            messageId = sbd.getConversationId();
+            messageId = sbd.getDocumentId();
             sendBestEduErrorAppReceipt(sbd);
         } catch (Exception e) {
             // NOOP
@@ -171,7 +175,7 @@ public class InternalQueue {
         StandardBusinessDocument receiptSbd = createSBD.createNextMoveSBD(Organisasjonsnummer.from(sbd.getReceiverIdentifier()),
                 Organisasjonsnummer.from(sbd.getSenderIdentifier()),
                 sbd.getConversationId(),
-                sbd.getDocumentId(),
+                uuidGenerator.generate(),
                 properties.getArkivmelding().getReceiptProcess(),
                 DocumentType.ARKIVMELDING_KVITTERING,
                 kvittering);

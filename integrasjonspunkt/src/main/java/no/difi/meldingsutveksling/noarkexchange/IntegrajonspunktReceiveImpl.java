@@ -125,7 +125,7 @@ public class IntegrajonspunktReceiveImpl {
         } else {
             byte[] asicBytes;
             try {
-                asicBytes = messagePersister.read(sbd.getConversationId(), NextMoveConsts.ASIC_FILE);
+                asicBytes = messagePersister.read(sbd.getDocumentId(), NextMoveConsts.ASIC_FILE);
             } catch (IOException e) {
                 throw new NextMoveRuntimeException("Unable to read persisted ASiC", e);
             }

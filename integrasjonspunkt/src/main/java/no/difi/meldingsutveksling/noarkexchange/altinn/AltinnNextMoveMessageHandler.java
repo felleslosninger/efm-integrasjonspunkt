@@ -38,7 +38,7 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
 
     @Override
     public void handleStandardBusinessDocument(StandardBusinessDocument sbd) {
-        log.debug(format("NextMove message id=%s", sbd.getConversationId()));
+        log.debug(format("NextMove message id=%s", sbd.getDocumentId()));
 
         if (sbdUtil.isStatus(sbd)) {
             handleStatus(sbd);

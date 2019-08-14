@@ -235,7 +235,7 @@ public class NextMoveServiceBus {
 
     private void handleSbd(StandardBusinessDocument sbd) {
         if (sbdUtil.isStatus(sbd)) {
-            log.debug(String.format("Message with id=%s is a receipt", sbd.getConversationId()));
+            log.debug(String.format("Message with id=%s is a receipt", sbd.getDocumentId()));
             StatusMessage msg = (StatusMessage) sbd.getAny();
             conversationService.registerStatus(sbd.getDocumentId(), messageStatusFactory.getMessageStatus(msg.getStatus()));
         } else {

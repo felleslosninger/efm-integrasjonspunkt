@@ -46,6 +46,7 @@ public class MessageMarkerFactory {
      */
     public static LogstashMarker markerFrom(StandardBusinessDocument sbd) {
         LogstashMarker conversationIdMarker = conversationIdMarker(sbd.getConversationId());
+        LogstashMarker messageIdMarker = messageIdMarker(sbd.getDocumentId());
         LogstashMarker messageTypeMarker = MarkerFactory.messageTypeMarker(sbd.getMessageType());
         LogstashMarker journalPostIdMarker = journalPostIdMarker(sbd.getJournalPostId());
         LogstashMarker receiverMarker = receiverMarker(sbd.getReceiverIdentifier());
@@ -53,6 +54,7 @@ public class MessageMarkerFactory {
         LogstashMarker documentTypeMarker = documentTypeMarker(sbd.getDocumentId());
         LogstashMarker processMarker = processMarker(sbd.getProcess());
         return conversationIdMarker.and(messageTypeMarker)
+                .and(messageIdMarker)
                 .and(journalPostIdMarker)
                 .and(receiverMarker)
                 .and(senderMarker)
