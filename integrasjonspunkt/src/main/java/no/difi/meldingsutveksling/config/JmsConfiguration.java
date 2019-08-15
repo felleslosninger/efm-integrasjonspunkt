@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.RedeliveryPolicy;
 import org.springframework.boot.autoconfigure.jms.activemq.ActiveMQProperties;
@@ -8,11 +9,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
+import org.springframework.jms.connection.CachingConnectionFactory;
 import org.springframework.util.StringUtils;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.Session;
 
+@Slf4j
 @Configuration
 @EnableJms
 @EnableConfigurationProperties({ActiveMQProperties.class, IntegrasjonspunktProperties.class})
@@ -42,14 +45,15 @@ public class JmsConfiguration {
 
         connectionFactory.setUseAsyncSend(true);
 
-        return connectionFactory;
+        return new CachingConnectionFactory(connectionFactory);
     }
 
     @Bean
-    DefaultJmsListenerContainerFactory myJmsContainerFactory(ActiveMQConnectionFactory connectionFactory) {
+    DefaultJmsListenerContainerFactory myJmsContainerFactory(ConnectionFactory connectionFactory) {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
         factory.setConnectionFactory(connectionFactory);
+        factory.setErrorHandler(t -> log.warn("JMS error: {}", t.getMessage()));
         return factory;
     }
 }

@@ -91,7 +91,7 @@ public class InternalQueue {
         this.documentConverter = documentConverter;
     }
 
-    @JmsListener(destination = NEXTMOVE, containerFactory = "myJmsContainerFactory", concurrency = "10")
+    @JmsListener(destination = NEXTMOVE, containerFactory = "myJmsContainerFactory", concurrency = "5")
     public void nextMoveListener(byte[] message, Session session) {
         NextMoveOutMessage nextMoveMessage;
         try {
