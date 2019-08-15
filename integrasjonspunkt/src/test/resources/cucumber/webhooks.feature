@@ -24,6 +24,7 @@ Feature: Webhooks
       """
       {
         "conversationId" : "bb8bb41a-c559-47ed-84f1-1846ece5d590",
+        "messageId" : "bb8bb41a-c559-47ed-84f1-1846ece5d591",
         "direction" : "INCOMING",
         "status" : "MOTTATT",
         "description" : "some description"
@@ -36,6 +37,7 @@ Feature: Webhooks
         "resource" : "messages",
         "event" : "status",
         "conversationId" : "bb8bb41a-c559-47ed-84f1-1846ece5d590",
+        "messageId" : "bb8bb41a-c559-47ed-84f1-1846ece5d591",
         "direction" : "INCOMING",
         "status" : "MOTTATT",
         "description" : "some description"

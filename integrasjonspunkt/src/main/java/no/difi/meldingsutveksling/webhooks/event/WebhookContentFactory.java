@@ -25,6 +25,7 @@ public class WebhookContentFactory {
                 .setCreatedTs(OffsetDateTime.now(clock))
                 .setResource("messages")
                 .setEvent("status")
+                .setMessageId(conversation.getMessageId())
                 .setConversationId(conversation.getConversationId())
                 .setDirection(conversation.getDirection())
                 .setServiceIdentifier(conversation.getServiceIdentifier())

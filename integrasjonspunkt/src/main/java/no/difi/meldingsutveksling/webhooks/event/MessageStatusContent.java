@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 @EqualsAndHashCode(callSuper = true)
 public class MessageStatusContent extends WebhookContentBase<MessageStatusContent> {
 
+    private String messageId;
     private String conversationId;
     private ConversationDirection direction;
     private ServiceIdentifier serviceIdentifier;
