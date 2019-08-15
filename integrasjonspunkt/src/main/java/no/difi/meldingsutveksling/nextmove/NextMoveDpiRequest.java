@@ -103,7 +103,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     @Override
     public String getConversationId() {
-        return message.getConversationId();
+        return message.getMessageId();
     }
 
     @Override

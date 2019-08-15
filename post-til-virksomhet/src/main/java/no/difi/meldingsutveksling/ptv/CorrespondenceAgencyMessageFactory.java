@@ -65,7 +65,7 @@ public class CorrespondenceAgencyMessageFactory {
                     .collect(Collectors.toMap(BusinessMessageFile::getFilename, p -> p));
 
             BusinessMessageFile arkivmeldingFile = Optional.ofNullable(fileMap.get(ARKIVMELDING_FILE))
-                    .orElseThrow(() -> new NextMoveRuntimeException(String.format("%s not found for message %s", ARKIVMELDING_FILE, message.getConversationId())));
+                    .orElseThrow(() -> new NextMoveRuntimeException(String.format("%s not found for message %s", ARKIVMELDING_FILE, message.getMessageId())));
 
             InputStream is = cryptoMessagePersister.readStream(message.getMessageId(), arkivmeldingFile.getIdentifier()).getInputStream();
             Arkivmelding arkivmelding = ArkivmeldingUtil.unmarshalArkivmelding(is);

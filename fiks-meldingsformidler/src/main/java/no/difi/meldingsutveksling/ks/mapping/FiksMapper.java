@@ -65,7 +65,7 @@ public class FiksMapper {
     public SendForsendelseMedId mapFrom(NextMoveOutMessage message, X509Certificate certificate) throws NextMoveException {
         return SendForsendelseMedId.builder()
                 .withForsendelse(getForsendelse(message, certificate))
-                .withForsendelsesid(message.getSbd().findScope(ScopeType.SENDER_REF).map(Scope::getInstanceIdentifier).orElse(message.getConversationId()))
+                .withForsendelsesid(message.getSbd().findScope(ScopeType.SENDER_REF).map(Scope::getInstanceIdentifier).orElse(message.getMessageId()))
                 .build();
     }
 
@@ -75,7 +75,7 @@ public class FiksMapper {
         Journalpost journalpost = ArkivmeldingUtil.getJournalpost(am);
 
         return Forsendelse.builder()
-                .withEksternref(message.getConversationId())
+                .withEksternref(message.getMessageId())
                 .withKunDigitalLevering(false)
                 .withSvarPaForsendelse(message.getSbd().findScope(ScopeType.RECEIVER_REF).map(Scope::getInstanceIdentifier).orElse(uuidGenerator.generate()))
                 .withTittel(journalpost.getOffentligTittel())
@@ -156,7 +156,7 @@ public class FiksMapper {
                 .filter(bmf -> bmf.getFilename().equals(referanseDokumentfil))
                 .findFirst()
                 .orElseThrow(() -> new NextMoveRuntimeException(
-                        String.format("File '%s' referenced in '%s' not found", referanseDokumentfil, message.getConversationId())));
+                        String.format("File '%s' referenced in '%s' not found", referanseDokumentfil, message.getMessageId())));
     }
 
     private Dokument getDocument(String messageId, BusinessMessageFile file, X509Certificate cert) {
