@@ -22,20 +22,19 @@ public class SFtpClient {
 
     /**
      * Attempts to connect via SFTP. The keyFileName is the name of the SSH key that must be located on the classpath.
-     *
+     * <p>
      * The keyfile is a SSH private key file
      *
      * @param keyFileName filename for the private key
      */
     public Connection connect(String keyFileName) {
         URL resource = this.getClass().getResource("/" + keyFileName);
-        if(resource == null) {
+        if (resource == null) {
             throw new ConnectException(String.format("SSH key file '%s' cannot be found on the classpath", keyFileName));
         }
         String keyfile = resource.getPath();
 
         System.out.println("--> " + keyfile);
-
 
 
         try {
@@ -78,7 +77,7 @@ public class SFtpClient {
 
         /**
          * Sets the remote directory to download/upload from
-         *
+         * <p>
          * Default ""
          *
          * @param path on remote host
@@ -91,7 +90,7 @@ public class SFtpClient {
 
         /**
          * Sets the local directory to download/upload from
-         *
+         * <p>
          * Default ""
          *
          * @param path on localhost
@@ -105,7 +104,7 @@ public class SFtpClient {
         public void upload(AltinnPackage altinnPackage) {
             try {
                 OutputStream outputStream = sftp.put("test.zip"); // filename generator
-                altinnPackage.write(outputStream);
+                altinnPackage.write(outputStream, null);
                 sftp.quit();
             } catch (SftpException | IOException e) {
                 e.printStackTrace();
@@ -113,15 +112,15 @@ public class SFtpClient {
         }
 
         public void upload(File file) {
-            try(InputStream inputStream = Files.newInputStream(file.toPath())) {
+            try (InputStream inputStream = Files.newInputStream(file.toPath())) {
                 sftp.put(inputStream, Paths.get(remoteDirectory, file.getName()).toString());
-            } catch(SftpException | IOException exception) {
+            } catch (SftpException | IOException exception) {
                 throw new UploadException(exception);
             }
         }
 
         @Override
-        public void close() throws Exception {
+        public void close() {
             channel.disconnect();
             localhost.disconnect();
         }
@@ -139,7 +138,7 @@ public class SFtpClient {
             } catch (IOException e) {
                 throw new DownloadException(e);
             }
-            try(OutputStream outputStream = Files.newOutputStream(path)) {
+            try (OutputStream outputStream = Files.newOutputStream(path)) {
                 sftp.get(Paths.get(remoteDirectory, fileName).toString(), outputStream);
             } catch (SftpException | IOException e) {
                 throw new DownloadException(e);

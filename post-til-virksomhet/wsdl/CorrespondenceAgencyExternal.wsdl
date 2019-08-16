@@ -9,6 +9,7 @@
                   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
                   xmlns:tns="http://www.altinn.no/services/ServiceEngine/Correspondence/2009/10"
                   xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
+                  xmlns:xmime="http://www.w3.org/2005/05/xmlmime"
 >
     <wsp:Policy wsu:Id="CustomBinding_ICorrespondenceAgencyExternal_policy">
         <wsp:ExactlyOne>
@@ -4703,7 +4704,7 @@
                             </xsd:appinfo>
                         </xsd:annotation>
                     </xsd:element>
-                    <xsd:element minOccurs="0" name="Data" nillable="true" type="xsd:base64Binary">
+                    <xsd:element minOccurs="0" name="Data" nillable="true" type="xsd:base64Binary" xmime:expectedContentTypes="application/octet-stream">
                         <xsd:annotation>
                             <xsd:appinfo>
                                 <Surrogate z:Id="1" i:type="d1p1:Annotation"

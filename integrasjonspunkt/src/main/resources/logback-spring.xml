@@ -9,46 +9,55 @@
     <springProperty name="password" source="app.logger.password"/>
     <springProperty name="profiles" source="spring.profiles.active"/>
     <springProperty name="orgnr" source="difi.move.org.number"/>
-    <appender name="stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <droppedWarnFrequency>5</droppedWarnFrequency>
-        <destination>${destination}</destination>
-        <!-- encoder is required -->
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <customFields>{"appname":"${project.artifactId}","buildinfo.version":"${project.version}","buildinfo.lastcommit":"${buildNumber}","orgnr":"${orgnr}"}</customFields>
-            <fieldNames>
-                <!-- Ignore message and stackTrace field here due to possible sensitive data (personal identity number), replaced in pattern below. -->
-                <message>[ignore]</message>
-                <stackTrace>[ignore]</stackTrace>
-            </fieldNames>
-            <provider class="net.logstash.logback.composite.loggingevent.LoggingEventPatternJsonProvider">
-                <pattern>
-                    {
-                    "message": "%replace(%msg){'[0-9]{11}','**********'}",
-                    "stack_trace": "%replace(%ex{full}){'[0-9]{11}','**********'}"
-                    }
-                </pattern>
-            </provider>
-        </encoder>
-        <if condition='property("ssl").contains("true")'>
-            <then>
-                <ssl>
-                    <trustStore>
-                        <location>${jks}</location>
-                        <password>${password}</password>
-                    </trustStore>
-                </ssl>
-            </then>
-        </if>
-    </appender>
+    <springProperty name="enableLogstash" source="app.logger.enableLogstash"/>
+
+    <if condition='property("enableLogstash").contains("true")'>
+        <then>
+            <appender name="stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+                <droppedWarnFrequency>5</droppedWarnFrequency>
+                <destination>${destination}</destination>
+                <!-- encoder is required -->
+                <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                    <customFields>{"appname":"${project.artifactId}","buildinfo.version":"${project.version}","buildinfo.lastcommit":"${buildNumber}","orgnr":"${orgnr}"}</customFields>
+                    <fieldNames>
+                        <!-- Ignore message and stackTrace field here due to possible sensitive data (personal identity number), replaced in pattern below. -->
+                        <message>[ignore]</message>
+                        <stackTrace>[ignore]</stackTrace>
+                    </fieldNames>
+                    <provider class="net.logstash.logback.composite.loggingevent.LoggingEventPatternJsonProvider">
+                        <pattern>
+                            {
+                            "message": "%replace(%msg){'[0-9]{11}','**********'}",
+                            "stack_trace": "%replace(%ex{full}){'[0-9]{11}','**********'}"
+                            }
+                        </pattern>
+                    </provider>
+                </encoder>
+                <if condition='property("ssl").contains("true")'>
+                    <then>
+                        <ssl>
+                            <trustStore>
+                                <location>${jks}</location>
+                                <password>${password}</password>
+                            </trustStore>
+                        </ssl>
+                    </then>
+                </if>
+            </appender>
+
+            <root level="INFO">
+                <appender-ref ref="stash"/>
+            </root>
+
+            <logger name="STATUS" level="INFO" additivity="false">
+                <appender-ref ref="stash"/>
+            </logger>
+        </then>
+    </if>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
-        <appender-ref ref="stash"/>
     </root>
-
-    <logger name="STATUS" level="INFO" additivity="false">
-        <appender-ref ref="stash"/>
-    </logger>
 
 </configuration>

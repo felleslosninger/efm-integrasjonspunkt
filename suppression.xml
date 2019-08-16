@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.2.xsd">
+    <suppress>
+        <notes><![CDATA[
+      file name: activemq-protobuf-1.1.jar
+      ]]></notes>
+        <gav regex="true">^org\.apache\.activemq\.protobuf:activemq-protobuf:.*$</gav>
+        <cpe>cpe:/a:apache:activemq</cpe>
+    </suppress>
+</suppressions>

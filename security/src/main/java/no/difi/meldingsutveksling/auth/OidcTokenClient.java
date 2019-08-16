@@ -1,7 +1,5 @@
 package no.difi.meldingsutveksling.auth;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -9,26 +7,32 @@ import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.cert.CertificateEncodingException;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.*;
 
+import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
+
+@Slf4j
 @Component
+@RequiredArgsConstructor
 public class OidcTokenClient {
 
     private static final String CLIENT_ID_PREFIX = "MOVE_IP_";
@@ -45,15 +49,10 @@ public class OidcTokenClient {
             "global/navn.read",
             "global/postadresse.read");
 
-    private static final Logger log = LoggerFactory.getLogger(OidcTokenClient.class);
+    private final IntegrasjonspunktProperties props;
 
-    private IntegrasjonspunktProperties props;
-
-    @Autowired
-    public OidcTokenClient(IntegrasjonspunktProperties props) {
-        this.props = props;
-    }
-
+    @Retryable(value = HttpClientErrorException.class, maxAttempts = -1,
+            backoff = @Backoff(delay = 5000, maxDelay = 1000*60*60, multiplier = 3))
     public IdportenOidcTokenResponse fetchToken() {
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.setErrorHandler(new OidcErrorHandler());
@@ -71,7 +70,7 @@ public class OidcTokenClient {
 
         URI accessTokenUri;
         try {
-             accessTokenUri = props.getOidc().getUrl().toURI();
+            accessTokenUri = props.getOidc().getUrl().toURI();
         } catch (URISyntaxException e) {
             log.error("Error converting property to URI", e);
             throw new RuntimeException(e);
@@ -98,21 +97,21 @@ public class OidcTokenClient {
         JWSHeader jwsHeader = new JWSHeader.Builder(JWSAlgorithm.RS256).x509CertChain(certChain).build();
 
         String clientId = props.getOidc().getClientId();
-        if (Strings.isNullOrEmpty(clientId)) {
-            clientId = CLIENT_ID_PREFIX+props.getOrg().getNumber();
+        if (!StringUtils.hasText(clientId)) {
+            clientId = CLIENT_ID_PREFIX + props.getOrg().getNumber();
         }
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
                 .audience(props.getOidc().getAudience())
                 .issuer(clientId)
                 .claim("scope", getCurrentScopes())
                 .jwtID(UUID.randomUUID().toString())
-                .issueTime(Date.from(ZonedDateTime.now(ZoneOffset.UTC).toInstant()))
-                .expirationTime(Date.from(ZonedDateTime.now(ZoneOffset.UTC).toInstant().plusSeconds(120)))
+                .issueTime(Date.from(OffsetDateTime.now(DEFAULT_ZONE_ID).toInstant()))
+                .expirationTime(Date.from(OffsetDateTime.now(DEFAULT_ZONE_ID).toInstant().plusSeconds(120)))
                 .build();
 
         RSASSASigner signer = new RSASSASigner(nokkel.loadPrivateKey());
 
-        if(nokkel.shouldLockProvider()) {
+        if (nokkel.shouldLockProvider()) {
             signer.getJCAContext().setProvider(nokkel.getKeyStore().getProvider());
         }
 
@@ -131,7 +130,7 @@ public class OidcTokenClient {
 
     public String getCurrentScopes() {
 
-        ArrayList<String> scopeList = Lists.newArrayList();
+        ArrayList<String> scopeList = new ArrayList<>();
         if (props.getFeature().isEnableDPO()) {
             scopeList.add(SCOPE_DPO);
         }

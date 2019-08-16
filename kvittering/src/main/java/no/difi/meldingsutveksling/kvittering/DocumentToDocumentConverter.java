@@ -1,8 +1,9 @@
 package no.difi.meldingsutveksling.kvittering;
 
 
+import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
@@ -26,13 +27,14 @@ import javax.xml.transform.dom.DOMSource;
  *
  * @author Glenn Bech
  */
+@UtilityClass
 class DocumentToDocumentConverter {
 
     private static JAXBContext jaxBContext;
 
     static {
         try {
-            jaxBContext = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Kvittering.class}, null);
+            jaxBContext = JAXBContextFactory.createContext(new Class[]{StandardBusinessDocument.class, Kvittering.class}, null);
         } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException(e.getMessage(), e);
         }
@@ -44,7 +46,7 @@ class DocumentToDocumentConverter {
      *
      * @param domDocument the source document
      */
-    public static EduDocument toDomainDocument(Document domDocument) {
+    public static StandardBusinessDocument toDomainDocument(Document domDocument) {
         TransformerFactory tf = TransformerFactory.newInstance();
         Transformer t;
         try {
@@ -52,7 +54,7 @@ class DocumentToDocumentConverter {
             DOMSource source = new DOMSource(domDocument);
             JAXBResult result = new JAXBResult(jaxBContext);
             t.transform(source, result);
-            return ((JAXBElement<EduDocument>) result.getResult()).getValue();
+            return ((JAXBElement<StandardBusinessDocument>) result.getResult()).getValue();
         } catch (TransformerException | JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
@@ -63,7 +65,7 @@ class DocumentToDocumentConverter {
      *
      * @return org.w3c.Document
      */
-    public static Document toXMLDocument(EduDocument jaxbDocument ) {
+    public static Document toXMLDocument(StandardBusinessDocument jaxbDocument ) {
         try {
             Marshaller marshaller = jaxBContext.createMarshaller();
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -75,7 +77,7 @@ class DocumentToDocumentConverter {
             } catch (ParserConfigurationException e) {
                 throw new MeldingsUtvekslingRuntimeException(e);
             }
-            JAXBElement<EduDocument> jbe = new ObjectFactory().createStandardBusinessDocument(jaxbDocument);
+            JAXBElement<StandardBusinessDocument> jbe = new ObjectFactory().createStandardBusinessDocument(jaxbDocument);
             marshaller.marshal(jbe, domDocument);
             return domDocument;
         } catch (JAXBException e) {

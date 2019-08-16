@@ -1,14 +1,18 @@
 package no.difi.meldingsutveksling.nextmove.message;
 
-import no.difi.meldingsutveksling.nextmove.ConversationResource;
-
 import java.io.IOException;
+import java.io.InputStream;
 
 public interface MessagePersister {
 
-    void write(ConversationResource cr, String filename, byte[] message) throws IOException;
+    void write(String messageId, String filename, byte[] message) throws IOException;
 
-    byte[] read(ConversationResource cr, String filename) throws IOException;
+    void writeStream(String messageId, String filename, InputStream stream, long size) throws IOException;
 
-    void delete(ConversationResource cr) throws IOException;
+
+    byte[] read(String messageId, String filename) throws IOException;
+
+    FileEntryStream readStream(String messageId, String filename);
+
+    void delete(String messageId) throws IOException;
 }

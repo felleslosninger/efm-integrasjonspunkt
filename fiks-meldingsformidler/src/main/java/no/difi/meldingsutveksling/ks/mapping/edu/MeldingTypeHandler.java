@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.ks.mapping.edu;
 
-import com.google.common.base.Objects;
 import no.difi.meldingsutveksling.ks.mapping.Handler;
 import no.difi.meldingsutveksling.ks.svarut.Dokument;
 import no.difi.meldingsutveksling.ks.svarut.Forsendelse;
@@ -9,6 +8,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.NoarksakType;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Used to map EDU MeldingType to Forsendelse
@@ -43,12 +43,12 @@ public class MeldingTypeHandler implements Handler<Forsendelse.Builder> {
         if (this == o) return true;
         if (!(o instanceof MeldingTypeHandler)) return false;
         MeldingTypeHandler that = (MeldingTypeHandler) o;
-        return Objects.equal(meldingType, that.meldingType) &&
-                Objects.equal(fileTypeHandlerFactory, that.fileTypeHandlerFactory);
+        return Objects.equals(meldingType, that.meldingType) &&
+                Objects.equals(fileTypeHandlerFactory, that.fileTypeHandlerFactory);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(meldingType, fileTypeHandlerFactory);
+        return Objects.hash(meldingType, fileTypeHandlerFactory);
     }
 }

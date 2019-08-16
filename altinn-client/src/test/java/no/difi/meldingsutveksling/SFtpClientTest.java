@@ -1,15 +1,14 @@
 package no.difi.meldingsutveksling;
 
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.SftpException;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 @Ignore("Kept for documentation purposes. To run tests successfully you need to setup a SFTP server running at localhost with a ssh key files")
 public class SFtpClientTest {
@@ -18,26 +17,26 @@ public class SFtpClientTest {
     private String sshPrivateKeyFileName;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         sshPrivateKeyFileName = "test_key";
         sFtpClient = new SFtpClient("localhost");
     }
 
     @Test
-    public void canConnect() throws JSchException {
+    public void canConnect() {
         SFtpClient.Connection connection = sFtpClient.connect(sshPrivateKeyFileName);
 
 
-        Assert.assertNotNull(connection);
+        assertThat(connection).isNotNull();
     }
 
     @Test(expected = SFtpClient.ConnectException.class)
-    public void keyFileNotFound() throws JSchException {
+    public void keyFileNotFound() {
         sFtpClient.connect("asdfasdfasdfadsf");
     }
 
     @Test
-    public void canUploadFile() throws JSchException, IOException, SftpException {
+    public void canUploadFile() {
         File file = new File("test.txt");
         SFtpClient.Connection connection = sFtpClient.connect(sshPrivateKeyFileName);
 
@@ -45,21 +44,21 @@ public class SFtpClientTest {
     }
 
     @Test(expected = SFtpClient.Connection.UploadException.class)
-    public void cannotUploadFile() throws Exception {
+    public void cannotUploadFile() {
         File file = new File("adsfasdfasdf.txt");
 
-        try(SFtpClient.Connection connection = sFtpClient.connect(sshPrivateKeyFileName)) {
+        try (SFtpClient.Connection connection = sFtpClient.connect(sshPrivateKeyFileName)) {
             connection.remoteDirectory("temp").upload(file);
         }
     }
 
     @Test
-    public void canDownloadFile() throws JSchException, SftpException, IOException {
+    public void canDownloadFile() {
         SFtpClient.Connection connection = sFtpClient.connect(sshPrivateKeyFileName);
 
         Path file = connection.localDirectory("./").remoteDirectory("temp").download("test.txt");
 
-        Assert.assertTrue(file.toFile().exists());
+        assertThat(file.toFile().exists()).isTrue();
     }
 
     @Test(expected = SFtpClient.Connection.DownloadException.class)
@@ -68,6 +67,6 @@ public class SFtpClientTest {
 
         connection.download("adsfdfsdkjfksjdfkjsd.txt");
 
-        Assert.fail();
+        fail();
     }
 }

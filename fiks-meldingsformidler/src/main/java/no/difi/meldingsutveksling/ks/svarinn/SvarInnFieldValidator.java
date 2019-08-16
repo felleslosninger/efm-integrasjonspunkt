@@ -1,24 +1,20 @@
 package no.difi.meldingsutveksling.ks.svarinn;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
+import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SvarInnFieldValidator {
 
-    private List<String> missingFields;
-
-    private SvarInnFieldValidator() {
-        this.missingFields = Lists.newArrayList();
-    }
+    private List<String> missingFields = new ArrayList<>();
 
     public static SvarInnFieldValidator validator() {
         return new SvarInnFieldValidator();
     }
 
     public SvarInnFieldValidator addField(String value, String fieldName) {
-        if (Strings.isNullOrEmpty(value)) {
+        if (!StringUtils.hasText(value)) {
             missingFields.add(fieldName);
         }
 

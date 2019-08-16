@@ -1,87 +1,120 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import com.google.common.collect.Lists;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.servicebus.ClientFactory;
 import com.microsoft.azure.servicebus.IMessage;
 import com.microsoft.azure.servicebus.IMessageReceiver;
 import com.microsoft.azure.servicebus.ReceiveMode;
 import com.microsoft.azure.servicebus.primitives.ConnectionStringBuilder;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
+import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.DocumentType;
+import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
-import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
+import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
+import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayload;
+import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayloadConverter;
 import no.difi.meldingsutveksling.noarkexchange.MessageContext;
-import no.difi.meldingsutveksling.noarkexchange.MessageException;
-import no.difi.meldingsutveksling.noarkexchange.MessageSender;
-import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentFactory;
+import no.difi.meldingsutveksling.noarkexchange.MessageContextException;
+import no.difi.meldingsutveksling.noarkexchange.MessageContextFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
-import org.eclipse.persistence.jaxb.JAXBContextFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import no.difi.meldingsutveksling.receipt.ConversationService;
+import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
+import no.difi.meldingsutveksling.serviceregistry.SRParameter;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import org.apache.commons.io.IOUtils;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
-import javax.xml.bind.*;
-import javax.xml.transform.stream.StreamSource;
-import java.io.ByteArrayInputStream;
+import javax.xml.bind.JAXBException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_DATA;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPE_INNSYN;
-import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.DATA;
-import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.INNSYN;
-import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.MEETING;
+import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
+import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
+import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.*;
 
 @Component
+@ConditionalOnProperty(name = "difi.move.feature.enableDPE", havingValue = "true")
+@Slf4j
 public class NextMoveServiceBus {
 
-    private static final Logger log = LoggerFactory.getLogger(NextMoveServiceBus.class);
+    private final IntegrasjonspunktProperties props;
+    private final NextMoveQueue nextMoveQueue;
+    private final ServiceBusRestClient serviceBusClient;
+    private final ObjectMapper om;
+    private final MessageContextFactory messageContextFactory;
+    private final AsicHandler asicHandler;
+    private final InternalQueue internalQueue;
+    private final CryptoMessagePersister cryptoMessagePersister;
+    private final ServiceBusPayloadConverter payloadConverter;
+    private final SBDReceiptFactory sbdReceiptFactory;
+    private final ServiceRegistryLookup serviceRegistryLookup;
+    private final ConversationService conversationService;
+    private final MessageStatusFactory messageStatusFactory;
+    private final TimeToLiveHelper timeToLiveHelper;
+    private final SBDUtil sbdUtil;
+    private final TaskExecutor taskExecutor;
 
-    private static final String NEXTMOVE_QUEUE_PREFIX = "nextbestqueue";
-
-    private IntegrasjonspunktProperties props;
-    private StandardBusinessDocumentFactory sbdf;
-    private MessageSender messageSender;
-    private NextMoveQueue nextMoveQueue;
-    private JAXBContext jaxbContext;
-    private ServiceBusRestClient serviceBusClient;
     private IMessageReceiver messageReceiver;
-    private InternalQueue internalQueue;
 
-    @Autowired
     public NextMoveServiceBus(IntegrasjonspunktProperties props,
-                              StandardBusinessDocumentFactory sbdf,
-                              MessageSender messageSender,
                               NextMoveQueue nextMoveQueue,
                               ServiceBusRestClient serviceBusClient,
-                              @Lazy InternalQueue internalQueue) throws JAXBException {
+                              ObjectMapper om,
+                              MessageContextFactory messageContextFactory,
+                              AsicHandler asicHandler,
+                              @Lazy InternalQueue internalQueue,
+                              CryptoMessagePersister cryptoMessagePersister,
+                              ServiceBusPayloadConverter payloadConverter,
+                              SBDReceiptFactory sbdReceiptFactory,
+                              ServiceRegistryLookup serviceRegistryLookup,
+                              ConversationService conversationService,
+                              MessageStatusFactory messageStatusFactory,
+                              TimeToLiveHelper timeToLiveHelper,
+                              SBDUtil sbdUtil, TaskExecutor taskExecutor) {
         this.props = props;
-        this.sbdf = sbdf;
-        this.messageSender = messageSender;
         this.nextMoveQueue = nextMoveQueue;
         this.serviceBusClient = serviceBusClient;
+        this.om = om;
+        this.messageContextFactory = messageContextFactory;
+        this.asicHandler = asicHandler;
         this.internalQueue = internalQueue;
-        this.jaxbContext = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, ConversationResource.class}, null);
+        this.cryptoMessagePersister = cryptoMessagePersister;
+        this.payloadConverter = payloadConverter;
+        this.sbdReceiptFactory = sbdReceiptFactory;
+        this.serviceRegistryLookup = serviceRegistryLookup;
+        this.conversationService = conversationService;
+        this.messageStatusFactory = messageStatusFactory;
+        this.timeToLiveHelper = timeToLiveHelper;
+        this.sbdUtil = sbdUtil;
+        this.taskExecutor = taskExecutor;
     }
 
     @PostConstruct
     public void init() throws NextMoveException {
         if (props.getNextmove().getServiceBus().isBatchRead()) {
-            String connectionString = String.format("Endpoint=sb://%s.%s/;SharedAccessKeyName=%s;SharedAccessKey=%s",
-                    props.getNextmove().getServiceBus().getNamespace(),
-                    props.getNextmove().getServiceBus().getHost(),
+            String connectionString = String.format("Endpoint=sb://%s/;SharedAccessKeyName=%s;SharedAccessKey=%s",
+                    props.getNextmove().getServiceBus().getBaseUrl(),
                     props.getNextmove().getServiceBus().getSasKeyName(),
                     serviceBusClient.getSasKey());
             ConnectionStringBuilder connectionStringBuilder = new ConnectionStringBuilder(connectionString, serviceBusClient.getLocalQueuePath());
@@ -91,68 +124,71 @@ public class NextMoveServiceBus {
                 throw new NextMoveException(e);
             }
         }
+
     }
 
-    public void putMessage(ConversationResource resource) throws NextMoveException {
-        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-            MessageContext context = messageSender.createMessageContext(resource);
-            EduDocument eduDocument = sbdf.create(resource, context);
+    public void putMessage(NextMoveOutMessage message) throws NextMoveException {
+        ServiceBusPayload payload = ServiceBusPayload.of(message.getSbd(), getAsicBytes(message));
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            om.writeValue(bos, payload);
+            serviceBusClient.sendMessage(bos.toByteArray(), getReceiverQueue(message));
+        } catch (IOException e) {
+            throw new NextMoveException("Error creating servicebus payload", e);
+        }
+    }
 
-            Marshaller marshaller = jaxbContext.createMarshaller();
-
-            ObjectFactory of = new ObjectFactory();
-            JAXBElement<EduDocument> sbd = of.createStandardBusinessDocument(eduDocument);
-            marshaller.marshal(sbd, os);
-
-            String queue = NEXTMOVE_QUEUE_PREFIX + resource.getReceiverId();
-            if (resource.getCustomProperties() != null &&
-                    resource.getCustomProperties().containsKey(MEETING.fullname()) &&
-                    "true".equals(resource.getCustomProperties().get(MEETING.fullname()))) {
-                queue = queue + MEETING.fullname();
-            } else {
-                switch (resource.getServiceIdentifier()) {
-                    case DPE_INNSYN:
-                        queue = queue + INNSYN.fullname();
-                        break;
-                    case DPE_DATA:
-                        queue = queue + DATA.fullname();
-                        break;
-                    case DPE_RECEIPT:
-                        queue = queue + receiptTarget();
-                        break;
-                    default:
-                        throw new NextMoveException("ServiceBus has no queue for ServiceIdentifier=" + resource.getServiceIdentifier());
-                }
+    private byte[] getAsicBytes(NextMoveOutMessage message) throws NextMoveException {
+        byte[] asicBytes = null;
+        try {
+            InputStream encryptedAsic = asicHandler.createEncryptedAsic(message, getMessageContext(message));
+            if (encryptedAsic != null) {
+                asicBytes = Base64.getEncoder()
+                        .encode(IOUtils.toByteArray(encryptedAsic));
             }
-            serviceBusClient.sendMessage(os.toByteArray(), queue);
+        } catch (IOException e) {
+            throw new NextMoveException("Unable to read encrypted asic", e);
+        }
+        return asicBytes;
+    }
 
-        } catch (JAXBException | IOException | MessageException e) {
-            log.error("Could not send conversation resource", e);
-            throw new NextMoveException("Caught exception during message sending:", e);
+    private MessageContext getMessageContext(NextMoveMessage message) throws NextMoveException {
+        try {
+            return messageContextFactory.from(message);
+        } catch (MessageContextException e) {
+            throw new NextMoveException("Could not create message context", e);
         }
     }
 
     public void getAllMessagesRest() {
         boolean messagesInQueue = true;
         while (messagesInQueue) {
-            ArrayList<ServiceBusMessage> messages = Lists.newArrayList();
-            for (int i=0; i<props.getNextmove().getServiceBus().getReadMaxMessages(); i++) {
+            ArrayList<ServiceBusMessage> messages = new ArrayList<>();
+            for (int i = 0; i < props.getNextmove().getServiceBus().getReadMaxMessages(); i++) {
                 Optional<ServiceBusMessage> msg = serviceBusClient.receiveMessage();
                 if (!msg.isPresent()) {
                     messagesInQueue = false;
                     break;
                 }
-                messages.add(msg.get());
+                if (sbdUtil.isExpired(msg.get().getPayload().getSbd())) {
+                    timeToLiveHelper.registerErrorStatusAndMessage(msg.get().getPayload().getSbd(), DPE, INCOMING);
+                    serviceBusClient.deleteMessage(msg.get());
+                } else {
+                    messages.add(msg.get());
+                }
             }
 
             for (ServiceBusMessage msg : messages) {
-                try {
-                    Optional<ConversationResource> cr = nextMoveQueue.enqueueEduDocument(msg.getBody());
-                    cr.ifPresent(this::sendReceipt);
-                    serviceBusClient.deleteMessage(msg);
-                } catch (IOException e) {
-                    log.error("Failed to put message on local queue", e);
+                if (msg.getPayload().getAsic() != null) {
+                    try {
+                        cryptoMessagePersister.write(msg.getPayload().getSbd().getDocumentId(),
+                                ASIC_FILE,
+                                Base64.getDecoder().decode(msg.getPayload().getAsic()));
+                    } catch (IOException e) {
+                        throw new NextMoveRuntimeException("Error persisting ASiC, aborting..", e);
+                    }
                 }
+                handleSbd(msg.getPayload().getSbd());
+                serviceBusClient.deleteMessage(msg);
             }
         }
     }
@@ -162,47 +198,90 @@ public class NextMoveServiceBus {
             boolean hasQueuedMessages = true;
             while (hasQueuedMessages) {
                 try {
-                    log.debug("Calling receiveBatch..");
+                    log.trace("Calling receiveBatch..");
                     Collection<IMessage> messages = messageReceiver.receiveBatch(100, Duration.ofSeconds(10));
                     if (messages != null && !messages.isEmpty()) {
                         log.debug("Processing {} messages..", messages.size());
-                        messages.forEach(m -> {
-                            try {
-                                log.debug(format("Received message on queue=%s with id=%s", serviceBusClient.getLocalQueuePath(), m.getMessageId()));
-                                Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-                                EduDocument eduDocument = unmarshaller.unmarshal(new StreamSource(new ByteArrayInputStream(m.getBody())), EduDocument.class).getValue();
-                                Optional<ConversationResource> cr = nextMoveQueue.enqueueEduDocument(eduDocument);
-                                cr.ifPresent(this::sendReceiptAsync);
-                                messageReceiver.completeAsync(m.getLockToken());
-                            } catch (JAXBException | IOException e) {
-                                log.error("Failed to put message on local queue", e);
-                            }
-                        });
+                        messages.forEach(this::handleMessage);
                         log.debug("Done processing {} messages", messages.size());
                     } else {
-                        log.debug("No messages in queue, cancelling batch");
+                        log.trace("No messages in queue, cancelling batch");
                         hasQueuedMessages = false;
                     }
                 } catch (InterruptedException | ServiceBusException e) {
                     log.error("Error while processing messages from service bus", e);
                 }
             }
-        });
+        }, taskExecutor);
     }
 
-    private CompletableFuture sendReceiptAsync(ConversationResource cr) {
-        return CompletableFuture.runAsync(() -> sendReceipt(cr));
+    private void handleMessage(IMessage m) {
+        try {
+            log.debug(format("Received message on queue=%s with id=%s", serviceBusClient.getLocalQueuePath(), m.getMessageId()));
+            ServiceBusPayload payload = payloadConverter.convert(m.getBody(), m.getMessageId());
+            if (sbdUtil.isExpired(payload.getSbd())) {
+                timeToLiveHelper.registerErrorStatusAndMessage(payload.getSbd(), DPE, INCOMING);
+            } else {
+                if (payload.getAsic() != null) {
+                    cryptoMessagePersister.write(payload.getSbd().getDocumentId(), ASIC_FILE, Base64.getDecoder().decode(payload.getAsic()));
+                }
+                handleSbd(payload.getSbd());
+            }
+            messageReceiver.completeAsync(m.getLockToken());
+        } catch (JAXBException | IOException e) {
+            log.error("Failed to put message on local queue", e);
+        }
     }
 
-    private void sendReceipt(ConversationResource cr) {
-        if (asList(DPE_INNSYN, DPE_DATA).contains(cr.getServiceIdentifier())) {
-            DpeReceiptConversationResource dpeReceipt = DpeReceiptConversationResource.of(cr);
-            internalQueue.enqueueNextmove(dpeReceipt);
+    private void handleSbd(StandardBusinessDocument sbd) {
+        if (sbdUtil.isStatus(sbd)) {
+            log.debug(String.format("Message with id=%s is a receipt", sbd.getDocumentId()));
+            StatusMessage msg = (StatusMessage) sbd.getAny();
+            conversationService.registerStatus(sbd.getDocumentId(), messageStatusFactory.getMessageStatus(msg.getStatus()));
+        } else {
+            sendReceiptAsync(nextMoveQueue.enqueue(sbd, DPE));
+        }
+    }
+
+    private void sendReceiptAsync(NextMoveInMessage message) {
+        CompletableFuture.runAsync(() -> sendReceipt(message), taskExecutor);
+    }
+
+    private void sendReceipt(NextMoveInMessage message) {
+        internalQueue.enqueueNextMove(NextMoveOutMessage.of(getReceipt(message), DPE));
+    }
+
+    private StandardBusinessDocument getReceipt(NextMoveInMessage message) {
+        return sbdReceiptFactory.createEinnsynStatusFrom(message.getSbd(),
+                DocumentType.STATUS,
+                ReceiptStatus.LEVERT);
+    }
+
+    private String getReceiverQueue(NextMoveOutMessage message) {
+        String prefix = NextMoveConsts.NEXTMOVE_QUEUE_PREFIX + message.getReceiverIdentifier();
+
+        if (sbdUtil.isStatus(message.getSbd())) {
+            return prefix + receiptTarget();
+        }
+
+        try {
+            ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(
+                    SRParameter.builder(message.getReceiverIdentifier())
+                            .conversationId(message.getConversationId()).build(),
+                    message.getSbd().getProcess(),
+                    message.getSbd().getStandard());
+
+            if (!StringUtils.hasText(serviceRecord.getService().getEndpointUrl())) {
+                throw new NextMoveRuntimeException(String.format("No endpointUrl defined for process %s", serviceRecord.getProcess()));
+            }
+            return prefix + serviceRecord.getService().getEndpointUrl();
+        } catch (ServiceRegistryLookupException e) {
+            throw new NextMoveRuntimeException(String.format("Unable to get service record for %s", message.getReceiverIdentifier()), e);
         }
     }
 
     private String receiptTarget() {
-        if (!isNullOrEmpty(props.getNextmove().getServiceBus().getReceiptQueue())) {
+        if (StringUtils.hasText(props.getNextmove().getServiceBus().getReceiptQueue())) {
             return props.getNextmove().getServiceBus().getReceiptQueue();
         }
         if (MEETING.fullname().equals(props.getNextmove().getServiceBus().getMode())) {

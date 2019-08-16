@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling;
 
-import com.google.common.collect.HashBiMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -9,12 +8,13 @@ public class MimeTypeExtensionMapper {
 
     private static final Logger log = LoggerFactory.getLogger(MimeTypeExtensionMapper.class);
 
-    private static final HashBiMap<String, String> mimeTypeMap = HashBiMap.create();
+    private static final HashBiMap<String, String> mimeTypeMap = new HashBiMap<>();
 
     static {
         mimeTypeMap.put("application/pdf", "pdf");
         mimeTypeMap.put("text/html", "html");
         mimeTypeMap.put("text/plain", "txt");
+        mimeTypeMap.put("text/xml", "xml");
         mimeTypeMap.put("application/msword", "doc");
         mimeTypeMap.put("application/vnd.openxmlformats-officedocument.wordprocessingml.document", "docx");
         mimeTypeMap.put("application/vnd.ms-excel", "xls");
@@ -47,7 +47,7 @@ public class MimeTypeExtensionMapper {
             return mimeTypeMap.get(mimeType);
         }
 
-        log.error(String.format("MimeType \'%s\' not in map - defaulting to PDF", mimeType));
+        log.error("MimeType '{}' not in map - defaulting to PDF", mimeType);
         return "pdf";
     }
 

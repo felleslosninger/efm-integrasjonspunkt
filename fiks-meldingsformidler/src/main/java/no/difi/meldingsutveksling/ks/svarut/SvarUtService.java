@@ -1,61 +1,74 @@
 package no.difi.meldingsutveksling.ks.svarut;
 
+import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.CertificateParserException;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.core.EDUCore;
 import no.difi.meldingsutveksling.ks.mapping.FiksMapper;
-import no.difi.meldingsutveksling.ks.receipt.DpfReceiptStatus;
+import no.difi.meldingsutveksling.ks.mapping.FiksStatusMapper;
+import no.difi.meldingsutveksling.nextmove.NextMoveException;
+import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.receipt.Conversation;
-import no.difi.meldingsutveksling.receipt.GenericReceiptStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
 
 import java.security.cert.X509Certificate;
-import java.time.LocalDateTime;
-import java.util.Optional;
 
+@Component
+@ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
+@RequiredArgsConstructor
 public class SvarUtService {
-    private SvarUtWebServiceClient client;
-    private ServiceRegistryLookup serviceRegistryLookup;
-    private FiksMapper fiksMapper;
-    private IntegrasjonspunktProperties props;
-    CertificateParser certificateParser;
 
-    public SvarUtService(SvarUtWebServiceClient svarUtClient,
-                         ServiceRegistryLookup serviceRegistryLookup,
-                         FiksMapper fiksMapper,
-                         IntegrasjonspunktProperties props) {
-        this.client = svarUtClient;
-        this.serviceRegistryLookup = serviceRegistryLookup;
-        this.fiksMapper = fiksMapper;
-        this.props = props;
-        certificateParser = new CertificateParser();
-    }
+    private final SvarUtWebServiceClient client;
+    private final ServiceRegistryLookup serviceRegistryLookup;
+    private final FiksMapper fiksMapper;
+    private final IntegrasjonspunktProperties props;
+    private final CertificateParser certificateParser;
+    private final FiksStatusMapper fiksStatusMapper;
 
-    public String send(EDUCore message) {
-        Optional<ServiceRecord> serviceRecord = serviceRegistryLookup.getServiceRecord(message.getReceiver().getIdentifier(), message.getServiceIdentifier());
-        if (!serviceRecord.isPresent()) {
-            throw new SvarUtServiceException(String.format("No DPF ServiceRecord found for identifier %s", message.getReceiver().getIdentifier()));
+    public String send(NextMoveOutMessage message) throws NextMoveException {
+        ServiceRecord serviceRecord;
+        try {
+            serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
+                            .securityLevel(message.getBusinessMessage().getSikkerhetsnivaa())
+                            .conversationId(message.getConversationId()).build(),
+                    message.getServiceIdentifier());
+        } catch (ServiceRegistryLookupException e) {
+            throw new SvarUtServiceException(String.format("DPF service record not found for identifier=%s", message.getReceiverIdentifier()));
         }
 
-        final X509Certificate x509Certificate = toX509Certificate(serviceRecord.get().getPemCertificate());
+        SvarUtRequest svarUtRequest = new SvarUtRequest(
+                getFiksUtUrl(),
+                getForsendelse(message, serviceRecord));
 
-
-        final SendForsendelseMedId forsendelse = fiksMapper.mapFrom(message, x509Certificate);
-        SvarUtRequest svarUtRequest = new SvarUtRequest(props.getFiks().getUt().getEndpointUrl().toString(), forsendelse);
         return client.sendMessage(svarUtRequest);
     }
 
+    private String getFiksUtUrl() {
+        return props.getFiks().getUt().getEndpointUrl().toString();
+    }
+
+    private SendForsendelseMedId getForsendelse(NextMoveOutMessage message, ServiceRecord serviceRecord) throws NextMoveException {
+        final X509Certificate x509Certificate = toX509Certificate(serviceRecord.getPemCertificate());
+        return fiksMapper.mapFrom(message, x509Certificate);
+    }
+
     public MessageStatus getMessageReceipt(final Conversation conversation) {
-        final String forsendelseId = client.getForsendelseId(props.getFiks().getUt().getEndpointUrl().toString(), conversation.getConversationId());
+        final String forsendelseId = client.getForsendelseId(getFiksUtUrl(), conversation.getConversationId());
+        return getMessageReceipt(forsendelseId);
+    }
+
+    public MessageStatus getMessageReceipt(String forsendelseId) {
         if (forsendelseId != null) {
-            final ForsendelseStatus forsendelseStatus = client.getForsendelseStatus(props.getFiks().getUt().getEndpointUrl().toString(), forsendelseId);
-            final DpfReceiptStatus receiptStatus = fiksMapper.mapFrom(forsendelseStatus);
-            return MessageStatus.of(receiptStatus);
+            final ForsendelseStatus forsendelseStatus = client.getForsendelseStatus(getFiksUtUrl(), forsendelseId);
+            return fiksStatusMapper.mapFrom(forsendelseStatus);
         } else {
-            return MessageStatus.of(GenericReceiptStatus.FEIL, LocalDateTime.now(), "forsendelseId finnes ikke i SvarUt.");
+            return fiksStatusMapper.noForsendelseId();
         }
     }
 

@@ -1,13 +1,11 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -16,34 +14,31 @@ public class ConversationStrategyFactory {
 
     private Map<ServiceIdentifier, ConversationStrategy> strategies;
 
-    @Autowired
     public ConversationStrategyFactory(IntegrasjonspunktProperties props,
-                                       DpoConversationStrategy dpoStrat,
-                                       DpeConversationStrategy dpeStrat,
-                                       DpvConversationStrategy dpvStrat,
-                                       DpiConversationStrategy dpiStrat) {
-        strategies = Maps.newEnumMap(ServiceIdentifier.class);
+                                       ObjectProvider<DpoConversationStrategy> dpoStrat,
+                                       ObjectProvider<DpfConversationStrategy> dpfStrat,
+                                       ObjectProvider<DpeConversationStrategy> dpeStrat,
+                                       ObjectProvider<DpvConversationStrategy> dpvStrat,
+                                       ObjectProvider<DpiConversationStrategy> dpiStrat) {
+        strategies = new EnumMap<>(ServiceIdentifier.class);
         if (props.getFeature().isEnableDPO()) {
-            strategies.put(ServiceIdentifier.DPO, dpoStrat);
+            strategies.put(ServiceIdentifier.DPO, dpoStrat.getIfAvailable());
+        }
+        if (props.getFeature().isEnableDPF()) {
+            strategies.put(ServiceIdentifier.DPF, dpfStrat.getIfAvailable());
         }
         if (props.getFeature().isEnableDPV()) {
-            strategies.put(ServiceIdentifier.DPV, dpvStrat);
+            strategies.put(ServiceIdentifier.DPV, dpvStrat.getIfAvailable());
         }
         if (props.getFeature().isEnableDPI()) {
-            strategies.put(ServiceIdentifier.DPI, dpiStrat);
+            strategies.put(ServiceIdentifier.DPI, dpiStrat.getIfAvailable());
         }
         if (props.getFeature().isEnableDPE()) {
-            strategies.put(ServiceIdentifier.DPE_INNSYN, dpeStrat);
-            strategies.put(ServiceIdentifier.DPE_DATA, dpeStrat);
-            strategies.put(ServiceIdentifier.DPE_RECEIPT, dpeStrat);
+            strategies.put(ServiceIdentifier.DPE, dpeStrat.getIfAvailable());
         }
     }
 
-    public List<ServiceIdentifier> getEnabledServices() {
-        return Lists.newArrayList(strategies.keySet());
-    }
-
-    public Optional<ConversationStrategy> getStrategy(ConversationResource conversationResource) {
-        return Optional.ofNullable(strategies.get(conversationResource.getServiceIdentifier()));
+    public Optional<ConversationStrategy> getStrategy(ServiceIdentifier serviceIdentifier) {
+        return Optional.ofNullable(strategies.get(serviceIdentifier));
     }
 }

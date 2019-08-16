@@ -1,14 +1,13 @@
 package no.difi.meldingsutveksling.services;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.noarkexchange.MessageException;
-import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import no.difi.meldingsutveksling.noarkexchange.TestConstants;
+import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecordWrapper;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.Before;
@@ -17,7 +16,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.mockito.Mockito.when;
 
@@ -25,52 +24,56 @@ import static org.mockito.Mockito.when;
 public class AdresseregisterTest {
 
     Adresseregister adresseregister;
-    public static final String SENDER_PARTY_NUMBER = "910075918";
-    public static final String RECIEVER_PARTY_NUMBER = "910077473";
+    private static final String SENDER_PARTY_NUMBER = "910075918";
+    private static final String RECIEVER_PARTY_NUMBER = "910077473";
+    private static final String CONVERSATION_ID = "foo123";
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    @Mock
+    @Mock(lenient = true)
     private ServiceRegistryLookup serviceRegistryLookup;
 
     @Mock
-    private StandardBusinessDocumentWrapper documentWrapper;
+    private StandardBusinessDocument sbdMock;
     private String emptyCertificate = "";
 
     @Before
-    public void setup() {
+    public void setup() throws ServiceRegistryLookupException {
         adresseregister = new Adresseregister(serviceRegistryLookup);
-        when(documentWrapper.getSenderOrgNumber()).thenReturn(SENDER_PARTY_NUMBER);
-        when(documentWrapper.getReceiverOrgNumber()).thenReturn(RECIEVER_PARTY_NUMBER);
-        when(serviceRegistryLookup.getServiceRecord(RECIEVER_PARTY_NUMBER)).thenReturn(ServiceRecordWrapper.of(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"), Lists.newArrayList(), Maps.newHashMap()));
-        when(serviceRegistryLookup.getServiceRecord(SENDER_PARTY_NUMBER)).thenReturn(ServiceRecordWrapper.of(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"), Lists.newArrayList(), Maps.newHashMap()));
+        when(sbdMock.getSenderIdentifier()).thenReturn(SENDER_PARTY_NUMBER);
+        when(sbdMock.getReceiverIdentifier()).thenReturn(RECIEVER_PARTY_NUMBER);
+        when(sbdMock.getConversationId()).thenReturn(CONVERSATION_ID);
+        when(serviceRegistryLookup.getServiceRecord(SRParameter.builder(RECIEVER_PARTY_NUMBER)
+                .conversationId(CONVERSATION_ID).build()))
+                .thenReturn(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"));
+        when(serviceRegistryLookup.getServiceRecord(SENDER_PARTY_NUMBER)).thenReturn(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"));
     }
 
     @Test
     public void senderCertificateIsMissing() throws Exception {
         expectedException.expect(MessageException.class);
         expectedException.expect(new StatusMatches(StatusMessage.MISSING_SENDER_CERTIFICATE));
-        when(serviceRegistryLookup.getServiceRecord(SENDER_PARTY_NUMBER)).thenReturn(ServiceRecordWrapper.of(new ServiceRecord(null, SENDER_PARTY_NUMBER, emptyCertificate, "http://localhost:123"), Lists.newArrayList(), Maps.newHashMap()));
+        when(serviceRegistryLookup.getServiceRecord(SENDER_PARTY_NUMBER)).thenReturn(new ServiceRecord(null, SENDER_PARTY_NUMBER, emptyCertificate, "http://localhost:123"));
 
-
-        adresseregister.validateCertificates(documentWrapper);
-
+        adresseregister.validateCertificates(sbdMock);
     }
 
     @Test
     public void recieverCertificateIsInValid() throws Exception {
         expectedException.expect(MessageException.class);
         expectedException.expect(new StatusMatches(StatusMessage.MISSING_RECIEVER_CERTIFICATE));
-        when(serviceRegistryLookup.getServiceRecord(RECIEVER_PARTY_NUMBER)).thenReturn(ServiceRecordWrapper.of(new ServiceRecord(null, RECIEVER_PARTY_NUMBER, emptyCertificate, "http://localhost:123"), Lists.newArrayList(), Maps.newHashMap()));
+        when(serviceRegistryLookup.getServiceRecord(SRParameter.builder(RECIEVER_PARTY_NUMBER)
+                .conversationId(CONVERSATION_ID).build()))
+                .thenReturn(new ServiceRecord(null, RECIEVER_PARTY_NUMBER, emptyCertificate, "http://localhost:123"));
 
-        adresseregister.validateCertificates(documentWrapper);
+        adresseregister.validateCertificates(sbdMock);
     }
 
     @Test
-    public void certificatesAreValid() throws MessageException {
-        adresseregister.validateCertificates(documentWrapper);
-        when(serviceRegistryLookup.getServiceRecord(RECIEVER_PARTY_NUMBER)).thenReturn(ServiceRecordWrapper.of(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"), Lists.newArrayList(), Maps.newHashMap()));
+    public void certificatesAreValid() throws MessageException, ServiceRegistryLookupException {
+        adresseregister.validateCertificates(sbdMock);
+        when(serviceRegistryLookup.getServiceRecord(RECIEVER_PARTY_NUMBER)).thenReturn(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"));
     }
 
     private class StatusMatches extends TypeSafeMatcher<MessageException> {

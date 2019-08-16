@@ -20,7 +20,7 @@ public class PutMessageMarker {
      */
     public static LogstashMarker markerFrom(PutMessageRequestWrapper requestAdapter) {
         final LogstashMarker messageTypeMarker = MarkerFactory.messageTypeMarker(requestAdapter.getMessageType().name().toLowerCase());
-        final LogstashMarker receiverMarker = MarkerFactory.receiverMarker(requestAdapter.getRecieverPartyNumber());
+        final LogstashMarker receiverMarker = MarkerFactory.receiverMarker(requestAdapter.getReceiverPartyNumber());
         final LogstashMarker senderMarker = MarkerFactory.senderMarker(requestAdapter.getSenderPartynumber());
         final LogstashMarker conversationIdMarker = MarkerFactory.conversationIdMarker(requestAdapter.getConversationId());
         final LogstashMarker markers = conversationIdMarker.and(receiverMarker).and(senderMarker).and(messageTypeMarker);

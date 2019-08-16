@@ -3,19 +3,18 @@ package no.difi.meldingsutveksling.noarkexchange;
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.core.EDUCoreService;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.logging.MarkerFactory;
-import no.difi.meldingsutveksling.noarkexchange.putmessage.StrategyFactory;
+import no.difi.meldingsutveksling.nextmove.ConversationStrategyFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
+import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecordWrapper;
-import no.difi.meldingsutveksling.services.Adresseregister;
-import org.apache.commons.lang.StringUtils;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.util.StringUtils;
 
 import javax.jws.WebParam;
 import javax.jws.WebService;
@@ -23,7 +22,6 @@ import javax.xml.ws.BindingType;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 import static no.difi.meldingsutveksling.noarkexchange.PutMessageMarker.markerFrom;
@@ -46,80 +44,49 @@ public class IntegrasjonspunktImpl implements SOAPport {
     private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktImpl.class);
 
     @Autowired
-    @Qualifier("mshClient")
-    private NoarkClient mshClient;
-
-    @Autowired
     private IntegrasjonspunktProperties properties;
-
-    @Autowired
-    private Adresseregister adresseRegister;
-
-    @Autowired
-    private EDUCoreService coreService;
 
     @Autowired
     private ServiceRegistryLookup serviceRegistryLookup;
 
     @Autowired
-    private StrategyFactory strategyFactory;
+    private ConversationStrategyFactory strategyFactory;
+
+    @Autowired
+    private NextMoveAdapter nextMoveAdapter;
 
     @Override
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
 
-        String organisasjonsnummer = getCanReceiveMessageRequest.getReceiver().getOrgnr();
+        String orgnr = getCanReceiveMessageRequest.getReceiver().getOrgnr();
         GetCanReceiveMessageResponseType response = new GetCanReceiveMessageResponseType();
 
         Predicate<String> personnrPredicate = Pattern.compile(String.format("\\d{%d}", 11)).asPredicate();
-        if (personnrPredicate.test(organisasjonsnummer) && !strategyFactory.hasFactory(ServiceIdentifier.DPI)) {
+        if (personnrPredicate.test(orgnr)) {
             response.setResult(false);
             return response;
         }
 
-        final ServiceRecordWrapper serviceRecord;
+        final ServiceRecord serviceRecord;
         try {
-            serviceRecord = serviceRegistryLookup.getServiceRecord(organisasjonsnummer);
+            serviceRecord = serviceRegistryLookup.getServiceRecord(orgnr);
         } catch (Exception e) {
             log.error("Exception during service registry lookup: ", e);
             response.setResult(false);
             return response;
         }
 
-        final LogstashMarker receiverMarker = MarkerFactory.receiverMarker(organisasjonsnummer);
-        if (!serviceRecord.getFailedServiceIdentifiers().isEmpty()) {
-            String failed = StringUtils.join(serviceRecord.getFailedServiceIdentifiers(), ", ");
-            log.error(receiverMarker, "Service registry failed to look up one or more potential service identifiers - getCanReceive returning false (failed: {})", failed);
-            response.setResult(false);
+        final LogstashMarker receiverMarker = MarkerFactory.receiverMarker(orgnr);
+
+        if (asList(DPO, DPF, DPV).contains(serviceRecord.getServiceIdentifier()) &&
+                strategyFactory.getStrategy(serviceRecord.getServiceIdentifier()).isPresent()) {
+            Audit.info(String.format("CanReceive = true. Receiver = %s, service identifier = %s", orgnr, serviceRecord.getServiceIdentifier()), receiverMarker);
+            response.setResult(true);
             return response;
         }
 
-        boolean validServiceIdentifier = false;
-        boolean mshCanReceive = false;
-        boolean isDpv = false;
-        if (asList(DPO, DPI, DPF).contains(serviceRecord.getServiceRecord().getServiceIdentifier()) &&
-                strategyFactory.hasFactory(serviceRecord.getServiceRecord().getServiceIdentifier())) {
-            validServiceIdentifier = true;
-            Audit.info("CanReceive = true", receiverMarker);
-        } else if (mshClient.canRecieveMessage(organisasjonsnummer)) {
-            mshCanReceive = true;
-            Audit.info("MSH canReceive = true", receiverMarker);
-        } else {
-            isDpv = true;
-        }
-
-        boolean strategyFactoryAvailable;
-        if (isDpv) {
-            strategyFactoryAvailable = strategyFactory.hasFactory(DPV);
-        } else {
-            strategyFactoryAvailable = validServiceIdentifier;
-        }
-        if (!strategyFactoryAvailable && !mshCanReceive) {
-            Audit.error("CanReceive = false. Either feature toggle for DPV is disabled, or MSH cannot receive", receiverMarker);
-            response.setResult(false);
-            return response;
-        }
-
-        response.setResult(true);
+        Audit.error(String.format("CanReceive = false. Receiver (%s) accepts %s, but feature is disabled.", orgnr, serviceRecord.getServiceIdentifier()), receiverMarker);
+        response.setResult(false);
         return response;
     }
 
@@ -131,26 +98,28 @@ public class IntegrasjonspunktImpl implements SOAPport {
                 message.swapSenderAndReceiver();
             }
 
-            if (!isNullOrEmpty(properties.getFiks().getInn().getFallbackSenderOrgNr()) &&
-                    message.getRecieverPartyNumber().equals(properties.getFiks().getInn().getFallbackSenderOrgNr())) {
+            if (StringUtils.hasText(properties.getFiks().getInn().getFallbackSenderOrgNr()) &&
+                    message.getReceiverPartyNumber().equals(properties.getFiks().getInn().getFallbackSenderOrgNr())) {
                 Audit.info(String.format("Message is AppReceipt, but receiver (%s) is the configured fallback sender organization number. Discarding message.",
-                        message.getRecieverPartyNumber()), markerFrom(message));
+                        message.getReceiverPartyNumber()), markerFrom(message));
                 return PutMessageResponseFactory.createOkResponse();
             }
         }
 
-        ServiceRecordWrapper receiverRecord = serviceRegistryLookup.getServiceRecord(message.getRecieverPartyNumber());
-
-        if (!receiverRecord.getFailedServiceIdentifiers().isEmpty()) {
-            String failed = StringUtils.join(receiverRecord.getFailedServiceIdentifiers(), ", ");
-            log.error("Service registry failed to look up one or more potential service identifiers - getCanReceive returning false (failed: {})", failed);
-            return PutMessageResponseFactory.createErrorResponse(new MessageException(StatusMessage.FAILED_SERVICEIDENTIFIERS));
+        ServiceRecord receiverRecord;
+        try {
+            receiverRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(message.getReceiverPartyNumber())
+                    .conversationId(message.getConversationId())
+                    .build());
+        } catch (ServiceRegistryLookupException e) {
+            log.error("Error looking up service record for {}", message.getReceiverPartyNumber(), e);
+            return PutMessageResponseFactory.createErrorResponse(StatusMessage.MISSING_SERVICE_RECORD);
         }
 
         if (PayloadUtil.isAppReceipt(message.getPayload()) &&
-                receiverRecord.getServiceRecord().getServiceIdentifier() != ServiceIdentifier.DPO) {
+                receiverRecord.getServiceIdentifier() != ServiceIdentifier.DPO) {
             Audit.info(String.format("Message is AppReceipt, but receiver (%s) is not DPO. Discarding message.",
-                    message.getRecieverPartyNumber()), markerFrom(message));
+                    message.getReceiverPartyNumber()), markerFrom(message));
             return PutMessageResponseFactory.createOkResponse();
         }
 
@@ -158,38 +127,18 @@ public class IntegrasjonspunktImpl implements SOAPport {
             message.setSenderPartyNumber(properties.getOrg().getNumber());
         }
 
-        Audit.info("Received EDU message", markerFrom(message));
+        Audit.info(String.format("Received EDU message [id=%s]", message.getConversationId()), markerFrom(message));
 
         if (PayloadUtil.isEmpty(message.getPayload())) {
             Audit.error("Payload is missing", markerFrom(message));
             if (properties.getFeature().isReturnOkOnEmptyPayload()) {
                 return PutMessageResponseFactory.createOkResponse();
             } else {
-                return PutMessageResponseFactory.createErrorResponse(new MessageException(StatusMessage.MISSING_PAYLOAD));
+                return PutMessageResponseFactory.createErrorResponse(StatusMessage.MISSING_PAYLOAD);
             }
         }
 
-        return coreService.queueMessage(message);
-    }
-
-    public void setMshClient(NoarkClient mshClient) {
-        this.mshClient = mshClient;
-    }
-
-    public NoarkClient getMshClient() {
-        return mshClient;
-    }
-
-    public void setAdresseRegister(Adresseregister adresseRegister) {
-        this.adresseRegister = adresseRegister;
-    }
-
-    public EDUCoreService getCoreService() {
-        return coreService;
-    }
-
-    void setCoreService(EDUCoreService coreService) {
-        this.coreService = coreService;
+        return nextMoveAdapter.convertAndSend(message);
     }
 
 }

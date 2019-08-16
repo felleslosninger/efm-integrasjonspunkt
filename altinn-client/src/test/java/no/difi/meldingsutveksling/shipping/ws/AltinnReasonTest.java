@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.shipping.ws;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class AltinnReasonTest {
     AltinnReason altinnReason;
@@ -21,27 +21,27 @@ public class AltinnReasonTest {
     public void toStringShouldContainReasonId() {
         String actual = altinnReason.toString();
 
-        assertTrue(actual.contains(Integer.toString(altinnReason.getId())));
+        assertThat(actual.contains(Integer.toString(altinnReason.getId()))).isTrue();
     }
 
     @Test
     public void toStringShouldContainMessage() {
         String actual = altinnReason.toString();
 
-        assertTrue(actual.contains(altinnReason.getMessage()));
+        assertThat(actual.contains(altinnReason.getMessage())).isTrue();
     }
 
     @Test
     public void toStringShouldContainUserId() {
         String actual = altinnReason.toString();
 
-        assertTrue(actual.contains(altinnReason.getUserId()));
+        assertThat(actual.contains(altinnReason.getUserId())).isTrue();
     }
 
     @Test
     public void toStringShouldContainLocalizedMessage() {
         String actual = altinnReason.toString();
 
-        assertTrue(actual.contains(altinnReason.getLocalized()));
+        assertThat(actual.contains(altinnReason.getLocalized())).isTrue();
     }
 }

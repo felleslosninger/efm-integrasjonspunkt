@@ -8,19 +8,28 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.datatype.XMLGregorianCalendar;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+import no.difi.meldingsutveksling.ApiType;
+import no.difi.meldingsutveksling.validation.IsDocumentType;
+import no.difi.meldingsutveksling.validation.UUID;
+import no.difi.meldingsutveksling.xml.OffsetDateTimeAdapter;
+
+import javax.persistence.Embeddable;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Past;
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.io.Serializable;
+import java.time.OffsetDateTime;
 
 
 /**
  * <p>Java class for DocumentIdentification complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="DocumentIdentification">
  *   &lt;complexContent>
@@ -37,176 +46,66 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "DocumentIdentification", propOrder = {
-    "standard",
-    "typeVersion",
-    "instanceIdentifier",
-    "type",
-    "multipleType",
-    "creationDateAndTime"
+        "standard",
+        "typeVersion",
+        "instanceIdentifier",
+        "type",
+        "multipleType",
+        "creationDateAndTime"
 })
-public class DocumentIdentification {
+@Data
+@Embeddable
+public class DocumentIdentification implements Serializable {
 
     @XmlElement(name = "Standard", required = true)
+    @NotNull
+    @ApiModelProperty(
+            value = "Document standard",
+            example = "urn:no:difi:arkivmelding:xsd::arkivmelding",
+            required = true
+    )
     protected String standard;
+
     @XmlElement(name = "TypeVersion", required = true)
+    @NotNull
+    @ApiModelProperty(
+            example = "2.0",
+            required = true
+    )
     protected String typeVersion;
+
     @XmlElement(name = "InstanceIdentifier", required = true)
+    @UUID
+    @ApiModelProperty(
+            value = "The conversation ID. Usually a UUID",
+            example = "90c0bacf-c233-4a54-96fc-e205b79862d9"
+    )
     protected String instanceIdentifier;
+
     @XmlElement(name = "Type", required = true)
+    @NotNull
+    @IsDocumentType(ApiType.NEXTMOVE)
+    @ApiModelProperty(
+            value = "Document type. This is always identical to the last part of the standard and must correspond with the name of the payload property.",
+            example = "arkivmelding",
+            required = true
+    )
     protected String type;
+
     @XmlElement(name = "MultipleType")
     protected Boolean multipleType;
+
     @XmlElement(name = "CreationDateAndTime", required = true)
     @XmlSchemaType(name = "dateTime")
-    protected XMLGregorianCalendar creationDateAndTime;
-
-    /**
-     * Gets the value of the standard property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getStandard() {
-        return standard;
-    }
-
-    /**
-     * Sets the value of the standard property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setStandard(String value) {
-        this.standard = value;
-    }
-
-    /**
-     * Gets the value of the typeVersion property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getTypeVersion() {
-        return typeVersion;
-    }
-
-    /**
-     * Sets the value of the typeVersion property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setTypeVersion(String value) {
-        this.typeVersion = value;
-    }
-
-    /**
-     * Gets the value of the instanceIdentifier property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getInstanceIdentifier() {
-        return instanceIdentifier;
-    }
-
-    /**
-     * Sets the value of the instanceIdentifier property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setInstanceIdentifier(String value) {
-        this.instanceIdentifier = value;
-    }
-
-    /**
-     * Gets the value of the type property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getType() {
-        return type;
-    }
-
-    /**
-     * Sets the value of the type property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setType(String value) {
-        this.type = value;
-    }
-
-    /**
-     * Gets the value of the multipleType property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Boolean }
-     *     
-     */
-    public Boolean isMultipleType() {
-        return multipleType;
-    }
-
-    /**
-     * Sets the value of the multipleType property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Boolean }
-     *     
-     */
-    public void setMultipleType(Boolean value) {
-        this.multipleType = value;
-    }
-
-    /**
-     * Gets the value of the creationDateAndTime property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link XMLGregorianCalendar }
-     *     
-     */
-    public XMLGregorianCalendar getCreationDateAndTime() {
-        return creationDateAndTime;
-    }
-
-    /**
-     * Sets the value of the creationDateAndTime property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link XMLGregorianCalendar }
-     *     
-     */
-    public void setCreationDateAndTime(XMLGregorianCalendar value) {
-        this.creationDateAndTime = value;
-    }
-
+    @XmlJavaTypeAdapter(OffsetDateTimeAdapter.class)
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    @Past
+    @ApiModelProperty(
+            value = "When the message was created.",
+            example = "2019-05-10T01:31:52+02:00"
+    )
+    protected OffsetDateTime creationDateAndTime;
 }

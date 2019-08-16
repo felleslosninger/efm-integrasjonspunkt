@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.auth;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import com.google.common.base.MoreObjects;
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class IdportenOidcTokenResponse {
@@ -12,6 +11,7 @@ public class IdportenOidcTokenResponse {
     private String scope;
 
     public IdportenOidcTokenResponse() {
+        // NOOP
     }
 
     public String getAccessToken() {
@@ -40,10 +40,10 @@ public class IdportenOidcTokenResponse {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("accessToken", accessToken)
-                .add("expiresIn", expiresIn)
-                .add("scope", scope)
-                .toString();
+        return "IdportenOidcTokenResponse{" +
+                "accessToken='" + accessToken + '\'' +
+                ", expiresIn=" + expiresIn +
+                ", scope='" + scope + '\'' +
+                '}';
     }
 }

@@ -1,19 +1,9 @@
 package no.difi.meldingsutveksling;
 
+import lombok.Value;
+
+@Value
 public class FileReference {
-    String value;
-    private Integer receiptID;
-
-    public FileReference(String value, Integer receiptID) {
-        this.value = value;
-        this.receiptID = receiptID;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public Integer getReceiptID() {
-        return receiptID;
-    }
+    private final String value;
+    private final Integer receiptID;
 }

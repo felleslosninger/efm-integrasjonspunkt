@@ -8,19 +8,28 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import no.difi.meldingsutveksling.nextmove.AbstractEntity;
+import org.hibernate.annotations.DiscriminatorOptions;
+
+import javax.persistence.*;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 
 /**
  * <p>Java class for Partner complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="Partner">
  *   &lt;complexContent>
@@ -33,75 +42,69 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Partner", propOrder = {
-    "identifier",
-    "contactInformation"
+        "identifier",
+        "contactInformation"
 })
-public class Partner {
+@Getter
+@Setter
+@ToString
+@Entity
+@Table(name = "partner")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorOptions(force = true)
+public class Partner extends AbstractEntity<Long> {
 
     @XmlElement(name = "Identifier", required = true)
+    @Embedded
+    @NotNull
+    @Valid
     protected PartnerIdentification identifier;
+
     @XmlElement(name = "ContactInformation")
-    protected List<ContactInformation> contactInformation;
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "partner_id", nullable = false)
+    @Valid
+    protected Set<ContactInformation> contactInformation;
 
-    /**
-     * Gets the value of the identifier property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link PartnerIdentification }
-     *     
-     */
-    public PartnerIdentification getIdentifier() {
-        return identifier;
-    }
-
-    /**
-     * Sets the value of the identifier property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link PartnerIdentification }
-     *     
-     */
-    public void setIdentifier(PartnerIdentification value) {
-        this.identifier = value;
+    public Partner setIdentifier(PartnerIdentification identifier) {
+        this.identifier = identifier;
+        identifier.setPartner(this);
+        return this;
     }
 
     /**
      * Gets the value of the contactInformation property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the contactInformation property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getContactInformation().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link ContactInformation }
-     * 
-     * 
      */
-    public List<ContactInformation> getContactInformation() {
+    public Set<ContactInformation> getContactInformation() {
         if (contactInformation == null) {
-            contactInformation = new ArrayList<ContactInformation>();
+            contactInformation = new HashSet<>();
         }
         return this.contactInformation;
     }
 
-    public void setContactInformation(List<ContactInformation> contactInformation) {
-        this.contactInformation = contactInformation;
+    public Partner addContactInformation(ContactInformation contactInformation) {
+        getContactInformation().add(contactInformation);
+        return this;
     }
 }

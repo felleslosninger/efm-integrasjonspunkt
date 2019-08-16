@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.ks.svarut;
 
-import lombok.Data;
+import lombok.Value;
 
-@Data
+@Value
 public class SvarUtRequest {
     private final String endPointURL;
     private final SendForsendelseMedId forsendelse;

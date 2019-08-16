@@ -13,44 +13,32 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>transport</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
-
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>domain</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
-
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>dokumentpakking</artifactId>
-            <version>1.7.98-SNAPSHOT</version>
         </dependency>
-
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>kvittering</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
-
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>noarkexchange</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.modelmapper</groupId>
             <artifactId>modelmapper</artifactId>
-            <version>0.7.3</version>
         </dependency>
         <!-- change version to parent pom  when cleaning-in-pom-files branch is merged to master -->
-        <dependency>
-            <groupId>commons-configuration</groupId>
-            <artifactId>commons-configuration</artifactId>
-        </dependency>
-
+<!--        <dependency>-->
+<!--            <groupId>commons-configuration</groupId>-->
+<!--            <artifactId>commons-configuration</artifactId>-->
+<!--        </dependency>-->
     </dependencies>
 
 </project>
