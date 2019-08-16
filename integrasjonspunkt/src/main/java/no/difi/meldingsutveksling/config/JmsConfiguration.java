@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.ActiveMQPrefetchPolicy;
 import org.apache.activemq.RedeliveryPolicy;
 import org.springframework.boot.autoconfigure.jms.activemq.ActiveMQProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -32,6 +33,22 @@ public class JmsConfiguration {
             connectionFactory.setPassword(activeMQProps.getPassword());
         }
 
+        connectionFactory.setRedeliveryPolicy(getRedeliveryPolicy(props));
+        connectionFactory.setNonBlockingRedelivery(true);
+        connectionFactory.setUseAsyncSend(true);
+        connectionFactory.setPrefetchPolicy(getActiveMQPrefetchPolicy());
+
+        return new CachingConnectionFactory(connectionFactory);
+    }
+
+    private ActiveMQPrefetchPolicy getActiveMQPrefetchPolicy() {
+        ActiveMQPrefetchPolicy prefetchPolicy = new ActiveMQPrefetchPolicy();
+        prefetchPolicy.setQueuePrefetch(1);
+        prefetchPolicy.setTopicPrefetch(1);
+        return prefetchPolicy;
+    }
+
+    private RedeliveryPolicy getRedeliveryPolicy(IntegrasjonspunktProperties props) {
         RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
         redeliveryPolicy.setRedeliveryDelay(20000L);
         redeliveryPolicy.setMaximumRedeliveryDelay(1000L * 60L * 60L);
@@ -40,12 +57,7 @@ public class JmsConfiguration {
         // 5 retries will happen within the first hour. After that, get max retries from properties (default 20).
         redeliveryPolicy.setMaximumRedeliveries(5 + props.getQueue().getMaximumRetryHours());
         redeliveryPolicy.setUseExponentialBackOff(true);
-        connectionFactory.setRedeliveryPolicy(redeliveryPolicy);
-        connectionFactory.setNonBlockingRedelivery(true);
-
-        connectionFactory.setUseAsyncSend(true);
-
-        return new CachingConnectionFactory(connectionFactory);
+        return redeliveryPolicy;
     }
 
     @Bean
