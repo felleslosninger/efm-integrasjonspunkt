@@ -44,12 +44,12 @@ public class ConversationService {
     private static final Set<ServiceIdentifier> POLLABLES = new HashSet<>(Arrays.asList(DPV, DPF));
 
     @Transactional
-    public Optional<Conversation> registerStatus(String conversationId, MessageStatus status) {
-        Optional<Conversation> c = repo.findByConversationId(conversationId).stream().findFirst();
+    public Optional<Conversation> registerStatus(String messageId, MessageStatus status) {
+        Optional<Conversation> c = repo.findByMessageId(messageId).stream().findFirst();
         if (c.isPresent()) {
             return Optional.of(registerStatus(c.get(), status));
         } else {
-            log.warn(format("Conversation with id=%s not found, cannot register receipt status=%s", conversationId, status));
+            log.warn(format("Conversation with id=%s not found, cannot register receipt status=%s", messageId, status));
             return Optional.empty();
         }
     }
@@ -74,15 +74,15 @@ public class ConversationService {
         if (ReceiptStatus.valueOf(status.getStatus()) == FEIL &&
                 props.getFeature().isMailErrorStatus()) {
             try {
-                String title = format("Integrasjonspunkt: status %s registrert for forsendelse %s", FEIL.toString(), conversation.getConversationId());
+                String title = format("Integrasjonspunkt: status %s registrert for forsendelse %s", FEIL.toString(), conversation.getMessageId());
                 title = (isNullOrEmpty(conversation.getMessageReference())) ? title : title + format(" / %s", conversation.getMessageReference());
                 String direction = conversation.getDirection() == INCOMING ? "Innkommende" : "Utgående";
                 String messageRef = (isNullOrEmpty(conversation.getMessageReference())) ? "" : format("og messageReference %s ", conversation.getMessageReference());
-                String body = format("%s forsendelse med conversationId %s %shar registrert status '%s'. Se statusgrensesnitt for detaljer.",
-                        direction, conversation.getConversationId(), messageRef, FEIL.toString());
+                String body = format("%s forsendelse med conversationId %s (messageId %s) %shar registrert status '%s'. Se statusgrensesnitt for detaljer.",
+                        direction, conversation.getConversationId(), conversation.getMessageId(), messageRef, FEIL.toString());
                 mailSender.send(title, body);
             } catch (Exception e) {
-                log.error(format("Error sending status mail for conversationId %s", conversation.getConversationId()), e);
+                log.error(format("Error sending status mail for messageId %s", conversation.getMessageId()), e);
             }
         }
         if (asList(LEST, FEIL, LEVETID_UTLOPT, INNKOMMENDE_LEVERT).contains(ReceiptStatus.valueOf(status.getStatus()))) {
@@ -91,7 +91,7 @@ public class ConversationService {
         }
 
         log.debug(String.format("Added status '%s' to conversation[id=%s]", status.getStatus(),
-                conversation.getConversationId()),
+                conversation.getMessageId()),
                 MessageStatusMarker.from(status));
 
         repo.save(conversation);
@@ -115,7 +115,7 @@ public class ConversationService {
 
     @Transactional
     public Conversation registerConversation(MessageInformable message) {
-        return findConversation(message.getConversationId())
+        return findConversation(message.getMessageId())
                 .orElseGet(() -> createConversation(message));
     }
 
@@ -126,6 +126,11 @@ public class ConversationService {
             @Override
             public String getConversationId() {
                 return sbd.getConversationId();
+            }
+
+            @Override
+            public String getMessageId() {
+                return sbd.getDocumentId();
             }
 
             @Override
@@ -155,11 +160,11 @@ public class ConversationService {
         });
     }
 
-    public Optional<Conversation> findConversation(String conversationId) {
-        return repo.findByConversationId(conversationId).stream()
+    public Optional<Conversation> findConversation(String messageId) {
+        return repo.findByMessageId(messageId).stream()
                 .findFirst()
                 .filter(p -> {
-                    log.debug(String.format(CONVERSATION_EXISTS, conversationId));
+                    log.debug(String.format(CONVERSATION_EXISTS, messageId));
                     return true;
                 });
     }

@@ -47,6 +47,8 @@ public class Conversation extends AbstractEntity<Long> implements MessageInforma
 
     @Column(name = "conversation_id")
     private String conversationId;
+    @Column(name = "message_id")
+    private String messageId;
     private String senderIdentifier;
     private String receiverIdentifier;
     private String messageReference;
@@ -70,6 +72,7 @@ public class Conversation extends AbstractEntity<Long> implements MessageInforma
     }
 
     private Conversation(String conversationId,
+                         String messageId,
                          String messageReference,
                          String senderIdentifier,
                          String receiverIdentifier,
@@ -80,6 +83,7 @@ public class Conversation extends AbstractEntity<Long> implements MessageInforma
                          OffsetDateTime lastUpdate
     ) {
         this.conversationId = conversationId;
+        this.messageId = messageId;
         this.messageReference = messageReference;
         this.senderIdentifier = senderIdentifier;
         this.receiverIdentifier = receiverIdentifier;
@@ -101,6 +105,7 @@ public class Conversation extends AbstractEntity<Long> implements MessageInforma
     }
 
     public static Conversation of(String conversationId,
+                                  String messageId,
                                   String messageReference,
                                   String senderIdentifier,
                                   String receiverIdentifier,
@@ -110,12 +115,12 @@ public class Conversation extends AbstractEntity<Long> implements MessageInforma
                                   OffsetDateTime expiry,
                                   OffsetDateTime lastUpdate,
                                   MessageStatus... statuses) {
-        return new Conversation(conversationId, messageReference, senderIdentifier, receiverIdentifier, direction, messageTitle, serviceIdentifier, expiry, lastUpdate)
+        return new Conversation(conversationId, messageId, messageReference, senderIdentifier, receiverIdentifier, direction, messageTitle, serviceIdentifier, expiry, lastUpdate)
                 .addMessageStatuses(statuses);
     }
 
     public static Conversation of(MessageInformable msg, OffsetDateTime lastUpdate, MessageStatus... statuses) {
-        return new Conversation(msg.getConversationId(), msg.getConversationId(), msg.getSenderIdentifier(), msg.getReceiverIdentifier(),
+        return new Conversation(msg.getConversationId(), msg.getMessageId(), msg.getConversationId(), msg.getSenderIdentifier(), msg.getReceiverIdentifier(),
                 msg.getDirection(), "", msg.getServiceIdentifier(), msg.getExpiry(), lastUpdate)
                 .addMessageStatuses(statuses);
     }

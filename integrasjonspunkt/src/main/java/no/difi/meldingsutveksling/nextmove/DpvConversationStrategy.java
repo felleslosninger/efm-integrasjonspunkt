@@ -44,7 +44,7 @@ public class DpvConversationStrategy implements ConversationStrategy {
 
         String serviceCode = correspondence.getCorrespondence().getServiceCode().getValue();
         String serviceEditionCode = correspondence.getCorrespondence().getServiceEdition().getValue();
-        conversationService.findConversation(message.getConversationId())
+        conversationService.findConversation(message.getMessageId())
                 .ifPresent(c -> conversationService.save(c.setServiceCode(serviceCode).setServiceEditionCode(serviceEditionCode)));
 
         if (props.getNoarkSystem().isEnable()) {

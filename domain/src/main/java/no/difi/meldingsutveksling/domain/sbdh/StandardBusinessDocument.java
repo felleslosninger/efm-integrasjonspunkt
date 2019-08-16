@@ -110,7 +110,7 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
 
     @JsonIgnore
     public MessageInfo getMessageInfo() {
-        return new MessageInfo(getReceiverIdentifier(), getSenderIdentifier(), getJournalPostId(), getConversationId(), getMessageType());
+        return new MessageInfo(getMessageType(), getReceiverIdentifier(), getSenderIdentifier(), getJournalPostId(), getConversationId(), getDocumentId());
     }
 
     @JsonIgnore

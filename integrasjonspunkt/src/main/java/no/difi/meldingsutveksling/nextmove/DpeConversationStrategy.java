@@ -21,7 +21,7 @@ public class DpeConversationStrategy implements ConversationStrategy {
     public void send(NextMoveOutMessage message) throws NextMoveException {
         serviceBus.putMessage(message);
         Audit.info(format("Message [id=%s, serviceIdentifier=%s] sent to service bus",
-                message.getConversationId(), message.getServiceIdentifier()),
+                message.getMessageId(), message.getServiceIdentifier()),
                 markerFrom(message));
     }
 }

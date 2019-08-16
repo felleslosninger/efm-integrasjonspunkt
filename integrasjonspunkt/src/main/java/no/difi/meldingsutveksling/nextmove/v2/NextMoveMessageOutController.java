@@ -95,8 +95,8 @@ public class NextMoveMessageOutController {
                 .map(NextMoveOutMessage::getSbd);
     }
 
-    @GetMapping("/{conversationId}")
-    @ApiOperation(value = "Get message", notes = "Returns message with given conversationId")
+    @GetMapping("/{messageId}")
+    @ApiOperation(value = "Get message", notes = "Returns message with given messageId")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
             @ApiResponse(code = 400, message = "Bad request", response = String.class)
@@ -104,16 +104,16 @@ public class NextMoveMessageOutController {
     @Transactional
     public StandardBusinessDocument getMessage(
             @ApiParam(
-                    value = "The conversation ID. Usually a UUID",
+                    value = "The message ID (UUID)",
                     example = "90c0bacf-c233-4a54-96fc-e205b79862d9",
                     required = true
             )
-            @PathVariable("conversationId") String conversationId) {
-        return messageService.getMessage(conversationId).getSbd();
+            @PathVariable("messageId") String messageId) {
+        return messageService.getMessage(messageId).getSbd();
     }
 
-    @PutMapping(value = "/{conversationId}")
-    @ApiOperation(value = "Upload file", notes = "Upload a file to the message with supplied conversationId")
+    @PutMapping(value = "/{messageId}")
+    @ApiOperation(value = "Upload file", notes = "Upload a file to the message with supplied messageId")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success"),
             @ApiResponse(code = 400, message = "Bad request")
@@ -121,11 +121,11 @@ public class NextMoveMessageOutController {
     @Transactional
     public void uploadFile(
             @ApiParam(
-                    value = "The conversation ID. Usually a UUID",
+                    value = "The message ID. Usually a UUID",
                     example = "90c0bacf-c233-4a54-96fc-e205b79862d9",
                     required = true
             )
-            @PathVariable("conversationId") String conversationId,
+            @PathVariable("messageId") String messageId,
             @ApiParam(
                     value = "HTTP header",
                     example = "application/pdf"
@@ -142,12 +142,12 @@ public class NextMoveMessageOutController {
             )
             @RequestParam(value = "title", required = false) String title,
             HttpServletRequest request) {
-        NextMoveOutMessage message = messageService.getMessage(conversationId);
+        NextMoveOutMessage message = messageService.getMessage(messageId);
         messageService.addFile(message, new NextMoveUploadedFile(contentType, contentDisposition, title, request));
     }
 
-    @PostMapping("/{conversationId}")
-    @ApiOperation(value = "Send message", notes = "Send the message with supplied conversationId")
+    @PostMapping("/{messageId}")
+    @ApiOperation(value = "Send message", notes = "Send the message with supplied messageId")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
             @ApiResponse(code = 400, message = "Bad request", response = String.class)
@@ -155,12 +155,12 @@ public class NextMoveMessageOutController {
     @Transactional(dontRollbackOn = TimeToLiveException.class)
     public void sendMessage(
             @ApiParam(
-                    value = "The conversation ID. Usually a UUID",
+                    value = "The message ID. Usually a UUID",
                     example = "90c0bacf-c233-4a54-96fc-e205b79862d9",
                     required = true
             )
-            @PathVariable("conversationId") String conversationId) {
-        NextMoveOutMessage message = messageService.getMessage(conversationId);
+            @PathVariable("messageId") String messageId) {
+        NextMoveOutMessage message = messageService.getMessage(messageId);
         messageService.sendMessage(message);
     }
 }

@@ -31,7 +31,7 @@ public class NextMoveSender {
     @Transactional
     public void send(NextMoveOutMessage msg) throws NextMoveException {
         if (sbdUtil.isExpired(msg.getSbd())) {
-            conversationService.findConversation(msg.getConversationId())
+            conversationService.findConversation(msg.getMessageId())
                     .ifPresent(timeToLiveHelper::registerErrorStatusAndMessage);
 
             if (sbdUtil.isStatus(msg.getSbd())) {
@@ -50,14 +50,14 @@ public class NextMoveSender {
                 return;
             }
 
-            conversationService.registerStatus(msg.getConversationId(), messageStatusFactory.getMessageStatus(ReceiptStatus.SENDT));
+            conversationService.registerStatus(msg.getMessageId(), messageStatusFactory.getMessageStatus(ReceiptStatus.SENDT));
         }
 
-        messageRepo.deleteByConversationId(msg.getConversationId());
+        messageRepo.deleteByMessageId(msg.getMessageId());
         try {
-            cryptoMessagePersister.delete(msg.getConversationId());
+            cryptoMessagePersister.delete(msg.getMessageId());
         } catch (IOException e) {
-            log.error("Error deleting files from conversation with id={}", msg.getConversationId(), e);
+            log.error("Error deleting files from message with id={}", msg.getMessageId(), e);
         }
     }
 }

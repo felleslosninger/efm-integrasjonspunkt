@@ -23,7 +23,7 @@ Feature: Receiving an expired Next Move DPO message
             },
             "documentIdentification": {
                 "creationDateAndTime": "2019-03-25T11:35:00+01:00",
-                "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
+                "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b924",
                 "standard": "urn:no:difi:arkivmelding:xsd::arkivmelding",
                 "type": "arkivmelding",
                 "typeVersion": "2.0"
@@ -65,7 +65,7 @@ Feature: Receiving an expired Next Move DPO message
   Scenario: As a user I want an expired DPO message to be stopped
 
     Given the application checks for new DPO messages
-    Then the message statuses for the conversation with id = "2507fcb8-6543-4c5f-ac06-f5df75bb677e" are:
+    Then the message statuses for the conversation with id = "ff88849c-e281-4809-8555-7cd54952b924" are:
     """
     {
       "content" : [ {
@@ -73,6 +73,7 @@ Feature: Receiving an expired Next Move DPO message
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET",
         "conversationId" : "2507fcb8-6543-4c5f-ac06-f5df75bb677e",
+        "messageId" : "ff88849c-e281-4809-8555-7cd54952b924",
         "convId" : 24
       }, {
         "id" : 26,
@@ -80,6 +81,7 @@ Feature: Receiving an expired Next Move DPO message
         "status" : "LEVETID_UTLOPT",
         "description" : "Levetiden for meldingen er utgått. Må sendes på nytt",
         "conversationId" : "2507fcb8-6543-4c5f-ac06-f5df75bb677e",
+        "messageId" : "ff88849c-e281-4809-8555-7cd54952b924",
         "convId" : 24
       } ],
       "pageable" : {

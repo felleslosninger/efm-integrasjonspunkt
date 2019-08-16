@@ -32,7 +32,7 @@ public class DpfConversationStrategy implements ConversationStrategy {
         svarUtService.send(message);
 
         Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] sent to SvarUt",
-                message.getConversationId(), message.getServiceIdentifier()),
+                message.getMessageId(), message.getServiceIdentifier()),
                 markerFrom(message));
 
         if (props.getNoarkSystem().isEnable()) {

@@ -58,7 +58,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     private byte[] getContent(String fileName) {
         try {
-            return cryptoMessagePersister.read(message.getConversationId(), fileName);
+            return cryptoMessagePersister.read(message.getMessageId(), fileName);
         } catch (IOException e) {
             throw new NextMoveRuntimeException(String.format("Could not read file \"%s\"", fileName), e);
         }
@@ -103,7 +103,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     @Override
     public String getConversationId() {
-        return message.getConversationId();
+        return message.getMessageId();
     }
 
     @Override

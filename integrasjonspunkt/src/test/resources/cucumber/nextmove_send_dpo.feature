@@ -350,7 +350,7 @@ Feature: Sending a Next Move DPO message
     """
     Testing 1 2 3
     """
-    And the message statuses for the conversation with id = "37efbd4c-413d-4e2c-bbc5-257ef4a65a56" are:
+    And the message statuses for the conversation with id = "ff88849c-e281-4809-8555-7cd54952b916" are:
     """
     {
       "content" : [ {
@@ -358,12 +358,14 @@ Feature: Sending a Next Move DPO message
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET",
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
+        "messageId" : "ff88849c-e281-4809-8555-7cd54952b916",
         "convId" : 166
       }, {
         "id" : 170,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "SENDT",
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
+        "messageId" : "ff88849c-e281-4809-8555-7cd54952b916",
         "convId" : 166
       } ],
       "pageable" : {
@@ -445,7 +447,7 @@ Feature: Sending a Next Move DPO message
     """
     And Altinn sends the message
     And the application checks for new DPO messages
-    And the message statuses for the conversation with id = "37efbd4c-413d-4e2c-bbc5-257ef4a65a56" are:
+    And the message statuses for the conversation with id = "ff88849c-e281-4809-8555-7cd54952b916" are:
     """
     {
       "content" : [ {
@@ -453,18 +455,21 @@ Feature: Sending a Next Move DPO message
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET",
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
+        "messageId" : "ff88849c-e281-4809-8555-7cd54952b916",
         "convId" : 166
       }, {
         "id" : 170,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "SENDT",
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
+        "messageId" : "ff88849c-e281-4809-8555-7cd54952b916",
         "convId" : 166
       }, {
         "id" : 171,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "LEVERT",
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
+        "messageId" : "ff88849c-e281-4809-8555-7cd54952b916",
         "convId" : 166
       } ],
       "pageable" : {

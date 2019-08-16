@@ -187,7 +187,7 @@ public class AltinnPackage {
                 throw new MeldingsUtvekslingRuntimeException("Altinn zip does not contain BestEdu document, cannot proceed");
             }
             if (asicInputStream != null) {
-                messagePersister.writeStream(sbd.getConversationId(), ASIC_FILE, asicInputStream, asicSize);
+                messagePersister.writeStream(sbd.getDocumentId(), ASIC_FILE, asicInputStream, asicSize);
             }
             return new AltinnPackage(manifest, recipientList, sbd, null);
         }

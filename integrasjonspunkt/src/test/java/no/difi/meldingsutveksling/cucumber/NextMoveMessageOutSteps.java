@@ -125,11 +125,11 @@ public class NextMoveMessageOutSteps {
         );
 
         Map<String, String> uriVariables = new HashMap<>();
-        uriVariables.put("conversationId", messageOutHolder.get().getSbd().getConversationId());
+        uriVariables.put("messageId", messageOutHolder.get().getSbd().getDocumentId());
         uriVariables.put("title", title);
 
         this.response = testRestTemplate.exchange(
-                "/api/messages/out/{conversationId}?title={title}",
+                "/api/messages/out/{messageId}?title={title}",
                 HttpMethod.PUT,
                 new HttpEntity<>(body, headers),
                 String.class,
@@ -143,10 +143,10 @@ public class NextMoveMessageOutSteps {
     @Given("^I send the message$")
     public void iSendTheMessage() {
         this.response = testRestTemplate.exchange(
-                "/api/messages/out/{conversationId}",
+                "/api/messages/out/{messageId}",
                 HttpMethod.POST, new HttpEntity(null),
                 String.class,
-                messageOutHolder.get().getSbd().getConversationId());
+                messageOutHolder.get().getSbd().getDocumentId());
         assertThat(response.getStatusCode())
                 .withFailMessage(response.toString())
                 .isEqualTo(HttpStatus.OK);
@@ -155,10 +155,10 @@ public class NextMoveMessageOutSteps {
     @Given("^I send the message and get the following error response:$")
     public void iSendTheMessageAndGetTheFollowingErrorResponse(String body) {
         this.response = testRestTemplate.exchange(
-                "/api/messages/out/{conversationId}",
+                "/api/messages/out/{messageId}",
                 HttpMethod.POST, new HttpEntity(null),
                 String.class,
-                messageOutHolder.get().getSbd().getConversationId());
+                messageOutHolder.get().getSbd().getDocumentId());
 
         try {
             new JsonContentAssert(String.class, response.getBody())

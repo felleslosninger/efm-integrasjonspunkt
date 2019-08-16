@@ -61,6 +61,11 @@ public class MessageStatus extends AbstractEntity<Long> {
     }
 
     @JsonView(Views.MessageStatus.class)
+    public String getMessageId() {
+        return conversation.getMessageId();
+    }
+
+    @JsonView(Views.MessageStatus.class)
     public String getConversationId() {
         return conversation.getConversationId();
     }

@@ -112,7 +112,7 @@ public class ServiceBusRestClient {
             try {
                 ServiceBusPayload payload = payloadConverter.convert(response.getBody(), messageId);
                 sbmBuilder.payload(payload);
-                log.debug(format("Received message on queue=%s with conversationId=%s", localQueuePath, payload.getSbd().getConversationId()));
+                log.debug(format("Received message on queue=%s with messageId=%s", localQueuePath, payload.getSbd().getDocumentId()));
                 return Optional.of(sbmBuilder.build());
             } catch (JAXBException e) {
                 log.error(String.format("Error creating old format from message id=%s", messageId), e);
@@ -144,9 +144,9 @@ public class ServiceBusRestClient {
         URI uri = convertToUri(resourceUri);
         ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.DELETE, httpEntity, String.class);
         if (!response.getStatusCode().is2xxSuccessful()) {
-            log.error("{} got response {}, message [conversationId={}] was not deleted",
+            log.error("{} got response {}, message [messageId={}] was not deleted",
                     resourceUri, response.getStatusCode().toString(),
-                    message.getPayload().getSbd().getConversationId());
+                    message.getPayload().getSbd().getDocumentId());
         }
     }
 

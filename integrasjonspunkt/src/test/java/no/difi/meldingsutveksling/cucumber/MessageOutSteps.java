@@ -46,6 +46,11 @@ public class MessageOutSteps {
         messageOutHolder.getOrCalculate(Message::new).setConversationId(conversationId);
     }
 
+    @Given("^the messageId is \"([^\"]*)\"")
+    public void givenTheMessageId(String messageId) {
+        messageOutHolder.getOrCalculate(Message::new).setMessageId(messageId);
+    }
+
     @Given("^the payload is:$")
     public void thePayloadIs(String payload) {
         messageOutHolder.get().setBody(payload);

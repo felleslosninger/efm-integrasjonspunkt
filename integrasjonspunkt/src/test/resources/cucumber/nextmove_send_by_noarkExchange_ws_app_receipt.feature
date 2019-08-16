@@ -43,7 +43,7 @@ Feature: Sending a BEST/EDU AppReceipt message by the noarkExchange WebService
                             </File>
                         </ArrayOfFile>
                         <Reportee>910075918</Reportee>
-                        <SendersReference>ac5efbd4c-413d-4e2c-bbc5-257ef4a65b23</SendersReference>
+                        <SendersReference>19efbd4c-413d-4e2c-bbc5-257ef4a65b38</SendersReference>
                     </Manifest>
                     <RecipientList>
                         <Recipient>
@@ -66,7 +66,7 @@ Feature: Sending a BEST/EDU AppReceipt message by the noarkExchange WebService
     <ns0:BrokerServiceManifest xmlns:ns0="http://schema.altinn.no/services/ServiceEngine/Broker/2015/06">
        <ns0:ExternalServiceCode>v3888</ns0:ExternalServiceCode>
        <ns0:ExternalServiceEditionCode>70515</ns0:ExternalServiceEditionCode>
-       <ns0:SendersReference>ac5efbd4c-413d-4e2c-bbc5-257ef4a65b23</ns0:SendersReference>
+       <ns0:SendersReference>19efbd4c-413d-4e2c-bbc5-257ef4a65b38</ns0:SendersReference>
        <ns0:Reportee>910075918</ns0:Reportee>
        <ns0:FileList>
           <ns0:File>
@@ -106,7 +106,7 @@ Feature: Sending a BEST/EDU AppReceipt message by the noarkExchange WebService
         "documentIdentification" : {
           "standard" : "urn:no:difi:arkivmelding:xsd::arkivmelding_kvittering",
           "typeVersion" : "2.0",
-          "instanceIdentifier" : "19efbd4c-413d-4e2c-bbc5-257ef4a65b38",
+          "instanceIdentifier" : "c54636e3-4aa4-4d59-91d1-db1b2f59a4b2",
           "type" : "arkivmelding_kvittering",
           "creationDateAndTime" : "2019-03-25T12:38:23+01:00"
         },
@@ -139,12 +139,14 @@ Feature: Sending a BEST/EDU AppReceipt message by the noarkExchange WebService
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET",
         "conversationId" : "c54636e3-4aa4-4d59-91d1-db1b2f59a4b2",
+        "messageId" : "c54636e3-4aa4-4d59-91d1-db1b2f59a4b2",
         "convId" : 38
       }, {
         "id" : 40,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "SENDT",
         "conversationId" : "c54636e3-4aa4-4d59-91d1-db1b2f59a4b2",
+        "messageId" : "c54636e3-4aa4-4d59-91d1-db1b2f59a4b2",
         "convId" : 38
       } ],
       "pageable" : {

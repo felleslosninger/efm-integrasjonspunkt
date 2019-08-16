@@ -38,7 +38,7 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
 
     @Override
     public void handleStandardBusinessDocument(StandardBusinessDocument sbd) {
-        log.debug(format("NextMove message id=%s", sbd.getConversationId()));
+        log.debug(format("NextMove message id=%s", sbd.getDocumentId()));
 
         if (sbdUtil.isStatus(sbd)) {
             handleStatus(sbd);
@@ -46,7 +46,7 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
             if (properties.getNoarkSystem().isEnable() && !properties.getNoarkSystem().getEndpointURL().isEmpty()) {
                 conversationService.registerConversation(sbd, DPO, INCOMING);
                 internalQueue.enqueueNoark(sbd);
-                conversationService.registerStatus(sbd.getConversationId(), messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_MOTTATT));
+                conversationService.registerStatus(sbd.getDocumentId(), messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_MOTTATT));
             } else {
                 nextMoveQueue.enqueue(sbd, DPO);
             }
@@ -57,7 +57,7 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
     private void handleStatus(StandardBusinessDocument sbd) {
         StatusMessage status = (StatusMessage) sbd.getAny();
         MessageStatus ms = messageStatusFactory.getMessageStatus(status.getStatus());
-        conversationService.registerStatus(sbd.getConversationId(), ms);
+        conversationService.registerStatus(sbd.getDocumentId(), ms);
     }
 
     private void sendReceivedStatusToSender(StandardBusinessDocument sbd) {

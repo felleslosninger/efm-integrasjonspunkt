@@ -17,38 +17,38 @@ public class InMemoryMessagePersister implements MessagePersister {
     private final Map<String, Map<String, byte[]>> data = new HashMap<>();
 
     @Override
-    public void write(String conversationId, String filename, byte[] message) {
-        Map<String, byte[]> files = getFiles(conversationId);
+    public void write(String messageId, String filename, byte[] message) {
+        Map<String, byte[]> files = getFiles(messageId);
         files.put(filename, Arrays.copyOf(message, message.length));
-        data.put(conversationId, files);
+        data.put(messageId, files);
     }
 
     @Override
-    public void writeStream(String conversationId, String filename, InputStream stream, long size) throws IOException {
-        Map<String, byte[]> files = getFiles(conversationId);
+    public void writeStream(String messageId, String filename, InputStream stream, long size) throws IOException {
+        Map<String, byte[]> files = getFiles(messageId);
         files.put(filename, IOUtils.toByteArray(stream));
-        data.put(conversationId, files);
+        data.put(messageId, files);
     }
 
     @Override
-    public byte[] read(String conversationId, String filename) {
-        Map<String, byte[]> files = getFiles(conversationId);
+    public byte[] read(String messageId, String filename) {
+        Map<String, byte[]> files = getFiles(messageId);
         return files.get(filename);
     }
 
     @Override
-    public FileEntryStream readStream(String conversationId, String filename) {
-        Map<String, byte[]> files = getFiles(conversationId);
+    public FileEntryStream readStream(String messageId, String filename) {
+        Map<String, byte[]> files = getFiles(messageId);
         byte[] bytes = files.get(filename);
         return FileEntryStream.of(new BufferedInputStream(new ByteArrayInputStream(bytes)), bytes.length);
     }
 
     @Override
-    public void delete(String conversationId) {
-        data.remove(conversationId);
+    public void delete(String messageId) {
+        data.remove(messageId);
     }
 
-    private Map<String, byte[]> getFiles(String conversationId) {
-        return data.getOrDefault(conversationId, new HashMap<>());
+    private Map<String, byte[]> getFiles(String messageId) {
+        return data.getOrDefault(messageId, new HashMap<>());
     }
 }

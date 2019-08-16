@@ -19,9 +19,9 @@ public class NextMoveMessageEntry {
     @GeneratedValue
     private Integer entryId;
 
-    @Column(name = "conversation_id")
+    @Column(name = "message_id")
     @NonNull
-    private String conversationId;
+    private String messageId;
 
     @Column(name = "filename")
     @NonNull

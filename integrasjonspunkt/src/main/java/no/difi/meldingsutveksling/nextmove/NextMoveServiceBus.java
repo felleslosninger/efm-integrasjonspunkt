@@ -180,7 +180,7 @@ public class NextMoveServiceBus {
             for (ServiceBusMessage msg : messages) {
                 if (msg.getPayload().getAsic() != null) {
                     try {
-                        cryptoMessagePersister.write(msg.getPayload().getSbd().getConversationId(),
+                        cryptoMessagePersister.write(msg.getPayload().getSbd().getDocumentId(),
                                 ASIC_FILE,
                                 Base64.getDecoder().decode(msg.getPayload().getAsic()));
                     } catch (IOException e) {
@@ -223,7 +223,7 @@ public class NextMoveServiceBus {
                 timeToLiveHelper.registerErrorStatusAndMessage(payload.getSbd(), DPE, INCOMING);
             } else {
                 if (payload.getAsic() != null) {
-                    cryptoMessagePersister.write(payload.getSbd().getConversationId(), ASIC_FILE, Base64.getDecoder().decode(payload.getAsic()));
+                    cryptoMessagePersister.write(payload.getSbd().getDocumentId(), ASIC_FILE, Base64.getDecoder().decode(payload.getAsic()));
                 }
                 handleSbd(payload.getSbd());
             }
@@ -235,9 +235,9 @@ public class NextMoveServiceBus {
 
     private void handleSbd(StandardBusinessDocument sbd) {
         if (sbdUtil.isStatus(sbd)) {
-            log.debug(String.format("Message with id=%s is a receipt", sbd.getConversationId()));
+            log.debug(String.format("Message with id=%s is a receipt", sbd.getDocumentId()));
             StatusMessage msg = (StatusMessage) sbd.getAny();
-            conversationService.registerStatus(sbd.getConversationId(), messageStatusFactory.getMessageStatus(msg.getStatus()));
+            conversationService.registerStatus(sbd.getDocumentId(), messageStatusFactory.getMessageStatus(msg.getStatus()));
         } else {
             sendReceiptAsync(nextMoveQueue.enqueue(sbd, DPE));
         }

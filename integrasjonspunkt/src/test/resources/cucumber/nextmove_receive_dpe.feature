@@ -3,7 +3,7 @@ Feature: Receiving a Next Move DPE message
   Background:
     Given a "GET" request to "http://localhost:9099/identifier/910075935?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075935.json"
     And a "GET" request to "http://localhost:9099/identifier/974720760?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/974720760.json"
-    And a "GET" request to "http://localhost:9099/identifier/910077473?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
+    And a "GET" request to "http://localhost:9099/identifier/910077473?securityLevel=3&conversationId=37efbd4c-413d-4e2c-bbc5-257ef4a65a45" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
     And ServiceBus prepares a message with the following SBD:
     """
     {
@@ -24,7 +24,7 @@ Feature: Receiving a Next Move DPE message
             },
             "documentIdentification": {
                 "creationDateAndTime": "2019-03-25T11:35:00+01:00",
-                "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
+                "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b917",
                 "standard": "urn:no:difi:meldingsutveksling:2.0",
                 "type": "innsynskrav",
                 "typeVersion": "2.0"
@@ -79,25 +79,28 @@ Feature: Receiving a Next Move DPE message
     """
     Before the law sits a gatekeeper.
     """
-    And the message statuses for the conversation with id = "37efbd4c-413d-4e2c-bbc5-257ef4a65a45" are:
+    And the message statuses for the conversation with id = "ff88849c-e281-4809-8555-7cd54952b917" are:
     """
     {
       "content" : [ {
         "id" : 10,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET",
+        "messageId" : "ff88849c-e281-4809-8555-7cd54952b917",
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a45",
         "convId" : 9
       }, {
         "id" : 11,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "INNKOMMENDE_MOTTATT",
+        "messageId" : "ff88849c-e281-4809-8555-7cd54952b917",
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a45",
         "convId" : 9
       }, {
         "id" : 12,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "INNKOMMENDE_LEVERT",
+        "messageId" : "ff88849c-e281-4809-8555-7cd54952b917",
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a45",
         "convId" : 9
       } ],

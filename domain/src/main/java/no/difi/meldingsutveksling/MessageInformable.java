@@ -8,6 +8,8 @@ public interface MessageInformable {
 
     String getConversationId();
 
+    String getMessageId();
+
     String getSenderIdentifier();
 
     String getReceiverIdentifier();

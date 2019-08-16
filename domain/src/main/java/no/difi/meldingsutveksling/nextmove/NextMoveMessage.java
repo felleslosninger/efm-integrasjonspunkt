@@ -29,6 +29,8 @@ public abstract class NextMoveMessage extends AbstractEntity<Long> implements Me
     @NonNull
     private String conversationId;
     @NonNull
+    private String messageId;
+    @NonNull
     private String processIdentifier;
     @NonNull
     private String receiverIdentifier;

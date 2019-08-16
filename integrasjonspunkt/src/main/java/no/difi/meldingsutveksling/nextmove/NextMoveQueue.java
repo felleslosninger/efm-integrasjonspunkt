@@ -32,7 +32,7 @@ public class NextMoveQueue {
         if (sbd.getAny() instanceof BusinessMessage) {
             NextMoveInMessage message = NextMoveInMessage.of(sbd, serviceIdentifier);
 
-            if (!messageRepo.findByConversationId(sbd.getConversationId()).isPresent()) {
+            if (!messageRepo.findByMessageId(sbd.getDocumentId()).isPresent()) {
                 messageRepo.save(message);
             }
 
@@ -40,7 +40,7 @@ public class NextMoveQueue {
             conversationService.registerStatus(c, messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_MOTTATT));
 
             Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] put on local queue",
-                    message.getConversationId(), message.getServiceIdentifier()), markerFrom(message));
+                    message.getMessageId(), message.getServiceIdentifier()), markerFrom(message));
             return message;
 
         } else {

@@ -208,18 +208,21 @@ Feature: Receiving a DPF message and forward to Noark P360
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET",
         "conversationId" : "d4751d30-c9e5-4648-9612-956cdb5e53bc",
+        "messageId" : "d4751d30-c9e5-4648-9612-956cdb5e53bc",
         "convId" : 220
       }, {
         "id" : 222,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "INNKOMMENDE_MOTTATT",
         "conversationId" : "d4751d30-c9e5-4648-9612-956cdb5e53bc",
+        "messageId" : "d4751d30-c9e5-4648-9612-956cdb5e53bc",
         "convId" : 220
       }, {
         "id" : 223,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "INNKOMMENDE_LEVERT",
         "conversationId" : "d4751d30-c9e5-4648-9612-956cdb5e53bc",
+        "messageId" : "d4751d30-c9e5-4648-9612-956cdb5e53bc",
         "convId" : 220
       } ],
       "pageable" : {

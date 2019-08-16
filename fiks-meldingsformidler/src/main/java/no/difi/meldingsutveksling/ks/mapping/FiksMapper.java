@@ -65,7 +65,7 @@ public class FiksMapper {
     public SendForsendelseMedId mapFrom(NextMoveOutMessage message, X509Certificate certificate) throws NextMoveException {
         return SendForsendelseMedId.builder()
                 .withForsendelse(getForsendelse(message, certificate))
-                .withForsendelsesid(message.getSbd().findScope(ScopeType.SENDER_REF).map(Scope::getInstanceIdentifier).orElse(message.getConversationId()))
+                .withForsendelsesid(message.getSbd().findScope(ScopeType.SENDER_REF).map(Scope::getInstanceIdentifier).orElse(message.getMessageId()))
                 .build();
     }
 
@@ -75,7 +75,7 @@ public class FiksMapper {
         Journalpost journalpost = ArkivmeldingUtil.getJournalpost(am);
 
         return Forsendelse.builder()
-                .withEksternref(message.getConversationId())
+                .withEksternref(message.getMessageId())
                 .withKunDigitalLevering(false)
                 .withSvarPaForsendelse(message.getSbd().findScope(ScopeType.RECEIVER_REF).map(Scope::getInstanceIdentifier).orElse(uuidGenerator.generate()))
                 .withTittel(journalpost.getOffentligTittel())
@@ -126,7 +126,7 @@ public class FiksMapper {
     private Arkivmelding getArkivmelding(NextMoveOutMessage message) throws NextMoveException {
         String arkivmeldingIdentifier = getArkivmeldingIdentifier(message);
 
-        try (FileEntryStream fileEntryStream = cryptoMessagePersister.readStream(message.getConversationId(), arkivmeldingIdentifier)) {
+        try (FileEntryStream fileEntryStream = cryptoMessagePersister.readStream(message.getMessageId(), arkivmeldingIdentifier)) {
             return ArkivmeldingUtil.unmarshalArkivmelding(fileEntryStream.getInputStream());
         } catch (JAXBException e) {
             throw new NextMoveException("Error unmarshalling arkivmelding", e);
@@ -147,7 +147,7 @@ public class FiksMapper {
         return docs.stream()
                 .flatMap(p -> p.getDokumentobjekt().stream())
                 .map(d -> getBusinessMessageFile(message, d.getReferanseDokumentfil()))
-                .map(file -> getDocument(message.getConversationId(), file, cert))
+                .map(file -> getDocument(message.getMessageId(), file, cert))
                 .collect(Collectors.toSet());
     }
 
@@ -156,12 +156,12 @@ public class FiksMapper {
                 .filter(bmf -> bmf.getFilename().equals(referanseDokumentfil))
                 .findFirst()
                 .orElseThrow(() -> new NextMoveRuntimeException(
-                        String.format("File '%s' referenced in '%s' not found", referanseDokumentfil, message.getConversationId())));
+                        String.format("File '%s' referenced in '%s' not found", referanseDokumentfil, message.getMessageId())));
     }
 
-    private Dokument getDocument(String conversationId, BusinessMessageFile file, X509Certificate cert) {
+    private Dokument getDocument(String messageId, BusinessMessageFile file, X509Certificate cert) {
         try {
-            FileEntryStream fileEntryStream = cryptoMessagePersister.readStream(conversationId, file.getIdentifier());
+            FileEntryStream fileEntryStream = cryptoMessagePersister.readStream(messageId, file.getIdentifier());
 
             return Dokument.builder()
                     .withData(getDataHandler(cert, fileEntryStream.getInputStream()))
@@ -169,7 +169,7 @@ public class FiksMapper {
                     .withMimetype(file.getMimetype())
                     .build();
         } catch (IOException e) {
-            throw new NextMoveRuntimeException(String.format("Could not get Document for conversationId %s", conversationId));
+            throw new NextMoveRuntimeException(String.format("Could not get Document for messageId=%s", messageId));
         }
     }
 

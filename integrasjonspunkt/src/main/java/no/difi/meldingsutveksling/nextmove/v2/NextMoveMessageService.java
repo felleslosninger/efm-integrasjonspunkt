@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
+import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MessagePersistException;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
@@ -36,9 +36,9 @@ public class NextMoveMessageService {
     private final InternalQueue internalQueue;
     private final ConversationService conversationService;
 
-    NextMoveOutMessage getMessage(String conversationId) {
-        return messageRepo.findByConversationId(conversationId)
-                .orElseThrow(() -> new ConversationNotFoundException(conversationId));
+    NextMoveOutMessage getMessage(String messageId) {
+        return messageRepo.findByMessageId(messageId)
+                .orElseThrow(() -> new MessageNotFoundException(messageId));
     }
 
     Page<NextMoveOutMessage> findMessages(Predicate predicate, Pageable pageable) {
@@ -82,7 +82,7 @@ public class NextMoveMessageService {
         String identifier = UUID.randomUUID().toString();
 
         try {
-            cryptoMessagePersister.writeStream(message.getConversationId(), identifier, file.getInputStream(), file.getSize());
+            cryptoMessagePersister.writeStream(message.getMessageId(), identifier, file.getInputStream(), file.getSize());
         } catch (IOException e) {
             throw new MessagePersistException(file.getOriginalFilename());
         }

@@ -78,6 +78,7 @@ public class WebhooksSteps {
     public void theFollowingMessageStatusIsPublished(String body) throws IOException {
         MessageStatusContent event = objectMapper.readValue(body, MessageStatusContent.class);
         Conversation conversation = new Conversation()
+                .setMessageId(event.getMessageId())
                 .setConversationId(event.getConversationId())
                 .setDirection(event.getDirection())
                 .setServiceIdentifier(event.getServiceIdentifier());

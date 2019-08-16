@@ -53,6 +53,10 @@ public interface MessageStatusRepository extends PagingAndSortingRepository<Mess
             builder.and(messageStatus.conversation.conversationId.eq(input.getConversationId()));
         }
 
+        if (input.getMessageId() != null) {
+            builder.and(messageStatus.conversation.messageId.eq(input.getMessageId()));
+        }
+
         if (input.getStatus() != null) {
             builder.and(messageStatus.status.eq(input.getStatus()));
         }

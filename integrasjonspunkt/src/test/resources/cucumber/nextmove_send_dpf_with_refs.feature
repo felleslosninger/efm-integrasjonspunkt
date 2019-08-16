@@ -172,7 +172,7 @@ Feature: Sending a Next Move DPF message with sender And receiver refs
                 <mimetype>text/plain</mimetype>
                 <skalSigneres>false</skalSigneres>
             </dokumenter>
-            <eksternref>45efbd4c-413d-4e2c-bbc5-257ef4a65a91</eksternref>
+            <eksternref>abc8849c-e281-4809-8555-7cd54952b916</eksternref>
             <krevNiva4Innlogging>false</krevNiva4Innlogging>
             <kryptert>true</kryptert>
             <kunDigitalLevering>false</kunDigitalLevering>

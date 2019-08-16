@@ -78,7 +78,7 @@ public class DpoPolling {
             final DownloadRequest request = new DownloadRequest(reference.getValue(), properties.getOrg().getNumber());
             log.debug(format("Downloading message with altinnId=%s", reference.getValue()));
             StandardBusinessDocument sbd = client.download(request, messagePersister);
-            Audit.info(format("Downloaded message with id=%s", sbd.getConversationId()), sbd.createLogstashMarkers());
+            Audit.info(format("Downloaded message with id=%s", sbd.getDocumentId()), sbd.createLogstashMarkers());
 
             if (sbdUtil.isExpired(sbd)) {
                 timeToLiveHelper.registerErrorStatusAndMessage(sbd, DPO, INCOMING);

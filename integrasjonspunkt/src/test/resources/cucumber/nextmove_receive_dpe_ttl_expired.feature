@@ -25,7 +25,7 @@ Feature: Receiving an expired Next Move DPE message
             },
             "documentIdentification": {
                 "creationDateAndTime": "2019-03-25T11:35:00+01:00",
-                "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
+                "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b918",
                 "standard": "urn:no:difi:meldingsutveksling:2.0",
                 "type": "innsynskrav",
                 "typeVersion": "2.0"
@@ -67,7 +67,7 @@ Feature: Receiving an expired Next Move DPE message
   Scenario: As a user I want an expired DPE message to be stopped
 
     Given the application checks for new DPE messages
-    Then the message statuses for the conversation with id = "f58a286c-8325-41ee-9398-da8471c3e234" are:
+    Then the message statuses for the conversation with id = "ff88849c-e281-4809-8555-7cd54952b918" are:
     """
     {
       "content" : [ {
@@ -75,6 +75,7 @@ Feature: Receiving an expired Next Move DPE message
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET",
         "conversationId" : "f58a286c-8325-41ee-9398-da8471c3e234",
+        "messageId" : "ff88849c-e281-4809-8555-7cd54952b918",
         "convId" : 13
       }, {
         "id" : 15,
@@ -82,6 +83,7 @@ Feature: Receiving an expired Next Move DPE message
         "status" : "LEVETID_UTLOPT",
         "description" : "Levetiden for meldingen er utgått. Må sendes på nytt",
         "conversationId" : "f58a286c-8325-41ee-9398-da8471c3e234",
+        "messageId" : "ff88849c-e281-4809-8555-7cd54952b918",
         "convId" : 13
       } ],
       "pageable" : {
