@@ -95,7 +95,7 @@ public class InternalQueue {
         this.uuidGenerator = uuidGenerator;
     }
 
-    @JmsListener(destination = NEXTMOVE, containerFactory = "myJmsContainerFactory", concurrency = "10")
+    @JmsListener(destination = NEXTMOVE, containerFactory = "myJmsContainerFactory", concurrency = "100")
     public void nextMoveListener(byte[] message, Session session) {
         NextMoveOutMessage nextMoveMessage;
         try {
