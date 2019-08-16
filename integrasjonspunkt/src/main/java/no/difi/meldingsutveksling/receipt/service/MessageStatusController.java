@@ -56,7 +56,7 @@ public class MessageStatusController {
             @ApiParam(value = "MessageId", required = true, example = "ff88849c-e281-4809-8555-7cd54952b917")
             @PathVariable("messageId") String messageId) {
 
-        return statusRepo.findByMessageId(messageId)
+        return statusRepo.findByConversationMessageId(messageId)
                 .orElseThrow(() -> new MessageStatusNotFoundException(messageId));
     }
 
