@@ -13,6 +13,7 @@ public class WebhookFilterValidator implements ConstraintValidator<WebhookFilter
     @Autowired
     private WebhookFilterParser webhookFilterParser;
 
+    @Override
     public void initialize(WebhookFilter constraint) {
         // NOOP
     }

@@ -8,6 +8,7 @@ import javax.validation.ConstraintValidatorContext;
 @Slf4j
 public class UUIDValidator implements ConstraintValidator<UUID, String> {
 
+    @Override
     public void initialize(UUID constraint) {
         // NOOP
     }
