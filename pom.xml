@@ -28,10 +28,6 @@
             <url>https://beta-meldingsutveksling.difi.no/content/repositories/releases/</url>
         </repository>
         <repository>
-            <id>Jsch</id>
-            <url>http://jsch.sf.net/maven2/</url>
-        </repository>
-        <repository>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
