@@ -44,7 +44,7 @@ public class MessageStatusController {
         return statusRepo.find(input, pageable);
     }
 
-    @GetMapping("{id}")
+    @GetMapping("{messageId}")
     @ApiOperation(value = "Get status", notes = "Get status with given id")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = MessageStatus.class),
@@ -53,11 +53,11 @@ public class MessageStatusController {
     })
     @JsonView(Views.MessageStatus.class)
     public MessageStatus status(
-            @ApiParam(value = "Id", required = true, example = "1")
-            @PathVariable("id") Long id) {
+            @ApiParam(value = "MessageId", required = true, example = "ff88849c-e281-4809-8555-7cd54952b917")
+            @PathVariable("messageId") String messageId) {
 
-        return statusRepo.findById(id)
-                .orElseThrow(() -> new MessageStatusNotFoundException(id));
+        return statusRepo.findByMessageId(messageId)
+                .orElseThrow(() -> new MessageStatusNotFoundException(messageId));
     }
 
     @GetMapping("peek")
