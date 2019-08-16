@@ -551,7 +551,6 @@
                 <version>1.4.3</version>
                 <configuration>
                     <format>ALL</format>
-                    <suppressionFile>${basedir}/suppression.xml</suppressionFile>
                 </configuration>
             </plugin>
         </plugins>
