@@ -552,7 +552,7 @@
             <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
-                <version>5.0.0</version>
+                <version>1.4.3</version>
                 <configuration>
                     <format>ALL</format>
                     <suppressionFile>${basedir}/suppression.xml</suppressionFile>
