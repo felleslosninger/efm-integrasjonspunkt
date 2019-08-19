@@ -551,6 +551,7 @@
                 <version>4.0.2</version>
                 <configuration>
                     <format>ALL</format>
+                    <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
                 </configuration>
             </plugin>
         </plugins>
