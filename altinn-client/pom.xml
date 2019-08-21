@@ -32,6 +32,12 @@
     <dependency>
         <groupId>no.difi.move-common</groupId>
         <artifactId>audit</artifactId>
+        <exclusions>
+            <exclusion>
+                <artifactId>javax.mail</artifactId>
+                <groupId>com.sun.mail</groupId>
+            </exclusion>
+        </exclusions>
     </dependency>
 
     <dependency>
@@ -80,6 +86,20 @@
     <dependency>
         <groupId>com.sun.xml.ws</groupId>
         <artifactId>jaxws-rt</artifactId>
+        <exclusions>
+            <exclusion>
+                <artifactId>FastInfoset</artifactId>
+                <groupId>com.sun.xml.fastinfoset</groupId>
+            </exclusion>
+            <exclusion>
+                <artifactId>woodstox-core</artifactId>
+                <groupId>com.fasterxml.woodstox</groupId>
+            </exclusion>
+            <exclusion>
+                <artifactId>stax2-api</artifactId>
+                <groupId>org.codehaus.woodstox</groupId>
+            </exclusion>
+        </exclusions>
     </dependency>
 </dependencies>
 </project>

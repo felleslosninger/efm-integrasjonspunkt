@@ -51,6 +51,12 @@
         <dependency>
             <groupId>no.difi.move-common</groupId>
             <artifactId>webservice-tools</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>javax.mail</artifactId>
+                    <groupId>com.sun.mail</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>javax.activation</groupId>

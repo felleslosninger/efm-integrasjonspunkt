@@ -103,6 +103,10 @@
                     <artifactId>json-smart</artifactId>
                     <groupId>net.minidev</groupId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>javax.mail</artifactId>
+                    <groupId>com.sun.mail</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
 
