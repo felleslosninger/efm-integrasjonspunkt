@@ -189,6 +189,11 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
     }
 
     @JsonIgnore
+    public String getMessageId() {
+        return getDocumentId();
+    }
+
+    @JsonIgnore
     public Payload getPayload() {
         if (getAny() instanceof Payload) {
             return (Payload) getAny();

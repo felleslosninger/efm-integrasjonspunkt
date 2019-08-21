@@ -56,7 +56,7 @@ Feature: Sending a Next Move DPV message
             },
             "documentIdentification": {
                 "creationDateAndTime": "2019-03-25T11:35:00+01:00",
-                "instanceIdentifier": "abc8849c-e281-4809-8555-7cd54952b916",
+                "instanceIdentifier": "abc8849c-e281-4809-8555-7cd54952b926",
                 "standard": "urn:no:difi:arkivmelding:xsd::arkivmelding",
                 "type": "arkivmelding",
                 "typeVersion": "2.0"

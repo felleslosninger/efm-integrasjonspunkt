@@ -46,6 +46,17 @@ public class IntegrasjonspunktHandlerExceptionResolver extends DefaultHandlerExc
         return super.doResolveException(request, response, handler, ex);
     }
 
+    @Override
+    protected void logException(Exception ex, HttpServletRequest request) {
+        if (ex instanceof HttpStatusCodeException || ex instanceof ConstraintViolationException) {
+            if (logger.isTraceEnabled()) {
+                logger.trace(buildLogMessage(ex, request));
+            }
+        } else {
+            super.logException(ex, request);
+        }
+    }
+
     private ModelAndView handleConstraintViolationException(ConstraintViolationException ex, HttpServletResponse response) throws IOException {
         response.sendError(HttpStatus.BAD_REQUEST.value(), ex.getLocalizedMessage());
         return new ModelAndView();
