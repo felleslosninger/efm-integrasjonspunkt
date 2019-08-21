@@ -15,6 +15,7 @@ import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
+import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.validation.Asserter;
 import no.difi.meldingsutveksling.validation.group.ValidationGroupFactory;
@@ -45,12 +46,19 @@ public class NextMoveValidator {
     private final CryptoMessagePersister cryptoMessagePersister;
     private final TimeToLiveHelper timeToLiveHelper;
     private final SBDUtil sbdUtil;
+    private final ConversationService conversationService;
 
     void validate(StandardBusinessDocument sbd) {
         messageRepo.findByMessageId(sbd.getDocumentId())
             .map(p -> {
                 throw new MessageAlreadyExistsException(p.getMessageId());
             });
+        if (!sbdUtil.isStatus(sbd)) {
+            conversationService.findConversation(sbd.getMessageId())
+                    .map(c -> {
+                        throw new MessageAlreadyExistsException(sbd.getMessageId());
+                    });
+        }
 
         ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd);
         ServiceIdentifier serviceIdentifier = serviceRecord.getServiceIdentifier();

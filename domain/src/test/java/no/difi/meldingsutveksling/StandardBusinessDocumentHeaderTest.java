@@ -52,6 +52,7 @@ public class StandardBusinessDocumentHeaderTest {
                 .to(Organisasjonsnummer.fromIso6523("123456789"))
                 .relatedToJournalPostId("some journalpost")
                 .relatedToConversationId("some conversation")
+                .relatedToMessageId("some messageId")
                 .process(Process.LEGACY)
                 .standard(Standard.LEGACY.getValue())
                 .type(DocumentType.BESTEDU_KVITTERING)
@@ -68,6 +69,7 @@ public class StandardBusinessDocumentHeaderTest {
                 .to(Organisasjonsnummer.fromIso6523("123456789"))
                 .relatedToJournalPostId("some journalpost")
                 .relatedToConversationId("some conversation")
+                .relatedToMessageId("some messageId")
                 .process(Process.LEGACY)
                 .standard(Standard.LEGACY.getValue())
                 .type(DocumentType.BESTEDU_MELDING)
@@ -84,6 +86,7 @@ public class StandardBusinessDocumentHeaderTest {
                 .to(Organisasjonsnummer.fromIso6523("123456789"))
                 .relatedToJournalPostId("some journalpost")
                 .relatedToConversationId("some conversation")
+                .relatedToMessageId("some messageId")
                 .build();
     }
 

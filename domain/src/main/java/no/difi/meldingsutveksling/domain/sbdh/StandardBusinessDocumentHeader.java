@@ -169,6 +169,7 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
         private Organisasjonsnummer mottaker;
         private String journalPostId;
         private String conversationId;
+        private String messageId;
         private DocumentType documentType;
         private String standard;
         private Process process;
@@ -208,13 +209,18 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
             return this;
         }
 
+        public Builder relatedToMessageId(String messageId) {
+            this.messageId = messageId;
+            return this;
+        }
+
         public StandardBusinessDocumentHeader build() {
             StandardBusinessDocumentHeader sbdh = new StandardBusinessDocumentHeader()
                     .setHeaderVersion(HEADER_VERSION)
                     .addSender(createSender(avsender))
                     .addReceiver(createReciever(mottaker))
                     .setBusinessScope(createBusinessScope(fromConversationId(conversationId)))
-                    .setDocumentIdentification(createDocumentIdentification(documentType, standard));
+                    .setDocumentIdentification(createDocumentIdentification(messageId, documentType, standard));
             if (StringUtils.hasText(journalPostId)) {
                 sbdh.getBusinessScope().getScope().add(fromJournalPostId(journalPostId));
             }
@@ -235,7 +241,7 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
                             .setAuthority(orgNummer.authority()));
         }
 
-        private DocumentIdentification createDocumentIdentification(DocumentType documentType, String standard) {
+        private DocumentIdentification createDocumentIdentification(String messageId, DocumentType documentType, String standard) {
             if (documentType == null) {
                 throw new MeldingsUtvekslingRuntimeException("IsDocumentType must be set");
             }
@@ -245,7 +251,7 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
                     .setStandard(standard)
                     .setType(documentType.getType())
                     .setTypeVersion(TYPE_VERSION)
-                    .setInstanceIdentifier(UUID.randomUUID().toString());
+                    .setInstanceIdentifier(messageId);
         }
 
         private BusinessScope createBusinessScope(Scope... scopes) {
