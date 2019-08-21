@@ -1,7 +1,6 @@
 /**
- *
  * From https://svn.apache.org/.../trunk/samples/org/apache/xml/security/samples/DSNamespaceContext.java
- *
+ * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
  * distributed with this work for additional information
@@ -9,9 +8,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -31,8 +30,7 @@ import java.util.Map;
  */
 public class DSNamespaceContext implements NamespaceContext {
 
-    private Map<String, String> namespaceMap =
-            new HashMap<String, String>();
+    private Map<String, String> namespaceMap = new HashMap<>();
 
     public DSNamespaceContext() {
         namespaceMap.put("ds", "http://www.w3.org/2000/09/xmldsig#");
@@ -52,13 +50,11 @@ public class DSNamespaceContext implements NamespaceContext {
     }
 
     public String getPrefix(String arg0) {
-        for (String key : namespaceMap.keySet()) {
-            String value = namespaceMap.get(key);
-            if (value.equals(arg0)) {
-                return key;
-            }
-        }
-        return null;
+        return namespaceMap.entrySet().stream()
+                .filter(p -> p.getValue().equals(arg0))
+                .findAny()
+                .map(Map.Entry::getKey)
+                .orElse(null);
     }
 
     public Iterator<String> getPrefixes(String arg0) {

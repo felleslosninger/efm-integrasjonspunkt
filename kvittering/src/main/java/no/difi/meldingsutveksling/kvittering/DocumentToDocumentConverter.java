@@ -3,8 +3,8 @@ package no.difi.meldingsutveksling.kvittering;
 
 import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.w3c.dom.Document;
@@ -65,22 +65,25 @@ class DocumentToDocumentConverter {
      *
      * @return org.w3c.Document
      */
-    public static Document toXMLDocument(StandardBusinessDocument jaxbDocument ) {
+    public static Document toXMLDocument(StandardBusinessDocument jaxbDocument) {
         try {
             Marshaller marshaller = jaxBContext.createMarshaller();
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setNamespaceAware(true);
 
-            Document domDocument;
-            try {
-                domDocument = dbf.newDocumentBuilder().newDocument();
-            } catch (ParserConfigurationException e) {
-                throw new MeldingsUtvekslingRuntimeException(e);
-            }
+            Document domDocument = getDomDocument(dbf);
             JAXBElement<StandardBusinessDocument> jbe = new ObjectFactory().createStandardBusinessDocument(jaxbDocument);
             marshaller.marshal(jbe, domDocument);
             return domDocument;
         } catch (JAXBException e) {
+            throw new MeldingsUtvekslingRuntimeException(e);
+        }
+    }
+
+    private static Document getDomDocument(DocumentBuilderFactory dbf) {
+        try {
+            return dbf.newDocumentBuilder().newDocument();
+        } catch (ParserConfigurationException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
     }

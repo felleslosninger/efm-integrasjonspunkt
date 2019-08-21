@@ -13,6 +13,7 @@ public class OneOfValidator implements ConstraintValidator<OneOf, String> {
 
     private Set<String> acceptedValues;
 
+    @Override
     public void initialize(OneOf constraint) {
         this.acceptedValues = new HashSet<>(Arrays.asList(constraint.value()));
     }

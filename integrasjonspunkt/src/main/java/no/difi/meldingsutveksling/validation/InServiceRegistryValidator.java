@@ -14,6 +14,7 @@ public class InServiceRegistryValidator implements ConstraintValidator<InService
     @Autowired
     private ServiceRegistryLookup serviceRegistryLookup;
 
+    @Override
     public void initialize(InServiceRegistry constraint) {
         // NOOP
     }

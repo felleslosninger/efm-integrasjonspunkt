@@ -78,7 +78,7 @@ public class AltinnPackage {
                 .withExternalService(
                         new ExternalServiceBuilder()
                                 .withExternalServiceCode("v3888")
-                                .withExternalServiceEditionCode(new BigInteger("070515"))
+                                .withExternalServiceEditionCode(BigInteger.valueOf(70515))
                                 .build())
                 .withFileName(getFileName(document))
                 .build();

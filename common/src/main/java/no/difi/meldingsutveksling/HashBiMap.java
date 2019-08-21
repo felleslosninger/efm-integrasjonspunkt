@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class HashBiMap<K, V> extends HashMap<K, V> {
 
-    private final HashMap<V, K> inverse = new HashMap<>();
+    private final transient Map<V, K> inverse = new HashMap<>();
 
     @Override
     public V put(K key, V value) {
@@ -25,5 +25,15 @@ public class HashBiMap<K, V> extends HashMap<K, V> {
 
     public Map<V, K> inverse() {
         return Collections.unmodifiableMap(inverse);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 }

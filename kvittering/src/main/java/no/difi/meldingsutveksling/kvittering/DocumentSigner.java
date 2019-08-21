@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.kvittering;
 
+import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import org.w3c.dom.Document;
@@ -24,6 +25,7 @@ import java.util.List;
 /**
  * @author Glenn Bech
  */
+@UtilityClass
 class DocumentSigner {
 
     private static final String SIGN_ENTIRE_DOCUMENT = "";

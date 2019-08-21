@@ -76,9 +76,13 @@ public class AltinnWsClient {
                 throw new MeldingsUtvekslingRuntimeException("Error waiting for upload thread to finish", e);
             }
         } catch (Exception e) {
-            Audit.error("Message failed to upload to altinn", request.getMarkers(), e);
+            auditError(request, e);
             throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, e);
         }
+    }
+
+    private void auditError(UploadRequest request, Exception e) {
+        Audit.error("Message failed to upload to altinn", request.getMarkers(), e);
     }
 
     private void uploadToAltinn(UploadRequest request, String senderReference, StreamedPayloadBasicBE parameters) {
@@ -87,7 +91,7 @@ public class AltinnWsClient {
             ReceiptExternalStreamedBE receiptAltinn = iBrokerServiceExternalBasicStreamed.uploadFileStreamedBasic(parameters, FILE_NAME, senderReference, request.getSender(), configuration.getPassword(), configuration.getUsername());
             log.debug(markerFrom(receiptAltinn).and(request.getMarkers()), "Message uploaded to altinn");
         } catch (IBrokerServiceExternalBasicStreamedUploadFileStreamedBasicAltinnFaultFaultFaultMessage e) {
-            Audit.error("Message failed to upload to altinn", request.getMarkers(), e);
+            auditError(request, e);
             throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, AltinnReasonFactory.from(e), e);
         }
         log.debug("Thread finished: upload to altinn");
@@ -103,7 +107,7 @@ public class AltinnWsClient {
         try {
             altinnPackage.write(pos, context);
         } catch (IOException e) {
-            Audit.error("Message failed to upload to altinn", request.getMarkers(), e);
+            auditError(request, e);
             throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, e);
         }
     }

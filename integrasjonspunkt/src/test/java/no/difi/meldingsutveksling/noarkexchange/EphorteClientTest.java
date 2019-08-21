@@ -17,7 +17,7 @@ public class EphorteClientTest {
         EphorteClient client = new EphorteClient(settings);
 
         PutMessageResponseType result = client.sendEduMelding(new PutMessageRequestType());
-        assertEquals(result.getResult().getType(), "Hello world");
+        assertEquals("Hello world", result.getResult().getType());
     }
 
     @Test

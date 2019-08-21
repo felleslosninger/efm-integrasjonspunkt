@@ -5,7 +5,7 @@ import org.apache.commons.codec.binary.Base64;
 
 import javax.xml.bind.annotation.*;
 import java.io.InputStream;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "payload", namespace = "urn:no:difi:meldingsutveksling:1.0")
@@ -21,11 +21,11 @@ public class Payload {
     private InputStream inputStream;
 
     public Payload(byte[] payload) {
-        this.Content = new Content(new String(Base64.encodeBase64(payload), Charset.forName("UTF-8")));
+        this.Content = new Content(new String(Base64.encodeBase64(payload), StandardCharsets.UTF_8));
     }
 
     public Payload(byte[] payload, ConversationResource conversation) {
-        this.Content = new Content(new String(Base64.encodeBase64(payload), Charset.forName("UTF-8")));
+        this.Content = new Content(new String(Base64.encodeBase64(payload), StandardCharsets.UTF_8));
         this.conversation = conversation;
     }
 

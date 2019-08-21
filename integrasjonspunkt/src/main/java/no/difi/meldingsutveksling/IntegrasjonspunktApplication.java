@@ -68,6 +68,7 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
         }
     }
 
+    @SuppressWarnings("squid:S106")
     private static void checkNtpSync(ConfigurableApplicationContext context) {
         IntegrasjonspunktProperties props = context.getBean(IntegrasjonspunktProperties.class);
         if (props.getNtp().isDisable()) {
@@ -91,12 +92,14 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
         }
     }
 
+    @SuppressWarnings("squid:S106")
     private static void logMissingJCE(Exception e) {
         System.out.println(MISSING_JCE_MESSAGE);
         log.error(MISSING_JCE_MESSAGE);
         log.error(e.getMessage());
     }
 
+    @SuppressWarnings("squid:S106")
     private static void logMissingJCE() {
         System.out.println(MISSING_JCE_MESSAGE);
         log.error(MISSING_JCE_MESSAGE);

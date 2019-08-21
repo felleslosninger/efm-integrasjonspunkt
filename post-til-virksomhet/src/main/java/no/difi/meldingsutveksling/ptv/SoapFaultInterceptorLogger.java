@@ -56,9 +56,9 @@ public class SoapFaultInterceptorLogger extends ClientInterceptorAdapter {
     public void afterCompletion(MessageContext messageContext, Exception ex) throws WebServiceClientException {
         if (Optional.ofNullable(ex).filter(e -> e instanceof SoapFaultInterceptorLogger.SoapFaultException).isPresent()) {
             final WebServiceMessage response = messageContext.getResponse();
-            Audit.error("Failed to send message", getLogMarker().and(Markers.append("soap_fault", asString(response.getPayloadSource()))), ex);
+            Audit.error(FAILED_TO_SEND_MESSAGE, getLogMarker().and(Markers.append("soap_fault", asString(response.getPayloadSource()))), ex);
         } else if (ex != null) {
-            Audit.error("Failed to send message", ex);
+            Audit.error(FAILED_TO_SEND_MESSAGE, ex);
         }
     }
 

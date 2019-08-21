@@ -24,7 +24,6 @@ import no.difi.meldingsutveksling.nextmove.NextMoveQueue;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.MessageContext;
-import no.difi.meldingsutveksling.noarkexchange.MessageContextException;
 import no.difi.meldingsutveksling.noarkexchange.MessageContextFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
@@ -55,16 +54,10 @@ public class SvarInnNextMoveForwarder implements Consumer<Forsendelse> {
 
     @Override
     public void accept(Forsendelse forsendelse) {
-        MessageContext context;
-        try {
-            context = messageContextFactory.from(forsendelse.getSvarSendesTil().getOrgnr(),
-                    forsendelse.getMottaker().getOrgnr(),
-                    forsendelse.getId(),
-                    keyInfo.getX509Certificate());
-        } catch (MessageContextException e) {
-            log.error("Could not create message context", e);
-            return;
-        }
+        MessageContext context = messageContextFactory.from(forsendelse.getSvarSendesTil().getOrgnr(),
+                forsendelse.getMottaker().getOrgnr(),
+                forsendelse.getId(),
+                keyInfo.getX509Certificate());
         StandardBusinessDocument sbd = createSBD.createNextMoveSBD(
                 context.getAvsender().getOrgNummer(),
                 context.getMottaker().getOrgNummer(),
