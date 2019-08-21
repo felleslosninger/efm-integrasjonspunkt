@@ -551,7 +551,6 @@
                 <version>1.4.3</version>
                 <configuration>
                     <format>ALL</format>
-                    <suppressionFile>${basedir}/suppression.xml</suppressionFile>
                 </configuration>
             </plugin>
         </plugins>
@@ -570,12 +569,4 @@
             </properties>
         </profile>
     </profiles>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-properties-migrator</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-    </dependencies>
 </project>

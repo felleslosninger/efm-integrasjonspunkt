@@ -20,7 +20,6 @@ import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.processM
  */
 public class MessageMarkerFactory {
 
-    private static final String DOCUMENT_ID = "document_id";
     private static final String ALTINN_RECEIPT_ID = "altinn-receipt-id";
     private static final String PAYLOAD_SIZE = "payload-size";
 

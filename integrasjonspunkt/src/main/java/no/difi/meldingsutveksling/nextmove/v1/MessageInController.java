@@ -110,6 +110,7 @@ public class MessageInController {
     }
 
     @PostMapping("/pop")
+    @Transactional
     public ResponseEntity popPost(
             @RequestParam(value = "serviceIdentifier", required = false) String serviceIdentifier,
             @RequestParam(value = "conversationId", required = false) String conversationId) {

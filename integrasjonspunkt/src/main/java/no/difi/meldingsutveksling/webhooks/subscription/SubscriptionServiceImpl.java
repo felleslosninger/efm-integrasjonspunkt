@@ -7,7 +7,6 @@ import no.difi.meldingsutveksling.exceptions.SubscriptionNotFoundException;
 import no.difi.meldingsutveksling.webhooks.WebhookPusher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
