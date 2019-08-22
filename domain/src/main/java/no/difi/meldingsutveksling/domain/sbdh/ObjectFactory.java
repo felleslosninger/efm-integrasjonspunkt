@@ -32,10 +32,10 @@ public class ObjectFactory {
 
     private static final String NAMESPACE_URI = "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader";
     private static final QName _CorrelationInformation_QNAME = new QName(NAMESPACE_URI, "CorrelationInformation");
-    private static final QName _BusinessService_QNAME = new QName("http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader", "BusinessService");
-    private static final QName _ScopeInformation_QNAME = new QName("http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader", "ScopeInformation");
-    private static final QName _StandardBusinessDocumentHeader_QNAME = new QName("http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader", "StandardBusinessDocumentHeader");
-    private static final QName _StandardBusinessDocument_QNAME = new QName("http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader", "StandardBusinessDocument");
+    private static final QName _BusinessService_QNAME = new QName(NAMESPACE_URI, "BusinessService");
+    private static final QName _ScopeInformation_QNAME = new QName(NAMESPACE_URI, "ScopeInformation");
+    private static final QName _StandardBusinessDocumentHeader_QNAME = new QName(NAMESPACE_URI, "StandardBusinessDocumentHeader");
+    private static final QName _StandardBusinessDocument_QNAME = new QName(NAMESPACE_URI, "StandardBusinessDocument");
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: no.difi.meldingsutveksling.domain.sbdh

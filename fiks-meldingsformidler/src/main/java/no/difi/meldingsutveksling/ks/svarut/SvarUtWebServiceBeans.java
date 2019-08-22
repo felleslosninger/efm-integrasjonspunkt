@@ -43,9 +43,9 @@ public class SvarUtWebServiceBeans {
 
     @Bean
     public AbstractHttpWebServiceMessageSender svarUtMessageSender(IntegrasjonspunktProperties properties) {
-        return new PreauthMessageSender()
-                .setUser(properties.getFiks().getUt().getUsername())
-                .setPass(properties.getFiks().getUt().getPassword());
+        return new PreauthMessageSender(
+                properties.getFiks().getUt().getUsername(),
+                properties.getFiks().getUt().getPassword());
     }
 
     @Bean
