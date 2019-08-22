@@ -10,6 +10,7 @@ import java.util.List;
 @ApiModel(value = "capabilities")
 public class Capabilities {
 
+    @SuppressWarnings("squid:S1700")
     @ApiModelProperty(value = "List of capabilities")
     private List<Capability> capabilities;
 }

@@ -44,6 +44,12 @@
         <dependency>
             <groupId>com.nimbusds</groupId>
             <artifactId>oauth2-oidc-sdk</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>javax.mail</artifactId>
+                    <groupId>com.sun.mail</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

@@ -1,11 +1,13 @@
 package no.difi.meldingsutveksling.kvittering;
 
+import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import javax.xml.XMLConstants;
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.*;
 import javax.xml.crypto.dsig.dom.DOMSignContext;
@@ -15,6 +17,7 @@ import javax.xml.crypto.dsig.keyinfo.KeyValue;
 import javax.xml.crypto.dsig.spec.C14NMethodParameterSpec;
 import javax.xml.crypto.dsig.spec.TransformParameterSpec;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyException;
 import java.security.NoSuchAlgorithmException;
@@ -24,6 +27,7 @@ import java.util.List;
 /**
  * @author Glenn Bech
  */
+@UtilityClass
 class DocumentSigner {
 
     private static final String SIGN_ENTIRE_DOCUMENT = "";
@@ -33,15 +37,17 @@ class DocumentSigner {
      * receiver can verify to make sure it was not tampered with
      *
      * @param ipNokkel the IntegrasjonspunktNokkel managing private and public key for the signer
-     * @param doc     the document to sign
+     * @param doc      the document to sign
      */
     public static Document sign(Document doc, IntegrasjonspunktNokkel ipNokkel) {
 
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        documentBuilderFactory.setNamespaceAware(true);
         try {
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            documentBuilderFactory.setNamespaceAware(true);
+
             XMLSignatureFactory xmlSignatureFactory;
-            if( ipNokkel.shouldLockProvider()) {
+            if (ipNokkel.shouldLockProvider()) {
                 xmlSignatureFactory = XMLSignatureFactory.getInstance("DOM", ipNokkel.getKeyStore().getProvider());
             } else {
                 xmlSignatureFactory = XMLSignatureFactory.getInstance("DOM");
@@ -84,6 +90,7 @@ class DocumentSigner {
                 MarshalException |
                 InvalidAlgorithmParameterException |
                 KeyException |
+                ParserConfigurationException |
                 XMLSignatureException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }

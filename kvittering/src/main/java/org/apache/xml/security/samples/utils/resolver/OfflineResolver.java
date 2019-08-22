@@ -1,9 +1,8 @@
 /**
- *
  * Modified version of xml-security-java/trunk/samples/org/apache/xml/security/samples/utils/resolver/OfflineResolver.java
  * from http://santuario.apache.org/
  * Made changes to be compatible with our currently used version of xmlsec.
- *
+ * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
  * distributed with this work for additional information
@@ -11,9 +10,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,10 +22,12 @@
  */
 package org.apache.xml.security.samples.utils.resolver;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.xml.security.signature.XMLSignatureInput;
 import org.apache.xml.security.utils.resolver.ResourceResolverContext;
 import org.apache.xml.security.utils.resolver.ResourceResolverException;
 import org.apache.xml.security.utils.resolver.ResourceResolverSpi;
+import org.springframework.http.MediaType;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -42,50 +43,49 @@ import java.util.Map;
  *
  * @author $Author$
  */
+@Slf4j
 public class OfflineResolver extends ResourceResolverSpi {
 
-    static org.slf4j.Logger log =
-            org.slf4j.LoggerFactory.getLogger(OfflineResolver.class);
+    /**
+     * Field _uriMap
+     */
+    private static Map<String, String> uriMap = null;
 
-    /** Field _uriMap */
-    static Map<String, String> _uriMap = null;
-
-    /** Field _mimeMap */
-    static Map<String, String> _mimeMap = null;
+    /**
+     * Field _mimeMap
+     */
+    private static Map<String, String> mimeMap = null;
 
     static {
         org.apache.xml.security.Init.init();
 
-        OfflineResolver._uriMap = new HashMap<String, String>();
-        OfflineResolver._mimeMap = new HashMap<String, String>();
+        OfflineResolver.uriMap = new HashMap<>();
+        OfflineResolver.mimeMap = new HashMap<>();
 
         OfflineResolver.register("http://www.w3.org/TR/xml-stylesheet",
                 "samples/data/org/w3c/www/TR/xml-stylesheet.html",
-                "text/html");
+                MediaType.TEXT_HTML_VALUE);
         OfflineResolver.register("http://www.w3.org/TR/2000/REC-xml-20001006",
                 "samples/data/org/w3c/www/TR/2000/REC-xml-20001006",
-                "text/xml");
+                MediaType.TEXT_XML_VALUE);
         OfflineResolver.register("http://www.nue.et-inf.uni-siegen.de/index.html",
                 "samples/data/org/apache/xml/security/temp/nuehomepage",
-                "text/html");
+                MediaType.TEXT_HTML_VALUE);
         OfflineResolver.register("http://www.nue.et-inf.uni-siegen.de/~geuer-pollmann/id2.xml",
-                "samples/data/org/apache/xml/security/temp/id2.xml", "text/xml");
+                "samples/data/org/apache/xml/security/temp/id2.xml", MediaType.TEXT_XML_VALUE);
         OfflineResolver.register("http://xmldsig.pothole.com/xml-stylesheet.txt",
-                "samples/data/com/pothole/xmldsig/xml-stylesheet.txt", "text/xml");
+                "samples/data/com/pothole/xmldsig/xml-stylesheet.txt", MediaType.TEXT_XML_VALUE);
         OfflineResolver.register("http://www.w3.org/Signature/2002/04/xml-stylesheet.b64",
-                "samples/data/ie/baltimore/merlin-examples/merlin-xmldsig-twenty-three/xml-stylesheet.b64", "text/plain");
+                "samples/data/ie/baltimore/merlin-examples/merlin-xmldsig-twenty-three/xml-stylesheet.b64",
+                MediaType.TEXT_PLAIN_VALUE);
     }
 
     /**
      * Method register
-     *
-     * @param URI
-     * @param filename
-     * @param MIME
      */
-    private static void register(String URI, String filename, String MIME) {
-        OfflineResolver._uriMap.put(URI, filename);
-        OfflineResolver._mimeMap.put(URI, MIME);
+    private static void register(String uri, String filename, String mime) {
+        OfflineResolver.uriMap.put(uri, filename);
+        OfflineResolver.mimeMap.put(uri, mime);
     }
 
     private static URI getNewURI(String uri, String baseURI) throws URISyntaxException {
@@ -108,24 +108,22 @@ public class OfflineResolver extends ResourceResolverSpi {
         final String uriToResolve = context.uriToResolve;
         try {
 
-            if (OfflineResolver._uriMap.containsKey(uriToResolve)) {
-                String newURI = OfflineResolver._uriMap.get(uriToResolve);
+            if (OfflineResolver.uriMap.containsKey(uriToResolve)) {
+                String newURI = OfflineResolver.uriMap.get(uriToResolve);
 
                 log.debug("Mapped " + uriToResolve + " to " + newURI);
 
-                InputStream is = new FileInputStream(newURI);
+                try (InputStream is = new FileInputStream(newURI)) {
+                    log.debug("Available bytes = " + is.available());
 
-                log.debug("Available bytes = " + is.available());
+                    XMLSignatureInput result = new XMLSignatureInput(is);
+                    result.setSourceURI(uriToResolve);
+                    result.setMIMEType(OfflineResolver.mimeMap.get(uriToResolve));
 
-                XMLSignatureInput result = new XMLSignatureInput(is);
-
-                // XMLSignatureInput result = new XMLSignatureInput(inputStream);
-                result.setSourceURI(uriToResolve);
-                result.setMIMEType(OfflineResolver._mimeMap.get(uriToResolve));
-
-                return result;
+                    return result;
+                }
             } else {
-                Object exArgs[] = {"The URI " + uriToResolve + " is not configured for offline work"};
+                Object[] exArgs = {"The URI " + uriToResolve + " is not configured for offline work"};
 
                 throw new ResourceResolverException("generic.EmptyMessage", exArgs, uriToResolve, context.baseUri);
             }
@@ -144,11 +142,15 @@ public class OfflineResolver extends ResourceResolverSpi {
         try {
             URI uriNew = getNewURI(uriNodeValue, context.baseUri);
             if (uriNew.getScheme().equals("http")) {
-                log.debug("I state that I can resolve " + uriNew.toString());
+                if (log.isDebugEnabled()) {
+                    log.debug(String.format("I state that I can resolve %s", uriNew.toString()));
+                }
                 return true;
             }
 
-            log.debug("I state that I can't resolve " + uriNew.toString());
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("I state that I can't resolve %s", uriNew.toString()));
+            }
         } catch (URISyntaxException ex) {
             //
         }

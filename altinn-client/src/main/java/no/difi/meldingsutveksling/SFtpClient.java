@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling;
 
 import com.jcraft.jsch.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+@Slf4j
 public class SFtpClient {
 
     private final JSch jSch = new JSch();
@@ -34,7 +36,7 @@ public class SFtpClient {
         }
         String keyfile = resource.getPath();
 
-        System.out.println("--> " + keyfile);
+        log.info("--> " + keyfile);
 
 
         try {
@@ -107,7 +109,7 @@ public class SFtpClient {
                 altinnPackage.write(outputStream, null);
                 sftp.quit();
             } catch (SftpException | IOException e) {
-                e.printStackTrace();
+                log.error("FTP put failed", e);
             }
         }
 

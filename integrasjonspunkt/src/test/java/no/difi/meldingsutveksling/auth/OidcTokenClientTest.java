@@ -92,7 +92,7 @@ public class OidcTokenClientTest {
 
     @Test
     @Ignore("Manual test")
-    public void testOathRestTemplate() throws InterruptedException, URISyntaxException {
+    public void testOathRestTemplate() throws URISyntaxException {
         OidcTokenClient oidcTokenClient = new OidcTokenClient(props);
         OauthRestTemplateConfig config = new OauthRestTemplateConfig(props, oidcTokenClient);
         RestOperations ops = config.restTemplate();

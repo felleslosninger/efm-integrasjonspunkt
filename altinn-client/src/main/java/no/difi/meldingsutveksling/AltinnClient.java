@@ -46,6 +46,7 @@ public class AltinnClient {
         }
     }
 
+    @SuppressWarnings("squid:S106")
     private void printIt(AltinnPackage altinnPackage) {
         try {
             JAXBContext ctx = JAXBContextFactory.createContext(new Class[]{StandardBusinessDocument.class}, null);

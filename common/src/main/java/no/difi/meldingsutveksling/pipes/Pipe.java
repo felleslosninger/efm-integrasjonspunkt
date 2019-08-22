@@ -7,7 +7,6 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -46,6 +45,7 @@ public class Pipe {
         }
     }
 
+    @SuppressWarnings("squir:S1172")
     private void handleCompleteAsync(Void dummy, Throwable t) {
         close();
         if (t != null) {

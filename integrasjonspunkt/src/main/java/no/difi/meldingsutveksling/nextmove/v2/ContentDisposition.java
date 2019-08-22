@@ -20,6 +20,8 @@ import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 @Builder
 public final class ContentDisposition {
 
+    private static final String CHARSET_SHOULD_BE_UTF_8_OR_ISO_8859_1 = "Charset should be UTF-8 or ISO-8859-1";
+
     private final String type;
     private final String name;
     private final String filename;
@@ -90,16 +92,14 @@ public final class ContentDisposition {
      * @return the parsed content disposition
      * @see #toString()
      */
+    @SuppressWarnings("squid:S3776")
     public static ContentDisposition parse(String contentDisposition) {
         List<String> parts = tokenize(contentDisposition);
-        String type = parts.get(0);
-        String name = null;
+
+        ContentDispositionBuilder builder = ContentDisposition.builder()
+                .type(parts.get(0));
+
         String filename = null;
-        Charset charset = null;
-        Long size = null;
-        OffsetDateTime creationDate = null;
-        OffsetDateTime modificationDate = null;
-        OffsetDateTime readDate = null;
         for (int i = 1; i < parts.size(); i++) {
             String part = parts.get(i);
             int eqIndex = part.indexOf('=');
@@ -107,33 +107,36 @@ public final class ContentDisposition {
                 String attribute = part.substring(0, eqIndex);
                 String value = (part.startsWith("\"", eqIndex + 1) && part.endsWith("\"") ?
                         part.substring(eqIndex + 2, part.length() - 1) :
-                        part.substring(eqIndex + 1, part.length()));
+                        part.substring(eqIndex + 1));
                 if (attribute.equals("name")) {
-                    name = value;
+                    builder.name(value);
                 } else if (attribute.equals("filename*")) {
                     filename = decodeHeaderFieldParam(value);
-                    charset = Charset.forName(value.substring(0, value.indexOf('\'')));
+                    builder.filename(filename);
+                    Charset charset = Charset.forName(value.substring(0, value.indexOf('\'')));
+                    builder.charset(charset);
                     Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
-                            "Charset should be UTF-8 or ISO-8859-1");
+                            CHARSET_SHOULD_BE_UTF_8_OR_ISO_8859_1);
                 } else if (attribute.equals("filename") && (filename == null)) {
                     filename = value;
+                    builder.filename(filename);
                 } else if (attribute.equals("size")) {
-                    size = Long.parseLong(value);
+                    builder.size(Long.parseLong(value));
                 } else if (attribute.equals("creation-date")) {
                     try {
-                        creationDate = OffsetDateTime.parse(value, RFC_1123_DATE_TIME);
+                        builder.creationDate(OffsetDateTime.parse(value, RFC_1123_DATE_TIME));
                     } catch (DateTimeParseException ex) {
                         // ignore
                     }
                 } else if (attribute.equals("modification-date")) {
                     try {
-                        modificationDate = OffsetDateTime.parse(value, RFC_1123_DATE_TIME);
+                        builder.modificationDate(OffsetDateTime.parse(value, RFC_1123_DATE_TIME));
                     } catch (DateTimeParseException ex) {
                         // ignore
                     }
                 } else if (attribute.equals("read-date")) {
                     try {
-                        readDate = OffsetDateTime.parse(value, RFC_1123_DATE_TIME);
+                        builder.readDate(OffsetDateTime.parse(value, RFC_1123_DATE_TIME));
                     } catch (DateTimeParseException ex) {
                         // ignore
                     }
@@ -142,7 +145,7 @@ public final class ContentDisposition {
                 throw new IllegalArgumentException("Invalid content disposition format");
             }
         }
-        return new ContentDisposition(type, name, filename, charset, size, creationDate, modificationDate, readDate);
+        return builder.build();
     }
 
     private static List<String> tokenize(String headerValue) {
@@ -155,19 +158,7 @@ public final class ContentDisposition {
         parts.add(type);
         if (index >= 0) {
             do {
-                int nextIndex = index + 1;
-                boolean quoted = false;
-                while (nextIndex < headerValue.length()) {
-                    char ch = headerValue.charAt(nextIndex);
-                    if (ch == ';') {
-                        if (!quoted) {
-                            break;
-                        }
-                    } else if (ch == '"') {
-                        quoted = !quoted;
-                    }
-                    nextIndex++;
-                }
+                int nextIndex = getNextIndex(headerValue, index);
                 String part = headerValue.substring(index + 1, nextIndex).trim();
                 if (!part.isEmpty()) {
                     parts.add(part);
@@ -177,6 +168,23 @@ public final class ContentDisposition {
             while (index < headerValue.length());
         }
         return parts;
+    }
+
+    private static int getNextIndex(String headerValue, int index) {
+        int nextIndex = index + 1;
+        boolean quoted = false;
+        while (nextIndex < headerValue.length()) {
+            char ch = headerValue.charAt(nextIndex);
+            if (ch == ';') {
+                if (!quoted) {
+                    break;
+                }
+            } else if (ch == '"') {
+                quoted = !quoted;
+            }
+            nextIndex++;
+        }
+        return nextIndex;
     }
 
     /**
@@ -197,8 +205,8 @@ public final class ContentDisposition {
         }
         Charset charset = Charset.forName(input.substring(0, firstQuoteIndex));
         Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
-                "Charset should be UTF-8 or ISO-8859-1");
-        byte[] value = input.substring(secondQuoteIndex + 1, input.length()).getBytes(charset);
+                CHARSET_SHOULD_BE_UTF_8_OR_ISO_8859_1);
+        byte[] value = input.substring(secondQuoteIndex + 1).getBytes(charset);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         int index = 0;
         while (index < value.length) {
@@ -239,7 +247,7 @@ public final class ContentDisposition {
             return input;
         }
         Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
-                "Charset should be UTF-8 or ISO-8859-1");
+                CHARSET_SHOULD_BE_UTF_8_OR_ISO_8859_1);
         byte[] source = input.getBytes(charset);
         int len = source.length;
         StringBuilder sb = new StringBuilder(len << 1);

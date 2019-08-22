@@ -11,6 +11,7 @@ public class IntegrasjonspunkEurekaApplicationTests {
 
 	@Test
 	public void contextLoads() {
+		// Tests that the configuration loads
 	}
 
 }

@@ -56,9 +56,9 @@ public class CmsUtil {
 
         AlgorithmIdentifier hash = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256, DERNull.INSTANCE);
         AlgorithmIdentifier mask = new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, hash);
-        AlgorithmIdentifier p_source = new AlgorithmIdentifier(PKCSObjectIdentifiers.id_pSpecified, new DEROctetString(new byte[0]));
+        AlgorithmIdentifier pSource = new AlgorithmIdentifier(PKCSObjectIdentifiers.id_pSpecified, new DEROctetString(new byte[0]));
 
-        ASN1Encodable parameters = new RSAESOAEPparams(hash, mask, p_source);
+        ASN1Encodable parameters = new RSAESOAEPparams(hash, mask, pSource);
 
         return new AlgorithmIdentifier(PKCSObjectIdentifiers.id_RSAES_OAEP, parameters);
     }

@@ -2,8 +2,8 @@ package no.difi.meldingsutveksling.transport;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Payload;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.springframework.context.ApplicationContext;
@@ -49,11 +49,10 @@ public class FileTransport implements Transport {
      */
     @Override
     public void send(ApplicationContext context, StandardBusinessDocument sbd, InputStream is) {
-
+        // Not currently in use
     }
 
     private String createFilename() {
         return System.currentTimeMillis() + ".xml";
     }
-
 }

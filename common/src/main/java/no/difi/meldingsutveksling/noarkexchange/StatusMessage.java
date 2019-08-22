@@ -7,7 +7,7 @@ public enum StatusMessage {
     UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT("Ikke i stand til å sende melding til mottaker", "Unable to create standard business document that reciever expects", 4),
     UNABLE_TO_EXTRACT_ZIP_CONTENTS("Kan ikke behandle melding", "Unable to extract zip contents", 5),
     UNABLE_TO_EXTRACT_BEST_EDU("Teknisk feil: kan ikke behandle melding", "Unable to extract BEST EDU", 6),
-    UNABLE_TO_FIND_RECEIVER("Mottaker ikke funnet", "Motaker ikke funnet i Adresseregister",7),
+    UNABLE_TO_FIND_RECEIVER("Mottaker ikke funnet", "Motaker ikke funnet i Adresseregister", 7),
     MISSING_PAYLOAD("Request has missing or empty payload", "Missing payload", 8),
     APP_RECEIPT_CONTAINS_ERROR("Technical error from the receiving archive system", "AppReceipt contains an error", 9),
     DPV_REQUEST_MISSING_VALUES("Teknisk feil: Kunne ikke sende post til virksomhet", "Failed to create Correspondence Agency Request", 10),
@@ -20,7 +20,7 @@ public enum StatusMessage {
 
     private final String endUserMessage;
     private final String technicalMessage;
-    private String id;
+    private final String id;
 
     StatusMessage(String endUserMessage, String technicalMessage, int id) {
         this.endUserMessage = endUserMessage;
@@ -38,9 +38,5 @@ public enum StatusMessage {
 
     public String getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 }

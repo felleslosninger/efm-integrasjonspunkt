@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 
@@ -12,11 +13,12 @@ import java.io.ByteArrayOutputStream;
 public class PutMessageRequestConverter {
 
     private static final JAXBContext jaxbContext;
+
     static {
         try {
             jaxbContext = JAXBContextFactory.createContext("no.difi.meldingsutveksling.kvittering.xsd:no.difi.meldingsutveksling.noarkexchange.schema", Thread.currentThread().getContextClassLoader());
         } catch (JAXBException e) {
-            throw new RuntimeException("Could not create JAXBContext for " + PutMessageRequestType.class);
+            throw new MeldingsUtvekslingRuntimeException("Could not create JAXBContext for " + PutMessageRequestType.class);
         }
     }
 
@@ -27,7 +29,7 @@ public class PutMessageRequestConverter {
             marshaller.marshal(new JAXBElement<>(new QName("uri", "local"), PutMessageRequestType.class, request), os);
             return os.toByteArray();
         } catch (JAXBException e) {
-            throw new RuntimeException("Unable to create unmarshaller for " + PutMessageRequestType.class, e);
+            throw new MeldingsUtvekslingRuntimeException("Unable to create unmarshaller for " + PutMessageRequestType.class, e);
         }
     }
 
@@ -40,7 +42,7 @@ public class PutMessageRequestConverter {
             StreamSource source = new StreamSource(is);
             return unmarshaller.unmarshal(source, PutMessageRequestType.class).getValue();
         } catch (JAXBException e) {
-            throw new RuntimeException("Unable to create unmarshaller for " + PutMessageRequestType.class, e);
+            throw new MeldingsUtvekslingRuntimeException("Unable to create unmarshaller for " + PutMessageRequestType.class, e);
         }
     }
 }

@@ -39,7 +39,7 @@ public class MessageContextFactory {
         return context;
     }
 
-    public MessageContext from(String senderOrgnr, String receiverOrgnr, String conversationId, Certificate certificate) throws MessageContextException {
+    public MessageContext from(String senderOrgnr, String receiverOrgnr, String conversationId, Certificate certificate) {
         MessageContext context = new MessageContext();
         context.setAvsender(createAvsender(senderOrgnr));
         context.setMottaker(createMottaker(receiverOrgnr, certificate));

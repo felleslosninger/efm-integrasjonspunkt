@@ -58,6 +58,7 @@ public class HovedDokument {
 	@XmlRootElement(name = "tittel")
 	public static class Tittel {
 		@XmlValue
+		@SuppressWarnings("squid:S1700")
 		private String tittel;
 		@XmlAttribute
 		private String lang;

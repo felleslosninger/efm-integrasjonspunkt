@@ -12,6 +12,7 @@ public class IsDocumentTypeValidator implements ConstraintValidator<IsDocumentTy
 
     private ApiType api;
 
+    @Override
     public void initialize(IsDocumentType constraint) {
         this.api = constraint.value();
     }

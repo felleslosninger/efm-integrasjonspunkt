@@ -128,8 +128,10 @@ public class Conversation extends AbstractEntity<Long> implements MessageInforma
     Conversation addMessageStatus(MessageStatus status) {
         status.setConversation(this);
         this.messageStatuses.add(status);
-        statusLogger.info(markerFrom(this).and(markerFrom(status)), String.format("Conversation [id=%s] updated with status \"%s\"",
-                this.getConversationId(), status.getStatus()));
+        if (statusLogger.isInfoEnabled()) {
+            statusLogger.info(markerFrom(this).and(markerFrom(status)), String.format("Conversation [id=%s] updated with status \"%s\"",
+                    this.getConversationId(), status.getStatus()));
+        }
         return this;
     }
 

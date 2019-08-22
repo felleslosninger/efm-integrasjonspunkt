@@ -10,6 +10,7 @@ public class InstanceOfValidator implements ConstraintValidator<InstanceOf, Obje
 
     private Class<?> expectedClass;
 
+    @Override
     public void initialize(InstanceOf constraint) {
         this.expectedClass = constraint.value();
     }

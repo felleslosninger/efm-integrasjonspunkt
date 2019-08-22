@@ -286,6 +286,12 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>kvittering</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>stax2-api</artifactId>
+                    <groupId>org.codehaus.woodstox</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
@@ -306,6 +312,20 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>security</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>javax.mail</artifactId>
+                    <groupId>com.sun.mail</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>json-smart</artifactId>
+                    <groupId>net.minidev</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>asm</artifactId>
+                    <groupId>org.ow2.asm</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
@@ -315,10 +335,22 @@
         <dependency>
             <groupId>no.difi.commons</groupId>
             <artifactId>commons-certvalidator</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>guava</artifactId>
+                    <groupId>com.google.guava</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>no.difi.vefa</groupId>
             <artifactId>peppol-lookup</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>guava</artifactId>
+                    <groupId>com.google.guava</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -395,6 +427,12 @@
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>activemq-broker</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>error_prone_annotations</artifactId>
+                    <groupId>com.google.errorprone</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.activemq</groupId>
@@ -413,10 +451,22 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jetty</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>asm</artifactId>
+                    <groupId>org.ow2.asm</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>asm</artifactId>
+                    <groupId>org.ow2.asm</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -488,9 +538,13 @@
         </dependency>
 
         <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>jakarta.mail</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.jvnet.jax-ws-commons.spring</groupId>
             <artifactId>jaxws-spring</artifactId>
-            <version>1.9</version>
             <exclusions>
                 <exclusion>
                     <groupId>javax.servlet</groupId>
@@ -503,6 +557,10 @@
                 <exclusion>
                     <artifactId>commons-logging</artifactId>
                     <groupId>commons-logging</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>FastInfoset</artifactId>
+                    <groupId>com.sun.xml.fastinfoset</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -522,12 +580,6 @@
             <artifactId>lombok</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax</groupId>
-            <artifactId>javaee-api</artifactId>
-            <version>7.0</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
         </dependency>
@@ -536,6 +588,12 @@
             <groupId>org.powermock</groupId>
             <artifactId>powermock-module-junit4</artifactId>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>javassist</artifactId>
+                    <groupId>org.javassist</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
@@ -586,6 +644,12 @@
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>checker-qual</artifactId>
+                    <groupId>org.checkerframework</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
@@ -599,11 +663,7 @@
 
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
-            <artifactId>eclipselink</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.mail</groupId>
-            <artifactId>javax.mail-api</artifactId>
+            <artifactId>org.eclipse.persistence.moxy</artifactId>
         </dependency>
 
         <dependency>
@@ -651,6 +711,12 @@
         <dependency>
             <groupId>com.microsoft.azure</groupId>
             <artifactId>azure-servicebus</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>proton-j</artifactId>
+                    <groupId>org.apache.qpid</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -660,6 +726,12 @@
         <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-apt</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>javassist</artifactId>
+                    <groupId>org.javassist</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
@@ -687,6 +759,10 @@
         <dependency>
             <groupId>org.jvnet.staxex</groupId>
             <artifactId>stax-ex</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.jms</groupId>
+            <artifactId>javax.jms-api</artifactId>
         </dependency>
     </dependencies>
 </project>

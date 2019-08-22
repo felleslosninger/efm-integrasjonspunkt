@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import org.springframework.util.StringUtils;
 import org.springframework.xml.transform.StringSource;
@@ -9,6 +10,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -63,7 +65,7 @@ public class PayloadUtil {
         } else if (payload instanceof Node) {
             return ((Node) payload).getFirstChild().getTextContent();
         } else {
-            throw new RuntimeException("Could not get payload as String");
+            throw new MeldingsUtvekslingRuntimeException("Could not get payload as String");
         }
     }
 
@@ -73,7 +75,7 @@ public class PayloadUtil {
         } else if (payload instanceof Node) {
             return !((Node) payload).hasChildNodes();
         } else {
-            throw new RuntimeException(PAYLOAD_UNKNOWN_TYPE);
+            throw new MeldingsUtvekslingRuntimeException(PAYLOAD_UNKNOWN_TYPE);
         }
     }
 
@@ -97,8 +99,9 @@ public class PayloadUtil {
             String doc = getDoc(payload);
 
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
             DocumentBuilder builder = factory.newDocumentBuilder();
-            Document document = builder.parse(new ByteArrayInputStream(doc.getBytes(java.nio.charset.Charset.forName("utf-8"))));
+            Document document = builder.parse(new ByteArrayInputStream(doc.getBytes(StandardCharsets.UTF_8)));
             result = expression.evaluate(document);
         } catch (XPathExpressionException | ParserConfigurationException | SAXException | IOException e) {
             throw new PayloadException("Could not execute query \'" + xpath + "\'  on the payload");
@@ -109,12 +112,8 @@ public class PayloadUtil {
     public static List<NoarkDocument> parsePayloadForDocuments(Object payload) throws PayloadException {
         List<NoarkDocument> docs = new ArrayList<>();
 
-        String doc = getDoc(payload);
-
-        XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
-        XMLEventReader eventReader;
         try {
-            eventReader = xmlInputFactory.createXMLEventReader(new StringReader(doc));
+            XMLEventReader eventReader = getEventReader(payload);
             NoarkDocument noarkDocument = null;
             while (eventReader.hasNext()) {
                 XMLEvent event = eventReader.nextEvent();
@@ -126,28 +125,16 @@ public class PayloadUtil {
                             noarkDocument = new NoarkDocument();
                             break;
                         case "veFilnavn":
-                            event = eventReader.nextEvent();
-                            if (noarkDocument != null) {
-                                noarkDocument.setFilename(event.asCharacters().getData());
-                            }
+                            event = setFilename(eventReader, noarkDocument);
                             break;
                         case "veMimeType":
-                            event = eventReader.nextEvent();
-                            if (noarkDocument != null) {
-                                noarkDocument.setContentType(event.asCharacters().getData());
-                            }
+                            event = setContentType(eventReader, noarkDocument);
                             break;
                         case "dbTittel":
-                            event = eventReader.nextEvent();
-                            if (noarkDocument != null) {
-                                noarkDocument.setTitle(event.asCharacters().getData());
-                            }
+                            event = setTitle(eventReader, noarkDocument);
                             break;
                         case "base64":
-                            event = eventReader.nextEvent();
-                            if (noarkDocument != null) {
-                                noarkDocument.setContent(event.asCharacters().getData().getBytes(StandardCharsets.UTF_8));
-                            }
+                            event = setContent(eventReader, noarkDocument);
                             break;
                         default:
                             break;
@@ -164,6 +151,49 @@ public class PayloadUtil {
         } catch (XMLStreamException e) {
             throw new PayloadException("Error parsing payload", e);
         }
+    }
+
+    private static XMLEvent setContent(XMLEventReader eventReader, NoarkDocument noarkDocument) throws XMLStreamException {
+        XMLEvent event;
+        event = eventReader.nextEvent();
+        if (noarkDocument != null) {
+            noarkDocument.setContent(event.asCharacters().getData().getBytes(StandardCharsets.UTF_8));
+        }
+        return event;
+    }
+
+    private static XMLEvent setTitle(XMLEventReader eventReader, NoarkDocument noarkDocument) throws XMLStreamException {
+        XMLEvent event;
+        event = eventReader.nextEvent();
+        if (noarkDocument != null) {
+            noarkDocument.setTitle(event.asCharacters().getData());
+        }
+        return event;
+    }
+
+    private static XMLEvent setContentType(XMLEventReader eventReader, NoarkDocument noarkDocument) throws XMLStreamException {
+        XMLEvent event;
+        event = eventReader.nextEvent();
+        if (noarkDocument != null) {
+            noarkDocument.setContentType(event.asCharacters().getData());
+        }
+        return event;
+    }
+
+    private static XMLEvent setFilename(XMLEventReader eventReader, NoarkDocument noarkDocument) throws XMLStreamException {
+        XMLEvent event;
+        event = eventReader.nextEvent();
+        if (noarkDocument != null) {
+            noarkDocument.setFilename(event.asCharacters().getData());
+        }
+        return event;
+    }
+
+    private XMLEventReader getEventReader(Object payload) throws XMLStreamException {
+        String doc = getDoc(payload);
+        XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+        xmlInputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+        return xmlInputFactory.createXMLEventReader(new StringReader(doc));
     }
 
     private static String getDoc(Object payload) {
