@@ -25,9 +25,15 @@ public class NextMoveServiceBusPayloadFactory {
         return ServiceBusPayload.of(message.getSbd(), getAsicBytes(message));
     }
 
+    @SuppressWarnings({"squid:S1168", "squid:S2583"})
     private byte[] getAsicBytes(NextMoveOutMessage message) throws NextMoveException {
         try {
             InputStream encryptedAsic = asicHandler.createEncryptedAsic(message, getMessageContext(message));
+
+            if (encryptedAsic == null) {
+                return null;
+            }
+
             return Base64.getEncoder().encode(IOUtils.toByteArray(encryptedAsic));
         } catch (IOException e) {
             throw new NextMoveException("Unable to read encrypted asic", e);
