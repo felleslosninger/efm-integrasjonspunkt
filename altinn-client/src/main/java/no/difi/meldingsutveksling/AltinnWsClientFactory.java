@@ -1,7 +1,5 @@
 package no.difi.meldingsutveksling;
 
-//import com.sun.xml.ws.developer.JAXWSProperties;
-
 import com.sun.xml.ws.developer.JAXWSProperties;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceExternalBasicSF;

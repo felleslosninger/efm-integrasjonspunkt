@@ -57,6 +57,9 @@ public class CorrespondenceAgencyMessageFactory {
     private final CryptoMessagePersister cryptoMessagePersister;
     private final Clock clock;
     private final ReporteeFactory reporteeFactory;
+    private final ObjectFactory objectFactory = new ObjectFactory();
+    private final no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory correspondenceObjectFactory = new no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory();
+    private final no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory notificationObjectFactory = new no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory();
 
     @SneakyThrows
     public InsertCorrespondenceV2 create(NextMoveOutMessage message) {
@@ -83,10 +86,7 @@ public class CorrespondenceAgencyMessageFactory {
 
             attachmentExternalBEV2List.getBinaryAttachmentV2().addAll(getAttachments(message.getMessageId(), files));
 
-            return create(message.getConversationId(),
-                    message.getReceiverIdentifier(),
-                    message.getSbd().getProcess(),
-                    message.getSbd().getStandard(),
+            return create(message,
                     jp.getOffentligTittel(),
                     jp.getOffentligTittel(),
                     jp.getTittel(),
@@ -99,10 +99,7 @@ public class CorrespondenceAgencyMessageFactory {
             BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
             attachmentExternalBEV2List.getBinaryAttachmentV2().addAll(getAttachments(message.getMessageId(), message.getFiles()));
 
-            return create(message.getConversationId(),
-                    message.getReceiverIdentifier(),
-                    message.getSbd().getProcess(),
-                    message.getSbd().getStandard(),
+            return create(message,
                     msg.getTittel(),
                     msg.getSammendrag(),
                     msg.getInnhold(),
@@ -143,30 +140,26 @@ public class CorrespondenceAgencyMessageFactory {
         }
     }
 
-    public InsertCorrespondenceV2 create(String conversationId,
-                                         String receiverIdentifier,
-                                         String process,
-                                         String documentType,
+    public InsertCorrespondenceV2 create(NextMoveOutMessage message,
                                          String messageTitle,
                                          String messageSummary,
                                          String messageBody,
                                          BinaryAttachmentExternalBEV2List attachments) {
 
+        final InsertCorrespondenceV2 myInsertCorrespondenceV2 = correspondenceObjectFactory.createInsertCorrespondenceV2();
+        myInsertCorrespondenceV2.setCorrespondence(getMyInsertCorrespondenceV2(message, messageTitle, messageSummary, messageBody, attachments));
+        myInsertCorrespondenceV2.setSystemUserCode(config.getSystemUserCode());
+        // Reference set by the message sender
+        myInsertCorrespondenceV2.setExternalShipmentReference(message.getConversationId());
+
+        return myInsertCorrespondenceV2;
+    }
+
+    private MyInsertCorrespondenceV2 getMyInsertCorrespondenceV2(NextMoveOutMessage message, String messageTitle, String messageSummary, String messageBody, BinaryAttachmentExternalBEV2List attachments) {
+        ServiceRecord serviceRecord = getServiceRecord(message);
+
         MyInsertCorrespondenceV2 correspondence = new MyInsertCorrespondenceV2();
-        ObjectFactory objectFactory = new ObjectFactory();
-
-        ServiceRecord serviceRecord;
-        try {
-            serviceRecord = serviceRegistryLookup.getServiceRecord(
-                    SRParameter.builder(receiverIdentifier)
-                            .conversationId(conversationId).build(),
-                    process,
-                    documentType);
-        } catch (ServiceRegistryLookupException e) {
-            throw new MeldingsUtvekslingRuntimeException(String.format("Could not get service record for receiver %s", receiverIdentifier));
-        }
-
-        correspondence.setReportee(objectFactory.createMyInsertCorrespondenceV2Reportee(receiverIdentifier));
+        correspondence.setReportee(objectFactory.createMyInsertCorrespondenceV2Reportee(message.getReceiverIdentifier()));
         // Service code from service record, default 4255
         correspondence.setServiceCode(objectFactory.createMyInsertCorrespondenceV2ServiceCode(serviceRecord.getService().getServiceCode()));
         // Service edition from service record, default 10 (Administration)
@@ -179,38 +172,52 @@ public class CorrespondenceAgencyMessageFactory {
         correspondence.setVisibleDateTime(DateTimeUtil.toXMLGregorianCalendar(OffsetDateTime.now(clock)));
         correspondence.setDueDateTime(DateTimeUtil.toXMLGregorianCalendar(OffsetDateTime.now(clock).plusDays(getDaysToReply())));
 
-        ExternalContentV2 externalContentV2 = new ExternalContentV2();
-        externalContentV2.setLanguageCode(objectFactory.createExternalContentV2LanguageCode("1044"));
-        externalContentV2.setMessageTitle(objectFactory.createExternalContentV2MessageTitle(messageTitle));
-        externalContentV2.setMessageSummary(objectFactory.createExternalContentV2MessageSummary(messageSummary));
-        externalContentV2.setMessageBody(objectFactory.createExternalContentV2MessageBody(messageBody));
-
         // The date and time the message can be deleted by the user
         correspondence.setAllowSystemDeleteDateTime(
                 objectFactory.createMyInsertCorrespondenceV2AllowSystemDeleteDateTime(
                         DateTimeUtil.toXMLGregorianCalendar(getAllowSystemDeleteDateTime())));
 
+        correspondence.setContent(objectFactory.createMyInsertCorrespondenceV2Content(getExternalContentV2(messageTitle, messageSummary, messageBody, attachments)));
+        correspondence.setNotifications(objectFactory.createMyInsertCorrespondenceV2Notifications(getNotificationBEList()));
+        return correspondence;
+    }
 
-        AttachmentsV2 attachmentsV2 = new AttachmentsV2();
-        attachmentsV2.setBinaryAttachments(objectFactory.createAttachmentsV2BinaryAttachments(attachments));
-        externalContentV2.setAttachments(objectFactory.createExternalContentV2Attachments(attachmentsV2));
-        correspondence.setContent(objectFactory.createMyInsertCorrespondenceV2Content(externalContentV2));
-
-        List<Notification2009> notificationList = createNotifications();
-
+    private NotificationBEList getNotificationBEList() {
         NotificationBEList notifications = new NotificationBEList();
+        List<Notification2009> notificationList = createNotifications();
         List<Notification2009> notification = notifications.getNotification();
         notification.addAll(notificationList);
-        correspondence.setNotifications(objectFactory.createMyInsertCorrespondenceV2Notifications(notifications));
+        return notifications;
+    }
 
-        no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory correspondenceObjectFactory = new no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory();
-        final InsertCorrespondenceV2 myInsertCorrespondenceV2 = correspondenceObjectFactory.createInsertCorrespondenceV2();
-        myInsertCorrespondenceV2.setCorrespondence(correspondence);
-        myInsertCorrespondenceV2.setSystemUserCode(config.getSystemUserCode());
-        // Reference set by the message sender
-        myInsertCorrespondenceV2.setExternalShipmentReference(conversationId);
+    private ExternalContentV2 getExternalContentV2(String messageTitle, String messageSummary, String messageBody, BinaryAttachmentExternalBEV2List attachments) {
+        ExternalContentV2 externalContentV2 = new ExternalContentV2();
+        externalContentV2.setLanguageCode(objectFactory.createExternalContentV2LanguageCode("1044"));
+        externalContentV2.setMessageTitle(objectFactory.createExternalContentV2MessageTitle(messageTitle));
+        externalContentV2.setMessageSummary(objectFactory.createExternalContentV2MessageSummary(messageSummary));
+        externalContentV2.setMessageBody(objectFactory.createExternalContentV2MessageBody(messageBody));
+        externalContentV2.setAttachments(objectFactory.createExternalContentV2Attachments(getAttachmentsV2(attachments)));
+        return externalContentV2;
+    }
 
-        return myInsertCorrespondenceV2;
+    private AttachmentsV2 getAttachmentsV2(BinaryAttachmentExternalBEV2List attachments) {
+        AttachmentsV2 attachmentsV2 = new AttachmentsV2();
+        attachmentsV2.setBinaryAttachments(objectFactory.createAttachmentsV2BinaryAttachments(attachments));
+        return attachmentsV2;
+    }
+
+    private ServiceRecord getServiceRecord(NextMoveOutMessage message) {
+        ServiceRecord serviceRecord;
+        try {
+            serviceRecord = serviceRegistryLookup.getServiceRecord(
+                    SRParameter.builder(message.getReceiverIdentifier())
+                            .conversationId(message.getConversationId()).build(),
+                    message.getSbd().getProcess(),
+                    message.getSbd().getStandard());
+        } catch (ServiceRegistryLookupException e) {
+            throw new MeldingsUtvekslingRuntimeException(String.format("Could not get service record for receiver %s", message.getReceiverIdentifier()));
+        }
+        return serviceRecord;
     }
 
     private Long getDaysToReply() {
@@ -284,27 +291,25 @@ public class CorrespondenceAgencyMessageFactory {
                 (conversation.getConversationId());
         filter.setSendersReference(sendersReference);
         filter.setServiceCode(conversation.getServiceCode());
-        filter.setServiceEditionCode(Integer.valueOf(conversation.getServiceEditionCode()));
+        filter.setServiceEditionCode(Integer.parseInt(conversation.getServiceEditionCode()));
         statusRequest.setFilterCriteria(filter);
 
         return statusRequest;
     }
 
     private TextToken createTextToken(int num, String value) {
-        no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory objectFactory = new no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory();
         TextToken textToken = new TextToken();
         textToken.setTokenNum(num);
-        textToken.setTokenValue(objectFactory.createTextTokenTokenValue(value));
+        textToken.setTokenValue(notificationObjectFactory.createTextTokenTokenValue(value));
 
         return textToken;
     }
 
     private JAXBElement<ReceiverEndPointBEList> createReceiverEndPoint(TransportType type) {
-        no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory objectFactory = new no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory();
         ReceiverEndPoint receiverEndPoint = new ReceiverEndPoint();
-        receiverEndPoint.setTransportType(objectFactory.createReceiverEndPointTransportType(type));
+        receiverEndPoint.setTransportType(notificationObjectFactory.createReceiverEndPointTransportType(type));
         ReceiverEndPointBEList receiverEndpoints = new ReceiverEndPointBEList();
         receiverEndpoints.getReceiverEndPoint().add(receiverEndPoint);
-        return objectFactory.createNotification2009ReceiverEndPoints(receiverEndpoints);
+        return notificationObjectFactory.createNotification2009ReceiverEndPoints(receiverEndpoints);
     }
 }

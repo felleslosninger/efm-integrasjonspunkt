@@ -136,7 +136,7 @@ public class SBDReceiptFactory {
                 throw new MeldingsUtvekslingRuntimeException("created non validating document");
             }
         } catch (XPathExpressionException | XMLSecurityException e) {
-            throw new RuntimeException("Could not validate signature that we used to sign the document", e);
+            throw new MeldingsUtvekslingRuntimeException("Could not validate signature that we used to sign the document", e);
         }
         return toDomainDocument(signedXmlDoc);
     }
