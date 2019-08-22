@@ -71,6 +71,10 @@ public class AltinnWsClient {
 
             log.debug("Blocking main thread to wait for upload..");
             altinnUpload.get();
+        } catch (InterruptedException e) {
+            log.error("Altinn upload was interrupted!", e);
+            // Restore interrupted state...      T
+            Thread.currentThread().interrupt();
         } catch (ExecutionException e) {
             throw new MeldingsUtvekslingRuntimeException("Error waiting for upload thread to finish", e);
         } catch (Exception e) {

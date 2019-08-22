@@ -1,10 +1,7 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.microsoft.azure.servicebus.ClientFactory;
-import com.microsoft.azure.servicebus.IMessage;
-import com.microsoft.azure.servicebus.IMessageReceiver;
-import com.microsoft.azure.servicebus.ReceiveMode;
+import com.microsoft.azure.servicebus.*;
 import com.microsoft.azure.servicebus.primitives.ConnectionStringBuilder;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import lombok.extern.slf4j.Slf4j;
@@ -17,9 +14,6 @@ import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayload;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayloadConverter;
-import no.difi.meldingsutveksling.noarkexchange.MessageContext;
-import no.difi.meldingsutveksling.noarkexchange.MessageContextException;
-import no.difi.meldingsutveksling.noarkexchange.MessageContextFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
@@ -28,7 +22,6 @@ import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import org.apache.commons.io.IOUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.task.TaskExecutor;
@@ -39,7 +32,6 @@ import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -62,8 +54,6 @@ public class NextMoveServiceBus {
     private final NextMoveQueue nextMoveQueue;
     private final ServiceBusRestClient serviceBusClient;
     private final ObjectMapper om;
-    private final MessageContextFactory messageContextFactory;
-    private final AsicHandler asicHandler;
     private final InternalQueue internalQueue;
     private final CryptoMessagePersister cryptoMessagePersister;
     private final ServiceBusPayloadConverter payloadConverter;
@@ -74,6 +64,7 @@ public class NextMoveServiceBus {
     private final TimeToLiveHelper timeToLiveHelper;
     private final SBDUtil sbdUtil;
     private final TaskExecutor taskExecutor;
+    private final NextMoveServiceBusPayloadFactory nextMoveServiceBusPayloadFactory;
 
     private IMessageReceiver messageReceiver;
 
@@ -81,8 +72,6 @@ public class NextMoveServiceBus {
                               NextMoveQueue nextMoveQueue,
                               ServiceBusRestClient serviceBusClient,
                               ObjectMapper om,
-                              MessageContextFactory messageContextFactory,
-                              AsicHandler asicHandler,
                               @Lazy InternalQueue internalQueue,
                               CryptoMessagePersister cryptoMessagePersister,
                               ServiceBusPayloadConverter payloadConverter,
@@ -91,13 +80,14 @@ public class NextMoveServiceBus {
                               ConversationService conversationService,
                               MessageStatusFactory messageStatusFactory,
                               TimeToLiveHelper timeToLiveHelper,
-                              SBDUtil sbdUtil, TaskExecutor taskExecutor) {
+                              SBDUtil sbdUtil,
+                              TaskExecutor taskExecutor,
+                              NextMoveServiceBusPayloadFactory nextMoveServiceBusPayloadFactory) {
         this.props = props;
         this.nextMoveQueue = nextMoveQueue;
         this.serviceBusClient = serviceBusClient;
         this.om = om;
-        this.messageContextFactory = messageContextFactory;
-        this.asicHandler = asicHandler;
+        this.nextMoveServiceBusPayloadFactory = nextMoveServiceBusPayloadFactory;
         this.internalQueue = internalQueue;
         this.cryptoMessagePersister = cryptoMessagePersister;
         this.payloadConverter = payloadConverter;
@@ -120,7 +110,11 @@ public class NextMoveServiceBus {
             ConnectionStringBuilder connectionStringBuilder = new ConnectionStringBuilder(connectionString, serviceBusClient.getLocalQueuePath());
             try {
                 this.messageReceiver = ClientFactory.createMessageReceiverFromConnectionStringBuilder(connectionStringBuilder, ReceiveMode.PEEKLOCK);
-            } catch (InterruptedException | ServiceBusException e) {
+            } catch (InterruptedException e) {
+                log.error("Error while constructing message receiver. Thread was interrupted", e);
+                // Restore interrupted state...      T
+                Thread.currentThread().interrupt();
+            } catch (ServiceBusException e) {
                 throw new NextMoveException(e);
             }
         }
@@ -128,34 +122,13 @@ public class NextMoveServiceBus {
     }
 
     public void putMessage(NextMoveOutMessage message) throws NextMoveException {
-        ServiceBusPayload payload = ServiceBusPayload.of(message.getSbd(), getAsicBytes(message));
+        ServiceBusPayload payload = nextMoveServiceBusPayloadFactory.toServiceBusPayload(message);
+
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             om.writeValue(bos, payload);
             serviceBusClient.sendMessage(bos.toByteArray(), getReceiverQueue(message));
         } catch (IOException e) {
             throw new NextMoveException("Error creating servicebus payload", e);
-        }
-    }
-
-    private byte[] getAsicBytes(NextMoveOutMessage message) throws NextMoveException {
-        byte[] asicBytes = null;
-        try {
-            InputStream encryptedAsic = asicHandler.createEncryptedAsic(message, getMessageContext(message));
-            if (encryptedAsic != null) {
-                asicBytes = Base64.getEncoder()
-                        .encode(IOUtils.toByteArray(encryptedAsic));
-            }
-        } catch (IOException e) {
-            throw new NextMoveException("Unable to read encrypted asic", e);
-        }
-        return asicBytes;
-    }
-
-    private MessageContext getMessageContext(NextMoveMessage message) throws NextMoveException {
-        try {
-            return messageContextFactory.from(message);
-        } catch (MessageContextException e) {
-            throw new NextMoveException("Could not create message context", e);
         }
     }
 
@@ -208,7 +181,11 @@ public class NextMoveServiceBus {
                         log.trace("No messages in queue, cancelling batch");
                         hasQueuedMessages = false;
                     }
-                } catch (InterruptedException | ServiceBusException e) {
+                } catch (InterruptedException e) {
+                    log.error("Error while processing messages from service bus. Thread was interrupted", e);
+                    // Restore interrupted state...      T
+                    Thread.currentThread().interrupt();
+                } catch (ServiceBusException e) {
                     log.error("Error while processing messages from service bus", e);
                 }
             }
@@ -218,7 +195,7 @@ public class NextMoveServiceBus {
     private void handleMessage(IMessage m) {
         try {
             log.debug(format("Received message on queue=%s with id=%s", serviceBusClient.getLocalQueuePath(), m.getMessageId()));
-            ServiceBusPayload payload = payloadConverter.convert(m.getBody(), m.getMessageId());
+            ServiceBusPayload payload = payloadConverter.convert(getBody(m), m.getMessageId());
             if (sbdUtil.isExpired(payload.getSbd())) {
                 timeToLiveHelper.registerErrorStatusAndMessage(payload.getSbd(), DPE, INCOMING);
             } else {
@@ -231,6 +208,11 @@ public class NextMoveServiceBus {
         } catch (JAXBException | IOException e) {
             log.error("Failed to put message on local queue", e);
         }
+    }
+
+    private byte[] getBody(IMessage message) {
+        MessageBody messageBody = message.getMessageBody();
+        return messageBody.getBinaryData().get(0);
     }
 
     private void handleSbd(StandardBusinessDocument sbd) {

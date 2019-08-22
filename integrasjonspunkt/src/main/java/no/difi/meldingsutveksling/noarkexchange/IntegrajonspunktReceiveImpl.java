@@ -8,7 +8,6 @@ import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.BestEduConverter;
-import no.difi.meldingsutveksling.domain.sbdh.CorrelationInformation;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
@@ -95,7 +94,7 @@ public class IntegrajonspunktReceiveImpl {
         this.internalQueue = internalQueue;
     }
 
-    public CorrelationInformation forwardToNoarkSystem(StandardBusinessDocument sbd) throws MessageException {
+    public void forwardToNoarkSystem(StandardBusinessDocument sbd) throws MessageException {
         try {
             adresseregisterService.validateCertificates(sbd);
             log.debug(markerFrom(sbd), "Certificates validated");
@@ -108,13 +107,11 @@ public class IntegrajonspunktReceiveImpl {
             conversationService.registerStatus(sbd.getDocumentId(), messageStatusFactory.getMessageStatus(ReceiptStatus.LEST));
             if (!properties.getFeature().isForwardReceivedAppReceipts()) {
                 Audit.info("AppReceipt forwarding disabled - will not deliver to archive");
-                return new CorrelationInformation();
             }
         }
         PutMessageRequestType putMessage = convertSbdToPutMessageRequest(sbd);
 
         forwardToNoarkSystemAndSendReceipts(sbd, putMessage);
-        return new CorrelationInformation();
     }
 
     private PutMessageRequestType convertSbdToPutMessageRequest(StandardBusinessDocument sbd) {
