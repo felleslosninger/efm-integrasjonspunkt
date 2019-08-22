@@ -69,12 +69,10 @@ public class AltinnWsClient {
                     () -> uploadToAltinn(request, senderReference, parameters),
                     taskExecutor);
 
-            try {
-                log.debug("Blocking main thread to wait for upload..");
-                altinnUpload.get();
-            } catch (InterruptedException | ExecutionException e) {
-                throw new MeldingsUtvekslingRuntimeException("Error waiting for upload thread to finish", e);
-            }
+            log.debug("Blocking main thread to wait for upload..");
+            altinnUpload.get();
+        } catch (ExecutionException e) {
+            throw new MeldingsUtvekslingRuntimeException("Error waiting for upload thread to finish", e);
         } catch (Exception e) {
             auditError(request, e);
             throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, e);

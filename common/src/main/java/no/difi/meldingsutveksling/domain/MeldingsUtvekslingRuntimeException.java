@@ -13,7 +13,7 @@ public class MeldingsUtvekslingRuntimeException extends RuntimeException {
         super(message);
     }
 
-    public MeldingsUtvekslingRuntimeException(String s, Exception e) {
+    public MeldingsUtvekslingRuntimeException(String s, Throwable e) {
         super(s, e);
     }
 
