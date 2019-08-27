@@ -4,6 +4,7 @@ import cucumber.api.java.After;
 import cucumber.api.java.en.Given;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import org.mockito.Mockito;
 
 import static org.mockito.BDDMockito.given;
@@ -12,14 +13,17 @@ import static org.mockito.BDDMockito.given;
 public class IntegrasjonspunktPropertiesSteps {
 
     private final IntegrasjonspunktProperties integrasjonspunktProperties;
+    private final NoarkClient noarkClient;
 
     @After
     public void after() {
         Mockito.reset(integrasjonspunktProperties.getNoarkSystem());
+        Mockito.reset(noarkClient.getNoarkClientSettings());
     }
 
     @Given("^the Noark System is enabled$")
     public void theNoarkSystemIsEnabled() {
-        given(integrasjonspunktProperties.getNoarkSystem().isEnable()).willReturn(true);
+        given(integrasjonspunktProperties.getNoarkSystem().getEndpointURL()).willReturn("http://localhost:8088/testExchangeBinding");
+        given(noarkClient.getNoarkClientSettings().getEndpointUrl()).willReturn("http://localhost:8088/testExchangeBinding");
     }
 }

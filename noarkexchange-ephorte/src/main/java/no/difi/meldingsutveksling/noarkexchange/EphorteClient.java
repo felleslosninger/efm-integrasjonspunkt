@@ -28,6 +28,11 @@ public class EphorteClient implements NoarkClient {
     }
 
     @Override
+    public NoarkClientSettings getNoarkClientSettings() {
+        return settings;
+    }
+
+    @Override
     public boolean canRecieveMessage(String orgnr) {
         GetCanReceiveMessageRequestType r = new GetCanReceiveMessageRequestType();
         AddressType addressType = new AddressType();

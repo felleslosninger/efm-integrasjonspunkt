@@ -15,6 +15,7 @@ import no.difi.meldingsutveksling.receipt.ConversationService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 import static no.difi.meldingsutveksling.ptv.WithLogstashMarker.withLogstashMarker;
 
@@ -47,7 +48,7 @@ public class DpvConversationStrategy implements ConversationStrategy {
         conversationService.findConversation(message.getMessageId())
                 .ifPresent(c -> conversationService.save(c.setServiceCode(serviceCode).setServiceEditionCode(serviceEditionCode)));
 
-        if (props.getNoarkSystem().isEnable()) {
+        if (!isNullOrEmpty(props.getNoarkSystem().getEndpointURL())) {
             sendAppReceipt(message);
         }
     }

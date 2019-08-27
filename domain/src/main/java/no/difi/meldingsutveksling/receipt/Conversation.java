@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
@@ -25,6 +26,7 @@ import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 
 @Getter
 @Setter
+@ToString
 @Entity
 @Slf4j
 @Table(name = "conversation",
@@ -66,6 +68,7 @@ public class Conversation extends AbstractEntity<Long> implements MessageInforma
     private ServiceIdentifier serviceIdentifier;
 
     @OneToMany(mappedBy = "conversation", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
     private Set<MessageStatus> messageStatuses;
 
     public Conversation() {
@@ -141,24 +144,4 @@ public class Conversation extends AbstractEntity<Long> implements MessageInforma
                 .anyMatch(ms -> ms.getStatus().equals(status.getStatus()));
     }
 
-    @Override
-    public String toString() {
-        return "Conversation{" +
-                "id=" + getId() + '\'' +
-                ", conversationId='" + conversationId + '\'' +
-                ", senderIdentifier='" + senderIdentifier + '\'' +
-                ", receiverIdentifier='" + receiverIdentifier + '\'' +
-                ", messageReference='" + messageReference + '\'' +
-                ", messageTitle='" + messageTitle + '\'' +
-                ", serviceCode='" + serviceCode + '\'' +
-                ", serviceEditionCode='" + serviceEditionCode + '\'' +
-                ", lastUpdate=" + lastUpdate +
-                ", pollable=" + pollable +
-                ", finished=" + finished +
-                ", expiry=" + expiry +
-                ", direction=" + direction +
-                ", serviceIdentifier=" + serviceIdentifier +
-                ", messageStatuses=" + messageStatuses +
-                '}';
-    }
 }

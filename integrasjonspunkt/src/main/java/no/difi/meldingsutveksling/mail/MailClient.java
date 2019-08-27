@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.mail;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClientSettings;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageResponseFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
@@ -20,6 +21,11 @@ public class MailClient implements NoarkClient {
     public MailClient(IntegrasjonspunktProperties props, String subject) {
         this.props = props;
         this.subject = subject;
+    }
+
+    @Override
+    public NoarkClientSettings getNoarkClientSettings() {
+        return null;
     }
 
     @Override
