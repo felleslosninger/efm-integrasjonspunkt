@@ -30,8 +30,6 @@ public class TaskExecutorConfig {
     }
 
     private int getCorePoolSize() {
-        int availableProcessors = Runtime.getRuntime().availableProcessors();
-        log.info("Available processors: {}", availableProcessors);
-        return Math.max(6, availableProcessors - 1);
+        return 100;
     }
 }
