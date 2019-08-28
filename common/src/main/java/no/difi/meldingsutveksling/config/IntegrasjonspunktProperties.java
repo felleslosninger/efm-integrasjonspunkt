@@ -250,8 +250,6 @@ public class IntegrasjonspunktProperties {
     @Data
     @ToString(exclude = "password")
     public static class NorskArkivstandardSystem {
-
-        private boolean enable;
         private String endpointURL;
         private String username;
         private String password;

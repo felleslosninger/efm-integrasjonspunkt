@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
 @Component
@@ -59,7 +60,7 @@ public class DeadLetterQueueHandler {
                     nextMoveMessage.getReceiverIdentifier(), nextMoveMessage.getServiceIdentifier());
             messageId = nextMoveMessage.getMessageId();
             Audit.error(errorMsg, NextMoveMessageMarkers.markerFrom(nextMoveMessage));
-            if (properties.getNoarkSystem().isEnable() && noarkClient != null) {
+            if (!isNullOrEmpty(properties.getNoarkSystem().getEndpointURL()) && noarkClient != null) {
                 bestEduErrorAppReceiptService.sendBestEduErrorAppReceipt(nextMoveMessage, errorMsg);
             }
         } catch (IOException e) {

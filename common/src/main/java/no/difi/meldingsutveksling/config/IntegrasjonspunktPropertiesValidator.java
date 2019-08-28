@@ -19,11 +19,6 @@ public class IntegrasjonspunktPropertiesValidator implements Validator {
     public void validate(Object target, Errors errors) {
         IntegrasjonspunktProperties props = (IntegrasjonspunktProperties) target;
 
-        if (props.getFeature().isEnableDPO()) {
-            ValidationUtils.rejectIfEmpty(errors, "noarkSystem.type", EMPTY_FIELD, DPO_ERROR_MSG);
-            ValidationUtils.rejectIfEmpty(errors, "noarkSystem.endpointURL", EMPTY_FIELD, DPO_ERROR_MSG);
-        }
-
         if (props.getFeature().isEnableDPV()) {
             ValidationUtils.rejectIfEmpty(errors, "dpv.username", EMPTY_FIELD, DPV_ERROR_MSG);
             ValidationUtils.rejectIfEmpty(errors, "dpv.password", EMPTY_FIELD, DPV_ERROR_MSG);

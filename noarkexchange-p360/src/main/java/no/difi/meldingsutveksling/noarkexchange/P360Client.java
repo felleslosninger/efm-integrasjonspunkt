@@ -33,6 +33,12 @@ public class P360Client implements NoarkClient {
         templateFactory = settings.createTemplateFactory();
     }
 
+
+    @Override
+    public NoarkClientSettings getNoarkClientSettings() {
+        return settings;
+    }
+
     @Override
     public boolean canRecieveMessage(String orgnr) {
         GetCanReceiveMessageRequestType r = new GetCanReceiveMessageRequestType();

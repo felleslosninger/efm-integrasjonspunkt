@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.function.Consumer;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
@@ -28,8 +30,7 @@ public class DpfPolling {
     }
 
     private Consumer<Forsendelse> getSvarInnForwarder() {
-        if (properties.getNoarkSystem().isEnable()
-                && !properties.getNoarkSystem().getEndpointURL().isEmpty()) {
+        if (!isNullOrEmpty(properties.getNoarkSystem().getEndpointURL())) {
             return svarInnPutMessageForwarder;
         }
 

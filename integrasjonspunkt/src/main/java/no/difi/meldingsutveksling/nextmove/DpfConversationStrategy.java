@@ -14,6 +14,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
 @Component
@@ -35,7 +36,7 @@ public class DpfConversationStrategy implements ConversationStrategy {
                 message.getMessageId(), message.getServiceIdentifier()),
                 markerFrom(message));
 
-        if (props.getNoarkSystem().isEnable()) {
+        if (!isNullOrEmpty(props.getNoarkSystem().getEndpointURL())) {
             sendAppReceipt(message);
         }
     }

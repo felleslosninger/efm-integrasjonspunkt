@@ -18,6 +18,7 @@ import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
@@ -43,7 +44,7 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
         if (sbdUtil.isStatus(sbd)) {
             handleStatus(sbd);
         } else {
-            if (properties.getNoarkSystem().isEnable() && !properties.getNoarkSystem().getEndpointURL().isEmpty()) {
+            if (!isNullOrEmpty(properties.getNoarkSystem().getEndpointURL())) {
                 conversationService.registerConversation(sbd, DPO, INCOMING);
                 internalQueue.enqueueNoark(sbd);
                 conversationService.registerStatus(sbd.getDocumentId(), messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_MOTTATT));
