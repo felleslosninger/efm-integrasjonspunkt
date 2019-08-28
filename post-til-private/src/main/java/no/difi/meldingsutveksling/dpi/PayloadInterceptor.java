@@ -5,6 +5,7 @@ import org.springframework.ws.client.WebServiceClientException;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 import org.springframework.ws.context.MessageContext;
 
+import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -33,7 +34,7 @@ public class PayloadInterceptor implements ClientInterceptor {
     @Override
     public boolean handleResponse(MessageContext messageContext) throws WebServiceClientException {
         Source payloadSource = messageContext.getResponse().getPayloadSource();
-        if(payloadSource != null) {
+        if (payloadSource != null) {
             String payload = asXmlString(payloadSource);
             callback.accept(payload);
         }
@@ -43,7 +44,9 @@ public class PayloadInterceptor implements ClientInterceptor {
     private String asXmlString(Source source) {
         StringWriter sw = new StringWriter();
         try {
-            final Transformer transformer = TransformerFactory.newInstance().newTransformer();
+            TransformerFactory factory = TransformerFactory.newInstance();
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            final Transformer transformer = factory.newTransformer();
             StreamResult sr = new StreamResult(sw);
             transformer.transform(source, sr);
             return sw.toString();

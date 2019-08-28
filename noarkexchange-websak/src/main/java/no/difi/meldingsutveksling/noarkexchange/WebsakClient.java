@@ -10,7 +10,6 @@ import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.soap.client.core.SoapActionCallback;
 
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,13 +48,8 @@ public class WebsakClient implements NoarkClient {
 
     @Override
     public PutMessageResponseType sendEduMelding(PutMessageRequestType request) {
-        JAXBElement<no.difi.meldingsutveksling.noarkexchange.websak.schema.PutMessageRequestType> websakRequest;
-        try {
-            websakRequest = new PutMessageRequestMapper().mapFrom(request);
-        } catch (JAXBException e) {
-            throw new RuntimeException("Could not create PutMessageRequest for WebSak", e);
-        }
-
+        JAXBElement<no.difi.meldingsutveksling.noarkexchange.websak.schema.PutMessageRequestType> websakRequest
+                = new PutMessageRequestMapper().mapFrom(request);
 
         final WebServiceTemplate template = templateFactory.createTemplate("no.difi.meldingsutveksling.noarkexchange.websak.schema", markerFrom(new PutMessageRequestWrapper(request)));
         JAXBElement<no.difi.meldingsutveksling.noarkexchange.websak.schema.PutMessageResponseType> response

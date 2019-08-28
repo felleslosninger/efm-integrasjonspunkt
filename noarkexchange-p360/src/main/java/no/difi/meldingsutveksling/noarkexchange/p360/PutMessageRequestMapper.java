@@ -5,10 +5,9 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import org.modelmapper.ModelMapper;
 
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
 
 public class PutMessageRequestMapper {
-    public JAXBElement<no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType> mapFrom(PutMessageRequestType domain) throws JAXBException {
+    public JAXBElement<no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType> mapFrom(PutMessageRequestType domain) {
         no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType r =
                 new no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType();
 
