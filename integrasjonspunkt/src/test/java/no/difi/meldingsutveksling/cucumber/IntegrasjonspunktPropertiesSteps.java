@@ -24,6 +24,12 @@ public class IntegrasjonspunktPropertiesSteps {
     @Given("^the Noark System is enabled$")
     public void theNoarkSystemIsEnabled() {
         given(integrasjonspunktProperties.getNoarkSystem().getEndpointURL()).willReturn("http://localhost:8088/testExchangeBinding");
+        given(integrasjonspunktProperties.getNoarkSystem().getType()).willReturn("p360");
         given(noarkClient.getNoarkClientSettings().getEndpointUrl()).willReturn("http://localhost:8088/testExchangeBinding");
+    }
+
+    @Given("^the Noark System is disabled$")
+    public void theNoarkSystemIsDisabled() {
+        given(integrasjonspunktProperties.getNoarkSystem().getType()).willReturn("");
     }
 }

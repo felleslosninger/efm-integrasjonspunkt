@@ -44,7 +44,7 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
         if (sbdUtil.isStatus(sbd)) {
             handleStatus(sbd);
         } else {
-            if (!isNullOrEmpty(properties.getNoarkSystem().getEndpointURL())) {
+            if (!isNullOrEmpty(properties.getNoarkSystem().getType())) {
                 conversationService.registerConversation(sbd, DPO, INCOMING);
                 internalQueue.enqueueNoark(sbd);
                 conversationService.registerStatus(sbd.getDocumentId(), messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_MOTTATT));

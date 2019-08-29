@@ -36,7 +36,7 @@ public class DpfConversationStrategy implements ConversationStrategy {
                 message.getMessageId(), message.getServiceIdentifier()),
                 markerFrom(message));
 
-        if (!isNullOrEmpty(props.getNoarkSystem().getEndpointURL())) {
+        if (!isNullOrEmpty(props.getNoarkSystem().getType())) {
             sendAppReceipt(message);
         }
     }

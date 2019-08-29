@@ -30,7 +30,7 @@ public class DpfPolling {
     }
 
     private Consumer<Forsendelse> getSvarInnForwarder() {
-        if (!isNullOrEmpty(properties.getNoarkSystem().getEndpointURL())) {
+        if (!isNullOrEmpty(properties.getNoarkSystem().getType())) {
             return svarInnPutMessageForwarder;
         }
 

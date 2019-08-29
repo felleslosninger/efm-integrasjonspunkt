@@ -48,7 +48,7 @@ public class DpvConversationStrategy implements ConversationStrategy {
         conversationService.findConversation(message.getMessageId())
                 .ifPresent(c -> conversationService.save(c.setServiceCode(serviceCode).setServiceEditionCode(serviceEditionCode)));
 
-        if (!isNullOrEmpty(props.getNoarkSystem().getEndpointURL())) {
+        if (!isNullOrEmpty(props.getNoarkSystem().getType())) {
             sendAppReceipt(message);
         }
     }

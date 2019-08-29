@@ -60,7 +60,7 @@ public class DeadLetterQueueHandler {
                     nextMoveMessage.getReceiverIdentifier(), nextMoveMessage.getServiceIdentifier());
             messageId = nextMoveMessage.getMessageId();
             Audit.error(errorMsg, NextMoveMessageMarkers.markerFrom(nextMoveMessage));
-            if (!isNullOrEmpty(properties.getNoarkSystem().getEndpointURL()) && noarkClient != null) {
+            if (!isNullOrEmpty(properties.getNoarkSystem().getType()) && noarkClient != null) {
                 bestEduErrorAppReceiptService.sendBestEduErrorAppReceipt(nextMoveMessage, errorMsg);
             }
         } catch (IOException e) {
