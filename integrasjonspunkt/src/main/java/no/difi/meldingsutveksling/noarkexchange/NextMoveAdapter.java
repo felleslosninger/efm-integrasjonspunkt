@@ -94,7 +94,7 @@ public class NextMoveAdapter {
     private List<BasicNextMoveFile> getFiles(PutMessageRequestWrapper message) throws JAXBException, PayloadException {
         List<NoarkDocument> noarkDocuments = PayloadUtil.parsePayloadForDocuments(message.getPayload());
         List<BasicNextMoveFile> files = noarkDocuments.stream()
-                .map(d -> BasicNextMoveFile.of(d.getTitle(), d.getFilename(), d.getContentType(), Base64.getDecoder().decode(d.getContent())))
+                .map(d -> BasicNextMoveFile.of(d.getTitle(), d.getFilename(), d.getContentType(), Base64.getMimeDecoder().decode(d.getContent())))
                 .collect(Collectors.toList());
         files.add(getArkivmeldingFile(message));
         return files;
