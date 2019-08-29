@@ -20,6 +20,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -34,6 +35,7 @@ import static no.difi.meldingsutveksling.receipt.ReceiptStatus.INNKOMMENDE_MOTTA
 
 @RequiredArgsConstructor
 @ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
+@ConditionalOnBean(name = "localNoark")
 @Component
 public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
 
