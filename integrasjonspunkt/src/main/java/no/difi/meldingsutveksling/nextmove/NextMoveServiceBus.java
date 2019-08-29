@@ -11,7 +11,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
-import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
+import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayload;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayloadConverter;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
@@ -55,7 +55,7 @@ public class NextMoveServiceBus {
     private final ServiceBusRestClient serviceBusClient;
     private final ObjectMapper om;
     private final InternalQueue internalQueue;
-    private final CryptoMessagePersister cryptoMessagePersister;
+    private final MessagePersister messagePersister;
     private final ServiceBusPayloadConverter payloadConverter;
     private final SBDReceiptFactory sbdReceiptFactory;
     private final ServiceRegistryLookup serviceRegistryLookup;
@@ -73,7 +73,7 @@ public class NextMoveServiceBus {
                               ServiceBusRestClient serviceBusClient,
                               ObjectMapper om,
                               @Lazy InternalQueue internalQueue,
-                              CryptoMessagePersister cryptoMessagePersister,
+                              MessagePersister messagePersister,
                               ServiceBusPayloadConverter payloadConverter,
                               SBDReceiptFactory sbdReceiptFactory,
                               ServiceRegistryLookup serviceRegistryLookup,
@@ -87,9 +87,9 @@ public class NextMoveServiceBus {
         this.nextMoveQueue = nextMoveQueue;
         this.serviceBusClient = serviceBusClient;
         this.om = om;
+        this.messagePersister = messagePersister;
         this.nextMoveServiceBusPayloadFactory = nextMoveServiceBusPayloadFactory;
         this.internalQueue = internalQueue;
-        this.cryptoMessagePersister = cryptoMessagePersister;
         this.payloadConverter = payloadConverter;
         this.sbdReceiptFactory = sbdReceiptFactory;
         this.serviceRegistryLookup = serviceRegistryLookup;
@@ -153,7 +153,7 @@ public class NextMoveServiceBus {
             for (ServiceBusMessage msg : messages) {
                 if (msg.getPayload().getAsic() != null) {
                     try {
-                        cryptoMessagePersister.write(msg.getPayload().getSbd().getDocumentId(),
+                        messagePersister.write(msg.getPayload().getSbd().getDocumentId(),
                                 ASIC_FILE,
                                 Base64.getDecoder().decode(msg.getPayload().getAsic()));
                     } catch (IOException e) {
@@ -200,7 +200,7 @@ public class NextMoveServiceBus {
                 timeToLiveHelper.registerErrorStatusAndMessage(payload.getSbd(), DPE, INCOMING);
             } else {
                 if (payload.getAsic() != null) {
-                    cryptoMessagePersister.write(payload.getSbd().getDocumentId(), ASIC_FILE, Base64.getDecoder().decode(payload.getAsic()));
+                    messagePersister.write(payload.getSbd().getDocumentId(), ASIC_FILE, Base64.getDecoder().decode(payload.getAsic()));
                 }
                 handleSbd(payload.getSbd());
             }
