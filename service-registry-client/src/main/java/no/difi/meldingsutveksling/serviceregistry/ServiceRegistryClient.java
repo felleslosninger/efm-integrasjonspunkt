@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.IdentifierResource;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
@@ -43,6 +44,9 @@ public class ServiceRegistryClient {
         try {
             return client.getResource("identifier/" + parameter.getIdentifier(), parameter.getQuery());
         } catch (HttpClientErrorException httpException) {
+            if (httpException.getStatusCode() == HttpStatus.NOT_FOUND) {
+                throw new NotFoundInServiceRegistryException(parameter.getIdentifier());
+            }
             byte[] errorBody = httpException.getResponseBodyAsByteArray();
             try {
                 ErrorResponse error = objectMapper.readValue(errorBody, ErrorResponse.class);

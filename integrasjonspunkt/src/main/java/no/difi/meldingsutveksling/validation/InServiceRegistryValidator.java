@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.validation;
 
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.serviceregistry.NotFoundInServiceRegistryException;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -27,7 +28,11 @@ public class InServiceRegistryValidator implements ConstraintValidator<InService
         try {
             return serviceRegistryLookup.isInServiceRegistry(getStrippedIdentifier(s));
         } catch (Exception e) {
-            log.debug("Service Registry lookup failed with: {}", e.getLocalizedMessage());
+            if (e.getCause() instanceof NotFoundInServiceRegistryException) {
+                log.debug("Service Registry lookup failed with: {}", e.getLocalizedMessage());
+            } else {
+                log.error("Service Registry lookup failed", e);
+            }
             return false;
         }
     }
