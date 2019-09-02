@@ -62,12 +62,11 @@ public class AltinnWsClient {
     private void upload(UploadRequest request, String senderReference) {
 
         try {
+            StreamedPayloadBasicBE parameters = new StreamedPayloadBasicBE();
+            parameters.setDataStream(getDataHandler(request));
+
             CompletableFuture<Void> altinnUpload = CompletableFuture.runAsync(
-                    () -> {
-                        StreamedPayloadBasicBE parameters = new StreamedPayloadBasicBE();
-                        parameters.setDataStream(getDataHandler(request));
-                        uploadToAltinn(request, senderReference, parameters);
-                    },
+                    () -> uploadToAltinn(request, senderReference, parameters),
                     taskExecutor);
 
             log.debug("Blocking main thread to wait for upload..");
@@ -164,6 +163,7 @@ public class AltinnWsClient {
             TmpFile tmpFile = TmpFile.create();
             File file = tmpFile.getFile();
             FileUtils.copyInputStreamToFile(dh.getInputStream(), file);
+            log.info(file.getAbsolutePath());
             AltinnPackage altinnPackage = AltinnPackage.from(file, messagePersister, context);
 
             tmpFile.delete();
