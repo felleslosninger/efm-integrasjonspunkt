@@ -18,7 +18,6 @@ import no.difi.meldingsutveksling.shipping.ws.ManifestBuilder;
 import no.difi.meldingsutveksling.shipping.ws.RecipientBuilder;
 import org.apache.commons.io.FileUtils;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.task.TaskExecutor;
 
 import javax.activation.DataHandler;
 import javax.xml.bind.JAXBElement;
@@ -48,7 +47,6 @@ public class AltinnWsClient {
     private final IBrokerServiceExternalBasicStreamed iBrokerServiceExternalBasicStreamed;
     private final AltinnWsConfiguration configuration;
     private final ApplicationContext context;
-    private final TaskExecutor taskExecutor;
     private final Plumber plumber;
 
     public void send(UploadRequest request) {
@@ -79,8 +77,11 @@ public class AltinnWsClient {
     }
 
     private DataHandler getDataHandler(UploadRequest request) {
-        AltinnPackage altinnPackage = AltinnPackage.from(request);
-        PipedInputStream outlet = plumber.pipe("write Altinn zip", inlet -> writeAltinnZip(request, altinnPackage, inlet)).outlet();
+        PipedInputStream outlet = plumber.pipe("write Altinn zip",
+                inlet -> {
+                    AltinnPackage altinnPackage = AltinnPackage.from(request);
+                    writeAltinnZip(request, altinnPackage, inlet);
+                }).outlet();
         return new DataHandler(InputStreamDataSource.of(outlet));
     }
 
