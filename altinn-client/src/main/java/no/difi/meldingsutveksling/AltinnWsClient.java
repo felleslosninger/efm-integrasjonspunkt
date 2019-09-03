@@ -164,7 +164,6 @@ public class AltinnWsClient {
             TmpFile tmpFile = TmpFile.create();
             File file = tmpFile.getFile();
             FileUtils.copyInputStreamToFile(dh.getInputStream(), file);
-            log.info(file.getAbsolutePath());
             AltinnPackage altinnPackage = AltinnPackage.from(file, messagePersister, context);
 
             tmpFile.delete();
