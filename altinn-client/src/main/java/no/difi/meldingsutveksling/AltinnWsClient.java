@@ -7,7 +7,6 @@ import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.ObjectFactory;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.*;
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.*;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
@@ -31,8 +30,6 @@ import java.io.PipedOutputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -60,28 +57,9 @@ public class AltinnWsClient {
     }
 
     private void upload(UploadRequest request, String senderReference) {
-
-        try {
-            CompletableFuture<Void> altinnUpload = CompletableFuture.runAsync(
-                    () -> {
-                        StreamedPayloadBasicBE parameters = new StreamedPayloadBasicBE();
-                        parameters.setDataStream(getDataHandler(request));
-                        uploadToAltinn(request, senderReference, parameters);
-                    },
-                    taskExecutor);
-
-            log.debug("Blocking main thread to wait for upload..");
-            altinnUpload.get();
-        } catch (InterruptedException e) {
-            log.error("Altinn upload was interrupted!", e);
-            // Restore interrupted state...      T
-            Thread.currentThread().interrupt();
-        } catch (ExecutionException e) {
-            throw new MeldingsUtvekslingRuntimeException("Error waiting for upload thread to finish", e);
-        } catch (Exception e) {
-            auditError(request, e);
-            throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, e);
-        }
+        StreamedPayloadBasicBE parameters = new StreamedPayloadBasicBE();
+        parameters.setDataStream(getDataHandler(request));
+        uploadToAltinn(request, senderReference, parameters);
     }
 
     private void auditError(UploadRequest request, Exception e) {
