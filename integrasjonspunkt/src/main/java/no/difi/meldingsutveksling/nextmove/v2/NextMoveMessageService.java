@@ -54,7 +54,7 @@ public class NextMoveMessageService {
     public NextMoveOutMessage createMessage(StandardBusinessDocument sbd) {
         validator.validate(sbd);
         NextMoveOutMessage message = nextMoveOutMessageFactory.getNextMoveOutMessage(sbd);
-        messageRepo.save(message);
+        messageRepo.saveAndFlush(message);
         conversationService.registerConversation(message);
         return message;
     }
@@ -71,7 +71,7 @@ public class NextMoveMessageService {
                 .setMimetype(getMimeType(file.getContentType(), file.getOriginalFilename()))
                 .setPrimaryDocument(message.isPrimaryDocument(file.getOriginalFilename())));
 
-        messageRepo.save(message);
+        messageRepo.saveAndFlush(message);
     }
 
     private String getTitle(String name) {

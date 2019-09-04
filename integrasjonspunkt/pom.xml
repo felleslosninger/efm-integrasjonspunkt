@@ -676,12 +676,6 @@
         <dependency>
             <groupId>com.microsoft.azure</groupId>
             <artifactId>azure-servicebus</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>proton-j</artifactId>
-                    <groupId>org.apache.qpid</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>

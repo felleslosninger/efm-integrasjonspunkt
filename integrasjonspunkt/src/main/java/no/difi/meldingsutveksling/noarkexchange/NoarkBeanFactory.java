@@ -16,7 +16,7 @@ public class NoarkBeanFactory {
     private final IntegrasjonspunktProperties properties;
 
     @Bean(name = "localNoark")
-    @ConditionalOnProperty(value = "difi.move.noarkSystem.endpointURL", havingValue = "true")
+    @ConditionalOnProperty(value = "difi.move.noarkSystem.type")
     public NoarkClient localNoark() {
         NoarkClientSettings clientSettings = new NoarkClientSettings(
                 properties.getNoarkSystem().getEndpointURL(),

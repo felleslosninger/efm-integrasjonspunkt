@@ -130,9 +130,8 @@ public class CmsUtil {
     public InputStream decryptCMSStreamed(InputStream encrypted, PrivateKey privateKey, Provider provider) {
 
         try {
-            CMSEnvelopedData cms;
-
-            cms = new CMSEnvelopedData(encrypted);
+            CMSEnvelopedDataParser cms;
+            cms = new CMSEnvelopedDataParser(encrypted);
             RecipientInformationStore recipients = cms.getRecipientInfos();
             Collection<?> c = recipients.getRecipients();
             Iterator<?> it = c.iterator();

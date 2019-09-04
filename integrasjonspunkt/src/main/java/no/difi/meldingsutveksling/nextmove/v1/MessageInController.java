@@ -146,7 +146,7 @@ public class MessageInController {
                     messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_LEVERT));
 
             if (message.getServiceIdentifier() == DPE) {
-                StandardBusinessDocument statusSbd = receiptFactory.createEinnsynStatusFrom(message.getSbd(), DocumentType.STATUS, ReceiptStatus.LEST);
+                StandardBusinessDocument statusSbd = receiptFactory.createEinnsynStatusFrom(message.getSbd(), DocumentType.STATUS, ReceiptStatus.LEVERT);
                 NextMoveOutMessage msg = NextMoveOutMessage.of(statusSbd, DPE);
                 internalQueue.enqueueNextMove(msg);
             }

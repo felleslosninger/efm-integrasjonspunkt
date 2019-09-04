@@ -40,7 +40,6 @@ public class DpoPolling {
     private final AltinnWsClientFactory altinnWsClientFactory;
     private final TimeToLiveHelper timeToLiveHelper;
     private final SBDUtil sbdUtil;
-    private final ConversationService conversationService;
 
     private ServiceRecord serviceRecord;
 

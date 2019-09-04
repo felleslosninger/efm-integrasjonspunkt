@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.domain.webhooks.Subscription;
 import no.difi.meldingsutveksling.exceptions.SubscriptionNotFoundException;
+import no.difi.meldingsutveksling.exceptions.SubscriptionWithSameNameAndPushEndpointAlreadyExists;
 import no.difi.meldingsutveksling.webhooks.WebhookPusher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +33,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public Subscription createSubscription(Subscription subscription) {
+        subscriptionRepository.getDistinctByNameAndPushEndpoint(subscription.getName(), subscription.getPushEndpoint())
+                .ifPresent(p -> {
+                    throw new SubscriptionWithSameNameAndPushEndpointAlreadyExists();
+                });
+
         webhookPusher.ping(subscription.getPushEndpoint());
         return subscriptionRepository.save(subscription);
     }
@@ -39,6 +45,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     public void updateSubscription(Long id, Subscription subscription) {
         Subscription existingSubscription = getSubscription(id);
+
+        subscriptionRepository.getDistinctByNameAndPushEndpoint(subscription.getName(), subscription.getPushEndpoint())
+                .filter(p -> !p.getId().equals(id))
+                .ifPresent(p -> {
+                    throw new SubscriptionWithSameNameAndPushEndpointAlreadyExists();
+                });
 
         Optional.ofNullable(subscription.getPushEndpoint()).ifPresent(pushEndpoint -> {
             if (!existingSubscription.getPushEndpoint().equals(pushEndpoint)) {

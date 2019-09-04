@@ -4,12 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.api.java.After;
 import cucumber.api.java.en.And;
 import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.nextmove.ServiceBusRestTemplate;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayload;
 import no.difi.meldingsutveksling.pipes.Plumber;
 import org.apache.commons.io.IOUtils;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -32,6 +35,8 @@ public class ServiceBusInSteps {
     private final Holder<Message> messageInHolder;
     private final ObjectMapper objectMapper;
     private final AsicFactory asicFactory;
+    private final IntegrasjonspunktNokkel keyInfo;
+    private final ObjectProvider<CmsUtil> cmsUtilProvider;
     private final Plumber plumber;
 
     @After
@@ -46,7 +51,8 @@ public class ServiceBusInSteps {
 
         Message message = messageInHolder.get();
 
-        PipedInputStream is = plumber.pipe("create asic", inlet -> asicFactory.createAsic(message, inlet)).outlet();
+        PipedInputStream is = plumber.pipe("create asic", inlet -> asicFactory.createAsic(message, inlet))
+                .andThen("CMS encrypt", (outlet, inlet) -> cmsUtilProvider.getIfAvailable().createCMSStreamed(outlet, inlet, keyInfo.getX509Certificate())).outlet();
         byte[] asic = IOUtils.toByteArray(is);
         is.close();
         byte[] base64encodedAsic = Base64.getEncoder().encode(asic);

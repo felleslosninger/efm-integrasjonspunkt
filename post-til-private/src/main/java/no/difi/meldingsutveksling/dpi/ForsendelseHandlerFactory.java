@@ -10,16 +10,11 @@ public class ForsendelseHandlerFactory {
 
     private final DigitalPostInnbyggerConfig config;
 
-    public ForsendelseBuilderHandler create(MeldingsformidlerRequest request) throws MeldingsformidlerException {
-        if (!request.isPrintProvider()) {
-            return new DigitalForsendelseHandler(config);
+    public ForsendelseBuilderHandler create(MeldingsformidlerRequest request) {
+        if (request.isPrintProvider()) {
+            return new PrintForsendelseHandler(config);
         } else {
-            if (config.getFeature().isEnablePrint()) {
-                return new PrintForsendelseHandler(config);
-            } else {
-                throw new MeldingsformidlerException("Print is disabled, unable to send message");
-            }
-
+            return new DigitalForsendelseHandler(config);
         }
     }
 }

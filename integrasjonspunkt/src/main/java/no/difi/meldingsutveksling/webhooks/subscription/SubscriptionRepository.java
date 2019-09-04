@@ -9,9 +9,13 @@ import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
+import java.util.Optional;
+
 public interface SubscriptionRepository extends PagingAndSortingRepository<Subscription, Long>,
         QuerydslPredicateExecutor<Subscription>,
         QuerydslBinderCustomizer<QSubscription> {
+
+    Optional<Subscription> getDistinctByNameAndPushEndpoint(String name, String pushEndpoint);
 
     /**
      * Using this to avoid Exception if the entity is already deleted at the time of deletion

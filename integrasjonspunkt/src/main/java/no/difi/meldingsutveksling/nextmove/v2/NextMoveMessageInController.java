@@ -163,12 +163,12 @@ public class NextMoveMessageInController {
                 markerFrom(message));
 
         if (message.getServiceIdentifier() == DPO) {
-            StandardBusinessDocument statusSbd = receiptFactory.createArkivmeldingStatusFrom(message.getSbd(), DocumentType.STATUS, ReceiptStatus.LEST);
+            StandardBusinessDocument statusSbd = receiptFactory.createArkivmeldingStatusFrom(message.getSbd(), DocumentType.STATUS, ReceiptStatus.LEVERT);
             NextMoveOutMessage msg = NextMoveOutMessage.of(statusSbd, DPO);
             internalQueue.enqueueNextMove(msg);
         }
         if (message.getServiceIdentifier() == DPE) {
-            StandardBusinessDocument statusSbd = receiptFactory.createEinnsynStatusFrom(message.getSbd(), DocumentType.STATUS, ReceiptStatus.LEST);
+            StandardBusinessDocument statusSbd = receiptFactory.createEinnsynStatusFrom(message.getSbd(), DocumentType.STATUS, ReceiptStatus.LEVERT);
             NextMoveOutMessage msg = NextMoveOutMessage.of(statusSbd, DPE);
             internalQueue.enqueueNextMove(msg);
         }

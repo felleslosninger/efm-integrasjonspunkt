@@ -5,6 +5,7 @@ Feature: Sending a Next Move DPF message with sender And receiver refs
     Given a "GET" request to "http://localhost:9099/identifier/987464291?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/987464291.json"
     And a "GET" request to "http://localhost:9099/identifier/910075924?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075924.json"
     And a "GET" request to "http://localhost:9099/identifier/910077473?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
+    And the Noark System is disabled
     And a SOAP request to "https://test.svarut.ks.no/tjenester/forsendelseservice/ForsendelsesServiceV9" will respond with the following payload:
     """
     <ser:sendForsendelseMedIdResponse xmlns:ser="http://www.ks.no/svarut/servicesV9">
@@ -164,7 +165,7 @@ Feature: Sending a Next Move DPF message with sender And receiver refs
     <ns2:sendForsendelseMedId xmlns:ns2="http://www.ks.no/svarut/servicesV9"
                               xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope">
         <forsendelse>
-            <avgivendeSystem>p360</avgivendeSystem>
+            <avgivendeSystem></avgivendeSystem>
             <dokumenter>
                 <data><!--encrypted content--></data>
                 <ekskluderesFraPrint>false</ekskluderesFraPrint>
