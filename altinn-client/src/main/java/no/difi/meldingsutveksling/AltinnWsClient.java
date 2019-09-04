@@ -7,7 +7,6 @@ import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.ObjectFactory;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.*;
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.*;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
@@ -19,26 +18,24 @@ import no.difi.meldingsutveksling.shipping.ws.ManifestBuilder;
 import no.difi.meldingsutveksling.shipping.ws.RecipientBuilder;
 import org.apache.commons.io.FileUtils;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.task.TaskExecutor;
 
 import javax.activation.DataHandler;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.IOException;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
 public class AltinnWsClient {
 
+    private static final String FAILED_TO_PREPARE_ZIP_FOR_UPLOAD_TO_ALTINN_BROKER_SERVICE = "Failed to prepare ZIP for upload to Altinn broker service";
     private static final String FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE = "Failed to upload a message to Altinn broker service";
     private static final String FAILED_TO_INITATE_ALTINN_BROKER_SERVICE = "Failed to initate Altinn broker service";
     private static final String FILE_NAME = "sbd.zip";
@@ -51,7 +48,6 @@ public class AltinnWsClient {
     private final IBrokerServiceExternalBasicStreamed iBrokerServiceExternalBasicStreamed;
     private final AltinnWsConfiguration configuration;
     private final ApplicationContext context;
-    private final TaskExecutor taskExecutor;
     private final Plumber plumber;
 
     public void send(UploadRequest request) {
@@ -60,27 +56,17 @@ public class AltinnWsClient {
     }
 
     private void upload(UploadRequest request, String senderReference) {
+        TmpFile tmpFile = createTemporaryZipFile(request);
 
-        try {
-            CompletableFuture<Void> altinnUpload = CompletableFuture.runAsync(
-                    () -> {
-                        StreamedPayloadBasicBE parameters = new StreamedPayloadBasicBE();
-                        parameters.setDataStream(getDataHandler(request));
-                        uploadToAltinn(request, senderReference, parameters);
-                    },
-                    taskExecutor);
-
-            log.debug("Blocking main thread to wait for upload..");
-            altinnUpload.get();
-        } catch (InterruptedException e) {
-            log.error("Altinn upload was interrupted!", e);
-            // Restore interrupted state...      T
-            Thread.currentThread().interrupt();
-        } catch (ExecutionException e) {
-            throw new MeldingsUtvekslingRuntimeException("Error waiting for upload thread to finish", e);
-        } catch (Exception e) {
+        try (InputStream inputStream = tmpFile.getInputStream()) {
+            StreamedPayloadBasicBE parameters = new StreamedPayloadBasicBE();
+            parameters.setDataStream(new DataHandler(InputStreamDataSource.of(inputStream)));
+            uploadToAltinn(request, senderReference, parameters);
+        } catch (IOException e) {
             auditError(request, e);
             throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, e);
+        } finally {
+            tmpFile.delete();
         }
     }
 
@@ -100,19 +86,19 @@ public class AltinnWsClient {
         log.debug("Thread finished: upload to altinn");
     }
 
-    private DataHandler getDataHandler(UploadRequest request) {
+    private TmpFile createTemporaryZipFile(UploadRequest request) {
         AltinnPackage altinnPackage = AltinnPackage.from(request);
-        PipedInputStream outlet = plumber.pipe("write Altinn zip", inlet -> writeAltinnZip(request, altinnPackage, inlet)).outlet();
-        return new DataHandler(InputStreamDataSource.of(outlet));
-    }
+        TmpFile tmpFile = TmpFile.create();
 
-    private void writeAltinnZip(UploadRequest request, AltinnPackage altinnPackage, PipedOutputStream pos) {
-        try {
-            altinnPackage.write(pos, context);
+        try (OutputStream os = tmpFile.getOutputStream()) {
+            altinnPackage.write(os, context);
         } catch (IOException e) {
+            tmpFile.delete();
             auditError(request, e);
-            throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, e);
+            throw new AltinnWsException(FAILED_TO_PREPARE_ZIP_FOR_UPLOAD_TO_ALTINN_BROKER_SERVICE, e);
         }
+
+        return tmpFile;
     }
 
     /**

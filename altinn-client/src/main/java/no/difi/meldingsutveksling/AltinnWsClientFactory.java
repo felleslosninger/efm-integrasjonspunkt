@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling;
 
-import com.sun.xml.ws.developer.JAXWSProperties; // NOSONAR
+import com.sun.xml.ws.developer.JAXWSProperties;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceExternalBasicSF;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasic;
@@ -9,7 +9,6 @@ import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExter
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.pipes.Plumber;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 
 import javax.xml.ws.BindingProvider;
@@ -22,7 +21,6 @@ public class AltinnWsClientFactory {
 
     private final ApplicationContextHolder applicationContextHolder;
     private final AltinnWsConfigurationFactory altinnWsConfigurationFactory;
-    private final TaskExecutor taskExecutor;
     private final Plumber plumber;
     private final IntegrasjonspunktProperties properties;
 
@@ -33,7 +31,6 @@ public class AltinnWsClientFactory {
                 getBrokerServiceExternalBasicStreamedSF(configuration),
                 configuration,
                 applicationContextHolder.getApplicationContext(),
-                taskExecutor,
                 plumber);
     }
 

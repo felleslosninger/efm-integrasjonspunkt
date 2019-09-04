@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
@@ -27,12 +28,12 @@ public class DpoConversationStrategy implements ConversationStrategy {
 
     @Override
     public void send(NextMoveOutMessage message) throws NextMoveException {
-        try {
-            MessageContext messageContext = messageContextFactory.from(message);
-            InputStream is = asicHandler.createEncryptedAsic(message, messageContext);
+        MessageContext messageContext = getMessageContext(message);
+
+        try (InputStream is = asicHandler.createEncryptedAsic(message, messageContext)) {
             Transport transport = transportFactory.createTransport(message.getSbd());
             transport.send(applicationContextHolder.getApplicationContext(), message.getSbd(), is);
-        } catch (MessageContextException e) {
+        } catch (IOException e) {
             throw new NextMoveException(String.format("Error sending message with messageId=%s to Altinn", message.getMessageId()), e);
         }
 
@@ -40,5 +41,14 @@ public class DpoConversationStrategy implements ConversationStrategy {
                 message.getMessageId(), message.getServiceIdentifier()),
                 markerFrom(message));
     }
+
+    private MessageContext getMessageContext(NextMoveOutMessage message) throws NextMoveException {
+        try {
+            return messageContextFactory.from(message);
+        } catch (MessageContextException e) {
+            throw new NextMoveException(String.format("Error sending message with messageId=%s to Altinn", message.getMessageId()), e);
+        }
+    }
+
 
 }

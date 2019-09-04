@@ -13,6 +13,8 @@ import no.difi.meldingsutveksling.domain.StreamedFile;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -31,15 +33,25 @@ public class CreateAsice {
         AsicWriter asicWriter = AsicWriterFactory.newFactory()
                 .newContainer(archive)
                 .add(new BufferedInputStream(new ByteArrayInputStream(manifest.getBytes())), "manifest.xml", MimeType.XML);
-        files.forEach(f -> {
-            try {
-                log.debug("Adding file {} of type {}", f.getFileName(), f.getMimeType());
-                InputStream inputStream = new BufferedInputStream(f.getInputStream());
-                asicWriter.add(inputStream, f.getFileName(), MimeType.forString(f.getMimeType()));
-            } catch (IOException e) {
-                throw new MeldingsUtvekslingRuntimeException(StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT.getTechnicalMessage(), e);
+
+        List<InputStream> streamsToClose = new ArrayList<>();
+
+        try {
+            files.forEach(f -> {
+                try {
+                    log.debug("Adding file {} of type {}", f.getFileName(), f.getMimeType());
+                    InputStream inputStream = new BufferedInputStream(f.getInputStream());
+                    streamsToClose.add(inputStream);
+                    asicWriter.add(inputStream, f.getFileName(), MimeType.forString(f.getMimeType()));
+                } catch (IOException e) {
+                    throw new MeldingsUtvekslingRuntimeException(StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT.getTechnicalMessage(), e);
+                }
+            });
+            asicWriter.sign(signatureHelper);
+        } finally {
+            for (InputStream is : streamsToClose) {
+                is.close();
             }
-        });
-        asicWriter.sign(signatureHelper);
+        }
     }
 }
