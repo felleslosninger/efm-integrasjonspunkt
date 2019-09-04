@@ -43,8 +43,6 @@ public class AsicHandler {
 
     InputStream createEncryptedAsic(NextMoveOutMessage msg, MessageContext messageContext) {
 
-        if (msg.getFiles() == null || msg.getFiles().isEmpty()) return null;
-
         List<NextMoveStreamedFile> attachments = msg.getFiles().stream()
                 .sorted((a, b) -> {
                     if (a.getPrimaryDocument()) return -1;
