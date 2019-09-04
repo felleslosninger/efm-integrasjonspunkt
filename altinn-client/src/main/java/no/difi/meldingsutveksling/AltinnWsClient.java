@@ -25,7 +25,7 @@ import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.PipedOutputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -56,17 +56,30 @@ public class AltinnWsClient {
     }
 
     private void upload(UploadRequest request, String senderReference) {
-        TmpFile tmpFile = createTemporaryZipFile(request);
-
-        try (InputStream inputStream = tmpFile.getInputStream()) {
+        try (InputStream inputStream = getInputStream(request)) {
             StreamedPayloadBasicBE parameters = new StreamedPayloadBasicBE();
             parameters.setDataStream(new DataHandler(InputStreamDataSource.of(inputStream)));
             uploadToAltinn(request, senderReference, parameters);
         } catch (IOException e) {
             auditError(request, e);
             throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, e);
-        } finally {
-            tmpFile.delete();
+        }
+    }
+
+    private InputStream getInputStream(UploadRequest request) {
+        return plumber.pipe("write Altinn zip",
+                inlet -> {
+                    AltinnPackage altinnPackage = AltinnPackage.from(request);
+                    writeAltinnZip(request, altinnPackage, inlet);
+                }).outlet();
+    }
+
+    private void writeAltinnZip(UploadRequest request, AltinnPackage altinnPackage, PipedOutputStream pos) {
+        try {
+            altinnPackage.write(pos, context);
+        } catch (IOException e) {
+            auditError(request, e);
+            throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, e);
         }
     }
 
@@ -83,22 +96,8 @@ public class AltinnWsClient {
             auditError(request, e);
             throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, AltinnReasonFactory.from(e), e);
         }
+
         log.debug("Thread finished: upload to altinn");
-    }
-
-    private TmpFile createTemporaryZipFile(UploadRequest request) {
-        AltinnPackage altinnPackage = AltinnPackage.from(request);
-        TmpFile tmpFile = TmpFile.create();
-
-        try (OutputStream os = tmpFile.getOutputStream()) {
-            altinnPackage.write(os, context);
-        } catch (IOException e) {
-            tmpFile.delete();
-            auditError(request, e);
-            throw new AltinnWsException(FAILED_TO_PREPARE_ZIP_FOR_UPLOAD_TO_ALTINN_BROKER_SERVICE, e);
-        }
-
-        return tmpFile;
     }
 
     /**

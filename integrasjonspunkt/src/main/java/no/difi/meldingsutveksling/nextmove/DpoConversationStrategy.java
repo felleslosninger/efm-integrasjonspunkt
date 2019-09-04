@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.nextmove;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ApplicationContextHolder;
-import no.difi.meldingsutveksling.TmpFile;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.MessageContext;
 import no.difi.meldingsutveksling.noarkexchange.MessageContextException;
@@ -39,13 +38,7 @@ public class DpoConversationStrategy implements ConversationStrategy {
         MessageContext messageContext = getMessageContext(message);
 
         try (InputStream is = asicHandler.createEncryptedAsic(message, messageContext)) {
-            TmpFile tmpFile = TmpFile.create(is);
-
-            try (InputStream is2 = tmpFile.getInputStream()) {
-                transport.send(applicationContextHolder.getApplicationContext(), message.getSbd(), is2);
-            } finally {
-                tmpFile.delete();
-            }
+            transport.send(applicationContextHolder.getApplicationContext(), message.getSbd(), is);
         } catch (IOException e) {
             Audit.error(String.format("Error sending message with messageId=%s to Altinn", message.getMessageId()), markerFrom(message), e);
             throw new NextMoveException(String.format("Error sending message with messageId=%s to Altinn", message.getMessageId()), e);
@@ -63,6 +56,4 @@ public class DpoConversationStrategy implements ConversationStrategy {
             throw new NextMoveException(String.format("Error sending message with messageId=%s to Altinn", message.getMessageId()), e);
         }
     }
-
-
 }
