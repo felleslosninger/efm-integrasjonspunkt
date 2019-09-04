@@ -10,7 +10,6 @@ import no.difi.meldingsutveksling.noarkexchange.MessageContextException;
 import no.difi.meldingsutveksling.noarkexchange.MessageContextFactory;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
-import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -40,7 +39,7 @@ public class DpoConversationStrategy implements ConversationStrategy {
         MessageContext messageContext = getMessageContext(message);
 
         try (InputStream is = asicHandler.createEncryptedAsic(message, messageContext)) {
-            TmpFile tmpFile = createTemporaryZipFile(is);
+            TmpFile tmpFile = TmpFile.create(is);
 
             try (InputStream is2 = tmpFile.getInputStream()) {
                 transport.send(applicationContextHolder.getApplicationContext(), message.getSbd(), is2);
@@ -48,24 +47,13 @@ public class DpoConversationStrategy implements ConversationStrategy {
                 tmpFile.delete();
             }
         } catch (IOException e) {
+            Audit.error(String.format("Error sending message with messageId=%s to Altinn", message.getMessageId()), markerFrom(message), e);
             throw new NextMoveException(String.format("Error sending message with messageId=%s to Altinn", message.getMessageId()), e);
         }
 
         Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] sent to altinn",
                 message.getMessageId(), message.getServiceIdentifier()),
                 markerFrom(message));
-    }
-
-    private TmpFile createTemporaryZipFile(InputStream is) throws IOException {
-        TmpFile tmpFile = TmpFile.create();
-        try {
-            FileUtils.copyInputStreamToFile(is, tmpFile.getFile());
-        } catch (IOException e) {
-            tmpFile.delete();
-            throw e;
-        }
-
-        return tmpFile;
     }
 
     private MessageContext getMessageContext(NextMoveOutMessage message) throws NextMoveException {

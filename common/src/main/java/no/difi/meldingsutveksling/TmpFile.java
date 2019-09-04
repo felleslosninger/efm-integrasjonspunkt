@@ -30,6 +30,12 @@ public class TmpFile {
         return tmpFile;
     }
 
+    public static TmpFile create(InputStream is) throws IOException {
+        TmpFile tmpFile = TmpFile.create();
+        FileUtils.copyInputStreamToFile(is, tmpFile.getFile());
+        return tmpFile;
+    }
+
     public OutputStream getOutputStream() throws IOException {
         return FileUtils.openOutputStream(getFile());
     }

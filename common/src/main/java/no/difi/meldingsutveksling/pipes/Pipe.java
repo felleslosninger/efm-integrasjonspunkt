@@ -72,7 +72,7 @@ public class Pipe {
             logStart(description);
             consumer.accept(outlet, newPipe.inlet);
             logFinish(description);
-        }).whenCompleteAsync(newPipe::handleCompleteAsync);
+        }, executor).whenCompleteAsync(newPipe::handleCompleteAsync);
         return newPipe;
     }
 
