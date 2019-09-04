@@ -25,7 +25,7 @@ public class ForsendelseHandlerFactoryTest {
     }
 
     @Test
-    public void shouldCreateDigitalForsendelseHandler() throws MeldingsformidlerException {
+    public void shouldCreateDigitalForsendelseHandler() {
         when(mock.isPrintProvider()).thenReturn(false);
 
         ForsendelseBuilderHandler forsendelseBuilderHandler = factory.create(mock);
@@ -34,20 +34,11 @@ public class ForsendelseHandlerFactoryTest {
     }
 
     @Test
-    public void shouldCreatePrintForsendelseHandler() throws MeldingsformidlerException {
+    public void shouldCreatePrintForsendelseHandler() {
         when(mock.isPrintProvider()).thenReturn(true);
-        config.getFeature().setEnablePrint(true);
 
         ForsendelseBuilderHandler forsendelseBuilderHandler = factory.create(mock);
 
         assertThat(forsendelseBuilderHandler, instanceOf(PrintForsendelseHandler.class));
-    }
-
-    @Test(expected = MeldingsformidlerException.class)
-    public void shouldFailWithExceptionWhenIsPrintProviderAndPrintIsDisabled() throws MeldingsformidlerException {
-        when(mock.isPrintProvider()).thenReturn(true);
-        config.getFeature().setEnablePrint(false);
-
-        factory.create(mock);
     }
 }

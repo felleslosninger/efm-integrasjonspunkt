@@ -11,10 +11,10 @@ public class ForsendelseHandlerFactory {
     private final DigitalPostInnbyggerConfig config;
 
     public ForsendelseBuilderHandler create(MeldingsformidlerRequest request) {
-        if (!request.isPrintProvider()) {
-            return new DigitalForsendelseHandler(config);
-        } else {
+        if (request.isPrintProvider()) {
             return new PrintForsendelseHandler(config);
+        } else {
+            return new DigitalForsendelseHandler(config);
         }
     }
 }
