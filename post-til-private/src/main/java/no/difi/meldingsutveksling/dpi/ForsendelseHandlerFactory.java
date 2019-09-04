@@ -10,7 +10,7 @@ public class ForsendelseHandlerFactory {
 
     private final DigitalPostInnbyggerConfig config;
 
-    public ForsendelseBuilderHandler create(MeldingsformidlerRequest request) throws MeldingsformidlerException {
+    public ForsendelseBuilderHandler create(MeldingsformidlerRequest request) {
         if (!request.isPrintProvider()) {
             return new DigitalForsendelseHandler(config);
         } else {
