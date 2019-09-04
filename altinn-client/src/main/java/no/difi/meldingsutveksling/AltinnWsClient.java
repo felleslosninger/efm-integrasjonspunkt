@@ -23,7 +23,9 @@ import javax.activation.DataHandler;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import java.io.File;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -85,38 +87,18 @@ public class AltinnWsClient {
     }
 
     private TmpFile createTemporaryZipFile(UploadRequest request) {
-        try {
-            try (PipedInputStream outlet = plumber.pipe("write Altinn zip",
-                    inlet -> {
-                        AltinnPackage altinnPackage = AltinnPackage.from(request);
-                        writeAltinnZip(request, altinnPackage, inlet);
-                    }).outlet()) {
+        AltinnPackage altinnPackage = AltinnPackage.from(request);
+        TmpFile tmpFile = TmpFile.create();
 
-                TmpFile tmpFile = TmpFile.create();
-                File file = tmpFile.getFile();
-
-                try {
-                    FileUtils.copyInputStreamToFile(outlet, file);
-                } catch (IOException e) {
-                    tmpFile.delete();
-                    auditError(request, e);
-                    throw new AltinnWsException(FAILED_TO_PREPARE_ZIP_FOR_UPLOAD_TO_ALTINN_BROKER_SERVICE, e);
-                }
-                return tmpFile;
-            }
+        try (OutputStream os = tmpFile.getOutputStream()) {
+            altinnPackage.write(os, context);
         } catch (IOException e) {
+            tmpFile.delete();
             auditError(request, e);
             throw new AltinnWsException(FAILED_TO_PREPARE_ZIP_FOR_UPLOAD_TO_ALTINN_BROKER_SERVICE, e);
         }
-    }
 
-    private void writeAltinnZip(UploadRequest request, AltinnPackage altinnPackage, PipedOutputStream pos) {
-        try {
-            altinnPackage.write(pos, context);
-        } catch (IOException e) {
-            auditError(request, e);
-            throw new AltinnWsException(FAILED_TO_PREPARE_ZIP_FOR_UPLOAD_TO_ALTINN_BROKER_SERVICE, e);
-        }
+        return tmpFile;
     }
 
     /**
