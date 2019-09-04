@@ -236,7 +236,7 @@ public class NextMoveServiceBus {
     private StandardBusinessDocument getReceipt(NextMoveInMessage message) {
         return sbdReceiptFactory.createEinnsynStatusFrom(message.getSbd(),
                 DocumentType.STATUS,
-                ReceiptStatus.LEVERT);
+                ReceiptStatus.MOTTATT);
     }
 
     private String getReceiverQueue(NextMoveOutMessage message) {

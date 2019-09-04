@@ -104,7 +104,7 @@ public class IntegrajonspunktReceiveImpl {
         }
 
         if (sbdUtil.isReceipt(sbd)) {
-            conversationService.registerStatus(sbd.getDocumentId(), messageStatusFactory.getMessageStatus(ReceiptStatus.LEST));
+            conversationService.registerStatus(sbd.getDocumentId(), messageStatusFactory.getMessageStatus(ReceiptStatus.LEVERT));
             if (!properties.getFeature().isForwardReceivedAppReceipts()) {
                 Audit.info("AppReceipt forwarding disabled - will not deliver to archive");
             }
@@ -163,7 +163,7 @@ public class IntegrajonspunktReceiveImpl {
     }
 
     private void sendLevertStatus(StandardBusinessDocument sbd) {
-        StandardBusinessDocument statusSbd = sbdReceiptFactory.createArkivmeldingStatusFrom(sbd, DocumentType.STATUS, ReceiptStatus.LEST);
+        StandardBusinessDocument statusSbd = sbdReceiptFactory.createArkivmeldingStatusFrom(sbd, DocumentType.STATUS, ReceiptStatus.LEVERT);
         NextMoveOutMessage msg = NextMoveOutMessage.of(statusSbd, DPO);
         internalQueue.enqueueNextMove(msg);
     }
