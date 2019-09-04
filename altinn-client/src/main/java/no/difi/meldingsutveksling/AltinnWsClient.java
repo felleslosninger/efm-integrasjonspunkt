@@ -85,24 +85,29 @@ public class AltinnWsClient {
     }
 
     private TmpFile createTemporaryZipFile(UploadRequest request) {
-        PipedInputStream outlet = plumber.pipe("write Altinn zip",
-                inlet -> {
-                    AltinnPackage altinnPackage = AltinnPackage.from(request);
-                    writeAltinnZip(request, altinnPackage, inlet);
-                }).outlet();
-
-        TmpFile tmpFile = TmpFile.create();
-        File file = tmpFile.getFile();
-
         try {
-            FileUtils.copyInputStreamToFile(outlet, file);
+            try (PipedInputStream outlet = plumber.pipe("write Altinn zip",
+                    inlet -> {
+                        AltinnPackage altinnPackage = AltinnPackage.from(request);
+                        writeAltinnZip(request, altinnPackage, inlet);
+                    }).outlet()) {
+
+                TmpFile tmpFile = TmpFile.create();
+                File file = tmpFile.getFile();
+
+                try {
+                    FileUtils.copyInputStreamToFile(outlet, file);
+                } catch (IOException e) {
+                    tmpFile.delete();
+                    auditError(request, e);
+                    throw new AltinnWsException(FAILED_TO_PREPARE_ZIP_FOR_UPLOAD_TO_ALTINN_BROKER_SERVICE, e);
+                }
+                return tmpFile;
+            }
         } catch (IOException e) {
-            tmpFile.delete();
             auditError(request, e);
             throw new AltinnWsException(FAILED_TO_PREPARE_ZIP_FOR_UPLOAD_TO_ALTINN_BROKER_SERVICE, e);
         }
-
-        return tmpFile;
     }
 
     private void writeAltinnZip(UploadRequest request, AltinnPackage altinnPackage, PipedOutputStream pos) {
