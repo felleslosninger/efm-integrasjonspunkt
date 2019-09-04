@@ -14,12 +14,7 @@ public class ForsendelseHandlerFactory {
         if (!request.isPrintProvider()) {
             return new DigitalForsendelseHandler(config);
         } else {
-            if (config.getFeature().isEnablePrint()) {
-                return new PrintForsendelseHandler(config);
-            } else {
-                throw new MeldingsformidlerException("Print is disabled, unable to send message");
-            }
-
+            return new PrintForsendelseHandler(config);
         }
     }
 }
