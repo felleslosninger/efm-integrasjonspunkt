@@ -20,7 +20,7 @@ public class Pipe {
     private Pipe(Executor executor) {
         this.executor = executor;
         this.inlet = new PipedOutputStream();
-        this.outlet = new PipedInputStream();
+        this.outlet = new PipedInputStream(32768);
         connectInletAndOutlet();
     }
 

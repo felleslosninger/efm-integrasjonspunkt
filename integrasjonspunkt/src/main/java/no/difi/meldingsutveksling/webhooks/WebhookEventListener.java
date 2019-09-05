@@ -14,7 +14,7 @@ public class WebhookEventListener {
 
     private final WebhookPusher webhookPusher;
 
-    @Async
+    @Async("threadPoolTaskScheduler")
     @EventListener(WebhookEvent.class)
     public void onApplicationEvent(WebhookEvent event) {
         webhookPusher.push(event);

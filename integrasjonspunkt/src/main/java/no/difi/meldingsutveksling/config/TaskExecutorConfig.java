@@ -15,6 +15,7 @@ public class TaskExecutorConfig {
     public ThreadPoolTaskExecutor threadPoolTaskExecutor() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
         taskExecutor.setCorePoolSize(getCorePoolSize());
+        taskExecutor.setThreadNamePrefix("TaskExecutor");
         /*
             If corePoolSize or more threads are running, the Executor always prefers queuing a request rather than adding a new thread.
          */
