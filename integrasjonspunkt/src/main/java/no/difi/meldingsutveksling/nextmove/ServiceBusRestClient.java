@@ -15,7 +15,6 @@ import org.springframework.web.client.ResourceAccessException;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -110,12 +109,12 @@ public class ServiceBusRestClient {
                     .sequenceNumber(brokerProperties.getSequenceNumber());
 
             try {
-                ServiceBusPayload payload = payloadConverter.convert(response.getBody(), messageId);
+                ServiceBusPayload payload = payloadConverter.convert(response.getBody());
                 sbmBuilder.payload(payload);
                 log.debug(format("Received message on queue=%s with messageId=%s", localQueuePath, payload.getSbd().getDocumentId()));
                 return Optional.of(sbmBuilder.build());
-            } catch (JAXBException e) {
-                log.error(String.format("Error creating old format from message id=%s", messageId), e);
+            } catch (IOException e) {
+                log.error(String.format("Error extracting ServiceBusPayload from message id=%s", messageId), e);
             }
         } catch (ResourceAccessException | IOException e) {
             log.error("Polling of DPE messages failed with: {}", e.getLocalizedMessage());

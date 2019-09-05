@@ -29,7 +29,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
-import javax.xml.bind.JAXBException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Duration;
@@ -195,7 +194,7 @@ public class NextMoveServiceBus {
     private void handleMessage(IMessage m) {
         try {
             log.debug(format("Received message on queue=%s with id=%s", serviceBusClient.getLocalQueuePath(), m.getMessageId()));
-            ServiceBusPayload payload = payloadConverter.convert(getBody(m), m.getMessageId());
+            ServiceBusPayload payload = payloadConverter.convert(getBody(m));
             if (sbdUtil.isExpired(payload.getSbd())) {
                 timeToLiveHelper.registerErrorStatusAndMessage(payload.getSbd(), DPE, INCOMING);
             } else {
@@ -205,7 +204,7 @@ public class NextMoveServiceBus {
                 handleSbd(payload.getSbd());
             }
             messageReceiver.completeAsync(m.getLockToken());
-        } catch (JAXBException | IOException e) {
+        } catch (IOException e) {
             log.error("Failed to put message on local queue", e);
         }
     }

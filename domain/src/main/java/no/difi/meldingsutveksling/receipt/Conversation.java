@@ -30,7 +30,10 @@ import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 @Entity
 @Slf4j
 @Table(name = "conversation",
-        indexes = {@Index(columnList = "conversation_id")})
+        indexes = {
+            @Index(columnList = "conversation_id"),
+            @Index(columnList = "message_id")
+})
 @ApiModel(description = "Conversation")
 @NamedEntityGraph(name = "Conversation.messageStatuses", attributeNodes = @NamedAttributeNode("messageStatuses"))
 public class Conversation extends AbstractEntity<Long> implements MessageInformable {
@@ -132,8 +135,8 @@ public class Conversation extends AbstractEntity<Long> implements MessageInforma
         status.setConversation(this);
         this.messageStatuses.add(status);
         if (statusLogger.isInfoEnabled()) {
-            statusLogger.info(markerFrom(this).and(markerFrom(status)), String.format("Conversation [id=%s] updated with status \"%s\"",
-                    this.getConversationId(), status.getStatus()));
+            statusLogger.info(markerFrom(this).and(markerFrom(status)), String.format("Message [id=%s] updated with status \"%s\"",
+                    this.getMessageId(), status.getStatus()));
         }
         return this;
     }

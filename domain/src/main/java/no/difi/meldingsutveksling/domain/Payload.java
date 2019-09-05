@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.domain;
 
-import no.difi.meldingsutveksling.nextmove.ConversationResource;
 import org.apache.commons.codec.binary.Base64;
 
 import javax.xml.bind.annotation.*;
@@ -14,24 +13,11 @@ public class Payload {
     @XmlElement(namespace = "urn:no:difi:meldingsutveksling:1.0")
     private Content Content;
 
-    @XmlElement(namespace = "urn:no:difi:meldingsutveksling:1.0")
-    private ConversationResource conversation;
-
     @XmlTransient
     private InputStream inputStream;
 
     public Payload(byte[] payload) {
         this.Content = new Content(new String(Base64.encodeBase64(payload), StandardCharsets.UTF_8));
-    }
-
-    public Payload(byte[] payload, ConversationResource conversation) {
-        this.Content = new Content(new String(Base64.encodeBase64(payload), StandardCharsets.UTF_8));
-        this.conversation = conversation;
-    }
-
-    public Payload(InputStream inputStream, ConversationResource conversation) {
-        this.inputStream = inputStream;
-        this.conversation = conversation;
     }
 
     public Payload() {
@@ -46,7 +32,4 @@ public class Payload {
         return this.inputStream;
     }
 
-    public ConversationResource getConversation() {
-        return conversation;
-    }
 }
