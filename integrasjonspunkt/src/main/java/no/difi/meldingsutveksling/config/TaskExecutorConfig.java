@@ -31,6 +31,6 @@ public class TaskExecutorConfig {
     }
 
     private int getCorePoolSize() {
-        return 100;
+        return 1;
     }
 }
