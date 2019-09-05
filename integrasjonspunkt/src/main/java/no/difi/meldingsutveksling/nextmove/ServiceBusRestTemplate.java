@@ -23,6 +23,7 @@ public class ServiceBusRestTemplate extends RestTemplate {
                 .setSocketTimeout(props.getNextmove().getServiceBus().getConnectTimeout())
                 .build();
         return HttpClientBuilder.create()
+                .useSystemProperties()
                 .setDefaultRequestConfig(requestConfig)
                 .build();
     }
