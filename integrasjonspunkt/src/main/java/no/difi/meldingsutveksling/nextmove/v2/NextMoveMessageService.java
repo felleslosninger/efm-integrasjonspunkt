@@ -82,7 +82,7 @@ public class NextMoveMessageService {
         String identifier = UUID.randomUUID().toString();
 
         try {
-            cryptoMessagePersister.writeStream(message.getMessageId(), identifier, file.getInputStream(), file.getSize());
+            cryptoMessagePersister.writeStream(message.getMessageId(), identifier, file.getInputStream());
         } catch (IOException e) {
             throw new MessagePersistException(file.getOriginalFilename());
         }

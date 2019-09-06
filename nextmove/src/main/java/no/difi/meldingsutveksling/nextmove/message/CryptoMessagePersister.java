@@ -7,7 +7,7 @@ public interface CryptoMessagePersister {
 
     void write(String messageId, String filename, byte[] message) throws IOException;
 
-    void writeStream(String messageId, String filename, InputStream stream, long size) throws IOException;
+    void writeStream(String messageId, String filename, InputStream stream) throws IOException;
 
 
     byte[] read(String messageId, String filename) throws IOException;

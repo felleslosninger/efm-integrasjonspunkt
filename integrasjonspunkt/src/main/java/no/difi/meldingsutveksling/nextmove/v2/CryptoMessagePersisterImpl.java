@@ -41,10 +41,10 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
         delegate.write(messageId, filename, encryptedMessage);
     }
 
-    public void writeStream(String messageId, String filename, InputStream stream, long size) throws IOException {
+    public void writeStream(String messageId, String filename, InputStream stream) throws IOException {
         Pipe pipe = plumber.pipe("CMS encrypt", inlet -> cmsUtilProvider.getIfAvailable().createCMSStreamed(stream, inlet, keyInfo.getX509Certificate()));
         try (PipedInputStream is = pipe.outlet()) {
-            delegate.writeStream(messageId, filename, is, size);
+            delegate.writeStream(messageId, filename, is, -1L);
         }
     }
 
