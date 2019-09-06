@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.nextmove.message;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +10,7 @@ public class AutoClosingInputStream extends InputStream {
 
     private final InputStream delegate;
     private final Callback callback;
+    private boolean closed = false;
 
     @Override
     public int read(byte[] b) throws IOException {
@@ -42,8 +42,11 @@ public class AutoClosingInputStream extends InputStream {
 
     @Override
     public void close() throws IOException {
-        delegate.close();
-        callback.onClose();
+        if (!closed) {
+            delegate.close();
+            closed = true;
+            callback.onClose();
+        }
     }
 
     @Override
