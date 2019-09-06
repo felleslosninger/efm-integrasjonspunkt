@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.nextmove.message;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.apache.commons.io.IOUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -13,8 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Blob;
 import java.sql.SQLException;
-
-import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 
 @Slf4j
 @Component
