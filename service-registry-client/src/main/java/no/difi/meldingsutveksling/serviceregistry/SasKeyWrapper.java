@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.serviceregistry;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
@@ -12,6 +13,6 @@ import javax.persistence.Id;
 public class SasKeyWrapper {
 
     @Id
+    @Column(length = 45)
     String saskey;
-
 }

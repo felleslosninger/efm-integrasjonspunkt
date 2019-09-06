@@ -50,9 +50,9 @@ public class Conversation extends AbstractEntity<Long> implements MessageInforma
         return super.getId();
     }
 
-    @Column(name = "conversation_id")
+    @Column(name = "conversation_id", length = 36)
     private String conversationId;
-    @Column(name = "message_id")
+    @Column(name = "message_id", length = 36)
     private String messageId;
     private String senderIdentifier;
     private String receiverIdentifier;
